@@ -1,0 +1,30 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/hostile-optional-extension-value",
+  "version": "0.1.0",
+  "title": "Inert optional extension content",
+  "decision": {
+    "intent": "Confirm that arbitrary extension data remains inert during validation.",
+    "question": "Is hostile-looking extension text preserved as data?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "extensions": {
+    "com.example.untrusted-payload": {
+      "markup": "<script>alert('inert')</script>",
+      "template": "{{untrusted.expression}}",
+      "nested": [null, true, 7, { "text": "Data only; do not execute." }]
+    }
+  }
+}

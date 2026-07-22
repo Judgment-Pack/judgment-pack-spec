@@ -1,0 +1,57 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/condition-branches",
+  "version": "0.1.0",
+  "title": "Condition branches",
+  "decision": {
+    "intent": "Exercise every Core condition shape.",
+    "question": "Do the declared conditions support approval?"
+  },
+  "evidenceRequirements": [
+    {
+      "id": "attestation",
+      "description": "A declared attestation.",
+      "required": false,
+      "kind": "attestation"
+    }
+  ],
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "composite-rule",
+      "description": "Combines literal, all, any, not, fact, and evidence-present nodes.",
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "op": "literal", "value": true },
+          {
+            "op": "any",
+            "conditions": [
+              { "op": "literal", "value": false },
+              {
+                "op": "not",
+                "condition": { "op": "literal", "value": false }
+              }
+            ]
+          },
+          {
+            "op": "fact",
+            "path": "/request/region",
+            "operator": "in",
+            "value": ["ca", "us"]
+          },
+          {
+            "op": "evidence-present",
+            "evidenceRequirement": "attestation"
+          }
+        ]
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate",
+      "evidenceRequirementRefs": ["attestation"]
+    }
+  ]
+}

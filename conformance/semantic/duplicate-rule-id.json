@@ -1,0 +1,30 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/duplicate-rule-id",
+  "version": "0.1.0",
+  "title": "Duplicate rule identifier",
+  "decision": {
+    "intent": "Exercise semantic identifier uniqueness.",
+    "question": "Is the repeated rule identifier rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "decision-rule",
+      "description": "The first rule with this identifier.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    },
+    {
+      "id": "decision-rule",
+      "description": "The second rule with this identifier.",
+      "when": { "op": "literal", "value": false },
+      "outcome": "reject",
+      "onUnknown": "ignore"
+    }
+  ]
+}

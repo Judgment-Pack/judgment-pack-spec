@@ -1,0 +1,24 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/unknown-root-member",
+  "version": "0.1.0",
+  "title": "Unknown root member",
+  "unexpectedRootMember": true,
+  "decision": {
+    "intent": "Exercise closed root-object validation.",
+    "question": "Is the unknown member rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

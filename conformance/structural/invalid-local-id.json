@@ -1,0 +1,23 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/invalid-local-id",
+  "version": "0.1.0",
+  "title": "Invalid local identifier",
+  "decision": {
+    "intent": "Exercise local-identifier grammar.",
+    "question": "Is an uppercase identifier rejected?"
+  },
+  "outcomes": [
+    { "id": "Accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "reject",
+      "onUnknown": "ignore"
+    }
+  ]
+}

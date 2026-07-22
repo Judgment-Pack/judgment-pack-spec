@@ -1,0 +1,23 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "judgment-packs/relative-id",
+  "version": "0.1.0",
+  "title": "Relative pack identifier",
+  "decision": {
+    "intent": "Exercise absolute-URI validation.",
+    "question": "Is the relative identifier rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

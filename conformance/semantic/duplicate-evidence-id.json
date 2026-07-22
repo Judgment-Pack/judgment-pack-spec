@@ -1,0 +1,27 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/duplicate-evidence-id",
+  "version": "0.1.0",
+  "title": "Duplicate evidence identifier",
+  "decision": {
+    "intent": "Exercise collection-local identifier uniqueness.",
+    "question": "Are duplicate evidence identifiers rejected?"
+  },
+  "evidenceRequirements": [
+    { "id": "attestation", "description": "First declaration.", "required": false },
+    { "id": "attestation", "description": "Second declaration.", "required": true }
+  ],
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

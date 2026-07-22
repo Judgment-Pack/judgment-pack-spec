@@ -1,0 +1,24 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/dangling-fallback-outcome",
+  "version": "0.1.0",
+  "title": "Dangling fallback outcome",
+  "decision": {
+    "intent": "Exercise fallback-outcome reference resolution.",
+    "question": "Is an undeclared fallback outcome rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": false },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "fallbackOutcome": "manual-review"
+}

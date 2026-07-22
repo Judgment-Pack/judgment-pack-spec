@@ -1,0 +1,23 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/duplicate-outcome-id",
+  "version": "0.1.0",
+  "title": "Duplicate outcome identifier",
+  "decision": {
+    "intent": "Exercise semantic identifier uniqueness.",
+    "question": "Is the repeated outcome identifier rejected?"
+  },
+  "outcomes": [
+    { "id": "decision", "label": "First decision" },
+    { "id": "decision", "label": "Second decision" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "decision",
+      "onUnknown": "ignore"
+    }
+  ]
+}

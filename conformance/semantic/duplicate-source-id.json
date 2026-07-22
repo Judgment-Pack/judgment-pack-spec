@@ -1,0 +1,35 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/duplicate-source-id",
+  "version": "0.1.0",
+  "title": "Duplicate source identifier",
+  "decision": {
+    "intent": "Exercise collection-local identifier uniqueness.",
+    "question": "Are duplicate source identifiers rejected?"
+  },
+  "sources": [
+    {
+      "id": "policy",
+      "title": "First source",
+      "locator": { "kind": "uri", "value": "https://example.com/first" }
+    },
+    {
+      "id": "policy",
+      "title": "Second source",
+      "locator": { "kind": "uri", "value": "https://example.com/second" }
+    }
+  ],
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

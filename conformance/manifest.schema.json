@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/protossai/judgment-pack-spec/v0.1.0-draft/conformance/manifest.schema.json",
+  "title": "Judgment Pack conformance manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "suiteVersion",
+    "specVersion",
+    "status",
+    "validationProfile",
+    "cases"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "./manifest.schema.json"
+    },
+    "suiteVersion": {
+      "const": "0.1.0-draft"
+    },
+    "specVersion": {
+      "const": "0.1.0-draft"
+    },
+    "status": {
+      "const": "research-preview"
+    },
+    "validationProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jsonSchemaDialect",
+        "formatAssertionRequired",
+        "rejectDuplicateObjectMembers"
+      ],
+      "properties": {
+        "jsonSchemaDialect": {
+          "const": "https://json-schema.org/draft/2020-12/schema"
+        },
+        "formatAssertionRequired": {
+          "const": true
+        },
+        "rejectDuplicateObjectMembers": {
+          "const": true
+        }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/case"
+      }
+    }
+  },
+  "$defs": {
+    "extensionName": {
+      "type": "string",
+      "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "path"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^JPS-(?:CARRIER|STRUCTURE|SEMANTIC|CAPABILITY)-[A-Z0-9]+(?:-[A-Z0-9]+)*$"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$"
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "layer",
+        "expectedResult",
+        "expectedDiagnostic",
+        "focus",
+        "specSection"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?:carrier|structural|semantic|valid)/[a-z0-9][a-z0-9-]*\\.json$"
+        },
+        "layer": {
+          "enum": ["carrier", "structural", "semantic"]
+        },
+        "expectedResult": {
+          "enum": ["valid", "invalid", "unsupported"]
+        },
+        "expectedDiagnostic": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/diagnostic" }
+          ]
+        },
+        "focus": {
+          "type": "string",
+          "minLength": 1
+        },
+        "specSection": {
+          "type": "string",
+          "pattern": "^§"
+        },
+        "supportedExtensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/extensionName"
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "expectedResult": { "const": "valid" }
+            },
+            "required": ["expectedResult"]
+          },
+          "then": {
+            "properties": {
+              "expectedDiagnostic": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "expectedDiagnostic": { "$ref": "#/$defs/diagnostic" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

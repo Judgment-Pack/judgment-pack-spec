@@ -1,0 +1,29 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/required-extension-supported",
+  "version": "0.1.0",
+  "title": "Supported required extension",
+  "decision": {
+    "intent": "Exercise successful required-extension capability negotiation.",
+    "question": "Can a capable consumer fully interpret the pack?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "Carries data understood by the declared consumer capability.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "com.example.review-policy": { "reviewMode": "two-person" }
+      }
+    }
+  ],
+  "metadata": {
+    "requiredExtensions": ["com.example.review-policy"]
+  }
+}

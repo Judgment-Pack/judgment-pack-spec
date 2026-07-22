@@ -1,0 +1,31 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/invalid-published-date",
+  "version": "0.1.0",
+  "title": "Invalid publication date",
+  "decision": {
+    "intent": "Exercise date-format validation.",
+    "question": "Is the invalid date rejected?"
+  },
+  "sources": [
+    {
+      "id": "policy",
+      "title": "Example policy",
+      "publishedAt": "2026-02-30",
+      "locator": { "kind": "uri", "value": "https://example.com/policy" }
+    }
+  ],
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

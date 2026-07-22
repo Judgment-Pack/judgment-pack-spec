@@ -1,0 +1,2 @@
+jsonschema[format-nongpl]==4.23.0
+Markdown==3.7

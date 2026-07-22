@@ -1,0 +1,24 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/dangling-source-ref",
+  "version": "0.1.0",
+  "title": "Dangling rule source reference",
+  "decision": {
+    "intent": "Exercise source-reference resolution.",
+    "question": "Is an undeclared rule source reference rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "References an undeclared source.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "sourceRefs": ["policy"]
+    }
+  ]
+}

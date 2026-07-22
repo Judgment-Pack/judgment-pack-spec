@@ -1,8 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/protossai/judgment-pack-spec/main/schema/judgment-pack-core.schema.json",
+  "$id": "https://raw.githubusercontent.com/protossai/judgment-pack-spec/v0.1.0-draft/schema/judgment-pack-core.schema.json",
   "title": "Judgment Pack Core",
   "description": "Research-preview structural schema. Conformance does not establish truth, authority, safety, or operational fitness.",
+  "$comment": "JPS structural conformance requires uri, date, and date-time format assertions even when a general-purpose validator treats format as annotation-only.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -514,7 +515,49 @@
               ]
             },
             "value": true
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "operator": {
+                    "enum": [
+                      "greater-than",
+                      "greater-than-or-equal",
+                      "less-than",
+                      "less-than-or-equal"
+                    ]
+                  }
+                },
+                "required": ["operator"]
+              },
+              "then": {
+                "properties": {
+                  "value": {
+                    "$ref": "#/$defs/decimalString"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "operator": {
+                    "const": "in"
+                  }
+                },
+                "required": ["operator"]
+              },
+              "then": {
+                "properties": {
+                  "value": {
+                    "type": "array",
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          ]
         },
         {
           "type": "object",

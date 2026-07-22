@@ -1,0 +1,32 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/exception-escalate",
+  "version": "0.1.0",
+  "title": "Escalate exception",
+  "decision": {
+    "intent": "Exercise the escalate exception branch.",
+    "question": "Should the exception require escalation?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "base-rule",
+      "description": "A declared base rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "escalation",
+      "description": "Requires escalation without a target rule or outcome.",
+      "when": { "op": "literal", "value": true },
+      "effect": "escalate",
+      "onUnknown": "ignore"
+    }
+  ]
+}

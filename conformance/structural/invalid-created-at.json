@@ -1,0 +1,24 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/invalid-created-at",
+  "version": "0.1.0",
+  "title": "Invalid creation timestamp",
+  "decision": {
+    "intent": "Exercise date-time-format validation.",
+    "question": "Is a date without a time rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "metadata": { "createdAt": "2026-07-22" }
+}

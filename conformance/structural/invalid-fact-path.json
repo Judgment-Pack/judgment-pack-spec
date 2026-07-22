@@ -1,0 +1,28 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/invalid-fact-path",
+  "version": "0.1.0",
+  "title": "Invalid fact path",
+  "decision": {
+    "intent": "Exercise fact-path syntax.",
+    "question": "Is a non-pointer path rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "fact-rule",
+      "description": "Uses a path without its leading slash.",
+      "when": {
+        "op": "fact",
+        "path": "request/enabled",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/dangling-exception-outcome",
+  "version": "0.1.0",
+  "title": "Dangling exception outcome",
+  "decision": {
+    "intent": "Exercise exception outcome resolution.",
+    "question": "Is an undeclared forced outcome rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "forced-result",
+      "description": "References an undeclared outcome.",
+      "when": { "op": "literal", "value": true },
+      "effect": "force-outcome",
+      "outcome": "missing-outcome",
+      "onUnknown": "ignore"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/dangling-nested-evidence-present",
+  "version": "0.1.0",
+  "title": "Dangling nested evidence-present reference",
+  "decision": {
+    "intent": "Exercise recursive condition-reference traversal.",
+    "question": "Is a deeply nested undeclared evidence reference rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "nested-rule",
+      "description": "Nests evidence-present below not, all, and any nodes.",
+      "when": {
+        "op": "not",
+        "condition": {
+          "op": "all",
+          "conditions": [
+            {
+              "op": "any",
+              "conditions": [
+                {
+                  "op": "evidence-present",
+                  "evidenceRequirement": "missing-evidence"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

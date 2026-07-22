@@ -1,0 +1,28 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/invalid-in-operand",
+  "version": "0.1.0",
+  "title": "Invalid in operand",
+  "decision": {
+    "intent": "Exercise the membership-operand shape.",
+    "question": "Is a scalar membership operand rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "membership-rule",
+      "description": "Uses a scalar where membership requires an array.",
+      "when": {
+        "op": "fact",
+        "path": "/category",
+        "operator": "in",
+        "value": "one-category"
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate"
+    }
+  ]
+}

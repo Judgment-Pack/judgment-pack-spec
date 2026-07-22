@@ -1,0 +1,24 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/duplicate-root-member",
+  "version": "0.1.0",
+  "title": "First title",
+  "title": "Second title",
+  "decision": {
+    "intent": "Exercise duplicate-member rejection.",
+    "question": "Is this carrier accepted?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

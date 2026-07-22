@@ -1,0 +1,33 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/exception-suppress-rule",
+  "version": "0.1.0",
+  "title": "Suppress-rule exception",
+  "decision": {
+    "intent": "Exercise the suppress-rule exception branch.",
+    "question": "Should the base rule be suppressed?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "base-rule",
+      "description": "The declared suppression target.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "suppression",
+      "description": "Suppresses the declared base rule.",
+      "when": { "op": "literal", "value": true },
+      "effect": "suppress-rule",
+      "targetRule": "base-rule",
+      "onUnknown": "ignore"
+    }
+  ]
+}

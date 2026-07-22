@@ -1,0 +1,23 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/minimal-literal",
+  "version": "0.1.0",
+  "title": "Minimal literal decision",
+  "decision": {
+    "intent": "Provide the smallest focused valid pack.",
+    "question": "Does the literal rule select accept?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A true literal condition.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

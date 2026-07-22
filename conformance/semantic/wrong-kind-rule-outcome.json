@@ -1,0 +1,30 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/wrong-kind-rule-outcome",
+  "version": "0.1.0",
+  "title": "Wrong-kind rule outcome",
+  "decision": {
+    "intent": "Exercise reference-kind checking.",
+    "question": "Can a rule id satisfy an outcome reference?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "first-rule",
+      "description": "Incorrectly names another rule as its outcome.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "second-rule",
+      "onUnknown": "ignore"
+    },
+    {
+      "id": "second-rule",
+      "description": "A declared rule, not an outcome.",
+      "when": { "op": "literal", "value": false },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

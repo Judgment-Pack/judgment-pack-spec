@@ -1,0 +1,24 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/dangling-evidence-ref",
+  "version": "0.1.0",
+  "title": "Dangling rule evidence reference",
+  "decision": {
+    "intent": "Exercise evidence-reference resolution.",
+    "question": "Is an undeclared rule evidence reference rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "References an undeclared evidence requirement.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "evidenceRequirementRefs": ["receipt"]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/dangling-rule-outcome",
+  "version": "0.1.0",
+  "title": "Dangling rule outcome",
+  "decision": {
+    "intent": "Exercise outcome-reference resolution.",
+    "question": "Is an undeclared rule outcome rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "References an undeclared outcome.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "manual-review",
+      "onUnknown": "ignore"
+    }
+  ]
+}

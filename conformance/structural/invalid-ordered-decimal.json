@@ -1,0 +1,28 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/invalid-ordered-decimal",
+  "version": "0.1.0",
+  "title": "Invalid ordered decimal",
+  "decision": {
+    "intent": "Exercise the ordered-operand decimal grammar.",
+    "question": "Is a leading-zero decimal operand rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "ordered-rule",
+      "description": "Uses a decimal operand with a prohibited leading zero.",
+      "when": {
+        "op": "fact",
+        "path": "/amount",
+        "operator": "greater-than",
+        "value": "01"
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate"
+    }
+  ]
+}

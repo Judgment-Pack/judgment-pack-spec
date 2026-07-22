@@ -1,0 +1,26 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/missing-required-extension-value",
+  "version": "0.1.0",
+  "title": "Missing required extension value",
+  "decision": {
+    "intent": "Exercise required-extension declaration consistency.",
+    "question": "Must a required extension have a value in the document?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "metadata": {
+    "requiredExtensions": ["com.example.review-policy"]
+  }
+}

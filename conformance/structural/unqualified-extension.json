@@ -1,0 +1,24 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/unqualified-extension",
+  "version": "0.1.0",
+  "title": "Unqualified extension",
+  "decision": {
+    "intent": "Exercise extension namespace validation.",
+    "question": "Is an unqualified extension name rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "extensions": { "review-policy": true }
+}

@@ -1,0 +1,32 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/force-outcome-missing-outcome",
+  "version": "0.1.0",
+  "title": "Incomplete force-outcome exception",
+  "decision": {
+    "intent": "Exercise exception discriminators.",
+    "question": "Is a force-outcome effect without an outcome rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "forced-review",
+      "description": "Intentionally omits the required outcome.",
+      "when": { "op": "literal", "value": true },
+      "effect": "force-outcome",
+      "onUnknown": "ignore"
+    }
+  ]
+}

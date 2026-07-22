@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="$language">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="$description">
+    <meta name="color-scheme" content="light">
+    $robots_meta
+    <title>$page_title</title>
+    $base_element
+    <link rel="icon" href="$favicon" type="image/svg+xml">
+    <link rel="stylesheet" href="$stylesheet">
+  </head>
+  <body class="$body_class">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="preview-banner" role="note">
+      <strong>Research preview · $version</strong>
+      <span>No compatibility guarantee. Not for consequential production decisions.</span>
+    </div>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="$home" aria-label="JPS home">
+          <span class="brand-mark" aria-hidden="true">J</span>
+          <span>Judgment Pack Specification</span>
+        </a>
+        <nav aria-label="Primary">$navigation</nav>
+      </div>
+    </header>
+    <div class="page-layout">
+      <main id="main-content" tabindex="-1">
+        $hero
+        <div class="page-meta">
+          <span class="artifact-label">$artifact_label</span>
+          $source_link
+        </div>
+        <article class="prose">$content</article>
+      </main>
+      $toc
+    </div>
+    <footer class="site-footer"><div>$footer</div></footer>
+  </body>
+</html>

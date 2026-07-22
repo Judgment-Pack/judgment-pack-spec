@@ -1,0 +1,130 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.invalid/judgment-packs/software-change-review",
+  "version": "0.1.0",
+  "title": "Synthetic software change review",
+  "description": "A non-operational example for discussing the schema. It labels a fictional training-demo change and does not authorize deployment or represent a production change policy.",
+  "decision": {
+    "intent": "Assign a demonstration label to a fictional software change used in a training environment.",
+    "question": "Which review label should the fictional training-demo change display?"
+  },
+  "applicability": {
+    "op": "fact",
+    "path": "/change/environment",
+    "operator": "equals",
+    "value": "training-demo"
+  },
+  "evidenceRequirements": [
+    {
+      "id": "test-summary",
+      "description": "An invented test summary for the fictional change.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "rollback-note",
+      "description": "An invented rollback note for the fictional change.",
+      "required": true,
+      "kind": "document"
+    }
+  ],
+  "sources": [
+    {
+      "id": "demo-change-checklist",
+      "title": "Fictional training-demo change checklist",
+      "publisher": "Example Learning Lab",
+      "publishedAt": "2026-07-01",
+      "locator": {
+        "kind": "uri",
+        "value": "https://example.invalid/checklists/training-demo-changes"
+      },
+      "citation": {
+        "location": "Illustrative review section",
+        "excerpt": "A demo change with a passed check status, a test summary, and a rollback note may display the ready-for-demo label."
+      },
+      "rights": "Invented content for specification testing; not an operational policy."
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "ready-for-demo",
+      "label": "Ready for demo",
+      "description": "A display label for the fictional scenario, not permission to deploy software."
+    },
+    {
+      "id": "needs-revision",
+      "label": "Needs revision",
+      "description": "The fictional change is labelled for another editing pass."
+    },
+    {
+      "id": "human-review",
+      "label": "Review the label",
+      "description": "A person should inspect the synthetic inputs before choosing a demonstration label."
+    }
+  ],
+  "rules": [
+    {
+      "id": "failed-demo-checks",
+      "description": "Label the fictional change as needing revision when its declared check status is failed.",
+      "when": {
+        "op": "fact",
+        "path": "/change/checkStatus",
+        "operator": "equals",
+        "value": "failed"
+      },
+      "outcome": "needs-revision",
+      "onUnknown": "escalate",
+      "evidenceRequirementRefs": ["test-summary"],
+      "sourceRefs": ["demo-change-checklist"],
+      "rationale": "This exercises an exact string equality without implying production release semantics."
+    },
+    {
+      "id": "passed-demo-checks",
+      "description": "Display the ready-for-demo label when the fictional status is passed and both invented notes are present.",
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "fact",
+            "path": "/change/checkStatus",
+            "operator": "equals",
+            "value": "passed"
+          },
+          {
+            "op": "evidence-present",
+            "evidenceRequirement": "test-summary"
+          },
+          {
+            "op": "evidence-present",
+            "evidenceRequirement": "rollback-note"
+          }
+        ]
+      },
+      "outcome": "ready-for-demo",
+      "onUnknown": "escalate",
+      "evidenceRequirementRefs": ["test-summary", "rollback-note"],
+      "sourceRefs": ["demo-change-checklist"],
+      "rationale": "The rule is intentionally narrow and exists only to exercise the draft representation."
+    }
+  ],
+  "fallbackOutcome": "human-review",
+  "escalation": {
+    "triggers": [
+      "not-applicable",
+      "missing-required-evidence",
+      "unknown",
+      "conflict",
+      "no-match"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Fictional demo maintainer"
+    },
+    "message": "Inspect only synthetic training inputs and choose a demonstration label; do not deploy anything."
+  },
+  "metadata": {
+    "authors": ["Judgment Pack Specification contributors"],
+    "createdAt": "2026-07-22T00:00:00Z",
+    "license": "Apache-2.0"
+  }
+}

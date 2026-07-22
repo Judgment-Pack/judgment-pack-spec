@@ -1,0 +1,35 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/dangling-exception-evidence",
+  "version": "0.1.0",
+  "title": "Dangling exception evidence",
+  "decision": {
+    "intent": "Exercise exception-condition reference traversal.",
+    "question": "Is undeclared exception evidence rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "manual-stop",
+      "description": "References undeclared evidence in its condition.",
+      "when": {
+        "op": "evidence-present",
+        "evidenceRequirement": "missing-evidence"
+      },
+      "effect": "escalate",
+      "onUnknown": "escalate"
+    }
+  ]
+}

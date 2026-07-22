@@ -1,0 +1,24 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/unknown-decision-member",
+  "version": "0.1.0",
+  "title": "Unknown decision member",
+  "decision": {
+    "intent": "Exercise a closed nested Core object.",
+    "question": "Is an unknown decision member rejected?",
+    "priority": "high"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

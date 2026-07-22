@@ -1,0 +1,27 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/empty-escalation-triggers",
+  "version": "0.1.0",
+  "title": "Empty escalation triggers",
+  "decision": {
+    "intent": "Exercise the escalation trigger minimum.",
+    "question": "Must configured handoff intent name a trigger?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "escalation": {
+    "triggers": [],
+    "target": { "kind": "human-role", "name": "Reviewer" }
+  }
+}

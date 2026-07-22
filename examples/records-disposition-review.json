@@ -1,0 +1,141 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.invalid/judgment-packs/records-disposition-review",
+  "version": "0.1.0",
+  "title": "Synthetic records disposition review",
+  "description": "A non-operational example using invented training fixtures. It is not records-management or legal guidance and does not authorize retention or deletion.",
+  "decision": {
+    "intent": "Assign a demonstration disposition label to an invented record used in a training exercise.",
+    "question": "Which demonstration label should the fictional training record display?"
+  },
+  "applicability": {
+    "op": "fact",
+    "path": "/record/context",
+    "operator": "equals",
+    "value": "training-fixture"
+  },
+  "evidenceRequirements": [
+    {
+      "id": "inventory-note",
+      "description": "An invented inventory note identifying the fictional training fixture.",
+      "required": true,
+      "kind": "document"
+    }
+  ],
+  "sources": [
+    {
+      "id": "demo-disposition-schedule",
+      "title": "Fictional training-fixture disposition schedule",
+      "publisher": "Example Learning Lab",
+      "publishedAt": "2026-07-01",
+      "locator": {
+        "kind": "uri",
+        "value": "https://example.invalid/schedules/training-fixtures"
+      },
+      "citation": {
+        "location": "Illustrative labels",
+        "excerpt": "Active example material receives the retain-demo label; retired example material receives the remove-demo-copy label."
+      },
+      "rights": "Invented content for specification testing; not a legal or operational schedule."
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "retain-demo",
+      "label": "Retain demo fixture",
+      "description": "A demonstration label only; it does not authorize retention of any real record."
+    },
+    {
+      "id": "remove-demo-copy",
+      "label": "Remove demo copy",
+      "description": "A demonstration label only; it does not delete anything or authorize records disposition."
+    },
+    {
+      "id": "human-review",
+      "label": "Review the label",
+      "description": "A person should inspect the synthetic inputs before choosing a demonstration label."
+    }
+  ],
+  "rules": [
+    {
+      "id": "active-example-material",
+      "description": "Label active fictional example material for retention in the demo.",
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "fact",
+            "path": "/record/category",
+            "operator": "equals",
+            "value": "example-material"
+          },
+          {
+            "op": "fact",
+            "path": "/record/trainingStatus",
+            "operator": "equals",
+            "value": "active"
+          },
+          {
+            "op": "evidence-present",
+            "evidenceRequirement": "inventory-note"
+          }
+        ]
+      },
+      "outcome": "retain-demo",
+      "onUnknown": "escalate",
+      "evidenceRequirementRefs": ["inventory-note"],
+      "sourceRefs": ["demo-disposition-schedule"],
+      "rationale": "This exact-match example exists solely to exercise the draft representation."
+    },
+    {
+      "id": "retired-example-material",
+      "description": "Label retired fictional example material for removal from the demo copy.",
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "fact",
+            "path": "/record/category",
+            "operator": "equals",
+            "value": "example-material"
+          },
+          {
+            "op": "fact",
+            "path": "/record/trainingStatus",
+            "operator": "equals",
+            "value": "retired"
+          },
+          {
+            "op": "evidence-present",
+            "evidenceRequirement": "inventory-note"
+          }
+        ]
+      },
+      "outcome": "remove-demo-copy",
+      "onUnknown": "escalate",
+      "evidenceRequirementRefs": ["inventory-note"],
+      "sourceRefs": ["demo-disposition-schedule"],
+      "rationale": "The outcome is a harmless display label and is not a deletion instruction."
+    }
+  ],
+  "fallbackOutcome": "human-review",
+  "escalation": {
+    "triggers": [
+      "not-applicable",
+      "missing-required-evidence",
+      "unknown",
+      "conflict",
+      "no-match"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Fictional training curator"
+    },
+    "message": "Inspect only invented fixture data and choose a demonstration label; do not retain or delete real records."
+  },
+  "metadata": {
+    "authors": ["Judgment Pack Specification contributors"],
+    "createdAt": "2026-07-22T00:00:00Z",
+    "license": "Apache-2.0"
+  }
+}

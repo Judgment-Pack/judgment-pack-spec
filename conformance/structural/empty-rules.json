@@ -1,0 +1,15 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/empty-rules",
+  "version": "0.1.0",
+  "title": "Empty rules",
+  "decision": {
+    "intent": "Exercise the minimum rule count.",
+    "question": "Is an empty rule collection rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": []
+}

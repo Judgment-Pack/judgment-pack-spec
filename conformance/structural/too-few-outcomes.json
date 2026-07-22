@@ -1,0 +1,22 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/too-few-outcomes",
+  "version": "0.1.0",
+  "title": "Too few outcomes",
+  "decision": {
+    "intent": "Exercise the minimum outcome count.",
+    "question": "Is one declared outcome insufficient?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

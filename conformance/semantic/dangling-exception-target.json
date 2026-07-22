@@ -1,0 +1,33 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/dangling-exception-target",
+  "version": "0.1.0",
+  "title": "Dangling exception target",
+  "decision": {
+    "intent": "Exercise exception-target resolution.",
+    "question": "Is an undeclared target rule rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "base-rule",
+      "description": "A declared rule that is not the exception target.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "suppression",
+      "description": "References an undeclared rule.",
+      "when": { "op": "literal", "value": true },
+      "effect": "suppress-rule",
+      "targetRule": "missing-rule",
+      "onUnknown": "ignore"
+    }
+  ]
+}

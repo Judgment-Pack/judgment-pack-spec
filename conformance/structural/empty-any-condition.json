@@ -1,0 +1,23 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/empty-any-condition",
+  "version": "0.1.0",
+  "title": "Empty any condition",
+  "decision": {
+    "intent": "Exercise condition arity.",
+    "question": "Is an empty disjunction rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "empty-any-rule",
+      "description": "Contains no child conditions.",
+      "when": { "op": "any", "conditions": [] },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

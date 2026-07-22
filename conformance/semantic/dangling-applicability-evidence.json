@@ -1,0 +1,27 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/dangling-applicability-evidence",
+  "version": "0.1.0",
+  "title": "Dangling applicability evidence",
+  "decision": {
+    "intent": "Exercise applicability reference traversal.",
+    "question": "Is undeclared applicability evidence rejected?"
+  },
+  "applicability": {
+    "op": "evidence-present",
+    "evidenceRequirement": "missing-evidence"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

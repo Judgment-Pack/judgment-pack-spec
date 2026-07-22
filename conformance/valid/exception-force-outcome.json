@@ -1,0 +1,33 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/exception-force-outcome",
+  "version": "0.1.0",
+  "title": "Force-outcome exception",
+  "decision": {
+    "intent": "Exercise the force-outcome exception branch.",
+    "question": "Should the exception force rejection?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "base-rule",
+      "description": "A declared base rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "forced-rejection",
+      "description": "Forces a declared outcome.",
+      "when": { "op": "literal", "value": true },
+      "effect": "force-outcome",
+      "outcome": "reject",
+      "onUnknown": "ignore"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "specVersion": "0.1.0-draft",
+  "id": "https://example.com/judgment-packs/reserved-extension-name",
+  "version": "0.1.0",
+  "title": "Reserved extension name",
+  "decision": {
+    "intent": "Exercise the reserved extension namespace.",
+    "question": "May a pack author use a specification-reserved name?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally ordinary rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ],
+  "extensions": {
+    "org.judgmentpack.future": true
+  }
+}
