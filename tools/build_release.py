@@ -19,6 +19,7 @@ VERSION_PATTERN = re.compile(
 BUNDLE_PATHS = (
     "README.md",
     "LICENSE",
+    "NOTICE",
     "CHANGELOG.md",
     "VERSIONING.md",
     "TESTING.md",
