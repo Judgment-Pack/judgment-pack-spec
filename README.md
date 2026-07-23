@@ -1,6 +1,6 @@
 # Judgment Pack Specification
 
-[![Repository conformance](https://github.com/protossai/judgment-pack-spec/actions/workflows/conformance.yml/badge.svg)](https://github.com/protossai/judgment-pack-spec/actions/workflows/conformance.yml)
+[![Repository conformance](https://github.com/Judgment-Pack/judgment-pack-spec/actions/workflows/conformance.yml/badge.svg)](https://github.com/Judgment-Pack/judgment-pack-spec/actions/workflows/conformance.yml)
 
 > **Status: Research Preview — `0.1.0-draft`**
 >

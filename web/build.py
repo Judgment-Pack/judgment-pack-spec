@@ -27,7 +27,7 @@ DEFAULT_OUTPUT = ROOT / "public"
 TEMPLATE = Template((WEB_ROOT / "templates" / "page.html").read_text(encoding="utf-8"))
 SITE_VERSION = "0.1.0-draft"
 TAGGED_SOURCE_REF = "v0.1.0-draft"
-GITHUB_BLOB_ROOT = "https://github.com/protossai/judgment-pack-spec/blob/"
+GITHUB_BLOB_ROOT = "https://github.com/Judgment-Pack/judgment-pack-spec/blob/"
 GITHUB_ROOT = GITHUB_BLOB_ROOT + TAGGED_SOURCE_REF + "/"
 OUTPUT_MARKER = ".generated-by-jps-site-build"
 GENERATOR_ID = "jps-site-build"
@@ -468,7 +468,7 @@ def footer_html(current: PurePosixPath) -> str:
         ("Contribute", PurePosixPath("project/contributing/index.html")),
         ("Security", PurePosixPath("project/security/index.html")),
         ("Apache-2.0", PurePosixPath("project/license/index.html")),
-        ("Source on GitHub", "https://github.com/protossai/judgment-pack-spec"),
+        ("Source on GitHub", "https://github.com/Judgment-Pack/judgment-pack-spec"),
     )
     links = []
     for label, target in targets:
@@ -712,7 +712,7 @@ def build_markdown_pages(
             body += """
 <div class="notice notice-info"><strong>Ready to report a result?</strong>
 Use only a minimal synthetic reproduction, then
-<a href="https://github.com/protossai/judgment-pack-spec/issues/new?template=testing-feedback.md">open a testing feedback issue on GitHub</a>.</div>
+<a href="https://github.com/Judgment-Pack/judgment-pack-spec/issues/new?template=testing-feedback.md">open a testing feedback issue on GitHub</a>.</div>
 """
         hero = ""
         body_class = ""
