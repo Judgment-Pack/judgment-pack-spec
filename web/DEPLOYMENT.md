@@ -87,11 +87,12 @@ changing Firebase Authentication's authorized-domain list. The returned preview 
 but public to anyone who has it; it is not an access-control boundary.
 
 Review the preview URL on desktop and mobile, follow internal and external links, and compare the
-displayed version with the intended source checkout. The `0.1.0-draft` site links to the immutable
-tagged source and permits indexing because it represents a published research preview. A Firebase
-preview-channel URL is nevertheless temporary and should be shared as a deployment candidate, not
-as the durable specification URL. The explicit seven-day expiration limits stale preview content;
-Firebase permits changing or deleting the channel sooner.
+displayed version with the intended source checkout. Normative `0.1.0-draft` artifacts and their
+browsable views link to the immutable tag. Living overview, tooling, and boundary pages updated
+after that tag link to the clearly labelled current `main` source instead; they must not be
+presented as tagged content. A Firebase preview-channel URL is temporary and should be shared as a
+deployment candidate, not as the durable specification URL. The explicit seven-day expiration
+limits stale preview content; Firebase permits changing or deleting the channel sooner.
 
 ## Promote the reviewed preview to live
 

@@ -1,11 +1,10 @@
-# Protoss CLI for JPS
+# Protoss CLI
 
-> **Status: informative tooling design; implementation and releases are separate**
+> **Status: public, nonnormative developer tool; maintained separately; no tagged release yet**
 >
 > The public [`protoss-cli`](https://github.com/protossai/protoss-cli) repository implements the
-> initial commands and owns its [installation and release
-> instructions](https://github.com/protossai/protoss-cli#install-a-tagged-release). CLI behavior is
-> nonnormative and its pre-1.0 interfaces may change independently of JPS releases.
+> initial commands. CLI behavior is nonnormative, and its pre-1.0 interfaces may change
+> independently of JPS releases.
 
 The developer tool is an extensible `protoss` executable with Judgment Pack Specification (JPS)
 functionality under the `protoss spec` namespace. It lives in a separate `protoss-cli` repository,
@@ -13,12 +12,46 @@ remains nonnormative, and must consume immutable JPS releases in the same way as
 implementation.
 
 The [tooling architecture](tooling-architecture.md) defines the repository and authority boundary.
-This page proposes the user-facing command structure within that boundary.
+This page provides installation and current-command guidance, records nonbinding design
+constraints, and labels deferred commands explicitly.
+
+## Install the CLI
+
+The CLI is distributed separately from JPS. The instructions here are self-contained so an update
+to the CLI repository's documentation is not required to install it. Go 1.21 or newer is currently
+required for a source installation.
+
+For a convenient installation, let Go resolve the latest available module version:
+
+```bash
+go install github.com/protossai/protoss-cli/cmd/protoss@latest
+protoss version
+```
+
+`@latest` is a moving version query, not a reproducibility pin. Before eligible CLI tags exist, it
+resolves an untagged public revision; after tags exist, it selects the latest eligible module
+release. For a repeatable installation known to bundle the immutable JPS `v0.1.0-draft` artifacts,
+pin the initial public CLI commit instead:
+
+```bash
+go install github.com/protossai/protoss-cli/cmd/protoss@63f42d255ad79346f53efbab536af4c752db5d95
+protoss version
+```
+
+Go writes the executable to `GOBIN`, or to the `bin` directory under `GOPATH` when `GOBIN` is not
+set. Run `go env GOBIN GOPATH` to inspect those locations and add the applicable directory to
+`PATH` if `protoss` is not found. On Windows the executable is named `protoss.exe`.
+
+No CLI version has been tagged at the time of this JPS preview. These source installations
+currently report `0.0.0-dev` because `go install` does not supply release linker metadata. The
+[Protoss CLI releases](https://github.com/protossai/protoss-cli/releases) page is authoritative for
+any tagged archives, checksums, and provenance. Installation needs network access; the documented
+validation commands operate offline after installation.
 
 ## Product goals
 
-The CLI should help developers inspect and test JPS documents without turning a Protoss
-implementation into the specification.
+The CLI helps developers inspect and test JPS documents without turning a Protoss implementation
+into the specification.
 
 Its initial goals are to:
 
@@ -47,9 +80,8 @@ protoss
     └── explain <diagnostic-code>       # deferred until codes are stable
 ```
 
-The minimum viable implementation contains `validate`, `test-conformance`, and bundled schema
-access. `explain` should not ship until the project publishes a stable, versioned diagnostic
-contract.
+The current implementation contains `validate`, `test-conformance`, and bundled schema access.
+`explain` remains deferred until the project publishes a stable, versioned diagnostic contract.
 
 There should be no unqualified `evaluate`, `decide`, or `execute` command while JPS defines no
 evaluator-conformance class or portable decision result.
@@ -208,7 +240,7 @@ Every command should distinguish these states:
 failure must not be reported as a document-conformance result.
 
 Human output should be a rendering of the same result represented by JSON, not a separate semantic
-contract. A proposed machine result could have this shape:
+contract. An abridged current machine result has this general shape:
 
 ```json
 {
