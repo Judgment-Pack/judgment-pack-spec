@@ -3,6 +3,16 @@
 All notable changes prepared for or included in Judgment Pack Specification previews are recorded
 here.
 
+## Unreleased
+
+### Added
+
+- A `NOTICE` file naming Brian Jin as the copyright holder, included in the release bundle. The
+  repository previously identified no owner: `LICENSE` is the unmodified Apache-2.0 text, whose
+  appendix is a template rather than a filled-in field. `LICENSE` is deliberately left
+  byte-identical to the canonical text so automated license scanners continue to report a clean
+  Apache-2.0 match.
+
 ## `0.1.0-draft` — 2026-07-22
 
 Initial research preview.
