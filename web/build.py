@@ -24,7 +24,9 @@ WEB_ROOT = ROOT / "web"
 DEFAULT_OUTPUT = ROOT / "public"
 TEMPLATE = Template((WEB_ROOT / "templates" / "page.html").read_text(encoding="utf-8"))
 SITE_VERSION = "0.1.0-draft"
-GITHUB_ROOT = "https://github.com/protossai/judgment-pack-spec/blob/v0.1.0-draft/"
+TAGGED_SOURCE_REF = "v0.1.0-draft"
+GITHUB_BLOB_ROOT = "https://github.com/protossai/judgment-pack-spec/blob/"
+GITHUB_ROOT = GITHUB_BLOB_ROOT + TAGGED_SOURCE_REF + "/"
 OUTPUT_MARKER = ".generated-by-jps-site-build"
 
 
@@ -36,6 +38,89 @@ class Page:
     description: str
     section: str
     artifact_label: str = "Informative"
+    source_ref: str = TAGGED_SOURCE_REF
+
+
+@dataclass(frozen=True)
+class ExampleGuide:
+    focus: str
+    demonstrates: str
+    good_for: tuple[str, ...]
+    edges: tuple[str, ...]
+    failure_paths: tuple[str, ...]
+
+
+EXAMPLE_GUIDES = {
+    "minimal-expense-approval.json": ExampleGuide(
+        focus="Cross-feature authoring and local-reference tracing.",
+        demonstrates=(
+            "A fuller JPS document with applicability, two evidence requirements, a cited source, "
+            "three outcomes and rules, an exception, a fallback, and explicit escalation metadata."
+        ),
+        good_for=(
+            "Tracing outcome, evidence, and source IDs from declarations to every local reference.",
+            "Inspecting nested all/not conditions and the boundary between schema checks and semantic checks.",
+            "Reviewing how one synthetic pack records applicability, exceptions, fallback, and human-handoff configuration.",
+        ),
+        edges=(
+            "The declared amount split includes 5000 in the less-than-or-equal branch and values above 5000 in the review branch. Ordered decimal evaluation is still informative in this draft, so this is not a portable execution test.",
+            "In the informative model, an active-investigation forced outcome bypasses normal rules. Separately, a prohibited category plus an amount above 5000 can produce conflicting normal-rule candidates. Neither behavior is a portable evaluator result.",
+            "If activeInvestigation is absent, its exception is unknown and declares escalation in the informative model. Missing required evidence also requests handoff, while a non-employee-expense value is not applicable.",
+            "If resolution otherwise completes with no matching rule, the declared manual-review fallback applies. The listed no-match escalation trigger is unreachable in the informative algorithm while that fallback exists.",
+        ),
+        failure_paths=(
+            "In a scratch copy, remove an outcome or evidence declaration while leaving a reference to it; the document can retain a valid JSON shape but must fail semantic document conformance.",
+            "Add an unknown root member to produce a structural failure, or duplicate a JSON member to produce a carrier failure before schema validation.",
+            "Never treat an illustrative approve, reject, or review label as authorization to process a real expense.",
+        ),
+    ),
+    "software-change-review.json": ExampleGuide(
+        focus="Schema-versus-semantics exercises in a harmless training scenario.",
+        demonstrates=(
+            "A deliberately non-operational training-demo pack with two required evidence items, "
+            "simple exact-match rules, a compound evidence condition, and a human-review fallback."
+        ),
+        good_for=(
+            "Following the scratch-edit exercises in Test the preview.",
+            "Contrasting structural JSON Schema validation with semantic local-reference validation.",
+            "Checking how multiple evidence requirements are declared and referenced by one rule.",
+        ),
+        edges=(
+            "Only the fictional training-demo environment is applicable; any other environment is outside the example's declared scope.",
+            "With required evidence present, a known pending status matches neither rule; the informative experiment selects the human-review fallback.",
+            "A missing status or required evidence instead produces an unresolved reason and may request the configured handoff; it does not select the fallback.",
+            "Ready for demo is only a display label. It is never deployment approval."
+        ),
+        failure_paths=(
+            "Add an unexpected root member in a scratch copy to see a structural failure.",
+            "Change a rule outcome to missing-outcome: the local ID can pass the schema while the dangling reference fails semantic document conformance.",
+            "Do not substitute a production change, real test report, credential, or internal locator for the invented training data.",
+        ),
+    ),
+    "records-disposition-review.json": ExampleGuide(
+        focus="A sensitive-domain-shaped example with an explicitly harmless boundary.",
+        demonstrates=(
+            "A second unrelated domain using applicability, exact-match rules, one evidence item, "
+            "one cited source, and a human-review fallback without offering legal or records guidance."
+        ),
+        good_for=(
+            "Checking that the same JPS document shape remains understandable outside software and expense examples.",
+            "Tracing evidence and source references through two mutually exclusive illustrative status rules.",
+            "Reviewing whether safety boundaries remain visible in a domain where labels could otherwise be mistaken for authority.",
+        ),
+        edges=(
+            "Only context=training-fixture is applicable, and active and retired are mutually exclusive exact labels in the invented data.",
+            "With required evidence present, another known status or category matches no rule; the informative experiment selects the human-review fallback.",
+            "A missing field or inventory note instead produces an unresolved reason and may request the configured handoff; it does not select the fallback.",
+            "The example.invalid source locator is inert, and ordinary validation must not fetch it unless explicitly requested.",
+        ),
+        failure_paths=(
+            "Remove the inventory-note declaration while retaining a reference to produce a semantic document failure.",
+            "Give a source an invalid date or URI to produce a structural format failure when format assertion is enabled.",
+            "Remove demo copy is only a display label: it never deletes, retains, or authorizes disposition of any real record.",
+        ),
+    ),
+}
 
 
 PAGES = (
@@ -45,6 +130,7 @@ PAGES = (
         "Judgment Pack Specification",
         "A research preview of a portable, vendor-neutral representation for reusable organizational judgment.",
         "overview",
+        source_ref="main",
     ),
     Page(
         "spec/judgment-pack-core.md",
@@ -64,10 +150,11 @@ PAGES = (
     Page(
         "docs/cli-design.md",
         PurePosixPath("cli/index.html"),
-        "Protoss CLI for JPS",
-        "The command surface, result model, safety defaults, and release boundary for protoss spec.",
+        "Protoss CLI",
+        "Install and use the nonnormative protoss spec developer commands for JPS.",
         "cli",
-        "Informative tooling design",
+        "Nonnormative CLI guide",
+        source_ref="main",
     ),
     Page(
         "GOVERNANCE.md",
@@ -138,6 +225,7 @@ PAGES = (
         "Origin and boundary",
         "The relationship between the vendor-neutral proposal and Protoss AI.",
         "project",
+        source_ref="main",
     ),
     Page(
         "docs/tooling-architecture.md",
@@ -145,6 +233,7 @@ PAGES = (
         "Tooling architecture",
         "Why the separate protoss-cli repository owns the protoss spec command namespace.",
         "project",
+        source_ref="main",
     ),
     Page(
         "jeps/0000-jep-process.md",
@@ -183,7 +272,7 @@ NAVIGATION = (
     ("testing", "Test the preview", PurePosixPath("testing/index.html")),
     ("examples", "Examples", PurePosixPath("examples/index.html")),
     ("conformance", "Conformance", PurePosixPath("conformance/index.html")),
-    ("cli", "CLI", PurePosixPath("cli/index.html")),
+    ("cli", "Protoss CLI", PurePosixPath("cli/index.html")),
     ("project", "Project", PurePosixPath("project/index.html")),
 )
 
@@ -345,6 +434,7 @@ def page_html(
     body: str,
     toc: str = "",
     source: str | None = None,
+    source_ref: str = TAGGED_SOURCE_REF,
     hero: str = "",
     body_class: str = "",
     base_href: str = "",
@@ -355,10 +445,21 @@ def page_html(
     home = output_href(output, PurePosixPath("index.html"))
     source_link = ""
     if source:
+        source_is_tagged = source_ref == TAGGED_SOURCE_REF
+        source_label = "View tagged source" if source_is_tagged else "View current source"
+        source_title = (
+            f"Source from the immutable {TAGGED_SOURCE_REF} tag"
+            if source_is_tagged
+            else f"Current source from the mutable {source_ref} branch"
+        )
         source_link = (
             '<a class="source-link" href="'
-            + html.escape(GITHUB_ROOT + source)
-            + '" title="Source from the immutable v0.1.0-draft tag">View tagged source</a>'
+            + html.escape(GITHUB_BLOB_ROOT + source_ref + "/" + source)
+            + '" title="'
+            + html.escape(source_title, quote=True)
+            + '">'
+            + html.escape(source_label)
+            + "</a>"
         )
     toc_panel = ""
     mobile_toc = ""
@@ -449,6 +550,10 @@ def source_link(current: PurePosixPath, source: str, label: str = "Download raw 
         f'<a class="button button-secondary" href="{html.escape(artifact_link(current, source))}" '
         f'download>{html.escape(label)}</a>'
     )
+
+
+def item_list(items: tuple[str, ...]) -> str:
+    return "<ul>" + "".join(f"<li>{html.escape(item)}</li>" for item in items) + "</ul>"
 
 
 def prepare_output(output: Path) -> None:
@@ -558,6 +663,7 @@ Use only a minimal synthetic reproduction, then
             body=body,
             toc=toc,
             source=page.source,
+            source_ref=page.source_ref,
             hero=hero,
             body_class=body_class,
         )
@@ -608,10 +714,21 @@ def build_examples(
 ) -> None:
     index_output = PurePosixPath("examples/index.html")
     cards = []
-    for path in sorted((ROOT / "examples").glob("*.json")):
+    example_paths = sorted((ROOT / "examples").glob("*.json"))
+    example_names = {path.name for path in example_paths}
+    guide_names = set(EXAMPLE_GUIDES)
+    if example_names != guide_names:
+        missing = ", ".join(sorted(example_names - guide_names)) or "none"
+        stale = ", ".join(sorted(guide_names - example_names)) or "none"
+        raise ValueError(
+            f"example guidance mismatch; missing guides: {missing}; stale guides: {stale}"
+        )
+
+    for path in example_paths:
         source = path.relative_to(ROOT).as_posix()
         raw = path.read_text(encoding="utf-8")
         value = json.loads(raw)
+        guide = EXAMPLE_GUIDES[path.name]
         detail_output = routes[source]
         assert isinstance(detail_output, PurePosixPath)
         title = str(value.get("title", path.stem.replace("-", " ").title()))
@@ -624,6 +741,7 @@ def build_examples(
   <p class="card-kicker">Synthetic · non-operational</p>
   <h2><a href="{html.escape(output_href(index_output, detail_output))}">{html.escape(title)}</a></h2>
   <p>{html.escape(description)}</p>
+  <p><strong>Focus:</strong> {html.escape(guide.focus)}</p>
   <p class="card-meta">{len(outcomes)} outcomes · {len(rules)} rules</p>
 </article>"""
         )
@@ -640,6 +758,23 @@ external action.</div>
   <div><dt>Rules</dt><dd>{len(rules)}</dd></div>
 </dl>
 <p>{source_link(detail_output, source)}</p>
+<h2 id="example-guide">Guide to this example</h2>
+<p><strong>Focus:</strong> {html.escape(guide.focus)}</p>
+<p>The checked-in document is expected to pass JPS carrier, structural, and semantic document
+checks. The edge and failure notes below are inspection prompts or scratch-copy exercises; they do
+not assert a portable evaluator result.</p>
+<h3 id="what-this-example-demonstrates">What this example demonstrates</h3>
+<p>{html.escape(guide.demonstrates)}</p>
+<h3 id="good-for">Good for</h3>
+{item_list(guide.good_for)}
+<h3 id="edges-to-inspect">Edges to inspect</h3>
+{item_list(guide.edges)}
+<h3 id="failure-paths">Failure paths</h3>
+{item_list(guide.failure_paths)}
+<div class="notice notice-info"><strong>Keep the layers separate.</strong> A malformed carrier, a
+schema-shape failure, and a dangling local reference fail at different document-conformance layers.
+Missing evidence, unknown facts, conflicts, and no-match handling belong to the informative
+resolution experiment because JPS 0.1.0-draft defines no evaluator conformance class.</div>
 <h2 id="document">Document</h2>
 {raw_block(raw)}
 """
@@ -656,10 +791,28 @@ external action.</div>
 
     index_body = f"""
 <h1>Synthetic examples</h1>
-<p class="lede">Three unrelated domains exercise the same portable document shape without
-claiming that the examples are complete, authoritative, or safe for operational use.</p>
+<p class="lede">These are synthetic, structurally and semantically conforming JPS documents for
+inspecting and testing the document format. Three unrelated domains exercise the same portable
+shape without claiming that the examples are complete, authoritative, or safe for operational
+use.</p>
 <div class="notice notice-info"><strong>Use synthetic data only.</strong> These examples are
-designed for structural and semantic document testing, not decision execution.</div>
+designed for structural and semantic document testing, not decision execution. Ordinary validation
+must not fetch their source locators unless explicitly requested.</div>
+<h2 id="how-to-use-these-examples">How to use these examples</h2>
+<ol>
+  <li>Open a detail page to understand the document's focus, boundaries, edges, and useful failure exercises.</li>
+  <li>Download the exact JSON and validate it locally; the checked-in document should pass all three document-conformance layers.</li>
+  <li>Edit only a scratch copy to create a carrier, structural, or semantic failure.</li>
+  <li>Compare what you observe with <a href="{html.escape(output_href(index_output, PurePosixPath('testing/index.html')))}">Test the preview</a>.</li>
+</ol>
+<p>JPS 0.1.0-draft defines document conformance, not portable rule evaluation. The edge notes on
+each page explain illustrative applicability, evidence, unknown, conflict, and fallback situations
+without claiming an expected runtime decision. Validity never proves truth, authority, safety, or
+fitness.</p>
+<p>For the structural baseline, use an independent Draft 2020-12 implementation and inspect
+semantic references separately. For all current JPS document-conformance layers, the separate,
+nonnormative <a href="{html.escape(output_href(index_output, PurePosixPath('cli/index.html')))}">Protoss CLI</a>
+is one available local tool.</p>
 <div class="card-grid">{''.join(cards)}</div>
 """
     rendered = page_html(
@@ -857,7 +1010,7 @@ def build_project_index(output_root: Path) -> None:
                 ("Design principles", "Constraints that shape JPS.", "project/design-principles/index.html"),
                 ("Non-goals", "What JPS intentionally does not standardize.", "project/non-goals/index.html"),
                 ("Origin and boundary", "How JPS relates to Protoss AI.", "project/origin-and-boundary/index.html"),
-                ("CLI design", "Nonnormative protoss spec commands, outputs, and safety defaults.", "cli/index.html"),
+                ("Protoss CLI", "Install and use nonnormative protoss spec commands.", "cli/index.html"),
                 ("Tooling architecture", "The separate protoss CLI repository boundary.", "project/tooling/index.html"),
                 ("Site deployment", "Build, preview, and hosting guidance.", "project/deployment/index.html"),
             ),

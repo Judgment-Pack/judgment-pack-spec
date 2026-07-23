@@ -2,11 +2,11 @@
 
 ## Status and scope
 
-This document is an informative architecture recommendation. It is not part of the normative
-Judgment Pack Specification (JPS), does not define a final or released CLI contract, and does not
-commit the project to a delivery date or implementation language.
+This document is an informative architecture description. It is not part of the normative Judgment
+Pack Specification (JPS) and does not turn the separate, pre-1.0 CLI interfaces into JPS interfaces.
+Future CLI implementation and release decisions remain independently governed.
 
-The recommended ecosystem has two repositories:
+The current public ecosystem has two repositories:
 
 | Repository | Responsibility |
 | --- | --- |
@@ -64,8 +64,8 @@ checks, telemetry, credentials, operating-system installers, or mutable service 
 A separate `protoss-cli` repository owns the `protoss` executable and the implementation decisions
 needed to distribute it. JPS functionality belongs beneath an explicit specification namespace:
 
-The [proposed CLI design](cli-design.md) describes the user-facing commands, result model, exit
-codes, and safety defaults in more detail.
+The [Protoss CLI guide](cli-design.md) describes installation, user-facing commands, the result
+model, exit codes, and safety defaults in more detail.
 
 ```text
 protoss
@@ -80,7 +80,7 @@ protoss
     └── doctor
 ```
 
-The initial JPS command surface should remain deliberately narrow:
+The initial `protoss spec` command surface should remain deliberately narrow:
 
 - `protoss spec validate` checks the carrier, structural schema, semantic references, and required
   extension capabilities supported by the installed tool. It reports the exact JPS release used.
@@ -88,7 +88,7 @@ The initial JPS command surface should remain deliberately narrow:
   documents from unsupported required capabilities.
 - `protoss spec schema` identifies or emits an immutable schema bundled for an exact JPS release.
 - `protoss spec explain` could give nonnormative help after the project publishes a stable,
-  versioned diagnostic contract; it is not part of the proposed minimum viable product.
+  versioned diagnostic contract; it is not part of the current public command surface.
 
 There should be no unqualified `evaluate`, `decide`, or `execute` command while JPS lacks an
 evaluator conformance class. Any future experimental evaluator should be unmistakably labeled as
@@ -141,8 +141,8 @@ The repositories should integrate through immutable artifacts rather than shared
 
 1. A specification change updates prose, schema, examples, and focused conformance cases together
    in `judgment-pack-spec`. Its own CI validates artifact integrity before merge.
-2. Before a JPS release, `protoss-cli` CI runs the proposed corpus at the exact specification commit
-   or release candidate. Independent implementations can run the same artifact.
+2. Before a JPS release, `protoss-cli` CI runs the version-pinned corpus at the exact specification
+   commit or release candidate. Independent implementations can run the same artifact.
 3. The specification repository publishes an immutable tag, versioned schema URL, conformance
    bundle, checksums, release notes, and matching static-site release view.
 4. A normal dependency-update pull request in `protoss-cli` pins that tag and recorded checksums,

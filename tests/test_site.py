@@ -164,6 +164,45 @@ class StaticSiteTests(unittest.TestCase):
                 for extension in case.get("supportedExtensions", []):
                     self.assertIn(extension, content)
 
+    def test_example_pages_explain_scope_edges_and_failure_paths(self) -> None:
+        index = (self.output / "examples" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("How to use these examples", index)
+        self.assertIn("structurally and semantically conforming JPS documents", index)
+        self.assertIn("Protoss CLI", index)
+        self.assertIn("one available local tool", index)
+        self.assertIn("For the structural baseline", index)
+
+        expected = {
+            "minimal-expense-approval": (
+                "Cross-feature authoring and local-reference tracing",
+                "Ordered decimal evaluation is still informative",
+                "remove an outcome or evidence declaration",
+            ),
+            "software-change-review": (
+                "Schema-versus-semantics exercises",
+                "pending status matches neither rule",
+                "Change a rule outcome to missing-outcome",
+            ),
+            "records-disposition-review": (
+                "sensitive-domain-shaped example",
+                "context=training-fixture",
+                "Remove demo copy is only a display label",
+            ),
+        }
+        for slug, phrases in expected.items():
+            with self.subTest(example=slug):
+                detail = self.output / "examples" / slug / "index.html"
+                self.assertTrue(detail.is_file())
+                content = detail.read_text(encoding="utf-8")
+                self.assertIn("Guide to this example", content)
+                self.assertIn("What this example demonstrates", content)
+                self.assertIn("Good for", content)
+                self.assertIn("Edges to inspect", content)
+                self.assertIn("Failure paths", content)
+                self.assertIn("defines no evaluator conformance class", content)
+                for phrase in phrases:
+                    self.assertIn(phrase, content)
+
     def test_firebase_configuration_is_static_only(self) -> None:
         config = json.loads((ROOT / "firebase.json").read_text(encoding="utf-8"))
         hosting = config["hosting"]
@@ -177,15 +216,48 @@ class StaticSiteTests(unittest.TestCase):
     def test_cli_page_is_explicitly_nonnormative_and_separate(self) -> None:
         content = (self.output / "cli" / "index.html").read_text(encoding="utf-8")
         overview = (self.output / "index.html").read_text(encoding="utf-8")
-        self.assertIn("<title>Protoss CLI for JPS — JPS</title>", content)
-        self.assertIn('aria-current="page">CLI</a>', content)
-        self.assertIn(">CLI</a>", overview)
-        self.assertIn("implementation and releases are separate", content)
+        specification = (
+            self.output / "spec" / "0.1.0-draft" / "index.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn("<title>Protoss CLI — JPS</title>", content)
+        self.assertIn('aria-current="page">Protoss CLI</a>', content)
+        self.assertIn(">Protoss CLI</a>", overview)
+        self.assertNotIn(">CLI proposal</a>", content)
+        self.assertNotIn("Proposed Protoss CLI", content)
+        self.assertNotIn("Informative proposal", content)
+        self.assertIn(
+            '<span class="artifact-label">Nonnormative CLI guide</span>',
+            content,
+        )
+        self.assertIn("public, nonnormative developer tool", content)
         self.assertIn("github.com/protossai/protoss-cli", content)
-        self.assertIn("nonnormative and its pre-1.0", content)
+        self.assertIn("CLI behavior is nonnormative", content)
+        self.assertIn("pre-1.0 interfaces may change", content)
+        self.assertIn(
+            "go install github.com/protossai/protoss-cli/cmd/protoss@latest",
+            content,
+        )
+        self.assertIn(
+            "go install github.com/protossai/protoss-cli/cmd/protoss@63f42d255ad79346f53efbab536af4c752db5d95",
+            content,
+        )
+        self.assertIn("moving version query", content)
+        self.assertIn("0.0.0-dev", content)
+        self.assertIn("blob/main/docs/cli-design.md", content)
+        self.assertIn("View current source", content)
+        self.assertNotIn("blob/v0.1.0-draft/docs/cli-design.md", content)
+        self.assertIn(
+            "blob/v0.1.0-draft/spec/judgment-pack-core.md",
+            specification,
+        )
+        self.assertIn("View tagged source", specification)
         self.assertIn("protoss spec validate", content)
         self.assertNotIn("protoss jps", content)
         self.assertIn("There should be no unqualified", content)
+        lowered = content.lower()
+        self.assertNotIn("official validator", lowered)
+        self.assertNotIn("certified validator", lowered)
+        self.assertNotIn("reference implementation", lowered)
 
     def test_published_site_is_indexable_and_nested_404_is_not(self) -> None:
         robots = (self.output / "robots.txt").read_text(encoding="utf-8")

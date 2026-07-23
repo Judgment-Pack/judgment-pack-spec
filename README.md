@@ -60,8 +60,8 @@ a possible later profile, not a claim of this draft.
 | [`CHANGELOG.md`](CHANGELOG.md)                                                   | Draft and published change history                  |
 | [`docs/design-principles.md`](docs/design-principles.md)                         | Design constraints                                  |
 | [`docs/non-goals.md`](docs/non-goals.md)                                         | Explicit boundary                                   |
-| [`docs/origin-and-boundary.md`](docs/origin-and-boundary.md)                     | Relationship to Protoss                             |
-| [`docs/cli-design.md`](docs/cli-design.md)                                       | Nonnormative `protoss spec` command interface       |
+| [`docs/origin-and-boundary.md`](docs/origin-and-boundary.md)                     | Relationship to Protoss AI                          |
+| [`docs/cli-design.md`](docs/cli-design.md)                                       | Install and use the nonnormative Protoss CLI        |
 | [`docs/tooling-architecture.md`](docs/tooling-architecture.md)                   | Boundary for the separate `protoss` CLI             |
 | [`jeps/0000-jep-process.md`](jeps/0000-jep-process.md)                           | Proposed change process                             |
 | [`ROADMAP.md`](ROADMAP.md)                                                       | Evidence-gated path toward a specification          |
@@ -72,7 +72,8 @@ This repository intentionally contains no end-user CLI source. The separate, pub
 [`protoss-cli`](https://github.com/protossai/protoss-cli) repository exposes JPS tools under
 `protoss spec <command>` and consumes immutable specification releases like any other
 implementation. Its current integration boundary is the executable and versioned JSON output; no
-stable Go SDK or plugin API exists yet. See the [CLI design](docs/cli-design.md) and
+stable Go SDK or plugin API exists yet. See the self-contained [Protoss CLI guide](docs/cli-design.md)
+for installation and usage, and the
 [tooling architecture recommendation](docs/tooling-architecture.md).
 
 ## Minimal shape
