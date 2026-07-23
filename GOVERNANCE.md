@@ -64,7 +64,7 @@ report problems, or contribute implementations.
 
 - Source and specification: <https://github.com/Judgment-Pack/judgment-pack-spec>
 - Issue tracker: <https://github.com/Judgment-Pack/judgment-pack-spec/issues>
-- Discussion (Slack): <https://judgment-pack.slack.com>
+- Discussion: [join the Judgment Pack Slack](https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw)
 - Contributing guide: [./CONTRIBUTING.md](./CONTRIBUTING.md)
 - Code of conduct: [./CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 - Roadmap: [./ROADMAP.md](./ROADMAP.md)

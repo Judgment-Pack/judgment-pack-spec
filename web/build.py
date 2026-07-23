@@ -30,7 +30,7 @@ TAGGED_SOURCE_REF = "v0.1.0-draft"
 GITHUB_BLOB_ROOT = "https://github.com/Judgment-Pack/judgment-pack-spec/blob/"
 GITHUB_ROOT = GITHUB_BLOB_ROOT + TAGGED_SOURCE_REF + "/"
 GITHUB_URL = "https://github.com/Judgment-Pack/judgment-pack-spec"
-SLACK_URL = "https://judgment-pack.slack.com"
+SLACK_URL = "https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw"
 # Recognizable, monochrome inline marks (currentColor) — no external icon dependency.
 GITHUB_ICON_SVG = (
     '<svg class="nav-icon-svg" viewBox="0 0 16 16" width="18" height="18" '
@@ -507,10 +507,11 @@ def render_markdown(
     return body, renderer.toc
 
 
-def nav_icon_link(url: str, label: str, svg: str) -> str:
+def nav_icon_link(url: str, label: str, svg: str, lead: bool = False) -> str:
     """External community icon link: new tab, accessible name, tooltip, keyboard-focusable."""
+    css = "nav-icon-item nav-icon-lead" if lead else "nav-icon-item"
     return (
-        '<li class="nav-icon-item">'
+        f'<li class="{css}">'
         f'<a class="nav-icon" href="{html.escape(url)}" target="_blank" rel="noopener noreferrer" '
         f'aria-label="{html.escape(label, quote=True)}" title="{html.escape(label, quote=True)}">'
         f"{svg}</a></li>"
@@ -531,12 +532,10 @@ def nav_html(current: PurePosixPath, active: str) -> str:
             f'<li><a href="{html.escape(output_href(current, target))}"{current_attr}>'
             f"{html.escape(label)}</a></li>"
         )
-    icons = (
-        nav_icon_link(GITHUB_URL, "View the specification on GitHub", GITHUB_ICON_SVG)
-        + nav_icon_link(SLACK_URL, "Join the Judgment Pack community", SLACK_ICON_SVG)
-    )
-    return '<ul class="primary-nav">' + "".join(links) + '<li class="nav-icons">' + \
-        '<ul class="nav-icon-group">' + icons + "</ul></li></ul>"
+    # Icon links are ordinary primary-nav items so they sit inline and inherit list-style: none.
+    links.append(nav_icon_link(GITHUB_URL, "View the specification on GitHub", GITHUB_ICON_SVG, lead=True))
+    links.append(nav_icon_link(SLACK_URL, "Join the Judgment Pack community", SLACK_ICON_SVG))
+    return '<ul class="primary-nav">' + "".join(links) + "</ul>"
 
 
 def footer_html(current: PurePosixPath) -> str:

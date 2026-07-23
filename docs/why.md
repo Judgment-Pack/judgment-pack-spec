@@ -184,4 +184,4 @@ document, including evidence requirements, sources, exceptions, escalation, and 
 - Read the [specification](../spec/judgment-pack-core.md) for the normative model and conformance requirements.
 - Follow development and open issues on
   [GitHub](https://github.com/Judgment-Pack/judgment-pack-spec).
-- Join the discussion on [Slack](https://judgment-pack.slack.com).
+- Join the discussion on [Slack](https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw).

@@ -83,10 +83,13 @@ summary:focus-visible,
   text-align: center;
 }
 
-.site-header {
+.site-top {
   position: sticky;
-  z-index: 10;
   top: 0;
+  z-index: 20;
+}
+
+.site-header {
   background: rgb(255 255 255 / 94%);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(12px);
@@ -156,21 +159,10 @@ summary:focus-visible,
   background: #e5eeee;
 }
 
-.nav-icons {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 0.3rem;
-  padding-left: 0.4rem;
+.nav-icon-lead {
+  margin-left: 0.35rem;
+  padding-left: 0.45rem;
   border-left: 1px solid var(--line);
-}
-
-.nav-icon-group {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.05rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
 .primary-nav .nav-icon {

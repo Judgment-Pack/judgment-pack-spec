@@ -434,7 +434,7 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn('href="https://github.com/Judgment-Pack/judgment-pack-spec"', nav)
         self.assertIn('aria-label="View the specification on GitHub"', nav)
         self.assertIn('title="View the specification on GitHub"', nav)
-        self.assertIn('href="https://judgment-pack.slack.com"', nav)
+        self.assertIn('href="https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw"', nav)
         self.assertIn('aria-label="Join the Judgment Pack community"', nav)
         self.assertIn('title="Join the Judgment Pack community"', nav)
         self.assertGreaterEqual(nav.count('target="_blank"'), 2)
@@ -482,7 +482,7 @@ class StaticSiteTests(unittest.TestCase):
             "open, vendor-neutral specification for executable and testable AI judgment", footer
         )
         self.assertIn('href="https://github.com/Judgment-Pack/judgment-pack-spec"', footer)
-        self.assertIn('href="https://judgment-pack.slack.com"', footer)
+        self.assertIn('href="https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw"', footer)
         self.assertIn(">Apache-2.0</a>", footer)
 
     def test_supplier_invoice_example_is_published(self) -> None:

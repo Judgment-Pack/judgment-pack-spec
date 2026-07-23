@@ -181,7 +181,7 @@ Judgment Enhancement Proposal (JEP), include compatibility and security analysis
 and negative examples.
 
 The specification is developed in public by its maintainers and community contributors. Participate
-via GitHub and the project [Slack](https://judgment-pack.slack.com). The specification is not
+via GitHub and the project [Slack](https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw). The specification is not
 controlled by any required commercial runtime; the long-term goal is reproducible behavior across
 independent implementations, which may be open-source or proprietary.
 
