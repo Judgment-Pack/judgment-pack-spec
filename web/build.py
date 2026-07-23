@@ -478,7 +478,15 @@ def strip_front_matter(text: str) -> str:
 
 
 def home_body(text: str) -> str:
-    """Remove repository-only title/status chrome replaced by the site hero."""
+    """Return the shared overview content for the site homepage, dropping repository-only
+    chrome (title, badges, status callout, and the README hero/diagram) that the site
+    replaces with its own hero. A ``<!-- site-overview -->`` marker delimits the shared
+    content; everything above it is GitHub-README-only. Falls back to stripping the leading
+    title, one badge line, and the status blockquote when the marker is absent."""
+    marker = "<!-- site-overview -->"
+    index = text.find(marker)
+    if index >= 0:
+        return text[index + len(marker) :].lstrip("\n")
     lines = text.splitlines()
     if lines and lines[0].startswith("# "):
         lines = lines[1:]

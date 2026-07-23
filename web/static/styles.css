@@ -165,15 +165,9 @@ summary:focus-visible,
 }
 
 .brand-mark {
-  display: grid;
+  display: block;
   width: 2rem;
   height: 2rem;
-  place-items: center;
-  color: #fff4e2;
-  background: var(--brand);
-  border-radius: 0.45rem;
-  font-family: Georgia, serif;
-  font-size: 1.25rem;
 }
 
 .primary-nav {

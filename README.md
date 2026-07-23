@@ -1,11 +1,34 @@
 # Judgment Pack Specification
 
 [![Repository conformance](https://github.com/Judgment-Pack/judgment-pack-spec/actions/workflows/conformance.yml/badge.svg)](https://github.com/Judgment-Pack/judgment-pack-spec/actions/workflows/conformance.yml)
+[![Join the community on Slack](https://img.shields.io/badge/Slack-Join%20the%20community-4A154B?logo=slack&logoColor=white)](https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw)
 
 > **Status: Research Preview — `0.1.0-draft`**
 >
 > This repository is an early design proposal. It is not an industry standard, is not covered by
 > compatibility guarantees, and is not ready for consequential production decisions.
+
+## Why judgment needs its own layer
+
+<p align="center">
+  <img src="docs/assets/jp.png" width="880" alt="Two-panel comparison. Left, the Coding Agent Environment: a clear task and explicit target, executable artifacts, fast pass/fail feedback, and a stable evaluation harness (build, test, lint, CI, git, docker) — the environment supplies objective signals. Right, the Business AI Agent Environment: ambiguous goals, evidence scattered across reports, forecasts, dashboards, email, and Slack, meaning that depends on context, and delayed or subjective feedback — the environment rarely supplies a single ground truth. Conclusion: coding agents work well because their environment already knows how to check the work; business agents need an explicit judgment layer and evaluation harness.">
+</p>
+
+Coding agents do useful multi-step work because they operate inside an environment that already knows how
+to judge their output: compilers, type systems, tests, linters, static analysis, version control, code
+review, and CI supply objective pass/fail signals against an explicit target.
+
+Most business AI agents lack that environment. Their goals are ambiguous, their evidence is scattered
+across documents and systems, the meaning of a term depends on context, and feedback is delayed or
+subjective — so the same decision is hard to evaluate definitively. What is missing is not more
+information; it is an explicit **judgment layer** and a way to test it.
+
+Judgment Pack makes that layer explicit. A Judgment Pack is a portable, vendor-neutral JSON document that
+declares what decision is being made, what evidence it requires, when it applies, how exceptions and
+uncertainty are handled, which outcomes are possible, and when a human must take over — so the reasoning
+behind a decision can be inspected, tested, versioned, and moved between independent tools.
+
+<!-- site-overview -->
 
 AI systems increasingly participate in business decisions, but prompts, retrieval configurations,
 and application code do not provide a stable interchange format for the judgment behind those
