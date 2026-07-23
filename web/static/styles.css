@@ -306,11 +306,17 @@ summary:focus-visible,
 
 .page-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 15rem;
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(2rem, 6vw, 5rem);
   width: min(calc(100% - 2rem), var(--content));
   min-height: 55vh;
   margin: clamp(2.5rem, 6vw, 5rem) auto 6rem;
+}
+
+/* Only reserve the side column when a table of contents is actually present, so
+   pages without one use the full width instead of leaving a gap. */
+.page-layout:has(.page-toc) {
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 15rem);
 }
 
 .home-page .page-layout {
@@ -349,9 +355,9 @@ main {
   text-transform: none;
 }
 
-.prose {
-  max-width: var(--measure);
-}
+/* The prose article fills its column. Readable text blocks are capped individually
+   (see the max-width rules below) so wide blocks — tables, code frames, the annotated
+   JSON — can use the full available width instead of being boxed into a narrow measure. */
 
 .home-page .prose {
   max-width: 58rem;
@@ -392,7 +398,13 @@ main {
 }
 
 .prose p,
-.prose li {
+.prose li,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose blockquote,
+.prose .notice,
+.prose .field-reference {
   max-width: 70ch;
 }
 
@@ -728,8 +740,8 @@ main {
 
 .annotated-json {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 17rem;
-  gap: 1.25rem;
+  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
+  gap: clamp(1rem, 2vw, 1.5rem);
   align-items: start;
   margin: 1.4rem 0;
 }
