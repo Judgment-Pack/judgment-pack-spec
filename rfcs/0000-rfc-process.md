@@ -1,4 +1,4 @@
-# JEP 0000: Judgment Enhancement Proposal process
+# RFC 0000: Request for Comments process
 
 - Status: Active
 - Type: Process
@@ -6,12 +6,17 @@
 
 ## Summary
 
-A Judgment Enhancement Proposal (JEP) is the design record for a material change to the Judgment
-Pack Specification, its profiles, conformance model, or governance.
+A Request for Comments (RFC) is the design record for a material change to the Judgment Pack
+Specification, its profiles, conformance model, or governance. "RFC" is used here in the sense
+adopted by projects such as Rust and React — a proposal opened for public comment and deliberate
+disposition — not the IETF sense of an already-published standard.
+
+This process replaces the earlier Judgment Enhancement Proposal (JEP) process; the required
+sections and evidence bar are unchanged.
 
 ## Required sections
 
-Every standards-track JEP should contain:
+Every standards-track RFC should contain:
 
 1. **Summary** — the proposed change in plain language.
 2. **Problem** — the interoperability problem and affected users.
@@ -33,12 +38,12 @@ Every standards-track JEP should contain:
 - `Withdrawn`
 - `Superseded`
 
-Acceptance means the design is approved for the maturity named by the JEP. It does not automatically
+Acceptance means the design is approved for the maturity named by the RFC. It does not automatically
 make a feature stable.
 
 ## Review
 
-Research-preview JEPs remain open for public comment for a reasonable period based on complexity.
+Research-preview RFCs remain open for public comment for a reasonable period based on complexity.
 Maintainers may request prototypes or conformance cases before disposition. A stable normative
 feature should not be accepted without evidence from two independent implementations.
 
@@ -46,3 +51,14 @@ feature should not be accepted without evidence from two independent implementat
 
 During `0.x`, breaking proposals are allowed but must be labeled and accompanied by migration
 guidance. After a stable release, its compatibility policy takes precedence over this draft process.
+
+## Seeded proposals
+
+The following early-stage RFCs are published as `Draft` to make current design questions visible
+rather than settled. They are not part of the specification.
+
+- [RFC 0001 — Pack manifest](0001-pack-manifest.md)
+- [RFC 0002 — Judgment Graph composition](0002-judgment-graph.md)
+- [RFC 0003 — Evidence reference](0003-evidence-reference.md)
+- [RFC 0004 — Planner interface](0004-planner-interface.md)
+- [RFC 0005 — Pack discovery](0005-pack-discovery.md)

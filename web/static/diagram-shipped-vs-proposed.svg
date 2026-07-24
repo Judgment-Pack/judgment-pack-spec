@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 552" role="img" aria-labelledby="svp-t svp-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="svp-t">What is shipped versus what is proposed</title>
+  <desc id="svp-d">A vertical stack. Agent and Judgment Planner are product; Judgment Graph is proposed; the Judgment Pack single-decision document and its conformance classes are the shipped standard; the runtime validates documents today; Composite Judgment is proposed.</desc>
+  <defs>
+    <marker id="svp-arw" markerWidth="10" markerHeight="10" refX="6.5" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6.5,3 L0,6 Z" fill="#566466"/>
+    </marker>
+  </defs>
+
+  <!-- flow arrows -->
+  <g stroke="#566466" stroke-width="1.5" marker-end="url(#svp-arw)">
+    <line x1="320" y1="60"  x2="320" y2="77"/>
+    <line x1="320" y1="126" x2="320" y2="143"/>
+    <line x1="320" y1="192" x2="320" y2="209"/>
+    <line x1="320" y1="340" x2="320" y2="357"/>
+    <line x1="320" y1="406" x2="320" y2="423"/>
+  </g>
+
+  <!-- Agent (product) -->
+  <rect x="130" y="14" width="380" height="46" rx="8" fill="#eef2ed" stroke="#566466" stroke-width="1.5"/>
+  <text x="320" y="42" text-anchor="middle" font-size="15" fill="#152426">Agent · the caller</text>
+
+  <!-- Planner (product) -->
+  <rect x="130" y="80" width="380" height="46" rx="8" fill="#eef2ed" stroke="#566466" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="320" y="108" text-anchor="middle" font-size="15" fill="#152426">Judgment Planner · product</text>
+
+  <!-- Graph (proposed) -->
+  <rect x="130" y="146" width="380" height="46" rx="8" fill="#fff0d8" stroke="#a65d13" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="320" y="174" text-anchor="middle" font-size="15" fill="#5a3410">Judgment Graph · proposed</text>
+
+  <!-- SHIPPED container -->
+  <rect x="108" y="210" width="424" height="130" rx="12" fill="#f1f8f3" stroke="#236232" stroke-width="2"/>
+  <text x="126" y="230" font-size="11" font-weight="700" letter-spacing="0.06em" fill="#236232">THE STANDARD · SHIPPED</text>
+  <rect x="150" y="240" width="340" height="42" rx="8" fill="#e4f3e7" stroke="#236232" stroke-width="1.5"/>
+  <text x="320" y="266" text-anchor="middle" font-size="15" fill="#0f2b2e">Judgment Pack · one decision</text>
+  <rect x="150" y="290" width="340" height="42" rx="8" fill="#e4f3e7" stroke="#236232" stroke-width="1.5"/>
+  <text x="320" y="316" text-anchor="middle" font-size="14" fill="#0f2b2e">Conformance · carrier / structural / semantic</text>
+
+  <!-- Runtime -->
+  <rect x="130" y="358" width="380" height="46" rx="8" fill="#e7f2f2" stroke="#183b3f" stroke-width="1.5"/>
+  <text x="320" y="386" text-anchor="middle" font-size="15" fill="#0f2b2e">Runtime · validates documents today</text>
+
+  <!-- Composite (proposed) -->
+  <rect x="130" y="424" width="380" height="46" rx="8" fill="#fff0d8" stroke="#a65d13" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="320" y="452" text-anchor="middle" font-size="15" fill="#5a3410">Composite Judgment · proposed</text>
+
+  <!-- legend -->
+  <g font-size="13" fill="#152426">
+    <rect x="60"  y="500" width="14" height="14" rx="3" fill="#e4f3e7" stroke="#236232" stroke-width="1.5"/>
+    <text x="80"  y="511">Shipped</text>
+    <rect x="176" y="500" width="14" height="14" rx="3" fill="#fff0d8" stroke="#a65d13" stroke-width="1.5"/>
+    <text x="196" y="511">Proposed</text>
+    <rect x="300" y="500" width="14" height="14" rx="3" fill="#e7f2f2" stroke="#183b3f" stroke-width="1.5"/>
+    <text x="320" y="511">Runtime</text>
+    <rect x="416" y="500" width="14" height="14" rx="3" fill="#eef2ed" stroke="#566466" stroke-width="1.5"/>
+    <text x="436" y="511">Product</text>
+  </g>
+</svg>

@@ -25,15 +25,15 @@ Open a design issue describing:
 5. security and privacy consequences; and
 6. how two independent implementations could test agreement.
 
-Material changes should become a Judgment Enhancement Proposal (JEP). Copy the structure in
-[`jeps/0000-jep-process.md`](jeps/0000-jep-process.md).
+Material changes should become a Request for Comments (RFC). Copy the structure in
+[`rfcs/0000-rfc-process.md`](rfcs/0000-rfc-process.md).
 
 ## Pull requests
 
 A pull request should:
 
 - remain focused on one problem;
-- link the relevant issue or JEP;
+- link the relevant issue or RFC;
 - update prose, schema, examples, and conformance cases together when applicable;
 - include at least one negative or adversarial case for normative behavior;
 - identify breaking changes explicitly; and

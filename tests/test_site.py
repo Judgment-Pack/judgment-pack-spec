@@ -88,7 +88,6 @@ class StaticSiteTests(unittest.TestCase):
             "testing/index.html",
             "examples/index.html",
             "conformance/index.html",
-            "cli/index.html",
             "project/index.html",
             "project/tooling/index.html",
             "project/deployment/index.html",
@@ -240,51 +239,27 @@ class StaticSiteTests(unittest.TestCase):
             redirect["redirects"][0]["destination"], "https://judgmentpack.org"
         )
 
-    def test_cli_page_is_explicitly_nonnormative_and_separate(self) -> None:
-        content = (self.output / "cli" / "index.html").read_text(encoding="utf-8")
-        overview = (self.output / "index.html").read_text(encoding="utf-8")
+    def test_implementations_page_lists_the_neutral_reference_runtime(self) -> None:
+        # The Protoss CLI has been superseded by the neutral judgment-pack runtime, which owns its
+        # own repository and docs; the separate on-site CLI page no longer exists.
+        self.assertFalse((self.output / "cli" / "index.html").exists())
+        impl = (self.output / "implementations" / "index.html").read_text(encoding="utf-8")
+        self.assertIn(
+            'href="https://github.com/Judgment-Pack/judgment-pack-runtime"', impl
+        )
+        self.assertIn(">judgment-pack</a>", impl)
+        self.assertIn("vendor-neutral reference runtime", impl)
+        self.assertNotIn("protoss", impl.lower())
+        # The specification, not any implementation, remains the authority.
+        self.assertIn("The specification is the authority.", impl)
+        self.assertIn("equally valid", impl)
+        self.assertNotIn("official validator", impl.lower())
+        # The spec page still cites its immutable tagged source (docs use the mutable branch).
         specification = (
             self.output / "spec" / "0.1.0-draft" / "index.html"
         ).read_text(encoding="utf-8")
-        self.assertIn("<title>Protoss CLI — JPS</title>", content)
-        self.assertIn('aria-current="location">Implementations</a>', content)
-        self.assertIn(">Implementations</a>", overview)
-        self.assertNotIn(">CLI proposal</a>", content)
-        self.assertNotIn("Proposed Protoss CLI", content)
-        self.assertNotIn("Informative proposal", content)
-        self.assertIn(
-            '<span class="artifact-label">Nonnormative CLI guide</span>',
-            content,
-        )
-        self.assertIn("public, nonnormative developer tool", content)
-        self.assertIn("github.com/protossai/protoss-cli", content)
-        self.assertIn("CLI behavior is nonnormative", content)
-        self.assertIn("pre-1.0 interfaces may change", content)
-        self.assertIn(
-            "go install github.com/protossai/protoss-cli/cmd/protoss@latest",
-            content,
-        )
-        self.assertIn(
-            "go install github.com/protossai/protoss-cli/cmd/protoss@63f42d255ad79346f53efbab536af4c752db5d95",
-            content,
-        )
-        self.assertIn("moving version query", content)
-        self.assertIn("0.0.0-dev", content)
-        self.assertIn("blob/main/docs/cli-design.md", content)
-        self.assertIn("View current source", content)
-        self.assertNotIn("blob/v0.1.0-draft/docs/cli-design.md", content)
-        self.assertIn(
-            "blob/v0.1.0-draft/spec/judgment-pack-core.md",
-            specification,
-        )
+        self.assertIn("blob/v0.1.0-draft/spec/judgment-pack-core.md", specification)
         self.assertIn("View tagged source", specification)
-        self.assertIn("protoss spec validate", content)
-        self.assertNotIn("protoss jps", content)
-        self.assertIn("There should be no unqualified", content)
-        lowered = content.lower()
-        self.assertNotIn("official validator", lowered)
-        self.assertNotIn("certified validator", lowered)
-        self.assertNotIn("reference implementation", lowered)
 
     def test_published_site_is_indexable_and_nested_404_is_not(self) -> None:
         robots = (self.output / "robots.txt").read_text(encoding="utf-8")
@@ -308,14 +283,12 @@ class StaticSiteTests(unittest.TestCase):
             self.output / "implementations" / "index.html"
         ).read_text(encoding="utf-8")
         self.assertIn("<title>Implementations — JPS</title>", implementations)
-        self.assertIn("Protoss CLI", implementations)
-        self.assertIn("One implementation among peers", implementations)
+        self.assertIn(">judgment-pack</a>", implementations)
+        self.assertIn("implementation among peers", implementations)
         self.assertIn("This list is open", implementations)
         lowered = implementations.lower()
-        # The page explicitly denies reference/official status rather than claiming it.
-        self.assertIn(
-            "does not make an implementation a reference implementation", lowered
-        )
+        # The page denies normative/official status rather than claiming it.
+        self.assertIn("does not confer certification", lowered)
 
     def test_production_pages_carry_absolute_canonical_and_og_url(self) -> None:
         overview = (self.output / "index.html").read_text(encoding="utf-8")
@@ -495,17 +468,17 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn('href="../spec/0.1.0-draft/"', why)
         self.assertNotIn("Protoss", why)
 
-    def test_neutral_pages_contain_no_protoss(self) -> None:
-        # Protoss is confined to the Implementations section; every other page is vendor-neutral.
-        allowed = {"cli/index.html", "implementations/index.html"}
-        offenders = []
-        for page in self.output.rglob("*.html"):
-            rel = page.relative_to(self.output).as_posix()
-            if rel in allowed:
-                continue
-            if "protoss" in page.read_text(encoding="utf-8").lower():
-                offenders.append(rel)
-        self.assertEqual([], offenders, f"Protoss appears on neutral pages: {offenders}")
+    def test_protoss_appears_only_in_changelog_history(self) -> None:
+        # The Protoss CLI has been superseded by the neutral judgment-pack runtime. Protoss now
+        # survives only in the changelog, as the historical record of that removal.
+        allowed = {"project/changelog/index.html"}
+        offenders = [
+            page.relative_to(self.output).as_posix()
+            for page in self.output.rglob("*.html")
+            if page.relative_to(self.output).as_posix() not in allowed
+            and "protoss" in page.read_text(encoding="utf-8").lower()
+        ]
+        self.assertEqual([], offenders, f"Protoss appears outside the changelog: {offenders}")
 
     def test_footer_has_tagline_and_community_links(self) -> None:
         overview = (self.output / "index.html").read_text(encoding="utf-8")
@@ -544,6 +517,149 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn('<dl class="field-reference">', schema)
         self.assertIn("<dt><code>op</code></dt>", schema)
         self.assertIn("<dt><code>operator</code></dt>", schema)
+
+    def test_faq_and_proposals_are_generated_and_in_primary_nav(self) -> None:
+        faq = self.output / "faq" / "index.html"
+        proposals = self.output / "rfcs" / "index.html"
+        self.assertTrue(faq.is_file())
+        self.assertTrue(proposals.is_file())
+        self.assertIn("<title>FAQ — JPS</title>", faq.read_text(encoding="utf-8"))
+        nav = self._primary_nav((self.output / "index.html").read_text(encoding="utf-8"))
+        self.assertIn(">FAQ</a>", nav)
+        self.assertIn(">Proposals</a>", nav)
+
+    def test_rfc_rename_is_complete_on_the_guidance_surface(self) -> None:
+        # The change-proposal process is now "Request for Comments (RFC)"; the old JEP route is gone.
+        process = self.output / "rfcs" / "0000-rfc-process" / "index.html"
+        self.assertTrue(process.is_file())
+        self.assertIn("Request for Comments", process.read_text(encoding="utf-8"))
+        self.assertFalse((self.output / "project" / "jep-process" / "index.html").exists())
+        governance = (
+            self.output / "project" / "governance" / "index.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Request for Comments (RFC)", governance)
+        self.assertNotIn("Judgment Enhancement Proposal", governance)
+        # The old name survives only as history (changelog) and as the rename note (RFC process).
+        allowed = {"project/changelog/index.html", "rfcs/0000-rfc-process/index.html"}
+        offenders = [
+            page.relative_to(self.output).as_posix()
+            for page in self.output.rglob("*.html")
+            if "Judgment Enhancement Proposal" in page.read_text(encoding="utf-8")
+            and page.relative_to(self.output).as_posix() not in allowed
+        ]
+        self.assertEqual([], offenders, f"stale JEP references: {offenders}")
+
+    def test_vision_page_is_labeled_non_normative(self) -> None:
+        vision = (
+            self.output / "architecture" / "vision" / "index.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn('<span class="artifact-label">Non-normative</span>', vision)
+        self.assertIn("This page is not part of the", vision)
+        # The layered-vision terms are allowed to appear here, clearly labeled.
+        self.assertIn("Judgment Graph", vision)
+        # Static SVG diagrams (JS-free) illustrate the shipped-vs-proposed split.
+        self.assertEqual(vision.count('img class="diagram"'), 3)
+        for name in ("shipped-vs-proposed", "three-properties", "knowledge-input"):
+            svg = self.output / "assets" / f"diagram-{name}.svg"
+            self.assertTrue(svg.is_file(), f"missing diagram asset: {name}")
+            self.assertIn(f'src="/assets/diagram-{name}.svg"', vision)
+
+    def test_specification_page_excludes_layered_vision_terms(self) -> None:
+        # The product/runtime vision must not leak into the normative specification page.
+        spec = (
+            self.output / "spec" / "0.1.0-draft" / "index.html"
+        ).read_text(encoding="utf-8")
+        for term in ("Judgment Graph", "Composite Judgment", "Judgment Planner", "Evidence Layer"):
+            self.assertNotIn(term, spec, f"vision term leaked into the spec page: {term}")
+
+    def _internal_html_targets(self, page):
+        targets = set()
+        for link in inspect(page).links:
+            parsed = urlsplit(link)
+            if parsed.scheme or parsed.netloc or link.startswith(("mailto:", "tel:")):
+                continue
+            path = unquote(parsed.path)
+            if not path:
+                continue
+            dest = (
+                (self.output / path.lstrip("/"))
+                if path.startswith("/")
+                else (page.parent / path)
+            ).resolve()
+            if dest.is_dir():
+                dest = dest / "index.html"
+            if dest.suffix == ".html" and dest.exists():
+                targets.add(dest.resolve())
+        return targets
+
+    def test_every_page_is_reachable_from_home(self) -> None:
+        # Guards against orphaned pages that can only be reached by hunting through prose links.
+        pages = {p.resolve() for p in self.output.rglob("*.html")}
+        home = (self.output / "index.html").resolve()
+        seen = {home}
+        stack = [home]
+        while stack:
+            for dest in self._internal_html_targets(stack.pop()):
+                if dest in pages and dest not in seen:
+                    seen.add(dest)
+                    stack.append(dest)
+        orphaned = {
+            p.relative_to(self.output).as_posix() for p in pages - seen
+        } - {"404.html"}  # 404 is intentionally unlinked
+        self.assertEqual(set(), orphaned, f"pages unreachable from home: {sorted(orphaned)}")
+
+    def test_breadcrumbs_orient_every_page(self) -> None:
+        home = (self.output / "index.html").read_text(encoding="utf-8")
+        self.assertNotIn('class="breadcrumb"', home)  # the homepage needs no breadcrumb
+        for page in self.output.rglob("*.html"):
+            rel = page.relative_to(self.output).as_posix()
+            if rel in {"index.html", "404.html"}:
+                continue
+            with self.subTest(page=rel):
+                text = page.read_text(encoding="utf-8")
+                self.assertIn('<nav class="breadcrumb"', text)
+                self.assertIn(">Home</a>", text)
+        vision = (
+            self.output / "architecture" / "vision" / "index.html"
+        ).read_text(encoding="utf-8")
+        crumb = vision[
+            vision.index('class="breadcrumb"') : vision.index(
+                "</nav>", vision.index('class="breadcrumb"')
+            )
+        ]
+        self.assertIn(">Home</a>", crumb)
+        self.assertIn(">Concepts</a>", crumb)  # deep page nests under its section index
+
+    def test_faq_covers_skills_tools_and_agent_integration(self) -> None:
+        faq = (self.output / "faq" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('id="skills-tools-and-agent-integration"', faq)
+        self.assertIn('id="skills-and-tools"', faq)
+        # The tools/skills/packs distinction and the adversarial "skills with a new name" test.
+        self.assertIn("What conclusion is justified", faq)
+        self.assertIn("skills with a new name", faq)
+        # The integration diagram is a static SVG (JS-free) that resolves.
+        self.assertIn('src="/assets/diagram-skills-pack-flow.svg"', faq)
+        self.assertTrue(
+            (self.output / "assets" / "diagram-skills-pack-flow.svg").is_file()
+        )
+        why = (self.output / "why" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("faq/#skills-and-tools", why)  # the Why page points into this section
+
+    def test_concepts_hub_links_the_learning_pages(self) -> None:
+        concepts = self.output / "concepts" / "index.html"
+        self.assertTrue(concepts.is_file())
+        text = concepts.read_text(encoding="utf-8")
+        self.assertIn("<title>Concepts — JPS</title>", text)
+        for phrase in (
+            "Why Judgment Pack?",
+            "Architecture vision",
+            "How Judgment Pack compares",
+            "Field guide",
+            "FAQ",
+        ):
+            self.assertIn(phrase, text)
+        home = (self.output / "index.html").read_text(encoding="utf-8")
+        self.assertIn(">Concepts</a>", home[home.index("<footer") :])
 
 
 if __name__ == "__main__":

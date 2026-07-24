@@ -102,6 +102,9 @@ Judgment Pack is a portable contract describing the judgment an implementation i
 evidence needed to verify its behavior. The JSON schema is the serialization mechanism, not the whole
 value: the value is the explicit, testable judgment the document carries.
 
+Skills operationalize tasks; Judgment Packs make consequential conclusions explicit and verifiable.
+See the [FAQ on skills and tools](../FAQ.md#skills-and-tools) for how they fit together.
+
 ## A concrete example: approving a supplier invoice
 
 Consider a common operational decision: **Should this supplier invoice be approved automatically?**
@@ -182,6 +185,7 @@ document, including evidence requirements, sources, exceptions, escalation, and 
 ## Next steps
 
 - Read the [specification](../spec/judgment-pack-core.md) for the normative model and conformance requirements.
+- Browse the [concepts overview](concepts) for the architecture vision, prior-art comparison, and field guide.
 - Follow development and open issues on
   [GitHub](https://github.com/Judgment-Pack/judgment-pack-spec).
 - Join the discussion on [Slack](https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw).

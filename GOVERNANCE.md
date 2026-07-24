@@ -32,10 +32,10 @@ The convenience of any single implementation is not sufficient reason to add a C
 ## Decision process
 
 - Minor editorial changes may use ordinary pull requests.
-- Material or normative changes require a Judgment Enhancement Proposal (JEP) and a public review
+- Material or normative changes require a Request for Comments (RFC) and a public review
   period.
 - Stable features should have two independent implementations and conformance cases.
-- Maintainers publish the disposition and rationale for a JEP.
+- Maintainers publish the disposition and rationale for an RFC.
 - Material objections and minority positions should be recorded rather than silently discarded.
 
 During the research preview, maintainers may reject or remove concepts aggressively. There is no
@@ -52,7 +52,7 @@ The specification intends to evolve through real implementations and interoperab
 independent conforming implementations, production adopters, and sustained outside contribution
 accumulate, the maintainers intend to formalize multi-party governance.
 
-That transition should be proposed through a public governance JEP covering technical steering,
+That transition should be proposed through a public governance RFC covering technical steering,
 release authority, trademarks, intellectual property, and the project's long-term home. Until the
 supporting implementation and contribution base exists, adding heavier governance ceremony would
 create process without creating independent technical power.
