@@ -24,7 +24,7 @@ Describe relevant risks, or explain why there are none.
 
 ## Checklist
 
-- [ ] I linked the relevant issue or JEP.
+- [ ] I linked the relevant issue or RFC.
 - [ ] I updated prose, schema, examples, and cases together where applicable.
 - [ ] I did not imply that conformance proves truth, authority, safety, or operational fitness.
 - [ ] I signed off my commits under the DCO.

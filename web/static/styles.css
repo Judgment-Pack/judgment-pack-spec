@@ -147,7 +147,7 @@ summary:focus-visible,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1rem;
   width: min(calc(100% - 2rem), var(--content));
   min-height: 4.25rem;
   margin-inline: auto;
@@ -182,10 +182,10 @@ summary:focus-visible,
 
 .primary-nav a {
   display: block;
-  padding: 0.55rem 0.68rem;
+  padding: 0.5rem 0.52rem;
   color: var(--muted);
   border-radius: 0.4rem;
-  font-size: 0.87rem;
+  font-size: 0.85rem;
   font-weight: 640;
   text-decoration: none;
 }
@@ -209,7 +209,7 @@ summary:focus-visible,
 }
 
 /* Hidden (and not a tab stop) on desktop where the hamburger isn't shown; the
-   max-width:880px block renders it clipped-but-focusable so the label toggle works. */
+   max-width:1080px block renders it clipped-but-focusable so the label toggle works. */
 .nav-toggle-input {
   display: none;
 }
@@ -451,6 +451,72 @@ summary:focus-visible,
 
 main {
   min-width: 0;
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 1.25rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.breadcrumb a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+.breadcrumb .crumb-sep {
+  color: var(--line);
+}
+
+.breadcrumb .crumb-current {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.diagram-figure {
+  margin: 1.75rem 0;
+  padding: 1.1rem 1rem 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+}
+
+.diagram-figure img.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.diagram-figure.is-portrait img.diagram {
+  max-width: 430px;
+}
+
+.diagram-figure.is-standard img.diagram {
+  max-width: 600px;
+}
+
+.diagram-figure.is-wide img.diagram {
+  max-width: 100%;
+}
+
+.diagram-caption {
+  margin: 0.85rem auto 0;
+  max-width: 48ch;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--muted);
+  text-align: center;
 }
 
 .page-meta {
@@ -988,7 +1054,7 @@ main {
   margin-top: 0.3rem;
 }
 
-@media (max-width: 880px) {
+@media (max-width: 1080px) {
   /* Positioned so the collapsed menu drops below the full header width. */
   .site-header {
     position: relative;

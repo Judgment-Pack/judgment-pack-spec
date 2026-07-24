@@ -258,15 +258,6 @@ PAGES = (
         "testing",
     ),
     Page(
-        "docs/cli-design.md",
-        PurePosixPath("cli/index.html"),
-        "Protoss CLI",
-        "Install and use the nonnormative protoss spec developer commands for JPS.",
-        "implementations",
-        "Nonnormative CLI guide",
-        source_ref="main",
-    ),
-    Page(
         "GOVERNANCE.md",
         PurePosixPath("project/governance/index.html"),
         "Governance",
@@ -346,11 +337,91 @@ PAGES = (
         source_ref="main",
     ),
     Page(
-        "jeps/0000-jep-process.md",
-        PurePosixPath("project/jep-process/index.html"),
-        "Judgment Enhancement Proposal process",
-        "The proposed process for material changes to JPS.",
-        "project",
+        "FAQ.md",
+        PurePosixPath("faq/index.html"),
+        "FAQ",
+        "Answers to common and hard architectural questions about the Judgment Pack Specification.",
+        "faq",
+        source_ref="main",
+    ),
+    Page(
+        "docs/architecture/vision.md",
+        PurePosixPath("architecture/vision/index.html"),
+        "Architecture vision (non-normative)",
+        "A non-normative picture of the layered architecture, labeling each part as shipped, proposed, runtime, or product.",
+        "concepts",
+        "Non-normative",
+        source_ref="main",
+    ),
+    Page(
+        "docs/concepts/comparison.md",
+        PurePosixPath("concepts/comparison/index.html"),
+        "How Judgment Pack compares",
+        "How JPS relates to DMN, policy engines, rule engines, BPMN, knowledge graphs, and LLM evaluation.",
+        "concepts",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/README.md",
+        PurePosixPath("rfcs/index.html"),
+        "Proposals (RFCs)",
+        "Open Requests for Comments — design proposals that are not part of the specification.",
+        "proposals",
+        "Non-normative",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0000-rfc-process.md",
+        PurePosixPath("rfcs/0000-rfc-process/index.html"),
+        "Request for Comments (RFC) process",
+        "The process for proposing material changes to JPS.",
+        "proposals",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0001-pack-manifest.md",
+        PurePosixPath("rfcs/0001-pack-manifest/index.html"),
+        "RFC 0001: Pack manifest",
+        "Draft proposal for an optional manifest describing a pack from the outside.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0002-judgment-graph.md",
+        PurePosixPath("rfcs/0002-judgment-graph/index.html"),
+        "RFC 0002: Judgment Graph composition",
+        "Draft proposal for a portable format that composes several packs into a decision graph.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0003-evidence-reference.md",
+        PurePosixPath("rfcs/0003-evidence-reference/index.html"),
+        "RFC 0003: Evidence reference",
+        "Draft proposal for how a pack names the evidence it needs so runtimes can bind it to sources.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0004-planner-interface.md",
+        PurePosixPath("rfcs/0004-planner-interface/index.html"),
+        "RFC 0004: Planner interface",
+        "Exploratory proposal testing whether any of a pack-selecting planner is standardizable.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0005-pack-discovery.md",
+        PurePosixPath("rfcs/0005-pack-discovery/index.html"),
+        "RFC 0005: Pack discovery",
+        "Draft proposal for a portable index format for finding and selecting packs across catalogs.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
     ),
     Page(
         "releases/v0.1.0-draft.md",
@@ -379,13 +450,27 @@ PAGES = (
 NAVIGATION = (
     ("overview", "Overview", PurePosixPath("index.html")),
     ("why", "Why", PurePosixPath("why/index.html")),
-    ("spec", "Specification", PurePosixPath("spec/0.1.0-draft/index.html")),
-    ("field-guide", "Field guide", PurePosixPath("field-guide/index.html")),
+    ("spec", "Spec", PurePosixPath("spec/0.1.0-draft/index.html")),
     ("examples", "Examples", PurePosixPath("examples/index.html")),
     ("conformance", "Conformance", PurePosixPath("conformance/index.html")),
+    ("faq", "FAQ", PurePosixPath("faq/index.html")),
     ("implementations", "Implementations", PurePosixPath("implementations/index.html")),
+    ("proposals", "Proposals", PurePosixPath("rfcs/index.html")),
     ("governance", "Governance", PurePosixPath("project/governance/index.html")),
 )
+
+
+# Sections that own an index page. A page in one of these sections gets a breadcrumb
+# "Home / <section> / <page>" so its parent index is always one click up; other sections
+# render "Home / <page>". Keyed by the `section` field on Page / page_html().
+SECTION_INDEX = {
+    "examples": ("Examples", PurePosixPath("examples/index.html")),
+    "conformance": ("Conformance", PurePosixPath("conformance/index.html")),
+    "proposals": ("Proposals", PurePosixPath("rfcs/index.html")),
+    "concepts": ("Concepts", PurePosixPath("concepts/index.html")),
+    "project": ("Project & docs", PurePosixPath("project/index.html")),
+    "implementations": ("Implementations", PurePosixPath("implementations/index.html")),
+}
 
 
 def output_href(current: PurePosixPath, target: PurePosixPath) -> str:
@@ -570,6 +655,8 @@ def nav_html(current: PurePosixPath, active: str) -> str:
 
 def footer_html(current: PurePosixPath) -> str:
     internal = (
+        ("Concepts", PurePosixPath("concepts/index.html")),
+        ("Project & docs", PurePosixPath("project/index.html")),
         ("Governance", PurePosixPath("project/governance/index.html")),
         ("Contributing", PurePosixPath("project/contributing/index.html")),
         ("Code of conduct", PurePosixPath("project/code-of-conduct/index.html")),
@@ -666,6 +753,27 @@ def page_html(
             body = mobile_toc + body
     base_element = f'<base href="{html.escape(base_href)}">' if base_href else ""
 
+    # Breadcrumb: "Home / <section index> / <this page>" so every page shows its place and its
+    # parent index is one click up. Skipped on the homepage and the 404 page.
+    breadcrumb = ""
+    if output.as_posix() not in {"index.html", "404.html"}:
+        crumbs = [f'<a href="{html.escape(home)}">Home</a>']
+        section_crumb = SECTION_INDEX.get(section)
+        if section_crumb is not None and section_crumb[1] != output:
+            crumbs.append(
+                f'<a href="{html.escape(output_href(output, section_crumb[1]))}">'
+                f"{html.escape(section_crumb[0])}</a>"
+            )
+        crumbs.append(
+            f'<span class="crumb-current" aria-current="page">{html.escape(title)}</span>'
+        )
+        separator = '<span class="crumb-sep" aria-hidden="true">/</span>'
+        breadcrumb = (
+            '<nav class="breadcrumb" aria-label="Breadcrumb">'
+            + separator.join(crumbs)
+            + "</nav>"
+        )
+
     effective_noindex = noindex or config.default_noindex
     canonical_link = ""
     social_meta = ""
@@ -695,6 +803,7 @@ def page_html(
         favicon=html.escape(favicon),
         home=html.escape(home),
         navigation=nav_html(output, section),
+        breadcrumb=breadcrumb,
         hero=hero,
         body_class=html.escape(body_class),
         artifact_label=html.escape(artifact_label),
@@ -934,6 +1043,9 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
             ".": PurePosixPath("index.html"),
             "examples": PurePosixPath("examples/index.html"),
             "conformance": PurePosixPath("conformance/index.html"),
+            "rfcs": PurePosixPath("rfcs/index.html"),
+            "concepts": PurePosixPath("concepts/index.html"),
+            "docs/concepts": PurePosixPath("concepts/index.html"),
             "schema": PurePosixPath("schema/index.html"),
             "web": PurePosixPath("project/deployment/index.html"),
             "LICENSE": PurePosixPath("project/license/index.html"),
@@ -1374,10 +1486,19 @@ def build_project_index(output_root: Path) -> None:
             ),
         ),
         (
+            "Concepts and proposals",
+            (
+                ("FAQ", "Common and hard architectural questions.", "faq/index.html"),
+                ("Field guide", "Plain-language walkthrough of every field.", "field-guide/index.html"),
+                ("Architecture vision", "A non-normative picture of the layered architecture.", "architecture/vision/index.html"),
+                ("Comparison", "How JPS relates to DMN, policy engines, and rule engines.", "concepts/comparison/index.html"),
+                ("Proposals (RFCs)", "Open design proposals and the change process.", "rfcs/index.html"),
+            ),
+        ),
+        (
             "Participation and stewardship",
             (
                 ("Contributing", "Ways to test and propose changes.", "project/contributing/index.html"),
-                ("JEP process", "Process for material proposals.", "project/jep-process/index.html"),
                 ("Governance", "Current decision model and future neutrality.", "project/governance/index.html"),
                 ("Security", "Security boundary and reporting.", "project/security/index.html"),
                 ("Testing feedback", "Safe, reproducible report template.", "project/testing-feedback/index.html"),
@@ -1404,6 +1525,37 @@ boundary between the specification and future developer tools.</p>
         title="Project information",
         description="Governance, roadmap, release, design, tooling, security, and contribution information for JPS.",
         section="project",
+        artifact_label="Informative",
+        body=body,
+    )
+    write_page(output_root, page_output, rendered)
+
+
+def build_concepts_index(output_root: Path) -> None:
+    page_output = PurePosixPath("concepts/index.html")
+    cards = (
+        ("Why Judgment Pack?", "The gap between information and judgment, and why coding agents work better than most business agents.", "why/index.html"),
+        ("Architecture vision", "A non-normative picture of the layered architecture — what is shipped versus what is proposed.", "architecture/vision/index.html"),
+        ("How Judgment Pack compares", "How JPS relates to DMN, policy engines, rule engines, BPMN, and knowledge graphs.", "concepts/comparison/index.html"),
+        ("Field guide", "A plain-language walkthrough of every part of a Judgment Pack document.", "field-guide/index.html"),
+        ("FAQ", "Answers to common and hard architectural questions.", "faq/index.html"),
+    )
+    grid = "".join(
+        project_card(page_output, title, description, PurePosixPath(target))
+        for title, description, target in cards
+    )
+    body = f"""
+<h1>Concepts</h1>
+<p class="lede">Start here to understand what a Judgment Pack is, how it differs from the systems it
+is often confused with, and where the wider architecture is headed — before reading the normative
+specification.</p>
+<div class="card-grid">{grid}</div>
+"""
+    rendered = page_html(
+        output=page_output,
+        title="Concepts",
+        description="Understand what a Judgment Pack is, how it compares to prior art, and the non-normative architecture vision.",
+        section="concepts",
         artifact_label="Informative",
         body=body,
     )
@@ -1523,30 +1675,31 @@ def publish_canonical_schemas(output_root: Path) -> None:
 
 def build_implementations_index(output_root: Path) -> None:
     page_output = PurePosixPath("implementations/index.html")
-    cli_href = output_href(page_output, PurePosixPath("cli/index.html"))
+    runtime_url = "https://github.com/Judgment-Pack/judgment-pack-runtime"
     body = f"""
 <h1>Implementations</h1>
 <p class="lede">Independent tools that implement JPS document conformance. A listing here records
-that a tool exercises the public specification; it is not certification, endorsement, or a
-reference designation.</p>
-<div class="notice notice-info"><strong>The specification is the authority.</strong> No listed
-implementation is normative. Passing a tool's checks establishes only what that tool reports about
-the JPS document layers, never factual grounding, authorization, safety, or fitness.</div>
+that a tool exercises the public specification; it is not certification, endorsement, or authority
+over the specification.</p>
+<div class="notice notice-info"><strong>The specification is the authority.</strong> No
+implementation — including the reference runtime — is normative. Passing a tool's checks establishes
+only what that tool reports about the JPS document layers, never factual grounding, authorization,
+safety, or fitness. Any implementation that passes the public conformance corpus is equally valid.</div>
 <h2 id="available">Available implementations</h2>
 <div class="card-grid">
   <article class="card">
-    <p class="card-kicker">Nonnormative · maintained by Protoss AI</p>
-    <h2><a href="{html.escape(cli_href)}">Protoss CLI</a></h2>
-    <p>A public developer tool exposing <code>protoss spec</code> commands that validate the carrier,
-    structural schema, and semantic references of a JPS document against an immutable specification
-    release.</p>
-    <p class="card-meta">One implementation among peers</p>
+    <p class="card-kicker">Open source · Apache-2.0 · maintained with the specification</p>
+    <h2><a href="{html.escape(runtime_url)}" target="_blank" rel="noopener noreferrer">judgment-pack</a></h2>
+    <p>The project's vendor-neutral reference runtime. It validates the carrier, structural schema,
+    and semantic references of a JPS document against an immutable specification release. It does not
+    evaluate rules, choose an outcome, fetch a source, or authorize an action.</p>
+    <p class="card-meta">Reference runtime · one implementation among peers</p>
   </article>
 </div>
 <h2 id="adding-an-implementation">Adding an implementation</h2>
 <p>This list is open to independent implementations tested against the public conformance
-artifacts. Presence here does not make an implementation a reference implementation, an official
-validator, or a certification authority.</p>
+artifacts. Presence here does not confer certification, official-validator status, endorsement, or
+authority over the specification.</p>
 """
     rendered = page_html(
         output=page_output,
@@ -1579,6 +1732,7 @@ def build(output: Path, config: BuildConfig) -> None:
     build_conformance(output, routes, manifest)
     build_implementations_index(output)
     build_project_index(output)
+    build_concepts_index(output)
     build_license(output)
     build_not_found(output)
     build_robots(output, config)

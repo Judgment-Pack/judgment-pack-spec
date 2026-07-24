@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 300" role="img" aria-labelledby="sp-t sp-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="sp-t">How skills, tools, and Judgment Packs fit together</title>
+  <desc id="sp-d">An agent or workflow runs a skill. The skill calls tools, which read evidence sources. The skill also invokes a Judgment Pack, and the evidence feeds that pack. The pack produces a judgment result that routes to one authorized outcome: approved leads to an authorized action, rejected leads to stop or close, insufficient evidence leads to a request for evidence, and escalated leads to human review.</desc>
+  <!--
+    Mermaid source (rendered statically for the JavaScript-free site):
+    flowchart LR
+      A[Agent or Workflow] --> S[Skill]
+      S --> T[Tools]
+      T --> E[Evidence Sources]
+      S --> J[Judgment Pack]
+      E --> J
+      J --> R{Judgment Result}
+      R -->|Approved| X[Authorized Action]
+      R -->|Rejected| Y[Stop or Close]
+      R -->|Insufficient evidence| Z[Request Evidence]
+      R -->|Escalated| H[Human Review]
+  -->
+  <defs>
+    <marker id="sp-arw" markerWidth="10" markerHeight="10" refX="6.5" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6.5,3 L0,6 Z" fill="#566466"/>
+    </marker>
+  </defs>
+
+  <!-- edges -->
+  <g stroke="#566466" stroke-width="1.5" fill="none" marker-end="url(#sp-arw)">
+    <line x1="156" y1="46" x2="183" y2="46"/>
+    <line x1="282" y1="46" x2="309" y2="46"/>
+    <line x1="398" y1="46" x2="425" y2="46"/>
+    <line x1="234" y1="68" x2="258" y2="127"/>
+    <path d="M498,68 C452,98 402,108 349,126"/>
+    <line x1="366" y1="158" x2="405" y2="200"/>
+    <line x1="534" y1="200" x2="598" y2="40"/>
+    <line x1="534" y1="205" x2="598" y2="108"/>
+    <line x1="534" y1="212" x2="598" y2="176"/>
+    <line x1="534" y1="217" x2="598" y2="244"/>
+  </g>
+
+  <!-- top chain: agent · skill · tools · evidence (the surrounding ecosystem) -->
+  <g>
+    <rect x="16"  y="24" width="140" height="44" rx="8" fill="#eef2ed" stroke="#566466" stroke-width="1.5"/>
+    <text x="86"  y="51" text-anchor="middle" font-size="14" fill="#152426">Agent or Workflow</text>
+    <rect x="186" y="24" width="96"  height="44" rx="8" fill="#eef2ed" stroke="#566466" stroke-width="1.5"/>
+    <text x="234" y="51" text-anchor="middle" font-size="14" fill="#152426">Skill</text>
+    <rect x="312" y="24" width="86"  height="44" rx="8" fill="#eef2ed" stroke="#566466" stroke-width="1.5"/>
+    <text x="355" y="51" text-anchor="middle" font-size="14" fill="#152426">Tools</text>
+    <rect x="428" y="24" width="140" height="44" rx="8" fill="#eef2ed" stroke="#566466" stroke-width="1.5"/>
+    <text x="498" y="51" text-anchor="middle" font-size="14" fill="#152426">Evidence Sources</text>
+  </g>
+
+  <!-- judgment pack (the focus) -->
+  <rect x="196" y="130" width="170" height="52" rx="9" fill="#e4f3e7" stroke="#236232" stroke-width="2"/>
+  <text x="281" y="153" text-anchor="middle" font-size="15" font-weight="600" fill="#0f2b2e">Judgment Pack</text>
+  <text x="281" y="171" text-anchor="middle" font-size="12" fill="#2c4a3a">is a conclusion justified?</text>
+
+  <!-- judgment result (decision node) -->
+  <polygon points="470,168 532,208 470,248 408,208" fill="#f1f8f3" stroke="#236232" stroke-width="1.5"/>
+  <text x="470" y="204" text-anchor="middle" font-size="12.5" fill="#0f2b2e">Judgment</text>
+  <text x="470" y="219" text-anchor="middle" font-size="12.5" fill="#0f2b2e">Result</text>
+
+  <!-- outcomes -->
+  <g>
+    <rect x="600" y="14" width="212" height="52" rx="9" fill="#e4f3e7" stroke="#236232" stroke-width="1.5"/>
+    <text x="706" y="36" text-anchor="middle" font-size="13" font-weight="700" fill="#0f2b2e">Approved</text>
+    <text x="706" y="54" text-anchor="middle" font-size="12.5" fill="#20402f">→ Authorized action</text>
+
+    <rect x="600" y="82" width="212" height="52" rx="9" fill="#eef2ed" stroke="#566466" stroke-width="1.5"/>
+    <text x="706" y="104" text-anchor="middle" font-size="13" font-weight="700" fill="#152426">Rejected</text>
+    <text x="706" y="122" text-anchor="middle" font-size="12.5" fill="#3a4744">→ Stop or close</text>
+
+    <rect x="600" y="150" width="212" height="52" rx="9" fill="#fff0d8" stroke="#a65d13" stroke-width="1.5"/>
+    <text x="706" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#5a3410">Insufficient evidence</text>
+    <text x="706" y="190" text-anchor="middle" font-size="12.5" fill="#5a3410">→ Request evidence</text>
+
+    <rect x="600" y="218" width="212" height="52" rx="9" fill="#e7f2f2" stroke="#183b3f" stroke-width="1.5"/>
+    <text x="706" y="240" text-anchor="middle" font-size="13" font-weight="700" fill="#0f2b2e">Escalated</text>
+    <text x="706" y="258" text-anchor="middle" font-size="12.5" fill="#3a5a5c">→ Human review</text>
+  </g>
+</svg>

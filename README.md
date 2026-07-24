@@ -99,7 +99,8 @@ not define evaluator conformance or a portable decision result.
 | [`VERSIONING.md`](VERSIONING.md)                                                 | Release and compatibility policy                    |
 | [`CHANGELOG.md`](CHANGELOG.md)                                                   | Draft and published change history                  |
 | [`docs/design-principles.md`](docs/design-principles.md)                        | Design principles, non-goals, and origin and scope  |
-| [`jeps/0000-jep-process.md`](jeps/0000-jep-process.md)                           | Proposed change process                             |
+| [`FAQ.md`](FAQ.md)                                                               | Answers to common and hard architectural questions  |
+| [`rfcs/`](rfcs/)                                                                 | Open change proposals (RFCs), including the process  |
 | [`ROADMAP.md`](ROADMAP.md)                                                       | Evidence-gated path toward a specification          |
 | [`web/`](web/)                                                                   | Static documentation site and deployment guide      |
 | [`.vscode/tasks.json`](.vscode/tasks.json)                                       | One-command local documentation preview             |
@@ -200,7 +201,7 @@ and do not present agreement between experimental evaluators as JPS conformance.
 
 Start with [`TESTING.md`](TESTING.md) for a short exercise or
 [`CONTRIBUTING.md`](CONTRIBUTING.md) to propose a change. Material changes should begin as a
-Judgment Enhancement Proposal (JEP), include compatibility and security analysis, and add positive
+Request for Comments (RFC), include compatibility and security analysis, and add positive
 and negative examples.
 
 The specification is developed in public by its maintainers and community contributors. Participate
