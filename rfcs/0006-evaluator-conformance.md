@@ -157,11 +157,32 @@ Implementation experience recorded from that first implementation:
   implementation that silently drops unknown argument keys produces a silently different
   disposition.
 
-The second implementation remains future work, and to count as independent evidence it must be
-derived from this RFC's text, not ported from the first implementation — a port inherits the
-first implementer's silent resolutions and proves nothing about the prose. Per RFC 0000,
-maintainers may request prototypes before disposition, and a stable normative feature should not
-be accepted without evidence from two independent implementations.
+The second implementation exists: a clean-room, stdlib-only Python evaluator written from this
+RFC and the Core text alone — inside an information barrier (reference texts only; no access to
+the first implementation, its repository, or its tools; the session log was audited afterwards),
+by a different model family than the first implementation's authors, on the maintainer's
+machine. Its interpretation log records twenty-one numbered decisions with the text each relied
+on. Cross-implementation result: **13/13 semantic agreement** with the first implementation —
+identical kind, outcome, reason set, and handoff state on the nine appendix instances plus three
+probes (omitted evidence input, decimal-string ordering, missing exception fact).
+
+The exercise also did the other half of its job — it found a genuine underdetermination:
+
+- **The disposition's concrete serialization is not pinned.** "`handoff` ∈ {`none`, `requested`}
+  echoing the declared target when requested" was read by the first implementation as a handoff
+  *object* carrying a state and a target echo, and by the second as a bare two-value string with
+  no target member — the second implementer explicitly declined to "invent an extra field" and
+  flagged the target-echo phrase as under-specified. Semantic content agreed throughout; the
+  JSON layout did not. The later draft must specify the disposition's exact members, not just
+  their vocabulary.
+
+Independence caveats, recorded rather than hidden: both implementations ultimately trace to the
+same maintainer's direction, and this RFC's own implementation-experience notes (above) were part
+of the second implementer's reference text — its no-destination handoff reading cites them, so
+that particular convergence is corroborated rather than blind. Third-party implementation
+experience remains the strongest evidence this process can add. Per RFC 0000, a stable normative
+feature should not be accepted without evidence from two independent implementations; that bar
+now has its first real data.
 
 ## Unresolved questions
 
@@ -174,6 +195,9 @@ be accepted without evidence from two independent implementations.
 - **Number representability** — is equality between syntactically valid but arithmetically
   unrepresentable JSON numbers `unknown` (as the first implementation chose) or an explicit
   input error?
+- **Disposition serialization** — the exact JSON members of the disposition (in particular the
+  handoff state and target echo) must be pinned; two independent implementations agreed on all
+  semantics while serializing `handoff` incompatibly.
 - **Trace minimum** — must a trace surface a true rule that a forced outcome skipped?
 - **Graph interaction** — the disposition is a *candidate* representation for
   [RFC 0002](0002-judgment-graph.md)'s partial-failure question, not the answer: whether a
