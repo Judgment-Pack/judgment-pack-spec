@@ -134,13 +134,32 @@ extension; undeclared evidence key).
 
 ## Implementation
 
-No evaluator exists today in either repository: the Go reference runtime validates documents and
-evaluates nothing, and the specification repository owns no executable — the contract and corpus
-belong here, engines do not. The plausible pair, both future work: an experimental evaluator in
-the Go reference runtime — unmistakably labeled, claiming no conformance, and outside the default
-validation path, per the pre-stated guardrails in
-[tooling-architecture](../docs/tooling-architecture.md) — and an independently governed second
-runtime in another language or from a third party, under the same guardrails. Per RFC 0000,
+The first implementation exists: the Go reference runtime implements this RFC's pinned semantics
+as `judgment-pack experimental evaluate` and the `experimental_evaluate` MCP tool (its ADR-0007) —
+unmistakably labeled, claiming no conformance, and outside the default validation path, per the
+pre-stated guardrails in [tooling-architecture](../docs/tooling-architecture.md). The nine
+appendix instances run as its acceptance tests and reproduce identically over both of its
+surfaces. The specification repository still owns no executable — the contract and corpus belong
+here, engines do not.
+
+Implementation experience recorded from that first implementation:
+
+- The restated step 2 was implementable exactly as written; instances 7a and 7b are
+  deterministic in practice.
+- **Number representability is a real gap:** a syntactically valid JSON number can exceed an
+  exact-arithmetic implementation's range (an extreme exponent), making equality undeterminable.
+  The implementation maps this to §7.4's "incomparable values produce `unknown`" — never a silent
+  false — but the later draft should state representability explicitly and the corpus should
+  carry a row for it.
+- §8.1's direct exception escalation with no `escalation` object was implemented as a requested
+  handoff with no target; the later draft should confirm that shape.
+- Honoring the declared `additionalProperties: false` required strict wire-argument decoding; an
+  implementation that silently drops unknown argument keys produces a silently different
+  disposition.
+
+The second implementation remains future work, and to count as independent evidence it must be
+derived from this RFC's text, not ported from the first implementation — a port inherits the
+first implementer's silent resolutions and proves nothing about the prose. Per RFC 0000,
 maintainers may request prototypes before disposition, and a stable normative feature should not
 be accepted without evidence from two independent implementations.
 
@@ -152,6 +171,9 @@ be accepted without evidence from two independent implementations.
   [RFC 0003](0003-evidence-reference.md)'s evidence reference, or stay minimal?
 - **Beyond decimals** — units and date/time must be excluded explicitly, not
   `unknown`-by-accident.
+- **Number representability** — is equality between syntactically valid but arithmetically
+  unrepresentable JSON numbers `unknown` (as the first implementation chose) or an explicit
+  input error?
 - **Trace minimum** — must a trace surface a true rule that a forced outcome skipped?
 - **Graph interaction** — the disposition is a *candidate* representation for
   [RFC 0002](0002-judgment-graph.md)'s partial-failure question, not the answer: whether a
