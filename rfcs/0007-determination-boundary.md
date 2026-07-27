@@ -12,10 +12,19 @@
 ## Summary
 
 Core draws its expressive boundary at **computation**: a pack compares facts and does not calculate.
-Encoding 461 lines of real regulatory text showed that the boundary which actually appears in use is
-**determination** — and the two are not the same line. What left the pack was not only arithmetic;
-part of the *legal judgment* left with it, into a preparation layer the format cannot describe,
-attribute, or audit.
+Two encodings of real policy — deliberately opposite in character, by different authors — show that
+the boundary which actually appears in use is **determination**, and that the two are not the same
+line. In both, part of the *judgment* left the pack along with the work it could not express, into a
+preparation layer the format cannot describe, attribute, or audit.
+
+The size of the effect is strongly domain-dependent, and this RFC is bounded by that: encoding
+arithmetic-dense regulation displaced 124 facts and 13 determinations, while encoding qualitative
+policy displaced 5 and 1. **The format fits qualitative policy well.** But the escape did not vanish
+there — it merely changed cause. In the first domain judgment escaped because the format cannot
+calculate; in the second because it cannot quantify over a collection. Neither gap predicts the
+other, and that is the point: **the boundary is not a property of arithmetic. It opens wherever the
+format lacks the device a policy sentence needs, and what falls through is a judgment rather than a
+value.**
 
 The specification has no vocabulary for that loss, because it only ever contemplated losing
 calculation.
@@ -43,7 +52,13 @@ Three consequences, none visible in the format today:
 
 ## Evidence
 
-From Study 001, encoding the NBA Collective Bargaining Agreement excerpt published by RuleArena
+Two encodings of real policy, deliberately chosen to be opposites, by **different model families**
+under a clean-room barrier. Study 002 was run specifically to falsify the generalisation drawn from
+Study 001; it did not.
+
+### Study 001 — arithmetic-dense regulation
+
+Encoding the NBA Collective Bargaining Agreement excerpt published by RuleArena
 (ACL 2025, MIT, commit `3b9e2256`) as a pack. The pack validates, and its 61 rules cover **61 / 61**
 of the vocabulary the benchmark uses to annotate which provisions govern each instance. Full report:
 [expressiveness note](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/main/studies/001-policy-representation/EXPRESSIVENESS-NOTE.md).
@@ -71,6 +86,45 @@ routine. The pack became **61 violation detectors all resolving to `illegal`, wi
 reachable only as `fallbackOutcome`.** That works, and it makes every fired rule a citation — but it
 is a shape the author had to discover, not one the specification describes.
 
+### Study 002 — qualitative policy, run to falsify the generalisation
+
+Encoding the "Cancel flight" decision from the airline agent policy published by τ-bench (MIT, commit
+`1d244f5d`) — 166 lines of real customer-service policy: deontic, procedural, essentially
+arithmetic-free. Authored clean-room by a different model family, with a null result licensed in
+advance. Full report:
+[Study 002](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/002-qualitative-policy).
+
+**E5 — the effect is heavily domain-dependent, and that bounds this RFC.** Prepared facts fell from
+124 to **5**, prepared determinations from 13 to **1**, and seven policy devices were carried with no
+friction. The resulting pack is two outcomes, one rule, one escalation exception. **The format fits
+qualitative policy far better than it fits regulatory computation**, and any reading of E1–E3 that
+treats them as a general indictment is wrong.
+
+**E6 — but the escape reproduces, through a device gap that has nothing to do with arithmetic.** The
+single prepared determination in Study 002 is forced by this sentence:
+
+> "If any portion of the flight has already been flown, the agent cannot help and transfer is needed."
+
+**Core has no quantifier over a runtime collection.** `any` combines a fixed, authored list of
+conditions; it cannot ask whether *some element* of a variable-length array satisfies a predicate. So
+the pack cannot decide "any portion already flown" — something upstream must inspect the segments and
+hand it the conclusion.
+
+This is the load-bearing result of the pair. In Study 001 judgment escaped because the format cannot
+calculate; in Study 002 it escaped because the format cannot quantify. **The determination boundary
+is therefore not a property of arithmetic. It appears wherever the format lacks the device a policy
+sentence needs, and what is lost is a judgment rather than a value.** Two domains, two unrelated
+missing devices, the same class of loss.
+
+Study 002 also reproduced **E4 independently**: with no rule precedence available, its author encoded
+the policy's "if … otherwise" ordering as an `escalate` exception plus a single `any` rule plus a
+fallback — a different shape from Study 001's 61 violation detectors, arrived at by a different author
+for the same reason. Two observations of one cause.
+
+*Exposure recorded by that study, and it cuts against its own finding:* the authoring brief disclosed
+what Study 001 had found, which primes toward finding migration. Mitigations and the reasoning are in
+the study's report; a future replication should withhold the prior result.
+
 ## Specification (sketch — deliberately unsettled)
 
 Three separable questions. E2 motivates the RFC; A and B are the mechanisms that would address what
@@ -96,6 +150,13 @@ was observed.
   `unknown`.
 - *A fourth condition value.* Recorded so the option is visible; rejected on sight for what it would
   do to §7.
+
+**D. Collection quantification (E6).** The narrowest and best-evidenced gap of the three studies:
+one sentence of ordinary policy prose, squarely in the format's design centre, that cannot be
+expressed. Candidates: *nothing* (a prepared boolean is an acceptable answer, and the cost is exactly
+E6); or an existential/universal condition over an array-valued fact pointer, which is a small,
+bounded addition to §7 and does not imply arithmetic. Of everything in this RFC this is the most
+likely to be worth doing, and the cheapest to specify.
 
 **C. The architectural constraint (E4).** Either document the single-outcome / violation-detector
 pattern as non-normative authoring guidance, or revisit whether §8's conflict rule should treat a
@@ -156,8 +217,12 @@ in an implementation of it.
   format plausibly has to face, none of them evidenced here: obligations and prohibitions as distinct
   from outcomes; ordinal or rubric assessment as distinct from boolean conditions; precedence between
   provisions. Whether JPS needs any of them is an empirical question for the next encoding, not a
-  claim of this RFC.
-- **Does E1–E3 reproduce outside arithmetic-dense regulation?** Study 001 is one domain, chosen for
-  measurement properties rather than representativeness, and it is the hardest case for a format that
-  declines to compute. A qualitative-policy domain might show none of it — and that result would be
-  as informative as the original finding.
+  claim of this RFC. Two of those guesses have since been resolved by Study 002: **precedence is now
+  evidenced twice** (E4), and **quantification — which was not on the list at all — turned out to be
+  the concrete gap** (E6). The method found something the speculation did not, which is the argument
+  for continuing to run encodings rather than enumerating candidates.
+- ~~**Does E1–E3 reproduce outside arithmetic-dense regulation?**~~ **Answered by Study 002: yes,
+  ~25× weaker, and via an unrelated missing device (E5, E6).** The remaining open form of the question
+  is quantitative rather than existential: *how common* is the escape in qualitative policy? One
+  determination in one decision does not measure a rate, and a third encoding should be chosen to
+  estimate one rather than to look for the phenomenon again.
