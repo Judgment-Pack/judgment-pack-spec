@@ -157,7 +157,10 @@ Implementation experience recorded from that first implementation:
   implementation that silently drops unknown argument keys produces a silently different
   disposition.
 
-The second implementation exists: a clean-room, stdlib-only Python evaluator written from this
+The second implementation exists — published, with its interpretation log, clean-room protocol,
+and agreement harness, in
+[judgment-pack-evaluator-experiments](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments):
+a clean-room, stdlib-only Python evaluator written from this
 RFC and the Core text alone — inside an information barrier (reference texts only; no access to
 the first implementation, its repository, or its tools; the session log was audited afterwards),
 by a different model family than the first implementation's authors, on the maintainer's
