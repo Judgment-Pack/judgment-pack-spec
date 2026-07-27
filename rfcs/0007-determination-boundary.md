@@ -125,6 +125,32 @@ for the same reason. Two observations of one cause.
 what Study 001 had found, which primes toward finding migration. Mitigations and the reasoning are in
 the study's report; a future replication should withhold the prior result.
 
+### Study 003 — the census, answering "how common?"
+
+A preregistered census over **all twelve separable decisions** in τ-bench's airline and retail
+policies, with the blinding Study 002 lacked: hypothesis-blind encoders in isolated rooms producing
+neutral fact ledgers, then a separate measurement pass — two independent classifiers, adjudicated,
+disagreement counts published (**zero** fact-class disagreements across 84 facts). All twelve packs
+validate. Full report:
+[Study 003](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/003-escape-census).
+
+**E7 — in this frame the escape is universal, and one device dominates.** Every decision required at
+least one prepared determination (**12/12**; 40 of 58 prepared facts). The registered "all-scalar
+decisions escape cleanly" clause proved vacuous rather than false: no such decision exists in either
+policy, because request inputs are collections — passengers, payment methods, segments, items — and
+every *all / any / each / how many* over one of them is a conclusion the format cannot draw.
+**Collection-quantification forced 25 of the 40 determinations (63%); arithmetic — which Study 001
+made look like the phenomenon — forced 6.** Within the 25, roughly 19 are ∃/∀-shaped and 6 are
+count-shaped (`count(filter(…))` against a limit — meaningfully more language than a quantifier).
+
+**E8 — measurement method moves the count.** Study 002's decision, blind-re-encoded and
+independently classified, yielded **4** determinations where the original self-report found **1**.
+Absolute counts in Studies 001–002 should be read as floors; the census's two-classifier adjudicated
+protocol is the reference method. The residues (55 sentences) also gave the previously unevidenced
+candidate areas their first evidence — deontic gradation, cross-decision references,
+derivation-versus-check, terminality — while confirming that most sequencing loss is agent procedure
+a decision format arguably should not hold.
+
 ## Specification (sketch — deliberately unsettled)
 
 Three separable questions. E2 motivates the RFC; A and B are the mechanisms that would address what
@@ -151,12 +177,15 @@ was observed.
 - *A fourth condition value.* Recorded so the option is visible; rejected on sight for what it would
   do to §7.
 
-**D. Collection quantification (E6).** The narrowest and best-evidenced gap of the three studies:
-one sentence of ordinary policy prose, squarely in the format's design centre, that cannot be
-expressed. Candidates: *nothing* (a prepared boolean is an acceptable answer, and the cost is exactly
-E6); or an existential/universal condition over an array-valued fact pointer, which is a small,
-bounded addition to §7 and does not imply arithmetic. Of everything in this RFC this is the most
-likely to be worth doing, and the cheapest to specify.
+**D. Collection quantification (E6, E7).** No longer merely the best-evidenced gap — the census
+shows it is the *dominant cause* of determination escape: 25 of 40 across twelve decisions, versus 6
+for arithmetic. Candidates: *nothing* (a prepared boolean per conclusion, at the cost E7 quantifies);
+or an existential/universal condition over an array-valued fact pointer — a small, bounded addition
+to §7, no arithmetic implied, expressing roughly nineteen of the twenty-five observed cases. The
+six **count-shaped** cases (`count(filter(…))` compared to a limit) are named and deliberately
+deferred: counting-with-predicates is the first step of a query language, which the non-goals
+exclude. Of everything in this RFC, the bounded quantifier is the most likely to be worth doing, the
+cheapest to specify, and now the best evidenced.
 
 **C. The architectural constraint (E4).** Either document the single-outcome / violation-detector
 pattern as non-normative authoring guidance, or revisit whether §8's conflict rule should treat a
@@ -222,7 +251,9 @@ in an implementation of it.
   the concrete gap** (E6). The method found something the speculation did not, which is the argument
   for continuing to run encodings rather than enumerating candidates.
 - ~~**Does E1–E3 reproduce outside arithmetic-dense regulation?**~~ **Answered by Study 002: yes,
-  ~25× weaker, and via an unrelated missing device (E5, E6).** The remaining open form of the question
-  is quantitative rather than existential: *how common* is the escape in qualitative policy? One
-  determination in one decision does not measure a rate, and a third encoding should be chosen to
-  estimate one rather than to look for the phenomenon again.
+  ~25× weaker, and via an unrelated missing device (E5, E6).**
+- ~~**How common is the escape in qualitative policy?**~~ **Answered by the Study 003 census (E7):
+  universal in its frame — 12/12 decisions — with quantification as the dominant device.** The open
+  form that remains is external validity: the frame is two policies by one benchmark team, and the
+  rate outside it is unmeasured. A census over a differently-authored corpus is the natural
+  replication.
