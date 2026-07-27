@@ -28,7 +28,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0004](0004-planner-interface.md) | Planner interface | Draft | Likely product |
 | [0005](0005-pack-discovery.md) | Pack discovery | Draft | Specification (format) + product (service) |
 | [0006](0006-evaluator-conformance.md) | Evaluator conformance | Draft | Specification (semantics + conformance class) |
-| [0007](0007-fact-preparation-boundary.md) | The fact-preparation boundary — derived values and materiality | Draft | Specification (Core or profile) — undecided |
+| [0007](0007-determination-boundary.md) | The determination boundary — what a pack cannot hold | Draft | Specification (Core or profile) — undecided |
 
 The "Belongs to" column records where each proposal would land if accepted. A format that
 independent tools must agree on is a candidate for the specification. An algorithm or engine belongs
