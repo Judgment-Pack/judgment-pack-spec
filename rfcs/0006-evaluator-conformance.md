@@ -15,7 +15,8 @@ Propose that a later draft of the [core specification](../spec/judgment-pack-cor
 normative *evaluator* conformance class: portable semantics for applying a pack to runtime facts
 and evidence, and a portable *disposition* that two independent evaluators must produce
 identically from the same inputs. The raw material is the informative §§7–8; promote them, close
-their portability gaps, and test with an evaluation corpus beside the validation corpus.
+their portability gaps — one of which this RFC resolves in its own sketch — and test with an
+evaluation corpus beside the validation corpus.
 
 ## Problem
 
@@ -27,92 +28,167 @@ comparing evaluators, auditors replaying a decision, integrators exchanging deci
 
 ## Evidence
 
-In a working session — not yet a committed artifact — three readers walked eight input instances
-for [`data-request-intake-triage`](../examples/data-request-intake-triage.json) through §§7–8.
-Six were unanimous; two diverged: §8 step 2's binary "is absent" collides with §7.5's
-three-valued presence, permitting reason `unknown` or `missing-required-evidence` from the same
-missing-evidence input; and `not-applicable` proved to be simultaneously a result kind and a
-reason — §8 mandates both at once, so a reporting layer that flattens to one field must invent a
-projection the spec does not define. The exercise is unrecorded, so weight these claims
-accordingly; committing the instances and divergence writeups as non-normative draft fixtures is
-a prerequisite for review.
+Three readers independently walked input instances for
+[`data-request-intake-triage`](../examples/data-request-intake-triage.json) through §§7–8; an
+adversarial review then reconstructed and re-walked the set independently (recorded on this RFC's
+pull request). The instances, inputs, and expected results are committed in the
+[appendix](#appendix-walked-instances-non-normative) below. Two findings survived both passes:
+
+1. **One genuine semantic divergence.** §8 step 2's binary test — "record
+   `missing-required-evidence` if any required evidence is absent" — does not define "absent" in
+   terms of §7.5's three-valued presence, and §7.5 makes presence `false` only "when a complete
+   evidence manifest is available and associates no item" while defining no manifest interchange
+   form. For appendix instance 7, careful readers legitimately produce either
+   `unresolved`/`{missing-required-evidence}` or `unresolved`/`{unknown}` from the same input,
+   with different termination points. The sketch below resolves this.
+2. **One lossy-reporting finding, not a semantic divergence.** §8 defines "a `not-applicable`
+   result carrying reason `not-applicable`" — the result kind and the reason are both mandated,
+   so an evaluator has exactly one correct result (appendix instance 1). What the spec does not
+   define is a serialized result envelope, so a reporter that flattens kind and reason into one
+   field invents a projection. This motivates the portable disposition; it is not evidence that
+   careful evaluators disagree.
 
 ## Specification (sketch)
 
 - **Inputs** — a semantically conformant pack; one JSON facts document (`fact.path` as an
-  RFC 6901 pointer); an evidence-availability input making §7.5's three-valued presence
-  derivable.
-- **Condition semantics** — §§7.1–7.4 normative: three-valued logic, type-preserving equality,
-  unresolved pointers yield `unknown`.
-- **Decimal ordering** — by mathematical value of the §2.2 grammar; units and date/time stay
-  out.
-- **Resolution** — §8 normative, its required-evidence check restated in three-valued terms;
-  conflict stays `unresolved`, never tie-broken.
-- **Disposition** — result kind (`outcome`, `not-applicable`, `unresolved`), a reason set, a
-  separate handoff axis; escalation is not a result kind.
-- **Boundaries** — unsupported required extensions are refused; resource exhaustion fails
-  explicitly.
+  RFC 6901 pointer); an evidence-availability document; the evaluator's supported-extension set.
+- **Evidence availability** — one JSON object keyed by declared `evidenceRequirements[].id`,
+  each value `present`, `absent`, or `unknown`; an omitted key means `unknown`; a duplicate or
+  undeclared key is an input error. `present`/`absent`/`unknown` map to §7.5's
+  true/false/unknown, replacing the undefined evidence manifest with a portable tri-state.
+- **Condition semantics** — the §7 preamble (`literal`) and §§7.1–7.5 become normative:
+  three-valued logic, type-preserving equality, unresolved pointers yield `unknown`.
+- **Decimal ordering** — an ordered comparison is defined iff both values are JSON strings
+  conforming to the §2.2 decimal grammar, compared by mathematical value; any other value —
+  including a JSON number — yields `unknown`. Units and date/time stay out.
+- **Resolution** — §8 becomes normative with its step 2 restated in §7.5's terms: record
+  `missing-required-evidence` iff any required requirement's presence is **false**; record
+  `unknown` iff any required requirement's presence is **unknown** and none is false. Either
+  reason blocks outcomes and the fallback and yields `unresolved` after exception inspection, per
+  §8's existing order. Conflict stays `unresolved`, never tie-broken. The §8 step order is
+  contractual only where it affects the disposition; it mandates no implementation algorithm.
+- **Disposition** — required member `kind` ∈ {`outcome`, `not-applicable`, `unresolved`};
+  `outcomeId` required iff `kind` = `outcome` and forbidden otherwise; `reasons` an unordered,
+  deduplicated set (set equality; empty iff `kind` = `outcome`); `handoff` ∈ {`none`,
+  `requested`} echoing the declared target when requested. Escalation is not a result kind.
+- **Errors are not dispositions** — an unsupported required extension, a malformed input, or
+  resource exhaustion produces an explicit evaluation error, never a disposition; corpus inputs
+  must fit mandated minimum limits so identical corpus runs cannot diverge on limits.
 
 Product-only, now and later: fact acquisition, evidence collection, handoff delivery,
 authorization, and *when* to evaluate.
 
 ## Alternatives
 
-- **No change** — rejected; identical inputs already yield different reason sets across careful
-  readers.
-- **Extension** — §9 forbids only an *optional* extension from changing Core semantics, but
-  evaluation semantics over Core's own rules, conditions, and outcomes govern how every pack is
-  read; a required extension would fork the ecosystem pack-by-pack and cannot amend §3.4.
-  Rejected.
-- **Result format only** — rejected; evaluators would emit well-formed but disagreeing records.
-- **Product-only** — viable for engines, but the result and its semantics are a genuine
+- **No change** — viable while demand is speculative, but the committed appendix and the
+  independently reproduced divergence on instance 7 are concrete disagreement between careful
+  readings, and §7.5's undefined manifest guarantees it recurs in implementations.
+- **Result format only** — standardize the disposition envelope without the semantics. Viable
+  and architecture-aligned (a format in the specification, engines in runtimes), and the fallback
+  position if semantics stall — but evaluators would emit well-formed, comparable, *disagreeing*
+  records; instance 7 would simply serialize its divergence.
+- **Evaluation profile** — a separately named, opt-in profile defining the class outside Core.
+  Viable; §9 forbids only *optional* extensions from changing Core semantics, and a profile is
+  how Core-versus-profile (unresolved below) would land if Core amendment proves too heavy.
+- **Product-only** — correct for engines, but the result and its semantics are a genuine
   interchange need.
-- **Core versus profile** — both remain live; see unresolved questions.
 
 ## Compatibility
 
-Document conformance is untouched; every existing pack remains valid. The later draft would amend
-the Status paragraph and §3.4 and re-title §§7–8 out of "(informative)" — a labeled breaking
-change permitted during `0.x` per RFC 0000. Acceptance changes nothing by itself: §3.4's
-prohibition holds until the class and its corpus ship, and claims against `0.1.0-draft` remain
-forbidden permanently.
+Document conformance is untouched; every existing pack remains valid against `0.1.0-draft`.
+Defining the class touches more than §§7–8: the Purpose and §3 openings, §3.4, §3.5's
+runtime-correctness non-claim, §§6.5–6.6's "informative" cross-references, §13, and the exact
+`specVersion`, schema, and corpus metadata must change together in the later draft — a labeled
+`0.x` breaking change per RFC 0000. Migration: a pack needs no edits, but evaluator-conformance
+claims attach only to the later exact `specVersion`; nothing is acquired automatically, and
+claims against `0.1.0-draft` remain forbidden permanently.
 
 ## Security and privacy
 
-Runtime facts are untrusted; the three-valued semantics is a safety property — hostile or missing
-data degrades to `unknown`, never silently to `false` or an outcome. A conformance claim will be
-misread as proof decisions are correct or authorized; the §3.5 non-claims must extend to the
-class. Dispositions leak rule and evidence-requirement ids across trust boundaries. Silent
-truncation forges a disposition; limit exhaustion must fail explicitly.
+Runtime facts and evidence inputs are untrusted. The three-valued semantics makes missing-data
+handling *deterministic and author-controlled*, not safe by default: known-absent evidence is
+`false` under the tri-state input, `onUnknown: ignore` deliberately lets resolution continue, and
+a strong `all`/`any` can decide despite an `unknown` child. The portable claim is that every
+evaluator degrades the same way — the pack's declared `onUnknown` policy, not an implementation's
+guess, decides. A conformance claim will be misread as proof decisions are correct or authorized;
+the §3.5 truth, authenticity, authority, and safety non-claims extend to the class unchanged,
+while §3.5's "a particular runtime applied the pack correctly" bullet must be rewritten — this
+class makes exactly that limited claim and no other. Dispositions leak rule and
+evidence-requirement ids across trust boundaries. Silent truncation forges a disposition; limit
+exhaustion must be an explicit error.
 
 ## Conformance
 
-An evaluation corpus mirroring the [validation corpus](../conformance/README.md), a fourth layer
-under the stop-at-target-layer rule. The eight walked instances, once committed, seed the
-positive, negative, and boundary rows; constructed cases beyond the walked set add
-completeness-signal variants, hostile optional-extension content that must stay inert during
-evaluation, and rule-order permutations that must not change any result.
+An evaluation corpus beside the [validation corpus](../conformance/README.md), with its own case
+carrier: pack reference, facts document, evidence-availability document, supported-extension
+set, and expected disposition (or expected error). The appendix instances seed the first rows —
+instance 7's two variants pin the semantics this RFC chooses — for example:
+
+> facts: `type=data-access, completeness=complete, appropriateness=pass, embargo=false`;
+> evidence: `intake-form: present, sponsor-endorsement: absent` → expected
+> `{kind: unresolved, reasons: [missing-required-evidence], handoff: requested}`.
+
+Constructed cases add hostile optional-extension content that must stay inert during evaluation,
+rule-order permutations that must not change any result, and error rows (unsupported required
+extension; undeclared evidence key).
 
 ## Implementation
 
 No evaluator exists today in either repository: the Go reference runtime validates documents and
-evaluates nothing, and the specification repository's Python tooling validates the corpus only.
-The plausible pair, both future work: an experimental evaluator added to the Go runtime, labeled
-per §3.4 and claiming no conformance; and the Python tooling extended to evaluate, or a third
-party. Per RFC 0000, maintainers may request prototypes before disposition, and a stable
-normative feature should not be accepted without evidence from two independent implementations.
+evaluates nothing, and the specification repository owns no executable — the contract and corpus
+belong here, engines do not. The plausible pair, both future work: an experimental evaluator in
+the Go reference runtime — unmistakably labeled, claiming no conformance, and outside the default
+validation path, per the pre-stated guardrails in
+[tooling-architecture](../docs/tooling-architecture.md) — and an independently governed second
+runtime in another language or from a third party, under the same guardrails. Per RFC 0000,
+maintainers may request prototypes before disposition, and a stable normative feature should not
+be accepted without evidence from two independent implementations.
 
 ## Unresolved questions
 
-- **Core or profile** — this RFC proposes the class, not its packaging.
-- **Evidence interchange** — does the evidence-availability input grow into
-  [RFC 0003](0003-evidence-reference.md)'s evidence reference, or stay a minimal tri-state?
+- **Core or profile** — this RFC proposes the class, not its packaging; the evaluation-profile
+  alternative above is the live counter-proposal to Core amendment.
+- **Evidence interchange** — does the tri-state evidence-availability input grow into
+  [RFC 0003](0003-evidence-reference.md)'s evidence reference, or stay minimal?
 - **Beyond decimals** — units and date/time must be excluded explicitly, not
   `unknown`-by-accident.
 - **Trace minimum** — must a trace surface a true rule that a forced outcome skipped?
-- **Graph interaction** — [RFC 0002](0002-judgment-graph.md)'s composite result presupposes this
-  disposition: its "partial failure" question is answered by `unresolved` propagating downstream,
-  and its outcome-as-evidence edges must map a disposition into the evidence-availability input.
-  [RFC 0004](0004-planner-interface.md)'s selection query probes the applicability gate, so
-  `not-applicable` must stay a distinct result kind and never read as authorization.
+- **Graph interaction** — the disposition is a *candidate* representation for
+  [RFC 0002](0002-judgment-graph.md)'s partial-failure question, not the answer: whether a
+  downstream pack sees an unresolved upstream as `absent` or `unknown` evidence, which
+  requirement receives it, how outcome identity survives the mapping, and whether downstream
+  evaluation stops or accumulates are all edge semantics RFC 0002 still owes.
+- **Selection probe** — [RFC 0004](0004-planner-interface.md)'s thin selection query should not
+  consume full dispositions (they couple selection to evidence and resolution); a separately
+  exposed tri-state applicability check would preserve the separation, and applicability is
+  never authorization.
 - **Claim verification** — is passing the corpus self-asserted, or must results be published?
+
+## Appendix: walked instances (non-normative)
+
+Evidence, not specification. Pack: [`data-request-intake-triage`](../examples/data-request-intake-triage.json).
+Facts abbreviate `/request/*`: `type` (default `data-access` where unstated), `completeness` (C),
+`appropriateness` (A), `embargoedInformationToUnauthorizedRecipients` (E). Evidence availability
+abbreviates `intake-form` (IF) and `sponsor-endorsement` (SE). Expected dispositions follow the
+sketch's chosen semantics; before that choice, instance 7a was the recorded divergence — the
+original three-reader exercise split it between `{unknown}` and `{missing-required-evidence}`,
+and the adversarial re-walk confirmed both readings were defensible under §§7–8 as written.
+
+| # | Facts | Evidence | Expected disposition |
+| --- | --- | --- | --- |
+| 1 | `type=dataset-deletion`, others omitted | IF present, SE present | `not-applicable`, reasons `{not-applicable}`, handoff requested |
+| 2 | `type` missing | IF present, SE present | `unresolved`, reasons `{unknown}`, handoff requested |
+| 3 | C=complete, A=hard-fail, E=false | IF present, SE present | `outcome: decline-redirect`, no handoff |
+| 4 | C=incomplete, A=pass, E=false | IF present, SE present | `outcome: clarify-return`, no handoff |
+| 5 | C=complete, A=pending, E=false | IF present, SE present | `outcome: clarify-return`, no handoff |
+| 6 | C=complete, A=pass, E=false | IF present, SE present | `outcome: proceed`, no handoff |
+| 7a | C=complete, A=pass, E=false | IF present, SE **unknown** | `unresolved`, reasons `{unknown}`, handoff requested — *the recorded divergence, resolved by the sketch* |
+| 7b | C=complete, A=pass, E=false | IF present, SE **absent** | `unresolved`, reasons `{missing-required-evidence}`, handoff requested |
+| 8 | C=complete, A=pass, E=**true** | IF present, SE present | `outcome: decline-redirect` (forced; normal rules skipped), no handoff |
+| 9 | C=incomplete, A=**hard-fail**, E=false | IF present, SE present | `unresolved`, reasons `{conflict}` (decline and clarify rules both true), handoff requested |
+
+Instance 8's forced outcome bypasses a proceed rule that would otherwise be true — the trace
+question above. Instance 9 is why conflict is never tie-broken: §8's closing rules out array
+order, lexical id order, and implementation-defined priority. The `no-match` fallback path is
+unreachable for this pack while `fallbackOutcome` is declared; a fallback-free variant belongs in
+the constructed corpus rows.
