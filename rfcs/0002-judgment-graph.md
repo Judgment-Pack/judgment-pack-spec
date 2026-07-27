@@ -25,6 +25,10 @@ every integrator wires composition privately and non-portably.
 Decision Model and Notation (DMN) needed a Decision Requirements Graph precisely because real models
 are graphs of decisions, not single tables — and defining that graph's semantics took the standard
 years. The same pressure appears here as soon as more than one pack is authored for one workflow.
+The repository's own [`data-request-intake-triage`](../examples/data-request-intake-triage.json)
+example already shows the seam: its summarized completeness and appropriateness facts are the
+verdicts of an upstream assessment that would naturally be its own pack feeding this one — an edge
+this format would make first-class instead of an out-of-band convention.
 
 ## Specification (sketch)
 
@@ -70,6 +74,8 @@ independent of any evaluator.
 - **Shared namespace** — do packs in a graph share a fact/evidence namespace, or is each isolated
   with explicit mapping?
 - **Cycles** — are cyclic dependencies always invalid, or valid with a declared fixpoint rule?
-- **Partial failure** — how is an unresolved upstream decision represented downstream?
+- **Partial failure** — how is an unresolved upstream decision represented downstream? The
+  portable disposition proposed by [RFC 0006](0006-evaluator-conformance.md) is the candidate
+  representation.
 - **Composite result** — is the aggregated result a portable artifact (a spec concern) or a runtime
   output? This is the hardest question and is deliberately unresolved.

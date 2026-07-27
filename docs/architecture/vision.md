@@ -41,7 +41,7 @@ and no runtime. Those exclusions are intentional; see the
 | Judgment Graph | A *format* for composing several packs. | Proposed | [RFC 0002](../../rfcs/0002-judgment-graph.md) |
 | Judgment Pack | A single-decision document. | **Shipped** | The specification |
 | Evidence (sources) | What a pack references; supplied by any system. | Reference **shipped**; integration out of scope | [RFC 0003](../../rfcs/0003-evidence-reference.md) |
-| Runtime | Validates today; may evaluate later. | Validator shipped; evaluator experimental | Reference runtime |
+| Runtime | Validates today; may evaluate later. | Validator shipped; evaluator conformance proposed | Reference runtime, [RFC 0006](../../rfcs/0006-evaluator-conformance.md) |
 | Composite Judgment | The aggregated result of evaluating a graph. | Proposed | [RFC 0002](../../rfcs/0002-judgment-graph.md) |
 | Discovery / registry | Finding and selecting packs across catalogs. | Proposed (format) / product (service) | [RFC 0001](../../rfcs/0001-pack-manifest.md), [RFC 0005](../../rfcs/0005-pack-discovery.md) |
 
