@@ -449,6 +449,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0007-fact-preparation-boundary.md",
+        PurePosixPath("rfcs/0007-fact-preparation-boundary/index.html"),
+        "RFC 0007: The fact-preparation boundary",
+        "Draft proposal on derived values, their attribution, and materiality — the gaps found by encoding real regulatory text as a pack.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/0006-evaluator-conformance.md",
         PurePosixPath("rfcs/0006-evaluator-conformance/index.html"),
         "RFC 0006: Evaluator conformance",
