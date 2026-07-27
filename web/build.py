@@ -449,6 +449,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0007-determination-boundary.md",
+        PurePosixPath("rfcs/0007-determination-boundary/index.html"),
+        "RFC 0007: The determination boundary",
+        "Draft proposal: the specification draws its boundary at computation, but the boundary that appears in use is determination — and part of the judgment leaves the pack.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/0006-evaluator-conformance.md",
         PurePosixPath("rfcs/0006-evaluator-conformance/index.html"),
         "RFC 0006: Evaluator conformance",
