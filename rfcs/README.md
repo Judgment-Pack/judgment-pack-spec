@@ -29,6 +29,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0005](0005-pack-discovery.md) | Pack discovery | Draft | Specification (format) + product (service) |
 | [0006](0006-evaluator-conformance.md) | Evaluator conformance | Draft | Specification (semantics + conformance class) |
 | [0007](0007-determination-boundary.md) | The determination boundary — what a pack cannot hold | Draft | Specification (Core or profile) — undecided |
+| [0008](0008-bounded-collection-quantifiers.md) | Bounded collection quantifiers for conditions | Draft | Specification (condition schema + semantics) — Core or profile undecided |
 | [0009](0009-interim-review-regime.md) | The interim review regime | Accepted | Process (governance) |
 
 The "Belongs to" column records where each proposal would land if accepted. A format that

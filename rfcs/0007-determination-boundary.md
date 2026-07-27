@@ -181,11 +181,22 @@ was observed.
 shows it is the *dominant cause* of determination escape: 25 of 40 across twelve decisions, versus 6
 for arithmetic. Candidates: *nothing* (a prepared boolean per conclusion, at the cost E7 quantifies);
 or an existential/universal condition over an array-valued fact pointer — a small, bounded addition
-to §7, no arithmetic implied, expressing roughly nineteen of the twenty-five observed cases. The
-six **count-shaped** cases (`count(filter(…))` compared to a limit) are named and deliberately
+to §7, no arithmetic implied, ~~expressing roughly nineteen of the twenty-five observed cases~~. The
+~~six~~ **count-shaped** cases (`count(filter(…))` compared to a limit) are named and deliberately
 deferred: counting-with-predicates is the first step of a query language, which the non-goals
-exclude. Of everything in this RFC, the bounded quantifier is the most likely to be worth doing, the
-cheapest to specify, and now the best evidenced.
+exclude. Of everything in this RFC, the bounded quantifier is ~~the most likely to be worth doing~~
+the cheapest to specify, and now the best evidenced.
+
+> **Amended 2026-07-27 — the "roughly nineteen" figure is withdrawn.** It was estimated from shape
+> names rather than per-fact reading. A per-fact re-analysis of the same 25 facts — two independent
+> readers, mutually blind, with recorded adjudication; expressibility agreement 25/25 — puts a bare
+> bounded quantifier's reach at **3**, or **5** with an additional all-equal-at-a-sub-path
+> operator; the remaining 20 need joins, counts, ordinal selection, fact-to-fact comparison, or
+> whole-list classification. The count-shaped figure of six stands. The re-analysis is post-hoc and
+> unregistered, not census-grade. E7's *device* count (25 of 40) is unaffected; only the
+> sub-classification within it changes. The proposal, the corrected numbers, and the question of
+> whether 3 of 25 licenses a Core amendment at all now live in
+> [RFC 0008](0008-bounded-collection-quantifiers.md).
 
 **C. The architectural constraint (E4).** Either document the single-outcome / violation-detector
 pattern as non-normative authoring guidance, or revisit whether §8's conflict rule should treat a
