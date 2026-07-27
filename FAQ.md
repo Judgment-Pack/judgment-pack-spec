@@ -321,7 +321,8 @@ behavior may be removed or changed with migration notes.
 
 ## Governance and Open source
 
-**Q40. Who controls JPS?** Its maintainers and community contributors, in public. No required
+**Q40. Who controls JPS?** Its maintainer, in public; there are no independent contributors yet
+(see [governance](GOVERNANCE.md#interim-review-regime)). No required
 commercial runtime controls it; conformance is defined by the prose, schema, and corpus, not by any
 vendor's product. See [governance](GOVERNANCE.md).
 

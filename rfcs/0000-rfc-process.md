@@ -47,6 +47,13 @@ Research-preview RFCs remain open for public comment for a reasonable period bas
 Maintainers may request prototypes or conformance cases before disposition. A stable normative
 feature should not be accepted without evidence from two independent implementations.
 
+While the project has a single maintainer, public comment alone has not drawn outside review. Every
+RFC opened after 2026-07-27 therefore also receives a recorded adversarial review by a model from a
+different vendor than any model that assisted its drafting, with a written maintainer disposition
+for each finding. What the record must contain, what the review does not substitute for, and the
+criteria that end the requirement are in
+[`GOVERNANCE.md`](../GOVERNANCE.md#interim-review-regime).
+
 ## Compatibility
 
 During `0.x`, breaking proposals are allowed but must be labeled and accompanied by migration
