@@ -213,6 +213,31 @@ EXAMPLE_GUIDES = {
             "Approve, escalate, and reject are only display labels; never treat them as authorization to pay, hold, or refuse a real invoice.",
         ),
     ),
+    "data-request-intake-triage.json": ExampleGuide(
+        focus="A three-way triage decision over summarized assessment facts.",
+        demonstrates=(
+            "A synthetic data-governance intake pack that routes a data request to proceed, "
+            "clarify/return, or decline/redirect using summarized completeness and appropriateness "
+            "facts, two required evidence items, a cited source, a forced-outcome exception, a "
+            "clarify fallback, and explicit escalation."
+        ),
+        good_for=(
+            "Modeling a triage decision whose inputs are themselves the verdicts of an upstream review process.",
+            "Tracing a forced-outcome exception that overrides every normal rule in the informative model.",
+            "Contrasting fix-with-more-information outcomes (clarify/return) with fail-permanently outcomes (decline/redirect).",
+        ),
+        edges=(
+            "Only the six declared request types are applicable; any other request type is outside the example's declared scope.",
+            "An incomplete submission that also carries a hard appropriateness failure matches both the clarify rule and the decline rule, producing conflicting normal-rule candidates in the informative model. Conflict handling is not a portable evaluator result in this draft.",
+            "In the informative model, the embargoed-information forced outcome bypasses normal rules entirely; a missing embargo fact makes the exception unknown, and its onUnknown declares escalation.",
+            "If resolution otherwise completes with no matching rule, the declared clarify-return fallback applies. The listed no-match escalation trigger is unreachable in the informative algorithm while that fallback exists.",
+        ),
+        failure_paths=(
+            "In a scratch copy, remove the decline-redirect outcome while leaving the exception that references it; the document keeps a valid JSON shape but must fail semantic document conformance.",
+            "Point a rule's evidenceRequirementRefs at an undeclared evidence id to produce a dangling-reference semantic failure.",
+            "Proceed, clarify, and decline are only display labels; never treat them as authorization to accept, return, or refuse a real data request.",
+        ),
+    ),
 }
 
 
