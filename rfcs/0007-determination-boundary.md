@@ -140,8 +140,10 @@ decisions escape cleanly" clause proved vacuous rather than false: no such decis
 policy, because request inputs are collections — passengers, payment methods, segments, items — and
 every *all / any / each / how many* over one of them is a conclusion the format cannot draw.
 **Collection-quantification forced 25 of the 40 determinations (63%); arithmetic — which Study 001
-made look like the phenomenon — forced 6.** Within the 25, roughly 19 are ∃/∀-shaped and 6 are
-count-shaped (`count(filter(…))` against a limit — meaningfully more language than a quantifier).
+made look like the phenomenon — forced 6.** Within the 25, ~~roughly 19 are ∃/∀-shaped~~ — **amended
+2026-07-27: 3, or 5 with a uniformity operator; see the amendment under question D and
+[RFC 0008](0008-bounded-collection-quantifiers.md)** — and 6 are count-shaped
+(`count(filter(…))` against a limit — meaningfully more language than a quantifier).
 
 **E8 — measurement method moves the count.** Study 002's decision, blind-re-encoded and
 independently classified, yielded **4** determinations where the original self-report found **1**.
@@ -182,7 +184,7 @@ shows it is the *dominant cause* of determination escape: 25 of 40 across twelve
 for arithmetic. Candidates: *nothing* (a prepared boolean per conclusion, at the cost E7 quantifies);
 or an existential/universal condition over an array-valued fact pointer — a small, bounded addition
 to §7, no arithmetic implied, ~~expressing roughly nineteen of the twenty-five observed cases~~. The
-~~six~~ **count-shaped** cases (`count(filter(…))` compared to a limit) are named and deliberately
+six **count-shaped** cases (`count(filter(…))` compared to a limit) are named and deliberately
 deferred: counting-with-predicates is the first step of a query language, which the non-goals
 exclude. Of everything in this RFC, the bounded quantifier is ~~the most likely to be worth doing~~
 the cheapest to specify, and now the best evidenced.

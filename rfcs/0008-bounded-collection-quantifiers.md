@@ -251,7 +251,7 @@ it only if that census count earns it.
   literal only). Strictly larger than a bounded quantifier.
 - **Count and cardinality comparisons — 6 cases.** `count(filter(methods, type ==
   travel_certificate)) in [0,1]`; `|methods| == 1`. Limit tests need length-of-array plus an
-  ordered comparison, and in four the filter predicate is itself a join. This is the slope RFC 0007
+  ordered comparison, and in three the filter predicate is itself a join. This is the slope RFC 0007
   named and the non-goals exclude.
 - **Selection, size-against-size, and whole-list classification — 7 cases.**
   `R1:/order/originalPaymentMethod/type`, `R2:/request/newPaymentMethodDiffersFromOriginal`, and
@@ -269,15 +269,16 @@ The accounting closes: 3 expressible + 2 `uniform` + 7 join + 6 cardinality + 7 
 size-against-size, and classification = **25**.
 
 The deferral is a feature. A quantifier that expresses 3 cases and stops is a bounded addition to
-§7; one that reaches 12 by admitting pointers-as-operands and cardinality is a query language
-arriving in instalments.
+§7; one that reaches 12 by admitting pointers-as-operands and intra-element field comparison is a
+query language arriving in instalments.
 
 ## Alternatives
 
 - **No change**, or **wait for a second corpus.** The status quo is one prepared boolean per
   conclusion, at the cost E7 measures; this remedy recovers 3 of 25, and the frame is two policies
   by one benchmark team. A partial fix must still be specified, tested, and supported permanently.
-- **The larger language.** Admit array-valued pointer operands and cardinality, reaching 12 of 25.
+- **The larger language.** Admit array-valued pointer operands and intra-element field
+  comparison, reaching 12 of 25.
   Rejected here, and named as the thing this RFC is defined against.
 - **Profile, not Core.** An optional evaluation profile could carry the operators; the natural
   landing if Core amendment proves heavy, and the same landing RFC 0006 reserves for its own class.
