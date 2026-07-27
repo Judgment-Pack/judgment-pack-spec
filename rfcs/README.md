@@ -27,6 +27,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0003](0003-evidence-reference.md) | Evidence reference | Draft | Specification (format) |
 | [0004](0004-planner-interface.md) | Planner interface | Draft | Likely product |
 | [0005](0005-pack-discovery.md) | Pack discovery | Draft | Specification (format) + product (service) |
+| [0006](0006-evaluator-conformance.md) | Evaluator conformance | Draft | Specification (semantics + conformance class) |
 
 The "Belongs to" column records where each proposal would land if accepted. A format that
 independent tools must agree on is a candidate for the specification. An algorithm or engine belongs

@@ -449,6 +449,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0006-evaluator-conformance.md",
+        PurePosixPath("rfcs/0006-evaluator-conformance/index.html"),
+        "RFC 0006: Evaluator conformance",
+        "Draft proposal for a normative evaluator conformance class with portable dispositions and an evaluation corpus.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.1.0-draft.md",
         PurePosixPath("project/releases/0.1.0-draft/index.html"),
         "0.1.0-draft release notes",
