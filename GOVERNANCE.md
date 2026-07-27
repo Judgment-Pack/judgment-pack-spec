@@ -58,6 +58,11 @@ This section adds an adversarial reading where there is currently none. It is no
 Breadth means readers with different exposure — users, implementers, operators — and no model has
 any.
 
+This section is the operative text proposed by
+[RFC 0009](./rfcs/0009-interim-review-regime.md), which is its design record. The regime was
+introduced through the RFC process it amends, and the adversarial review of the proposal, with a
+written disposition for every finding, is recorded on that RFC's pull request.
+
 ### Practice
 
 The precedent is partial. RFC 0006
@@ -65,29 +70,71 @@ The precedent is partial. RFC 0006
 prompt verbatim, the unedited findings of an OpenAI Codex review of a Claude-drafted RFC, the
 response, and a maintainer disposition; the bar stated at the time was a different model family, not
 a different vendor. RFC 0007 and the reference runtime's architecture decision records carry no such
-record and were merged without one. The requirement below is prospective: it applies to work opened
-after 2026-07-27.
+record and were merged without one.
 
-- **Scope.** Every RFC in this repository. The maintainer applies the same rule to material
-  architecture decision records in the reference runtime — a *material* ADR being one that changes a
-  public surface, a documented claim, or conformance-relevant behavior — but this document governs
-  only this repository, and that obligation binds `judgment-pack-runtime` only once its own
-  `docs/adr/README.md` records it. Runtime ADRs are written after the decision and are immutable
-  once accepted, so the review attaches to the pull request that makes the decision, not to the ADR
-  text.
+- **Scope.** Every pull request merged after 2026-07-27 that creates, materially amends, or
+  dispositions an RFC in this repository. Predating the requirement is not an exemption: RFCs
+  0001–0007 acquire it the next time such a pull request touches them, and an RFC opened early and
+  completed later is covered by the merge, not by the opening date. Editorial pull requests —
+  typography, links, formatting — are not covered.
+- **Runtime.** The maintainer applies the same rule to material decisions in the reference runtime,
+  with or without an architecture decision record. A decision is *material* when it changes a public
+  surface, a documented claim, conformance-relevant behavior, the security posture, or a dependency
+  boundary. Not writing an ADR does not make a decision immaterial. This document binds only this
+  repository; the runtime's adopting text is its
+  [`docs/adr/README.md`](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/README.md),
+  and the obligation exists there only once that text is merged. Until then this bullet states an
+  intention, not a rule the runtime is under. Runtime ADRs are written after the decision and are
+  immutable once accepted, so the review attaches to the pull request that makes the decision, not
+  to the ADR text.
 - **Cross-vendor review.** At least one adversarial review by a model from a **different vendor**
-  than any model that assisted the drafting.
+  than any model that assisted the drafting. *Vendor* means the organization that controls the
+  model's weights and training — the developer, not the API host and not a reseller. Two hosted
+  copies of the same model share lineage and are the same vendor here, whatever the invoice says.
+  *Assisted the drafting* means generated or revised text that survives in the merged artifact.
+  Applying an accepted finding in the maintainer's own words does not make the reviewer a drafter;
+  adopting reviewer-generated text verbatim does not invalidate the review that produced it, but the
+  record says where that happened.
 - **Record.** The review is recorded in the pull request, in a comment beginning with the heading
-  `## Cross-vendor adversarial review`, so that compliance is greppable from pull-request history.
-  The record names the drafting model or models and the reviewing model, each with vendor, model
-  identifier, and date; quotes the review prompt verbatim; and includes the reviewing model's
+  `## Cross-vendor adversarial review`. The record names the drafting model or models and the
+  reviewing model, each with vendor, model identifier, and date; states the commit SHA that was
+  reviewed and what repository context the reviewer was given — files, diff range, tools, whether it
+  could read the working tree; quotes the review prompt verbatim; and includes the reviewing model's
   complete unedited output, including findings the maintainer rejects. If more than one review was
   run, every run is linked and the record states that no run was discarded.
-- **Disposition.** Every finding receives a written maintainer disposition: accept, reject with
-  reason, or defer with the condition that would reopen it.
-- **Pull requests only.** No RFC, and no material ADR, is merged except through a pull request
-  carrying the review and the dispositions. Direct pushes to the default branch are not used for
-  either.
+- **Change after review.** If the artifact changes materially after the reviewed SHA, the pull
+  request carries either a fresh review of the later SHA or a disposition note saying specifically
+  why the change does not warrant one. "Nothing substantive changed" is not such a note unless it
+  says what changed.
+- **Disposition.** Every finding receives a written maintainer disposition: accept, accept in part,
+  reject with reason, or defer with the condition that would reopen it. Every accepted finding links
+  to the commit that implements it or to the tracked follow-up that will.
+- **Redaction.** The unedited-output requirement yields to disclosure risk and to nothing else. If
+  the raw output contains an exploitable vulnerability, personal data, or credentials, the published
+  record may redact exactly that portion. The redaction is marked in place, its reason class stated
+  — vulnerability, personal data, or credential — the unredacted original preserved privately, and
+  the full text published after remediation when it is safe to publish, handled under
+  [`SECURITY.md`](./SECURITY.md). A finding the maintainer finds unwelcome is not a disclosure risk.
+- **Pull requests only.** No RFC, and no material runtime decision, is merged except through a pull
+  request carrying the review and the dispositions. Direct pushes to the default branch are not used
+  for either.
+
+### What the record cannot show
+
+The heading convention above makes records *findable*. It does not make compliance *provable*. The
+record makes the maintainer's claims discoverable; it cannot verify them. These stay attestations by
+the reviewed party:
+
+- which models actually assisted the drafting;
+- that the quoted prompt is the complete input, including system instructions, attached context, and
+  tool output;
+- that the quoted output is complete and unedited apart from a marked redaction;
+- that no run was discarded.
+
+Pull-request comments are editable and deletable by their author, so the comment is not the anchor.
+The reviewed commit SHA is: the artifact under review is fixed in Git history even when the text
+describing it is not. A reader who wants more than an attestation would need provider-side logs,
+which this project does not publish and does not claim to.
 
 ### Limits
 
@@ -95,9 +142,11 @@ Model review is not decision authority. It is not authoritative; the disposition
 named above is, and they are accountable for it. Known weaknesses:
 
 - The reviewing model is selected, prompted, transcribed, and dispositioned by the party being
-  reviewed. Nothing here prevents re-running a review until it is agreeable. Only the recorded
-  prompt, the complete output, and the link to every run make that visible, and only a reader who
-  checks makes it cost anything.
+  reviewed. Nothing here prevents re-running a review until it is agreeable. The recorded prompt, the
+  complete output, and the link to every run are what would make that visible — and every one of them
+  is supplied by the same party, per
+  [What the record cannot show](#what-the-record-cannot-show). Only a reader who checks makes any of
+  it cost anything.
 - Cross-vendor review is intended to decorrelate some vendor-specific blind spots. The effect is
   unmeasured, and models from different vendors still share training data, tuning conventions, and
   benchmark culture, so the blind spots they share are not vendor-shaped.
@@ -122,6 +171,9 @@ arrival:
 - an RFC is no longer merged by its own author, and the other maintainer records the disposition;
 - recusal under [Maintainer conflicts](#maintainer-conflicts) becomes available, and the
   single-maintainer substitute recorded there lapses;
+- with exactly two maintainers, the non-author can block everything by being absent. If the
+  non-author is conflicted, or does not respond within 14 days of a review request, the author
+  merges, and the disposition states that no second maintainer reviewed it and why;
 - the cross-vendor review requirement continues until this section is removed.
 
 ### Exit criteria
@@ -130,20 +182,37 @@ Recorded in advance. This regime ends when both of the following hold.
 
 1. The project has at least two maintainers with merge rights who are independent of each other:
    distinct legal persons, not employed by or contracting with the same entity and not funded by it
-   for this work, each with at least five merged non-trivial commits authored before being granted
-   merge rights.
+   for this work. A maintainer added after this section is adopted must have at least five merged
+   non-trivial commits authored before their first grant of merge rights. The founding maintainer
+   named above is exempt from that count: they held merge rights before there was anything to merge,
+   and a rule they could satisfy by revoking and re-granting their own rights would measure nothing.
 2. Substantive comment on RFCs has come from at least two distinct third-party GitHub accounts,
-   belonging to neither maintainer, across at least two separate RFCs.
+   belonging to neither maintainer, across at least two separate RFCs. Comment is *substantive* when
+   it engages the technical substance and receives a written disposition; a typo report, an
+   endorsement, or an aside nobody answered is not. The two commenters are identified natural
+   persons, not accounts created for the purpose.
 
-Both conditions are countable from public repository history. Two things in them are not observable
-from outside: whether comment is substantive, and whether a commenter was solicited. The maintainer
-states both with the evidence, and an outside reader can dispute either on the removal pull request.
+Part of this is recorded publicly as it happens, and part is not. Nomination and every grant of merge
+rights are recorded in this repository on the day they occur, so the number of maintainers, the date
+of each grant, and the commits preceding it are checkable by anyone. Independence is not checkable:
+employment, contracting, funding, and whether two accounts are two people cannot be established from
+repository history, and Git authorship metadata is not identity. Whether a comment is substantive is
+a judgment, and whether a commenter was solicited is invisible from outside. Those are
+**attestations**. The maintainer states each one, with the evidence relied on, in the removal RFC,
+and an outside reader can dispute any of them there.
+
+**Reactivation.** If the maintainers with merge rights fall below two — resignation, inactivity, or
+loss of independence — this regime reactivates on that day, automatically, whether or not anyone
+announces it. The section is restored to this document by ordinary pull request citing this clause.
+Restoring an accountability regime whose precondition has returned needs no RFC; removing one does.
 
 A maintainer removes this section by a governance RFC citing the evidence for each condition,
 disposed under the process in this document. The RFC may be short. Deleting the project's only
 standing accountability regime is a governance change, so it takes the route this document requires
-for one. This section was itself added by ordinary pull request rather than by RFC: it removes
-nothing and constrains only the maintainer, and its removal does the opposite.
+for one. This regime was introduced by that route — through
+[RFC 0009](./rfcs/0009-interim-review-regime.md), under the process it amends, with its adversarial
+review and a disposition for every finding recorded on that RFC's pull request — and its removal
+takes the same route.
 
 Dropping the `-draft` suffix is governed by [`ROADMAP.md`](./ROADMAP.md) Stage 3 and
 [`VERSIONING.md`](./VERSIONING.md). This section neither restates that bar nor supplies a second,

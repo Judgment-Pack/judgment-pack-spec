@@ -48,11 +48,14 @@ Maintainers may request prototypes or conformance cases before disposition. A st
 feature should not be accepted without evidence from two independent implementations.
 
 While the project has a single maintainer, public comment alone has not drawn outside review. Every
-RFC opened after 2026-07-27 therefore also receives a recorded adversarial review by a model from a
-different vendor than any model that assisted its drafting, with a written maintainer disposition
-for each finding. What the record must contain, what the review does not substitute for, and the
-criteria that end the requirement are in
-[`GOVERNANCE.md`](../GOVERNANCE.md#interim-review-regime).
+pull request merged after 2026-07-27 that creates, materially amends, or dispositions an RFC —
+including RFCs 0001–0007, which predate the requirement and acquire it the next time such a pull
+request touches them — therefore also carries a recorded adversarial review by a model from a
+different vendor than any model that assisted the drafting, with a written maintainer disposition for
+each finding. What the record must contain, what it cannot prove, what the review does not substitute
+for, and the criteria that end the requirement are in
+[`GOVERNANCE.md`](../GOVERNANCE.md#interim-review-regime); the design record is
+[RFC 0009](0009-interim-review-regime.md).
 
 ## Compatibility
 
