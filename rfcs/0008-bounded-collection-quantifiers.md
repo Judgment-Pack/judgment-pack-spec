@@ -230,41 +230,11 @@ does **not** force them — `(true, false)` and `(unknown, unknown)` satisfy the
 duality is a consistency check on the choice, not its derivation. The values are pinned as
 conformance rows rather than left to be re-derived.
 
-**Order and short-circuiting.** Element order carries no meaning: within the mandated limits, a
-permutation or a duplicate cannot change the result. Short-circuiting is permitted **only on the
-dominant value** — `true` for `exists`, `false` for `every` — and **never on `unknown`**; an
-evaluator that stops at the first `unknown` element contradicts the tables above.
-
-**Limit accounting is undefined in this draft, and defining it is an acceptance precondition.** The
-design intent is normative-in-waiting and is stated first, because it is what constrains the model
-that must eventually be written: the budget MUST be charged **before any element is evaluated** and
-**independently of element order**, so short-circuiting may only reduce *actual* work and can
-**never** change whether the limit was exceeded. Without that, an `exists` whose match happens to sit
-at index 0 returns `true` while the same array permuted returns a resource error, and two conformant
-evaluators diverge on the same inputs — the portability failure RFC 0006 exists to prevent.
-Adversarial review confirms this idea is coherent, but only once a precise precharged budget exists.
-
-No such budget exists here. An earlier draft of this RFC put a number on it — array length times a
-per-`where` constant, multiplied across nesting — and that was false precision, now withdrawn. There
-is no defined work unit, and `equals` over composites, `in`, and `uniform`'s deep equality all cost
-in proportion to runtime data rather than to the authored condition. A model that satisfies the
-intent above must, at minimum:
-
-- define a **work unit**, and a **preflight function** that computes the charge without evaluating
-  the condition and yields the same charge under any element order;
-- charge **ragged nested arrays** correctly: the child work of an outer array `A` over inner arrays
-  `Bᵢ` is `Σᵢ |Bᵢ|`, not `|A| × |B|` — there is no single inner length to multiply by;
-- charge **Boolean subtrees** inside `where`, including branches a short-circuiting evaluator never
-  reaches;
-- charge **deep equality** against the size of the values compared, not as a constant;
-- charge **`uniform`**, which has no `where` at all, so no `where`-shaped rule reaches it;
-- charge **sibling aggregates additively**, since the nesting bound below permits them;
-- state whether **pointer resolution** happens during preflight, and how an unresolved or non-array
-  inner path is charged — a pointer that fails to resolve still had to be looked up.
-
-Producing that model is a **precondition for accepting this RFC**, not an implementation detail; it
-is restated as an Unresolved question below. Until it exists, the resource story here is an intent
-with a named hole in it.
+**Order and short-circuiting.** Element order carries no meaning: within the mandated minimum limits
+defined under Limit accounting below, a permutation or a duplicate cannot change the result.
+Short-circuiting is permitted **only on the dominant value** — `true` for `exists`, `false` for
+`every` — and **never on `unknown`**; an evaluator that stops at the first `unknown` element
+contradicts the tables above.
 
 **Nesting: a maximum aggregate depth of two.** Call `exists`, `every`, and `uniform` **aggregates**.
 `uniform` counts, because it traverses a collection exactly as the quantifiers do — the earlier "at
@@ -276,8 +246,8 @@ of two**: a top-level aggregate may contain aggregates in its `where`, and those
 Two consequences, neither stated before:
 
 - **Sibling aggregates at the same depth are permitted.** A `where` may hold several aggregates under
-  an `all` or `any`. Their costs **add**; no single product bounds the work, which is one reason the
-  accounting model above has to be written before this is safe.
+  an `all` or `any`. Their costs **add**; no single product bounds the work, which is why Limit
+  accounting below charges them additively rather than by any product of lengths.
 - **Depth is structural, not syntactic adjacency.** An aggregate reached only through `all`, `any`,
   or `not` inside a `where` is still at depth two, and one inside *its* `where` is at depth three and
   invalid. Wrapping does not launder depth.
@@ -291,9 +261,269 @@ launder depth. This replaces per-implementation depth limits.
 **No measured case in the census needs even one level of nesting** — the shape table has no nested
 row and none of the deferred bullets asks for one. Depth two is retained only because forbidding a
 construct the grammar would otherwise admit is itself a rule to specify, and the question of whether
-that is the right trade is Unresolved below. Exhaustion of the budget is an explicit evaluation
-error, never a disposition ([RFC 0006](0006-evaluator-conformance.md)); see Compatibility for why
-that sentence cannot be written against Core `0.1.0-draft` at all.
+that is the right trade is Unresolved below.
+
+### Limit accounting
+
+Earlier drafts left this undefined and called defining it an acceptance precondition. This section is
+the model, and it discharges **that** precondition — not RFC 0000's evidence bar, which remains unmet
+(Implementation). An earlier draft also put a number on it — array length times a per-`where`
+constant, multiplied across nesting — and that was false precision, withdrawn and not restored here:
+`equals` over composites, `in`, and `uniform`'s deep equality all cost in proportion to runtime data
+rather than to the authored condition, so the model charges runtime data.
+
+The model is stated as one portable charge every conforming accounting must reproduce for admission,
+not as one implementation's internal constants — an implementation's own metering is its business up
+to the rule stated immediately below. Like the rest of this section its MUSTs are
+normative-in-waiting: they bind an implementation only under RFC 0006's evaluator class (**Normative
+status** above).
+
+**Exact for admission, not a floor.** Inside the **guaranteed domain** stated under Portability below,
+the charge defined here is **exact for the purpose of admission**: an evaluation is exhausted **iff**
+the normative charge for the §8 path exceeds the budget that evaluation carries. An implementation MAY
+meter additional internal work — a coarser unit, a per-allocation surcharge, its own defensive
+counters — but **no such charge may change a result inside the guaranteed domain**. Two admissions
+are distinct here. **Carrier admission** is §3.1's concern: outside a corpus run, an
+implementation's documented carrier limits remain local and MAY refuse a document before evaluation
+begins, saying so per §10. **Evaluation admission** is this model's concern and is exact wherever it
+is reached: once a document passes the carrier, an in-domain input the normative charge admits MUST
+be answered, and one the normative charge refuses MUST be refused with the typed error below. A
+corpus run adds the guarantee that in-domain fixtures reach evaluation at all — that is what the
+domain minima under Portability oblige. That is all that survives of the earlier draft's floors —
+an implementation may **account** more work than this model, never **refuse** at the evaluation
+stage what this model admits.
+
+The earlier draft made every quantity a lower bound, and review broke that reading rather than
+disliking it: with floors, on one in-domain input at one carried budget, an evaluator charging the
+stated amount answers and an evaluator charging twice as much raises a resource error, **both
+conforming**. Above-limit rows were portable, below-limit rows were not, and a corpus can only
+disqualify an over-charging evaluator on the shapes it happens to list. That is the portability
+failure RFC 0006 exists to prevent, so the model states one number every implementation must
+reproduce for admission. Whether the *numbers* are right is Unresolved below; whether the model is a
+floor or exact no longer is.
+
+**Work unit.** A **work unit** is one elementary step of bounded cost. The charge is byte-weighted
+wherever the processing it stands for is. The normative charge for an evaluation is the sum of:
+
+- **1** per condition node visited;
+- **compiling** an authored pointer — reading its bytes, splitting it, decoding its escapes — costs
+  the pointer's byte length, **once per distinct authored pointer per evaluation**, since the compiled
+  form is reused for every later resolution. The earlier draft made that reuse a MAY; an exact charge
+  cannot leave it optional, so it is fixed here;
+- **resolving** a compiled pointer costs one unit per reference token — empty reference tokens
+  included — plus the tokens' bytes, and never less than one unit. `/a////b` is five traversals over
+  two bytes of token and costs seven; a pointer with no tokens costs the one step that selects the
+  root. The steps are counted separately from the bytes because a resolution loops once per token
+  whatever the tokens weigh, and the bytes are charged per resolution because each step hashes or
+  compares them against the document;
+- **a value** — an authored operand or a selected runtime value — costs `V`, defined immediately
+  below;
+- an `evidence-present` node costs the byte length of the evidence-requirement id it looks up, on top
+  of its node unit: the id is a name a lookup hashes like any other, and a `where` looks it up once
+  per element.
+
+**`V`: structure is charged, not only leaves.**
+
+```text
+V(scalar) = 1 + byteLength(its JSON token)
+V(array)  = 1 + elementCount + Σ V(element)
+V(object) = 1 + memberCount + Σ (byteLength(memberName) + V(value))
+```
+
+The recurrence is **authoritative**; the intuition behind it is a structural traversal charge, not
+a serialization length. The leading `1` is the node a comparison enters, the per-element and
+per-member `1` is the separator it steps over, and the bytes are the bytes it reads. A scalar's
+token is its **exact source UTF-8 token** — a string's quotes and escapes as they appear in the
+carrier, a number's original lexeme with **no canonicalization** — so `"ab"` costs `1 + 4`, and a
+1,000-byte spelling of the number one costs `1 + 1000`, never `1 + 1`: the traversal that measures a
+padded token reads its bytes whatever value they denote, so the charge follows the token, not the
+value. A member name is charged **unquoted**, because what a comparison does with a name is hash or
+compare it, not re-serialize it.
+
+The earlier draft charged a container "at least the sum of its members' costs" and nothing for the
+container itself, which priced structure at zero. Review broke it. With `Wₖ = [[], [], …, []]`, a
+leaf-only recursion gives `V([]) = 0` and therefore `V(Wₖ) = 0`, so
+`{"op":"uniform","path":"/rows","at":""}` over `{"rows":[Wₖ, Wₖ]}` bought `Θ(k)` recursive comparisons
+for a constant charge, and `m` copies of `Wₖ` bought `Θ(m·k)` for nothing at all — the same defect
+reached plain `equals`, not just `uniform`, and deep singleton chains were free the same way. Under
+the recursion above `V(Wₖ) = 1 + 2k`, a chain of `d` singleton containers costs `2d` plus its leaf,
+and the attack is priced; the **empty containers** row in Conformance carries the arithmetic. `V` is also
+independent of element order, which Order-independence below requires.
+
+A flat charge per node is not a limit at all: it bounds how many things an evaluation touches while
+leaving the work per thing unbounded. That is not deduced. Three candidate models were broken by
+inputs that bought unbounded processing under a budget they satisfied, and the fourth's first
+published form was broken twice more by review — zero-cost containers here, an unbounded measurement
+exception next — see Implementation.
+
+**Reserve before spending, measurement included.** Each charge MUST be levied before the work it
+prices is performed, so an input too expensive to afford is refused with its bytes still unread rather
+than scanned and then billed for. **Measurement is metered too, and there is no exception.** A charge
+that depends on a runtime value's size is not known before the value is traversed, so an
+implementation MUST reserve it **incrementally as it traverses** — one unit for each container it
+enters, one for each member it steps over, a name's bytes before it reads the name, a scalar's bytes
+as it reads them and in chunks if the token is long — and MUST refuse immediately before the next priced step
+when that step cannot be reserved — reaching exactly zero after the final charged step is
+**admitted**, so the incremental procedure and the whole-total rule agree at the boundary. No
+traversal step ever runs unreserved. `V` is shaped for exactly this:
+every unit in it corresponds to one step of the traversal that measures it, so paying it incrementally
+and paying it as a lump differ only in *when* refusal happens, never in *whether*. Because the total
+is a monotone sum, a mid-traversal refusal is the decision the whole total would have produced — the
+implementation does not learn the exact total, but it learns that the total exceeds the budget, which
+is all admission needs.
+
+The earlier draft made one exception: a selected value's size "MUST be charged immediately afterwards,
+which bounds any overrun at one selected value". One value is a count, not a work bound — a selected
+value may be gigabytes, or nested to whatever the carrier admits — so the exception permitted
+unbounded time, memory, and stack before refusal, and it is **deleted**. Refusal before work is now a
+property of **every** rule in this model rather than of most of them.
+
+**Condition precharge.** (Core `0.2.0-draft` reserves *preflight* for §8.2's input admission,
+which completes before §8 step 1; the precharge here happens after that, inside the **evaluation**
+phase.) The whole charge for a condition tree MUST be computed, and MUST fit the budget,
+before any predicate of that tree is evaluated. Computing it MAY resolve pointers — including a
+`fact`'s, because a comparison's cost depends on the value the pointer selects and there is no honest
+cheaper approximation of it — and every such resolution is itself charged. A resolution that fails
+still costs its lookup: an unresolved or non-array aggregate `path` costs that lookup and nothing
+more, and an unresolved `fact.path` costs its lookup and its authored operand, with no selected value
+to charge. Because the total is a monotone sum, the check MAY be performed incrementally and
+abandoned at the first overrun; what MUST NOT happen is a predicate of the tree running before that
+tree's charge is either paid or refused. A charged resolution may be performed twice — once to price
+it, once to evaluate it — so the budget bounds actual work up to a constant factor, which is what a
+work unit is for.
+
+**Order-independence.** The charge MUST be a function of the authored condition and of the input
+documents with every array read as a multiset: two documents differing only in the order of an
+array's elements MUST carry the same charge, so no permutation of any array can change whether the
+limit trips. Duplication is not permutation. A duplicated element is one more element and is charged
+as one, so duplication MAY carry a charge past the limit; only the condition's *value* is
+duplication-invariant, and only while both inputs remain within the limits, which is what **Order and
+short-circuiting** above says.
+
+**Boolean subtrees.** `all`, `any`, and `not` cost their node unit plus **every** branch, including
+branches a short-circuiting evaluator never reaches.
+
+**Comparisons.** A comparison is charged against **both** sides: the authored operand and the runtime
+value its pointer selected. Only one of the two is authored, and the other is the one an attacker
+supplies. A `fact` condition therefore costs its node unit, its pointer's compile on first use, one
+resolution of that pointer, `V` of its authored operand, and `V` of the value the pointer selected —
+and nothing for a selected value when the pointer does not resolve. `in` charges `V` of the selected
+value **once per candidate**, since each candidate can be compared against the whole of it, plus `V`
+of the candidate array itself.
+
+**Aggregates.** `exists` and `every` cost their node unit, their `path`'s compile on first use, one
+resolution of that `path`, and their `where` once per element **actually present**, so a ragged nesting
+costs `Σᵢ |Bᵢ|` and never `|A| × |B|` — there is no single inner length to multiply by. An aggregate
+whose `path` does not resolve, or resolves to a non-array, costs the node and that resolution and
+nothing more. Sibling aggregates add; the depth bound above permits them.
+
+`uniform` has no `where`, so no `where`-shaped rule reaches it. It costs its node unit, one compile
+each of `path` and `at` on first use, one resolution of `path`, and then, over its members: one
+resolution of `at` per member, including the resolutions that fail; `V` of each selected value; and a
+**reread term** of `(n−1) × max`, where `n` is the number of members whose `at` resolved and the
+maximum is `V` taken over those `n` values — zero when fewer than two resolve. The reread term prices
+the comparisons, and it is the part that was missing.
+§7.4 equality is total, so one representative absorbs every member equal to it and the comparison
+count stays linear — but the representative is one of the values, each of the other `n-1` comparisons
+can read the whole of it, and the sum of the values is therefore not a bound on the pass. Leaving the
+reread unpriced admitted work proportional to `longest × members` for a charge of
+`longest + members`: order-dependent work under an order-independent charge, measured at about
+**575x** between two permutations of one input that were charged alike. The term is a maximum over
+the resolved values rather than the elected representative's size precisely so that it does not
+depend on which member is elected, and therefore not on the order the members arrive in.
+
+**Composition.** The budget is one running total for one evaluation, and charges accumulate across
+every condition §8 reaches. A condition §8 never reaches MUST NOT be charged — a suppressed rule,
+every rule after a step-6 forced outcome, everything after a false or unknown applicability — so the
+total is a property of the §8 path rather than of pack and facts alone. §8 fixes that path, so it is
+the same path, and the same total, for every evaluator that follows it.
+
+**Short-circuiting.** Given precharge and order-independence, short-circuiting can only reduce
+*actual* work: it can never change whether the limit was exceeded. That is now a theorem of the two
+rules above rather than an aspiration stated beside them. Without them, an `exists` whose match
+happens to sit at index 0 returns `true` while the same array permuted returns a resource error, and
+two conformant evaluators diverge on the same inputs — the portability failure RFC 0006 exists to
+prevent.
+
+**Exhaustion.** Exceeding the budget MUST produce an explicit evaluation error, never a disposition
+([RFC 0006](0006-evaluator-conformance.md)); see Compatibility for why that sentence cannot be
+written against Core `0.1.0-draft` at all.
+
+**Portability: the mandated minimum domain.** A MUST-*define* is not portability. Two evaluators that
+both define limits may define different ones, so a MUST-define alone gives them no shared above-limit
+input and leaves "within the mandated minimum limits" without a referent. Three requirements close
+that, and they are chosen together:
+
+1. **Every evaluation-corpus case carries the work budget it assumes.** Core `0.2.0-draft`'s
+   evaluation-corpus carrier already defines the member — optional `workBudget`, in the units
+   above, unused by the seed rows and waiting for these. An implementation
+   claiming the class MUST honor it for a corpus run. Above-budget rows are then portable by
+   construction — the normative charge exceeds a budget both evaluators are running — rather than by
+   being extravagant enough to exceed every plausible default.
+2. **A guaranteed domain, on every dimension the rows exercise.** An implementation claiming the
+   evaluator class with these operators MUST support a configured budget of at least **100,000 work
+   units**, and in a corpus run MUST NOT refuse, for a limit of its own, an input inside every
+   dimension below. These are the *mandated minimum limits* that every "within the mandated minimum
+   limits" in this RFC and in RFC 0006 refers to.
+
+   | Dimension | Corpus-mode minimum | Exercised by |
+   | --- | ---: | --- |
+   | configured work budget | 100,000 units | every accounting row |
+   | array length | 10,000 elements | long authored pointer; empty containers |
+   | bytes per input document | 2 MiB (2,097,152) | the megabyte-pointer pack |
+   | bytes in one string value | 1,048,576 | the megabyte authored pointer |
+   | bytes in one number token | 4,096 | thousand-digit operand; `uniform` reread |
+   | bytes in an evidence-requirement id | 1,024 | long evidence-requirement id |
+   | container nesting depth | 32 | ragged nesting; empty containers |
+
+   Only the first two were stated before, and that was a hole review found: the guaranteed domain
+   covered budget and array length while Core §10 leaves document bytes, nesting depth, string sizes,
+   and — a dimension §10 does not even list, though this model charges it — number-token bytes to
+   independent implementation limits. A conforming implementation could therefore refuse the megabyte
+   pointer, the thousand-digit token, the long requirement id, or a deep container **before** the
+   accounting under test ran, and pass the row for the wrong reason. Core is not contradicted by
+   fixing minima here: §2.1 and §3.1 require explicit failure when a *documented* limit is exceeded
+   and cap nothing numerically, and §10 SHOULD-defines limits without figures, so these numbers add
+   minima where Core has none. Depth **32** is a round figure with room, not a measurement: the
+   deepest input in the accounting rows nests five containers. The dimensions bound the limits, not
+   their interaction — 10,000 elements under an expensive `where` can still exhaust a 100,000-unit
+   budget, which is the second reason a case states its own budget instead of relying on the domain.
+3. **Defaults stay local.** Outside a corpus run the default budget is implementation-defined and
+   MUST be documented (§10). Nothing here fixes one, and the two prototypes' defaults differ by a
+   factor of two.
+
+One carrier gap keeps the fourteen rows below out of the corpus for now, and it is named rather than
+papered over: `V` reads **exact source UTF-8 tokens**, while the `0.2.0-draft` carrier embeds facts
+as parsed JSON — a normal parse erases the distinctions `V` charges (`"a"` versus its escaped
+spelling, a padded number lexeme versus its value), so two harnesses could compute different charges
+for the same embedded row. Accounting rows therefore require the **raw-document fixture form** the
+corpus README defers to the next `suiteVersion`: a case member referencing a UTF-8 JSON fixture file
+whose bytes ARE the source tokens `V` measures. Until that form exists, the fourteen rows bind
+implementations to this model but are not yet expressible as portable corpus rows — their arithmetic
+is checkable against this text, not against a manifest.
+
+**Refusal is a typed error, and the row says which type.** Core `0.2.0-draft` §8.4 defines the
+error taxonomy (with `resource-exhaustion` among the four minimum classes and a fixed precedence),
+and the evaluation-corpus carrier already records `expectedErrorClass` and `expectedErrorPhase`
+(`preflight` | `evaluation`) alongside `workBudget`. An accounting row that expects refusal expects
+class **`resource-exhaustion`** raised in the **`evaluation`** phase — a §8.2 input-preflight or
+parse-phase refusal does **not** satisfy it and **fails** the row, which is the other reason the
+corpus-mode minima above are mandatory rather than advisory. Class and phase are the only error
+members these rows compare; message text is not compared, and this RFC defines no taxonomy of its
+own.
+
+*Non-normative.* Refusals driven by an authored quantity are also fast — the megabyte-pointer row is
+refused by its compile charge before any element is visited — and wall-clock is a useful smoke test of
+that. It is **not** a conformance criterion: nothing in a corpus run measures time, and a row
+expecting "refused fast enough" would not be machine-checkable. What is checkable is the accounting
+order, which the row states.
+
+The cross-implementation corpus's `L3` row is the demonstration of why (1) is needed rather than an
+open question: an `exists` whose charge lands between the two prototypes' default budgets, so the
+same input yields a disposition under one and a resource error under the other. Under (3) both are
+conformant; under (1) the row states the budget it is run at and both must then agree. The row is
+still **untestable at today's prototypes** — the Go CLI exposes no budget control — and is recorded
+as untestable rather than forced.
 
 ### Under discussion, not settled: `uniform`
 
@@ -337,8 +567,8 @@ let a dominant value beat an `unknown` sibling; the alternative, infectious miss
 `uniform` the one operator in which absence outranks evidence. Equality is §7.4's throughout, so
 arrays compare element-wise **in order**, objects compare **without regard to member order**, `null`
 equals `null`, and there is no coercion between JSON types. `uniform`'s share of the evaluation
-budget is part of the accounting model this draft leaves undefined — the operator has no `where`, so
-nothing in the withdrawn cost sketch reached it at all.
+budget is the per-member term and the reread term under Limit accounting above — the operator has no
+`where`, so no `where`-shaped rule reaches it and it needed a charge of its own.
 
 **`uniform` is the one construct here that is not reducible to the existing tables.** It produces no
 per-element three-valued result and applies neither §7.1 nor §7.2; it is a genuine new aggregate,
@@ -464,18 +694,27 @@ condition changes meaning. **Not** purely additive for evaluators — see the §
 - New §7.6 `exists` and §7.7 `every` (and §7.8 `uniform` if adopted).
 - §3.3 — the semantic-conformance bullet "every `evidence-present` condition names a declared
   evidence requirement" must recurse into `where`, as must every other condition-walking bullet.
-- §10 — **a deliberate SHOULD→MUST uplift.** §10 today says implementations "SHOULD define limits
-  for … collection sizes … and evaluation work". A quantifier makes that bound load-bearing rather
-  than prudential: it decides dispositions. For collection size and evaluation work only, this RFC
-  raises the guidance to MUST. This is additive for documents and **normative for evaluators** — but
-  a MUST-*define* is not portability. Two evaluators that both define limits may define different
-  ones, so no facts document is guaranteed to be above the limit for both, and a portable "exceeds
-  the mandated limit" error row cannot be written from a MUST-define alone. Closing that needs one of
-  three things: fix a common limit in the specification; carry the configured limit in the
-  evaluation-case input so a corpus row can state the threshold it assumes; or scope evaluator
-  portability to a common guaranteed domain and drop the above-limit row entirely. The choice is
-  Unresolved below, and Conformance's "exceed the mandated limits" row is explicitly conditional
-  on it.
+- §10 — **a deliberate SHOULD→MUST uplift, plus the corpus-mode minima.** §10 today says
+  implementations "SHOULD define limits for document bytes, nesting depth, collection sizes, string
+  sizes, and evaluation work". A quantifier makes that bound load-bearing rather than prudential: it
+  decides dispositions. For collection size and evaluation work only, this RFC raises the guidance to
+  MUST. A MUST-*define* is not portability on its own — two evaluators that both define limits may
+  define different ones — so §10 also gains the corpus-mode minima Limit accounting tabulates: a
+  configurable budget of at least 100,000 work units, no refusal of a 10,000-element array on its
+  length alone, and, in a corpus run, no refusal for a limit of the implementation's own of 2 MiB per
+  input document, a 1,048,576-byte string value, a 4,096-byte number token, a 1,024-byte
+  evidence-requirement id, or 32 levels of container nesting. Number-token size is the one dimension
+  §10 does not currently list and this model charges, so §10's list gains it. Nothing there
+  contradicts §§2.1/3.1, which require explicit failure when a *documented* limit is exceeded and fix
+  no figures. Defaults outside a corpus run stay implementation-defined and documented. This is
+  additive for documents and **normative for evaluators**. The third leg is not §10's: RFC 0006's
+  evaluation-case carrier gains members carrying the budget a case is run under and, for an expected
+  error, its class and phase — which is what makes an above-budget row portable and machine-checkable
+  — and this RFC therefore depends on RFC 0006 for the carrier as well as for the error contract.
+  Where the accounting model's own text lands is not settled: §10 lists limits and defines no unit of
+  work, so the model arrives either as a new §10 subsection or beside the operator sections. It is one
+  section's worth of normative text either way, and this RFC does not choose its eventual Core section
+  number.
 - §13 — the open-questions list.
 - Schema — two (or three) new `$defs/condition` `oneOf` branches plus **depth-indexed, non-recursive
   definitions** enforcing the aggregate-depth bound (three tiers by remaining depth, the last
@@ -500,9 +739,13 @@ and a fresh array in the same rule.
   depth adding on top. Implementations MUST define collection-size and evaluation-work limits — the
   §10 uplift named in Compatibility — the budget MUST be charged before evaluation and independently
   of element order, and exhaustion MUST produce an explicit evaluation error, never a disposition,
-  per RFC 0006's *errors are not dispositions*. **How that budget is computed is not defined in this
-  draft**, which is the open blocker recorded in Specification and Unresolved questions: the
-  mitigation is stated as a requirement with no portable formula behind it yet.
+  per RFC 0006's *errors are not dispositions*, reported as class `resource-exhaustion` in the
+  evaluation phase so a corpus row cannot be satisfied by a parser refusing the input first. **How
+  that budget is computed is Limit accounting**, and the charge is byte-weighted rather than
+  node-counted for this bullet's reason: a node-counted budget bounds the shape of the work and not
+  its amount, and three candidate models were broken by inputs that bought unbounded processing under
+  a budget they satisfied — as was the first published form of the fourth, by values whose structure
+  it priced at zero and by a measurement step it excepted from reserve-before-spending.
 - **Silent truncation forges a disposition, asymmetrically.** Truncating an `every` at N elements
   returns `true` from a list whose N+1-th element was false; truncating an `exists` used as a denial
   gate returns `false` and flips deny to allow. Both failures are permissive.
@@ -526,8 +769,14 @@ and a fresh array in the same rule.
 ## Conformance
 
 Rows for the evaluation corpus RFC 0006 proposes, using its case carrier (pack, facts, evidence
-availability, supported extensions, expected disposition **or expected error**). Per RFC 0006, all
-corpus inputs fit the mandated minimum limits.
+availability, supported extensions, expected disposition **or expected error**) extended with the
+work budget the case is run under and, for an expected error, its class and phase, per Limit
+accounting. Every row states that budget; the above-budget rows are above *their own* budget, not above
+an unstated default. No row leaves the mandated minimum domain on any dimension of the table in Limit
+accounting — the longest array is 10,000 elements, the largest string is the 1,048,576-byte pointer,
+the largest number token is 1,000 bytes, the longest evidence id 1,000, the deepest input nests five
+containers, and every row expecting an answer carries a normative charge at or below 100,000 units,
+the largest being 69,011 — so no row depends on a domain an implementation is not obliged to support.
 
 **Positive and negative.** `exists` true where one of three segments matches; `every` true where all
 match; a depth-two nesting of both, true. `exists` false over a non-empty all-false array; `every`
@@ -543,7 +792,8 @@ array with `evidence-present` as the whole `where`, evidence both present and ab
 element-invariant and emptiness overrides it. Non-array values at `path` — object, string, number,
 `null`, `true` — each `unknown`; unresolved `path` `unknown`. Permuted order and a duplicated
 element: identical disposition — **for inputs within the mandated minimum limits**, which is what
-makes the row implementation-independent given permitted short-circuiting.
+makes the row implementation-independent given permitted short-circuiting, and which now has the
+referent Limit accounting supplies.
 
 **Ragged arrays, one row per operator.** A missing pointer does not have one result; it depends on
 the operator and on what the other elements yield, so "ragged → `unknown`" is not a row:
@@ -593,18 +843,95 @@ are equal → `unknown`. `at` missing in one element of three whose other two ar
 `[1, 2, ‹at missing›]` → **`false`**, stated explicitly because the earlier draft implied `unknown`;
 this is the clause-3-before-clause-4 row. Singleton whose `at` is missing → `unknown`, not `true`.
 Permutation of the elements in every row above → identical result. `uniform`'s limit-accounting rows
-cannot be written until the accounting model exists, since the operator has no `where` for a
-`where`-shaped budget to charge.
+are the reread and empty-container rows below: the operator has no `where`, so they exercise the
+reread term and `V`'s structural charge rather than a `where`-shaped charge.
 
-**Adversarial.** A facts document sized to exceed the mandated limits must yield an explicit
-resource error, not `true`, `false`, or `unresolved` — run in two permutations, one placing a
-dominant-value element first and one placing it last, expecting the *same* error in both, which is
-the row that would pin order-independent limit accounting. **That row is conditional on the
-portability question in Compatibility's §10 bullet.** A MUST-define does not give two evaluators a
-shared above-limit input, so the row exists under a fixed common limit or under a limit carried in
-the evaluation-case input, and is dropped entirely if portability is instead scoped to a common
-guaranteed domain. An empty-array `every` gating a permissive outcome, with the permissive
+**Adversarial.** A facts document whose charge exceeds **the budget its case carries** must yield an
+explicit error of class `resource-exhaustion` in the evaluation phase, not `true`, `false`, or
+`unresolved` — run in two permutations, one placing a dominant-value element first and one placing it
+last, expecting the *same class and phase* in both. That is the row that pins order-independent limit
+accounting, and it is no longer conditional: the case carries its budget, so both evaluators are above
+the limit on the same input. An empty-array `every` gating a permissive outcome, with the permissive
 disposition recorded as *expected* and cross-referenced to the advisory above.
+
+**Limit accounting, fourteen rows over eleven attacks.** Every input below broke a candidate model
+rather than being a shape invented for coverage, and the last one broke this model's own first
+published form. The earlier draft described these as prose bullets with no budgets and no totals,
+which review correctly said were not reproducible rows; each is now stated with its exact parameters,
+its exact normative charge, the budget it is run at, and its expectation. Because the charge is exact
+for admission, the total in each row is a number a reader can recompute from Limit accounting and an
+implementation must reproduce — that is what makes these rows portable, rather than their being
+extravagant.
+
+Four fixtures keep the parameters inside a table cell. **`E(n)`** is the facts document `{"rows":[…]}`
+whose `n` members are `{"v":0}` except exactly one `{"v":1}`; `E(n)ᶠ` places that member first and
+`E(n)ˡ` last, and the two carry the same charge because `V(0) = V(1) = 2`. **`Wₖ`** is an array of `k`
+empty arrays. **`Q(p, x)`** is the condition
+`{"op":"exists","path":"/rows","where":{"op":"fact","path":p,"operator":"equals","value":x}}`.
+**`U(at)`** is `{"op":"uniform","path":"/rows","at":at}`. Three constants recur: `/rows` compiles at 5
+and resolves at 5, so an aggregate over it costs **11** before its members; `/v` compiles at 2 and
+resolves at 2; and `Q("/v",1)`'s `where` costs **7** at each member of `E(n)` — one node unit, a
+two-unit resolution, `V(1) = 2` for the authored operand, and `V = 2` for the selected `0` or `1`.
+
+| Attack | Input, exactly | Charge | Budget | Expected |
+| --- | --- | ---: | ---: | --- |
+| Order-independence, affordable | `Q("/v",1)` over `E(200)ᶠ`, then over `E(200)ˡ` | 1,413 each | 2,000 | answered in both, `exists` `true`, identical disposition |
+| Order-independence, refused | the same two inputs | 1,413 each | 1,000 | refused in both, `resource-exhaustion` in the evaluation phase |
+| Duplication is not permutation | `Q("/v",1)` over `E(200)`, then over that array with two members duplicated (202 members) | 1,413 / 1,427 | 1,420 | answered (`true`) / refused |
+| Ragged nesting | `exists` on `/rows` whose `where` is `exists` on `/items` whose `where` is `Q`'s inner `fact`, over inner arrays of 100, 200, and 300 all-`{"v":0}` members, then over three inner arrays of 300 | 4,240 / 6,340 | 5,000 | answered (`false`) / refused — no length-product model separates them, since it charges both alike |
+| Unreached branch | `any` over `{"op":"literal","value":true}` and `Q("/v",1)` over `E(200)` | 1,415 | 1,000 | refused, though a short-circuiting evaluator never reaches the aggregate |
+| Long authored pointer | `Q(P, true)` over 10,000 `{}` members, where `P` is `"/"` followed by 1,048,575 `a`s | 10,486,868,587 | 100,000 | refused on the pointer's bytes, not the element count: the 1,048,576-unit compile alone exceeds the budget, before one element is visited |
+| Empty reference tokens | `Q(S, true)` over 1,000 `{}` members, `S` being 100 slashes and so 100 empty reference tokens, then `Q("/", true)` over the same members | 106,111 / 7,012 | 100,000 | refused / answered (`unknown`) — charging token bytes alone would price 100 traversals at nothing |
+| Long authored operand | `Q("/v", N)` over `E(200)`, `N` a 1,000-digit number, then `Q("/v", 1)` over the same | 201,213 / 1,413 | 100,000 | refused (would be `false`) / answered (`true`) |
+| Long selected value, string | `Q("/v","a")` over 200 members `{"v": ‹1,000-byte string›}`, then over 200 members `{"v":"a"}` | 202,013 / 2,213 | 100,000 | refused / answered (`true`) — this is the half of the comparison the attacker supplies |
+| Long selected value, number | `Q("/v",1)` over 200 members `{"v": ‹1,000-digit number›}`, then over 200 members `{"v":1}` | 201,213 / 1,413 | 100,000 | refused / answered (`true`) |
+| Long evidence-requirement id | `exists` on `/rows` whose whole `where` is `evidence-present` naming a declared 1,000-character id, over 200 members, then one naming a 1-character id | 200,211 / 411 | 100,000 | refused / answered |
+| `uniform` reread, affordable | `U("/v")` over 1,000 members, 999 carrying `1` and one carrying the 64-byte token `1.` followed by 62 zeros — the same value, so no clause-3 counterexample cuts the pass short — in both permutations | 69,011 each | 100,000 | answered in both, `uniform` `true`, equal charges |
+| `uniform` reread, refused | the same shape with a 1,000-byte token, `1.` followed by 998 zeros | 1,005,011 each | 100,000 | refused in both permutations, same class and phase |
+| Empty containers | `U("")` over `{"rows":[W₁₀₀₀₀, W₁₀₀₀₀]}`, then over four copies of `W₁₀₀₀₀` | 60,016 / 140,022 | 100,000 | answered (`true`) / refused |
+
+Every total above is the model applied term by term, so a reader can check them without an
+implementation:
+
+```text
+legend  11 = aggregate node 1 + compile "/rows" 5 + resolve "/rows" 5
+         2 = compile "/v"          7 = the per-member where charge over E(n)
+         5 = V(true)               1,001 = V(1,000-digit number)
+         4 = V("a")                1,003 = V(1,000-byte string)
+
+Q over E(n):         11 + 2 + 7n
+  n = 200 → 1,413                       n = 202 → 1,427
+ragged nesting:      11 + 6 + 2 + 3×(1+6) + 7m        m = inner members in total
+  m = 600 → 4,240                       m = 900 → 6,340
+unreached branch:    1 (any) + 1 (literal) + 1,413 → 1,415
+megabyte pointer:    11 + 1,048,576 + 10,000 × (1 + 1,048,576 + 5) → 10,486,868,587
+empty tokens:        11 + 100 + 1,000 × (1 + 100 + 5) → 106,111
+                     11 + 1 + 1,000 × (1 + 1 + 5) → 7,012
+long operand:        11 + 2 + 200 × (1 + 2 + 1,001 + 2) → 201,213
+long string value:   11 + 2 + 200 × (1 + 2 + 4 + 1,003) → 202,013
+long number value:   11 + 2 + 200 × (1 + 2 + 2 + 1,001) → 201,213
+long evidence id:    11 + 200 × (1 + 1,000) → 200,211  ;  11 + 200 × (1 + 1) → 411
+uniform reread:      11 + 2 + 1,000×2 + (999×2 + (1+M)) + 999×(1+M)
+  M = 64 → 69,011                       M = 1,000 → 1,005,011
+empty containers:    V(Wₖ) = 1 + 2k, so V(W₁₀₀₀₀) = 20,001
+                     m members: 11 + m×1 + m×20,001 + (m−1)×20,001
+  m = 2 → 60,016                        m = 4 → 140,022
+```
+
+Three things those totals say. The long-operand row and the long-number-value row both charge
+**201,213** — the identical total reached from opposite sides of one comparison, which is what
+charging both sides means and what a model charging only authored bytes could not produce. Every
+answering row fits the mandated 100,000-unit minimum, the largest at 69,011, so no row asks for a
+domain an implementation need not support; that constraint is what fixes the affordable `uniform`
+token at **64 bytes**, because the reread term alone is `999 × (1 + M)` and `M = 1,000` costs
+1,005,011 — the earlier draft's "affordable variant of the same shape" as a genuinely long token could
+not have fitted the budget it was asserted to fit. And the empty-containers row is the fifth attack:
+where this model's first published form charged **13** and **15** for 10,000 and 30,000 child-container
+comparisons, the structural `V` charges 60,016 and 140,022, one side of the mandated budget each.
+
+The expectation column names the condition value for the answering rows; the disposition follows from
+the pack's outcome and `onUnknown` policy exactly as in the rows above, and what these rows pin is the
+answered-or-refused decision and, when refused, the error's class and phase.
 
 The equivalence check any implementation should run, scoped to the facts a quantifier actually
 reaches: re-encode `A6:/reservation/anySegmentCancelledByAirline`,
@@ -637,19 +964,53 @@ boundary.
 
 **Both prototypes now exist** (2026-07-27): the Go runtime's opt-in prototype (its ADR-0009) and a
 clean-room Python extension implemented by a different model lineage under the experiments
-repository's information-barrier protocol, each choosing its accounting model independently. An
-82-row corpus over this RFC's Conformance section agrees on **81 rows across both implementations**,
+repository's information-barrier protocol, each choosing its accounting model independently. **The
+pre-amendment 82-row semantic corpus** agrees on **81 rows across both implementations**,
 and re-encoding the three reachable census facts as quantifier twins yields dispositions identical
 to the prepared-boolean originals in nine of nine room-scenario pairs (with the recorded caveat that
 only A6 is a mechanical re-exposure; R3/R5 require producer-side data shaping). Of the five
 predicted disagreement points, four agree; the fifth — where the limit is drawn — diverged exactly
-as predicted, on a row whose charge lands between the two default budgets. Implementation also
-produced two corrections recorded in this revision: the determinacy rule under `uniform`'s truth
-table — adopted after the prototypes disagreed on huge-exponent numeric equality, a case no earlier
-corpus row exercised — and hard evidence for the accounting precondition: the first Go candidate
-charged flat units and was broken by a large-pointer attack; its byte-sensitive successor was found
-to leave selected runtime values unpriced; the third revision resolves and charges them in
-preflight. Full matrix, corpus, and adjudications:
+as predicted, on a row whose charge lands between the two default budgets. That divergence is why
+Limit accounting carries the budget in the corpus case rather than fixing one number, and why default
+budgets stay local. Implementation also produced two corrections recorded in this revision: the
+determinacy rule under `uniform`'s truth table — adopted after the prototypes disagreed on
+huge-exponent numeric equality, a case no earlier corpus row exercised — and the accounting model
+itself, reached through **four candidates, three of them killed by a demonstrated attack rather than
+retired on taste**:
+
+1. Flat units per node. Broken by a megabyte-long authored pointer resolved once per element: tens of
+   gigabytes of scanning under a 100,000-unit budget it satisfied.
+2. Authored bytes charged, runtime values not. Broken by a two-byte operand compared, once per
+   element, against as much runtime JSON as the carrier admits — the half of the comparison the
+   author does not write.
+3. Both sides charged by their bytes, but with a flat step per pointer resolution, a flat node per
+   `evidence-present`, and nothing for `uniform`'s repeated representative comparison. Broken three
+   ways: a hundred empty reference tokens priced at one unit per resolution, a thousand-character
+   requirement id hashed once per element for one unit, and an unpriced reread that admitted
+   order-dependent work under an order-independent charge — about 575x between two permutations of
+   one input that were charged alike.
+4. The current model: one step per reference token, requirement-id bytes, and the `(n-1) × max`
+   reread term.
+
+Limit accounting is that fourth candidate generalized and then made **exact for admission**. The
+generalization's first published form was itself broken twice by review rather than by measurement,
+and both repairs are in the section above: values were charged by their leaves alone, so arrays of
+empty containers and deep singleton chains cost nothing while comparison work grew with them; and
+measuring a selected value was excepted from reserve-before-spending "at one selected value", which is
+a count and not a work bound. Neither break retired the candidate — the reread term, the per-token
+step, and the id bytes all survive — so the history stays at four candidates with the fourth repaired,
+not five.
+
+What none of that establishes: **no accounting row in Conformance has cross-implementation results
+yet.** The 82 rows that agree are the pre-amendment semantic corpus; the fourteen accounting rows and
+their totals were added by this amendment and have been run by neither prototype. The Python prototype
+counts a different unit — characters, with the pointer compile folded into each resolution attempt —
+and has not been re-measured against this model, which under floors was a permitted variation and
+under exactness is a nonconformance to fix. So 81 of 82 rows agreeing is evidence that the two
+implementations agree on *semantics*, not evidence that either satisfies the accounting model. No
+candidate should be called complete until it survives adversarial pricing attacks, and the count so
+far is three killed outright and the fourth broken twice and repaired. Full matrix, corpus, and
+adjudications:
 [`harness/RFC0008-AGREEMENT.md`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/rfc0008-python-prototype/harness/RFC0008-AGREEMENT.md)
 (both prototypes live on unmerged review branches at the time of this amendment — the experiments
 repository's `rfc0008-python-prototype` and the runtime's `rfc-0008-quantifier-prototype`; the
@@ -688,30 +1049,21 @@ direction.
   membership and 9 join-blocked cases argue the other way. Relatedly, should `evidence-present` be
   forbidden inside `where` to keep the inner language purely element-local, given that it is
   element-invariant and interacts oddly with the empty array?
-- **What is the limit-accounting model, and can an above-limit case be portable at all?** This is the
-  open blocker, and it has two halves. First, the model. It must define a **work unit** and an
-  **order-independent preflight charge** computed before any element is evaluated; charge **ragged
-  nested arrays** as `Σᵢ |Bᵢ|` rather than `|A| × |B|`; charge **Boolean subtrees**, including
-  branches a short-circuiting evaluator skips; charge **deep equality** against the size of the
-  values compared; charge **`uniform`**, which has no `where`; charge **sibling aggregates
-  additively**; and state whether **pointer resolution** happens during preflight and how an
-  unresolved or non-array inner path is charged. Second, portability. Even with such a model,
-  raising §10 to MUST-define does not make an above-limit input portable, because two evaluators may
-  define different limits: fix a common limit, carry the configured limit in the evaluation-case
-  input, or scope portability to a common guaranteed domain and drop the above-limit corpus row.
-  Both halves must be answered before this RFC can advance; the intent that short-circuiting may
-  only reduce actual work and never change whether the limit was exceeded is settled, the mechanism
-  is not. Neither half is hypothetical any longer. On the first: two prototypes carry
-  independently chosen candidate models, and candidacy is doing real work in that sentence — the Go
-  prototype's first candidate (flat units per pointer and per scalar) was broken under adversarial
-  review by a large-pointer input doing gigabytes of scanning under budget, and review of its
-  byte-sensitive successor found selected runtime values still unpriced, forcing a third revision
-  that resolves and charges them in preflight. The **unit's shape** (bytes, not nodes) and the
-  **charging of runtime values, not only authored operands** are both load-bearing and belong in
-  the model; no candidate should be called complete until it survives adversarial pricing attacks.
-  On the second: the cross-implementation corpus carries a reproducible row (L3) where the two
-  prototypes return an outcome and a resource error on the same input solely because their default
-  budgets differ.
+- **Are the mandated minimums right?** Three questions that were open here are now answered rather
+  than deferred: the model (Specification's **Limit accounting**), portability (the charge is exact
+  for admission inside the guaranteed domain), and floor-or-exact — **exact**, because floors let two
+  conforming evaluators disagree on an in-domain input, which is the failure RFC 0006 exists to
+  prevent. What remains open is the **numbers**. 100,000 work units, 10,000 elements, and every
+  dimension added beside them — 2 MiB per document, a 1,048,576-byte string, a 4,096-byte number
+  token, a 1,024-byte requirement id, depth 32 — are the first prototype's default budget and round
+  figures fitted around the attack rows, not measurements: nobody has profiled what an implementation
+  of this class can actually afford, and no census case comes near any of them. Too high excludes
+  small implementations; too low, and a corpus case that fits the domain is not worth running. Two
+  costs of exactness are accepted with it and should be reviewed on their own: every unit in the model
+  is now an interoperability surface, since an implementation may no longer decide admission by a
+  cheaper conservative over-approximation — it may compute one internally, but must fall back on the
+  exact charge whenever the two would differ in-domain — and the existing Python prototype's
+  character-counting unit becomes a nonconformance rather than a permitted variation.
 - **Do per-element diagnostics belong in the trace?** Authors want them, they carry element content
   across trust boundaries, and RFC 0006's disposition has no trace member to put them in.
 - **Core or profile** — and is the vacuous-truth advisory a required validator diagnostic or
