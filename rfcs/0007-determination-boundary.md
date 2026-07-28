@@ -190,8 +190,8 @@ exclude. Of everything in this RFC, the bounded quantifier is ~~the most likely 
 the cheapest to specify, and now the best evidenced.
 
 > **Amended 2026-07-27 — the "roughly nineteen" figure is withdrawn.** It was estimated from shape
-> names rather than per-fact reading. A per-fact re-analysis of the same 25 facts — two independent
-> readers, mutually blind, with recorded adjudication; expressibility agreement 25/25 — puts a bare
+> names rather than per-fact reading. A per-fact re-analysis of the same 25 facts — two separate
+> blinded model runs with recorded adjudication; expressibility agreement 25/25 — puts a bare
 > bounded quantifier's reach at **3**, or **5** with an additional all-equal-at-a-sub-path
 > operator; the remaining 20 need joins, counts, ordinal selection, fact-to-fact comparison, or
 > whole-list classification. The count-shaped figure of six stands. The re-analysis is post-hoc and
