@@ -9,7 +9,7 @@ the same maintainer and is not independent evidence of interoperability. Conform
 implementations may be open-source or proprietary; conformance is defined by the specification and
 its conformance cases, not by any single vendor's product.
 
-The current status is an early research preview (`0.1.0-draft`). There is no compatibility guarantee
+The current status is an early research preview (`0.2.0-draft`). There is no compatibility guarantee
 for `0.x` drafts. Concepts may be revised or removed as the specification is exercised against real
 implementations.
 

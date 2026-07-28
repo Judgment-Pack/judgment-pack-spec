@@ -242,9 +242,10 @@ mechanism let that pack express more of its own decision, or does it merely rela
 
 ## Implementation
 
-None. The evidence is the *absence* of these features in two independent evaluators that agree 13/13
-on the current semantics ([RFC 0006](0006-evaluator-conformance.md)) — the gap is in the format, not
-in an implementation of it.
+None. The evidence is the *absence* of these features in the two evaluators that agree 13/13 on the
+current semantics ([RFC 0006](0006-evaluator-conformance.md), whose caveat applies here: both trace to
+one maintainer's direction, so they are not independent) — the gap is in the format, not in an
+implementation of it.
 
 ## Unresolved questions
 

@@ -29,7 +29,16 @@ outputs, environment variables, or vendor extensions that are not declared as re
 ## A small stable core
 
 The core should standardize only concepts required for exchange. Industry vocabularies, runtime
-targets, evaluation methods, signatures, and enterprise governance should evolve as profiles.
+targets, signatures, and enterprise governance should evolve as profiles.
+
+Evaluation is the recorded exception, and the reason belongs with the principle.
+[RFC 0006](../rfcs/0006-evaluator-conformance.md) asked whether the evaluator conformance class
+belonged in Core or in a profile and was answered on acceptance as **Core**: the evaluation semantics
+and the disposition live in Core §§3.4 and 7–8 so that
+[RFC 0008](../rfcs/0008-bounded-collection-quantifiers.md) and any future evaluation profile share one
+error contract and one result shape rather than each restating them. An evaluation *method* — a scoring
+regime, a calibration procedure, a test harness — still belongs in a profile or a product, and the
+engine that performs an evaluation still belongs to a runtime.
 
 ## Independent implementation
 

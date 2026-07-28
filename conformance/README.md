@@ -1,8 +1,10 @@
 # Conformance corpus
 
 This directory contains 47 focused research-preview cases for testing the carrier, structural, and
-semantic requirements of Judgment Pack Core `0.1.0-draft`. It is versioned with the draft but is not
-yet a complete or normative conformance suite. Evaluator behavior is intentionally out of scope.
+semantic requirements of Judgment Pack Core `0.2.0-draft`. It is versioned with the draft but is not
+yet a complete or normative conformance suite. Evaluator behavior is out of scope *here*: it has its
+own corpus, in [`evaluation/`](evaluation/README.md), which is normative for the evaluator conformance
+class of §3.4. A document-conformance result never depends on it.
 
 [`manifest.json`](manifest.json) is the machine-readable case index. Its shape is defined by
 [`manifest.schema.json`](manifest.schema.json).
@@ -17,7 +19,8 @@ yet a complete or normative conformance suite. Evaluator behavior is intentional
 - `semantic/` contains documents that pass structural validation but fail a prose requirement, or
   cannot be fully interpreted with the case's declared consumer capabilities.
 - `valid/` contains documents expected to pass carrier, structural, and semantic checks. A valid
-  result does not claim factual truth, authority, evaluator conformance, or operational fitness.
+  result does not claim factual truth, authority, operational fitness, or anything about an
+  evaluator: evaluator conformance is claimed against `evaluation/`, never against this layer.
 
 Validation proceeds in layer order. A runner should stop a case at its target layer rather than
 reporting downstream diagnostics for content that failed an earlier layer.
@@ -56,7 +59,12 @@ algorithm.
 
 ## Current boundary
 
-This corpus does not yet test condition evaluation, resolution results, resource limits,
-canonicalization, signatures, imports, or migration behavior. Future expansion should remain
-focused: one primary expectation per negative fixture, with positive, boundary, and adversarial
-counterparts added when the corresponding semantics become normative.
+This corpus does not test condition evaluation, resolution results, resource limits,
+canonicalization, signatures, imports, or migration behavior. Condition and resolution results are
+covered — as a seed corpus with stated gaps — by [`evaluation/`](evaluation/README.md). Future
+expansion here should remain focused: one primary expectation per negative fixture, with positive,
+boundary, and adversarial counterparts added when the corresponding semantics become normative.
+
+Every fixture declares `specVersion` `0.2.0-draft`, which is exact. `structural/invalid-spec-version.json`
+still declares `0.1.0-draft`, which is now the negative case: an unedited `0.1.0-draft` pack is
+unchanged in meaning but must be re-declared to be structurally conforming to this draft (§11).

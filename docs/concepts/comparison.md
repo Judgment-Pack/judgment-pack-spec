@@ -63,9 +63,10 @@ Pack?](../why.md) develops this at length.
 ## LLM evaluation frameworks
 
 Eval frameworks record inputs and expected outputs to measure a model. A pack represents the *rules
-and reasoning being evaluated*, in a form separate from any one model or prompt. Evaluation cases can
-be attached to a pack, but portable evaluation is a possible later profile, not a claim of the
-current draft.
+and reasoning being evaluated*, in a form separate from any one model or prompt. The current draft
+also says what applying a pack means, for an implementation claiming the evaluator conformance class,
+and pins the result it must produce — but that is a portable result, not a measurement of a model, and
+the specification still supplies no evaluator.
 
 ## Summary
 

@@ -83,7 +83,7 @@ class StaticSiteTests(unittest.TestCase):
     def test_primary_pages_are_generated_without_client_javascript(self) -> None:
         expected = (
             "index.html",
-            "spec/0.1.0-draft/index.html",
+            "spec/0.2.0-draft/index.html",
             "schema/index.html",
             "testing/index.html",
             "examples/index.html",
@@ -190,7 +190,7 @@ class StaticSiteTests(unittest.TestCase):
         expected = {
             "minimal-expense-approval": (
                 "Cross-feature authoring and local-reference tracing",
-                "Ordered decimal evaluation is still informative",
+                "Ordered decimal comparison is defined for the evaluator conformance class only",
                 "remove an outcome or evidence declaration",
             ),
             "software-change-review": (
@@ -214,7 +214,7 @@ class StaticSiteTests(unittest.TestCase):
                 self.assertIn("Good for", content)
                 self.assertIn("Edges to inspect", content)
                 self.assertIn("Failure paths", content)
-                self.assertIn("defines no evaluator conformance class", content)
+                self.assertIn("normative for the evaluator conformance class only", content)
                 for phrase in phrases:
                     self.assertIn(phrase, content)
 
@@ -256,9 +256,9 @@ class StaticSiteTests(unittest.TestCase):
         self.assertNotIn("official validator", impl.lower())
         # The spec page still cites its immutable tagged source (docs use the mutable branch).
         specification = (
-            self.output / "spec" / "0.1.0-draft" / "index.html"
+            self.output / "spec" / "0.2.0-draft" / "index.html"
         ).read_text(encoding="utf-8")
-        self.assertIn("blob/v0.1.0-draft/spec/judgment-pack-core.md", specification)
+        self.assertIn("blob/v0.2.0-draft/spec/judgment-pack-core.md", specification)
         self.assertIn("View tagged source", specification)
 
     def test_published_site_is_indexable_and_nested_404_is_not(self) -> None:
@@ -294,13 +294,13 @@ class StaticSiteTests(unittest.TestCase):
         overview = (self.output / "index.html").read_text(encoding="utf-8")
         self.assertIn(f'<link rel="canonical" href="{self.base_url}/">', overview)
         spec = (
-            self.output / "spec" / "0.1.0-draft" / "index.html"
+            self.output / "spec" / "0.2.0-draft" / "index.html"
         ).read_text(encoding="utf-8")
         self.assertIn(
-            f'<link rel="canonical" href="{self.base_url}/spec/0.1.0-draft/">', spec
+            f'<link rel="canonical" href="{self.base_url}/spec/0.2.0-draft/">', spec
         )
         self.assertIn(
-            f'property="og:url" content="{self.base_url}/spec/0.1.0-draft/"', spec
+            f'property="og:url" content="{self.base_url}/spec/0.2.0-draft/"', spec
         )
 
     def test_absolute_urls_never_contain_double_slashes(self) -> None:
@@ -317,14 +317,14 @@ class StaticSiteTests(unittest.TestCase):
     def test_sitemap_lists_indexable_pages_and_excludes_404(self) -> None:
         sitemap = (self.output / "sitemap.xml").read_text(encoding="utf-8")
         self.assertIn(f"<loc>{self.base_url}/</loc>", sitemap)
-        self.assertIn(f"<loc>{self.base_url}/spec/0.1.0-draft/</loc>", sitemap)
+        self.assertIn(f"<loc>{self.base_url}/spec/0.2.0-draft/</loc>", sitemap)
         self.assertIn(f"<loc>{self.base_url}/implementations/</loc>", sitemap)
         self.assertNotIn("404", sitemap)
 
     def test_pages_carry_neutral_generator_and_commit_provenance(self) -> None:
         overview = (self.output / "index.html").read_text(encoding="utf-8")
         self.assertIn(
-            '<meta name="generator" content="jps-site-build 0.1.0-draft">', overview
+            '<meta name="generator" content="jps-site-build 0.2.0-draft">', overview
         )
         self.assertIn("Built from", overview)
         self.assertIn(self.commit_sha[:12], overview)
@@ -333,11 +333,19 @@ class StaticSiteTests(unittest.TestCase):
 
     def test_schemas_are_served_at_their_canonical_id_path(self) -> None:
         cases = {
-            "schema/0.1.0-draft/judgment-pack-core.schema.json": ROOT
+            "schema/0.2.0-draft/judgment-pack-core.schema.json": ROOT
             / "schema"
             / "judgment-pack-core.schema.json",
-            "schema/0.1.0-draft/conformance/manifest.schema.json": ROOT
+            # The superseded schema keeps its own $id path so an older pack stays checkable.
+            "schema/0.1.0-draft/judgment-pack-core.schema.json": ROOT
+            / "schema"
+            / "judgment-pack-core-0.1.0-draft.schema.json",
+            "schema/0.2.0-draft/conformance/manifest.schema.json": ROOT
             / "conformance"
+            / "manifest.schema.json",
+            "schema/0.2.0-draft/conformance/evaluation/manifest.schema.json": ROOT
+            / "conformance"
+            / "evaluation"
             / "manifest.schema.json",
         }
         for served, source in cases.items():
@@ -465,7 +473,7 @@ class StaticSiteTests(unittest.TestCase):
             self.assertIn(phrase, why)
         # Links to the full example and the specification, rewritten to real site routes.
         self.assertIn('href="../examples/supplier-invoice-approval/"', why)
-        self.assertIn('href="../spec/0.1.0-draft/"', why)
+        self.assertIn('href="../spec/0.2.0-draft/"', why)
         self.assertNotIn("Protoss", why)
 
     def test_protoss_appears_only_in_changelog_history(self) -> None:
@@ -567,7 +575,7 @@ class StaticSiteTests(unittest.TestCase):
     def test_specification_page_excludes_layered_vision_terms(self) -> None:
         # The product/runtime vision must not leak into the normative specification page.
         spec = (
-            self.output / "spec" / "0.1.0-draft" / "index.html"
+            self.output / "spec" / "0.2.0-draft" / "index.html"
         ).read_text(encoding="utf-8")
         for term in ("Judgment Graph", "Composite Judgment", "Judgment Planner", "Evidence Layer"):
             self.assertNotIn(term, spec, f"vision term leaked into the spec page: {term}")

@@ -332,9 +332,10 @@ weaker one.
   disclosure is the point of it.
 - **Label the whole project "research" and say nothing more specific.** A blanket label is cheaper
   and needs no process. Rejected: the project already carries more precise maturity markers —
-  `0.1.0-draft`, the `ROADMAP.md` stages, Core §3.4's prohibition on evaluator-conformance claims,
-  the research-preview status in `GOVERNANCE.md` — and those attach to security and compatibility
-  claims where the distinction actually decides something. A blanket label would blur markers that
+  `0.1.0-draft`, the `ROADMAP.md` stages, Core §3.4's rules on evaluator-conformance claims (a flat
+  prohibition under `0.1.0-draft`, when this was written; exactly one permitted claim form under §3.4.1
+  as of `0.2.0-draft`), the research-preview status in `GOVERNANCE.md` — and those attach to security
+  and compatibility claims where the distinction actually decides something. A blanket label would blur markers that
   currently discriminate, and it would say nothing at all about who reviews a decision.
 - **Wait for a second maintainer and adopt real peer review then.** The correct end state, and the
   one the exit criteria point at. Rejected as a plan for now: it makes the accountability regime

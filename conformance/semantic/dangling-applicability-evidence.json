@@ -1,5 +1,5 @@
 {
-  "specVersion": "0.1.0-draft",
+  "specVersion": "0.2.0-draft",
   "id": "https://example.com/judgment-packs/dangling-applicability-evidence",
   "version": "0.1.0",
   "title": "Dangling applicability evidence",

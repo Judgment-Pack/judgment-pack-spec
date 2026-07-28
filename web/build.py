@@ -26,8 +26,8 @@ ROOT = Path(__file__).resolve().parents[1]
 WEB_ROOT = ROOT / "web"
 DEFAULT_OUTPUT = ROOT / "public"
 TEMPLATE = Template((WEB_ROOT / "templates" / "page.html").read_text(encoding="utf-8"))
-SITE_VERSION = "0.1.0-draft"
-TAGGED_SOURCE_REF = "v0.1.0-draft"
+SITE_VERSION = "0.2.0-draft"
+TAGGED_SOURCE_REF = "v0.2.0-draft"
 GITHUB_BLOB_ROOT = "https://github.com/Judgment-Pack/judgment-pack-spec/blob/"
 GITHUB_ROOT = GITHUB_BLOB_ROOT + TAGGED_SOURCE_REF + "/"
 GITHUB_URL = "https://github.com/Judgment-Pack/judgment-pack-spec"
@@ -132,10 +132,10 @@ EXAMPLE_GUIDES = {
             "Reviewing how one synthetic pack records applicability, exceptions, fallback, and human-handoff configuration.",
         ),
         edges=(
-            "The declared amount split includes 5000 in the less-than-or-equal branch and values above 5000 in the review branch. Ordered decimal evaluation is still informative in this draft, so this is not a portable execution test.",
-            "In the informative model, an active-investigation forced outcome bypasses normal rules. Separately, a prohibited category plus an amount above 5000 can produce conflicting normal-rule candidates. Neither behavior is a portable evaluator result.",
-            "If activeInvestigation is absent, its exception is unknown and declares escalation in the informative model. Missing required evidence also requests handoff, while a non-employee-expense value is not applicable.",
-            "If resolution otherwise completes with no matching rule, the declared manual-review fallback applies. The listed no-match escalation trigger is unreachable in the informative algorithm while that fallback exists.",
+            "The declared amount split includes 5000 in the less-than-or-equal branch and values above 5000 in the review branch. Ordered decimal comparison is defined for the evaluator conformance class only, and this page is not a corpus row, so nothing here asserts a portable result.",
+            "Under the §§7–8 resolution model, an active-investigation forced outcome bypasses normal rules. Separately, a prohibited category plus an amount above 5000 can produce conflicting normal-rule candidates. Neither behavior is a portable evaluator result.",
+            "If activeInvestigation is absent, its exception is unknown and declares escalation under the §§7–8 resolution model. Missing required evidence also requests handoff, while a non-employee-expense value is not applicable.",
+            "If resolution otherwise completes with no matching rule, the declared manual-review fallback applies. The listed no-match escalation trigger is unreachable under the §8 algorithm while that fallback exists.",
         ),
         failure_paths=(
             "In a scratch copy, remove an outcome or evidence declaration while leaving a reference to it; the document can retain a valid JSON shape but must fail semantic document conformance.",
@@ -156,7 +156,7 @@ EXAMPLE_GUIDES = {
         ),
         edges=(
             "Only the fictional training-demo environment is applicable; any other environment is outside the example's declared scope.",
-            "With required evidence present, a known pending status matches neither rule; the informative experiment selects the human-review fallback.",
+            "With required evidence present, a known pending status matches neither rule; the §§7–8 resolution model selects the human-review fallback.",
             "A missing status or required evidence instead produces an unresolved reason and may request the configured handoff; it does not select the fallback.",
             "Ready for demo is only a display label. It is never deployment approval."
         ),
@@ -179,7 +179,7 @@ EXAMPLE_GUIDES = {
         ),
         edges=(
             "Only context=training-fixture is applicable, and active and retired are mutually exclusive exact labels in the invented data.",
-            "With required evidence present, another known status or category matches no rule; the informative experiment selects the human-review fallback.",
+            "With required evidence present, another known status or category matches no rule; the §§7–8 resolution model selects the human-review fallback.",
             "A missing field or inventory note instead produces an unresolved reason and may request the configured handoff; it does not select the fallback.",
             "The example.invalid source locator is inert, and ordinary validation must not fetch it unless explicitly requested.",
         ),
@@ -203,7 +203,7 @@ EXAMPLE_GUIDES = {
         ),
         edges=(
             "Only context=training-fixture is applicable; any other context is outside the example's declared scope.",
-            "A restricted supplier rejects and a variance above the declared tolerance escalates; both outrank the automatic path in the informative model.",
+            "A restricted supplier rejects and a variance above the declared tolerance escalates; both outrank the automatic path under the §§7–8 resolution model.",
             "With all required evidence present, an in-tolerance invoice from a non-restricted supplier follows the automatic approve path.",
             "A suspected-duplicate flag forces manual review; missing required evidence instead requests the configured handoff.",
         ),
@@ -223,14 +223,14 @@ EXAMPLE_GUIDES = {
         ),
         good_for=(
             "Modeling a triage decision whose inputs are themselves the verdicts of an upstream review process.",
-            "Tracing a forced-outcome exception that overrides every normal rule in the informative model.",
+            "Tracing a forced-outcome exception that overrides every normal rule under the §§7–8 resolution model.",
             "Contrasting fix-with-more-information outcomes (clarify/return) with fail-permanently outcomes (decline/redirect).",
         ),
         edges=(
             "Only the six declared request types are applicable; any other request type is outside the example's declared scope.",
-            "An incomplete submission that also carries a hard appropriateness failure matches both the clarify rule and the decline rule, producing conflicting normal-rule candidates in the informative model. Conflict handling is not a portable evaluator result in this draft.",
-            "In the informative model, the embargoed-information forced outcome bypasses normal rules entirely; a missing embargo fact makes the exception unknown, and its onUnknown declares escalation.",
-            "If resolution otherwise completes with no matching rule, the declared clarify-return fallback applies. The listed no-match escalation trigger is unreachable in the informative algorithm while that fallback exists.",
+            "An incomplete submission that also carries a hard appropriateness failure matches both the clarify rule and the decline rule, producing conflicting normal-rule candidates under the §§7–8 resolution model. Conflict handling is not a portable evaluator result in this draft.",
+            "Under the §§7–8 resolution model, the embargoed-information forced outcome bypasses normal rules entirely; a missing embargo fact makes the exception unknown, and its onUnknown declares escalation.",
+            "If resolution otherwise completes with no matching rule, the declared clarify-return fallback applies. The listed no-match escalation trigger is unreachable under the §8 algorithm while that fallback exists.",
         ),
         failure_paths=(
             "In a scratch copy, remove the decline-redirect outcome while leaving the exception that references it; the document keeps a valid JSON shape but must fail semantic document conformance.",
@@ -260,9 +260,9 @@ PAGES = (
     ),
     Page(
         "spec/judgment-pack-core.md",
-        PurePosixPath("spec/0.1.0-draft/index.html"),
-        "JPS Core 0.1.0-draft",
-        "The normative prose for JPS carrier, structural, and semantic document conformance.",
+        PurePosixPath("spec/0.2.0-draft/index.html"),
+        "JPS Core 0.2.0-draft",
+        "The normative prose for JPS carrier, structural, and semantic document conformance and for the evaluator conformance class.",
         "spec",
         "Normative prose",
     ),
@@ -470,9 +470,9 @@ PAGES = (
         "rfcs/0006-evaluator-conformance.md",
         PurePosixPath("rfcs/0006-evaluator-conformance/index.html"),
         "RFC 0006: Evaluator conformance",
-        "Draft proposal for a normative evaluator conformance class with portable dispositions and an evaluation corpus.",
+        "Accepted standards-track RFC: the design record for the evaluator conformance class, portable disposition, error contract, and evaluation corpus that landed in Core 0.2.0-draft.",
         "proposals",
-        "Draft proposal",
+        "Accepted standards-track RFC",
         source_ref="main",
     ),
     Page(
@@ -485,11 +485,27 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "releases/v0.2.0-draft.md",
+        PurePosixPath("project/releases/0.2.0-draft/index.html"),
+        "0.2.0-draft release notes",
+        "Scope, artifacts, the independence caveat, limitations, and testing guidance for the draft that adds the evaluator conformance class.",
+        "project",
+    ),
+    Page(
         "releases/v0.1.0-draft.md",
         PurePosixPath("project/releases/0.1.0-draft/index.html"),
         "0.1.0-draft release notes",
         "Scope, artifacts, limitations, and testing guidance for the first draft release.",
         "project",
+        source_ref="v0.1.0-draft",
+    ),
+    Page(
+        "conformance/evaluation/README.md",
+        PurePosixPath("conformance/evaluation/index.html"),
+        "Evaluation corpus",
+        "The seed evaluation corpus and its case carrier — normative for the evaluator conformance class and for nothing else.",
+        "conformance",
+        "Normative for the evaluator class",
     ),
     Page(
         "web/DEPLOYMENT.md",
@@ -511,7 +527,7 @@ PAGES = (
 NAVIGATION = (
     ("overview", "Overview", PurePosixPath("index.html")),
     ("why", "Why", PurePosixPath("why/index.html")),
-    ("spec", "Spec", PurePosixPath("spec/0.1.0-draft/index.html")),
+    ("spec", "Spec", PurePosixPath("spec/0.2.0-draft/index.html")),
     ("examples", "Examples", PurePosixPath("examples/index.html")),
     ("conformance", "Conformance", PurePosixPath("conformance/index.html")),
     ("faq", "FAQ", PurePosixPath("faq/index.html")),
@@ -912,7 +928,7 @@ def raw_block(text: str, language: str = "json") -> str:
 # One human-readable definition per JSON key, derived from the normative schema. Each entry is
 # (summary, allowed-values-or-None). Powers the clickable-key cards and the schema field reference.
 KEY_REFERENCE: dict[str, tuple[str, tuple[str, ...] | None]] = {
-    "specVersion": ("The JPS specification version this document targets.", ("0.1.0-draft",)),
+    "specVersion": ("The JPS specification version this document targets.", ("0.2.0-draft",)),
     "id": ("A stable identifier. At the top level it is the pack's globally unique URI; inside outcomes, rules, evidence requirements, sources, and exceptions it is a pack-local id (lowercase, hyphenated).", None),
     "version": ("The pack's own semantic version (MAJOR.MINOR.PATCH), separate from specVersion.", None),
     "title": ("A short human-readable name for the pack.", None),
@@ -945,7 +961,7 @@ KEY_REFERENCE: dict[str, tuple[str, tuple[str, ...] | None]] = {
     "exceptions": ("Overrides that change the ordinary outcome under specific conditions.", None),
     "effect": ("What an exception does.", ("suppress-rule", "force-outcome", "escalate")),
     "targetRule": ("The rule id a suppress-rule exception disables.", None),
-    "fallbackOutcome": ("The outcome id used when no rule matches (informative model).", None),
+    "fallbackOutcome": ("The outcome id used when no rule matches (§8).", None),
     "escalation": ("Handoff configuration: when and to whom the decision is escalated. Not itself an outcome.", None),
     "triggers": ("The situations that cause escalation.", ("not-applicable", "missing-required-evidence", "unknown", "conflict", "no-match")),
     "target": ("The escalation destination: a kind and a name.", None),
@@ -1116,9 +1132,21 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
             "conformance/manifest.schema.json": PurePosixPath(
                 "conformance/manifest-schema/index.html"
             ),
+            # The evaluation corpus is browsable as one page; its machine-readable files are served
+            # from the copied artifact tree rather than as generated pages.
+            "conformance/evaluation": PurePosixPath("conformance/evaluation/index.html"),
+            "conformance/evaluation/manifest.json": PurePosixPath(
+                "artifacts/conformance/evaluation/manifest.json"
+            ),
+            "conformance/evaluation/manifest.schema.json": PurePosixPath(
+                "artifacts/conformance/evaluation/manifest.schema.json"
+            ),
             ".vscode/tasks.json": GITHUB_ROOT + ".vscode/tasks.json",
         }
     )
+    for path in sorted((ROOT / "conformance" / "evaluation" / "packs").glob("*.json")):
+        source = path.relative_to(ROOT).as_posix()
+        routes[source] = PurePosixPath("artifacts") / PurePosixPath(source)
     for path in sorted((ROOT / "examples").glob("*.json")):
         source = path.relative_to(ROOT).as_posix()
         routes[source] = PurePosixPath("examples") / path.stem / "index.html"
@@ -1165,7 +1193,7 @@ Use only a minimal synthetic reproduction, then
     <p class="hero-lede">Judgment Pack is an open specification for representing the evidence, rules,
     exceptions, uncertainty, escalation criteria, and evaluations behind an AI agent's decisions.</p>
     <div class="hero-actions">
-      <a class="button button-primary" href="{html.escape(output_href(page.output, PurePosixPath('spec/0.1.0-draft/index.html')))}">Read the specification</a>
+      <a class="button button-primary" href="{html.escape(output_href(page.output, PurePosixPath('spec/0.2.0-draft/index.html')))}">Read the specification</a>
       <a class="button button-secondary" href="{html.escape(GITHUB_URL)}" target="_blank" rel="noopener noreferrer">View on GitHub</a>
     </div>
     <p class="hero-support"><a href="{html.escape(output_href(page.output, PurePosixPath('why/index.html')))}">Why Judgment Pack?</a></p>
@@ -1176,8 +1204,9 @@ Use only a minimal synthetic reproduction, then
       <li>JSON carrier conformance</li>
       <li>Schema structure and formats</li>
       <li>Document references and constraints</li>
+      <li>Evaluator conformance, against the evaluation corpus</li>
     </ol>
-    <p><strong>It does not define evaluator conformance or prove truth, authority, safety, or fitness.</strong></p>
+    <p><strong>It never proves truth, authority, safety, or fitness.</strong></p>
   </div>
 </section>"""
             toc = ""
@@ -1231,7 +1260,7 @@ clickable cards beside each example document.</p>
     rendered = page_html(
         output=page_output,
         title="JPS Core JSON Schema",
-        description="The normative JSON Schema for JPS Core 0.1.0-draft.",
+        description=f"The normative JSON Schema for JPS Core {SITE_VERSION}.",
         section="spec",
         artifact_label="Normative schema",
         body=body,
@@ -1292,8 +1321,8 @@ external action.</div>
 <h2 id="example-guide">Guide to this example</h2>
 <p><strong>Focus:</strong> {html.escape(guide.focus)}</p>
 <p>The checked-in document is expected to pass JPS carrier, structural, and semantic document
-checks. The edge and failure notes below are inspection prompts or scratch-copy exercises; they do
-not assert a portable evaluator result.</p>
+checks. The edge and failure notes below are inspection prompts or scratch-copy exercises; they are
+not evaluation-corpus rows and assert no evaluator-conformance result.</p>
 <h3 id="what-this-example-demonstrates">What this example demonstrates</h3>
 <p>{html.escape(guide.demonstrates)}</p>
 <h3 id="good-for">Good for</h3>
@@ -1304,8 +1333,9 @@ not assert a portable evaluator result.</p>
 {item_list(guide.failure_paths)}
 <div class="notice notice-info"><strong>Keep the layers separate.</strong> A malformed carrier, a
 schema-shape failure, and a dangling local reference fail at different document-conformance layers.
-Missing evidence, unknown facts, conflicts, and no-match handling belong to the informative
-resolution experiment because JPS 0.1.0-draft defines no evaluator conformance class.</div>
+Missing evidence, unknown facts, conflicts, and no-match handling belong to the resolution model of
+§§7–8, which JPS 0.2.0-draft makes normative for the evaluator conformance class only.
+A document-conformance result never depends on them, and the notes on this page are not corpus rows.</div>
 <h2 id="document">Annotated document</h2>
 <p>The complete validated pack. Each highlighted key links to its definition on the right — click a
 key to see what it means and its allowed values.</p>
@@ -1325,7 +1355,7 @@ key to see what it means and its allowed values.</p>
     index_body = f"""
 <h1>Synthetic examples</h1>
 <p class="lede">These are synthetic, structurally and semantically conforming JPS documents for
-inspecting and testing the document format. Three unrelated domains exercise the same portable
+inspecting and testing the document format. Unrelated domains exercise the same portable
 shape without claiming that the examples are complete, authoritative, or safe for operational
 use.</p>
 <div class="notice notice-info"><strong>Use synthetic data only.</strong> These examples are
@@ -1338,10 +1368,12 @@ must not fetch their source locators unless explicitly requested.</div>
   <li>Edit only a scratch copy to create a carrier, structural, or semantic failure.</li>
   <li>Compare what you observe with <a href="{html.escape(output_href(index_output, PurePosixPath('testing/index.html')))}">Test the preview</a>.</li>
 </ol>
-<p>JPS 0.1.0-draft defines document conformance, not portable rule evaluation. The edge notes on
-each page explain illustrative applicability, evidence, unknown, conflict, and fallback situations
-without claiming an expected runtime decision. Validity never proves truth, authority, safety, or
-fitness.</p>
+<p>These pages are about document conformance. JPS 0.2.0-draft also defines portable evaluation
+semantics, but an evaluator-conformance claim is made against the
+<a href="{html.escape(output_href(index_output, PurePosixPath('conformance/evaluation/index.html')))}">evaluation
+corpus</a>, never against an example. The edge notes on each page explain illustrative applicability,
+evidence, unknown, conflict, and fallback situations without claiming an expected runtime decision.
+Validity never proves truth, authority, safety, or fitness.</p>
 <p>For the structural baseline, use an independent Draft 2020-12 implementation and inspect
 semantic references separately. Conforming tools that check all current JPS document-conformance
 layers are listed on the <a href="{html.escape(output_href(index_output, PurePosixPath('implementations/index.html')))}">Implementations</a> page.</p>
@@ -1458,8 +1490,10 @@ about factual grounding, authority, safety, or operational fitness.</div>
     manifest_schema_output = PurePosixPath("conformance/manifest-schema/index.html")
     body = f"""
 {intro}
-<div class="notice notice-warning"><strong>Document conformance only.</strong> This corpus does
-not define evaluator conformance and cannot establish truth, authority, safety, or fitness.</div>
+<div class="notice notice-warning"><strong>Document conformance only.</strong> These cases test
+documents. Evaluator conformance is claimed against the separate
+<a href="{html.escape(output_href(index_output, PurePosixPath('conformance/evaluation/index.html')))}">evaluation
+corpus</a>, and no corpus of either kind can establish truth, authority, safety, or fitness.</div>
 <nav class="case-summary" aria-label="Conformance layers"><ul>{summaries}</ul></nav>
 <p class="artifact-actions">
   <a class="button button-secondary" href="{html.escape(output_href(index_output, manifest_output))}">View manifest</a>
@@ -1530,7 +1564,9 @@ def build_project_index(output_root: Path) -> None:
         (
             "Release and direction",
             (
-                ("0.1.0-draft release", "Published draft scope and known limitations.", "project/releases/0.1.0-draft/index.html"),
+                ("0.2.0-draft release", "Current draft scope, the independence caveat, and known limitations.", "project/releases/0.2.0-draft/index.html"),
+                ("0.1.0-draft release", "The first published draft's scope and known limitations.", "project/releases/0.1.0-draft/index.html"),
+                ("0.1.0-draft specification", "Where the superseded draft's tagged prose lives.", "spec/0.1.0-draft/index.html"),
                 ("Changelog", "Draft and published preview history.", "project/changelog/index.html"),
                 ("Versioning", "Release and compatibility policy.", "project/versioning/index.html"),
                 ("Roadmap", "Evidence gates for each maturity stage.", "project/roadmap/index.html"),
@@ -1717,7 +1753,11 @@ def build_not_found(output_root: Path) -> None:
 
 CANONICAL_SCHEMA_SOURCES = (
     "schema/judgment-pack-core.schema.json",
+    # The superseded schema stays served at its own $id so a pack that still declares the older
+    # exact specVersion remains checkable.
+    "schema/judgment-pack-core-0.1.0-draft.schema.json",
     "conformance/manifest.schema.json",
+    "conformance/evaluation/manifest.schema.json",
 )
 
 
@@ -1773,6 +1813,57 @@ authority over the specification.</p>
     write_page(output_root, page_output, rendered)
 
 
+PREVIOUS_SITE_VERSION = "0.1.0-draft"
+
+
+def build_superseded_spec_notice(output_root: Path) -> None:
+    """Keep the previous draft's versioned URL resolvable.
+
+    ``/spec/0.1.0-draft/`` was published and may already have been cited. The prose itself is not
+    re-published here — the immutable tag holds it — but the URL must not 404, for the same reason the
+    superseded schema stays served at its own ``$id``.
+    """
+    page_output = PurePosixPath(f"spec/{PREVIOUS_SITE_VERSION}/index.html")
+    current = output_href(page_output, PurePosixPath(f"spec/{SITE_VERSION}/index.html"))
+    release_notes = output_href(
+        page_output, PurePosixPath(f"project/releases/{PREVIOUS_SITE_VERSION}/index.html")
+    )
+    versioning = output_href(page_output, PurePosixPath("project/versioning/index.html"))
+    tag_url = f"{GITHUB_ROOT}tree/v{PREVIOUS_SITE_VERSION}/spec"
+    body = f"""
+<h1>JPS Core {html.escape(PREVIOUS_SITE_VERSION)} is superseded</h1>
+<p class="lede">This URL held the prose for JPS Core <code>{html.escape(PREVIOUS_SITE_VERSION)}</code>.
+The current draft is <a href="{html.escape(current)}">Core {html.escape(SITE_VERSION)}</a>.</p>
+<div class="notice notice-warning"><strong>Nothing here is normative.</strong> This page is a
+signpost. The normative text of a superseded draft is the tagged source, not a rendered page on a
+mutable site.</div>
+<ul>
+  <li><a href="{html.escape(tag_url)}" target="_blank" rel="noopener noreferrer">Tagged
+  <code>v{html.escape(PREVIOUS_SITE_VERSION)}</code> source</a> — the immutable prose as published.</li>
+  <li><a href="{html.escape(release_notes)}">{html.escape(PREVIOUS_SITE_VERSION)} release notes</a> —
+  that draft's scope and known limitations.</li>
+  <li><a href="{html.escape(current)}">Core {html.escape(SITE_VERSION)}</a> — the current draft. The
+  document format is unchanged; a pack must re-declare <code>specVersion</code>, and the
+  <code>{html.escape(PREVIOUS_SITE_VERSION)}</code> schema stays served at its own
+  <code>$id</code> for packs that keep the older value.</li>
+  <li><a href="{html.escape(versioning)}">Versioning policy</a> — why a conformance claim is made
+  against one exact version and is never inherited.</li>
+</ul>
+"""
+    rendered = page_html(
+        output=page_output,
+        title=f"JPS Core {PREVIOUS_SITE_VERSION} (superseded)",
+        description=(
+            f"JPS Core {PREVIOUS_SITE_VERSION} is superseded by {SITE_VERSION}; where to find the "
+            "tagged prose of the earlier draft."
+        ),
+        section="spec",
+        artifact_label="Superseded",
+        body=body,
+    )
+    write_page(output_root, page_output, rendered)
+
+
 def build(output: Path, config: BuildConfig) -> None:
     global _CONFIG
     _CONFIG = config
@@ -1789,6 +1880,7 @@ def build(output: Path, config: BuildConfig) -> None:
     publish_canonical_schemas(output)
     build_markdown_pages(output, routes)
     build_schema_page(output, routes)
+    build_superseded_spec_notice(output)
     build_examples(output, routes)
     build_conformance(output, routes, manifest)
     build_implementations_index(output)

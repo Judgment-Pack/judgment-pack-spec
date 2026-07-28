@@ -6,7 +6,7 @@ each field means and does not mean. It is written for authors, reviewers, implem
 whether the format fits their work.
 
 <div class="notice notice-info"><strong>Informative.</strong> This guide is explanatory, not normative. The
-authority is <a href="../spec/0.1.0-draft/">the normative specification</a> and its machine-readable
+authority is <a href="../spec/0.2.0-draft/">the normative specification</a> and its machine-readable
 schema. Where this guide and the normative prose appear to disagree, the prose wins; where the prose and the
 schema appear to disagree, the prose still wins and the mismatch is a specification defect that should be
 reported.</div>
@@ -22,14 +22,15 @@ A few terms recur throughout:
 
 - **Core** is the base representation described here. It deliberately excludes profiles and extensions that a
   later specification may layer on top.
-- **`0.1.0-draft`** is the exact experimental draft this guide describes. It is a research preview and may
-  change in incompatible ways.
+- **`0.2.0-draft`** is the exact draft this guide describes. It is a research preview and may change in
+  incompatible ways.
 - **JPS** is shorthand for the Judgment Pack Specification, the body of normative prose and schema that defines
   the format.
 
-The single most important framing: this draft standardizes **documents**, not decision execution. It defines
-what a valid Judgment Pack document looks like and what its fields mean. It does not define a portable engine
-that reads a pack and returns a decision.
+The single most important framing: this draft standardizes **documents**, and — for implementations that claim
+the evaluator conformance class of §3.4 — what an evaluation of one *means*. It defines what a valid Judgment
+Pack document looks like, what its fields mean, and which result a conforming evaluator must produce. It still
+ships no engine, and it never authorizes acting on a result.
 
 ## Normative words
 
@@ -61,10 +62,12 @@ Several other terms have precise senses in JPS:
 the prose controls. The schema is a machine-readable projection of the structural rules, not an independent
 authority.</div>
 
-## The three conformance levels
+## The three document-conformance levels
 
 This draft defines conformance for **documents** at three cumulative levels. Each level assumes the one before
-it.
+it. They are three of four conformance classes: the fourth, **evaluator conformance** (Core §3.4), is not
+about a document at all — it is about what an implementation computes from one, and it is described in
+[How a pack is evaluated](#how-a-pack-is-evaluated) below.
 
 - **Carrier-conforming** — the file is complete, valid JSON per RFC 8259, has no duplicate member names within
   any object, and is not silently truncated. A reader that hits a resource limit must fail explicitly rather
@@ -79,7 +82,10 @@ it.
 <div class="notice notice-warning"><strong>What conformance does not mean.</strong> None of these levels
 establish that a claim is true, that evidence is authentic or sufficient, that an author or reviewer had
 authority, that an outcome is legal or safe, or that any particular runtime applied the pack correctly.
-Conformance is about document validity, nothing more.</div>
+Document conformance is about document validity, nothing more. Core §3.5 makes exactly one narrow
+exception, and only for the evaluator class: an evaluator-conformance claim says the implementation
+computed the specified result for the evaluation-corpus inputs it ran, and nothing about any other
+input, deployment, or production run.</div>
 
 ## JSON punctuation
 
@@ -110,7 +116,7 @@ The document is a single JSON object. These are its members:
 
 | Field | Required | Meaning |
 | --- | --- | --- |
-| `specVersion` | yes | Exactly the string `0.1.0-draft`. |
+| `specVersion` | yes | Exactly the string `0.2.0-draft`. |
 | `id` | yes | A stable absolute URI identifying the pack series. |
 | `version` | yes | The revision of this pack (see below). |
 | `title` | yes | A non-empty human-readable title. |
@@ -135,7 +141,8 @@ preserved for authoring and display, but it **never** sets rule priority.
 Two version fields describe different things and move independently:
 
 - `specVersion` names **which specification** the document follows. In this draft it is always the exact string
-  `0.1.0-draft`.
+  `0.2.0-draft`. A pack written for `0.1.0-draft` means the same thing here and needs only this one value
+  changed; because the value is exact, an unedited one is not structurally conforming.
 - `version` names **which revision of this pack** you are looking at. It matches
   `^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$` — three dot-separated non-negative integers with no
   leading zeros.
@@ -388,9 +395,15 @@ disjunction.
 
 Equality is **type-preserving**: the string `"1"`, the number `1`, and the Boolean `true` are all distinct, and
 there is no coercion between JSON types. Array equality is order-sensitive; object equality ignores member
-order. The ordered operators (`greater-than` and friends) have a valid representation in the schema, but this
-draft does **not** define a portable ordering for their decimal-string operands — structural acceptance of an
-ordered condition does not imply that any two evaluators would order the values the same way.
+order. The ordered operators (`greater-than` and friends) are defined for the evaluator conformance class:
+both the selected value and the operand must be decimal strings, and they are then compared by mathematical
+value — anything else, including a JSON number, is `unknown`. Outside that class, structural acceptance of an
+ordered condition still implies nothing about how a tool would order the values.
+
+The two families deliberately disagree about scale: `"1.0"` and `"1.00"` are *not* equal under `equals`,
+because equality compares strings, while neither is greater than the other under an ordered comparison,
+because ordering reads mathematical value. If a pack needs decimal-aware equality, it must normalise scale
+itself — in the operand and in the facts it is compared against.
 
 **`evidence-present`** — checks whether a declared evidence requirement was supplied.
 
@@ -400,17 +413,17 @@ ordered condition does not imply that any two evaluators would order the values 
 
 The `evidenceRequirement` names a declared requirement's id.
 
-## How a pack would be evaluated (informative, experimental)
+## How a pack is evaluated
 
-<div class="notice notice-warning"><strong>Informative and experimental.</strong> JPS 0.1.0-draft defines no
-evaluator conformance. The following describes an experimental model only; a conforming implementation cannot
-claim evaluator conformance in this draft.</div>
+<div class="notice notice-info"><strong>Still informative — but the specification is not.</strong> This guide
+stays explanatory. What it now summarizes is normative: JPS 0.2.0-draft makes the condition and resolution
+semantics binding on an implementation that claims the evaluator conformance class (Core 3.4), and it defines
+the result that implementation must produce. A document-conformance claim is unaffected by all of it.</div>
 
-Everything in this section is a design experiment recorded so that reviewers can compare notes on it. The
-allowed shapes of conditions remain normative through the schema, but the results and the algorithm below do
-not determine conformance and may change.
+The allowed shapes of conditions are normative through the schema for everyone. The results and the algorithm
+below are normative for the evaluator class and informative for every other consumer.
 
-**Three-valued conditions.** In the experiment a condition produces `true`, `false`, or `unknown`.
+**Three-valued conditions.** A condition produces `true`, `false`, or `unknown`.
 
 | `all` | Result |
 | --- | --- |
@@ -430,27 +443,29 @@ not determine conformance and may change.
 | `false` | `true` |
 | `unknown` | `unknown` |
 
-**Evidence presence** is `true` when the runtime explicitly associates at least one supplied item with the
-named requirement; `false` when a complete evidence manifest is available and associates none; and `unknown`
-when the runtime cannot tell whether the manifest is complete. This draft defines no evidence-manifest
-interchange format.
+**Evidence presence** comes from one input: an evidence-availability document mapping each declared requirement
+id to `present`, `absent`, or `unknown`, where an omitted key — or an omitted document — means `unknown`. Those
+map to `true`, `false`, and `unknown`. That tri-state replaces `0.1.0-draft`'s undefined "complete evidence
+manifest", which was the one place two careful readers could legitimately disagree. There is still no
+evidence-manifest interchange format beyond it.
 
-**Result and reason tokens.** The experiment distinguishes three result kinds: an `outcome` result naming
+**Result and reason tokens.** There are three result kinds: an `outcome` result naming
 exactly one declared outcome; a `not-applicable` result (which is not an outcome); and an `unresolved` result
 carrying one or more reasons. The reason vocabulary matches the escalation triggers — `not-applicable`,
 `missing-required-evidence`, `unknown`, `conflict`, `no-match` — plus a separate `exception-escalation` reason
 that marks a direct request from a true `escalate` exception rather than a trigger-selected one. Reasons form a
 de-duplicated set with no priority order.
 
-**Experimental evaluation order.** Roughly, an evaluator would:
+**Evaluation order.** Roughly, a conforming evaluator:
 
 1. Test **applicability** (an omitted `applicability` counts as `true`). If false, stop with `not-applicable`;
    if unknown, stop `unresolved` with reason `unknown`.
-2. Inspect **required evidence**, recording `missing-required-evidence` for any that is absent.
+2. Inspects **required evidence**: `missing-required-evidence` if any required requirement's presence is
+   `false`; `unknown` if any is `unknown` and none is `false`.
 3. Evaluate **exceptions** and combine their effects: `suppress-rule` effects union their targets;
    `force-outcome` effects agree only if they name the same outcome; `escalate` effects take precedence and
    record `exception-escalation`.
-4. **Stop `unresolved`** if required evidence is missing, an exception is unknown with `onUnknown: escalate`,
+4. **Stops `unresolved`** if step 2 recorded either reason, an exception is unknown with `onUnknown: escalate`,
    forced outcomes conflict, or an exception directly requests escalation.
 5. Otherwise honor a single compatible **forced outcome**, or else evaluate the **unsuppressed rules**.
 6. Collect the outcomes of **true rules** as candidates; an unknown rule with `onUnknown: escalate` records
@@ -459,8 +474,17 @@ de-duplicated set with no priority order.
 8. Return the **single candidate** if there is one; otherwise use `fallbackOutcome` if present; otherwise stop
    `unresolved` with reason `no-match`.
 
-Array order and lexical id order never break a tie in this experiment. `onUnknown: escalate` blocks otherwise
-compatible outcomes; `onUnknown: ignore` never rewrites an unknown into false and never erases it from a trace.
+Array order and lexical id order never break a tie, and a conflict is never tie-broken at all. `onUnknown:
+escalate` blocks otherwise compatible outcomes; `onUnknown: ignore` never rewrites an unknown into false and
+never erases it from a trace.
+
+**The result a conforming evaluator emits** is one *disposition*: `kind` (`outcome`, `not-applicable`, or
+`unresolved`), `outcomeId` only when the kind is `outcome`, `reasons` as a sorted set, and a `handoff` object
+carrying `state` (`none` or `requested`) plus `triggeredBy` when requested. It does not echo the escalation
+target — that is in the pack. Two conforming implementations given the same inputs must produce byte-identical
+dispositions after canonicalization. If an evaluation cannot be completed — a non-conforming pack, an
+unsupported required extension, a malformed facts or evidence document, a limit reached — the result is a named
+**error**, never a disposition, and never a quietly truncated one.
 
 ## JSON Pointer and decimal strings
 
@@ -559,13 +583,14 @@ Uniqueness of ids is a separate semantic requirement enforced by the prose, not 
 
 ## What the draft leaves undefined
 
-`0.1.0-draft` deliberately stops at document representation and validity. It does not define:
+`0.2.0-draft` stops at document representation and validity, plus the meaning of one evaluation. It does not
+define:
 
-- evaluator conformance;
-- a portable serialized decision-result format;
-- portable ordered-decimal comparison;
-- units or conversions between them;
-- an evidence-manifest interchange format;
+- how to *perform* an evaluation — the semantics are specified, the engine is not;
+- composition of several packs, or a composite result;
+- units or conversions between them, or date and time ordering;
+- an evidence interchange format beyond the presence tri-state;
+- a machine-readable diagnostic contract for validation or for evaluation errors;
 - authentication or signatures;
 - the authority of an author or reviewer;
 - imports or remote references;

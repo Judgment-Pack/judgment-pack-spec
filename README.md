@@ -3,7 +3,7 @@
 [![Repository conformance](https://github.com/Judgment-Pack/judgment-pack-spec/actions/workflows/conformance.yml/badge.svg)](https://github.com/Judgment-Pack/judgment-pack-spec/actions/workflows/conformance.yml)
 [![Join the community on Slack](https://img.shields.io/badge/Slack-Join%20the%20community-4A154B?logo=slack&logoColor=white)](https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw)
 
-> **Status: Research Preview — `0.1.0-draft`**
+> **Status: Research Preview — `0.2.0-draft`**
 >
 > This repository is an early design proposal. It is not an industry standard, is not covered by
 > compatibility guarantees, and is not ready for consequential production decisions.
@@ -63,11 +63,15 @@ This research preview exists to test whether a small declarative core can suppor
 and runtimes without standardizing any one product, model, or workflow.
 
 The specification is successful only if independent implementations can exchange the same pack and
-agree on its document structure and declared field and reference semantics. Portable evaluation is
-a possible later profile, not a claim of this draft.
+agree on its document structure and declared field and reference semantics — and, for the class added
+in `0.2.0-draft`, on the result of applying it.
 
-Core `0.1.0-draft` supports testing carrier, structural, and semantic document conformance. It does
-not define evaluator conformance or a portable decision result.
+Core `0.2.0-draft` supports testing carrier, structural, and semantic document conformance, and
+defines a fourth class: evaluator conformance (§3.4), with normative condition and resolution
+semantics, one portable result (the §8.3 disposition), an error contract (§8.4), and a seed evaluation
+corpus. Document conformance is unchanged, and exactly one form of evaluator-conformance claim is
+definable — against the class and the corpus, for one exact `specVersion` (§3.4.1). No implementation
+ships such a claim today.
 
 ## What JPS is
 
@@ -95,6 +99,7 @@ not define evaluator conformance or a portable decision result.
 | [`schema/judgment-pack-core.schema.json`](schema/judgment-pack-core.schema.json) | Normative Draft 2020-12 structural schema           |
 | [`examples/`](examples/)                                                         | Synthetic examples from unrelated domains           |
 | [`conformance/`](conformance/)                                                   | 47 non-normative document-conformance test cases    |
+| [`conformance/evaluation/`](conformance/evaluation/README.md)                     | 20-case seed evaluation corpus (normative for §3.4) |
 | [`TESTING.md`](TESTING.md)                                                       | A 10–15 minute external testing exercise            |
 | [`VERSIONING.md`](VERSIONING.md)                                                 | Release and compatibility policy                    |
 | [`CHANGELOG.md`](CHANGELOG.md)                                                   | Draft and published change history                  |
@@ -115,7 +120,7 @@ for the current landscape.
 
 ```json
 {
-  "specVersion": "0.1.0-draft",
+  "specVersion": "0.2.0-draft",
   "id": "https://example.com/judgment-packs/expense-approval",
   "version": "0.1.0",
   "title": "Expense approval",
@@ -155,13 +160,17 @@ These are deliberately separate claims:
 2. **Structural conformance:** the document satisfies the JPS schema, including asserted formats.
 3. **Semantic document conformance:** local references and cross-field constraints satisfy the
    normative prose.
-4. **Factual grounding:** evidence supports the pack's claims.
-5. **Organizational authorization:** an accountable organization permits the pack's use.
-6. **Operational fitness:** a particular runtime applies it safely and effectively.
+4. **Evaluator conformance:** an implementation computes the specified result — the §8.3 disposition —
+   from a pack, facts, and evidence availability, and passes the evaluation corpus for that exact
+   `specVersion`.
+5. **Factual grounding:** evidence supports the pack's claims.
+6. **Organizational authorization:** an accountable organization permits the pack's use.
+7. **Operational fitness:** a particular runtime applies it safely and effectively.
 
-This research preview specifies the first three document claims. It explicitly does not specify
-evaluator conformance; the condition and resolution sections are informative experiments only. A
-validator must never imply factual grounding, organizational authorization, or operational fitness.
+This research preview specifies the first four claims. The fourth is new in `0.2.0-draft`, is claimed
+only as §3.4.1 permits, and says one thing: that the implementation computed the specified
+disposition for the corpus inputs it ran. A validator or evaluator must never imply factual grounding,
+organizational authorization, or operational fitness.
 The core specification defines the
 [normative artifact roles and precedence](spec/judgment-pack-core.md#11-normative-artifacts-and-precedence).
 
@@ -194,8 +203,10 @@ press `Ctrl+C` there to stop the server.
 Use **Terminal → Run Build Task** or `Ctrl+Shift+B` to install dependencies and rebuild the site
 without starting the server. The task definitions are in [`.vscode/tasks.json`](.vscode/tasks.json).
 
-These exercises test documents, not decisions. Do not infer or automate a real outcome from a pack
-and do not present agreement between experimental evaluators as JPS conformance.
+These exercises test documents, not decisions. Do not infer or automate a real outcome from a pack,
+and do not present agreement between evaluators as JPS conformance: an evaluator-conformance claim is
+made against the evaluation corpus for one exact `specVersion`, on the terms in §3.4.1, and nothing
+else counts.
 
 ## Participate
 

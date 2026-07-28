@@ -149,12 +149,14 @@ files. R5 also records that collapsing availability to one boolean loses per-ele
 ## Specification
 
 **Normative status.** The schema branches below are normative under *document* conformance in a
-later exact `specVersion`. Their interpretation is **informative exactly as §7 is today** — §7's
-preamble says the allowed JSON shapes remain normative through the schema and the results described
-do not, and §3.4 forbids evaluator-conformance claims under `0.1.0-draft`. The semantics here become
-normative only if [RFC 0006](0006-evaluator-conformance.md)'s evaluator class is accepted. This RFC
-takes a hard dependency on that class for one further reason recorded in Compatibility: Core
-`0.1.0-draft` has no evaluation-error contract to put limit exhaustion in.
+later exact `specVersion`. Their interpretation was **informative exactly as §7 was under
+`0.1.0-draft`** — that §7 preamble said the allowed JSON shapes remain normative through the schema
+and the results described do not, and §3.4 forbade evaluator-conformance claims under `0.1.0-draft`.
+The semantics here become normative for the evaluator conformance class that
+[RFC 0006](0006-evaluator-conformance.md) landed in Core `0.2.0-draft`; this RFC's hard dependency on
+that class is therefore satisfied, including the one further reason recorded in Compatibility — Core
+`0.1.0-draft` had no evaluation-error contract to put limit exhaustion in, and `0.2.0-draft` §8.4
+does.
 
 Two new members of §7's condition union, structurally valid anywhere a condition is allowed —
 including inside `all`, `any`, `not`, and (to a maximum aggregate depth of two) each other.
@@ -620,9 +622,11 @@ accepted. That bar applies here in full and is not met.
 The natural prototype bed is the Go reference runtime's **experimental** evaluator (its ADR-0007),
 which already implements §7's three-valued logic and RFC 0006's pinned semantics, so two operators
 are a local addition plus a limits budget. It makes no conformance claims, and prototyping there
-establishes none: Core §3.4 forbids evaluator-conformance claims under `0.1.0-draft` whatever is
-implemented, and RFC 0006's class does not exist yet. A prototype yields implementation experience
-and corpus rows, not standing. The natural second is the clean-room Python evaluator in
+establishes none: prototyping is not a claim under §3.4.1 whatever is implemented, and the operators
+proposed here are in no `specVersion`, so no corpus exists to claim against. (When this was written
+RFC 0006's class did not exist at all; it landed in Core `0.2.0-draft`, which changes where the
+prohibition lives, not the conclusion.) A prototype yields implementation experience and corpus rows,
+not standing. The natural second is the clean-room Python evaluator in
 [judgment-pack-evaluator-experiments](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments),
 rewritten from this RFC's text alone behind a fresh information barrier — with RFC 0006's recorded
 caveat that both trace to one maintainer's direction, so agreement corroborates rather than

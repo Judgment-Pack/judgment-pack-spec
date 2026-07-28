@@ -1,0 +1,68 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.invalid/judgment-packs/direct-exception-escalation",
+  "version": "0.1.0",
+  "title": "Synthetic direct-escalation fixture without a handoff configuration",
+  "description": "Constructed corpus fixture carrying an escalate exception and no escalation object, so a direct handoff request has no Core-defined destination. Synthetic content for specification testing; it authorizes nothing.",
+  "decision": {
+    "intent": "Exercise a direct exception escalation in a pack that supplies no handoff configuration.",
+    "question": "Should this synthetic request be approved, held, or handed off?"
+  },
+  "outcomes": [
+    {
+      "id": "approve",
+      "label": "Approve",
+      "description": "The synthetic request proceeds."
+    },
+    {
+      "id": "hold",
+      "label": "Hold",
+      "description": "The synthetic request waits."
+    }
+  ],
+  "rules": [
+    {
+      "id": "approve-when-ready",
+      "description": "Approve the request once it is marked ready.",
+      "when": {
+        "op": "fact",
+        "path": "/request/ready",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "approve",
+      "onUnknown": "ignore"
+    },
+    {
+      "id": "hold-when-not-ready",
+      "description": "Hold the request while it is marked not ready.",
+      "when": {
+        "op": "fact",
+        "path": "/request/ready",
+        "operator": "equals",
+        "value": false
+      },
+      "outcome": "hold",
+      "onUnknown": "ignore"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "escalate-flagged-request",
+      "description": "A flagged request is handed to a person regardless of readiness; this pack declares no handoff configuration, so the request names no destination.",
+      "when": {
+        "op": "fact",
+        "path": "/request/flagged",
+        "operator": "equals",
+        "value": true
+      },
+      "effect": "escalate",
+      "onUnknown": "ignore"
+    }
+  ],
+  "metadata": {
+    "authors": ["Judgment Pack Specification contributors"],
+    "createdAt": "2026-07-28T00:00:00Z",
+    "license": "Apache-2.0"
+  }
+}

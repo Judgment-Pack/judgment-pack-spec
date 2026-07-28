@@ -15,8 +15,27 @@ CONFORMANCE = ROOT / "conformance"
 SCHEMA_PATH = ROOT / "schema" / "judgment-pack-core.schema.json"
 MANIFEST_PATH = CONFORMANCE / "manifest.json"
 MANIFEST_SCHEMA_PATH = CONFORMANCE / "manifest.schema.json"
-SPEC_VERSION = "0.1.0-draft"
-SCHEMA_ID = "https://judgmentpack.org/schema/0.1.0-draft/judgment-pack-core.schema.json"
+EVALUATION = CONFORMANCE / "evaluation"
+EVALUATION_MANIFEST_PATH = EVALUATION / "manifest.json"
+EVALUATION_MANIFEST_SCHEMA_PATH = EVALUATION / "manifest.schema.json"
+SPEC_VERSION = "0.2.0-draft"
+PREVIOUS_SPEC_VERSION = "0.1.0-draft"
+SCHEMA_ID = f"https://judgmentpack.org/schema/{SPEC_VERSION}/judgment-pack-core.schema.json"
+PREVIOUS_SCHEMA_PATH = (
+    ROOT / "schema" / f"judgment-pack-core-{PREVIOUS_SPEC_VERSION}.schema.json"
+)
+PREVIOUS_SCHEMA_ID = (
+    f"https://judgmentpack.org/schema/{PREVIOUS_SPEC_VERSION}/judgment-pack-core.schema.json"
+)
+# §8.3: the reason vocabulary a disposition may carry.
+REASONS = {
+    "not-applicable",
+    "missing-required-evidence",
+    "unknown",
+    "conflict",
+    "no-match",
+    "exception-escalation",
+}
 
 
 class DuplicateMemberError(ValueError):
@@ -430,6 +449,121 @@ class RepositoryConformanceTests(unittest.TestCase):
     def test_canonical_example_and_fixture_do_not_drift(self) -> None:
         example = (ROOT / "examples" / "minimal-expense-approval.json").read_bytes()
         fixture = (CONFORMANCE / "valid" / "minimal-expense-approval.json").read_bytes()
+        self.assertEqual(example, fixture)
+
+    def test_superseded_schema_stays_published_for_its_own_version(self) -> None:
+        # A 0.1.0-draft pack is unchanged in meaning (Core §11) but must be re-declared to pass the
+        # current schema, so the older schema stays available at its own exact version.
+        previous = strict_json_loads(PREVIOUS_SCHEMA_PATH.read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(previous)
+        self.assertEqual(previous["$id"], PREVIOUS_SCHEMA_ID)
+        self.assertEqual(
+            previous["properties"]["specVersion"]["const"], PREVIOUS_SPEC_VERSION
+        )
+        self.assertEqual(self.schema["properties"]["specVersion"]["const"], SPEC_VERSION)
+
+    def test_evaluation_manifest_matches_its_schema(self) -> None:
+        schema = strict_json_loads(
+            EVALUATION_MANIFEST_SCHEMA_PATH.read_text(encoding="utf-8")
+        )
+        Draft202012Validator.check_schema(schema)
+        manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
+        errors = sorted(validator.iter_errors(manifest), key=lambda item: list(item.path))
+        self.assertEqual([], [error.message for error in errors])
+        self.assertEqual(manifest["suiteVersion"], SPEC_VERSION)
+        self.assertEqual(manifest["specVersion"], SPEC_VERSION)
+        self.assertEqual(manifest["label"], "seed")
+        ids = [case["id"] for case in manifest["cases"]]
+        self.assertEqual(len(ids), len(set(ids)), "duplicate evaluation case ids")
+
+    def test_evaluation_cases_are_well_formed_against_their_pack(self) -> None:
+        # Carrier well-formedness only: the specification repository owns no evaluator, so these
+        # checks verify that each case could be run, never that a disposition is the right one.
+        manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
+        packs: dict[str, Any] = {}
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                pack_path = (EVALUATION / case["pack"]).resolve()
+                try:
+                    pack_path.relative_to(EVALUATION.resolve())
+                except ValueError:
+                    self.fail(f"pack path escapes the evaluation corpus: {case['pack']}")
+                self.assertTrue(pack_path.is_file(), f"missing pack: {case['pack']}")
+                if case["pack"] not in packs:
+                    pack = strict_json_loads(pack_path.read_text(encoding="utf-8"))
+                    self.assertEqual(pack["specVersion"], SPEC_VERSION)
+                    self.assertEqual([], structural_diagnostics(self.validator, pack))
+                    self.assertEqual([], semantic_diagnostics(pack))
+                    packs[case["pack"]] = pack
+                pack = packs[case["pack"]]
+
+                declared_evidence = {
+                    item["id"] for item in pack.get("evidenceRequirements", [])
+                }
+                for key, value in (case.get("evidenceAvailability") or {}).items():
+                    self.assertIn(
+                        key,
+                        declared_evidence,
+                        f"undeclared evidence key {key}: §8.2 makes that an evaluation error",
+                    )
+                    self.assertIn(value, {"present", "absent", "unknown"})
+
+                self.assertEqual(
+                    "expectedDisposition" in case,
+                    "expectedErrorClass" not in case,
+                    "a case states exactly one of expectedDisposition and expectedErrorClass",
+                )
+                disposition = case.get("expectedDisposition")
+                if disposition is None:
+                    continue
+
+                reasons = disposition["reasons"]
+                self.assertEqual(reasons, sorted(set(reasons)), "reasons are a sorted set")
+                self.assertTrue(set(reasons) <= REASONS, f"unknown reason in {reasons}")
+                kind = disposition["kind"]
+                if kind == "outcome":
+                    self.assertEqual([], reasons, "an outcome disposition carries no reason")
+                    outcomes = {item["id"] for item in pack["outcomes"]}
+                    self.assertIn(disposition["outcomeId"], outcomes)
+                else:
+                    self.assertNotIn("outcomeId", disposition)
+                    self.assertTrue(reasons, f"{kind} carries at least one reason")
+                if kind == "not-applicable":
+                    self.assertEqual(["not-applicable"], reasons)
+
+                handoff = disposition["handoff"]
+                triggers = set(pack.get("escalation", {}).get("triggers", []))
+                if handoff["state"] == "requested":
+                    triggered = handoff["triggeredBy"]
+                    self.assertEqual(triggered, sorted(set(triggered)))
+                    self.assertTrue(triggered, "a requested handoff names what triggered it")
+                    self.assertTrue(
+                        set(triggered) <= set(reasons),
+                        "triggeredBy is a subset of reasons",
+                    )
+                    for trigger in triggered:
+                        self.assertTrue(
+                            trigger in triggers or trigger == "exception-escalation",
+                            f"{trigger} is neither a declared trigger nor a direct request",
+                        )
+                else:
+                    self.assertEqual("none", handoff["state"])
+                    self.assertNotIn("triggeredBy", handoff)
+
+    def test_evaluation_manifest_covers_every_pack_fixture_once(self) -> None:
+        # Mirrors test_manifest_covers_every_fixture_once: a pack committed under packs/ and
+        # referenced by no case would ship in the release bundle unexercised.
+        manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
+        referenced = {case["pack"] for case in manifest["cases"]}
+        committed = {
+            f"packs/{path.name}" for path in (EVALUATION / "packs").glob("*.json")
+        }
+        self.assertEqual(committed, referenced)
+
+    def test_evaluation_pack_fixture_does_not_drift_from_the_example(self) -> None:
+        example = (ROOT / "examples" / "data-request-intake-triage.json").read_bytes()
+        fixture = (EVALUATION / "packs" / "data-request-intake-triage.json").read_bytes()
         self.assertEqual(example, fixture)
 
     def test_relative_markdown_links_resolve(self) -> None:

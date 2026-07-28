@@ -1,0 +1,84 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.invalid/judgment-packs/decimal-threshold-fee",
+  "version": "0.1.0",
+  "title": "Synthetic decimal-threshold fee fixture",
+  "description": "Constructed corpus fixture whose rules order a decimal-string amount against a threshold and key an exemption to an exact declared string, so ordered comparison and equality are exercised separately. Synthetic content for specification testing; it authorizes nothing.",
+  "decision": {
+    "intent": "Exercise ordered comparison of two decimal strings, the deliberate absence of decimal-aware equality, and the refusal to coerce a JSON number into an ordered comparison.",
+    "question": "Which synthetic fee band applies to this declared amount?"
+  },
+  "outcomes": [
+    {
+      "id": "standard-fee",
+      "label": "Standard fee",
+      "description": "The declared amount is at or above the threshold."
+    },
+    {
+      "id": "reduced-fee",
+      "label": "Reduced fee",
+      "description": "The declared amount is below the threshold."
+    },
+    {
+      "id": "exempt",
+      "label": "Exempt",
+      "description": "The declared amount matches the exempt declaration exactly."
+    }
+  ],
+  "rules": [
+    {
+      "id": "standard-fee-at-or-above-threshold",
+      "description": "Charge the standard fee when the declared amount is at or above the threshold of 1000.",
+      "when": {
+        "op": "fact",
+        "path": "/request/amount",
+        "operator": "greater-than-or-equal",
+        "value": "1000"
+      },
+      "outcome": "standard-fee",
+      "onUnknown": "escalate",
+      "rationale": "Ordered comparison is by mathematical value, so 1000.00 is not above 1000 and 999.99 is not at or above it."
+    },
+    {
+      "id": "reduced-fee-below-threshold",
+      "description": "Charge the reduced fee when the declared amount is below the threshold of 1000.",
+      "when": {
+        "op": "fact",
+        "path": "/request/amount",
+        "operator": "less-than",
+        "value": "1000"
+      },
+      "outcome": "reduced-fee",
+      "onUnknown": "escalate",
+      "rationale": "An amount that is neither at or above nor below the threshold is not a decimal string this pack can order, and escalating is preferred to guessing."
+    },
+    {
+      "id": "exempt-declared-amount",
+      "description": "Exempt the declared amount when it is submitted as exactly the string 1000.",
+      "when": {
+        "op": "fact",
+        "path": "/request/amount",
+        "operator": "equals",
+        "value": "1000"
+      },
+      "outcome": "exempt",
+      "onUnknown": "ignore",
+      "rationale": "Equality is type-preserving JSON equality and is deliberately not decimal-aware, so a declaration of 1000.00 is not exempt even though it is neither greater nor less than 1000."
+    }
+  ],
+  "escalation": {
+    "triggers": [
+      "unknown"
+    ],
+    "target": {
+      "kind": "queue",
+      "name": "Fee review queue"
+    },
+    "message": "Escalate an amount that cannot be ordered against the threshold, including an amount submitted as a JSON number rather than a decimal string."
+  },
+  "metadata": {
+    "authors": ["Judgment Pack Specification contributors"],
+    "createdAt": "2026-07-28T00:00:00Z",
+    "license": "Apache-2.0"
+  }
+}

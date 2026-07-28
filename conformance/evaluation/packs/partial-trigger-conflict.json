@@ -1,0 +1,76 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.invalid/judgment-packs/partial-trigger-conflict",
+  "version": "0.1.0",
+  "title": "Synthetic partial-trigger routing fixture",
+  "description": "Constructed corpus fixture whose escalation trigger list is a strict subset of the reasons its rules can generate, so a retained reason can exist without requesting a handoff. Synthetic content for specification testing; it authorizes nothing.",
+  "decision": {
+    "intent": "Exercise the handoff members of the portable disposition where the configured triggers name fewer reasons than resolution retains.",
+    "question": "Which synthetic review track does this request take?"
+  },
+  "outcomes": [
+    {
+      "id": "track-a",
+      "label": "Track A",
+      "description": "The first synthetic routing outcome."
+    },
+    {
+      "id": "track-b",
+      "label": "Track B",
+      "description": "The second synthetic routing outcome."
+    }
+  ],
+  "rules": [
+    {
+      "id": "select-track-a",
+      "description": "Route to track A when the request carries the track-A marker.",
+      "when": {
+        "op": "fact",
+        "path": "/flags/trackA",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "track-a",
+      "onUnknown": "ignore"
+    },
+    {
+      "id": "select-track-b",
+      "description": "Route to track B when the request carries the track-B marker.",
+      "when": {
+        "op": "fact",
+        "path": "/flags/trackB",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "track-b",
+      "onUnknown": "ignore"
+    },
+    {
+      "id": "hold-for-review-decision",
+      "description": "Route to track A when a review decision has been recorded; escalate rather than guess when the decision is unknown.",
+      "when": {
+        "op": "fact",
+        "path": "/flags/reviewDecided",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "track-a",
+      "onUnknown": "escalate"
+    }
+  ],
+  "escalation": {
+    "triggers": [
+      "conflict"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Routing coordinator"
+    },
+    "message": "Escalate a routing conflict to the coordinator. An unknown review decision alone is deliberately not a configured trigger for this synthetic pack."
+  },
+  "metadata": {
+    "authors": ["Judgment Pack Specification contributors"],
+    "createdAt": "2026-07-28T00:00:00Z",
+    "license": "Apache-2.0"
+  }
+}

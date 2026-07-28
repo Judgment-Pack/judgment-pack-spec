@@ -5,6 +5,11 @@ Judgment Pack Specification. An RFC is a proposal opened for public comment, in 
 projects such as Rust and React. **An RFC is not part of the specification.** Nothing here is
 normative, and no conformance class depends on any of it.
 
+An accepted RFC is the exception, and only in one direction: the design record stays here and stays
+non-normative, while the text it produced lives in the specification. [RFC 0006](0006-evaluator-conformance.md)
+is accepted and landed in Core `0.2.0-draft`; the normative statement of the evaluator conformance
+class is [§3.4 of the Core specification](../spec/judgment-pack-core.md), not this directory.
+
 The purpose of this directory is to make the project's open design questions *visible* rather than
 to imply they are settled. Concepts that are frequently assumed to be part of Judgment Pack — a
 graph that composes packs, a planner that selects them, an evidence-integration layer, a discovery
@@ -27,7 +32,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0003](0003-evidence-reference.md) | Evidence reference | Draft | Specification (format) |
 | [0004](0004-planner-interface.md) | Planner interface | Draft | Likely product |
 | [0005](0005-pack-discovery.md) | Pack discovery | Draft | Specification (format) + product (service) |
-| [0006](0006-evaluator-conformance.md) | Evaluator conformance | Draft | Specification (semantics + conformance class) |
+| [0006](0006-evaluator-conformance.md) | Evaluator conformance | Accepted | Specification (Core `0.2.0-draft`: semantics + conformance class) |
 | [0007](0007-determination-boundary.md) | The determination boundary — what a pack cannot hold | Draft | Specification (Core or profile) — undecided |
 | [0008](0008-bounded-collection-quantifiers.md) | Bounded collection quantifiers for conditions | Draft | Specification (condition schema + semantics) — Core or profile undecided |
 | [0009](0009-interim-review-regime.md) | The interim review regime | Accepted | Process (governance) |
