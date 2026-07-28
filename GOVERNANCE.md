@@ -58,10 +58,11 @@ This section adds an adversarial reading where there is currently none. It is no
 Breadth means readers with different exposure — users, implementers, operators — and no model has
 any.
 
-This section is the operative text proposed by
-[RFC 0009](./rfcs/0009-interim-review-regime.md), which is its design record. The regime was
-introduced through the RFC process it amends, and the adversarial review of the proposal, with a
-written disposition for every finding, is recorded on that RFC's pull request.
+This section is the operative text proposed by [RFC 0009](./rfcs/0009-interim-review-regime.md),
+which is its design record, adopted 2026-07-27. The regime was introduced through the RFC process it
+amends; two adversarial reviews of the proposal, with a written disposition for every finding, are
+recorded on that RFC's pull request, and the maintainer's merge of that pull request is the
+acceptance.
 
 ### Practice
 
@@ -72,11 +73,14 @@ response, and a maintainer disposition; the bar stated at the time was a differe
 a different vendor. RFC 0007 and the reference runtime's architecture decision records carry no such
 record and were merged without one.
 
-- **Scope.** Every pull request merged after 2026-07-27 that creates, materially amends, or
-  dispositions an RFC in this repository. Predating the requirement is not an exemption: RFCs
-  0001–0007 acquire it the next time such a pull request touches them, and an RFC opened early and
-  completed later is covered by the merge, not by the opening date. Editorial pull requests —
-  typography, links, formatting — are not covered.
+- **Scope.** The pull request adopting [RFC 0009](./rfcs/0009-interim-review-regime.md) and every
+  pull request merged after it, where that pull request creates, materially amends, or dispositions
+  an RFC in this repository. The test is commit-relative, not date-relative: the adopting pull
+  request is inside its own scope rather than the last one exempt from it, and no merge falls into a
+  same-day gap. Predating the requirement is not an exemption: RFCs 0001–0007 acquire it the next
+  time such a pull request touches them, and an RFC opened early and completed later is covered by
+  the merge, not by the opening date. Editorial pull requests — typography, links, formatting — are
+  not covered.
 - **Runtime.** The maintainer applies the same rule to material decisions in the reference runtime,
   with or without an architecture decision record. A decision is *material* when it changes a public
   surface, a documented claim, conformance-relevant behavior, the security posture, or a dependency
@@ -84,17 +88,23 @@ record and were merged without one.
   repository; the runtime's adopting text is its
   [`docs/adr/README.md`](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/README.md),
   and the obligation exists there only once that text is merged. Until then this bullet states an
-  intention, not a rule the runtime is under. Runtime ADRs are written after the decision and are
-  immutable once accepted, so the review attaches to the pull request that makes the decision, not
-  to the ADR text.
+  intention, not a rule the runtime is under. That text also requires every runtime pull request to
+  declare its material-decision impact, so a change treated as immaterial is classified out loud and
+  can be disputed rather than passing in silence. Runtime ADRs are written after the decision and
+  are immutable once accepted, so the review attaches to the pull request that makes the decision,
+  not to the ADR text.
 - **Cross-vendor review.** At least one adversarial review by a model from a **different vendor**
   than any model that assisted the drafting. *Vendor* means the organization that controls the
   model's weights and training — the developer, not the API host and not a reseller. Two hosted
   copies of the same model share lineage and are the same vendor here, whatever the invoice says.
-  *Assisted the drafting* means generated or revised text that survives in the merged artifact.
-  Applying an accepted finding in the maintainer's own words does not make the reviewer a drafter;
-  adopting reviewer-generated text verbatim does not invalidate the review that produced it, but the
-  record says where that happened.
+  *Assisted the drafting* means generated or revised text that survives in the merged artifact, or
+  planning, analysis, structure, or design choices supplied by a model and relied on to produce it.
+  Paraphrase does not launder assistance: a model that shaped the outline, chose the arguments, or
+  settled a design question assisted the drafting even when none of its sentences survive. Applying
+  an accepted finding in the maintainer's own words does not make the reviewer a drafter; adopting
+  reviewer-generated text verbatim does not invalidate the review that produced it, but the record
+  says where that happened. A case the maintainer cannot call is declared in the record, and the
+  declaration is an attestation like the others below.
 - **Record.** The review is recorded in the pull request, in a comment beginning with the heading
   `## Cross-vendor adversarial review`. The record names the drafting model or models and the
   reviewing model, each with vendor, model identifier, and date; states the commit SHA that was
@@ -102,10 +112,14 @@ record and were merged without one.
   could read the working tree; quotes the review prompt verbatim; and includes the reviewing model's
   complete unedited output, including findings the maintainer rejects. If more than one review was
   run, every run is linked and the record states that no run was discarded.
-- **Change after review.** If the artifact changes materially after the reviewed SHA, the pull
-  request carries either a fresh review of the later SHA or a disposition note saying specifically
-  why the change does not warrant one. "Nothing substantive changed" is not such a note unless it
-  says what changed.
+- **Change after review.** A material change to the artifact after the reviewed SHA requires a fresh
+  review of the later SHA. One class of change is excepted: a change that implements a dispositioned
+  finding of a review already recorded on the same pull request, which is covered by that finding's
+  disposition and by the commit the disposition links. Without the exception the requirement never
+  terminates — every review provokes changes and every change provokes a review — and the exception
+  opens no general escape, because it is pinned to specific recorded findings: a material change no
+  recorded finding asked for is not covered by one. A note in place of a review is available only
+  for non-material changes — typography, links, formatting — and the note says what changed.
 - **Disposition.** Every finding receives a written maintainer disposition: accept, accept in part,
   reject with reason, or defer with the condition that would reopen it. Every accepted finding links
   to the commit that implements it or to the tracked follow-up that will.
@@ -114,7 +128,8 @@ record and were merged without one.
   record may redact exactly that portion. The redaction is marked in place, its reason class stated
   — vulnerability, personal data, or credential — the unredacted original preserved privately, and
   the full text published after remediation when it is safe to publish, handled under
-  [`SECURITY.md`](./SECURITY.md). A finding the maintainer finds unwelcome is not a disclosure risk.
+  [`SECURITY.md`](./SECURITY.md). A finding the maintainer finds unwelcome is not a
+  disclosure risk.
 - **Pull requests only.** No RFC, and no material runtime decision, is merged except through a pull
   request carrying the review and the dispositions. Direct pushes to the default branch are not used
   for either.
@@ -125,7 +140,7 @@ The heading convention above makes records *findable*. It does not make complian
 record makes the maintainer's claims discoverable; it cannot verify them. These stay attestations by
 the reviewed party:
 
-- which models actually assisted the drafting;
+- which models actually assisted the drafting, including assistance that left no surviving text;
 - that the quoted prompt is the complete input, including system instructions, attached context, and
   tool output;
 - that the quoted output is complete and unedited apart from a marked redaction;
@@ -145,8 +160,8 @@ named above is, and they are accountable for it. Known weaknesses:
   reviewed. Nothing here prevents re-running a review until it is agreeable. The recorded prompt, the
   complete output, and the link to every run are what would make that visible — and every one of them
   is supplied by the same party, per
-  [What the record cannot show](#what-the-record-cannot-show). Only a reader who checks makes any of
-  it cost anything.
+  [What the record cannot show](#what-the-record-cannot-show).
+  Only a reader who checks makes any of it cost anything.
 - Cross-vendor review is intended to decorrelate some vendor-specific blind spots. The effect is
   unmeasured, and models from different vendors still share training data, tuning conventions, and
   benchmark culture, so the blind spots they share are not vendor-shaped.
@@ -165,12 +180,14 @@ Outside review is not made unnecessary by this regime. It is what the regime is 
 
 ### When a second maintainer arrives
 
-Two maintainers do not by themselves end this regime; both exit conditions below must hold. On
-arrival:
+*Arrival* is the grant of merge rights to a second distinct legal person, whether or not that person
+is independent of the first under the exit criteria below. The bullets here trigger on the grant.
+Two maintainers do not by themselves end this regime: the exit criteria still require independence,
+and ending the regime still takes the removal RFC. On arrival:
 
 - an RFC is no longer merged by its own author, and the other maintainer records the disposition;
-- recusal under [Maintainer conflicts](#maintainer-conflicts) becomes available, and the
-  single-maintainer substitute recorded there lapses;
+- recusal under [Maintainer conflicts](#maintainer-conflicts) becomes available, and
+  the single-maintainer substitute recorded there lapses;
 - with exactly two maintainers, the non-author can block everything by being absent. If the
   non-author is conflicted, or does not respond within 14 days of a review request, the author
   merges, and the disposition states that no second maintainer reviewed it and why;
@@ -178,7 +195,9 @@ arrival:
 
 ### Exit criteria
 
-Recorded in advance. This regime ends when both of the following hold.
+Recorded in advance. They are prerequisites for opening the RFC that removes this section, not a
+self-executing end: this regime is in force until that RFC merges, whether or not the conditions
+hold on any given day.
 
 1. The project has at least two maintainers with merge rights who are independent of each other:
    distinct legal persons, not employed by or contracting with the same entity and not funded by it
@@ -192,6 +211,13 @@ Recorded in advance. This regime ends when both of the following hold.
    endorsement, or an aside nobody answered is not. The two commenters are identified natural
    persons, not accounts created for the purpose.
 
+What those conditions measure is independent participation: that merge rights are held by more than
+one person, and that someone who is neither maintainer has engaged the substance and been answered
+in public. They do not measure breadth. Nothing here counts users, implementers, or operators, or
+asks what exposure a commenter argues from, so on the day this regime exits the project still has no
+measure of the breadth that the second paragraph above says model review is not. Multi-party
+governance is what that is for; this regime ends where that work starts.
+
 Part of this is recorded publicly as it happens, and part is not. Nomination and every grant of merge
 rights are recorded in this repository on the day they occur, so the number of maintainers, the date
 of each grant, and the commits preceding it are checkable by anyone. Independence is not checkable:
@@ -201,18 +227,24 @@ a judgment, and whether a commenter was solicited is invisible from outside. Tho
 **attestations**. The maintainer states each one, with the evidence relied on, in the removal RFC,
 and an outside reader can dispute any of them there.
 
-**Reactivation.** If the maintainers with merge rights fall below two — resignation, inactivity, or
-loss of independence — this regime reactivates on that day, automatically, whether or not anyone
-announces it. The section is restored to this document by ordinary pull request citing this clause.
-Restoring an accountability regime whose precondition has returned needs no RFC; removing one does.
-
 A maintainer removes this section by a governance RFC citing the evidence for each condition,
-disposed under the process in this document. The RFC may be short. Deleting the project's only
-standing accountability regime is a governance change, so it takes the route this document requires
-for one. This regime was introduced by that route — through
+disposed under the process in this document. The RFC may be short. It is not opened before both
+conditions hold, and until it merges every requirement above applies unchanged. Deleting the
+project's only standing accountability regime is a governance change, so it takes the route
+this document requires for one. This regime was introduced by that route — through
 [RFC 0009](./rfcs/0009-interim-review-regime.md), under the process it amends, with its adversarial
-review and a disposition for every finding recorded on that RFC's pull request — and its removal
+reviews and a disposition for every finding recorded on that RFC's pull request — and its removal
 takes the same route.
+
+**Reactivation.** After removal, this regime reactivates on the day fewer than two independent
+maintainers hold merge rights — by resignation, by revocation of rights, by loss of independence, or
+by inactivity — automatically, whether or not anyone announces it. A maintainer with no authored
+commit, recorded review, or recorded disposition in the preceding 90 days does not count toward the
+two. Counting accounts is not the test: two accounts held by one legal person, or held by two people
+no longer independent of each other, were never two maintainers for this purpose. The section is
+restored to this document by ordinary pull request citing this clause, and it binds from the day the
+condition returned, not from the day that pull request merges. Restoring an accountability regime
+whose precondition has returned needs no RFC; removing one does.
 
 Dropping the `-draft` suffix is governed by [`ROADMAP.md`](./ROADMAP.md) Stage 3 and
 [`VERSIONING.md`](./VERSIONING.md). This section neither restates that bar nor supplies a second,

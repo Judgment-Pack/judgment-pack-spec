@@ -461,9 +461,9 @@ PAGES = (
         "rfcs/0009-interim-review-regime.md",
         PurePosixPath("rfcs/0009-interim-review-regime/index.html"),
         "RFC 0009: The interim review regime",
-        "Draft process proposal: what stands in for outside review while the project has one maintainer, what the public record cannot prove, and the criteria that end the regime.",
+        "Accepted process RFC: what stands in for outside review while the project has one maintainer, what the public record cannot prove, and the criteria that permit removing the regime.",
         "proposals",
-        "Draft proposal",
+        "Accepted process RFC",
         source_ref="main",
     ),
     Page(
