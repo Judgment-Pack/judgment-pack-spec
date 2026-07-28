@@ -282,11 +282,16 @@ status** above).
 the charge defined here is **exact for the purpose of admission**: an evaluation is exhausted **iff**
 the normative charge for the §8 path exceeds the budget that evaluation carries. An implementation MAY
 meter additional internal work — a coarser unit, a per-allocation surcharge, its own defensive
-counters — but **no such charge may change a result inside the guaranteed domain**: an in-domain input
-the normative charge admits MUST be answered, and one the normative charge refuses MUST be refused.
-Outside the domain, implementation-defined limits MAY refuse anything, and MUST say so (§10). That is
-all that survives of the earlier draft's floors — an implementation may **account** more work than
-this model, never **refuse** in-domain what this model admits.
+counters — but **no such charge may change a result inside the guaranteed domain**. Two admissions
+are distinct here. **Carrier admission** is §3.1's concern: outside a corpus run, an
+implementation's documented carrier limits remain local and MAY refuse a document before evaluation
+begins, saying so per §10. **Evaluation admission** is this model's concern and is exact wherever it
+is reached: once a document passes the carrier, an in-domain input the normative charge admits MUST
+be answered, and one the normative charge refuses MUST be refused with the typed error below. A
+corpus run adds the guarantee that in-domain fixtures reach evaluation at all — that is what the
+domain minima under Portability oblige. That is all that survives of the earlier draft's floors —
+an implementation may **account** more work than this model, never **refuse** at the evaluation
+stage what this model admits.
 
 The earlier draft made every quantity a lower bound, and review broke that reading rather than
 disliking it: with floors, on one in-domain input at one carried budget, an evaluator charging the
@@ -325,12 +330,15 @@ V(array)  = 1 + elementCount + Σ V(element)
 V(object) = 1 + memberCount + Σ (byteLength(memberName) + V(value))
 ```
 
-`V` is the length of a **minimal JSON encoding** of the value — braces, brackets, commas, colons,
-keys, and tokens — made explicit rather than left as an intuition: the leading `1` is the node a
-comparison enters, the per-element and per-member `1` is the separator it steps over, and the bytes
-are the bytes it reads. A scalar's token is its minimal JSON encoding, so a string's two quotes count
-and `"ab"` costs `1 + 4`; a member name is charged **unquoted**, because what a comparison does with a
-name is hash or compare it, not re-serialize it.
+The recurrence is **authoritative**; the intuition behind it is a structural traversal charge, not
+a serialization length. The leading `1` is the node a comparison enters, the per-element and
+per-member `1` is the separator it steps over, and the bytes are the bytes it reads. A scalar's
+token is its **exact source UTF-8 token** — a string's quotes and escapes as they appear in the
+carrier, a number's original lexeme with **no canonicalization** — so `"ab"` costs `1 + 4`, and a
+1,000-byte spelling of the number one costs `1 + 1000`, never `1 + 1`: the traversal that measures a
+padded token reads its bytes whatever value they denote, so the charge follows the token, not the
+value. A member name is charged **unquoted**, because what a comparison does with a name is hash or
+compare it, not re-serialize it.
 
 The earlier draft charged a container "at least the sum of its members' costs" and nothing for the
 container itself, which priced structure at zero. Review broke it. With `Wₖ = [[], [], …, []]`, a
@@ -338,8 +346,8 @@ leaf-only recursion gives `V([]) = 0` and therefore `V(Wₖ) = 0`, so
 `{"op":"uniform","path":"/rows","at":""}` over `{"rows":[Wₖ, Wₖ]}` bought `Θ(k)` recursive comparisons
 for a constant charge, and `m` copies of `Wₖ` bought `Θ(m·k)` for nothing at all — the same defect
 reached plain `equals`, not just `uniform`, and deep singleton chains were free the same way. Under
-the recursion above `V(Wₖ) = 1 + 2k`, a chain of `d` singleton containers costs `d` plus its leaf, and
-the attack is priced; the **empty containers** row in Conformance carries the arithmetic. `V` is also
+the recursion above `V(Wₖ) = 1 + 2k`, a chain of `d` singleton containers costs `2d` plus its leaf,
+and the attack is priced; the **empty containers** row in Conformance carries the arithmetic. `V` is also
 independent of element order, which Order-independence below requires.
 
 A flat charge per node is not a limit at all: it bounds how many things an evaluation touches while
@@ -354,8 +362,10 @@ than scanned and then billed for. **Measurement is metered too, and there is no 
 that depends on a runtime value's size is not known before the value is traversed, so an
 implementation MUST reserve it **incrementally as it traverses** — one unit for each container it
 enters, one for each member it steps over, a name's bytes before it reads the name, a scalar's bytes
-as it reads them and in chunks if the token is long — and MUST refuse mid-traversal the moment the
-remaining budget is exhausted. No traversal step ever runs unreserved. `V` is shaped for exactly this:
+as it reads them and in chunks if the token is long — and MUST refuse immediately before the next priced step
+when that step cannot be reserved — reaching exactly zero after the final charged step is
+**admitted**, so the incremental procedure and the whole-total rule agree at the boundary. No
+traversal step ever runs unreserved. `V` is shaped for exactly this:
 every unit in it corresponds to one step of the traversal that measures it, so paying it incrementally
 and paying it as a lump differ only in *when* refusal happens, never in *whether*. Because the total
 is a monotone sum, a mid-traversal refusal is the decision the whole total would have produced — the
