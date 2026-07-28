@@ -6,7 +6,9 @@ escalation criteria, and evaluations behind a decision in a form that can be ins
 independently of the system that produced it.
 
 The specification is maintained in public as a vendor-neutral proposal. It is developed in the open
-by its maintainers and community contributors and is independent of any single product or company.
+— today by a single maintainer, with no independent contributors yet (see
+[GOVERNANCE.md](../GOVERNANCE.md#interim-review-regime)) — and is independent of any single product
+or company.
 No required commercial runtime controls it, and no implementation is designated normative by virtue
 of its origin.
 

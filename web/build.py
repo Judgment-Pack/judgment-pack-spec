@@ -458,6 +458,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0009-interim-review-regime.md",
+        PurePosixPath("rfcs/0009-interim-review-regime/index.html"),
+        "RFC 0009: The interim review regime",
+        "Accepted process RFC: what stands in for outside review while the project has one maintainer, what the public record cannot prove, and the criteria that permit removing the regime.",
+        "proposals",
+        "Accepted process RFC",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/0006-evaluator-conformance.md",
         PurePosixPath("rfcs/0006-evaluator-conformance/index.html"),
         "RFC 0006: Evaluator conformance",
