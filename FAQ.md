@@ -21,23 +21,29 @@ judge their output — compilers, tests, CI. Most business agents have no such h
 the judgment behind a business decision explicit enough to test, the way a test suite makes "correct
 code" explicit. See [Why Judgment Pack?](docs/why.md).
 
-**Q3. Is JPS a standard yet?** No. It is a research preview at `0.1.0-draft` with no compatibility
+**Q3. Is JPS a standard yet?** No. It is a research preview at `0.2.0-draft` with no compatibility
 guarantee; any `0.x` release may change incompatibly.
 
 **Q4. Who is it for?** Tool and runtime implementers; standards and architecture reviewers;
 enterprise architects evaluating governable AI decisioning; AI researchers studying testable
 judgment; and domain experts who author packs.
 
-**Q5. What is the one thing to understand about scope?** It specifies a document, not an engine.
-Conformance means a document agrees with a contract — never that the pack is true, authorized, safe,
-or fit for use.
+**Q5. What is the one thing to understand about scope?** It specifies a document, and — new in
+`0.2.0-draft` — what evaluating that document means, not an engine. Document conformance means a
+document agrees with a contract; evaluator conformance (§3.4) means an implementation complies with the
+§§7–10 evaluation contract for every input it admits, evidenced by the corpus published for the exact
+version claimed. Neither is ever a claim that the pack is true, authorized, safe, or fit for use.
 
 ## Architecture
 
-**Q6. What does the specification define today?** Three document-conformance classes for a single
-decision: carrier (valid JSON and encoding), structural (the schema), and semantic (local references
-and cross-field rules). Nothing else is normative. See the
-[core specification](spec/judgment-pack-core.md).
+**Q6. What does the specification define today?** Four conformance classes for a single decision.
+Three are about the document: carrier (valid JSON and encoding), structural (the schema), and semantic
+(local references and cross-field rules). The fourth, new in `0.2.0-draft`, is **evaluator
+conformance** (§3.4): what an evaluation of a pack *means* and the one portable result it produces
+(§8.3). §§7–8 are normative for that class and informative for everyone else, and the
+[evaluation corpus](conformance/evaluation/README.md) is normative for it and for nothing else.
+Normative status stops there: outside the prose, the schema, and that corpus, nothing in the
+repository is normative (§1.1). See the [core specification](spec/judgment-pack-core.md).
 
 **Q7. Where do "Judgment Graph", "Planner", "Runtime", and "Composite Judgment" fit?** Nowhere in the
 specification — they appear nowhere in it. The graph and composite result are proposals; the planner
@@ -59,9 +65,10 @@ versionable, and reusable. A giant pack is unauditable and forces unrelated deci
 together. Composing small packs is valuable — but composition is its own unsolved problem
 ([RFC 0002](rfcs/0002-judgment-graph.md)), not an argument for one big document.
 
-**Q11. Is a Judgment Pack executable?** It is declarative. A runtime may evaluate it, but the
-specification's resolution model is explicitly informative and experimental and defines no evaluator
-conformance and no portable result.
+**Q11. Is a Judgment Pack executable?** It is declarative — a pack contains no code and Core executes
+nothing. What `0.2.0-draft` does define is what a runtime's evaluation must *mean*: §§7–8 are
+normative for the evaluator conformance class of §3.4, and §8.3 pins one portable result, the
+disposition. Applying an outcome is still outside Core, and a disposition authorizes nothing.
 
 ## Judgment Packs
 
@@ -75,9 +82,11 @@ consistently. If two decisions have different evidence, outcomes, or escalation,
 **Q14. What is inside a pack?** A decision (intent and question), evidence requirements, sources,
 outcomes, rules, exceptions, escalation configuration, metadata, and namespaced extensions.
 
-**Q15. How is a pack tested?** Against the conformance corpus — carrier, structural, and semantic
-cases. Behavioral evaluation cases can be authored, but portable evaluation is a possible later
-profile, not a conformance claim now.
+**Q15. How is a pack tested?** Against the document-conformance corpus — carrier, structural, and
+semantic cases. Evaluation behavior has its own corpus,
+[`conformance/evaluation/`](conformance/evaluation/README.md), which is what an evaluator-conformance
+claim is made against (§3.4.1). It is a seed corpus with stated gaps, and passing it says nothing
+about inputs it does not contain.
 
 ## Judgment Graph (proposed)
 
@@ -128,9 +137,10 @@ either governed by its own pack or is product logic ([RFC 0004](rfcs/0004-planne
 generated pack is only a candidate document. Structural conformance says it is well-formed; it says
 nothing about whether the judgment is correct or whether anyone with authority approved it.
 
-**Q25. Can an agent compose packs at runtime?** Not portably yet — that needs the graph format and
-evaluation semantics, both proposed or experimental. An implementation can do it privately, but it
-cannot claim JPS conformance for the result.
+**Q25. Can an agent compose packs at runtime?** Not portably yet. Single-pack evaluation semantics are
+normative for the evaluator class as of `0.2.0-draft`, but the graph format is still a proposal, and a
+composite result has no defined shape. An implementation can compose privately; it cannot claim JPS
+conformance for the composite.
 
 **Q26. Why not just prompt an LLM, or use MCP?** A prompt couples intent to one model and phrasing;
 it is not a structured document a second tool can validate, diff, or version. MCP is a runtime
@@ -288,15 +298,16 @@ That bar is deliberate, and it is why the interoperability formats are tracked o
 ## Runtime and Performance
 
 **Q33. Is there an official runtime?** There is a vendor-neutral reference runtime. It validates
-documents at the carrier, structural, and semantic layers. It does not evaluate rules, choose an
-outcome, fetch a source, or authorize anything, and it is a reference, not the only valid
-implementation.
+documents at the carrier, structural, and semantic layers; it carries an experimental evaluator that
+makes no conformance claim, and it is a reference, not the only valid implementation. No
+implementation claims evaluator conformance as of `0.2.0-draft` — whether the runtime does is a
+decision for that repository, made against the corpus and stated there (§3.4.1).
 
 **Q34. Does a conforming validator "make a decision"?** No. Passing validation establishes only the
 document-conformance layers reported. It never establishes truth, authority, safety, or fitness.
 
-**Q35. How does execution scale?** The specification defines no execution, so there are no execution
-benchmarks to quote. What can be said honestly: a pack is a small, static, cacheable document that
+**Q35. How does execution scale?** The specification defines what an evaluation *means*, not how to
+perform one, so there are no execution benchmarks to quote. What can be said honestly: a pack is a small, static, cacheable document that
 validates offline in milliseconds and distributes over a CDN like any JSON artifact. The cost of
 evaluating a graph of packs is an open question for a runtime and for
 [RFC 0002](rfcs/0002-judgment-graph.md).
@@ -342,9 +353,11 @@ architecture stays on product properties, not on the specification.
 ## Composite Judgment, Testing, and Enterprise
 
 **Q44. What is "Composite Judgment"?** The proposed aggregated result of evaluating a graph of packs.
-It presupposes an evaluator the specification does not define, so it is a proposal with two halves:
-the portable result format (a specification question, if tools must exchange it) and the computed
-output (a runtime concern). See [RFC 0002](rfcs/0002-judgment-graph.md).
+Core now defines the single-pack result (§8.3's disposition) but nothing about composing several, so
+it remains a proposal with two halves: the portable composite format (a specification question, if
+tools must exchange it) and the computed output (a runtime concern). Whether a downstream pack sees an
+unresolved upstream as absent or unknown evidence is one of the edge semantics still owed. See
+[RFC 0002](rfcs/0002-judgment-graph.md).
 
 **Q45. Does passing conformance mean the pack is correct?** No — and this is the load-bearing
 distinction. Conformance means the document agrees with the contract. Factual grounding,

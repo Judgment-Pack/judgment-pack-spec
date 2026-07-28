@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://judgmentpack.org/schema/0.2.0-draft/conformance/manifest.schema.json",
+  "$id": "https://judgmentpack.org/schema/0.1.0-draft/conformance/manifest.schema.json",
   "title": "Judgment Pack conformance manifest",
   "type": "object",
   "additionalProperties": false,
@@ -17,10 +17,10 @@
       "const": "./manifest.schema.json"
     },
     "suiteVersion": {
-      "const": "0.2.0-draft"
+      "const": "0.1.0-draft"
     },
     "specVersion": {
-      "const": "0.2.0-draft"
+      "const": "0.1.0-draft"
     },
     "status": {
       "const": "research-preview"

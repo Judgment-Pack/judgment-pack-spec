@@ -4,8 +4,9 @@ This exercise takes about 10–15 minutes. It tests whether the current JSON sha
 and whether a Draft 2020-12 validator reports the expected structural results. It also invites
 feedback about authoring and local references.
 
-It does **not** test evaluator conformance. Core `0.1.0-draft` does not define an evaluator
-conformance class, and schema acceptance does not show that a pack is correct, authorized, safe,
+It does **not** test evaluator conformance. Core `0.2.0-draft` does define that class (§3.4), but it
+is claimed against the [evaluation corpus](conformance/evaluation/README.md) on the terms in §3.4.1,
+not by this exercise — and schema acceptance never shows that a pack is correct, authorized, safe,
 or operationally fit.
 
 ## Before you start
@@ -85,8 +86,9 @@ another fictional, low-risk scenario. Keep the declared IDs and their references
 schema validation again and repeat the manual reference review above.
 
 While editing, note anything that is hard to express, easy to misunderstand, or accepted by the
-schema despite looking contradictory. Avoid adding ordered comparisons of decimal strings: their
-executable comparison semantics are reserved for a later evaluator draft.
+schema despite looking contradictory. Ordered comparisons of decimal strings now have defined
+semantics for the evaluator class (§7.4) and still imply no executable support outside it, so a
+structural pass over one says nothing about how any tool would compare the values.
 
 ## 5. Report what you learned (minutes 13–15)
 

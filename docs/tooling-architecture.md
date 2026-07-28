@@ -36,6 +36,8 @@ The specification repository owns:
 - normative prose and its normative references;
 - versioned JSON Schemas and immutable schema identifiers;
 - carrier, structural, and semantic conformance cases and their manifests;
+- the evaluation corpus and its case carrier, normative for the evaluator conformance class only
+  (Core §1.1);
 - synthetic examples, testing guidance, release notes, and compatibility statements;
 - integrity tests that detect drift among prose, schemas, examples, and conformance metadata; and
 - the source and deployment configuration for a static specification site.
@@ -61,10 +63,13 @@ reject duplicate JSON member names, assert required URI/date/date-time formats, 
 resource limits, and avoid fetching source locators. Network access or external extension execution
 should require a separate explicit action.
 
-There should be no unqualified evaluate, decide, or execute behavior presented as JPS conformance
-while JPS lacks an evaluator conformance class. Any experimental evaluator should be unmistakably
-labeled as experimental, produce no JPS evaluator-conformance claim, and remain outside the default
-validation path.
+There should be no unqualified evaluate, decide, or execute behavior presented as JPS conformance.
+Core `0.2.0-draft` defines an evaluator conformance class, and §3.4.1 makes exactly one claim
+definable: against that class and the evaluation corpus, for one exact `specVersion`, with the
+results stated. Until an implementation has run that corpus and says so, its evaluator should be
+unmistakably labeled experimental, produce no JPS evaluator-conformance claim, and remain outside the
+default validation path. Nothing about JPS execution — applying an outcome — becomes conformant
+either way.
 
 ## Version compatibility
 
@@ -114,7 +119,7 @@ document-conformance layers actually reported. It does not establish that:
 - evidence is authentic or sufficient;
 - an author, reviewer, plugin, or operator has organizational authority;
 - a declared outcome is lawful, ethical, safe, or suitable;
-- an experimental evaluator produced a portable result; or
+- an evaluator without a §3.4.1 claim produced a portable result; or
 - an external action should be performed.
 
 JPS confers no certification or standards authority, and implementation documentation, diagnostics,

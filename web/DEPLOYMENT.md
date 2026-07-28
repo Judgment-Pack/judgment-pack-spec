@@ -16,6 +16,23 @@ Open `http://localhost:8000`, check the generated pages and links, and stop the 
 Ctrl+C. Re-run the build after source changes. Treat `public/` as disposable generated output; do
 not edit it in place.
 
+## Published URLs are kept resolvable
+
+A versioned URL that has been published may already have been cited, so the generator keeps it
+resolvable rather than letting it 404, and it does so with generated pages rather than host redirects —
+`firebase.json`'s spec target deliberately declares no `rewrites` and no `redirects`, and the site
+tests assert that. Two cases exist today:
+
+- each schema is copied to the path of its own `$id`, including both superseded `0.1.0-draft` schemas —
+  the Core structural schema and the document-conformance manifest schema — so every `$id` the previous
+  draft published still resolves for a document that keeps the older exact `specVersion`; and
+- `/spec/<previous version>/` keeps a short signpost page saying the draft is superseded and linking to
+  the tagged source, that draft's release notes, and the current specification. It publishes no
+  normative text: the normative text of a superseded draft is its tag, never a page on a mutable site.
+
+When the current version bumps, `SITE_VERSION` and `PREVIOUS_SITE_VERSION` in `web/build.py` move
+together, and the signpost follows the previous version.
+
 ## Why Firebase Hosting is the recommended default
 
 [Firebase Hosting](https://firebase.google.com/docs/hosting) is a good fit for this site because the
@@ -87,7 +104,7 @@ changing Firebase Authentication's authorized-domain list. The returned preview 
 but public to anyone who has it; it is not an access-control boundary.
 
 Review the preview URL on desktop and mobile, follow internal and external links, and compare the
-displayed version with the intended source checkout. Normative `0.1.0-draft` artifacts and their
+displayed version with the intended source checkout. Normative tagged artifacts and their
 browsable views link to the immutable tag. Living overview, tooling, and boundary pages updated
 after that tag link to the clearly labelled current `main` source instead; they must not be
 presented as tagged content. A Firebase preview-channel URL is temporary and should be shared as a

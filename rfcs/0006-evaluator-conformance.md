@@ -1,13 +1,45 @@
 # RFC 0006: Evaluator conformance
 
-- Status: Draft
-- Type: Standards-track (candidate Core amendment or profile)
+- Status: Accepted
+- Type: Standards-track (Core amendment)
 - Created: 2026-07-27
+- Accepted: 2026-07-28
 
-> This is an open proposal, not part of the specification. See
-> [RFC 0000](0000-rfc-process.md) for the process and evidence bar. Core `0.1.0-draft` forbids
-> evaluator-conformance claims, and nothing in this RFC weakens that prohibition before a later
-> draft ships the class it proposes.
+> **Adoption record.** This RFC was accepted by the single maintainer under the interim review regime
+> ([RFC 0009](0009-interim-review-regime.md)), and the amendment it proposes lands in Core
+> [`0.2.0-draft`](../spec/judgment-pack-core.md) in the same merge: §3.4 defines the evaluator
+> conformance class, §8.2 its inputs, §8.3 the portable disposition, §8.4 the error contract, and
+> [`conformance/evaluation/`](../conformance/evaluation/README.md) the seed corpus. The reviews of
+> this RFC and of the amendment, with a written disposition for every finding, are recorded on the
+> pull requests; RFC 0006's own review record is
+> [pull request 9](https://github.com/Judgment-Pack/judgment-pack-spec/pull/9).
+>
+> This document stays the record of the *proposal*. Where its sketch and the landed text differ — the
+> disposition's exact members, the named error classes, and the sketch's requirement that corpus inputs
+> fit *mandated minimum* limits (Core §10 mandates only that an implementation define and document its
+> limits, and the corpus keeps its cases well inside any plausible one instead) — the specification
+> governs; §1.1 makes an RFC informative in any case.
+>
+> The Core-or-profile question below is resolved to Core, and two other questions were answered on
+> acceptance. Of the rest, Core §13 carries four: evidence interchange, number representability, the
+> trace minimum, and the machine-readable diagnostic contract. Graph interaction and the selection probe
+> are not Core questions and stay with [RFC 0002](0002-judgment-graph.md) and
+> [RFC 0004](0004-planner-interface.md). Claim verification — where corpus results are published and who
+> may check them — is carried nowhere normative and stays open in this RFC only; Core §3.4.1 requires a
+> claim to state the results, which makes it an attestation by the claimant.
+>
+> **What the evidence supports, and what it does not.** The evidence is two implementations and a
+> 13/13 agreement corpus. Both implementations trace to one maintainer's direction — the second was
+> written clean-room, inside an information barrier, by a different model family, but from reference
+> texts this maintainer chose and including this RFC's own implementation-experience notes. Their
+> agreement therefore **corroborates** the semantics; it does not independently confirm them.
+>
+> Acceptance is at the maturity this RFC names. Per [RFC 0000](0000-rfc-process.md), acceptance
+> approves a design for that maturity and makes nothing stable: this is design approval for a **draft**
+> specification, not a stability claim, and `0.2.0-draft` may still change incompatibly. RFC 0000's bar
+> for a stable normative feature — evidence from two *independent* implementations — is **not met**,
+> and it is re-tested at stabilization rather than treated as satisfied by this acceptance. Third-party
+> implementation experience remains the evidence this process cannot manufacture.
 
 ## Summary
 
@@ -99,9 +131,11 @@ Document conformance is untouched; every existing pack remains valid against `0.
 Defining the class touches more than §§7–8: the Purpose and §3 openings, §3.4, §3.5's
 runtime-correctness non-claim, §§6.5–6.6's "informative" cross-references, §13, and the exact
 `specVersion`, schema, and corpus metadata must change together in the later draft — a labeled
-`0.x` breaking change per RFC 0000. Migration: a pack needs no edits, but evaluator-conformance
-claims attach only to the later exact `specVersion`; nothing is acquired automatically, and
-claims against `0.1.0-draft` remain forbidden permanently.
+`0.x` breaking change per RFC 0000. Migration: a pack needs exactly one edit, its `specVersion` value,
+because that value is exact (Core §4); it keeps its meaning and stays valid against the preserved
+`0.1.0-draft` schema if left unedited. Evaluator-conformance claims attach only to the later exact
+`specVersion`; nothing is acquired automatically, and claims against `0.1.0-draft` remain forbidden
+permanently.
 
 ## Security and privacy
 
@@ -150,9 +184,14 @@ Implementation experience recorded from that first implementation:
   exact-arithmetic implementation's range (an extreme exponent), making equality undeterminable.
   The implementation maps this to §7.4's "incomparable values produce `unknown`" — never a silent
   false — but the later draft should state representability explicitly and the corpus should
-  carry a row for it.
+  carry a row for it. *What landed: half of that ask.* Core §8.3 names this as the single seam its
+  byte-agreement requirement does not cover and §13 keeps the choice between `unknown` and an input
+  error open, so the corpus deliberately carries **no** row — a row cannot state an expected result
+  while the result is undecided. The corpus README records the absence.
 - §8.1's direct exception escalation with no `escalation` object was implemented as a requested
-  handoff with no target; the later draft should confirm that shape.
+  handoff with no target; the later draft should confirm that shape. *Confirmed:* Core §8.1 and
+  §8.3's `state` rule both say `requested` with no Core-defined destination, and the corpus carries a
+  row for it.
 - Honoring the declared `additionalProperties: false` required strict wire-argument decoding; an
   implementation that silently drops unknown argument keys produces a silently different
   disposition.
@@ -166,8 +205,15 @@ the first implementation, its repository, or its tools; the session log was audi
 by a different model family than the first implementation's authors, on the maintainer's
 machine. Its interpretation log records twenty-one numbered decisions with the text each relied
 on. Cross-implementation result: **13/13 semantic agreement** with the first implementation —
-identical kind, outcome, reason set, and handoff state on the nine appendix instances plus three
-probes (omitted evidence input, decimal-string ordering, missing exception fact).
+identical kind, outcome, reason set, and handoff state on ten rows over the nine walked appendix
+instances, counting both variants of instance 7, plus three probes (omitted evidence input,
+decimal-string ordering, missing exception fact): thirteen in total.
+
+Those thirteen rows are the imported part of the landed corpus. The seven rows constructed after
+acceptance — the handoff subset rule, `state: none`, `no-match` with no fallback, a direct exception
+escalation with no `escalation` object, and §7.4's ordered comparison — are **not** part of the 13/13
+result. They were derived from the landed text and replayed through the clean-room Python evaluator
+alone; the corpus README says so rather than folding them into the agreement number.
 
 The exercise also did the other half of its job — it found a genuine underdetermination:
 
@@ -189,19 +235,40 @@ now has its first real data.
 
 ## Unresolved questions
 
-- **Core or profile** — this RFC proposes the class, not its packaging; the evaluation-profile
-  alternative above is the live counter-proposal to Core amendment.
+Acceptance answered three of these and left the rest open. An answered question keeps its text, struck,
+with the answer beside it; nothing is deleted, because what acceptance decided is only legible next to
+what it was choosing between.
+
+- ~~**Core or profile** — this RFC proposes the class, not its packaging; the evaluation-profile
+  alternative above is the live counter-proposal to Core amendment.~~ **Answered on acceptance: Core.**
+  [RFC 0008](0008-bounded-collection-quantifiers.md) and any future evaluation profile both need the
+  error contract and the disposition shape, and neither should restate them; one shared place in Core
+  is what makes a profile additive rather than a second, competing definition. The profile alternative
+  stays on the record as the packaging that would have been chosen had Core amendment proved too heavy.
 - **Evidence interchange** — does the tri-state evidence-availability input grow into
-  [RFC 0003](0003-evidence-reference.md)'s evidence reference, or stay minimal?
-- **Beyond decimals** — units and date/time must be excluded explicitly, not
-  `unknown`-by-accident.
+  [RFC 0003](0003-evidence-reference.md)'s evidence reference, or stay minimal? Core `0.2.0-draft`
+  ships the tri-state (§8.2) and records the question in §13.
+- ~~**Beyond decimals** — units and date/time must be excluded explicitly, not
+  `unknown`-by-accident.~~ **Answered by §7.4 as amended: excluded explicitly.** An ordered comparison
+  is defined iff both values are §2.2 decimal strings; any other value, including a JSON number,
+  yields `unknown`, and a unit or date/time operand is not expressible in an ordered comparison at all
+  rather than accidentally unknown.
 - **Number representability** — is equality between syntactically valid but arithmetically
   unrepresentable JSON numbers `unknown` (as the first implementation chose) or an explicit
-  input error?
-- **Disposition serialization** — the exact JSON members of the disposition (in particular the
+  input error? Still open, and now bounded rather than merely implied: §7.4 confines the
+  cannot-compare-exactly case to JSON numbers outside an implementation's exact range, §8.3 names it as
+  the single seam in the byte-agreement requirement, and Core §13 carries the choice itself.
+- ~~**Disposition serialization** — the exact JSON members of the disposition (in particular the
   handoff state and target echo) must be pinned; two independent implementations agreed on all
-  semantics while serializing `handoff` incompatibly.
-- **Trace minimum** — must a trace surface a true rule that a forced outcome skipped?
+  semantics while serializing `handoff` incompatibly.~~ **Answered by §8.3: pinned, and neither
+  implementation's shape was adopted whole.** `handoff` is an object — the second implementer's bare
+  string cannot carry why a handoff was requested — but it carries `state` and, when requested,
+  `triggeredBy`, and it does **not** echo the escalation target, which was the first implementation's
+  reading. A copy of the target would let a disposition disagree with its own pack, and §6.7 makes the
+  target a display name rather than an address. Set members are sorted and comparison is by set
+  equality, with RFC 8785 named for the byte-level case.
+- **Trace minimum** — must a trace surface a true rule that a forced outcome skipped? Still open;
+  §8.3 only requires that a trace live *outside* the disposition and change no member of it.
 - **Graph interaction** — the disposition is a *candidate* representation for
   [RFC 0002](0002-judgment-graph.md)'s partial-failure question, not the answer: whether a
   downstream pack sees an unresolved upstream as `absent` or `unknown` evidence, which
@@ -211,7 +278,10 @@ now has its first real data.
   consume full dispositions (they couple selection to evidence and resolution); a separately
   exposed tri-state applicability check would preserve the separation, and applicability is
   never authorization.
-- **Claim verification** — is passing the corpus self-asserted, or must results be published?
+- **Claim verification** — is passing the corpus self-asserted, or must results be published? Half
+  answered: §3.4.1 requires that a claim state the version, the corpus version, and the results
+  obtained, and forbids a claim without corpus results — but it does not say where those results are
+  published or who may check them, so the claim remains an attestation by the claimant.
 
 ## Appendix: walked instances (non-normative)
 

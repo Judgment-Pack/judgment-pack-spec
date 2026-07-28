@@ -12,15 +12,19 @@ or company.
 No required commercial runtime controls it, and no implementation is designated normative by virtue
 of its origin.
 
-JPS defines document conformance, not any particular runtime. It specifies what a conforming
-Judgment Pack document must contain and how such documents are validated against tagged prose and
-schemas. It does not specify how any given engine, service, or tool is built.
+JPS defines document conformance and, as of `0.2.0-draft`, what an evaluation of a pack means for an
+implementation claiming the evaluator conformance class (Core §3.4) — never how any engine is built. It
+specifies what a conforming Judgment Pack document must contain, how such documents are validated
+against tagged prose and schemas, and which single portable result an evaluation produces. It does not
+specify how any given engine, service, or tool is built.
 
 ## What the specification is
 
 - The normative prose and its normative references;
 - versioned JSON Schemas and immutable schema identifiers;
 - carrier, structural, and semantic conformance cases and their manifests;
+- the evaluation corpus and its case carrier, normative for the evaluator conformance class of Core
+  §3.4 and for nothing else;
 - synthetic examples, testing guidance, release notes, and compatibility statements.
 
 These artifacts are published as immutable, versioned releases. Any conforming implementation,

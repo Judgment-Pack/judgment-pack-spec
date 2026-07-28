@@ -23,9 +23,10 @@ declares a single decision (its evidence requirements, applicability, rules, exc
 uncertainty handling, escalation, and sources) — together with how to check that a document
 **conforms** at the carrier, structural, and semantic layers.
 
-That is the entire standard. It defines no evaluator, no execution, no composition, no discovery,
-and no runtime. Those exclusions are intentional; see the
-[non-goals](../non-goals.md).
+As of `0.2.0-draft` it also defines what an *evaluation* of one pack means — the semantics an
+implementation must follow to claim the evaluator conformance class, and the one portable result it
+produces. It still ships no evaluator, and it defines no execution, no composition, no discovery, and
+no runtime. Those exclusions are intentional; see the [non-goals](../non-goals.md).
 
 ## The layered picture, labeled
 
@@ -41,12 +42,13 @@ and no runtime. Those exclusions are intentional; see the
 | Judgment Graph | A *format* for composing several packs. | Proposed | [RFC 0002](../../rfcs/0002-judgment-graph.md) |
 | Judgment Pack | A single-decision document. | **Shipped** | The specification |
 | Evidence (sources) | What a pack references; supplied by any system. | Reference **shipped**; integration out of scope | [RFC 0003](../../rfcs/0003-evidence-reference.md) |
-| Runtime | Validates today; may evaluate later. | Validator shipped; evaluator conformance proposed | Reference runtime, [RFC 0006](../../rfcs/0006-evaluator-conformance.md) |
+| Runtime | Validates documents; may also evaluate. | Validator shipped; evaluator conformance class **shipped** in Core `0.2.0-draft` §3.4, claimed by no implementation yet | Reference runtime, [RFC 0006](../../rfcs/0006-evaluator-conformance.md) |
 | Composite Judgment | The aggregated result of evaluating a graph. | Proposed | [RFC 0002](../../rfcs/0002-judgment-graph.md) |
 | Discovery / registry | Finding and selecting packs across catalogs. | Proposed (format) / product (service) | [RFC 0001](../../rfcs/0001-pack-manifest.md), [RFC 0005](../../rfcs/0005-pack-discovery.md) |
 
-Only the **Judgment Pack** row is the standard. Everything above and below it is a proposal, a
-runtime behavior, or product territory.
+The **Judgment Pack** row is the standard, and the Runtime row is now half of one: the *meaning* of an
+evaluation is specified, while the engine that performs it is not. Everything else above and below is a
+proposal, a runtime behavior, or product territory.
 
 ## How to read the picture
 
@@ -61,9 +63,10 @@ Three tests decide where each part belongs, and they are worth stating plainly:
   optional profile, only after two implementations prove it. Pack manifest, graph composition, and
   evidence reference are formats.
 - An **algorithm or engine** — how a pack is validated, or how a graph is evaluated into a composite
-  result — belongs to a runtime. The specification's experimental resolution model is where
-  evaluation semantics would migrate as a runtime implements them, never a normative claim of the
-  document.
+  result — belongs to a runtime. That migration has already happened once, in the direction this test
+  predicts: the *meaning* of an evaluation is now a normative claim of the document, in Core §§7–8 for
+  the evaluator conformance class, with its result pinned as the §8.3 disposition — while the engine
+  that computes it still belongs to a runtime. That is the split the Runtime row above states.
 - A **hosted service or business logic** — a running registry, a planner that weighs cost, latency,
   and tenant context — is product. Standardizing it would re-couple a neutral format to one vendor.
 

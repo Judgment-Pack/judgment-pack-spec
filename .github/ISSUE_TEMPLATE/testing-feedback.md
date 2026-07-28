@@ -13,8 +13,9 @@ Do not include customer, employee, personal, confidential, regulated, credential
 data. Remove access tokens, internal URLs, organization names, and real policy text. Use a minimal
 synthetic reproduction. Anything submitted here may become public.
 
-This template is for structural-validation and authoring feedback. Core 0.1.0-draft has no
-evaluator conformance class, so please do not describe an inferred outcome as an evaluator result.
+This template is for structural-validation and authoring feedback. Core 0.2.0-draft does define an
+evaluator conformance class (Core 3.4), but a claim against it is made only against the evaluation
+corpus, so please do not describe an inferred outcome as an evaluator-conformance result.
 -->
 
 ## What did you test?
@@ -65,4 +66,5 @@ policies, or source locators.
 - [ ] The reproduction is synthetic and low risk.
 - [ ] I removed sensitive data, credentials, internal URLs, organization names, and real policy text.
 - [ ] I am not treating schema acceptance as proof of truth, authority, safety, or operational fitness.
-- [ ] I am not claiming evaluator conformance under `0.1.0-draft`.
+- [ ] I am not claiming evaluator conformance; if I ran the evaluation corpus, I say which `specVersion`
+      and which results (Core 3.4.1).

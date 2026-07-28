@@ -85,8 +85,8 @@ independent of any evaluator.
 - **Shared namespace** — do packs in a graph share a fact/evidence namespace, or is each isolated
   with explicit mapping?
 - **Cycles** — are cyclic dependencies always invalid, or valid with a declared fixpoint rule?
-- **Partial failure** — how is an unresolved upstream decision represented downstream? The
-  portable disposition proposed by [RFC 0006](0006-evaluator-conformance.md) is the candidate
-  representation.
+- **Partial failure** — how is an unresolved upstream decision represented downstream? The portable
+  disposition of Core §8.3, landed by [RFC 0006](0006-evaluator-conformance.md) in `0.2.0-draft`, is
+  the candidate representation; the edge semantics stay this RFC's to settle.
 - **Composite result** — is the aggregated result a portable artifact (a spec concern) or a runtime
   output? This is the hardest question and is deliberately unresolved.

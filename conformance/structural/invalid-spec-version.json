@@ -1,11 +1,11 @@
 {
-  "specVersion": "0.2.0-draft",
+  "specVersion": "0.1.0-draft",
   "id": "https://example.com/judgment-packs/invalid-spec-version",
   "version": "0.1.0",
-  "title": "Invalid specification version",
+  "title": "Superseded specification version",
   "decision": {
     "intent": "Exercise the exact specification-version constraint.",
-    "question": "Is an unknown specification version rejected?"
+    "question": "Is a specification version other than the exact current draft rejected?"
   },
   "outcomes": [
     { "id": "accept", "label": "Accept" },

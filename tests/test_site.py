@@ -13,6 +13,12 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
+# anywhere the site publishes. The tokens are assembled from fragments deliberately: the repository
+# greps its own working tree for that brand, so a guard that spelled it out would be the thing it
+# forbids. Nothing here depends on the strings beyond matching them.
+RETIRED_BRAND_TOKENS = ("prot" + "oss", "raw.githubusercontent.com")
+
 
 class DocumentInspector(HTMLParser):
     def __init__(self) -> None:
@@ -83,7 +89,7 @@ class StaticSiteTests(unittest.TestCase):
     def test_primary_pages_are_generated_without_client_javascript(self) -> None:
         expected = (
             "index.html",
-            "spec/0.1.0-draft/index.html",
+            "spec/0.2.0-draft/index.html",
             "schema/index.html",
             "testing/index.html",
             "examples/index.html",
@@ -183,14 +189,14 @@ class StaticSiteTests(unittest.TestCase):
         index = (self.output / "examples" / "index.html").read_text(encoding="utf-8")
         self.assertIn("How to use these examples", index)
         self.assertIn("structurally and semantically conforming JPS documents", index)
-        self.assertNotIn("Protoss", index)
+        self._assert_no_retired_brand(index, "examples/index.html")
         self.assertIn("Conforming tools", index)
         self.assertIn("For the structural baseline", index)
 
         expected = {
             "minimal-expense-approval": (
                 "Cross-feature authoring and local-reference tracing",
-                "Ordered decimal evaluation is still informative",
+                "Ordered decimal comparison is defined for the evaluator conformance class only",
                 "remove an outcome or evidence declaration",
             ),
             "software-change-review": (
@@ -214,7 +220,7 @@ class StaticSiteTests(unittest.TestCase):
                 self.assertIn("Good for", content)
                 self.assertIn("Edges to inspect", content)
                 self.assertIn("Failure paths", content)
-                self.assertIn("defines no evaluator conformance class", content)
+                self.assertIn("normative for the evaluator conformance class only", content)
                 for phrase in phrases:
                     self.assertIn(phrase, content)
 
@@ -240,8 +246,8 @@ class StaticSiteTests(unittest.TestCase):
         )
 
     def test_implementations_page_lists_the_neutral_reference_runtime(self) -> None:
-        # The Protoss CLI has been superseded by the neutral judgment-pack runtime, which owns its
-        # own repository and docs; the separate on-site CLI page no longer exists.
+        # The earlier vendor-branded CLI has been superseded by the neutral judgment-pack runtime, which
+        # owns its own repository and docs; the separate on-site CLI page no longer exists.
         self.assertFalse((self.output / "cli" / "index.html").exists())
         impl = (self.output / "implementations" / "index.html").read_text(encoding="utf-8")
         self.assertIn(
@@ -249,16 +255,16 @@ class StaticSiteTests(unittest.TestCase):
         )
         self.assertIn(">judgment-pack</a>", impl)
         self.assertIn("vendor-neutral reference runtime", impl)
-        self.assertNotIn("protoss", impl.lower())
+        self._assert_no_retired_brand(impl, "implementations/index.html")
         # The specification, not any implementation, remains the authority.
         self.assertIn("The specification is the authority.", impl)
         self.assertIn("equally valid", impl)
         self.assertNotIn("official validator", impl.lower())
         # The spec page still cites its immutable tagged source (docs use the mutable branch).
         specification = (
-            self.output / "spec" / "0.1.0-draft" / "index.html"
+            self.output / "spec" / "0.2.0-draft" / "index.html"
         ).read_text(encoding="utf-8")
-        self.assertIn("blob/v0.1.0-draft/spec/judgment-pack-core.md", specification)
+        self.assertIn("blob/v0.2.0-draft/spec/judgment-pack-core.md", specification)
         self.assertIn("View tagged source", specification)
 
     def test_published_site_is_indexable_and_nested_404_is_not(self) -> None:
@@ -276,7 +282,7 @@ class StaticSiteTests(unittest.TestCase):
         primary_nav = overview[nav_start : overview.index("</nav>", nav_start)]
         # A vendor product must not sit as a peer of Specification/Conformance in primary nav.
         self.assertIn(">Implementations</a>", primary_nav)
-        self.assertNotIn("Protoss CLI", primary_nav)
+        self._assert_no_retired_brand(primary_nav, "primary navigation")
         self.assertNotIn(">CLI</a>", primary_nav)
 
         implementations = (
@@ -294,13 +300,13 @@ class StaticSiteTests(unittest.TestCase):
         overview = (self.output / "index.html").read_text(encoding="utf-8")
         self.assertIn(f'<link rel="canonical" href="{self.base_url}/">', overview)
         spec = (
-            self.output / "spec" / "0.1.0-draft" / "index.html"
+            self.output / "spec" / "0.2.0-draft" / "index.html"
         ).read_text(encoding="utf-8")
         self.assertIn(
-            f'<link rel="canonical" href="{self.base_url}/spec/0.1.0-draft/">', spec
+            f'<link rel="canonical" href="{self.base_url}/spec/0.2.0-draft/">', spec
         )
         self.assertIn(
-            f'property="og:url" content="{self.base_url}/spec/0.1.0-draft/"', spec
+            f'property="og:url" content="{self.base_url}/spec/0.2.0-draft/"', spec
         )
 
     def test_absolute_urls_never_contain_double_slashes(self) -> None:
@@ -317,27 +323,39 @@ class StaticSiteTests(unittest.TestCase):
     def test_sitemap_lists_indexable_pages_and_excludes_404(self) -> None:
         sitemap = (self.output / "sitemap.xml").read_text(encoding="utf-8")
         self.assertIn(f"<loc>{self.base_url}/</loc>", sitemap)
-        self.assertIn(f"<loc>{self.base_url}/spec/0.1.0-draft/</loc>", sitemap)
+        self.assertIn(f"<loc>{self.base_url}/spec/0.2.0-draft/</loc>", sitemap)
         self.assertIn(f"<loc>{self.base_url}/implementations/</loc>", sitemap)
         self.assertNotIn("404", sitemap)
 
     def test_pages_carry_neutral_generator_and_commit_provenance(self) -> None:
         overview = (self.output / "index.html").read_text(encoding="utf-8")
         self.assertIn(
-            '<meta name="generator" content="jps-site-build 0.1.0-draft">', overview
+            '<meta name="generator" content="jps-site-build 0.2.0-draft">', overview
         )
         self.assertIn("Built from", overview)
         self.assertIn(self.commit_sha[:12], overview)
         generator = overview.split('name="generator" content="')[1].split('"')[0]
-        self.assertNotIn("protoss", generator.lower())
+        self._assert_no_retired_brand(generator, "generator meta")
 
     def test_schemas_are_served_at_their_canonical_id_path(self) -> None:
         cases = {
-            "schema/0.1.0-draft/judgment-pack-core.schema.json": ROOT
+            "schema/0.2.0-draft/judgment-pack-core.schema.json": ROOT
             / "schema"
             / "judgment-pack-core.schema.json",
+            # The superseded schemas keep the $id path each was published under, so an older pack stays
+            # checkable and a previously published identifier does not 404.
+            "schema/0.1.0-draft/judgment-pack-core.schema.json": ROOT
+            / "schema"
+            / "judgment-pack-core-0.1.0-draft.schema.json",
             "schema/0.1.0-draft/conformance/manifest.schema.json": ROOT
+            / "schema"
+            / "conformance-manifest-0.1.0-draft.schema.json",
+            "schema/0.2.0-draft/conformance/manifest.schema.json": ROOT
             / "conformance"
+            / "manifest.schema.json",
+            "schema/0.2.0-draft/conformance/evaluation/manifest.schema.json": ROOT
+            / "conformance"
+            / "evaluation"
             / "manifest.schema.json",
         }
         for served, source in cases.items():
@@ -465,20 +483,26 @@ class StaticSiteTests(unittest.TestCase):
             self.assertIn(phrase, why)
         # Links to the full example and the specification, rewritten to real site routes.
         self.assertIn('href="../examples/supplier-invoice-approval/"', why)
-        self.assertIn('href="../spec/0.1.0-draft/"', why)
-        self.assertNotIn("Protoss", why)
+        self.assertIn('href="../spec/0.2.0-draft/"', why)
+        self._assert_no_retired_brand(why, "why/index.html")
 
-    def test_protoss_appears_only_in_changelog_history(self) -> None:
-        # The Protoss CLI has been superseded by the neutral judgment-pack runtime. Protoss now
-        # survives only in the changelog, as the historical record of that removal.
-        allowed = {"project/changelog/index.html"}
-        offenders = [
+    def _assert_no_retired_brand(self, text: str, where: str) -> None:
+        lowered = text.lower()
+        for token in RETIRED_BRAND_TOKENS:
+            self.assertNotIn(token, lowered, f"{where} names the retired pre-publication identifier")
+
+    def test_retired_brand_appears_on_no_page(self) -> None:
+        # The retired pre-publication brand and its raw hosting domain survive nowhere on the site, not
+        # even in the changelog: the changelog records that the listing was replaced without naming it.
+        offenders = sorted(
             page.relative_to(self.output).as_posix()
             for page in self.output.rglob("*.html")
-            if page.relative_to(self.output).as_posix() not in allowed
-            and "protoss" in page.read_text(encoding="utf-8").lower()
-        ]
-        self.assertEqual([], offenders, f"Protoss appears outside the changelog: {offenders}")
+            if any(
+                token in page.read_text(encoding="utf-8").lower()
+                for token in RETIRED_BRAND_TOKENS
+            )
+        )
+        self.assertEqual([], offenders, f"the retired identifier appears on {offenders}")
 
     def test_footer_has_tagline_and_community_links(self) -> None:
         overview = (self.output / "index.html").read_text(encoding="utf-8")
@@ -567,7 +591,7 @@ class StaticSiteTests(unittest.TestCase):
     def test_specification_page_excludes_layered_vision_terms(self) -> None:
         # The product/runtime vision must not leak into the normative specification page.
         spec = (
-            self.output / "spec" / "0.1.0-draft" / "index.html"
+            self.output / "spec" / "0.2.0-draft" / "index.html"
         ).read_text(encoding="utf-8")
         for term in ("Judgment Graph", "Composite Judgment", "Judgment Planner", "Evidence Layer"):
             self.assertNotIn(term, spec, f"vision term leaked into the spec page: {term}")

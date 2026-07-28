@@ -1,7 +1,7 @@
 {
   "$schema": "./manifest.schema.json",
-  "suiteVersion": "0.1.0-draft",
-  "specVersion": "0.1.0-draft",
+  "suiteVersion": "0.2.0-draft",
+  "specVersion": "0.2.0-draft",
   "status": "research-preview",
   "validationProfile": {
     "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
@@ -174,7 +174,7 @@
         "code": "JPS-STRUCTURE-SPEC-VERSION",
         "path": "/specVersion"
       },
-      "focus": "exact supported specification version",
+      "focus": "exact supported specification version; a pack still declaring 0.1.0-draft must be re-declared",
       "specSection": "§4"
     },
     {
