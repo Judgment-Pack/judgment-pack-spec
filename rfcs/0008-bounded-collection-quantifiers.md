@@ -378,7 +378,9 @@ value may be gigabytes, or nested to whatever the carrier admits — so the exce
 unbounded time, memory, and stack before refusal, and it is **deleted**. Refusal before work is now a
 property of **every** rule in this model rather than of most of them.
 
-**Preflight.** The whole charge for a condition tree MUST be computed, and MUST fit the budget,
+**Condition precharge.** (Core `0.2.0-draft` reserves *preflight* for §8.2's input admission,
+which completes before §8 step 1; the precharge here happens after that, inside the **evaluation**
+phase.) The whole charge for a condition tree MUST be computed, and MUST fit the budget,
 before any predicate of that tree is evaluated. Computing it MAY resolve pointers — including a
 `fact`'s, because a comparison's cost depends on the value the pointer selects and there is no honest
 cheaper approximation of it — and every such resolution is itself charged. A resolution that fails
@@ -452,8 +454,9 @@ both define limits may define different ones, so a MUST-define alone gives them 
 input and leaves "within the mandated minimum limits" without a referent. Three requirements close
 that, and they are chosen together:
 
-1. **Every evaluation-corpus case carries the work budget it assumes.** RFC 0006's case carrier gains
-   one member: the budget, in the units above, the case is to be run under. An implementation
+1. **Every evaluation-corpus case carries the work budget it assumes.** Core `0.2.0-draft`'s
+   evaluation-corpus carrier already defines the member — optional `workBudget`, in the units
+   above, unused by the seed rows and waiting for these. An implementation
    claiming the class MUST honor it for a corpus run. Above-budget rows are then portable by
    construction — the normative charge exceeds a budget both evaluators are running — rather than by
    being extravagant enough to exceed every plausible default.
@@ -489,17 +492,25 @@ that, and they are chosen together:
    MUST be documented (§10). Nothing here fixes one, and the two prototypes' defaults differ by a
    factor of two.
 
-**Refusal is a typed error, and the row says which type.** RFC 0006's *errors are not dispositions*
-bullet names three causes — an unsupported required extension, a malformed input, and **resource
-exhaustion** — while its case carrier distinguishes only "expected error", with no taxonomy and no
-error equality. That is too coarse to check an accounting row, because a parser refusing the megabyte
-pointer on a string limit and an evaluator refusing it on its budget both produce "an error". So a row
-that expects refusal expects an error of class **`resource-exhaustion`** raised in the **evaluation**
-phase, and the case carrier records both members alongside the budget. A carrier-phase or parse-phase
-refusal does **not** satisfy an evaluation-phase expectation and **fails** the row — which is the other
-reason the corpus-mode minima above are mandatory rather than advisory. Class and phase are the only
-error members these rows compare; message text is not compared, and this RFC defines no further
-taxonomy than the one class it needs.
+One carrier gap keeps the fourteen rows below out of the corpus for now, and it is named rather than
+papered over: `V` reads **exact source UTF-8 tokens**, while the `0.2.0-draft` carrier embeds facts
+as parsed JSON — a normal parse erases the distinctions `V` charges (`"a"` versus its escaped
+spelling, a padded number lexeme versus its value), so two harnesses could compute different charges
+for the same embedded row. Accounting rows therefore require the **raw-document fixture form** the
+corpus README defers to the next `suiteVersion`: a case member referencing a UTF-8 JSON fixture file
+whose bytes ARE the source tokens `V` measures. Until that form exists, the fourteen rows bind
+implementations to this model but are not yet expressible as portable corpus rows — their arithmetic
+is checkable against this text, not against a manifest.
+
+**Refusal is a typed error, and the row says which type.** Core `0.2.0-draft` §8.4 defines the
+error taxonomy (with `resource-exhaustion` among the four minimum classes and a fixed precedence),
+and the evaluation-corpus carrier already records `expectedErrorClass` and `expectedErrorPhase`
+(`preflight` | `evaluation`) alongside `workBudget`. An accounting row that expects refusal expects
+class **`resource-exhaustion`** raised in the **`evaluation`** phase — a §8.2 input-preflight or
+parse-phase refusal does **not** satisfy it and **fails** the row, which is the other reason the
+corpus-mode minima above are mandatory rather than advisory. Class and phase are the only error
+members these rows compare; message text is not compared, and this RFC defines no taxonomy of its
+own.
 
 *Non-normative.* Refusals driven by an authored quantity are also fast — the megabyte-pointer row is
 refused by its compile charge before any element is visited — and wall-clock is a useful smoke test of
