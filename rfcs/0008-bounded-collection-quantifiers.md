@@ -314,9 +314,14 @@ table is stated this way because the earlier draft's three bullets overlapped �
 3. Any two elements whose `at`-values **both resolve** and are **unequal** under §7.4 equality →
    **`false`**. A known counterexample dominates missing data: uniformity is already disproved, and
    no absent value can restore it.
-4. Otherwise, if `at` fails to resolve in **any** element → **`unknown`**. This includes a singleton
-   whose `at` is missing: that case is `unknown`, **not** `true`. The earlier claim that singleton
-   arrays are `true` is corrected here.
+4. Otherwise, if `at` fails to resolve in **any** element, **or any resolved pair's §7.4 equality
+   is indeterminate** (for example a numeric token §7.4 cannot compare) → **`unknown`**. This
+   includes a singleton whose `at` is missing: that case is `unknown`, **not** `true`. The earlier
+   claim that singleton arrays are `true` is corrected here. The indeterminate-equality arm was
+   absent from this table's first published form and was found by implementation — the clauses
+   covered known inequality, missing values, and known equality, and were silent on a comparison
+   that resolves but does not decide; it sits after clause 3, so a known counterexample still
+   dominates.
 5. Otherwise → **`true`**: `at` resolved in every element and every selected value is equal.
 
 Clause 3 before clause 4 is the strong-information reading, and it matches how §7.1 and §7.2 already
@@ -603,6 +608,24 @@ empty-array values, unknown dominance in `every`, non-array `path`, where the li
 whether a short-circuiting and a non-short-circuiting evaluator report the same error at the limit
 boundary.
 
+**Both prototypes now exist** (2026-07-27): the Go runtime's opt-in prototype (its ADR-0009) and a
+clean-room Python extension implemented by a different model lineage under the experiments
+repository's information-barrier protocol, each choosing its accounting model independently. An
+80-row corpus over this RFC's Conformance section agrees on **79 rows across both implementations**,
+and re-encoding the three reachable census facts as quantifier twins yields dispositions identical
+to the prepared-boolean originals in nine of nine room-scenario pairs (with the recorded caveat that
+only A6 is a mechanical re-exposure; R3/R5 require producer-side data shaping). Of the five
+predicted disagreement points, four agree; the fifth — where the limit is drawn — diverged exactly
+as predicted, on a row whose charge lands between the two default budgets. Implementation also
+produced two corrections recorded in this revision: the indeterminate-equality arm in `uniform`'s
+clause 4, and hard evidence for the accounting precondition — the first Go candidate model charged
+flat units and was broken under adversarial review by a large-pointer input doing gigabytes of work
+under budget; the repaired model charges bytes. Full matrix, corpus, and adjudications:
+[`harness/RFC0008-AGREEMENT.md`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/main/harness/RFC0008-AGREEMENT.md).
+None of this is conformance evidence (§3.4; RFC 0006's class does not exist), and RFC 0000's
+acceptance bar remains formally unmet: these are prototypes traceable to one maintainer's
+direction.
+
 ## Unresolved questions
 
 - **Is 3 of 25 enough to amend Core?** The strongest argument against this RFC is its own Evidence
@@ -646,7 +669,13 @@ boundary.
   input, or scope portability to a common guaranteed domain and drop the above-limit corpus row.
   Both halves must be answered before this RFC can advance; the intent that short-circuiting may
   only reduce actual work and never change whether the limit was exceeded is settled, the mechanism
-  is not.
+  is not. Neither half is hypothetical any longer. On the first: both prototypes satisfy every
+  obligation above with independently chosen models, and the Go prototype's first candidate — flat
+  units per pointer and per scalar — was broken under adversarial review by a large-pointer input
+  doing gigabytes of scanning under budget, so the **unit's shape** (bytes, not nodes) is itself
+  load-bearing and belongs in the model. On the second: the cross-implementation corpus carries a
+  reproducible row (L3) where the two prototypes return an outcome and a resource error on the same
+  input solely because their default budgets differ.
 - **Do per-element diagnostics belong in the trace?** Authors want them, they carry element content
   across trust boundaries, and RFC 0006's disposition has no trace member to put them in.
 - **Core or profile** — and is the vacuous-truth advisory a required validator diagnostic or
