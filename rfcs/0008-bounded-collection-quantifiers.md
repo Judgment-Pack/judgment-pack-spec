@@ -390,15 +390,20 @@ query language arriving in instalments.
 - **Graph-level quantification.** Compose instead of extend: a Judgment Graph edge
   ([RFC 0002](0002-judgment-graph.md)) that evaluated a sub-pack once per element of a collection
   and exposed the aggregated dispositions ("all granted", "any denied") as an upstream fact would
-  relocate the bounded aggregation from the condition language to the composition layer. Its reach
-  is exactly this RFC's: a per-element sub-pack is an element-rooted predicate over literals, so
-  the three element-predicate cases move and the joins, counts, ordinal selections, and
-  field-vs-field comparisons stay out of reach — §7's limits apply inside the sub-pack too.
-  Rejected as a substitute: it requires the graph format, a per-element fan-out edge RFC 0002 does
-  not currently contain, aggregation semantics, and an answer to RFC 0002's hardest unresolved
-  question (the composite result) — heavier machinery for the same reach. Orthogonal rather than
-  competing: if both land, quantifiers aggregate within a pack and the graph composes across
-  packs.
+  relocate the bounded aggregation from the condition language to the composition layer. Under a
+  deliberately minimal fan-out — each invocation receiving only the element as its facts root, a
+  shared evidence context, dispositions folded with all/any — its reach within the census's 25-fact
+  table matches the bare `exists`/`every` pair: the same three element-predicate cases, since §7's
+  literal-only comparisons apply inside the sub-pack too. It is not equivalent to this RFC
+  generally: it does not replace `uniform` (two further cases) or nested quantification, and a
+  *richer* fan-out that gave each invocation its own evidence manifest would reach the census's A1
+  per-passenger evidence residue, which these operators deliberately cannot (`evidence-present` is
+  element-invariant here). Rejected as a substitute: RFC 0002 defines none of the required
+  invocation, disposition-mapping, empty-array, evidence-context, or aggregation semantics, and
+  answering them means a separate evaluation-semantics proposal atop its hardest unresolved
+  question (the composite result) — heavier machinery for the same measured three cases.
+  Orthogonal rather than competing: if both land, quantifiers aggregate within a pack and the
+  graph composes across packs.
 - **Profile, not Core.** An optional evaluation profile could carry the operators; the natural
   landing if Core amendment proves heavy, and the same landing RFC 0006 reserves for its own class.
 - **Extension.** Unavailable *if* RFC 0006's class lands: §9 forbids an **optional** extension from

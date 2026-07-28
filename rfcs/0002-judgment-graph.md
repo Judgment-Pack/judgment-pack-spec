@@ -31,12 +31,15 @@ verdicts of an upstream assessment that would naturally be its own pack feeding 
 this format would make first-class instead of an out-of-band convention.
 
 The escape census ([Study 003](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/003-escape-census),
-2026-07) supplies the first measured, third-party evidence. Encoding all twelve separable decisions
-of two public agent policies, hypothesis-blind encoders recorded a recurring residue family that is
-exactly this RFC's problem — *forward entitlements / cross-decision references*: "insurance enables
-full refund if…" belongs to the Cancel decision, and there is no way for one pack to reference
-another's outcome (RESULTS.md, Finding 4). The gap was hit independently by encoders who had never
-read this RFC, which is stronger evidence than the seeded example above.
+2026-07) supplies this RFC's first measured evidence from third-party policy text: all twelve
+separable decisions of two public policies, written by a third party for a purpose unrelated to
+JPS, encoded under an information barrier. Finding 4 reports a *forward entitlements /
+cross-decision references* residue family — "insurance enables full refund if…" was left out of the
+Book-flight pack because it belongs to the Cancel decision, and one pack cannot reference another's
+outcome — which is exactly the edge this format proposes. The encoding runs were isolated and
+barred from specification RFCs, so the observation was not prompted by this proposal; the study
+itself was conducted by this project, so this is internally produced corpus evidence, not
+independent third-party validation.
 
 ## Specification (sketch)
 
