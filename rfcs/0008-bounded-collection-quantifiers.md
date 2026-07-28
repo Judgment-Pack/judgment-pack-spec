@@ -387,6 +387,18 @@ query language arriving in instalments.
 - **The larger language.** Admit array-valued pointer operands and intra-element field
   comparison, reaching 12 of 25.
   Rejected here, and named as the thing this RFC is defined against.
+- **Graph-level quantification.** Compose instead of extend: a Judgment Graph edge
+  ([RFC 0002](0002-judgment-graph.md)) that evaluated a sub-pack once per element of a collection
+  and exposed the aggregated dispositions ("all granted", "any denied") as an upstream fact would
+  relocate the bounded aggregation from the condition language to the composition layer. Its reach
+  is exactly this RFC's: a per-element sub-pack is an element-rooted predicate over literals, so
+  the three element-predicate cases move and the joins, counts, ordinal selections, and
+  field-vs-field comparisons stay out of reach — §7's limits apply inside the sub-pack too.
+  Rejected as a substitute: it requires the graph format, a per-element fan-out edge RFC 0002 does
+  not currently contain, aggregation semantics, and an answer to RFC 0002's hardest unresolved
+  question (the composite result) — heavier machinery for the same reach. Orthogonal rather than
+  competing: if both land, quantifiers aggregate within a pack and the graph composes across
+  packs.
 - **Profile, not Core.** An optional evaluation profile could carry the operators; the natural
   landing if Core amendment proves heavy, and the same landing RFC 0006 reserves for its own class.
 - **Extension.** Unavailable *if* RFC 0006's class lands: §9 forbids an **optional** extension from
