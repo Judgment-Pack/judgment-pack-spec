@@ -167,10 +167,13 @@ These are deliberately separate claims:
 6. **Organizational authorization:** an accountable organization permits the pack's use.
 7. **Operational fitness:** a particular runtime applies it safely and effectively.
 
-This research preview specifies the first four claims. The fourth is new in `0.2.0-draft`, is claimed
-only as §3.4.1 permits, and says one thing: that the implementation computed the specified
-disposition for the corpus inputs it ran. A validator or evaluator must never imply factual grounding,
-organizational authorization, or operational fitness.
+This research preview specifies the first four claims. The fourth is new in `0.2.0-draft` and is
+claimed only as §3.4.1 permits: it says that the implementation complies with the whole evaluator
+contract of §§7–10 for every input it admits, and every row of the named corpus version must have
+passed for the claim to be made at all. Corpus results are required evidence of that compliance, not
+the boundary of it, and passing a seed corpus is no evidence about inputs it does not contain. A
+validator or evaluator must never imply factual grounding, organizational authorization, or operational
+fitness.
 The core specification defines the
 [normative artifact roles and precedence](spec/judgment-pack-core.md#11-normative-artifacts-and-precedence).
 

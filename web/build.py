@@ -133,7 +133,7 @@ EXAMPLE_GUIDES = {
         ),
         edges=(
             "The declared amount split includes 5000 in the less-than-or-equal branch and values above 5000 in the review branch. Ordered decimal comparison is defined for the evaluator conformance class only, and this page is not a corpus row, so nothing here asserts a portable result.",
-            "Under the §§7–8 resolution model, an active-investigation forced outcome bypasses normal rules. Separately, a prohibited category plus an amount above 5000 can produce conflicting normal-rule candidates. Neither behavior is a portable evaluator result.",
+            "Under the §§7–8 resolution model, an active-investigation forced outcome bypasses normal rules. Separately, a prohibited category plus an amount above 5000 can produce conflicting normal-rule candidates, which resolve to an unresolved disposition carrying the conflict reason. Both behaviors are specified for an implementation claiming evaluator conformance; this page is not a corpus row, so nothing here is the corpus expectation for either.",
             "If activeInvestigation is absent, its exception is unknown and declares escalation under the §§7–8 resolution model. Missing required evidence also requests handoff, while a non-employee-expense value is not applicable.",
             "If resolution otherwise completes with no matching rule, the declared manual-review fallback applies. The listed no-match escalation trigger is unreachable under the §8 algorithm while that fallback exists.",
         ),
@@ -228,7 +228,7 @@ EXAMPLE_GUIDES = {
         ),
         edges=(
             "Only the six declared request types are applicable; any other request type is outside the example's declared scope.",
-            "An incomplete submission that also carries a hard appropriateness failure matches both the clarify rule and the decline rule, producing conflicting normal-rule candidates under the §§7–8 resolution model. Conflict handling is not a portable evaluator result in this draft.",
+            "An incomplete submission that also carries a hard appropriateness failure matches both the clarify rule and the decline rule, producing conflicting normal-rule candidates under the §§7–8 resolution model. In this draft that is a portable result for an implementation claiming evaluator conformance: an unresolved disposition carrying the conflict reason, never a tie-broken outcome.",
             "Under the §§7–8 resolution model, the embargoed-information forced outcome bypasses normal rules entirely; a missing embargo fact makes the exception unknown, and its onUnknown declares escalation.",
             "If resolution otherwise completes with no matching rule, the declared clarify-return fallback applies. The listed no-match escalation trigger is unreachable under the §8 algorithm while that fallback exists.",
         ),
@@ -506,6 +506,16 @@ PAGES = (
         "The seed evaluation corpus and its case carrier — normative for the evaluator conformance class and for nothing else.",
         "conformance",
         "Normative for the evaluator class",
+    ),
+    Page(
+        "conformance/evaluation/errata.md",
+        PurePosixPath("conformance/evaluation/errata/index.html"),
+        "Evaluation corpus errata",
+        "The project's record of defective rows in a released evaluation corpus — the only thing that can excuse a failing row from an evaluator-conformance claim.",
+        "conformance",
+        "Normative for the evaluator class",
+        # Errata postdate the release they apply to, so this page tracks the branch, not the tag.
+        source_ref="main",
     ),
     Page(
         "web/DEPLOYMENT.md",
@@ -1753,9 +1763,10 @@ def build_not_found(output_root: Path) -> None:
 
 CANONICAL_SCHEMA_SOURCES = (
     "schema/judgment-pack-core.schema.json",
-    # The superseded schema stays served at its own $id so a pack that still declares the older
-    # exact specVersion remains checkable.
+    # The superseded schemas stay served at the $id each was published under, so a pack or manifest that
+    # still declares the older exact specVersion remains checkable and a cited identifier keeps resolving.
     "schema/judgment-pack-core-0.1.0-draft.schema.json",
+    "schema/conformance-manifest-0.1.0-draft.schema.json",
     "conformance/manifest.schema.json",
     "conformance/evaluation/manifest.schema.json",
 )
@@ -1792,8 +1803,9 @@ safety, or fitness. Any implementation that passes the public conformance corpus
     <p class="card-kicker">Open source · Apache-2.0 · maintained with the specification</p>
     <h2><a href="{html.escape(runtime_url)}" target="_blank" rel="noopener noreferrer">judgment-pack</a></h2>
     <p>The project's vendor-neutral reference runtime. It validates the carrier, structural schema,
-    and semantic references of a JPS document against an immutable specification release. It does not
-    evaluate rules, choose an outcome, fetch a source, or authorize an action.</p>
+    and semantic references of a JPS document against an immutable specification release. Its evaluator
+    is experimental and claims no evaluator conformance; nothing it reports chooses an outcome for a real
+    decision, fetches a source, or authorizes an action.</p>
     <p class="card-meta">Reference runtime · one implementation among peers</p>
   </article>
 </div>
@@ -1828,8 +1840,13 @@ def build_superseded_spec_notice(output_root: Path) -> None:
     release_notes = output_href(
         page_output, PurePosixPath(f"project/releases/{PREVIOUS_SITE_VERSION}/index.html")
     )
+    current_release_notes = output_href(
+        page_output, PurePosixPath(f"project/releases/{SITE_VERSION}/index.html")
+    )
     versioning = output_href(page_output, PurePosixPath("project/versioning/index.html"))
-    tag_url = f"{GITHUB_ROOT}tree/v{PREVIOUS_SITE_VERSION}/spec"
+    # GITHUB_ROOT already points into the *current* tag's blob tree, so the previous draft's tagged
+    # source must be built from the repository URL instead.
+    tag_url = f"{GITHUB_URL}/tree/v{PREVIOUS_SITE_VERSION}/spec"
     body = f"""
 <h1>JPS Core {html.escape(PREVIOUS_SITE_VERSION)} is superseded</h1>
 <p class="lede">This URL held the prose for JPS Core <code>{html.escape(PREVIOUS_SITE_VERSION)}</code>.
@@ -1842,10 +1859,17 @@ mutable site.</div>
   <code>v{html.escape(PREVIOUS_SITE_VERSION)}</code> source</a> — the immutable prose as published.</li>
   <li><a href="{html.escape(release_notes)}">{html.escape(PREVIOUS_SITE_VERSION)} release notes</a> —
   that draft's scope and known limitations.</li>
-  <li><a href="{html.escape(current)}">Core {html.escape(SITE_VERSION)}</a> — the current draft. The
-  document format is unchanged; a pack must re-declare <code>specVersion</code>, and the
-  <code>{html.escape(PREVIOUS_SITE_VERSION)}</code> schema stays served at its own
-  <code>$id</code> for packs that keep the older value.</li>
+  <li><a href="{html.escape(current)}">Core {html.escape(SITE_VERSION)}</a> — the current draft. A
+  <code>{html.escape(PREVIOUS_SITE_VERSION)}</code> pack is unchanged in representation and in
+  document-conformance meaning there and needs only its <code>specVersion</code> re-declared;
+  re-declaring it also opts it into that draft's evaluator semantics and confers no conformance on any
+  implementation.</li>
+  <li><a href="{html.escape(current_release_notes)}">{html.escape(SITE_VERSION)} release notes</a> — what
+  "preserved" means for the <code>{html.escape(PREVIOUS_SITE_VERSION)}</code> schemas, which stay served at
+  the <code>$id</code> each was published under. Each preserved file matches the tagged artifact in every
+  byte except that <code>$id</code> member, which was re-pointed to this project's domain when the retired
+  pre-publication identifier was withdrawn; the release notes publish the SHA-256 digest of both forms, and
+  the immutable tag remains the authoritative record of its own bytes.</li>
   <li><a href="{html.escape(versioning)}">Versioning policy</a> — why a conformance claim is made
   against one exact version and is never inherited.</li>
 </ul>

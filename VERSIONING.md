@@ -16,9 +16,14 @@ binds hardest on evaluator conformance (Core §3.4): such a claim names the exac
 evaluation corpus published with it, and is not inherited by a later or an earlier version. The corpus
 version is the `suiteVersion` member of the evaluation manifest, and the corpus is frozen when a
 `specVersion` is released — rows are added only on the way to the next one (Core §3.4.1) — so two
-identically worded claims require the same rows. A superseded schema stays published so packs that keep
-the older `specVersion` remain checkable, and a previously published versioned URL stays resolvable;
-neither confers anything on a claim.
+identically worded claims require the same rows, and such a claim must state that every one of those rows
+passed. A failing row blocks the claim unless a project-issued erratum
+(`conformance/evaluation/errata.md`) marks it defective for that corpus version; a claimant cannot make
+that call for itself. A superseded schema stays published so documents that keep the older `specVersion`
+remain checkable, and a previously published versioned URL stays resolvable; neither confers anything on a
+claim. A preserved schema is served at the `$id` it was published under, and where that identifier was
+re-pointed to this project's own domain it differs from the tagged artifact in that one member and nothing
+else — the release notes of the version that preserved it publish the digest of both forms.
 
 Any `0.x` release may change reader, writer, or semantic behavior incompatibly. Release notes must
 identify those effects and include migration guidance when an earlier pack can be transformed.

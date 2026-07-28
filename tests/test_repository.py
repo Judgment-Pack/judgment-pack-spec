@@ -27,6 +27,13 @@ PREVIOUS_SCHEMA_PATH = (
 PREVIOUS_SCHEMA_ID = (
     f"https://judgmentpack.org/schema/{PREVIOUS_SPEC_VERSION}/judgment-pack-core.schema.json"
 )
+PREVIOUS_MANIFEST_SCHEMA_PATH = (
+    ROOT / "schema" / f"conformance-manifest-{PREVIOUS_SPEC_VERSION}.schema.json"
+)
+PREVIOUS_MANIFEST_SCHEMA_ID = (
+    f"https://judgmentpack.org/schema/{PREVIOUS_SPEC_VERSION}"
+    "/conformance/manifest.schema.json"
+)
 # §8.3: the reason vocabulary a disposition may carry.
 REASONS = {
     "not-applicable",
@@ -452,8 +459,9 @@ class RepositoryConformanceTests(unittest.TestCase):
         self.assertEqual(example, fixture)
 
     def test_superseded_schema_stays_published_for_its_own_version(self) -> None:
-        # A 0.1.0-draft pack is unchanged in meaning (Core §11) but must be re-declared to pass the
-        # current schema, so the older schema stays available at its own exact version.
+        # A 0.1.0-draft pack is unchanged in representation and document-conformance meaning (Core §11)
+        # but must be re-declared to pass the current schema, so the older schema stays available at its
+        # own exact version for a document that keeps the older value.
         previous = strict_json_loads(PREVIOUS_SCHEMA_PATH.read_text(encoding="utf-8"))
         Draft202012Validator.check_schema(previous)
         self.assertEqual(previous["$id"], PREVIOUS_SCHEMA_ID)
@@ -461,6 +469,17 @@ class RepositoryConformanceTests(unittest.TestCase):
             previous["properties"]["specVersion"]["const"], PREVIOUS_SPEC_VERSION
         )
         self.assertEqual(self.schema["properties"]["specVersion"]["const"], SPEC_VERSION)
+
+        # The document-conformance manifest schema was published at its own 0.1.0-draft identifier too,
+        # so a manifest that still cites it keeps resolving.
+        previous_manifest = strict_json_loads(
+            PREVIOUS_MANIFEST_SCHEMA_PATH.read_text(encoding="utf-8")
+        )
+        Draft202012Validator.check_schema(previous_manifest)
+        self.assertEqual(previous_manifest["$id"], PREVIOUS_MANIFEST_SCHEMA_ID)
+        self.assertEqual(
+            previous_manifest["properties"]["specVersion"]["const"], PREVIOUS_SPEC_VERSION
+        )
 
     def test_evaluation_manifest_matches_its_schema(self) -> None:
         schema = strict_json_loads(
@@ -481,6 +500,15 @@ class RepositoryConformanceTests(unittest.TestCase):
         # Carrier well-formedness only: the specification repository owns no evaluator, so these
         # checks verify that each case could be run, never that a disposition is the right one.
         manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
+        # §8.2 makes the pack input a semantically conforming document, so a pack fixture is required to
+        # conform — except for a fixture whose whole point is the §8.4 `pack-not-conformant` error, which
+        # requires the opposite. The check is therefore conditional on what the case expects rather than
+        # dropped: a fixture that quietly became conforming would make such a row unrunnable too.
+        non_conformant_packs = {
+            case["pack"]
+            for case in manifest["cases"]
+            if case.get("expectedErrorClass") == "pack-not-conformant"
+        }
         packs: dict[str, Any] = {}
         for case in manifest["cases"]:
             with self.subTest(case=case["id"]):
@@ -490,11 +518,27 @@ class RepositoryConformanceTests(unittest.TestCase):
                 except ValueError:
                     self.fail(f"pack path escapes the evaluation corpus: {case['pack']}")
                 self.assertTrue(pack_path.is_file(), f"missing pack: {case['pack']}")
+                expects_non_conformant_pack = case["pack"] in non_conformant_packs
+                if expects_non_conformant_pack:
+                    self.assertNotIn(
+                        "expectedDisposition",
+                        case,
+                        "a pack another case expects to fail §3.3 cannot also yield a disposition",
+                    )
                 if case["pack"] not in packs:
                     pack = strict_json_loads(pack_path.read_text(encoding="utf-8"))
-                    self.assertEqual(pack["specVersion"], SPEC_VERSION)
-                    self.assertEqual([], structural_diagnostics(self.validator, pack))
-                    self.assertEqual([], semantic_diagnostics(pack))
+                    diagnostics = structural_diagnostics(
+                        self.validator, pack
+                    ) + semantic_diagnostics(pack)
+                    if expects_non_conformant_pack:
+                        self.assertNotEqual(
+                            [],
+                            diagnostics,
+                            f"{case['pack']} conforms, so no case can expect pack-not-conformant",
+                        )
+                    else:
+                        self.assertEqual(pack["specVersion"], SPEC_VERSION)
+                        self.assertEqual([], diagnostics)
                     packs[case["pack"]] = pack
                 pack = packs[case["pack"]]
 

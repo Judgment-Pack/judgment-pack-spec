@@ -28,9 +28,11 @@ guarantee; any `0.x` release may change incompatibly.
 enterprise architects evaluating governable AI decisioning; AI researchers studying testable
 judgment; and domain experts who author packs.
 
-**Q5. What is the one thing to understand about scope?** It specifies a document, not an engine.
-Conformance means a document agrees with a contract — never that the pack is true, authorized, safe,
-or fit for use.
+**Q5. What is the one thing to understand about scope?** It specifies a document, and — new in
+`0.2.0-draft` — what evaluating that document means, not an engine. Document conformance means a
+document agrees with a contract; evaluator conformance (§3.4) means an implementation complies with the
+§§7–10 evaluation contract for every input it admits, evidenced by the corpus published for the exact
+version claimed. Neither is ever a claim that the pack is true, authorized, safe, or fit for use.
 
 ## Architecture
 

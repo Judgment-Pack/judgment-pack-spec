@@ -9,8 +9,10 @@ industry standard or as suitable, by conformance alone, for consequential decisi
 conformance, unchanged in substance from `0.1.0-draft`, and evaluator conformance (§3.4), which is
 new. Sections 7 and 8 are normative for an implementation that claims the evaluator class and
 informative for every other consumer; a document-conformance claim does not depend on them. The
-document format is unchanged: a `0.1.0-draft` pack is unchanged in meaning here and may be
-re-declared as `0.2.0-draft` without other edits (§11).
+document format is unchanged: a `0.1.0-draft` pack is unchanged in representation and in
+document-conformance meaning here and may be re-declared as `0.2.0-draft` without other edits.
+Re-declaration also opts the pack into this draft's evaluator semantics (§§7–8), which existed for no
+consumer under `0.1.0-draft`, and confers no conformance on any implementation (§11).
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT**, and **MAY** are to be
 interpreted as described by BCP 14 when, and only when, they appear in all capitals. Normative
@@ -145,7 +147,7 @@ An implementation is *evaluator conforming* when, given
 
 - a semantically conforming pack (§3.3);
 - one JSON facts document;
-- one evidence-availability document (§8.2); and
+- at most one evidence-availability document, whose absence §8.2 defines; and
 - its own supported-extension set,
 
 it produces the portable disposition of §8.3 under the semantics of §§7–8, reports every condition
@@ -153,14 +155,23 @@ that prevents completing an evaluation as an evaluation error rather than as a d
 defines the limits §10 requires of this class, and passes the evaluation corpus published for the
 exact `specVersion` it names.
 
-The claim is narrow by construction: it says that the implementation computed the disposition this
-document specifies for those inputs. It says nothing about the pack, the facts, the evidence, or the
-consequences of acting on a disposition (§3.5).
+The claim is scoped by the contract, not by the corpus: it asserts that the implementation satisfies
+every requirement of §§7–10 — the semantics, the disposition, the error classes, and the documented
+limits — for every input it admits. It says nothing about the pack, the facts, the evidence, or the
+consequences of acting on a disposition (§3.5). Corpus results are required evidence for that claim
+and are not exhaustive evidence of it (§3.4.1).
 
-An implementation that computes the disposition this document specifies and fails a corpus row has
-found a specification defect in that row, not a conformance failure. §1.1 makes this document
-control; the row is corrected under §3.4.1's corpus versioning, and no claim is made or lost against
-a defective row.
+Every row of the corpus published for the claimed `specVersion` MUST pass, and a failed row blocks the
+claim. A failed row does not by itself decide who is wrong: a divergence is as likely to be a defect
+in the row as in the implementation, and §1.1 makes this document control over the corpus. What a
+claimant MUST NOT do is decide that question for itself. A row is defective for a released corpus
+version only when the project has said so in a versioned erratum, published beside the corpus as
+`conformance/evaluation/errata.md`: one entry naming the `suiteVersion` it applies to, the case id, the
+date of issue, and the defect. An erratum edits nothing — the manifest of a released version is never
+changed (§3.4.1), so the frozen rows stay exactly as published — and it has one effect: a claim against
+that `suiteVersion` may exclude the row the erratum names, provided the claim names the row and cites
+the erratum. Until such an erratum exists, a failing row is a blocked claim and a specification-defect
+report, in that order.
 
 Carrier, structural, and semantic document conformance are untouched by this class. A document is
 conforming or not without reference to any evaluator, and an implementation MAY claim document
@@ -170,8 +181,10 @@ conformance alone.
 
 Exactly one form of evaluator-conformance claim is definable: a claim against this class and against
 the [evaluation corpus](../conformance/evaluation/README.md) for one exact `specVersion`, naming that
-version, the corpus version, and the results obtained. Everything else remains forbidden. An
-implementation MUST NOT:
+version, the corpus version, the results obtained, and — in the claim's own words, not as an inference
+a reader must draw — that every row of that corpus version passed. If a project-issued erratum marks a
+row defective for that corpus version (§3.4), the claim MUST name that row and cite the erratum;
+otherwise "every row" means every row. Everything else remains forbidden. An implementation MUST NOT:
 
 - claim partial or qualified evaluator conformance — a subset of §§7–8, a subset of the corpus, or
   conformance "except for" any requirement;
@@ -180,7 +193,9 @@ implementation MUST NOT:
 - claim evaluator conformance without having run the evaluation corpus for the exact `specVersion`
   claimed;
 - claim evaluator conformance under `0.1.0-draft`, which defines no such class, or under any
-  `specVersion` whose corpus it has not run; or
+  `specVersion` whose corpus it has not run;
+- claim evaluator conformance while a row of the named corpus version fails, unless a project-issued
+  erratum for that `suiteVersion` marks that row defective and the claim names and cites it (§3.4); or
 - describe an evaluator-conformance claim as establishing anything §3.5 excludes.
 
 A claim is made against one exact `specVersion` and is not inherited by any other version (§11).
@@ -192,7 +207,16 @@ The corpus is **frozen at the release of a `specVersion`** and grows only into t
 added, changed, or corrected on the way to a later `specVersion`, never inside a released one, so two
 identically worded claims against the same `specVersion` require the same rows. "The corpus version"
 a claim must name is the `suiteVersion` member of the evaluation manifest, which for a released
-version equals the `specVersion` the corpus was published for.
+version equals the `specVersion` the corpus was published for. An erratum (§3.4) is the only
+post-release statement about a released corpus, and it changes no row.
+
+Two optional case members of the corpus carrier are defined and unused by every row of this version's
+corpus, so that a later row can carry them without a carrier change. `workBudget` is a positive integer
+of evaluation-work units, in the accounting units a future work-accounting model will define; when it is
+absent, the case sets no budget and the implementation's own documented limit (§10) applies.
+`expectedErrorPhase` is `preflight` or `evaluation` and says which phase an expected error class was
+reached in — while admitting the inputs (§8.2) or while evaluating them (§8) — so it accompanies
+`expectedErrorClass` and never an expected disposition.
 
 ### 3.5 Non-claims
 
@@ -206,10 +230,14 @@ Conformance MUST NOT be described as proof that:
 - use of the pack is safe.
 
 The runtime-correctness bullet has exactly one narrow exception. An evaluator-conformance claim
-(§3.4) asserts that the claimed implementation computed the §8.3 disposition this document specifies
-for the evaluation-corpus inputs it ran. It asserts nothing about any other input, any deployment,
-any particular run in production, the facts and evidence a caller supplied, or the permissibility of
-acting on a disposition. Every other bullet above applies to the evaluator class unchanged.
+(§3.4) asserts that the claimed implementation complies with the complete evaluator contract of
+§§7–10 — the semantics of §§7–8, the §8.3 disposition, the §8.4 error classes, and the limits §10
+requires of the class — for every input it admits, not merely for the inputs it happened to run. Its
+corpus results are required evidence of that compliance and are not exhaustive evidence of it: the
+corpus is a seed corpus, and passing every row of it demonstrates nothing directly about an input no
+row contains (§3.4.1). The claim asserts nothing about any deployment, any particular run in
+production, the facts and evidence a caller supplied, or the permissibility of acting on a
+disposition. Every other bullet above applies to the evaluator class unchanged.
 
 ## 4. Root object
 
@@ -540,8 +568,10 @@ requested handoff whose destination the pack does not supply (§8.3).
 
 ### 8.2 Evaluation inputs
 
-An evaluation takes exactly four inputs. Three are documents; the fourth is a property of the
-implementation.
+An evaluation takes four inputs. Three are documents — the pack and the facts document are always
+supplied, and the evidence-availability document is optional, with the meaning of its absence defined
+below — and the fourth is a property of the implementation. Two documents are therefore the minimum
+and three the maximum.
 
 - **Pack** — one semantically conforming document (§3.3). A pack that is not semantically conforming
   is an evaluation error (§8.4), not a disposition.
@@ -550,14 +580,34 @@ implementation.
   merging, or acquisition.
 - **Evidence availability** — one JSON object whose member names are declared
   `evidenceRequirements[].id` values and whose values are exactly one of the strings `present`,
-  `absent`, or `unknown`. An omitted key means `unknown`. An omitted document as a whole means every
-  declared requirement is `unknown`. A member name that is not a declared requirement id, or a value
-  outside those three strings, is an evaluation error (§8.4) — an undeclared key is far more likely
-  to be a caller's mistake than a statement about the pack. Duplicate member names are already
-  rejected by §2.1.
+  `absent`, or `unknown`. An omitted key means `unknown`. An omitted document as a whole is the
+  implicit empty object, which by that rule makes every declared requirement `unknown`; it is the only
+  form absence takes, and it is not an error. A value that is not a JSON object at all, a member name
+  that is not a declared requirement id, or a value outside those three strings is an evaluation error
+  (§8.4) — an undeclared key is far more likely to be a caller's mistake than a statement about the
+  pack. Duplicate member names are already rejected by §2.1.
 - **Supported extensions** — the set of `metadata.requiredExtensions` capabilities the implementation
   supports. A required capability outside that set is an evaluation error (§8.4), never a
   disposition (§9).
+
+**Input preflight.** The inputs are admitted before evaluation begins. An implementation claiming
+evaluator conformance MUST validate them in this order — the pack, then the facts document, then the
+evidence-availability document, then the pack's `metadata.requiredExtensions` against its own
+supported-extension set — and MUST complete that validation before step 1 of §8 runs. That order is the
+error precedence of §8.4, so the first failure encountered is also the class §8.4 requires be reported.
+
+Any violation of this section's shape requirements is the `malformed-input` evaluation error of §8.4: an
+evidence-availability input that is not a JSON object, an undeclared member name, a value outside
+`present`, `absent`, and `unknown`, and a facts or evidence-availability input that is not a
+carrier-conforming JSON text (§2.1) are all that error. So is reaching a documented document or carrier
+limit while admitting an input, because §2.1 requires refusing such a document rather than processing
+part of it, so the input is never admitted (§8.4, §10).
+
+Because preflight completes before step 1, no result can outrace an input error: a pack whose
+applicability is false, presented with an evidence-availability document carrying an undeclared key, is
+the `malformed-input` error and never the `not-applicable` disposition, and the same holds for every
+other terminal step of §8 and for every preflight failure. Two conforming implementations therefore
+agree on which inputs are admitted at all, not only on what an admitted input produces.
 
 Core defines no transport, file layout, or command-line surface for these inputs. It defines what
 they mean.
@@ -648,7 +698,13 @@ result. This is the §3.1 rule applied one layer up: a documented limit or a mal
 explicit failure, never a silent partial processing that a caller could mistake for a result. A
 truncated evaluation reported as a disposition is a forged disposition.
 
-An implementation MUST report the class of every evaluation error, identified by exactly one of:
+An implementation MUST report the class of every evaluation error, and every evaluation error is
+identified by exactly one class: exactly one of the four Core classes below, or — for a condition no
+Core class covers — exactly one documented implementation-defined class in the form this section
+requires of one. A Core class always takes precedence: an implementation-defined class is reported only
+when no Core class applies, never in place of one that does.
+
+The Core classes are:
 
 - **`pack-not-conformant`** — the pack input is not a semantically conforming document (§3.3),
   failing at any of the carrier, structural, or semantic layer.
@@ -656,22 +712,30 @@ An implementation MUST report the class of every evaluation error, identified by
   `metadata.requiredExtensions` that the implementation does not support. §9's "structurally readable
   but not fully interpretable" report is this error for the evaluator class: the unsupported part may
   be the part that decides, so no disposition may be produced.
-- **`malformed-input`** — the facts document or the evidence-availability document is not a
-  carrier-conforming JSON text (§2.1), or the evidence-availability document violates §8.2 by
-  carrying an undeclared member name or a value outside `present`, `absent`, and `unknown`.
-- **`resource-exhaustion`** — a limit documented under §10 was reached.
+- **`malformed-input`** — an input failed the preflight of §8.2. The facts document or the
+  evidence-availability document is not a carrier-conforming JSON text (§2.1); or the
+  evidence-availability input violates §8.2 by not being a JSON object, by carrying an undeclared member
+  name, or by carrying a value outside `present`, `absent`, and `unknown`; or a documented document or
+  carrier limit — bytes, nesting depth, or string size — was reached while admitting an input, which
+  §2.1 requires be refused rather than partly processed, so the input never became one.
+- **`resource-exhaustion`** — a limit documented under §10 was reached during evaluation: a
+  collection-size limit or the evaluation-work limit. This class is about work an admitted input turned
+  out to require, never about admitting the input in the first place.
 
-More than one class can apply to the same inputs: an over-limit facts document is `malformed-input`,
-because §2.1 requires rejecting data beyond a documented limit, and equally `resource-exhaustion`; a
-pack that fails semantic conformance presented with an evidence document carrying an undeclared key is
-both `pack-not-conformant` and `malformed-input`. The classes are therefore evaluated in one fixed
-order — `pack-not-conformant`, then `malformed-input`, then `unsupported-required-extension`, then
-`resource-exhaustion` — and the first that applies is the class reported, so that two conforming
-implementations report the same class for the same inputs. An implementation MAY name the other classes
-it also considered as message detail.
+More than one class can apply to the same inputs: a pack that fails semantic conformance presented with
+an evidence document carrying an undeclared key is both `pack-not-conformant` and `malformed-input`. The
+classes are therefore evaluated in one fixed order — `pack-not-conformant`, then `malformed-input`, then
+`unsupported-required-extension`, then `resource-exhaustion` — and the first that applies is the class
+reported, so that two conforming implementations report the same class for the same inputs. That order is
+the preflight order of §8.2, and the phase split between `malformed-input` and `resource-exhaustion` is
+what keeps it from contradicting §10: a limit reached while admitting an input is `malformed-input`
+because the input was refused, and `resource-exhaustion` is reserved for a limit reached while evaluating
+an input that was admitted. An implementation MAY name the other classes it also considered as message
+detail.
 
-An implementation MAY define additional classes for conditions none of these cover, and MAY attach any
-message detail it likes. An implementation-defined class MUST be named in the reverse-domain form of
+As stated above, an implementation MAY define an additional class for a condition none of the four Core
+classes covers — and only for such a condition — and MAY attach any message detail it likes. An
+implementation-defined class MUST be documented and MUST be named in the reverse-domain form of
 §9 — for example `com.example.timeout` — which cannot collide with a Core class identifier, since
 those are bare kebab-case names, nor with a class another implementation defines. The transport, exit
 status, and wire format of an evaluation error are not defined here; the class identifier is. A
@@ -704,8 +768,12 @@ input. They SHOULD define limits for document bytes, nesting depth, collection s
 and evaluation work.
 
 An implementation claiming evaluator conformance (§3.4) MUST define and document at least its
-collection-size and evaluation-work limits, and reaching one MUST produce the
-`resource-exhaustion` evaluation error of §8.4 rather than a disposition. Defining a limit is not
+collection-size and evaluation-work limits, and reaching one of those during an evaluation MUST produce
+the `resource-exhaustion` evaluation error of §8.4 rather than a disposition. A documented document or
+carrier limit — bytes, nesting depth, or string size — reached while admitting an input instead produces
+`malformed-input`: §2.1 refuses such a document rather than processing part of it, and §8.2's preflight
+therefore never admits it (§8.4). Either way the evaluation yields an explicit error and never a
+disposition; the two classes differ only in which phase the limit belongs to. Defining a limit is not
 portability: two conforming implementations may define different limits, so an input above either
 one is outside the portable claim. The evaluation corpus therefore keeps its cases well inside any
 plausible limit instead of probing one.
@@ -730,8 +798,14 @@ reader, writer, and semantic compatibility separately and supply machine-readabl
 A published pack version SHOULD be immutable. Changed content SHOULD receive a new version.
 
 `0.2.0-draft` changes no part of the document format. A pack declaring `specVersion` `0.1.0-draft` is
-unchanged in meaning under this draft and may be re-declared as `0.2.0-draft` by editing that one
-value and nothing else. Because the value is exact (§4), an unedited `0.1.0-draft` pack is not
+unchanged in representation and in document-conformance meaning under this draft — every member, every
+cross-field rule, and every conformance verdict of §§3.1–3.3 is the same — and may be re-declared as
+`0.2.0-draft` by editing that one value and nothing else. Re-declaration is not semantically inert: it
+opts the pack into the evaluator semantics of §§7–8, which are normative for the class defined here and
+existed for no consumer under `0.1.0-draft` (§7.5 replaces that draft's undefined appeal to a complete
+evidence manifest). What re-declaration does not do is confer conformance on anything: an
+evaluator-conformance claim is a claim about an implementation, made only as §3.4.1 permits, and no pack
+edit creates, transfers, or strengthens one. Because the value is exact (§4), an unedited `0.1.0-draft` pack is not
 structurally conforming to `0.2.0-draft` and must be re-declared before an implementation claiming
 this draft evaluates it; the `0.1.0-draft` schema remains published for packs that keep the older
 value.

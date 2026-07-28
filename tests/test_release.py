@@ -55,6 +55,36 @@ class ReleaseBuilderTests(unittest.TestCase):
                 evaluation_path.write_text(json.dumps(evaluation), encoding="utf-8")
                 BUILD_RELEASE.validate_artifacts("0.3.0-draft", "v0.3.0-draft", root=root)
 
+    def test_validate_requires_head_to_be_the_release_commit(self) -> None:
+        # Artifacts are validated from the worktree and archived from the commit, so a release built
+        # while HEAD points elsewhere would ship a tree nobody validated.
+        manifest = json.loads(
+            (ROOT / "conformance" / "manifest.json").read_text(encoding="utf-8")
+        )
+        version = manifest["specVersion"]
+        tag = f"v{version}"
+        commit = "a" * 40
+        original = BUILD_RELEASE.git
+        try:
+            for head, expected in ((commit, None), ("b" * 40, "not checked out")):
+                with self.subTest(head=head):
+                    def fake_git(*arguments: str, head: str = head) -> str:
+                        if arguments[:2] == ("rev-parse", "--verify"):
+                            return head if arguments[2] == "HEAD^{commit}" else commit
+                        if arguments[0] == "status":
+                            return ""
+                        raise AssertionError(f"unexpected git call: {arguments}")
+
+                    BUILD_RELEASE.git = fake_git
+                    if expected is None:
+                        self.assertEqual(BUILD_RELEASE.validate(tag, commit), version)
+                    else:
+                        with self.assertRaises(ValueError) as raised:
+                            BUILD_RELEASE.validate(tag, commit)
+                        self.assertIn(expected, str(raised.exception))
+        finally:
+            BUILD_RELEASE.git = original
+
     @staticmethod
     def _release_tree(directory: Path, version: str) -> Path:
         """A minimal, correctly pinned artifact tree for the version-pinning checks."""

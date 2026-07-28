@@ -33,6 +33,11 @@ that version is released: rows are added, changed, or corrected only on the way 
 `specVersion`, never inside a released one, so two identically worded claims require the same rows
 (Core §3.4.1).
 
+A claim against a released corpus must state that **every** row of it passed (Core §3.4.1). A failing row
+blocks the claim, and a claimant cannot excuse it by calling the row defective: only a project-issued
+erratum, recorded in [`errata.md`](errata.md) against that `suiteVersion`, can do that, and even then the
+claim must name the row and cite the erratum. An erratum edits no row.
+
 Every case records:
 
 | Field                  | Meaning                                                                                        |
@@ -45,8 +50,19 @@ Every case records:
 | `supportedExtensions`  | The capabilities the evaluator is assumed to support. Empty for every seed case.                 |
 | `expectedDisposition`  | The exact §8.3 disposition, both sets already sorted — **or**                                    |
 | `expectedErrorClass`   | the §8.4 error class expected instead of a disposition. Exactly one of the two is present.       |
+| `workBudget`           | Optional. A positive integer of evaluation-work units; absent means no budget (see below).        |
+| `expectedErrorPhase`   | Optional. `preflight` or `evaluation`, alongside `expectedErrorClass` only (see below).           |
 | `focus`                | What the row is for, in one sentence.                                                           |
 | `specSection`          | The section that decides the expectation.                                                       |
+
+`workBudget` and `expectedErrorPhase` are defined by this version's carrier and used by no row in it, so
+that a later row can carry them without another carrier change (Core §3.4.1). `workBudget` is stated in
+the accounting units a future work-accounting model will define; when it is absent the case sets no
+budget and the implementation's own documented §10 limit applies. `expectedErrorPhase` says which phase
+the expected error class was reached in — `preflight`, while the inputs were being admitted (§8.2), or
+`evaluation`, while an admitted input was being evaluated (§8) — which is the distinction §8.4 uses to
+keep `malformed-input` and `resource-exhaustion` apart. The carrier rejects it on a row that expects a
+disposition.
 
 An omitted `evidenceAvailability` member means the case supplies no evidence document at all, which
 §8.2 makes equivalent to every declared requirement being `unknown`. An omitted key inside a supplied
@@ -115,20 +131,49 @@ Stated rather than implied, because a seed corpus that hides its gaps is worse t
 - **No error rows.** `expectedErrorClass` is part of the carrier and no case uses it yet. Each of the
   §8.4 classes — a non-conforming pack, an unsupported required extension, a malformed facts or
   evidence document, an undeclared evidence key, resource exhaustion — deserves a row, as does §8.4's
-  precedence order where two classes apply to the same inputs.
+  precedence order where two classes apply to the same inputs, and so does the phase split between
+  `malformed-input` and `resource-exhaustion` that `expectedErrorPhase` exists to record.
+- **The carrier cannot yet express some of those rows, and that is deferred.** `facts` is embedded
+  parsed JSON and `evidenceAvailability` is constrained to the tri-state by this carrier's own schema, so
+  a malformed-JSON document, a duplicate member, a non-object evidence input, and an invalid evidence
+  state have no fixture form here. A raw-document fixture form — a case that carries an input as unparsed
+  bytes — is **deferred to the next `suiteVersion`**; it is a carrier change, and this one is frozen at
+  release (Core §3.4.1). This repository's own checks also still require every evidence key a case supplies
+  to be declared by its pack, so an undeclared-key row needs that check made conditional on the expected
+  error class, exactly as the pack-conformance check already is. The `workBudget` and `expectedErrorPhase`
+  members were added now, ahead of the rows that will use them, precisely so that those rows do not need
+  another carrier change; no row in this version uses either.
+- **Three mandatory operators have no row.** §7.4 requires every operator of an implementation claiming
+  the class, and the fixtures exercise only `equals`, `in`, `greater-than-or-equal`, and `less-than`.
+  There is no `not-equals`, `greater-than`, or `less-than-or-equal` row.
+- **No `literal` and no `not` row.** Of §7's condition forms the fixtures use `fact`, `all`, `any`, and
+  `evidence-present`. A `literal` condition and a `not` condition — including `not` over an `unknown`
+  child, which §7.3 requires to stay `unknown` — have no row.
+- **No composite-equality row.** Every `equals` operand in the fixtures is a Boolean or a string. §7.4's
+  recursive equality over arrays and objects, its member-order-insensitive object comparison, and
+  equality against `null` are all unexercised.
+- **No fallback-selection row.** Only one fixture declares a `fallbackOutcome`, and no row reaches it:
+  the two rows that produce that outcome do so through a true rule at §8 step 9, and the one row that
+  reaches step 10 has no fallback to select (`no-match-without-a-fallback`). Step 10's positive branch —
+  no true rule, a declared fallback, and false or ignored-unknown rules that must not prevent it — has no
+  row.
 - **No number-representability row.** RFC 0006's implementation experience asked for one, and it is
   deliberately absent: whether equality involving a JSON number an implementation cannot represent
   exactly is `unknown` or an input error is open (Core §13), and §8.3 names it as the single seam in
   the byte-agreement requirement. A row cannot state an expected result until the question closes.
-- **Thin handoff coverage.** Only the three `partial-trigger-conflict` rows and the direct-escalation
-  row distinguish `handoff` from `reasons`; every imported row uses a pack that declares all five
-  triggers, so on those rows `triggeredBy` always equals `reasons` and `state` is `requested` exactly
-  when `kind` is not `outcome`. No row yet combines a direct exception escalation with a
-  trigger-selected reason, and no row exercises a pack that declares `escalation` with triggers none of
-  its reachable reasons can match.
+- **Thin handoff coverage, stated exactly.** Of the twenty rows, exactly one — `handoff-trigger-subset` —
+  has `triggeredBy` as a proper subset of `reasons`. Two more, `retained-reason-without-a-trigger` and
+  `no-match-without-a-fallback`, pair an `unresolved` result with `state: none`. One,
+  `direct-exception-escalation-without-configuration`, records a requested handoff in a pack that declares
+  no `escalation` object, so the request has no Core-defined destination; on that row `triggeredBy` still
+  equals `reasons`. On every other row with `state: requested` — all thirteen imported rows, whose pack
+  declares all five triggers, and the one decimal row that escalates on an unknown — `triggeredBy` equals
+  `reasons`, and `state` is `requested` exactly when `kind` is not `outcome`. So the subset rule of §8.3
+  rests on a single row, and no row combines a direct exception escalation with a trigger-selected reason
+  or exercises a pack that declares `escalation` with triggers none of its reachable reasons can match.
 - **Unexercised structure.** `suppress-rule` exceptions, an unknown exception with
-  `onUnknown: escalate` combined with a forced outcome, `not` conditions, conditions nested more than
-  one level, and `missing-required-evidence` together with any other reason all have no row.
+  `onUnknown: escalate` combined with a forced outcome, conditions nested more than one level, and
+  `missing-required-evidence` together with any other reason all have no row.
 - **No permutation or hostile rows.** Rule-order permutations that must not change a result, and
   hostile optional-extension content that must stay inert during evaluation, are both called for by
   RFC 0006 and absent here.

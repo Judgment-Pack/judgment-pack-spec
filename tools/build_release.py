@@ -81,6 +81,12 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
 
 
 def validate(tag: str, commit: str) -> str:
+    """Gate a release on the tree that was actually validated.
+
+    ``validate_artifacts`` reads the worktree while ``build`` archives the resolved commit, so the two
+    describe the same release only when ``HEAD`` is that commit. Checking it here is what makes the
+    validated tree and the archived tree one tree instead of two that happen to share a tag.
+    """
     version = release_version(tag)
     validate_artifacts(version, tag)
 
@@ -88,6 +94,14 @@ def validate(tag: str, commit: str) -> str:
     resolved_tag = git("rev-parse", "--verify", f"refs/tags/{tag}^{{commit}}")
     if resolved_commit != resolved_tag:
         raise ValueError("release tag does not resolve to the requested commit")
+    resolved_head = git("rev-parse", "--verify", "HEAD^{commit}")
+    if resolved_head != resolved_commit:
+        raise ValueError(
+            "release worktree is not checked out at the release commit: "
+            f"HEAD is {resolved_head} and {tag} resolves to {resolved_commit}. "
+            "The artifacts are validated from the worktree and archived from the commit, so they "
+            f"must be the same tree; check out {tag} and run the builder again."
+        )
     if git("status", "--porcelain", "--untracked-files=no"):
         raise ValueError("tracked release worktree is dirty")
     return version

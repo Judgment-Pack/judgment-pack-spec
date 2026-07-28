@@ -84,8 +84,9 @@ establish that a claim is true, that evidence is authentic or sufficient, that a
 authority, that an outcome is legal or safe, or that any particular runtime applied the pack correctly.
 Document conformance is about document validity, nothing more. Core §3.5 makes exactly one narrow
 exception, and only for the evaluator class: an evaluator-conformance claim says the implementation
-computed the specified result for the evaluation-corpus inputs it ran, and nothing about any other
-input, deployment, or production run.</div>
+complies with the §§7–10 evaluator contract for every input it admits, with the corpus published for the
+claimed version as required but non-exhaustive evidence of that, and says nothing about any deployment or
+production run.</div>
 
 ## JSON punctuation
 
@@ -141,8 +142,10 @@ preserved for authoring and display, but it **never** sets rule priority.
 Two version fields describe different things and move independently:
 
 - `specVersion` names **which specification** the document follows. In this draft it is always the exact string
-  `0.2.0-draft`. A pack written for `0.1.0-draft` means the same thing here and needs only this one value
-  changed; because the value is exact, an unedited one is not structurally conforming.
+  `0.2.0-draft`. A pack written for `0.1.0-draft` is the same document with the same document-conformance
+  meaning here and needs only this one value changed; because the value is exact, an unedited one is not
+  structurally conforming. Changing it also opts the pack into this draft's evaluator semantics, which no
+  consumer had under `0.1.0-draft`, and confers no conformance on any implementation.
 - `version` names **which revision of this pack** you are looking at. It matches
   `^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$` — three dot-separated non-negative integers with no
   leading zeros.

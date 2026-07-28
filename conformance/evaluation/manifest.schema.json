@@ -176,6 +176,15 @@
         "expectedDisposition": {
           "$ref": "#/$defs/disposition"
         },
+        "workBudget": {
+          "description": "Optional. A positive integer of evaluation-work units, in the accounting units a future work-accounting model will define. Absent means the case sets no budget and the implementation's own documented §10 limit applies. No row of this suite version uses it (Core §3.4.1).",
+          "type": "integer",
+          "minimum": 1
+        },
+        "expectedErrorPhase": {
+          "description": "Optional. Which phase an expected error class was reached in: preflight, while admitting the inputs (§8.2), or evaluation, while evaluating an admitted input (§8). It accompanies expectedErrorClass only, never an expected disposition. No row of this suite version uses it (Core §3.4.1).",
+          "enum": ["preflight", "evaluation"]
+        },
         "expectedErrorClass": {
           "description": "The §8.4 error class a conforming evaluator must report instead of a disposition: one of the four Core classes, or an implementation-defined class in the reverse-domain form §8.4 requires of one.",
           "type": "string",
@@ -205,7 +214,10 @@
       "oneOf": [
         { "required": ["expectedDisposition"] },
         { "required": ["expectedErrorClass"] }
-      ]
+      ],
+      "dependentRequired": {
+        "expectedErrorPhase": ["expectedErrorClass"]
+      }
     }
   }
 }

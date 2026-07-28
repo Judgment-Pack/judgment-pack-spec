@@ -66,5 +66,7 @@ expansion here should remain focused: one primary expectation per negative fixtu
 boundary, and adversarial counterparts added when the corresponding semantics become normative.
 
 Every fixture declares `specVersion` `0.2.0-draft`, which is exact. `structural/invalid-spec-version.json`
-still declares `0.1.0-draft`, which is now the negative case: an unedited `0.1.0-draft` pack is
-unchanged in meaning but must be re-declared to be structurally conforming to this draft (§11).
+still declares `0.1.0-draft`, which is now the negative case: an unedited `0.1.0-draft` pack is unchanged
+in representation and document-conformance meaning but must be re-declared to be structurally conforming
+to this draft, and re-declaring it also opts it into this draft's evaluator semantics without conferring
+conformance on any implementation (§11).

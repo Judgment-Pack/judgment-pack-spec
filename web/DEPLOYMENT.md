@@ -23,8 +23,9 @@ resolvable rather than letting it 404, and it does so with generated pages rathe
 `firebase.json`'s spec target deliberately declares no `rewrites` and no `redirects`, and the site
 tests assert that. Two cases exist today:
 
-- each schema is copied to the path of its own `$id`, including the superseded `0.1.0-draft` schema, so
-  a `$id` resolves for packs that still declare the older exact `specVersion`; and
+- each schema is copied to the path of its own `$id`, including both superseded `0.1.0-draft` schemas —
+  the Core structural schema and the document-conformance manifest schema — so every `$id` the previous
+  draft published still resolves for a document that keeps the older exact `specVersion`; and
 - `/spec/<previous version>/` keeps a short signpost page saying the draft is superseded and linking to
   the tagged source, that draft's release notes, and the current specification. It publishes no
   normative text: the normative text of a superseded draft is its tag, never a page on a mutable site.

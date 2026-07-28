@@ -31,8 +31,26 @@ here.
   `state: none`, `no-match` with no fallback, a direct exception escalation in a pack with no
   `escalation` object, and §7.4's ordered comparison including its refusal to coerce a JSON number. It
   is normative for the evaluator class only, version-pinned, and grows by RFC. Its README states its
-  gaps: no error rows, no number-representability row (deliberately — that question is open), thin
-  handoff coverage on the imported rows, no `suppress-rule` row, and no permutation or hostile rows.
+  gaps: no error rows, no number-representability row (deliberately — that question is open), handoff
+  coverage counted row by row, three mandatory operators (`not-equals`, `greater-than`,
+  `less-than-or-equal`) with no row, no `literal`, `not`, composite-equality, or fallback-selection row,
+  no `suppress-rule` row, no permutation or hostile rows, and the inputs its carrier cannot yet express.
+- **The claim's scope is the contract, not the corpus (§§3.4, 3.4.1, 3.5).** An evaluator-conformance
+  claim asserts compliance with the whole §§7–10 contract for every input the implementation admits;
+  corpus results are required, non-exhaustive evidence of that. A claim must state that every row of the
+  named corpus version passed, and a failed row blocks the claim.
+- **An erratum mechanism for a frozen corpus** at
+  [`conformance/evaluation/errata.md`](conformance/evaluation/errata.md). Only a project-issued, versioned
+  erratum can mark a row of a released corpus defective — a claimant cannot — and an erratum edits no row.
+  It is in place and empty for `suiteVersion` `0.2.0-draft`.
+- **Input preflight (§8.2).** The inputs are admitted before §8 runs, in the order pack, facts, evidence
+  availability; an omitted evidence document is the implicit empty object; any violation of §8.2's shape,
+  including a non-object evidence input, is `malformed-input`; and because preflight completes before step
+  1, an input error can never be outraced by a `not-applicable` result.
+- Two optional case members in the evaluation carrier, defined now and used by no row so that later rows
+  need no carrier change: `workBudget` (a positive integer of work units, in the units a future accounting
+  model will define) and `expectedErrorPhase` (`preflight` or `evaluation`, alongside `expectedErrorClass`
+  only).
 - A top-level `FAQ.md`; an informative, non-normative architecture-vision page
   (`docs/architecture/vision.md`); a prior-art comparison page (`docs/concepts/comparison.md`); and
   seeded draft RFCs 0001–0005 (pack manifest, Judgment Graph composition, evidence reference,
@@ -59,11 +77,26 @@ here.
 
 - Version identifiers move to `0.2.0-draft`: Core prose, the structural schema (`$id` and the exact
   `specVersion` constant), the document-conformance manifest, every example, and every fixture. The
-  document format is unchanged, so a `0.1.0-draft` pack is unchanged in meaning and needs only that one
-  value edited; because the value is exact, an unedited pack is not structurally conforming here. The
-  `0.1.0-draft` schema is preserved at `schema/judgment-pack-core-0.1.0-draft.schema.json` and is still
-  served at its own `$id`. `conformance/structural/invalid-spec-version.json` now carries `0.1.0-draft`
-  as its negative value, which makes the re-declaration requirement a corpus case.
+  document format is unchanged, so a `0.1.0-draft` pack is unchanged in representation and
+  document-conformance meaning and needs only that one value edited; because the value is exact, an
+  unedited pack is not structurally conforming here. Re-declaration is not inert, though: it opts the pack
+  into this draft's evaluator semantics, which existed for no consumer under `0.1.0-draft`, and confers no
+  conformance on any implementation. The `0.1.0-draft` schema is preserved at
+  `schema/judgment-pack-core-0.1.0-draft.schema.json`, and that draft's document-conformance manifest
+  schema at `schema/conformance-manifest-0.1.0-draft.schema.json`, both served at the `$id` each was
+  published under so a previously cited identifier still resolves. Each preserved file matches the tagged
+  `v0.1.0-draft` artifact in every byte except its `$id` member, which was re-pointed to the project's
+  neutral domain when the retired pre-publication identifier was withdrawn; `releases/v0.2.0-draft.md`
+  publishes the digests of both forms. `conformance/structural/invalid-spec-version.json` now carries
+  `0.1.0-draft` as its negative value, which makes the re-declaration requirement a corpus case.
+- §8.4's classes are split by phase so the error contract cannot contradict §10: a documented document or
+  carrier limit reached while admitting an input is `malformed-input` (§2.1 refuses the document, so
+  preflight never admits it), while a collection-size or evaluation-work limit reached during evaluation is
+  `resource-exhaustion`. Every error carries exactly one class — a Core class where one applies, otherwise
+  a documented implementation-defined class in §9's reverse-domain form.
+- `tools/build_release.py` now requires `HEAD` to be the resolved release commit. Artifacts are validated
+  from the worktree and archived from the commit, so the gate previously accepted a validated tree and an
+  archived tree that were not the same tree.
 - The evidence behind the change is two implementations agreeing 13/13. Both trace to one maintainer's
   direction, so that agreement corroborates the semantics rather than independently confirming them,
   and RFC 0000's bar for a *stable* feature is still unmet — carried as a caveat in the RFC's adoption
@@ -71,14 +104,17 @@ here.
 - Every assertion that evaluator conformance cannot be claimed is now the `0.2.0-draft` truth: the
   class exists, claims are governed by §3.4.1, and no implementation ships a claim with this release.
   The reference runtime's evaluator remains experimental and claims nothing; whether it claims the
-  class is a decision for that repository.
+  class is a decision for that repository. The site says the same: the implementations listing no longer
+  says the runtime does not evaluate rules, and the example guides no longer call a conflict result
+  unportable now that §8.3 makes it a portable `unresolved` disposition.
 
 - Renamed the change-proposal process from Judgment Enhancement Proposal (JEP) to Request for
   Comments (RFC); moved `jeps/` to `rfcs/`. The required sections and evidence bar are unchanged.
   The historical `0.1.0-draft` entry below is left as shipped.
-- Implementations page: replaced the Protoss CLI listing with the vendor-neutral `judgment-pack`
-  reference runtime (which inherited the CLI implementation), linking to its own repository, and
-  removed the Protoss-branded on-site CLI page. Every page on the site is now vendor-neutral.
+- Implementations page: replaced the earlier vendor-branded CLI listing with the vendor-neutral
+  `judgment-pack` reference runtime (which inherited that CLI's implementation), linking to its own
+  repository, and removed the vendor-branded on-site CLI page. Every page on the site is now
+  vendor-neutral, and no page names the retired pre-publication brand.
 
 ## `0.1.0-draft` — 2026-07-22
 
