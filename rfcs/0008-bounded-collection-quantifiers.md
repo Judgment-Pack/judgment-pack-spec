@@ -15,7 +15,7 @@
 Add two condition operators to §7 — `exists` and `every` — that evaluate an inner condition once per
 element of an array-valued fact and combine the per-element results with the same strong
 three-valued logic §7.1 and §7.2 already use. Inside the inner condition, the element becomes the
-root every pointer resolves against. Nothing else changes: no arithmetic, no counting, no access to
+root pointers resolve against (`uniform`'s `at`, defined below, is member-relative by its own rule). Nothing else changes: no arithmetic, no counting, no access to
 the outer facts document, no way to reach a second collection.
 
 The addition is deliberately smaller than the problem. Of the 25 collection-quantification
@@ -181,8 +181,9 @@ resolves against it exactly as §7.4 says today. Then:
   element**, and it is restored to its previous value when that element's evaluation finishes;
 - `uniform`'s `at` resolves against **each member selected by `uniform`'s `path`**, not against the
   current condition root;
-- the empty pointer selects whatever the current root is: the facts document at the top level, the
-  element inside a `where`.
+- an empty `fact.path` or aggregate `path` selects whatever the current root is: the facts
+  document at the top level, the element inside a `where`. An empty `uniform.at` selects **each
+  whole member**, under the preceding rule, not the current root.
 
 Nesting therefore re-roots once per level. An inner quantifier's `path` is rooted at the element its
 enclosing `where` is running on; that inner quantifier's own `where` re-roots again at the inner
@@ -279,9 +280,12 @@ Two consequences, neither stated before:
   or `not` inside a `where` is still at depth two, and one inside *its* `where` is at depth three and
   invalid. Wrapping does not launder depth.
 
-The bound is normative and schema-enforceable through **depth-indexed, non-recursive definitions** —
-an outer condition definition whose aggregate branches take their `where` from a second definition
-whose aggregate branches are absent — rather than being left to per-implementation depth limits.
+The bound is normative and schema-enforceable through **depth-indexed, non-recursive definitions**:
+three condition definitions by remaining depth, where the outer definition's aggregate branches take
+their `where` from a depth-one definition, the depth-one definition's aggregate branches take theirs
+from a depth-zero definition, and the depth-zero definition carries no aggregate branch at all — with
+`all`, `any`, and `not` recursing **within their own tier** at every level, so wrapping cannot
+launder depth. This replaces per-implementation depth limits.
 **No measured case in the census needs even one level of nesting** — the shape table has no nested
 row and none of the deferred bullets asks for one. Depth two is retained only because forbidding a
 construct the grammar would otherwise admit is itself a rule to specify, and the question of whether
@@ -444,8 +448,9 @@ condition changes meaning. **Not** purely additive for evaluators — see the §
   on it.
 - §13 — the open-questions list.
 - Schema — two (or three) new `$defs/condition` `oneOf` branches plus **depth-indexed, non-recursive
-  definitions** enforcing the aggregate-depth bound (an inner condition definition carrying no
-  aggregate branch at all, so depth three is unrepresentable), and the exact `specVersion`.
+  definitions** enforcing the aggregate-depth bound (three tiers by remaining depth, the last
+  carrying no aggregate branch, `all`/`any`/`not` recursing within-tier, so depth three is
+  unrepresentable), and the exact `specVersion`.
 
 A document using `exists` fails schema validation against `0.1.0-draft`, so the operators arrive
 with a new exact `specVersion` and schema — a labeled `0.x` change per RFC 0000, not a silent
