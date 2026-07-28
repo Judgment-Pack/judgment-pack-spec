@@ -476,6 +476,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0008-bounded-collection-quantifiers.md",
+        PurePosixPath("rfcs/0008-bounded-collection-quantifiers/index.html"),
+        "RFC 0008: Bounded collection quantifiers",
+        "Draft proposal for existential and universal conditions over an array-valued fact, and an honest count of how few measured cases they reach.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.1.0-draft.md",
         PurePosixPath("project/releases/0.1.0-draft/index.html"),
         "0.1.0-draft release notes",
