@@ -60,6 +60,30 @@ than a rule it sets: collision rules that depend on evaluation results reintrodu
 and the prototype now decides every collision from the declared edges and the supplied inputs
 alone.
 
+A preregistered study
+([Study 004](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/004-composition-closure),
+2026-07-30) then measured that prototype grammar's closure over the cross-decision escape in
+Study 003's frame. The frame was derived by a registered rule, not picked (five residue
+sentences qualified; zero of the census's forty prepared-determination facts did — itself a
+result); encoding rooms were hypothesis-blind, given only the policy, the census's own packs,
+and the tool. **The grammar closed none of the five.** Every room produced a *validating* graph
+with zero edges, independently declining to declare an edge that would be unfaithful — one room
+demonstrated candidate edges that validate at exit 0 while inverting the policy's meaning — and
+the blocking constructs were counted: an effect/entitlement device on four of five (the
+reference changes a later decision's *rules*, not its facts), with action-completion facts and
+a disjunctive fan-in on the fifth. The registered predictor's misses were as informative as its
+hits: both items predicted to close as scalar verdict-consumption failed on one mechanism, the
+gap between a decision's *permission* and an act's *performance*. The measured observation this
+leaves for the RFC to weigh, not a resolution: within one policy's own decisions, the
+cross-decision escape in this corpus is effect/entitlement-shaped rather than dataflow-shaped,
+while the outcome-as-input edge this sketch proposes matches the seam *between* systems — an
+upstream decision's recorded verdict consumed as a downstream document's fact — which that
+study's frame, by construction, could not contain. Whether this RFC scopes composition to the
+between-systems seam or grows the edge toward entitlement constructs is now an evidenced
+choice, and still an open one. The usual bounds apply: one grammar, one frame, two policies by
+one benchmark team, internally produced under a preregistration; neither the zero nor any other
+rate licenses claims about composition as a design class.
+
 ## Specification (sketch)
 
 A graph document references packs by `(id, version)` and declares directed dependencies between
@@ -103,7 +127,12 @@ author with this RFC, counts toward encodability and nothing else.
 
 Each question stays open. The runtime prototype (see Evidence) takes a position on the first four,
 recorded here as one implementation's tested answers rather than as resolutions; the positions are
-encoded as that surface's tests, so a better answer has a concrete artifact to refute.
+encoded as that surface's tests, so a better answer has a concrete artifact to refute. Study 004
+(see Evidence) then measured that grammar against the census's cross-decision residue and closed
+none of it, naming four constructs implicated in that grammar's five open items — entitlement
+edges, action-completion facts, disjunctive fan-in, outcome-value mapping — so the questions
+below now have a negative result to weigh beside the positions, and one prior question: which
+seam this format is *for*.
 
 - **Ordering and conflict** — when two packs produce conflicting outcomes for a shared question,
   what does the format say (if anything) versus the evaluator? *Prototype position: refuse, never
