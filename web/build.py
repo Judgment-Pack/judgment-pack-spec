@@ -1952,7 +1952,6 @@ SLIDES: tuple[Slide, ...] = (
             "The same models sit behind both panels. Only one environment can tell you whether the "
             "work was any good."
         ),
-        wide=True,
     ),
     Slide(
         anchor="knowledge-and-judgment",
