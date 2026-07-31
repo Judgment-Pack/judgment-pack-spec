@@ -1876,19 +1876,18 @@ SLIDES: tuple[Slide, ...] = (
     Slide(
         anchor="decision-engine",
         kicker="01 — The premise",
-        heading="Every enterprise is a decision engine",
+        heading="Every company runs on decisions",
         lede=(
-            "Approve, reject, escalate, hold. Strip away the software and the org chart and what an "
-            "organization does is decide — thousands of times a day, mostly by rules nobody ever "
-            "wrote down."
+            "Approve or decline. Escalate or handle it. Refund or refuse. Strip away the software "
+            "and the org chart, and this is what a company does all day."
         ),
         points=(
-            "<strong>The reasoning is institutional.</strong> Which evidence counts, which exception "
-            "overrides, when to stop and ask a human — accumulated over years, held in people's heads.",
-            "<strong>It lives everywhere and nowhere.</strong> Policy documents, procedure notes, "
-            "precedent, tribal knowledge, and the one analyst who remembers why the threshold is 5,000.",
-            "<strong>Now execution is being handed to agents.</strong> The judgment is what an agent "
-            "needs most, and it is the one thing no system hands over.",
+            "<strong>The know-how is real, and it was expensive.</strong> Which evidence counts, "
+            "which exception beats which rule, when to stop and ask a person. It took years to build up.",
+            "<strong>Almost none of it is written down.</strong> It lives in policy documents, in "
+            "precedent, and in the one person who remembers why the limit is 5,000.",
+            "<strong>Now AI is doing the work.</strong> And that know-how is exactly the thing nobody "
+            "can hand it.",
         ),
         figure="deck-decision-engine.svg",
         figure_alt=(
@@ -1896,49 +1895,49 @@ SLIDES: tuple[Slide, ...] = (
             "an arrow labelled judgment leading to a box of decisions: approve, reject, escalate, "
             "hold."
         ),
-        figure_caption="The arrow is the asset. It is also the part that was never written down.",
+        figure_caption="The arrow is the valuable part. It is also the part nobody wrote down.",
     ),
     Slide(
         anchor="black-box",
         kicker="02 — The problem",
-        heading="When the agent gets it wrong, nobody can say why",
+        heading="When the AI gets it wrong, nobody can say why",
         lede=(
-            "Business rules, the system prompt, application code, and statistical weights are mixed "
-            "into one object. A wrong answer comes out of all four at once."
+            "Company rules, the instructions given to the model, ordinary software code, and the "
+            "model's own guesswork all end up mixed into one thing."
         ),
         points=(
-            "<strong>There is no seam to test at.</strong> Prompt ambiguity, a code path, or a "
-            "hallucination — the failure looks identical from outside.",
-            "<strong>Audit gets behaviour, not an artifact.</strong> You can show a reviewer what the "
-            "system did. You cannot hand them what it was supposed to do.",
-            "<strong>It cannot move.</strong> Change framework, vendor, or model and the judgment is "
-            "reconstructed from memory rather than migrated.",
-            "<strong>Improvement is guesswork.</strong> With no stated intent, there is nothing for a "
-            "change to be measured against.",
+            "<strong>You cannot isolate the cause.</strong> Were the instructions unclear? Was it a "
+            "bug? Did the model simply make something up? From outside, all three look the same.",
+            "<strong>Auditors get behaviour, not a document.</strong> You can show someone what the "
+            "system did. You cannot show them what it was supposed to do.",
+            "<strong>It cannot move.</strong> Switch tools, vendors, or models and someone rebuilds "
+            "the reasoning from memory.",
+            "<strong>You cannot tell whether a change helped.</strong> With nothing written down, "
+            "there is nothing to measure against.",
         ),
         figure="deck-black-box.svg",
         figure_alt=(
-            "A single hatched box containing business rules, the system prompt, application code, and "
-            "model weights together, with question marks pressing in from all four sides."
+            "A single hatched box containing company rules, AI instructions, software code, and the "
+            "model's guesswork together, with question marks pressing in from all four sides."
         ),
-        figure_caption="Four things in one box, and one output. Which part produced it?",
+        figure_caption="Four things in one box, one answer out. Which part caused it?",
     ),
     Slide(
         anchor="coding-agents",
         kicker="03 — The diagnosis",
-        heading="Coding agents work because their environment already checks the work",
+        heading="AI works best where the work checks itself",
         lede=(
-            "The most reliable agents today are not built on better models. They are built where the "
-            "environment supplies objective signals for free."
+            "The AI that genuinely delivers today is AI that writes code. Not because coding is easy "
+            "— because the work comes with an automatic referee."
         ),
         points=(
-            "<strong>Coding agents inherit a harness.</strong> Compilers, type systems, tests, "
-            "linters, version control, CI — an explicit target and fast pass/fail feedback.",
-            "<strong>Business agents inherit none of it.</strong> Ambiguous goals, evidence scattered "
-            "across documents and dashboards, meaning that depends on context, feedback that arrives "
-            "late or never.",
-            "<strong>So the fix is not a better model.</strong> What is missing is not information. It "
-            "is an explicit judgment layer, and a way to test it.",
+            "<strong>Code grades itself.</strong> It compiles or it does not. Tests pass or they "
+            "fail. The verdict arrives in seconds, and nobody has to agree on it first.",
+            "<strong>Business decisions have no referee.</strong> Goals are fuzzy, the evidence is "
+            "spread across a dozen systems, the same word means different things to different teams, "
+            "and you learn whether you were right months later.",
+            "<strong>So the missing piece is not a smarter model.</strong> It is writing the judgment "
+            "down, and having a way to check it.",
         ),
         figure="deck-coding-vs-business.png",
         figure_alt=(
@@ -1951,204 +1950,200 @@ SLIDES: tuple[Slide, ...] = (
         ),
         figure_caption=(
             "Coding agents work well because their environment already knows how to check the work. "
-            "Business agents need an explicit judgment layer and evaluation harness."
+            "Business decisions need that checking built for them."
         ),
         wide=True,
     ),
     Slide(
         anchor="knowledge-and-judgment",
         kicker="04 — The distinction",
-        heading="Knowledge answers. Judgment decides.",
+        heading="Knowing things is not the same as deciding",
         lede=(
-            "Most enterprise AI effort goes into retrieval — into knowing more. That is a different "
-            "problem from deciding well, and solving it does not solve this one."
+            "Most AI effort goes into helping the machine know more — search, retrieval, connecting "
+            "it to your documents. That is a different problem, and solving it does not solve this one."
         ),
         points=(
-            "<strong>Knowledge finds what is relevant.</strong> A knowledge base, a graph, a vector "
-            "index, an API. It holds no view on what follows from what it found.",
-            "<strong>Judgment determines what follows.</strong> Whether this case is in scope, which "
-            "rule fires, which exception overrides it, whether the evidence is sufficient, when a "
-            "human must take over.",
-            "<strong>Knowledge is an input, not a parent.</strong> Evidence sources feed a pack. They "
-            "do not sit above it, and no amount of retrieval produces the decision.",
+            "<strong>Search finds what is relevant.</strong> It has no opinion about what should "
+            "happen next.",
+            "<strong>Judgment decides what happens next.</strong> Does this case even apply? Which "
+            "rule fires? What overrides it? Is this enough to act on, or does a person need to look?",
+            "<strong>One feeds the other.</strong> Your documents and databases are inputs to a "
+            "decision. They do not make the decision, and better search will never start.",
         ),
         figure="deck-knowledge-vs-judgment.svg",
         figure_alt=(
-            "Two boxes side by side. Knowledge answers what is known — documents, tables, APIs, "
-            "retrieval and citation — and feeds Judgment, which decides what follows: applicability "
-            "and rules, exceptions and escalation, testable and portable."
+            "Two boxes side by side. Knowledge answers what do we know — documents, databases, "
+            "search results, with no opinion on what to do — and feeds Judgment, which answers so "
+            "what happens: which rule applies, what overrides it, when to ask a person."
         ),
         figure_caption="Complementary, not competing — and only one of them decides.",
     ),
     Slide(
         anchor="what-a-pack-is",
         kicker="05 — The proposal",
-        heading="Put the judgment in a document that another tool can read",
+        heading="Write the decision down in a file",
         lede=(
-            "A Judgment Pack is a portable JSON document that declares one decision — and nothing "
-            "else. No prompt, no model, no runtime is inside it."
+            "A Judgment Pack is a plain file that spells out one decision, completely. No AI inside "
+            "it, no software inside it. Just the reasoning, in a form a machine can act on."
         ),
         points=(
-            "<strong>It states intent, not just logic.</strong> What decision is being made, what "
-            "evidence may support it, and when the pack applies at all.",
-            "<strong>It states the messy parts explicitly.</strong> Exceptions that override the "
-            "ordinary outcome, what happens when a fact is unknown, and when a human must take over — "
-            "the nuance that hand-written code buries and a prompt leaves to chance.",
-            "<strong>Outcomes are a closed set.</strong> A pack cannot invent a result that was never "
-            "declared.",
-            "<strong>It is versioned, diffable, and reviewable.</strong> Judgment becomes a pull "
-            "request rather than a conversation.",
+            "<strong>It states the intent, not only the logic.</strong> What is being decided, and "
+            "why — so a reader can tell whether the rules actually serve the goal.",
+            "<strong>It puts the awkward parts in writing.</strong> The exceptions, what to do when "
+            "a fact is missing, and when a person has to take over — the nuance code buries and "
+            "instructions leave to chance.",
+            "<strong>The possible answers are fixed in advance.</strong> It cannot return something "
+            "nobody approved.",
+            "<strong>It reviews like code.</strong> Version it, compare two versions, and argue about "
+            "a change in writing rather than in a meeting.",
         ),
         figure="deck-pack-anatomy.svg",
         figure_alt=(
-            "One document listing, in order: decision, evidence, applicability, rules, exceptions, "
-            "uncertainty, outcomes, and escalation — each with a one-line gloss."
+            "One document listing, in order: the decision, evidence, when it applies, rules, "
+            "exceptions, missing facts, answers, and ask a human — each with a one-line gloss."
         ),
-        figure_caption="One document, one decision. The JSON is the serialization; the contract is the point.",
+        figure_caption="One file, one decision. The file format is the easy part; the contents are the point.",
     ),
     Slide(
         anchor="conformance",
         kicker="06 — The discipline",
-        heading="It says what it checked, and refuses to imply the rest",
+        heading="A green checkmark that does not mean “approved”",
         lede=(
-            "The failure mode for a format like this is a green checkmark that a reader takes as "
-            "approval. The specification is built to make that impossible to say by accident."
+            "The obvious way to ruin this is a tool that says PASS and lets everyone read it as "
+            "“this decision is fine.” The design works hard to make that impossible to say by accident."
         ),
         points=(
-            "<strong>Four claims are checkable.</strong> That the bytes parse, that the document fits "
-            "the schema, that its references hold, and — as of this draft — that an implementation "
-            "computes the specified result.",
-            "<strong>Three are deliberately out of reach.</strong> Whether the evidence is true, "
-            "whether anyone accountable authorized this, and whether acting on it here is safe.",
-            "<strong>Passing is never permission.</strong> A conforming pack is not a correct, "
-            "authorized, or safe pack, and no implementation is allowed to imply otherwise.",
+            "<strong>Four things can be checked automatically.</strong> That the file opens, that it "
+            "is put together correctly, that it does not contradict itself, and that two separate "
+            "tools reach the same answer from it.",
+            "<strong>Three things are deliberately out of reach.</strong> Whether the facts are "
+            "actually true. Whether anyone with authority approved this. Whether it is safe to act "
+            "on here.",
+            "<strong>Passing is never permission.</strong> A valid file is not a correct, authorised, "
+            "or safe one — and nothing built on this is allowed to imply that it is.",
         ),
         figure="deck-conformance-line.svg",
         figure_alt=(
-            "Four filled rows — carrier, structural, semantic, evaluator — above a drawn line, with "
-            "factual grounding, authorization, and operational fitness in outline below it. The "
-            "specification stops at the line on purpose."
+            "Four filled rows — readable, well-formed, consistent, agreed — above a drawn line, with "
+            "is it true, is it allowed, and is it safe in outline below it. Nothing below the line is "
+            "ever claimed."
         ),
         figure_caption="Drawing this line is the design. Blurring it is the whole risk.",
     ),
     Slide(
         anchor="portability",
         kicker="07 — The test",
-        heading="Two implementations, written separately, agree byte for byte",
+        heading="Built twice, separately, with identical answers",
         lede=(
-            "Portability is a claim that has to be earned by measurement, not asserted in a README. "
-            "So the project measured it."
+            "“Portable” is easy to claim and hard to earn. So it was tested rather than asserted."
         ),
         points=(
-            "<strong>The result is pinned, not described.</strong> One decision produces one portable "
-            "disposition, canonicalized under RFC 8785 so two engines can be compared as bytes rather "
-            "than as prose.",
-            "<strong>A second evaluator was written clean-room</strong> — from the specification text "
-            "alone, inside an information barrier, by a different model family.",
-            "<strong>20 of 20 rows byte-agree</strong> across the frozen evaluation corpus, with every "
-            "serialization rule that could diverge producing identical bytes.",
-            "<strong>Where they disagreed, the prose was fixed.</strong> An early divergence over how "
-            "a handoff serialized located an ambiguity in the specification — which is what the "
-            "exercise is for.",
+            "<strong>One decision, one answer — down to the character.</strong> The result is pinned "
+            "precisely enough that two programs can be compared automatically instead of by eye.",
+            "<strong>The second version was built in isolation.</strong> From the written spec alone, "
+            "in a different programming language, with no access to the first.",
+            "<strong>All 20 test cases matched exactly.</strong> Every detail that could have drifted "
+            "between them did not.",
+            "<strong>Where they disagreed, the writing got fixed.</strong> An early mismatch showed "
+            "the spec was ambiguous. Catching that is the entire point of the exercise.",
         ),
         note=(
-            "Stated plainly, because it matters: both implementations trace to the same maintainer's "
-            "direction. That agreement corroborates that the specification is precise. It is not "
-            "independent evidence of interoperability, and the project does not present it as such."
+            "Said plainly: both were built under the same maintainer. That shows the spec is precise "
+            "enough to follow. It is <em>not</em> proof that two unrelated companies would agree, and "
+            "it is not presented as such."
         ),
         figure="deck-portable-result.svg",
         figure_alt=(
-            "One pack and its facts feed two separately written implementations — a Go reference "
-            "runtime and a clean-room evaluator — and both produce one disposition, byte-identical "
-            "after RFC 8785 canonicalization."
+            "One decision file feeds two separately built programs — the reference tool, built by the "
+            "project, and an independent rebuild, built from the written spec alone. Both produce the "
+            "same answer, identical character for character."
         ),
-        figure_caption="A disagreement between two honest readers is a defect in the prose.",
+        figure_caption="If two careful readers disagree, the writing was unclear — so the writing gets fixed.",
     ),
     Slide(
         anchor="inputs",
         kicker="08 — The open edge",
-        heading="A pack says which evidence matters. It cannot say the evidence is real.",
+        heading="A file can say which evidence matters. It cannot say the evidence is real.",
         lede=(
-            "An agent that can assert a fact can also invent one. That gap is genuine, it sits outside "
-            "the specification, and the project is researching it in the open rather than specifying "
-            "it early."
+            "An AI that can state a fact can also invent one. That is a genuine hole, it sits outside "
+            "this specification, and it is being worked on in the open rather than quietly patched."
         ),
         points=(
-            "<strong>Take the model out of the proof path.</strong> A reference gateway runs the "
-            "source itself and signs the result; a caller cannot supply a receipt it did not earn.",
-            "<strong>Sessions are chained and sealed</strong>, which catches the two things a store "
-            "cannot attest about itself — a whole session replayed into it, or its tail rolled back.",
-            "<strong>Verification needs only the public key</strong>, so the power to check confers no "
-            "power to forge. The format and the verifier are open on purpose.",
+            "<strong>Let the system fetch the data, not the AI.</strong> A reference service runs the "
+            "lookup itself and signs the result, so an AI cannot hand in a number it made up.",
+            "<strong>Each session is sealed when it closes.</strong> That catches the two tricks a "
+            "stored record cannot catch by itself: replaying an old session, or quietly deleting the "
+            "end of one.",
+            "<strong>Anyone can check it; nobody extra can fake it.</strong> Checking needs only a "
+            "public key. The format and the checker are open on purpose — an assurance nobody can "
+            "verify is worth nothing.",
         ),
         note=(
-            "The ceiling is stated up front and does not move: this proves <strong>byte-lineage, not "
-            "truth</strong>. It establishes what a judgment was computed over — never that those "
-            "bytes are accurate, that the named source produced them, or that acting on the result is "
-            "authorized."
+            "The limit is stated up front and does not move: this proves <strong>where the data came "
+            "from, not that it is correct</strong>. It shows the numbers a decision was based on were "
+            "not tampered with. It says nothing about whether those numbers were right."
         ),
         figure="deck-attested-inputs.svg",
         figure_alt=(
-            "A source is run by a gateway that signs each result into a receipt. Receipts are chained "
-            "per session and the session is sealed; a verifier checks the chain and the seal using "
-            "only the public key."
+            "A source is fetched and signed by a gateway, producing a receipt. Receipts are linked in "
+            "order and the session is sealed. A verifier checks the chain and the seal using only a "
+            "public key."
         ),
-        figure_caption="Proof of the bytes a judgment was computed over — and nothing beyond that.",
+        figure_caption="Shows the data was not tampered with — never that the data is correct.",
     ),
     Slide(
         anchor="evidence",
         kicker="09 — The method",
-        heading="The published record includes the results that went against us",
+        heading="We publish the results that went against us",
         quote=(
-            "“A standard earns trust by shipping a small, testable core and being honest about what is "
-            "still a proposal.”"
+            "“A standard earns trust by shipping something small that works, and being honest about "
+            "everything that does not yet.”"
         ),
         lede=(
-            "Studies are preregistered before they run, encoders work blind to the hypothesis, and "
-            "negative results are published at the same volume as positive ones. Three examples, all "
-            "unflattering:"
+            "Experiments are written down before they are run, the people doing the work do not know "
+            "which result is hoped for, and failures get published as loudly as successes. Three "
+            "examples, none of them flattering:"
         ),
         points=(
-            "<strong>A composition grammar closed 0 of 5 items</strong> it was designed to close. Five "
-            "independent encoders each produced a valid graph with zero edges rather than declare one "
-            "that would be unfaithful.",
-            "<strong>An estimate of “about 19 of 25” was withdrawn</strong> and re-measured at 3 — the "
-            "figure had been read off shape names rather than off the facts, and it had already "
-            "propagated into an open proposal.",
-            "<strong>A study's own central premise was found false</strong> by its adversarial review. "
-            "The headline was rewritten to say so, four endpoints were relabelled as unable to fail, "
-            "and the flattering summary table was deleted rather than defended.",
+            "<strong>A feature meant to solve a problem solved none of it.</strong> Five people tried "
+            "independently, and all five concluded the honest answer was to build nothing.",
+            "<strong>A number we had published was six times too high.</strong> “About 19 of 25” was "
+            "re-measured properly at 3. It had already been quoted elsewhere. We corrected it in public.",
+            "<strong>A study's core assumption turned out to be false — and we found it ourselves.</strong> "
+            "The headline was rewritten to say so, and the flattering summary table was deleted "
+            "rather than defended.",
         ),
         note=(
-            "This is also why the project calls itself a research preview and not a standard. The "
-            "roadmap is gated on evidence — independent implementations, external reviews, real "
-            "adopters — and none of those gates is quietly marked satisfied."
+            "This is also why it is called a research preview and not a standard. The path to a real "
+            "1.0 is gated on evidence — outside implementations, outside reviews, real users — and "
+            "none of those gates is quietly ticked off."
         ),
     ),
     Slide(
         anchor="status",
         kicker="10 — Where it actually stands",
-        heading="Small, shipped, and honest about the rest",
+        heading="Small, working, and honest about the rest",
         lede=(
-            "Research preview 0.2.0-draft. No compatibility guarantee, and not for consequential "
-            "production decisions today."
+            "A research preview. No stability promises yet, and not something to put in front of a "
+            "consequential real decision today."
         ),
         points=(
-            "<strong>Shipped:</strong> the pack document and its carrier, structural, and semantic "
-            "conformance; the evaluator conformance class with one portable result; a 47-case document "
-            "corpus and a 20-case evaluation corpus.",
-            "<strong>Implemented:</strong> a vendor-neutral reference runtime, plus a second "
-            "clean-room evaluator kept separate precisely so agreement means something.",
-            "<strong>Proposed, not shipped:</strong> graph composition, the planner interface, pack "
-            "discovery and manifests — each tracked as an open RFC with its evidence bar stated.",
-            "<strong>Open:</strong> trustworthy input acquisition, and everything the roadmap's "
-            "later stages still gate on.",
+            "<strong>Works today:</strong> the file format, the checks that tell you a file is sound, "
+            "and an agreed way to turn one into an answer — held in place by 47 tests on the format "
+            "and 20 on the answers.",
+            "<strong>Built:</strong> a reference tool anyone can run, plus a second independent one "
+            "kept deliberately separate so that agreement between them means something.",
+            "<strong>Proposed, not built:</strong> chaining decisions together, choosing which "
+            "decision applies, and a shared directory for finding them. Each is an open proposal with "
+            "its bar for acceptance written down.",
+            "<strong>Still open:</strong> proving where evidence came from, and everything the later "
+            "stages depend on.",
         ),
         actions=(
             ("Read the specification", "spec/0.2.0-draft/index.html", False),
-            ("Browse worked examples", "examples/index.html", True),
-            ("See the implementations", "implementations/index.html", True),
-            ("Evidence-gated roadmap", "project/roadmap/index.html", True),
+            ("See a worked example", "examples/index.html", True),
+            ("Try the tools", "implementations/index.html", True),
+            ("What has to be proven next", "project/roadmap/index.html", True),
         ),
     ),
 )

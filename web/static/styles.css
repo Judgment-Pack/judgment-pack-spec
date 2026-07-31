@@ -1315,8 +1315,10 @@ body.deck .page-meta {
   grid-template-columns: minmax(0, 1fr);
 }
 
+/* The figure carries the idea, so it gets the larger share of the row and the
+   bullets read as support beside it. */
 .slide-body.has-figure {
-  grid-template-columns: minmax(0, 23rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
 }
 
 .slide-body.figure-wide {
@@ -1455,6 +1457,86 @@ body.deck .page-meta {
 .deck-rail a:hover,
 .deck-rail a:focus-visible {
   background: var(--accent);
+  transform: scale(1.3);
+}
+
+/* --- which section am I on? -------------------------------------------------
+
+   With no JavaScript there is no scroll-spy, so the active dot is done twice,
+   and the two cover different cases:
+
+   1. `:target` — after a dot (or any in-page link) is followed, the URL names a
+      section and `:has()` lets the matching dot light up. Works everywhere
+      `:has()` does, but only after a click.
+   2. A scroll-driven view timeline — tracks free scrolling too, which is the
+      case (1) cannot see. Newer, so it is behind `@supports` and simply does
+      not apply where it is unsupported.
+
+   Both are progressive: without either, the rail is still a working set of
+   links. The timelines are keyed by position rather than by anchor name, so
+   adding a slide means extending the lists below, not rewriting them. */
+
+body.deck:has(#decision-engine:target) .deck-rail a[href="#decision-engine"],
+body.deck:has(#black-box:target) .deck-rail a[href="#black-box"],
+body.deck:has(#coding-agents:target) .deck-rail a[href="#coding-agents"],
+body.deck:has(#knowledge-and-judgment:target) .deck-rail a[href="#knowledge-and-judgment"],
+body.deck:has(#what-a-pack-is:target) .deck-rail a[href="#what-a-pack-is"],
+body.deck:has(#conformance:target) .deck-rail a[href="#conformance"],
+body.deck:has(#portability:target) .deck-rail a[href="#portability"],
+body.deck:has(#inputs:target) .deck-rail a[href="#inputs"],
+body.deck:has(#evidence:target) .deck-rail a[href="#evidence"],
+body.deck:has(#status:target) .deck-rail a[href="#status"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.4);
+}
+
+@supports (animation-timeline: view()) {
+  /* Hoist each slide's timeline so the rail, which is not a descendant of the
+     slides, can still reference it. */
+  body.deck {
+    timeline-scope: --slide-1, --slide-2, --slide-3, --slide-4, --slide-5,
+      --slide-6, --slide-7, --slide-8, --slide-9, --slide-10;
+  }
+
+  .slide:nth-child(1) { view-timeline-name: --slide-1; }
+  .slide:nth-child(2) { view-timeline-name: --slide-2; }
+  .slide:nth-child(3) { view-timeline-name: --slide-3; }
+  .slide:nth-child(4) { view-timeline-name: --slide-4; }
+  .slide:nth-child(5) { view-timeline-name: --slide-5; }
+  .slide:nth-child(6) { view-timeline-name: --slide-6; }
+  .slide:nth-child(7) { view-timeline-name: --slide-7; }
+  .slide:nth-child(8) { view-timeline-name: --slide-8; }
+  .slide:nth-child(9) { view-timeline-name: --slide-9; }
+  .slide:nth-child(10) { view-timeline-name: --slide-10; }
+
+  /* `fill-mode: none` is what makes this a spy rather than a latch: outside the
+     range the keyframe stops applying and the dot returns to rest. */
+  .deck-rail a {
+    animation: deck-dot-active linear;
+    animation-fill-mode: none;
+    animation-range: cover 35% cover 65%;
+  }
+
+  .deck-rail a:nth-child(1) { animation-timeline: --slide-1; }
+  .deck-rail a:nth-child(2) { animation-timeline: --slide-2; }
+  .deck-rail a:nth-child(3) { animation-timeline: --slide-3; }
+  .deck-rail a:nth-child(4) { animation-timeline: --slide-4; }
+  .deck-rail a:nth-child(5) { animation-timeline: --slide-5; }
+  .deck-rail a:nth-child(6) { animation-timeline: --slide-6; }
+  .deck-rail a:nth-child(7) { animation-timeline: --slide-7; }
+  .deck-rail a:nth-child(8) { animation-timeline: --slide-8; }
+  .deck-rail a:nth-child(9) { animation-timeline: --slide-9; }
+  .deck-rail a:nth-child(10) { animation-timeline: --slide-10; }
+}
+
+@keyframes deck-dot-active {
+  0%,
+  100% {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.4);
+  }
 }
 
 @media (width < 60rem) {

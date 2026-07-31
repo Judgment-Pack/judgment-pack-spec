@@ -69,7 +69,7 @@ def black_box() -> str:
     p.append(ink(rough_rect(pen, 176, 48, 248, 168, 3.6), 2.4))
 
     for index, label in enumerate(
-        ("business rules", "system prompt", "application code", "model weights")
+        ("company rules", "AI instructions", "software code", "the model's guesswork")
     ):
         p.append(Text(300, 84 + index * 34, label, 13.5, "500").render())
 
@@ -83,7 +83,7 @@ def black_box() -> str:
     p.append(ink(rough_arrow(pen, 516, 86, 432, 108, 2.4), 1.8, MUTED))
     p.append(ink(rough_arrow(pen, 516, 182, 432, 158, 2.4), 1.8, MUTED))
 
-    p.append(Text(300, 244, "Wrong answer. Which part was wrong?", 13.5, "600", fill=MUTED).render())
+    p.append(Text(300, 244, "Wrong answer. Which part caused it?", 13.5, "600", fill=MUTED).render())
 
     return document(
         width=600,
@@ -107,22 +107,22 @@ def knowledge_vs_judgment() -> str:
     pen = Pen(41)
     p = []
 
-    p.extend(box(pen, 24, 56, 216, 150, "Knowledge", "answers what is known", STONE, 17))
+    p.extend(box(pen, 24, 56, 216, 150, "Knowledge", "what do we know?", STONE, 17))
     for index, line in enumerate(
-        ("documents, tables, APIs", "retrieval and citation", "no view on what follows")
+        ("documents, databases,", "search results", "— no opinion on what to do")
     ):
         p.append(Text(132, 236 + index * 22, line, 12.5, "400", fill=MUTED).render())
 
-    p.extend(box(pen, 360, 56, 216, 150, "Judgment", "decides what follows", GREEN, 17))
+    p.extend(box(pen, 360, 56, 216, 150, "Judgment", "so what happens?", GREEN, 17))
     for index, line in enumerate(
-        ("applicability and rules", "exceptions and escalation", "testable, and portable")
+        ("which rule applies,", "what overrides it,", "when to ask a person")
     ):
         p.append(Text(468, 236 + index * 22, line, 12.5, "400", fill=MUTED).render())
 
     p.append(ink(rough_arrow(pen, 252, 131, 348, 131, 2.4, 11), 2.1))
     p.append(Text(300, 118, "feeds", 12.5, "600", fill=MUTED).render())
 
-    p.append(Text(300, 32, "An input, not a parent", 15, "700").render())
+    p.append(Text(300, 32, "One feeds the other", 15, "700").render())
     return document(
         width=600,
         height=310,
@@ -151,14 +151,14 @@ def pack_anatomy() -> str:
     p.append(ink(rough_rect(pen, 88, 44, 504, 296, 3.4), 2.3))
 
     rows = (
-        ("decision", "what is being decided, and why", GREEN),
-        ("evidence", "what may support it", None),
-        ("applicability", "when this pack applies at all", None),
-        ("rules", "what follows from the evidence", None),
-        ("exceptions", "what overrides the ordinary outcome", None),
-        ("uncertainty", "what happens when a fact is unknown", None),
-        ("outcomes", "the closed set of permitted results", None),
-        ("escalation", "when a human must take over", SAND),
+        ("the decision", "what is being decided, and why", GREEN),
+        ("evidence", "what facts it needs", None),
+        ("when it applies", "and when it does not", None),
+        ("rules", "what follows from those facts", None),
+        ("exceptions", "what overrides the normal answer", None),
+        ("missing facts", "what to do when something is unknown", None),
+        ("answers", "the fixed set it may return", None),
+        ("ask a human", "when a person must take over", SAND),
     )
     for index, (name, gloss, fill) in enumerate(rows):
         top = 62 + index * 35
@@ -167,7 +167,7 @@ def pack_anatomy() -> str:
         p.append(Text(114, top + 19, name, 13, "700", anchor="start").render())
         p.append(Text(240, top + 19, gloss, 12, "400", anchor="start", fill=MUTED).render())
 
-    p.append(Text(340, 364, "Portable JSON. No prompt, no model, no runtime inside it.", 12.5, "500", fill=MUTED).render())
+    p.append(Text(340, 364, "A plain file. No AI, no code, no vendor inside it.", 12.5, "500", fill=MUTED).render())
     return document(
         width=680,
         height=384,
@@ -192,18 +192,18 @@ def pack_anatomy() -> str:
 def conformance_line() -> str:
     pen = Pen(71)
     p = []
-    p.append(Text(300, 26, "Four claims the format can make — and three it cannot", 14, "700").render())
+    p.append(Text(300, 26, "What can be checked — and what never can", 14, "700").render())
 
     inside = (
-        ("Carrier", "the bytes parse as declared"),
-        ("Structural", "the document fits the schema"),
-        ("Semantic", "its references and cross-field rules hold"),
-        ("Evaluator", "an implementation computes the specified result"),
+        ("Readable", "the file opens, and is what it says it is"),
+        ("Well-formed", "every part is present and correctly shaped"),
+        ("Consistent", "nothing inside it contradicts anything else"),
+        ("Agreed", "two separate tools get the same answer from it"),
     )
     outside = (
-        ("Factual grounding", "the evidence is actually true"),
-        ("Authorization", "someone accountable permitted this"),
-        ("Operational fitness", "acting on it here is safe"),
+        ("Is it true?", "whether the facts behind it are real"),
+        ("Is it allowed?", "whether anyone with authority approved it"),
+        ("Is it safe?", "whether acting on it here is wise"),
     )
 
     for index, (name, gloss) in enumerate(inside):
@@ -216,7 +216,7 @@ def conformance_line() -> str:
     # the line the specification stops at
     p.append(ink(rough_line(pen, 26, 232, 574, 232, 2.6), 2.6, "#8d3026"))
     p.append(ink(rough_line(pen, 26, 236, 574, 236, 2.6), 1.4, "#8d3026", 0.5))
-    p.append(Text(300, 254, "the specification stops here — on purpose", 12.5, "700", fill="#8d3026").render())
+    p.append(Text(300, 254, "nothing below this line is ever claimed", 12.5, "700", fill="#8d3026").render())
 
     for index, (name, gloss) in enumerate(outside):
         top = 268 + index * 44
@@ -247,24 +247,24 @@ def conformance_line() -> str:
 def portable_result() -> str:
     pen = Pen(89)
     p = []
-    p.append(Text(300, 26, "Same pack, same facts, different engines", 15, "700").render())
+    p.append(Text(300, 26, "Same file, same facts, different software", 15, "700").render())
 
-    p.extend(box(pen, 216, 46, 168, 56, "one pack + facts", None, GREEN, 13.5))
+    p.extend(box(pen, 216, 46, 168, 56, "one decision file", None, GREEN, 13.5))
 
     p.append(ink(rough_arrow(pen, 250, 106, 150, 142, 2.4), 1.9))
     p.append(ink(rough_arrow(pen, 350, 106, 450, 142, 2.4), 1.9))
 
-    p.extend(box(pen, 44, 146, 212, 60, "Go reference runtime", None, None, 13))
-    p.extend(box(pen, 344, 146, 212, 60, "clean-room evaluator", None, None, 13))
-    p.append(Text(150, 222, "written from the spec", 11.5, "400", fill=MUTED).render())
-    p.append(Text(450, 222, "written from the spec, separately", 11.5, "400", fill=MUTED).render())
+    p.extend(box(pen, 44, 146, 212, 60, "the reference tool", None, None, 13))
+    p.extend(box(pen, 344, 146, 212, 60, "an independent rebuild", None, None, 13))
+    p.append(Text(150, 222, "built by the project", 11.5, "400", fill=MUTED).render())
+    p.append(Text(450, 222, "built from the written spec alone", 11.5, "400", fill=MUTED).render())
 
     p.append(ink(rough_arrow(pen, 150, 232, 250, 268, 2.4), 1.9))
     p.append(ink(rough_arrow(pen, 450, 232, 350, 268, 2.4), 1.9))
 
-    p.extend(box(pen, 176, 272, 248, 62, "one disposition", "byte-identical after RFC 8785", SAND, 15))
+    p.extend(box(pen, 176, 272, 248, 62, "the same answer", "identical, character for character", SAND, 15))
 
-    p.append(Text(300, 358, "If two independent readers disagree, the prose was ambiguous — that is the point of the test.", 12, "500", fill=MUTED).render())
+    p.append(Text(300, 358, "If two careful readers disagree, the writing was unclear — and the writing gets fixed.", 12, "500", fill=MUTED).render())
     return document(
         width=600,
         height=378,
@@ -287,16 +287,16 @@ def portable_result() -> str:
 def attested_inputs() -> str:
     pen = Pen(101)
     p = []
-    p.append(Text(300, 24, "The model cannot forge the signature", 15, "700").render())
+    p.append(Text(300, 24, "The AI never touches the evidence", 15, "700").render())
 
     p.extend(box(pen, 24, 52, 130, 58, "source", None, None, 13.5))
     p.append(ink(rough_arrow(pen, 158, 81, 210, 81, 2.2, 10), 1.9))
-    p.extend(box(pen, 214, 44, 172, 74, "gateway", "signs each result", GREEN, 15))
+    p.extend(box(pen, 214, 44, 172, 74, "gateway", "fetches it and signs it", GREEN, 15))
     p.append(ink(rough_arrow(pen, 390, 81, 442, 81, 2.2, 10), 1.9))
     p.extend(box(pen, 446, 52, 130, 58, "receipt", None, SAND, 13.5))
 
     # the chain of receipts, sealed
-    p.append(Text(300, 148, "chained per session, then sealed", 12.5, "600", fill=MUTED).render())
+    p.append(Text(300, 148, "linked in order, then sealed", 12.5, "600", fill=MUTED).render())
     for index in range(4):
         left = 148 + index * 78
         p.append(ink(rough_rect(pen, left, 160, 58, 34, 2.2), 1.7))
@@ -309,9 +309,9 @@ def attested_inputs() -> str:
     p.append(Text(411, 182, "seal", 12, "700").render())
 
     p.append(ink(rough_arrow(pen, 300, 202, 300, 236, 2.2, 10), 1.9))
-    p.extend(box(pen, 180, 240, 240, 56, "verifier", "public key only", None, 14.5))
+    p.extend(box(pen, 180, 240, 240, 56, "verifier", "needs only a public key", None, 14.5))
 
-    p.append(Text(300, 324, "Proof of the bytes a judgment was computed over — never proof that they are true.", 12, "600", fill="#8d3026").render())
+    p.append(Text(300, 324, "Shows the data was not tampered with. Never that the data is correct.", 12, "600", fill="#8d3026").render())
     return document(
         width=600,
         height=344,
@@ -335,7 +335,7 @@ def attested_inputs() -> str:
 def decision_engine() -> str:
     pen = Pen(131)
     p = []
-    p.append(Text(300, 26, "What actually leaves the building", 15, "700").render())
+    p.append(Text(300, 26, "What a company actually produces", 15, "700").render())
 
     p.append(wash(rough_region(pen, 40, 48, 200, 200, 3.4), STONE))
     p.append(ink(rough_rect(pen, 40, 48, 200, 200, 3.4), 2.2))
@@ -352,8 +352,8 @@ def decision_engine() -> str:
     for index, line in enumerate(("approve  ·  reject", "escalate  ·  hold")):
         p.append(Text(443, 146 + index * 26, line, 13, "500", fill=MUTED).render())
 
-    p.append(Text(300, 276, "Hand execution to an agent and this arrow is the only thing that matters —", 12.5, "500", fill=MUTED).render())
-    p.append(Text(300, 296, "and the only thing nobody wrote down.", 12.5, "700").render())
+    p.append(Text(300, 276, "Hand the work to AI and this arrow is what matters most —", 12.5, "500", fill=MUTED).render())
+    p.append(Text(300, 296, "and it is the one thing nobody wrote down.", 12.5, "700").render())
     return document(
         width=600,
         height=316,
@@ -363,7 +363,7 @@ def decision_engine() -> str:
             "An organization box holds policy, precedent, expertise, and hard-won exceptions. An "
             "arrow labelled judgment leads from it to a box of decisions: approve, reject, escalate, "
             "hold. When execution is handed to an agent, that arrow is the only thing that matters — "
-            "and the only thing nobody wrote down."
+            "and it is the one thing nobody wrote down."
         ),
         body="\n".join("  " + part for part in p),
     )

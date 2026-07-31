@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 344" role="img" aria-labelledby="ai-t ai-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
   <title id="ai-t">Attested inputs: signed receipts, a sealed session, and a public-key verifier</title>
   <desc id="ai-d">A source is run by the gateway, which signs each result into a receipt. Receipts are chained per session and the session is then sealed. A verifier checks the chain and the seal using only the public key, so checking grants no power to forge. The mechanism proves the byte-lineage of the inputs a judgment was computed over — never that those bytes are true.</desc>
-  <text x="300" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">The model cannot forge the signature</text>
+  <text x="300" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">The AI never touches the evidence</text>
   <path d="M23.9,53.1 Q89,50.7 153.8,52.5 M154.9,51.2 Q156.2,81 154.9,109.7 M155,109.5 Q89,109.3 22.8,109 M23.2,110.8 Q24.5,81 24.1,51.3 M23.7,51 Q89,50.9 154,52.9 M154,51 Q151.7,81 153.4,110 M154.5,110.4 Q89,108.9 24.3,109.1 M23.1,109.3 Q25.9,81 24.5,51.7" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <text x="89" y="86" text-anchor="middle" font-size="13.5" font-weight="600" fill="#152426">source</text>
   <path d="M158.8,80.3 Q184,79.7 209.2,80.3 M209.7,80.9 Q206.2,84.4 201.3,86 M209.6,81.4 Q205.8,78.3 201.3,75.5" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <path d="M213.1,45 Q300,44 387,44.4 Q385.9,81 385.5,117 Q300,120.1 213.4,118.6 Q215.1,81 215.1,43.6 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
   <path d="M215,45 Q300,46.3 387,44 M385,45.1 Q387.5,81 386.4,118.5 M386.8,117.9 Q300,117.7 213.1,119.1 M214.4,119.2 Q213.4,81 212.8,43.9 M213.4,43.6 Q300,46.2 386.6,45.1 M386.4,44.3 Q384.3,81 385.8,117.1 M386,116.8 Q300,116.3 213,118.4 M214.3,118.2 Q213,81 214.5,44.2" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <text x="300" y="79" text-anchor="middle" font-size="15" font-weight="600" fill="#152426">gateway</text>
-  <text x="300" y="97" text-anchor="middle" font-size="12" font-weight="400" fill="#566466">signs each result</text>
+  <text x="300" y="97" text-anchor="middle" font-size="12" font-weight="400" fill="#566466">fetches it and signs it</text>
   <path d="M390,81.4 Q416,79.5 441.7,80.4 M442,81 Q437.8,83.7 433.3,86.3 M441.8,81.4 Q437.8,78.3 433.1,75.8" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <path d="M446.5,51.9 Q511,50.5 576.5,51.3 Q573.6,81 577.1,110.3 Q511,108 445.7,111 Q444.4,81 445.2,51.2 Z" fill="#fff0d8" stroke="none" opacity="0.55"/>
   <path d="M445.8,51.6 Q511,49.6 575.9,51.5 M575.8,52.5 Q574.7,81 576.5,109.5 M575.7,109.5 Q511,111.8 446.9,110 M446.1,109.5 Q448.6,81 446.6,51 M446.7,51.3 Q511,53.6 575.6,52.1 M576.3,52.8 Q577.4,81 576,110.6 M575.3,109.5 Q511,110.2 446.2,108.8 M445.7,109.7 Q448.4,81 445.9,51.8" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <text x="511" y="86" text-anchor="middle" font-size="13.5" font-weight="600" fill="#152426">receipt</text>
-  <text x="300" y="148" text-anchor="middle" font-size="12.5" font-weight="600" fill="#566466">chained per session, then sealed</text>
+  <text x="300" y="148" text-anchor="middle" font-size="12.5" font-weight="600" fill="#566466">linked in order, then sealed</text>
   <path d="M148.3,160.4 Q177,158 206.7,159.5 M206,159.7 Q204.9,177 206.6,194.7 M206.6,193.6 Q177,192.6 148.4,194.4 M147.6,194.5 Q148.3,177 147.5,159.5 M147.2,160 Q177,161.9 205.3,159.2 M205.4,159.9 Q205.9,177 206.5,194.4 M205.6,194.1 Q177,192.8 147.5,193.4 M148.7,194.1 Q146,177 147.3,160.7" fill="none" stroke="#152426" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <path d="M205.6,176.8 Q216,178.6 225.4,176.9" fill="none" stroke="#566466" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <path d="M226.3,159.5 Q255,159.3 283.9,160.4 M283.8,160.2 Q285.6,177 284.1,194.9 M284.4,193.8 Q255,193.9 226.4,194 M225.2,193.8 Q225.3,177 225.2,159.6 M226.4,160.7 Q255,161.2 283.3,159.6 M284.1,159.6 Q284.7,177 283.3,194 M284.1,194.2 Q255,193.3 226.5,194.3 M226.9,194.6 Q225.1,177 225.5,159.5" fill="none" stroke="#152426" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
@@ -29,6 +29,6 @@
   <path d="M299.2,201.1 Q298.6,219 299.8,236.6 M300.1,235.7 Q297.6,231.6 295.2,227.7 M300.3,236.1 Q302.6,231.7 305.2,227.2" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <path d="M179.8,238.9 Q300,240.1 419.5,240.2 M419.9,239.4 Q421.1,268 421,296.5 M420.1,296.7 Q300,296.7 179.9,295.9 M180.9,295.5 Q181.4,268 179,239.8 M181.2,239.9 Q300,237.8 419.7,239.5 M418.9,239.9 Q420.9,268 421,296.9 M419,295.9 Q300,293.3 178.9,296.5 M179.7,296.2 Q179.8,268 179,239" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <text x="300" y="266" text-anchor="middle" font-size="14.5" font-weight="600" fill="#152426">verifier</text>
-  <text x="300" y="284" text-anchor="middle" font-size="11.5" font-weight="400" fill="#566466">public key only</text>
-  <text x="300" y="324" text-anchor="middle" font-size="12" font-weight="600" fill="#8d3026">Proof of the bytes a judgment was computed over — never proof that they are true.</text>
+  <text x="300" y="284" text-anchor="middle" font-size="11.5" font-weight="400" fill="#566466">needs only a public key</text>
+  <text x="300" y="324" text-anchor="middle" font-size="12" font-weight="600" fill="#8d3026">Shows the data was not tampered with. Never that the data is correct.</text>
 </svg>
