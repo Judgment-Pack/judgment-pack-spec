@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 326" role="img" aria-labelledby="cb-t cb-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="cb-t">Why coding agents can be definitively evaluated</title>
+  <desc id="cb-d">Two panels. A coding agent gets a tick: pass or fail, in seconds — the target is explicit and the verdict is objective. A business agent gets a question mark: no verdict at all — the goal is fuzzy and feedback comes months later. One environment checks the work; the other cannot.</desc>
+  <text x="300" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">One of these gets graded</text>
+  <path d="M19.4,45.3 Q154,42 287.3,42.7 Q287.8,160 287.8,277.3 Q154,277.2 19.3,275.5 Q17.6,160 19,44.3 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
+  <path d="M21.1,44.9 Q154,43.9 288.3,43.9 M289,44.1 Q287.7,160 288.3,274.8 M289.3,276 Q154,274.4 19.8,276.7 M18.8,275.9 Q19,160 20.9,45.2 M21.3,45.2 Q154,47.4 287.4,44.4 M288.9,43.8 Q286.7,160 286.9,277 M286.7,274.8 Q154,277.5 19.9,275.4 M19.1,277.3 Q23.3,160 20,43.9" fill="none" stroke="#152426" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="154" y="76" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">A coding agent</text>
+  <path d="M92.2,85.7 Q154,86.6 216.2,85.7 M92.3,87.2 Q154,88.5 215.6,87.9" fill="none" stroke="#566466" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M137.7,131.5 Q144,138.7 150.3,145 M150.6,145.7 Q161,131.1 172,117.3" fill="none" stroke="#236232" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="154" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#152426">pass or fail, in seconds</text>
+  <text x="154" y="220" text-anchor="middle" font-size="12" font-weight="400" fill="#566466">the target is explicit</text>
+  <text x="154" y="242" text-anchor="middle" font-size="12" font-weight="400" fill="#566466">the verdict is objective</text>
+  <path d="M311.7,43.2 Q446,44 579.8,42.9 M581.2,43.8 Q577,160 579.8,275.7 M580.7,274.7 Q446,273.4 312.9,276.8 M313.2,276.1 Q313.1,160 311.7,44.7 M313.3,42.9 Q446,43.9 580.7,44 M579.6,45 Q580.5,160 580.3,275.6 M579.7,276.6 Q446,274.8 313.3,276.7 M312.1,276.8 Q311,160 311.2,44.6" fill="none" stroke="#152426" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="446" y="76" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">A business agent</text>
+  <path d="M384,85.7 Q446,87 508.1,86.2 M384.1,87.4 Q446,86.5 508.2,87.8" fill="none" stroke="#566466" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="446" y="148" text-anchor="middle" font-size="46" font-weight="700" fill="#8d3026">?</text>
+  <text x="446" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#152426">no verdict at all</text>
+  <text x="446" y="220" text-anchor="middle" font-size="12" font-weight="400" fill="#566466">the goal is fuzzy</text>
+  <text x="446" y="242" text-anchor="middle" font-size="12" font-weight="400" fill="#566466">feedback comes months later</text>
+  <text x="300" y="306" text-anchor="middle" font-size="13" font-weight="700" fill="#566466">One environment checks the work. The other cannot.</text>
+</svg>

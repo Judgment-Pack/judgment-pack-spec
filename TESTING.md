@@ -26,6 +26,13 @@ Validation should not fetch any URI in a source locator.
 Record the validator name and version, its selected schema dialect, and whether format assertion is
 enabled. Different implementations can otherwise appear to disagree.
 
+**Why this exercise does not hand you a tool.** The project maintains a reference runtime that
+validates these documents offline in a single command, and you are welcome to reach for it
+afterwards. It is deliberately not the instrument here. What this exercise tests is whether the
+published schema is understandable to a validator that knows nothing about this project, and a run
+through the project's own implementation cannot answer that question — however much more convenient
+it would be.
+
 ## 1. Establish a structural baseline (minutes 0–4)
 
 Configure the external validator with:

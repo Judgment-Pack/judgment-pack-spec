@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 326" role="img" aria-labelledby="av-t av-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="av-t">One decision file, read by three different people</title>
+  <desc id="av-d">A decision written down feeds three readers. Engineering gets logic that outlives the tool. The policy owner gets rules they can read without code. Risk and audit get what the system was supposed to do. The reasoning stops belonging to one tool.</desc>
+  <text x="300" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">One file, three readers</text>
+  <path d="M19.5,129.2 Q95,126.6 168.9,128.5 Q167,166 171.1,203.1 Q95,203.9 20.1,203.5 Q18.1,166 20.3,128.1 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
+  <path d="M19.1,127.2 Q95,128 171.1,126.8 M168.9,129.1 Q172.8,166 169.6,204.4 M170.5,204.4 Q95,205.1 19.5,204.1 M21.3,204.9 Q22.7,166 18.8,127.4 M19.4,128.8 Q95,129.5 169.7,127.8 M171.1,129.3 Q167.4,166 169.8,203 M168.7,204.7 Q95,203.6 20.7,204.8 M19.8,205 Q21.8,166 20.3,128.4" fill="none" stroke="#152426" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="95" y="160" text-anchor="middle" font-size="14" font-weight="700" fill="#152426">the decision</text>
+  <text x="95" y="180" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">written down</text>
+  <path d="M176.5,165.8 Q208.8,124 243.3,84.8 M243.6,84 Q244.2,89.1 242.1,93.7 M243.7,83.5 Q239.2,85.4 234.5,86.9" fill="none" stroke="#566466" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M250,53.1 Q415,50.2 579.5,51.8 M580.8,51.9 Q580.9,84 579.4,115.5 M580.5,115.3 Q415,117.9 249.3,115.4 M249.9,116.6 Q249.8,84 249,51.2 M250.1,52 Q415,52.2 578.9,51.4 M580.7,53 Q579,84 580.3,115.2 M580.3,115.4 Q415,114.2 250.3,115.9 M251,116.7 Q251.4,84 249.7,52.4" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="266" y="79" text-anchor="start" font-size="13.5" font-weight="700" fill="#152426">Engineering</text>
+  <text x="266" y="99" text-anchor="start" font-size="12" font-weight="400" fill="#566466">logic that outlives the tool</text>
+  <path d="M175.8,165.5 Q210,166.5 243.3,164.1 M244.3,164.3 Q240,167 235.7,169 M243.9,164.2 Q239.6,161.6 235.4,159" fill="none" stroke="#566466" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M250,131.1 Q415,129.4 579.6,131.4 M580.2,131.6 Q582.3,164 579.7,197 M580.3,195.8 Q415,193.4 250.2,196.1 M250.6,195.5 Q252.5,164 250.7,132.2 M250.4,131.9 Q415,133.2 579.9,132.3 M581,131.3 Q582.4,164 579.1,195.4 M579,197 Q415,193.3 250.1,196.7 M250.9,195.1 Q250.6,164 249.8,132.9" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="266" y="159" text-anchor="start" font-size="13.5" font-weight="700" fill="#152426">The policy owner</text>
+  <text x="266" y="179" text-anchor="start" font-size="12" font-weight="400" fill="#566466">rules they can read without code</text>
+  <path d="M175.5,165.6 Q209.5,205.4 244.7,243.5 M243.6,243.8 Q238.9,243.5 234.3,240.7 M244,243.8 Q242.8,239.1 242.3,234.1" fill="none" stroke="#566466" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M249.4,211.4 Q415,212.7 580.6,211.6 M579.9,212 Q579.4,244 579,276.3 M580.1,276.9 Q415,274.6 250.9,276 M249.5,275.8 Q252.5,244 249.9,211.4 M251,212.7 Q415,213.2 579.2,211.8 M579.4,211 Q577.3,244 581,275.5 M580.2,276.8 Q415,277.3 250.3,277 M249.5,275.8 Q251,244 250.1,210.9" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="266" y="239" text-anchor="start" font-size="13.5" font-weight="700" fill="#152426">Risk and audit</text>
+  <text x="266" y="259" text-anchor="start" font-size="12" font-weight="400" fill="#566466">what it was supposed to do</text>
+  <text x="300" y="306" text-anchor="middle" font-size="13" font-weight="700" fill="#566466">The reasoning stops belonging to one tool.</text>
+</svg>

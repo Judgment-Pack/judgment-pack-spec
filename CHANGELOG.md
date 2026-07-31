@@ -115,6 +115,22 @@ here.
   `judgment-pack` reference runtime (which inherited that CLI's implementation), linking to its own
   repository, and removed the vendor-branded on-site CLI page. Every page on the site is now
   vendor-neutral, and no page names the retired pre-publication brand.
+- **The first evaluator-conformance claim now exists, and the site stops saying it does not.** The
+  reference runtime states one for `0.2.0-draft` in its own repository. Four surfaces asserted the
+  opposite as present fact and are corrected: the overview (`README.md`), the architecture vision's
+  Runtime row, FAQ Q33, and the implementations listing. Each now records that a claim exists and
+  where it lives, and none restates any part of it — a partial restatement is what §3.4.1 forbids, and
+  the distinction the corrected text carries is that `experimental` on a runtime surface reports
+  *stability* and never conformance. The dated records are deliberately not edited: the
+  `0.2.0-draft` release notes and the entries above describe what was true at that release.
+- Implementations page: added the clean-room Python evaluator as a second listing, with a stated
+  caveat that both implementations trace to one maintainer and so corroborate the specification's
+  precision rather than evidencing independent interoperability.
+- Architecture vision: recorded that where a pack's *inputs* come from is an open question outside
+  this specification, naming the research repositories and the reference gateway — with their stated
+  ceiling, byte-lineage rather than truth, carried on the site rather than left to the reader.
+- RFC 0002: the runtime's graph prototype is no longer described as living unmerged on a branch. The
+  reviewed commit stays pinned; the surface has since merged, shipped, and grown past it.
 
 ## `0.1.0-draft` — 2026-07-22
 

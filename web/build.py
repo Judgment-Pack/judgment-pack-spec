@@ -742,6 +742,7 @@ def nav_html(current: PurePosixPath, active: str) -> str:
 
 def footer_html(current: PurePosixPath) -> str:
     internal = (
+        ("Presentation", PurePosixPath("presentation/index.html")),
         ("Concepts", PurePosixPath("concepts/index.html")),
         ("Project & docs", PurePosixPath("project/index.html")),
         ("Governance", PurePosixPath("project/governance/index.html")),
@@ -1788,6 +1789,8 @@ def publish_canonical_schemas(output_root: Path) -> None:
 def build_implementations_index(output_root: Path) -> None:
     page_output = PurePosixPath("implementations/index.html")
     runtime_url = "https://github.com/Judgment-Pack/judgment-pack-runtime"
+    experiments_url = "https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments"
+    governance = output_href(page_output, PurePosixPath("project/governance/index.html"))
     body = f"""
 <h1>Implementations</h1>
 <p class="lede">Independent tools that implement JPS document conformance. A listing here records
@@ -1802,13 +1805,31 @@ safety, or fitness. Any implementation that passes the public conformance corpus
   <article class="card">
     <p class="card-kicker">Open source · Apache-2.0 · maintained with the specification</p>
     <h2><a href="{html.escape(runtime_url)}" target="_blank" rel="noopener noreferrer">judgment-pack</a></h2>
-    <p>The project's vendor-neutral reference runtime. It validates the carrier, structural schema,
-    and semantic references of a JPS document against an immutable specification release. Its evaluator
-    is experimental and claims no evaluator conformance; nothing it reports chooses an outcome for a real
-    decision, fetches a source, or authorizes an action.</p>
+    <p>The project's vendor-neutral reference runtime; the command it installs is <code>jpack</code>.
+    It validates the carrier, structural schema, and semantic references of a JPS document against an
+    immutable specification release, and it states an evaluator-conformance claim in its own
+    repository, which is where that claim’s own terms must be read. Its evaluating surfaces stay labelled
+    <code>experimental</code>, which reports their <em>stability</em> and never their conformance.
+    Nothing it reports chooses an outcome for a real decision, fetches a source, or authorizes an
+    action.</p>
     <p class="card-meta">Reference runtime · one implementation among peers</p>
   </article>
+  <article class="card">
+    <p class="card-kicker">Open source · Apache-2.0 · experimental, claims no conformance</p>
+    <h2><a href="{html.escape(experiments_url)}" target="_blank" rel="noopener noreferrer">clean-room Python evaluator</a></h2>
+    <p>A second evaluator, written from the specification text alone inside an information barrier and
+    published with its interpretation log, clean-room protocol, and agreement harness. It exists to
+    test whether the prose pins the semantics: where two independent readings diverge, the divergence
+    locates an ambiguity in the specification rather than a defect in either reader. It claims no JPS
+    conformance of any kind.</p>
+    <p class="card-meta">Agreement evidence · not a conformance claim</p>
+  </article>
 </div>
+<div class="notice notice-warning"><strong>Two implementations, one author.</strong> Both listings
+above trace to the same maintainer's direction, so their agreement corroborates that the
+specification is precise — it is not independent evidence of interoperability, and the project does
+not present it as such. See <a href="{html.escape(governance)}">governance</a> for the interim
+review regime this sits under.</div>
 <h2 id="adding-an-implementation">Adding an implementation</h2>
 <p>This list is open to independent implementations tested against the public conformance
 artifacts. Presence here does not confer certification, official-validator status, endorsement, or
@@ -1821,6 +1842,514 @@ authority over the specification.</p>
         section="implementations",
         artifact_label="Informative",
         body=body,
+    )
+    write_page(output_root, page_output, rendered)
+
+
+@dataclass(frozen=True)
+class Slide:
+    """One full-height section of the presentation.
+
+    ``figure`` names a file in ``web/static``; ``wide`` puts it under the text
+    instead of beside it, for the two figures that need the room.
+    """
+
+    anchor: str
+    kicker: str
+    heading: str
+    lede: str = ""
+    points: tuple[str, ...] = ()
+    quote: str = ""
+    note: str = ""
+    figure: str = ""
+    figure_alt: str = ""
+    figure_caption: str = ""
+    wide: bool = False
+    actions: tuple[tuple[str, str, bool], ...] = ()
+
+
+# The deck is written to be read in order and skimmed out of order, so every
+# slide carries its own claim in the heading and its evidence in the points.
+# Numbers here are load-bearing and each is sourced from a repository that
+# publishes its own method; none is rounded up.
+SLIDES: tuple[Slide, ...] = (
+    Slide(
+        anchor="decision-engine",
+        kicker="01 — The premise",
+        heading="Every company runs on decisions",
+        lede=(
+            "Approve or decline. Escalate or handle it. Refund or refuse. Strip away the software "
+            "and the org chart, and making decisions is what a company does all day."
+        ),
+        points=(
+            "<strong>Your operational know-how is your most valuable asset.</strong> Which evidence "
+            "counts, which exception beats which rule, and when to ask a human. It took years to "
+            "build up.",
+            "<strong>Almost none of it is written down.</strong> It lives in policy documents, in "
+            "past precedents, and in the heads of senior staff.",
+            "<strong>Now AI is taking over the work.</strong> But this institutional know-how is the "
+            "exact thing software teams struggle to hand it.",
+        ),
+        figure="deck-decision-engine.svg",
+        figure_alt=(
+            "An organization box holding policy, precedent, expertise, and hard-won exceptions, with "
+            "an arrow labelled judgment leading to a box of decisions: approve, reject, escalate, "
+            "hold."
+        ),
+        figure_caption=(
+            "The arrow is institutional judgment — the most critical part, and the part nobody wrote "
+            "down."
+        ),
+    ),
+    Slide(
+        anchor="black-box",
+        kicker="02 — The problem",
+        heading="When AI makes a mistake, nobody can explain why",
+        lede=(
+            "Company rules, prompt instructions, software code, and the model's own statistical "
+            "guesses are mashed together into a single black box."
+        ),
+        points=(
+            "<strong>You cannot isolate the root cause.</strong> Was the prompt unclear? Was it a "
+            "software bug? Did the model hallucinate? From the outside, all three look identical.",
+            "<strong>Auditors get outcomes, not policy.</strong> You can show regulators what the AI "
+            "did, but not a clean document proving what it was supposed to do.",
+            "<strong>Your logic is locked to one vendor.</strong> Switch AI tools or models, and "
+            "engineers rebuild your business reasoning from scratch.",
+            "<strong>You cannot measure improvement.</strong> Without a written baseline of rules, "
+            "there is no way to test whether a prompt change made decisions better or worse.",
+        ),
+        figure="deck-black-box.svg",
+        figure_alt=(
+            "A single hatched box containing company rules, AI instructions, software code, and the "
+            "model's guesswork together, with question marks pressing in from all four sides."
+        ),
+        figure_caption="Four different layers in one box. When an error happens, which part caused it?",
+    ),
+    Slide(
+        anchor="coding-agents",
+        kicker="03 — The diagnosis",
+        heading="AI succeeds where the work checks itself",
+        lede=(
+            "AI works exceptionally well at writing code. Not because coding is easy, but because "
+            "code comes with an automatic referee."
+        ),
+        points=(
+            "<strong>Code grades itself.</strong> Software compiles or it fails. Automated tests pass "
+            "or they break. The verdict is instant and clear.",
+            "<strong>Business decisions lack a referee.</strong> Rules are spread across systems, "
+            "terms mean different things to different teams, and results take months to evaluate.",
+            "<strong>The fix is not just a smarter model.</strong> The missing piece is writing "
+            "business judgment down in a clear format that can be checked automatically.",
+        ),
+        figure="deck-coding-vs-business.svg",
+        figure_alt=(
+            "Two panels. A coding agent gets a tick: pass or fail, in seconds — the target is "
+            "explicit and the verdict is objective. A business agent gets a question mark: no verdict "
+            "at all — the goal is fuzzy and feedback comes months later."
+        ),
+        figure_caption=(
+            "The same models sit behind both panels. Only one environment can tell you whether the "
+            "work was any good."
+        ),
+    ),
+    Slide(
+        anchor="knowledge-and-judgment",
+        kicker="04 — The distinction",
+        heading="Search finds information. Judgment makes the call.",
+        lede=(
+            "Most AI projects focus on search and document retrieval. Connecting AI to your documents "
+            "matters, but finding information is not the same as making a decision."
+        ),
+        points=(
+            "<strong>Search retrieves facts.</strong> It locates the relevant policy page or customer "
+            "history, but it has no opinion on what to do next.",
+            "<strong>Judgment decides the action.</strong> It determines which rule applies, handles "
+            "exceptions, checks whether the evidence is sufficient, and escalates to a human when it "
+            "is not.",
+            "<strong>Search feeds judgment.</strong> Data and documents are inputs to a decision. "
+            "They do not make the call on their own.",
+        ),
+        figure="deck-knowledge-vs-judgment.svg",
+        figure_alt=(
+            "Two boxes side by side. Knowledge answers what do we know — documents, databases, "
+            "search results, with no opinion on what to do — and feeds Judgment, which answers so "
+            "what happens: which rule applies, what overrides it, when to ask a person."
+        ),
+        figure_caption="Knowledge and judgment work together — but only judgment decides what happens next.",
+    ),
+    Slide(
+        anchor="what-a-pack-is",
+        kicker="05 — The proposal",
+        heading="Package business judgment into a single file",
+        lede=(
+            "A Judgment Pack is a clean, structured file that spells out one business decision "
+            "completely. No hidden AI prompts, no buried code — just clear, executable logic."
+        ),
+        points=(
+            "<strong>It states business intent.</strong> What is being decided and why, so anyone can "
+            "verify that the rules match the business goal.",
+            "<strong>It handles real-world complexity.</strong> Exceptions, missing information, and "
+            "the point at which a human manager must step in are all written down explicitly.",
+            "<strong>The permitted outcomes are named in advance.</strong> The file lists every result "
+            "the business will accept, so anything else an AI produces is visibly outside the set "
+            "rather than a plausible-looking surprise.",
+            "<strong>It reviews like software.</strong> Track changes over time, compare versions, "
+            "and sign off on a policy update in writing.",
+        ),
+        figure="deck-pack-anatomy.svg",
+        figure_alt=(
+            "One document listing, in order: the decision, evidence, when it applies, rules, "
+            "exceptions, missing facts, answers, and ask a human — each with a one-line gloss."
+        ),
+        figure_caption="One decision, one clean file — which is what makes business logic inspectable.",
+    ),
+    Slide(
+        anchor="who-it-is-for",
+        kicker="06 — Who it is for",
+        heading="One file, three different readers",
+        lede=(
+            "Judgment Pack connects business policy, AI engineering, and compliance review through a "
+            "single shared artifact — one each of them can actually read."
+        ),
+        points=(
+            "<strong>Engineering and technology leaders</strong> keep institutional knowledge as an asset the company "
+            "owns — written in a vendor-neutral file rather than inside one vendor's prompt, so "
+            "changing the tool underneath does not mean rewriting the rules. Whether decisions hold "
+            "when the <em>model</em> changes is untested, and implementations from outside this "
+            "project remain an open gate.",
+            "<strong>Risk, legal, and compliance teams</strong> inspect the exact logic, exception "
+            "rules, and human escalation triggers before a system goes live — rather than inferring "
+            "them from behaviour afterwards.",
+            "<strong>The policy owner</strong> can read the rules that govern their own process without "
+            "reading code, and argue with a proposed change before it ships rather than after.",
+            "<strong>The common thread:</strong> the reasoning stops being a property of one tool and "
+            "becomes a document all three can review.",
+        ),
+        figure="deck-audience-value.svg",
+        figure_alt=(
+            "A decision written down feeds three readers. Engineering gets logic that outlives the "
+            "tool. The policy owner gets rules they can read without code. Risk and audit get what "
+            "the system was supposed to do."
+        ),
+        figure_caption="Aligning technical execution, operational rules, and regulatory review on one artifact.",
+    ),
+    Slide(
+        anchor="conformance",
+        kicker="07 — Guardrails",
+        heading="Checking the format is not the same as business approval",
+        lede=(
+            "The obvious risk with automated checks is that a “valid” file gets read as a “safe” "
+            "business decision. The design keeps those two things firmly apart."
+        ),
+        points=(
+            "<strong>What automated tools check:</strong> that the file is correctly formed, and that it "
+            "hangs together internally — every reference resolves, identifiers are unique, and each "
+            "field means what the specification says it means.",
+            "<strong>What agreement between tools actually is:</strong> a requirement the "
+            "specification places on conforming engines — same inputs, same result — not a check "
+            "anyone runs against your file. The evidence behind it is a 20-row seed corpus that "
+            "publishes its own gaps.",
+            "<strong>What stays with people:</strong> whether the input facts are true, whether "
+            "someone with authority signed off, and whether the policy is lawful and safe to act on "
+            "here.",
+            "<strong>Validation is not permission.</strong> A valid file is well formed and "
+            "internally consistent. It does not mean the rules are free of contradictions — two "
+            "rules that disagree are a result the engine reports, not a validation failure — and "
+            "never that the logic is correct, authorised, or appropriate for a given case.",
+        ),
+        figure="deck-conformance-line.svg",
+        figure_alt=(
+            "Four filled rows — readable, well-formed, references resolve, and evaluated — above a drawn "
+            "line, with "
+            "is it true, is it allowed, and is it safe in outline below it. Nothing below the line is "
+            "ever claimed."
+        ),
+        figure_caption=(
+            "Keeping structural validation separate from business sign-off is what stops a green "
+            "check being misread."
+        ),
+    ),
+    Slide(
+        anchor="findings",
+        kicker="08 — Research findings",
+        heading="What the research has shown so far",
+        lede=(
+            "The work tested whether business reasoning can be lifted out of AI prompts and into a "
+            "standalone, portable format. Four things came back:"
+        ),
+        points=(
+            "<strong>Logic can be separated from the model.</strong> Business rules do not have to "
+            "live inside a prompt. Moved into a plain file, the exceptions and escalation rules stay "
+            "explicit rather than implied.",
+            "<strong>Separate implementations reach the same result.</strong> A second tool, rebuilt "
+            "from the written specification alone in a different programming language, matches the "
+            "reference tool on every case — byte for byte, once the specification was amended to pin "
+            "the one output detail their first run showed it had left open.",
+            "<strong>Not everything fits, and the misfits are informative.</strong> Encoding real "
+            "policies surfaced cases the format could not hold — recorded as published negatives rather "
+            "than smoothed over, and they are what the open proposals are trying to answer.",
+            "<strong>Disagreement is the useful signal.</strong> Where the two implementations "
+            "differed, the fault was in the written specification rather than in either program — so "
+            "the specification got fixed.",
+        ),
+        note=(
+            "Measured across 47 tests on the file format, plus 20 decision scenarios replayed through "
+            "both engines. One limit, stated plainly: both implementations trace to the same "
+            "maintainer, and the second was written from reference texts that already carried the "
+            "first's implementation notes — so the agreement <em>corroborates</em> that the "
+            "specification is precise rather than independently confirming it. Two genuinely "
+            "independent implementations is the bar for calling any of this stable, and it is not met."
+        ),
+        figure="deck-portable-result.svg",
+        figure_alt=(
+            "One decision file feeds two separately built programs — the reference tool, built by the "
+            "project, and an independent rebuild, built from the written spec alone. Both produce the "
+            "same answer, identical character for character."
+        ),
+        figure_caption="Independent engines processing the same Judgment Pack reach identical results.",
+    ),
+    Slide(
+        anchor="inputs",
+        kicker="09 — Data integrity",
+        heading="Verifying the facts before the logic is applied",
+        lede=(
+            "A Judgment Pack defines how rules are applied. It cannot guarantee the input data is "
+            "factual — and an AI that can state a fact can also invent one. That gap is handled in a "
+            "separate layer."
+        ),
+        points=(
+            "<strong>A gateway fetches the data, not the AI.</strong> A configured source is run by the "
+            "gateway and its result signed on the way in — so a model can still state a made-up "
+            "number, but it cannot produce a valid receipt for one.",
+            "<strong>Records are tamper-evident.</strong> A completed session is sealed, so an "
+            "altered, replayed, or truncated record can be detected rather than passing silently.",
+            "<strong>Anyone can verify, and no-one gains the power to forge.</strong> Checking needs "
+            "only a public key — no access to the source systems, and nothing that would let the "
+            "checker mint a record. The key has to be obtained out of band.",
+        ),
+        note=(
+            "The ceiling is stated up front and does not move: this proves <strong>that these exact "
+            "bytes passed through the gateway and were not altered afterwards</strong> — never that a "
+            "genuinely-named system produced them, and never that the data was right. The source name "
+            "on a receipt is an operator label, not an authenticated origin. This is a "
+            "single-operator reference implementation that no runtime consumes yet, and nothing in the "
+            "specification defines it — which is why the status section still lists it as open."
+        ),
+        figure="deck-attested-inputs.svg",
+        figure_alt=(
+            "A source is fetched and signed by a gateway, producing a receipt. Receipts are linked in "
+            "order and the session is sealed. A verifier checks the chain and the seal using only a "
+            "public key."
+        ),
+        figure_caption="Securing the data feed before the decision rules are applied to it.",
+    ),
+    Slide(
+        anchor="evidence",
+        kicker="10 — Open research",
+        heading="We publish the results that went against us",
+        quote=(
+            "“An open standard earns trust by solving real problems simply, and being transparent "
+            "about what is still unsolved.”"
+        ),
+        lede=(
+            "Experiments are written down before they run, the people doing the work do not know "
+            "which result is hoped for, and failures are published as visibly as successes. Three "
+            "examples, none of them flattering:"
+        ),
+        points=(
+            "<strong>Chaining decisions together closed nothing in the frame we tested.</strong> We "
+            "measured it against five clauses picked by a rule fixed in advance from two published "
+            "benchmark policies. Five isolated AI sessions worked them blind to the hypothesis, and "
+            "every one produced a valid graph with no links at all. One went further and showed the "
+            "links it could have declared pass every check while inverting the policy's meaning.",
+            "<strong>A number we published was six times too high.</strong> We said a feature we were "
+            "weighing would cover about 19 of 25 hard cases. Our own re-count put it at 3, hours "
+            "after we had already repeated the figure in a companion proposal. We struck it out in "
+            "public rather than quietly editing it away.",
+            "<strong>A study's own assumption turned out to be false, and our own review caught "
+            "it.</strong> It assumed two checks were independent. They were not. We rewrote the "
+            "finding, relabelled the results that no longer counted, and deleted the flattering "
+            "summary table.",
+        ),
+        note=(
+            "None of this is something you have to take on trust — each is written up in full, method "
+            "and data, in the "
+            '<a href="https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments" '
+            'target="_blank" rel="noopener noreferrer">public research repository</a>. It is also why '
+            "this is published as a research preview: to invite independent review and testing before "
+            "a 1.0, rather than after it."
+        ),
+    ),
+    Slide(
+        anchor="status",
+        kicker="11 — Project status",
+        heading="What works today, and what comes next",
+        lede=(
+            "Current release: Core 0.2.0-draft. A practical foundation for testing and evaluation — "
+            "with no stability promises yet, and not something to put in front of a consequential "
+            "real decision today."
+        ),
+        points=(
+            "<strong>Ready today:</strong> the file specification, the checks that a file is sound, "
+            "and an agreed way to turn one into an answer — held in place by 47 tests on the format "
+            "and 20 on the answers.",
+            "<strong>Tooling:</strong> an open-source reference implementation anyone can run, plus a "
+            "second written clean-room from the specification text. Both trace to the same "
+            "maintainer, so their agreement shows the prose is precise enough to follow — not that "
+            "two unrelated parties would agree.",
+            "<strong>Proposed, not standardised:</strong> linking several decisions together, choosing "
+            "which decision applies, and a shared catalogue for finding them. The first has a working "
+            "prototype in the reference runtime, labelled experimental for stability — composition "
+            "itself has no conformance class for anyone to claim; "
+            "the other two have no portable format at all, and the project expects that choosing which "
+            "decision applies ends up outside the specification entirely. Each has its evidence bar "
+            "written down in advance, and none has met it.",
+            "<strong>Still open:</strong> the outside implementations, outside reviews, and real users "
+            "that a 1.0 is gated on. Proving where evidence came from has a working open reference "
+            "gateway, but nothing in the specification defines it yet.",
+        ),
+        actions=(
+            ("Read the specification", "spec/0.2.0-draft/index.html", False),
+            ("See a worked example", "examples/index.html", True),
+            ("Try the tools", "implementations/index.html", True),
+            ("View the roadmap", "project/roadmap/index.html", True),
+        ),
+    ),
+    Slide(
+        anchor="get-involved",
+        kicker="12 — Get involved",
+        heading="Help build the open standard for AI judgment",
+        lede=(
+            "This is a vendor-neutral specification with, today, a single maintainer and no independent "
+            "contributors — which is exactly the problem. At this stage the most useful contribution is "
+            "criticism. Four kinds of people would move it furthest:"
+        ),
+        points=(
+            "<strong>Evaluation partners.</strong> Teams running AI in domains where a decision has "
+            "to be defensible, willing to model real workflows as Judgment Packs alongside their "
+            "existing system — not in place of it.",
+            "<strong>Open-source maintainers.</strong> Engineers interested in building validators, "
+            "authoring tools, SDKs, and runtime integrations — above all, an implementation this "
+            "project did not write.",
+            "<strong>Risk and compliance experts.</strong> Policy, legal, and audit practitioners to "
+            "pressure-test exception handling, escalation, and what an auditor actually needs to see.",
+            "<strong>Research collaborators.</strong> People working on data attestation, evaluation "
+            "method, and decision composition — especially anyone willing to try to break a published "
+            "result.",
+        ),
+        note=(
+            "The most valuable thing anyone can send is a case this format handles badly. The "
+            "roadmap is gated on evidence from outside the project, and that evidence does not exist "
+            "yet."
+        ),
+        actions=(
+            ("Read the specification", "spec/0.2.0-draft/index.html", False),
+            ("Contribute on GitHub", "https://github.com/Judgment-Pack/judgment-pack-spec", True),
+            (
+                "Join the Slack community",
+                "https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw",
+                True,
+            ),
+            ("How to contribute", "project/contributing/index.html", True),
+        ),
+    ),
+)
+
+
+def slide_html(current: PurePosixPath, index: int, slide: Slide) -> str:
+    parts = [
+        f'<span class="slide-number">{html.escape(slide.kicker)}</span>',
+    ]
+    heading_tag = "h1" if index == 0 else "h2"
+    parts.append(f"<{heading_tag}>{html.escape(slide.heading)}</{heading_tag}>")
+    if slide.quote:
+        parts.append(f'<blockquote class="slide-quote">{html.escape(slide.quote)}</blockquote>')
+    if slide.lede:
+        parts.append(f'<p class="slide-lede">{html.escape(slide.lede)}</p>')
+
+    figure = ""
+    if slide.figure:
+        source = output_href(current, PurePosixPath("assets") / slide.figure)
+        caption = (
+            f"<figcaption>{html.escape(slide.figure_caption)}</figcaption>"
+            if slide.figure_caption
+            else ""
+        )
+        figure = (
+            '<figure class="slide-figure">'
+            f'<img src="{html.escape(source)}" alt="{html.escape(slide.figure_alt, quote=True)}">'
+            f"{caption}</figure>"
+        )
+
+    points = ""
+    if slide.points:
+        items = "".join(f"<li>{point}</li>" for point in slide.points)
+        points = f'<ul class="slide-points">{items}</ul>'
+
+    if figure or points:
+        # A wide figure sits under the text; a standard one sits beside it.
+        if slide.wide:
+            body_class = "slide-body figure-wide"
+            inner = points + figure
+        elif figure and points:
+            body_class = "slide-body has-figure"
+            inner = figure + points
+        else:
+            body_class = "slide-body"
+            inner = figure + points
+        parts.append(f'<div class="{body_class}">{inner}</div>')
+
+    if slide.note:
+        parts.append(f'<p class="slide-note">{slide.note}</p>')
+
+    if slide.actions:
+        links = []
+        for label, target, quiet in slide.actions:
+            # An absolute target leaves the site, so it opens in a new tab and
+            # never carries a referrer-bearing opener back to this page.
+            if target.startswith("https://"):
+                href = html.escape(target, quote=True)
+                external = ' target="_blank" rel="noopener noreferrer"'
+            else:
+                href = html.escape(output_href(current, PurePosixPath(target)))
+                external = ""
+            css = ' class="is-quiet"' if quiet else ""
+            links.append(f'<a{css} href="{href}"{external}>{html.escape(label)}</a>')
+        parts.append(f'<div class="slide-actions">{"".join(links)}</div>')
+
+    return (
+        f'<section class="slide" id="{html.escape(slide.anchor)}">'
+        f'<div class="slide-inner">{"".join(parts)}</div>'
+        "</section>"
+    )
+
+
+def build_presentation(output_root: Path) -> None:
+    """A scroll-through overview of the project, one full-height section per idea."""
+    page_output = PurePosixPath("presentation/index.html")
+    rail = "".join(
+        f'<a href="#{html.escape(slide.anchor)}" '
+        f'aria-label="{html.escape(slide.kicker, quote=True)}"></a>'
+        for slide in SLIDES
+    )
+    sections = "".join(slide_html(page_output, index, slide) for index, slide in enumerate(SLIDES))
+    body = (
+        f'<nav class="deck-rail" aria-label="Sections">{rail}</nav>'
+        f'<div class="deck-run">{sections}</div>'
+    )
+    rendered = page_html(
+        output=page_output,
+        title="Judgment Pack in twelve sections",
+        description=(
+            "A scroll-through overview of the Judgment Pack Specification: the problem, the format, who "
+            "it is for, what checking does and does not establish, and where the project honestly "
+            "stands."
+        ),
+        section="concepts",
+        artifact_label="Non-normative overview",
+        body=body,
+        body_class="deck",
     )
     write_page(output_root, page_output, rendered)
 
@@ -1908,6 +2437,7 @@ def build(output: Path, config: BuildConfig) -> None:
     build_examples(output, routes)
     build_conformance(output, routes, manifest)
     build_implementations_index(output)
+    build_presentation(output)
     build_project_index(output)
     build_concepts_index(output)
     build_license(output)

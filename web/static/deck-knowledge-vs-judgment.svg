@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 310" role="img" aria-labelledby="kj-t kj-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="kj-t">Knowledge is an input to judgment, not a layer above it</title>
+  <desc id="kj-d">Two boxes side by side. Knowledge answers what is known — documents, tables, APIs, retrieval and citation — and holds no view on what follows. It feeds Judgment, which decides what follows: applicability and rules, exceptions and escalation, testable and portable.</desc>
+  <path d="M23.4,57.2 Q132,58.4 239.2,56.5 Q241.3,131 238.8,205.3 Q132,206.8 25,205.8 Q25.9,131 24.4,57 Z" fill="#eef2ed" stroke="none" opacity="0.55"/>
+  <path d="M24.3,57.2 Q132,55.2 241,56.3 M240.9,56.3 Q243,131 240.9,205.2 M239.7,206.1 Q132,204 22.9,206.4 M23.8,205.7 Q23.7,131 24.9,55.4 M23.9,56.5 Q132,54.7 240.9,56.8 M239.4,56.1 Q239.6,131 240.1,206.3 M239.1,205.7 Q132,203.9 24.8,206 M22.9,205.8 Q21.2,131 25.1,56" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="132" y="129" text-anchor="middle" font-size="17" font-weight="600" fill="#152426">Knowledge</text>
+  <text x="132" y="147" text-anchor="middle" font-size="14" font-weight="400" fill="#566466">what do we know?</text>
+  <text x="132" y="236" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">documents, databases,</text>
+  <text x="132" y="258" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">search results</text>
+  <text x="132" y="280" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">— no opinion on what to do</text>
+  <path d="M360.1,55.9 Q468,58.9 576.3,56.2 Q573.4,131 576.5,206.6 Q468,208.2 360.8,206.7 Q358.6,131 359,55.3 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
+  <path d="M360.3,55.9 Q468,58.6 577.2,56.6 M575.6,55.1 Q575.5,131 574.9,205.7 M576.9,205.1 Q468,207.7 360.6,206.2 M358.8,205.3 Q358.3,131 359.7,56.7 M359.5,56.8 Q468,53.3 576.5,55.7 M576.1,56.9 Q577.5,131 576.8,205.3 M575.8,207 Q468,207.1 361.1,205.8 M359.6,206.5 Q361.1,131 359.3,54.8" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="468" y="129" text-anchor="middle" font-size="17" font-weight="600" fill="#152426">Judgment</text>
+  <text x="468" y="147" text-anchor="middle" font-size="14" font-weight="400" fill="#566466">so what happens?</text>
+  <text x="468" y="236" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">which rule applies,</text>
+  <text x="468" y="258" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">what overrides it,</text>
+  <text x="468" y="280" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">when to ask a person</text>
+  <path d="M251.3,130.2 Q300,129.5 348.3,131 M348.2,131.4 Q343.4,134 339,136.7 M347.6,131 Q343.7,127.4 338.7,125.3" fill="none" stroke="#152426" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="300" y="118" text-anchor="middle" font-size="12.5" font-weight="600" fill="#566466">feeds</text>
+  <text x="300" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">One feeds the other</text>
+</svg>
