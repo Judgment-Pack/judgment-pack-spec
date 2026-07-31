@@ -449,7 +449,50 @@ def coding_vs_business() -> str:
     )
 
 
+# --------------------------------------------------------------------------
+# 06 — one file, three readers
+# --------------------------------------------------------------------------
+
+def audience_value() -> str:
+    """Who picks the file up, and what each of them gets from it."""
+    pen = Pen(173)
+    p = []
+    p.append(Text(300, 26, "One file, three readers", 15, "700").render())
+
+    p.append(wash(rough_region(pen, 20, 128, 150, 76, 3.2), GREEN))
+    p.append(ink(rough_rect(pen, 20, 128, 150, 76, 3.2), 2.2))
+    p.append(Text(95, 160, "the decision", 14, "700").render())
+    p.append(Text(95, 180, "written down", 12.5, "400", fill=MUTED).render())
+
+    readers = (
+        ("Engineering", "logic that outlives the tool", 52),
+        ("The policy owner", "rules they can read without code", 132),
+        ("Risk and audit", "what it was supposed to do", 212),
+    )
+    for label, gain, top in readers:
+        p.append(ink(rough_arrow(pen, 176, 166, 244, top + 32, 2.4, 10), 1.8, MUTED))
+        p.append(ink(rough_rect(pen, 250, top, 330, 64, 2.8), 1.9))
+        p.append(Text(266, top + 27, label, 13.5, "700", anchor="start").render())
+        p.append(Text(266, top + 47, gain, 12, "400", anchor="start", fill=MUTED).render())
+
+    p.append(Text(300, 306, "The reasoning stops belonging to one tool.", 13, "700", fill=MUTED).render())
+
+    return document(
+        width=600,
+        height=326,
+        slug="av",
+        title="One decision file, read by three different people",
+        desc=(
+            "A decision written down feeds three readers. Engineering gets logic that outlives the "
+            "tool. The policy owner gets rules they can read without code. Risk and audit get what "
+            "the system was supposed to do. The reasoning stops belonging to one tool."
+        ),
+        body="\n".join("  " + part for part in p),
+    )
+
+
 FIGURES = {
+    "deck-audience-value": audience_value,
     "deck-coding-vs-business": coding_vs_business,
     "deck-decision-engine": decision_engine,
     "deck-black-box": black_box,

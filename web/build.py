@@ -1879,15 +1879,16 @@ SLIDES: tuple[Slide, ...] = (
         heading="Every company runs on decisions",
         lede=(
             "Approve or decline. Escalate or handle it. Refund or refuse. Strip away the software "
-            "and the org chart, and this is what a company does all day."
+            "and the org chart, and making decisions is what a company does all day."
         ),
         points=(
-            "<strong>The know-how is real, and it was expensive.</strong> Which evidence counts, "
-            "which exception beats which rule, when to stop and ask a person. It took years to build up.",
+            "<strong>Your operational know-how is your most valuable asset.</strong> Which evidence "
+            "counts, which exception beats which rule, and when to ask a human. It took years to "
+            "build up.",
             "<strong>Almost none of it is written down.</strong> It lives in policy documents, in "
-            "precedent, and in the one person who remembers why the limit is 5,000.",
-            "<strong>Now AI is doing the work.</strong> And that know-how is exactly the thing nobody "
-            "can hand it.",
+            "past precedents, and in the heads of senior staff.",
+            "<strong>Now AI is taking over the work.</strong> But this institutional know-how is the "
+            "exact thing software teams struggle to hand it.",
         ),
         figure="deck-decision-engine.svg",
         figure_alt=(
@@ -1895,58 +1896,57 @@ SLIDES: tuple[Slide, ...] = (
             "an arrow labelled judgment leading to a box of decisions: approve, reject, escalate, "
             "hold."
         ),
-        figure_caption="The arrow is the valuable part. It is also the part nobody wrote down.",
+        figure_caption=(
+            "The arrow is institutional judgment — the most critical part, and the part nobody wrote "
+            "down."
+        ),
     ),
     Slide(
         anchor="black-box",
         kicker="02 — The problem",
-        heading="When the AI gets it wrong, nobody can say why",
+        heading="When AI makes a mistake, nobody can explain why",
         lede=(
-            "Company rules, the instructions given to the model, ordinary software code, and the "
-            "model's own guesswork all end up mixed into one thing."
+            "Company rules, prompt instructions, software code, and the model's own statistical "
+            "guesses are mashed together into a single black box."
         ),
         points=(
-            "<strong>You cannot isolate the cause.</strong> Were the instructions unclear? Was it a "
-            "bug? Did the model simply make something up? From outside, all three look the same.",
-            "<strong>Auditors get behaviour, not a document.</strong> You can show someone what the "
-            "system did. You cannot show them what it was supposed to do.",
-            "<strong>It cannot move.</strong> Switch tools, vendors, or models and someone rebuilds "
-            "the reasoning from memory.",
-            "<strong>You cannot tell whether a change helped.</strong> With nothing written down, "
-            "there is nothing to measure against.",
+            "<strong>You cannot isolate the root cause.</strong> Was the prompt unclear? Was it a "
+            "software bug? Did the model hallucinate? From the outside, all three look identical.",
+            "<strong>Auditors get outcomes, not policy.</strong> You can show regulators what the AI "
+            "did, but not a clean document proving what it was supposed to do.",
+            "<strong>Your logic is locked to one vendor.</strong> Switch AI tools or models, and "
+            "engineers rebuild your business reasoning from scratch.",
+            "<strong>You cannot measure improvement.</strong> Without a written baseline of rules, "
+            "there is no way to test whether a prompt change made decisions better or worse.",
         ),
         figure="deck-black-box.svg",
         figure_alt=(
             "A single hatched box containing company rules, AI instructions, software code, and the "
             "model's guesswork together, with question marks pressing in from all four sides."
         ),
-        figure_caption="Four things in one box, one answer out. Which part caused it?",
+        figure_caption="Four different layers in one box. When an error happens, which part caused it?",
     ),
     Slide(
         anchor="coding-agents",
         kicker="03 — The diagnosis",
-        heading="AI works best where the work checks itself",
+        heading="AI succeeds where the work checks itself",
         lede=(
-            "The AI that genuinely delivers today is AI that writes code. Not because coding is easy "
-            "— because the work comes with an automatic referee."
+            "AI works exceptionally well at writing code. Not because coding is easy, but because "
+            "code comes with an automatic referee."
         ),
         points=(
-            "<strong>Code grades itself.</strong> It compiles or it does not. Tests pass or they "
-            "fail. The verdict arrives in seconds, and nobody has to agree on it first.",
-            "<strong>Business decisions have no referee.</strong> Goals are fuzzy, the evidence is "
-            "spread across a dozen systems, the same word means different things to different teams, "
-            "and you learn whether you were right months later.",
-            "<strong>So the missing piece is not a smarter model.</strong> It is writing the judgment "
-            "down, and having a way to check it.",
+            "<strong>Code grades itself.</strong> Software compiles or it fails. Automated tests pass "
+            "or they break. The verdict is instant and clear.",
+            "<strong>Business decisions lack a referee.</strong> Rules are spread across systems, "
+            "terms mean different things to different teams, and results take months to evaluate.",
+            "<strong>The fix is not just a smarter model.</strong> The missing piece is writing "
+            "business judgment down in a clear format that can be checked automatically.",
         ),
         figure="deck-coding-vs-business.svg",
         figure_alt=(
-            "Two panels. A coding agent writes code, which passes through a compiler and tests, "
-            "producing a pass-or-fail verdict in seconds: the target is explicit, the work actually "
-            "runs, and the verdict is objective — the environment grades the work. A business agent "
-            "reads documents, weighs them up, and decides, producing no verdict at all: the goal is "
-            "fuzzy, evidence is scattered, and feedback comes months later — nothing says pass or "
-            "fail."
+            "Two panels. A coding agent gets a tick: pass or fail, in seconds — the target is "
+            "explicit and the verdict is objective. A business agent gets a question mark: no verdict "
+            "at all — the goal is fuzzy and feedback comes months later."
         ),
         figure_caption=(
             "The same models sit behind both panels. Only one environment can tell you whether the "
@@ -1956,18 +1956,19 @@ SLIDES: tuple[Slide, ...] = (
     Slide(
         anchor="knowledge-and-judgment",
         kicker="04 — The distinction",
-        heading="Knowing things is not the same as deciding",
+        heading="Search finds information. Judgment makes the call.",
         lede=(
-            "Most AI effort goes into helping the machine know more — search, retrieval, connecting "
-            "it to your documents. That is a different problem, and solving it does not solve this one."
+            "Most AI projects focus on search and document retrieval. Connecting AI to your documents "
+            "matters, but finding information is not the same as making a decision."
         ),
         points=(
-            "<strong>Search finds what is relevant.</strong> It has no opinion about what should "
-            "happen next.",
-            "<strong>Judgment decides what happens next.</strong> Does this case even apply? Which "
-            "rule fires? What overrides it? Is this enough to act on, or does a person need to look?",
-            "<strong>One feeds the other.</strong> Your documents and databases are inputs to a "
-            "decision. They do not make the decision, and better search will never start.",
+            "<strong>Search retrieves facts.</strong> It locates the relevant policy page or customer "
+            "history, but it has no opinion on what to do next.",
+            "<strong>Judgment decides the action.</strong> It determines which rule applies, handles "
+            "exceptions, checks whether the evidence is sufficient, and escalates to a human when it "
+            "is not.",
+            "<strong>Search feeds judgment.</strong> Data and documents are inputs to a decision. "
+            "They do not make the call on their own.",
         ),
         figure="deck-knowledge-vs-judgment.svg",
         figure_alt=(
@@ -1975,51 +1976,78 @@ SLIDES: tuple[Slide, ...] = (
             "search results, with no opinion on what to do — and feeds Judgment, which answers so "
             "what happens: which rule applies, what overrides it, when to ask a person."
         ),
-        figure_caption="Complementary, not competing — and only one of them decides.",
+        figure_caption="Knowledge and judgment work together — but only judgment decides what happens next.",
     ),
     Slide(
         anchor="what-a-pack-is",
         kicker="05 — The proposal",
-        heading="Write the decision down in a file",
+        heading="Package business judgment into a single file",
         lede=(
-            "A Judgment Pack is a plain file that spells out one decision, completely. No AI inside "
-            "it, no software inside it. Just the reasoning, in a form a machine can act on."
+            "A Judgment Pack is a clean, structured file that spells out one business decision "
+            "completely. No hidden AI prompts, no buried code — just clear, executable logic."
         ),
         points=(
-            "<strong>It states the intent, not only the logic.</strong> What is being decided, and "
-            "why — so a reader can tell whether the rules actually serve the goal.",
-            "<strong>It puts the awkward parts in writing.</strong> The exceptions, what to do when "
-            "a fact is missing, and when a person has to take over — the nuance code buries and "
-            "instructions leave to chance.",
-            "<strong>The possible answers are fixed in advance.</strong> It cannot return something "
-            "nobody approved.",
-            "<strong>It reviews like code.</strong> Version it, compare two versions, and argue about "
-            "a change in writing rather than in a meeting.",
+            "<strong>It states business intent.</strong> What is being decided and why, so anyone can "
+            "verify that the rules match the business goal.",
+            "<strong>It handles real-world complexity.</strong> Exceptions, missing information, and "
+            "the point at which a human manager must step in are all written down explicitly.",
+            "<strong>Outcomes are strictly controlled.</strong> The AI can only return an outcome the "
+            "business approved. It cannot improvise a new one.",
+            "<strong>It reviews like software.</strong> Track changes over time, compare versions, "
+            "and sign off on a policy update in writing.",
         ),
         figure="deck-pack-anatomy.svg",
         figure_alt=(
             "One document listing, in order: the decision, evidence, when it applies, rules, "
             "exceptions, missing facts, answers, and ask a human — each with a one-line gloss."
         ),
-        figure_caption="One file, one decision. The file format is the easy part; the contents are the point.",
+        figure_caption="One decision, one clean file — which is what makes business logic inspectable.",
+    ),
+    Slide(
+        anchor="who-it-is-for",
+        kicker="06 — Who it is for",
+        heading="One file, three different readers",
+        lede=(
+            "Judgment Pack connects business policy, AI engineering, and compliance review through a "
+            "single shared artifact — one each of them can actually read."
+        ),
+        points=(
+            "<strong>Technology leaders</strong> keep institutional knowledge as an asset the company "
+            "owns. Change the model or the tool underneath without rewriting the business rules.",
+            "<strong>Risk, legal, and compliance teams</strong> inspect the exact logic, exception "
+            "rules, and human escalation triggers before a system goes live — rather than inferring "
+            "them from behaviour afterwards.",
+            "<strong>AI and software engineers</strong> get prompt bugs that are traceable to a line, "
+            "behaviour changes that show up in a diff, and a human fallback path defined in advance "
+            "instead of improvised.",
+            "<strong>The common thread:</strong> the reasoning stops being a property of one tool and "
+            "becomes a document all three can review.",
+        ),
+        figure="deck-audience-value.svg",
+        figure_alt=(
+            "A decision written down feeds three readers. Engineering gets logic that outlives the "
+            "tool. The policy owner gets rules they can read without code. Risk and audit get what "
+            "the system was supposed to do."
+        ),
+        figure_caption="Aligning technical execution, operational rules, and regulatory review on one artifact.",
     ),
     Slide(
         anchor="conformance",
-        kicker="06 — The discipline",
-        heading="A green checkmark that does not mean “approved”",
+        kicker="07 — Guardrails",
+        heading="Checking the format is not the same as business approval",
         lede=(
-            "The obvious way to ruin this is a tool that says PASS and lets everyone read it as "
-            "“this decision is fine.” The design works hard to make that impossible to say by accident."
+            "The obvious risk with automated checks is that a “valid” file gets read as a “safe” "
+            "business decision. The design keeps those two things firmly apart."
         ),
         points=(
-            "<strong>Four things can be checked automatically.</strong> That the file opens, that it "
-            "is put together correctly, that it does not contradict itself, and that two separate "
-            "tools reach the same answer from it.",
-            "<strong>Three things are deliberately out of reach.</strong> Whether the facts are "
-            "actually true. Whether anyone with authority approved this. Whether it is safe to act "
-            "on here.",
-            "<strong>Passing is never permission.</strong> A valid file is not a correct, authorised, "
-            "or safe one — and nothing built on this is allowed to imply that it is.",
+            "<strong>What automated tools verify:</strong> that the file is correctly formed, that it "
+            "does not contradict itself, and that separate tools reach the same result from it.",
+            "<strong>What stays with people:</strong> whether the input facts are true, whether "
+            "someone with authority signed off, and whether the policy is lawful and safe to act on "
+            "here.",
+            "<strong>Validation is not permission.</strong> A valid Judgment Pack proves the logic is "
+            "clear and runnable — never that it is correct, authorised, or appropriate for a given "
+            "case.",
         ),
         figure="deck-conformance-line.svg",
         figure_alt=(
@@ -2027,29 +2055,38 @@ SLIDES: tuple[Slide, ...] = (
             "is it true, is it allowed, and is it safe in outline below it. Nothing below the line is "
             "ever claimed."
         ),
-        figure_caption="Drawing this line is the design. Blurring it is the whole risk.",
+        figure_caption=(
+            "Keeping structural validation separate from business sign-off is what stops a green "
+            "check being misread."
+        ),
     ),
     Slide(
-        anchor="portability",
-        kicker="07 — The test",
-        heading="Built twice, separately, with identical answers",
+        anchor="findings",
+        kicker="08 — Research findings",
+        heading="What the research has shown so far",
         lede=(
-            "“Portable” is easy to claim and hard to earn. So it was tested rather than asserted."
+            "The work tested whether business reasoning can be lifted out of AI prompts and into a "
+            "standalone, portable format. Four things came back:"
         ),
         points=(
-            "<strong>One decision, one answer — down to the character.</strong> The result is pinned "
-            "precisely enough that two programs can be compared automatically instead of by eye.",
-            "<strong>The second version was built in isolation.</strong> From the written spec alone, "
-            "in a different programming language, with no access to the first.",
-            "<strong>All 20 test cases matched exactly.</strong> Every detail that could have drifted "
-            "between them did not.",
-            "<strong>Where they disagreed, the writing got fixed.</strong> An early mismatch showed "
-            "the spec was ambiguous. Catching that is the entire point of the exercise.",
+            "<strong>Logic can be separated from the model.</strong> Business rules do not have to "
+            "live inside a prompt. Moved into a plain file, the exceptions and escalation rules stay "
+            "explicit rather than implied.",
+            "<strong>Separate implementations reach identical decisions.</strong> Two tools, built "
+            "separately from the written spec alone and in different programming languages, agreed on "
+            "every test case — down to the character.",
+            "<strong>Writing judgment down exposes gaps in the policy itself.</strong> The act of "
+            "making a rule explicit surfaces the missing cases and vague wording that prose had been "
+            "hiding.",
+            "<strong>Disagreement is the useful signal.</strong> Where the two implementations "
+            "differed, the fault was in the written specification rather than in either program — so "
+            "the specification got fixed.",
         ),
         note=(
-            "Said plainly: both were built under the same maintainer. That shows the spec is precise "
-            "enough to follow. It is <em>not</em> proof that two unrelated companies would agree, and "
-            "it is not presented as such."
+            "Measured across 47 tests on the file format and 20 decision scenarios run through both "
+            "engines. One limit, stated plainly: both implementations were built under the same "
+            "maintainer, so this shows the specification is precise enough to follow independently — "
+            "not that two unrelated companies would agree."
         ),
         figure="deck-portable-result.svg",
         figure_alt=(
@@ -2057,30 +2094,29 @@ SLIDES: tuple[Slide, ...] = (
             "project, and an independent rebuild, built from the written spec alone. Both produce the "
             "same answer, identical character for character."
         ),
-        figure_caption="If two careful readers disagree, the writing was unclear — so the writing gets fixed.",
+        figure_caption="Independent engines processing the same Judgment Pack reach identical results.",
     ),
     Slide(
         anchor="inputs",
-        kicker="08 — The open edge",
-        heading="A file can say which evidence matters. It cannot say the evidence is real.",
+        kicker="09 — Data integrity",
+        heading="Verifying the facts before the logic is applied",
         lede=(
-            "An AI that can state a fact can also invent one. That is a genuine hole, it sits outside "
-            "this specification, and it is being worked on in the open rather than quietly patched."
+            "A Judgment Pack defines how rules are applied. It cannot guarantee the input data is "
+            "factual — and an AI that can state a fact can also invent one. That gap is handled in a "
+            "separate layer."
         ),
         points=(
-            "<strong>Let the system fetch the data, not the AI.</strong> A reference service runs the "
-            "lookup itself and signs the result, so an AI cannot hand in a number it made up.",
-            "<strong>Each session is sealed when it closes.</strong> That catches the two tricks a "
-            "stored record cannot catch by itself: replaying an old session, or quietly deleting the "
-            "end of one.",
-            "<strong>Anyone can check it; nobody extra can fake it.</strong> Checking needs only a "
-            "public key. The format and the checker are open on purpose — an assurance nobody can "
-            "verify is worth nothing.",
+            "<strong>The system fetches the data, not the AI.</strong> Values are pulled directly from "
+            "the source and signed on the way in, so a model cannot substitute a number it made up.",
+            "<strong>Records are tamper-evident.</strong> A completed session is sealed, so an "
+            "altered, replayed, or truncated record can be detected rather than passing silently.",
+            "<strong>Anyone can verify, and no-one gains the power to forge.</strong> Checking needs "
+            "only a public key — no access to the source systems, and no privileged position.",
         ),
         note=(
-            "The limit is stated up front and does not move: this proves <strong>where the data came "
-            "from, not that it is correct</strong>. It shows the numbers a decision was based on were "
-            "not tampered with. It says nothing about whether those numbers were right."
+            "The ceiling is stated up front and does not move: this proves <strong>where the data "
+            "came from and that it was not altered</strong> — never that the data was right in the "
+            "first place."
         ),
         figure="deck-attested-inputs.svg",
         figure_alt=(
@@ -2088,19 +2124,19 @@ SLIDES: tuple[Slide, ...] = (
             "order and the session is sealed. A verifier checks the chain and the seal using only a "
             "public key."
         ),
-        figure_caption="Shows the data was not tampered with — never that the data is correct.",
+        figure_caption="Securing the data feed before the decision rules are applied to it.",
     ),
     Slide(
         anchor="evidence",
-        kicker="09 — The method",
+        kicker="10 — Open research",
         heading="We publish the results that went against us",
         quote=(
-            "“A standard earns trust by shipping something small that works, and being honest about "
-            "everything that does not yet.”"
+            "“An open standard earns trust by solving real problems simply, and being transparent "
+            "about what is still unsolved.”"
         ),
         lede=(
-            "Experiments are written down before they are run, the people doing the work do not know "
-            "which result is hoped for, and failures get published as loudly as successes. Three "
+            "Experiments are written down before they run, the people doing the work do not know "
+            "which result is hoped for, and failures are published as visibly as successes. Three "
             "examples, none of them flattering:"
         ),
         points=(
@@ -2121,37 +2157,73 @@ SLIDES: tuple[Slide, ...] = (
             "and data, in the "
             '<a href="https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments" '
             'target="_blank" rel="noopener noreferrer">public research repository</a>. It is also why '
-            "this is a research preview and not a standard: the path to 1.0 is gated on outside "
-            "implementations, outside reviews, and real users."
+            "this is published as a research preview: to invite independent review and testing before "
+            "a 1.0, rather than after it."
         ),
     ),
     Slide(
         anchor="status",
-        kicker="10 — Where it stands, and who it is for",
-        heading="Small, working, and honest about the rest",
+        kicker="11 — Project status",
+        heading="What works today, and what comes next",
         lede=(
-            "A research preview. No stability promises yet, and not something to put in front of a "
-            "consequential real decision today."
+            "Current release: Core 0.2.0-draft. A practical foundation for testing and evaluation — "
+            "with no stability promises yet, and not something to put in front of a consequential "
+            "real decision today."
         ),
         points=(
-            "<strong>Works today:</strong> the file format, the checks that a file is sound, and an "
-            "agreed way to turn one into an answer — held in place by 47 tests on the format and 20 "
-            "on the answers, and by two separately built tools that agree.",
-            "<strong>Not yet:</strong> chaining decisions together, choosing which decision applies, "
-            "a shared directory for finding them, and proving where evidence came from. Each is an "
-            "open proposal with its bar for acceptance written down.",
-            "<strong>If you are building with AI,</strong> your decision logic stays yours: a file "
-            "you can read, test, version, and carry to another tool — rather than prose buried in a "
-            "prompt that has to be reconstructed every time something changes.",
-            "<strong>If you answer to someone for it,</strong> the reasoning becomes an artifact you "
-            "can hand a reviewer — what the system was <em>supposed</em> to do, beside what it did. "
-            "That is the document that does not exist today.",
+            "<strong>Ready today:</strong> the file specification, the checks that a file is sound, "
+            "and an agreed way to turn one into an answer — held in place by 47 tests on the format "
+            "and 20 on the answers.",
+            "<strong>Tooling:</strong> an open-source reference implementation anyone can run, plus a "
+            "second one kept deliberately separate so that agreement between them means something.",
+            "<strong>Proposed, not built:</strong> linking several decisions together, choosing which "
+            "decision applies, and a shared catalogue for finding them. Each is an open proposal with "
+            "its bar for acceptance written down in advance.",
+            "<strong>Still open:</strong> proving where evidence came from, and the outside "
+            "implementations, outside reviews, and real users that a 1.0 is gated on.",
         ),
         actions=(
             ("Read the specification", "spec/0.2.0-draft/index.html", False),
             ("See a worked example", "examples/index.html", True),
             ("Try the tools", "implementations/index.html", True),
-            ("What has to be proven next", "project/roadmap/index.html", True),
+            ("View the roadmap", "project/roadmap/index.html", True),
+        ),
+    ),
+    Slide(
+        anchor="get-involved",
+        kicker="12 — Get involved",
+        heading="Help build the open standard for AI judgment",
+        lede=(
+            "This is a vendor-neutral, community-driven specification, and at this stage the most "
+            "useful contribution is criticism. Four kinds of people would move it furthest:"
+        ),
+        points=(
+            "<strong>Evaluation partners.</strong> Teams running AI in domains where a decision has "
+            "to be defensible, willing to model real workflows as Judgment Packs alongside their "
+            "existing system — not in place of it.",
+            "<strong>Open-source maintainers.</strong> Engineers interested in building validators, "
+            "authoring tools, SDKs, and runtime integrations — above all, an implementation this "
+            "project did not write.",
+            "<strong>Risk and compliance experts.</strong> Policy, legal, and audit practitioners to "
+            "pressure-test exception handling, escalation, and what an auditor actually needs to see.",
+            "<strong>Research collaborators.</strong> People working on data attestation, evaluation "
+            "method, and decision composition — especially anyone willing to try to break a published "
+            "result.",
+        ),
+        note=(
+            "The most valuable thing anyone can send is a case this format handles badly. The "
+            "roadmap is gated on evidence from outside the project, and that evidence does not exist "
+            "yet."
+        ),
+        actions=(
+            ("Read the specification", "spec/0.2.0-draft/index.html", False),
+            ("Contribute on GitHub", "https://github.com/Judgment-Pack/judgment-pack-spec", True),
+            (
+                "Join the Slack community",
+                "https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw",
+                True,
+            ),
+            ("How to contribute", "project/contributing/index.html", True),
         ),
     ),
 )
@@ -2204,15 +2276,19 @@ def slide_html(current: PurePosixPath, index: int, slide: Slide) -> str:
         parts.append(f'<p class="slide-note">{slide.note}</p>')
 
     if slide.actions:
-        links = "".join(
-            f'<a class="is-quiet" href="{html.escape(output_href(current, PurePosixPath(target)))}">'
-            f"{html.escape(label)}</a>"
-            if quiet
-            else f'<a href="{html.escape(output_href(current, PurePosixPath(target)))}">'
-            f"{html.escape(label)}</a>"
-            for label, target, quiet in slide.actions
-        )
-        parts.append(f'<div class="slide-actions">{links}</div>')
+        links = []
+        for label, target, quiet in slide.actions:
+            # An absolute target leaves the site, so it opens in a new tab and
+            # never carries a referrer-bearing opener back to this page.
+            if target.startswith("https://"):
+                href = html.escape(target, quote=True)
+                external = ' target="_blank" rel="noopener noreferrer"'
+            else:
+                href = html.escape(output_href(current, PurePosixPath(target)))
+                external = ""
+            css = ' class="is-quiet"' if quiet else ""
+            links.append(f'<a{css} href="{href}"{external}>{html.escape(label)}</a>')
+        parts.append(f'<div class="slide-actions">{"".join(links)}</div>')
 
     return (
         f'<section class="slide" id="{html.escape(slide.anchor)}">'
@@ -2236,10 +2312,11 @@ def build_presentation(output_root: Path) -> None:
     )
     rendered = page_html(
         output=page_output,
-        title="Judgment Pack in ten sections",
+        title="Judgment Pack in twelve sections",
         description=(
-            "A scroll-through overview of the Judgment Pack Specification: the problem, the format, "
-            "what conformance does and does not establish, and where the project honestly stands."
+            "A scroll-through overview of the Judgment Pack Specification: the problem, the format, who "
+            "it is for, what checking does and does not establish, and where the project honestly "
+            "stands."
         ),
         section="concepts",
         artifact_label="Non-normative overview",

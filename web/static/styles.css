@@ -1290,10 +1290,18 @@ body.deck .page-meta {
   text-transform: uppercase;
 }
 
+/* The first section is the page's only h1 and the rest are h2s, which is a
+   requirement of the site's tests rather than a design intent. Left alone the
+   two pick up different type — .prose h1 is a serif at weight 500, capped at
+   19ch — so the opening section would look like a different deck. Every
+   heading property is restated here so both render identically. */
 .slide h1,
 .slide h2 {
+  max-width: none;
   margin: 0 0 0.7rem;
+  font-family: inherit;
   font-size: clamp(1.7rem, 4vw, 2.75rem);
+  font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
   text-wrap: balance;
@@ -1487,11 +1495,13 @@ body.deck .page-meta {
   body.deck:has(#coding-agents:target) .deck-rail a[href="#coding-agents"],
   body.deck:has(#knowledge-and-judgment:target) .deck-rail a[href="#knowledge-and-judgment"],
   body.deck:has(#what-a-pack-is:target) .deck-rail a[href="#what-a-pack-is"],
+  body.deck:has(#who-it-is-for:target) .deck-rail a[href="#who-it-is-for"],
   body.deck:has(#conformance:target) .deck-rail a[href="#conformance"],
-  body.deck:has(#portability:target) .deck-rail a[href="#portability"],
+  body.deck:has(#findings:target) .deck-rail a[href="#findings"],
   body.deck:has(#inputs:target) .deck-rail a[href="#inputs"],
   body.deck:has(#evidence:target) .deck-rail a[href="#evidence"],
-  body.deck:has(#status:target) .deck-rail a[href="#status"] {
+  body.deck:has(#status:target) .deck-rail a[href="#status"],
+  body.deck:has(#get-involved:target) .deck-rail a[href="#get-involved"] {
     background: var(--accent);
     border-color: var(--accent);
     transform: scale(1.4);
@@ -1502,8 +1512,7 @@ body.deck .page-meta {
   /* Hoist each slide's timeline so the rail, which is not a descendant of the
      slides, can still reference it. */
   body.deck {
-    timeline-scope: --slide-1, --slide-2, --slide-3, --slide-4, --slide-5,
-      --slide-6, --slide-7, --slide-8, --slide-9, --slide-10;
+    timeline-scope: --slide-1, --slide-2, --slide-3, --slide-4, --slide-5, --slide-6, --slide-7, --slide-8, --slide-9, --slide-10, --slide-11, --slide-12;
   }
 
   .slide:nth-child(1) { view-timeline-name: --slide-1; }
@@ -1516,6 +1525,8 @@ body.deck .page-meta {
   .slide:nth-child(8) { view-timeline-name: --slide-8; }
   .slide:nth-child(9) { view-timeline-name: --slide-9; }
   .slide:nth-child(10) { view-timeline-name: --slide-10; }
+  .slide:nth-child(11) { view-timeline-name: --slide-11; }
+  .slide:nth-child(12) { view-timeline-name: --slide-12; }
 
   /* `fill-mode: none` is what makes this a spy rather than a latch: outside the
      range the keyframe stops applying and the dot returns to rest. */
@@ -1535,6 +1546,8 @@ body.deck .page-meta {
   .deck-rail a:nth-child(8) { animation-timeline: --slide-8; }
   .deck-rail a:nth-child(9) { animation-timeline: --slide-9; }
   .deck-rail a:nth-child(10) { animation-timeline: --slide-10; }
+  .deck-rail a:nth-child(11) { animation-timeline: --slide-11; }
+  .deck-rail a:nth-child(12) { animation-timeline: --slide-12; }
 }
 
 @keyframes deck-dot-active {
