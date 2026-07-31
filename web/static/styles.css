@@ -1465,30 +1465,37 @@ body.deck .page-meta {
    With no JavaScript there is no scroll-spy, so the active dot is done twice,
    and the two cover different cases:
 
-   1. `:target` — after a dot (or any in-page link) is followed, the URL names a
-      section and `:has()` lets the matching dot light up. Works everywhere
-      `:has()` does, but only after a click.
-   2. A scroll-driven view timeline — tracks free scrolling too, which is the
-      case (1) cannot see. Newer, so it is behind `@supports` and simply does
-      not apply where it is unsupported.
+   1. A scroll-driven view timeline, where supported. This is the accurate one:
+      it follows the scroll position, so the lit dot is always the section you
+      are actually looking at.
+   2. `:target` as the fallback — after a dot is followed the URL names a
+      section, and `:has()` lights the matching dot. Click-only, but it works
+      wherever `:has()` does.
 
-   Both are progressive: without either, the rail is still a working set of
-   links. The timelines are keyed by position rather than by anchor name, so
-   adding a slide means extending the lists below, not rewriting them. */
+   They are mutually exclusive on purpose. A fragment stays in the URL after you
+   scroll away from it, so running (2) alongside (1) leaves the clicked dot lit
+   as well as the current one — two active dots, which is worse than one that
+   lags. `@supports not` hands the job to exactly one mechanism.
 
-body.deck:has(#decision-engine:target) .deck-rail a[href="#decision-engine"],
-body.deck:has(#black-box:target) .deck-rail a[href="#black-box"],
-body.deck:has(#coding-agents:target) .deck-rail a[href="#coding-agents"],
-body.deck:has(#knowledge-and-judgment:target) .deck-rail a[href="#knowledge-and-judgment"],
-body.deck:has(#what-a-pack-is:target) .deck-rail a[href="#what-a-pack-is"],
-body.deck:has(#conformance:target) .deck-rail a[href="#conformance"],
-body.deck:has(#portability:target) .deck-rail a[href="#portability"],
-body.deck:has(#inputs:target) .deck-rail a[href="#inputs"],
-body.deck:has(#evidence:target) .deck-rail a[href="#evidence"],
-body.deck:has(#status:target) .deck-rail a[href="#status"] {
-  background: var(--accent);
-  border-color: var(--accent);
-  transform: scale(1.4);
+   Without either, the rail is still a working set of links. Timelines are keyed
+   by position rather than anchor name, so adding a slide means extending the
+   lists below rather than rewriting them. */
+
+@supports not (animation-timeline: view()) {
+  body.deck:has(#decision-engine:target) .deck-rail a[href="#decision-engine"],
+  body.deck:has(#black-box:target) .deck-rail a[href="#black-box"],
+  body.deck:has(#coding-agents:target) .deck-rail a[href="#coding-agents"],
+  body.deck:has(#knowledge-and-judgment:target) .deck-rail a[href="#knowledge-and-judgment"],
+  body.deck:has(#what-a-pack-is:target) .deck-rail a[href="#what-a-pack-is"],
+  body.deck:has(#conformance:target) .deck-rail a[href="#conformance"],
+  body.deck:has(#portability:target) .deck-rail a[href="#portability"],
+  body.deck:has(#inputs:target) .deck-rail a[href="#inputs"],
+  body.deck:has(#evidence:target) .deck-rail a[href="#evidence"],
+  body.deck:has(#status:target) .deck-rail a[href="#status"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.4);
+  }
 }
 
 @supports (animation-timeline: view()) {

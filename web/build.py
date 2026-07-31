@@ -2104,18 +2104,25 @@ SLIDES: tuple[Slide, ...] = (
             "examples, none of them flattering:"
         ),
         points=(
-            "<strong>A feature meant to solve a problem solved none of it.</strong> Five people tried "
-            "independently, and all five concluded the honest answer was to build nothing.",
-            "<strong>A number we had published was six times too high.</strong> “About 19 of 25” was "
-            "re-measured properly at 3. It had already been quoted elsewhere. We corrected it in public.",
-            "<strong>A study's core assumption turned out to be false — and we found it ourselves.</strong> "
-            "The headline was rewritten to say so, and the flattering summary table was deleted "
-            "rather than defended.",
+            "<strong>Chaining decisions together closed none of the cases it was built for.</strong> "
+            "We proposed it, then tried it on five real cases. Five people worked them independently, "
+            "and all five concluded the honest move was to link nothing. It is still a proposal, not "
+            "a feature.",
+            "<strong>A number we published was six times too high.</strong> We said a feature we were "
+            "weighing would cover about 19 of 25 hard cases. A stricter re-count put it at 3 — after "
+            "the number had already been quoted elsewhere. We withdrew it in public.",
+            "<strong>A study's own assumption turned out to be false, and our own review caught "
+            "it.</strong> It assumed two checks were independent. They were not. We rewrote the "
+            "finding, relabelled the results that no longer counted, and deleted the flattering "
+            "summary table.",
         ),
         note=(
-            "This is also why it is called a research preview and not a standard. The path to a real "
-            "1.0 is gated on evidence — outside implementations, outside reviews, real users — and "
-            "none of those gates is quietly ticked off."
+            "None of this is something you have to take on trust — each is written up in full, method "
+            "and data, in the "
+            '<a href="https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments" '
+            'target="_blank" rel="noopener noreferrer">public research repository</a>. It is also why '
+            "this is a research preview and not a standard: the path to 1.0 is gated on outside "
+            "implementations, outside reviews, and real users."
         ),
     ),
     Slide(
