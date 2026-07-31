@@ -300,13 +300,14 @@ That bar is deliberate, and it is why the interoperability formats are tracked o
 **Q33. Is there an official runtime?** No — "official" is the wrong word, deliberately. There is a
 vendor-neutral *reference* runtime, and it is one implementation among peers rather than the
 authority. It validates documents at the carrier, structural, and semantic layers, and it states an
-evaluator-conformance claim for `0.2.0-draft` in its own repository, in the single file §3.4.1
-requires. Two cautions about how to read that. First, its evaluating surfaces stay labelled
-`experimental`, which is a statement about *stability* — such a surface may change or be removed —
-and never a statement about conformance. Second, the claim is that implementation's, not this
-project's: a claim attaches to an implementation and one exact `specVersion`, and this project
-neither issues, verifies, nor certifies one. Nothing on this site restates any part of it, because a
-partial restatement is precisely what §3.4.1 forbids.
+evaluator-conformance claim in its own repository, in one file it chose — §3.4.1 fixes the form a
+claim must take, not the file it lives in. Two cautions about how to read that. First, its
+evaluating surfaces stay labelled `experimental`, which is a statement about *stability* — such a
+surface may change or be removed — and never a statement about conformance. Second, the claim is
+that implementation's, not this project's: a claim attaches to an implementation and one exact
+`specVersion`, and this project neither issues, verifies, nor certifies one. This site therefore
+points at that file rather than reproducing the corpus version, the results, and the every-row
+statement that together make a claim complete. Read it there, in full, or not at all.
 
 **Q34. Does a conforming validator "make a decision"?** No. Passing validation establishes only the
 document-conformance layers reported. It never establishes truth, authority, safety, or fitness.

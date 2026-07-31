@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 412" role="img" aria-labelledby="cl-t cl-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
   <title id="cl-t">What conformance establishes, and what it never establishes</title>
   <desc id="cl-d">Four filled rows above a drawn line: carrier — the bytes parse as declared; structural — the document fits the schema; semantic — its references and cross-field rules hold; evaluator — an implementation computes the specified result. Below the line, drawn in outline only: factual grounding, authorization, and operational fitness. The specification stops at the line on purpose.</desc>
-  <text x="300" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#152426">What can be checked — and what never can</text>
+  <text x="300" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#152426">What this establishes — and what it never does</text>
   <path d="M39.5,44.4 Q300,43.7 559.6,44.4 Q559,62 560.9,80.4 Q300,79.4 40.3,79.1 Q39.3,62 40.9,43.9 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
   <path d="M40.2,44.2 Q300,42.6 559.8,44.2 M560.2,44 Q559.5,62 560.9,79.7 M560.3,80.1 Q300,80.7 39.2,80.9 M39.2,79.1 Q42.2,62 40.5,43.9 M39.3,43.9 Q300,42.6 560.1,44.5 M559.5,43.5 Q557.8,62 559.7,79.7 M559.2,79.6 Q300,77.8 39.3,79.9 M40.6,79.4 Q40.8,62 40,44.9" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <text x="58" y="67" text-anchor="start" font-size="13.5" font-weight="700" fill="#152426">Readable</text>
@@ -12,12 +12,12 @@
   <text x="180" y="111" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">every part is present and correctly shaped</text>
   <path d="M40.7,132.3 Q300,131.1 560.4,131.8 Q558.6,150 560.1,167.4 Q300,169.3 40.8,167.6 Q41.5,150 40.7,131.6 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
   <path d="M40.4,131.1 Q300,133.4 559.6,132.3 M559.3,131.2 Q559.6,150 560.2,168.3 M560.9,168.7 Q300,167.1 40.9,168.2 M39.4,168.6 Q38.4,150 40.4,131.2 M40.3,131.7 Q300,133.2 560.3,131.6 M560.4,132 Q562,150 559.3,168 M560.3,167.5 Q300,168.4 40.5,167.7 M39.8,168.8 Q38.4,150 40.5,132.8" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
-  <text x="58" y="155" text-anchor="start" font-size="13.5" font-weight="700" fill="#152426">Consistent</text>
-  <text x="180" y="155" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">nothing inside it contradicts anything else</text>
+  <text x="58" y="155" text-anchor="start" font-size="13.5" font-weight="700" fill="#152426">Joined up</text>
+  <text x="180" y="155" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">every reference resolves, every name is unique</text>
   <path d="M40.8,176.6 Q300,175.2 560.2,176.3 Q560.3,194 559.8,212.8 Q300,213 39.1,212.4 Q38.1,194 40.9,175.9 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
   <path d="M40,175.2 Q300,178.1 560.4,176 M559.3,176.3 Q561.1,194 559.8,211.1 M560.3,212.4 Q300,210 40.2,212.2 M39.6,211.8 Q42,194 40.5,175.2 M40.7,176.4 Q300,176.7 560.8,175 M559.9,176.8 Q560.9,194 559.8,211.1 M559.4,212.5 Q300,211.8 39.1,212.7 M40.4,212.3 Q40.8,194 39.9,176.6" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
-  <text x="58" y="199" text-anchor="start" font-size="13.5" font-weight="700" fill="#152426">Agreed</text>
-  <text x="180" y="199" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">two separate tools get the same answer from it</text>
+  <text x="58" y="199" text-anchor="start" font-size="13.5" font-weight="700" fill="#152426">Evaluated</text>
+  <text x="180" y="199" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">an engine claiming this computes the specified result</text>
   <path d="M25.3,231.4 Q300,230.9 574.7,231.8" fill="none" stroke="#8d3026" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <path d="M26.3,236.3 Q300,233.4 574.4,235.9" fill="none" stroke="#8d3026" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
   <text x="300" y="254" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8d3026">nothing below this line is ever claimed</text>

@@ -1807,8 +1807,8 @@ safety, or fitness. Any implementation that passes the public conformance corpus
     <h2><a href="{html.escape(runtime_url)}" target="_blank" rel="noopener noreferrer">judgment-pack</a></h2>
     <p>The project's vendor-neutral reference runtime; the command it installs is <code>jpack</code>.
     It validates the carrier, structural schema, and semantic references of a JPS document against an
-    immutable specification release, and it states an evaluator-conformance claim for
-    <code>0.2.0-draft</code> in its own repository. Its evaluating surfaces stay labelled
+    immutable specification release, and it states an evaluator-conformance claim in its own
+    repository, which is where that claim’s own terms must be read. Its evaluating surfaces stay labelled
     <code>experimental</code>, which reports their <em>stability</em> and never their conformance.
     Nothing it reports chooses an outcome for a real decision, fetches a source, or authorizes an
     action.</p>
@@ -2013,7 +2013,10 @@ SLIDES: tuple[Slide, ...] = (
         ),
         points=(
             "<strong>Technology leaders</strong> keep institutional knowledge as an asset the company "
-            "owns. Change the model or the tool underneath without rewriting the business rules.",
+            "owns — written in a vendor-neutral file rather than inside one vendor's prompt, so "
+            "changing the tool underneath does not mean rewriting the rules. Whether decisions hold "
+            "when the <em>model</em> changes is untested, and implementations from outside this "
+            "project remain an open gate.",
             "<strong>Risk, legal, and compliance teams</strong> inspect the exact logic, exception "
             "rules, and human escalation triggers before a system goes live — rather than inferring "
             "them from behaviour afterwards.",
@@ -2040,18 +2043,25 @@ SLIDES: tuple[Slide, ...] = (
             "business decision. The design keeps those two things firmly apart."
         ),
         points=(
-            "<strong>What automated tools verify:</strong> that the file is correctly formed, that it "
-            "does not contradict itself, and that separate tools reach the same result from it.",
+            "<strong>What automated tools check:</strong> that the file is correctly formed, and that it "
+            "hangs together internally — every reference resolves, identifiers are unique, and each "
+            "field means what the specification says it means.",
+            "<strong>What agreement between tools actually is:</strong> a requirement the "
+            "specification places on conforming engines — same inputs, same result — not a check "
+            "anyone runs against your file. The evidence behind it is a 20-row seed corpus that "
+            "publishes its own gaps.",
             "<strong>What stays with people:</strong> whether the input facts are true, whether "
             "someone with authority signed off, and whether the policy is lawful and safe to act on "
             "here.",
-            "<strong>Validation is not permission.</strong> A valid Judgment Pack proves the logic is "
-            "clear and runnable — never that it is correct, authorised, or appropriate for a given "
-            "case.",
+            "<strong>Validation is not permission.</strong> A valid file is well formed and "
+            "internally consistent. It does not mean the rules are free of contradictions — two "
+            "rules that disagree are a result the engine reports, not a validation failure — and "
+            "never that the logic is correct, authorised, or appropriate for a given case.",
         ),
         figure="deck-conformance-line.svg",
         figure_alt=(
-            "Four filled rows — readable, well-formed, consistent, agreed — above a drawn line, with "
+            "Four filled rows — readable, well-formed, references resolve, and evaluated — above a drawn "
+            "line, with "
             "is it true, is it allowed, and is it safe in outline below it. Nothing below the line is "
             "ever claimed."
         ),
@@ -2072,9 +2082,10 @@ SLIDES: tuple[Slide, ...] = (
             "<strong>Logic can be separated from the model.</strong> Business rules do not have to "
             "live inside a prompt. Moved into a plain file, the exceptions and escalation rules stay "
             "explicit rather than implied.",
-            "<strong>Separate implementations reach identical decisions.</strong> Two tools, built "
-            "separately from the written spec alone and in different programming languages, agreed on "
-            "every test case — down to the character.",
+            "<strong>Separate implementations reach the same result.</strong> A second tool, rebuilt "
+            "from the written specification alone in a different programming language, matches the "
+            "reference tool on every case — byte for byte, once the specification was amended to pin "
+            "the one output detail their first run showed it had left open.",
             "<strong>Writing judgment down exposes gaps in the policy itself.</strong> The act of "
             "making a rule explicit surfaces the missing cases and vague wording that prose had been "
             "hiding.",
@@ -2083,10 +2094,12 @@ SLIDES: tuple[Slide, ...] = (
             "the specification got fixed.",
         ),
         note=(
-            "Measured across 47 tests on the file format and 20 decision scenarios run through both "
-            "engines. One limit, stated plainly: both implementations were built under the same "
-            "maintainer, so this shows the specification is precise enough to follow independently — "
-            "not that two unrelated companies would agree."
+            "Measured across 47 tests on the file format, plus 20 decision scenarios replayed through "
+            "both engines. One limit, stated plainly: both implementations trace to the same "
+            "maintainer, and the second was written from reference texts that already carried the "
+            "first's implementation notes — so the agreement <em>corroborates</em> that the "
+            "specification is precise rather than independently confirming it. Two genuinely "
+            "independent implementations is the bar for calling any of this stable, and it is not met."
         ),
         figure="deck-portable-result.svg",
         figure_alt=(
@@ -2106,17 +2119,22 @@ SLIDES: tuple[Slide, ...] = (
             "separate layer."
         ),
         points=(
-            "<strong>The system fetches the data, not the AI.</strong> Values are pulled directly from "
-            "the source and signed on the way in, so a model cannot substitute a number it made up.",
+            "<strong>A gateway fetches the data, not the AI.</strong> A configured source is run by the "
+            "gateway and its result signed on the way in — so a model can still state a made-up "
+            "number, but it cannot produce a valid receipt for one.",
             "<strong>Records are tamper-evident.</strong> A completed session is sealed, so an "
             "altered, replayed, or truncated record can be detected rather than passing silently.",
             "<strong>Anyone can verify, and no-one gains the power to forge.</strong> Checking needs "
-            "only a public key — no access to the source systems, and no privileged position.",
+            "only a public key — no access to the source systems, and nothing that would let the "
+            "checker mint a record. The key has to be obtained out of band.",
         ),
         note=(
-            "The ceiling is stated up front and does not move: this proves <strong>where the data "
-            "came from and that it was not altered</strong> — never that the data was right in the "
-            "first place."
+            "The ceiling is stated up front and does not move: this proves <strong>that these exact "
+            "bytes passed through the gateway and were not altered afterwards</strong> — never that a "
+            "genuinely-named system produced them, and never that the data was right. The source name "
+            "on a receipt is an operator label, not an authenticated origin. This is a "
+            "single-operator reference implementation that no runtime consumes yet, which is why the "
+            "next section still lists proving where evidence came from as open."
         ),
         figure="deck-attested-inputs.svg",
         figure_alt=(
@@ -2140,13 +2158,15 @@ SLIDES: tuple[Slide, ...] = (
             "examples, none of them flattering:"
         ),
         points=(
-            "<strong>Chaining decisions together closed none of the cases it was built for.</strong> "
-            "We proposed it, then tried it on five real cases. Five people worked them independently, "
-            "and all five concluded the honest move was to link nothing. It is still a proposal, not "
-            "a feature.",
+            "<strong>Chaining decisions together closed nothing in the frame we tested.</strong> We "
+            "measured it against five clauses picked by a rule fixed in advance from two published "
+            "benchmark policies. Five isolated AI sessions worked them blind to the hypothesis, and "
+            "every one produced a valid graph with no links at all. One went further and showed the "
+            "links it could have declared pass every check while inverting the policy's meaning.",
             "<strong>A number we published was six times too high.</strong> We said a feature we were "
-            "weighing would cover about 19 of 25 hard cases. A stricter re-count put it at 3 — after "
-            "the number had already been quoted elsewhere. We withdrew it in public.",
+            "weighing would cover about 19 of 25 hard cases. Our own re-count put it at 3, hours "
+            "after we had already repeated the figure in a companion proposal. We struck it out in "
+            "public rather than quietly editing it away.",
             "<strong>A study's own assumption turned out to be false, and our own review caught "
             "it.</strong> It assumed two checks were independent. They were not. We rewrote the "
             "finding, relabelled the results that no longer counted, and deleted the flattering "
@@ -2175,12 +2195,18 @@ SLIDES: tuple[Slide, ...] = (
             "and an agreed way to turn one into an answer — held in place by 47 tests on the format "
             "and 20 on the answers.",
             "<strong>Tooling:</strong> an open-source reference implementation anyone can run, plus a "
-            "second one kept deliberately separate so that agreement between them means something.",
-            "<strong>Proposed, not built:</strong> linking several decisions together, choosing which "
-            "decision applies, and a shared catalogue for finding them. Each is an open proposal with "
-            "its bar for acceptance written down in advance.",
-            "<strong>Still open:</strong> proving where evidence came from, and the outside "
-            "implementations, outside reviews, and real users that a 1.0 is gated on.",
+            "second written clean-room from the specification text. Both trace to the same "
+            "maintainer, so their agreement shows the prose is precise enough to follow — not that "
+            "two unrelated parties would agree.",
+            "<strong>Proposed, not standardised:</strong> linking several decisions together, choosing "
+            "which decision applies, and a shared catalogue for finding them. The first has a working "
+            "prototype in the reference runtime, labelled experimental and claiming no conformance; "
+            "the other two have no implementation at all, and the project expects that choosing which "
+            "decision applies ends up outside the specification entirely. Each has its evidence bar "
+            "written down in advance, and none has met it.",
+            "<strong>Still open:</strong> the outside implementations, outside reviews, and real users "
+            "that a 1.0 is gated on. Proving where evidence came from has a working open reference "
+            "gateway, but nothing in the specification defines it yet.",
         ),
         actions=(
             ("Read the specification", "spec/0.2.0-draft/index.html", False),

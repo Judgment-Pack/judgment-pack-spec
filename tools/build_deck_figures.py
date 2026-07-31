@@ -193,13 +193,13 @@ def pack_anatomy() -> str:
 def conformance_line() -> str:
     pen = Pen(71)
     p = []
-    p.append(Text(300, 26, "What can be checked — and what never can", 14, "700").render())
+    p.append(Text(300, 26, "What this establishes — and what it never does", 14, "700").render())
 
     inside = (
         ("Readable", "the file opens, and is what it says it is"),
         ("Well-formed", "every part is present and correctly shaped"),
-        ("Consistent", "nothing inside it contradicts anything else"),
-        ("Agreed", "two separate tools get the same answer from it"),
+        ("Joined up", "every reference resolves, every name is unique"),
+        ("Evaluated", "an engine claiming this computes the specified result"),
     )
     outside = (
         ("Is it true?", "whether the facts behind it are real"),
