@@ -1939,18 +1939,18 @@ SLIDES: tuple[Slide, ...] = (
             "<strong>So the missing piece is not a smarter model.</strong> It is writing the judgment "
             "down, and having a way to check it.",
         ),
-        figure="deck-coding-vs-business.png",
+        figure="deck-coding-vs-business.svg",
         figure_alt=(
-            "Two-panel comparison. Left, the Coding Agent Environment: a clear task and explicit "
-            "target, executable artifacts, fast pass/fail feedback, and a stable evaluation harness "
-            "of build, test, lint, CI, git, and docker — the environment supplies objective signals. "
-            "Right, the Business AI Agent Environment: ambiguous goals, evidence scattered across "
-            "reports, forecasts, dashboards, email, and Slack, meaning that depends on context, and "
-            "delayed or subjective feedback — the environment rarely supplies a single ground truth."
+            "Two panels. A coding agent writes code, which passes through a compiler and tests, "
+            "producing a pass-or-fail verdict in seconds: the target is explicit, the work actually "
+            "runs, and the verdict is objective — the environment grades the work. A business agent "
+            "reads documents, weighs them up, and decides, producing no verdict at all: the goal is "
+            "fuzzy, evidence is scattered, and feedback comes months later — nothing says pass or "
+            "fail."
         ),
         figure_caption=(
-            "Coding agents work well because their environment already knows how to check the work. "
-            "Business decisions need that checking built for them."
+            "The same models sit behind both panels. Only one environment can tell you whether the "
+            "work was any good."
         ),
         wide=True,
     ),

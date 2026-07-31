@@ -21,6 +21,7 @@ from sketch import (
     rough_line,
     rough_rect,
     rough_region,
+    underline,
     wash,
 )
 
@@ -369,7 +370,113 @@ def decision_engine() -> str:
     )
 
 
+# --------------------------------------------------------------------------
+# 03 — why coding agents can be definitively evaluated
+# --------------------------------------------------------------------------
+
+def _tick(pen, cx, cy, size=13):
+    """A drawn checkmark — two strokes rather than a glyph, so it matches the boxes."""
+    return (
+        rough_line(pen, cx - size * 0.55, cy, cx - size * 0.12, cy + size * 0.45, 1.4)
+        + " "
+        + rough_line(pen, cx - size * 0.12, cy + size * 0.45, cx + size * 0.6, cy - size * 0.5, 1.4)
+    )
+
+
+def coding_vs_business() -> str:
+    """The README's two-panel comparison, redrawn simply in the deck's own hand."""
+    pen = Pen(151)
+    p = []
+    p.append(Text(450, 30, "Why coding agents can be definitively evaluated", 17, "700").render())
+
+    panels = (
+        {
+            "x": 24,
+            "fill": GREEN,
+            "title": "A coding agent",
+            "chain": ("writes code", "compiler", "tests"),
+            "verdict": "pass or fail, in seconds",
+            "tick": True,
+            "lines": (
+                "the target is explicit",
+                "the work actually runs",
+                "the verdict is objective",
+            ),
+            "footer": "the environment grades the work",
+        },
+        {
+            "x": 466,
+            "fill": None,
+            "title": "A business agent",
+            "chain": ("reads documents", "weighs it up", "decides"),
+            "verdict": "no verdict at all",
+            "tick": False,
+            "lines": (
+                "the goal is fuzzy",
+                "evidence is scattered",
+                "feedback comes months later",
+            ),
+            "footer": "nothing says pass or fail",
+        },
+    )
+
+    for panel in panels:
+        left = panel["x"]
+        mid = left + 205
+        if panel["fill"]:
+            p.append(wash(rough_region(pen, left, 48, 410, 296, 3.6), panel["fill"]))
+        p.append(ink(rough_rect(pen, left, 48, 410, 296, 3.6), 2.2))
+        p.append(Text(mid, 80, panel["title"], 16, "700").render())
+        p.append(ink(underline(pen, mid - 74, 90, 148), 1.3, MUTED))
+
+        # the three-step chain each agent runs
+        for index, label in enumerate(panel["chain"]):
+            bx = left + 20 + index * 128
+            p.append(ink(rough_rect(pen, bx, 108, 110, 42, 2.4), 1.7))
+            p.append(Text(bx + 55, 134, label, 11.5, "500").render())
+            if index < 2:
+                p.append(ink(rough_arrow(pen, bx + 112, 129, bx + 126, 129, 1.6, 7), 1.5, MUTED))
+
+        # the verdict the chain does, or does not, produce
+        if panel["tick"]:
+            p.append(ink(_tick(pen, mid - 84, 180, 15), 2.4, "#236232"))
+        else:
+            p.append(Text(mid - 62, 190, "?", 27, "700", fill="#8d3026").render())
+        p.append(Text(mid + 18, 187, panel["verdict"], 13, "600").render())
+
+        for index, line in enumerate(panel["lines"]):
+            top = 224 + index * 26
+            p.append(ink(rough_line(pen, left + 26, top - 4, left + 36, top - 4, 1.0), 1.6, MUTED))
+            p.append(Text(left + 46, top, line, 12.5, "400", anchor="start", fill=MUTED).render())
+
+        p.append(ink(rough_line(pen, left + 20, 306, left + 390, 306, 1.6), 1.2, MUTED, 0.7))
+        p.append(Text(mid, 328, panel["footer"], 12.5, "700", fill=MUTED).render())
+
+    p.append(wash(rough_region(pen, 90, 364, 720, 52, 2.8), SAND))
+    p.append(ink(rough_rect(pen, 90, 364, 720, 52, 2.8), 1.9))
+    p.append(Text(450, 387, "Coding agents work because their environment already checks the work.", 13, "500").render())
+    p.append(Text(450, 406, "Business decisions need that checking built for them.", 13, "700").render())
+
+    return document(
+        width=900,
+        height=432,
+        slug="cb",
+        title="Why coding agents can be definitively evaluated",
+        desc=(
+            "Two panels. A coding agent writes code, which passes through a compiler and tests, "
+            "producing a pass-or-fail verdict in seconds: the target is explicit, the work actually "
+            "runs, and the verdict is objective — the environment grades the work. A business agent "
+            "reads documents, weighs them up, and decides, producing no verdict at all: the goal is "
+            "fuzzy, evidence is scattered, and feedback comes months later — nothing says pass or "
+            "fail. Coding agents work because their environment already checks the work; business "
+            "decisions need that checking built for them."
+        ),
+        body="\n".join("  " + part for part in p),
+    )
+
+
 FIGURES = {
+    "deck-coding-vs-business": coding_vs_business,
     "deck-decision-engine": decision_engine,
     "deck-black-box": black_box,
     "deck-knowledge-vs-judgment": knowledge_vs_judgment,

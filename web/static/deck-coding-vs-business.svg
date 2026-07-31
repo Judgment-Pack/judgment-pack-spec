@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 432" role="img" aria-labelledby="cb-t cb-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="cb-t">Why coding agents can be definitively evaluated</title>
+  <desc id="cb-d">Two panels. A coding agent writes code, which passes through a compiler and tests, producing a pass-or-fail verdict in seconds: the target is explicit, the work actually runs, and the verdict is objective — the environment grades the work. A business agent reads documents, weighs them up, and decides, producing no verdict at all: the goal is fuzzy, evidence is scattered, and feedback comes months later — nothing says pass or fail. Coding agents work because their environment already checks the work; business decisions need that checking built for them.</desc>
+  <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#152426">Why coding agents can be definitively evaluated</text>
+  <path d="M23.4,49.4 Q229,45.9 433.3,46.6 Q433.8,196 433.8,345.4 Q229,345.3 23.3,343.5 Q21.4,196 22.9,48.3 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
+  <path d="M25.1,49 Q229,47.9 434.3,47.9 M435.1,48.1 Q433.7,196 434.3,342.8 M435.4,343.9 Q229,342.3 23.8,344.7 M22.8,343.8 Q22.9,196 25,49.3 M25.3,49.3 Q229,51.6 433.4,48.4 M435,47.8 Q432.6,196 432.8,345 M432.6,342.7 Q229,345.6 23.9,343.3 M23.1,345.4 Q27.5,196 24,47.9" fill="none" stroke="#152426" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="229" y="80" text-anchor="middle" font-size="16" font-weight="700" fill="#152426">A coding agent</text>
+  <path d="M155.2,89.7 Q229,90.6 303.2,89.7 M155.3,91.2 Q229,92.5 302.6,91.9" fill="none" stroke="#566466" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M44.3,107.1 Q99,107.9 153.9,107.1 M154.3,108.3 Q154.4,129 154,150.5 M153.8,149.4 Q99,150 43.9,149.2 M44.9,149.9 Q46.1,129 43.8,107.8 M44.5,107.1 Q99,109.9 154.6,108.5 M154.8,108.1 Q153.2,129 153.8,150.5 M154.9,149.3 Q99,150.1 44.5,150 M43.7,150.7 Q43.7,129 44.2,107.7" fill="none" stroke="#152426" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="99" y="134" text-anchor="middle" font-size="11.5" font-weight="500" fill="#152426">writes code</text>
+  <path d="M155.9,129.3 Q163,129.6 170.6,129.3 M170,129.2 Q167.1,131 163.8,132.7 M170,128.8 Q167.3,126.6 164.1,125.5" fill="none" stroke="#566466" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M172.2,107.7 Q227,106.1 282.5,108.6 M281.2,108.2 Q281.7,129 282.1,149.1 M281.5,149.5 Q227,149.4 172.4,150.4 M172.9,150 Q171.7,129 172.7,108.9 M172.9,107.1 Q227,109.5 282.1,108.5 M282,107.1 Q280.5,129 282.3,149.8 M282.9,150.6 Q227,150 172.2,150.5 M171.5,150.5 Q172.7,129 172.9,107.1" fill="none" stroke="#152426" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="227" y="134" text-anchor="middle" font-size="11.5" font-weight="500" fill="#152426">compiler</text>
+  <path d="M284.6,129.2 Q291,129.5 298.1,129.2 M297.8,129.3 Q294.8,130.5 292,132.5 M298.1,128.8 Q295.4,126.5 291.8,125.2" fill="none" stroke="#566466" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M300.7,107.1 Q355,109.1 409.7,108.4 M409.2,108.9 Q409.3,129 410.3,149.4 M409.4,150.5 Q355,149 299.6,150.3 M300.5,150.5 Q301.7,129 299.4,107.3 M300.9,108 Q355,107.9 410.5,108.2 M409.1,107.2 Q408.1,129 409.2,149.5 M410,150.8 Q355,148.8 299.8,150 M299.8,150.5 Q300.9,129 300.2,108.3" fill="none" stroke="#152426" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="355" y="134" text-anchor="middle" font-size="11.5" font-weight="500" fill="#152426">tests</text>
+  <path d="M136.3,180.3 Q139.8,183.5 143.1,186.5 M143.7,187 Q148.4,179.5 153.5,172.5" fill="none" stroke="#236232" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="247" y="187" text-anchor="middle" font-size="13" font-weight="600" fill="#152426">pass or fail, in seconds</text>
+  <path d="M49.7,220 Q55,219.7 59.6,219.7" fill="none" stroke="#566466" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="70" y="224" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">the target is explicit</text>
+  <path d="M50.4,246 Q55,246.8 60.3,246.3" fill="none" stroke="#566466" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="70" y="250" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">the work actually runs</text>
+  <path d="M49.8,271.9 Q55,272.6 60.3,271.8" fill="none" stroke="#566466" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="70" y="276" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">the verdict is objective</text>
+  <path d="M43.9,306.5 Q229,306.9 413.5,306.4" fill="none" stroke="#566466" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  <text x="229" y="328" text-anchor="middle" font-size="12.5" font-weight="700" fill="#566466">the environment grades the work</text>
+  <path d="M466,47.5 Q671,51.2 875,48.3 M875.8,47.2 Q876.2,196 876.8,343.5 M876.8,344.2 Q671,343.8 466.9,344.7 M464.6,343.1 Q463.7,196 465.5,48.3 M465.7,47.7 Q671,51.5 876.5,46.7 M875.9,49.3 Q878.1,196 875.8,343 M875.2,345.1 Q671,343.1 465.8,343.6 M467.4,345.4 Q468.2,196 466.5,47.2" fill="none" stroke="#152426" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="671" y="80" text-anchor="middle" font-size="16" font-weight="700" fill="#152426">A business agent</text>
+  <path d="M597.4,89.6 Q671,89.5 745.3,89.9 M597.4,91.3 Q671,92.6 745.2,91.5" fill="none" stroke="#566466" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M485.7,107.5 Q541,108.9 595.2,107.9 M596.3,108.6 Q595.2,129 595.4,150.8 M596.2,149.2 Q541,150 486.6,150.7 M486.7,149.6 Q486.4,129 486.3,108.6 M486.9,108.9 Q541,107.3 596.1,107.3 M596.8,107.9 Q593.7,129 595.4,150.3 M596.4,150.9 Q541,152 486,150.2 M486.4,150.1 Q487.6,129 486.2,108.6" fill="none" stroke="#152426" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="541" y="134" text-anchor="middle" font-size="11.5" font-weight="500" fill="#152426">reads documents</text>
+  <path d="M598.6,128.6 Q605,129.6 611.7,128.7 M612.3,128.8 Q608.6,130.1 606.3,132.6 M611.8,128.7 Q608.8,127.5 605.7,125.3" fill="none" stroke="#566466" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M613.3,107.1 Q669,109.3 724.2,108.9 M723.6,107.1 Q723.9,129 723.1,150.9 M723,150.6 Q669,149 613.1,150.3 M614.5,150 Q613.2,129 614.5,107.8 M614.3,108.2 Q669,105.7 723.3,108.3 M723.6,108.1 Q723.8,129 724.8,149.5 M723.8,150.6 Q669,152.2 613.1,149 M613.3,149.5 Q613.1,129 614,108.7" fill="none" stroke="#152426" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="669" y="134" text-anchor="middle" font-size="11.5" font-weight="500" fill="#152426">weighs it up</text>
+  <path d="M725.6,128.8 Q733,129.1 739.8,129.3 M739.9,129 Q737.3,131.2 733.8,132.6 M740,129.1 Q736.7,127.7 733.7,125.1" fill="none" stroke="#566466" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M742.1,107.7 Q797,109.7 853,108.9 M852.4,108.1 Q854.4,129 851.2,150.3 M851.2,150 Q797,151.7 741.8,149.8 M742.6,150.4 Q740.7,129 741.1,107.9 M742.1,107.4 Q797,107.2 851.1,107.1 M852.4,107.5 Q850.7,129 852.1,150.7 M851.8,149.7 Q797,151.4 742.1,150.9 M741.3,150.8 Q744.2,129 741.3,107.3" fill="none" stroke="#152426" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="797" y="134" text-anchor="middle" font-size="11.5" font-weight="500" fill="#152426">decides</text>
+  <text x="609" y="190" text-anchor="middle" font-size="27" font-weight="700" fill="#8d3026">?</text>
+  <text x="689" y="187" text-anchor="middle" font-size="13" font-weight="600" fill="#152426">no verdict at all</text>
+  <path d="M492.2,219.6 Q497,220.1 502.2,219.6" fill="none" stroke="#566466" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="512" y="224" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">the goal is fuzzy</text>
+  <path d="M492.1,246.4 Q497,245.3 502.2,246.4" fill="none" stroke="#566466" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="512" y="250" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">evidence is scattered</text>
+  <path d="M492.4,272.3 Q497,272.6 502.2,271.7" fill="none" stroke="#566466" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="512" y="276" text-anchor="start" font-size="12.5" font-weight="400" fill="#566466">feedback comes months later</text>
+  <path d="M486.6,305.8 Q671,304.4 856.3,306" fill="none" stroke="#566466" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  <text x="671" y="328" text-anchor="middle" font-size="12.5" font-weight="700" fill="#566466">nothing says pass or fail</text>
+  <path d="M90.5,363.4 Q450,361.6 811,364.3 Q810.2,390 810.5,415.3 Q450,416.1 90,415.6 Q90.3,390 89.8,363.5 Z" fill="#fff0d8" stroke="none" opacity="0.55"/>
+  <path d="M90.9,363.2 Q450,364.2 810.4,364.9 M809.1,365.1 Q809.7,390 810,416.2 M809,417 Q450,415.9 90.5,416.4 M89.8,415.9 Q87.2,390 90.7,363.2 M90.5,363.5 Q450,363.3 809.5,364.9 M810.1,363 Q810,390 809.5,415.7 M809,417.1 Q450,417.8 89.9,416.2 M89.1,416.1 Q87.7,390 89.4,364.1" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="450" y="387" text-anchor="middle" font-size="13" font-weight="500" fill="#152426">Coding agents work because their environment already checks the work.</text>
+  <text x="450" y="406" text-anchor="middle" font-size="13" font-weight="700" fill="#152426">Business decisions need that checking built for them.</text>
+</svg>
