@@ -1991,8 +1991,9 @@ SLIDES: tuple[Slide, ...] = (
             "verify that the rules match the business goal.",
             "<strong>It handles real-world complexity.</strong> Exceptions, missing information, and "
             "the point at which a human manager must step in are all written down explicitly.",
-            "<strong>Outcomes are strictly controlled.</strong> The AI can only return an outcome the "
-            "business approved. It cannot improvise a new one.",
+            "<strong>The permitted outcomes are named in advance.</strong> The file lists every result "
+            "the business will accept, so anything else an AI produces is visibly outside the set "
+            "rather than a plausible-looking surprise.",
             "<strong>It reviews like software.</strong> Track changes over time, compare versions, "
             "and sign off on a policy update in writing.",
         ),
@@ -2012,7 +2013,7 @@ SLIDES: tuple[Slide, ...] = (
             "single shared artifact — one each of them can actually read."
         ),
         points=(
-            "<strong>Technology leaders</strong> keep institutional knowledge as an asset the company "
+            "<strong>Engineering and technology leaders</strong> keep institutional knowledge as an asset the company "
             "owns — written in a vendor-neutral file rather than inside one vendor's prompt, so "
             "changing the tool underneath does not mean rewriting the rules. Whether decisions hold "
             "when the <em>model</em> changes is untested, and implementations from outside this "
@@ -2020,9 +2021,8 @@ SLIDES: tuple[Slide, ...] = (
             "<strong>Risk, legal, and compliance teams</strong> inspect the exact logic, exception "
             "rules, and human escalation triggers before a system goes live — rather than inferring "
             "them from behaviour afterwards.",
-            "<strong>AI and software engineers</strong> get prompt bugs that are traceable to a line, "
-            "behaviour changes that show up in a diff, and a human fallback path defined in advance "
-            "instead of improvised.",
+            "<strong>The policy owner</strong> can read the rules that govern their own process without "
+            "reading code, and argue with a proposed change before it ships rather than after.",
             "<strong>The common thread:</strong> the reasoning stops being a property of one tool and "
             "becomes a document all three can review.",
         ),
@@ -2086,9 +2086,9 @@ SLIDES: tuple[Slide, ...] = (
             "from the written specification alone in a different programming language, matches the "
             "reference tool on every case — byte for byte, once the specification was amended to pin "
             "the one output detail their first run showed it had left open.",
-            "<strong>Writing judgment down exposes gaps in the policy itself.</strong> The act of "
-            "making a rule explicit surfaces the missing cases and vague wording that prose had been "
-            "hiding.",
+            "<strong>Not everything fits, and the misfits are informative.</strong> Encoding real "
+            "policies surfaced cases the format could not hold — recorded as published negatives rather "
+            "than smoothed over, and they are what the open proposals are trying to answer.",
             "<strong>Disagreement is the useful signal.</strong> Where the two implementations "
             "differed, the fault was in the written specification rather than in either program — so "
             "the specification got fixed.",
@@ -2133,8 +2133,8 @@ SLIDES: tuple[Slide, ...] = (
             "bytes passed through the gateway and were not altered afterwards</strong> — never that a "
             "genuinely-named system produced them, and never that the data was right. The source name "
             "on a receipt is an operator label, not an authenticated origin. This is a "
-            "single-operator reference implementation that no runtime consumes yet, which is why the "
-            "next section still lists proving where evidence came from as open."
+            "single-operator reference implementation that no runtime consumes yet, and nothing in the "
+            "specification defines it — which is why the status section still lists it as open."
         ),
         figure="deck-attested-inputs.svg",
         figure_alt=(
@@ -2200,8 +2200,9 @@ SLIDES: tuple[Slide, ...] = (
             "two unrelated parties would agree.",
             "<strong>Proposed, not standardised:</strong> linking several decisions together, choosing "
             "which decision applies, and a shared catalogue for finding them. The first has a working "
-            "prototype in the reference runtime, labelled experimental and claiming no conformance; "
-            "the other two have no implementation at all, and the project expects that choosing which "
+            "prototype in the reference runtime, labelled experimental for stability — composition "
+            "itself has no conformance class for anyone to claim; "
+            "the other two have no portable format at all, and the project expects that choosing which "
             "decision applies ends up outside the specification entirely. Each has its evidence bar "
             "written down in advance, and none has met it.",
             "<strong>Still open:</strong> the outside implementations, outside reviews, and real users "
@@ -2220,8 +2221,9 @@ SLIDES: tuple[Slide, ...] = (
         kicker="12 — Get involved",
         heading="Help build the open standard for AI judgment",
         lede=(
-            "This is a vendor-neutral, community-driven specification, and at this stage the most "
-            "useful contribution is criticism. Four kinds of people would move it furthest:"
+            "This is a vendor-neutral specification with, today, a single maintainer and no independent "
+            "contributors — which is exactly the problem. At this stage the most useful contribution is "
+            "criticism. Four kinds of people would move it furthest:"
         ),
         points=(
             "<strong>Evaluation partners.</strong> Teams running AI in domains where a decision has "

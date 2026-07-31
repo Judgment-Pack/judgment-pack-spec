@@ -270,12 +270,13 @@ def portable_result() -> str:
         width=600,
         height=378,
         slug="pr",
-        title="Two independent implementations produce one byte-identical result",
+        title="Two separately built implementations produce one byte-identical result",
         desc=(
-            "One pack and its facts feed two separately written implementations — the Go reference "
-            "runtime and a clean-room evaluator, each written from the specification text alone. "
+            "One pack and its facts feed two separately built implementations — the project's Go "
+            "reference runtime, and a clean-room evaluator written from the specification text alone. "
             "Both produce one disposition, byte-identical after RFC 8785 canonicalization. A "
-            "disagreement between them locates ambiguity in the prose."
+            "disagreement between them locates ambiguity in the prose. Both trace to one maintainer, "
+            "so this corroborates the text rather than independently confirming it."
         ),
         body="\n".join("  " + part for part in p),
     )
@@ -288,7 +289,7 @@ def portable_result() -> str:
 def attested_inputs() -> str:
     pen = Pen(101)
     p = []
-    p.append(Text(300, 24, "The AI never touches the evidence", 15, "700").render())
+    p.append(Text(300, 24, "The AI cannot sign for the evidence", 15, "700").render())
 
     p.extend(box(pen, 24, 52, 130, 58, "source", None, None, 13.5))
     p.append(ink(rough_arrow(pen, 158, 81, 210, 81, 2.2, 10), 1.9))

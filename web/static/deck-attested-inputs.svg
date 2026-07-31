@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 344" role="img" aria-labelledby="ai-t ai-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
   <title id="ai-t">Attested inputs: signed receipts, a sealed session, and a public-key verifier</title>
   <desc id="ai-d">A source is run by the gateway, which signs each result into a receipt. Receipts are chained per session and the session is then sealed. A verifier checks the chain and the seal using only the public key, so checking grants no power to forge. The mechanism proves the byte-lineage of the inputs a judgment was computed over — never that those bytes are true.</desc>
-  <text x="300" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">The AI never touches the evidence</text>
+  <text x="300" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">The AI cannot sign for the evidence</text>
   <path d="M23.9,53.1 Q89,50.7 153.8,52.5 M154.9,51.2 Q156.2,81 154.9,109.7 M155,109.5 Q89,109.3 22.8,109 M23.2,110.8 Q24.5,81 24.1,51.3 M23.7,51 Q89,50.9 154,52.9 M154,51 Q151.7,81 153.4,110 M154.5,110.4 Q89,108.9 24.3,109.1 M23.1,109.3 Q25.9,81 24.5,51.7" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
   <text x="89" y="86" text-anchor="middle" font-size="13.5" font-weight="600" fill="#152426">source</text>
   <path d="M158.8,80.3 Q184,79.7 209.2,80.3 M209.7,80.9 Q206.2,84.4 201.3,86 M209.6,81.4 Q205.8,78.3 201.3,75.5" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
