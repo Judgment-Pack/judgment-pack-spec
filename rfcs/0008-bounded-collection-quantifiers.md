@@ -74,8 +74,8 @@ information barrier is the isolated contexts and nothing stronger. It is not cen
 briefs and the run metadata are committed alongside the raw outputs, so the characterization can be
 audited rather than taken on trust. Raw outputs, briefs, adjudication, and the per-fact table:
 [`analysis/`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/003-escape-census/analysis)
-(committed on the `census-shape-subclassification` branch, merging ahead of this RFC; pinned at
-commit `5d42452`), recorded in the study's `DEVIATIONS.md`.
+(written on the `census-shape-subclassification` branch, since merged to that repository's `main` as
+commit `00e0d82`), recorded in the study's `DEVIATIONS.md`.
 
 **Q1 — the shape table.** The 25 facts, across the 11 rooms producing at least one (A4 produced
 none), sub-divide as follows. Per-fact assignments are in the linked artifact.
@@ -948,11 +948,13 @@ accepted. That bar applies here in full and is not met.
 
 The natural prototype bed is the Go reference runtime's **experimental** evaluator (its ADR-0007),
 which already implements §7's three-valued logic and RFC 0006's pinned semantics, so two operators
-are a local addition plus a limits budget. It makes no conformance claims, and prototyping there
-establishes none: prototyping is not a claim under §3.4.1 whatever is implemented, and the operators
-proposed here are in no `specVersion`, so no corpus exists to claim against. (When this was written
-RFC 0006's class did not exist at all; it landed in Core `0.2.0-draft`, which changes where the
-prohibition lives, not the conclusion.) A prototype yields implementation experience and corpus rows,
+are a local addition plus a limits budget. Prototyping there
+establishes no claim about these operators: prototyping is not a claim under §3.4.1 whatever is
+implemented, and the operators proposed here are in no `specVersion`, so no corpus exists to claim
+against. (When this was written RFC 0006's class did not exist at all and that runtime claimed
+nothing. The class landed in Core `0.2.0-draft` and the runtime now claims it — and the conclusion
+is unchanged, because that claim expressly excludes every input admitted under this prototype's
+opt-in, which is exactly the separation this paragraph asks for.) A prototype yields implementation experience and corpus rows,
 not standing. The natural second is the clean-room Python evaluator in
 [judgment-pack-evaluator-experiments](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments),
 rewritten from this RFC's text alone behind a fresh information barrier — with RFC 0006's recorded
@@ -1011,13 +1013,16 @@ implementations agree on *semantics*, not evidence that either satisfies the acc
 candidate should be called complete until it survives adversarial pricing attacks, and the count so
 far is three killed outright and the fourth broken twice and repaired. Full matrix, corpus, and
 adjudications:
-[`harness/RFC0008-AGREEMENT.md`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/rfc0008-python-prototype/harness/RFC0008-AGREEMENT.md)
-(both prototypes live on unmerged review branches at the time of this amendment — the experiments
-repository's `rfc0008-python-prototype` and the runtime's `rfc-0008-quantifier-prototype`; the
-links follow the branches and the artifacts arrive on `main` when those pull requests merge).
-None of this is conformance evidence (§3.4; RFC 0006's class does not exist), and RFC 0000's
+[`harness/RFC0008-AGREEMENT.md`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/main/harness/RFC0008-AGREEMENT.md)
+(both prototypes were on unmerged review branches when this amendment was written; both have since
+merged, those branches no longer exist, and this link follows `main`. The runtime's prototype ships
+as its `--rfc0008-quantifiers` opt-in).
+None of this is conformance evidence, and RFC 0000's
 acceptance bar remains formally unmet: these are prototypes traceable to one maintainer's
-direction.
+direction. The evaluator conformance class has since landed in Core `0.2.0-draft` §3.4 — which
+changes nothing here, in either direction: these operators belong to no published JPS version, so a
+pack using one is not a conforming document, and the reference runtime's claim of that class
+expressly excludes every input admitted under this opt-in.
 
 ## Unresolved questions
 

@@ -42,7 +42,8 @@ no runtime. Those exclusions are intentional; see the [non-goals](../non-goals.m
 | Judgment Graph | A *format* for composing several packs. | Proposed | [RFC 0002](../../rfcs/0002-judgment-graph.md) |
 | Judgment Pack | A single-decision document. | **Shipped** | The specification |
 | Evidence (sources) | What a pack references; supplied by any system. | Reference **shipped**; integration out of scope | [RFC 0003](../../rfcs/0003-evidence-reference.md) |
-| Runtime | Validates documents; may also evaluate. | Validator shipped; evaluator conformance class **shipped** in Core `0.2.0-draft` §3.4, claimed by no implementation yet | Reference runtime, [RFC 0006](../../rfcs/0006-evaluator-conformance.md) |
+| Evidence acquisition | Getting the bytes, and showing they were not invented. | Out of scope; open research, no RFC proposes it | [Research](#where-those-inputs-come-from-is-a-separate-open-question) |
+| Runtime | Validates documents; may also evaluate. | Validator shipped; evaluator conformance class **shipped** in Core `0.2.0-draft` §3.4, and the reference runtime now states a claim of it in its own repository | Reference runtime, [RFC 0006](../../rfcs/0006-evaluator-conformance.md) |
 | Composite Judgment | The aggregated result of evaluating a graph. | Proposed | [RFC 0002](../../rfcs/0002-judgment-graph.md) |
 | Discovery / registry | Finding and selecting packs across catalogs. | Proposed (format) / product (service) | [RFC 0001](../../rfcs/0001-pack-manifest.md), [RFC 0005](../../rfcs/0005-pack-discovery.md) |
 
@@ -84,6 +85,25 @@ take over*. Evidence sources feed a pack; they do not sit above it.
 The [Why Judgment Pack?](../why.md) page develops this distinction, and the
 [comparison](../concepts/comparison.md) page contrasts the format with DMN, policy engines, and rule
 engines.
+
+### Where those inputs come from is a separate, open question
+
+A pack says which evidence matters. It says nothing about whether the bytes an agent presents as
+that evidence are the bytes a source actually returned — and an agent that can assert a fact can
+also invent one. That is a real gap, it is deliberately **outside this specification**, and the
+project is researching it in the open rather than specifying it early:
+[judgment-pack-evaluator-experiments](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments)
+holds the studies, and
+[judgment-pack-gateway](https://github.com/Judgment-Pack/judgment-pack-gateway) is a research-preview
+reference gateway that signs each acquired result under one identity and seals a session so a
+verifier holding only the public key can detect replay and rollback.
+
+Its ceiling is stated up front and is worth repeating here, because it is the kind of claim that
+inflates in retelling: the mechanism proves **byte-lineage, not truth**. It establishes what a
+judgment was computed over. It establishes nothing about whether those bytes are accurate, whether
+the named source produced them, or whether acting on the result is authorized — the same three
+things [conformance never establishes](../../spec/judgment-pack-core.md). Nothing in this research
+line is part of JPS, and no RFC proposes it as one today.
 
 ## The point of labeling
 

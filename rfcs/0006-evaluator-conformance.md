@@ -169,12 +169,19 @@ extension; undeclared evidence key).
 ## Implementation
 
 The first implementation exists: the Go reference runtime implements this RFC's pinned semantics
-as `judgment-pack experimental evaluate` and the `experimental_evaluate` MCP tool (its ADR-0007) —
-unmistakably labeled, claiming no conformance, and outside the default validation path, per the
+as `jpack experimental evaluate` and the `experimental_evaluate` MCP tool (its ADR-0007) —
+unmistakably labeled and outside the default validation path, per the
 pre-stated guardrails in [tooling-architecture](../docs/tooling-architecture.md). The nine
-appendix instances run as its acceptance tests and reproduce identically over both of its
+appendix instances run as its acceptance tests and reproduce identically over its evaluating
 surfaces. The specification repository still owns no executable — the contract and corpus belong
 here, engines do not.
+
+Two details in that paragraph have changed since it was written, and neither changes what this RFC
+concluded. The command was `judgment-pack` and is now `jpack`. More materially, that implementation
+claimed no conformance then and claims the class now, having run the corpus for the exact
+`specVersion` and stated the claim where §3.4.1 requires it. That is the guardrail working as
+written rather than an exception to it: the evaluating surfaces stay labelled `experimental`,
+because that label reports their stability and never their conformance.
 
 Implementation experience recorded from that first implementation:
 

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 384" role="img" aria-labelledby="pa-t pa-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="pa-t">What one Judgment Pack declares</title>
+  <desc id="pa-d">A single document listing, in order: decision — what is being decided and why; evidence — what may support it; applicability — when this pack applies at all; rules — what follows from the evidence; exceptions — what overrides the ordinary outcome; uncertainty — what happens when a fact is unknown; outcomes — the closed set of permitted results; and escalation — when a human must take over. It is portable JSON with no prompt, model, or runtime inside it.</desc>
+  <text x="340" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">One document, one decision</text>
+  <path d="M87.3,44.4 Q340,42.1 593,44.6 Q590.4,192 592.7,340.5 Q340,339.9 89.3,340.2 Q85.6,192 87.3,42.8 Z" fill="#ffffff" stroke="none" opacity="0.55"/>
+  <path d="M86.7,44.7 Q340,43.9 591.2,42.6 M591.5,44.7 Q588.8,192 593.2,339.9 M591.5,339.6 Q340,337 89,339.3 M86.7,339.1 Q88.4,192 87.2,43.1 M86.8,43 Q340,43.6 592.5,45.3 M591.8,44.2 Q594,192 592.3,340.4 M590.9,340 Q340,338.5 87.2,341 M88,341.1 Q87.4,192 89,44.2" fill="none" stroke="#152426" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M100.5,62.6 Q340,61.5 580.5,61.3 Q579.8,76 579.7,90.5 Q340,91.5 100.2,90.2 Q98.4,76 99.5,61.7 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
+  <text x="114" y="81" text-anchor="start" font-size="13" font-weight="700" fill="#152426">decision</text>
+  <text x="240" y="81" text-anchor="start" font-size="12" font-weight="400" fill="#566466">what is being decided, and why</text>
+  <text x="114" y="116" text-anchor="start" font-size="13" font-weight="700" fill="#152426">evidence</text>
+  <text x="240" y="116" text-anchor="start" font-size="12" font-weight="400" fill="#566466">what may support it</text>
+  <text x="114" y="151" text-anchor="start" font-size="13" font-weight="700" fill="#152426">applicability</text>
+  <text x="240" y="151" text-anchor="start" font-size="12" font-weight="400" fill="#566466">when this pack applies at all</text>
+  <text x="114" y="186" text-anchor="start" font-size="13" font-weight="700" fill="#152426">rules</text>
+  <text x="240" y="186" text-anchor="start" font-size="12" font-weight="400" fill="#566466">what follows from the evidence</text>
+  <text x="114" y="221" text-anchor="start" font-size="13" font-weight="700" fill="#152426">exceptions</text>
+  <text x="240" y="221" text-anchor="start" font-size="12" font-weight="400" fill="#566466">what overrides the ordinary outcome</text>
+  <text x="114" y="256" text-anchor="start" font-size="13" font-weight="700" fill="#152426">uncertainty</text>
+  <text x="240" y="256" text-anchor="start" font-size="12" font-weight="400" fill="#566466">what happens when a fact is unknown</text>
+  <text x="114" y="291" text-anchor="start" font-size="13" font-weight="700" fill="#152426">outcomes</text>
+  <text x="240" y="291" text-anchor="start" font-size="12" font-weight="400" fill="#566466">the closed set of permitted results</text>
+  <path d="M100.6,307.3 Q340,307.4 579.6,306.4 Q579.8,321 579.4,334.7 Q340,335.4 100.4,334.8 Q101.1,321 100.5,306.5 Z" fill="#fff0d8" stroke="none" opacity="0.55"/>
+  <text x="114" y="326" text-anchor="start" font-size="13" font-weight="700" fill="#152426">escalation</text>
+  <text x="240" y="326" text-anchor="start" font-size="12" font-weight="400" fill="#566466">when a human must take over</text>
+  <text x="340" y="364" text-anchor="middle" font-size="12.5" font-weight="500" fill="#566466">Portable JSON. No prompt, no model, no runtime inside it.</text>
+</svg>

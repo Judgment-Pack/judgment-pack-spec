@@ -70,8 +70,10 @@ Core `0.2.0-draft` supports testing carrier, structural, and semantic document c
 defines a fourth class: evaluator conformance (§3.4), with normative condition and resolution
 semantics, one portable result (the §8.3 disposition), an error contract (§8.4), and a seed evaluation
 corpus. Document conformance is unchanged, and exactly one form of evaluator-conformance claim is
-definable — against the class and the corpus, for one exact `specVersion` (§3.4.1). No implementation
-ships such a claim today.
+definable — against the class and the corpus, for one exact `specVersion` (§3.4.1). The first such
+claim now exists: the reference runtime states one in its own repository, in the single file §3.4.1
+requires. This project does not issue, verify, or certify it — a claim attaches to an implementation,
+and repeating part of one here would be the partial claim §3.4.1 forbids.
 
 ## What JPS is
 

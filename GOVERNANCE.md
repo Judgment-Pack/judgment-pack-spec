@@ -87,8 +87,8 @@ record and were merged without one.
   boundary. Not writing an ADR does not make a decision immaterial. This document binds only this
   repository; the runtime's adopting text is its
   [`docs/adr/README.md`](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/README.md),
-  and the obligation exists there only once that text is merged. Until then this bullet states an
-  intention, not a rule the runtime is under. That text also requires every runtime pull request to
+  and the obligation exists there because that text is merged — so this bullet now describes a rule
+  the runtime is under rather than an intention. That text also requires every runtime pull request to
   declare its material-decision impact, so a change treated as immaterial is classified out loud and
   can be disputed rather than passing in silence. Runtime ADRs are written after the decision and
   are immutable once accepted, so the review attaches to the pull request that makes the decision,

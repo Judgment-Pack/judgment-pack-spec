@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 378" role="img" aria-labelledby="pr-t pr-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="pr-t">Two independent implementations produce one byte-identical result</title>
+  <desc id="pr-d">One pack and its facts feed two separately written implementations — the Go reference runtime and a clean-room evaluator, each written from the specification text alone. Both produce one disposition, byte-identical after RFC 8785 canonicalization. A disagreement between them locates ambiguity in the prose.</desc>
+  <text x="300" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">Same pack, same facts, different engines</text>
+  <path d="M215.4,45.6 Q300,47.6 385.1,46.5 Q386,74 384.5,101.2 Q300,100.3 216.5,101.2 Q217.1,74 216.1,46.2 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
+  <path d="M217.2,45.6 Q300,45 384.4,47.1 M382.9,46.3 Q383.6,74 382.9,102.3 M384.2,101.6 Q300,102.2 216.9,102.1 M216.3,102.8 Q213.4,74 215.1,45.6 M216.6,46.8 Q300,45.1 383.6,47.1 M383.8,45.4 Q383.4,74 383.8,101.6 M383,101.8 Q300,100 215.9,102.7 M215.4,102.4 Q213.2,74 215.7,44.8" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="300" y="79" text-anchor="middle" font-size="13.5" font-weight="600" fill="#152426">one pack + facts</text>
+  <path d="M249.4,105.7 Q199.8,123.6 150.4,141.5 M150.2,142.1 Q153.6,139.1 155.3,134.8 M150.3,142.4 Q154.5,142.5 158.6,143.3" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M350.6,106.4 Q399.5,125.5 450.3,142 M449.8,141.9 Q445.8,143.9 441.1,143.8 M450.2,142 Q447.4,138.3 444.4,134.9" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M43.7,146.9 Q150,147.3 255.2,145.2 M255.7,146.8 Q254.5,176 256.9,205.8 M255.5,205 Q150,208.2 43.7,207.1 M45.2,206.7 Q41.7,176 43.1,146.9 M43.4,146.5 Q150,148.6 256.7,147 M254.9,145.6 Q255.7,176 255.7,205.7 M256.1,206.2 Q150,207.3 44.6,205.1 M45,206 Q41.3,176 43.8,145.2" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="150" y="181" text-anchor="middle" font-size="13" font-weight="600" fill="#152426">Go reference runtime</text>
+  <path d="M344.7,146.3 Q450,148 555.4,145.7 M554.9,146.8 Q556.8,176 556.2,206.3 M555.6,205.1 Q450,208.4 344.6,206.1 M343,205.5 Q342,176 344.9,147 M344.9,146.6 Q450,144.1 556.3,146.7 M554.9,145.6 Q556.6,176 554.9,205.3 M556.4,205.8 Q450,205.3 344.1,205.8 M343.9,205.7 Q346.1,176 345,146" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="450" y="181" text-anchor="middle" font-size="13" font-weight="600" fill="#152426">clean-room evaluator</text>
+  <text x="150" y="222" text-anchor="middle" font-size="11.5" font-weight="400" fill="#566466">written from the spec</text>
+  <text x="450" y="222" text-anchor="middle" font-size="11.5" font-weight="400" fill="#566466">written from the spec, separately</text>
+  <path d="M150.8,231.7 Q200.7,248.2 249.5,268.6 M250,268.5 Q245.4,267.9 241,269.4 M249.5,268.2 Q246.6,264.9 244.1,261.2" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M450.2,232.7 Q399.7,249.1 350.5,267.7 M350.3,267.6 Q353.1,264.8 355.4,260.7 M349.9,267.7 Q354.5,268.5 358.9,270.1" fill="none" stroke="#152426" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <path d="M176.4,272.5 Q300,270.1 424.4,270.9 Q423.5,303 423.1,335.2 Q300,335.7 176.9,334.8 Q175.9,303 175,272.5 Z" fill="#fff0d8" stroke="none" opacity="0.55"/>
+  <path d="M176.7,272.9 Q300,271.2 424.2,272.1 M425,271.4 Q421.6,303 423.7,334.2 M424.3,334.2 Q300,334.1 176.3,333.5 M175,334 Q178.1,303 176,272.7 M174.8,272.6 Q300,273.7 423.6,272.4 M422.8,272.3 Q421.6,303 424.6,333.5 M424,335 Q300,333.7 176.7,334.1 M175.9,334.3 Q176.9,303 176.1,271.4" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="300" y="301" text-anchor="middle" font-size="15" font-weight="600" fill="#152426">one disposition</text>
+  <text x="300" y="319" text-anchor="middle" font-size="12" font-weight="400" fill="#566466">byte-identical after RFC 8785</text>
+  <text x="300" y="358" text-anchor="middle" font-size="12" font-weight="500" fill="#566466">If two independent readers disagree, the prose was ambiguous — that is the point of the test.</text>
+</svg>

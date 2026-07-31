@@ -43,8 +43,9 @@ independent third-party validation.
 
 The reference runtime carries a working prototype of this composition
 ([ADR-0015](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/a3058cbadee993306d2f8bc9184cd6d9191a9143/docs/adr/0015-experimental-graph-surface.md),
-2026-07-29, behind an explicitly experimental surface; at the time of writing it lives on the
-runtime's `jgraph` branch, unmerged, and the link pins the reviewed commit): a closed-schema
+2026-07-29, behind an explicitly experimental surface; the link pins the reviewed commit, which at
+the time of review sat unmerged on the runtime's `jgraph` branch — it has since merged and been
+released, and that surface has grown past what the pinned commit shows): a closed-schema
 document of nodes, edges, and one declared result node, where a node references a pack, an edge
 feeds one node's outcome downstream as a fact at an RFC 6901 pointer and/or as a tri-state
 evidence contribution, and every node evaluates through the runtime's unchanged Core §§7–8
@@ -120,8 +121,10 @@ reference; version drift; a cycle where the format forbids one.
 
 Two implementations should agree on whether a given graph document is well-formed and acyclic,
 independent of any evaluator. One implementation exists — the reference runtime's experimental
-surface (ADR-0015, on its unmerged `jgraph` branch at the time of writing) — and, sharing an
-author with this RFC, counts toward encodability and nothing else.
+graph surface (ADR-0015), written against an earlier draft of this sketch, since merged and
+released, and since grown past what that decision record describes — and, sharing an author with
+this RFC, counts toward encodability and nothing else. A second, independent implementation is
+what the evidence bar actually asks for, and there is none.
 
 ## Unresolved questions
 

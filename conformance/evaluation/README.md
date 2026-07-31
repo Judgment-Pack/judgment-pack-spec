@@ -116,13 +116,19 @@ one maintainer's direction, so their agreement corroborates the semantics rather
 confirming them. The rows are pinned because the specification now says what the result is, not
 because two programs happened to match.
 
-**The seven constructed rows do not carry that agreement.** They were read off the specification text
-by the same maintainer, then replayed through one of those two implementations — the clean-room Python
-evaluator, with each fixture's `specVersion` locally re-declared to the draft that evaluator targets,
-which is exactly the one-value migration of Core §11 — and all seven reproduced. That is a
-single-implementation check on a derivation, not two implementations agreeing on pinned semantics. A
-divergence found against one of these rows is as likely to be a defect in the row as in an
-implementation (Core §3.4).
+**When this corpus was published, the seven constructed rows did not carry that agreement.** They
+were read off the specification text by the same maintainer, then replayed through one of those two
+implementations — the clean-room Python evaluator — and all seven reproduced. That was a
+single-implementation check on a derivation, not two implementations agreeing on pinned semantics.
+
+**They carry it now, and at the byte level.** Both implementations have since been run over this
+whole frozen corpus and **all twenty rows byte-agree**, each disposition compared against the
+other's rather than only against the manifest, so every §8.3 serialization rule that could have
+diverged is covered. That strengthens the evidence behind the constructed rows and changes nothing
+about its independence: the caveat above holds in full, because both implementations still trace to
+one maintainer's direction. A divergence found against any of these rows remains as likely to be a
+defect in the row as in an implementation (Core §3.4), and only a project-issued erratum can settle
+that (see [errata](errata.md)).
 
 ## What is missing
 

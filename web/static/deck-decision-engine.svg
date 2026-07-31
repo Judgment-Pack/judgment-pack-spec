@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 316" role="img" aria-labelledby="de-t de-d" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="de-t">The organization turns policy, precedent, and expertise into decisions</title>
+  <desc id="de-d">An organization box holds policy, precedent, expertise, and hard-won exceptions. An arrow labelled judgment leads from it to a box of decisions: approve, reject, escalate, hold. When execution is handed to an agent, that arrow is the only thing that matters — and the only thing nobody wrote down.</desc>
+  <text x="300" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">What actually leaves the building</text>
+  <path d="M39.4,47.1 Q140,48.1 240,48.5 Q239.5,148 240.8,248.4 Q140,250.4 38.9,247.3 Q39.6,148 40.2,48.2 Z" fill="#eef2ed" stroke="none" opacity="0.55"/>
+  <path d="M40.2,48.7 Q140,50.8 239.5,48 M238.8,47.4 Q237.9,148 239.2,248.4 M239,248 Q140,248.7 38.9,248.1 M39.5,247.6 Q36.6,148 40.2,48.9 M40,48.9 Q140,44.9 241,48.5 M239.1,48.3 Q238.2,148 241.1,248.6 M238.8,246.9 Q140,250.1 40.3,247.5 M39.5,248.8 Q42.7,148 40,48.9" fill="none" stroke="#152426" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="140" y="76" text-anchor="middle" font-size="14" font-weight="700" fill="#152426">the organization</text>
+  <text x="140" y="108" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">policy</text>
+  <text x="140" y="138" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">precedent</text>
+  <text x="140" y="168" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">expertise</text>
+  <text x="140" y="198" text-anchor="middle" font-size="12.5" font-weight="400" fill="#566466">hard-won exceptions</text>
+  <path d="M246,148.7 Q284,149.9 321.9,147.2 M322.4,147.6 Q317.9,151.9 312.2,154 M322,148 Q317.9,144.2 312.9,142.4" fill="none" stroke="#152426" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="284" y="134" text-anchor="middle" font-size="12" font-weight="600" fill="#566466">judgment</text>
+  <path d="M324.7,83.1 Q443,83 559.9,83.9 Q562,148 558.9,213.1 Q443,213.2 327.2,211.7 Q327.4,148 326.9,85.1 Z" fill="#e4f3e7" stroke="none" opacity="0.55"/>
+  <path d="M324.9,85.1 Q443,86.2 560.8,82.9 M559,83.9 Q559,148 560.5,213.2 M559.7,210.8 Q443,209.7 326.1,210.7 M327.3,212.8 Q326.3,148 326.1,83.7 M325.6,82.9 Q443,85.2 559.3,82.9 M560.5,84.6 Q561.5,148 560.8,211.3 M559.5,212.5 Q443,212.1 326.6,212.5 M325.4,212.5 Q323.3,148 326.2,84" fill="none" stroke="#152426" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+  <text x="443" y="114" text-anchor="middle" font-size="15" font-weight="700" fill="#152426">decisions</text>
+  <text x="443" y="146" text-anchor="middle" font-size="13" font-weight="500" fill="#566466">approve  ·  reject</text>
+  <text x="443" y="172" text-anchor="middle" font-size="13" font-weight="500" fill="#566466">escalate  ·  hold</text>
+  <text x="300" y="276" text-anchor="middle" font-size="12.5" font-weight="500" fill="#566466">Hand execution to an agent and this arrow is the only thing that matters —</text>
+  <text x="300" y="296" text-anchor="middle" font-size="12.5" font-weight="700" fill="#152426">and the only thing nobody wrote down.</text>
+</svg>
