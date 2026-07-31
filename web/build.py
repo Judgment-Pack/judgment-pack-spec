@@ -2127,23 +2127,25 @@ SLIDES: tuple[Slide, ...] = (
     ),
     Slide(
         anchor="status",
-        kicker="10 — Where it actually stands",
+        kicker="10 — Where it stands, and who it is for",
         heading="Small, working, and honest about the rest",
         lede=(
             "A research preview. No stability promises yet, and not something to put in front of a "
             "consequential real decision today."
         ),
         points=(
-            "<strong>Works today:</strong> the file format, the checks that tell you a file is sound, "
-            "and an agreed way to turn one into an answer — held in place by 47 tests on the format "
-            "and 20 on the answers.",
-            "<strong>Built:</strong> a reference tool anyone can run, plus a second independent one "
-            "kept deliberately separate so that agreement between them means something.",
-            "<strong>Proposed, not built:</strong> chaining decisions together, choosing which "
-            "decision applies, and a shared directory for finding them. Each is an open proposal with "
-            "its bar for acceptance written down.",
-            "<strong>Still open:</strong> proving where evidence came from, and everything the later "
-            "stages depend on.",
+            "<strong>Works today:</strong> the file format, the checks that a file is sound, and an "
+            "agreed way to turn one into an answer — held in place by 47 tests on the format and 20 "
+            "on the answers, and by two separately built tools that agree.",
+            "<strong>Not yet:</strong> chaining decisions together, choosing which decision applies, "
+            "a shared directory for finding them, and proving where evidence came from. Each is an "
+            "open proposal with its bar for acceptance written down.",
+            "<strong>If you are building with AI,</strong> your decision logic stays yours: a file "
+            "you can read, test, version, and carry to another tool — rather than prose buried in a "
+            "prompt that has to be reconstructed every time something changes.",
+            "<strong>If you answer to someone for it,</strong> the reasoning becomes an artifact you "
+            "can hand a reviewer — what the system was <em>supposed</em> to do, beside what it did. "
+            "That is the document that does not exist today.",
         ),
         actions=(
             ("Read the specification", "spec/0.2.0-draft/index.html", False),
