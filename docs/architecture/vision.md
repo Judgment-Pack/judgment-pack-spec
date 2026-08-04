@@ -31,7 +31,7 @@ no runtime. Those exclusions are intentional; see the [non-goals](../non-goals.m
 ## The layered picture, labeled
 
 <div class="diagram-figure is-portrait">
-<img class="diagram" src="/assets/diagram-shipped-vs-proposed.svg" alt="Vertical stack. Agent and Judgment Planner are product; Judgment Graph and Composite Judgment are proposed; the Judgment Pack single-decision document and its conformance classes are the shipped standard; the runtime validates documents today.">
+<img class="diagram" src="/assets/diagram-shipped-vs-proposed.svg" alt="Vertical stack. Agent and Judgment Planner are product; Judgment Graph and Composite Judgment are proposed; the Judgment Pack single-decision document and its four conformance classes are the shipped standard; a runtime validates and evaluates.">
 <p class="diagram-caption">Only the green core — the Judgment Pack document and its conformance classes — is the standard. Everything else is proposed, runtime, or product.</p>
 </div>
 
@@ -93,17 +93,32 @@ that evidence are the bytes a source actually returned — and an agent that can
 also invent one. That is a real gap, it is deliberately **outside this specification**, and the
 project is researching it in the open rather than specifying it early:
 [judgment-pack-evaluator-experiments](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments)
-holds the studies, and
-[judgment-pack-gateway](https://github.com/Judgment-Pack/judgment-pack-gateway) is a research-preview
-reference gateway that signs each acquired result under one identity and seals a session so a
-verifier holding only the public key can detect replay and rollback.
+holds the studies and reference-adjacent prototypes, and
+[judgment-pack-gateway](https://github.com/Judgment-Pack/judgment-pack-gateway) holds the later hosted
+reference shape. They are distinct artifacts, not one interoperable interface:
+
+- The inline [acquisition proxy](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/acquisition-proxy)
+  wraps a downstream MCP server and issues version-1 HMAC receipts with retained,
+  content-addressed results. Verification needs the same secret that can mint a receipt, and replay
+  and tail rollback remain outside what the store can prove about itself.
+- The gateway's incompatible version-2 format signs receipts and session seals with Ed25519. A
+  verifier with a separately pinned public key can check a store against the registry obtained from
+  the key holder without gaining the power to forge. Version 2 deliberately rejects version 1.
+- A portable [derivation rule](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/derivation-rule)
+  maps attested bytes into facts and evidence availability, and the experimental
+  [admission gate](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/fabrication-gate)
+  passes only that deterministic result to evaluation. The gateway alone does not remove
+  caller-supplied facts, and the JPS reference runtime consumes none of these formats today.
 
 Its ceiling is stated up front and is worth repeating here, because it is the kind of claim that
 inflates in retelling: the mechanism proves **byte-lineage, not truth**. It establishes what a
 judgment was computed over. It establishes nothing about whether those bytes are accurate, whether
 the named source produced them, or whether acting on the result is authorized — the same three
 things [conformance never establishes](../../spec/judgment-pack-core.md). Nothing in this research
-line is part of JPS, and no RFC proposes it as one today.
+line is part of JPS, and no RFC proposes the acquisition, receipt, seal, or admission formats as JPS
+today. The derivation-rule evidence is also bounded: a later probe showed that the set of fields a
+short-circuiting rule happened to read is not necessarily a sufficient policy basis. No portable
+repair has been selected.
 
 ## The point of labeling
 

@@ -126,9 +126,23 @@ here.
 - Implementations page: added the clean-room Python evaluator as a second listing, with a stated
   caveat that both implementations trace to one maintainer and so corroborate the specification's
   precision rather than evidencing independent interoperability.
+- Site ecosystem update: the landing hero now gives Slack and the public project repositories the
+  same first-screen prominence as the specification, and a status-labelled project directory links
+  the runtime, cloneable demo, gateway, and research repositories without presenting any companion
+  tool as normative. The Implementations page now links directly to runtime releases, build and MCP
+  guidance, and the runtime's complete conformance claim; records project matrices, experimental
+  graphs, opt-in evaluation records, and reviewed-set locking as non-normative runtime behavior; and
+  lists the demo and gateway separately as companion projects. It also corrects the stale statement
+  that the runtime never produces an outcome: its evaluator produces a disposition from supplied
+  inputs, which never authorizes an action or establishes truth, safety, or fitness.
 - Architecture vision: recorded that where a pack's *inputs* come from is an open question outside
   this specification, naming the research repositories and the reference gateway — with their stated
   ceiling, byte-lineage rather than truth, carried on the site rather than left to the reader.
+- Architecture vision: distinguishes the inline HMAC acquisition proxy from the incompatible
+  Ed25519 gateway and adds the portable-derivation and deterministic-admission steps between
+  acquisition and evaluation. The page and presentation now state that no runtime consumes these
+  formats and that none is part of JPS; the architecture diagram also reflects Core
+  `0.2.0-draft`'s evaluator class and a runtime that evaluates as well as validates.
 - RFC 0002: the runtime's graph prototype is no longer described as living unmerged on a branch. The
   reviewed commit stays pinned; the surface has since merged, shipped, and grown past it.
 

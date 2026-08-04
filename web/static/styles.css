@@ -148,7 +148,7 @@ summary:focus-visible,
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  width: min(calc(100% - 2rem), var(--content));
+  width: min(calc(100% - 2rem), 88rem);
   min-height: 4.25rem;
   margin-inline: auto;
 }
@@ -172,7 +172,7 @@ summary:focus-visible,
 
 .primary-nav {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
   gap: 0.1rem;
   margin: 0;
@@ -209,7 +209,7 @@ summary:focus-visible,
 }
 
 /* Hidden (and not a tab stop) on desktop where the hamburger isn't shown; the
-   max-width:1080px block renders it clipped-but-focusable so the label toggle works. */
+   max-width:1280px block renders it clipped-but-focusable so the label toggle works. */
 .nav-toggle-input {
   display: none;
 }
@@ -427,6 +427,110 @@ summary:focus-visible,
   padding-top: 1rem;
   border-top: 1px solid rgb(255 255 255 / 20%);
   font-size: 0.9rem;
+}
+
+.home-ecosystem {
+  margin: clamp(-2rem, -3vw, -1rem) 0 clamp(4rem, 8vw, 7rem);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  background: #edf2ef;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  scroll-margin-top: 7rem;
+}
+
+.home-section-heading {
+  display: grid;
+  grid-template-columns: minmax(16rem, 0.75fr) minmax(20rem, 1.25fr);
+  gap: clamp(1.5rem, 5vw, 4rem);
+  align-items: end;
+  margin-bottom: 1.5rem;
+}
+
+.home-section-heading h2 {
+  max-width: 13ch;
+  margin: 0;
+  color: var(--brand-strong);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.1rem, 4vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.home-section-intro p {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--muted);
+}
+
+.home-section-intro p + p {
+  margin-top: 0.55rem;
+  font-weight: 700;
+}
+
+.ecosystem-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.ecosystem-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: clamp(1.1rem, 2.5vw, 1.5rem);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  box-shadow: 0 8px 28px rgb(26 51 54 / 4%);
+}
+
+.ecosystem-card-community {
+  grid-column: 1 / -1;
+  background: var(--info-soft);
+  border-color: #bdd6d7;
+}
+
+.ecosystem-card h3 {
+  max-width: 27ch;
+  margin: 0 0 0.65rem;
+  color: var(--brand-strong);
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  line-height: 1.25;
+}
+
+.ecosystem-card > p:not(.card-kicker) {
+  max-width: 66ch;
+  margin: 0;
+  color: var(--muted);
+}
+
+.ecosystem-card code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+  font-size: 0.88rem;
+  font-weight: 720;
+}
+
+.card-actions .button {
+  min-height: 2.45rem;
+  padding: 0.48rem 0.8rem;
+}
+
+.ecosystem-boundary {
+  max-width: 92ch;
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
 }
 
 .page-layout {
@@ -1054,7 +1158,7 @@ main {
   margin-top: 0.3rem;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1280px) {
   /* Positioned so the collapsed menu drops below the full header width. */
   .site-header {
     position: relative;
@@ -1177,8 +1281,18 @@ main {
   }
 
   .facts,
-  .card-grid {
+  .card-grid,
+  .ecosystem-grid,
+  .home-section-heading {
     grid-template-columns: 1fr;
+  }
+
+  .ecosystem-card-community {
+    grid-column: auto;
+  }
+
+  .card-actions .button {
+    width: 100%;
   }
 
   .case-summary ul {
