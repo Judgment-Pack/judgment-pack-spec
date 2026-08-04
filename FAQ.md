@@ -299,9 +299,10 @@ That bar is deliberate, and it is why the interoperability formats are tracked o
 
 **Q33. Is there an official runtime?** No — "official" is the wrong word, deliberately. There is a
 vendor-neutral *reference* runtime, and it is one implementation among peers rather than the
-authority. It validates documents at the carrier, structural, and semantic layers, and it states an
-evaluator-conformance claim in its own repository, in one file it chose — §3.4.1 fixes the form a
-claim must take, not the file it lives in. Two cautions about how to read that. First, its
+authority. It validates documents at the carrier, structural, and semantic layers, and it [states an
+evaluator-conformance claim in its own repository, in one file it
+chose](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/CONFORMANCE.md) — §3.4.1
+fixes the form a claim must take, not the file it lives in. Two cautions about how to read that. First, its
 evaluating surfaces stay labelled `experimental`, which is a statement about *stability* — such a
 surface may change or be removed — and never a statement about conformance. Second, the claim is
 that implementation's, not this project's: a claim attaches to an implementation and one exact

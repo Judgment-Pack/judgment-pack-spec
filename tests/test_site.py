@@ -260,6 +260,35 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("The specification is the authority.", impl)
         self.assertIn("equally valid", impl)
         self.assertNotIn("official validator", impl.lower())
+        self.assertIn(
+            'href="https://github.com/Judgment-Pack/judgment-pack-runtime/releases/latest"',
+            impl,
+        )
+        self.assertIn(
+            'href="https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/CONFORMANCE.md"',
+            impl,
+        )
+        for feature in (
+            "Project-owned pack matrices",
+            "Opt-in JSONL evaluation records",
+            "reviewed-set lock",
+        ):
+            self.assertIn(feature, impl)
+
+        # A demo and an input-lineage gateway are useful adjacent projects, not extra
+        # implementations or sources of authority over JPS.
+        available = impl[
+            impl.index('id="available"') : impl.index('id="companion-projects"')
+        ]
+        companions = impl[
+            impl.index('id="companion-projects"') : impl.index(
+                'id="adding-an-implementation"'
+            )
+        ]
+        self.assertNotIn("judgment-pack-gateway", available)
+        self.assertIn("judgment-pack-demo", companions)
+        self.assertIn("judgment-pack-gateway", companions)
+        self.assertIn("proves byte-lineage, never truth", companions)
         # The spec page still cites its immutable tagged source (docs use the mutable branch).
         specification = (
             self.output / "spec" / "0.2.0-draft" / "index.html"
@@ -431,6 +460,39 @@ class StaticSiteTests(unittest.TestCase):
         self.assertGreaterEqual(nav.count('target="_blank"'), 2)
         self.assertGreaterEqual(nav.count('rel="noopener noreferrer"'), 2)
 
+    def test_homepage_promotes_slack_and_the_open_project_ecosystem(self) -> None:
+        overview = (self.output / "index.html").read_text(encoding="utf-8")
+        hero = overview[overview.index('<section class="hero"') : overview.index("</section>")]
+        self.assertIn(">Join Slack</a>", hero)
+        self.assertIn(">Browse repositories</a>", hero)
+        self.assertIn('href="https://github.com/Judgment-Pack"', hero)
+
+        ecosystem = overview[
+            overview.index('id="project-ecosystem"') : overview.index(
+                '<div class="page-meta">'
+            )
+        ]
+        for url in (
+            "https://github.com/Judgment-Pack/judgment-pack-runtime",
+            "https://github.com/Judgment-Pack/judgment-pack-demo",
+            "https://github.com/Judgment-Pack/judgment-pack-gateway",
+            "https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments",
+        ):
+            self.assertIn(f'href="{url}"', ecosystem)
+        self.assertIn(">Join the Slack community</a>", ecosystem)
+        self.assertIn("non-normative runtime features", ecosystem)
+        self.assertIn("Use synthetic, non-sensitive material only.", ecosystem)
+        self.assertIn("only the tagged Core prose", ecosystem)
+
+    def test_current_runtime_claim_is_linked_instead_of_partially_repeated(self) -> None:
+        claim_url = (
+            "https://github.com/Judgment-Pack/judgment-pack-runtime/"
+            "blob/main/CONFORMANCE.md"
+        )
+        for relative in ("index.html", "faq/index.html", "implementations/index.html"):
+            page = (self.output / relative).read_text(encoding="utf-8")
+            self.assertIn(f'href="{claim_url}"', page, relative)
+
     def test_why_and_governance_are_in_primary_navigation(self) -> None:
         nav = self._primary_nav((self.output / "index.html").read_text(encoding="utf-8"))
         self.assertIn(">Why</a>", nav)
@@ -485,6 +547,32 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn('href="../examples/supplier-invoice-approval/"', why)
         self.assertIn('href="../spec/0.2.0-draft/"', why)
         self._assert_no_retired_brand(why, "why/index.html")
+
+    def test_architecture_and_presentation_show_the_current_input_pipeline(self) -> None:
+        diagram = (self.output / "assets" / "diagram-shipped-vs-proposed.svg").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("structural / semantic / evaluator", diagram)
+        self.assertIn("Runtime · validates and evaluates", diagram)
+
+        architecture = (
+            self.output / "architecture" / "vision" / "index.html"
+        ).read_text(encoding="utf-8")
+        for phrase in (
+            "acquisition proxy",
+            "version-2 format",
+            "derivation rule",
+            "admission gate",
+            "consumes none of these formats today",
+        ):
+            self.assertIn(phrase, architecture)
+
+        presentation = (
+            self.output / "presentation" / "index.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Admission is deterministic.", presentation)
+        self.assertIn(">Inspect the gateway</a>", presentation)
+        self.assertIn(">Review the input-lineage research</a>", presentation)
 
     def _assert_no_retired_brand(self, text: str, where: str) -> None:
         lowered = text.lower()

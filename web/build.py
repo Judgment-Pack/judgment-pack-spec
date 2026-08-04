@@ -28,9 +28,18 @@ DEFAULT_OUTPUT = ROOT / "public"
 TEMPLATE = Template((WEB_ROOT / "templates" / "page.html").read_text(encoding="utf-8"))
 SITE_VERSION = "0.2.0-draft"
 TAGGED_SOURCE_REF = "v0.2.0-draft"
-GITHUB_BLOB_ROOT = "https://github.com/Judgment-Pack/judgment-pack-spec/blob/"
+GITHUB_ORG_URL = "https://github.com/Judgment-Pack"
+GITHUB_URL = GITHUB_ORG_URL + "/judgment-pack-spec"
+GITHUB_BLOB_ROOT = GITHUB_URL + "/blob/"
 GITHUB_ROOT = GITHUB_BLOB_ROOT + TAGGED_SOURCE_REF + "/"
-GITHUB_URL = "https://github.com/Judgment-Pack/judgment-pack-spec"
+RUNTIME_URL = GITHUB_ORG_URL + "/judgment-pack-runtime"
+RUNTIME_RELEASES_URL = RUNTIME_URL + "/releases/latest"
+RUNTIME_BUILD_URL = RUNTIME_URL + "/blob/main/docs/building-with-packs.md"
+RUNTIME_MCP_URL = RUNTIME_URL + "/blob/main/docs/mcp-clients.md"
+RUNTIME_CLAIM_URL = RUNTIME_URL + "/blob/main/CONFORMANCE.md"
+DEMO_URL = GITHUB_ORG_URL + "/judgment-pack-demo"
+GATEWAY_URL = GITHUB_ORG_URL + "/judgment-pack-gateway"
+EXPERIMENTS_URL = GITHUB_ORG_URL + "/judgment-pack-evaluator-experiments"
 SLACK_URL = "https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw"
 # Recognizable, monochrome inline marks (currentColor) — no external icon dependency.
 GITHUB_ICON_SVG = (
@@ -1172,6 +1181,83 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
     return routes
 
 
+def home_ecosystem_html(current: PurePosixPath) -> str:
+    """Render the non-normative paths from the specification into the wider project."""
+    implementations = output_href(current, PurePosixPath("implementations/index.html"))
+    return f"""
+<section class="home-ecosystem" id="project-ecosystem" aria-labelledby="ecosystem-title">
+  <div class="home-section-heading">
+    <div>
+      <p class="eyebrow">Open tools, demos, and research</p>
+      <h2 id="ecosystem-title">Take the next step.</h2>
+    </div>
+    <div class="home-section-intro">
+      <p>The specification stays independent. Companion repositories let you run it, inspect the
+      implementation, and challenge the research without turning any tool into the standard.</p>
+      <p><a href="{html.escape(GITHUB_ORG_URL)}" target="_blank" rel="noopener noreferrer">Browse the project's public repositories</a></p>
+    </div>
+  </div>
+  <div class="ecosystem-grid">
+    <article class="ecosystem-card ecosystem-card-community">
+      <p class="card-kicker">Community · Slack</p>
+      <h3>Bring the case the format handles badly.</h3>
+      <p>Questions, criticism, implementation work, and testing feedback are welcome. The most useful
+      contribution at this stage is a concrete failure or a second implementation.</p>
+      <div class="card-actions">
+        <a class="button button-primary" href="{html.escape(SLACK_URL)}" target="_blank" rel="noopener noreferrer">Join the Slack community</a>
+      </div>
+    </article>
+    <article class="ecosystem-card">
+      <p class="card-kicker">Reference runtime · CLI + MCP</p>
+      <h3>Build and test packs locally.</h3>
+      <p><code>jpack</code> validates documents, runs project-owned matrices, evaluates Core inputs,
+      and exposes offline tools and method prompts over stdio MCP. Project configuration, graph
+      composition, evaluation records, and reviewed-set locks are non-normative runtime features.</p>
+      <div class="card-actions">
+        <a href="{html.escape(RUNTIME_RELEASES_URL)}" target="_blank" rel="noopener noreferrer">Download <code>jpack</code></a>
+        <a href="{html.escape(RUNTIME_URL)}" target="_blank" rel="noopener noreferrer">Runtime repository</a>
+      </div>
+    </article>
+    <article class="ecosystem-card">
+      <p class="card-kicker">Cloneable demo · Synthetic scenarios</p>
+      <h3>See decisions, refusals, and handoff requests.</h3>
+      <p>The browser sandbox and self-serve Slack-app source demonstrate authoring, deterministic
+      evaluation, experimental composition, attested inputs, and replayable evaluation records. The
+      runtime computes every disposition; the model may gather inputs, draft, and narrate, but it
+      cannot change the runtime result. Use synthetic, non-sensitive material only.</p>
+      <div class="card-actions">
+        <a href="{html.escape(DEMO_URL)}" target="_blank" rel="noopener noreferrer">Demo repository</a>
+      </div>
+    </article>
+    <article class="ecosystem-card">
+      <p class="card-kicker">Input lineage · Research gateway</p>
+      <h3>Trace a judgment to the bytes it used.</h3>
+      <p>The open reference gateway signs acquired results and seals sessions. A verifier with a
+      separately pinned public key can check the store against the registry obtained from the key
+      holder and detect tampering, replay, and rollback after sealing. It proves byte-lineage, never
+      truth, source identity, authorization, or production readiness.</p>
+      <div class="card-actions">
+        <a href="{html.escape(GATEWAY_URL)}" target="_blank" rel="noopener noreferrer">Gateway repository</a>
+      </div>
+    </article>
+    <article class="ecosystem-card">
+      <p class="card-kicker">Open evidence · Experiments</p>
+      <h3>Inspect the methods and the negative results.</h3>
+      <p>Clean-room implementations, agreement harnesses, and preregistered studies test where the
+      prose is precise and where the format or surrounding trust model still fails.</p>
+      <div class="card-actions">
+        <a href="{html.escape(EXPERIMENTS_URL)}" target="_blank" rel="noopener noreferrer">Research repository</a>
+        <a href="{html.escape(implementations)}">Implementation boundaries</a>
+      </div>
+    </article>
+  </div>
+  <p class="ecosystem-boundary"><strong>Status boundary:</strong> only the tagged Core prose,
+  schemas, and named conformance artifacts define JPS. Every runtime workflow, graph, gateway,
+  demo, and research format above is separately governed and non-normative.</p>
+</section>
+"""
+
+
 def build_markdown_pages(
     output_root: Path, routes: dict[str, PurePosixPath | str]
 ) -> None:
@@ -1205,9 +1291,10 @@ Use only a minimal synthetic reproduction, then
     exceptions, uncertainty, escalation criteria, and evaluations behind an AI agent's decisions.</p>
     <div class="hero-actions">
       <a class="button button-primary" href="{html.escape(output_href(page.output, PurePosixPath('spec/0.2.0-draft/index.html')))}">Read the specification</a>
-      <a class="button button-secondary" href="{html.escape(GITHUB_URL)}" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+      <a class="button button-secondary" href="{html.escape(SLACK_URL)}" target="_blank" rel="noopener noreferrer">Join Slack</a>
+      <a class="button button-secondary" href="{html.escape(GITHUB_ORG_URL)}" target="_blank" rel="noopener noreferrer">Browse repositories</a>
     </div>
-    <p class="hero-support"><a href="{html.escape(output_href(page.output, PurePosixPath('why/index.html')))}">Why Judgment Pack?</a></p>
+    <p class="hero-support"><a href="{html.escape(output_href(page.output, PurePosixPath('why/index.html')))}">Why Judgment Pack?</a> · <a href="#project-ecosystem">See what you can run today</a></p>
   </div>
   <div class="scope-card" aria-label="Current scope">
     <p class="scope-card-title">What this draft can test</p>
@@ -1219,7 +1306,8 @@ Use only a minimal synthetic reproduction, then
     </ol>
     <p><strong>It never proves truth, authority, safety, or fitness.</strong></p>
   </div>
-</section>"""
+</section>
+{home_ecosystem_html(page.output)}"""
             toc = ""
         rendered = page_html(
             output=page.output,
@@ -1788,35 +1876,52 @@ def publish_canonical_schemas(output_root: Path) -> None:
 
 def build_implementations_index(output_root: Path) -> None:
     page_output = PurePosixPath("implementations/index.html")
-    runtime_url = "https://github.com/Judgment-Pack/judgment-pack-runtime"
-    experiments_url = "https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments"
     governance = output_href(page_output, PurePosixPath("project/governance/index.html"))
+    python_evaluator_url = EXPERIMENTS_URL + "/tree/main/python"
+    gateway_spec_url = GATEWAY_URL + "/blob/main/SPEC.md"
+    gateway_corpus_url = GATEWAY_URL + "/tree/main/corpus"
     body = f"""
 <h1>Implementations</h1>
-<p class="lede">Independent tools that implement JPS document conformance. A listing here records
-that a tool exercises the public specification; it is not certification, endorsement, or authority
-over the specification.</p>
+<p class="lede">Independent tools that implement one or more JPS conformance classes or test the
+specification's semantics. A listing here is not certification, endorsement, or authority over the
+specification.</p>
 <div class="notice notice-info"><strong>The specification is the authority.</strong> No
-implementation — including the reference runtime — is normative. Passing a tool's checks establishes
-only what that tool reports about the JPS document layers, never factual grounding, authorization,
-safety, or fitness. Any implementation that passes the public conformance corpus is equally valid.</div>
+implementation — including the reference runtime — is normative. A claim belongs to its claimant,
+one conformance class, and one exact <code>specVersion</code>. Corpus results are required but
+non-exhaustive evidence; they are not certification. Any implementation that satisfies the complete
+requirements of the same class for the same exact version is equally valid. No conformance class
+establishes factual grounding, authorization, safety, or operational fitness.</div>
 <h2 id="available">Available implementations</h2>
 <div class="card-grid">
   <article class="card">
     <p class="card-kicker">Open source · Apache-2.0 · maintained with the specification</p>
-    <h2><a href="{html.escape(runtime_url)}" target="_blank" rel="noopener noreferrer">judgment-pack</a></h2>
+    <h2><a href="{html.escape(RUNTIME_URL)}" target="_blank" rel="noopener noreferrer">judgment-pack</a></h2>
     <p>The project's vendor-neutral reference runtime; the command it installs is <code>jpack</code>.
     It validates the carrier, structural schema, and semantic references of a JPS document against an
-    immutable specification release, and it states an evaluator-conformance claim in its own
-    repository, which is where that claim’s own terms must be read. Its evaluating surfaces stay labelled
-    <code>experimental</code>, which reports their <em>stability</em> and never their conformance.
-    Nothing it reports chooses an outcome for a real decision, fetches a source, or authorizes an
-    action.</p>
-    <p class="card-meta">Reference runtime · one implementation among peers</p>
+    immutable specification release. Its evaluator produces a disposition from supplied inputs, and
+    the runtime states an evaluator-conformance claim <a href="{html.escape(RUNTIME_CLAIM_URL)}"
+    target="_blank" rel="noopener noreferrer">in full in its own repository</a>. Evaluating surfaces
+    stay labelled <code>experimental</code>, which reports their <em>stability</em>, never their
+    conformance. A disposition never establishes truth, authorization, safety, or fitness, does not
+    authorize an action, and the runtime fetches no source.</p>
+    <ul>
+      <li>CLI and stdio MCP surfaces for validation, schemas, fixtures, project inventory, evaluation,
+      and six static method prompts.</li>
+      <li>Project-owned pack matrices with informative, non-gating coverage, plus an experimental
+      graph-composition workflow with its own matrices.</li>
+      <li>Opt-in JSONL evaluation records and a deterministic reviewed-set lock that detects drift.
+      Both are runtime conventions, not JPS audit or approval formats.</li>
+    </ul>
+    <div class="artifact-actions">
+      <a class="button button-primary" href="{html.escape(RUNTIME_RELEASES_URL)}" target="_blank" rel="noopener noreferrer">Download latest release</a>
+      <a class="button button-secondary" href="{html.escape(RUNTIME_BUILD_URL)}" target="_blank" rel="noopener noreferrer">Build with packs</a>
+      <a class="button button-secondary" href="{html.escape(RUNTIME_MCP_URL)}" target="_blank" rel="noopener noreferrer">Connect an MCP client</a>
+    </div>
+    <p class="card-meta">Reference runtime · one implementation among peers · <a href="{html.escape(RUNTIME_URL)}" target="_blank" rel="noopener noreferrer">source</a></p>
   </article>
   <article class="card">
     <p class="card-kicker">Open source · Apache-2.0 · experimental, claims no conformance</p>
-    <h2><a href="{html.escape(experiments_url)}" target="_blank" rel="noopener noreferrer">clean-room Python evaluator</a></h2>
+    <h2><a href="{html.escape(python_evaluator_url)}" target="_blank" rel="noopener noreferrer">clean-room Python evaluator</a></h2>
     <p>A second evaluator, written from the specification text alone inside an information barrier and
     published with its interpretation log, clean-room protocol, and agreement harness. It exists to
     test whether the prose pins the semantics: where two independent readings diverge, the divergence
@@ -1830,15 +1935,44 @@ above trace to the same maintainer's direction, so their agreement corroborates 
 specification is precise — it is not independent evidence of interoperability, and the project does
 not present it as such. See <a href="{html.escape(governance)}">governance</a> for the interim
 review regime this sits under.</div>
+<h2 id="companion-projects">Companion projects</h2>
+<p>These projects exercise the implementation around JPS. They are not additional JPS
+implementations, and none of their interfaces or artifacts becomes part of the specification by
+being listed here.</p>
+<div class="card-grid">
+  <article class="card">
+    <p class="card-kicker">Cloneable sandbox · Slack-app source · non-normative</p>
+    <h2><a href="{html.escape(DEMO_URL)}" target="_blank" rel="noopener noreferrer">judgment-pack demo</a></h2>
+    <p>A browser workspace and enterprise-shaped synthetic project with the runtime pre-wired over
+    MCP, plus a self-serve Slack implementation. It demonstrates pack authoring and matrices,
+    evaluation and honest refusal, experimental graphs, attested inputs, project-owned evaluation
+    records, and reviewed-set drift detection. The runtime computes every disposition; the model may
+    gather inputs, draft, and narrate, but cannot change the runtime result. Use synthetic,
+    non-sensitive material only.</p>
+    <p class="card-meta">Demo material · never authorization or production guidance</p>
+  </article>
+  <article class="card">
+    <p class="card-kicker">Open source · research preview · not integrated with the runtime</p>
+    <h2><a href="{html.escape(GATEWAY_URL)}" target="_blank" rel="noopener noreferrer">open reference gateway</a></h2>
+    <p>The gateway acquires JSON results from operator-configured sources, content-addresses them,
+    signs version-2 receipts with Ed25519, chains them per session, and seals the final count. A
+    verifier with a separately pinned public key can check a store against the gateway-held registry.
+    This is a localhost-only, single-operator reference with no authentication, high availability, or
+    key rotation. It proves byte-lineage, never truth, source identity, authorization, or production
+    readiness.</p>
+    <p class="card-meta"><a href="{html.escape(gateway_spec_url)}" target="_blank" rel="noopener noreferrer">Receipt and seal specification</a> · <a href="{html.escape(gateway_corpus_url)}" target="_blank" rel="noopener noreferrer">frozen corpus</a></p>
+  </article>
+</div>
 <h2 id="adding-an-implementation">Adding an implementation</h2>
-<p>This list is open to independent implementations tested against the public conformance
+<p>This list is open to independent tools tested against the public conformance
 artifacts. Presence here does not confer certification, official-validator status, endorsement, or
-authority over the specification.</p>
+authority over the specification. A submission should say which class and exact version it claims,
+if any, and link to the complete claim rather than asking this project to restate it.</p>
 """
     rendered = page_html(
         output=page_output,
         title="Implementations",
-        description="Independent, nonnormative tools that implement JPS document conformance.",
+        description="Independent JPS implementations and separately governed companion tools.",
         section="implementations",
         artifact_label="Informative",
         body=body,
@@ -2112,7 +2246,7 @@ SLIDES: tuple[Slide, ...] = (
     Slide(
         anchor="inputs",
         kicker="09 — Data integrity",
-        heading="Verifying the facts before the logic is applied",
+        heading="Verifying the inputs before the logic is applied",
         lede=(
             "A Judgment Pack defines how rules are applied. It cannot guarantee the input data is "
             "factual — and an AI that can state a fact can also invent one. That gap is handled in a "
@@ -2122,8 +2256,12 @@ SLIDES: tuple[Slide, ...] = (
             "<strong>A gateway fetches the data, not the AI.</strong> A configured source is run by the "
             "gateway and its result signed on the way in — so a model can still state a made-up "
             "number, but it cannot produce a valid receipt for one.",
-            "<strong>Records are tamper-evident.</strong> A completed session is sealed, so an "
-            "altered, replayed, or truncated record can be detected rather than passing silently.",
+            "<strong>Admission is deterministic.</strong> A declared rule derives facts from the "
+            "attested bytes, and an experimental gate passes only that result to the evaluator. The "
+            "model supplies neither the proof nor the admitted facts.",
+            "<strong>Records are tamper-evident.</strong> After a session is sealed, an altered, "
+            "replayed, or truncated store can be detected against the registry obtained from the key "
+            "holder rather than passing silently.",
             "<strong>Anyone can verify, and no-one gains the power to forge.</strong> Checking needs "
             "only a public key — no access to the source systems, and nothing that would let the "
             "checker mint a record. The key has to be obtained out of band.",
@@ -2133,8 +2271,10 @@ SLIDES: tuple[Slide, ...] = (
             "bytes passed through the gateway and were not altered afterwards</strong> — never that a "
             "genuinely-named system produced them, and never that the data was right. The source name "
             "on a receipt is an operator label, not an authenticated origin. This is a "
-            "single-operator reference implementation that no runtime consumes yet, and nothing in the "
-            "specification defines it — which is why the status section still lists it as open."
+            "single-operator reference implementation with no authentication, high availability, or "
+            "key rotation. No runtime consumes it yet, and nothing in the specification defines the "
+            "gateway, derivation, or admission formats — which is why the status section still lists "
+            "the line as open."
         ),
         figure="deck-attested-inputs.svg",
         figure_alt=(
@@ -2142,7 +2282,11 @@ SLIDES: tuple[Slide, ...] = (
             "order and the session is sealed. A verifier checks the chain and the seal using only a "
             "public key."
         ),
-        figure_caption="Securing the data feed before the decision rules are applied to it.",
+        figure_caption="The acquisition proof; deterministic derivation and admission follow before evaluation.",
+        actions=(
+            ("Inspect the gateway", GATEWAY_URL, False),
+            ("Review the input-lineage research", EXPERIMENTS_URL, True),
+        ),
     ),
     Slide(
         anchor="evidence",
@@ -2194,10 +2338,16 @@ SLIDES: tuple[Slide, ...] = (
             "<strong>Ready today:</strong> the file specification, the checks that a file is sound, "
             "and an agreed way to turn one into an answer — held in place by 47 tests on the format "
             "and 20 on the answers.",
-            "<strong>Tooling:</strong> an open-source reference implementation anyone can run, plus a "
-            "second written clean-room from the specification text. Both trace to the same "
-            "maintainer, so their agreement shows the prose is precise enough to follow — not that "
-            "two unrelated parties would agree.",
+            "<strong>Tooling:</strong> the open-source reference runtime serves the same core through "
+            "a CLI and stdio MCP, walks project-owned pack matrices, and reports informative coverage. "
+            "Projects can opt into JSONL evaluation records and a reviewed-set lock that makes drift "
+            "visible. Those workflows are runtime conventions, not JPS audit, approval, or security "
+            "formats.",
+            "<strong>Demonstrations and checks:</strong> a cloneable browser sandbox and self-serve "
+            "Slack-app source exercise synthetic end-to-end flows, while a second evaluator written "
+            "clean-room from the specification checks the semantics. Both evaluators trace to the "
+            "same maintainer, so their agreement corroborates the prose rather than independently "
+            "confirming interoperability.",
             "<strong>Proposed, not standardised:</strong> linking several decisions together, choosing "
             "which decision applies, and a shared catalogue for finding them. The first has a working "
             "prototype in the reference runtime, labelled experimental for stability — composition "
@@ -2206,13 +2356,14 @@ SLIDES: tuple[Slide, ...] = (
             "decision applies ends up outside the specification entirely. Each has its evidence bar "
             "written down in advance, and none has met it.",
             "<strong>Still open:</strong> the outside implementations, outside reviews, and real users "
-            "that a 1.0 is gated on. Proving where evidence came from has a working open reference "
-            "gateway, but nothing in the specification defines it yet.",
+            "that a 1.0 is gated on. A working open gateway, portable derivation prototype, and "
+            "deterministic admission gate explore where inputs came from, but no runtime consumes "
+            "their formats and nothing in JPS defines them.",
         ),
         actions=(
             ("Read the specification", "spec/0.2.0-draft/index.html", False),
             ("See a worked example", "examples/index.html", True),
-            ("Try the tools", "implementations/index.html", True),
+            ("Tools, demos, and source", "implementations/index.html", True),
             ("View the roadmap", "project/roadmap/index.html", True),
         ),
     ),
@@ -2245,12 +2396,8 @@ SLIDES: tuple[Slide, ...] = (
         ),
         actions=(
             ("Read the specification", "spec/0.2.0-draft/index.html", False),
-            ("Contribute on GitHub", "https://github.com/Judgment-Pack/judgment-pack-spec", True),
-            (
-                "Join the Slack community",
-                "https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw",
-                True,
-            ),
+            ("Contribute on GitHub", GITHUB_URL, True),
+            ("Join the Slack community", SLACK_URL, True),
             ("How to contribute", "project/contributing/index.html", True),
         ),
     ),
