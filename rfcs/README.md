@@ -6,7 +6,9 @@ projects such as Rust and React. **An RFC is not part of the specification.** No
 normative, and no conformance class depends on any of it.
 
 An accepted RFC is the exception, and only in one direction: the design record stays here and stays
-non-normative, while the text it produced lives in the specification. [RFC 0006](0006-evaluator-conformance.md)
+non-normative, while the text it produced lives where the proposal declared it would land — for a
+standards-track RFC, the specification; for a cross-project exploratory record, the repository that
+owns the artifact (see the closing note below). [RFC 0006](0006-evaluator-conformance.md)
 is accepted and landed in Core `0.2.0-draft`; the normative statement of the evaluator conformance
 class is [§3.4 of the Core specification](../spec/judgment-pack-core.md), not this directory.
 
@@ -36,8 +38,12 @@ stable feature requires two independent implementations and conformance cases.
 | [0007](0007-determination-boundary.md) | The determination boundary — what a pack cannot hold | Draft | Specification (Core or profile) — undecided |
 | [0008](0008-bounded-collection-quantifiers.md) | Bounded collection quantifiers for conditions | Draft | Specification (condition schema + semantics) — Core or profile undecided |
 | [0009](0009-interim-review-regime.md) | The interim review regime | Accepted | Process (governance) |
+| [0010](0010-gateway-signing-identity.md) | The gateway signing identity — custody, rotation, and anchoring | Draft | Research line (gateway repository: code, `SPEC.md`, guidance, corpus) — outside the specification |
 
 The "Belongs to" column records where each proposal would land if accepted. A format that
 independent tools must agree on is a candidate for the specification. An algorithm or engine belongs
 to a runtime. A hosted service belongs to a product. Several of these proposals split across that
-boundary, and saying so early is part of the design.
+boundary, and saying so early is part of the design. A record whose every part lands in another
+repository of the project is a cross-project exploratory record (see
+[RFC 0000](0000-rfc-process.md)): acceptance endorses the record, and adoption stays with that
+repository.

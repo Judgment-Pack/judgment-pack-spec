@@ -494,6 +494,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0010-gateway-signing-identity.md",
+        PurePosixPath("rfcs/0010-gateway-signing-identity/index.html"),
+        "RFC 0010: The gateway signing identity",
+        "Draft proposal for the gateway's trust root: seed custody, content-binding seals, rotation, and external anchoring — every part landing outside JPS.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
