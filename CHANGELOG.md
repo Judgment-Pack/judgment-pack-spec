@@ -7,6 +7,13 @@ here.
 
 ### Added
 
+- RFC 0010 (Draft): the gateway signing identity — custody of the private seed (which also keys
+  the arguments commitment), content-binding seals, key rotation in the registry, and external
+  checkpoint anchoring of sealed history. The first RFC whose every part lands outside JPS — in
+  the reference gateway repository's code, specification, guidance, and corpus — and the
+  architecture vision's statement that no RFC proposes the research line's formats as JPS remains
+  true. Prompted by a stray private seed found untracked in the runtime repository's working
+  tree; the ignore-rule guards shipped separately in both repositories.
 - **Core `0.2.0-draft`: the evaluator conformance class.** [RFC 0006](rfcs/0006-evaluator-conformance.md)
   is accepted at draft maturity and lands in the specification: §3.4 defines the class and §3.4.1 the
   single form of claim permitted against it, §§7–8 become normative for that class (and stay

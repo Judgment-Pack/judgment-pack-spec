@@ -41,6 +41,18 @@ Every standards-track RFC should contain:
 Acceptance means the design is approved for the maturity named by the RFC. It does not automatically
 make a feature stable.
 
+## Cross-project exploratory records
+
+An RFC in this directory normally proposes a change to JPS, a profile, the conformance model, or
+governance. A proposal whose every part lands in another repository of the project — the reference
+runtime, the gateway, the research line — may still be recorded here as a **cross-project
+exploratory record** when the design question deserves public visibility before any implementation
+exists. Its `Type` must say so, its text must name where each part would land, and its statuses
+carry adjusted semantics: acceptance endorses the design record as written and confers no authority
+over the owning repository, which makes its own adoption decision by its own process. Nothing
+recorded this way becomes part of JPS by being recorded.
+[RFC 0010](0010-gateway-signing-identity.md) is the first such record.
+
 ## Review
 
 Research-preview RFCs remain open for public comment for a reasonable period based on complexity.
