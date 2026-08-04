@@ -1102,9 +1102,10 @@ main {
   display: block;
 }
 
-.keydef h4 {
+.keydef .keydef-title {
   margin: 0 0 0.4rem;
   font-size: 0.98rem;
+  font-weight: 700;
 }
 
 .keydef p {

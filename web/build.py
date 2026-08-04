@@ -28,6 +28,12 @@ DEFAULT_OUTPUT = ROOT / "public"
 TEMPLATE = Template((WEB_ROOT / "templates" / "page.html").read_text(encoding="utf-8"))
 SITE_VERSION = "0.2.0-draft"
 TAGGED_SOURCE_REF = "v0.2.0-draft"
+SITE_NAME = "Judgment Pack Specification"
+SITE_SHORT_NAME = "JPS"
+SITE_DESCRIPTION = (
+    "Judgment Pack (JPS) is an open, vendor-neutral specification for making AI judgment "
+    "explicit, testable, portable, and governable separately from any runtime."
+)
 GITHUB_ORG_URL = "https://github.com/Judgment-Pack"
 GITHUB_URL = GITHUB_ORG_URL + "/judgment-pack-spec"
 GITHUB_BLOB_ROOT = GITHUB_URL + "/blob/"
@@ -255,7 +261,7 @@ PAGES = (
         "README.md",
         PurePosixPath("index.html"),
         "Judgment Pack Specification",
-        "Judgment Pack is an open specification for representing, testing, and exchanging the evidence, rules, exceptions, uncertainty, escalation criteria, and evaluations behind AI decisions.",
+        SITE_DESCRIPTION,
         "overview",
         source_ref="main",
     ),
@@ -290,6 +296,7 @@ PAGES = (
         "Test the research preview",
         "A short, synthetic exercise for testing JPS documents and reporting reproducible feedback.",
         "testing",
+        source_ref="main",
     ),
     Page(
         "GOVERNANCE.md",
@@ -297,6 +304,7 @@ PAGES = (
         "Governance",
         "How the open, vendor-neutral specification is governed and how to participate.",
         "governance",
+        source_ref="main",
     ),
     Page(
         "ROADMAP.md",
@@ -304,6 +312,7 @@ PAGES = (
         "Evidence-gated roadmap",
         "The evidence required before JPS can advance beyond a research preview.",
         "project",
+        source_ref="main",
     ),
     Page(
         "VERSIONING.md",
@@ -318,6 +327,7 @@ PAGES = (
         "Changelog",
         "The draft and published history of the JPS research preview.",
         "project",
+        source_ref="main",
     ),
     Page(
         "CONTRIBUTING.md",
@@ -524,6 +534,7 @@ PAGES = (
         "The seed evaluation corpus and its case carrier — normative for the evaluator conformance class and for nothing else.",
         "conformance",
         "Normative for the evaluator class",
+        source_ref="main",
     ),
     Page(
         "conformance/evaluation/errata.md",
@@ -541,6 +552,7 @@ PAGES = (
         "Static site deployment",
         "How to build, preview, and later publish the provider-neutral static site.",
         "project",
+        source_ref="main",
     ),
     Page(
         ".github/ISSUE_TEMPLATE/testing-feedback.md",
@@ -692,11 +704,69 @@ def home_body(text: str) -> str:
     return "\n".join(lines)
 
 
+_FAQ_QUESTION_RE = re.compile(r"^\*\*(Q\d+\.\s+.+?\?)\*\*\s*(.*)$")
+
+
+def faq_semantic_markdown(text: str) -> str:
+    """Promote numbered FAQ questions to headings in the generated site.
+
+    The source stays compact and readable on GitHub. The HTML gets real question headings so
+    humans, assistive technology, search systems, and browser agents can identify each answer as a
+    self-contained passage. The FAQ page uses an H2-only table of contents, so these H3s do not turn
+    its navigation into a 47-item list.
+    """
+    output: list[str] = []
+    for line in text.splitlines():
+        match = _FAQ_QUESTION_RE.match(line)
+        if match is None:
+            output.append(line)
+            continue
+        question, answer_start = match.groups()
+        output.extend((f"### {question}", "", answer_start))
+    return "\n".join(output)
+
+
+_FAQ_HTML_RE = re.compile(
+    r'(?P<heading><h3 id="q\d+[^\"]*"[^>]*>.*?</h3>)\n'
+    r'(?P<answer>.*?)(?=\n<h[23](?:\s|>)|\Z)',
+    re.DOTALL,
+)
+
+
+def faq_microdata_html(body: str, expected_count: int) -> str:
+    """Wrap every complete visible FAQ answer in schema.org microdata without adding scripts."""
+    wrapped = 0
+
+    def replace(match: re.Match[str]) -> str:
+        nonlocal wrapped
+        wrapped += 1
+        heading = match.group("heading").replace("<h3 ", '<h3 itemprop="name" ', 1)
+        answer = match.group("answer").strip()
+        return (
+            '<section class="faq-item" itemprop="mainEntity" itemscope '
+            'itemtype="https://schema.org/Question">\n'
+            + heading
+            + '\n<div itemprop="acceptedAnswer" itemscope '
+            'itemtype="https://schema.org/Answer"><div itemprop="text">\n'
+            + answer
+            + "\n</div></div>\n</section>"
+        )
+
+    result = _FAQ_HTML_RE.sub(replace, body)
+    if wrapped != expected_count:
+        raise ValueError(
+            f"FAQ structured-data coverage mismatch: expected {expected_count}, wrapped {wrapped}"
+        )
+    return result
+
+
 def render_markdown(
     text: str,
     source: str,
     output: PurePosixPath,
     routes: dict[str, PurePosixPath | str],
+    *,
+    toc_depth: str = "2-3",
 ) -> tuple[str, str]:
     renderer = markdown.Markdown(
         extensions=[
@@ -709,7 +779,7 @@ def render_markdown(
             "toc": {
                 "anchorlink": False,
                 "permalink": False,
-                "toc_depth": "2-3",
+                "toc_depth": toc_depth,
             }
         },
         output_format="html5",
@@ -766,6 +836,7 @@ def footer_html(current: PurePosixPath) -> str:
         ("Governance", PurePosixPath("project/governance/index.html")),
         ("Contributing", PurePosixPath("project/contributing/index.html")),
         ("Code of conduct", PurePosixPath("project/code-of-conduct/index.html")),
+        ("Machine-readable guide", PurePosixPath("llms.txt")),
         ("Apache-2.0", PurePosixPath("project/license/index.html")),
     )
     external = (
@@ -789,14 +860,60 @@ def footer_html(current: PurePosixPath) -> str:
             f"<code>{html.escape(config.short_sha)}</code>"
             f" · {html.escape(config.build_time)}</span>"
         )
+    project_scope = ""
+    project_meta = ""
+    if current == PurePosixPath("index.html") and config.is_production and config.base_url:
+        project_scope = (
+            ' itemscope itemtype="https://schema.org/Project" '
+            f'itemid="{html.escape(config.base_url + "/#project", quote=True)}"'
+        )
+        project_meta = (
+            f'<meta itemprop="alternateName" content="{SITE_SHORT_NAME}">'
+            f'<meta itemprop="description" content="{html.escape(SITE_DESCRIPTION, quote=True)}">'
+            f'<link itemprop="url" href="{html.escape(config.base_url + "/", quote=True)}">'
+            f'<link itemprop="sameAs" href="{html.escape(GITHUB_ORG_URL, quote=True)}">'
+            f'<link itemprop="license" href="{html.escape(absolute_url(config.base_url, PurePosixPath("project/license/index.html")), quote=True)}">'
+        )
+    project_name = (
+        '<span itemprop="name">Judgment Pack</span>' if project_scope else "Judgment Pack"
+    )
     return (
-        '<span class="footer-tagline">Judgment Pack is an open, vendor-neutral specification for '
-        "executable and testable AI judgment.</span>"
+        f'<span class="footer-tagline"{project_scope}>'
+        + project_name
+        + " is an open, vendor-neutral specification for "
+        "explicit and testable AI judgment."
+        + project_meta
+        + "</span>"
         '<span class="footer-links">'
         + " · ".join(links)
         + "</span>"
         + build_stamp
     )
+
+
+def complete_page_title(title: str) -> str:
+    if title == SITE_NAME:
+        return f"{SITE_NAME} ({SITE_SHORT_NAME})"
+    return f"{title} | {SITE_NAME}"
+
+
+def concise_meta_description(description: str, limit: int = 160) -> str:
+    """Normalize metadata copy and shorten it at a word boundary without changing visible prose."""
+    normalized = re.sub(r"\s+", " ", description).strip()
+    if len(normalized) <= limit:
+        return normalized
+    shortened = normalized[: limit - 1].rsplit(" ", 1)[0].rstrip(" ,;:—-")
+    return shortened + "…"
+
+
+def page_schema_type(output: PurePosixPath) -> str:
+    if output == PurePosixPath("index.html"):
+        return "WebSite"
+    if output == PurePosixPath("faq/index.html"):
+        return "FAQPage"
+    if output == PurePosixPath(f"spec/{SITE_VERSION}/index.html"):
+        return "TechArticle"
+    return "WebPage"
 
 
 def page_html(
@@ -860,51 +977,152 @@ def page_html(
     base_element = f'<base href="{html.escape(base_href)}">' if base_href else ""
 
     # Breadcrumb: "Home / <section index> / <this page>" so every page shows its place and its
-    # parent index is one click up. Skipped on the homepage and the 404 page.
+    # parent index is one click up. Skipped on the homepage and the 404 page. Production markup uses
+    # the same visible trail as BreadcrumbList microdata; there is no hidden or divergent SEO copy.
     breadcrumb = ""
     if output.as_posix() not in {"index.html", "404.html"}:
-        crumbs = [f'<a href="{html.escape(home)}">Home</a>']
+        crumb_items: list[tuple[str, PurePosixPath]] = [
+            ("Home", PurePosixPath("index.html"))
+        ]
         section_crumb = SECTION_INDEX.get(section)
         if section_crumb is not None and section_crumb[1] != output:
-            crumbs.append(
-                f'<a href="{html.escape(output_href(output, section_crumb[1]))}">'
-                f"{html.escape(section_crumb[0])}</a>"
+            crumb_items.append(section_crumb)
+        crumb_items.append((title, output))
+        crumbs: list[str] = []
+        structured_breadcrumbs = bool(config.base_url and not (noindex or config.default_noindex))
+        for position, (label, target) in enumerate(crumb_items, start=1):
+            last = position == len(crumb_items)
+            item_scope = (
+                ' itemprop="itemListElement" itemscope '
+                'itemtype="https://schema.org/ListItem"'
+                if structured_breadcrumbs
+                else ""
             )
-        crumbs.append(
-            f'<span class="crumb-current" aria-current="page">{html.escape(title)}</span>'
-        )
+            if last:
+                item_url = ""
+                if structured_breadcrumbs:
+                    item_url = (
+                        f'<meta itemprop="name" content="{html.escape(label, quote=True)}">'
+                        f'<link itemprop="item" href="{html.escape(absolute_url(config.base_url, target), quote=True)}">'
+                        f'<meta itemprop="position" content="{position}">'
+                    )
+                crumb = (
+                    f'<span{item_scope}><span class="crumb-current" aria-current="page"'
+                    f'>{html.escape(label)}</span>{item_url}</span>'
+                )
+            else:
+                structured_meta = ""
+                if structured_breadcrumbs:
+                    structured_meta = (
+                        f'<meta itemprop="name" content="{html.escape(label, quote=True)}">'
+                        f'<link itemprop="item" href="{html.escape(absolute_url(config.base_url, target), quote=True)}">'
+                        f'<meta itemprop="position" content="{position}">'
+                    )
+                crumb = (
+                    f'<span{item_scope}><a href="{html.escape(output_href(output, target))}">'
+                    f'{html.escape(label)}</a>{structured_meta}</span>'
+                )
+            crumbs.append(crumb)
         separator = '<span class="crumb-sep" aria-hidden="true">/</span>'
+        breadcrumb_scope = (
+            ' itemprop="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList"'
+            if structured_breadcrumbs
+            else ""
+        )
         breadcrumb = (
-            '<nav class="breadcrumb" aria-label="Breadcrumb">'
+            f'<nav class="breadcrumb" aria-label="Breadcrumb"{breadcrumb_scope}>'
             + separator.join(crumbs)
             + "</nav>"
         )
 
     effective_noindex = noindex or config.default_noindex
     canonical_link = ""
+    discovery_links = ""
     social_meta = ""
+    html_schema = ""
+    schema_meta = ""
+    full_title = complete_page_title(title)
+    meta_description = concise_meta_description(description)
     if config.base_url and not effective_noindex:
-        location = html.escape(absolute_url(config.base_url, output), quote=True)
+        raw_location = absolute_url(config.base_url, output)
+        location = html.escape(raw_location, quote=True)
+        raw_logo = absolute_url(config.base_url, PurePosixPath("assets/logo.png"))
+        logo = html.escape(raw_logo, quote=True)
+        sitemap = html.escape(
+            absolute_url(config.base_url, PurePosixPath("sitemap.xml")), quote=True
+        )
+        license_url = html.escape(
+            absolute_url(config.base_url, PurePosixPath("project/license/index.html")), quote=True
+        )
         canonical_link = f'<link rel="canonical" href="{location}">'
+        discovery_links = (
+            f'<link rel="sitemap" type="application/xml" href="{sitemap}">'
+            f'<link rel="license" href="{license_url}">'
+        )
         social_meta = (
             '<meta property="og:type" content="website">'
             f'<meta property="og:url" content="{location}">'
-            f'<meta property="og:title" content="{html.escape(f"{title} — JPS", quote=True)}">'
-            f'<meta property="og:description" content="{html.escape(description, quote=True)}">'
+            f'<meta property="og:site_name" content="{SITE_NAME}">'
+            '<meta property="og:locale" content="en_US">'
+            f'<meta property="og:title" content="{html.escape(full_title, quote=True)}">'
+            f'<meta property="og:description" content="{html.escape(meta_description, quote=True)}">'
+            f'<meta property="og:image" content="{logo}">'
+            '<meta property="og:image:type" content="image/png">'
+            '<meta property="og:image:width" content="1024">'
+            '<meta property="og:image:height" content="1024">'
+            '<meta property="og:image:alt" content="Judgment Pack geometric mark">'
+            '<meta name="twitter:card" content="summary">'
+            f'<meta name="twitter:title" content="{html.escape(full_title, quote=True)}">'
+            f'<meta name="twitter:description" content="{html.escape(meta_description, quote=True)}">'
+            f'<meta name="twitter:image" content="{logo}">'
+            '<meta name="twitter:image:alt" content="Judgment Pack geometric mark">'
         )
+        schema_type = page_schema_type(output)
+        schema_item_id = (
+            config.base_url + "/#website" if schema_type == "WebSite" else raw_location + "#webpage"
+        )
+        html_schema = (
+            f' itemscope itemtype="https://schema.org/{schema_type}" '
+            f'itemid="{html.escape(schema_item_id, quote=True)}"'
+        )
+        name_property = "headline" if schema_type == "TechArticle" else "name"
+        schema_meta = (
+            f'<meta itemprop="{name_property}" content="{html.escape(title, quote=True)}">'
+            f'<meta itemprop="description" content="{html.escape(meta_description, quote=True)}">'
+            '<meta itemprop="inLanguage" content="en">'
+            f'<link itemprop="url" href="{location}">'
+            f'<link itemprop="license" href="{license_url}">'
+        )
+        if schema_type == "WebSite":
+            schema_meta += f'<meta itemprop="alternateName" content="{SITE_SHORT_NAME}">'
+        else:
+            schema_meta += (
+                f'<link itemprop="isPartOf" href="{html.escape(config.base_url + "/#website", quote=True)}">'
+                f'<link itemprop="about" href="{html.escape(absolute_url(config.base_url, PurePosixPath("spec/0.2.0-draft/index.html")), quote=True)}">'
+            )
+        if schema_type == "TechArticle":
+            schema_meta += (
+                f'<meta itemprop="version" content="{SITE_VERSION}">'
+                '<meta itemprop="creativeWorkStatus" content="Research preview">'
+            )
     generator_meta = f'<meta name="generator" content="{GENERATOR_ID} {html.escape(SITE_VERSION)}">'
 
     return TEMPLATE.safe_substitute(
         language="en",
-        page_title=html.escape(f"{title} — JPS"),
-        description=html.escape(description, quote=True),
+        html_schema=html_schema,
+        page_title=html.escape(full_title),
+        description=html.escape(meta_description, quote=True),
         robots_meta=(
-            '<meta name="robots" content="noindex, nofollow">' if effective_noindex else ""
+            '<meta name="robots" content="noindex, nofollow">'
+            if effective_noindex
+            else '<meta name="robots" content="index, follow, max-image-preview:large">'
         ),
         base_element=base_element,
         canonical_link=canonical_link,
+        discovery_links=discovery_links,
         social_meta=social_meta,
         generator_meta=generator_meta,
+        schema_meta=schema_meta,
         stylesheet=html.escape(stylesheet),
         favicon=html.escape(favicon),
         home=html.escape(home),
@@ -1070,7 +1288,7 @@ def _keydef_cards(current: PurePosixPath) -> str:
             vals = '<p class="kd-values"><span>One of:</span> ' + chips + "</p>"
         parts.append(
             '<div class="keydef" id="kd-' + html.escape(key) + '">'
-            + "<h4><code>" + html.escape(key) + "</code></h4>"
+            + '<p class="keydef-title"><code>' + html.escape(key) + "</code></p>"
             + "<p>" + html.escape(summary) + "</p>" + vals + "</div>"
         )
     guide = output_href(current, PurePosixPath("field-guide/index.html"))
@@ -1273,11 +1491,25 @@ def build_markdown_pages(
     for page in PAGES:
         path = ROOT / page.source
         text = path.read_text(encoding="utf-8")
+        faq_question_count = 0
         if page.source == "README.md":
             text = home_body(text)
+        elif page.source == "FAQ.md":
+            faq_question_count = sum(
+                1 for line in text.splitlines() if _FAQ_QUESTION_RE.match(line)
+            )
+            text = faq_semantic_markdown(text)
         elif page.source == ".github/ISSUE_TEMPLATE/testing-feedback.md":
             text = "# Testing feedback template\n\n" + strip_front_matter(text)
-        body, toc = render_markdown(text, page.source, page.output, routes)
+        body, toc = render_markdown(
+            text,
+            page.source,
+            page.output,
+            routes,
+            toc_depth="2" if page.source == "FAQ.md" else "2-3",
+        )
+        if page.source == "FAQ.md" and active_config().is_production:
+            body = faq_microdata_html(body, faq_question_count)
         if page.source in {
             "TESTING.md",
             ".github/ISSUE_TEMPLATE/testing-feedback.md",
@@ -1295,9 +1527,10 @@ Use only a minimal synthetic reproduction, then
 <section class="hero" aria-labelledby="hero-title">
   <div class="hero-copy">
     <p class="eyebrow">Open, vendor-neutral specification</p>
-    <h1 id="hero-title">Make expert judgment executable and testable.</h1>
-    <p class="hero-lede">Judgment Pack is an open specification for representing the evidence, rules,
-    exceptions, uncertainty, escalation criteria, and evaluations behind an AI agent's decisions.</p>
+    <h1 id="hero-title">The Judgment Pack Specification makes AI judgment explicit and testable.</h1>
+    <p class="hero-lede">Judgment Pack (JPS) is an open, vendor-neutral specification for representing
+    the evidence, rules, exceptions, uncertainty, escalation criteria, and evaluations behind an AI
+    agent's decisions.</p>
     <div class="hero-actions">
       <a class="button button-primary" href="{html.escape(output_href(page.output, PurePosixPath('spec/0.2.0-draft/index.html')))}">Read the specification</a>
       <a class="button button-secondary" href="{html.escape(SLACK_URL)}" target="_blank" rel="noopener noreferrer">Join Slack</a>
@@ -1352,7 +1585,7 @@ by the Core specification.</p>
 conformance only. It does not establish semantic document conformance, truth, authority, safety,
 or operational fitness.</div>
 <dl class="facts">
-  <div><dt>Planned release identifier</dt><dd><code>{html.escape(str(schema.get('$id', '')))}</code></dd></div>
+  <div><dt>Canonical schema identifier</dt><dd><code>{html.escape(str(schema.get('$id', '')))}</code></dd></div>
   <div><dt>Dialect</dt><dd><code>{html.escape(str(schema.get('$schema', '')))}</code></dd></div>
   <div><dt>Root properties</dt><dd>{len(properties)}</dd></div>
   <div><dt>Definitions</dt><dd>{len(definitions)}</dd></div>
@@ -1567,7 +1800,9 @@ about factual grounding, authority, safety, or operational fitness.</div>
         rendered = page_html(
             output=detail_output,
             title=case["id"],
-            description=case["focus"],
+            description=(
+                f"JPS {layer} conformance case {case['id']}: {case['focus']}"
+            ),
             section="conformance",
             artifact_label="Informative test case",
             body=body,
@@ -1812,6 +2047,67 @@ def build_robots(output_root: Path, config: BuildConfig) -> None:
     (output_root / "robots.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def build_llms_txt(output_root: Path, config: BuildConfig) -> None:
+    """Publish a concise, non-authoritative navigation aid for language-model consumers."""
+
+    def guide_url(output: PurePosixPath) -> str:
+        if config.base_url:
+            return absolute_url(config.base_url, output)
+        path = output.as_posix()
+        if path == "index.html":
+            return "/"
+        if path.endswith("/index.html"):
+            return "/" + path[: -len("index.html")]
+        return "/" + path
+
+    document = f"""# {SITE_NAME} ({SITE_SHORT_NAME})
+
+> {SITE_DESCRIPTION}
+
+- Current draft: `{SITE_VERSION}`
+- Status: research preview; no compatibility, production-readiness, certification, truth, safety, or authorization claim
+- License: Apache-2.0
+- Canonical site: {guide_url(PurePosixPath("index.html"))}
+
+This experimental file is a navigation aid, not a crawler-control policy or a source of normative
+text. `robots.txt` controls crawling. The versioned Core prose and named artifacts below control JPS
+conformance.
+
+## Normative specification and artifacts
+
+- [JPS Core {SITE_VERSION}]({guide_url(PurePosixPath("spec/0.2.0-draft/index.html"))}): normative prose for the four named conformance classes
+- [Core JSON Schema]({guide_url(PurePosixPath("schema/0.2.0-draft/judgment-pack-core.schema.json"))}): normative structural schema
+- [Document-conformance corpus]({guide_url(PurePosixPath("conformance/index.html"))}): carrier, structural, and semantic cases
+- [Evaluation corpus]({guide_url(PurePosixPath("conformance/evaluation/index.html"))}): normative only for evaluator conformance
+- [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
+
+## Explanations and direct answers
+
+- [Why Judgment Pack?]({guide_url(PurePosixPath("why/index.html"))})
+- [Field guide]({guide_url(PurePosixPath("field-guide/index.html"))})
+- [Frequently asked questions]({guide_url(PurePosixPath("faq/index.html"))})
+- [How Judgment Pack compares]({guide_url(PurePosixPath("concepts/comparison/index.html"))})
+- [Synthetic examples]({guide_url(PurePosixPath("examples/index.html"))})
+
+## Project boundaries and participation
+
+- [Implementations and claim boundaries]({guide_url(PurePosixPath("implementations/index.html"))})
+- [Governance]({guide_url(PurePosixPath("project/governance/index.html"))})
+- [Proposals (RFCs)]({guide_url(PurePosixPath("rfcs/index.html"))}): not normative unless accepted and landed in a release
+- [Specification repository]({GITHUB_URL})
+- [Public repositories]({GITHUB_ORG_URL})
+- [Community Slack]({SLACK_URL})
+
+## Interpretation boundary
+
+A conforming document or evaluator result never establishes that evidence is true, that a pack is
+authorized, that an outcome is safe or fit, or that an action may be taken. The specification,
+reference runtime, demo, gateway, and research repositories have separate authority and release
+boundaries.
+"""
+    (output_root / "llms.txt").write_text(document, encoding="utf-8")
+
+
 def build_sitemap(output_root: Path, config: BuildConfig) -> None:
     if not (config.is_production and config.base_url):
         return
@@ -1826,8 +2122,7 @@ def build_sitemap(output_root: Path, config: BuildConfig) -> None:
         seen.add(location)
         locations.append(location)
     entries = "".join(
-        f"  <url><loc>{html.escape(location)}</loc>"
-        f"<lastmod>{html.escape(config.build_time)}</lastmod></url>\n"
+        f"  <url><loc>{html.escape(location)}</loc></url>\n"
         for location in sorted(locations)
     )
     document = (
@@ -2413,6 +2708,19 @@ SLIDES: tuple[Slide, ...] = (
 )
 
 
+def static_svg_dimensions(filename: str) -> tuple[str, str]:
+    """Read intrinsic width/height from a checked-in SVG viewBox for stable image layout."""
+    source = repository_file(f"web/static/{filename}").read_text(encoding="utf-8")
+    match = re.search(
+        r'<svg\b[^>]*\bviewBox="[-+0-9.]+\s+[-+0-9.]+\s+([-+0-9.]+)\s+([-+0-9.]+)"',
+        source,
+    )
+    if match is None:
+        raise ValueError(f"static SVG has no numeric viewBox: {filename}")
+    width, height = (f"{float(value):g}" for value in match.groups())
+    return width, height
+
+
 def slide_html(current: PurePosixPath, index: int, slide: Slide) -> str:
     parts = [
         f'<span class="slide-number">{html.escape(slide.kicker)}</span>',
@@ -2427,6 +2735,7 @@ def slide_html(current: PurePosixPath, index: int, slide: Slide) -> str:
     figure = ""
     if slide.figure:
         source = output_href(current, PurePosixPath("assets") / slide.figure)
+        width, height = static_svg_dimensions(slide.figure)
         caption = (
             f"<figcaption>{html.escape(slide.figure_caption)}</figcaption>"
             if slide.figure_caption
@@ -2434,7 +2743,8 @@ def slide_html(current: PurePosixPath, index: int, slide: Slide) -> str:
         )
         figure = (
             '<figure class="slide-figure">'
-            f'<img src="{html.escape(source)}" alt="{html.escape(slide.figure_alt, quote=True)}">'
+            f'<img src="{html.escape(source)}" width="{width}" height="{height}" '
+            f'loading="lazy" decoding="async" alt="{html.escape(slide.figure_alt, quote=True)}">'
             f"{caption}</figure>"
         )
 
@@ -2599,6 +2909,7 @@ def build(output: Path, config: BuildConfig) -> None:
     build_license(output)
     build_not_found(output)
     build_robots(output, config)
+    build_llms_txt(output, config)
     build_sitemap(output, config)
 
 
@@ -2629,7 +2940,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--build-time",
         default="",
-        help="ISO-8601 UTC timestamp for sitemap lastmod; defaults to build wall-clock",
+        help="ISO-8601 UTC timestamp for build provenance; defaults to build wall-clock",
     )
     return parser.parse_args()
 

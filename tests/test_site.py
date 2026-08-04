@@ -27,6 +27,8 @@ class DocumentInspector(HTMLParser):
         self.links: list[str] = []
         self.scripts = 0
         self.h1_count = 0
+        self.heading_levels: list[int] = []
+        self.images: list[dict[str, str | None]] = []
         self.dangerous_attributes: list[tuple[str, str]] = []
         self.navigation_labels: list[str] = []
 
@@ -42,10 +44,13 @@ class DocumentInspector(HTMLParser):
             self.scripts += 1
         if tag == "h1":
             self.h1_count += 1
+        if re.fullmatch(r"h[1-6]", tag):
+            self.heading_levels.append(int(tag[1]))
         if tag in {"a", "link"} and values.get("href"):
             self.links.append(values["href"] or "")
         if tag == "img" and values.get("src"):
             self.links.append(values["src"] or "")
+            self.images.append(values)
 
 
 def inspect(path: Path) -> DocumentInspector:
@@ -106,6 +111,25 @@ class StaticSiteTests(unittest.TestCase):
                 document = inspect(page)
                 self.assertEqual(document.scripts, 0)
                 self.assertIn("main-content", document.ids)
+
+    def test_headings_and_images_preserve_semantics_and_layout(self) -> None:
+        for page in self.output.rglob("*.html"):
+            with self.subTest(page=page.relative_to(self.output).as_posix()):
+                document = inspect(page)
+                for previous, current in zip(
+                    document.heading_levels, document.heading_levels[1:]
+                ):
+                    self.assertLessEqual(
+                        current,
+                        previous + 1,
+                        f"heading level jumps from h{previous} to h{current}",
+                    )
+                for image in document.images:
+                    self.assertTrue(image.get("width"), f"image lacks width: {image.get('src')}")
+                    self.assertTrue(image.get("height"), f"image lacks height: {image.get('src')}")
+                    if image.get("class") != "brand-mark":
+                        self.assertEqual(image.get("decoding"), "async")
+                        self.assertEqual(image.get("loading"), "lazy")
 
     def test_every_local_link_resolves_and_fragment_exists(self) -> None:
         parsed_documents: dict[Path, DocumentInspector] = {}
@@ -233,10 +257,17 @@ class StaticSiteTests(unittest.TestCase):
         self.assertTrue(spec["cleanUrls"])
         self.assertNotIn("rewrites", spec)
         self.assertNotIn("redirects", spec)
-        policy = spec["headers"][0]["headers"][0]["value"]
+        global_headers = next(rule for rule in spec["headers"] if rule["source"] == "**")
+        policy = global_headers["headers"][0]["value"]
         self.assertIn("script-src 'none'", policy)
-        header_keys = {header["key"] for header in spec["headers"][0]["headers"]}
+        header_keys = {header["key"] for header in global_headers["headers"]}
         self.assertIn("Strict-Transport-Security", header_keys)
+        artifact_headers = next(
+            rule for rule in spec["headers"] if rule["source"] == "/artifacts/**"
+        )
+        self.assertIn(
+            {"key": "X-Robots-Tag", "value": "noindex"}, artifact_headers["headers"]
+        )
         # The redirect target 301s every path to the canonical neutral domain.
         redirect = next(site for site in hosting if site.get("target") == "redirect")
         self.assertNotIn("rewrites", redirect)
@@ -244,6 +275,24 @@ class StaticSiteTests(unittest.TestCase):
         self.assertEqual(
             redirect["redirects"][0]["destination"], "https://judgmentpack.org"
         )
+
+    def test_live_deployment_guide_cannot_publish_preview_noindex_bytes(self) -> None:
+        guide = (ROOT / "web" / "DEPLOYMENT.md").read_text(encoding="utf-8")
+        self.assertNotIn("firebase hosting:clone", guide)
+        self.assertIn("Do not clone the preview", guide)
+        self.assertIn("--environment production", guide)
+        self.assertIn("--base-url https://judgmentpack.org", guide)
+        self.assertIn('test "${noindex_pages[0]}" = "public/404.html"', guide)
+        self.assertIn("firebase deploy --only hosting:spec", guide)
+
+        workflow = (ROOT / ".github" / "workflows" / "deploy.yml").read_text(
+            encoding="utf-8"
+        )
+        validation = workflow.index("- name: Validate production artifact")
+        authentication = workflow.index("- uses: google-github-actions/auth@v2", validation)
+        self.assertLess(validation, authentication)
+        self.assertIn("python -m unittest discover -s tests -v", workflow)
+        self.assertIn('test "${noindex_pages[0]}" = "public/404.html"', workflow)
 
     def test_implementations_page_lists_the_neutral_reference_runtime(self) -> None:
         # The earlier vendor-branded CLI has been superseded by the neutral judgment-pack runtime, which
@@ -317,7 +366,9 @@ class StaticSiteTests(unittest.TestCase):
         implementations = (
             self.output / "implementations" / "index.html"
         ).read_text(encoding="utf-8")
-        self.assertIn("<title>Implementations — JPS</title>", implementations)
+        self.assertIn(
+            "<title>Implementations | Judgment Pack Specification</title>", implementations
+        )
         self.assertIn(">judgment-pack</a>", implementations)
         self.assertIn("implementation among peers", implementations)
         self.assertIn("This list is open", implementations)
@@ -355,6 +406,109 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn(f"<loc>{self.base_url}/spec/0.2.0-draft/</loc>", sitemap)
         self.assertIn(f"<loc>{self.base_url}/implementations/</loc>", sitemap)
         self.assertNotIn("404", sitemap)
+        # A deployment timestamp is not a page-level content modification timestamp.
+        self.assertNotIn("<lastmod>", sitemap)
+
+    def test_indexable_pages_have_complete_search_and_social_metadata(self) -> None:
+        titles: set[str] = set()
+        descriptions: set[str] = set()
+        for page in self.output.rglob("*.html"):
+            if page.name == "404.html":
+                continue
+            with self.subTest(page=page.relative_to(self.output).as_posix()):
+                text = page.read_text(encoding="utf-8")
+                title_match = re.search(r"<title>([^<]+)</title>", text)
+                description_match = re.search(
+                    r'<meta name="description" content="([^"]+)">', text
+                )
+                canonical_match = re.search(
+                    r'<link rel="canonical" href="([^"]+)">', text
+                )
+                self.assertIsNotNone(title_match)
+                self.assertIsNotNone(description_match)
+                self.assertIsNotNone(canonical_match)
+                title = title_match.group(1)
+                description = description_match.group(1)
+                canonical = canonical_match.group(1)
+                self.assertIn("Judgment Pack Specification", title)
+                self.assertLessEqual(len(description), 160)
+                self.assertNotIn(title, titles)
+                self.assertNotIn(description, descriptions)
+                titles.add(title)
+                descriptions.add(description)
+                self.assertIn(
+                    'name="robots" content="index, follow, max-image-preview:large"', text
+                )
+                self.assertIn(f'property="og:url" content="{canonical}"', text)
+                self.assertIn('property="og:site_name" content="Judgment Pack Specification"', text)
+                self.assertIn(
+                    f'property="og:image" content="{self.base_url}/assets/logo.png"', text
+                )
+                self.assertIn('property="og:image:width" content="1024"', text)
+                self.assertIn('property="og:image:height" content="1024"', text)
+                self.assertIn('name="twitter:card" content="summary"', text)
+                self.assertIn(
+                    f'name="twitter:image" content="{self.base_url}/assets/logo.png"', text
+                )
+                self.assertIn(
+                    f'<link rel="sitemap" type="application/xml" href="{self.base_url}/sitemap.xml">',
+                    text,
+                )
+                self.assertIn('itemscope itemtype="https://schema.org/', text)
+
+    def test_supported_microdata_mirrors_visible_content_without_scripts(self) -> None:
+        home = (self.output / "index.html").read_text(encoding="utf-8")
+        self.assertIn('itemtype="https://schema.org/WebSite"', home)
+        self.assertIn(f'itemid="{self.base_url}/#website"', home)
+        self.assertIn('itemtype="https://schema.org/Project"', home)
+        self.assertIn('itemprop="alternateName" content="JPS"', home)
+
+        specification = (
+            self.output / "spec" / "0.2.0-draft" / "index.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn('itemtype="https://schema.org/TechArticle"', specification)
+        self.assertIn('itemprop="version" content="0.2.0-draft"', specification)
+        self.assertIn('itemtype="https://schema.org/BreadcrumbList"', specification)
+
+        superseded = (
+            self.output / "spec" / "0.1.0-draft" / "index.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn('itemtype="https://schema.org/WebPage"', superseded)
+        self.assertNotIn('itemtype="https://schema.org/TechArticle"', superseded)
+        self.assertNotIn('itemprop="version" content="0.2.0-draft"', superseded)
+
+        faq = (self.output / "faq" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('itemtype="https://schema.org/FAQPage"', faq)
+        self.assertEqual(faq.count('itemtype="https://schema.org/Question"'), 47)
+        self.assertEqual(faq.count('itemtype="https://schema.org/Answer"'), 47)
+        self.assertEqual(faq.count('itemprop="acceptedAnswer"'), 47)
+        self.assertIn(
+            '<h3 itemprop="name" id="q1-what-is-a-judgment-pack-in-one-sentence">', faq
+        )
+        self.assertNotIn("<script", home + specification + faq)
+
+    def test_llms_guide_is_explicitly_non_authoritative_and_resolvable(self) -> None:
+        guide = (self.output / "llms.txt").read_text(encoding="utf-8")
+        self.assertIn("# Judgment Pack Specification (JPS)", guide)
+        self.assertIn("Current draft: `0.2.0-draft`", guide)
+        self.assertIn("experimental file is a navigation aid", guide)
+        self.assertIn(f"{self.base_url}/spec/0.2.0-draft/", guide)
+        self.assertIn(f"{self.base_url}/faq/", guide)
+        self.assertIn("never establishes that evidence is true", guide)
+
+    def test_living_pages_link_to_current_source(self) -> None:
+        cases = {
+            "testing/index.html": "TESTING.md",
+            "project/governance/index.html": "GOVERNANCE.md",
+            "project/changelog/index.html": "CHANGELOG.md",
+            "project/deployment/index.html": "web/DEPLOYMENT.md",
+            "conformance/evaluation/index.html": "conformance/evaluation/README.md",
+        }
+        for output, source in cases.items():
+            with self.subTest(output=output):
+                text = (self.output / output).read_text(encoding="utf-8")
+                self.assertIn(f"blob/main/{source}", text)
+                self.assertIn("View current source", text)
 
     def test_pages_carry_neutral_generator_and_commit_provenance(self) -> None:
         overview = (self.output / "index.html").read_text(encoding="utf-8")
@@ -422,6 +576,11 @@ class StaticSiteTests(unittest.TestCase):
             self.assertIn('name="robots" content="noindex, nofollow"', overview)
             self.assertNotIn('rel="canonical"', overview)
             self.assertFalse((output / "sitemap.xml").exists())
+            self.assertTrue((output / "llms.txt").is_file())
+            self.assertIn(
+                "experimental file is a navigation aid",
+                (output / "llms.txt").read_text(encoding="utf-8"),
+            )
 
     def test_production_build_refuses_missing_base_url(self) -> None:
         with tempfile.TemporaryDirectory(prefix="jps-guard-test-") as temporary:
@@ -533,7 +692,9 @@ class StaticSiteTests(unittest.TestCase):
 
     def test_why_page_explains_motivation(self) -> None:
         why = (self.output / "why" / "index.html").read_text(encoding="utf-8")
-        self.assertIn("<title>Why Judgment Pack? — JPS</title>", why)
+        self.assertIn(
+            "<title>Why Judgment Pack? | Judgment Pack Specification</title>", why
+        )
         for phrase in (
             "Why coding agents work better",
             "Coding agents have compilers and tests.",
@@ -596,7 +757,7 @@ class StaticSiteTests(unittest.TestCase):
         overview = (self.output / "index.html").read_text(encoding="utf-8")
         footer = overview[overview.index("<footer") :]
         self.assertIn(
-            "open, vendor-neutral specification for executable and testable AI judgment", footer
+            "open, vendor-neutral specification for explicit and testable AI judgment", footer
         )
         self.assertIn('href="https://github.com/Judgment-Pack/judgment-pack-spec"', footer)
         self.assertIn('href="https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw"', footer)
@@ -635,7 +796,10 @@ class StaticSiteTests(unittest.TestCase):
         proposals = self.output / "rfcs" / "index.html"
         self.assertTrue(faq.is_file())
         self.assertTrue(proposals.is_file())
-        self.assertIn("<title>FAQ — JPS</title>", faq.read_text(encoding="utf-8"))
+        self.assertIn(
+            "<title>FAQ | Judgment Pack Specification</title>",
+            faq.read_text(encoding="utf-8"),
+        )
         nav = self._primary_nav((self.output / "index.html").read_text(encoding="utf-8"))
         self.assertIn(">FAQ</a>", nav)
         self.assertIn(">Proposals</a>", nav)
@@ -761,7 +925,7 @@ class StaticSiteTests(unittest.TestCase):
         concepts = self.output / "concepts" / "index.html"
         self.assertTrue(concepts.is_file())
         text = concepts.read_text(encoding="utf-8")
-        self.assertIn("<title>Concepts — JPS</title>", text)
+        self.assertIn("<title>Concepts | Judgment Pack Specification</title>", text)
         for phrase in (
             "Why Judgment Pack?",
             "Architecture vision",

@@ -14,6 +14,13 @@ here.
   architecture vision's statement that no RFC proposes the research line's formats as JPS remains
   true. Prompted by a stray private seed found untracked in the runtime repository's working
   tree; the ignore-rule guards shipped separately in both repositories.
+- Search, answer-engine, and generative-engine discoverability for the static site: every indexable production
+  page now carries full-name titles, explicit index directives, complete Open Graph and summary-card
+  metadata, sitemap and license discovery links, and schema.org Microdata for the site, project,
+  versioned technical specification, visible breadcrumbs, and all 47 complete FAQ answers. FAQ
+  questions now render as stable semantic headings without adding executable JavaScript, and a
+  concise experimental `/llms.txt` navigation aid points machine readers to the normative,
+  informative, proposed, and companion-project surfaces without claiming crawler or ranking support.
 - **Core `0.2.0-draft`: the evaluator conformance class.** [RFC 0006](rfcs/0006-evaluator-conformance.md)
   is accepted at draft maturity and lands in the specification: §3.4 defines the class and §3.4.1 the
   single form of claim permitted against it, §§7–8 become normative for that class (and stay
@@ -82,6 +89,12 @@ here.
 
 ### Changed
 
+- Search metadata descriptions are normalized to 160 characters, conformance-case descriptions now
+  name JPS and their layer, and sitemap entries no longer misreport the deployment timestamp as every
+  page's content-modification time. Duplicate downloadable JSON under `/artifacts/` now carries an
+  `X-Robots-Tag: noindex` response while canonical schema URLs remain available. The deployment guide
+  also forbids cloning the intentionally `noindex` preview artifact to live and requires an explicit
+  production build plus indexing checks.
 - Version identifiers move to `0.2.0-draft`: Core prose, the structural schema (`$id` and the exact
   `specVersion` constant), the document-conformance manifest, every example, and every fixture. The
   document format is unchanged, so a `0.1.0-draft` pack is unchanged in representation and

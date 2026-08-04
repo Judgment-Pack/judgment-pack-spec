@@ -31,7 +31,7 @@ no runtime. Those exclusions are intentional; see the [non-goals](../non-goals.m
 ## The layered picture, labeled
 
 <div class="diagram-figure is-portrait">
-<img class="diagram" src="/assets/diagram-shipped-vs-proposed.svg" alt="Vertical stack. Agent and Judgment Planner are product; Judgment Graph and Composite Judgment are proposed; the Judgment Pack single-decision document and its four conformance classes are the shipped standard; a runtime validates and evaluates.">
+<img class="diagram" src="/assets/diagram-shipped-vs-proposed.svg" width="640" height="552" loading="lazy" decoding="async" alt="Vertical stack. Agent and Judgment Planner are product; Judgment Graph and Composite Judgment are proposed; the Judgment Pack single-decision document and its four conformance classes are the shipped standard; a runtime validates and evaluates.">
 <p class="diagram-caption">Only the green core — the Judgment Pack document and its conformance classes — is the standard. Everything else is proposed, runtime, or product.</p>
 </div>
 
@@ -54,7 +54,7 @@ proposal, a runtime behavior, or product territory.
 ## How to read the picture
 
 <div class="diagram-figure is-standard">
-<img class="diagram" src="/assets/diagram-three-properties.svg" alt="The neutral judgment-pack-spec is the standard. A reference runtime, independent implementations, and products consume it as peers, and the reference runtime feeds a conformance corpus back to the specification.">
+<img class="diagram" src="/assets/diagram-three-properties.svg" width="640" height="372" loading="lazy" decoding="async" alt="The neutral judgment-pack-spec is the standard. A reference runtime, independent implementations, and products consume it as peers, and the reference runtime feeds a conformance corpus back to the specification.">
 <p class="diagram-caption">A format goes to the specification, an engine to the runtime, a service to a product — and no consumer owns the standard.</p>
 </div>
 
@@ -78,7 +78,7 @@ A knowledge graph, a database, an API, or a document store answers *what is know
 take over*. Evidence sources feed a pack; they do not sit above it.
 
 <div class="diagram-figure is-wide">
-<img class="diagram" src="/assets/diagram-knowledge-input.svg" alt="Evidence sources such as a knowledge graph, SQL, APIs, and documents feed a Judgment Pack, which declares which decision applies and when to escalate, and produces a decision with rationale.">
+<img class="diagram" src="/assets/diagram-knowledge-input.svg" width="720" height="268" loading="lazy" decoding="async" alt="Evidence sources such as a knowledge graph, SQL, APIs, and documents feed a Judgment Pack, which declares which decision applies and when to escalate, and produces a decision with rationale.">
 <p class="diagram-caption">Evidence sources answer “what is known.” The pack decides which of it matters — so knowledge feeds the pack rather than sitting above it.</p>
 </div>
 

@@ -75,6 +75,16 @@ jobs:
             --base-url "${BASE_URL}" \
             --commit-sha "${{ github.sha }}" \
             --build-time "$(git show -s --format=%cI ${{ github.sha }})"
+      - name: Validate production artifact
+        run: |
+          python -m unittest discover -s tests -v
+          grep -Fq '<link rel="canonical" href="https://judgmentpack.org/">' public/index.html
+          grep -Fxq 'Allow: /' public/robots.txt
+          grep -Fxq 'Sitemap: https://judgmentpack.org/sitemap.xml' public/robots.txt
+          test -f public/sitemap.xml
+          mapfile -t noindex_pages < <(grep -R -l -F 'noindex, nofollow' public --include='*.html')
+          test "${#noindex_pages[@]}" -eq 1
+          test "${noindex_pages[0]}" = "public/404.html"
       - uses: google-github-actions/auth@v2
         with:
           project_id: ${{ env.GCP_PROJECT }}

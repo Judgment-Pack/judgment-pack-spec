@@ -115,10 +115,11 @@ reproducing its corpus version, its results, or its every-row statement.
 | [`.vscode/tasks.json`](.vscode/tasks.json)                                       | One-command local documentation preview             |
 
 The `docs/` directory records the specification's design constraints, its explicit non-goals, and
-how the spec stays independent of any implementation. The specification defines documents only and
-contains no end-user tooling. Conforming implementations may be open-source or proprietary and
-consume immutable specification releases like any other implementation; see the Implementations page
-for the current landscape.
+how the spec stays independent of any implementation. The specification defines the portable
+document and, for evaluator conformance, what evaluating it means; it does not define or ship an
+engine or end-user tooling. Conforming implementations may be open-source or proprietary and consume
+immutable specification releases like any other implementation; see the Implementations page for the
+current landscape.
 
 ## Minimal shape
 
