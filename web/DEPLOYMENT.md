@@ -1,14 +1,14 @@
 # Static site deployment
 
 > This document is a deployment guide only. It does not create a Firebase project, authenticate to
-> Firebase, upload files, change DNS, or deploy anything. No Firebase project is known to exist for
-> this repository.
+> Firebase, upload files, change DNS, or deploy anything. The committed GitHub Actions workflow owns
+> the production project and site bindings; the manual examples below remain fictional safeguards.
 
 The site generator writes a provider-neutral static artifact to `public/`. Build and inspect that
 artifact before using any hosting command:
 
 ```bash
-python3 web/build.py
+python3 web/build.py --environment preview
 python3 -m http.server 8000 --bind 127.0.0.1 --directory public
 ```
 
@@ -93,15 +93,17 @@ of truth if the CLI prompts differ from this guide.
 Rebuild from a clean, reviewed revision immediately before previewing:
 
 ```bash
-python3 web/build.py
+python3 web/build.py --environment preview
 firebase hosting:channel:deploy spec-review --expires 7d --no-authorized-domains --project jps-spec-preview-example
 ```
 
 Before confirming the command, verify the project ID shown by the CLI. This command is an external
 write: it uploads the Hosting configuration and current `public/` contents to the `spec-review`
-preview channel. `--no-authorized-domains` prevents this static documentation deployment from
-changing Firebase Authentication's authorized-domain list. The returned preview URL is temporary
-but public to anyone who has it; it is not an access-control boundary.
+preview channel. Preview output deliberately carries `noindex, nofollow`, has no canonical URLs or
+sitemap, and blocks crawling in `robots.txt`. `--no-authorized-domains` prevents this static
+documentation deployment from changing Firebase Authentication's authorized-domain list. The
+returned preview URL is temporary but public to anyone who has it; it is not an access-control
+boundary.
 
 Review the preview URL on desktop and mobile, follow internal and external links, and compare the
 displayed version with the intended source checkout. Normative tagged artifacts and their
@@ -111,31 +113,37 @@ presented as tagged content. A Firebase preview-channel URL is temporary and sho
 deployment candidate, not as the durable specification URL. The explicit seven-day expiration
 limits stale preview content; Firebase permits changing or deleting the channel sooner.
 
-## Promote the reviewed preview to live
+## Publish the approved revision to live
 
-Obtain explicit release approval before changing the live channel. To publish the exact version
-that reviewers saw, clone the preview channel to the live channel:
-
-```bash
-firebase hosting:clone jps-spec-site-example:spec-review jps-spec-site-example:live
-```
-
-Replace both fictional site IDs with the actual ID from `firebase hosting:sites:list`, then confirm
-the source and target before approving the clone. This command changes the live site. Afterward,
-verify the live `web.app` or `firebaseapp.com` URL reported by Firebase and repeat the critical page
-and link checks.
-
-If promotion by cloning is not appropriate, Firebase also supports a direct live deployment from
-the repository root:
+Obtain explicit release approval before changing the live channel. **Do not clone the preview
+channel to live:** its artifact is intentionally `noindex` and uncanonical, and cloning preserves
+those bytes. The committed production workflow rebuilds the approved `main` revision with the live
+canonical origin. For a manual release from the exact clean, reviewed revision, use the same
+production build contract:
 
 ```bash
-python3 web/build.py
-firebase deploy --only hosting --project jps-spec-preview-example
+commit_sha="$(git rev-parse HEAD)"
+build_time="$(git show -s --format=%cI "$commit_sha")"
+python3 web/build.py \
+  --environment production \
+  --base-url https://judgmentpack.org \
+  --commit-sha "$commit_sha" \
+  --build-time "$build_time"
+python3 -m unittest discover -s tests
+mapfile -t noindex_pages < <(rg -l 'noindex, nofollow' public --glob '*.html')
+test "${#noindex_pages[@]}" -eq 1
+test "${noindex_pages[0]}" = "public/404.html"
+rg -q '^Allow: /$' public/robots.txt
+test -f public/sitemap.xml
+firebase target:apply hosting spec jps-spec-site-example --project jps-spec-preview-example
+firebase deploy --only hosting:spec --project jps-spec-preview-example
 ```
 
-A direct deployment should be exceptional in this workflow because rebuilding or changing local
-files after preview review can introduce drift. Inspect `public/` again before running it. The
-`--only hosting` scope prevents an accidental deployment of unrelated Firebase resource types.
+Replace both fictional IDs with the values already verified for the intended project. Confirm the
+project, target, clean commit, canonical origin, and generated indexing checks before approving the
+external write. The `--only hosting:spec` scope prevents an accidental deployment of the redirect
+site or unrelated Firebase resources. Afterward, verify the live Firebase URL and custom domain,
+including the homepage canonical, `robots.txt`, `sitemap.xml`, and a nested specification page.
 
 See Firebase's guide to
 [testing, previewing, and deploying](https://firebase.google.com/docs/hosting/test-preview-deploy)
@@ -194,10 +202,12 @@ they do not cap charges.
 
 ## Provider-neutral alternative
 
-Firebase is optional. After running `python3 web/build.py`, publish the contents of `public/` with
-any static host that can serve an `index.html`, preserve paths and MIME types, and provide HTTPS.
-Configure that provider's build output or upload root as `public/`; no Python process, server-side
-rendering, database, or Firebase SDK is required at runtime.
+Firebase is optional. Build production output with the explicit environment, canonical base URL,
+commit SHA, and build time shown above, then publish `public/` with any static host that can serve an
+`index.html`, preserve paths and MIME types, and provide HTTPS. Never publish the default preview
+artifact: it is intentionally `noindex`. Configure that provider's build output or upload root as
+`public/`; no Python process, server-side rendering, database, or Firebase SDK is required at
+runtime.
 
 Apply the same preview-before-live, public-content review, custom-domain, retention, cost, and
 rollback precautions with whichever provider is selected.

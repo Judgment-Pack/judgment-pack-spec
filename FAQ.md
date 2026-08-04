@@ -259,7 +259,7 @@ skill:
 ```
 
 <div class="diagram-figure is-wide">
-<img class="diagram" src="/assets/diagram-skills-pack-flow.svg" alt="An agent or workflow runs a skill. The skill calls tools, which read evidence sources; the skill also invokes a Judgment Pack, and the evidence feeds that pack. The pack produces a judgment result routed to one outcome: approved leads to an authorized action, rejected to stop or close, insufficient evidence to a request for evidence, and escalated to human review.">
+<img class="diagram" src="/assets/diagram-skills-pack-flow.svg" width="820" height="300" loading="lazy" decoding="async" alt="An agent or workflow runs a skill. The skill calls tools, which read evidence sources; the skill also invokes a Judgment Pack, and the evidence feeds that pack. The pack produces a judgment result routed to one outcome: approved leads to an authorized action, rejected to stop or close, insufficient evidence to a request for evidence, and escalated to human review.">
 <p class="diagram-caption">Tools retrieve data and perform actions; the skill coordinates the task; the Judgment Pack evaluates whether a conclusion is justified; the runtime performs the authorized action afterward.</p>
 </div>
 
@@ -314,9 +314,10 @@ statement that together make a claim complete. Read it there, in full, or not at
 document-conformance layers reported. It never establishes truth, authority, safety, or fitness.
 
 **Q35. How does execution scale?** The specification defines what an evaluation *means*, not how to
-perform one, so there are no execution benchmarks to quote. What can be said honestly: a pack is a small, static, cacheable document that
-validates offline in milliseconds and distributes over a CDN like any JSON artifact. The cost of
-evaluating a graph of packs is an open question for a runtime and for
+perform one, so there are no execution benchmarks to quote. A pack is a small, static, cacheable JSON
+document that can be validated offline and distributed like any other static artifact; its actual
+performance is an implementation claim that needs its own measurements. The cost of evaluating a
+graph of packs is an open question for a runtime and for
 [RFC 0002](rfcs/0002-judgment-graph.md).
 
 ## Discovery and Versioning
