@@ -82,7 +82,7 @@ jobs:
           grep -Fxq 'Allow: /' public/robots.txt
           grep -Fxq 'Sitemap: https://judgmentpack.org/sitemap.xml' public/robots.txt
           test -f public/sitemap.xml
-          mapfile -t noindex_pages < <(grep -R -l -F 'noindex, nofollow' public --include='*.html')
+          mapfile -t noindex_pages < <(grep -R -l -F '<meta name="robots" content="noindex, nofollow">' public --include='*.html')
           test "${#noindex_pages[@]}" -eq 1
           test "${noindex_pages[0]}" = "public/404.html"
       - uses: google-github-actions/auth@v2

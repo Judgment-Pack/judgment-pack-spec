@@ -130,7 +130,7 @@ python3 web/build.py \
   --commit-sha "$commit_sha" \
   --build-time "$build_time"
 python3 -m unittest discover -s tests
-mapfile -t noindex_pages < <(rg -l 'noindex, nofollow' public --glob '*.html')
+mapfile -t noindex_pages < <(rg -lF '<meta name="robots" content="noindex, nofollow">' public --glob '*.html')
 test "${#noindex_pages[@]}" -eq 1
 test "${noindex_pages[0]}" = "public/404.html"
 rg -q '^Allow: /$' public/robots.txt

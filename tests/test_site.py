@@ -284,6 +284,10 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("--base-url https://judgmentpack.org", guide)
         self.assertIn('test "${noindex_pages[0]}" = "public/404.html"', guide)
         self.assertIn("firebase deploy --only hosting:spec", guide)
+        # The scan must match the full meta tag: pages that merely QUOTE the directive in prose
+        # or snippets (this guide's own rendered page does) must not count as noindex.
+        noindex_tag = '<meta name="robots" content="noindex, nofollow">'
+        self.assertIn(f"rg -lF '{noindex_tag}'", guide)
 
         workflow = (ROOT / ".github" / "workflows" / "deploy.yml").read_text(
             encoding="utf-8"
@@ -293,6 +297,7 @@ class StaticSiteTests(unittest.TestCase):
         self.assertLess(validation, authentication)
         self.assertIn("python -m unittest discover -s tests -v", workflow)
         self.assertIn('test "${noindex_pages[0]}" = "public/404.html"', workflow)
+        self.assertIn(f"grep -R -l -F '{noindex_tag}'", workflow)
 
     def test_implementations_page_lists_the_neutral_reference_runtime(self) -> None:
         # The earlier vendor-branded CLI has been superseded by the neutral judgment-pack runtime, which
