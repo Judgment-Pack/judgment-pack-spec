@@ -15,6 +15,42 @@
 > This repository is an early design proposal. It is not an industry standard, is not covered by
 > compatibility guarantees, and is not ready for consequential production decisions.
 
+## Project ecosystem and where to contribute
+
+Judgment Pack is split across a neutral specification and separately governed implementations,
+demos, and research. Choose the repository that matches the work you want to do:
+
+**Runnable implementations are available today.** The
+[Go reference runtime](https://github.com/Judgment-Pack/judgment-pack-runtime) validates and
+evaluates packs through the `jpack` CLI and a stdio MCP server; its
+[conformance statement](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/CONFORMANCE.md)
+records the exact supported surface. A
+[stdlib-only Python evaluator](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/python)
+provides a clean-room comparison implementation for agreement testing. The Python implementation
+is experimental and claims no JPS conformance; because both projects share maintainership, their
+agreement is not independent interoperability evidence.
+
+Looking for implementation work? Browse the curated `good first issue` queues for the
+[Go runtime](https://github.com/Judgment-Pack/judgment-pack-runtime/labels/good%20first%20issue),
+[gateway](https://github.com/Judgment-Pack/judgment-pack-gateway/labels/good%20first%20issue), or
+[evaluator experiments](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/labels/good%20first%20issue).
+Maintainers are available to clarify scope and review focused first contributions.
+
+| Repository | What lives there | A good fit for |
+| --- | --- | --- |
+| [`judgment-pack-spec`](https://github.com/Judgment-Pack/judgment-pack-spec) (this repository) | Core prose, schemas, examples, conformance artifacts, RFCs, and governance | Domain modeling, specification writing, JSON Schema, conformance fixtures, and interoperability |
+| [`judgment-pack-runtime`](https://github.com/Judgment-Pack/judgment-pack-runtime) | Go reference runtime with the `jpack` CLI and stdio MCP surfaces for validation and evaluation | Go, CLI and MCP integration, diagnostics, and deterministic tests |
+| [`judgment-pack-demo`](https://github.com/Judgment-Pack/judgment-pack-demo) | Cloneable browser sandbox and Slack-app source with synthetic projects and the runtime connected over MCP | Docker, MCP integrations, end-to-end examples, developer experience, and tutorials |
+| [`judgment-pack-gateway`](https://github.com/Judgment-Pack/judgment-pack-gateway) | Go research gateway for acquired JSON, content-addressed signed receipts, and sealed sessions | Go, provenance tests, verification examples, and trust-boundary documentation |
+| [`judgment-pack-evaluator-experiments`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments) | Python clean-room evaluators, agreement harnesses, and preregistered studies; claims no JPS conformance | Python, AI evaluation, reproducibility checks, result tooling, and adversarial fixtures |
+
+Only the tagged Core prose, schemas, and named conformance artifacts in this repository define JPS.
+The runtime is one implementation among peers; every listed tool, demo, and research repository is
+separately governed and non-normative. Their interfaces and results do not become part of the
+specification by being listed here. See
+[Implementations and project boundaries](https://judgmentpack.org/implementations/) for the fuller
+status of each project.
+
 ## Why judgment needs its own layer
 
 <p align="center">
