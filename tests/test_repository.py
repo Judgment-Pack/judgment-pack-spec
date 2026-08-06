@@ -379,6 +379,17 @@ class RepositoryConformanceTests(unittest.TestCase):
         cls.manifest = strict_json_loads(MANIFEST_PATH.read_text(encoding="utf-8"))
         cls.validator = Draft202012Validator(cls.schema, format_checker=FormatChecker())
 
+    def test_pointer_escaping(self) -> None:
+        cases = [
+            ([], ""),
+            (["rules", 0, "when"], "/rules/0/when"),
+            (["a/b", "c~d"], "/a~1b/c~0d"),
+        ]
+
+        for parts, expected in cases:
+            with self.subTest(parts=parts):
+                self.assertEqual(pointer(parts), expected)
+
     def test_schemas_are_valid_draft_2020_12(self) -> None:
         Draft202012Validator.check_schema(self.schema)
         Draft202012Validator.check_schema(self.manifest_schema)
