@@ -5,7 +5,7 @@ on:
     types: [closed]
 
 permissions:
-  issues: write
+  pull-requests: write
 
 jobs:
   thank-contributor:
@@ -56,4 +56,3 @@ jobs:
           gh api --method POST \
             "repos/${GH_REPOSITORY}/issues/${PR_NUMBER}/comments" \
             --raw-field body="${COMMENT_BODY}"
-
