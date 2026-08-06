@@ -21,9 +21,21 @@ class ReleaseBuilderTests(unittest.TestCase):
     def test_release_version_accepts_exact_semver_tags(self) -> None:
         self.assertEqual(BUILD_RELEASE.release_version("v0.1.0-draft"), "0.1.0-draft")
         self.assertEqual(BUILD_RELEASE.release_version("v1.2.3-rc.1"), "1.2.3-rc.1")
+        self.assertEqual(BUILD_RELEASE.release_version("v1.2.3-0"), "1.2.3-0")
+        self.assertEqual(BUILD_RELEASE.release_version("v1.2.3-alpha.1"), "1.2.3-alpha.1")
+        # Alphanumeric prerelease ids may contain leading zeroes (SemVer §9).
+        self.assertEqual(BUILD_RELEASE.release_version("v1.2.3-01alpha"), "1.2.3-01alpha")
 
     def test_release_version_rejects_ambiguous_tags(self) -> None:
-        for tag in ("0.1.0", "v0.1", "v00.1.0", "v0.1.0+local", "main"):
+        for tag in (
+            "0.1.0",
+            "v0.1",
+            "v00.1.0",
+            "v0.1.0+local",
+            "main",
+            "v1.2.3-01",
+            "v1.2.3-alpha.01",
+        ):
             with self.subTest(tag=tag), self.assertRaises(ValueError):
                 BUILD_RELEASE.release_version(tag)
 
