@@ -1,7 +1,14 @@
 # Judgment Pack Specification
 
 [![Repository conformance](https://github.com/Judgment-Pack/judgment-pack-spec/actions/workflows/conformance.yml/badge.svg)](https://github.com/Judgment-Pack/judgment-pack-spec/actions/workflows/conformance.yml)
+[![License: Apache-2.0](https://img.shields.io/github/license/Judgment-Pack/judgment-pack-spec)](LICENSE)
+
+[![Website](https://img.shields.io/badge/website-judgmentpack.org-0B7285)](https://judgmentpack.org)
+[![Project ecosystem](https://img.shields.io/badge/project-ecosystem-4C6EF5)](https://judgmentpack.org/implementations/)
 [![Join the community on Slack](https://img.shields.io/badge/Slack-Join%20the%20community-4A154B?logo=slack&logoColor=white)](https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw)
+
+[![Good first issues](https://img.shields.io/github/issues/Judgment-Pack/judgment-pack-spec/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/Judgment-Pack/judgment-pack-spec/labels/good%20first%20issue)
+[![Open Source Helpers](https://www.codetriage.com/judgment-pack/judgment-pack-spec/badges/users.svg)](https://www.codetriage.com/judgment-pack/judgment-pack-spec)
 
 > **Status: Research Preview — `0.2.0-draft`**
 >
