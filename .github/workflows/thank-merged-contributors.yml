@@ -1,0 +1,59 @@
+name: Thank merged contributors
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  issues: write
+
+jobs:
+  thank-contributor:
+    if: github.event.pull_request.merged == true && github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    env:
+      COMMENT_BODY: |
+        <!-- judgment-pack-next-contribution -->
+        🎉 Thank you for your contribution to Judgment Pack!
+
+        If you’d like another task, choose a path that interests you:
+
+        - [Go runtime](https://github.com/Judgment-Pack/judgment-pack-runtime/labels/good%20first%20issue)
+        - [Gateway and provenance](https://github.com/Judgment-Pack/judgment-pack-gateway/labels/good%20first%20issue)
+        - [Python and evaluator experiments](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/labels/good%20first%20issue)
+        - [Specification and documentation](https://github.com/Judgment-Pack/judgment-pack-spec/labels/good%20first%20issue)
+    steps:
+      - name: Check for an existing recommendation
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          case "${PR_NUMBER}" in
+            ""|*[!0-9]*) exit 1 ;;
+          esac
+
+          existing="$(
+            gh api --paginate \
+              "repos/${GH_REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100" \
+              --jq '.[] | select(.body | contains("<!-- judgment-pack-next-contribution -->")) | .id'
+          )"
+
+          if [ -n "${existing}" ]; then
+            printf 'already-posted=true\n' >> "${GITHUB_OUTPUT}"
+          else
+            printf 'already-posted=false\n' >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Thank the contributor and suggest another task
+        if: steps.existing.outputs.already-posted != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api --method POST \
+            "repos/${GH_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            --raw-field body="${COMMENT_BODY}"
+
