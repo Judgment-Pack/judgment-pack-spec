@@ -390,6 +390,43 @@ class RepositoryConformanceTests(unittest.TestCase):
             with self.subTest(parts=parts):
                 self.assertEqual(pointer(parts), expected)
 
+    def test_strict_json_loads_duplicate_member_detection(self) -> None:
+        cases = [
+            (
+                "unique_members",
+                '{"a": 1, "b": 2, "c": {"d": 3}}',
+                {"a": 1, "b": 2, "c": {"d": 3}},
+                None,
+            ),
+            (
+                "duplicate_member_root",
+                '{"a": 1, "b": 2, "a": 3}',
+                None,
+                "a",
+            ),
+            (
+                "duplicate_member_nested",
+                '{"a": 1, "b": {"c": 2, "c": 4}}',
+                None,
+                "c",
+            ),
+            (
+                "same_member_separate_siblings",
+                '{"a": {"x": 1}, "b": {"x": 2}}',
+                {"a": {"x": 1}, "b": {"x": 2}},
+                None,
+            ),
+        ]
+
+        for name, text, expected_result, expected_duplicate_member in cases:
+            with self.subTest(case=name):
+                if expected_duplicate_member is not None:
+                    with self.assertRaises(DuplicateMemberError) as ctx:
+                        strict_json_loads(text)
+                    self.assertEqual(ctx.exception.member, expected_duplicate_member)
+                else:
+                    self.assertEqual(strict_json_loads(text), expected_result)
+
     def test_schemas_are_valid_draft_2020_12(self) -> None:
         Draft202012Validator.check_schema(self.schema)
         Draft202012Validator.check_schema(self.manifest_schema)
