@@ -356,32 +356,37 @@ prerequisite is unmet too.
    [RFC 0010](0010-gateway-signing-identity.md), if any part is built, the design record may belong in
    the repository that owns the artifact. Either answer is a reasonable outcome, not a failure of this
    RFC.
-8. **Bootstrap: what a fresh verifier must be given, and from whom.** The consumer step pins an
-   authority key (Unresolved #1) — but that alone does not bootstrap a verifier. Its minimal trust
-   assumption is **two out-of-band pins**: the authority key it will trust for a series, and a
-   **genesis head** — a starting checkpoint digest of the registry history it accepts as real. From
-   there it can walk the append-only history forward, and it can refuse an older-snapshot replay only
-   if it also persists a minimum accepted head (Specification §2). Below the genesis pin the verifier
-   is trust-on-first-use: it can prove the history it holds is internally consistent, not that it is
-   the true one. There is no bootstrapping trust from nothing; the anchor relocates the out-of-band
-   problem — the same shape as pinning the gateway's public key, or the checkpoint witness of
-   [RFC 0010](0010-gateway-signing-identity.md) — it does not remove it. How genesis pins are
-   distributed, how they rotate when the authority key rotates, and whether the two-pin minimum
-   should be stated as a requirement on every consumer step, are open.
-9. **Equivocation: the single-operator ceiling, and a convergence with RFC 0010.** A single operator
-   holding both the signing key and the history can present two different, internally valid histories
-   to two fresh verifiers — or to one verifier at different times, absent persisted state. A signed
-   genesis alone cannot detect this split view: an isolated offline verifier's acceptance establishes
-   membership in the view it was handed, never global consistency. Security already states this bound
-   for the neutral-log model; it holds for the publisher model equally, and it is the concrete content
-   of the Alternatives trade — the self-contained registry costs exactly the ability to catch its own
-   signer equivocating, which is what the transparency-log / witness / cross-signing direction would
-   buy back. Recorded as a convergence, not a proposal: the checkpoint-anchoring gap
-   [RFC 0010](0010-gateway-signing-identity.md) §2 names for the gateway and the currency registry
-   sketched here need the **same underlying primitive** — an externally anchored, hash-chained,
-   independently signed checkpoint log whose single operator can still be caught equivocating.
-   Whether one shared mechanism should serve both records, and who would operate it, is open. (A
-   frozen — and **not yet run** —
+8. **Bootstrap: what a fresh verifier must be given, and under which signer model.** The consumer
+   step pins an authority key for the series (Unresolved #1) and, to refuse an older-snapshot
+   replay, persists a minimum accepted head (Specification §2). What is not settled is what else —
+   if anything — a fresh verifier must be given before its first snapshot. A pinned publisher key
+   authenticates whatever history it is first handed; but authenticity of a view is not uniqueness
+   of the series' origin. Without some independently supplied starting anchor (a genesis-head pin,
+   an externally obtained checkpoint, or a richer trust bundle), the verifier cannot distinguish
+   the series' history from any other history the same key signed — and even with one, a fork
+   placed after the anchor point is not prevented. Whether such an anchor is necessary at all, per
+   signer model (a neutral-log model may require more trust artifacts, not fewer); which threat it
+   addresses and which it provably does not; and how it would be distributed, and rotated when the
+   authority key rotates — open, and inseparable from Unresolved #1's trust mapping.
+9. **Split views of the registry itself, and what witnessing would actually require.** Distinct
+   from the publisher-equivocation limit Security records for the neutral-log model: the threat
+   here is the registry operator — one party holding the currency-signing key and the history —
+   presenting two internally valid, contradictory histories to different fresh verifiers, or to
+   one verifier at different times. Nothing in the sketch gives an isolated offline verifier a way
+   to see the sibling view; its acceptance establishes membership in the view it was handed. A
+   persisted minimum accepted head catches some sequential conflicting views (Specification §2),
+   and no more. Making split views observable in general is the transparency-log / witness /
+   cross-signing direction the Alternatives trade names — and what that direction would deliver is
+   conditional on a still-unspecified witness contract: retention, cross-view comparison, verifier
+   enforcement, and witness independence and non-collusion. Related, not identical:
+   [RFC 0010](0010-gateway-signing-identity.md) records its own external-anchoring questions for
+   the gateway — its §2 prerequisite (count-binding seals becoming content-binding) is
+   gateway-specific, its §4 checkpoints are gateway-signed with witness forms expressly
+   non-interchangeable, and whether anchoring is worth adopting is open there. Whether any single
+   witnessing mechanism could serve both records' different threat models — or each needs its
+   own — is an open question for whichever repository would own such a mechanism; nothing here
+   proposes one. (A frozen — and **not yet run** —
    [preregistration in the interoperability studies](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/016-policy-currency-anchor)
-   registers exactly this boundary as expected-undetected cells; it establishes nothing until its
-   primary attempt publishes, and is cited here as a measurement plan, not evidence.)
+   registers the fresh-verifier split view as expected-undetected cells and the persisted-head
+   sequential case as a refusal; it establishes nothing until its primary attempt publishes, and
+   is cited as a measurement plan, not evidence.)
