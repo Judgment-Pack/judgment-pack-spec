@@ -356,3 +356,32 @@ prerequisite is unmet too.
    [RFC 0010](0010-gateway-signing-identity.md), if any part is built, the design record may belong in
    the repository that owns the artifact. Either answer is a reasonable outcome, not a failure of this
    RFC.
+8. **Bootstrap: what a fresh verifier must be given, and from whom.** The consumer step pins an
+   authority key (Unresolved #1) — but that alone does not bootstrap a verifier. Its minimal trust
+   assumption is **two out-of-band pins**: the authority key it will trust for a series, and a
+   **genesis head** — a starting checkpoint digest of the registry history it accepts as real. From
+   there it can walk the append-only history forward, and it can refuse an older-snapshot replay only
+   if it also persists a minimum accepted head (Specification §2). Below the genesis pin the verifier
+   is trust-on-first-use: it can prove the history it holds is internally consistent, not that it is
+   the true one. There is no bootstrapping trust from nothing; the anchor relocates the out-of-band
+   problem — the same shape as pinning the gateway's public key, or the checkpoint witness of
+   [RFC 0010](0010-gateway-signing-identity.md) — it does not remove it. How genesis pins are
+   distributed, how they rotate when the authority key rotates, and whether the two-pin minimum
+   should be stated as a requirement on every consumer step, are open.
+9. **Equivocation: the single-operator ceiling, and a convergence with RFC 0010.** A single operator
+   holding both the signing key and the history can present two different, internally valid histories
+   to two fresh verifiers — or to one verifier at different times, absent persisted state. A signed
+   genesis alone cannot detect this split view: an isolated offline verifier's acceptance establishes
+   membership in the view it was handed, never global consistency. Security already states this bound
+   for the neutral-log model; it holds for the publisher model equally, and it is the concrete content
+   of the Alternatives trade — the self-contained registry costs exactly the ability to catch its own
+   signer equivocating, which is what the transparency-log / witness / cross-signing direction would
+   buy back. Recorded as a convergence, not a proposal: the checkpoint-anchoring gap
+   [RFC 0010](0010-gateway-signing-identity.md) §2 names for the gateway and the currency registry
+   sketched here need the **same underlying primitive** — an externally anchored, hash-chained,
+   independently signed checkpoint log whose single operator can still be caught equivocating.
+   Whether one shared mechanism should serve both records, and who would operate it, is open. (A
+   frozen — and **not yet run** —
+   [preregistration in the interoperability studies](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/016-policy-currency-anchor)
+   registers exactly this boundary as expected-undetected cells; it establishes nothing until its
+   primary attempt publishes, and is cited here as a measurement plan, not evidence.)
