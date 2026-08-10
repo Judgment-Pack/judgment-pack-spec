@@ -1,4 +1,4 @@
-# RFC 0011: A currency anchor for judgment artifacts — detecting staleness and rollback across the receipt boundary
+# RFC 0011: A currency anchor for pack versions — detecting stale and retired policy across the receipt boundary
 
 - Status: Draft
 - Type: Exploratory (research line — a cross-project artifact, outside JPS)
@@ -7,47 +7,54 @@
 > This is an open proposal, not part of the specification. See
 > [RFC 0000](0000-rfc-process.md) for the process and evidence bar.
 >
-> **Scope note, load-bearing.** Nothing this RFC proposes lands in JPS Core, a profile, or a
-> conformance class. If accepted, the parts land across repositories: the *identity* it keys on is
-> the pack manifest ([RFC 0001](0001-pack-manifest.md)) and Core §5; the *index format* is a facet
-> of pack discovery ([RFC 0005](0005-pack-discovery.md)) or a sibling of it; the *verification
-> ceremony* it reuses is the [reference gateway's](https://github.com/Judgment-Pack/judgment-pack-gateway)
-> registry-anchored offline check; the local precedent it generalizes is the reference runtime's
-> reviewed-set lock; and the *consumer step* lands in whichever receipt or execution-verification
-> protocol chooses to consult it. It is recorded under [RFC 0000's](0000-rfc-process.md)
-> cross-project exploratory provision: a disposition here endorses (or declines) the design record
-> as written and confers no authority over any owning repository, each of which decides by its own
-> process. In particular it proposes **no** change to the gateway: the gateway's scope forbids it,
-> and this record honors that (see Alternatives). The [architecture vision's](../docs/architecture/vision.md)
-> statement — that these downstream questions establish binding and lineage, never that a policy or
-> a fact is true — remains true with this RFC merged. It is recorded here because the design
-> question is currently invisible: [Study 014](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/014-openworkproof-binding)
-> *measured* a boundary — two attacks that no verification layer catches — and nothing anywhere
-> records what closing it would take.
+> **Scope note, load-bearing.** Nothing this RFC proposes lands in JPS Core, a profile, a
+> conformance class, or any other RFC's specification-track surface. It *references* existing
+> identity — Core §5's series `id` and `version`, and [RFC 0001](0001-pack-manifest.md)'s proposed
+> pack digest — but proposes no change to them. If accepted, every proposed part lands in another
+> repository: the currency-registry **format**, its **writer**, and an **offline verifier** land in
+> the [reference runtime](https://github.com/Judgment-Pack/judgment-pack-runtime), generalizing its
+> reviewed-set lock; the **consumer step** lands in each receipt or execution-verification protocol
+> that chooses to consult the registry — [OpenWorkProof](https://github.com/dengyier/OpenWorkProof)
+> first — by that protocol's own process. It proposes **no** change to the
+> [reference gateway](https://github.com/Judgment-Pack/judgment-pack-gateway): the gateway's scope
+> forbids it holding a policy authority, and this record honors that (see Alternatives). It borrows
+> the gateway's *offline-comparison-against-a-pinned-snapshot* pattern as prior art and names
+> everything the currency problem needs beyond it as new. Whether the format should later become
+> standards-track pack-discovery work ([RFC 0005](0005-pack-discovery.md)) is an open question
+> (Unresolved #4), not a destination proposed here. It is recorded under
+> [RFC 0000's](0000-rfc-process.md) cross-project exploratory provision: a disposition here endorses
+> (or declines) the design record as written and confers no authority over any owning repository.
+> The [architecture vision's](../docs/architecture/vision.md) statement — that these downstream
+> questions establish binding and lineage, never that a policy or a fact is true — remains true with
+> this RFC merged. It is recorded here because the design question is currently invisible:
+> [Study 014](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/014-openworkproof-binding)
+> named a limitation it could not measure, and nothing anywhere records what addressing it would
+> take.
 
 ## Summary
 
-A judgment authorizes an action, a receipt protocol binds the two, and an offline verifier later
-proves the binding held. Two attacks survive every such proof, because the artifacts they produce
-are internally consistent:
+An action is taken in reliance on a judgment, a receipt protocol binds the two, and an offline
+verifier later proves the binding held. One class of problem survives every such proof, because the
+artifacts it produces are internally consistent: a judgment made under a **pack version that has
+since been retired** is reused, or re-derived, after the version it applied is no longer current.
+Every digest still matches; the decision is simply out of date, and no receipt can carry a true
+statement about its own currency.
 
-1. **Staleness** — a genuine judgment, correct when made, is reused after the policy it applied has
-   been superseded. Every digest still matches; the decision is simply out of date.
-2. **Rollback** — a decision is re-derived, coherently and with valid signatures, under an older
-   version of the policy that would decide differently. Nothing in the chain records that a newer
-   version exists.
+Detecting this requires an anchor **outside** the chain that records which versions of a pack series
+are currently in force. This RFC records the problem and sketches one direction — a **pack-version
+currency registry**: an append-only, independently signed history of add/retire/reinstate events
+over a pack series, verified offline against a pinned snapshot, keyed on pack identity, and reusing
+the gateway's snapshot-comparison pattern without touching the gateway. It scopes the claim
+narrowly and states, up front, three things the sketch does not settle and one thing it cannot do:
 
-Neither is detectable from inside the chain, and that is not a gap in any one verifier: a chain is a
-closed, self-consistent object, and a holder of the relevant keys can re-mint it whole. Detection
-requires an anchor **outside** the chain that states which version of a policy series is current —
-a statement no receipt can carry about itself.
-
-This RFC records the problem, sketches one direction — a **judgment currency registry**: an
-append-only, independently signed, offline-verifiable statement of the current version of a pack
-series, keyed on pack identity and reusing the gateway's registry-anchored verification pattern
-without touching the gateway — and states plainly the one thing that makes currency genuinely hard,
-which the sketch does not solve: a currency check needs a notion of *now*, and JPS and the gateway
-both deliberately have none.
+- It addresses **pack-version staleness** only. It does **not** address a decision re-minted under a
+  different *authorization contract* while the pack is unchanged — that is a property of the receipt
+  protocol's own authorization state, not of pack currency (see Problem, and Study 014's `e22`).
+- Who is authorized to speak for a series' currency is a trust-mapping question the sketch does not
+  answer (Unresolved #1).
+- A currency check needs a notion of *now* that JPS and the gateway deliberately refuse to hold, so
+  an offline check establishes only **membership at the pinned snapshot** — not real-time staleness
+  (Unresolved #3, and Security).
 
 ## Problem
 
@@ -55,250 +62,291 @@ both deliberately have none.
 composed the reference evaluator with an independently developed receipt protocol
 ([OpenWorkProof](https://github.com/dengyier/OpenWorkProof)) and tried, one mutation at a time, to
 break the binding between a judgment and the action a receipt chain represents. Its verifier catches
-substitution of the pack, the facts, the disposition, and the action; it catches tampered
-signatures, broken causal chains, and out-of-window authorization. Its registered matrix contains
-exactly two cells that **no layer catches, by construction, registered as expected-undetected
-before the study ran** and confirmed undetected in the frozen primary attempt:
+substitution of the pack, the facts, the disposition, and the action; tampered signatures; broken
+causal chains; and out-of-window authorization. In registering its mutation matrix it also recorded,
+in a section titled *analytic limitations* (its `PREREGISTRATION.md` §4c), two things its machinery
+**cannot** measure and therefore does not score:
 
-- **`e18` — staleness.** The baseline chain, verbatim, in a world where the pack series has since
-  published a newer version. No retained byte differs from a valid decision, because none can:
-  currency is not a property of the artifact, it is a relation between the artifact and a world that
-  moved.
-- **`e22` — rollback.** A fully consistent chain re-minted under an alternative, older, laxer policy
-  artifact. The receipt protocol has no version ordering over policy artifacts — an older one is a
-  different, equally valid contract — so a rollback and a first-time decision are indistinguishable
-  to it.
+- **Staleness of the pack version.** A decision correct under pack version `V` at decision time,
+  reused after `V` has been superseded. No retained byte differs from a valid decision, because
+  currency is not a property of the artifact — it is a relation between the artifact and a world that
+  moved. The study removed its illustrative `e18` row precisely because it is baseline bytes plus an
+  unobservable scenario: there is nothing to put in a fixture. It is an analytic limitation, not a
+  measured result, and this RFC treats it as one.
+- **Rollback of the authorization contract.** The study's `e22` is a *descriptive* row (excluded
+  from its endpoint, marked "alternative valid WorkOrder remint accepted"): the same judgment —
+  identical `(packId, packVersion, packDigest)` — re-bound under a different, older OpenWorkProof
+  work order. This RFC's registry would **accept** `e22`, because the pack version did not change;
+  what rolled back was the receipt protocol's authorization contract, not the pack. `e22` is named
+  here to draw the boundary, not as something a pack-version anchor detects. Authorization-contract
+  currency is the receipt protocol's own problem; it is out of scope.
 
-The same question arrived independently from the other side of the composition: the OpenWorkProof
-author, reviewing the study, named the missing piece as an *external anchor* and asked where it
-should live, listing a transparency service, a monotonic registry, and a trusted current-version
-pointer as candidates. Two independently designed systems reached the same boundary from opposite
-directions. That convergence is the evidence that the boundary is real and not an artifact of either
-design.
+The same missing piece was raised, independently, from the protocol side: a receipt-protocol
+implementer reviewing the study observed that closing the gap needs an *external anchor* and asked
+where it should live. That remark is motivating context, not evidence — it is not a citable public
+artifact and it establishes only that the question was asked, not that two designs provably
+converged.
 
-What is **not** inherent here — the part worth recording — is that JPS already owns every primitive
-this needs except the anchor itself:
+What is worth recording is that JPS already owns the *identity* such an anchor would key on, and
+nothing more:
 
-- **Identity and version exist.** Core §5 gives a pack a series identity (an absolute-URI `id`) and
-  a `MAJOR.MINOR.PATCH` `version`, independent of `specVersion`. [RFC 0001](0001-pack-manifest.md)
-  proposes a `contentHash` over the canonical pack bytes. The thing a currency statement would name
-  — *this series, this version, this digest* — is already expressible.
-- **A local currency statement already exists.** The reference runtime's reviewed-set lock
-  (`jpack.lock.json`) pins a set of pack digests as the reviewed, current set for a project, and the
-  audit trail records the pack digest a decision was made under. That is a "these are current"
-  statement — but it is *local* to the project that wrote it and carries no independent signature a
-  third-party verifier could pin. It is the right shape at the wrong scope.
-- **The verification mechanism already exists, one repository over.** The gateway's sealed-session
-  registry is an anchor that lives *outside* the store it checks: given the registry and a pinned
-  public key, a verifier decides **offline** — no network — whether a store has replayed a whole
-  session, rolled its receipt count back (`tail-rollback`), or exceeded its sealed high-water mark,
-  and re-sealing a session is refused so a count cannot be walked backward. That is precisely the
-  monotonic, out-of-store, offline-verifiable anchor shape the problem calls for.
+- **Identity and version exist; their digest does not, yet.** Core §5 gives a pack a series identity
+  (an absolute-URI `id`) and a `MAJOR.MINOR.PATCH` `version`; §11 makes a published `(id, version)`
+  immutable only at SHOULD strength, and defines no precedence, supersession, or retirement over
+  versions. [RFC 0001](0001-pack-manifest.md) *proposes* a `contentHash` but is Draft and leaves both
+  the digest algorithm and the canonicalization unresolved; Core §13 lists content identity,
+  canonicalization, and signatures as open. So "this series, this version, this digest" is
+  *nameable*, but the digest it names is not yet an agreed portable value — a prerequisite, not a
+  given (see Specification §0).
+- **A local, unsigned digest inventory is precedent.** The reference runtime's reviewed-set lock
+  (`jpack.lock.json`) is a deterministic, project-local list of pack digests with drift refusal, and
+  its ADR is explicit that it approves nothing. It is precedent for *a local digest inventory that
+  refuses drift* — and nothing more. It has no series identifier, no version, no supported-set or
+  retirement notion, no history, no append-only order, and no independent signature a third party
+  could pin. The currency registry's identity, lifecycle, history, signature, and trust model are all
+  new; only the "deterministic digest inventory" shape is borrowed.
+- **Offline comparison against a pinned snapshot is demonstrated, one repository over.** The gateway
+  shows that a verifier can decide, offline and with no network, whether a store agrees with a
+  separately trusted, signed snapshot, and flag a count mismatch against it. That is the *pattern*
+  the currency check reuses. It is emphatically **not** authenticated append-only history: the
+  gateway's seal binds a session's *count*, not its contents (RFC 0010 §2 exists to fix exactly
+  that), its "replay" check merely notices a session absent from the snapshot, and refusing to
+  re-seal is writer behavior, not third-party proof that history was not rewritten. Everything the
+  currency problem needs beyond "compare against a pinned snapshot" — an authenticated registry head,
+  a prefix-consistency rule, a lifecycle state machine, and an authority model — is new machinery,
+  named as such below.
 
-So the anchor is a missing *artifact*, not a missing *capability*. Affected users: any relying party
-that acts on a judgment whose freshness matters — which is any judgment over a policy that can
-change. Today the only defense is that the relying party pins the exact version it expects and
-rejects everything else (see Alternatives), which works for one verifier trusting one publisher and
-does not scale to open verification.
+So the anchor is a missing *artifact* whose hardest parts are genuinely unsolved. Affected users: any
+relying party that acts on a judgment whose pack version can be retired — which is any long-lived
+policy. Today the only defense is that the relying party pins the exact version it expects and
+rejects everything else (see Alternatives).
 
 ## Evidence
 
-- **The two registered cells and the frozen run.** `e18` and `e22` are registered in Study 014's
-  matrix as `expected-undetected` with the rationale "currency is not chain-internal; detecting it
-  needs an anchor outside the chain," and the frozen primary attempt records both passing all three
-  verification layers. This is not a verifier that failed to look; it is a boundary that was
-  predicted, registered before results, and measured. See the study's
-  [`ANALYSIS.md`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/main/studies/014-openworkproof-binding/ANALYSIS.md).
-- **The gateway proves the mechanism works.** The registry-anchored offline check is not
-  hypothetical: it ships, with a frozen corpus, and catches whole-session replay and count rollback
-  today — over acquisition sessions. What is unproven is the *subject change*, not the machinery.
-- **The reviewed-set lock proves the local statement works.** A signed-by-nobody, local "current
-  digests" statement is already consumed by the runtime. What is unproven is the *scope change* —
-  from a project's own lock to an independently pinnable anchor — not the concept.
-- **Independent convergence.** The receipt-protocol author reached the same "needs an external
-  anchor" conclusion without access to the study's internal reasoning, from the protocol side. Two
-  parties, two designs, one boundary.
+- **Study 014's analytic-limitations section and its frozen run.** §4c registers pack-version
+  currency as unmeasurable-by-construction and gives the reasoning; the frozen primary attempt scored
+  39 cells with `e18` absent (removed, not measured) and `e22` present only as an excluded
+  descriptive row. The evidence this RFC draws is the *registered reasoning that the class is not
+  chain-internal*, not a pair of measured cells — an earlier draft of this RFC, and a sentence in the
+  study's own post-run `ANALYSIS.md`, both overstated it as "two registered expected-undetected
+  cells"; that sentence is inaccurate against the pinned matrix and is being corrected in the study's
+  `DEVIATIONS.md`.
+- **The gateway proves the comparison pattern, at its stated strength.** Offline comparison against a
+  pinned, signed snapshot ships, with a frozen corpus — over acquisition sessions, binding counts.
+  What is unproven is every part the currency problem adds: content-bound history, a lifecycle state
+  machine, and an authority for the assertion.
+- **The reviewed-set lock proves the local inventory shape.** A deterministic local digest list with
+  drift refusal is consumed by the runtime today. What is unproven is the *signed, third-party
+  pinnable, versioned-with-history* generalization — which is most of the design.
 
 ## Specification (sketch)
 
-Field names and canonical forms are deliberately not fixed here; whichever repository owns the
-artifact governs its canonicalization, exactly as [RFC 0010](0010-gateway-signing-identity.md)
-defers to the gateway's `SPEC.md`.
+Field names and canonical forms are deliberately not fixed here; the owning repository governs them,
+exactly as [RFC 0010](0010-gateway-signing-identity.md) defers to the gateway's `SPEC.md`.
 
-### 1. What the anchor states (format)
+### 0. Prerequisite: one agreed pack digest (not owned here)
 
-A **currency registry** is an append-only, independently signed log. Each entry binds a pack
-*series* to a *current version* and its content digest — `(seriesId, version, contentHash)` — signed
-by an authority the verifier pins out of band, at a defined position in an append-only order. "Which
-digest is current for this series" is the whole of the claim. The registry states currency; it does
-**not** state that the decision was correct, that the facts were true, or that the action was
-authorized — those remain outside every layer, here as everywhere.
+The whole mechanism rests on chain, manifest, and registry naming the *same* digest for the same
+pack. That agreement does not exist yet: [RFC 0001](0001-pack-manifest.md) leaves the algorithm and
+canonicalization open, and Study 014 uses SHA-256 over exact retained bytes as an expedient, not an
+agreed canonical hash. A currency registry cannot be built portably until either RFC 0001's digest
+scheme is settled, or an algorithm-qualified digest representation (e.g. `sha256:<hex>` over an
+exactly specified byte sequence) is fixed and required of every producer and consumer. This RFC does
+not settle it; it records the dependency as hard.
 
-Two properties are load-bearing and mirror the gateway's registry directly:
+### 1. What the anchor states — a signed event history (format)
 
-- **Monotonicity.** A version may not be walked backward: an entry that supersedes `seriesId` must
-  advance its position, and re-publishing an earlier version at a later position is refused, the way
-  the gateway refuses to re-seal a sealed session. This is what turns rollback (`e22`) from
-  invisible into a detectable regression against the anchor.
-- **Supersession, not just latest.** A series may have several *currently supported* versions, not
-  one — a security-patched `1.4.2` and a `2.0.0` may both be current while `1.4.1` is not. Currency
-  is therefore membership in a current set, not equality with a single maximum. The entry shape must
-  express a supported set and its retirements, or the anchor will force a false "one live version"
-  model onto real policy lifecycles. (This is the sketch's least-settled format decision; see
-  Unresolved.)
+A **currency registry** for a pack series is an append-only, independently signed log of lifecycle
+**events**, not a table of "the current version." Each event is one of:
 
-### 2. What a verifier does with it (consumer step)
+- **add** `(seriesId, version, digest)` — this immutable `(version, digest)` binding enters the
+  supported set;
+- **retire** `(seriesId, version)` — this version leaves the supported set;
+- **reinstate** `(seriesId, version)` — a previously retired version re-enters (an emergency
+  rollback to a known-good release is a legitimate lifecycle move, not an attack).
 
-A verifier already holds, from the chain it is checking, the pack identity and digest the decision
-was made under — Study 014's commitment carries exactly `(packId, packVersion, packDigest)`, and the
-gateway/runtime lock carries the digest natively. The added step is one comparison against a
-**retained snapshot** of the currency registry, pinned and verified under the authority's key
-exactly as the gateway's registry is:
+Each event carries an authenticated **sequence position** and binds the prior head (a hash of the
+canonical prefix), so the log has an append-only order a verifier can check, not merely a set a
+writer asserts. The *current supported set* of a series at any position is the fold of its events up
+to that position — several versions may be current at once (a patched `1.4.2` and a `2.0.0` while
+`1.4.1` is retired), so currency is membership in a set, never equality with a maximum, and version
+strings carry no precedence of their own.
 
-1. Verify the chain as today (nothing changes here).
-2. Extract `(seriesId, version, contentHash)` from the verified chain.
-3. Verify the retained currency-registry snapshot's signature under the pinned authority key.
-4. If the chain's `(version, contentHash)` is not in the series' current set at that snapshot,
-   the decision is **stale or rolled back** — the registered `e18`/`e22` outcome, now caught.
+The security property is a property of the **history**, not of the version numbers: an event may not
+silently rewrite the prefix it commits to, and `(version, digest)` bindings are immutable once added,
+so a "rollback" is detectable as a prefix that disagrees with a later authenticated head — the same
+place the gateway's anchoring gap (RFC 0010 §2) says content-binding must live. What this does *not*
+give is a rule that forbids reinstating a retired version: reinstatement is a signed event like any
+other, so the anchor distinguishes an *authorized* reinstatement from an *unauthorized* prefix
+rewrite by signature and head-consistency, not by version arithmetic.
 
-The step is receipt-protocol-agnostic in principle: it reads only pack identity, which any protocol
-that binds a judgment already carries. Whether it can be *specified* portably or must be restated
-per protocol is open (see Unresolved).
+The registry states currency; it does **not** state that a decision was correct, that facts were
+true, or that an action was authorized.
 
-### 3. Where it lives (cross-project placement)
+### 2. What a verifier does with it — membership at a pinned snapshot (consumer step)
 
-- The **identity** it keys on is [RFC 0001](0001-pack-manifest.md) + Core §5 — no new identity.
-- The **format** is a facet of, or a sibling to, pack discovery ([RFC 0005](0005-pack-discovery.md)),
-  which already spans "specification (format) + product (service)": a discovery index that answers
-  "what versions of this series exist" is one field short of answering "which are current."
-- The **verification pattern** is the gateway's `verify_with_registry` shape, reused — not extended
-  in the gateway. A separate verifier, or a runtime subcommand, consumes the snapshot.
-- The **local precedent** is the reviewed-set lock; a signed, publishable currency registry is that
-  lock's third-party-pinnable generalization.
-- The **consumer step** lands in each protocol that opts in — a JPS-side reference verifier, and,
-  independently, OpenWorkProof or any other receipt protocol, by its own decision.
+A verifier holds, from the chain it is checking, the pack identity and digest the decision was made
+under. The added step is a comparison against a **retained, signed snapshot** of the registry, pinned
+under an authority key the verifier trusts for that series (Unresolved #1):
+
+1. Verify the chain as today (unchanged).
+2. Extract `(seriesId, version, digest)` from the verified chain — where the protocol exposes it
+   (see Compatibility; this is not automatic).
+3. Verify the snapshot's signature and its internal head-consistency under the pinned authority.
+4. Fold the snapshot's events to the series' supported set **at the snapshot's position**. If the
+   chain's `(version, digest)` is not in that set, report exactly **"not current at snapshot"** — no
+   more.
+
+Step 4's verdict is deliberately narrow. It is **not** "this decision was stale when used" and **not**
+"this is the latest state of the world." It is membership against one pinned, dated assertion. A
+legitimate decision made and used while `v1` was current, but audited after `v1` retired, produces the
+same "not current at snapshot" as a genuine stale reuse — distinguishing them needs a trusted ordering
+between the *action's* time and the *registry's* state that neither JPS nor this sketch provides
+(Unresolved #3). And replaying an *older* signed snapshot must itself be refused, which requires the
+verifier to persist a minimum accepted registry head — a rollback rule on the snapshot, not just on
+the log.
+
+### 3. Where each part lands (cross-project placement)
+
+- The **identity** it keys on is Core §5 + [RFC 0001](0001-pack-manifest.md), **referenced, not
+  changed**.
+- The **format, writer, and offline verifier** land in the
+  [reference runtime](https://github.com/Judgment-Pack/judgment-pack-runtime): a currency-registry
+  artifact and a `jpack` verify subcommand, generalizing the reviewed-set lock. Not JPS Core, not a
+  profile, not RFC 0005.
+- The **consumer step** lands in each receipt or execution-verification protocol that opts in, by its
+  own process — OpenWorkProof first, since Study 014's adapter already carries `(packId, packVersion,
+  packDigest)` and runs an offline ceremony the step would extend.
+- The **authority** that signs currency is out of band and unresolved (Unresolved #1).
 
 Nothing in this list is the gateway growing a policy authority, and nothing is JPS Core acquiring a
-registry. The artifact is new; every part it reuses stays where it is.
+registry.
 
 ## Alternatives
 
-- **No change — pin the exact version at the verifier.** The null option, and the correct one for a
-  single relying party trusting a single publisher: the verifier hardcodes the `(version,
-  contentHash)` it will accept and rejects all others. This *does* catch `e18`/`e22` for that
-  verifier — it is a currency registry of size one, held privately. It fails only when verification
-  must be open: when a party who did not configure the pin must still tell current from stale. The
-  argument for writing the anchor down is exactly the gateway's argument in
-  [RFC 0010](0010-gateway-signing-identity.md) — the format is cheapest to agree on before there are
-  many verifiers, not after.
-- **Reuse the reviewed-set lock as-is.** Rejected as insufficient, not wrong: the lock is a local
-  project artifact with no independent signature, so a third party cannot pin it. It is the right
-  data at the wrong scope, and the currency registry is its generalization, not its replacement.
+- **No change — pin the exact version at the verifier.** The null option, correct for a single
+  relying party trusting a single publisher: hardcode the accepted `(version, digest)` and reject all
+  else. This is a currency registry of size one, held privately, and it addresses the stale-version
+  class for that verifier. It fails only when verification must be open — when a party that did not
+  configure the pin must still tell current from retired.
+- **Reuse the reviewed-set lock as-is.** Insufficient, not wrong: local, unsigned for third parties,
+  and carrying no version/series/history. It is precedent for the local inventory shape, not a
+  third-party currency anchor.
 - **Grow the anchor inside the gateway.** Rejected on scope, firmly. The gateway "does not decide
-  anything," and its `CONTRIBUTING` forbids a receipt asserting that its contents are true or that an
-  action was authorized "no matter how convenient." "Which policy version is current" is a decision
-  about policy authority — precisely what the gateway refuses to hold. Study 014 respected that
-  boundary; this RFC does too. The gateway lends its *registry pattern*; it does not host the
-  subject.
+  anything," and its `CONTRIBUTING` forbids a receipt asserting its contents are true or an action
+  authorized "no matter how convenient." "Which pack version is current" is a policy-authority
+  statement — precisely what the gateway refuses to hold. Study 014 respected that boundary; this RFC
+  does too. The gateway lends its snapshot-comparison *pattern*; it does not host the subject.
 - **A full transparency log outright.** Strictly stronger and strictly heavier, the same trade
   [RFC 0010](0010-gateway-signing-identity.md) records for checkpoints: inclusion and consistency
-  proofs at the cost of standing infrastructure. For a cross-party currency oracle this may in fact
-  be the right end state (see Security and privacy); the append-only signed registry is the
-  self-contained step that does not require it on day one.
+  proofs at the cost of standing infrastructure. For a cross-party currency authority it may be the
+  right end state; the append-only signed registry is the self-contained step that does not require
+  it on day one, at the cost that an isolated offline verifier cannot detect a signer's split view.
 
 ## Compatibility
 
-- The consumer step is **additive**. A verifier that does not consult a currency registry keeps
-  exactly today's guarantees and today's blind spot — it simply does not catch `e18`/`e22`, which is
-  the current state. No existing verification result changes.
-- No JPS format changes. The registry keys on existing identity; the chain artifacts a protocol
-  already produces are unchanged.
-- The migration risk is **silent non-consultation**: a verifier that believes it checks currency but
-  holds a stale or absent snapshot gets a false sense of freshness. The registry snapshot must
-  therefore be a pinned, dated, signed input the verifier reports on — not an optional lookup whose
-  absence passes quietly. This mirrors [RFC 0010's](0010-gateway-signing-identity.md) fail-open
-  warning: an unaware or under-provisioned verifier must be made to *reject*, not to pass.
+- The consumer step is **not** purely additive, and the earlier draft's claim that it was is
+  withdrawn. A currency-unaware verifier over unchanged artifacts cannot be made to fail closed by
+  the registry alone; making an unaware verifier *reject* rather than silently skip requires a
+  versioned envelope in the consuming protocol — itself a protocol change, per protocol. What *is*
+  additive is the guarantee for verifiers that do not adopt it: they keep exactly today's behavior and
+  today's blind spot.
+- The step is **not** protocol-agnostic. Core's portable disposition exposes only `kind`,
+  `outcomeId`, `reasons`, and `handoff`; JPS defines no receipt chain; a protocol may bind opaque
+  judgment bytes without surfacing `(seriesId, version, digest)` at all. OpenWorkProof carrying the
+  tuple demonstrates OWP's fit, not a portable interface. Whether one specification can serve multiple
+  protocols, or each must restate the extraction and envelope, is open (Unresolved #5).
+- No JPS format changes. The registry references existing identity; but see §0 — a shared digest is a
+  hard prerequisite, and "already nameable" is not "already portable."
 
 ## Security and privacy
 
-- **The registry is a new trust dependency, pinned out of band.** An impostor currency registry is
-  the same attack class the gateway's `SECURITY.md` and [RFC 0010](0010-gateway-signing-identity.md)
-  already name: internal consistency proving itself. The authority key must be pinned exactly as the
-  gateway's public key must be; the anchor relocates the out-of-band problem to the currency
-  authority rather than removing it.
-- **Who signs is the crux, and it is a policy-authority question, not a crypto one.** If the pack
-  publisher signs its own currency, the anchor detects third-party rollback but trusts the publisher
-  not to lie about its own supersessions; a neutral log signing over what publishers assert detects
-  publisher equivocation at the cost of the infrastructure the transparency-log alternative names.
-  This is the single largest unresolved question and is stated as one.
-- **Metadata disclosure.** A currency registry reveals a policy series' version cadence and
-  retirements to anyone who reads it — activity metadata about how often a policy changes. Usually
-  benign, occasionally not; worth one sentence in guidance, not a blocker.
-- **The freshness floor.** A currency check is only as current as the retained snapshot. A verifier
-  offline against a month-old snapshot cannot detect a supersession that happened last week — it has
-  simply moved the staleness from the decision to the anchor. This does not defeat the mechanism
-  (rollback to a version retired *before* the snapshot is still caught), but it means "fully offline"
-  and "detects staleness in real time" cannot both be true. See Unresolved.
+- **The registry is a new trust dependency, pinned out of band.** An impostor registry is the same
+  attack class the gateway's `SECURITY.md` and [RFC 0010](0010-gateway-signing-identity.md) name:
+  internal consistency proving itself. The authority key is pinned exactly as the gateway's public key
+  is; the anchor relocates the out-of-band problem to the currency authority.
+- **Who signs is the crux, and it is a policy-authority question.** Core §10 forbids treating a URL or
+  publisher label as authenticity, so an absolute-URI `seriesId` supplies syntax, not an authenticated
+  owner: a verifier pinning a key must be told, out of band, that the key is authoritative *for that
+  series*. Publisher-signing and neutral-log models need different artifacts — series-to-key
+  delegation, rotation, and revocation for the first; inclusion proofs that attest inclusion, not
+  currency authority, for the second, which cannot alone detect publisher equivocation for an isolated
+  offline verifier. No model is chosen (Unresolved #1).
+- **The freshness floor.** A currency check is only as current as the pinned snapshot; an offline
+  verifier against a month-old snapshot cannot see last week's retirement. This does not defeat the
+  mechanism — a version retired *before* the snapshot is still caught — but "fully offline" and
+  "detects staleness in real time" cannot both hold, and the honest verdict is membership at the
+  snapshot, not real-time staleness (Unresolved #3).
+- **Resource risk of an unbounded append-only history.** A registry and its snapshots grow without
+  bound, and a verifier folds an event history it did not author. Without limits, an oversized
+  snapshot, an oversized series, or an oversized supported set is a denial-of-verification vector.
+  Implementation limits (maximum snapshot bytes, events per series, current-set size) and fail-closed
+  behavior above them are part of the format work, not an afterthought.
 
 ## Conformance
 
-Cases would follow the gateway's frozen-corpus style, over currency-registry vectors: positive (a
-chain whose `(version, contentHash)` is in the series' current set at the snapshot verifies), negative
-(a version retired at or before the snapshot fails; a registry entry signed under an unpinned
-authority fails; a snapshot whose signature does not verify fails closed), boundary (a version
-retired at exactly the snapshot position; a series with a multi-version current set, one member
-present and one retired), adversarial (a rolled-back entry re-publishing an earlier version at a
-later position, which the monotonicity rule must reject; a currency snapshot presented to a
-currency-unaware verifier, which must fail closed under an explicit envelope rather than silently
-pass; a chain whose pack digest matches a *retired* version whose bytes still validate structurally —
-the `e22` vector, now caught by the anchor rather than missed).
+Cases would follow the gateway's frozen-corpus style, over currency-registry vectors:
+
+- **Positive** — a chain whose `(version, digest)` is in the series' supported set at the snapshot
+  verifies; a snapshot with a valid head chain and authorized events verifies.
+- **Negative** — a version retired at or before the snapshot fails "not current at snapshot"; an event
+  signed under an unpinned authority fails; a snapshot whose signature or head-consistency does not
+  verify fails closed.
+- **Boundary** — a version retired at exactly the snapshot position; a series whose supported set has
+  two members, one present in the chain and one retired; a snapshot at series genesis; a snapshot,
+  series, or supported set at the registered size limit, and one past it (which must fail closed).
+- **Adversarial** — a prefix rewrite: a later head that disagrees with an earlier one under the same
+  authority, which head-consistency must reject; a replayed *older* signed snapshot presented in place
+  of a newer one, which the verifier's persisted-minimum-head rule must reject; an *unauthorized*
+  reinstatement (a reinstate event not under the series authority), which must fail while an authorized
+  reinstatement passes — the case that separates a legitimate emergency rollback from an attack; a
+  currency-unaware verifier handed a snapshot, which must fail closed only under an explicit envelope
+  (and does not, without one — see Compatibility).
 
 ## Implementation
 
-Two independent implementations are plausible and none exists; this RFC's own bar is unmet.
+Two independent implementations are plausible and none exists; this RFC's own bar is unmet, and §0's
+prerequisite is unmet too.
 
-1. A **currency-registry writer and offline verifier**, stdlib-shaped, reusing the gateway's
-   `verify_with_registry` structure over the new entry type. The reviewed-set lock supplies the
-   local writer's data model; the gateway supplies the offline-check pattern. The clean-room caveat
-   from the project's protocol applies: a second implementation built by this project evidences
-   precision, not interoperability.
+1. A **currency-registry writer and offline verifier** in the reference runtime, reusing the gateway's
+   snapshot-comparison structure over the new event type, with the reviewed-set lock as the local
+   data-model precedent. The clean-room caveat applies: a second implementation built by this project
+   evidences precision, not interoperability.
 2. A **consumer step in an independent receipt protocol** — OpenWorkProof is the natural first, since
-   Study 014 already carries `(packId, packVersion, packDigest)` in its commitment and its adapter
-   verifier already runs an offline ceremony the currency check would slot into as one more step.
-   That it would be built by the protocol's own author, by its own process, is the point of the
-   cross-project provision, and the strongest available evidence that the anchor interoperates rather
-   than that one project agrees with itself.
-
-A JPS-side reference verifier consuming a currency snapshot demonstrates the check but, built here,
-counts toward interoperability the way a second in-house implementation does — as precision, not
-independence.
+   Study 014 already carries the tuple and runs an offline ceremony the step would slot into. Built by
+   the protocol's own author, by its own process, it is the strongest available evidence that the
+   anchor interoperates rather than that one project agrees with itself.
 
 ## Unresolved questions
 
-1. **Who signs currency?** The publisher (detects third-party rollback, trusts the publisher about
-   its own supersessions) or a neutral log (detects publisher equivocation, needs infrastructure).
-   No position is taken; this is the question the whole record exists to make askable, and it is a
-   governance question wearing a format's clothes.
-2. **Latest, or current set?** Real policy series support several versions at once. An anchor that
-   models "the latest" is simpler and wrong for security-patch backports; an anchor that models a
-   current *set* with retirements is right and multiplies the verifier's state and the adversarial
-   surface. The sketch leans to the set and does not fix its shape.
-3. **The freshness floor.** A currency check needs a notion of *now* that JPS and the gateway both
-   deliberately refuse to hold — the gateway signs `sealedAt` and never validates it. An offline
-   snapshot pushes "now" to snapshot time. Whether a currency anchor can stay honestly offline, or
-   whether real-time staleness detection is irreducibly an online property (and therefore outside the
-   line's offline-first posture), is the deepest open question, and the honest answer may be that
-   offline currency detects *rollback below the snapshot* but not *staleness above it*.
-4. **One RFC or a facet of 0005?** Pack discovery already answers "what versions exist." Currency is
-   one field and one signature away. Whether this is [RFC 0005's](0005-pack-discovery.md) natural
-   extension or a sibling record is undecided, and the answer decides where the format eventually
-   lands.
-5. **Portable consumer step, or per-protocol?** The comparison reads only pack identity, which
-   suggests a portable specification; but each receipt protocol expresses that identity in its own
-   binding, which suggests a per-protocol restatement. Whether one normative "how to consult a
-   currency anchor" can serve OpenWorkProof, a JPS-side verifier, and the next protocol is open.
-6. **Whether this record should later live beside its implementation.** Like
-   [RFC 0010](0010-gateway-signing-identity.md), if any part of this is built, the design record may
-   belong in the repository that owns the artifact — pack discovery's, a currency-registry
-   repository's, or the runtime's — rather than here. Either answer is a reasonable outcome, not a
-   failure of this RFC.
+1. **Who signs currency, and how is authority for a series established?** Publisher (needs
+   series-to-key delegation, rotation, revocation; trusts the publisher about its own retirements) or
+   neutral log (needs infrastructure; attests inclusion, not currency authority). Core §10 forbids
+   inferring authority from the series URL, so the trust mapping is out-of-band and unspecified here.
+   This is the largest open question and is a governance question wearing a format's clothes.
+2. **What is the event/lifecycle state machine, exactly?** add/retire/reinstate is a sketch; the exact
+   legal transitions, whether a digest can ever rebind, and how forks or parallel supported lines are
+   modeled are unfixed. The adversarial "unauthorized reinstatement vs prefix rewrite" case is the one
+   that tests it.
+3. **The freshness floor.** A currency check needs a notion of *now* that JPS and the gateway
+   deliberately refuse to hold. An offline snapshot pushes "now" to snapshot time, so offline currency
+   detects *retirement below the snapshot* but not *staleness above it*, and cannot by itself order the
+   action against the registry state. Whether real-time staleness is irreducibly online — and
+   therefore outside the line's offline-first posture — is open, and the honest answer may be yes.
+4. **One RFC, a runtime artifact, or standards-track pack discovery?** [RFC 0005](0005-pack-discovery.md)
+   answers "what versions exist"; currency adds "which are in force," an event history and a signature
+   beyond a catalog index. Whether the format eventually belongs in the runtime, in a dedicated
+   repository, or as standards-track discovery work is undecided; it is **not** proposed as an RFC 0005
+   amendment here.
+5. **Portable consumer step, or per-protocol?** The extraction reads pack identity, which suggests a
+   portable spec; but each protocol expresses that identity in its own binding and needs its own
+   fail-closed envelope, which suggests per-protocol restatement. Whether one "how to consult a
+   currency anchor" can serve OpenWorkProof, a runtime verifier, and the next protocol is open.
+6. **The authorization-contract sibling.** Pack-version currency does not touch Study 014's `e22`
+   class — a same-pack decision re-minted under a rolled-back authorization contract. Whether that
+   deserves its own anchor, owned by the receipt protocol rather than by pack identity, is a separate
+   question this RFC deliberately does not open.
+7. **Whether this record should later live beside its implementation.** Like
+   [RFC 0010](0010-gateway-signing-identity.md), if any part is built, the design record may belong in
+   the repository that owns the artifact. Either answer is a reasonable outcome, not a failure of this
+   RFC.
