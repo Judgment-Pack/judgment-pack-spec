@@ -513,6 +513,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0011-judgment-currency-anchor.md",
+        PurePosixPath("rfcs/0011-judgment-currency-anchor/index.html"),
+        "RFC 0011: A currency anchor for pack versions",
+        "Draft proposal for detecting stale and retired pack versions across the receipt boundary — a signed, offline-verifiable currency registry, every part landing outside JPS.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",

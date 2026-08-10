@@ -39,6 +39,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0008](0008-bounded-collection-quantifiers.md) | Bounded collection quantifiers for conditions | Draft | Specification (condition schema + semantics) — Core or profile undecided |
 | [0009](0009-interim-review-regime.md) | The interim review regime | Accepted | Process (governance) |
 | [0010](0010-gateway-signing-identity.md) | The gateway signing identity — custody, rotation, and anchoring | Draft | Research line (gateway repository: code, `SPEC.md`, guidance, corpus) — outside the specification |
+| [0011](0011-judgment-currency-anchor.md) | A currency anchor for pack versions — detecting stale and retired policy | Draft | Research line (cross-project artifact: a runtime currency registry + verifier, consumer protocols) — outside the specification |
 
 The "Belongs to" column records where each proposal would land if accepted. A format that
 independent tools must agree on is a candidate for the specification. An algorithm or engine belongs
