@@ -120,6 +120,18 @@ today. The derivation-rule evidence is also bounded: a later probe showed that t
 short-circuiting rule happened to read is not necessarily a sufficient policy basis. No portable
 repair has been selected.
 
+### Whether other systems respect a judgment is measured, not assumed
+
+A disposition is data, not an authorization or an executed action, so two questions live
+entirely downstream of the specification: does the application that acts on a judgment
+behave consistently with it, and can a third party later prove which judgment authorized
+which executed action? Neither is answerable by the specification, and neither is
+proposed as part of JPS. Both are studied empirically — including against independently
+developed regression and receipt-verification systems — in the preregistered
+[evaluator experiments](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/main/studies/README.md),
+whose ceiling is the same one stated above: they establish binding and lineage, never
+that a policy or a fact is true.
+
 ## The point of labeling
 
 A standard earns trust by shipping a small, testable core and being honest about what is still a
