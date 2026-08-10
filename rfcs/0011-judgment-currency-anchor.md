@@ -277,6 +277,12 @@ registry.
   mechanism — a version retired *before* the snapshot is still caught — but "fully offline" and
   "detects staleness in real time" cannot both hold, and the honest verdict is membership at the
   snapshot, not real-time staleness (Unresolved #3).
+- **Metadata disclosure.** A signed lifecycle history reveals, to anyone who can read a snapshot, a
+  policy series' version cadence and its retire/reinstate activity — how often a policy changes, and
+  when a version was pulled or brought back. That is activity metadata, not judgment content, and it
+  is usually benign; occasionally it is not (a retirement can telegraph a discovered defect before an
+  operator is ready to say so). It warrants a sentence in operator guidance and an access decision on
+  who may read a series' currency, not a format change.
 - **Resource risk of an unbounded append-only history.** A registry and its snapshots grow without
   bound, and a verifier folds an event history it did not author. Without limits, an oversized
   snapshot, an oversized series, or an oversized supported set is a denial-of-verification vector.
