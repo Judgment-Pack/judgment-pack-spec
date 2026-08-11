@@ -206,6 +206,28 @@ between the *action's* time and the *registry's* state that neither JPS nor this
 verifier to persist a minimum accepted registry head — a rollback rule on the snapshot, not just on
 the log.
 
+### 2a. The verdict is an input to a transition rule, not a transition rule
+
+Membership at a snapshot answers *which versions an authority asserted in force at a position*. It
+does not answer *whether a particular decision may still be relied upon*. That second question is a
+**transition rule**, and it belongs to the relying organization — not to the registry, and not to the
+consumer step.
+
+The separation is load-bearing because reasonable organizations differ on the same history. Given a
+decision made under `v1` while `v1` was current, and a later position at which `v1` is retired, one
+organization may hold that every unused `v1` decision expires at the retirement event; another may
+allow a grace window; another may grandfather decisions created while `v1` was current until they
+expire on their own terms. None of these is more correct than the others — they are risk postures,
+and they are the relying party's to hold.
+
+A registry that encoded any one of them would be shipping one organization's risk posture as a format
+constant, and a consumer step that reported "this decision is void" rather than "this
+`(version, digest)` is not in the supported set at this snapshot" would be doing the same in the
+verifier. So: the format defined here carries no expiry, grace, or grandfathering semantics; §2 step
+4's verdict stays exactly as narrow as it is; and what that fact *means* for a given decision is
+computed elsewhere, by whoever bears the risk. This is a scope statement, not a mechanism — see
+Unresolved #10 for what it leaves open, and #11 for the evidence such a rule would need.
+
 ### 3. Where each part lands (cross-project placement)
 
 - The **identity** it keys on is Core §5 + [RFC 0001](0001-pack-manifest.md), **referenced, not
@@ -390,3 +412,37 @@ prerequisite is unmet too.
    registers the fresh-verifier split view as expected-undetected cells and the persisted-head
    sequential case as a refusal; it establishes nothing until its primary attempt publishes, and
    is cited as a measurement plan, not evidence.)
+10. **Where do transition rules live, and how are they made auditable?** §2a states what the registry
+   and the consumer step must *not* decide; it does not say where the deciding happens. Open:
+   whether a transition rule should be expressible portably at all, or whether it is irreducibly
+   local to each relying organization; whether the registry may carry a **non-binding** hint (an
+   authority's recommended transition alongside a retirement) without that hint hardening into a
+   de-facto rule that relying parties defer to unexamined — the failure mode this separation exists
+   to prevent; and how a relying party's own rule is itself recorded and audited, since a transition
+   applied inconsistently is invisible to every mechanism sketched here. Note the asymmetry: a
+   verifier that reports only membership can serve every transition rule, while a verifier that
+   reports a verdict can serve only one.
+11. **Would consuming artifacts cite the registry state they observed, and what would that buy?**
+   A construction raised publicly on the reference implementation's announcement thread
+   ([dev.to thread](https://dev.to/kikashy/the-receipt-was-valid-the-policy-was-retired-164a)):
+   a decision — and, separately, each execution acting on it — records the registry **head** it
+   validated against, inside the consuming protocol's own signed artifacts. An auditor could then
+   state a two-sided fact ("created against a head where `v1` was current; not current at the head I
+   trust now") instead of the one-sided membership verdict, which is precisely the input a
+   transition rule (#10) needs and cannot otherwise get. It also gives an honest producer fail-fast:
+   minting against a head where the version is already retired fails at mint time rather than at
+   audit. What it does **not** buy is ordering. A cited head attests the state an artifact *claims*
+   to have relied on, never when the artifact was created: a party able to coherently re-mint can
+   cite an older head deliberately, and a currency field inside an artifact its author controls
+   cannot establish that artifact's currency (the class
+   [Study 014](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/014-openworkproof-binding)
+   registered as unmeasurable from chain-internal evidence). The analogy is a build that cites a
+   commit: the commit can be shown to exist and the tree reconstructed at it, while the claim that
+   the build preceded some later commit is not established by the citation. Under a single operator
+   the citation also inherits the split view of #9 — the cited head is only as unambiguous as the
+   history it names. So the honest reading is: better evidence for #10, no progress on #3. Open:
+   whether the citation belongs in each consuming protocol's artifacts (it could land nowhere else —
+   this RFC defines no receipt), what a verifier is entitled to conclude from one, and whether the
+   ordering gap is closable at all without a trusted time source. The thread remark is motivating
+   context, not evidence: it establishes that the question was asked and by whom, nothing about the
+   construction's merit.
