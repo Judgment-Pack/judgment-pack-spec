@@ -525,7 +525,7 @@ PAGES = (
         "rfcs/0012-witness-contract.md",
         PurePosixPath("rfcs/0012-witness-contract/index.html"),
         "RFC 0012: What a witness contract would have to specify",
-        "Draft proposal enumerating the clauses a signed-history comparison depends on - attribution, delivery, enforcement, coverage, recency, non-collusion - and what a measured prototype does and does not achieve for each; every part landing outside JPS.",
+        "Draft proposal enumerating candidate clauses for a signed-history comparison - attribution, delivery, enforcement, coverage, retention, recency, non-collusion - with what one measured prototype did and did not achieve for each; every part landing outside JPS, in the reference runtime.",
         "proposals",
         "Draft proposal",
         source_ref="main",
