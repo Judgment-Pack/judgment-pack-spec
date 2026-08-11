@@ -182,7 +182,7 @@ rule.
 
 ### 7. Non-collusion — where mechanism ends and governance begins
 
-A witness that signs whatever each audience is shown satisfies every clause above. Study 017's
+A witness that signs whatever each audience is shown satisfies every other clause Study 017 implemented — retention (clause 5) is not among them, being unmeasured there. Study 017's
 exhibit is a pair in which one trusted key records contradictory heads at the same position for two
 audiences; each run is internally valid, satisfies its enforcement floor, and passes. That result
 supports a bounded statement: **a single-key, single-view comparison of the kind measured
@@ -266,8 +266,10 @@ a verdict string alone:
 - **Recency** — identical bytes under both policies, with opposite registered outcomes.
 - **Non-collusion** — one trusted key recording contradictory heads for two audiences: each side
   passes; and the same construction with one additional trusted conflicting record delivered.
-- **Boundary and resource** — record size, set size, and verification work at each registered limit
-  and one past it, each failing closed.
+- **Boundary and resource** — record size, set size, and verification work **at** each registered
+  limit (the ordinary expected outcome: at-limit input is valid input) and **one past** it (failing
+  closed), matching the inclusive reading Security states and Study 017's own at-cap and
+  one-past-cap vectors.
 
 ## Implementation
 
