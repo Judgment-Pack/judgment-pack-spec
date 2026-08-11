@@ -522,6 +522,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0012-witness-contract.md",
+        PurePosixPath("rfcs/0012-witness-contract/index.html"),
+        "RFC 0012: What a witness contract would have to specify",
+        "Draft proposal enumerating candidate clauses for a signed-history comparison - attribution, delivery, enforcement, coverage, retention, recency, non-collusion - with what one measured prototype did and did not achieve for each; every part landing outside JPS, in the reference runtime.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
