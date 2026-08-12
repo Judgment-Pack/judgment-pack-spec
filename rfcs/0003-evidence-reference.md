@@ -83,12 +83,19 @@ not accepted. The reason for the divergence is exactly the property the caveat n
 HMAC requires the key that mints it, so *an independent party can check this* was never true of
 version 1. Both statements therefore stand, of different artifacts — the acquisition proxy is the
 research artifact and keeps version 1; the gateway owns the format that gets deployed and
-independently implemented, and its receipts are the asymmetric signatures §13 would contemplate.
-See the gateway's `SPEC.md` §1 and §5 for the current contract, which is where a reader should go
-rather than to this passage.
+independently implemented, and its receipts are asymmetric signatures. Note that §13 selects no
+scheme: it lists "content identity, canonicalization, and signatures" as an unresolved question
+and prefers neither symmetric nor asymmetric cryptography. The struck sentence attributed a
+preference to §13 that §13 does not express, and this amendment does not inherit it — gateway
+version 2 is an asymmetric-signature *example bearing on* that open question, not the answer to
+it. See the gateway's `SPEC.md` §1 and §5 for the current contract, which is where a reader
+should go rather than to this passage.
 
-It is one worked, product-side, single-author example bearing on the "content identity,
-canonicalization, and signatures" §13 defers; it changes nothing normative.
+The acquisition proxy and admission gate are one worked, product-side, **single-author** example
+bearing on the "content identity, canonicalization, and signatures" §13 defers. The gateway
+carries a different bound and it is not this one: its format has a clean-room second
+implementation, so it is not single-author — which is why the two are named separately above
+rather than sharing an evidence claim. Neither changes anything normative.
 
 ## Specification (sketch)
 
