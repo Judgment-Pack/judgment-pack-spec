@@ -140,6 +140,12 @@ rejects everything else (see Alternatives).
 - **The reviewed-set lock proves the local inventory shape.** A deterministic local digest list with
   drift refusal is consumed by the runtime today. What is unproven is the *signed, third-party
   pinnable, versioned-with-history* generalization — which is most of the design.
+- **The study line exercised one registered schema, at study-internal strength.** Studies 016–018
+  (see Implementation) built a registry writer and offline verifier for one series under
+  study-minted keys, and each primary attempt published with R1 holding. What is unproven is
+  unchanged in kind: the portable format §0 waits on, Unresolved #1's authority governance, any
+  independent implementation, and interoperability — which the studies' own registrations
+  expressly disclaim.
 
 ## Specification (sketch)
 
@@ -448,9 +454,11 @@ and exercised offline, and it satisfies neither path below.
    [published study](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/018-transition-rules)
    has since measured §2a's separation: one registry verdict, over byte-identical commitment,
    snapshot, and trust configuration, supported four configured rule evaluations yielding three
-   distinct outcomes — the rule, not the evidence, determines usability — and a duration-measured
-   window is unavailable offline, exactly #3's gap. The study takes no position on where a rule is
-   sourced, constrained, or audited; this question stays open as written.)
+   distinct outcomes — the rule, not the evidence, determines usability. Its duration-window cell
+   returned `transition-unavailable` in that no-clock apparatus — exhibiting #3's gap there,
+   without deciding whether another offline design could verify a retained trusted ordering. The
+   study takes no position on where a rule is sourced, constrained, or audited; this question
+   stays open as written.)
 11. **Would consuming artifacts cite the registry state they observed, and what would that be good
    for?** A construction raised publicly by a reader (`@circuit`) on the reference implementation's
    announcement thread
@@ -496,7 +504,8 @@ and exercised offline, and it satisfies neither path below.
    measured, within its registered cells, what a citation buys: a stated transition rule computes
    usability deterministically from retained artifacts; a rule that reads no citation is
    unaffected by every citation finding; and the backdated citation confirmed as registered
-   expected-undetected — honest reliance and backdated reliance are byte-identical evidence, and
-   signing the citation changes nothing, because the party that would sign is the party that
-   chooses what to cite. The ordering gap remains #3's. Study-internal; no interoperability
-   claim.)
+   expected-undetected — honest reliance and backdated reliance are byte-identical evidence. The
+   citation is unsigned in that apparatus on purpose; that author-signing would not close the gap
+   — because the signing party chooses what to cite — is the study's registered inference from
+   its full-keys attacker model, not an executed comparison. The ordering gap remains #3's.
+   Study-internal; no interoperability claim.)
