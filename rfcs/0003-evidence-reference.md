@@ -62,19 +62,40 @@ by this project, so this is evidence of encodability and cross-implementation ag
 surface, not the independent third-party validation the evidence bar ultimately requires, and not a
 claim that the contract is complete.
 
-Beside the derivation rule, the line built the two layers this RFC deliberately leaves to products —
-an attestation component that content-addresses an acquired result and issues an HMAC receipt over
-its canonical form under a *caller-configured attestation authority*, and an admission gate that
-makes a pack's facts be *exactly* the derivation over those attested bytes. One bearing on the
-reference contract: a resolved value can carry byte-lineage back to an *attestation trust root*
-— that the admitted bytes are the ones that trust root attested, unaltered — *without the reference
+Beside the derivation rule, the line built the two layers this RFC deliberately leaves to products
+— an attestation component that content-addresses an acquired result and issues a receipt over its
+canonical form under a *caller-configured attestation authority* — **receipt version 1, a keyed
+HMAC**, which the acquisition proxy still specifies and deliberately keeps — and an admission gate
+that makes a pack's facts be *exactly* the derivation over those attested bytes. One bearing on the
+reference contract: a resolved value can carry byte-lineage back to an *attestation trust root* —
+that the admitted bytes are the ones that trust root attested, unaltered — *without the reference
 becoming a fetch instruction*; the reference stays a pure identifier, and the attestation and
 derivation happen in the resolving layer, around the pack, never inside it. The bounds are load-
-bearing: this proves lineage to the trust root over a canonical result, **not** that a genuine named
-source returned those bytes (the recorded server identity is an unauthenticated assertion), and an
-HMAC receipt is a keyed integrity proof, not the asymmetric signature Core §13's "signatures" would
-contemplate. It is one worked, product-side, single-author example bearing on the "content identity,
-canonicalization, and signatures" §13 defers; it changes nothing normative.
+bearing: this proves lineage to the trust root over a canonical result, **not** that a genuine
+named source returned those bytes (the recorded server identity is an unauthenticated assertion),
+and ~~an HMAC receipt is a keyed integrity proof, not the asymmetric signature Core §13's
+"signatures" would contemplate~~ — **amended 2026-08-12: that caveat described receipt version 1
+and is now superseded for the deployed path.** The
+[gateway](https://github.com/Judgment-Pack/judgment-pack-gateway) is normative for **receipt
+version 2**: receipts and seals are **Ed25519 signatures** rather than HMACs, the chain link is
+`prevSignature`, and a receipt carries a `keyId`. A version 1 receipt does not verify there and is
+not accepted. The reason for the divergence is exactly the property the caveat named: verifying an
+HMAC requires the key that mints it, so *an independent party can check this* was never true of
+version 1. Both statements therefore stand, of different artifacts — the acquisition proxy is the
+research artifact and keeps version 1; the gateway owns the format that gets deployed and
+independently implemented, and its receipts are asymmetric signatures. Note that §13 selects no
+scheme: it lists "content identity, canonicalization, and signatures" as an unresolved question
+and prefers neither symmetric nor asymmetric cryptography. The struck sentence attributed a
+preference to §13 that §13 does not express, and this amendment does not inherit it — gateway
+version 2 is an asymmetric-signature *example bearing on* that open question, not the answer to
+it. See the gateway's `SPEC.md` §1 and §5 for the current contract, which is where a reader
+should go rather than to this passage.
+
+The acquisition proxy and admission gate are one worked, product-side, **single-author** example
+bearing on the "content identity, canonicalization, and signatures" §13 defers. The gateway
+carries a different bound and it is not this one: its format has a clean-room second
+implementation, so it is not single-author — which is why the two are named separately above
+rather than sharing an evidence claim. Neither changes anything normative.
 
 ## Specification (sketch)
 
