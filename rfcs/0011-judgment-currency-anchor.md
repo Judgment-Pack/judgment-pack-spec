@@ -338,8 +338,18 @@ Cases would follow the gateway's frozen-corpus style, over currency-registry vec
 
 ## Implementation
 
-Two independent implementations are plausible and none exists; this RFC's own bar is unmet, and §0's
-prerequisite is unmet too.
+Two independent implementations are plausible and neither exists; this RFC's own bar is unmet, and
+§0's prerequisite is unmet too. What exists since this record first merged is narrower than either:
+a study-internal registry writer and offline verifier, built for
+[Study 016](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/016-policy-currency-anchor)
+and re-consumed digest-pinned and unmodified by
+[Study 017](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/017-witnessed-currency)
+and
+[Study 018](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/018-transition-rules),
+each primary attempt published with R1 holding. That is a measured prototype inside a study harness
+that expressly disclaims format-proposal and interoperability status
+([RFC 0012](0012-witness-contract.md), Evidence): it evidences that §1's sketch can be implemented
+and exercised offline, and it satisfies neither path below.
 
 1. A **currency-registry writer and offline verifier** in the reference runtime, reusing the gateway's
    snapshot-comparison structure over the new event type, with the reviewed-set lock as the local
@@ -412,11 +422,16 @@ prerequisite is unmet too.
    non-interchangeable, and whether anchoring is worth adopting is open there. Whether any single
    witnessing mechanism could serve both records' different threat models — or each needs its
    own — is an open question for whichever repository would own such a mechanism; nothing here
-   proposes one. (A frozen — and **not yet run** —
-   [preregistration in the interoperability studies](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/016-policy-currency-anchor)
-   registers the fresh-verifier split view as expected-undetected cells and the persisted-head
-   sequential case as a refusal; it establishes nothing until its primary attempt publishes, and
-   is cited as a measurement plan, not evidence.)
+   proposes one. (That
+   [preregistration's primary attempt has published](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/016-policy-currency-anchor)
+   and landed as registered: the fresh-verifier split view confirmed expected-undetected — each
+   run internally correct, the contradiction living only across the pair — while the stateful
+   sibling, a verifier provisioned with the other view's head, refused by prefix containment, so
+   the registered silence is exactly statelessness. A follow-up study then measured a minimal
+   witness comparison over the same frozen verifier;
+   [RFC 0012](0012-witness-contract.md) records the candidate clauses a witness contract would
+   have to specify and the standing of that evidence — locked replication plus a reviewer
+   holdout, study-internal throughout, no interoperability claim.)
 10. **Where is a transition rule sourced, evaluated, and audited?** §2a states that this registry
    and §2's membership primitive do not determine continued reliance; it deliberately does not say
    where that determination happens. Open: whether a transition rule can be expressed portably at
@@ -429,7 +444,13 @@ prerequisite is unmet too.
    relying party's own rule is recorded and audited, since a rule applied inconsistently is
    invisible to every mechanism sketched here. What a membership-only report avoids is hard-coding
    one rule into the primitive; what a derived usability result would additionally require — the
-   ordering of #3 among it — is exactly what this question asks.
+   ordering of #3 among it — is exactly what this question asks. (A
+   [published study](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/018-transition-rules)
+   has since measured §2a's separation: one registry verdict, over byte-identical commitment,
+   snapshot, and trust configuration, supported four configured rule evaluations yielding three
+   distinct outcomes — the rule, not the evidence, determines usability — and a duration-measured
+   window is unavailable offline, exactly #3's gap. The study takes no position on where a rule is
+   sourced, constrained, or audited; this question stays open as written.)
 11. **Would consuming artifacts cite the registry state they observed, and what would that be good
    for?** A construction raised publicly by a reader (`@circuit`) on the reference implementation's
    announcement thread
@@ -469,3 +490,13 @@ prerequisite is unmet too.
    identifier embedded in every signed decision and execution artifact reveals which view of a
    series an actor observed, correlates artifacts that share a head, and carries that linkage to
    every audience the artifacts reach, outliving any access control on the registry itself.
+
+   (The same
+   [study](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/018-transition-rules)
+   measured, within its registered cells, what a citation buys: a stated transition rule computes
+   usability deterministically from retained artifacts; a rule that reads no citation is
+   unaffected by every citation finding; and the backdated citation confirmed as registered
+   expected-undetected — honest reliance and backdated reliance are byte-identical evidence, and
+   signing the citation changes nothing, because the party that would sign is the party that
+   chooses what to cite. The ordering gap remains #3's. Study-internal; no interoperability
+   claim.)
