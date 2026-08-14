@@ -33,11 +33,39 @@ A manifest is a separate JSON document referencing one pack `(id, version)`. Can
 
 - `packId`, `packVersion`, `specVersion`;
 - `decisionQuestion` (copied for discovery, not authoritative);
-- `contentHash` (digest of the canonical pack bytes);
+- `contentHash` (digest of the exact pack bytes — see *Digest* below);
 - optional `keywords`, `domainHints`, `supersedes`.
 
 The manifest is descriptive only. It never overrides the pack, and a consumer that disagrees with
 the manifest trusts the pack body and the digest.
+
+### Digest
+
+`contentHash` is the string `sha256:` followed by the 64 lowercase hex characters of SHA-256 over
+the exact pack bytes as retained or served. There is no canonicalization rule: no whitespace or
+member-order normalization, no encoding repair, no semantic equivalence. Byte-different packs are
+hashed as distinct inputs and, absent a SHA-256 collision, carry different digests even when every
+conforming evaluator maps them to identical dispositions. Identity-by-exact-bytes is this RFC's
+manifest-layer choice: semantic identity is not a manifest concept, and Core makes no
+pack-content-identity claim of its own — §8.3's portability claim is about canonicalized
+dispositions, not pack bytes.
+
+The algorithm prefix is the agility mechanism. A future algorithm arrives as a new prefix over the
+same exact-bytes rule; an unprefixed value never exists, and a consumer must refuse an
+unrecognized prefix rather than fall back. Digest comparison is exact string equality.
+
+This resolves, within the proposal, the question this RFC previously left open ("which digest
+algorithm and canonicalization rule?") the way every shipped producer already behaves: the
+reference runtime's reviewed-set lock records `sha256:<hex>` over the exact pack bytes it reads
+and pins, the gateway's receipts record `sha256:` plus 64 lowercase hex over retained artifact
+bytes, and among the published studies, Study 014 registered prefixed SHA-256 over retained pack
+bytes and Study 016 carried the form into its registry, naming it an expedient pending this rule.
+A resolved question inside a Draft is still a proposal: acceptance and adoption remain pending
+(RFC 0000), and the Implementation bar below — two independent implementations emitting and
+verifying manifests offline and agreeing on the negative cases — remains unmet. The section adds
+no identity notion to Core: §13's open bullet (content identity, canonicalization, and signatures
+as Core concepts) stays open; the manifest digest names bytes at the interchange layer, nothing
+more.
 
 ## Alternatives
 
@@ -71,6 +99,5 @@ same accept/reject decision on the negative cases.
 ## Unresolved questions
 
 - Is the manifest one-to-one with a pack, or can it describe a set?
-- Which digest algorithm and canonicalization rule?
 - Does discovery ([RFC 0005](0005-pack-discovery.md)) consume manifests directly, or a derived
   index?

@@ -92,14 +92,15 @@ converged.
 What is worth recording is that JPS already owns the *identity* such an anchor would key on, and
 nothing more:
 
-- **Identity and version exist; their digest does not, yet.** Core §5 gives a pack a series identity
-  (an absolute-URI `id`) and a `MAJOR.MINOR.PATCH` `version`; §11 makes a published `(id, version)`
-  immutable only at SHOULD strength, and defines no precedence, supersession, or retirement over
-  versions. [RFC 0001](0001-pack-manifest.md) *proposes* a `contentHash` but is Draft and leaves both
-  the digest algorithm and the canonicalization unresolved; Core §13 lists content identity,
-  canonicalization, and signatures as open. So "this series, this version, this digest" is
-  *nameable*, but the digest it names is not yet an agreed portable value — a prerequisite, not a
-  given (see Specification §0).
+- **Identity and version exist; their digest now has a specified candidate.** Core §§4–5 give a
+  pack a series identity (an absolute-URI `id`) and a `MAJOR.MINOR.PATCH` `version`; §11 makes a
+  published `(id, version)` immutable only at SHOULD strength, and defines no precedence,
+  supersession, or retirement over versions. [RFC 0001](0001-pack-manifest.md)'s *Digest* section
+  specifies the form (`sha256:` plus 64 lowercase hex over the exact pack bytes, no
+  canonicalization) within a still-Draft proposal; Core §13 still lists content identity,
+  canonicalization, and signatures as open Core concepts, and no independent pair has met
+  RFC 0001's implementation bar. So "this series, this version, this digest" is nameable under a
+  specified candidate rule, not yet an accepted or demonstrated agreement (see Specification §0).
 - **A local, unsigned digest inventory is precedent.** The reference runtime's reviewed-set lock
   (`jpack.lock.json`) is a deterministic, project-local list of pack digests with drift refusal, and
   its ADR is explicit that it approves nothing. It is precedent for *a local digest inventory that
@@ -143,24 +144,27 @@ rejects everything else (see Alternatives).
 - **The study line exercised one registered schema, at study-internal strength.** Studies 016–018
   (see Implementation) built a registry writer and offline verifier for one series under
   study-minted keys, and each primary attempt published with R1 holding. What is unproven is
-  unchanged in kind: the portable format §0 waits on, Unresolved #1's authority governance, any
-  independent implementation, and interoperability — which the studies' own registrations
-  expressly disclaim.
+  unchanged in kind: acceptance and adoption of the candidate digest rule §0 now names,
+  Unresolved #1's authority governance, any independent implementation, and interoperability —
+  which the studies' own registrations expressly disclaim.
 
 ## Specification (sketch)
 
 Field names and canonical forms are deliberately not fixed here; the owning repository governs them,
 exactly as [RFC 0010](0010-gateway-signing-identity.md) defers to the gateway's `SPEC.md`.
 
-### 0. Prerequisite: one agreed pack digest (not owned here)
+### 0. Prerequisite: one agreed pack digest (candidate specified in RFC 0001)
 
 The whole mechanism rests on chain, manifest, and registry naming the *same* digest for the same
-pack. That agreement does not exist yet: [RFC 0001](0001-pack-manifest.md) leaves the algorithm and
-canonicalization open, and Study 014 uses SHA-256 over exact retained bytes as an expedient, not an
-agreed canonical hash. A currency registry cannot be built portably until either RFC 0001's digest
-scheme is settled, or an algorithm-qualified digest representation (e.g. `sha256:<hex>` over an
-exactly specified byte sequence) is fixed and required of every producer and consumer. This RFC does
-not settle it; it records the dependency as hard.
+pack. A concrete candidate now exists: [RFC 0001](0001-pack-manifest.md)'s *Digest* section
+specifies `sha256:` plus 64 lowercase hex over the exact pack bytes, with no canonicalization
+rule — computable for any pack whether or not a manifest document accompanies it, and matching
+the form every shipped producer already writes and the expedient Studies 014 and 016 registered.
+Two cautions survive. RFC 0001 is a Draft: the ambiguity is resolved within the proposal, and
+acceptance — let alone adoption by external producers and consumers this RFC cannot compel —
+remains pending. And no two independent implementations have yet met RFC 0001's emit/verify and
+negative-case agreement bar, so portability here rests on a specified candidate, not on observed
+agreement.
 
 ### 1. What the anchor states — a signed event history (format)
 
@@ -289,8 +293,9 @@ registry.
   judgment bytes without surfacing `(seriesId, version, digest)` at all. OpenWorkProof carrying the
   tuple demonstrates OWP's fit, not a portable interface. Whether one specification can serve multiple
   protocols, or each must restate the extraction and envelope, is open (Unresolved #5).
-- No JPS format changes. The registry references existing identity; but see §0 — a shared digest is a
-  hard prerequisite, and "already nameable" is not "already portable."
+- No JPS format changes. The registry references existing identity; see §0 — RFC 0001 now specifies
+  the candidate digest rule, and "specified candidate" is still not "accepted or demonstrated
+  agreement."
 
 ## Security and privacy
 
@@ -344,8 +349,10 @@ Cases would follow the gateway's frozen-corpus style, over currency-registry vec
 
 ## Implementation
 
-Two independent implementations are plausible and neither exists; this RFC's own bar is unmet, and
-§0's prerequisite is unmet too. What exists since this record first merged is narrower than either:
+Two independent implementations are plausible and neither exists; this RFC's own bar is unmet.
+§0's prerequisite now has a specified candidate (RFC 0001, *Digest*), still pending acceptance
+and any independent demonstration. What exists since this record first merged is narrower than
+either:
 a study-internal registry writer and offline verifier, built for
 [Study 016](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/016-policy-currency-anchor)
 and re-consumed digest-pinned and unmodified by
