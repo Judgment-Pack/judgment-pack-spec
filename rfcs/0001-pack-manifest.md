@@ -33,11 +33,35 @@ A manifest is a separate JSON document referencing one pack `(id, version)`. Can
 
 - `packId`, `packVersion`, `specVersion`;
 - `decisionQuestion` (copied for discovery, not authoritative);
-- `contentHash` (digest of the canonical pack bytes);
+- `contentHash` (digest of the exact pack bytes — see *Digest* below);
 - optional `keywords`, `domainHints`, `supersedes`.
 
 The manifest is descriptive only. It never overrides the pack, and a consumer that disagrees with
 the manifest trusts the pack body and the digest.
+
+### Digest
+
+`contentHash` is the string `sha256:` followed by the 64 lowercase hex characters of SHA-256 over
+the exact pack bytes as retained or served. There is no canonicalization rule: no whitespace or
+member-order normalization, no encoding repair, no semantic equivalence. Two byte-different packs
+carry different digests even when every conforming evaluator maps them to identical dispositions —
+semantic identity is not a manifest concept, and Core §8.3 already takes this position by making
+the disposition byte-portable while leaving the pack's representation alone.
+
+The algorithm prefix is the agility mechanism. A future algorithm arrives as a new prefix over the
+same exact-bytes rule; an unprefixed value never exists, and a consumer must refuse an
+unrecognized prefix rather than fall back. Digest comparison is exact string equality.
+
+This answers the question this RFC previously left open ("which digest algorithm and
+canonicalization rule?") the way every shipped producer already behaves: the reference runtime's
+reviewed-set lock records `sha256:<hex>` over the exact bytes it decoded, the gateway's receipts
+record `sha256:` plus 64 lowercase hex over retained artifact bytes, and the published
+interoperability studies (014, 016–018) registered SHA-256 over exact retained bytes as an
+expedient pending this rule. The expedient is now the rule. What this section does not supply is
+interop evidence: the Implementation bar below — two independent implementations reaching the
+same accept/reject offline — remains unmet. And it adds no identity notion to Core: §13's open
+bullet (content identity, canonicalization, and signatures as Core concepts) stays open; the
+manifest digest names bytes at the interchange layer, nothing more.
 
 ## Alternatives
 
@@ -71,6 +95,5 @@ same accept/reject decision on the negative cases.
 ## Unresolved questions
 
 - Is the manifest one-to-one with a pack, or can it describe a set?
-- Which digest algorithm and canonicalization rule?
 - Does discovery ([RFC 0005](0005-pack-discovery.md)) consume manifests directly, or a derived
   index?

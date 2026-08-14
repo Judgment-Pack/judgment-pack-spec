@@ -92,14 +92,15 @@ converged.
 What is worth recording is that JPS already owns the *identity* such an anchor would key on, and
 nothing more:
 
-- **Identity and version exist; their digest does not, yet.** Core §5 gives a pack a series identity
-  (an absolute-URI `id`) and a `MAJOR.MINOR.PATCH` `version`; §11 makes a published `(id, version)`
-  immutable only at SHOULD strength, and defines no precedence, supersession, or retirement over
-  versions. [RFC 0001](0001-pack-manifest.md) *proposes* a `contentHash` but is Draft and leaves both
-  the digest algorithm and the canonicalization unresolved; Core §13 lists content identity,
-  canonicalization, and signatures as open. So "this series, this version, this digest" is
-  *nameable*, but the digest it names is not yet an agreed portable value — a prerequisite, not a
-  given (see Specification §0).
+- **Identity and version exist; their digest is now a settled rule.** Core §5 gives a pack a series
+  identity (an absolute-URI `id`) and a `MAJOR.MINOR.PATCH` `version`; §11 makes a published
+  `(id, version)` immutable only at SHOULD strength, and defines no precedence, supersession, or
+  retirement over versions. [RFC 0001](0001-pack-manifest.md)'s *Digest* section fixes the digest
+  form (`sha256:` plus 64 lowercase hex over the exact pack bytes, no canonicalization); Core §13
+  still lists content identity, canonicalization, and signatures as open Core concepts, and the
+  rule has no cross-implementation interop evidence yet. So "this series, this version, this
+  digest" is nameable under an agreed rule whose portability is settled on paper, not yet
+  demonstrated (see Specification §0).
 - **A local, unsigned digest inventory is precedent.** The reference runtime's reviewed-set lock
   (`jpack.lock.json`) is a deterministic, project-local list of pack digests with drift refusal, and
   its ADR is explicit that it approves nothing. It is precedent for *a local digest inventory that
@@ -152,15 +153,16 @@ rejects everything else (see Alternatives).
 Field names and canonical forms are deliberately not fixed here; the owning repository governs them,
 exactly as [RFC 0010](0010-gateway-signing-identity.md) defers to the gateway's `SPEC.md`.
 
-### 0. Prerequisite: one agreed pack digest (not owned here)
+### 0. Prerequisite: one agreed pack digest (settled in RFC 0001)
 
 The whole mechanism rests on chain, manifest, and registry naming the *same* digest for the same
-pack. That agreement does not exist yet: [RFC 0001](0001-pack-manifest.md) leaves the algorithm and
-canonicalization open, and Study 014 uses SHA-256 over exact retained bytes as an expedient, not an
-agreed canonical hash. A currency registry cannot be built portably until either RFC 0001's digest
-scheme is settled, or an algorithm-qualified digest representation (e.g. `sha256:<hex>` over an
-exactly specified byte sequence) is fixed and required of every producer and consumer. This RFC does
-not settle it; it records the dependency as hard.
+pack. That agreement now exists: [RFC 0001](0001-pack-manifest.md)'s *Digest* section fixes the
+form as `sha256:` plus 64 lowercase hex over the exact pack bytes, with no canonicalization rule —
+computable for any pack whether or not a manifest document accompanies it, and matching both the
+form every shipped producer already writes and the expedient the studies registered. One caution
+survives the settlement: the rule is settled, not demonstrated. No two independent implementations
+have yet emitted and compared this digest (RFC 0001's own Implementation bar), so portability here
+rests on an agreed rule, not on observed agreement.
 
 ### 1. What the anchor states — a signed event history (format)
 
@@ -289,8 +291,8 @@ registry.
   judgment bytes without surfacing `(seriesId, version, digest)` at all. OpenWorkProof carrying the
   tuple demonstrates OWP's fit, not a portable interface. Whether one specification can serve multiple
   protocols, or each must restate the extraction and envelope, is open (Unresolved #5).
-- No JPS format changes. The registry references existing identity; but see §0 — a shared digest is a
-  hard prerequisite, and "already nameable" is not "already portable."
+- No JPS format changes. The registry references existing identity; see §0 — the shared digest rule
+  is settled in RFC 0001, and "settled rule" is still not "demonstrated agreement."
 
 ## Security and privacy
 
@@ -344,8 +346,9 @@ Cases would follow the gateway's frozen-corpus style, over currency-registry vec
 
 ## Implementation
 
-Two independent implementations are plausible and neither exists; this RFC's own bar is unmet, and
-§0's prerequisite is unmet too. What exists since this record first merged is narrower than either:
+Two independent implementations are plausible and neither exists; this RFC's own bar is unmet.
+§0's prerequisite is settled as a rule (RFC 0001, *Digest*) with the same caveat: no independent
+pair has demonstrated it. What exists since this record first merged is narrower than either:
 a study-internal registry writer and offline verifier, built for
 [Study 016](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/tree/main/studies/016-policy-currency-anchor)
 and re-consumed digest-pinned and unmodified by
