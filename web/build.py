@@ -2550,7 +2550,7 @@ SLIDES: tuple[Slide, ...] = (
             "the specification got fixed.",
         ),
         note=(
-            "Measured across 47 tests on the file format, plus 20 decision scenarios replayed through "
+            "Measured across 49 tests on the file format, plus 20 decision scenarios replayed through "
             "both engines. One limit, stated plainly: both implementations trace to the same "
             "maintainer, and the second was written from reference texts that already carried the "
             "first's implementation notes — so the agreement <em>corroborates</em> that the "
@@ -2658,7 +2658,7 @@ SLIDES: tuple[Slide, ...] = (
         ),
         points=(
             "<strong>Ready today:</strong> the file specification, the checks that a file is sound, "
-            "and an agreed way to turn one into an answer — held in place by 47 tests on the format "
+            "and an agreed way to turn one into an answer — held in place by 49 tests on the format "
             "and 20 on the answers.",
             "<strong>Tooling:</strong> the open-source reference runtime serves the same core through "
             "a CLI and stdio MCP, walks project-owned pack matrices, and reports informative coverage. "

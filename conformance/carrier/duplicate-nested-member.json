@@ -1,0 +1,23 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.com/judgment-packs/duplicate-nested-member",
+  "version": "0.1.0",
+  "title": "Duplicate nested member",
+  "decision": {
+    "intent": "Exercise duplicate-member rejection below the root.",
+    "question": "Is this carrier accepted?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "First label", "label": "Second label" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}
