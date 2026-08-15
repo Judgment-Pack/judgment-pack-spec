@@ -41,6 +41,29 @@ A pull request should:
 
 Normative changes are not accepted solely because the reference implementation supports them.
 
+## Local checks
+
+CI runs the repository checks on Python 3.12. That is what the workflow currently uses rather
+than a declared minimum version for the project.
+
+Install the test dependencies:
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+Run the same checks CI runs:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+**Install the dependencies even if the suite appears to run without them.** `requirements-dev.txt`
+pins `jsonschema[format-nongpl]`, and the `format` keyword is only checked when those extras are
+present. Without them, `jsonschema` silently ignores `format`, so conformance cases that exist to
+prove a malformed URI or timestamp is rejected come back **valid** and the suite passes while
+checking less than it says it does. Two current corpus cases behave exactly that way.
+
 ## Developer Certificate of Origin
 
 Contributions must be signed off using Git's `--signoff` option. The sign-off certifies the
