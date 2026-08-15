@@ -34,6 +34,18 @@
       "specSection": "§2"
     },
     {
+      "id": "carrier-duplicate-nested-member",
+      "path": "carrier/duplicate-nested-member.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-DUPLICATE-MEMBER",
+        "path": "/label"
+      },
+      "focus": "duplicate object member names are rejected below the root, not only at it",
+      "specSection": "§2"
+    },
+    {
       "id": "structural-missing-decision",
       "path": "structural/missing-decision.json",
       "layer": "structural",
@@ -260,6 +272,18 @@
       },
       "focus": "membership comparison operands are non-empty arrays",
       "specSection": "§7.4"
+    },
+    {
+      "id": "structural-non-object-root",
+      "path": "structural/non-object-root.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": ""
+      },
+      "focus": "the pack root is an object, not merely well-formed JSON",
+      "specSection": "§4"
     },
     {
       "id": "semantic-duplicate-outcome-id",
@@ -531,7 +555,9 @@
       "expectedDiagnostic": null,
       "focus": "consumer fully interprets a declared required extension it supports",
       "specSection": "§9",
-      "supportedExtensions": ["com.example.review-policy"]
+      "supportedExtensions": [
+        "com.example.review-policy"
+      ]
     },
     {
       "id": "valid-hostile-optional-extension-value",
