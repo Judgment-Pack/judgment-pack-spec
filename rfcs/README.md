@@ -41,6 +41,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0010](0010-gateway-signing-identity.md) | The gateway signing identity — custody, rotation, and anchoring | Draft | Research line (gateway repository: code, `SPEC.md`, guidance, corpus) — outside the specification |
 | [0011](0011-judgment-currency-anchor.md) | A currency anchor for pack versions — detecting stale and retired policy | Draft | Research line (cross-project artifact: a runtime currency registry + verifier, consumer protocols) — outside the specification |
 | [0012](0012-witness-contract.md) | What a witness contract would have to specify — candidate clauses for a signed-history comparison | Draft | Research line (cross-project artifact: a witness format + verifier, consumer protocols) — outside the specification |
+| [0013](0013-evaluator-error-and-precedence-cases.md) | The first evaluation-suite rows that use `expectedErrorClass`, including two where several §8.4 classes apply and the order decides | Draft | Specification-track (evaluation conformance suite) |
 
 The "Belongs to" column records where each proposal would land if accepted. A format that
 independent tools must agree on is a candidate for the specification. An algorithm or engine belongs

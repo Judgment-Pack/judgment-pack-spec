@@ -522,6 +522,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0013-evaluator-error-and-precedence-cases.md",
+        PurePosixPath("rfcs/0013-evaluator-error-and-precedence-cases/index.html"),
+        "RFC 0013: The first evaluator error and precedence cases",
+        "Draft proposal for the first evaluation-suite rows that use expectedErrorClass - three single-condition error cases and, more usefully, two where several classes apply at once and the row fixes which one section 8.4's order reports.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/0012-witness-contract.md",
         PurePosixPath("rfcs/0012-witness-contract/index.html"),
         "RFC 0012: What a witness contract would have to specify",
