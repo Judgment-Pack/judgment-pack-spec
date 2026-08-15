@@ -945,3 +945,144 @@ class StaticSiteTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FieldReferenceDriftTests(unittest.TestCase):
+    """The website's field reference must fail closed when the schema moves.
+
+    `KEY_REFERENCE` in `web/build.py` carries hand-written explanations, and its
+    coverage is maintained by hand. Nothing previously proved the rendered
+    reference stayed complete: a property could be added, removed, or have its
+    vocabulary changed and the page would go on describing the schema that used
+    to exist. The prose stays hand-written — this is drift detection, not
+    generation.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        sys.path.insert(0, str(ROOT / "web"))
+        import build  # noqa: PLC0415
+
+        cls.build = build
+        cls.schema = json.loads(
+            (ROOT / "schema" / "judgment-pack-core.schema.json").read_text(encoding="utf-8")
+        )
+
+    @staticmethod
+    def _object_properties(node: object, found: dict[str, list[dict]] | None = None) -> dict[str, list[dict]]:
+        """Every documented object property, with each schema site it appears at.
+
+        A name is collected once per site rather than once overall, because a
+        contextual key such as `kind` or `op` means different things in
+        different objects and the reference has to keep those meanings apart.
+        """
+        if found is None:
+            found = {}
+        if isinstance(node, dict):
+            if node.get("type") == "object" and isinstance(node.get("properties"), dict):
+                for name, sub in node["properties"].items():
+                    found.setdefault(name, []).append(sub)
+            for value in node.values():
+                FieldReferenceDriftTests._object_properties(value, found)
+        elif isinstance(node, list):
+            for value in node:
+                FieldReferenceDriftTests._object_properties(value, found)
+        return found
+
+    @staticmethod
+    def _vocabulary(sites: list[dict]) -> set[str]:
+        """The closed vocabulary a property has across every site it appears at.
+
+        Unioned deliberately: `kind` is a document/fact/measurement/attestation
+        in an evidence requirement, a uri/repository/path/other in a source
+        locator, and a human-role/queue/system in an escalation target. One
+        rendered entry describes all three, so the check must too — flattening
+        them into a single global definition is what the issue warns against,
+        and the union is checked against a reference entry that names each
+        context in its prose.
+        """
+        values: set[str] = set()
+        # A boolean is a closed vocabulary, but only where the property is
+        # boolean at EVERY site. `required` always is, so true/false is its
+        # vocabulary. `value` is a boolean in a literal condition and a decimal
+        # string, array or locator string elsewhere, so it has no single closed
+        # vocabulary and its entry rightly declares none. An earlier version of
+        # this rule fired on any boolean site and demanded true/false for
+        # `value`; the test caught it, which is the behaviour wanted from it.
+        objects = [site for site in sites if isinstance(site, dict)]
+        if objects and all(site.get("type") == "boolean" for site in objects):
+            values.update({"true", "false"})
+        for site in objects:
+            if "const" in site:
+                values.add(str(site["const"]))
+            if isinstance(site.get("enum"), list):
+                values.update(str(item) for item in site["enum"])
+            for combinator in ("anyOf", "oneOf", "allOf"):
+                for branch in site.get(combinator, []) or []:
+                    if isinstance(branch, dict):
+                        if "const" in branch:
+                            values.add(str(branch["const"]))
+                        if isinstance(branch.get("enum"), list):
+                            values.update(str(item) for item in branch["enum"])
+            items = site.get("items")
+            if isinstance(items, dict):
+                if "const" in items:
+                    values.add(str(items["const"]))
+                if isinstance(items.get("enum"), list):
+                    values.update(str(item) for item in items["enum"])
+        return values
+
+    def test_every_schema_property_is_documented_exactly_once(self) -> None:
+        schema_properties = set(self._object_properties(self.schema))
+        documented = set(self.build.KEY_REFERENCE)
+
+        undocumented = sorted(schema_properties - documented)
+        self.assertFalse(
+            undocumented,
+            f"schema properties with no field-reference entry: {undocumented}. "
+            f"Add each to KEY_REFERENCE in web/build.py with a hand-written "
+            f"explanation, or the rendered reference describes a schema that no "
+            f"longer exists.",
+        )
+        stale = sorted(documented - schema_properties)
+        self.assertFalse(
+            stale,
+            f"field-reference entries for properties the schema no longer has: "
+            f"{stale}. Remove them from KEY_REFERENCE in web/build.py.",
+        )
+
+    def test_closed_vocabularies_match_the_schema(self) -> None:
+        sites = self._object_properties(self.schema)
+        for name, (_summary, declared) in sorted(self.build.KEY_REFERENCE.items()):
+            with self.subTest(key=name):
+                derived = self._vocabulary(sites.get(name, []))
+                stated = set(declared or ())
+                self.assertEqual(
+                    stated,
+                    derived,
+                    f"the field reference states {sorted(stated) or 'no'} values for "
+                    f"{name!r} and the schema allows {sorted(derived) or 'none'}. "
+                    f"Update KEY_REFERENCE in web/build.py, or the rendered page "
+                    f"offers a vocabulary the schema will reject.",
+                )
+
+    def test_contextual_keys_keep_their_object_specific_meanings(self) -> None:
+        """A reused key must not be flattened into one misleading definition."""
+        for name, contexts in (
+            ("kind", ("document", "uri", "human-role")),
+            ("op", ("all", "any")),
+        ):
+            with self.subTest(key=name):
+                summary, declared = self.build.KEY_REFERENCE[name]
+                for value in contexts:
+                    self.assertIn(
+                        value,
+                        set(declared or ()),
+                        f"{name!r} loses the {value!r} context",
+                    )
+                self.assertGreater(
+                    len(summary.split(".")),
+                    1,
+                    f"{name!r} is reused across objects, so its entry must "
+                    f"distinguish those meanings rather than give one global gloss",
+                )
