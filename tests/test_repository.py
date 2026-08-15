@@ -379,6 +379,58 @@ class RepositoryConformanceTests(unittest.TestCase):
         cls.manifest = strict_json_loads(MANIFEST_PATH.read_text(encoding="utf-8"))
         cls.validator = Draft202012Validator(cls.schema, format_checker=FormatChecker())
 
+    def test_document_corpus_counts_match_the_manifest(self) -> None:
+        """Every CURRENT statement of the document-corpus size is the manifest's.
+
+        The manifest is the authoritative index and these statements repeat its
+        count by hand, so a corpus addition that misses one leaves a public
+        page asserting a number the repository can disprove.
+
+        This is deliberately a per-statement check rather than a search for the
+        number: the repository uses the same value for the FAQ question count,
+        which is a coincidence and not a fact about the corpus. Matching on the
+        number alone would tie the two together, so that changing the corpus
+        would demand editing the FAQ sentence. Historical statements in
+        CHANGELOG.md and releases/ are also out of scope by design — they record
+        what was true when published, and rewriting them would be falsifying a
+        record rather than fixing a stale one.
+        """
+        count = len(self.manifest["cases"])
+        statements = (
+            (
+                "README.md",
+                "the repository contents table",
+                f"| {count} non-normative document-conformance test cases",
+            ),
+            (
+                "conformance/README.md",
+                "the opening description",
+                f"This directory contains {count} focused research-preview cases",
+            ),
+            (
+                "web/build.py",
+                "the research-presentation note",
+                f"Measured across {count} tests on the file format",
+            ),
+            (
+                "web/build.py",
+                "the research-presentation summary",
+                f"held in place by {count} tests on the format",
+            ),
+        )
+        for relative, where, expected in statements:
+            with self.subTest(file=relative, statement=where):
+                text = (ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn(
+                    expected,
+                    text,
+                    f"{relative}: {where} no longer states the manifest's "
+                    f"{count} document-conformance cases. Update that statement "
+                    f"to match conformance/manifest.json, which is authoritative; "
+                    f"do not change CHANGELOG.md, releases/, or the FAQ question "
+                    f"count, which are out of scope.",
+                )
+
     def test_pointer_escaping(self) -> None:
         cases = [
             ([], ""),
