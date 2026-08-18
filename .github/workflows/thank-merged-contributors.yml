@@ -21,6 +21,7 @@ jobs:
         - [Go runtime](https://github.com/Judgment-Pack/judgment-pack-runtime/labels/good%20first%20issue)
         - [Gateway and provenance](https://github.com/Judgment-Pack/judgment-pack-gateway/labels/good%20first%20issue)
         - [Python and evaluator experiments](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/labels/good%20first%20issue)
+        - [Demos and applications](https://github.com/Judgment-Pack/judgment-pack-demo/labels/good%20first%20issue)
         - [Specification and documentation](https://github.com/Judgment-Pack/judgment-pack-spec/labels/good%20first%20issue)
     steps:
       - name: Check for an existing recommendation
