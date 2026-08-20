@@ -145,7 +145,7 @@ reproducing its corpus version, its results, or its every-row statement.
 | [`spec/judgment-pack-core.md`](spec/judgment-pack-core.md)                       | Normative prose for document conformance            |
 | [`schema/judgment-pack-core.schema.json`](schema/judgment-pack-core.schema.json) | Normative Draft 2020-12 structural schema           |
 | [`examples/`](examples/)                                                         | Synthetic examples from unrelated domains           |
-| [`conformance/`](conformance/)                                                   | 49 non-normative document-conformance test cases    |
+| [`conformance/`](conformance/)                                                   | 54 non-normative document-conformance test cases    |
 | [`conformance/evaluation/`](conformance/evaluation/README.md)                     | 20-case seed evaluation corpus (normative for §3.4) |
 | [`TESTING.md`](TESTING.md)                                                       | A 10–15 minute external testing exercise            |
 | [`VERSIONING.md`](VERSIONING.md)                                                 | Release and compatibility policy                    |
