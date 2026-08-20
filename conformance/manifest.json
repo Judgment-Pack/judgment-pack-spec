@@ -58,6 +58,66 @@
       "specSection": "§4"
     },
     {
+      "id": "structural-empty-title",
+      "path": "structural/empty-title.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MINLENGTH",
+        "path": "/title"
+      },
+      "focus": "root title must be a non-empty human-readable string",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-empty-decision-question",
+      "path": "structural/empty-decision-question.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MINLENGTH",
+        "path": "/decision/question"
+      },
+      "focus": "decision question must be a non-empty human-readable string",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-empty-outcome-label",
+      "path": "structural/empty-outcome-label.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MINLENGTH",
+        "path": "/outcomes/0/label"
+      },
+      "focus": "outcome label must be a non-empty human-readable string",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-empty-source-locator-value",
+      "path": "structural/empty-source-locator-value.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MINLENGTH",
+        "path": "/sources/0/locator/value"
+      },
+      "focus": "source locator value must be a non-empty string",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-empty-escalation-target-name",
+      "path": "structural/empty-escalation-target-name.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MINLENGTH",
+        "path": "/escalation/target/name"
+      },
+      "focus": "escalation target name must be a non-empty string",
+      "specSection": "§6.7"
+    },
+    {
       "id": "structural-unknown-root-member",
       "path": "structural/unknown-root-member.json",
       "layer": "structural",

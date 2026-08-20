@@ -1,6 +1,6 @@
 # Conformance corpus
 
-This directory contains 49 focused research-preview cases for testing the carrier, structural, and
+This directory contains 54 focused research-preview cases for testing the carrier, structural, and
 semantic requirements of Judgment Pack Core `0.2.0-draft`. It is versioned with the draft but is not
 yet a complete or normative conformance suite. Evaluator behavior is out of scope *here*: it has its
 own corpus, in [`evaluation/`](evaluation/README.md), which is normative for the evaluator conformance
