@@ -3,15 +3,28 @@
   "id": "https://example.com/judgment-packs/empty-outcome-label",
   "version": "0.1.0",
   "title": "Empty outcome label",
+  "decision": {
+    "intent": "Exercise the outcome label minimum.",
+    "question": "Must an outcome label be non-empty?"
+  },
   "outcomes": [
-    { "id": "accept", "label": "" },
-    { "id": "reject", "label": "Reject" }
+    {
+      "id": "accept",
+      "label": ""
+    },
+    {
+      "id": "reject",
+      "label": "Reject"
+    }
   ],
   "rules": [
     {
       "id": "literal-rule",
       "description": "A structurally minimal rule.",
-      "when": { "op": "literal", "value": true },
+      "when": {
+        "op": "literal",
+        "value": true
+      },
       "outcome": "accept",
       "onUnknown": "ignore"
     }

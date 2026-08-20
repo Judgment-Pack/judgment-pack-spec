@@ -79,7 +79,7 @@
         "path": "/decision/question"
       },
       "focus": "decision question must be a non-empty human-readable string",
-      "specSection": "§4"
+      "specSection": "§6.1"
     },
     {
       "id": "structural-empty-outcome-label",
@@ -91,7 +91,7 @@
         "path": "/outcomes/0/label"
       },
       "focus": "outcome label must be a non-empty human-readable string",
-      "specSection": "§4"
+      "specSection": "§6.4"
     },
     {
       "id": "structural-empty-source-locator-value",

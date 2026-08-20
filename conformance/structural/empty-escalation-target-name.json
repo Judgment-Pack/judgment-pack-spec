@@ -31,7 +31,7 @@
   ],
   "escalation": {
     "triggers": [
-      "needs-review"
+      "unknown"
     ],
     "target": {
       "kind": "human-role",
