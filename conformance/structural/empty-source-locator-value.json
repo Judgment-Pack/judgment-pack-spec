@@ -1,0 +1,43 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.com/judgment-packs/empty-source-locator-value",
+  "version": "0.1.0",
+  "title": "Empty source locator value",
+  "decision": {
+    "intent": "Exercise source locator value validation.",
+    "question": "Must a source locator value be non-empty?"
+  },
+  "sources": [
+    {
+      "id": "policy",
+      "title": "Example policy",
+      "publishedAt": "2026-02-28",
+      "locator": {
+        "kind": "uri",
+        "value": ""
+      }
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "reject",
+      "label": "Reject"
+    }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}
