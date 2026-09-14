@@ -106,8 +106,8 @@ none of it is a sketch, and not all of it is released.
   twenty-seven findings are recorded on the gateway's pull request 114.
 - **The record's citation** — runtime ADR-0033: `cites` on every record a run leaves, held to
   the gateway's structural grammar and to nothing else, recorded as given, omitted when none was
-  supplied; a rehearsal accepts structurally valid citations and writes no record, citations
-  included. Runtime ADR-0034: a matrix row may carry the same `cites` under `matrixVersion "3"`,
+  supplied; a rehearsal accepts a citations document of the grammar and within the limit and
+  writes no record, citations included. Runtime ADR-0034: a matrix row may carry the same `cites` under `matrixVersion "3"`,
   so a row transcribed under a receipted page can name that receipt. ADR-0033 shipped in runtime
   0.20.0; ADR-0034 is merged and tagged for 0.21.0, whose release was in progress at the time of
   writing. Each carries cross-vendor review records on its pull request: 145, eight rounds and
@@ -145,10 +145,14 @@ what, who checks what, and what a check means.
 An acquisition receipt records, under the gateway's signature, what the adapter reported about
 how it got the bytes: the adapter by name, version and digest; the operator-declared shape; the
 endpoint; a **commitment** to the statement (query, resource path or tool call) whose salt the
-caller alone holds; the source's own word about currency (a bookmark, a transaction id, an
+gateway returns to the caller and does not retain — exclusive possession of it depends on the
+transport and on the caller's custody, which the gateway's `SECURITY.md` says and this record
+does not improve on; the source's own word about currency (a bookmark, a transaction id, an
 ETag) or `null`; the transport's peer identity or `null`; the discovered schema by digest or
 `null`; an integrity token the upstream itself produced, carried verbatim, or `null`; for a page,
-the digest of each item; and when the adapter received the bytes. Two of these are the honest
+the gateway-computed digest of each item's canonical bytes, in order; and the adapter-reported
+observation time — except for the `command` shape, which reports nothing, where it is the
+gateway's own stamp of the moment it had read the command's output in full. Two of these are the honest
 bounds: `upstreamToken` never lets a source that vouches for itself and one that vouches for
 nothing read the same, and `shape` never lets bytes attested through a bare operator command
 read as bytes whose acquisition was recorded.
@@ -179,11 +183,11 @@ a citation that differs by case or by a leading zero names nothing.
 ### 3. The decision record cites, and is cited by digest
 
 The runtime writes `cites` on every record a run leaves when the caller supplied citations,
-holds the supplied document to the structural grammar above and to nothing else, and records
-it as given. It does not check that a session exists, that a receipt verifies, or that the
+holds the supplied document to the structural grammar above and to its document limit of one
+MiB, resolving and verifying nothing, and records it as given. It does not check that a session exists, that a receipt verifies, or that the
 cited receipts bear on the facts; a document not of the shape is refused as a bad invocation
-before the project is read; a rehearsal accepts a document of the shape and records nothing,
-citations included.
+before the project is read, as is one over the limit; a rehearsal accepts a document of the
+shape and within the limit and records nothing, citations included.
 
 A decision record is **cited by the digest of its bytes**, as the verifier enumerates
 candidates (§4 step 6): every regular file under the directory whole, a `.jsonl` file included,
@@ -214,7 +218,11 @@ Given the store, the registry and the decision-record directory, the verifier re
   top-level `cites` member is a record that cites, and each of its citations resolves as an
   action's do, or `record-citation-unresolved`; a `cites` of another shape is
   `record-citation-malformed`. The finding is keyed by the candidate's digest — the same digest
-  an action would name it by. This is the one member of a record the verifier reads;
+  an action would name it by. This is the one member of a record the verifier reads — and the
+  reference reads it only in a record its scanner recognizes: a record nested deeper than ten
+  thousand levels is passed over in this step with no citation finding at all, while its bytes
+  remain a candidate for step 6, so an action's digest match does not establish that such a
+  record's citations were checked;
 - from the action to its receipts (§4 step 5): each citation resolves by three exact string
   comparisons — session directory name, receipt file stem, signature — or `citation-unresolved`.
   Whether the cited receipt itself verifies is that receipt's own finding, reported
@@ -313,7 +321,9 @@ is never stored and never signed into a receipt.
   either edit, and neither finding says anything about the book's order or history.
 - **Confusion.** Exact-string resolution: a citation that differs by case, by a leading zero, or
   by a look-alike character names nothing. A record's `cites` that is not exactly the grammar is
-  `record-citation-malformed`, never partially read.
+  `record-citation-malformed`, never partially read — in a record the reference's scanner
+  recognizes; a record beyond its nesting limit yields no citation finding and stays a digest
+  candidate (§5), so a match from the action's side says nothing about its citations.
 - **Resource.** The verifier's walk of the decision-record directory is not bounded in bytes,
   entries or time; the gateway states availability as a limit of the reference, and an operator
   who mounts an archive has made the walk as long as the archive. The executor's walk is the
@@ -336,8 +346,8 @@ version 3 receipt signed under the version 2 prefix. Adversarial: a member appen
 acquisition record (`v3-appended-member-inside-acquisition`), a malformed kind.
 
 On the runtime's side the conformance is shape refusal: a citation document not of the grammar
-is refused on every surface before the project is read, and a rehearsal accepts a document of
-the grammar and writes no record. These are the runtime's tests, not corpus vectors, and this
+is refused on every surface before the project is read, as is one over the one-MiB limit, and
+a rehearsal accepts a document of the grammar and within the limit and writes no record. These are the runtime's tests, not corpus vectors, and this
 record does not promote them.
 
 ## Implementation
