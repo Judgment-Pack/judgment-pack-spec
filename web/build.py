@@ -531,6 +531,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0014-lineage-record-and-action-binding.md",
+        PurePosixPath("rfcs/0014-lineage-record-and-action-binding/index.html"),
+        "RFC 0014: The lineage record and the action binding",
+        "Draft cross-project record of how a decision record cites the gateway receipts it relied on and an action receipt cites the decision record and the receipts it rests on - the version 3 receipt, one citation grammar, and a verifier's join in both directions - with what it claims and does not.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/0012-witness-contract.md",
         PurePosixPath("rfcs/0012-witness-contract/index.html"),
         "RFC 0012: What a witness contract would have to specify",
