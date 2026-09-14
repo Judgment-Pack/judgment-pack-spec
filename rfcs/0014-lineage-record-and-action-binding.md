@@ -34,9 +34,10 @@
 
 When a decision is challenged, three questions get asked: what information did we have, which
 rule did we apply, what did we then do. The project answers them from three ledgers that, until
-this line, only a person could reconcile. The gateway's receipts prove which bytes a named source
-returned; the runtime's decision record says what was judged and decided; a write to a target
-system was the application's own log. This record describes the join as built: a receipt that
+this line, only a person could reconcile. The gateway's receipts bind retained bytes to its
+attestation under operator-configured source and authority labels — byte-lineage, never that
+the genuinely named source returned them; the runtime's decision record says what was judged
+and decided; a write to a target system was the application's own log. This record describes the join as built: a receipt that
 names its source — which system, which statement, which snapshot, through what, for whom — and
 a **citation**, one grammar owned by the gateway, by which a decision record names the receipts
 it relied on and an action receipt names the decision record and the receipts it rests on. A
@@ -105,8 +106,8 @@ none of it is a sketch, and not all of it is released.
   the platform's MCP tool and mints the action receipt. Seven cross-vendor review rounds and
   twenty-seven findings are recorded on the gateway's pull request 114.
 - **The record's citation** — runtime ADR-0033: `cites` on every record a run leaves, held to
-  the gateway's structural grammar and to nothing else, recorded as given, omitted when none was
-  supplied; a rehearsal accepts a citations document of the grammar and within the limit and
+  the gateway's structural grammar and the runtime's one-MiB document limit, without resolving
+  or verifying citations, recorded as given, omitted when none was supplied; a rehearsal accepts a citations document of the grammar and within the limit and
   writes no record, citations included. Runtime ADR-0034: a matrix row may carry the same `cites` under `matrixVersion "3"`,
   so a row transcribed under a receipted page can name that receipt. ADR-0033 shipped in runtime
   0.20.0; ADR-0034 is merged and tagged for 0.21.0, whose release was in progress at the time of
@@ -159,8 +160,8 @@ read as bytes whose acquisition was recorded.
 
 The property this buys, and its bound: a reader can take *through what* — the adapter by name
 and digest, the shape, the endpoint — and *which snapshot*, when the source reported one, off
-the receipt offline; *which query* is a commitment, checkable offline only when the caller
-discloses the statement and its salt, and `null` when the adapter reported none. The
+the receipt offline; *which query* is a commitment, checkable offline when the statement and its
+salt are available to the reader, and `null` when the adapter reported none. The
 acquisition record is the **adapter's testimony under the gateway's signature** — a compromised
 adapter can misreport its acquisition as it can misreport its bytes, and is attributable by the
 source it was configured as; what it cannot do is sign, provided the isolation the operator
