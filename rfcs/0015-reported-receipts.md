@@ -489,11 +489,12 @@ Nothing of a report is implemented. Plausible independent implementations, were 
 the reference gateway minting and verifying reports; a second verifier of the receipt format; and at
 least two reporters in different MCP gateways or clients, the first a ContextForge plugin. A second
 verifier of version 3 now exists: the gateway's `verify-ts`, written in another language from the
-gateway's `SPEC.md` and frozen corpus, answers to every vector through the corpus's process contract
-([gateway #129](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/129)). Its author had
-earlier worked on the reference, so it is not a clean-room implementation, and whether it would
-count toward a bar is for the bar's holders; it verifies no report, since none is specified. RFC
-0000's bar of two independent implementations is unmet and is not claimed.
+gateway's `SPEC.md` and frozen corpus, answers to every canonicalization and store vector through
+the corpus's process contract ([gateway
+#129](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/129)). Its author had earlier
+worked on the reference, so it is not a clean-room implementation, and whether it would count toward
+a bar is for the bar's holders; it verifies no report, since none is specified. RFC 0000's bar of
+two independent implementations is unmet and is not claimed.
 
 ## Unresolved questions
 
