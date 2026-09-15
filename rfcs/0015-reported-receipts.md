@@ -122,22 +122,32 @@ What exists, and what it shows:
    bear on clause 2. ContextForge's plugins now run on the external CPEX package, which replaced the
    framework ContextForge carried in its own tree. In CPEX 0.1, `tool_pre_invoke` carries the tool's
    name and arguments and `tool_post_invoke` its name and result — not the arguments — so a reporter
-   is a pair of hooks that keeps the call in its own per-request `PluginContext` until the answer
-   comes. A hook answers with `continue_processing`, an optional `modified_payload` or a
-   `violation`; a plugin runs in the gateway's process, in an isolated environment, or as an
-   external service over MCP, gRPC or a Unix socket. CPEX's modes (`sequential`, `transform`,
-   `audit`, `concurrent`, `fire_and_forget`) run as phases in that order, a phase's plugins by
-   priority, so which result a `tool_post_invoke` hook observes is set by its mode and priority: an
-   `audit` or `fire_and_forget` hook sees the result after every plugin that transforms it, a
-   `sequential` hook of low priority sees it before most of them; ContextForge still accepts its
-   earlier modes (`enforce`, `enforce_ignore_error`, `permissive`, `disabled`) beside these. A
-   second MCP gateway offers a comparable hook with less to go on: Docker's MCP Gateway runs
-   interceptors `before` and `after` a tool call, and an `after` interceptor is handed the response
-   alone, with no request and nothing that names the invocation, so a reporter there would have to
-   pair a response with its call by means the gateway does not provide. The gateway's plugins note
-   was brought to the same reading ([gateway
-   #130](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/130), whose description lists
-   the sources read).
+   is a pair of hooks that, in one of the serial modes below, keeps the call in its own per-request
+   `PluginContext` until the answer comes. A hook answers with `continue_processing`, an optional
+   `modified_payload` or a `violation`; a plugin runs in the gateway's process, in an isolated
+   environment, or as an external service over MCP, gRPC or a Unix socket. CPEX's modes
+   (`sequential`, `transform`, `audit`, `concurrent`, `fire_and_forget`) run as phases in that
+   order, the plugins within each serial phase in ascending numeric priority (a lower number runs
+   first), so which result a `tool_post_invoke` hook observes is set by its mode and priority. A
+   `sequential` hook sees the changes of earlier `sequential` hooks, before later ones and the
+   `transform` phase; an `audit` hook, when reached, sees the chained result after the `sequential`
+   and `transform` phases. A `fire_and_forget` hook does not. In CPEX 0.1.3, the version
+   ContextForge pins ([`manager.py` at
+   0.1.3](https://github.com/contextforge-org/cpex/blob/277dfd1752d0f5ed24ae43d9ac26214d2380bc5f/cpex/framework/manager.py#L524)),
+   it is handed a snapshot of the payload the hook was invoked with, before any plugin transformed
+   it, though a comment there calls it the final payload; it is given a fresh `PluginContext`, so it
+   cannot read what its plugin kept at `tool_pre_invoke`; and it is scheduled when a plugin halts
+   the chain by returning a violation, but not when one is raised as an exception, as ContextForge's
+   normal tool-invocation path raises them. ContextForge still accepts its earlier modes (`enforce`,
+   `enforce_ignore_error`, `permissive`, `disabled`) beside these. A second MCP gateway offers a
+   comparable hook with less to go on: Docker's MCP Gateway runs interceptors `before` and `after` a
+   tool call, and an `after` interceptor is handed the response alone, with no request and nothing
+   that names the invocation, so a reporter there would have to pair a response with its call by
+   means the gateway does not provide. The gateway's plugins note was brought to the same reading
+   ([gateway #130](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/130), whose
+   description lists the sources read, and [gateway
+   #132](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/132), for what a
+   `fire_and_forget` hook is handed and when it runs).
 4. **A citation reads nothing but a signature.** §4 step 5 resolves an action's `cites` entry by
    three string comparisons and says "Nothing about the cited receipt's contents is read beyond its
    signature" ([RFC 0014](0014-lineage-record-and-action-binding.md) §5 records the same). If a
