@@ -32,8 +32,9 @@
 ## Summary
 
 The reference gateway signs two kinds of receipt. An *acquisition* attests bytes a source returned;
-an *action* is the lineage of a write the engine performed. In both, the engine started the program
-that touched the outside world. On the engine's catalog-backed path that program is also named by
+an *action* records an authenticated write request made through the engine's executor and the
+target's response, a refusal included. In both, the engine started the program that touched the
+outside world. On the engine's catalog-backed path that program is also named by
 the operator, pinned by digest, and run under the isolation the operator establishes; the format
 admits more than that path — a bare `"command"` source, whose recorded digest is of the resolved
 executable and does not bind a script an interpreter runs, and adapter subprocesses whose own
@@ -91,7 +92,8 @@ envelope from a caller, which is the property the first passage protects.
 The risk is not that a reporter can lie. A reporter can lie, and a receipt that names the reporter
 says so. The risk is **laundering**: a store holds receipts under one key, and a consumer that
 reads a reported receipt as an acquisition gives a reporter's claim the strongest attestation the
-project makes. Today what the key signed, the engine acquired or did — there is no third kind — and
+project makes. Today what the key signed is an acquisition or a request and response the engine
+mediated — there is no third kind — and
 the consumers written so far, the gateway's verifier, the runtime's citations and the engine's own
 action ladder among them, were written in that world. So the design question is less how to accept
 a report than what must never be confusable once one is accepted, and what a consumer must bind
@@ -200,8 +202,9 @@ identities of clause 4.
 A further candidate, **domain separation**: a report's signature under its own prefix (for instance
 `"judgment-pack-gateway/report/1:"`) rather than version 3's receipt prefix. `kind` is already inside
 the signed bytes, so a report cannot be re-labelled without breaking its signature; a separate
-prefix would additionally keep a report's signature from being valid as any other signed object's
-under any reading, at the cost of one more rule every verifier implements. A separate *key* for
+prefix would additionally keep a report's signature from being valid as a receipt or seal whose
+verifier requires its different specified prefix, at the cost of one more rule every verifier
+implements. A separate *key* for
 reports is a stronger variant with its own cost: the reference verifier's registry loader skips a
 seal whose `keyId` is not its own key's, so a separate key cannot assume an unchanged registry
 (clause 7). This record leaves both open.
@@ -249,8 +252,9 @@ a sealed session's count and chain speak for one kind of account and a consumer 
 session (§5a.1) knows what it scoped to. Separation by kind settles neither who may append nor who
 may seal. Today sessions share one namespace, any caller who knows a name can append to it and seal
 it, a transport session's end seals nothing, and a signer restart empties the signer's session map,
-so a session left unsealed at a restart can be neither continued nor sealed by the process that
-follows. A remote reporter adds accounts still queued outside the signer when a session is sealed. Questions a design would have to answer: who may append to and seal a report session;
+so the process that follows restores neither the previous count nor the previous chain; `/seal`
+refuses a session absent from its in-memory map rather than reconstructing it from disk. A remote
+reporter adds accounts still queued outside the signer when a session is sealed. Questions a design would have to answer: who may append to and seal a report session;
 whether reporters may share one; what happens to accounts in flight at a seal, to a lost
 acknowledgement and its retry, to an account that arrives after a seal, and after a signer crash;
 and how the registry handles a separate key or a separate store if clause 3's variants are taken.
@@ -271,9 +275,9 @@ not a failure of the check.
 
 A reporter can report one call twice, or a call that never happened, and the engine cannot tell
 either from a genuine account. A report key chosen by the reporter would let the engine refuse a
-second account under the same key; that stops accidental duplication and nothing else. This record
-does not propose a mechanism against fabrication, because there is none at the engine: the engine
-did not see the call.
+second account under the same key; that stops accidental duplication and nothing else. From the
+reporter's account alone, the engine cannot establish whether the call occurred. Whether clause 10's
+independently authenticated evidence would constrain acceptance remains open.
 
 ### 10. Upstream integrity
 
@@ -328,14 +332,17 @@ Stated in terms of the kind (clause 3): a consumer that requires the lineage of 
 refuses `kind: "report"`; a report verifies as a report and does not change the store-wide verdict
 by being one; and a consumer that accepts a report accepts the reporter's account under clause 12's
 binding — the engine's signature adds the reporter's verified identity, the time of receipt and the
-position, not the truth of the account.
+position, not the truth of the account. A consumer relying on the account must explicitly trust the
+authenticated reporting principal for that endpoint; the engine's admission allowlist (clause 4)
+does not establish the consumer's trust.
 
 ### 14. Retention, deletion and correction
 
 A report's `statement` and arguments would be committed as an acquisition's are, its result
 retained in the clear as any artifact is, and what a reporter puts in the other members is in the
-receipt in the clear. What happens afterwards is unspecified and consequential: rewriting a receipt
-breaks its signature and every later link of its chain; deleting a retained result makes the
+receipt in the clear. What happens afterwards is unspecified and consequential: changing a receipt's
+signed values without re-signing invalidates its signature and can prevent reconstruction of the
+session; deleting a retained result makes the
 receipt `artifact-missing`; removing sealed receipts or sessions conflicts with the registry; and an
 artifact may be shared by digest with another receipt. Questions a design would have to answer: how
 long reports and their results are retained; whether and how an authorized party deletes one; how
