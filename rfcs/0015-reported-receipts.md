@@ -117,13 +117,37 @@ What exists, and what it shows:
    not the signature but who started the program: an engine-started source, on the catalog-backed
    path pinned by digest, under the isolation §1.2a conditions the adapter's inability to sign on —
    against an account submitted remotely, by a program the engine neither started nor identified.
-3. **Where a reporter would sit.** The plugins note records ContextForge's plugin framework as it
-   was read for that note: hooks at `tool_pre_invoke` and `tool_post_invoke`, a hook answering with
-   `continue_processing`, an optional `modified_payload` or a `violation`, plugins run in-process or
-   as an external service over MCP (`kind: external`), in `enforce` or `permissive` mode. A reporter
-   would be a `tool_post_invoke` hook. Naming the hook does not settle which request and which
-   result it observes — other hooks may modify either — which clause 2 takes up. This record cites
-   the note for that surface and does not re-verify ContextForge's current interface.
+3. **Where a reporter would sit, as it stands.** The plugins note first recorded ContextForge's
+   plugin framework as it was read for that note; re-read on 2026-09-15, it has changed in ways that
+   bear on clause 2. ContextForge's plugins now run on the external CPEX package, which replaced the
+   framework ContextForge carried in its own tree. In CPEX 0.1, `tool_pre_invoke` carries the tool's
+   name and arguments and `tool_post_invoke` its name and result — not the arguments — so a reporter
+   is a pair of hooks that, in one of the serial modes below, keeps the call in its own per-request
+   `PluginContext` until the answer comes. A hook answers with `continue_processing`, an optional
+   `modified_payload` or a `violation`; a plugin runs in the gateway's process, in an isolated
+   environment, or as an external service over MCP, gRPC or a Unix socket. CPEX's modes
+   (`sequential`, `transform`, `audit`, `concurrent`, `fire_and_forget`) run as phases in that
+   order, the plugins within each serial phase in ascending numeric priority (a lower number runs
+   first), so which result a `tool_post_invoke` hook observes is set by its mode and priority. A
+   `sequential` hook sees the changes of earlier `sequential` hooks, before later ones and the
+   `transform` phase; an `audit` hook, when reached, sees the chained result after the `sequential`
+   and `transform` phases. A `fire_and_forget` hook does not. In CPEX 0.1.3, the version
+   ContextForge pins ([`manager.py` at
+   0.1.3](https://github.com/contextforge-org/cpex/blob/277dfd1752d0f5ed24ae43d9ac26214d2380bc5f/cpex/framework/manager.py#L524)),
+   it is handed a snapshot of the payload the hook was invoked with, before any plugin transformed
+   it, though a comment there calls it the final payload; it is given a fresh `PluginContext`, so it
+   cannot read what its plugin kept at `tool_pre_invoke`; and it is scheduled when a plugin halts
+   the chain by returning a violation, but not when one is raised as an exception, as ContextForge's
+   normal tool-invocation path raises them. ContextForge still accepts its earlier modes (`enforce`,
+   `enforce_ignore_error`, `permissive`, `disabled`) beside these. A second MCP gateway offers a
+   comparable hook with less to go on: Docker's MCP Gateway runs interceptors `before` and `after` a
+   tool call, and an `after` interceptor is handed the response alone, with no request and nothing
+   that names the invocation, so a reporter there would have to pair a response with its call by
+   means the gateway does not provide. The gateway's plugins note was brought to the same reading
+   ([gateway #130](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/130), whose
+   description lists the sources read, and
+   [gateway #132](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/132), for what a
+   `fire_and_forget` hook is handed and when it runs).
 4. **A citation reads nothing but a signature.** §4 step 5 resolves an action's `cites` entry by
    three string comparisons and says "Nothing about the cited receipt's contents is read beyond its
    signature" ([RFC 0014](0014-lineage-record-and-action-binding.md) §5 records the same). If a
@@ -461,11 +485,16 @@ genuine report by the same reporter about the same endpoint for a different call
 
 ## Implementation
 
-Nothing is implemented. Plausible independent implementations, were a design adopted: the reference
-gateway minting and verifying reports; a verifier of the receipt format written independently of the
-reference, which this record does not establish exists for version 3; and at least two reporters in
-different MCP gateways or clients, the first a ContextForge plugin. RFC 0000's bar of two independent
-implementations is unmet and is not claimed.
+Nothing of a report is implemented. Plausible independent implementations, were a design adopted:
+the reference gateway minting and verifying reports; a second verifier of the receipt format; and at
+least two reporters in different MCP gateways or clients, the first a ContextForge plugin. A second
+verifier of version 3 now exists: the gateway's `verify-ts`, written in another language from the
+gateway's `SPEC.md` and frozen corpus, answers to every canonicalization and store vector through
+the corpus's process contract
+([gateway #129](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/129)). Its author had earlier
+worked on the reference, so it is not a clean-room implementation, and whether it would count toward
+a bar is for the bar's holders; it verifies no report, since none is specified. RFC 0000's bar of
+two independent implementations is unmet and is not claimed.
 
 ## Unresolved questions
 
@@ -494,6 +523,9 @@ implementations is unmet and is not claimed.
     concludes after each (clause 14).
 13. Aggregate bounds on reporting and on the growth it causes (clause 15).
 14. How stores holding reports migrate, and whether reports live in a separate store (clause 16).
-15. Whether ContextForge's current plugin interface still offers what the plugins note recorded, and
-    whether a second MCP gateway offers a comparable hook — the evidence for clause 2's observation
-    point and for the implementation bar.
+15. Whether any MCP gateway hands a hook the call and its answer together, under a name for the
+    invocation, rather than leaving a reporter to pair them itself; and, where it does not, whether
+    a reporter's own pairing — through CPEX's per-request `PluginContext`, or across Docker's
+    `before` and `after` interceptors — holds under concurrent, retried and cancelled calls.
+    Evidence item 3 answers what this question first asked: ContextForge still offers the hook, as
+    CPEX's pair, and Docker's gateway offers one with the response alone.
