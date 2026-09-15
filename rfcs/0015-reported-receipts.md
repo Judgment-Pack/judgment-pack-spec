@@ -258,8 +258,15 @@ reporter adds accounts still queued outside the signer when a session is sealed.
 whether reporters may share one; what happens to accounts in flight at a seal, to a lost
 acknowledgement and its retry, to an account that arrives after a seal, and after a signer crash;
 and how the registry handles a separate key or a separate store if clause 3's variants are taken.
-Whatever the answers, **a sealed count establishes the accounts the engine accepted, never that every
-routed call was reported.**
+And for the reporting plugin's project, with the gateway's acknowledgement contract: does reporting
+complete before the original tool result is returned, or proceed independently? If reporting is
+refused or its outcome is unknown, what result and reporting status reach the caller? Retrying the
+account must be distinguished from rerunning the tool: a reporting failure does not establish that
+the original call failed or that its effects were undone — the MCP server's note draws the same
+line between a signer's refusal and an unknown outcome on its own path. Whatever the answers, under
+the base proposal **the seal authenticates the signer's declared final count of minted report
+receipts, whose contents are checked through store verification; it establishes neither a count of
+submissions merely received or admitted nor that every routed call was reported.**
 
 ### 8. Time
 
