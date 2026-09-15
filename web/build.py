@@ -531,6 +531,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0015-reported-receipts.md",
+        PurePosixPath("rfcs/0015-reported-receipts/index.html"),
+        "RFC 0015: What a reported receipt would have to specify",
+        "Draft cross-project record of what a receipt would have to specify if the gateway signed an authenticated party's account of a tool call it did not make - sixteen candidate clauses, the one bound such a receipt could carry, and why it must never read as an acquisition.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/0014-lineage-record-and-action-binding.md",
         PurePosixPath("rfcs/0014-lineage-record-and-action-binding/index.html"),
         "RFC 0014: The lineage record and the action binding",
