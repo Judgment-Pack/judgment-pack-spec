@@ -97,11 +97,17 @@ hits: both items predicted to close as scalar verdict-consumption failed on one 
 gap between a decision's *permission* and an act's *performance*. The measured observation this
 leaves for the RFC to weigh, not a resolution: within one policy's own decisions, the
 cross-decision escape in this corpus is effect/entitlement-shaped rather than dataflow-shaped,
-while the outcome-as-input edge this sketch proposes matches the seam *between* systems — an
+~~while the outcome-as-input edge this sketch proposes matches the seam *between* systems — an
 upstream decision's recorded verdict consumed as a downstream document's fact — which that
 study's frame, by construction, could not contain. Whether this RFC scopes composition to the
 between-systems seam or grows the edge toward entitlement constructs is now an evidenced
-choice, and still an open one. The usual bounds apply: one grammar, one frame, two policies by
+choice, and still an open one.~~ (*Amended 2026-09-21.* The struck passage did two things this RFC
+no longer does. It placed a claim about the seam between systems inside "the measured
+observation", although the study's frame could not contain that case, so nothing was measured
+about it: that use of the edge is intended and unmeasured. And it called the choice open; it is
+decided, in the Scope section below, for the dataflow seam and against effect and entitlement
+constructs. The within-policy observation before the strike is the measurement, and it stands.)
+The usual bounds apply: one grammar, one frame, two policies by
 one benchmark team, internally produced under a preregistration; neither the zero nor any other
 rate licenses claims about composition as a design class.
 
@@ -109,9 +115,8 @@ rate licenses claims about composition as a design class.
 
 *Added 2026-09-21.* Eight decision records of the reference runtime are specific to its graph
 surface. All are accepted, each is linked here at the runtime's `main`, and they first shipped
-across four versions. The list is not everything that governs the surface: it also inherits the
-runtime's decisions on the reviewed-set lock, audit records and evaluation traces, which were made
-for single packs and apply to graphs as well.
+across four versions. The list is not everything that governs the surface: the runtime's decisions
+on the reviewed-set lock, audit records and evaluation traces cover graphs too.
 
 | Record | What it decided | First released |
 | --- | --- | --- |
