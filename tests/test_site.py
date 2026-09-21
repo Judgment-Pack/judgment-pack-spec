@@ -204,10 +204,20 @@ class StaticSiteTests(unittest.TestCase):
             any(path.suffix == ".json" for path in staged),
             "nothing is staged; this test and the exclusion it holds can go with the directory",
         )
+        # Whole path components, not a substring: a sibling such as `staged-next/` is not this
+        # directory, the build would publish it, and this test must not object.
+        staged_parts = tuple(STAGED_EVALUATION_ROWS.split("/"))
+
+        def is_under_staged(parts: tuple[str, ...]) -> bool:
+            return any(
+                parts[index : index + len(staged_parts)] == staged_parts
+                for index in range(len(parts) - len(staged_parts) + 1)
+            )
+
         published = [
             path.relative_to(self.output).as_posix()
             for path in self.output.rglob("*")
-            if "evaluation/staged" in path.relative_to(self.output).as_posix()
+            if is_under_staged(path.relative_to(self.output).parts)
         ]
         self.assertEqual([], published)
 

@@ -698,10 +698,11 @@ class RepositoryConformanceTests(unittest.TestCase):
                 # An undeclared evidence key used to be refused here outright, because §8.2 makes it
                 # an evaluation error and every row expected a disposition. A row whose point is that
                 # error needs the key, so the check is conditional on what the case expects, exactly
-                # as the pack-conformance check above is — and it is stricter than the one it
-                # replaces: the class a case expects must be the one §8.4's fixed order reports for
-                # the case's own inputs, and a case whose inputs nothing refuses must not expect a
-                # preflight class at all.
+                # as the pack-conformance check above is. That admits what the old check refused — a
+                # correctly labelled error row — and asks more of everything it still covers: the
+                # class a case expects must be the one §8.4's fixed order reports for the case's own
+                # inputs, and a case whose inputs nothing refuses must not expect a preflight class
+                # at all. A row that keeps its disposition and gains an undeclared key still fails.
                 called_for = preflight_error_class(pack_diagnostics[case["pack"]], pack, case)
                 expected_class = case.get("expectedErrorClass")
                 if called_for is None:

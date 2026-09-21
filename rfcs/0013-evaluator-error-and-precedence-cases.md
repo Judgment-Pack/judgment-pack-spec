@@ -62,9 +62,9 @@
 > for case 5 fails in this repository, before any evaluator runs it. The check leaves
 > `resource-exhaustion` and implementation-defined classes, which §8.4 permits where no Core class
 > applies, to the case schema. The maintainer attests, and this repository does not show, that
-> fourteen deliberate breaks — of the staged rows, the fixtures, one released row, the site's
-> exclusion and the release bundle's — were each caught, and that one change the check must not
-> refuse was not; the list is in the review record.
+> fifteen deliberate breaks — of the staged rows, the fixtures, one released row, the site's
+> exclusion and the release bundle's — were each caught, and that two changes the checks must not
+> refuse were not; the lists are in the review records of rounds 1 and 2.
 >
 > **Implementation experience, which is not conformance evidence.** On 2026-09-21 both of this
 > project's evaluators were given the five staged cases by hand: the reference runtime 0.22.0, and
@@ -256,7 +256,8 @@ so rather than leave the heading out.
   than privacy: §8.4 exists so that a refusal is never mistaken for a result. Every one of these
   rows requires an error *instead of* a disposition, so each tests that a refusal happens as well
   as which one it is, and an implementation that answers any of them with a disposition has done
-  what §8.4 forbids by name: substituted `unresolved`, `not-applicable` or an outcome for the error.
+  what §8.4 forbids: emitted a disposition for the evaluation, substituting `unresolved`,
+  `not-applicable` or an outcome for the error.
 - **Conformance.** This proposal is conformance cases: three rows that show one class each and two
   boundary rows where the order decides. One of the three is adversarial in effect, which the
   proposal did not notice and the review at acceptance did: case 2's facts are the released

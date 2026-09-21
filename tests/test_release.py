@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import subprocess
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
@@ -105,14 +107,27 @@ class ReleaseBuilderTests(unittest.TestCase):
         # The released corpus beside them must stay in the bundle, so it is checked as the control.
         self.assertIn("conformance", BUILD_RELEASE.BUNDLE_PATHS)
         staged_root = ROOT / "conformance" / "evaluation" / "staged"
+        staged_root_posix = staged_root.relative_to(ROOT).as_posix()
         staged = sorted(
             path.relative_to(ROOT).as_posix() for path in staged_root.rglob("*") if path.is_file()
         )
         self.assertTrue(staged, "nothing is staged; this test can go with the directory")
-        released = "conformance/evaluation/manifest.json"
+        evaluation = ROOT / "conformance" / "evaluation"
+        released = sorted(
+            path.relative_to(ROOT).as_posix()
+            for path in [
+                evaluation / "manifest.json",
+                evaluation / "manifest.schema.json",
+                *(evaluation / "packs").glob("*.json"),
+            ]
+        )
+        # An attribute on a path says nothing about its ancestors, and `git archive` drops a whole
+        # directory that is export-ignored: a rule on conformance/evaluation would leave the
+        # released manifest "unspecified" and still omit it. So the ancestors are part of the control.
+        ancestors = ["conformance", "conformance/evaluation", "conformance/evaluation/packs"]
         try:
             completed = subprocess.run(
-                ["git", "check-attr", "export-ignore", "--", *staged, released],
+                ["git", "check-attr", "export-ignore", "--", *staged, *released, *ancestors],
                 cwd=ROOT,
                 check=True,
                 capture_output=True,
@@ -126,7 +141,37 @@ class ReleaseBuilderTests(unittest.TestCase):
         for path in staged:
             with self.subTest(path=path):
                 self.assertEqual("set", attributes.get(path))
-        self.assertEqual("unspecified", attributes.get(released))
+        for path in [*released, *ancestors]:
+            with self.subTest(path=path):
+                self.assertEqual("unspecified", attributes.get(path))
+
+        # The attributes are configuration; the archive is the fact. Where there is a commit to
+        # archive, list what the builder's own command would put in a bundle.
+        archived = subprocess.run(
+            ["git", "archive", "--format=tar", "HEAD", "conformance/evaluation"],
+            cwd=ROOT,
+            capture_output=True,
+        )
+        if archived.returncode != 0:
+            return  # no commit here (a bare scratch repository); the attribute checks above stand
+        with tarfile.open(fileobj=io.BytesIO(archived.stdout)) as bundle:
+            members = set(bundle.getnames())
+        tracked = set(
+            subprocess.run(
+                ["git", "ls-tree", "-r", "--name-only", "HEAD", "conformance/evaluation"],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.splitlines()
+        )
+        self.assertEqual(
+            [], sorted(name for name in members if name.startswith(staged_root_posix + "/"))
+        )
+        for path in released:
+            if path in tracked:
+                with self.subTest(archived=path):
+                    self.assertIn(path, members)
 
     @staticmethod
     def _release_tree(directory: Path, version: str) -> Path:
