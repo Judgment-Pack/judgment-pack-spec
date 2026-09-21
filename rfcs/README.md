@@ -16,7 +16,9 @@ The purpose of this directory is to make the project's open design questions *vi
 to imply they are settled. Concepts that are frequently assumed to be part of Judgment Pack — a
 graph that composes packs, a planner that selects them, an evidence-integration layer, a discovery
 registry — are design questions, not shipped features. They live here as drafts until they are
-prototyped and shown to interoperate across independent implementations.
+prototyped and shown to interoperate across independent implementations, or until one is
+dispositioned: the planner's record, [RFC 0004](0004-planner-interface.md), is rejected as product
+behavior and stays here as the record of why.
 
 ## Process
 
@@ -32,7 +34,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0001](0001-pack-manifest.md) | Pack manifest | Draft | Specification (format) |
 | [0002](0002-judgment-graph.md) | Judgment Graph composition | Draft | Specification (format) |
 | [0003](0003-evidence-reference.md) | Evidence reference | Draft | Specification (format) |
-| [0004](0004-planner-interface.md) | Planner interface | Draft | Likely product |
+| [0004](0004-planner-interface.md) | Planner interface | Rejected | Product — the specification standardizes no part of a planner |
 | [0005](0005-pack-discovery.md) | Pack discovery | Draft | Specification (format) + product (service) |
 | [0006](0006-evaluator-conformance.md) | Evaluator conformance | Accepted | Specification (Core `0.2.0-draft`: semantics + conformance class) |
 | [0007](0007-determination-boundary.md) | The determination boundary — what a pack cannot hold | Draft | Specification (Core or profile) — undecided |

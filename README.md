@@ -152,7 +152,7 @@ reproducing its corpus version, its results, or its every-row statement.
 | [`CHANGELOG.md`](CHANGELOG.md)                                                   | Draft and published change history                  |
 | [`docs/design-principles.md`](docs/design-principles.md)                        | Design principles, non-goals, and origin and scope  |
 | [`FAQ.md`](FAQ.md)                                                               | Answers to common and hard architectural questions  |
-| [`rfcs/`](rfcs/)                                                                 | Open change proposals (RFCs), including the process  |
+| [`rfcs/`](rfcs/)                                                                 | Change proposals (RFCs), their dispositions, and the process |
 | [`ROADMAP.md`](ROADMAP.md)                                                       | Evidence-gated path toward a specification          |
 | [`web/`](web/)                                                                   | Static documentation site and deployment guide      |
 | [`.vscode/tasks.json`](.vscode/tasks.json)                                       | One-command local documentation preview             |
