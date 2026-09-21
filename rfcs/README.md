@@ -16,6 +16,12 @@ class is [§3.4 of the Core specification](../spec/judgment-pack-core.md), not t
 and a retrospective one: the gateway's `SPEC.md` and the runtime's decision records govern what it
 describes, and they did so before it was written.
 
+Acceptance and incorporation are different events. [RFC 0000](0000-rfc-process.md) makes acceptance
+the approval of a design at the maturity the RFC names; RFC 0006's text landed in the same merge,
+which is a precedent and not a rule. [RFC 0013](0013-evaluator-error-and-precedence-cases.md) is
+accepted and awaits incorporation: its rows are staged for the `suiteVersion` after `0.2.0-draft`,
+are in no released corpus, and land when a later `specVersion` opens.
+
 The purpose of this directory is to make the project's open design questions *visible* rather than
 to imply they are settled. Concepts that are frequently assumed to be part of Judgment Pack — a
 graph that composes packs, a planner that selects them, an evidence-integration layer, a discovery

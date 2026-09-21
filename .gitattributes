@@ -1,0 +1,5 @@
+# Rows staged for a later suiteVersion are in no corpus (conformance/evaluation/staged/README.md).
+# A release bundle is built with `git archive` (tools/build_release.py), which honors export-ignore,
+# so no bundle ever carries a staged row, whatever is staged when a release is cut.
+conformance/evaluation/staged export-ignore
+conformance/evaluation/staged/** export-ignore

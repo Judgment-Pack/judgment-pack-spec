@@ -33,7 +33,7 @@
       },
       "supportedExtensions": [],
       "expectedErrorClass": "malformed-input",
-      "focus": "an evidence-availability document carrying a member name the pack does not declare is malformed input; the pack is conforming and requires no extension, so nothing else is wrong",
+      "focus": "an evidence-availability document carrying a member name the pack does not declare is malformed input; the pack is conforming and requires no extension, so no other class applies. The facts make the pack's applicability false, so an evaluator that resolves applicability before it has admitted the evidence document returns not-applicable here, where §8.2 requires the refusal first",
       "specSection": "§8.4"
     },
     {

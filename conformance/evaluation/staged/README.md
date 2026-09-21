@@ -12,21 +12,30 @@ reviewed, held to the same checks as released rows, and runnable by hand — unt
 
 - **Not part of any corpus.** A claim of evaluator conformance names a `suiteVersion` and states that
   every row of that corpus passed (Core §3.4.1). No `suiteVersion` contains these rows, so no claim
-  may cite them and no claim is affected by them, in either direction. An implementation that
-  disagrees with a staged row has not failed anything; it has found something worth reporting.
+  may cite them, and what a claim must state about its corpus is unchanged. That is a statement
+  about corpus obligations and about nothing wider. Core §3.4 scopes a claim to every applicable
+  requirement for every admitted input, not to the rows that happen to exist, and these rows restate
+  §8.2 and §8.4 as already released. So an implementation that disagrees with a staged row has not
+  failed a released-corpus row, and it may still be violating the released contract. A disagreement
+  needs adjudicating, not dismissing: either the row is wrong, which is worth reporting while it can
+  still be changed, or the implementation is.
 - **Not frozen.** A staged row may still be changed or withdrawn. Its wording is settled enough to
   review, not settled enough to bind.
 - **Not evidence of conformance.** Running them is implementation experience. The results recorded in
   [RFC 0013](../../../rfcs/0013-evaluator-error-and-precedence-cases.md) are that and nothing more.
-- **Not published with the specification.** The project's site serves the released corpus and its
-  carrier. This directory is work in progress on `main` and is reachable in the repository only.
+- **Not published with the specification, and in no release bundle.** The project's site serves the
+  released corpus and its carrier; its build copies every other JSON file under `conformance/` and
+  skips this directory, and a test holds that nothing under it is served. A release bundle is a
+  `git archive`, and [`.gitattributes`](../../../.gitattributes) marks this directory
+  `export-ignore`, so no bundle carries a staged row whatever is staged when a release is cut. The
+  directory is work in progress on `main`, reachable in the repository and nowhere else.
 
 ## How a staged row lands
 
 When a later `specVersion` opens, each case moves into [`manifest.json`](../manifest.json) as it
 stands, its fixtures move into [`../packs/`](../packs/), the copy of the released fixture is deleted,
-and this directory is emptied. A release should not be cut with rows still staged for it: a row is
-either in that release's corpus or deliberately held for the one after.
+and this directory is emptied. A row left here when a release is cut is simply not in that release:
+it is held for the one after.
 
 ## What is here
 
@@ -52,6 +61,12 @@ to which more than one class applies, where §8.4's fixed order decides which is
 | `error-unsupported-required-extension` | a conforming pack requiring an extension nothing supports | `unsupported-required-extension` |
 | `error-precedence-pack-over-malformed-input` | the nonconforming pack **and** the undeclared member name | `pack-not-conformant` |
 | `error-precedence-malformed-input-over-extension` | the extension-requiring pack **and** the undeclared member name | `malformed-input` |
+
+The second row does one thing more than its name says. Its facts are the released corpus's first
+row's, which make the pack's applicability false, so an evaluator that resolved applicability before
+admitting the evidence document would answer `not-applicable` — a disposition where §8.2 requires
+the refusal first. Every one of the five is, besides, a test that an error is reported *instead of* a
+disposition (§8.4).
 
 None asserts `expectedErrorPhase`. §8.4 requires an implementation to report the class of an
 evaluation error; it does not require it to report a phase, so a row that asserted one would ask for

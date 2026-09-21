@@ -10,13 +10,15 @@
 > written disposition for every finding, is recorded on the pull request that makes it and under
 > [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews).
 >
-> **A lapse this acceptance repairs.** This RFC was merged as a Draft on 2026-08-15
-> ([pull request 64](https://github.com/Judgment-Pack/judgment-pack-spec/pull/64)) without the
-> cross-vendor adversarial review GOVERNANCE requires of a pull request that creates an RFC. That
-> was a lapse, not an exemption: the pull request's "verified, not recalled" list is the drafter
-> checking its own quotations, which the regime does not count. The review recorded on the
-> accepting pull request is the first this RFC has had, and it covers the proposal as well as the
-> disposition.
+> **A lapse this acceptance discloses, and cannot undo.** This RFC was merged as a Draft on
+> 2026-08-15 ([pull request 64](https://github.com/Judgment-Pack/judgment-pack-spec/pull/64))
+> without the cross-vendor adversarial review GOVERNANCE requires of a pull request that creates an
+> RFC. That was a lapse, not an exemption: the pull request's "verified, not recalled" list is the
+> drafter checking its own quotations, which the regime does not count. GOVERNANCE attaches the
+> review to the pull request that makes the change, so nothing done now makes pull request 64 have
+> met its own merge requirement. What is done now is narrower: the omission is on the record, and
+> the review recorded on the accepting pull request — the first this RFC has had — covers the
+> proposal as well as the disposition, so the scrutiny the proposal missed is no longer missing.
 >
 > **What acceptance means here.** The five rows are approved, at draft maturity, for the
 > `suiteVersion` after `0.2.0-draft`. They are **staged, not landed**. The `0.2.0-draft` corpus is
@@ -25,9 +27,14 @@
 > [`conformance/evaluation/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged),
 > held to the released case schema and to the same repository checks as released rows, and they
 > move into the manifest when a later `specVersion` opens. Opening one now was weighed and
-> declined: `specVersion` is exact, so a new version means re-declaring every pack, fixture and
-> example and moving every implementation, and five rows do not pay for that. A staged row is in
-> no corpus and no claim may cite one.
+> declined. `specVersion` is exact, so a new version obliges nobody to migrate — a pack may keep
+> the version it declares and stay checkable against it — but it does mean re-declaring every
+> artifact in this repository that is to target it, and a fresh claim, against the new corpus, from
+> every implementation that chooses to support it. Five rows do not pay for that. A staged row is
+> in no corpus and no claim may cite one; the site does not serve the staged directory and no
+> release bundle carries it. None of that makes a staged row optional reading: these five restate
+> §8.2 and §8.4 as already released, so an implementation that disagrees with one may be violating
+> the released contract without having failed a released row.
 >
 > **The four open questions, decided.**
 >
@@ -46,12 +53,18 @@
 >
 > **What the repository now checks.** The check that every evidence key a case supplies be
 > declared by its pack was unconditional, which no undeclared-key row could pass. It is now
-> conditional on the expected class, and stricter than before: the class a case expects must be
-> the one §8.4's fixed order reports for the case's own inputs, read statically from the pack
-> fixture, the evidence document and the supported extensions. A row that pinned the intuitive,
-> wrong class for case 5 fails in this repository, before any evaluator runs it. Every released row
-> passes unchanged. Eleven deliberate breaks of the staged rows, the fixtures and one released row
-> were each caught.
+> conditional on the expected class. That admits something it used to refuse — a correctly
+> labelled error row — and asks more of everything it still covers: the class a case expects must
+> be the one §8.4's fixed order reports for the case's own inputs, read statically from the pack
+> fixture, the evidence document and the supported extensions, and a case whose inputs nothing
+> refuses may expect none of the three classes decided while admitting them. For the twenty
+> released rows it refuses what the old check refused. A row that pinned the intuitive, wrong class
+> for case 5 fails in this repository, before any evaluator runs it. The check leaves
+> `resource-exhaustion` and implementation-defined classes, which §8.4 permits where no Core class
+> applies, to the case schema. The maintainer attests, and this repository does not show, that
+> fourteen deliberate breaks — of the staged rows, the fixtures, one released row, the site's
+> exclusion and the release bundle's — were each caught, and that one change the check must not
+> refuse was not; the list is in the review record.
 >
 > **Implementation experience, which is not conformance evidence.** On 2026-09-21 both of this
 > project's evaluators were given the five staged cases by hand: the reference runtime 0.22.0, and
@@ -207,9 +220,12 @@ its reason. The questions are kept as asked.*
 
 ## Prior art in this repository
 
-The document-conformance corpus already pairs a positive case with the adversarial one that
+~~The document-conformance corpus already pairs a positive case with the adversarial one that
 breaks it — `carrier-duplicate-root-member` beside `carrier-duplicate-nested-member`, for
-instance. Cases 4 and 5 are the same instinct one layer up: the interesting row is not the one
+instance.~~ *Amended 2026-09-21: that example was wrong, and the review at acceptance caught it.
+Both cases expect `invalid`; neither is a positive case. They are two complementary negative
+cases — the second exists because an implementation that checks duplicate members only at the
+root passes the first — and that is the instinct meant here.* Cases 4 and 5 are the same instinct one layer up: the interesting row is not the one
 where a rule fires, it is the one where two rules could and the order decides.
 
 ## The sections RFC 0000 asks for, supplied at acceptance
@@ -237,12 +253,18 @@ so rather than leave the heading out.
   must pass them, which an implementation that reports the wrong class today would not.
 - **Security and privacy.** The fixtures are synthetic. The rows assert a class identifier and no
   message text, so they invite no disclosure through diagnostics. One point bears on safety rather
-  than privacy: §8.4 exists so that a refusal is never mistaken for a result, and an implementation
-  that reports the wrong class still refuses — these rows test agreement on *which* refusal, not
-  whether one happens.
-- **Conformance.** This proposal is conformance cases: three positive-for-the-class rows and two
-  boundary rows where the order decides. It adds no adversarial row; an input built to make an
-  implementation emit a disposition where an error is due would be one, and is not attempted here.
+  than privacy: §8.4 exists so that a refusal is never mistaken for a result. Every one of these
+  rows requires an error *instead of* a disposition, so each tests that a refusal happens as well
+  as which one it is, and an implementation that answers any of them with a disposition has done
+  what §8.4 forbids by name: substituted `unresolved`, `not-applicable` or an outcome for the error.
+- **Conformance.** This proposal is conformance cases: three rows that show one class each and two
+  boundary rows where the order decides. One of the three is adversarial in effect, which the
+  proposal did not notice and the review at acceptance did: case 2's facts are the released
+  corpus's first row's, which make the pack's applicability false, so an evaluator that resolves
+  applicability before it has admitted the evidence document answers `not-applicable` — a
+  disposition where an error is due, and the trap §8.2's order exists to close. The staged row's
+  `focus` says so. No row is built to exhaust a limit, and none carries a malformed document the
+  carrier cannot yet express.
 - **Implementation.** Two evaluators, the reference runtime and the clean-room Python evaluator,
   both by this project and neither independent of the other in RFC 0006's sense. RFC 0000's bar of
   two independent implementations applies to a stable normative feature and is not claimed here;

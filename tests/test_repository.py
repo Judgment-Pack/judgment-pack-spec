@@ -374,6 +374,14 @@ def evaluate_case(
     return "valid", []
 
 
+# §8.4: the Core classes decided while admitting the inputs (§8.2), in the order they are evaluated.
+PREFLIGHT_ERROR_CLASSES = (
+    "pack-not-conformant",
+    "malformed-input",
+    "unsupported-required-extension",
+)
+
+
 def preflight_error_class(
     pack_diagnostics: list[Diagnostic], pack: Any, case: dict[str, Any]
 ) -> str | None:
@@ -697,11 +705,16 @@ class RepositoryConformanceTests(unittest.TestCase):
                 called_for = preflight_error_class(pack_diagnostics[case["pack"]], pack, case)
                 expected_class = case.get("expectedErrorClass")
                 if called_for is None:
-                    self.assertIn(
+                    # Nothing the case states refuses its inputs, so the three classes decided while
+                    # admitting them are ruled out. Anything else stays the schema's business:
+                    # `resource-exhaustion` is reached while evaluating, and §8.4 permits a documented
+                    # implementation-defined class where no Core class applies, neither of which this
+                    # repository can decide without an evaluator.
+                    self.assertNotIn(
                         expected_class,
-                        {None, "resource-exhaustion"},
-                        f"nothing this case states refuses its inputs, so §8.4 gives no preflight "
-                        f"class to expect: {expected_class}",
+                        PREFLIGHT_ERROR_CLASSES,
+                        "nothing this case states refuses its inputs, so §8.4 gives it no preflight "
+                        "class to expect",
                     )
                 else:
                     self.assertEqual(
@@ -812,7 +825,10 @@ class RepositoryConformanceTests(unittest.TestCase):
     def test_staged_evaluation_cases_are_well_formed_against_their_pack(self) -> None:
         self._check_evaluation_cases(self._staged_cases(), EVALUATION_STAGED)
 
-    def test_staged_cases_cover_every_staged_pack_fixture_once(self) -> None:
+    def test_staged_cases_reference_every_staged_pack_fixture(self) -> None:
+        # Every committed fixture is referenced, and every reference is committed. A fixture may be
+        # referenced more than once — the precedence rows reuse the single-class rows' fixtures on
+        # purpose — so this is set equality, not a count.
         referenced = {case["pack"] for case in self._staged_cases()}
         committed = {
             f"packs/{path.name}" for path in (EVALUATION_STAGED / "packs").glob("*.json")
@@ -833,20 +849,27 @@ class RepositoryConformanceTests(unittest.TestCase):
             with self.subTest(pack=path.name):
                 self.assertEqual((EVALUATION / "packs" / path.name).read_bytes(), path.read_bytes())
 
-    def test_staged_non_conformant_fixture_fails_for_exactly_one_reason(self) -> None:
+    def test_staged_non_conformant_fixture_fails_for_its_one_stated_reason(self) -> None:
         # RFC 0013: "The pack must fail for one stated reason. A fixture that is invalid three ways
-        # cannot show which one the class was reported for."
+        # cannot show which one the class was reported for." One reason is not enough to hold: a
+        # fixture that came to fail for a *different* single reason would leave its description, its
+        # rows' focus and the adoption record false. The stated reason is one outcome where §4
+        # requires two, so that is what is asserted.
         non_conformant = {
             case["pack"]
             for case in self._staged_cases()
             if case.get("expectedErrorClass") == "pack-not-conformant"
         }
-        self.assertTrue(non_conformant)
-        for name in sorted(non_conformant):
-            with self.subTest(pack=name):
-                pack = strict_json_loads((EVALUATION_STAGED / name).read_text(encoding="utf-8"))
-                diagnostics = structural_diagnostics(self.validator, pack) + semantic_diagnostics(pack)
-                self.assertEqual(1, len(diagnostics), [item.message for item in diagnostics])
+        self.assertEqual({"packs/error-single-outcome.json"}, non_conformant)
+        pack = strict_json_loads(
+            (EVALUATION_STAGED / "packs" / "error-single-outcome.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(1, len(pack["outcomes"]))
+        diagnostics = structural_diagnostics(self.validator, pack) + semantic_diagnostics(pack)
+        self.assertEqual(
+            [("JPS-STRUCTURE-COLLECTION-ARITY", "/outcomes")],
+            [(item.code, item.path) for item in diagnostics],
+        )
 
     def test_relative_markdown_links_resolve(self) -> None:
         link_pattern = re.compile(r"\[[^\]]*\]\(([^)]+)\)")

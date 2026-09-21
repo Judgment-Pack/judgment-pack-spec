@@ -152,10 +152,12 @@ Stated rather than implied, because a seed corpus that hides its gaps is worse t
   bytes — is **deferred to the next `suiteVersion`**; it is a carrier change, and this one is frozen at
   release (Core §3.4.1). This repository's own checks used to require every evidence key a case supplies
   to be declared by its pack, which an undeclared-key row cannot satisfy. That check is now conditional
-  on the expected error class, exactly as the pack-conformance check already was, and it is stricter
-  than the one it replaced: the class a case expects must be the one §8.4's fixed order reports for the
-  case's own inputs, and a case whose inputs nothing refuses may expect no preflight class. Every
-  released row passes it unchanged. The `workBudget` and `expectedErrorPhase`
+  on the expected error class, exactly as the pack-conformance check already was. It admits what it
+  used to refuse, a correctly labelled error row, and asks more of everything it still covers: the
+  class a case expects must be the one §8.4's fixed order reports for the case's own inputs, and a
+  case whose inputs nothing refuses may expect none of the three classes decided while admitting
+  them. For the released rows it refuses what the old check refused, and every one of them passes it
+  unchanged. The `workBudget` and `expectedErrorPhase`
   members were added now, ahead of the rows that will use them, precisely so that those rows do not need
   another carrier change; no row in this version uses either.
 - **Three mandatory operators have no row.** §7.4 requires every operator of an implementation claiming

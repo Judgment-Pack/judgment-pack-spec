@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -96,6 +97,36 @@ class ReleaseBuilderTests(unittest.TestCase):
                         self.assertIn(expected, str(raised.exception))
         finally:
             BUILD_RELEASE.git = original
+
+    def test_release_bundle_leaves_staged_evaluation_rows_out(self) -> None:
+        # The bundle is a `git archive` of BUNDLE_PATHS, and those include conformance/ whole. Rows
+        # staged for a later suiteVersion are in no corpus, so .gitattributes marks their directory
+        # export-ignore: no bundle carries a staged row, whatever is staged when a release is cut.
+        # The released corpus beside them must stay in the bundle, so it is checked as the control.
+        self.assertIn("conformance", BUILD_RELEASE.BUNDLE_PATHS)
+        staged_root = ROOT / "conformance" / "evaluation" / "staged"
+        staged = sorted(
+            path.relative_to(ROOT).as_posix() for path in staged_root.rglob("*") if path.is_file()
+        )
+        self.assertTrue(staged, "nothing is staged; this test can go with the directory")
+        released = "conformance/evaluation/manifest.json"
+        try:
+            completed = subprocess.run(
+                ["git", "check-attr", "export-ignore", "--", *staged, released],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except (OSError, subprocess.CalledProcessError) as error:
+            self.skipTest(f"git cannot read attributes here: {error}")
+        attributes = dict(
+            line.rsplit(": export-ignore: ", 1) for line in completed.stdout.splitlines()
+        )
+        for path in staged:
+            with self.subTest(path=path):
+                self.assertEqual("set", attributes.get(path))
+        self.assertEqual("unspecified", attributes.get(released))
 
     @staticmethod
     def _release_tree(directory: Path, version: str) -> Path:
