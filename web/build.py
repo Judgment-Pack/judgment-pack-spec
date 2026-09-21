@@ -18,6 +18,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 import markdown
 from markdown.extensions import Extension
+from markdown.inlinepatterns import SimpleTagInlineProcessor
 from markdown.treeprocessors import Treeprocessor
 from jsonschema import Draft202012Validator
 
@@ -717,6 +718,29 @@ class LinkRewriteExtension(Extension):
         )
 
 
+class StrikethroughExtension(Extension):
+    """Render ``~~text~~`` as ``<del>text</del>``, as GitHub does.
+
+    The RFCs correct themselves in place: a superseded sentence is struck and a dated note follows
+    it. Python-Markdown has no strikethrough, so on the site those sentences appeared unstruck,
+    wrapped in literal tildes, and a reader could not tell the withdrawn claim from the live one.
+    The rule is GitHub's: the delimiters hug non-space text, so ``a ~~ b`` and a lone ``~~`` stay
+    literal. A strike may span lines within a paragraph, and emphasis inside it still renders.
+    """
+
+    PATTERN = r"(~~)(?=\S)(.+?)(?<=\S)~~"
+
+    def extendMarkdown(self, md: markdown.Markdown) -> None:  # noqa: N802
+        # Priority 175 sits above emphasis (60-ish) and below code spans and escapes (190, 180),
+        # so tildes inside `code` stay literal. Python-Markdown does not count `~` among its
+        # escapable characters, so it is added: without that, `\~~` would still open a strike.
+        if "~" not in md.ESCAPED_CHARS:
+            md.ESCAPED_CHARS.append("~")
+        md.inlinePatterns.register(
+            SimpleTagInlineProcessor(self.PATTERN, "del"), "jps-strikethrough", 175
+        )
+
+
 def strip_front_matter(text: str) -> str:
     if not text.startswith("---\n"):
         return text
@@ -818,6 +842,7 @@ def render_markdown(
             "extra",
             "sane_lists",
             "toc",
+            StrikethroughExtension(),
             LinkRewriteExtension(source, output, routes),
         ],
         extension_configs={

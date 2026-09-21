@@ -229,6 +229,10 @@ here.
   `0.2.0-draft`'s evaluator class and a runtime that evaluates as well as validates.
 - RFC 0002: the runtime's graph prototype is no longer described as living unmerged on a branch. The
   reviewed commit stays pinned; the surface has since merged, shipped, and grown past it.
+- The site now renders `~~struck~~` text as a deletion, as GitHub does. The RFCs correct themselves
+  in place — a superseded sentence is struck and a dated note follows it — and the site's renderer
+  had no strikethrough, so on five published RFC pages a withdrawn claim appeared unstruck, wrapped
+  in literal tildes. A test holds that every strike in an RFC's source is a `<del>` on its page.
 
 ## `0.1.0-draft` — 2026-07-22
 

@@ -221,6 +221,27 @@ class StaticSiteTests(unittest.TestCase):
         ]
         self.assertEqual([], published)
 
+    def test_struck_text_in_an_rfc_is_struck_on_its_page(self) -> None:
+        # The RFCs correct themselves in place: a superseded sentence is wrapped in ~~tildes~~ and a
+        # dated note follows. GitHub renders that struck. If the site renders the tildes literally,
+        # a withdrawn claim reads as a live one — so every strike in an RFC's source must come out as
+        # a <del> element, and no literal delimiter may survive outside code.
+        code = re.compile(r"<(code|pre)\b.*?</\1>", re.S)
+        struck_sources = 0
+        for source in sorted((ROOT / "rfcs").glob("[0-9]*.md")):
+            text = re.sub(r"`[^`\n]*`", "", source.read_text(encoding="utf-8"))
+            strikes = len(re.findall(r"~~(?=\S).+?(?<=\S)~~", text, re.S))
+            if not strikes:
+                continue
+            struck_sources += 1
+            page = self.output / "rfcs" / source.stem / "index.html"
+            with self.subTest(rfc=source.name):
+                self.assertTrue(page.is_file())
+                html = code.sub("", page.read_text(encoding="utf-8"))
+                self.assertNotIn("~~", html, "a strike delimiter reached the page as text")
+                self.assertEqual(strikes, html.count("<del>"))
+        self.assertTrue(struck_sources, "no RFC uses a strike; this test has nothing to hold")
+
     def test_every_manifest_case_has_a_browsable_page(self) -> None:
         manifest = json.loads(
             (ROOT / "conformance" / "manifest.json").read_text(encoding="utf-8")
