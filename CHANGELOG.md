@@ -7,6 +7,15 @@ here.
 
 ### Added
 
+- The field guide gains **When rules could disagree**, informative authoring guidance for a
+  consequence of §8 that two independent encodings of real policy each had to discover: the format
+  has no rule priority, so a pack that holds both an *allowed* rule and a *not allowed* rule answers
+  `conflict` whenever one of each is true. It gives the shapes that work — detectors that all name
+  one outcome with the ordinary outcome as `fallbackOutcome`; the policy's own ordering as an
+  exception; disjoint conditions — says when `conflict` is the right answer, and names the trap in
+  the first shape: a detector with `onUnknown: ignore` lets the fallback answer for a check that
+  never ran. This is the guidance [RFC 0007](rfcs/0007-determination-boundary.md) (finding E4)
+  said did not exist. Nothing normative changes.
 - [RFC 0013](rfcs/0013-evaluator-error-and-precedence-cases.md) is `Accepted`, and its five rows —
   the first to use `expectedErrorClass`, two of them inputs where more than one §8.4 class applies
   and the fixed order decides — are **staged** in
