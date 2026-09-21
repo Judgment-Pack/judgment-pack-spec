@@ -489,6 +489,99 @@ dispositions after canonicalization. If an evaluation cannot be completed — a 
 unsupported required extension, a malformed facts or evidence document, a limit reached — the result is a named
 **error**, never a disposition, and never a quietly truncated one.
 
+## When rules could disagree
+
+<div class="notice notice-info"><strong>Authoring guidance, not a rule.</strong> Nothing in this section is
+required. It describes a consequence of the resolution model that authors have had to discover for
+themselves, and the shapes that work.</div>
+
+The format has **no rule priority**. There is no priority field, array order means nothing, and a conflict is
+never tie-broken. When true rules name more than one distinct outcome, the result is `unresolved` with reason
+`conflict` (Core §8, step 8 — the step numbers in this section are the specification's ten, not the shorter
+summary list above). That is deliberate: a pack that silently preferred one rule over another would
+be deciding something its author never wrote down.
+
+It has a consequence that surprises people writing their first real pack. Suppose a policy is a list of
+independent provisions, and you write one rule per provision that says *this is allowed* and one per
+prohibition that says *this is not*. As soon as one of each is true — which, with independent provisions, is
+routine — the pack answers `conflict`. It is not wrong. It is telling you that you wrote two answers and no
+way to choose. Two independent encodings of real policy ran into this, and arrived at the two shapes below
+([RFC 0007](../rfcs/0007-determination-boundary.md), finding E4).
+
+### Shape 1: detectors and a fallback
+
+Make every rule detect **one way the answer is the exceptional outcome**, have them all name that **same**
+outcome, and reach the ordinary outcome only through `fallbackOutcome`.
+
+```json
+{
+  "outcomes": [
+    { "id": "permitted", "label": "Permitted", "description": "No provision is violated." },
+    { "id": "violation", "label": "Violation", "description": "At least one provision is violated." }
+  ],
+  "fallbackOutcome": "permitted",
+  "rules": [
+    {
+      "id": "exceeds-cap",
+      "description": "The amount exceeds the cap.",
+      "when": { "op": "fact", "path": "/amount/exceedsCap", "operator": "equals", "value": true },
+      "outcome": "violation",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "outside-window",
+      "description": "The request falls outside the permitted window.",
+      "when": { "op": "fact", "path": "/request/outsideWindow", "operator": "equals", "value": true },
+      "outcome": "violation",
+      "onUnknown": "escalate"
+    }
+  ]
+}
+```
+
+Why it works: several true rules that name the same outcome are compatible (step 9), so any number of
+detectors can fire together, and each one that fires is a citation of the provision it encodes. When none
+fires, no rule contributes a candidate and the fallback applies (step 10). One encoding of an
+arithmetic-dense regulation ended as sixty-one such detectors.
+
+**The trap in this shape is `onUnknown`.** The fallback applies whenever no rule contributes a candidate, and
+an unknown rule with `onUnknown: ignore` contributes none and does not block. So a detector that could not
+see its facts, and ignores that, lets the pack answer *permitted* — not because nothing was violated, but
+because nothing could be checked. In this shape a detector should almost always be `onUnknown: escalate`,
+which blocks both a candidate and the fallback (step 7). Use `ignore` only for a detector whose absence of
+information genuinely cannot change the answer, and say why in its `rationale`.
+
+### Shape 2: order as an exception
+
+When the policy itself states an order — *if any part of the trip has been flown, hand off; otherwise …* —
+the overriding branch is an **exception**, because exceptions are the one place the format has precedence.
+They are evaluated before the rules, and their effects win:
+
+- `escalate` stops with `unresolved` and asks for a handoff, whatever the rules would have said;
+- `force-outcome` produces its outcome without the rules being evaluated at all;
+- `suppress-rule` removes one named rule and lets the rest decide.
+
+One encoding of a qualitative customer-service policy came out as a single `escalate` exception for the
+overriding case, one rule built with `any` for the ordinary case, and a fallback. If two `force-outcome`
+exceptions could both be true and name different outcomes, that is a conflict too (step 5); the precedence
+is between exceptions and rules, not among exceptions.
+
+### Shape 3: make the conditions disjoint
+
+You can also write each rule's condition so that it excludes the others — *allowed* becomes `all` of its own
+test and `not` of each prohibition's. For two or three rules this is the most readable form. It grows
+quickly, and it interacts with three-valued logic: if a prohibition's condition is `unknown`, then `not` of it
+is `unknown`, and so is the `all` that contains it, so the *allowed* rule is unknown too and its `onUnknown`
+decides what happens. That is usually what you want; make sure it is.
+
+### When `conflict` is the right answer
+
+Do not engineer a conflict away when the policy really is ambiguous. If two provisions genuinely apply and
+the source gives no way to choose, `unresolved` with reason `conflict` is the honest result, and listing
+`conflict` in `escalation.triggers` hands exactly that case to a person. The shapes above are for packs where
+the author knows the answer and the format needs to be told; they are not a way to make a pack look more
+decisive than its source.
+
 ## JSON Pointer and decimal strings
 
 A `fact.path` is a JSON Pointer matching:
