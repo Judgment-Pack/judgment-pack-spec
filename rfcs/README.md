@@ -42,7 +42,7 @@ stable feature requires two independent implementations and conformance cases.
 | --- | --- | --- | --- |
 | [0000](0000-rfc-process.md) | Request for Comments process | Active | Process |
 | [0001](0001-pack-manifest.md) | Pack manifest | Draft | Specification (format) |
-| [0002](0002-judgment-graph.md) | Judgment Graph composition | Draft | Specification (format) |
+| [0002](0002-judgment-graph.md) | Judgment Graph composition | Draft | Specification (format) — scoped to the dataflow seam: one decision's outcome as another's input |
 | [0003](0003-evidence-reference.md) | Evidence reference | Draft | Specification (format) |
 | [0004](0004-planner-interface.md) | Planner interface | Rejected | Product — the specification standardizes no part of a planner |
 | [0005](0005-pack-discovery.md) | Pack discovery | Draft | Specification (format) + product (service) |
