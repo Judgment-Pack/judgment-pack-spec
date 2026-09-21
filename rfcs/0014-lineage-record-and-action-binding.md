@@ -1,11 +1,59 @@
 # RFC 0014: The lineage record and the action binding — how a decision cites what it read, and an action cites what it decided
 
-- Status: Draft
+- Status: Accepted
 - Type: Exploratory (research line — a cross-project artifact: the gateway's version 3 receipt and its verifier's join, the reference runtime's citation members; outside JPS)
 - Created: 2026-09-14
+- Accepted: 2026-09-21
 
-> This is an open proposal, not part of the specification. See
-> [RFC 0000](0000-rfc-process.md) for the process and evidence bar.
+> **Adoption record.** This record is accepted by the single maintainer under the interim review
+> regime ([RFC 0009](0009-interim-review-regime.md)). The review of this disposition, with a
+> written disposition for every finding, is recorded on the pull request that makes it and under
+> [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews),
+> beside the four rounds under which the record was first merged as a Draft.
+>
+> **What acceptance means here, and what it does not.** Under [RFC 0000's](0000-rfc-process.md)
+> cross-project provision, acceptance endorses this design record as written. It confers no
+> authority over the gateway, the runtime or the demo, each of which adopted its part by its own
+> process before this record's acceptance — the gateway and the runtime before it was filed, the
+> demo hours after; nothing here becomes part of JPS; and it is not a stability
+> claim. RFC 0000's bar of two *independent* implementations is unmet and is not claimed: every
+> implementation named below is this project's, and *Implementation* says in what sense each is
+> and is not independent.
+>
+> **The process question this record raised is ruled on here.** Unresolved 8 asked whether the
+> cross-project provision, written for a design question that deserves visibility before any
+> implementation exists, covers a record filed after the parts were built. It does, and the pull
+> request that accepts this record amends RFC 0000 to say so. The reason is the one the scope note
+> gives: a binding that spans three repositories can be read, reviewed and objected to as one
+> design only if it is written down in one place, and that holds whether the parts exist yet or
+> not. RFC 0000 attaches three conditions: the record says that it is retrospective, so that it is
+> never read as having governed the work it describes; it describes what exists rather than
+> proposing it; and it states the implementation, release and review standing of each part. This
+> record met the first two as filed and states implementation and release standing under
+> *Evidence*. Review standing it stated for the executor and the two runtime decisions only, and
+> it is completed here: the pull requests that landed receipt version 3 in the gateway's `SPEC.md`
+> ([101](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/101)), its verifier
+> ([102](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/102)), the join from the
+> record's side ([112](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/112)), the
+> executor ([114](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/114)), the agreement
+> test ([116](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/116)) and `verify-ts`
+> ([129](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/129)) each carry a
+> cross-vendor review record under the gateway's own regime, as the runtime's pull requests 145
+> and 147 do under the runtime's; the demo's acts are demonstrations outside any such regime and
+> carry none. Those are the owning repositories' reviews of their own changes, not reviews of
+> this record.
+>
+> **What changed between filing and acceptance.** The record was filed on 2026-09-14, and four
+> developments since are recorded in place, each marked *amended 2026-09-21*. One overtook a
+> statement the record made without qualification and that statement is struck: the golden-record
+> agreement test, called unbuilt, is built for one platform (*Evidence*, Unresolved 5). One stands
+> beside statements that remain true: a second verifier of version 3, its join included, now
+> exists, and because it is neither independent nor clean-room, the record's statements that no
+> independent implementation exists and that no clean-room one has been built for the join are
+> kept (*Evidence*, *Implementation*). Two bring up to date statements the record had marked "at
+> the time of writing": runtime 0.21.0 is released, and the demo's Acts 7 and 8 are merged
+> (*Evidence*). One statement was checked and stands as written: the gateway has still cut no
+> release that contains version 3.
 >
 > **Scope note, load-bearing.** Nothing this RFC proposes lands in JPS Core, a profile, a
 > conformance class, or any other RFC's specification-track surface. Every part it records lives
@@ -24,11 +72,12 @@
 > repositories, each of which decides by its own process. Unusually for a record in this
 > directory, the parts already exist: this record is written after the fact, as the runtime's
 > decision records are, so that a binding that spans three repositories can be read, reviewed and
-> objected to as one design rather than reconstructed from three. RFC 0000 describes the
+> objected to as one design rather than reconstructed from three. RFC 0000 described the
 > provision for a design question that deserves visibility *before* any implementation exists,
-> and RFCs 0010 and 0011 were filed prospectively; this record therefore **seeks** the
-> provision's application to retrospective documentation and lists whether it covers that case
-> as an unresolved process question (Unresolved 8).
+> and RFCs 0010 and 0011 were filed prospectively; this record therefore **sought** the
+> provision's application to retrospective documentation and listed whether it covers that case
+> as an unresolved process question (Unresolved 8) — *amended 2026-09-21:* ruled on at
+> acceptance, in the adoption record above, and RFC 0000 now says that it does.
 
 ## Summary
 
@@ -111,7 +160,8 @@ none of it is a sketch, and not all of it is released.
   writes no record, citations included. Runtime ADR-0034: a matrix row may carry the same `cites` under `matrixVersion "3"`,
   so a row transcribed under a receipted page can name that receipt. ADR-0033 shipped in runtime
   0.20.0; ADR-0034 is merged and tagged for 0.21.0, whose release was in progress at the time of
-  writing. Each carries cross-vendor review records on its pull request: 145, eight rounds and
+  writing — *amended 2026-09-21:* runtime 0.21.0 was released on 2026-09-14 and carries
+  ADR-0034. Each carries cross-vendor review records on its pull request: 145, eight rounds and
   thirty-one findings; 147, seven rounds, whose closing summary counts nineteen findings where
   its round tables itemize seventeen — the discrepancy is the source's and is left as found.
 - **Worked examples** — the demo's Act 7
@@ -124,14 +174,39 @@ none of it is a sketch, and not all of it is released.
   it builds on Act 7): a receipted read, a judgment citing it, an action minted under a person's
   token, the three ledgers verified together, and the judgment rewritten after the fact to show
   the action receipt outliving it. These are demonstrations, not conformance evidence, and their
-  standing is as stated, not merged.
+  standing is as stated, not merged — *amended 2026-09-21:* both have since merged, on
+  2026-09-14 (Act 7 as [pull request 70](https://github.com/Judgment-Pack/judgment-pack-demo/pull/70),
+  Act 8 as [pull request 71](https://github.com/Judgment-Pack/judgment-pack-demo/pull/71)). They
+  remain demonstrations, not conformance evidence.
 
 What the evidence does **not** include, said here so the *Implementation* section is not
 misread: no second, independent implementation of the version 3 verifier exists; the runtime
-is the only writer of records that cite; and the golden-record agreement test the gateway's
+is the only writer of records that cite; ~~and the golden-record agreement test the gateway's
 [ADR-0001](https://github.com/Judgment-Pack/judgment-pack-gateway/blob/main/docs/adr/0001-one-engine-four-processes.md)
 names — one record fetched through both adapter shapes deriving to byte-identical facts — is a
-stated design and has not been built.
+stated design and has not been built.~~
+
+*Amended 2026-09-21 — the first and second statements stand, the third was overtaken, and
+nothing here meets a bar.* The first stands with a development beside it: a second verifier of
+version 3 now exists, and it is not independent. It is the gateway's `verify-ts`
+([gateway #129](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/129), merged
+2026-09-15): written in TypeScript from `SPEC.md` and the frozen corpus, it verifies receipt
+versions 2 and 3 and resolves the join in both directions (§4 steps 5–7); the gateway's CI
+holds it to every canonicalization and store vector through the corpus's process contract, and
+its own tests run the corpus's Ed25519 vectors. Its own README says what
+that makes it: its author had earlier changed the reference's registry handling, so it "is not a
+clean-room implementation in the strict sense", and it leaves the question to the reader:
+"Whether that meets a two-implementation bar is for whoever holds the bar to judge." This record
+judges that it does not meet RFC 0000's bar
+of *independent* implementations, and that it is nonetheless the first evidence that the join is
+specifiable from the text. The third statement was overtaken: the golden-record agreement test
+is built
+([gateway #116](https://github.com/Judgment-Pack/judgment-pack-gateway/pull/116), merged
+2026-09-14; design note
+[`both-paths-agreement.md`](https://github.com/Judgment-Pack/judgment-pack-gateway/blob/main/docs/design/both-paths-agreement.md)):
+it establishes ADR-0001's agreement "for one platform and two records" — Postgres — and its note
+lists the value types it does not cover. The second stands as written: the runtime is still the
+only writer of records that cite.
 
 ## Specification (sketch) — the join as built
 
@@ -354,14 +429,21 @@ record does not promote them.
 ## Implementation
 
 Two implementations exist and are not independent: the gateway's Go verifier and executor, and
-the runtime's Go record writer, both by this project. A clean-room second implementation of the
+the runtime's Go record writer, both by this project. (*Amended 2026-09-21:* three bodies of code
+now, none independent — the gateway's TypeScript verifier `verify-ts`, also by this project, is
+described under *Evidence*.) A clean-room second implementation of the
 verifier was built for receipt version 2 from the corpus alone — which is what exposed that the
 format had never been written down and produced `SPEC.md` §1 — and none has been built for
-version 3's join. The two-independent-implementations bar of [RFC 0000](0000-rfc-process.md)
+version 3's join. (*Amended 2026-09-21:* that stands. `verify-ts` implements the join and by
+its own account is not clean-room; the questions its author had to settle are in its
+[`AMBIGUITIES.md`](https://github.com/Judgment-Pack/judgment-pack-gateway/blob/main/verify-ts/AMBIGUITIES.md).)
+The two-independent-implementations bar of [RFC 0000](0000-rfc-process.md)
 is therefore **not met** for anything here, and this record asks for endorsement of a design
 record, not for acceptance of a stable feature. A plausible second implementation is the same
 exercise again: a verifier written from `SPEC.md` §1.2a and §4 and the version 3 corpus alone,
-by someone with no access to the Go code, whose disagreements would be the finding.
+by someone with no access to the Go code, whose disagreements would be the finding. That
+exercise is still owed: `verify-ts` was written to the text by an author who knew part of the
+reference.
 
 ## Unresolved questions
 
@@ -379,7 +461,9 @@ by someone with no access to the Go code, whose disagreements would be the findi
    weakening what the gateway's own verifier holds — a study, preregistered, with intervals.
 4. **A JPS-level member.** Only if two independent runtimes write records that cite. Until then
    the grammar is the gateway's and the record member is the runtime's.
-5. **The both-paths agreement.** The golden-record test ADR-0001 names is unbuilt, and
+5. **The both-paths agreement.** The golden-record test ADR-0001 names ~~is unbuilt~~ is built
+   for one platform and two records (*amended 2026-09-21;* see *Evidence*) — what stays open is
+   every platform and value type beyond those — and
    [RFC 0003](0003-evidence-reference.md)'s two-back-end bar — two runtimes with different back
    ends resolving the same *references* — is not what the gateway's two adapters are: they
    acquire bytes for operator-named sources and resolve no pack reference. This record does
@@ -392,6 +476,8 @@ by someone with no access to the Go code, whose disagreements would be the findi
    canonical form, at the cost of the verifier interpreting records, and whether a citation
    should bind position or sequence at all, are questions this record leaves open; for now the
    join is by bytes alone, and says so.
-8. **Retrospective records under RFC 0000.** The cross-project provision speaks of visibility
+8. ~~**Retrospective records under RFC 0000.** The cross-project provision speaks of visibility
    before an implementation exists. Whether it covers a record filed after the parts were built,
-   as this one is, is a process question for the maintainer's disposition of this record.
+   as this one is, is a process question for the maintainer's disposition of this record.~~
+   **Ruled on at acceptance, 2026-09-21: it does.** The adoption record gives the reason and the
+   condition, and [RFC 0000](0000-rfc-process.md) is amended in the same pull request.

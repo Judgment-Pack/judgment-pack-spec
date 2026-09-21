@@ -53,6 +53,14 @@ over the owning repository, which makes its own adoption decision by its own pro
 recorded this way becomes part of JPS by being recorded.
 [RFC 0010](0010-gateway-signing-identity.md) is the first such record.
 
+The provision also covers a **retrospective** record: one filed after its parts were built, when a
+design that spans more than one repository would otherwise have to be reconstructed from each of
+them. Such a record says that it is retrospective, describes what exists rather than proposing it,
+and states the implementation, release and review standing of each part. Its acceptance endorses
+the record as an account of the design and ratifies nothing in the owning repositories, whose
+adoption decisions are their own. [RFC 0014](0014-lineage-record-and-action-binding.md) is the first such record;
+the question was raised by that record and ruled on at its acceptance.
+
 ## Review
 
 Research-preview RFCs remain open for public comment for a reasonable period based on complexity.

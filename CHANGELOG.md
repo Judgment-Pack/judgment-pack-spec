@@ -104,6 +104,19 @@ here.
   `X-Robots-Tag: noindex` response while canonical schema URLs remain available. The deployment guide
   also forbids cloning the intentionally `noindex` preview artifact to live and requires an explicit
   production build plus indexing checks.
+- [RFC 0014](rfcs/0014-lineage-record-and-action-binding.md) (the lineage record and the action
+  binding) is `Accepted` — the first accepted cross-project record, and a retrospective one.
+  Acceptance endorses the record as an account of a design the gateway and the runtime had already
+  adopted by their own processes; it confers no authority over them, makes nothing part of JPS, and
+  claims no stability. The record's own process question — whether
+  [RFC 0000's](rfcs/0000-rfc-process.md) cross-project provision covers a record filed after its
+  parts were built — is ruled on, and RFC 0000 now says that it does and on what conditions. Four
+  developments since the record was filed on 2026-09-14 are recorded in place. One overtook a
+  statement and that statement is struck: the golden-record agreement test, called unbuilt, is
+  built for one platform. One stands beside statements that remain true: a second verifier of
+  receipt version 3 exists and is neither independent nor clean-room. Two update statements marked
+  "at the time of writing": runtime 0.21.0 is released, and the demo's Acts 7 and 8 are merged. The
+  descriptions of this directory no longer call it open proposals only.
 - Version identifiers move to `0.2.0-draft`: Core prose, the structural schema (`$id` and the exact
   `specVersion` constant), the document-conformance manifest, every example, and every fixture. The
   document format is unchanged, so a `0.1.0-draft` pack is unchanged in representation and
