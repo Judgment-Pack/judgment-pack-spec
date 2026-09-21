@@ -374,6 +374,22 @@ def evaluate_case(
     return "valid", []
 
 
+def pack_conformance_diagnostics(validator: Draft202012Validator, pack: Any) -> list[Diagnostic]:
+    """Why a parsed pack is not a semantically conforming document (§3.3), or an empty list.
+
+    The layers are ordered, as in `evaluate_case`: the semantic checks read a document the
+    structural layer has already accepted, and are not run on one it refused. That is §3.3's own
+    layering, and it is also what keeps this function total. `semantic_diagnostics` indexes into
+    `outcomes`, `rules`, `evidenceRequirements` and `metadata` as the schema shapes them, so on a
+    pack where one of those is `null` or a string it raises instead of reporting — and a fixture
+    whose whole point is to be nonconforming is exactly where such a shape turns up.
+    """
+    diagnostics = structural_diagnostics(validator, pack)
+    if diagnostics:
+        return diagnostics
+    return semantic_diagnostics(pack)
+
+
 # §8.4: the Core classes decided while admitting the inputs (§8.2), in the order they are evaluated.
 PREFLIGHT_ERROR_CLASSES = (
     "pack-not-conformant",
@@ -676,9 +692,7 @@ class RepositoryConformanceTests(unittest.TestCase):
                     )
                 if case["pack"] not in packs:
                     pack = strict_json_loads(pack_path.read_text(encoding="utf-8"))
-                    diagnostics = structural_diagnostics(
-                        self.validator, pack
-                    ) + semantic_diagnostics(pack)
+                    diagnostics = pack_conformance_diagnostics(self.validator, pack)
                     if expects_non_conformant_pack:
                         self.assertNotEqual(
                             [],
@@ -782,6 +796,41 @@ class RepositoryConformanceTests(unittest.TestCase):
         fixture = (EVALUATION / "packs" / "data-request-intake-triage.json").read_bytes()
         self.assertEqual(example, fixture)
 
+    def test_pack_conformance_diagnostics_is_layered_and_total(self) -> None:
+        # The evaluation-case checks call this on every pack fixture, the deliberately nonconforming
+        # ones included. It must report, never raise, whatever shape the pack has: a fixture written
+        # to fail structurally is exactly where a member turns out to be `null` or a string.
+        conforming = strict_json_loads(
+            (EVALUATION / "packs" / "direct-exception-escalation.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual([], pack_conformance_diagnostics(self.validator, conforming))
+
+        for member, value in (
+            ("evidenceRequirements", None),
+            ("outcomes", None),
+            ("rules", "not-an-array"),
+            ("metadata", None),
+            ("exceptions", 7),
+        ):
+            with self.subTest(member=member, value=value):
+                broken = json.loads(json.dumps(conforming))
+                broken[member] = value
+                diagnostics = pack_conformance_diagnostics(self.validator, broken)
+                self.assertTrue(diagnostics, "a structurally invalid pack reports why")
+                self.assertTrue(
+                    all(item.code.startswith("JPS-STRUCTURE-") for item in diagnostics),
+                    [item.code for item in diagnostics],
+                )
+
+        # A structurally clean pack still reaches the semantic layer: a rule that names an outcome
+        # the pack does not declare passes the schema and must be reported here.
+        dangling = json.loads(json.dumps(conforming))
+        dangling["rules"][0]["outcome"] = "undeclared-outcome"
+        self.assertEqual([], structural_diagnostics(self.validator, dangling))
+        semantic = pack_conformance_diagnostics(self.validator, dangling)
+        self.assertTrue(semantic, "the semantic layer runs once the structural layer is clean")
+        self.assertFalse(any(item.code.startswith("JPS-STRUCTURE-") for item in semantic))
+
     def _staged_cases(self) -> list[dict[str, Any]]:
         staged = strict_json_loads(EVALUATION_STAGED_CASES_PATH.read_text(encoding="utf-8"))
         return staged["cases"]
@@ -866,11 +915,20 @@ class RepositoryConformanceTests(unittest.TestCase):
             (EVALUATION_STAGED / "packs" / "error-single-outcome.json").read_text(encoding="utf-8")
         )
         self.assertEqual(1, len(pack["outcomes"]))
-        diagnostics = structural_diagnostics(self.validator, pack) + semantic_diagnostics(pack)
+        diagnostics = pack_conformance_diagnostics(self.validator, pack)
         self.assertEqual(
             [("JPS-STRUCTURE-COLLECTION-ARITY", "/outcomes")],
             [(item.code, item.path) for item in diagnostics],
         )
+        # The semantic layer is not run on a document the structural layer refused, so the line
+        # above cannot show that nothing is wrong *beneath* the stated reason — a rule naming an
+        # outcome that does not exist, say. "Exactly one reason" is therefore held the other way
+        # round as well: take the one reason away and the pack must conform at every layer.
+        repaired = json.loads(json.dumps(pack))
+        repaired["outcomes"].append(
+            {"id": "hold", "label": "Hold", "description": "The synthetic request waits."}
+        )
+        self.assertEqual([], pack_conformance_diagnostics(self.validator, repaired))
 
     def test_relative_markdown_links_resolve(self) -> None:
         link_pattern = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
