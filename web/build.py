@@ -453,9 +453,9 @@ PAGES = (
         "rfcs/0004-planner-interface.md",
         PurePosixPath("rfcs/0004-planner-interface/index.html"),
         "RFC 0004: Planner interface",
-        "Exploratory proposal testing whether any of a pack-selecting planner is standardizable.",
+        "Rejected proposal: whether any of a pack-selecting planner is standardizable. The recorded answer is no — a planner is product.",
         "proposals",
-        "Draft proposal",
+        "Rejected proposal",
         source_ref="main",
     ),
     Page(

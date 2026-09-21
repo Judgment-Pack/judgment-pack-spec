@@ -83,5 +83,5 @@ rather than settled. They are not part of the specification.
 - [RFC 0001 — Pack manifest](0001-pack-manifest.md)
 - [RFC 0002 — Judgment Graph composition](0002-judgment-graph.md)
 - [RFC 0003 — Evidence reference](0003-evidence-reference.md)
-- [RFC 0004 — Planner interface](0004-planner-interface.md)
+- [RFC 0004 — Planner interface](0004-planner-interface.md) — since dispositioned `Rejected`
 - [RFC 0005 — Pack discovery](0005-pack-discovery.md)

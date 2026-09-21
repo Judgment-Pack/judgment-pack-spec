@@ -89,6 +89,12 @@ here.
 
 ### Changed
 
+- [RFC 0004](rfcs/0004-planner-interface.md) (planner interface) is dispositioned `Rejected`: a
+  planner is product, and the specification standardizes no part of one, the narrow selection query
+  included. The RFC named this its most likely outcome when it was opened. The record states what the
+  rejection rests on — no pair of products has asked for the surface, and the reference runtime keeps
+  selection with the application on purpose — and what it leaves undecided. Nothing normative
+  changes; the index, the architecture vision and the site label follow.
 - Search metadata descriptions are normalized to 160 characters, conformance-case descriptions now
   name JPS and their layer, and sitemap entries no longer misreport the deployment timestamp as every
   page's content-modification time. Duplicate downloadable JSON under `/artifacts/` now carries an

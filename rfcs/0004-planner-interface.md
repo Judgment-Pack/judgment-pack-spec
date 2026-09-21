@@ -1,12 +1,54 @@
 # RFC 0004: Planner interface
 
-- Status: Draft
+- Status: Rejected
 - Type: Exploratory (likely product-only)
 - Created: 2026-07-24
+- Rejected: 2026-09-21
 
-> This is an open proposal, not part of the specification. See
-> [RFC 0000](0000-rfc-process.md) for the process and evidence bar. This RFC exists to test
-> whether *any* of a planner is standardizable; its most likely outcome is "product-only."
+> **Disposition record.** This RFC is rejected by the single maintainer under the interim review
+> regime ([RFC 0009](0009-interim-review-regime.md)). The review of this disposition, with a
+> written disposition for every finding, is recorded on the pull request that makes it and under
+> [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews).
+> *Rejected* is the outcome this RFC named as most likely on the day it
+> was opened, and it answers the RFC's own third unresolved question: a planner is product, and
+> the specification standardizes no part of one — the narrow selection query included.
+>
+> What the rejection rests on, with its limits:
+>
+> - **Nobody has asked for the one candidate surface.** The sketch offered a selection query "if
+>   two products want to interoperate on discovery". No such pair exists. The discovery index the
+>   query would read ([RFC 0005](0005-pack-discovery.md)) and the manifest that index would
+>   reference ([RFC 0001](0001-pack-manifest.md)) are both drafts that nothing emits, so a
+>   selection query has nothing to return. This is absence of demand in a project that has drawn
+>   no outside comment on any RFC; it is weak evidence, and it is the evidence there is.
+> - **The one implementation took the opposite position on purpose.** The reference runtime's
+>   [ADR-0012](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0012-jpack-project-convention.md)
+>   keeps selection with the application — its configuration "does not choose a pack for a
+>   request, and this runtime never will" — and gives this RFC's reason: applicability is not
+>   authorization. Its
+>   [ADR-0007](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0007-experimental-evaluator.md)
+>   scopes planner selection out of the evaluator. That is one runtime, by this project's
+>   maintainer: a recorded position, not independent evidence.
+> - **Declining removes an invitation the RFC itself worried about.** Its second unresolved
+>   question asked whether standardizing selection would encourage reading applicability as
+>   authorization. With no standardized selection surface there is nothing to misread. The
+>   statement under *Security and privacy* — authorization for which pack may run stays with the
+>   product — does not depend on this RFC's status: [RFC 0005](0005-pack-discovery.md) says the
+>   same of selection metadata, and the [non-goals](../docs/non-goals.md) already exclude
+>   orchestration.
+>
+> What the rejection does not decide. The first unresolved question — whether a selection query
+> could be portable at all — stays unanswered, because nothing was built to test it. RFC 0005's
+> question about how discovery relates to a selection interface now refers to an interface this
+> project declines to standardize; restating it is RFC 0005's to do when it is next amended.
+> [RFC 0006](0006-evaluator-conformance.md)'s note on a selection probe is advice to a product
+> that builds one and is unaffected. Two products that do want to interoperate on selection
+> would bring a new RFC with that evidence; this record would be its prior art, not its obstacle.
+>
+> This record replaces the banner that marked the RFC an open proposal, which said it existed "to
+> test whether *any* of a planner is standardizable; its most likely outcome is 'product-only.'"
+> Nothing here was ever part of the specification; see [RFC 0000](0000-rfc-process.md) for the
+> process. Every section below is the proposal as it stood, retained unedited as the record.
 
 ## Summary
 

@@ -38,7 +38,7 @@ no runtime. Those exclusions are intentional; see the [non-goals](../non-goals.m
 | Layer in the common picture | What it really is | Status | Where it lives |
 | --- | --- | --- | --- |
 | Agent | The caller. Any AI system that uses a pack. | Out of scope | Product |
-| Judgment Planner | Selects which pack(s) apply to a context. | Proposed / likely product | [RFC 0004](../../rfcs/0004-planner-interface.md) |
+| Judgment Planner | Selects which pack(s) apply to a context. | Product; rejected as a specification concern | [RFC 0004](../../rfcs/0004-planner-interface.md) |
 | Judgment Graph | A *format* for composing several packs. | Proposed | [RFC 0002](../../rfcs/0002-judgment-graph.md) |
 | Judgment Pack | A single-decision document. | **Shipped** | The specification |
 | Evidence (sources) | What a pack references; supplied by any system. | Reference **shipped**; integration out of scope | [RFC 0003](../../rfcs/0003-evidence-reference.md) |
