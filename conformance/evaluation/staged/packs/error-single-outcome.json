@@ -1,0 +1,45 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.invalid/judgment-packs/error-single-outcome",
+  "version": "0.1.0",
+  "title": "Synthetic nonconforming fixture with a single outcome",
+  "description": "Constructed staged fixture that fails structural conformance for exactly one reason: its outcomes array holds one entry, against the minimum of two. Every reference in it resolves, so nothing else is wrong with it. Synthetic content for specification testing; it authorizes nothing.",
+  "decision": {
+    "intent": "Present an evaluator with a pack that is not a conforming document, so that the only lawful answer is the pack-not-conformant evaluation error.",
+    "question": "Should this synthetic request be approved?"
+  },
+  "outcomes": [
+    {
+      "id": "approve",
+      "label": "Approve",
+      "description": "The synthetic request proceeds."
+    }
+  ],
+  "evidenceRequirements": [
+    {
+      "id": "intake-form",
+      "description": "The synthetic intake form for the request.",
+      "required": false,
+      "kind": "document"
+    }
+  ],
+  "rules": [
+    {
+      "id": "approve-when-ready",
+      "description": "Approve the request once it is marked ready.",
+      "when": {
+        "op": "fact",
+        "path": "/request/ready",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "approve",
+      "onUnknown": "ignore"
+    }
+  ],
+  "metadata": {
+    "authors": ["Judgment Pack Specification contributors"],
+    "createdAt": "2026-09-21T00:00:00Z",
+    "license": "Apache-2.0"
+  }
+}

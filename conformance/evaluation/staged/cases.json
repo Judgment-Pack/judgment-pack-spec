@@ -1,0 +1,93 @@
+{
+  "status": "staged",
+  "stagedAfter": "0.2.0-draft",
+  "caseSchema": "../manifest.schema.json#/$defs/case",
+  "cases": [
+    {
+      "id": "error-pack-not-conformant",
+      "origin": "rfc-0013-case-1",
+      "pack": "packs/error-single-outcome.json",
+      "facts": {
+        "request": {
+          "ready": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedErrorClass": "pack-not-conformant",
+      "focus": "a pack that is not a conforming document yields the pack-not-conformant evaluation error and no disposition; the fixture fails for one reason, a single outcome where two are required",
+      "specSection": "§8.4"
+    },
+    {
+      "id": "error-malformed-input-undeclared-evidence",
+      "origin": "rfc-0013-case-2",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "dataset-deletion"
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "not-a-declared-requirement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedErrorClass": "malformed-input",
+      "focus": "an evidence-availability document carrying a member name the pack does not declare is malformed input; the pack is conforming and requires no extension, so nothing else is wrong",
+      "specSection": "§8.4"
+    },
+    {
+      "id": "error-unsupported-required-extension",
+      "origin": "rfc-0013-case-3",
+      "pack": "packs/error-required-extension.json",
+      "facts": {
+        "request": {
+          "ready": true
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present"
+      },
+      "supportedExtensions": [],
+      "expectedErrorClass": "unsupported-required-extension",
+      "focus": "a conforming pack that requires an extension the implementation does not support yields no disposition, because the unsupported part may be the part that decides",
+      "specSection": "§8.4"
+    },
+    {
+      "id": "error-precedence-pack-over-malformed-input",
+      "origin": "rfc-0013-case-4",
+      "pack": "packs/error-single-outcome.json",
+      "facts": {
+        "request": {
+          "ready": true
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "not-a-declared-requirement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedErrorClass": "pack-not-conformant",
+      "focus": "both pack-not-conformant and malformed-input apply, and the fixed order reports pack-not-conformant; this is the worked example in §8.4 made a row",
+      "specSection": "§8.4"
+    },
+    {
+      "id": "error-precedence-malformed-input-over-extension",
+      "origin": "rfc-0013-case-5",
+      "pack": "packs/error-required-extension.json",
+      "facts": {
+        "request": {
+          "ready": true
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "not-a-declared-requirement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedErrorClass": "malformed-input",
+      "focus": "both malformed-input and unsupported-required-extension apply, and the fixed order reports malformed-input; an implementation that checks extension support while reading the pack, before it looks at the evidence document, reports the wrong class here",
+      "specSection": "§8.4"
+    }
+  ]
+}
