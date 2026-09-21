@@ -52,7 +52,7 @@ separable decisions of two public policies, written by a third party for a purpo
 JPS, encoded under an information barrier. Finding 4 reports a *forward entitlements /
 cross-decision references* residue family — "insurance enables full refund if…" was left out of the
 Book-flight pack because it belongs to the Cancel decision, and one pack cannot reference another's
-outcome — ~~which is exactly the edge this format proposes~~ (*amended 2026-09-21:* which
+outcome — <del>which is exactly the edge this format proposes</del> (*amended 2026-09-21:* which
 motivated this proposal, and which Study 004, below, then showed the prototype's edge does not
 express; the scope decision leaves effect and entitlement constructs of this kind outside the
 format). The encoding runs were isolated and
@@ -97,11 +97,11 @@ hits: both items predicted to close as scalar verdict-consumption failed on one 
 gap between a decision's *permission* and an act's *performance*. The measured observation this
 leaves for the RFC to weigh, not a resolution: within one policy's own decisions, the
 cross-decision escape in this corpus is effect/entitlement-shaped rather than dataflow-shaped,
-~~while the outcome-as-input edge this sketch proposes matches the seam *between* systems — an
+<del>while the outcome-as-input edge this sketch proposes matches the seam *between* systems — an
 upstream decision's recorded verdict consumed as a downstream document's fact — which that
 study's frame, by construction, could not contain. Whether this RFC scopes composition to the
 between-systems seam or grows the edge toward entitlement constructs is now an evidenced
-choice, and still an open one.~~ (*Amended 2026-09-21.* The struck passage did two things this RFC
+choice, and still an open one.</del> (*Amended 2026-09-21.* The struck passage did two things this RFC
 no longer does. It placed a claim about the seam between systems inside "the measured
 observation", although the study's frame could not contain that case, so nothing was measured
 about it: that use of the edge is intended and unmeasured. And it called the choice open; it is
