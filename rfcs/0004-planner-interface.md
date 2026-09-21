@@ -15,13 +15,19 @@
 >
 > What the rejection rests on, with its limits:
 >
-> - **Nobody has asked for the one candidate surface.** The sketch offered a selection query "if
->   two products want to interoperate on discovery". No such pair exists. The discovery index the
->   query would read ([RFC 0005](0005-pack-discovery.md)) and the manifest that index would
->   reference ([RFC 0001](0001-pack-manifest.md)) are both drafts that nothing emits, so a
->   selection query has nothing to return. This is absence of demand in a project that has drawn
->   no outside comment on any RFC; it is weak evidence, and it is the evidence there is.
-> - **The one implementation took the opposite position on purpose.** The reference runtime's
+> - **To the maintainer's knowledge, nobody has asked for the one candidate surface.** The sketch
+>   offered a selection query "if two products want to interoperate on discovery". The maintainer
+>   knows of no such pair; this repository cannot show that none exists anywhere. The discovery
+>   index the query would read ([RFC 0005](0005-pack-discovery.md)) and the manifest that index
+>   would reference ([RFC 0001](0001-pack-manifest.md)) are both drafts, and no producer of either
+>   format was found in this project's repositories, so there is no implementation or
+>   interoperability evidence for the proposed query. (The reference runtime does list a
+>   project's configured packs, through `packs list` and the `list_packs` tool, as an explicitly
+>   non-normative inventory; that is neither format, and it takes no decision context.) This is
+>   absence of demand in a project whose governance text says a public review period today
+>   "means a change sits in public and no one comments"; it is weak evidence, and it is the
+>   evidence there is.
+> - **The reference runtime deliberately leaves selection with the application.** Its
 >   [ADR-0012](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0012-jpack-project-convention.md)
 >   keeps selection with the application — its configuration "does not choose a pack for a
 >   request, and this runtime never will" — and gives this RFC's reason: applicability is not
@@ -29,9 +35,11 @@
 >   [ADR-0007](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0007-experimental-evaluator.md)
 >   scopes planner selection out of the evaluator. That is one runtime, by this project's
 >   maintainer: a recorded position, not independent evidence.
-> - **Declining removes an invitation the RFC itself worried about.** Its second unresolved
+> - **Declining avoids adding a surface the RFC itself worried about.** Its second unresolved
 >   question asked whether standardizing selection would encourage reading applicability as
->   authorization. With no standardized selection surface there is nothing to misread. The
+>   authorization. Declining adds no standardized selection surface; it does not remove the
+>   confusion, since Core still defines applicability and a product may still build a selector,
+>   and whether standardizing would have made the confusion worse stays untested. The
 >   statement under *Security and privacy* — authorization for which pack may run stays with the
 >   product — does not depend on this RFC's status: [RFC 0005](0005-pack-discovery.md) says the
 >   same of selection metadata, and the [non-goals](../docs/non-goals.md) already exclude
@@ -41,8 +49,10 @@
 > could be portable at all — stays unanswered, because nothing was built to test it. RFC 0005's
 > question about how discovery relates to a selection interface now refers to an interface this
 > project declines to standardize; restating it is RFC 0005's to do when it is next amended.
-> [RFC 0006](0006-evaluator-conformance.md)'s note on a selection probe is advice to a product
-> that builds one and is unaffected. Two products that do want to interoperate on selection
+> [RFC 0006](0006-evaluator-conformance.md)'s adoption record said the selection probe would
+> "stay with" this RFC; that record is amended in the same pull request to say that no active
+> proposal now carries it, and its note stands as advice to a product that builds a selector. Two
+> products that do want to interoperate on selection
 > would bring a new RFC with that evidence; this record would be its prior art, not its obstacle.
 >
 > This record replaces the banner that marked the RFC an open proposal, which said it existed "to

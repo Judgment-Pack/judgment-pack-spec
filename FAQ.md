@@ -132,6 +132,9 @@ integrator selects the pack. A standard answer needs a discovery and selection c
 ([RFC 0001](rfcs/0001-pack-manifest.md), [RFC 0005](rfcs/0005-pack-discovery.md)). Note the
 recursion: selecting a pack is itself a judgment, which is exactly why an autonomous selector is
 either governed by its own pack or is product logic ([RFC 0004](rfcs/0004-planner-interface.md)).
+The two halves of that contract now stand differently: the discovery formats are still draft
+proposals, while selection is not on a standards path — RFC 0004 was rejected, and choosing a pack
+stays with the product.
 
 **Q24. Can agents create Judgment Packs?** Yes — authoring a pack is a fine use of a model. But a
 generated pack is only a candidate document. Structural conformance says it is well-formed; it says

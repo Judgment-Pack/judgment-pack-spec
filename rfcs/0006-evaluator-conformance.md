@@ -24,7 +24,9 @@
 > acceptance. Of the rest, Core §13 carries four: evidence interchange, number representability, the
 > trace minimum, and the machine-readable diagnostic contract. Graph interaction and the selection probe
 > are not Core questions and stay with [RFC 0002](0002-judgment-graph.md) and
-> [RFC 0004](0004-planner-interface.md). Claim verification — where corpus results are published and who
+> [RFC 0004](0004-planner-interface.md). (*Amended 2026-09-21:* RFC 0004 has since been rejected.
+> The selection-probe note under *Unresolved questions* stands as informative advice to a product
+> that builds a selector, and no active proposal in this directory carries it.) Claim verification — where corpus results are published and who
 > may check them — is carried nowhere normative and stays open in this RFC only; Core §3.4.1 requires a
 > claim to state the results, which makes it an attestation by the claimant.
 >
