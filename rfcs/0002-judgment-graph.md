@@ -15,8 +15,9 @@
 >    input, as a fact or as evidence availability. The edge is not grown toward effect or entitlement
 >    constructs. *Scope*, below, gives the decision, what it rests on and what it leaves open.
 > 2. **The one implementation is described as it stands.** *Evidence* and *Implementation* named a
->    single runtime decision record and said the surface had "grown past" it. It is now governed by
->    eight, released across five runtime versions, and they are named.
+>    single runtime decision record and said the surface had "grown past" it. Eight graph-specific
+>    records now shape it, first released across four runtime versions, with the graph test verb in
+>    a fifth; they are named.
 > 3. **Four statements of the sketch are corrected or marked as diverging from that
 >    implementation.** Where the implementation departs from the sketch, the departure is recorded
 >    as a question for this RFC and not settled by adopting either side: an implementation that
@@ -51,7 +52,10 @@ separable decisions of two public policies, written by a third party for a purpo
 JPS, encoded under an information barrier. Finding 4 reports a *forward entitlements /
 cross-decision references* residue family — "insurance enables full refund if…" was left out of the
 Book-flight pack because it belongs to the Cancel decision, and one pack cannot reference another's
-outcome — which is exactly the edge this format proposes. The encoding runs were isolated and
+outcome — ~~which is exactly the edge this format proposes~~ (*amended 2026-09-21:* which
+motivated this proposal, and which Study 004, below, then showed the prototype's edge does not
+express; the scope decision leaves effect and entitlement constructs of this kind outside the
+format). The encoding runs were isolated and
 barred from specification RFCs, so the observation was not prompted by this proposal; the study
 itself was conducted by this project, so this is internally produced corpus evidence, not
 independent third-party validation.
@@ -103,12 +107,15 @@ rate licenses claims about composition as a design class.
 
 ### The implementation as it stands
 
-*Added 2026-09-21.* The reference runtime's graph surface is governed by eight decision records,
-all accepted, each linked here at the runtime's `main`:
+*Added 2026-09-21.* Eight decision records of the reference runtime are specific to its graph
+surface. All are accepted, each is linked here at the runtime's `main`, and they first shipped
+across four versions. The list is not everything that governs the surface: it also inherits the
+runtime's decisions on the reviewed-set lock, audit records and evaluation traces, which were made
+for single packs and apply to graphs as well.
 
 | Record | What it decided | First released |
 | --- | --- | --- |
-| [ADR-0015](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0015-experimental-graph-surface.md) | the standalone graph document, the `experimental graph` verbs, and a tested position on each of this RFC's open questions | 0.8.0 |
+| [ADR-0015](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0015-experimental-graph-surface.md) | the standalone graph document, the `experimental graph` verbs, and a tested position on each of this RFC's five original open questions | 0.8.0 |
 | [ADR-0016](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0016-graph-rows-coverage-report.md) | a derived coverage report over a graph's test rows, which informs and never gates | 0.10.0 |
 | [ADR-0017](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0017-declare-graphs-in-the-project-configuration.md) | graphs declared in the project configuration — reversing, knowingly, ADR-0015's position that they stay out of it | 0.10.0 |
 | [ADR-0026](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0026-run-the-declared-graph-matrix-over-mcp.md) | the declared graph matrix run over MCP, with a budget that stops a runaway matrix | 0.18.0 |
@@ -117,8 +124,9 @@ all accepted, each linked here at the runtime's `main`:
 | [ADR-0031](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0031-report-node-traces-in-the-graph-matrix-on-request.md) | each compared node's evaluation trace, on request | 0.19.0 |
 | [ADR-0032](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0032-let-a-graph-row-assert-the-handoff-target.md) | a test row may assert where a handoff would go | 0.19.0 |
 
-One increment has no record of its own: the graph test verb, which runs a rows document against a
-graph and compares dispositions byte for byte, shipped in 0.9.0.
+One increment has no record of its own, and accounts for a fifth version: the graph test verb,
+which runs a rows document against a graph and compares dispositions byte for byte in their
+RFC 8785 canonical form, shipped in 0.9.0.
 
 Five things about that surface bear on this RFC, and the first two are departures from its sketch.
 
@@ -131,9 +139,11 @@ Five things about that surface bear on this RFC, and the first two are departure
   project's pack entry, which `packs validate` checks and the graph surface never consults; and an
   optional reviewed-set lock of byte digests, which the deciding surfaces consult and the
   rehearsal surfaces do not. ADR-0030's digest binds the graph *document's* bytes, not its packs'.
-- **The document carries two switches whose meaning is evaluator behavior.** `onUnresolved`, on an
-  evidence feed, says which tri-state an upstream that produced no outcome contributes; `result`
-  says which node's disposition is the composite's headline.
+- **The document carries one switch whose meaning is evaluator behavior.** `onUnresolved`, on an
+  evidence feed, says which tri-state an upstream that produced no outcome contributes, and so
+  changes what a downstream node is given. The `result` member is a different kind of thing: a
+  structural reference naming the node whose disposition the composite echoes as its headline,
+  read after the nodes have evaluated and changing none of their inputs or dispositions.
 - **A graph composes only packs that one project configuration declares.** There is no remote,
   registry or cross-project node reference anywhere in the format.
 - **A companion format exists.** A rows document, with a version gate of its own, states cases and
@@ -151,28 +161,34 @@ disposition is a claimed evaluation; the graph around it is not.
 *Added 2026-09-21; decided by the maintainer.* Study 004 left one question prior to the others:
 which seam this format is for. **It is for the dataflow seam** — one decision's outcome consumed as
 another decision's input, as a fact at a pointer or as the availability of a piece of evidence.
-That is the seam that appears between decisions different parties or systems own: an upstream
-verdict that a downstream pack reads and does not re-derive. **The edge is not grown toward effect
-or entitlement constructs.**
+**The edge is not grown toward effect or entitlement constructs.** The use the maintainer has in
+mind for it is the seam between decisions that different parties or systems own — an upstream
+verdict that a downstream pack reads and does not re-derive. That use is **intended and
+unmeasured**: Study 004's frame could not contain a between-systems case by construction, and the
+one implementation composes only packs that a single project configuration declares, so nothing
+here shows that the seam between owners is where this edge is needed, or that it suffices there.
 
 What the decision rests on. Study 004 measured that, within one policy's own decisions, the
 cross-decision references in its corpus were effect- or entitlement-shaped on four of five items:
-the reference changes what a later decision may *conclude*, not a fact its conditions read. An
-edge that carried that would be a rule about another pack's rules, which is the first step of the
-general-purpose rules language the [non-goals](../docs/non-goals.md) exclude. The one
+the reference changes what a later decision may *conclude*, not a fact its conditions read. That is
+a measurement. What follows is a judgment, and it is the maintainer's: an edge that carried such a
+reference would be a rule about another pack's rules, and extending edges that way risks growing
+toward the general-purpose rules language the [non-goals](../docs/non-goals.md) exclude. The
+non-goals exclude that language; they do not themselves say an entitlement edge begins one. The one
 implementation reached the same place from the other side: its authoring guidance refuses an edge
 where "a permission is not a performed act, and an entitlement that changes what a later decision
-may conclude is not a fact its conditions read", and treats a validating graph with no edges as a
-correct answer. The limits are the ones Study 004 states for itself — one grammar, one frame, two
-policies by one benchmark team — and the implementation shares an author with this RFC.
+may conclude is not a fact its conditions read", and, where no faithful edge exists, treats a
+validating graph with no edges as the correct answer. The limits are the ones Study 004 states for
+itself — one grammar, one frame, two policies by one benchmark team — and the implementation
+shares an author with this RFC.
 
 What the decision leaves open, and where it goes. The within-policy residue Study 004 counted is
 real and stays uncounted for by this format. It belongs with
 [RFC 0007](0007-determination-boundary.md), which records what a pack cannot hold; nothing here
 proposes a device for it. And the decision sharpens one question the implementation has not
-faced, listed below under *Unresolved questions*: between systems, a downstream decision usually
-receives an upstream verdict that was **recorded** elsewhere, while the implementation
-**co-evaluates** every node in one run from one project's packs.
+faced, listed below under *Unresolved questions*: where decisions belong to different systems, a
+downstream decision may receive an upstream verdict that was **recorded** elsewhere, while the
+implementation **co-evaluates** every node in one run from one project's packs.
 
 ## Specification (sketch)
 
@@ -190,8 +206,9 @@ two of its sentences.*
   node should name its pack is now an unresolved question rather than a settled line.
 - *"Carries no evaluation semantics itself."* Too strong for anything that exposes an upstream
   outcome as evidence. The implementation needed a declared switch, `onUnresolved`, for what an
-  upstream without an outcome contributes, and a `result` member for which node is the headline.
-  The narrower claim that survives: the format defines **no algorithm** — no order of evaluation,
+  upstream without an outcome contributes. (Its `result` member, which names the headline node, is
+  structure and not semantics, and does not bear on this sentence.) The narrower claim that
+  survives: the format defines **no algorithm** — no order of evaluation,
   no conflict resolution, no aggregation — and may declare, per edge, a choice the evaluator must
   honor. Whether `onUnresolved` belongs in a portable format is listed below.
 
@@ -231,11 +248,14 @@ reference; version drift; a cycle where the format forbids one.
 
 *Amended 2026-09-21.* "Version drift" is a case the implementation's graph document cannot
 express, since it declares no version to drift from; it stays a case of this sketch. The
-implementation does give the other cases a concrete form worth borrowing: a dangling pack
-reference, an edge naming an undeclared node, a self-edge, a `result` naming an undeclared node,
-two edges feeding one fact pointer or one evidence requirement, two fact pointers where one is a
-prefix of the other once their RFC 6901 tokens are decoded, and a cycle, reported by strongly
-connected component. It also shows a distinction this section did not draw: whether references
+implementation does give the other cases a concrete form worth borrowing. Among its findings, and
+not a complete list of them: a dangling pack reference; an edge naming an undeclared node; a
+self-edge; a `result` naming an undeclared node; two edges feeding one fact pointer, or one
+evidence requirement, **of the same target node** — different nodes may use the same pointer or
+requirement id; two fact pointers of the same target node where one is a prefix of the other once
+their RFC 6901 tokens are decoded; a fact pointer of more than 64 decoded reference tokens; and a
+cycle, whose member nodes are determined using strongly connected components and reported together
+in one finding. It also shows a distinction this section did not draw: whether references
 resolve is two questions. One is answerable without reading any pack — in the implementation,
 from the graph and the project configuration that names the packs. The other requires reading a
 pack: that an edge's evidence requirement is one the target pack declares. The implementation
@@ -298,7 +318,9 @@ seam this format is *for*.
   already reads as unknown — and an evidence feed contributes a declared tri-state (unknown by
   default, absent by declaration), so an unresolved upstream reaches a downstream pack only
   through that pack's own declared semantics: its unknown handling for the default, its
-  required-evidence rule when the feed declares absence. Every requested handoff surfaces beside
+  required-evidence rule when the feed declares absence (*amended 2026-09-21:* and the fed
+  requirement is one the downstream pack marks required, and that pack is applicable; an absence
+  fed to an optional requirement engages no such rule). Every requested handoff surfaces beside
   the composite. Evaluation errors stay errors: a refused node refuses the whole run with its
   §8.4 class intact, and no partial composite exists.*
 - **Composite result** — is the aggregated result a portable artifact (a spec concern) or a runtime
@@ -316,10 +338,11 @@ seam this format is *for*.
   [RFC 0001](0001-pack-manifest.md)'s exact-bytes digest; the digest alone, with identity read
   from the pack. *Security and privacy* requires pinning, so "nothing" is not among them — but what
   a graph's reader may conclude when a pin and a loaded pack disagree is not yet said anywhere.
-- **Co-evaluated, or consumed as recorded?** The scope is the seam between decisions that
-  different parties own. The prototype evaluates every node in one run, from packs one project
-  configuration declares, and has no way to name a pack outside it. Between systems the upstream
-  verdict is usually already made: it arrives as a record, not as a pack to run. Whether an edge
+- **Co-evaluated, or consumed as recorded?** The intended use is the seam between decisions that
+  different parties own, and that use is unmeasured (see *Scope*). The prototype evaluates every
+  node in one run, from packs one project configuration declares, and has no way to name a pack
+  outside it. Where the upstream decision belongs to another system, its verdict may already have
+  been made, and would then arrive as a record and not as a pack to run. Whether an edge
   may take its input from a **recorded** disposition — and what it must then bind, which is where
   [RFC 0014](0014-lineage-record-and-action-binding.md)'s citation of a decision record by digest
   would meet this format — is unexamined. So is its cost: a recorded verdict can be stale in a way
@@ -327,9 +350,11 @@ seam this format is *for*.
 - **Does a per-edge evaluator switch belong in a portable format?** `onUnresolved` exists because
   exposing an outcome as evidence forces the question of what a missing outcome contributes. The
   alternatives are to fix one answer in the format, or to leave it to the downstream pack's own
-  handling of an unknown. The prototype's default, `unknown`, is the second; its `absent`, which
-  engages the downstream pack's required-evidence rule, is a claim about the *upstream* that only
-  the graph's author can make. Note that the
+  handling of an unknown. The prototype's default, `unknown`, is the second. Its `absent` engages
+  the downstream pack's required-evidence rule — when the target requirement is a required one
+  and the downstream pack is applicable, and not otherwise — and is a claim about the *upstream*
+  that the graph's author must ground in the source: the prototype's authoring guidance permits it
+  only when the source says a decision that produced no outcome is itself the missing evidence. Note that the
   prototype's "no outcome" covers `not-applicable` as well as `unresolved`.
 - **Is a test format part of the interchange?** The prototype grew a rows document — cases, inputs
   and expected dispositions for a graph, with its own version gate — because a composition nobody

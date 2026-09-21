@@ -120,11 +120,13 @@ here.
 - [RFC 0002](rfcs/0002-judgment-graph.md) (Judgment Graph composition) is amended; it stays a
   `Draft`. The question Study 004 left prior to the others — which seam the format is for — is
   decided: the **dataflow seam**, one decision's outcome consumed as another's input, and the edge
-  is not grown toward effect or entitlement constructs. The one implementation is described as it
-  stands: eight runtime decision records released across five versions, where the RFC named one.
-  Four statements of the sketch are corrected or marked as diverging from that implementation —
-  it names a pack by a project-local decision id and not by `(id, version)`, pins nothing about a
-  pack in the document, and carries two switches whose meaning is evaluator behavior — and each
+  is not grown toward effect or entitlement constructs. The use intended for it, the seam between
+  decisions different parties own, is stated as intended and unmeasured. The one implementation is
+  described as it stands: eight graph-specific runtime decision records, first released across four
+  versions, with the graph test verb in a fifth, where the RFC named one. Four statements of the
+  sketch are corrected or marked as diverging from that implementation — it names a pack by a
+  project-local decision id and not by `(id, version)`, pins nothing about a pack in the document,
+  and carries one switch, `onUnresolved`, whose meaning is evaluator behavior — and each
   divergence is recorded as a question for the RFC and not settled by adopting either side. Four
   unresolved questions are added: how a node names and pins its pack; whether an upstream verdict
   is co-evaluated or consumed as recorded; whether a per-edge evaluator switch belongs in a
