@@ -543,9 +543,9 @@ PAGES = (
         "rfcs/0014-lineage-record-and-action-binding.md",
         PurePosixPath("rfcs/0014-lineage-record-and-action-binding/index.html"),
         "RFC 0014: The lineage record and the action binding",
-        "Draft cross-project record of how a decision record cites the gateway receipts it relied on and an action receipt cites the decision record and the receipts it rests on - the version 3 receipt, one citation grammar, and a verifier's join in both directions - with what it claims and does not.",
+        "Accepted cross-project record of how a decision record cites the gateway receipts it relied on and an action receipt cites the decision record and the receipts it rests on - the version 3 receipt, one citation grammar, and a verifier's join in both directions - with what it claims and does not.",
         "proposals",
-        "Draft proposal",
+        "Accepted cross-project record",
         source_ref="main",
     ),
     Page(
