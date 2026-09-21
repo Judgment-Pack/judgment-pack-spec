@@ -18,6 +18,11 @@ MANIFEST_SCHEMA_PATH = CONFORMANCE / "manifest.schema.json"
 EVALUATION = CONFORMANCE / "evaluation"
 EVALUATION_MANIFEST_PATH = EVALUATION / "manifest.json"
 EVALUATION_MANIFEST_SCHEMA_PATH = EVALUATION / "manifest.schema.json"
+# Rows written for the suiteVersion after the released one. They are in no corpus and no claim may
+# cite them (conformance/evaluation/staged/README.md); they are held to the released case schema so
+# that moving them into the manifest edits nothing.
+EVALUATION_STAGED = EVALUATION / "staged"
+EVALUATION_STAGED_CASES_PATH = EVALUATION_STAGED / "cases.json"
 SPEC_VERSION = "0.2.0-draft"
 PREVIOUS_SPEC_VERSION = "0.1.0-draft"
 SCHEMA_ID = f"https://judgmentpack.org/schema/{SPEC_VERSION}/judgment-pack-core.schema.json"
@@ -369,6 +374,43 @@ def evaluate_case(
     return "valid", []
 
 
+# §8.4: the Core classes decided while admitting the inputs (§8.2), in the order they are evaluated.
+PREFLIGHT_ERROR_CLASSES = (
+    "pack-not-conformant",
+    "malformed-input",
+    "unsupported-required-extension",
+)
+
+
+def preflight_error_class(
+    pack_diagnostics: list[Diagnostic], pack: Any, case: dict[str, Any]
+) -> str | None:
+    """The §8.4 class an evaluation case's own inputs call for, read without an evaluator.
+
+    §8.4 evaluates the Core classes in one fixed order — `pack-not-conformant`, then
+    `malformed-input`, then `unsupported-required-extension`, then `resource-exhaustion` — and the
+    first that applies is the class reported. The first three are decided while admitting the inputs
+    (§8.2), and whether each applies can be read off a case and its pack fixture: the pack conforms or
+    does not, the evidence document names only declared requirements or does not, and the required
+    extensions are all supported or are not. This carrier embeds `facts` as parsed JSON and holds
+    evidence values to the tri-state, so an undeclared member name is the only malformed input a case
+    can state; `resource-exhaustion` is reached while evaluating, which this repository cannot do.
+    `None` therefore means nothing the case states refuses the inputs.
+
+    This restates the order independently of any evaluator, so a row that pins the wrong class for
+    its own inputs fails here rather than in whichever implementation happens to run it first.
+    """
+    if pack_diagnostics:
+        return "pack-not-conformant"
+    declared = {item["id"] for item in pack.get("evidenceRequirements", [])}
+    if any(key not in declared for key in case.get("evidenceAvailability") or {}):
+        return "malformed-input"
+    required = set(pack.get("metadata", {}).get("requiredExtensions", []))
+    if not required <= set(case["supportedExtensions"]):
+        return "unsupported-required-extension"
+    return None
+
+
 class RepositoryConformanceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -597,24 +639,31 @@ class RepositoryConformanceTests(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)), "duplicate evaluation case ids")
 
     def test_evaluation_cases_are_well_formed_against_their_pack(self) -> None:
+        manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
+        self._check_evaluation_cases(manifest["cases"], EVALUATION)
+
+    def _check_evaluation_cases(self, cases: list[dict[str, Any]], base: Path) -> None:
         # Carrier well-formedness only: the specification repository owns no evaluator, so these
         # checks verify that each case could be run, never that a disposition is the right one.
-        manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
+        # `base` is the directory a case's `pack` path resolves against: the released corpus, or the
+        # staged rows beside it.
+        #
         # §8.2 makes the pack input a semantically conforming document, so a pack fixture is required to
         # conform — except for a fixture whose whole point is the §8.4 `pack-not-conformant` error, which
         # requires the opposite. The check is therefore conditional on what the case expects rather than
         # dropped: a fixture that quietly became conforming would make such a row unrunnable too.
         non_conformant_packs = {
             case["pack"]
-            for case in manifest["cases"]
+            for case in cases
             if case.get("expectedErrorClass") == "pack-not-conformant"
         }
         packs: dict[str, Any] = {}
-        for case in manifest["cases"]:
+        pack_diagnostics: dict[str, list[Diagnostic]] = {}
+        for case in cases:
             with self.subTest(case=case["id"]):
-                pack_path = (EVALUATION / case["pack"]).resolve()
+                pack_path = (base / case["pack"]).resolve()
                 try:
-                    pack_path.relative_to(EVALUATION.resolve())
+                    pack_path.relative_to(base.resolve())
                 except ValueError:
                     self.fail(f"pack path escapes the evaluation corpus: {case['pack']}")
                 self.assertTrue(pack_path.is_file(), f"missing pack: {case['pack']}")
@@ -640,18 +689,41 @@ class RepositoryConformanceTests(unittest.TestCase):
                         self.assertEqual(pack["specVersion"], SPEC_VERSION)
                         self.assertEqual([], diagnostics)
                     packs[case["pack"]] = pack
+                    pack_diagnostics[case["pack"]] = diagnostics
                 pack = packs[case["pack"]]
 
-                declared_evidence = {
-                    item["id"] for item in pack.get("evidenceRequirements", [])
-                }
-                for key, value in (case.get("evidenceAvailability") or {}).items():
-                    self.assertIn(
-                        key,
-                        declared_evidence,
-                        f"undeclared evidence key {key}: §8.2 makes that an evaluation error",
-                    )
+                for value in (case.get("evidenceAvailability") or {}).values():
                     self.assertIn(value, {"present", "absent", "unknown"})
+
+                # An undeclared evidence key used to be refused here outright, because §8.2 makes it
+                # an evaluation error and every row expected a disposition. A row whose point is that
+                # error needs the key, so the check is conditional on what the case expects, exactly
+                # as the pack-conformance check above is. That admits what the old check refused — a
+                # correctly labelled error row — and asks more of everything it still covers: the
+                # class a case expects must be the one §8.4's fixed order reports for the case's own
+                # inputs, and a case whose inputs nothing refuses must not expect a preflight class
+                # at all. A row that keeps its disposition and gains an undeclared key still fails.
+                called_for = preflight_error_class(pack_diagnostics[case["pack"]], pack, case)
+                expected_class = case.get("expectedErrorClass")
+                if called_for is None:
+                    # Nothing the case states refuses its inputs, so the three classes decided while
+                    # admitting them are ruled out. Anything else stays the schema's business:
+                    # `resource-exhaustion` is reached while evaluating, and §8.4 permits a documented
+                    # implementation-defined class where no Core class applies, neither of which this
+                    # repository can decide without an evaluator.
+                    self.assertNotIn(
+                        expected_class,
+                        PREFLIGHT_ERROR_CLASSES,
+                        "nothing this case states refuses its inputs, so §8.4 gives it no preflight "
+                        "class to expect",
+                    )
+                else:
+                    self.assertEqual(
+                        called_for,
+                        expected_class,
+                        "§8.4 evaluates the classes in one fixed order and reports the first that "
+                        "applies to the case's own inputs",
+                    )
 
                 self.assertEqual(
                     "expectedDisposition" in case,
@@ -709,6 +781,96 @@ class RepositoryConformanceTests(unittest.TestCase):
         example = (ROOT / "examples" / "data-request-intake-triage.json").read_bytes()
         fixture = (EVALUATION / "packs" / "data-request-intake-triage.json").read_bytes()
         self.assertEqual(example, fixture)
+
+    def _staged_cases(self) -> list[dict[str, Any]]:
+        staged = strict_json_loads(EVALUATION_STAGED_CASES_PATH.read_text(encoding="utf-8"))
+        return staged["cases"]
+
+    def test_staged_evaluation_cases_match_the_released_case_schema(self) -> None:
+        # Staged rows are written for the suiteVersion after the released one. They validate against
+        # the released *case* schema unchanged, so moving a row into the manifest edits nothing, and
+        # they carry no suiteVersion, because they belong to none.
+        staged = strict_json_loads(EVALUATION_STAGED_CASES_PATH.read_text(encoding="utf-8"))
+        self.assertEqual({"status", "stagedAfter", "caseSchema", "cases"}, set(staged))
+        self.assertEqual("staged", staged["status"])
+        self.assertEqual(SPEC_VERSION, staged["stagedAfter"])
+        self.assertEqual("../manifest.schema.json#/$defs/case", staged["caseSchema"])
+        self.assertTrue(staged["cases"], "a staged file with no case should be deleted instead")
+
+        manifest_schema = strict_json_loads(
+            EVALUATION_MANIFEST_SCHEMA_PATH.read_text(encoding="utf-8")
+        )
+        case_validator = Draft202012Validator(
+            {
+                "$schema": manifest_schema["$schema"],
+                "$ref": "#/$defs/case",
+                "$defs": manifest_schema["$defs"],
+            },
+            format_checker=FormatChecker(),
+        )
+        for case in staged["cases"]:
+            with self.subTest(case=case.get("id")):
+                errors = sorted(case_validator.iter_errors(case), key=lambda item: list(item.path))
+                self.assertEqual([], [error.message for error in errors])
+
+        staged_ids = [case["id"] for case in staged["cases"]]
+        self.assertEqual(len(staged_ids), len(set(staged_ids)), "duplicate staged case ids")
+        manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
+        released_ids = {case["id"] for case in manifest["cases"]}
+        self.assertEqual(
+            set(),
+            set(staged_ids) & released_ids,
+            "a staged id that a released row already uses could not move into the manifest",
+        )
+
+    def test_staged_evaluation_cases_are_well_formed_against_their_pack(self) -> None:
+        self._check_evaluation_cases(self._staged_cases(), EVALUATION_STAGED)
+
+    def test_staged_cases_reference_every_staged_pack_fixture(self) -> None:
+        # Every committed fixture is referenced, and every reference is committed. A fixture may be
+        # referenced more than once — the precedence rows reuse the single-class rows' fixtures on
+        # purpose — so this is set equality, not a count.
+        referenced = {case["pack"] for case in self._staged_cases()}
+        committed = {
+            f"packs/{path.name}" for path in (EVALUATION_STAGED / "packs").glob("*.json")
+        }
+        self.assertEqual(committed, referenced)
+
+    def test_staged_copy_of_a_released_fixture_does_not_drift(self) -> None:
+        # A staged case may reuse a released fixture, and a case's `pack` path resolves inside its own
+        # directory, so the fixture is copied. The copy is the released bytes or it is a different
+        # pack under the same name.
+        shared = [
+            path
+            for path in (EVALUATION_STAGED / "packs").glob("*.json")
+            if (EVALUATION / "packs" / path.name).is_file()
+        ]
+        self.assertTrue(shared, "no staged case reuses a released fixture; delete this test with the copy")
+        for path in shared:
+            with self.subTest(pack=path.name):
+                self.assertEqual((EVALUATION / "packs" / path.name).read_bytes(), path.read_bytes())
+
+    def test_staged_non_conformant_fixture_fails_for_its_one_stated_reason(self) -> None:
+        # RFC 0013: "The pack must fail for one stated reason. A fixture that is invalid three ways
+        # cannot show which one the class was reported for." One reason is not enough to hold: a
+        # fixture that came to fail for a *different* single reason would leave its description, its
+        # rows' focus and the adoption record false. The stated reason is one outcome where §4
+        # requires two, so that is what is asserted.
+        non_conformant = {
+            case["pack"]
+            for case in self._staged_cases()
+            if case.get("expectedErrorClass") == "pack-not-conformant"
+        }
+        self.assertEqual({"packs/error-single-outcome.json"}, non_conformant)
+        pack = strict_json_loads(
+            (EVALUATION_STAGED / "packs" / "error-single-outcome.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(1, len(pack["outcomes"]))
+        diagnostics = structural_diagnostics(self.validator, pack) + semantic_diagnostics(pack)
+        self.assertEqual(
+            [("JPS-STRUCTURE-COLLECTION-ARITY", "/outcomes")],
+            [(item.code, item.path) for item in diagnostics],
+        )
 
     def test_relative_markdown_links_resolve(self) -> None:
         link_pattern = re.compile(r"\[[^\]]*\]\(([^)]+)\)")

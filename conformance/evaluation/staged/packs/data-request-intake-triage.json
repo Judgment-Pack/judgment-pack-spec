@@ -1,0 +1,190 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.invalid/judgment-packs/data-request-intake-triage",
+  "version": "0.1.0",
+  "title": "Synthetic data request intake triage",
+  "description": "Invented intake-triage policy for a fictional data platform team: route an incoming data request to proceed, clarify/return, or decline/redirect once completeness and appropriateness have been assessed. Synthetic content for specification testing; it authorizes nothing.",
+  "decision": {
+    "intent": "Triage an incoming data request into exactly one intake outcome once the completeness of the submission and the appropriateness of the request have been assessed.",
+    "question": "Should this data request proceed, be returned for clarification, or be declined and redirected?"
+  },
+  "applicability": {
+    "op": "fact",
+    "path": "/request/type",
+    "operator": "in",
+    "value": [
+      "new-data-pipeline",
+      "pipeline-change",
+      "dataset-onboarding",
+      "one-time-extract",
+      "data-access",
+      "reporting-feed"
+    ]
+  },
+  "evidenceRequirements": [
+    {
+      "id": "intake-form",
+      "description": "The submitted request carrying every mandatory intake field.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "sponsor-endorsement",
+      "description": "A named accountable business sponsor at or above the minimum seniority threshold.",
+      "required": true,
+      "kind": "attestation"
+    },
+    {
+      "id": "sensitive-data-approvals",
+      "description": "Data-owner, privacy, and/or legal approvals where sensitive or personal data is present.",
+      "required": false,
+      "kind": "attestation"
+    }
+  ],
+  "sources": [
+    {
+      "id": "intake-standard",
+      "title": "Example data request intake standard",
+      "publisher": "Example Data Governance Office",
+      "publishedAt": "2026-01-15",
+      "locator": {
+        "kind": "uri",
+        "value": "https://example.invalid/standards/data-request-intake"
+      },
+      "citation": {
+        "location": "Section 6 — Triage decision and outcomes",
+        "excerpt": "The reviewer assigns exactly one outcome: proceed when complete and appropriate; clarify/return when substantially valid but incomplete or not yet evaluable; decline/redirect when an appropriateness criterion fails in a way more information will not fix."
+      },
+      "rights": "Invented content for specification testing; not an operational policy."
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "proceed",
+      "label": "Proceed",
+      "description": "Complete and appropriate: accept into the delivery queue, record the accepted scope, and hand off to the build process."
+    },
+    {
+      "id": "clarify-return",
+      "label": "Clarify / return",
+      "description": "Substantially valid but incomplete or not yet evaluable: return with the specific enumerated gaps, all at once."
+    },
+    {
+      "id": "decline-redirect",
+      "label": "Decline / redirect",
+      "description": "Fails an appropriateness criterion that more information will not fix: decline with a clear reason and, where possible, a redirect or alternative."
+    }
+  ],
+  "rules": [
+    {
+      "id": "decline-hard-appropriateness-failure",
+      "description": "Decline when the request fails an appropriateness criterion that more information cannot fix, such as no sponsored purpose, consumers not authorized for the data classification, a data-residency breach, duplication of an existing asset, or the wrong delivery mechanism.",
+      "when": {
+        "op": "fact",
+        "path": "/request/appropriateness",
+        "operator": "equals",
+        "value": "hard-fail"
+      },
+      "outcome": "decline-redirect",
+      "onUnknown": "escalate",
+      "evidenceRequirementRefs": ["intake-form"],
+      "sourceRefs": ["intake-standard"],
+      "rationale": "The cited standard treats a hard appropriateness failure as a decline, not a clarification."
+    },
+    {
+      "id": "clarify-incomplete-or-not-evaluable",
+      "description": "Return for clarification when mandatory fields are missing or ambiguous, when approvals or triggered reviews are merely pending, or when appropriateness cannot yet be judged.",
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "op": "fact",
+            "path": "/request/completeness",
+            "operator": "equals",
+            "value": "incomplete"
+          },
+          {
+            "op": "fact",
+            "path": "/request/appropriateness",
+            "operator": "in",
+            "value": ["pending", "not-evaluable"]
+          }
+        ]
+      },
+      "outcome": "clarify-return",
+      "onUnknown": "escalate",
+      "evidenceRequirementRefs": ["intake-form"],
+      "sourceRefs": ["intake-standard"],
+      "rationale": "The cited standard returns substantially valid but not yet decidable requests with enumerated gaps."
+    },
+    {
+      "id": "proceed-complete-and-appropriate",
+      "description": "Proceed when every mandatory intake field is complete, every appropriateness criterion passes, and the mandatory evidence is present.",
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "fact",
+            "path": "/request/completeness",
+            "operator": "equals",
+            "value": "complete"
+          },
+          {
+            "op": "fact",
+            "path": "/request/appropriateness",
+            "operator": "equals",
+            "value": "pass"
+          },
+          {
+            "op": "evidence-present",
+            "evidenceRequirement": "intake-form"
+          },
+          {
+            "op": "evidence-present",
+            "evidenceRequirement": "sponsor-endorsement"
+          }
+        ]
+      },
+      "outcome": "proceed",
+      "onUnknown": "escalate",
+      "evidenceRequirementRefs": ["intake-form", "sponsor-endorsement"],
+      "sourceRefs": ["intake-standard"],
+      "rationale": "The cited standard accepts complete and appropriate requests into the delivery queue."
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "embargoed-information-to-unauthorized",
+      "description": "Embargoed material non-public information reaching recipients outside the authorized set, or ahead of public release, is a hard decline: restrict to the authorized set and escalate to the disclosure office.",
+      "when": {
+        "op": "fact",
+        "path": "/request/embargoedInformationToUnauthorizedRecipients",
+        "operator": "equals",
+        "value": true
+      },
+      "effect": "force-outcome",
+      "outcome": "decline-redirect",
+      "onUnknown": "escalate"
+    }
+  ],
+  "fallbackOutcome": "clarify-return",
+  "escalation": {
+    "triggers": [
+      "not-applicable",
+      "missing-required-evidence",
+      "unknown",
+      "conflict",
+      "no-match"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Intake reviewer"
+    },
+    "message": "Escalate to the intake reviewer: enumerate the missing intake fields or unresolved appropriateness criteria, note any conflicting rules, and route embargoed-information questions to the disclosure office."
+  },
+  "metadata": {
+    "authors": ["Judgment Pack Specification contributors"],
+    "createdAt": "2026-07-27T00:00:00Z",
+    "license": "Apache-2.0"
+  }
+}

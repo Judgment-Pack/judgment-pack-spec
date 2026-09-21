@@ -7,6 +7,25 @@ here.
 
 ### Added
 
+- [RFC 0013](rfcs/0013-evaluator-error-and-precedence-cases.md) is `Accepted`, and its five rows —
+  the first to use `expectedErrorClass`, two of them inputs where more than one §8.4 class applies
+  and the fixed order decides — are **staged** in
+  [`conformance/evaluation/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged)
+  for the `suiteVersion`
+  after `0.2.0-draft`. They are in no corpus: the `0.2.0-draft` corpus is frozen and unchanged, no
+  claim may cite a staged row, the site serves nothing under the staged directory, and no release
+  bundle carries it (`.gitattributes`, `export-ignore`). That does not make them optional reading:
+  they restate §8.2 and §8.4 as already released, so an implementation that disagrees with one may
+  be violating the released contract without having failed a released row. The RFC's four open
+  questions are decided (a structural fixture that fails for its one stated reason; no asserted
+  phase, because §8.4 requires a class and not a phase; two fixtures; five rows). The repository's
+  check that every evidence key a case supplies be declared by its pack becomes conditional on the
+  expected error class. It admits a correctly labelled error row, which it used to refuse, and asks
+  more of what it still covers: the class a case expects must be the one §8.4's fixed order reports
+  for the case's own inputs, read without an evaluator. For the released rows it refuses what the
+  old check refused, and every one passes unchanged. The RFC was first merged without the
+  cross-vendor review the interim regime requires; that cannot be undone, the adoption record says
+  so, and the review on the accepting pull request is the first the proposal has had.
 - RFC 0010 (Draft): the gateway signing identity — custody of the private seed (which also keys
   the arguments commitment), content-binding seals, key rotation in the registry, and external
   checkpoint anchoring of sealed history. The first RFC whose every part lands outside JPS — in

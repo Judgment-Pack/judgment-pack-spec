@@ -525,9 +525,9 @@ PAGES = (
         "rfcs/0013-evaluator-error-and-precedence-cases.md",
         PurePosixPath("rfcs/0013-evaluator-error-and-precedence-cases/index.html"),
         "RFC 0013: The first evaluator error and precedence cases",
-        "Draft proposal for the first evaluation-suite rows that use expectedErrorClass - three single-condition error cases and, more usefully, two where several classes apply at once and the row fixes which one section 8.4's order reports.",
+        "Accepted proposal for the first evaluation-suite rows that use expectedErrorClass - three single-condition error cases and, more usefully, two where several classes apply at once and the row fixes which one section 8.4's order reports. The rows are staged for the next suite version and are in no released corpus.",
         "proposals",
-        "Draft proposal",
+        "Accepted specification-track RFC",
         source_ref="main",
     ),
     Page(
@@ -2063,10 +2063,26 @@ def build_license(output_root: Path) -> None:
     write_page(output_root, page_output, rendered)
 
 
+# Rows staged for a later suiteVersion are in no corpus (conformance/evaluation/staged/README.md). The
+# site serves the specification and its released corpus, so it serves nothing under this directory;
+# the release bundle leaves it out by the same rule (.gitattributes, export-ignore).
+UNPUBLISHED_ARTIFACT_DIRECTORIES = (PurePosixPath("conformance/evaluation/staged"),)
+
+
+def is_published_artifact(relative: Path) -> bool:
+    parts = PurePosixPath(relative.as_posix()).parts
+    return not any(
+        parts[: len(unpublished.parts)] == unpublished.parts
+        for unpublished in UNPUBLISHED_ARTIFACT_DIRECTORIES
+    )
+
+
 def copy_artifacts(output_root: Path) -> None:
     for directory in ("schema", "examples", "conformance"):
         for path in sorted((ROOT / directory).rglob("*.json")):
             relative = path.relative_to(ROOT)
+            if not is_published_artifact(relative):
+                continue
             destination = output_root / "artifacts" / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, destination)

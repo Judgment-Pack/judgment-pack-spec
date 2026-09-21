@@ -16,6 +16,12 @@ class is [§3.4 of the Core specification](../spec/judgment-pack-core.md), not t
 and a retrospective one: the gateway's `SPEC.md` and the runtime's decision records govern what it
 describes, and they did so before it was written.
 
+Acceptance and incorporation are different events. [RFC 0000](0000-rfc-process.md) makes acceptance
+the approval of a design at the maturity the RFC names; RFC 0006's text landed in the same merge,
+which is a precedent and not a rule. [RFC 0013](0013-evaluator-error-and-precedence-cases.md) is
+accepted and awaits incorporation: its rows are staged for the `suiteVersion` after `0.2.0-draft`,
+are in no released corpus, and land when a later `specVersion` opens.
+
 The purpose of this directory is to make the project's open design questions *visible* rather than
 to imply they are settled. Concepts that are frequently assumed to be part of Judgment Pack — a
 graph that composes packs, a planner that selects them, an evidence-integration layer, a discovery
@@ -47,7 +53,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0010](0010-gateway-signing-identity.md) | The gateway signing identity — custody, rotation, and anchoring | Draft | Research line (gateway repository: code, `SPEC.md`, guidance, corpus) — outside the specification |
 | [0011](0011-judgment-currency-anchor.md) | A currency anchor for pack versions — detecting stale and retired policy | Draft | Research line (cross-project artifact: a runtime currency registry + verifier, consumer protocols) — outside the specification |
 | [0012](0012-witness-contract.md) | What a witness contract would have to specify — candidate clauses for a signed-history comparison | Draft | Research line (cross-project artifact: a witness format + verifier, consumer protocols) — outside the specification |
-| [0013](0013-evaluator-error-and-precedence-cases.md) | The first evaluation-suite rows that use `expectedErrorClass`, including two where several §8.4 classes apply and the order decides | Draft | Specification-track (evaluation conformance suite) |
+| [0013](0013-evaluator-error-and-precedence-cases.md) | The first evaluation-suite rows that use `expectedErrorClass`, including two where several §8.4 classes apply and the order decides | Accepted | Specification-track (evaluation conformance suite) — rows staged for the `suiteVersion` after `0.2.0-draft`, in no released corpus |
 | [0014](0014-lineage-record-and-action-binding.md) | The lineage record and the action binding — how a decision cites what it read, and an action cites what it decided | Accepted | Research line (cross-project artifact: gateway receipt version 3 + verifier join, runtime record and row citations; outside the specification) — a retrospective record; acceptance endorses the record only |
 | [0015](0015-reported-receipts.md) | What a reported receipt would have to specify — the engine signing a call it did not make | Draft | Research line (cross-project artifact: gateway receipt format, verifier and surface; a reporting plugin in an MCP gateway; outside the specification) |
 

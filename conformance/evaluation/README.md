@@ -138,15 +138,26 @@ Stated rather than implied, because a seed corpus that hides its gaps is worse t
   §8.4 classes — a non-conforming pack, an unsupported required extension, a malformed facts or
   evidence document, an undeclared evidence key, resource exhaustion — deserves a row, as does §8.4's
   precedence order where two classes apply to the same inputs, and so does the phase split between
-  `malformed-input` and `resource-exhaustion` that `expectedErrorPhase` exists to record.
+  `malformed-input` and `resource-exhaustion` that `expectedErrorPhase` exists to record. This corpus
+  still has none, and being frozen it will not gain any. Five are **staged** for the next
+  `suiteVersion` in
+  [`staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged)
+  — three single-class rows and the two precedence
+  rows [RFC 0013](../../rfcs/0013-evaluator-error-and-precedence-cases.md) proposed. They are in no
+  corpus, and no claim may cite them. `resource-exhaustion` and the phase split are not among them.
 - **The carrier cannot yet express some of those rows, and that is deferred.** `facts` is embedded
   parsed JSON and `evidenceAvailability` is constrained to the tri-state by this carrier's own schema, so
   a malformed-JSON document, a duplicate member, a non-object evidence input, and an invalid evidence
   state have no fixture form here. A raw-document fixture form — a case that carries an input as unparsed
   bytes — is **deferred to the next `suiteVersion`**; it is a carrier change, and this one is frozen at
-  release (Core §3.4.1). This repository's own checks also still require every evidence key a case supplies
-  to be declared by its pack, so an undeclared-key row needs that check made conditional on the expected
-  error class, exactly as the pack-conformance check already is. The `workBudget` and `expectedErrorPhase`
+  release (Core §3.4.1). This repository's own checks used to require every evidence key a case supplies
+  to be declared by its pack, which an undeclared-key row cannot satisfy. That check is now conditional
+  on the expected error class, exactly as the pack-conformance check already was. It admits what it
+  used to refuse, a correctly labelled error row, and asks more of everything it still covers: the
+  class a case expects must be the one §8.4's fixed order reports for the case's own inputs, and a
+  case whose inputs nothing refuses may expect none of the three classes decided while admitting
+  them. For the released rows it refuses what the old check refused, and every one of them passes it
+  unchanged. The `workBudget` and `expectedErrorPhase`
   members were added now, ahead of the rows that will use them, precisely so that those rows do not need
   another carrier change; no row in this version uses either.
 - **Three mandatory operators have no row.** §7.4 requires every operator of an implementation claiming

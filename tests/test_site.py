@@ -12,6 +12,9 @@ from urllib.parse import unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[1]
+# Mirrors UNPUBLISHED_ARTIFACT_DIRECTORIES in web/build.py: rows staged for a later suiteVersion are
+# in no corpus, and the site serves nothing under this directory.
+STAGED_EVALUATION_ROWS = "conformance/evaluation/staged"
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
 # anywhere the site publishes. The tokens are assembled from fragments deliberately: the repository
@@ -185,10 +188,38 @@ class StaticSiteTests(unittest.TestCase):
         for directory in ("schema", "examples", "conformance"):
             for source in (ROOT / directory).rglob("*.json"):
                 relative = source.relative_to(ROOT)
+                if relative.as_posix().startswith(STAGED_EVALUATION_ROWS + "/"):
+                    continue
                 published = self.output / "artifacts" / relative
                 with self.subTest(relative=relative.as_posix()):
                     self.assertTrue(published.is_file())
                     self.assertEqual(published.read_bytes(), source.read_bytes())
+
+    def test_staged_evaluation_rows_are_not_published(self) -> None:
+        # Staged rows are in no corpus (conformance/evaluation/staged/README.md) and that README says
+        # the site does not serve them. A recursive copy of conformance/ would, so the claim is held
+        # here: nothing under the staged directory is published, as an artifact or as a page.
+        staged = sorted((ROOT / STAGED_EVALUATION_ROWS).rglob("*"))
+        self.assertTrue(
+            any(path.suffix == ".json" for path in staged),
+            "nothing is staged; this test and the exclusion it holds can go with the directory",
+        )
+        # Whole path components, not a substring: a sibling such as `staged-next/` is not this
+        # directory, the build would publish it, and this test must not object.
+        staged_parts = tuple(STAGED_EVALUATION_ROWS.split("/"))
+
+        def is_under_staged(parts: tuple[str, ...]) -> bool:
+            return any(
+                parts[index : index + len(staged_parts)] == staged_parts
+                for index in range(len(parts) - len(staged_parts) + 1)
+            )
+
+        published = [
+            path.relative_to(self.output).as_posix()
+            for path in self.output.rglob("*")
+            if is_under_staged(path.relative_to(self.output).parts)
+        ]
+        self.assertEqual([], published)
 
     def test_every_manifest_case_has_a_browsable_page(self) -> None:
         manifest = json.loads(

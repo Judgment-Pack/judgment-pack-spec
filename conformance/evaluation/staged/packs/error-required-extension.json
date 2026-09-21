@@ -1,0 +1,68 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.invalid/judgment-packs/error-required-extension",
+  "version": "0.1.0",
+  "title": "Synthetic conforming fixture that requires an extension no evaluator supports",
+  "description": "Constructed staged fixture that is a fully conforming document and declares one required extension, a probe name that no implementation is expected to support. Synthetic content for specification testing; it authorizes nothing.",
+  "decision": {
+    "intent": "Present an evaluator with a conforming pack whose required extension it does not support, so that no disposition may be produced.",
+    "question": "Should this synthetic request be approved or held?"
+  },
+  "outcomes": [
+    {
+      "id": "approve",
+      "label": "Approve",
+      "description": "The synthetic request proceeds."
+    },
+    {
+      "id": "hold",
+      "label": "Hold",
+      "description": "The synthetic request waits."
+    }
+  ],
+  "evidenceRequirements": [
+    {
+      "id": "intake-form",
+      "description": "The synthetic intake form for the request.",
+      "required": false,
+      "kind": "document"
+    }
+  ],
+  "rules": [
+    {
+      "id": "approve-when-ready",
+      "description": "Approve the request once it is marked ready.",
+      "when": {
+        "op": "fact",
+        "path": "/request/ready",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "approve",
+      "onUnknown": "ignore"
+    },
+    {
+      "id": "hold-when-not-ready",
+      "description": "Hold the request while it is marked not ready.",
+      "when": {
+        "op": "fact",
+        "path": "/request/ready",
+        "operator": "equals",
+        "value": false
+      },
+      "outcome": "hold",
+      "onUnknown": "ignore"
+    }
+  ],
+  "extensions": {
+    "com.example.unsupported-probe": {
+      "note": "A required extension exists to change what a pack means. This one carries no meaning; it exists so that an evaluator must refuse."
+    }
+  },
+  "metadata": {
+    "authors": ["Judgment Pack Specification contributors"],
+    "createdAt": "2026-09-21T00:00:00Z",
+    "license": "Apache-2.0",
+    "requiredExtensions": ["com.example.unsupported-probe"]
+  }
+}
