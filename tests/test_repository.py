@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import collections
 import json
 import re
 import unittest
@@ -554,10 +555,16 @@ class RepositoryConformanceTests(unittest.TestCase):
         self.assertTrue(self.manifest["validationProfile"]["rejectDuplicateObjectMembers"])
 
     def test_manifest_covers_every_fixture_once(self) -> None:
-        listed = [case["path"] for case in self.manifest["cases"]]
-        case_ids = [case["id"] for case in self.manifest["cases"]]
-        self.assertEqual(len(listed), len(set(listed)), "manifest contains duplicate paths")
-        self.assertEqual(len(case_ids), len(set(case_ids)), "manifest contains duplicate case ids")
+        case_ids = collections.Counter(case["id"] for case in self.manifest["cases"])
+        for case_id, count in sorted(case_ids.items()):
+            with self.subTest(case_id=case_id):
+                self.assertEqual(1, count, f"case id {case_id!r} appears {count} times")
+
+        paths = collections.Counter(case["path"] for case in self.manifest["cases"])
+        for path, count in sorted(paths.items()):
+            with self.subTest(path=path):
+                self.assertEqual(1, count, f"case path {path!r} appears {count} times")
+
         for case in self.manifest["cases"]:
             directory = Path(case["path"]).parts[0]
             if directory == "valid":
@@ -565,12 +572,24 @@ class RepositoryConformanceTests(unittest.TestCase):
                 self.assertEqual("valid", case["expectedResult"])
             else:
                 self.assertEqual(case["layer"], directory)
-        fixture_paths = sorted(
-            str(path.relative_to(CONFORMANCE))
-            for directory in ("carrier", "structural", "semantic", "valid")
-            for path in (CONFORMANCE / directory).glob("*.json")
-        )
-        self.assertEqual(sorted(listed), fixture_paths)
+
+        listed = set(paths.keys())
+        on_disk = {
+            path.relative_to(CONFORMANCE).as_posix()
+            for path in CONFORMANCE.rglob("*.json")
+            if not (path.name.endswith(".schema.json") or path.name in ("manifest.json", "cases.json"))
+            and "evaluation" not in path.parts
+        }
+
+        for path in sorted(listed - on_disk):
+            with self.subTest(missing=path):
+                self.fail(f"case path {path!r} names no file")
+
+        for path in sorted(on_disk - listed):
+            with self.subTest(orphan=path):
+                self.fail(f"fixture {path!r} is named by no case")
+
+
 
     def test_conformance_cases(self) -> None:
         for case in self.manifest["cases"]:
@@ -651,8 +670,11 @@ class RepositoryConformanceTests(unittest.TestCase):
         self.assertEqual(manifest["suiteVersion"], SPEC_VERSION)
         self.assertEqual(manifest["specVersion"], SPEC_VERSION)
         self.assertEqual(manifest["label"], "seed")
-        ids = [case["id"] for case in manifest["cases"]]
-        self.assertEqual(len(ids), len(set(ids)), "duplicate evaluation case ids")
+        ids = collections.Counter(case["id"] for case in manifest["cases"])
+        for case_id, count in sorted(ids.items()):
+            with self.subTest(case_id=case_id):
+                self.assertEqual(1, count, f"evaluation case id {case_id!r} appears {count} times")
+
 
     def test_evaluation_cases_are_well_formed_against_their_pack(self) -> None:
         manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
@@ -785,11 +807,22 @@ class RepositoryConformanceTests(unittest.TestCase):
         # Mirrors test_manifest_covers_every_fixture_once: a pack committed under packs/ and
         # referenced by no case would ship in the release bundle unexercised.
         manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
-        referenced = {case["pack"] for case in manifest["cases"]}
-        committed = {
-            f"packs/{path.name}" for path in (EVALUATION / "packs").glob("*.json")
+        listed = {case["pack"] for case in manifest["cases"]}
+        on_disk = {
+            f"packs/{path.relative_to(EVALUATION / 'packs').as_posix()}"
+            for path in (EVALUATION / "packs").rglob("*.json")
+            if not (path.name.endswith(".schema.json") or path.name in ("manifest.json", "cases.json"))
         }
-        self.assertEqual(committed, referenced)
+
+        for path in sorted(listed - on_disk):
+            with self.subTest(missing=path):
+                self.fail(f"evaluation pack path {path!r} names no file")
+
+        for path in sorted(on_disk - listed):
+            with self.subTest(orphan=path):
+                self.fail(f"evaluation pack fixture {path!r} is named by no case")
+
+
 
     def test_evaluation_pack_fixture_does_not_drift_from_the_example(self) -> None:
         example = (ROOT / "examples" / "data-request-intake-triage.json").read_bytes()
@@ -862,13 +895,17 @@ class RepositoryConformanceTests(unittest.TestCase):
                 errors = sorted(case_validator.iter_errors(case), key=lambda item: list(item.path))
                 self.assertEqual([], [error.message for error in errors])
 
-        staged_ids = [case["id"] for case in staged["cases"]]
-        self.assertEqual(len(staged_ids), len(set(staged_ids)), "duplicate staged case ids")
+        staged_counts = collections.Counter(case["id"] for case in staged["cases"])
+        for case_id, count in sorted(staged_counts.items()):
+            with self.subTest(case_id=case_id):
+                self.assertEqual(1, count, f"staged case id {case_id!r} appears {count} times")
+
+        staged_ids = set(staged_counts.keys())
         manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
         released_ids = {case["id"] for case in manifest["cases"]}
         self.assertEqual(
             set(),
-            set(staged_ids) & released_ids,
+            staged_ids & released_ids,
             "a staged id that a released row already uses could not move into the manifest",
         )
 
@@ -879,11 +916,21 @@ class RepositoryConformanceTests(unittest.TestCase):
         # Every committed fixture is referenced, and every reference is committed. A fixture may be
         # referenced more than once — the precedence rows reuse the single-class rows' fixtures on
         # purpose — so this is set equality, not a count.
-        referenced = {case["pack"] for case in self._staged_cases()}
-        committed = {
-            f"packs/{path.name}" for path in (EVALUATION_STAGED / "packs").glob("*.json")
+        listed = {case["pack"] for case in self._staged_cases()}
+        on_disk = {
+            f"packs/{path.relative_to(EVALUATION_STAGED / 'packs').as_posix()}"
+            for path in (EVALUATION_STAGED / "packs").rglob("*.json")
+            if not (path.name.endswith(".schema.json") or path.name in ("manifest.json", "cases.json"))
         }
-        self.assertEqual(committed, referenced)
+
+        for path in sorted(listed - on_disk):
+            with self.subTest(missing=path):
+                self.fail(f"staged pack path {path!r} names no file")
+
+        for path in sorted(on_disk - listed):
+            with self.subTest(orphan=path):
+                self.fail(f"staged fixture {path!r} is named by no case")
+
 
     def test_staged_copy_of_a_released_fixture_does_not_drift(self) -> None:
         # A staged case may reuse a released fixture, and a case's `pack` path resolves inside its own
