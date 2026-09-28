@@ -306,8 +306,8 @@ cites it, are outside Core.
   above states the prohibition.
 - **Confusion about origin.** A value in a disposition may be read as verified. It is copied, not
   verified. Where a fact came from is recorded, if at all, outside Core.
-- **Resources.** A value declaration adds one pointer resolution per value, for the one outcome
-  produced. §10 has an implementation define limits on collection size and evaluation work and
+- **Resources.** A value declaration adds one pointer resolution per `fromFact` value, for the
+  one outcome produced. §10 has an implementation define limits on collection size and evaluation work and
   recommends one on string size. A declaration or a selected value past a documented limit is
   handled as §10 handles any other.
 
@@ -355,8 +355,11 @@ Error rows:
 - A malformed declaration together with an evidence-availability document carrying an undeclared
   member name: `pack-not-conformant`, the first class in §8.4's order.
 - For an implementation that does not support the extension, a well-formed pack that requires it:
-  `unsupported-required-extension`. The same pack with a malformed declaration gets the same
-  class from that implementation, which does not read the declaration.
+  `unsupported-required-extension`. The same pack gets the same class where its declaration
+  breaks only this extension's own rules, such as an empty declaration or an unknown `type`: an
+  implementation that does not support the extension is not required to check them. A fault
+  Core itself defines is another matter. A duplicate member name inside the declaration makes
+  the pack `pack-not-conformant` for every implementation, and that class comes first (§8.4).
 
 ## Implementation
 
