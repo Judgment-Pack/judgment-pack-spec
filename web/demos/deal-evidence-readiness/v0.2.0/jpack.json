@@ -1,0 +1,10 @@
+{
+  "configVersion": "3",
+  "packs": {
+    "deal-readiness": {
+      "path": "packs/deal-readiness.pack.json",
+      "matrix": "packs/deal-readiness.matrix.json",
+      "description": "Evidence readiness for a synthetic enterprise deal: reconcile current quote, delivery scope and approvals before owner review."
+    }
+  }
+}

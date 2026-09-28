@@ -1,0 +1,13 @@
+{
+  "synthetic": true,
+  "system": "Simulated CPQ export",
+  "status": "found",
+  "opportunityId": "DEMO-1042",
+  "quoteRevision": "Q-1042-R3",
+  "scopeId": "CA-CLOUD-2400",
+  "termsRevision": "TERMS-STANDARD-3",
+  "annualValueUSD": "480000",
+  "discountPercent": "20",
+  "nonStandardTerms": true,
+  "scopeDescription": "Enterprise content platform and migration services; Canadian cloud; 2,400 seats."
+}

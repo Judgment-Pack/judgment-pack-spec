@@ -1,0 +1,318 @@
+[
+  {
+    "key": "01-missing-review",
+    "diagnosis": {
+      "security": "record-not-found"
+    },
+    "facts": {
+      "deal": {
+        "annualValueUSD": "480000",
+        "context": "synthetic-demo",
+        "discountPercent": "20",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "present",
+      "security-review": "absent"
+    }
+  },
+  {
+    "key": "02-evidence-ready",
+    "diagnosis": {},
+    "facts": {
+      "deal": {
+        "annualValueUSD": "480000",
+        "context": "synthetic-demo",
+        "discountPercent": "20",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      },
+      "security": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "present",
+      "security-review": "present"
+    }
+  },
+  {
+    "key": "03-stale-quote",
+    "diagnosis": {
+      "security": "wrong-quote-revision"
+    },
+    "facts": {
+      "deal": {
+        "annualValueUSD": "480000",
+        "context": "synthetic-demo",
+        "discountPercent": "20",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "present",
+      "security-review": "unknown"
+    }
+  },
+  {
+    "key": "04-wrong-scope",
+    "diagnosis": {
+      "security": "wrong-delivery-scope"
+    },
+    "facts": {
+      "deal": {
+        "annualValueUSD": "480000",
+        "context": "synthetic-demo",
+        "discountPercent": "20",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "present",
+      "security-review": "unknown"
+    }
+  },
+  {
+    "key": "05-commercial-exception",
+    "diagnosis": {},
+    "facts": {
+      "deal": {
+        "annualValueUSD": "432000",
+        "context": "synthetic-demo",
+        "discountPercent": "28",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      },
+      "security": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "present",
+      "security-review": "present"
+    }
+  },
+  {
+    "key": "06-finance-mismatch",
+    "diagnosis": {
+      "finance": "wrong-commercial-value"
+    },
+    "facts": {
+      "deal": {
+        "annualValueUSD": "432000",
+        "context": "synthetic-demo",
+        "discountPercent": "28",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "security": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "unknown",
+      "security-review": "present"
+    }
+  },
+  {
+    "key": "07-wrong-opportunity",
+    "diagnosis": {
+      "security": "wrong-opportunity"
+    },
+    "facts": {
+      "deal": {
+        "annualValueUSD": "480000",
+        "context": "synthetic-demo",
+        "discountPercent": "20",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "present",
+      "security-review": "unknown"
+    }
+  },
+  {
+    "key": "08-known-refusal",
+    "diagnosis": {},
+    "facts": {
+      "deal": {
+        "annualValueUSD": "480000",
+        "context": "synthetic-demo",
+        "discountPercent": "20",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      },
+      "security": {
+        "approved": false
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "present",
+      "security-review": "present"
+    }
+  },
+  {
+    "key": "09-nonstandard-terms",
+    "diagnosis": {},
+    "facts": {
+      "deal": {
+        "annualValueUSD": "480000",
+        "context": "synthetic-demo",
+        "discountPercent": "20",
+        "nonStandardTerms": true,
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      },
+      "security": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "present",
+      "security-review": "present"
+    }
+  },
+  {
+    "key": "10-source-unavailable",
+    "diagnosis": {
+      "security": "lookup-unavailable-or-incomplete"
+    },
+    "facts": {
+      "deal": {
+        "annualValueUSD": "480000",
+        "context": "synthetic-demo",
+        "discountPercent": "20",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "present",
+      "security-review": "unknown"
+    }
+  },
+  {
+    "key": "11-finance-absent",
+    "diagnosis": {
+      "finance": "record-not-found"
+    },
+    "facts": {
+      "deal": {
+        "annualValueUSD": "480000",
+        "context": "synthetic-demo",
+        "discountPercent": "20",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "security": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "absent",
+      "security-review": "present"
+    }
+  },
+  {
+    "key": "12-unannounced-quote-change",
+    "diagnosis": {
+      "quote": "wrong-commercial-value"
+    },
+    "facts": {
+      "deal": {
+        "context": "synthetic-demo",
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      },
+      "security": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "unknown",
+      "finance-approval": "present",
+      "security-review": "present"
+    }
+  },
+  {
+    "key": "13-invalid-approval",
+    "diagnosis": {
+      "security": "approval-not-a-boolean"
+    },
+    "facts": {
+      "deal": {
+        "annualValueUSD": "480000",
+        "context": "synthetic-demo",
+        "discountPercent": "20",
+        "nonStandardTerms": false,
+        "stage": "negotiation"
+      },
+      "finance": {
+        "approved": true
+      }
+    },
+    "evidence": {
+      "crm-record": "present",
+      "current-quote": "present",
+      "finance-approval": "present",
+      "security-review": "unknown"
+    }
+  }
+]

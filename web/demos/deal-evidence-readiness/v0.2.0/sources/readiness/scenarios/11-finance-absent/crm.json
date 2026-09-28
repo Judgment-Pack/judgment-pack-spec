@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated CRM export",
+  "status": "found",
+  "opportunityId": "DEMO-1042",
+  "account": "Harborline Manufacturing (fictional)",
+  "context": "synthetic-demo",
+  "stage": "negotiation",
+  "currentQuoteRevision": "Q-1042-R3",
+  "scopeId": "CA-CLOUD-2400",
+  "owner": "Demo account executive"
+}

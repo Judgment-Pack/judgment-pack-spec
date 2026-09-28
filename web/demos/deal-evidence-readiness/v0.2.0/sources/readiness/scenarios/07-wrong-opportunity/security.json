@@ -1,0 +1,10 @@
+{
+  "synthetic": true,
+  "system": "Simulated security review repository",
+  "status": "found",
+  "opportunityId": "DEMO-OTHER",
+  "quoteRevision": "Q-1042-R3",
+  "scopeId": "CA-CLOUD-2400",
+  "approved": true,
+  "reviewer": "Demo security reviewer"
+}

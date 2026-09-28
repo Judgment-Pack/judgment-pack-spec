@@ -1,0 +1,13 @@
+{
+  "synthetic": true,
+  "system": "Simulated finance approvals repository",
+  "status": "found",
+  "opportunityId": "DEMO-1042",
+  "quoteRevision": "Q-1042-R4",
+  "scopeId": "CA-CLOUD-2400",
+  "termsRevision": "TERMS-STANDARD-3",
+  "approvedAnnualValueUSD": "432000",
+  "approvedDiscountPercent": "28",
+  "approved": true,
+  "reviewer": "Demo finance reviewer"
+}

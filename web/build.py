@@ -10,6 +10,7 @@ import hashlib
 import posixpath
 import re
 import shutil
+import zipfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
@@ -258,6 +259,15 @@ EXAMPLE_GUIDES = {
 
 
 PAGES = (
+    Page(
+        "docs/examples/deal-evidence-readiness.md",
+        PurePosixPath("examples/deal-evidence-readiness/index.html"),
+        "Deal evidence readiness",
+        "A synthetic Deal Desk walkthrough: reconcile CRM, quote, security and finance evidence, with a downloadable pack, 40 test cases and a one-page brief.",
+        "examples",
+        "Non-normative worked example",
+        source_ref="main",
+    ),
     Page(
         "README.md",
         PurePosixPath("index.html"),
@@ -676,6 +686,11 @@ class LocalLinkRewriter(Treeprocessor):
         self.routes = routes
 
     def rewrite(self, value: str) -> str:
+        # Known generated downloads use public URLs in repository Markdown, but must
+        # stay on the current host when browsing a local or hosted preview.
+        direct = self.routes.get(value)
+        if isinstance(direct, PurePosixPath):
+            return output_href(self.output, direct)
         parsed = urlsplit(value)
         if parsed.scheme or parsed.netloc or not parsed.path or parsed.path.startswith("/"):
             return value
@@ -1432,6 +1447,10 @@ def prepare_output(output: Path) -> None:
 
 def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
     routes: dict[str, PurePosixPath | str] = {page.source: page.output for page in PAGES}
+    for relative, _ in deal_demo_files():
+        routes[(DEAL_DEMO_SOURCE / relative).as_posix()] = DEAL_DEMO_OUTPUT / relative
+    demo_zip = DEAL_DEMO_OUTPUT / (DEAL_DEMO_ARCHIVE + ".zip")
+    routes["https://judgmentpack.org/" + demo_zip.as_posix()] = demo_zip
     routes.update(
         {
             ".": PurePosixPath("index.html"),
@@ -1523,6 +1542,7 @@ def home_ecosystem_html(current: PurePosixPath) -> str:
       runtime computes every disposition; the model may gather inputs, draft, and narrate, but it
       cannot change the runtime result. Use synthetic, non-sensitive material only.</p>
       <div class="card-actions">
+        <a href="{html.escape(output_href(current, PurePosixPath('examples/deal-evidence-readiness/index.html')))}">Deal evidence readiness example</a>
         <a href="{html.escape(DEMO_URL)}" target="_blank" rel="noopener noreferrer">Demo repository</a>
       </div>
     </article>
@@ -1765,6 +1785,13 @@ key to see what it means and its allowed values.</p>
 
     index_body = f"""
 <h1>Synthetic examples</h1>
+<div class="notice notice-info">
+  <strong>Worked business example: deal evidence readiness.</strong>
+  <p>Follow one fictional deal through missing reviews, stale approvals and commercial exceptions.
+  Download the one-page brief, runnable pack, 40 project test cases and synthetic records.</p>
+  <p><a href="{html.escape(output_href(index_output, PurePosixPath('examples/deal-evidence-readiness/index.html')))}">Explore the Deal Desk example</a></p>
+  <p>This companion-tool walkthrough is separate from the document-conformance examples below.</p>
+</div>
 <p class="lede">These are synthetic, structurally and semantically conforming JPS documents for
 inspecting and testing the document format. Unrelated domains exercise the same portable
 shape without claiming that the examples are complete, authoritative, or safe for operational
@@ -2102,7 +2129,55 @@ def is_published_artifact(relative: Path) -> bool:
     )
 
 
+DEAL_DEMO_SOURCE = PurePosixPath("web/demos/deal-evidence-readiness/v0.2.0")
+DEAL_DEMO_OUTPUT = PurePosixPath("artifacts/demos/deal-evidence-readiness/v0.2.0")
+DEAL_DEMO_ARCHIVE = "deal-evidence-readiness-v0.2.0"
+
+
+def deal_demo_files() -> list[tuple[PurePosixPath, bytes]]:
+    """Only explicitly reviewed, checksum-pinned public files may enter this bundle."""
+    manifest = json.loads(repository_file("web/demos/deal-evidence-readiness/manifest.json").read_text())
+    result = []
+    for name, digest in sorted(manifest["files"].items()):
+        relative = PurePosixPath(name)
+        if (relative.is_absolute() or relative.as_posix() != name
+                or any(part.startswith(".") for part in relative.parts)
+                or (relative.suffix not in {".json", ".md", ".csv", ".pdf"} and name != "LICENSE")):
+            raise ValueError(f"unsafe public demo path: {name}")
+        source = ROOT / DEAL_DEMO_SOURCE / relative
+        if source.is_symlink() or any(parent.is_symlink() for parent in source.parents):
+            raise ValueError(f"public demo file must not be a symlink: {name}")
+        content = source.read_bytes()
+        if hashlib.sha256(content).hexdigest() != digest:
+            raise ValueError(f"public demo checksum changed; review its manifest: {name}")
+        result.append((relative, content))
+    return result
+
+
+def copy_deal_demo(output_root: Path) -> None:
+    files = deal_demo_files()
+    sums = "".join(f"{hashlib.sha256(content).hexdigest()}  {path.as_posix()}\n" for path, content in files)
+    files.append((PurePosixPath("SHA256SUMS"), sums.encode("utf-8")))
+    destination = output_root / DEAL_DEMO_OUTPUT
+    destination.mkdir(parents=True, exist_ok=True)
+    archive = destination / (DEAL_DEMO_ARCHIVE + ".zip")
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as bundle:
+        for relative, content in files:
+            target = destination / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content)
+            # Fixed metadata keeps the downloadable archive reproducible across builds.
+            info = zipfile.ZipInfo(f"{DEAL_DEMO_ARCHIVE}/{relative.as_posix()}", date_time=(1980, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o100644 << 16
+            info.create_system = 3
+            bundle.writestr(info, content)
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    (destination / (archive.name + ".sha256")).write_text(f"{digest}  {archive.name}\n", encoding="utf-8")
+
+
 def copy_artifacts(output_root: Path) -> None:
+    copy_deal_demo(output_root)
     for directory in ("schema", "examples", "conformance"):
         for path in sorted((ROOT / directory).rglob("*.json")):
             relative = path.relative_to(ROOT)

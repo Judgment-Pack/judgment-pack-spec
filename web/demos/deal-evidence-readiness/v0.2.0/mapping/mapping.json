@@ -1,0 +1,757 @@
+{
+  "version": 2,
+  "case": {
+    "parameters": {
+      "opportunityId": {
+        "pointer": "/opportunityId",
+        "type": "string"
+      },
+      "quoteRevision": {
+        "pointer": "/quoteRevision",
+        "type": "string"
+      },
+      "scopeId": {
+        "pointer": "/scopeId",
+        "type": "string"
+      },
+      "termsRevision": {
+        "pointer": "/termsRevision",
+        "type": "string"
+      },
+      "annualValueUSD": {
+        "pointer": "/annualValueUSD",
+        "type": "string"
+      },
+      "discountPercent": {
+        "pointer": "/discountPercent",
+        "type": "string"
+      }
+    },
+    "facts": [],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "crm",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "opportunityId": "string",
+            "quoteRevision": "string",
+            "scopeId": "string",
+            "termsRevision": "string",
+            "annualValueUSD": "string",
+            "discountPercent": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/opportunityId",
+                  "param": "opportunityId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "crm-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-opportunity"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/currentQuoteRevision",
+                  "param": "quoteRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "crm-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-quote-revision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/scopeId",
+                  "param": "scopeId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "crm-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-delivery-scope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "crm-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/deal/context",
+                    "from": "/context"
+                  },
+                  {
+                    "pointer": "/deal/stage",
+                    "from": "/stage"
+                  }
+                ],
+                "evidence": {
+                  "crm-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-current-deal-quote-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "crm-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "quote",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "opportunityId": "string",
+            "quoteRevision": "string",
+            "scopeId": "string",
+            "termsRevision": "string",
+            "annualValueUSD": "string",
+            "discountPercent": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/opportunityId",
+                  "param": "opportunityId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "current-quote": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-opportunity"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/quoteRevision",
+                  "param": "quoteRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "current-quote": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-quote-revision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/scopeId",
+                  "param": "scopeId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "current-quote": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-delivery-scope"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/termsRevision",
+                  "param": "termsRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "current-quote": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-terms-revision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/annualValueUSD",
+                  "param": "annualValueUSD"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "current-quote": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-commercial-value"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/discountPercent",
+                  "param": "discountPercent"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "current-quote": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-discount"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "current-quote": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/deal/annualValueUSD",
+                    "from": "/annualValueUSD"
+                  },
+                  {
+                    "pointer": "/deal/discountPercent",
+                    "from": "/discountPercent"
+                  },
+                  {
+                    "pointer": "/deal/nonStandardTerms",
+                    "from": "/nonStandardTerms"
+                  }
+                ],
+                "evidence": {
+                  "current-quote": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-current-deal-quote-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "current-quote": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "security",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "opportunityId": "string",
+            "quoteRevision": "string",
+            "scopeId": "string",
+            "termsRevision": "string",
+            "annualValueUSD": "string",
+            "discountPercent": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/opportunityId",
+                  "param": "opportunityId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "security-review": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-opportunity"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/quoteRevision",
+                  "param": "quoteRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "security-review": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-quote-revision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/scopeId",
+                  "param": "scopeId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "security-review": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-delivery-scope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/approved",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/approved",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "security-review": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "approval-not-a-boolean"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "security-review": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/security/approved",
+                    "from": "/approved"
+                  }
+                ],
+                "evidence": {
+                  "security-review": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-current-deal-quote-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "security-review": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "finance",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "opportunityId": "string",
+            "quoteRevision": "string",
+            "scopeId": "string",
+            "termsRevision": "string",
+            "annualValueUSD": "string",
+            "discountPercent": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/opportunityId",
+                  "param": "opportunityId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "finance-approval": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-opportunity"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/quoteRevision",
+                  "param": "quoteRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "finance-approval": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-quote-revision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/scopeId",
+                  "param": "scopeId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "finance-approval": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-delivery-scope"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/termsRevision",
+                  "param": "termsRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "finance-approval": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-terms-revision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/approvedAnnualValueUSD",
+                  "param": "annualValueUSD"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "finance-approval": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-commercial-value"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/approvedDiscountPercent",
+                  "param": "discountPercent"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "finance-approval": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "wrong-discount"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/approved",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/approved",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "finance-approval": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "approval-not-a-boolean"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "finance-approval": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/finance/approved",
+                    "from": "/approved"
+                  }
+                ],
+                "evidence": {
+                  "finance-approval": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-current-deal-quote-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "finance-approval": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "unmapped": [],
+  "unmappedEvidence": []
+}

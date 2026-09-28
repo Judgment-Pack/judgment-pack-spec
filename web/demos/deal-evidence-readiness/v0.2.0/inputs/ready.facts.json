@@ -1,0 +1,15 @@
+{
+  "deal": {
+    "annualValueUSD": "480000",
+    "context": "synthetic-demo",
+    "discountPercent": "20",
+    "nonStandardTerms": false,
+    "stage": "negotiation"
+  },
+  "finance": {
+    "approved": true
+  },
+  "security": {
+    "approved": true
+  }
+}

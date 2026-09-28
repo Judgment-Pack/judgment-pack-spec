@@ -1,0 +1,1507 @@
+{
+  "matrixVersion": "3",
+  "cases": [
+    {
+      "id": "standard-18",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "18",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "evidence-ready"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "Standard deal at 18% discount"
+    },
+    {
+      "id": "boundary-20",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "evidence-ready"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "Exactly 20% discount stays within standard policy"
+    },
+    {
+      "id": "above-20",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "21",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "commercial-review"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "21% discount requires commercial review"
+    },
+    {
+      "id": "zero-discount",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "0",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "evidence-ready"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "No discount is valid"
+    },
+    {
+      "id": "negative-discount",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "-1",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "hold"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "Negative discount is invalid"
+    },
+    {
+      "id": "upper-boundary",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "100",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "commercial-review"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "100% discount is a commercial exception"
+    },
+    {
+      "id": "over-100",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "101",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "hold"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "Discount above 100% is invalid"
+    },
+    {
+      "id": "zero-value",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "0",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "hold"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "Zero-value deal is not evidence-ready"
+    },
+    {
+      "id": "security-declined",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": false
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "hold"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "Security refusal keeps the deal on hold"
+    },
+    {
+      "id": "finance-declined",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": false
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "hold"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "Finance refusal keeps the deal on hold"
+    },
+    {
+      "id": "nonstandard-terms",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": true
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "exception-escalation"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Nonstandard terms require a human"
+    },
+    {
+      "id": "outside-stage",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "discovery",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "not-applicable",
+        "reasons": [
+          "not-applicable"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "not-applicable"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Earlier-stage opportunity is outside this gate"
+    },
+    {
+      "id": "outside-demo",
+      "facts": {
+        "deal": {
+          "context": "production",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "not-applicable",
+        "reasons": [
+          "not-applicable"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "not-applicable"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Non-demo inputs are outside this illustrative policy"
+    },
+    {
+      "id": "unknown-security-approved",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {},
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Unknown security/approved never becomes approval"
+    },
+    {
+      "id": "unknown-finance-approved",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {}
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Unknown finance/approved never becomes approval"
+    },
+    {
+      "id": "unknown-deal-discountPercent",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Unknown deal/discountPercent never becomes approval"
+    },
+    {
+      "id": "unknown-deal-nonStandardTerms",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20"
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Unknown deal/nonStandardTerms never becomes approval"
+    },
+    {
+      "id": "missing-crm-record",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "absent",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Missing crm-record requires evidence review"
+    },
+    {
+      "id": "missing-current-quote",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "absent",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Missing current-quote requires evidence review"
+    },
+    {
+      "id": "missing-security-review",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "absent",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Missing security-review requires evidence review"
+    },
+    {
+      "id": "missing-finance-approval",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "absent"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Missing finance-approval requires evidence review"
+    },
+    {
+      "id": "unknown-security-evidence",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "unknown",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Unknown security availability requires evidence review"
+    },
+    {
+      "id": "above-boundary-fraction",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20.01",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "commercial-review"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "20.01% crosses the standard discount boundary"
+    },
+    {
+      "id": "numeric-json-is-unknown",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": 20,
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": true
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "A JSON number does not satisfy the decimal-string comparison contract"
+    },
+    {
+      "id": "text-approval-cannot-clear",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": "true"
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "hold"
+      },
+      "expectedHandoffTarget": null,
+      "focus": "A directly supplied textual approval cannot satisfy boolean consent and falls back to hold"
+    },
+    {
+      "id": "refusal-and-missing-finance",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": false
+        },
+        "security": {
+          "approved": false
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "absent"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "A missing required record blocks resolution even alongside a known refusal"
+    },
+    {
+      "id": "nonstandard-with-refusal",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation",
+          "annualValueUSD": "480000",
+          "discountPercent": "20",
+          "nonStandardTerms": true
+        },
+        "security": {
+          "approved": false
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "security-review": "present",
+        "finance-approval": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "exception-escalation"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      },
+      "focus": "Nonstandard terms request owner review before ordinary refusal-rule resolution"
+    },
+    {
+      "id": "source-01-missing-review",
+      "focus": "Security review has not arrived",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "480000",
+          "context": "synthetic-demo",
+          "discountPercent": "20",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "present",
+        "security-review": "absent"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      }
+    },
+    {
+      "id": "source-02-evidence-ready",
+      "focus": "Current evidence is ready for owner review",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "480000",
+          "context": "synthetic-demo",
+          "discountPercent": "20",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        },
+        "security": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "present",
+        "security-review": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "evidence-ready"
+      },
+      "expectedHandoffTarget": null
+    },
+    {
+      "id": "source-03-stale-quote",
+      "focus": "Approval exists for the previous quote",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "480000",
+          "context": "synthetic-demo",
+          "discountPercent": "20",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "present",
+        "security-review": "unknown"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      }
+    },
+    {
+      "id": "source-04-wrong-scope",
+      "focus": "Approval covers a different delivery scope",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "480000",
+          "context": "synthetic-demo",
+          "discountPercent": "20",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "present",
+        "security-review": "unknown"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      }
+    },
+    {
+      "id": "source-05-commercial-exception",
+      "focus": "A reviewed revised quote requests 28% discount",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "432000",
+          "context": "synthetic-demo",
+          "discountPercent": "28",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        },
+        "security": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "present",
+        "security-review": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "commercial-review"
+      },
+      "expectedHandoffTarget": null
+    },
+    {
+      "id": "source-06-finance-mismatch",
+      "focus": "Finance approval does not cover the quoted value",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "432000",
+          "context": "synthetic-demo",
+          "discountPercent": "28",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "security": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "unknown",
+        "security-review": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      }
+    },
+    {
+      "id": "source-07-wrong-opportunity",
+      "focus": "A security approval belongs to another deal",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "480000",
+          "context": "synthetic-demo",
+          "discountPercent": "20",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "present",
+        "security-review": "unknown"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      }
+    },
+    {
+      "id": "source-08-known-refusal",
+      "focus": "Security explicitly declined the current scope",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "480000",
+          "context": "synthetic-demo",
+          "discountPercent": "20",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        },
+        "security": {
+          "approved": false
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "present",
+        "security-review": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "hold"
+      },
+      "expectedHandoffTarget": null
+    },
+    {
+      "id": "source-09-nonstandard-terms",
+      "focus": "Nonstandard terms require a person",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "480000",
+          "context": "synthetic-demo",
+          "discountPercent": "20",
+          "nonStandardTerms": true,
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        },
+        "security": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "present",
+        "security-review": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "exception-escalation"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      }
+    },
+    {
+      "id": "source-10-source-unavailable",
+      "focus": "The security lookup could not be completed",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "480000",
+          "context": "synthetic-demo",
+          "discountPercent": "20",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "present",
+        "security-review": "unknown"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      }
+    },
+    {
+      "id": "source-11-finance-absent",
+      "focus": "A scoped finance lookup found no approval",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "480000",
+          "context": "synthetic-demo",
+          "discountPercent": "20",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "security": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "absent",
+        "security-review": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      }
+    },
+    {
+      "id": "source-12-unannounced-quote-change",
+      "focus": "Quote amounts changed without changing the request",
+      "facts": {
+        "deal": {
+          "context": "synthetic-demo",
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        },
+        "security": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "unknown",
+        "finance-approval": "present",
+        "security-review": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      }
+    },
+    {
+      "id": "source-13-invalid-approval",
+      "focus": "Approval text is not a boolean decision",
+      "facts": {
+        "deal": {
+          "annualValueUSD": "480000",
+          "context": "synthetic-demo",
+          "discountPercent": "20",
+          "nonStandardTerms": false,
+          "stage": "negotiation"
+        },
+        "finance": {
+          "approved": true
+        }
+      },
+      "evidenceAvailability": {
+        "crm-record": "present",
+        "current-quote": "present",
+        "finance-approval": "present",
+        "security-review": "unknown"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Deal Desk owner"
+      }
+    }
+  ]
+}

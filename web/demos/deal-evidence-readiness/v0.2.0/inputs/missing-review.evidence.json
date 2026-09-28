@@ -1,0 +1,6 @@
+{
+  "crm-record": "present",
+  "current-quote": "present",
+  "finance-approval": "present",
+  "security-review": "absent"
+}

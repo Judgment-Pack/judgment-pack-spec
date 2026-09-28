@@ -1,0 +1,295 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.invalid/packs/sales-deal-readiness",
+  "version": "0.2.0",
+  "title": "Deal evidence readiness — what is blocking review?",
+  "description": "Synthetic enterprise deal-desk example for Revenue Operations. Reconciles separate CRM, quote, security and finance records against an explicitly identified quote and delivery scope. A positive result means evidence readiness under this illustrative policy; it is not permission to sign or a prediction that the customer will buy.",
+  "decision": {
+    "intent": "Establish whether evidence for the current deal, quote and delivery scope is sufficient for the accountable owner to review, and expose missing records or policy exceptions.",
+    "question": "Is the evidence for this deal ready for owner review?"
+  },
+  "applicability": {
+    "op": "all",
+    "conditions": [
+      {
+        "op": "fact",
+        "path": "/deal/context",
+        "operator": "equals",
+        "value": "synthetic-demo"
+      },
+      {
+        "op": "fact",
+        "path": "/deal/stage",
+        "operator": "equals",
+        "value": "negotiation"
+      }
+    ]
+  },
+  "evidenceRequirements": [
+    {
+      "id": "crm-record",
+      "description": "CRM record naming the opportunity, current quote revision and delivery scope.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "current-quote",
+      "description": "Quote showing the same scope, terms revision, annual value and discount as the review request.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "security-review",
+      "description": "Security approval or refusal for the same opportunity, quote revision and delivery scope.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "finance-approval",
+      "description": "Finance approval or refusal covering the same quote, scope, terms revision, value and discount.",
+      "required": true,
+      "kind": "document"
+    }
+  ],
+  "sources": [
+    {
+      "id": "demo-policy",
+      "title": "Synthetic deal evidence policy v0.2.0",
+      "publisher": "Judgment Pack demo",
+      "locator": {
+        "kind": "path",
+        "value": "sources/policy/deal-evidence-policy-v0.2.0.md"
+      },
+      "citation": {
+        "location": "Evidence binding and decision gate",
+        "excerpt": "Records must match the reviewed opportunity, quote revision and delivery scope. Finance must cover the current terms, value and discount. Missing, inaccessible or mismatched evidence cannot clear the deal. A positive result means evidence readiness for owner review."
+      },
+      "rights": "Original synthetic demonstration content. Not OpenText policy."
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "evidence-ready",
+      "label": "Evidence ready for owner review",
+      "description": "The declared records match the submitted deal, quote revision, scope and commercial terms, and satisfy this demo policy. The accountable owner still decides whether to proceed."
+    },
+    {
+      "id": "commercial-review",
+      "label": "Commercial review required",
+      "description": "Security and finance clear the proposal, but discount above 20% requires Deal Desk review."
+    },
+    {
+      "id": "hold",
+      "label": "Hold — resolve the blocker",
+      "description": "A known approval or commercial validity check prevents readiness."
+    }
+  ],
+  "rules": [
+    {
+      "id": "standard-deal",
+      "description": "Complete matching approvals within standard commercial policy",
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "all",
+            "conditions": [
+              {
+                "op": "fact",
+                "path": "/deal/annualValueUSD",
+                "operator": "greater-than",
+                "value": "0"
+              },
+              {
+                "op": "fact",
+                "path": "/deal/discountPercent",
+                "operator": "greater-than-or-equal",
+                "value": "0"
+              },
+              {
+                "op": "fact",
+                "path": "/deal/discountPercent",
+                "operator": "less-than-or-equal",
+                "value": "100"
+              }
+            ]
+          },
+          {
+            "op": "fact",
+            "path": "/security/approved",
+            "operator": "equals",
+            "value": true
+          },
+          {
+            "op": "fact",
+            "path": "/finance/approved",
+            "operator": "equals",
+            "value": true
+          },
+          {
+            "op": "fact",
+            "path": "/deal/discountPercent",
+            "operator": "less-than-or-equal",
+            "value": "20"
+          },
+          {
+            "op": "fact",
+            "path": "/deal/nonStandardTerms",
+            "operator": "equals",
+            "value": false
+          }
+        ]
+      },
+      "outcome": "evidence-ready",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ],
+      "evidenceRequirementRefs": [
+        "crm-record",
+        "current-quote",
+        "security-review",
+        "finance-approval"
+      ],
+      "rationale": "The asserted evidence satisfies the reviewed gate; the owner remains responsible for any signature decision."
+    },
+    {
+      "id": "discount-exception",
+      "description": "Cleared proposal above the standard discount limit",
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "all",
+            "conditions": [
+              {
+                "op": "fact",
+                "path": "/deal/annualValueUSD",
+                "operator": "greater-than",
+                "value": "0"
+              },
+              {
+                "op": "fact",
+                "path": "/deal/discountPercent",
+                "operator": "greater-than-or-equal",
+                "value": "0"
+              },
+              {
+                "op": "fact",
+                "path": "/deal/discountPercent",
+                "operator": "less-than-or-equal",
+                "value": "100"
+              }
+            ]
+          },
+          {
+            "op": "fact",
+            "path": "/security/approved",
+            "operator": "equals",
+            "value": true
+          },
+          {
+            "op": "fact",
+            "path": "/finance/approved",
+            "operator": "equals",
+            "value": true
+          },
+          {
+            "op": "fact",
+            "path": "/deal/discountPercent",
+            "operator": "greater-than",
+            "value": "20"
+          },
+          {
+            "op": "fact",
+            "path": "/deal/nonStandardTerms",
+            "operator": "equals",
+            "value": false
+          }
+        ]
+      },
+      "outcome": "commercial-review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ],
+      "evidenceRequirementRefs": [
+        "crm-record",
+        "current-quote",
+        "security-review",
+        "finance-approval"
+      ],
+      "rationale": "Cleared proposal above the standard discount limit; this is a synthetic policy recommendation."
+    },
+    {
+      "id": "approval-declined",
+      "description": "Known security or finance refusal",
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "op": "fact",
+            "path": "/security/approved",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/finance/approved",
+            "operator": "equals",
+            "value": false
+          }
+        ]
+      },
+      "outcome": "hold",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ],
+      "evidenceRequirementRefs": [
+        "crm-record",
+        "current-quote",
+        "security-review",
+        "finance-approval"
+      ],
+      "rationale": "Known security or finance refusal; this is a synthetic policy recommendation."
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "non-standard-terms",
+      "description": "Nonstandard terms require a person even if finance and security are clear.",
+      "when": {
+        "op": "fact",
+        "path": "/deal/nonStandardTerms",
+        "operator": "equals",
+        "value": true
+      },
+      "effect": "escalate",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ]
+    }
+  ],
+  "fallbackOutcome": "hold",
+  "escalation": {
+    "triggers": [
+      "not-applicable",
+      "missing-required-evidence",
+      "unknown"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Deal Desk owner"
+    },
+    "message": "The Deal Desk owner coordinates the named evidence owner. Inspect the retained source diagnosis: obtain missing reviews, correct the exact quote or scope, or route nonstandard terms to Legal. No notification or signature is sent."
+  },
+  "metadata": {
+    "authors": [
+      "Codex — synthetic demo prepared for the maintainer"
+    ],
+    "createdAt": "2026-09-28T16:53:07.554602Z",
+    "license": "Apache-2.0"
+  }
+}

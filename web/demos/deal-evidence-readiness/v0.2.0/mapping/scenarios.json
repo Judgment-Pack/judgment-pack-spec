@@ -1,0 +1,359 @@
+[
+  {
+    "key": "01-missing-review",
+    "title": "Security review has not arrived",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "missing-required-evidence"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "missing-required-evidence"
+        ]
+      }
+    },
+    "diagnosis": {
+      "security": "record-not-found"
+    },
+    "owner": "Security reviewer",
+    "nextAction": "Obtain the security review for the current quote and delivery scope, then publish a new evidence batch."
+  },
+  {
+    "key": "02-evidence-ready",
+    "title": "Current evidence is ready for owner review",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "evidence-ready"
+    },
+    "diagnosis": {},
+    "owner": "Deal Desk owner",
+    "nextAction": "The accountable owner reviews the evidence package and decides whether to use the normal signature process."
+  },
+  {
+    "key": "03-stale-quote",
+    "title": "Approval exists for the previous quote",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "security": "wrong-quote-revision"
+    },
+    "owner": "Security reviewer",
+    "nextAction": "Obtain a security decision for Q-1042-R3; the prior quote approval cannot satisfy the current gate."
+  },
+  {
+    "key": "04-wrong-scope",
+    "title": "Approval covers a different delivery scope",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "security": "wrong-delivery-scope"
+    },
+    "owner": "Security reviewer",
+    "nextAction": "Review the Canadian cloud, 2,400-seat scope. An approval for the US, 800-seat scope does not establish readiness."
+  },
+  {
+    "key": "05-commercial-exception",
+    "title": "A reviewed revised quote requests 28% discount",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R4",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "432000",
+      "discountPercent": "28"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "commercial-review"
+    },
+    "diagnosis": {},
+    "owner": "Deal Desk owner",
+    "nextAction": "Review the discount exception. Matching source approvals do not automatically waive the standard 20% threshold."
+  },
+  {
+    "key": "06-finance-mismatch",
+    "title": "Finance approval does not cover the quoted value",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R4",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "432000",
+      "discountPercent": "28"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "finance": "wrong-commercial-value"
+    },
+    "owner": "Finance approver",
+    "nextAction": "Obtain finance approval for Q-1042-R4 at USD 432,000 and 28%, rather than reusing approval of different commercial values."
+  },
+  {
+    "key": "07-wrong-opportunity",
+    "title": "A security approval belongs to another deal",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "security": "wrong-opportunity"
+    },
+    "owner": "Security reviewer",
+    "nextAction": "Retrieve the review for DEMO-1042; do not use another deal’s approval."
+  },
+  {
+    "key": "08-known-refusal",
+    "title": "Security explicitly declined the current scope",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "hold"
+    },
+    "diagnosis": {},
+    "owner": "Security reviewer",
+    "nextAction": "Resolve the documented security objection with its accountable reviewer. The record is present; its decision is a refusal."
+  },
+  {
+    "key": "09-nonstandard-terms",
+    "title": "Nonstandard terms require a person",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "exception-escalation"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "exception-escalation"
+        ]
+      }
+    },
+    "diagnosis": {},
+    "owner": "Legal via Deal Desk owner",
+    "nextAction": "Ask Legal to review the nonstandard terms. Existing source approvals do not remove this policy escalation."
+  },
+  {
+    "key": "10-source-unavailable",
+    "title": "The security lookup could not be completed",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "security": "lookup-unavailable-or-incomplete"
+    },
+    "owner": "Integration owner / Security reviewer",
+    "nextAction": "Restore source access and retry acquisition. A failed lookup is not evidence that the review is absent."
+  },
+  {
+    "key": "11-finance-absent",
+    "title": "A scoped finance lookup found no approval",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "missing-required-evidence"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "missing-required-evidence"
+        ]
+      }
+    },
+    "diagnosis": {
+      "finance": "record-not-found"
+    },
+    "owner": "Finance approver",
+    "nextAction": "Obtain an approval for the exact current commercial terms."
+  },
+  {
+    "key": "12-unannounced-quote-change",
+    "title": "Quote amounts changed without changing the request",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "quote": "wrong-commercial-value"
+    },
+    "owner": "Sales Operations / CPQ owner",
+    "nextAction": "Reconcile the current quote and review request before reusing any approvals."
+  },
+  {
+    "key": "13-invalid-approval",
+    "title": "Approval text is not a boolean decision",
+    "case": {
+      "opportunityId": "DEMO-1042",
+      "quoteRevision": "Q-1042-R3",
+      "scopeId": "CA-CLOUD-2400",
+      "termsRevision": "TERMS-STANDARD-3",
+      "annualValueUSD": "480000",
+      "discountPercent": "20"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "security": "approval-not-a-boolean"
+    },
+    "owner": "Security reviewer / Integration owner",
+    "nextAction": "Obtain a typed approval or refusal from the source. Do not interpret arbitrary text as consent."
+  }
+]
