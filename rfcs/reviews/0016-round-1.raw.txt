@@ -1,58 +1,10 @@
-# RFC 0016 — interim-review-regime record, round 1
-
-Reviewer: codex-cli 0.157.1, model gpt-6-astra (OpenAI), workspace-write sandbox without network, writing only under a temporary directory it was given.
-Different vendor than the model that drafted the RFC (Claude), per RFC 0009 / GOVERNANCE.
-Run: 2026-09-28, on commit `318b8921a9f752769d78e240e8e325f17bf767eb`, where `rfcs/0016-outcome-values.md` has the SHA-256 `c796d8d74fa12566ca587c5fada86557d1f07d5395a75ecc3b4a6ce32a606c89`, one commit above spec `acc67aa`. Verdict: **mergeable after fixes** (5 MAJOR, 8 MINOR). The branch has since been rebased onto `main` at `14e96c2`, where that commit is `f98486bc8b4d2fba1119b7350b3ccc7cc1dae6bb`; the file under review is byte-identical in the two, and the SHA-256 above identifies it in either.
-
-> Note: the section below is a rendering of the reviewer's output for reading here. Links the reviewer emitted with absolute local paths, and relative links inside sentences it quoted from the RFC, have their targets rewritten so that they resolve from this directory; nothing else differs. The output as the reviewer emitted it is preserved in [0016-round-1.raw.txt](0016-round-1.raw.txt), altered only by redactions marked in place: each removes the leading part of a local file path, which names a local user account (reason class: personal data). The unredacted original is kept privately, as `GOVERNANCE.md` requires.
-
-## Prompt (verbatim)
-
-```
-You are the interim-review-regime peer reviewer for the judgment-pack-spec repository, per RFC 0009 / GOVERNANCE.md: a model from a different vendor than the one that drafted the document (Claude). Under review is a NEW standards-track proposal, RFC 0016, at status Draft. It PROPOSES; nothing of it is implemented or normative. The maintainer will disposition every finding; be precise and quote the sentence at fault.
-
-Reviewed commit: HEAD of this checkout, 318b8921a9f752769d78e240e8e325f17bf767eb. It is one commit on top of origin/main (run `git log -1` and `git diff origin/main...HEAD --stat`). The SHA-256 of rfcs/0016-outcome-values.md at that commit is c796d8d74fa12566ca587c5fada86557d1f07d5395a75ecc3b4a6ce32a606c89. Do not ask questions: state any assumption and proceed.
-
-Read, in this checkout:
-- rfcs/0016-outcome-values.md: the proposal under review.
-- rfcs/README.md: the index row added for it. web/build.py: the site page added for it.
-- rfcs/0000-rfc-process.md: the ten required sections of a standards-track RFC. Check each is present in RFC 0016 and honest, and hold the Evidence section to the process's evidence bar without asking it to claim evidence it does not have.
-- spec/judgment-pack-core.md: the specification the proposal would extend. The proposal cites §2.2, §3, §3.4.1, §6.4, §6.7, §7.4, §8 (steps 6, 9 and 10), §8.1, §8.3, §8.4, §9, §10 and §13.
-- schema/judgment-pack-core.schema.json: the normative schema, in particular the `outcome` and `extensions` definitions.
-- rfcs/0002-judgment-graph.md, rfcs/0006-evaluator-conformance.md, rfcs/0007-determination-boundary.md, rfcs/0014-lineage-record-and-action-binding.md, docs/non-goals.md: every one of these that the proposal cites.
-- examples/minimal-expense-approval.json and examples/supplier-invoice-approval.json: the two example packs the Evidence section describes.
-
-Do three things.
-
-A. Verify against source, not the proposal's word. For every sentence in RFC 0016 that says what Core, the schema, another RFC, the non-goals or an example pack says or does, open that source and check it. That includes every quotation (check it is verbatim), every section number, the claim about what the schema's `extensions` object refuses, the claim that two of the repository's five example packs compare a quantity, the account of what Study 004's "outcome-value mapping" means as RFC 0002 records it, and the statement of what Core produces today in the pass-through example when the fact is absent.
-
-B. Judge the design as a specification. In particular:
-1. Resolution. Is "after §8 has produced an outcome result, by step 6, 9 or 10" a complete and unambiguous place for the new step? Walk §8's ten steps and say whether any path to an outcome is missed, and whether the new step can ever change a result that is not an outcome.
-2. The unresolved result. When a value does not resolve, the proposal produces `unresolved` with the single reason `unknown`. Check that against §8, §8.1 and §8.3: is the reason set right, is the handoff behaviour fully determined, and can two implementations disagree?
-3. The disposition. Does the proposed `value` member keep §8.3's byte-identity requirement intact, including RFC 8785 canonicalization, member naming, and the rule that the disposition holds no number? Is "present iff kind is outcome and the named outcome carries a value declaration" decidable from the inputs alone?
-4. Types. Are `string`, `decimal` and `boolean` each fully specified for both `constant` and `fromFact`? Look for a value one implementation would admit and another refuse.
-5. The carrier. The proposal uses the reserved extension name `org.judgmentpack.outcome-values` and lists what that needs from Core. Check that list against §9 and the schema: is anything missing, and is the claim that an optional extension cannot do this correct?
-6. Errors. For a consumer that supports the extension, a malformed declaration makes the pack "not semantically conforming". Check that against §3.3 and §8.4's classes and order.
-7. Anything the proposal leaves undefined that an implementer would have to guess.
-
-C. Judge the honesty of scope. Does any sentence claim more than the proposal establishes: about evidence, about what is implemented, about what a value guarantees, or about what the alternatives cost? Is any alternative the process requires (no change, extension, profile, product-only behaviour) missing or unfairly described? Are the Conformance cases sufficient for positive, negative, boundary and adversarial coverage, and is any listed case wrong about its expected result?
-
-You may run `python3 -m unittest discover -s tests` and small Python checks (for example, validating the proposal's JSON examples against the schema). Set PYTHONDONTWRITEBYTECODE=1. Write anything you create under the TMPDIR you are given, and never modify the checkout. Do not use web search.
-
-MANDATORY, before anything else: create the file $TMPDIR/review-partial.md with the heading of this review, and append each finding and each thing found sound the moment you establish it, so that a partial record exists if this session ends before your final message.
-
-For each finding give: a severity (BLOCKER, MAJOR, MINOR), the exact sentence in RFC 0016 with its line number, what the source says or what the design problem is, and the smallest edit that would make the proposal true or complete. Then list what you examined and found sound. Then a verdict: `mergeable as written`, `mergeable after fixes` (list them), or `not mergeable`. Your final message must be the complete review. Do not end your turn on an intermediate observation.
-```
-
-## Findings
-
 **Peer review of RFC 0016**
 
 Reviewer: OpenAI Codex, GPT-6, 2026-09-28. Drafting model attributed by the commit: Anthropic Claude Fable 5.1.
 
 Verified HEAD `318b8921a9f752769d78e240e8e325f17bf767eb`, exactly one commit above `origin/main`, and the supplied SHA-256. The diff contains only the RFC, its index row, and its site entry. This review treats it as an unimplemented Draft proposal.
 
-I found **five MAJOR and eight MINOR issues; no BLOCKER**. All quotations below refer to [RFC 0016](../0016-outcome-values.md).
+I found **five MAJOR and eight MINOR issues; no BLOCKER**. All quotations below refer to [RFC 0016]([REDACTED: personal data (a local file path; its first segments name a local user account)]/rfcs/0016-outcome-values.md).
 
 1. **F1 — MAJOR: The proposed schema changes omit the required-extension list.**
 
@@ -66,7 +18,7 @@ I found **five MAJOR and eight MINOR issues; no BLOCKER**. All quotations below 
 2. **F2 — MAJOR: The implementation section drops the cited source’s independence caveat.**
 
    Lines 315–316:
-   > Two independent implementations are plausible: the Go reference runtime and the clean-room Python evaluator, the two whose agreement [RFC 0006](../0006-evaluator-conformance.md) reports.
+   > Two independent implementations are plausible: the Go reference runtime and the clean-room Python evaluator, the two whose agreement [RFC 0006](0006-evaluator-conformance.md) reports.
 
    RFC 0006, lines 33–44 and 237–243, expressly says their common maintainer direction prevents their agreement from independently confirming the semantics. GOVERNANCE.md, lines 171–174, likewise says they are not independent evidence. Separate languages and a clean-room barrier do not establish the independence claimed here.
 
@@ -249,26 +201,6 @@ Source verification also established:
 
 I read the requested sources, checked the changed index/site entries, and inspected all five example packs for the count. No web search was used. All **77 repository tests passed** with `PYTHONDONTWRITEBYTECODE=1`; `git diff --check` passed. Small Python checks confirmed the schema counterexamples and parsed the JSON examples, wrapping the tiers fragment appropriately. These tests establish repository integrity, not implementation of the proposed semantics.
 
-The checkout remains unchanged. The incremental record is preserved in `$TMPDIR/review-partial.md`.
+The checkout remains unchanged. The incremental record is preserved in [review-partial.md]([REDACTED: personal data (a local file path; its first segments name a local user account)]/review-partial.md).
 
 **Verdict: `mergeable after fixes`, as a Draft.** Fix both reserved-name admission sites, specify extension placement and Unicode admission, correct the independence and current-Core claims, and make the wording and conformance-case corrections identified in F4 and F6–F13. Neither implementation nor stable-feature evidence is required for this Draft-only merge.
-
-## Maintainer disposition
-
-Reviewed: commit `318b8921a9f752769d78e240e8e325f17bf767eb`. Every finding is applied in the second commit of the pull request; none is declined. Before accepting them, the maintainer checked five against their sources: F1 and F11 against the schema and a pattern match, F5 by parsing an escaped unpaired surrogate, F2 against the passages of RFC 0006 and `GOVERNANCE.md` the finding cites, and F6 against the outcomes the two example packs declare. Each held. No reviewer text is adopted verbatim in the RFC; the fixes are written in the record's own words.
-
-| # | Severity | Disposition |
-|---|---|---|
-| F1 | MAJOR | **Applied.** *What this needs from Core* now names both places the schema refuses the reserved prefix, the member names of an `extensions` object and the items of `metadata.requiredExtensions`, and says both admit this one name and go on refusing every other. The maintainer reproduced the second refusal against the schema before accepting the finding. |
-| F2 | MAJOR | **Applied.** *Implementation* calls the two "implementation paths", says they are not independent evidence, cites RFC 0006 and `GOVERNANCE.md` for that, and says RFC 0000's bar for a stable feature still needs an implementation directed independently of the project. |
-| F3 | MAJOR | **Applied.** The pass-through example now compares against the same pack without the declaration and without its `metadata.requiredExtensions` entry, which is a pack Core admits today, and says that pack produces `approve-refund`. |
-| F4 | MINOR | **Applied.** Unresolved question 3 says the five generated reasons match `escalation.triggers` and that `exception-escalation` is admitted beside them for a direct request. |
-| F5 | MAJOR | **Applied.** A `string` value is a JSON string that is a sequence of Unicode scalar values, for a constant and for a fact alike. A constant holding an unpaired surrogate makes the pack not semantically conforming; a selected fact holding one does not resolve. *Declaration* says why: RFC 8785 cannot serialize such a string. Cases added for both source forms and for a valid surrogate pair. |
-| F6 | MINOR | **Applied.** *Evidence* says that where either pack produces an outcome the disposition names a category, such as `approve` or `manual-review`, and does not carry the quantity compared. |
-| F7 | MINOR | **Applied.** The gloss is removed. *Evidence* keeps the construct's name as RFC 0002 records it and says it belongs to composition, where one decision's outcome feeds another's inputs. |
-| F8 | MINOR | **Applied.** *What this needs from Core* says §8.3 names four members and that the proposal admits a fifth member name, present only under the condition in the disposition table. |
-| F9 | MINOR | **Applied.** The no-change alternative says a rule that reads the quantity can already refuse to decide without it, by `onUnknown: escalate`, as both example packs do, and that what Core lacks is a requirement attached to the outcome itself. *Problem* is reworded to match. |
-| F10 | MAJOR | **Applied.** *Declaration* says the name appears in an outcome's `extensions` object and nowhere else, and that any other place makes the pack not semantically conforming for a consumer that supports the extension. Cases added for the name on the root alone and for mixed placement. |
-| F11 | MINOR | **Applied.** The value name is stated in words, one lowercase ASCII letter followed by zero or more ASCII letters or digits, with the whole name held to it. The pattern is removed. A case is added for a name ending in a line feed. |
-| F12 | MINOR | **Applied.** *Conformance* gains: failure after a forced outcome and after `fallbackOutcome`; two values of which one fails, with no `value` member; the three handoff cases; a malformed declaration on an outcome that would not have been produced, with applicability false; competing preflight failures with the expected §8.4 class; member-order permutations; and the Unicode, placement and naming cases. The whitespace case is split by type, and the unselected-outcome case is stated as a valid declaration whose fact is absent. *Resolution* now says the failed result carries no partial `value`, that `fallbackOutcome` is not tried in its place, and exactly when handoff is requested. |
-| F13 | MINOR | **Applied.** *Summary* says no calculation and no condition operator is added, and that a declared value that cannot be supplied withholds the outcome that declares it. |

@@ -86,9 +86,11 @@ outcome's `extensions` object. A pack in which any outcome carries that name MUS
 `metadata.requiredExtensions`. The extension changes what evaluation produces, which §9 forbids an
 optional extension to do.
 
-The name appears in an outcome's `extensions` object and nowhere else. The schema admits an
-`extensions` object on the root, the decision, a rule and other objects, and §9 asks only that a
-required name appear in some one of them. For this extension every other place is an error.
+As a member name of an `extensions` object, the name appears on an outcome and nowhere else. The
+schema admits an `extensions` object on the root, the decision, a rule and other objects, and §9
+asks only that a required name appear in some one of them. For this extension every such place
+but an outcome is an error. Its entry in `metadata.requiredExtensions` is a separate matter, and
+is required.
 
 The extension's value on an outcome is a non-empty JSON object, the **value declaration**. Each
 member name is a **value name**: one lowercase ASCII letter followed by zero or more ASCII letters
@@ -110,10 +112,9 @@ A JSON string may hold an unpaired surrogate, written as an escape such as `"\ud
 string is not a sequence of Unicode scalar values and is not a `string` value. RFC 8785 cannot
 serialize it, so admitting it would leave the disposition with no canonical form.
 
-A pack that lists the extension as required and violates this section is not semantically
-conforming for a consumer that supports the extension. That covers a malformed declaration, the
-name in a place other than an outcome's `extensions` object, and a declaration in a pack that does
-not list the name as required. For an implementation claiming evaluator conformance this is the
+A pack that violates this section is not semantically conforming for a consumer that supports the
+extension. That covers a malformed declaration, the name as a member of any `extensions` object
+other than an outcome's, and a declaration in a pack that does not list the name as required. For an implementation claiming evaluator conformance this is the
 `pack-not-conformant` error of §8.4. It is found in the preflight of §8.2, before step 1 of §8
 runs, and so whether or not the outcome that carries the fault would have been produced.
 
@@ -354,7 +355,8 @@ Error rows:
 - A malformed declaration together with an evidence-availability document carrying an undeclared
   member name: `pack-not-conformant`, the first class in §8.4's order.
 - For an implementation that does not support the extension, a well-formed pack that requires it:
-  `unsupported-required-extension`.
+  `unsupported-required-extension`. The same pack with a malformed declaration gets the same
+  class from that implementation, which does not read the declaration.
 
 ## Implementation
 

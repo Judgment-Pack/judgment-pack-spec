@@ -1,0 +1,118 @@
+**RFC 0016, round 2 — three MINOR findings; no MAJOR or BLOCKER.**
+
+Reviewed HEAD `bd3ec4d7b7456845e078b98ef641a90842867895`. The RFC’s SHA-256 matches the supplied `bc790140215b1c7c71e594ace1ead47f4dbb05ddbabb92dc784df087f645810b`. This review treats it strictly as an unimplemented Draft proposal.
+
+For evaluation cases, I assume a supporting evaluator, otherwise valid inputs, and no unnamed blockers, except where a case explicitly specifies otherwise.
+
+**Findings**
+
+1. **R2-1 — MINOR: The placement restriction also literally prohibits the required metadata entry.**
+
+   [rfcs/0016-outcome-values.md:89]([REDACTED: personal data (a local file path; its first segments name a local user account)]/rfcs/0016-outcome-values.md:89):
+
+   > The name appears in an outcome's `extensions` object and nowhere else.
+
+   Lines 85–86 require that same name to appear in `metadata.requiredExtensions`. The unqualified “nowhere else” contradicts that requirement.
+
+   The intended restriction on **extension keys** is otherwise complete: it covers the root, metadata, and every other schema-defined extension site. It does not conflict with Core §9 (`spec/judgment-pack-core.md:758–760`): an occurrence in an outcome’s `extensions` satisfies the requirement for an occurrence in at least one `extensions` object.
+
+   **Smallest edit:** Qualify the sentence: “As an extension key, the name appears only in an outcome’s `extensions` object.” Keep the separate requirement for its metadata entry.
+
+   Round-1 F10’s “Applied” disposition (`rfcs/reviews/0016-round-1.md:271`) is therefore only partly satisfactory: misplaced keys now have specified treatment, but the restriction needs this qualification.
+
+2. **R2-2 — MINOR: The error paragraph excludes a case it immediately claims to cover.**
+
+   [rfcs/0016-outcome-values.md:113]([REDACTED: personal data (a local file path; its first segments name a local user account)]/rfcs/0016-outcome-values.md:113):
+
+   > A pack that lists the extension as required and violates this section is not semantically conforming for a consumer that supports the extension.
+
+   The next sentence says:
+
+   > That covers a malformed declaration, the name in a place other than an outcome's `extensions` object, and a declaration in a pack that does not list the name as required.
+
+   A pack that does **not** list the name cannot satisfy the first sentence’s premise. Lines 85–86 already establish the declaration requirement; the new error paragraph should consistently classify its violation.
+
+   **Smallest edit:** Replace the first sentence’s opening with “A pack that violates this section …”. Retain the supporting-consumer qualification and the preflight/error-class text.
+
+3. **R2-3 — MINOR: Disclosed normalization still does not preserve the unedited output required by governance.**
+
+   [rfcs/reviews/0016-round-1.md:7]([REDACTED: personal data (a local file path; its first segments name a local user account)]/rfcs/reviews/0016-round-1.md:7):
+
+   > Note: the reviewer's links to the file under review and to its own partial record were emitted with absolute local paths; they are normalized here.
+
+   The disclosure is accurate. Comparing with the original output confirms only the three disclosed substitutions, plus a boundary newline. No finding was removed or substantively rewritten.
+
+   However, `GOVERNANCE.md:108–114` requires the complete **unedited** output. Lines 126–131 permit alterations only for marked disclosure-risk redactions. They provide no exception for link normalization.
+
+   **Smallest edit:** Preserve the original reviewer output unchanged in the record or an accompanying raw artifact. Put working navigation links outside that preserved output. No review rerun is needed.
+
+**A. Round-1 dispositions**
+
+All RFC line references in this table refer to `rfcs/0016-outcome-values.md` at HEAD. Quotes join ordinary source line wrapping.
+
+| Finding | Assessment | Resolving text at HEAD |
+|---|---|---|
+| F1 | Resolved | Lines 192–194: “The schema refuses every name beginning `org.judgmentpack.` in two places: as a member name of an `extensions` object, and as an item of `metadata.requiredExtensions`.” “Both would admit this one name, and both would go on refusing every other reserved name.” |
+| F2 | Resolved | Lines 362–365: “They are not independent evidence.” “RFC 0006 records that both trace to one maintainer's direction, and [`GOVERNANCE.md`](../GOVERNANCE.md) says that two implementations by one author are not independent.” |
+| F3 | Resolved | Lines 228–230: “The same pack without the declaration and without its entry in `metadata.requiredExtensions` is a pack Core admits today, and it produces `approve-refund`.” |
+| F4 | Resolved | Lines 378–379: “The five generated reasons match `escalation.triggers` (§6.7), and `exception-escalation` is admitted beside them for a direct request (§8).” |
+| F5 | Resolved | Lines 105–107: “A `constant` of type `string` is a JSON string that is a sequence of Unicode scalar values; of type `decimal`, a JSON string satisfying the decimal grammar of §2.2; of type `boolean`, a JSON Boolean.” Lines 143–148 impose the same string restriction on `fromFact`; the requested Unicode cases are present. |
+| F6 | Resolved | Lines 59–60: “Where either produces an outcome, the disposition names a category, such as `approve` or `manual-review`, and does not carry the quantity compared.” |
+| F7 | Resolved | Lines 69–70: “That construct belongs to composition, where one decision's outcome feeds another's inputs.” The unsupported specific mapping interpretation is removed. |
+| F8 | Resolved | Lines 195–196: “§8.3 gives the disposition ‘these members and no others’, and names four.” “The proposal admits a fifth member name, present only under the condition in the table above.” |
+| F9 | Resolved | Lines 246–247: “A rule that reads the quantity can already refuse to decide without it, by `onUnknown: escalate` (§8, step 7), as both example packs do.” |
+| F10 | Partly resolved | Lines 89–91: “The name appears in an outcome's `extensions` object and nowhere else.” “For this extension every other place is an error.” Misplacement and supporting-consumer preflight rejection are specified, but “nowhere else” needs R2-1’s qualification. |
+| F11 | Resolved | Lines 93–95: “Each member name is a **value name**: one lowercase ASCII letter followed by zero or more ASCII letters or digits.” The next sentence explicitly applies this to the whole name. |
+| F12 | Resolved | Lines 154–156: “No outcome is produced and the disposition carries no `value` member, whether or not the other values resolved.” “The result is final: `fallbackOutcome` is not tried in its place.” Lines 317–357 add all requested case families; their results are assessed below. |
+| F13 | Resolved | Lines 19–20: “The proposal does change one thing about what is decided: a declared value that cannot be supplied withholds the outcome that declares it.” |
+
+**B. What I examined and found sound**
+
+- **Placement and schema changes.** The schema provides `extensions` on nine object kinds: root, decision, evidence requirement, source, outcome, rule, exception, escalation, and metadata. The universal restriction covers every non-outcome site; listing them individually is unnecessary. Both reserved-prefix predicates are correctly identified at schema lines 109 and 417. In-memory checks reproduced both current rejections and confirmed that admitting the name structurally still leaves semantic placement validation necessary.
+
+- **Strings and decimals.** Constants and selected facts consistently use Unicode scalar-value sequences. RFC 8785 §3.2.2.2 requires an error for lone surrogates, so the canonicalization explanation is correct. A valid escaped surrogate pair represents an admitted supplementary-plane character. Empty strings and whitespace remain valid `string` values. Core §2.2’s decimal grammar already excludes surrogates and every other non-ASCII character; decimal needs no additional restriction.
+
+- **Value names.** The whole-name rule is unambiguous. Its mandatory first lowercase ASCII letter excludes an empty member name. Subsequent uppercase ASCII letters and digits are permitted; initial capitals, initial digits, and trailing line feeds are excluded.
+
+- **Preflight and error precedence.** For a supporting evaluator, malformed declarations are pack errors under the proposed semantic constraints, including declarations on unselected outcomes. Core §8.2 requires pack validation before facts, evidence availability, capability checks, and step 1. Consequently, `pack-not-conformant` precedes false applicability and a competing malformed evidence document, as §8.4 requires. R2-2 concerns the paragraph’s contradictory premise, not that precedence.
+
+  For an evaluator that **does not support the extension**, an otherwise Core-valid pack requiring it reaches `unsupported-required-extension`, even when the opaque contents violate extension-specific declaration rules. The proposal scopes those validation obligations to supporting consumers; Compatibility, lines 279–283, supplies the unsupported-consumer result. The combined unsupported-and-malformed case is not stated directly as a conformance row. Independently detectable Core nonconformance or malformed input still takes precedence.
+
+- **Resolution and handoff.** Steps 6, 9, and 10 are every Core outcome exit. Resolution cannot alter a non-outcome result. Failed value resolution produces only `unknown`, omits both `outcomeId` and `value`, and cannot retry fallback. A preliminary outcome has no retained blocking reasons; direct exception escalation would already have terminated at step 5. Thus handoff is requested exactly when configured triggers contain `unknown`, with `triggeredBy:["unknown"]`. The revised text agrees with §§8.1 and 8.3.
+
+- **Examples and alternatives.** The stripped pass-through pack is structurally valid and has valid references. With the stated `goodStanding: true`, absent or numeric `refundAmount` affects no Core condition, so its ordinary Core result is `approve-refund`. Both quantity-reading rules in each cited pack use `onUnknown: escalate`: expense lines 91 and 128; supplier lines 102 and 143. The revised no-change alternative correctly distinguishes that rule-level protection from a requirement attached to the selected outcome.
+
+- **Source attribution and independence.** RFC 0002 supports the reduced composition account without the removed mapping gloss. RFC 0006, lines 33–44 and 237–243, and GOVERNANCE, lines 171–174, support the revised independence caveat. RFC 0000’s stable-feature bar remains unmet; this does not prevent publishing a Draft. RFC 0007 supports the computation boundary and supplies no measured demand for outcome values. RFC 0014 keeps lineage machinery outside Core, and `docs/non-goals.md` supports the stated language boundary.
+
+Every added conformance case has the expected result under the stated supporting-evaluator assumptions:
+
+| Added case | Assessment |
+|---|---|
+| Supplementary-plane string constant encoded as a surrogate pair | Valid. |
+| Lone-surrogate constant; initial capital/digit or trailing-newline value name | Invalid declaration. |
+| Missing required-extension declaration; root-only or mixed outcome/rule placement | Invalid for a supporting consumer, subject to correcting R2-1/R2-2’s wording. |
+| Unresolvable `fromFact` after true-rule, forced, or fallback selection | `unresolved`, reason `unknown`. |
+| Two values, one failing | No partial `value` survives. |
+| Matching, nonmatching, or absent escalation configuration | Requested with `["unknown"]`, or `state: none`, respectively. |
+| Boolean `false`; declaration-member permutations | Valid value; identical canonical disposition, respectively. |
+| Decimal number, null, object, or surrounding whitespace | Does not resolve. |
+| String surrounding whitespace; string lone surrogate | Preserved unchanged; does not resolve, respectively. |
+| Another outcome’s valid declaration references unavailable facts | Does not block the selected outcome. |
+| Malformed declaration with false applicability | `pack-not-conformant` before evaluation. |
+| Malformed declaration with undeclared evidence-availability key | `pack-not-conformant` wins precedence. |
+| Otherwise valid required extension unsupported by evaluator | `unsupported-required-extension`. |
+
+**C. Round-1 record**
+
+I compared the record with the original artifacts available beside the checkout, `../prompt-r1.txt` and `../codex-r1.md`.
+
+- The recorded prompt matches the original exactly.
+- The recorded reviewed commit and RFC SHA-256 are correct. The round-1 blob hashes to `c796d8d74fa12566ca587c5fada86557d1f07d5395a75ecc3b4a6ce32a606c89`, and its parent is `acc67aa5e84c54e006096f377354a5575fb023eb`.
+- The normalization note accounts for all three content substitutions: the RFC link, the quoted RFC 0006 link, and the partial-record link. A terminal newline is also introduced by embedding the output; no finding prose is otherwise altered. R2-3 addresses governance compliance despite that accurate disclosure.
+- All thirteen findings and their severities survive. The dispositions correspond to actual edits, with F10’s remaining qualification identified above.
+
+One ancestry qualification: the current `origin/main` points to `80ae1260d215a872f078cc491c54248148b33bea`, one commit beyond the common base `acc67aa`. HEAD has two commits absent from `origin/main`; it is not literally based on the current tip. This does not affect either reviewed RFC blob or the requested round-to-round diff.
+
+I read every requested source and reviewed the specified diff. All **77 repository tests passed** with `PYTHONDONTWRITEBYTECODE=1`; `git diff --check` passed. These checks establish repository integrity, not implementation of the proposal. No web search was used, and the checkout remains unchanged. The incremental record is at `$TMPDIR/review-partial.md`.
+
+**Verdict: `mergeable after fixes`, as a Draft.** Qualify the placement restriction (R2-1), remove the contradictory error premise (R2-2), and preserve the unedited round-1 output (R2-3).
