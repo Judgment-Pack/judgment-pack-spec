@@ -11,8 +11,41 @@ or [get the complete demo (ZIP)](https://judgmentpack.org/artifacts/demos/deal-e
 ## The business problem
 
 An approval may exist and still cover the wrong quote, delivery scope or commercial terms.
-Someone has to reconcile the records, find the blocker, and repeat that work when the deal changes.
+The practical question is: **what is missing, what no longer matches, and who needs to act next?**
 This example makes those checks explicit and repeatable, with a reason the reviewer can inspect.
+
+### Pain points to test with a Deal Desk
+
+- **Evidence is scattered.** The opportunity, quote and approvals may live in different systems.
+  A reviewer has to assemble them before making a decision. The example brings four source
+  records into one evidence check; real connections require integration work.
+- **An approval can be stale.** A revised quote, delivery scope or discount can invalidate the
+  assumptions behind an earlier review. The mapping checks which deal, revision, scope and
+  commercial terms each record covers, rather than relying on an approved flag alone.
+- **Exceptions can be handled inconsistently.** Reviewers may interpret a discount boundary or
+  nonstandard terms differently. The pack makes the selected policy explicit, with saved tests
+  for its normal decisions, exceptions and boundaries.
+- **Blockers can surface late.** A missing security review or mismatched finance approval may only
+  become visible when someone tries to progress the deal. The example identifies the specific
+  gap and explains the next responsible role; it does not deliver a task or notification.
+- **The same review work gets repeated.** Each change can trigger another round of collecting
+  evidence and explaining the decision. A configured Desk/Runner can repeat the check on events
+  or schedules and retain the inputs and explanation for later review.
+
+These are problems to investigate with a prospective user. The synthetic demonstration shows
+how the checks work; it has not established their frequency, cost or impact on real sales cycles.
+
+### Who should evaluate this
+
+The proposed process owner is **Deal Desk or Revenue Operations**, with a sales leader as a
+potential sponsor and finance, security and legal as reviewers. The strongest candidate is a
+team repeatedly reconciling complex deals across several systems and approval owners.
+
+Start with one recurring review gate. Establish whether an existing CRM, quoting or contract
+workflow could address the gap more simply. The pilot should test the value of consistent checks
+across source records, versioned policy and a retained explanation against that alternative.
+
+## The example deal
 
 The fictional Harborline Manufacturing opportunity is worth **USD 480,000 annually**, at a
 20% discount, for Canadian cloud delivery to 2,400 seats. The amount illustrates the case;
@@ -55,6 +88,7 @@ separate configuration.
 
 The complete ZIP preserves relative paths and includes the policy, pack, test matrix,
 13 source scenarios, Runner mapping, sample inputs, one-pager and pilot worksheet.
+The same files are available in the [versioned demo release](https://github.com/Judgment-Pack/judgment-pack-spec/releases/tag/demo/deal-evidence-readiness/v0.2.0).
 
 | Artifact | Purpose |
 | --- | --- |
