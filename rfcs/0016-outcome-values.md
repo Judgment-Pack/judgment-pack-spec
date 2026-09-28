@@ -15,8 +15,9 @@ of one fact. Each has a declared type: `string`, `decimal` or `boolean`. When ev
 that outcome, the disposition carries the values. When a value is drawn from a fact and the fact
 cannot supply it, no outcome is produced: the result is `unresolved` with reason `unknown`.
 
-Nothing is calculated. A value names no tool and is not an instruction. The proposal adds what a
-result *states*; it adds nothing to what a pack can *decide*.
+Nothing is calculated, and no condition operator is added. A value names no tool and is not an
+instruction. The proposal does change one thing about what is decided: a declared value that cannot
+be supplied withholds the outcome that declares it.
 
 ## Problem
 
@@ -33,9 +34,10 @@ same pack.
 **A quantity passed through.** "Approve the proposed refund when it is 200 or less." The pack
 compares the fact `/proposed/refundAmount` with `"200"` and produces `approve`. Which quantity was
 approved is for the consumer to work out from its own copy of the facts, and the pack does not say
-which fact that is. Nor must the fact have been there: an outcome reached through
-`fallbackOutcome`, or through a rule that reads other facts, is produced whether or not the
-quantity is present.
+which fact that is. A rule that reads the quantity can refuse to decide without it, by
+`onUnknown: escalate`. Nothing ties the quantity to the outcome itself: an outcome reached through a
+forced outcome, through `fallbackOutcome`, or through a rule that reads other facts is produced
+whether or not the quantity is present.
 
 The affected users are pack authors, who cannot write the quantity where the policy is; consumers,
 who rebuild it outside the portable result; and readers of a decision record, who see that
@@ -54,19 +56,19 @@ The evidence is thin, and this section says how thin.
   [`minimal-expense-approval.json`](../examples/minimal-expense-approval.json) compares
   `/expense/amount` with `"5000"`, and
   [`supplier-invoice-approval.json`](../examples/supplier-invoice-approval.json) compares
-  `/invoice/variancePercent` with `"2.5"`. Their dispositions name `approve` or `manual-review` and
-  nothing else. These packs were written by the project as illustrations. They show the shape of
-  the gap, not how often real policy has it.
+  `/invoice/variancePercent` with `"2.5"`. Where either produces an outcome, the disposition names
+  a category, such as `approve` or `manual-review`, and does not carry the quantity compared. These
+  packs were written by the project as illustrations. They show the shape of the gap, not how
+  often real policy has it.
 - **Core anticipates the need.** §2.2 says that "exact decimal quantities outside ordered
   fact-condition operands require a future profile or declared extension."
 - **No study measures this.** RFC 0007's figures are about what a pack could not decide. They are
   not evidence about what a result should state, and this proposal does not rest on them.
 - **A construct with a similar name is a different one.** [RFC 0002](0002-judgment-graph.md)
   records that Study 004 of the research line named "outcome-value mapping" among the constructs
-  implicated in its edge grammar's open items. An edge in that grammar writes the upstream
-  outcome's identifier into the downstream decision's facts, and the phrase is about mapping that
-  identifier to some other value there. It concerns composition, and this RFC does not address
-  it (see *Unresolved questions*).
+  implicated in its edge grammar's open items. That construct belongs to composition, where one
+  decision's outcome feeds another's inputs. This RFC does not address it (see *Unresolved
+  questions*).
 - **There is no implementation experience.** No evaluator implements any part of this.
 
 The examples in this document were written for it.
@@ -84,9 +86,15 @@ outcome's `extensions` object. A pack in which any outcome carries that name MUS
 `metadata.requiredExtensions`. The extension changes what evaluation produces, which §9 forbids an
 optional extension to do.
 
+The name appears in an outcome's `extensions` object and nowhere else. The schema admits an
+`extensions` object on the root, the decision, a rule and other objects, and §9 asks only that a
+required name appear in some one of them. For this extension every other place is an error.
+
 The extension's value on an outcome is a non-empty JSON object, the **value declaration**. Each
-member name is a **value name**, matching `^[a-z][A-Za-z0-9]*$`. Each member value is a **value
-source**: a JSON object with these members and no others.
+member name is a **value name**: one lowercase ASCII letter followed by zero or more ASCII letters
+or digits. The whole name is held to that, so a name that ends in a line feed is not a value name,
+whatever a pattern's end anchor would admit. Each member value is a **value source**: a JSON object
+with these members and no others.
 
 | Member | Required | Value |
 | --- | --- | --- |
@@ -95,11 +103,19 @@ source**: a JSON object with these members and no others.
 | `fromFact` | one of the two | an RFC 6901 JSON Pointer into the facts document, as `fact.path` is (§7.4) |
 
 Exactly one of `constant` and `fromFact` is present. A `constant` of type `string` is a JSON
-string; of type `decimal`, a JSON string satisfying the decimal grammar of §2.2; of type
-`boolean`, a JSON Boolean.
+string that is a sequence of Unicode scalar values; of type `decimal`, a JSON string satisfying the
+decimal grammar of §2.2; of type `boolean`, a JSON Boolean.
 
-A pack that lists the extension as required and carries a declaration violating this section is
-not semantically conforming for a consumer that supports the extension.
+A JSON string may hold an unpaired surrogate, written as an escape such as `"\ud800"`. Such a
+string is not a sequence of Unicode scalar values and is not a `string` value. RFC 8785 cannot
+serialize it, so admitting it would leave the disposition with no canonical form.
+
+A pack that lists the extension as required and violates this section is not semantically
+conforming for a consumer that supports the extension. That covers a malformed declaration, the
+name in a place other than an outcome's `extensions` object, and a declaration in a pack that does
+not list the name as required. For an implementation claiming evaluator conformance this is the
+`pack-not-conformant` error of §8.4. It is found in the preflight of §8.2, before step 1 of §8
+runs, and so whether or not the outcome that carries the fault would have been produced.
 
 ```json
 {
@@ -126,17 +142,22 @@ For the produced outcome, each value source resolves as follows.
 - A `constant` resolves to the constant.
 - A `fromFact` selects a value from the facts document by the pointer rules of §7.4. It resolves
   if and only if the pointer resolves and the selected value is admitted by the declared type: a
-  JSON string for `string`; a JSON string satisfying §2.2 for `decimal`; a JSON Boolean for
-  `boolean`. Any other selected value does not resolve. That includes a JSON number, `null`, an
-  array, an object and, for `decimal`, a string that does not satisfy the grammar.
+  JSON string that is a sequence of Unicode scalar values for `string`; a JSON string satisfying
+  §2.2 for `decimal`; a JSON Boolean for `boolean`. Any other selected value does not resolve.
+  That includes a JSON number, `null`, an array, an object, a string holding an unpaired surrogate
+  and, for `decimal`, a string that does not satisfy the grammar.
 
 A value is copied exactly as it was found. Nothing is coerced, trimmed or normalized: `"0.10"`
 stays `"0.10"`, and a JSON number is never turned into a decimal string.
 
 If every value source resolves, the result is the outcome with its resolved values. If any does
-not, the result is `unresolved` with the single reason `unknown`, and no outcome is produced.
-Handoff follows §8.1 as for any other `unknown`. An implementation MAY name the value that did not
-resolve, outside the disposition.
+not, the result is `unresolved` with the single reason `unknown`. No outcome is produced and the
+disposition carries no `value` member, whether or not the other values resolved. The result is
+final: `fallbackOutcome` is not tried in its place.
+
+Handoff follows §8.1 as for any other `unknown`. It is requested exactly when the pack has an
+`escalation` object whose `triggers` name `unknown`, and `handoff.triggeredBy` is then
+`["unknown"]`. An implementation MAY name the value that did not resolve, outside the disposition.
 
 ### The disposition
 
@@ -168,10 +189,11 @@ byte-identity requirement of §8.3 extends to `value`.
 
 ### What this needs from Core
 
-- The schema's `extensions` object refuses every member name beginning `org.judgmentpack.`. It
-  would admit this one name.
-- §8.3 says the disposition has four members "and no others". For a pack that requires this
-  extension it would have five.
+- The schema refuses every name beginning `org.judgmentpack.` in two places: as a member name of
+  an `extensions` object, and as an item of `metadata.requiredExtensions`. Both would admit this
+  one name, and both would go on refusing every other reserved name.
+- §8.3 gives the disposition "these members and no others", and names four. The proposal admits a
+  fifth member name, present only under the condition in the table above.
 - §9 reserves names beginning `org.judgmentpack.` for "future specification-defined extensions"
   and defines none. This would be the first, and §9 would say where such an extension's semantics
   are found.
@@ -203,8 +225,9 @@ amount, which keeps the example to resolution; a real pack would also bound it.
 With facts `{"customer": {"goodStanding": true}, "proposed": {"refundAmount": "149.50"}}` the
 result is the disposition shown under *The disposition*.
 
-With `/proposed/refundAmount` absent, or given as the JSON number `149.5`, Core today produces
-`approve-refund`. Under this proposal the result is:
+Now take `/proposed/refundAmount` absent, or given as the JSON number `149.5`. The same pack
+without the declaration and without its entry in `metadata.requiredExtensions` is a pack Core
+admits today, and it produces `approve-refund`. With them, under this proposal, the result is:
 
 ```json
 {"handoff":{"state":"none"},"kind":"unresolved","reasons":["unknown"]}
@@ -220,7 +243,10 @@ cites it, are outside Core.
 
 - **No change.** Consumers keep tables from outcome identifier to quantity and read pass-through
   quantities from their own copy of the facts. It costs nothing in the specification. The quantity
-  stays outside the portable result, and nothing refuses an approval whose quantity is missing.
+  stays outside the portable result. A rule that reads the quantity can already refuse to decide
+  without it, by `onUnknown: escalate` (§8, step 7), as both example packs do. Core has no
+  requirement attached to the outcome itself, so a forced outcome, `fallbackOutcome` or a rule that
+  does not read the quantity produces the outcome without it.
 - **One outcome per quantity.** Expressible today, and sufficient for a small fixed set of tiers.
   It does not carry the quantity, and it cannot express pass-through at all.
 - **A Core amendment.** The outcome object gains an optional `values` member with the same
@@ -288,34 +314,59 @@ cites it, are outside Core.
 
 Document-level cases, for a consumer that supports the extension:
 
-- *Positive.* A declaration with a constant of each type; one with `fromFact`; one mixing both.
+- *Positive.* A declaration with a constant of each type; one with `fromFact`; one mixing both; a
+  `string` constant holding a character outside the Basic Multilingual Plane, written as a
+  surrogate pair.
 - *Negative.* A value source with both `constant` and `fromFact`; with neither; with an unknown
   `type`; with a member this section does not define; a `decimal` constant that fails §2.2; a
-  `boolean` constant given as the string `"true"`; an empty declaration; a value name that does not
-  match the pattern; a declaration in a pack that does not list the extension as required.
+  `boolean` constant given as the string `"true"`; a `string` constant holding an unpaired
+  surrogate; an empty declaration; a value name that begins with a capital or a digit; a value name
+  that ends in a line feed; a declaration in a pack that does not list the extension as required;
+  the extension name on the root object alone; the name on an outcome and on a rule as well.
 
 Evaluation rows:
 
 - *Positive.* A constant carried on an outcome produced by a true rule, by a forced outcome and by
   `fallbackOutcome`; a `fromFact` that resolves, of each type.
-- *Negative.* A `fromFact` whose pointer does not resolve; a `not-applicable` result and an
-  `unresolved` result, each carrying no `value`.
+- *Negative.* A `fromFact` whose pointer does not resolve, on an outcome produced by a true rule,
+  by a forced outcome and by `fallbackOutcome`, each `unresolved` with reason `unknown`; two
+  values of which one does not resolve, where the disposition carries no `value` member at all; a
+  `not-applicable` result and an `unresolved` result, each carrying no `value`.
+- *Handoff.* A value that does not resolve in a pack whose `escalation.triggers` name `unknown`,
+  where handoff is requested with `triggeredBy` of `["unknown"]`; in a pack whose triggers do not
+  name it, and in a pack with no `escalation` object, where `handoff.state` is `none`.
 - *Boundary.* A decimal with trailing zeroes copied unchanged; the empty string as a `string`
-  value; two true rules naming the same outcome, which carries its values once.
-- *Adversarial.* A fact given as a JSON number where `decimal` is declared; as `null`; as an
-  object; as a string with surrounding whitespace; a pointer that traverses an array out of range;
-  an outcome whose own values resolve while another outcome's would not, which resolves because
-  only the produced outcome is inspected.
+  value; the Boolean `false`; two true rules naming the same outcome, which carries its values
+  once; the same declaration with its members authored in another order, which yields the
+  byte-identical canonical disposition.
+- *Adversarial.* Where `decimal` is declared: a fact given as a JSON number, as `null`, as an
+  object, and as a string with surrounding whitespace, none of which resolves. Where `string` is
+  declared: a fact string with surrounding whitespace, which resolves and is copied unchanged,
+  and one holding an unpaired surrogate, which does not resolve. A pointer that traverses an array
+  out of range. A produced outcome whose own values resolve while another outcome declares a
+  `fromFact` the facts cannot supply: the result is the produced outcome, because only it is
+  inspected.
 
-One more row, for an implementation that does not support the extension: the pack is refused with
-`unsupported-required-extension`.
+Error rows:
+
+- A malformed declaration on an outcome the evaluation would not have produced, in a pack whose
+  applicability is false: `pack-not-conformant`, and not the `not-applicable` disposition.
+- A malformed declaration together with an evidence-availability document carrying an undeclared
+  member name: `pack-not-conformant`, the first class in §8.4's order.
+- For an implementation that does not support the extension, a well-formed pack that requires it:
+  `unsupported-required-extension`.
 
 ## Implementation
 
-Two independent implementations are plausible: the Go reference runtime and the clean-room Python
-evaluator, the two whose agreement [RFC 0006](0006-evaluator-conformance.md) reports. Neither
-implements this proposal. Each would need to read the declaration, run the resolution step after
-an outcome is produced, and add the member to the disposition it serializes.
+Two implementation paths are plausible: the Go reference runtime and the clean-room Python
+evaluator, the two whose agreement [RFC 0006](0006-evaluator-conformance.md) reports. They are not
+independent evidence. RFC 0006 records that both trace to one maintainer's direction, and
+[`GOVERNANCE.md`](../GOVERNANCE.md) says that two implementations by one author are not
+independent. RFC 0000's bar for a stable feature still needs an implementation directed
+independently of this project.
+
+Neither implements this proposal. Each would need to check the declaration in preflight, run the
+resolution step after an outcome is produced, and add the member to the disposition it serializes.
 
 ## Unresolved questions
 
@@ -324,10 +375,10 @@ an outcome is produced, and add the member to the disposition it serializes.
    and the schema to say how one is admitted. The Core form avoids that and binds every evaluator.
 2. **Should constants be carried?** See *Alternatives*. Carrying them copies pack content into the
    disposition, which §8.3 otherwise avoids.
-3. **Is `unknown` the right reason?** The reason vocabulary is closed and matches
-   `escalation.triggers` (§6.7). Reusing `unknown` adds nothing to it, and leaves a consumer unable
-   to tell a quantity that was missing from a condition that was unknown, except through
-   diagnostics outside the disposition.
+3. **Is `unknown` the right reason?** The five generated reasons match `escalation.triggers`
+   (§6.7), and `exception-escalation` is admitted beside them for a direct request (§8). Reusing
+   `unknown` adds nothing to either. It leaves a consumer unable to tell a quantity that was
+   missing from a condition that was unknown, except through diagnostics outside the disposition.
 4. **Decimal identity.** Values are copied without normalization, so `"5000"` and `"5000.00"` are
    different values. Core defines no scale, unit or decimal-aware equality (§2.2, §13), and this
    proposal adds none.
