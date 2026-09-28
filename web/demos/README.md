@@ -32,6 +32,7 @@ the immutable specification tag and its normative conformance corpus.
 - Fleet maintenance review: v0.1.0, 18 project test cases.
 - Location campaign readiness: v0.1.0, 18 project test cases.
 - Contractor order readiness: v0.1.0, 18 project test cases.
+- Customer recovery readiness: v0.1.0, 18 project test cases.
 
 The bundles contain offline inputs and setup instructions, not exported local Desk
-accounts, jobs or run history. Runtime v0.23.1 was used to validate all 112 cases.
+accounts, jobs or run history. Runtime v0.23.1 was used to validate all 130 cases.

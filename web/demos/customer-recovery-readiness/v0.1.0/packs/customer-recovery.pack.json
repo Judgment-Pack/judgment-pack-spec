@@ -1,0 +1,347 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.invalid/packs/customer-recovery",
+  "version": "0.1.0",
+  "title": "Customer recovery evidence readiness",
+  "description": "Synthetic demonstration. This gate does not issue credits, contact customers or close tickets. All records and the CAD 500 review threshold are fictional; no Qualtrics connection, employer policy or endorsement is represented.",
+  "decision": {
+    "intent": "Is this proposed customer remedy ready for accountable owner review? Reconcile matching source records and identify the next accountable owner.",
+    "question": "Is this proposed customer remedy ready for accountable owner review?"
+  },
+  "applicability": {
+    "op": "all",
+    "conditions": [
+      {
+        "op": "fact",
+        "path": "/review/context",
+        "operator": "equals",
+        "value": "synthetic-demo"
+      },
+      {
+        "op": "fact",
+        "path": "/review/purpose",
+        "operator": "equals",
+        "value": "customer-recovery-review"
+      }
+    ]
+  },
+  "evidenceRequirements": [
+    {
+      "id": "feedback-record",
+      "description": "Customer feedback and case record matching caseId, remedyRevision, accountScope.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "service-record",
+      "description": "Service investigation and proposed remedy matching caseId, remedyRevision, accountScope.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "approval-record",
+      "description": "Remedy approval record matching caseId, remedyRevision, accountScope.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "account-record",
+      "description": "Account owner and contact permission check matching caseId, remedyRevision, accountScope.",
+      "required": true,
+      "kind": "document"
+    }
+  ],
+  "sources": [
+    {
+      "id": "demo-policy",
+      "title": "Customer recovery evidence readiness — fictional policy v0.1.0",
+      "publisher": "Judgment Pack demo",
+      "locator": {
+        "kind": "path",
+        "value": "sources/policy/demo-policy.md"
+      },
+      "citation": {
+        "location": "Decision gate",
+        "excerpt": "Each record must match the submitted case, revision and scope. Missing or mismatched evidence cannot establish readiness. Positive results require accountable human review."
+      },
+      "rights": "Original synthetic example; no employer or customer policy is represented."
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "ready",
+      "label": "Ready for recovery owner review",
+      "description": "Ready for recovery owner review under the fictional evidence gate; no external action is authorized."
+    },
+    {
+      "id": "review",
+      "label": "Additional commercial review",
+      "description": "Additional commercial review under the fictional evidence gate; no external action is authorized."
+    },
+    {
+      "id": "hold",
+      "label": "Hold the proposed remedy",
+      "description": "Hold the proposed remedy under the fictional evidence gate; no external action is authorized."
+    }
+  ],
+  "rules": [
+    {
+      "id": "ready",
+      "description": "Matching positive records within this demo threshold",
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "all",
+            "conditions": [
+              {
+                "op": "fact",
+                "path": "/feedback/caseLinked",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/service/issueVerified",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/approval/remedyApproved",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/account/ownerAssigned",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/account/contactPermitted",
+                "operator": "equals",
+                "value": true
+              }
+            ]
+          },
+          {
+            "op": "all",
+            "conditions": [
+              {
+                "op": "fact",
+                "path": "/remedy/amountCAD",
+                "operator": "greater-than-or-equal",
+                "value": "0"
+              },
+              {
+                "op": "fact",
+                "path": "/remedy/amountCAD",
+                "operator": "less-than-or-equal",
+                "value": "100000"
+              }
+            ]
+          },
+          {
+            "op": "fact",
+            "path": "/approval/exceptionRequested",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/remedy/amountCAD",
+            "operator": "less-than-or-equal",
+            "value": "500"
+          }
+        ]
+      },
+      "outcome": "ready",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ],
+      "evidenceRequirementRefs": [
+        "feedback-record",
+        "service-record",
+        "approval-record",
+        "account-record"
+      ],
+      "rationale": "Matching positive records within this demo threshold. This is a fictional policy; the named owner remains accountable."
+    },
+    {
+      "id": "review-boundary",
+      "description": "Complete records requiring additional owner review",
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "all",
+            "conditions": [
+              {
+                "op": "fact",
+                "path": "/feedback/caseLinked",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/service/issueVerified",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/approval/remedyApproved",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/account/ownerAssigned",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/account/contactPermitted",
+                "operator": "equals",
+                "value": true
+              }
+            ]
+          },
+          {
+            "op": "all",
+            "conditions": [
+              {
+                "op": "fact",
+                "path": "/remedy/amountCAD",
+                "operator": "greater-than-or-equal",
+                "value": "0"
+              },
+              {
+                "op": "fact",
+                "path": "/remedy/amountCAD",
+                "operator": "less-than-or-equal",
+                "value": "100000"
+              }
+            ]
+          },
+          {
+            "op": "fact",
+            "path": "/approval/exceptionRequested",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/remedy/amountCAD",
+            "operator": "greater-than",
+            "value": "500"
+          }
+        ]
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ],
+      "evidenceRequirementRefs": [
+        "feedback-record",
+        "service-record",
+        "approval-record",
+        "account-record"
+      ],
+      "rationale": "Complete records requiring additional owner review. This is a fictional policy; the named owner remains accountable."
+    },
+    {
+      "id": "known-blocker",
+      "description": "A recorded prerequisite is explicitly false",
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "op": "fact",
+            "path": "/feedback/caseLinked",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/service/issueVerified",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/approval/remedyApproved",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/account/ownerAssigned",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/account/contactPermitted",
+            "operator": "equals",
+            "value": false
+          }
+        ]
+      },
+      "outcome": "hold",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ],
+      "evidenceRequirementRefs": [
+        "feedback-record",
+        "service-record",
+        "approval-record",
+        "account-record"
+      ],
+      "rationale": "A recorded prerequisite is explicitly false. This is a fictional policy; the named owner remains accountable."
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "human-exception",
+      "description": "Explicit exception requires owner review before ordinary outcome resolution.",
+      "when": {
+        "op": "fact",
+        "path": "/approval/exceptionRequested",
+        "operator": "equals",
+        "value": true
+      },
+      "effect": "escalate",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ]
+    }
+  ],
+  "fallbackOutcome": "hold",
+  "escalation": {
+    "triggers": [
+      "not-applicable",
+      "missing-required-evidence",
+      "unknown"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Customer recovery owner"
+    },
+    "message": "The Customer recovery owner coordinates the source owner. Inspect the acquisition diagnosis and retain this run before correcting inputs. No notification has been sent."
+  },
+  "metadata": {
+    "authors": [
+      "Codex — synthetic demo prepared for the maintainer"
+    ],
+    "createdAt": "2026-09-28T19:11:59.554631Z",
+    "license": "Apache-2.0"
+  }
+}

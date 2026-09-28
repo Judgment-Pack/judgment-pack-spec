@@ -1,0 +1,785 @@
+{
+  "version": 2,
+  "case": {
+    "parameters": {
+      "caseId": {
+        "pointer": "/caseId",
+        "type": "string"
+      },
+      "remedyRevision": {
+        "pointer": "/remedyRevision",
+        "type": "string"
+      },
+      "accountScope": {
+        "pointer": "/accountScope",
+        "type": "string"
+      }
+    },
+    "facts": [],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "feedback",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "caseId": "string",
+            "remedyRevision": "string",
+            "accountScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/caseId",
+                  "param": "caseId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "feedback-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-caseId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/remedyRevision",
+                  "param": "remedyRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "feedback-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-remedyRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/accountScope",
+                  "param": "accountScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "feedback-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-accountScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/feedback_caseLinked",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/feedback_caseLinked",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "feedback-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-feedback-caseLinked"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "feedback-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/review/context",
+                    "from": "/data/review_context"
+                  },
+                  {
+                    "pointer": "/review/purpose",
+                    "from": "/data/review_purpose"
+                  },
+                  {
+                    "pointer": "/feedback/caseLinked",
+                    "from": "/data/feedback_caseLinked"
+                  }
+                ],
+                "evidence": {
+                  "feedback-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "feedback-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "service",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "caseId": "string",
+            "remedyRevision": "string",
+            "accountScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/caseId",
+                  "param": "caseId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "service-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-caseId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/remedyRevision",
+                  "param": "remedyRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "service-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-remedyRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/accountScope",
+                  "param": "accountScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "service-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-accountScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/service_issueVerified",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/service_issueVerified",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "service-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-service-issueVerified"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "service-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/service/issueVerified",
+                    "from": "/data/service_issueVerified"
+                  },
+                  {
+                    "pointer": "/remedy/amountCAD",
+                    "from": "/data/remedy_amountCAD"
+                  }
+                ],
+                "evidence": {
+                  "service-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "service-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "approval",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "caseId": "string",
+            "remedyRevision": "string",
+            "accountScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/caseId",
+                  "param": "caseId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-caseId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/remedyRevision",
+                  "param": "remedyRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-remedyRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/accountScope",
+                  "param": "accountScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-accountScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/approval_remedyApproved",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/approval_remedyApproved",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-approval-remedyApproved"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/approval_exceptionRequested",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/approval_exceptionRequested",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-approval-exceptionRequested"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/approval/remedyApproved",
+                    "from": "/data/approval_remedyApproved"
+                  },
+                  {
+                    "pointer": "/approval/exceptionRequested",
+                    "from": "/data/approval_exceptionRequested"
+                  }
+                ],
+                "evidence": {
+                  "approval-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "account",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "caseId": "string",
+            "remedyRevision": "string",
+            "accountScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/caseId",
+                  "param": "caseId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "account-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-caseId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/remedyRevision",
+                  "param": "remedyRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "account-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-remedyRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/accountScope",
+                  "param": "accountScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "account-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-accountScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/account_ownerAssigned",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/account_ownerAssigned",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "account-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-account-ownerAssigned"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/account_contactPermitted",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/account_contactPermitted",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "account-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-account-contactPermitted"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "account-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/account/ownerAssigned",
+                    "from": "/data/account_ownerAssigned"
+                  },
+                  {
+                    "pointer": "/account/contactPermitted",
+                    "from": "/data/account_contactPermitted"
+                  }
+                ],
+                "evidence": {
+                  "account-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "account-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "unmapped": [],
+  "unmappedEvidence": []
+}

@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated Account owner and contact permission check",
+  "status": "found",
+  "caseId": "CX-CASE-042",
+  "remedyRevision": "REMEDY-R3",
+  "accountScope": "ACCT-042-CA-CAD",
+  "data": {
+    "account_ownerAssigned": true,
+    "account_contactPermitted": true
+  }
+}

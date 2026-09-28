@@ -1,0 +1,13 @@
+{
+  "synthetic": true,
+  "system": "Simulated Customer feedback and case record",
+  "status": "found",
+  "caseId": "CX-CASE-042",
+  "remedyRevision": "REMEDY-R3",
+  "accountScope": "ACCT-042-CA-CAD",
+  "data": {
+    "review_context": "synthetic-demo",
+    "review_purpose": "outside-demo-purpose",
+    "feedback_caseLinked": true
+  }
+}

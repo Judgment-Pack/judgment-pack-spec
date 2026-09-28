@@ -1,0 +1,19 @@
+{
+  "account": {
+    "contactPermitted": true,
+    "ownerAssigned": true
+  },
+  "feedback": {
+    "caseLinked": true
+  },
+  "remedy": {
+    "amountCAD": "500"
+  },
+  "review": {
+    "context": "synthetic-demo",
+    "purpose": "customer-recovery-review"
+  },
+  "service": {
+    "issueVerified": true
+  }
+}

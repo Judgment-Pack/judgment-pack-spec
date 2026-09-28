@@ -1,0 +1,10 @@
+{
+  "configVersion": "3",
+  "packs": {
+    "customer-recovery": {
+      "path": "packs/customer-recovery.pack.json",
+      "matrix": "packs/customer-recovery.matrix.json",
+      "description": "Is this proposed customer remedy ready for accountable owner review?"
+    }
+  }
+}

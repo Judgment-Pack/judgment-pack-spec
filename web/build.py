@@ -289,6 +289,8 @@ WORKED_DEMOS = (
         "Review location, offer, brand and channel records for one campaign revision. Includes 18 project test cases."),
     WorkedDemo("contractor-order-readiness", "0.1.0", "Contractor order readiness",
         "Reconcile quote, stock, credit and delivery records before a branch makes a commitment. Includes 18 project test cases."),
+    WorkedDemo("customer-recovery-readiness", "0.1.0", "Customer recovery readiness",
+        "Check feedback, service findings, remedy approval and account ownership before reviewing a customer remedy. Includes 18 project test cases."),
 )
 
 

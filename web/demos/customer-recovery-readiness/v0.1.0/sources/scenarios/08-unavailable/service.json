@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated Service investigation and proposed remedy",
+  "status": "found",
+  "caseId": "CX-CASE-042",
+  "remedyRevision": "REMEDY-R3",
+  "accountScope": "ACCT-042-CA-CAD",
+  "data": {
+    "service_issueVerified": true,
+    "remedy_amountCAD": "500"
+  }
+}

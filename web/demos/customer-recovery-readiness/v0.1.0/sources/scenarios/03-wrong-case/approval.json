@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated Remedy approval record",
+  "status": "found",
+  "caseId": "DIFFERENT-CASE",
+  "remedyRevision": "REMEDY-R3",
+  "accountScope": "ACCT-042-CA-CAD",
+  "data": {
+    "approval_remedyApproved": true,
+    "approval_exceptionRequested": false
+  }
+}

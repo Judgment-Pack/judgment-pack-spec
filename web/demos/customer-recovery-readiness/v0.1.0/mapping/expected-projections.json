@@ -1,0 +1,582 @@
+[
+  {
+    "key": "01-ready",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": false,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "02-missing",
+    "diagnosis": {
+      "approval": "record-not-found"
+    },
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "absent",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "03-wrong-case",
+    "diagnosis": {
+      "approval": "mismatch-caseId"
+    },
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "unknown",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "04-old-revision",
+    "diagnosis": {
+      "approval": "mismatch-remedyRevision"
+    },
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "unknown",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "05-wrong-scope",
+    "diagnosis": {
+      "approval": "mismatch-accountScope"
+    },
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "unknown",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "06-known-blocker",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": false,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": false,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "07-exception",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": true,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "08-unavailable",
+    "diagnosis": {
+      "approval": "lookup-unavailable-or-incomplete"
+    },
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "unknown",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "09-invalid-type",
+    "diagnosis": {
+      "approval": "invalid-approval-remedyApproved"
+    },
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "unknown",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "10-boundary",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": false,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "11-beyond-boundary",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": false,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500.01"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "12-invalid-range",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": false,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "-1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "13-number-contract",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": false,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": 500
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "14-wrong-purpose",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": false,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "outside-demo-purpose"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "15-missing-and-refused",
+    "diagnosis": {
+      "approval": "record-not-found"
+    },
+    "facts": {
+      "account": {
+        "contactPermitted": false,
+        "ownerAssigned": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "absent",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "16-exception-and-refused",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": false,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": true,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "500"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "17-minimum",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": false,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "0"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  },
+  {
+    "key": "18-maximum",
+    "diagnosis": {},
+    "facts": {
+      "account": {
+        "contactPermitted": true,
+        "ownerAssigned": true
+      },
+      "approval": {
+        "exceptionRequested": false,
+        "remedyApproved": true
+      },
+      "feedback": {
+        "caseLinked": true
+      },
+      "remedy": {
+        "amountCAD": "100000"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "customer-recovery-review"
+      },
+      "service": {
+        "issueVerified": true
+      }
+    },
+    "evidence": {
+      "account-record": "present",
+      "approval-record": "present",
+      "feedback-record": "present",
+      "service-record": "present"
+    }
+  }
+]
