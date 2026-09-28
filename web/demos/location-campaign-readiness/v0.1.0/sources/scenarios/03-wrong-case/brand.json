@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated Brand and content review",
+  "status": "found",
+  "locationId": "DIFFERENT-CASE",
+  "campaignRevision": "AUTUMN-R3",
+  "channelScope": "CA-EN-GOOGLE",
+  "data": {
+    "brand_approved": true,
+    "brand_restrictedClaim": false
+  }
+}

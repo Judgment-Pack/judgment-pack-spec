@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated Diagnostic observation report",
+  "status": "found",
+  "vehicleId": "BUS-042",
+  "observationBatch": "OBS-042-R3",
+  "componentId": "COOLING-UNIT-2",
+  "data": {
+    "diagnostic_signalSupported": true,
+    "diagnostic_priorityScore": "11"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "synthetic": true,
+  "system": "Simulated Asset and component record",
+  "status": "found",
+  "vehicleId": "BUS-042",
+  "observationBatch": "OBS-042-R3",
+  "componentId": "COOLING-UNIT-2",
+  "data": {
+    "review_context": "synthetic-demo",
+    "review_purpose": "outside-demo-purpose",
+    "asset_inScope": true
+  }
+}

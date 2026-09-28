@@ -1,0 +1,20 @@
+{
+  "brand": {
+    "approved": true,
+    "restrictedClaim": false
+  },
+  "channel": {
+    "ready": true
+  },
+  "location": {
+    "open": true
+  },
+  "offer": {
+    "spendCAD": "1000",
+    "termsConfirmed": true
+  },
+  "review": {
+    "context": "synthetic-demo",
+    "purpose": "campaign-review"
+  }
+}

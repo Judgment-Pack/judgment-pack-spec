@@ -1,0 +1,424 @@
+[
+  {
+    "key": "01-ready",
+    "title": "Matching evidence reaches the owner review gate",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "ready"
+    },
+    "diagnosis": {},
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "02-missing",
+    "title": "A required review has not arrived",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "missing-required-evidence",
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "missing-required-evidence",
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "credit": "record-not-found"
+    },
+    "nextAction": "Ask the Credit controller for the review matching this exact case, revision and scope.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "03-wrong-case",
+    "title": "Review belongs to a different orderId",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "credit": "mismatch-orderId"
+    },
+    "nextAction": "Retrieve the review for ORDER-042. Another case’s approval cannot establish readiness.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "04-old-revision",
+    "title": "Review covers the previous quoteRevision",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "credit": "mismatch-quoteRevision"
+    },
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "05-wrong-scope",
+    "title": "Review covers a different fulfillmentScope",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "credit": "mismatch-fulfillmentScope"
+    },
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "06-known-blocker",
+    "title": "One prerequisite is explicitly false",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "hold"
+    },
+    "diagnosis": {},
+    "nextAction": "Resolve the explicit negative prerequisite with its source owner; the existence of a file is not an approval.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "07-exception",
+    "title": "An explicit exception requests a human",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "exception-escalation"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "exception-escalation"
+        ]
+      }
+    },
+    "diagnosis": {},
+    "nextAction": "The Branch operations owner reviews the documented exception; existing positive records do not waive it.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "08-unavailable",
+    "title": "A lookup fails without proving absence",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "credit": "lookup-unavailable-or-incomplete"
+    },
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "09-invalid-type",
+    "title": "A textual approval is not typed consent",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "credit": "invalid-credit-approved"
+    },
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "10-boundary",
+    "title": "Exactly 10 at the illustrative threshold",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "ready"
+    },
+    "diagnosis": {},
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "11-beyond-boundary",
+    "title": "10.01 requires additional review",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "review"
+    },
+    "diagnosis": {},
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "12-invalid-range",
+    "title": "An out-of-range value holds the case",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "hold"
+    },
+    "diagnosis": {},
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "13-number-contract",
+    "title": "JSON number violates the decimal-string comparison contract",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {},
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "14-wrong-purpose",
+    "title": "The requested use is outside this pack",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "not-applicable",
+      "reasons": [
+        "not-applicable"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "not-applicable"
+        ]
+      }
+    },
+    "diagnosis": {},
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "15-missing-and-refused",
+    "title": "Missing evidence remains unresolved alongside a refusal",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "missing-required-evidence",
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "missing-required-evidence",
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "credit": "record-not-found"
+    },
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "16-exception-and-refused",
+    "title": "Explicit exception takes priority over ordinary refusal",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "exception-escalation"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "exception-escalation"
+        ]
+      }
+    },
+    "diagnosis": {},
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "17-minimum",
+    "title": "The minimum valid metric is inclusive",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "ready"
+    },
+    "diagnosis": {},
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  },
+  {
+    "key": "18-maximum",
+    "title": "The maximum valid metric requires additional review",
+    "case": {
+      "orderId": "ORDER-042",
+      "quoteRevision": "QUOTE-R3",
+      "fulfillmentScope": "BRANCH-017-SITE-042"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "review"
+    },
+    "diagnosis": {},
+    "nextAction": "The Branch operations owner reviews this result and the cited records before taking any external action.",
+    "owner": "Branch operations owner"
+  }
+]

@@ -1,0 +1,760 @@
+{
+  "matrixVersion": "3",
+  "cases": [
+    {
+      "id": "01-ready",
+      "focus": "Matching evidence reaches the owner review gate",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": false
+        },
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "ready"
+      },
+      "expectedHandoffTarget": null
+    },
+    {
+      "id": "02-missing",
+      "focus": "A required review has not arrived",
+      "facts": {
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "absent",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence",
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence",
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "03-wrong-case",
+      "focus": "Review belongs to a different datasetId",
+      "facts": {
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "unknown",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "04-old-revision",
+      "focus": "Review covers the previous batchId",
+      "facts": {
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "unknown",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "05-wrong-scope",
+      "focus": "Review covers a different contractRevision",
+      "facts": {
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "unknown",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "06-known-blocker",
+      "focus": "One prerequisite is explicitly false",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": false
+        },
+        "owner": {
+          "approved": false
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "hold"
+      },
+      "expectedHandoffTarget": null
+    },
+    {
+      "id": "07-exception",
+      "focus": "An explicit exception requests a human",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": true
+        },
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "exception-escalation"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "08-unavailable",
+      "focus": "A lookup fails without proving absence",
+      "facts": {
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "unknown",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "09-invalid-type",
+      "focus": "A textual approval is not typed consent",
+      "facts": {
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "unknown",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "10-boundary",
+      "focus": "Exactly 1 at the illustrative threshold",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": false
+        },
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "ready"
+      },
+      "expectedHandoffTarget": null
+    },
+    {
+      "id": "11-beyond-boundary",
+      "focus": "1.01 requires additional review",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": false
+        },
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1.01"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "review"
+      },
+      "expectedHandoffTarget": null
+    },
+    {
+      "id": "12-invalid-range",
+      "focus": "An out-of-range value holds the case",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": false
+        },
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "-0.1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "hold"
+      },
+      "expectedHandoffTarget": null
+    },
+    {
+      "id": "13-number-contract",
+      "focus": "JSON number violates the decimal-string comparison contract",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": false
+        },
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": 1
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "14-wrong-purpose",
+      "focus": "The requested use is outside this pack",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": false
+        },
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "outside-demo-purpose"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "not-applicable",
+        "reasons": [
+          "not-applicable"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "not-applicable"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "15-missing-and-refused",
+      "focus": "Missing evidence remains unresolved alongside a refusal",
+      "facts": {
+        "owner": {
+          "approved": false
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "absent",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence",
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence",
+            "unknown"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "16-exception-and-refused",
+      "focus": "Explicit exception takes priority over ordinary refusal",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": true
+        },
+        "owner": {
+          "approved": false
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "1"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "exception-escalation"
+          ]
+        }
+      },
+      "expectedHandoffTarget": {
+        "kind": "human-role",
+        "name": "Data product owner"
+      }
+    },
+    {
+      "id": "17-minimum",
+      "focus": "The minimum valid metric is inclusive",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": false
+        },
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "0"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "ready"
+      },
+      "expectedHandoffTarget": null
+    },
+    {
+      "id": "18-maximum",
+      "focus": "The maximum valid metric requires additional review",
+      "facts": {
+        "contract": {
+          "compatible": true,
+          "overrideRequested": false
+        },
+        "owner": {
+          "approved": true
+        },
+        "pipeline": {
+          "completed": true
+        },
+        "quality": {
+          "criticalChecksPassed": true,
+          "invalidRowsPercent": "100"
+        },
+        "review": {
+          "context": "synthetic-demo",
+          "purpose": "analytics-release"
+        }
+      },
+      "evidenceAvailability": {
+        "approval-record": "present",
+        "contract-record": "present",
+        "orchestrator-record": "present",
+        "quality-record": "present"
+      },
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        },
+        "outcomeId": "review"
+      },
+      "expectedHandoffTarget": null
+    }
+  ]
+}

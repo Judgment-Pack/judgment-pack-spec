@@ -1,0 +1,16 @@
+{
+  "delivery": {
+    "confirmed": true
+  },
+  "inventory": {
+    "allocated": true
+  },
+  "quote": {
+    "customerAccepted": true,
+    "discountPercent": "10"
+  },
+  "review": {
+    "context": "synthetic-demo",
+    "purpose": "order-commitment-review"
+  }
+}

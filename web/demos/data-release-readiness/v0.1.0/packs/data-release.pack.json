@@ -1,0 +1,329 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.invalid/packs/data-release",
+  "version": "0.1.0",
+  "title": "Data batch evidence readiness",
+  "description": "Synthetic demonstration. This gate does not publish a dataset or replace a quality engine. The 1% threshold is fictional; it is not a recommended production standard.",
+  "decision": {
+    "intent": "Is this data batch ready for an accountable release review? Reconcile matching source records and identify the next accountable owner.",
+    "question": "Is this data batch ready for an accountable release review?"
+  },
+  "applicability": {
+    "op": "all",
+    "conditions": [
+      {
+        "op": "fact",
+        "path": "/review/context",
+        "operator": "equals",
+        "value": "synthetic-demo"
+      },
+      {
+        "op": "fact",
+        "path": "/review/purpose",
+        "operator": "equals",
+        "value": "analytics-release"
+      }
+    ]
+  },
+  "evidenceRequirements": [
+    {
+      "id": "orchestrator-record",
+      "description": "Orchestrator completion record matching datasetId, batchId, contractRevision.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "quality-record",
+      "description": "Data quality report matching datasetId, batchId, contractRevision.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "contract-record",
+      "description": "Schema and contract check matching datasetId, batchId, contractRevision.",
+      "required": true,
+      "kind": "document"
+    },
+    {
+      "id": "approval-record",
+      "description": "Data owner review matching datasetId, batchId, contractRevision.",
+      "required": true,
+      "kind": "document"
+    }
+  ],
+  "sources": [
+    {
+      "id": "demo-policy",
+      "title": "Data batch evidence readiness — fictional policy v0.1.0",
+      "publisher": "Judgment Pack demo",
+      "locator": {
+        "kind": "path",
+        "value": "sources/policy/demo-policy.md"
+      },
+      "citation": {
+        "location": "Decision gate",
+        "excerpt": "Each record must match the submitted case, revision and scope. Missing or mismatched evidence cannot establish readiness. Positive results require accountable human review."
+      },
+      "rights": "Original synthetic example; no employer or customer policy is represented."
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "ready",
+      "label": "Ready for release review",
+      "description": "Ready for release review under the fictional evidence gate; no external action is authorized."
+    },
+    {
+      "id": "review",
+      "label": "Data quality review required",
+      "description": "Data quality review required under the fictional evidence gate; no external action is authorized."
+    },
+    {
+      "id": "hold",
+      "label": "Hold the release review",
+      "description": "Hold the release review under the fictional evidence gate; no external action is authorized."
+    }
+  ],
+  "rules": [
+    {
+      "id": "ready",
+      "description": "Matching positive records within this demo threshold",
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "all",
+            "conditions": [
+              {
+                "op": "fact",
+                "path": "/pipeline/completed",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/quality/criticalChecksPassed",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/contract/compatible",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/owner/approved",
+                "operator": "equals",
+                "value": true
+              }
+            ]
+          },
+          {
+            "op": "all",
+            "conditions": [
+              {
+                "op": "fact",
+                "path": "/quality/invalidRowsPercent",
+                "operator": "greater-than-or-equal",
+                "value": "0"
+              },
+              {
+                "op": "fact",
+                "path": "/quality/invalidRowsPercent",
+                "operator": "less-than-or-equal",
+                "value": "100"
+              }
+            ]
+          },
+          {
+            "op": "fact",
+            "path": "/contract/overrideRequested",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/quality/invalidRowsPercent",
+            "operator": "less-than-or-equal",
+            "value": "1"
+          }
+        ]
+      },
+      "outcome": "ready",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ],
+      "evidenceRequirementRefs": [
+        "orchestrator-record",
+        "quality-record",
+        "contract-record",
+        "approval-record"
+      ],
+      "rationale": "Matching positive records within this demo threshold. This is a fictional policy; the named owner remains accountable."
+    },
+    {
+      "id": "review-boundary",
+      "description": "Complete records requiring additional owner review",
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "all",
+            "conditions": [
+              {
+                "op": "fact",
+                "path": "/pipeline/completed",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/quality/criticalChecksPassed",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/contract/compatible",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "op": "fact",
+                "path": "/owner/approved",
+                "operator": "equals",
+                "value": true
+              }
+            ]
+          },
+          {
+            "op": "all",
+            "conditions": [
+              {
+                "op": "fact",
+                "path": "/quality/invalidRowsPercent",
+                "operator": "greater-than-or-equal",
+                "value": "0"
+              },
+              {
+                "op": "fact",
+                "path": "/quality/invalidRowsPercent",
+                "operator": "less-than-or-equal",
+                "value": "100"
+              }
+            ]
+          },
+          {
+            "op": "fact",
+            "path": "/contract/overrideRequested",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/quality/invalidRowsPercent",
+            "operator": "greater-than",
+            "value": "1"
+          }
+        ]
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ],
+      "evidenceRequirementRefs": [
+        "orchestrator-record",
+        "quality-record",
+        "contract-record",
+        "approval-record"
+      ],
+      "rationale": "Complete records requiring additional owner review. This is a fictional policy; the named owner remains accountable."
+    },
+    {
+      "id": "known-blocker",
+      "description": "A recorded prerequisite is explicitly false",
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "op": "fact",
+            "path": "/pipeline/completed",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/quality/criticalChecksPassed",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/contract/compatible",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "op": "fact",
+            "path": "/owner/approved",
+            "operator": "equals",
+            "value": false
+          }
+        ]
+      },
+      "outcome": "hold",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ],
+      "evidenceRequirementRefs": [
+        "orchestrator-record",
+        "quality-record",
+        "contract-record",
+        "approval-record"
+      ],
+      "rationale": "A recorded prerequisite is explicitly false. This is a fictional policy; the named owner remains accountable."
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "human-exception",
+      "description": "Explicit exception requires owner review before ordinary outcome resolution.",
+      "when": {
+        "op": "fact",
+        "path": "/contract/overrideRequested",
+        "operator": "equals",
+        "value": true
+      },
+      "effect": "escalate",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "demo-policy"
+      ]
+    }
+  ],
+  "fallbackOutcome": "hold",
+  "escalation": {
+    "triggers": [
+      "not-applicable",
+      "missing-required-evidence",
+      "unknown"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Data product owner"
+    },
+    "message": "The Data product owner coordinates the source owner. Inspect the acquisition diagnosis and retain this run before correcting inputs. No notification has been sent."
+  },
+  "metadata": {
+    "authors": [
+      "Codex — synthetic demo prepared for the maintainer"
+    ],
+    "createdAt": "2026-09-28T18:26:06.719035Z",
+    "license": "Apache-2.0"
+  }
+}

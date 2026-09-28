@@ -1,0 +1,10 @@
+{
+  "configVersion": "3",
+  "packs": {
+    "maintenance-review": {
+      "path": "packs/maintenance-review.pack.json",
+      "matrix": "packs/maintenance-review.matrix.json",
+      "description": "Is this maintenance recommendation ready for a planner to review?"
+    }
+  }
+}

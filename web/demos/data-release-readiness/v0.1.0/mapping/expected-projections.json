@@ -1,0 +1,528 @@
+[
+  {
+    "key": "01-ready",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": false
+      },
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "02-missing",
+    "diagnosis": {
+      "contract": "record-not-found"
+    },
+    "facts": {
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "absent",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "03-wrong-case",
+    "diagnosis": {
+      "contract": "mismatch-datasetId"
+    },
+    "facts": {
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "unknown",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "04-old-revision",
+    "diagnosis": {
+      "contract": "mismatch-batchId"
+    },
+    "facts": {
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "unknown",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "05-wrong-scope",
+    "diagnosis": {
+      "contract": "mismatch-contractRevision"
+    },
+    "facts": {
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "unknown",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "06-known-blocker",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": false
+      },
+      "owner": {
+        "approved": false
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "07-exception",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": true
+      },
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "08-unavailable",
+    "diagnosis": {
+      "contract": "lookup-unavailable-or-incomplete"
+    },
+    "facts": {
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "unknown",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "09-invalid-type",
+    "diagnosis": {
+      "contract": "invalid-contract-compatible"
+    },
+    "facts": {
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "unknown",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "10-boundary",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": false
+      },
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "11-beyond-boundary",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": false
+      },
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1.01"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "12-invalid-range",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": false
+      },
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "-0.1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "13-number-contract",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": false
+      },
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": 1
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "14-wrong-purpose",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": false
+      },
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "outside-demo-purpose"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "15-missing-and-refused",
+    "diagnosis": {
+      "contract": "record-not-found"
+    },
+    "facts": {
+      "owner": {
+        "approved": false
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "absent",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "16-exception-and-refused",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": true
+      },
+      "owner": {
+        "approved": false
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "1"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "17-minimum",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": false
+      },
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "0"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  },
+  {
+    "key": "18-maximum",
+    "diagnosis": {},
+    "facts": {
+      "contract": {
+        "compatible": true,
+        "overrideRequested": false
+      },
+      "owner": {
+        "approved": true
+      },
+      "pipeline": {
+        "completed": true
+      },
+      "quality": {
+        "criticalChecksPassed": true,
+        "invalidRowsPercent": "100"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "analytics-release"
+      }
+    },
+    "evidence": {
+      "approval-record": "present",
+      "contract-record": "present",
+      "orchestrator-record": "present",
+      "quality-record": "present"
+    }
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "synthetic": true,
+  "system": "Simulated Contractor quote and pricing record",
+  "status": "found",
+  "orderId": "ORDER-042",
+  "quoteRevision": "QUOTE-R3",
+  "fulfillmentScope": "BRANCH-017-SITE-042",
+  "data": {
+    "review_context": "synthetic-demo",
+    "review_purpose": "order-commitment-review",
+    "quote_customerAccepted": true,
+    "quote_discountPercent": 10
+  }
+}

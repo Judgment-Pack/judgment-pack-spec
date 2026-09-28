@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated Technician inspection record",
+  "status": "found",
+  "vehicleId": "BUS-042",
+  "observationBatch": "OBS-042-R3",
+  "componentId": "COOLING-UNIT-2",
+  "data": {
+    "inspection_faultConfirmed": true,
+    "inspection_safetyConcern": true
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "synthetic": true,
+  "system": "Simulated Channel and locale preflight",
+  "status": "found",
+  "locationId": "STORE-017",
+  "campaignRevision": "AUTUMN-R3",
+  "channelScope": "CA-EN-GOOGLE",
+  "data": {
+    "channel_ready": false
+  }
+}

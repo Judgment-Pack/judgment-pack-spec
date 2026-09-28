@@ -258,16 +258,50 @@ EXAMPLE_GUIDES = {
 }
 
 
+@dataclass(frozen=True)
+class WorkedDemo:
+    slug: str
+    version: str
+    title: str
+    summary: str
+
+    @property
+    def source(self) -> PurePosixPath:
+        return PurePosixPath("web/demos") / self.slug / ("v" + self.version)
+
+    @property
+    def output(self) -> PurePosixPath:
+        return PurePosixPath("artifacts/demos") / self.slug / ("v" + self.version)
+
+    @property
+    def archive(self) -> str:
+        return self.slug + "-v" + self.version
+
+
+WORKED_DEMOS = (
+    WorkedDemo("deal-evidence-readiness", "0.2.0", "Deal evidence readiness",
+        "Reconcile CRM, quote, security and finance records before an owner reviews a deal. Includes 40 project test cases."),
+    WorkedDemo("data-release-readiness", "0.1.0", "Data release readiness",
+        "Check that pipeline, quality, schema and owner records cover the same data batch. Includes 18 project test cases."),
+    WorkedDemo("fleet-maintenance-review", "0.1.0", "Fleet maintenance review",
+        "Connect a diagnostic recommendation to the right vehicle, inspection and work-order check. Includes 18 project test cases."),
+    WorkedDemo("location-campaign-readiness", "0.1.0", "Location campaign readiness",
+        "Review location, offer, brand and channel records for one campaign revision. Includes 18 project test cases."),
+    WorkedDemo("contractor-order-readiness", "0.1.0", "Contractor order readiness",
+        "Reconcile quote, stock, credit and delivery records before a branch makes a commitment. Includes 18 project test cases."),
+)
+
+
 PAGES = (
-    Page(
-        "docs/examples/deal-evidence-readiness.md",
-        PurePosixPath("examples/deal-evidence-readiness/index.html"),
-        "Deal evidence readiness",
-        "A synthetic Deal Desk walkthrough: reconcile CRM, quote, security and finance evidence, with a downloadable pack, 40 test cases and a one-page brief.",
+    *(Page(
+        f"docs/examples/{demo.slug}.md",
+        PurePosixPath(f"examples/{demo.slug}/index.html"),
+        demo.title,
+        demo.summary,
         "examples",
         "Non-normative worked example",
         source_ref="main",
-    ),
+    ) for demo in WORKED_DEMOS),
     Page(
         "README.md",
         PurePosixPath("index.html"),
@@ -1456,10 +1490,11 @@ def prepare_output(output: Path) -> None:
 
 def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
     routes: dict[str, PurePosixPath | str] = {page.source: page.output for page in PAGES}
-    for relative, _ in deal_demo_files():
-        routes[(DEAL_DEMO_SOURCE / relative).as_posix()] = DEAL_DEMO_OUTPUT / relative
-    demo_zip = DEAL_DEMO_OUTPUT / (DEAL_DEMO_ARCHIVE + ".zip")
-    routes["https://judgmentpack.org/" + demo_zip.as_posix()] = demo_zip
+    for demo in WORKED_DEMOS:
+        for relative, _ in demo_files(demo):
+            routes[(demo.source / relative).as_posix()] = demo.output / relative
+        demo_zip = demo.output / (demo.archive + ".zip")
+        routes["https://judgmentpack.org/" + demo_zip.as_posix()] = demo_zip
     routes.update(
         {
             ".": PurePosixPath("index.html"),
@@ -1794,13 +1829,19 @@ key to see what it means and its allowed values.</p>
 
     index_body = f"""
 <h1>Synthetic examples</h1>
-<div class="notice notice-info">
-  <strong>Worked business example: deal evidence readiness.</strong>
-  <p>Follow one fictional deal through missing reviews, stale approvals and commercial exceptions.
-  Download the one-page brief, runnable pack, 40 project test cases and synthetic records.</p>
-  <p><a href="{html.escape(output_href(index_output, PurePosixPath('examples/deal-evidence-readiness/index.html')))}">Explore the Deal Desk example</a></p>
-  <p>This companion-tool walkthrough is separate from the document-conformance examples below.</p>
-</div>
+<p class="lede">Start with a business decision, inspect the evidence, then try the policy locally.</p>
+<h2 id="worked-business-examples">Worked business examples</h2>
+<p>Each walkthrough includes a one-page PDF, a runnable pack, saved expectations, source fixtures
+and a pilot worksheet. These companion-tool examples are separate from the document-conformance
+examples below. All policies, records and thresholds are fictional.</p>
+<div class="card-grid">{''.join(
+    '<article class="card"><p class="card-kicker">Worked example · Synthetic</p><h3><a href="'
+    + html.escape(output_href(index_output, PurePosixPath(f'examples/{demo.slug}/index.html')))
+    + '">' + html.escape(demo.title) + '</a></h3><p>' + html.escape(demo.summary)
+    + '</p><p class="card-meta">One-page brief · Pack and tests · Source mapping</p></article>'
+    for demo in WORKED_DEMOS
+)}</div>
+<h2 id="document-examples">Document-conformance examples</h2>
 <p class="lede">These are synthetic, structurally and semantically conforming JPS documents for
 inspecting and testing the document format. Unrelated domains exercise the same portable
 shape without claiming that the examples are complete, authoritative, or safe for operational
@@ -1815,7 +1856,7 @@ must not fetch their source locators unless explicitly requested.</div>
   <li>Edit only a scratch copy to create a carrier, structural, or semantic failure.</li>
   <li>Compare what you observe with <a href="{html.escape(output_href(index_output, PurePosixPath('testing/index.html')))}">Test the preview</a>.</li>
 </ol>
-<p>These pages are about document conformance. JPS 0.2.0-draft also defines portable evaluation
+<p>The document examples below are about document conformance. JPS 0.2.0-draft also defines portable evaluation
 semantics, but an evaluator-conformance claim is made against the
 <a href="{html.escape(output_href(index_output, PurePosixPath('conformance/evaluation/index.html')))}">evaluation
 corpus</a>, never against an example. The edge notes on each page explain illustrative applicability,
@@ -2138,14 +2179,14 @@ def is_published_artifact(relative: Path) -> bool:
     )
 
 
-DEAL_DEMO_SOURCE = PurePosixPath("web/demos/deal-evidence-readiness/v0.2.0")
-DEAL_DEMO_OUTPUT = PurePosixPath("artifacts/demos/deal-evidence-readiness/v0.2.0")
-DEAL_DEMO_ARCHIVE = "deal-evidence-readiness-v0.2.0"
+DEAL_DEMO_SOURCE = WORKED_DEMOS[0].source
+DEAL_DEMO_OUTPUT = WORKED_DEMOS[0].output
+DEAL_DEMO_ARCHIVE = WORKED_DEMOS[0].archive
 
 
-def deal_demo_files() -> list[tuple[PurePosixPath, bytes]]:
+def demo_files(demo: WorkedDemo) -> list[tuple[PurePosixPath, bytes]]:
     """Only explicitly reviewed, checksum-pinned public files may enter this bundle."""
-    manifest = json.loads(repository_file("web/demos/deal-evidence-readiness/manifest.json").read_text())
+    manifest = json.loads(repository_file(f"web/demos/{demo.slug}/manifest.json").read_text())
     result = []
     for name, digest in sorted(manifest["files"].items()):
         relative = PurePosixPath(name)
@@ -2153,7 +2194,7 @@ def deal_demo_files() -> list[tuple[PurePosixPath, bytes]]:
                 or any(part.startswith(".") for part in relative.parts)
                 or (relative.suffix not in {".json", ".md", ".csv", ".pdf"} and name != "LICENSE")):
             raise ValueError(f"unsafe public demo path: {name}")
-        source = ROOT / DEAL_DEMO_SOURCE / relative
+        source = ROOT / demo.source / relative
         if source.is_symlink() or any(parent.is_symlink() for parent in source.parents):
             raise ValueError(f"public demo file must not be a symlink: {name}")
         content = source.read_bytes()
@@ -2163,20 +2204,20 @@ def deal_demo_files() -> list[tuple[PurePosixPath, bytes]]:
     return result
 
 
-def copy_deal_demo(output_root: Path) -> None:
-    files = deal_demo_files()
+def copy_demo(output_root: Path, demo: WorkedDemo) -> None:
+    files = demo_files(demo)
     sums = "".join(f"{hashlib.sha256(content).hexdigest()}  {path.as_posix()}\n" for path, content in files)
     files.append((PurePosixPath("SHA256SUMS"), sums.encode("utf-8")))
-    destination = output_root / DEAL_DEMO_OUTPUT
+    destination = output_root / demo.output
     destination.mkdir(parents=True, exist_ok=True)
-    archive = destination / (DEAL_DEMO_ARCHIVE + ".zip")
+    archive = destination / (demo.archive + ".zip")
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as bundle:
         for relative, content in files:
             target = destination / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(content)
             # Fixed metadata keeps the downloadable archive reproducible across builds.
-            info = zipfile.ZipInfo(f"{DEAL_DEMO_ARCHIVE}/{relative.as_posix()}", date_time=(1980, 1, 1, 0, 0, 0))
+            info = zipfile.ZipInfo(f"{demo.archive}/{relative.as_posix()}", date_time=(1980, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             info.create_system = 3
@@ -2185,8 +2226,17 @@ def copy_deal_demo(output_root: Path) -> None:
     (destination / (archive.name + ".sha256")).write_text(f"{digest}  {archive.name}\n", encoding="utf-8")
 
 
+def deal_demo_files() -> list[tuple[PurePosixPath, bytes]]:
+    return demo_files(WORKED_DEMOS[0])
+
+
+def copy_deal_demo(output_root: Path) -> None:
+    copy_demo(output_root, WORKED_DEMOS[0])
+
+
 def copy_artifacts(output_root: Path) -> None:
-    copy_deal_demo(output_root)
+    for demo in WORKED_DEMOS:
+        copy_demo(output_root, demo)
     for directory in ("schema", "examples", "conformance"):
         for path in sorted((ROOT / directory).rglob("*.json")):
             relative = path.relative_to(ROOT)

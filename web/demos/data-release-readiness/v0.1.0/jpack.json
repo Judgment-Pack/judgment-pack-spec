@@ -1,0 +1,10 @@
+{
+  "configVersion": "3",
+  "packs": {
+    "data-release": {
+      "path": "packs/data-release.pack.json",
+      "matrix": "packs/data-release.matrix.json",
+      "description": "Is this data batch ready for an accountable release review?"
+    }
+  }
+}

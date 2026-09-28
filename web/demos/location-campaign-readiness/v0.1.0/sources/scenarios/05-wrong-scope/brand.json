@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated Brand and content review",
+  "status": "found",
+  "locationId": "STORE-017",
+  "campaignRevision": "AUTUMN-R3",
+  "channelScope": "OTHER-SCOPE",
+  "data": {
+    "brand_approved": true,
+    "brand_restrictedClaim": false
+  }
+}

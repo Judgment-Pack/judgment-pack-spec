@@ -1,0 +1,13 @@
+{
+  "synthetic": true,
+  "system": "Simulated Schema and contract check",
+  "status": "not_found",
+  "datasetId": "orders_daily",
+  "batchId": "BATCH-2026-09-28-01",
+  "contractRevision": "CONTRACT-3",
+  "data": {
+    "contract_compatible": true,
+    "contract_overrideRequested": false
+  },
+  "checkedSuccessfully": true
+}

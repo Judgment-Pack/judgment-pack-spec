@@ -1,0 +1,528 @@
+[
+  {
+    "key": "01-ready",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": false
+      },
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "02-missing",
+    "diagnosis": {
+      "credit": "record-not-found"
+    },
+    "facts": {
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "absent",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "03-wrong-case",
+    "diagnosis": {
+      "credit": "mismatch-orderId"
+    },
+    "facts": {
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "unknown",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "04-old-revision",
+    "diagnosis": {
+      "credit": "mismatch-quoteRevision"
+    },
+    "facts": {
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "unknown",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "05-wrong-scope",
+    "diagnosis": {
+      "credit": "mismatch-fulfillmentScope"
+    },
+    "facts": {
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "unknown",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "06-known-blocker",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": false
+      },
+      "delivery": {
+        "confirmed": false
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "07-exception",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": true
+      },
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "08-unavailable",
+    "diagnosis": {
+      "credit": "lookup-unavailable-or-incomplete"
+    },
+    "facts": {
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "unknown",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "09-invalid-type",
+    "diagnosis": {
+      "credit": "invalid-credit-approved"
+    },
+    "facts": {
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "unknown",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "10-boundary",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": false
+      },
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "11-beyond-boundary",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": false
+      },
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10.01"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "12-invalid-range",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": false
+      },
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "101"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "13-number-contract",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": false
+      },
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": 10
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "14-wrong-purpose",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": false
+      },
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "outside-demo-purpose"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "15-missing-and-refused",
+    "diagnosis": {
+      "credit": "record-not-found"
+    },
+    "facts": {
+      "delivery": {
+        "confirmed": false
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "absent",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "16-exception-and-refused",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": true
+      },
+      "delivery": {
+        "confirmed": false
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "10"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "17-minimum",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": false
+      },
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "0"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  },
+  {
+    "key": "18-maximum",
+    "diagnosis": {},
+    "facts": {
+      "credit": {
+        "approved": true,
+        "exceptionRequested": false
+      },
+      "delivery": {
+        "confirmed": true
+      },
+      "inventory": {
+        "allocated": true
+      },
+      "quote": {
+        "customerAccepted": true,
+        "discountPercent": "100"
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "order-commitment-review"
+      }
+    },
+    "evidence": {
+      "credit-record": "present",
+      "delivery-record": "present",
+      "inventory-record": "present",
+      "quote-record": "present"
+    }
+  }
+]

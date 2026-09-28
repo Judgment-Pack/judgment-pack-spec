@@ -1,0 +1,13 @@
+{
+  "synthetic": true,
+  "system": "Simulated Location registry record",
+  "status": "found",
+  "locationId": "STORE-017",
+  "campaignRevision": "AUTUMN-R3",
+  "channelScope": "CA-EN-GOOGLE",
+  "data": {
+    "review_context": "synthetic-demo",
+    "review_purpose": "outside-demo-purpose",
+    "location_open": true
+  }
+}

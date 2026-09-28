@@ -1,0 +1,16 @@
+{
+  "asset": {
+    "inScope": true
+  },
+  "diagnostic": {
+    "priorityScore": "5",
+    "signalSupported": true
+  },
+  "review": {
+    "context": "synthetic-demo",
+    "purpose": "maintenance-planning"
+  },
+  "workorder": {
+    "noDuplicateOpen": true
+  }
+}

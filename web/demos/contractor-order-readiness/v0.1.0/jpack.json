@@ -1,0 +1,10 @@
+{
+  "configVersion": "3",
+  "packs": {
+    "contractor-order": {
+      "path": "packs/contractor-order.pack.json",
+      "matrix": "packs/contractor-order.matrix.json",
+      "description": "Is this contractor order ready for a branch owner to review?"
+    }
+  }
+}

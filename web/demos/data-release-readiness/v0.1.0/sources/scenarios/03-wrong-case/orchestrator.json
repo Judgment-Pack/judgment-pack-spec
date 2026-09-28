@@ -1,0 +1,13 @@
+{
+  "synthetic": true,
+  "system": "Simulated Orchestrator completion record",
+  "status": "found",
+  "datasetId": "orders_daily",
+  "batchId": "BATCH-2026-09-28-01",
+  "contractRevision": "CONTRACT-3",
+  "data": {
+    "review_context": "synthetic-demo",
+    "review_purpose": "analytics-release",
+    "pipeline_completed": true
+  }
+}

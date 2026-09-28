@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated Campaign offer and budget",
+  "status": "found",
+  "locationId": "STORE-017",
+  "campaignRevision": "AUTUMN-R3",
+  "channelScope": "CA-EN-GOOGLE",
+  "data": {
+    "offer_termsConfirmed": true,
+    "offer_spendCAD": "1000.01"
+  }
+}

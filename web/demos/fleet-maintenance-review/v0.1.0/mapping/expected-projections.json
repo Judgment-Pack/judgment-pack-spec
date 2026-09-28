@@ -1,0 +1,528 @@
+[
+  {
+    "key": "01-ready",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": false
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "02-missing",
+    "diagnosis": {
+      "inspection": "record-not-found"
+    },
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "absent",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "03-wrong-case",
+    "diagnosis": {
+      "inspection": "mismatch-vehicleId"
+    },
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "unknown",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "04-old-revision",
+    "diagnosis": {
+      "inspection": "mismatch-observationBatch"
+    },
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "unknown",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "05-wrong-scope",
+    "diagnosis": {
+      "inspection": "mismatch-componentId"
+    },
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "unknown",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "06-known-blocker",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": false
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": false
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "07-exception",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "08-unavailable",
+    "diagnosis": {
+      "inspection": "lookup-unavailable-or-incomplete"
+    },
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "unknown",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "09-invalid-type",
+    "diagnosis": {
+      "inspection": "invalid-inspection-faultConfirmed"
+    },
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "unknown",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "10-boundary",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": false
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "11-beyond-boundary",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5.01",
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": false
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "12-invalid-range",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "11",
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": false
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "13-number-contract",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": 5,
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": false
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "14-wrong-purpose",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": false
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "outside-demo-purpose"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "15-missing-and-refused",
+    "diagnosis": {
+      "inspection": "record-not-found"
+    },
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": false
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "absent",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "16-exception-and-refused",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "5",
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": false
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "17-minimum",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "0",
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": false
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  },
+  {
+    "key": "18-maximum",
+    "diagnosis": {},
+    "facts": {
+      "asset": {
+        "inScope": true
+      },
+      "diagnostic": {
+        "priorityScore": "10",
+        "signalSupported": true
+      },
+      "inspection": {
+        "faultConfirmed": true,
+        "safetyConcern": false
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "maintenance-planning"
+      },
+      "workorder": {
+        "noDuplicateOpen": true
+      }
+    },
+    "evidence": {
+      "asset-record": "present",
+      "diagnostic-record": "present",
+      "inspection-record": "present",
+      "workorder-record": "present"
+    }
+  }
+]

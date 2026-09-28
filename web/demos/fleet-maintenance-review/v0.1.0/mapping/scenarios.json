@@ -1,0 +1,424 @@
+[
+  {
+    "key": "01-ready",
+    "title": "Matching evidence reaches the owner review gate",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "ready"
+    },
+    "diagnosis": {},
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "02-missing",
+    "title": "A required review has not arrived",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "missing-required-evidence",
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "missing-required-evidence",
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "inspection": "record-not-found"
+    },
+    "nextAction": "Ask the Qualified technician for the review matching this exact case, revision and scope.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "03-wrong-case",
+    "title": "Review belongs to a different vehicleId",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "inspection": "mismatch-vehicleId"
+    },
+    "nextAction": "Retrieve the review for BUS-042. Another case’s approval cannot establish readiness.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "04-old-revision",
+    "title": "Review covers the previous observationBatch",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "inspection": "mismatch-observationBatch"
+    },
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "05-wrong-scope",
+    "title": "Review covers a different componentId",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "inspection": "mismatch-componentId"
+    },
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "06-known-blocker",
+    "title": "One prerequisite is explicitly false",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "hold"
+    },
+    "diagnosis": {},
+    "nextAction": "Resolve the explicit negative prerequisite with its source owner; the existence of a file is not an approval.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "07-exception",
+    "title": "An explicit exception requests a human",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "exception-escalation"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "exception-escalation"
+        ]
+      }
+    },
+    "diagnosis": {},
+    "nextAction": "The Fleet maintenance planner reviews the documented exception; existing positive records do not waive it.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "08-unavailable",
+    "title": "A lookup fails without proving absence",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "inspection": "lookup-unavailable-or-incomplete"
+    },
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "09-invalid-type",
+    "title": "A textual approval is not typed consent",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "inspection": "invalid-inspection-faultConfirmed"
+    },
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "10-boundary",
+    "title": "Exactly 5 at the illustrative threshold",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "ready"
+    },
+    "diagnosis": {},
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "11-beyond-boundary",
+    "title": "5.01 requires additional review",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "review"
+    },
+    "diagnosis": {},
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "12-invalid-range",
+    "title": "An out-of-range value holds the case",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "hold"
+    },
+    "diagnosis": {},
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "13-number-contract",
+    "title": "JSON number violates the decimal-string comparison contract",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {},
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "14-wrong-purpose",
+    "title": "The requested use is outside this pack",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "not-applicable",
+      "reasons": [
+        "not-applicable"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "not-applicable"
+        ]
+      }
+    },
+    "diagnosis": {},
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "15-missing-and-refused",
+    "title": "Missing evidence remains unresolved alongside a refusal",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "missing-required-evidence",
+        "unknown"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "missing-required-evidence",
+          "unknown"
+        ]
+      }
+    },
+    "diagnosis": {
+      "inspection": "record-not-found"
+    },
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "16-exception-and-refused",
+    "title": "Explicit exception takes priority over ordinary refusal",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "unresolved",
+      "reasons": [
+        "exception-escalation"
+      ],
+      "handoff": {
+        "state": "requested",
+        "triggeredBy": [
+          "exception-escalation"
+        ]
+      }
+    },
+    "diagnosis": {},
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "17-minimum",
+    "title": "The minimum valid metric is inclusive",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "ready"
+    },
+    "diagnosis": {},
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  },
+  {
+    "key": "18-maximum",
+    "title": "The maximum valid metric requires additional review",
+    "case": {
+      "vehicleId": "BUS-042",
+      "observationBatch": "OBS-042-R3",
+      "componentId": "COOLING-UNIT-2"
+    },
+    "expectedDisposition": {
+      "kind": "outcome",
+      "reasons": [],
+      "handoff": {
+        "state": "none"
+      },
+      "outcomeId": "review"
+    },
+    "diagnosis": {},
+    "nextAction": "The Fleet maintenance planner reviews this result and the cited records before taking any external action.",
+    "owner": "Fleet maintenance planner"
+  }
+]

@@ -1,0 +1,743 @@
+{
+  "version": 2,
+  "case": {
+    "parameters": {
+      "orderId": {
+        "pointer": "/orderId",
+        "type": "string"
+      },
+      "quoteRevision": {
+        "pointer": "/quoteRevision",
+        "type": "string"
+      },
+      "fulfillmentScope": {
+        "pointer": "/fulfillmentScope",
+        "type": "string"
+      }
+    },
+    "facts": [],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "quote",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "orderId": "string",
+            "quoteRevision": "string",
+            "fulfillmentScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/orderId",
+                  "param": "orderId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quote-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-orderId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/quoteRevision",
+                  "param": "quoteRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quote-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-quoteRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/fulfillmentScope",
+                  "param": "fulfillmentScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quote-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-fulfillmentScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/quote_customerAccepted",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/quote_customerAccepted",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quote-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-quote-customerAccepted"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quote-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/review/context",
+                    "from": "/data/review_context"
+                  },
+                  {
+                    "pointer": "/review/purpose",
+                    "from": "/data/review_purpose"
+                  },
+                  {
+                    "pointer": "/quote/customerAccepted",
+                    "from": "/data/quote_customerAccepted"
+                  },
+                  {
+                    "pointer": "/quote/discountPercent",
+                    "from": "/data/quote_discountPercent"
+                  }
+                ],
+                "evidence": {
+                  "quote-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quote-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "inventory",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "orderId": "string",
+            "quoteRevision": "string",
+            "fulfillmentScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/orderId",
+                  "param": "orderId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inventory-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-orderId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/quoteRevision",
+                  "param": "quoteRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inventory-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-quoteRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/fulfillmentScope",
+                  "param": "fulfillmentScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inventory-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-fulfillmentScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/inventory_allocated",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/inventory_allocated",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inventory-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-inventory-allocated"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inventory-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/inventory/allocated",
+                    "from": "/data/inventory_allocated"
+                  }
+                ],
+                "evidence": {
+                  "inventory-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inventory-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "credit",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "orderId": "string",
+            "quoteRevision": "string",
+            "fulfillmentScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/orderId",
+                  "param": "orderId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "credit-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-orderId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/quoteRevision",
+                  "param": "quoteRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "credit-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-quoteRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/fulfillmentScope",
+                  "param": "fulfillmentScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "credit-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-fulfillmentScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/credit_approved",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/credit_approved",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "credit-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-credit-approved"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/credit_exceptionRequested",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/credit_exceptionRequested",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "credit-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-credit-exceptionRequested"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "credit-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/credit/approved",
+                    "from": "/data/credit_approved"
+                  },
+                  {
+                    "pointer": "/credit/exceptionRequested",
+                    "from": "/data/credit_exceptionRequested"
+                  }
+                ],
+                "evidence": {
+                  "credit-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "credit-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "delivery",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "orderId": "string",
+            "quoteRevision": "string",
+            "fulfillmentScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/orderId",
+                  "param": "orderId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "delivery-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-orderId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/quoteRevision",
+                  "param": "quoteRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "delivery-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-quoteRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/fulfillmentScope",
+                  "param": "fulfillmentScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "delivery-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-fulfillmentScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/delivery_confirmed",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/delivery_confirmed",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "delivery-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-delivery-confirmed"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "delivery-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/delivery/confirmed",
+                    "from": "/data/delivery_confirmed"
+                  }
+                ],
+                "evidence": {
+                  "delivery-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "delivery-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "unmapped": [],
+  "unmappedEvidence": []
+}

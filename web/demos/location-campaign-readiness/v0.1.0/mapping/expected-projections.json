@@ -1,0 +1,528 @@
+[
+  {
+    "key": "01-ready",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": false
+      },
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "02-missing",
+    "diagnosis": {
+      "brand": "record-not-found"
+    },
+    "facts": {
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "absent",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "03-wrong-case",
+    "diagnosis": {
+      "brand": "mismatch-locationId"
+    },
+    "facts": {
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "unknown",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "04-old-revision",
+    "diagnosis": {
+      "brand": "mismatch-campaignRevision"
+    },
+    "facts": {
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "unknown",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "05-wrong-scope",
+    "diagnosis": {
+      "brand": "mismatch-channelScope"
+    },
+    "facts": {
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "unknown",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "06-known-blocker",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": false
+      },
+      "channel": {
+        "ready": false
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "07-exception",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": true
+      },
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "08-unavailable",
+    "diagnosis": {
+      "brand": "lookup-unavailable-or-incomplete"
+    },
+    "facts": {
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "unknown",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "09-invalid-type",
+    "diagnosis": {
+      "brand": "invalid-brand-approved"
+    },
+    "facts": {
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "unknown",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "10-boundary",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": false
+      },
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "11-beyond-boundary",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": false
+      },
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000.01",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "12-invalid-range",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": false
+      },
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "-1",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "13-number-contract",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": false
+      },
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": 1000,
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "14-wrong-purpose",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": false
+      },
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "outside-demo-purpose"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "15-missing-and-refused",
+    "diagnosis": {
+      "brand": "record-not-found"
+    },
+    "facts": {
+      "channel": {
+        "ready": false
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "absent",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "16-exception-and-refused",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": true
+      },
+      "channel": {
+        "ready": false
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "17-minimum",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": false
+      },
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "0",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  },
+  {
+    "key": "18-maximum",
+    "diagnosis": {},
+    "facts": {
+      "brand": {
+        "approved": true,
+        "restrictedClaim": false
+      },
+      "channel": {
+        "ready": true
+      },
+      "location": {
+        "open": true
+      },
+      "offer": {
+        "spendCAD": "1000000",
+        "termsConfirmed": true
+      },
+      "review": {
+        "context": "synthetic-demo",
+        "purpose": "campaign-review"
+      }
+    },
+    "evidence": {
+      "brand-record": "present",
+      "channel-record": "present",
+      "location-record": "present",
+      "offer-record": "present"
+    }
+  }
+]

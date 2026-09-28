@@ -1,0 +1,743 @@
+{
+  "version": 2,
+  "case": {
+    "parameters": {
+      "vehicleId": {
+        "pointer": "/vehicleId",
+        "type": "string"
+      },
+      "observationBatch": {
+        "pointer": "/observationBatch",
+        "type": "string"
+      },
+      "componentId": {
+        "pointer": "/componentId",
+        "type": "string"
+      }
+    },
+    "facts": [],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "asset",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "vehicleId": "string",
+            "observationBatch": "string",
+            "componentId": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/vehicleId",
+                  "param": "vehicleId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "asset-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-vehicleId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/observationBatch",
+                  "param": "observationBatch"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "asset-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-observationBatch"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/componentId",
+                  "param": "componentId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "asset-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-componentId"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/asset_inScope",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/asset_inScope",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "asset-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-asset-inScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "asset-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/review/context",
+                    "from": "/data/review_context"
+                  },
+                  {
+                    "pointer": "/review/purpose",
+                    "from": "/data/review_purpose"
+                  },
+                  {
+                    "pointer": "/asset/inScope",
+                    "from": "/data/asset_inScope"
+                  }
+                ],
+                "evidence": {
+                  "asset-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "asset-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "diagnostic",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "vehicleId": "string",
+            "observationBatch": "string",
+            "componentId": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/vehicleId",
+                  "param": "vehicleId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "diagnostic-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-vehicleId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/observationBatch",
+                  "param": "observationBatch"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "diagnostic-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-observationBatch"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/componentId",
+                  "param": "componentId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "diagnostic-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-componentId"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/diagnostic_signalSupported",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/diagnostic_signalSupported",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "diagnostic-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-diagnostic-signalSupported"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "diagnostic-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/diagnostic/signalSupported",
+                    "from": "/data/diagnostic_signalSupported"
+                  },
+                  {
+                    "pointer": "/diagnostic/priorityScore",
+                    "from": "/data/diagnostic_priorityScore"
+                  }
+                ],
+                "evidence": {
+                  "diagnostic-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "diagnostic-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "inspection",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "vehicleId": "string",
+            "observationBatch": "string",
+            "componentId": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/vehicleId",
+                  "param": "vehicleId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inspection-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-vehicleId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/observationBatch",
+                  "param": "observationBatch"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inspection-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-observationBatch"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/componentId",
+                  "param": "componentId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inspection-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-componentId"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/inspection_faultConfirmed",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/inspection_faultConfirmed",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inspection-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-inspection-faultConfirmed"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/inspection_safetyConcern",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/inspection_safetyConcern",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inspection-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-inspection-safetyConcern"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inspection-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/inspection/faultConfirmed",
+                    "from": "/data/inspection_faultConfirmed"
+                  },
+                  {
+                    "pointer": "/inspection/safetyConcern",
+                    "from": "/data/inspection_safetyConcern"
+                  }
+                ],
+                "evidence": {
+                  "inspection-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "inspection-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "workorder",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "vehicleId": "string",
+            "observationBatch": "string",
+            "componentId": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/vehicleId",
+                  "param": "vehicleId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "workorder-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-vehicleId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/observationBatch",
+                  "param": "observationBatch"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "workorder-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-observationBatch"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/componentId",
+                  "param": "componentId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "workorder-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-componentId"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/workorder_noDuplicateOpen",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/workorder_noDuplicateOpen",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "workorder-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-workorder-noDuplicateOpen"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "workorder-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/workorder/noDuplicateOpen",
+                    "from": "/data/workorder_noDuplicateOpen"
+                  }
+                ],
+                "evidence": {
+                  "workorder-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "workorder-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "unmapped": [],
+  "unmappedEvidence": []
+}

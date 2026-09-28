@@ -1,0 +1,743 @@
+{
+  "version": 2,
+  "case": {
+    "parameters": {
+      "locationId": {
+        "pointer": "/locationId",
+        "type": "string"
+      },
+      "campaignRevision": {
+        "pointer": "/campaignRevision",
+        "type": "string"
+      },
+      "channelScope": {
+        "pointer": "/channelScope",
+        "type": "string"
+      }
+    },
+    "facts": [],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "location",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "locationId": "string",
+            "campaignRevision": "string",
+            "channelScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/locationId",
+                  "param": "locationId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "location-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-locationId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/campaignRevision",
+                  "param": "campaignRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "location-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-campaignRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/channelScope",
+                  "param": "channelScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "location-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-channelScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/location_open",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/location_open",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "location-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-location-open"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "location-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/review/context",
+                    "from": "/data/review_context"
+                  },
+                  {
+                    "pointer": "/review/purpose",
+                    "from": "/data/review_purpose"
+                  },
+                  {
+                    "pointer": "/location/open",
+                    "from": "/data/location_open"
+                  }
+                ],
+                "evidence": {
+                  "location-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "location-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "offer",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "locationId": "string",
+            "campaignRevision": "string",
+            "channelScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/locationId",
+                  "param": "locationId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "offer-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-locationId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/campaignRevision",
+                  "param": "campaignRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "offer-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-campaignRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/channelScope",
+                  "param": "channelScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "offer-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-channelScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/offer_termsConfirmed",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/offer_termsConfirmed",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "offer-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-offer-termsConfirmed"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "offer-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/offer/termsConfirmed",
+                    "from": "/data/offer_termsConfirmed"
+                  },
+                  {
+                    "pointer": "/offer/spendCAD",
+                    "from": "/data/offer_spendCAD"
+                  }
+                ],
+                "evidence": {
+                  "offer-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "offer-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "brand",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "locationId": "string",
+            "campaignRevision": "string",
+            "channelScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/locationId",
+                  "param": "locationId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "brand-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-locationId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/campaignRevision",
+                  "param": "campaignRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "brand-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-campaignRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/channelScope",
+                  "param": "channelScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "brand-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-channelScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/brand_approved",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/brand_approved",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "brand-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-brand-approved"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/brand_restrictedClaim",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/brand_restrictedClaim",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "brand-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-brand-restrictedClaim"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "brand-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/brand/approved",
+                    "from": "/data/brand_approved"
+                  },
+                  {
+                    "pointer": "/brand/restrictedClaim",
+                    "from": "/data/brand_restrictedClaim"
+                  }
+                ],
+                "evidence": {
+                  "brand-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "brand-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "channel",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "locationId": "string",
+            "campaignRevision": "string",
+            "channelScope": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/locationId",
+                  "param": "locationId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "channel-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-locationId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/campaignRevision",
+                  "param": "campaignRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "channel-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-campaignRevision"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/channelScope",
+                  "param": "channelScope"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "channel-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-channelScope"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/channel_ready",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/channel_ready",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "channel-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-channel-ready"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "channel-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/channel/ready",
+                    "from": "/data/channel_ready"
+                  }
+                ],
+                "evidence": {
+                  "channel-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "channel-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "unmapped": [],
+  "unmappedEvidence": []
+}

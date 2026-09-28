@@ -1,0 +1,11 @@
+{
+  "synthetic": true,
+  "system": "Simulated Work-order coordination check",
+  "status": "found",
+  "vehicleId": "BUS-042",
+  "observationBatch": "OBS-042-R3",
+  "componentId": "COOLING-UNIT-2",
+  "data": {
+    "workorder_noDuplicateOpen": false
+  }
+}

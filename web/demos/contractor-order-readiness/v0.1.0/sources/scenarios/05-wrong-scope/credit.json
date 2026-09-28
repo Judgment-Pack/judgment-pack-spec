@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated Credit authorization record",
+  "status": "found",
+  "orderId": "ORDER-042",
+  "quoteRevision": "QUOTE-R3",
+  "fulfillmentScope": "OTHER-SCOPE",
+  "data": {
+    "credit_approved": true,
+    "credit_exceptionRequested": false
+  }
+}

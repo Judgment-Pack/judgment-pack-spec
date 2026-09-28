@@ -1,0 +1,10 @@
+{
+  "configVersion": "3",
+  "packs": {
+    "location-campaign": {
+      "path": "packs/location-campaign.pack.json",
+      "matrix": "packs/location-campaign.matrix.json",
+      "description": "Is this location’s campaign package ready for marketing owner review?"
+    }
+  }
+}

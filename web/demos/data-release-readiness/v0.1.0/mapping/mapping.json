@@ -1,0 +1,743 @@
+{
+  "version": 2,
+  "case": {
+    "parameters": {
+      "datasetId": {
+        "pointer": "/datasetId",
+        "type": "string"
+      },
+      "batchId": {
+        "pointer": "/batchId",
+        "type": "string"
+      },
+      "contractRevision": {
+        "pointer": "/contractRevision",
+        "type": "string"
+      }
+    },
+    "facts": [],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "orchestrator",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "datasetId": "string",
+            "batchId": "string",
+            "contractRevision": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/datasetId",
+                  "param": "datasetId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "orchestrator-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-datasetId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/batchId",
+                  "param": "batchId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "orchestrator-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-batchId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/contractRevision",
+                  "param": "contractRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "orchestrator-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-contractRevision"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/pipeline_completed",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/pipeline_completed",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "orchestrator-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-pipeline-completed"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "orchestrator-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/review/context",
+                    "from": "/data/review_context"
+                  },
+                  {
+                    "pointer": "/review/purpose",
+                    "from": "/data/review_purpose"
+                  },
+                  {
+                    "pointer": "/pipeline/completed",
+                    "from": "/data/pipeline_completed"
+                  }
+                ],
+                "evidence": {
+                  "orchestrator-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "orchestrator-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "quality",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "datasetId": "string",
+            "batchId": "string",
+            "contractRevision": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/datasetId",
+                  "param": "datasetId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quality-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-datasetId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/batchId",
+                  "param": "batchId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quality-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-batchId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/contractRevision",
+                  "param": "contractRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quality-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-contractRevision"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/quality_criticalChecksPassed",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/quality_criticalChecksPassed",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quality-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-quality-criticalChecksPassed"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quality-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/quality/criticalChecksPassed",
+                    "from": "/data/quality_criticalChecksPassed"
+                  },
+                  {
+                    "pointer": "/quality/invalidRowsPercent",
+                    "from": "/data/quality_invalidRowsPercent"
+                  }
+                ],
+                "evidence": {
+                  "quality-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "quality-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "contract",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "datasetId": "string",
+            "batchId": "string",
+            "contractRevision": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/datasetId",
+                  "param": "datasetId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "contract-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-datasetId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/batchId",
+                  "param": "batchId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "contract-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-batchId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/contractRevision",
+                  "param": "contractRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "contract-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-contractRevision"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/contract_compatible",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/contract_compatible",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "contract-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-contract-compatible"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/contract_overrideRequested",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/contract_overrideRequested",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "contract-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-contract-overrideRequested"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "contract-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/contract/compatible",
+                    "from": "/data/contract_compatible"
+                  },
+                  {
+                    "pointer": "/contract/overrideRequested",
+                    "from": "/data/contract_overrideRequested"
+                  }
+                ],
+                "evidence": {
+                  "contract-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "contract-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "approval",
+      "kind": "selected-file",
+      "provider": "local-file",
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "datasetId": "string",
+            "batchId": "string",
+            "contractRevision": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/datasetId",
+                  "param": "datasetId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-datasetId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/batchId",
+                  "param": "batchId"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-batchId"
+            },
+            {
+              "when": {
+                "op": "not",
+                "of": {
+                  "op": "equalsParam",
+                  "field": "/contractRevision",
+                  "param": "contractRevision"
+                }
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "mismatch-contractRevision"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "found"
+                  },
+                  {
+                    "op": "not",
+                    "of": {
+                      "op": "any",
+                      "of": [
+                        {
+                          "op": "equals",
+                          "field": "/data/owner_approved",
+                          "to": true
+                        },
+                        {
+                          "op": "equals",
+                          "field": "/data/owner_approved",
+                          "to": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "invalid-owner-approved"
+            },
+            {
+              "when": {
+                "op": "all",
+                "of": [
+                  {
+                    "op": "equals",
+                    "field": "/status",
+                    "to": "not_found"
+                  },
+                  {
+                    "op": "isTrue",
+                    "field": "/checkedSuccessfully"
+                  }
+                ]
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "absent"
+                },
+                "acquisitionStatus": "absent"
+              },
+              "reason": "record-not-found"
+            },
+            {
+              "when": {
+                "op": "equals",
+                "field": "/status",
+                "to": "found"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/owner/approved",
+                    "from": "/data/owner_approved"
+                  }
+                ],
+                "evidence": {
+                  "approval-record": "present"
+                },
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "matching-case-revision-and-scope"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {
+                  "approval-record": "unknown"
+                },
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "lookup-unavailable-or-incomplete"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "unmapped": [],
+  "unmappedEvidence": []
+}

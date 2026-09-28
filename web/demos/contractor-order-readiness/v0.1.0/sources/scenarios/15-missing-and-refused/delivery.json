@@ -1,0 +1,11 @@
+{
+  "synthetic": true,
+  "system": "Simulated Delivery slot and site check",
+  "status": "found",
+  "orderId": "ORDER-042",
+  "quoteRevision": "QUOTE-R3",
+  "fulfillmentScope": "BRANCH-017-SITE-042",
+  "data": {
+    "delivery_confirmed": false
+  }
+}

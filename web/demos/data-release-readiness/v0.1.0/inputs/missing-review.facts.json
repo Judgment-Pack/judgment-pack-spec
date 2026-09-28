@@ -1,0 +1,16 @@
+{
+  "owner": {
+    "approved": true
+  },
+  "pipeline": {
+    "completed": true
+  },
+  "quality": {
+    "criticalChecksPassed": true,
+    "invalidRowsPercent": "1"
+  },
+  "review": {
+    "context": "synthetic-demo",
+    "purpose": "analytics-release"
+  }
+}

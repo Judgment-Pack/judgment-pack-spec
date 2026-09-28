@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "system": "Simulated Data quality report",
+  "status": "found",
+  "datasetId": "orders_daily",
+  "batchId": "BATCH-2026-09-28-01",
+  "contractRevision": "CONTRACT-3",
+  "data": {
+    "quality_criticalChecksPassed": true,
+    "quality_invalidRowsPercent": 1
+  }
+}
