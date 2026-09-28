@@ -551,6 +551,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0016-outcome-values.md",
+        PurePosixPath("rfcs/0016-outcome-values/index.html"),
+        "RFC 0016: Outcome values",
+        "Draft proposal that an outcome may declare named values, each a constant or a copy of one fact, which the disposition carries - with no arithmetic, and an unresolved result when a value drawn from a fact cannot be supplied.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/0014-lineage-record-and-action-binding.md",
         PurePosixPath("rfcs/0014-lineage-record-and-action-binding/index.html"),
         "RFC 0014: The lineage record and the action binding",

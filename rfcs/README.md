@@ -56,6 +56,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0013](0013-evaluator-error-and-precedence-cases.md) | The first evaluation-suite rows that use `expectedErrorClass`, including two where several §8.4 classes apply and the order decides | Accepted | Specification-track (evaluation conformance suite) — rows staged for the `suiteVersion` after `0.2.0-draft`, in no released corpus |
 | [0014](0014-lineage-record-and-action-binding.md) | The lineage record and the action binding — how a decision cites what it read, and an action cites what it decided | Accepted | Research line (cross-project artifact: gateway receipt version 3 + verifier join, runtime record and row citations; outside the specification) — a retrospective record; acceptance endorses the record only |
 | [0015](0015-reported-receipts.md) | What a reported receipt would have to specify — the engine signing a call it did not make | Draft | Research line (cross-project artifact: gateway receipt format, verifier and surface; a reporting plugin in an MCP gateway; outside the specification) |
+| [0016](0016-outcome-values.md) | Outcome values — a decision that states a quantity | Draft | Specification (a specification-defined extension, or Core — undecided) |
 
 The "Belongs to" column records where each proposal would land if accepted. A format that
 independent tools must agree on is a candidate for the specification. An algorithm or engine belongs
