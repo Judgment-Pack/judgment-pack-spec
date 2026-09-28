@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 import zipfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from unittest.mock import patch
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -20,6 +20,19 @@ import build
 
 
 class DemoBundleTests(unittest.TestCase):
+    def test_download_rewrite_preserves_relative_link_context(self):
+        archive = "https://judgmentpack.org/artifacts/demo.zip"
+        rewriter = build.LocalLinkRewriter(None, "docs/topic/guide.md",
+            PurePosixPath("topic/guide/index.html"), {
+                "README.md": PurePosixPath("index.html"),
+                "docs/topic/README.md": PurePosixPath("topic/index.html"),
+                archive: PurePosixPath("artifacts/demo.zip"),
+            })
+        self.assertEqual(rewriter.rewrite("README.md"), "../")
+        self.assertEqual(rewriter.rewrite(archive), "../../artifacts/demo.zip")
+        self.assertEqual(rewriter.rewrite("https://example.test/README.md"),
+            "https://example.test/README.md")
+
     def test_download_is_reproducible_and_self_contained(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

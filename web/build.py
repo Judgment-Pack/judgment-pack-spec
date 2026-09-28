@@ -688,10 +688,10 @@ class LocalLinkRewriter(Treeprocessor):
     def rewrite(self, value: str) -> str:
         # Known generated downloads use public URLs in repository Markdown, but must
         # stay on the current host when browsing a local or hosted preview.
-        direct = self.routes.get(value)
+        parsed = urlsplit(value)
+        direct = self.routes.get(value) if parsed.scheme else None
         if isinstance(direct, PurePosixPath):
             return output_href(self.output, direct)
-        parsed = urlsplit(value)
         if parsed.scheme or parsed.netloc or not parsed.path or parsed.path.startswith("/"):
             return value
         target = posixpath.normpath(
