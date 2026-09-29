@@ -172,8 +172,9 @@ the other refuses it as `malformed-input`. RFC 8259's grammar admits the text, a
 a parser limit what a string may hold. Core takes its carrier from RFC 8259 (§2.1), says that two
 conforming implementations agree on which inputs are admitted (§8.2), and names one seam in the
 byte-identity requirement, which is not this one (§8.3). So this proposal does not say that
-refusing the document is conforming, or that admitting it is. It is the ninth of the *Unresolved
-questions* and an item under *What this needs from Core*.
+refusing the document is conforming, or that admitting it is, and it does not take the
+difference for an exception Core allows. It is the ninth of the *Unresolved questions* and an
+item under *What this needs from Core*.
 
 If every value source resolves, the result is the outcome with its resolved values. If any does
 not, the result is `unresolved` with the single reason `unknown`. No outcome is produced and the
@@ -194,8 +195,9 @@ The disposition gains one member.
 
 Every member of `value` is a JSON string or a JSON Boolean. The object holds no number, no `null`,
 no array and no nested object, so the number rules of RFC 8785 still never engage (§8.3). The
-byte-identity requirement of §8.3 extends to `value`, for the inputs two conforming
-implementations both admit.
+byte-identity requirement of §8.3 extends to `value`. The ninth of the *Unresolved questions*
+is no exception to it: this proposal claims none, and one could come only from a decision of
+Core's that is reconciled with §§8.2–8.4 and §10.
 
 ```json
 {"handoff":{"state":"none"},"kind":"outcome","outcomeId":"approve-refund","reasons":[],"value":{"currency":"CAD","refundAmount":"149.50"}}
@@ -224,12 +226,21 @@ implementations both admit.
   and defines none. This would be the first, and §9 would say where such an extension's semantics
   are found.
 - Core would say whether a facts document that holds a string with an unpaired surrogate is
-  admitted. It is one of three things: not a carrier-conforming text, so that every conforming
-  evaluator refuses it; a text an implementation may refuse under a documented limit, as §10
-  treats sizes, so that such an input is outside the portable claim; or a text every conforming
-  evaluator admits. This proposal's row for such a fact has one answer under the third, another
-  under the first, and is outside the claim under the second. The need is not of this proposal's
-  making: it holds for any pack evaluated over such a document.
+  admitted. Whether the text is a carrier-conforming one and whether a facts document may hold
+  it are two matters: §8.2 already holds the evidence-availability document to more than the
+  carrier does. Approaches Core could take include these, and this proposal takes none of them:
+  - every conforming evaluator refuses such a facts document. For a conforming pack the answer
+    is then `malformed-input`;
+  - every conforming evaluator admits it. This proposal's row for such a fact is then
+    `unresolved`, where the string is selected for a declared value and nothing else stops the
+    evaluation;
+  - Core names what every evaluator admits and lets an implementation refuse the rest under a
+    documented restriction. Core would then have to say which inputs are outside the portable
+    claim. §10 puts outside it an input above an implementation's limit, and a restriction on
+    what a string holds is not a limit of that kind until Core says it is.
+
+  This is a Core question beyond outcome values: it can change the answer for an otherwise
+  conforming pack whose evaluation reaches facts preflight.
 
 ## Examples
 
@@ -451,8 +462,9 @@ What the rows do not run:
   schema is published, so no such consumer was run.
 - An input at either prototype's limits, and a pack that uses this draft together with RFC 0008.
 - What this revision adds to *Declaration*: a member named `extensions` inside another
-  extension's value, the name required and carried nowhere, and the name listed twice. The first
-  is in the Python prototype's tests and the other two in the Go prototype's.
+  extension's value, the name required and carried nowhere, and the name listed twice. The
+  Python decision log records a test of the first, in entry 29. The Go decision record records
+  checks for the other two, in its third finding.
 
 What building it found, and where this revision answers it:
 
@@ -481,8 +493,10 @@ What building it found, and where this revision answers it:
 
 None of this is conformance evidence, and RFC 0000's bar for a stable feature is as far off as it
 was. The two prototypes trace to one maintainer's direction. The rows are not independent of the
-Go prototype, for the reason above. And the comparison was run by hand: it is one run, and
-nothing here says it is repeated.
+Go prototype, for the reason above. The agreement record reports two runs of the comparison with
+the same answer on every row: one against the Go prototype's branch before it was merged, and
+one against the runtime's main branch at `f98d4c9` after. When this was written the comparison
+was not part of the experiments repository's continuous checks.
 
 ## Unresolved questions
 
@@ -519,10 +533,11 @@ nothing here says it is repeated.
    the text and lets a parser limit what a string may hold. RFC 8785 cannot serialize such a
    string, which matters to Core only where the string would reach a disposition. One prototype
    refuses the text in any input, and the other admits it and refuses the value where it is
-   selected. The question is Core's and is wider than this proposal: it decides the answer for
-   any conforming pack evaluated over such a facts document. *What this needs from Core* gives
-   the three answers Core could give. Until it gives one, this proposal's row for such a fact is
-   a row of an evaluator that admits the document.
+   selected. This is a Core question beyond outcome values: it can change the answer for an
+   otherwise conforming pack whose evaluation reaches facts preflight. *What this needs from
+   Core* names approaches Core could take. Until Core takes one, this proposal's row for such a
+   fact is a row of an evaluator that admits the document, and nothing here makes the
+   difference between the two prototypes a conforming one.
 10. **Together with RFC 0008.** Two things are undecided: whether one evaluation may run under
     both drafts, and how the work of resolving values is charged under the one running budget
     [RFC 0008](0008-bounded-collection-quantifiers.md) requires of an evaluation. What a value's
