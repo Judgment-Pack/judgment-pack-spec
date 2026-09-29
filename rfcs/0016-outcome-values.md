@@ -69,9 +69,10 @@ The evidence is thin, and this section says how thin.
   implicated in its edge grammar's open items. That construct belongs to composition, where one
   decision's outcome feeds another's inputs. This RFC does not address it (see *Unresolved
   questions*).
-- **Two prototypes have run this document's rows.** *Implementation* says what exists and what
-  building it found. That is experience of whether the text can be built. It is not evidence of
-  need: no author has used the feature.
+- **Two prototypes have run rows written from this document.** *Implementation* says what exists
+  and what building it found. That is experience of whether the text can be built. It is not
+  evidence of need: every pack that was run was written for the test, and no use by an author is
+  evidenced here.
 
 The examples in this document were written for it.
 
@@ -127,9 +128,8 @@ runs, and so whether or not the outcome that carries the fault would have been p
 A pack that lists the name as required while no outcome carries a declaration is in error too,
 by one of two rules. Where the name is a member of some other `extensions` object, it is the rule
 of place above. Where it is a member of none, it is §9's rule that a required name has a value.
-An implementation that admits the name by setting it aside before it validates the rest has to
-check for the second itself, and for the name listed twice, since what it set aside is what the
-validator would have read.
+The name is listed in `metadata.requiredExtensions` once, as the schema requires of every item of
+that list.
 
 ```json
 {
@@ -164,11 +164,16 @@ For the produced outcome, each value source resolves as follows.
 A value is copied exactly as it was found. Nothing is coerced, trimmed or normalized: `"0.10"`
 stays `"0.10"`, and a JSON number is never turned into a decimal string.
 
-Resolution selects from a facts document that the preflight of §8.2 has admitted. Whether a
-document that holds a string with an unpaired surrogate is admitted is the carrier's matter, and
-§2.1 does not settle it. An implementation whose carrier refuses such a document answers
-`malformed-input` and selects nothing. The rule above, that such a string does not resolve,
-applies where the document is admitted. The two prototypes differ here (see *Implementation*).
+Resolution selects from a facts document that the preflight of §8.2 has admitted. The rule
+above, that a string holding an unpaired surrogate does not resolve, is a rule about a document
+that was admitted. Whether a conforming evaluator admits such a document is a question this
+proposal met and does not answer. The two prototypes differ on it: one admits the document, and
+the other refuses it as `malformed-input`. RFC 8259's grammar admits the text, and RFC 8259 lets
+a parser limit what a string may hold. Core takes its carrier from RFC 8259 (§2.1), says that two
+conforming implementations agree on which inputs are admitted (§8.2), and names one seam in the
+byte-identity requirement, which is not this one (§8.3). So this proposal does not say that
+refusing the document is conforming, or that admitting it is. It is the ninth of the *Unresolved
+questions* and an item under *What this needs from Core*.
 
 If every value source resolves, the result is the outcome with its resolved values. If any does
 not, the result is `unresolved` with the single reason `unknown`. No outcome is produced and the
@@ -189,7 +194,8 @@ The disposition gains one member.
 
 Every member of `value` is a JSON string or a JSON Boolean. The object holds no number, no `null`,
 no array and no nested object, so the number rules of RFC 8785 still never engage (§8.3). The
-byte-identity requirement of §8.3 extends to `value`.
+byte-identity requirement of §8.3 extends to `value`, for the inputs two conforming
+implementations both admit.
 
 ```json
 {"handoff":{"state":"none"},"kind":"outcome","outcomeId":"approve-refund","reasons":[],"value":{"currency":"CAD","refundAmount":"149.50"}}
@@ -217,6 +223,13 @@ byte-identity requirement of §8.3 extends to `value`.
 - §9 reserves names beginning `org.judgmentpack.` for "future specification-defined extensions"
   and defines none. This would be the first, and §9 would say where such an extension's semantics
   are found.
+- Core would say whether a facts document that holds a string with an unpaired surrogate is
+  admitted. It is one of three things: not a carrier-conforming text, so that every conforming
+  evaluator refuses it; a text an implementation may refuse under a documented limit, as §10
+  treats sizes, so that such an input is outside the portable claim; or a text every conforming
+  evaluator admits. This proposal's row for such a fact has one answer under the third, another
+  under the first, and is outside the claim under the second. The need is not of this proposal's
+  making: it holds for any pack evaluated over such a document.
 
 ## Examples
 
@@ -362,8 +375,9 @@ Evaluation rows:
 - *Adversarial.* Where `decimal` is declared: a fact given as a JSON number, as `null`, as an
   object, and as a string with surrounding whitespace, none of which resolves. Where `string` is
   declared: a fact string with surrounding whitespace, which resolves and is copied unchanged,
-  and one holding an unpaired surrogate, which does not resolve where the carrier admits the facts
-  document and is `malformed-input` where it does not. A pointer that traverses an array
+  and one holding an unpaired surrogate, which does not resolve. That last row is a row of an
+  evaluator that admits the facts document, and whether a conforming one does is open (see
+  *Resolution*). A pointer that traverses an array
   out of range. A produced outcome whose own values resolve while another outcome declares a
   `fromFact` the facts cannot supply: the result is the produced outcome, because only it is
   inspected.
@@ -397,53 +411,78 @@ independently of this project.
 **Both now implement it as a prototype** (2026-09-28), each behind an opt-in that is off by
 default: the Go runtime under its
 [ADR-0039](https://github.com/Judgment-Pack/judgment-pack-runtime/blob/main/docs/adr/0039-draft-rfc-outcome-values-prototype.md),
-and the Python evaluator as a clean-room extension, written under the experiments repository's
-information-barrier protocol by a model of a different vendor than the one that drafted the Go
-prototype, with its readings in entries 27 to 33 of its
+and the Python evaluator with its readings in entries 27 to 33 of its
 [decision log](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/main/python/DECISIONS.md).
 Both built the extension form. Neither claims anything by it.
 
-The cases this document lists under *Conformance* and *Examples* were written out as 60 rows,
-each with a pack of its own and the answer this text gives, and run through both. A disposition
-was compared byte for byte as each implementation wrote it, and an error by its class.
+How the Python prototype was written is the maintainer's account, and the record of it is the
+message of the commit that brought it into the experiments repository
+([`5cbcf5f`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/commit/5cbcf5f5f0fc58b3f52327a4d0c7c9ced5ccc585)):
+under that repository's
+[clean-room protocol](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/main/CLEAN-ROOM-PROTOCOL.md),
+by a model of a different vendor than the one that drafted the Go prototype, in a room that held
+the reference texts and the Python evaluator and not the Go one. By the same account, the model
+that drafted the Go prototype wrote the rows and the driver.
 
-| | Rows |
+Sixty rows were written from this document as it stood before this revision (specification
+commit `7c7abbb`), each with a pack of its own and the answer that text gives, and run through
+both. There is a row for every case listed under *Conformance*, reading "a constant of each
+type" as one row to a type, and for five cases of *Examples*. A disposition was compared byte
+for byte as each implementation wrote it, and an error by its class.
+
+| Against the answer each row carries | Rows |
 | --- | ---: |
-| Both give this document's answer | 56 |
-| Both agree with each other and not with this document | 3 |
+| Both implementations give it | 56 |
+| Both agree with each other and do not give it | 3 |
 | The two differ | 1 |
 
-Of the 39 rows whose answer is a disposition, 38 are the same bytes in both and the bytes this
-document gives, the example under *The disposition* among them. The record, the rows and the
-driver are in the experiments repository:
+Of the 39 rows whose answer is a disposition, 38 are the same bytes in both and the bytes the row
+carries, the example under *The disposition* among them. The record, the rows and the driver are
+in the experiments repository:
 [`harness/RFC0016-AGREEMENT.md`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/main/harness/RFC0016-AGREEMENT.md).
+
+What the rows do not run:
+
+- Four cases of *Examples*: the tiers where the rules produce `limit-high`; the pass-through
+  pack without its declaration, with the amount absent and with the amount a number, which Core
+  evaluates to `approve-refund`; and the calculated quantity, for which this document gives no
+  complete pack.
+- A consumer whose schema admits the name and which does not support the extension. No such
+  schema is published, so no such consumer was run.
+- An input at either prototype's limits, and a pack that uses this draft together with RFC 0008.
+- What this revision adds to *Declaration*: a member named `extensions` inside another
+  extension's value, the name required and carried nowhere, and the name listed twice. The first
+  is in the Python prototype's tests and the other two in the Go prototype's.
 
 What building it found, and where this revision answers it:
 
-- **The one difference is about the carrier.** A fact string that holds an unpaired surrogate:
-  the Python evaluator admits the facts document and the value does not resolve; the Go runtime's
-  carrier refuses the document as `malformed-input`. Neither was changed to match the other.
-  *Resolution* and the row under *Conformance* now say that the rule applies where the document is
-  admitted, and the question is the ninth under *Unresolved questions*.
-- **The three rows where both differ from this document** are those of a consumer that does not
-  support the extension. Both refuse the pack as `pack-not-conformant`, because both hold a pack
-  to the schema of `0.2.0-draft`, which refuses the name. The rows under *Conformance* now say
-  which schema they are rows of.
+- **The one difference is about admission.** A fact string that holds an unpaired surrogate:
+  the Python evaluator admits the facts document and the value does not resolve, which is the
+  answer the row carries; the Go runtime refuses the document as `malformed-input`. Neither was
+  changed to match the other. *Resolution*, the row under *Conformance* and *What this needs from
+  Core* now say that the question is open.
+- **The three rows both answer otherwise** are those of a consumer that does not support the
+  extension. The rows carry `unsupported-required-extension`, which is the answer of a consumer
+  whose schema admits the name. Both prototypes hold a pack to the schema of `0.2.0-draft`,
+  which refuses the name, and answer `pack-not-conformant`. That agrees with *Compatibility*, and
+  with the rows under *Conformance* as this revision words them.
 - **Both read "an `extensions` object" as one the schema defines**, and not as any member of that
   name. *Declaration* now says so.
 - **The two admit the name differently.** The Go runtime sets the name aside and has the published
   validator judge the rest. The Python evaluator admits the name in its two places and runs its
-  other checks as they were. The first way hides two faults from the validator, which
-  *Declaration* now names.
-- **The examples are fragments**, and each implementer completed them into packs in its own way.
-  The rows carry complete packs.
+  other checks as they were. An implementation that sets the name aside has to check two things
+  itself that the validator would have found in what was set aside: that a required name has a
+  value, and that it is listed once. *Declaration* now states both.
+- **The examples are fragments.** The Python implementer completed them into packs and recorded
+  how, in entry 32. The rows carry complete packs.
 - **The two bound the work differently**, and one of them admits the prototype together with the
   prototype of [RFC 0008](0008-bounded-collection-quantifiers.md) where the other refuses the pair.
-  Both are under *Unresolved questions*.
+  Both are under *Unresolved questions*. Neither was run.
 
 None of this is conformance evidence, and RFC 0000's bar for a stable feature is as far off as it
-was: the two prototypes trace to one maintainer's direction, and the model that wrote the rows
-and the driver is the one that drafted the Go prototype.
+was. The two prototypes trace to one maintainer's direction. The rows are not independent of the
+Go prototype, for the reason above. And the comparison was run by hand: it is one run, and
+nothing here says it is repeated.
 
 ## Unresolved questions
 
@@ -476,12 +515,17 @@ and the driver is the one that drafted the Go prototype.
    left it to their limits and chose differently: one counts declared values against a limit on
    authored items and the other has no such count, and they charge the work of resolution by
    different terms. An input near either limit is not portable between them.
-9. **The carrier and an unpaired surrogate.** §2.1 requires an implementation to reject malformed
-   input and does not say whether a JSON text that holds an unpaired surrogate escape is
-   malformed. RFC 8785 cannot serialize such a string. One prototype's carrier refuses the text in
-   any input, and the other admits it. The question is Core's and is wider than this proposal: it
-   decides the class of an evaluation of any pack over such a facts document.
-10. **Together with RFC 0008.** Neither this document nor
-    [RFC 0008](0008-bounded-collection-quantifiers.md) says what a pack that uses both means, or
-    whether one evaluation may run under both. One prototype refuses the pair and the other
-    admits it. Whichever is accepted second should say.
+9. **Is a facts document that holds an unpaired surrogate admitted?** RFC 8259's grammar admits
+   the text and lets a parser limit what a string may hold. RFC 8785 cannot serialize such a
+   string, which matters to Core only where the string would reach a disposition. One prototype
+   refuses the text in any input, and the other admits it and refuses the value where it is
+   selected. The question is Core's and is wider than this proposal: it decides the answer for
+   any conforming pack evaluated over such a facts document. *What this needs from Core* gives
+   the three answers Core could give. Until it gives one, this proposal's row for such a fact is
+   a row of an evaluator that admits the document.
+10. **Together with RFC 0008.** Two things are undecided: whether one evaluation may run under
+    both drafts, and how the work of resolving values is charged under the one running budget
+    [RFC 0008](0008-bounded-collection-quantifiers.md) requires of an evaluation. What a value's
+    pointer selects is not in doubt: RFC 0008 restores the condition root after each `where`, and
+    values are resolved against the facts document after an outcome is chosen. One prototype
+    refuses the pair and the other admits it. Whichever is accepted second should decide both.
