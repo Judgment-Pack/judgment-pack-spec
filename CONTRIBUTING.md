@@ -14,6 +14,19 @@ valuable as additive features.
 - an interoperability, privacy, security, or authoring-cost concern;
 - evidence that a concept belongs in a profile rather than Core.
 
+## Working on an issue
+
+You're welcome to comment that you'd like to take an issue, and a maintainer may assign it to you.
+Only that assignment reserves it. Without one, the first pull request that meets the issue's
+acceptance criteria is the one that gets merged, and until then the issue stays open to anyone.
+
+Work on one issue at a time. Finish the pull request you have open, or say you're withdrawing it,
+before you take another. We assign at most one issue to each contributor at once.
+
+If an assigned issue goes quiet for a couple of weeks with no pull request, a maintainer will
+check in. If there's no reply within a week after that, the issue is unassigned so someone else
+can pick it up. You're welcome to take it back while it's still open.
+
 ## Before proposing a feature
 
 Open a design issue describing:
