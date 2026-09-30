@@ -117,6 +117,13 @@ here.
 
 ### Changed
 
+- The six published demo projects now pass `jpack packs lint`, the check the runtime offers for a
+  project's producers. Each demo's `jpack.json` declares, for every fact pointer its pack reads and
+  every evidence requirement it declares, the source in the demo's own `mapping/mapping.json` that
+  supplies it; these are the runtime's non-normative hints and no pack changes. Each README adds the
+  lint to its commands and says what it checks. The demos keep their versions, and their published
+  archives change in `jpack.json` and `README.md` only; each demo's manifest records the new digests,
+  and the deal demo's archive pin moves with them. Nothing normative changes.
 - [RFC 0002](rfcs/0002-judgment-graph.md) (Judgment Graph composition) is amended; it stays a
   `Draft`. The question Study 004 left prior to the others — which seam the format is for — is
   decided: the **dataflow seam**, one decision's outcome consumed as another's input, and the edge

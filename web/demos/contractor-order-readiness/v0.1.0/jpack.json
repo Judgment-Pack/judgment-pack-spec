@@ -4,7 +4,59 @@
     "contractor-order": {
       "path": "packs/contractor-order.pack.json",
       "matrix": "packs/contractor-order.matrix.json",
-      "description": "Is this contractor order ready for a branch owner to review?"
+      "description": "Is this contractor order ready for a branch owner to review?",
+      "facts": {
+        "/credit/approved": {
+          "source": "The credit record: a JSON file selected for the case, read by the source \"credit\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/credit_approved of that file by the source's read rule."
+        },
+        "/credit/exceptionRequested": {
+          "source": "The credit record: a JSON file selected for the case, read by the source \"credit\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/credit_exceptionRequested of that file by the source's read rule."
+        },
+        "/delivery/confirmed": {
+          "source": "The delivery record: a JSON file selected for the case, read by the source \"delivery\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/delivery_confirmed of that file by the source's read rule."
+        },
+        "/inventory/allocated": {
+          "source": "The inventory record: a JSON file selected for the case, read by the source \"inventory\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/inventory_allocated of that file by the source's read rule."
+        },
+        "/quote/customerAccepted": {
+          "source": "The quote record: a JSON file selected for the case, read by the source \"quote\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/quote_customerAccepted of that file by the source's read rule."
+        },
+        "/quote/discountPercent": {
+          "source": "The quote record: a JSON file selected for the case, read by the source \"quote\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/quote_discountPercent of that file by the source's read rule."
+        },
+        "/review/context": {
+          "source": "The quote record: a JSON file selected for the case, read by the source \"quote\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/review_context of that file by the source's read rule."
+        },
+        "/review/purpose": {
+          "source": "The quote record: a JSON file selected for the case, read by the source \"quote\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/review_purpose of that file by the source's read rule."
+        }
+      },
+      "evidence": {
+        "credit-record": {
+          "source": "The credit record: a JSON file selected for the case, read by the source \"credit\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "delivery-record": {
+          "source": "The delivery record: a JSON file selected for the case, read by the source \"delivery\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "inventory-record": {
+          "source": "The inventory record: a JSON file selected for the case, read by the source \"inventory\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "quote-record": {
+          "source": "The quote record: a JSON file selected for the case, read by the source \"quote\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        }
+      }
     }
   }
 }

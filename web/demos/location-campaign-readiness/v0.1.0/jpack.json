@@ -4,7 +4,59 @@
     "location-campaign": {
       "path": "packs/location-campaign.pack.json",
       "matrix": "packs/location-campaign.matrix.json",
-      "description": "Is this location’s campaign package ready for marketing owner review?"
+      "description": "Is this location’s campaign package ready for marketing owner review?",
+      "facts": {
+        "/brand/approved": {
+          "source": "The brand record: a JSON file selected for the case, read by the source \"brand\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/brand_approved of that file by the source's read rule."
+        },
+        "/brand/restrictedClaim": {
+          "source": "The brand record: a JSON file selected for the case, read by the source \"brand\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/brand_restrictedClaim of that file by the source's read rule."
+        },
+        "/channel/ready": {
+          "source": "The channel record: a JSON file selected for the case, read by the source \"channel\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/channel_ready of that file by the source's read rule."
+        },
+        "/location/open": {
+          "source": "The location record: a JSON file selected for the case, read by the source \"location\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/location_open of that file by the source's read rule."
+        },
+        "/offer/spendCAD": {
+          "source": "The offer record: a JSON file selected for the case, read by the source \"offer\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/offer_spendCAD of that file by the source's read rule."
+        },
+        "/offer/termsConfirmed": {
+          "source": "The offer record: a JSON file selected for the case, read by the source \"offer\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/offer_termsConfirmed of that file by the source's read rule."
+        },
+        "/review/context": {
+          "source": "The location record: a JSON file selected for the case, read by the source \"location\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/review_context of that file by the source's read rule."
+        },
+        "/review/purpose": {
+          "source": "The location record: a JSON file selected for the case, read by the source \"location\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/review_purpose of that file by the source's read rule."
+        }
+      },
+      "evidence": {
+        "brand-record": {
+          "source": "The brand record: a JSON file selected for the case, read by the source \"brand\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "channel-record": {
+          "source": "The channel record: a JSON file selected for the case, read by the source \"channel\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "location-record": {
+          "source": "The location record: a JSON file selected for the case, read by the source \"location\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "offer-record": {
+          "source": "The offer record: a JSON file selected for the case, read by the source \"offer\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        }
+      }
     }
   }
 }

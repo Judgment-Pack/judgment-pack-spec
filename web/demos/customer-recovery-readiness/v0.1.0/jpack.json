@@ -4,7 +4,63 @@
     "customer-recovery": {
       "path": "packs/customer-recovery.pack.json",
       "matrix": "packs/customer-recovery.matrix.json",
-      "description": "Is this proposed customer remedy ready for accountable owner review?"
+      "description": "Is this proposed customer remedy ready for accountable owner review?",
+      "facts": {
+        "/account/contactPermitted": {
+          "source": "The account record: a JSON file selected for the case, read by the source \"account\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/account_contactPermitted of that file by the source's read rule."
+        },
+        "/account/ownerAssigned": {
+          "source": "The account record: a JSON file selected for the case, read by the source \"account\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/account_ownerAssigned of that file by the source's read rule."
+        },
+        "/approval/exceptionRequested": {
+          "source": "The approval record: a JSON file selected for the case, read by the source \"approval\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/approval_exceptionRequested of that file by the source's read rule."
+        },
+        "/approval/remedyApproved": {
+          "source": "The approval record: a JSON file selected for the case, read by the source \"approval\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/approval_remedyApproved of that file by the source's read rule."
+        },
+        "/feedback/caseLinked": {
+          "source": "The feedback record: a JSON file selected for the case, read by the source \"feedback\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/feedback_caseLinked of that file by the source's read rule."
+        },
+        "/remedy/amountCAD": {
+          "source": "The service record: a JSON file selected for the case, read by the source \"service\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/remedy_amountCAD of that file by the source's read rule."
+        },
+        "/review/context": {
+          "source": "The feedback record: a JSON file selected for the case, read by the source \"feedback\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/review_context of that file by the source's read rule."
+        },
+        "/review/purpose": {
+          "source": "The feedback record: a JSON file selected for the case, read by the source \"feedback\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/review_purpose of that file by the source's read rule."
+        },
+        "/service/issueVerified": {
+          "source": "The service record: a JSON file selected for the case, read by the source \"service\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/service_issueVerified of that file by the source's read rule."
+        }
+      },
+      "evidence": {
+        "account-record": {
+          "source": "The account record: a JSON file selected for the case, read by the source \"account\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "approval-record": {
+          "source": "The approval record: a JSON file selected for the case, read by the source \"approval\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "feedback-record": {
+          "source": "The feedback record: a JSON file selected for the case, read by the source \"feedback\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "service-record": {
+          "source": "The service record: a JSON file selected for the case, read by the source \"service\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        }
+      }
     }
   }
 }

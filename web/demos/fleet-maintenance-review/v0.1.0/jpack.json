@@ -4,7 +4,59 @@
     "maintenance-review": {
       "path": "packs/maintenance-review.pack.json",
       "matrix": "packs/maintenance-review.matrix.json",
-      "description": "Is this maintenance recommendation ready for a planner to review?"
+      "description": "Is this maintenance recommendation ready for a planner to review?",
+      "facts": {
+        "/asset/inScope": {
+          "source": "The asset record: a JSON file selected for the case, read by the source \"asset\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/asset_inScope of that file by the source's read rule."
+        },
+        "/diagnostic/priorityScore": {
+          "source": "The diagnostic record: a JSON file selected for the case, read by the source \"diagnostic\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/diagnostic_priorityScore of that file by the source's read rule."
+        },
+        "/diagnostic/signalSupported": {
+          "source": "The diagnostic record: a JSON file selected for the case, read by the source \"diagnostic\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/diagnostic_signalSupported of that file by the source's read rule."
+        },
+        "/inspection/faultConfirmed": {
+          "source": "The inspection record: a JSON file selected for the case, read by the source \"inspection\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/inspection_faultConfirmed of that file by the source's read rule."
+        },
+        "/inspection/safetyConcern": {
+          "source": "The inspection record: a JSON file selected for the case, read by the source \"inspection\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/inspection_safetyConcern of that file by the source's read rule."
+        },
+        "/review/context": {
+          "source": "The asset record: a JSON file selected for the case, read by the source \"asset\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/review_context of that file by the source's read rule."
+        },
+        "/review/purpose": {
+          "source": "The asset record: a JSON file selected for the case, read by the source \"asset\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/review_purpose of that file by the source's read rule."
+        },
+        "/workorder/noDuplicateOpen": {
+          "source": "The workorder record: a JSON file selected for the case, read by the source \"workorder\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/workorder_noDuplicateOpen of that file by the source's read rule."
+        }
+      },
+      "evidence": {
+        "asset-record": {
+          "source": "The asset record: a JSON file selected for the case, read by the source \"asset\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "diagnostic-record": {
+          "source": "The diagnostic record: a JSON file selected for the case, read by the source \"diagnostic\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "inspection-record": {
+          "source": "The inspection record: a JSON file selected for the case, read by the source \"inspection\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "workorder-record": {
+          "source": "The workorder record: a JSON file selected for the case, read by the source \"workorder\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        }
+      }
     }
   }
 }

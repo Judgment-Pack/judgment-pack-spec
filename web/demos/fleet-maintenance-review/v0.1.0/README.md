@@ -16,11 +16,14 @@ use `shasum -a 256 -c SHA256SUMS`. Then run:
 ```sh
 jpack packs validate --config jpack.json
 jpack packs test --config jpack.json
+jpack packs lint --config jpack.json
 jpack experimental evaluate --config jpack.json --pack-id maintenance-review --facts inputs/ready.facts.json --evidence inputs/ready.evidence.json --rehearsal --format json
 jpack experimental evaluate --config jpack.json --pack-id maintenance-review --facts inputs/missing-review.facts.json --evidence inputs/missing-review.evidence.json --rehearsal --format json
 ```
 
-Expected: **18 passed, 0 mismatched**. The ready input produces `outcomeId: ready`.
+Expected: **18 passed, 0 mismatched**, and the lint passes: every fact the pack reads and every
+evidence requirement it declares has a producer in `jpack.json`, naming its source in
+`mapping/mapping.json`. The ready input produces `outcomeId: ready`.
 The missing-review input is unresolved with reasons `missing-required-evidence` and `unknown`:
 the missing artifact also carries the exception flag, so that exception cannot be ruled out.
 These are completed decisions, not failed executions. Rehearsal commands do not create an

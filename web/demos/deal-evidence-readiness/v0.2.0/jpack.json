@@ -4,7 +4,55 @@
     "deal-readiness": {
       "path": "packs/deal-readiness.pack.json",
       "matrix": "packs/deal-readiness.matrix.json",
-      "description": "Evidence readiness for a synthetic enterprise deal: reconcile current quote, delivery scope and approvals before owner review."
+      "description": "Evidence readiness for a synthetic enterprise deal: reconcile current quote, delivery scope and approvals before owner review.",
+      "facts": {
+        "/deal/annualValueUSD": {
+          "source": "The quote record: a JSON file selected for the case, read by the source \"quote\" in mapping/mapping.json.",
+          "hint": "Mapped from /annualValueUSD of that file by the source's read rule."
+        },
+        "/deal/context": {
+          "source": "The crm record: a JSON file selected for the case, read by the source \"crm\" in mapping/mapping.json.",
+          "hint": "Mapped from /context of that file by the source's read rule."
+        },
+        "/deal/discountPercent": {
+          "source": "The quote record: a JSON file selected for the case, read by the source \"quote\" in mapping/mapping.json.",
+          "hint": "Mapped from /discountPercent of that file by the source's read rule."
+        },
+        "/deal/nonStandardTerms": {
+          "source": "The quote record: a JSON file selected for the case, read by the source \"quote\" in mapping/mapping.json.",
+          "hint": "Mapped from /nonStandardTerms of that file by the source's read rule."
+        },
+        "/deal/stage": {
+          "source": "The crm record: a JSON file selected for the case, read by the source \"crm\" in mapping/mapping.json.",
+          "hint": "Mapped from /stage of that file by the source's read rule."
+        },
+        "/finance/approved": {
+          "source": "The finance record: a JSON file selected for the case, read by the source \"finance\" in mapping/mapping.json.",
+          "hint": "Mapped from /approved of that file by the source's read rule."
+        },
+        "/security/approved": {
+          "source": "The security record: a JSON file selected for the case, read by the source \"security\" in mapping/mapping.json.",
+          "hint": "Mapped from /approved of that file by the source's read rule."
+        }
+      },
+      "evidence": {
+        "crm-record": {
+          "source": "The crm record: a JSON file selected for the case, read by the source \"crm\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "current-quote": {
+          "source": "The quote record: a JSON file selected for the case, read by the source \"quote\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "finance-approval": {
+          "source": "The finance record: a JSON file selected for the case, read by the source \"finance\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "security-review": {
+          "source": "The security record: a JSON file selected for the case, read by the source \"security\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        }
+      }
     }
   }
 }

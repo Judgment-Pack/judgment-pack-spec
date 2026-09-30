@@ -4,7 +4,59 @@
     "data-release": {
       "path": "packs/data-release.pack.json",
       "matrix": "packs/data-release.matrix.json",
-      "description": "Is this data batch ready for an accountable release review?"
+      "description": "Is this data batch ready for an accountable release review?",
+      "facts": {
+        "/contract/compatible": {
+          "source": "The contract record: a JSON file selected for the case, read by the source \"contract\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/contract_compatible of that file by the source's read rule."
+        },
+        "/contract/overrideRequested": {
+          "source": "The contract record: a JSON file selected for the case, read by the source \"contract\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/contract_overrideRequested of that file by the source's read rule."
+        },
+        "/owner/approved": {
+          "source": "The approval record: a JSON file selected for the case, read by the source \"approval\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/owner_approved of that file by the source's read rule."
+        },
+        "/pipeline/completed": {
+          "source": "The orchestrator record: a JSON file selected for the case, read by the source \"orchestrator\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/pipeline_completed of that file by the source's read rule."
+        },
+        "/quality/criticalChecksPassed": {
+          "source": "The quality record: a JSON file selected for the case, read by the source \"quality\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/quality_criticalChecksPassed of that file by the source's read rule."
+        },
+        "/quality/invalidRowsPercent": {
+          "source": "The quality record: a JSON file selected for the case, read by the source \"quality\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/quality_invalidRowsPercent of that file by the source's read rule."
+        },
+        "/review/context": {
+          "source": "The orchestrator record: a JSON file selected for the case, read by the source \"orchestrator\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/review_context of that file by the source's read rule."
+        },
+        "/review/purpose": {
+          "source": "The orchestrator record: a JSON file selected for the case, read by the source \"orchestrator\" in mapping/mapping.json.",
+          "hint": "Mapped from /data/review_purpose of that file by the source's read rule."
+        }
+      },
+      "evidence": {
+        "approval-record": {
+          "source": "The approval record: a JSON file selected for the case, read by the source \"approval\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "contract-record": {
+          "source": "The contract record: a JSON file selected for the case, read by the source \"contract\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "orchestrator-record": {
+          "source": "The orchestrator record: a JSON file selected for the case, read by the source \"orchestrator\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        },
+        "quality-record": {
+          "source": "The quality record: a JSON file selected for the case, read by the source \"quality\" in mapping/mapping.json.",
+          "hint": "Stated present, absent or unknown by the source's read rule, from the file selected for the case."
+        }
+      }
     }
   }
 }

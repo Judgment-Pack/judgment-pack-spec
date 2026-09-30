@@ -22,9 +22,12 @@ not authorize signature or send a task. The files are licensed under Apache-2.0;
 ```sh
 jpack packs validate --config jpack.json
 jpack packs test --config jpack.json
+jpack packs lint --config jpack.json
 ```
 
-Expected: **40 passed, 0 mismatched** with Runtime v0.23.1. These are project-owned
+Expected: **40 passed, 0 mismatched** with Runtime v0.23.1, and the lint passes: every fact the pack
+reads and every evidence requirement it declares has a producer in `jpack.json`, each naming the
+source in `mapping/mapping.json` that supplies it. These are project-owned
 tests, not JPS conformance evidence. See `COVERAGE-REVIEW.md` for the remaining advisory
 conflict probe. There are 27 policy cases and 13 cases using captured source projections.
 Running the matrix evaluates those inputs; it does not re-run the source mapping.
