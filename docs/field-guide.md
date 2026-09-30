@@ -257,6 +257,13 @@ permits a given use.
 An outcome is a **declared result**, not an authorization to perform any external action. Carrying it out is
 outside Core.
 
+An outcome whose id or label says that a person decides, such as `manual-review` or `human-review`, is an
+outcome like any other. A case that reaches it, through a rule or as the `fallbackOutcome`, is an ordinary
+`outcome` result: it carries no reasons, its `handoff.state` is `none`, and the [escalation](#escalation)
+target is not requested. A consumer that finds the cases needing a person by `handoff.state`, or by the
+`unresolved` kind, does not see it. An author who wants the configured target requested uses an exception with
+effect `escalate`, or leaves the case unresolved with a reason the escalation's `triggers` name.
+
 ### Rules
 
 `rules` lists one or more rules, each connecting a condition to an outcome.
@@ -268,7 +275,7 @@ outside Core.
 | `when` | yes | The condition (see [The condition language](#the-condition-language)). |
 | `outcome` | yes | The declared outcome id this rule proposes. |
 | `onUnknown` | yes | `ignore` or `escalate`. |
-| `evidenceRequirementRefs` | no | Ids of evidence requirements this rule relies on. |
+| `evidenceRequirementRefs` | no | Ids of evidence requirements this rule cites. A citation only: it gates nothing (see below). |
 | `sourceRefs` | no | Ids of sources supporting this rule. |
 | `rationale` | no | Human-readable justification. |
 
@@ -279,6 +286,16 @@ outside Core.
 - `escalate` — an unknown result blocks resolution and asks for a handoff.
 
 There is no rule-priority field, and array order carries no priority meaning.
+
+`evidenceRequirementRefs` is a citation for readers and tools. It does not gate the rule: no step of the
+resolution model reads it, so adding or removing it changes no evaluation, and a rule that names a requirement
+still applies when that evidence is absent. Evidence affects a result in two ways only:
+
+- a requirement declared `required: true`, which stops the evaluation before any rule is evaluated when it is
+  absent or unknown (step 2 of [How a pack is evaluated](#how-a-pack-is-evaluated)); and
+- an `evidence-present` condition inside a `when` (see [The condition language](#the-condition-language)).
+
+To make a rule depend on a document, use one of those two.
 
 ### Exceptions
 
@@ -326,6 +343,10 @@ The trigger tokens are:
 The `target` object has a `kind` — `human-role`, `queue`, or `system` — and a `name`. The escalation object
 records handoff **intent**, not delivery: it does not prove a handoff happened, and Core defines no delivery,
 routing, or authorization behavior.
+
+The target is requested in two cases only: an `unresolved` or `not-applicable` result with a reason that
+`triggers` names, and a true exception with effect `escalate`, whatever the triggers are. An `outcome` result
+never requests it, whatever its id says (see [Outcomes](#outcomes)).
 
 ### Metadata
 

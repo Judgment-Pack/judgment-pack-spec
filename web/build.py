@@ -47,6 +47,8 @@ RUNTIME_MCP_URL = RUNTIME_URL + "/blob/main/docs/mcp-clients.md"
 RUNTIME_CLAIM_URL = RUNTIME_URL + "/blob/main/CONFORMANCE.md"
 DEMO_URL = GITHUB_ORG_URL + "/judgment-pack-demo"
 GATEWAY_URL = GITHUB_ORG_URL + "/judgment-pack-gateway"
+DESK_URL = GITHUB_ORG_URL + "/judgment-pack-desk"
+RUNNER_URL = GITHUB_ORG_URL + "/judgment-pack-runner"
 EXPERIMENTS_URL = GITHUB_ORG_URL + "/judgment-pack-evaluator-experiments"
 SLACK_URL = "https://join.slack.com/t/judgment-pack/shared_invite/zt-44qrd47ok-o_~Vk3BFDzsN~EGAPkeQBw"
 # Recognizable, monochrome inline marks (currentColor) — no external icon dependency.
@@ -2487,6 +2489,25 @@ being listed here.</p>
     key rotation. It proves byte-lineage, never truth, source identity, authorization, or production
     readiness.</p>
     <p class="card-meta"><a href="{html.escape(gateway_spec_url)}" target="_blank" rel="noopener noreferrer">Receipt and seal specification</a> · <a href="{html.escape(gateway_corpus_url)}" target="_blank" rel="noopener noreferrer">frozen corpus</a></p>
+  </article>
+  <article class="card">
+    <p class="card-kicker">Open source · Apache-2.0 · research preview</p>
+    <h2><a href="{html.escape(DESK_URL)}" target="_blank" rel="noopener noreferrer">judgment-pack desk</a></h2>
+    <p>A local web desk for a Judgment Pack project: one Go binary that serves a browser application
+    and relays MCP messages between the page and a <code>jpack mcp</code> subprocess in the project
+    directory. The runtime computes every validation and disposition; the desk shows them and
+    computes none. An optional assistant can draft a pack through a model endpoint the operator
+    configures. It is a local, single-user tool, not a hosted service.</p>
+    <p class="card-meta">Local desk · separately governed · non-normative</p>
+  </article>
+  <article class="card">
+    <p class="card-kicker">Open source · Apache-2.0 · research preview, single-owner local pilot</p>
+    <h2><a href="{html.escape(RUNNER_URL)}" target="_blank" rel="noopener noreferrer">judgment-pack runner</a></h2>
+    <p>A local jobs runner. It turns a pack snapshot into a durable job: it checks a release, takes
+    facts and evidence availability, runs the pinned runtime through its public CLI, and keeps the
+    result and audit history on the local filesystem. It embeds no evaluator of its own. External
+    actions, graph execution, shared-user permissions, and agent loops are not implemented.</p>
+    <p class="card-meta">Local jobs · separately governed · non-normative</p>
   </article>
 </div>
 <h2 id="adding-an-implementation">Adding an implementation</h2>

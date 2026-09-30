@@ -395,6 +395,15 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("judgment-pack-demo", companions)
         self.assertIn("judgment-pack-gateway", companions)
         self.assertIn("proves byte-lineage, never truth", companions)
+        # The desk and the runner are tools around the runtime. Neither evaluates a pack
+        # itself, so neither is listed as an implementation.
+        for repository in ("judgment-pack-desk", "judgment-pack-runner"):
+            self.assertNotIn(repository, available)
+            self.assertIn(
+                f'href="https://github.com/Judgment-Pack/{repository}"', companions
+            )
+        self.assertIn("computes none", companions)
+        self.assertIn("embeds no evaluator of its own", companions)
         # The spec page still cites its immutable tagged source (docs use the mutable branch).
         specification = (
             self.output / "spec" / "0.2.0-draft" / "index.html"

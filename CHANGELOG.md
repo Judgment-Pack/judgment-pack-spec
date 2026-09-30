@@ -240,6 +240,18 @@ here.
   in place — a superseded sentence is struck and a dated note follows it — and the site's renderer
   had no strikethrough, so on five published RFC pages a withdrawn claim appeared unstruck, wrapped
   in literal tildes. A test holds that every strike in an RFC's source is a `<del>` on its page.
+- Field guide: a rule's `evidenceRequirementRefs` is now described as what it is, a citation that
+  no evaluation step reads. The guide said the rule "relies on" the requirements it names, which
+  reads as a gate. It now names the two mechanisms that do gate on evidence: a requirement declared
+  `required: true`, and an `evidence-present` condition. Nothing normative changes.
+- Field guide: says that an outcome named for human review, such as `manual-review`, is an ordinary
+  outcome result that requests no handoff, and that the escalation target is requested only by an
+  unresolved or not-applicable result whose reason the triggers name, or by an `escalate` exception.
+  Four of the five example packs use such an outcome as their `fallbackOutcome`. Nothing normative
+  changes.
+- README and Implementations page: the project's desk and jobs runner are listed with the other
+  companion projects, as separately governed, non-normative research previews. Neither evaluates a
+  pack itself, so neither is listed as an implementation.
 
 ## `0.1.0-draft` — 2026-07-22
 
