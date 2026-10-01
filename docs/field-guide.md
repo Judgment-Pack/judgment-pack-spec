@@ -572,6 +572,23 @@ because nothing could be checked. In this shape a detector should almost always 
 which blocks both a candidate and the fallback (step 7). Use `ignore` only for a detector whose absence of
 information genuinely cannot change the answer, and say why in its `rationale`.
 
+**The second trap is a fact of the wrong type.** There is no coercion between JSON types (Core §7.4), so a
+detector written as `equals true` is *false*, not unknown, when its fact arrives as `"true"`, `1` or `null`:
+the value is present, and it is not `true`. `onUnknown` never applies, no detector fires, and the pack answers
+*permitted*. The example above does exactly that for each of those three values, while a missing fact
+escalates. When the facts come from a feed you do not control, write each detector as **not the safe value**,
+so that anything but an exact `false` fires it:
+
+```json
+"when": { "op": "not", "condition": { "op": "fact", "path": "/amount/exceedsCap", "operator": "equals", "value": false } }
+```
+
+That detector reaches *violation* for `true`, `"true"`, `1` and `null`, and lets only `false` through to the
+fallback. To name the cause, add a detector of its own for a malformed flag, `not` of `in [true, false]`. The
+same holds for any condition that tests a caller-supplied value for equality: a wrong type can only ever make
+`equals` false and `not-equals` true. A runtime may note such a comparison in its trace, but the trace does
+not change the disposition.
+
 ### Shape 2: order as an exception
 
 When the policy itself states an order — *if any part of the trip has been flown, hand off; otherwise …* —

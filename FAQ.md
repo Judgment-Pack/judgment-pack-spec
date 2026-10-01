@@ -179,7 +179,7 @@ must be relied on beyond the skill that carries it:
 - ad-hoc handling of exceptions and overrides;
 - abstention and escalation as first-class states, not asides;
 - a standardized judgment output that other tools can read;
-- evidence provenance that travels with the conclusion;
+- a record of the conclusion that can carry the evidence it rested on, where a runtime keeps one (Core's disposition itself carries none; [RFC 0003](rfcs/0003-evidence-reference.md) is a draft);
 - versioning independent of the agent's implementation ([versioning](VERSIONING.md));
 - reusable [conformance cases](TESTING.md) that ship with the artifact;
 - portability across agents and runtimes;
