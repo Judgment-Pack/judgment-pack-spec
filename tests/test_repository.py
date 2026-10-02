@@ -18,6 +18,7 @@ CONFORMANCE = ROOT / "conformance"
 SCHEMA_PATH = ROOT / "schema" / "judgment-pack-core.schema.json"
 MANIFEST_PATH = CONFORMANCE / "manifest.json"
 MANIFEST_SCHEMA_PATH = CONFORMANCE / "manifest.schema.json"
+SPEC_PATH = ROOT / "spec" / "judgment-pack-core.md"
 EVALUATION = CONFORMANCE / "evaluation"
 EVALUATION_MANIFEST_PATH = EVALUATION / "manifest.json"
 EVALUATION_MANIFEST_SCHEMA_PATH = EVALUATION / "manifest.schema.json"
@@ -203,6 +204,32 @@ def pointer_depth(ptr: str) -> int:
 def pointer_contains(ancestor: str, descendant: str) -> bool:
     """Whether `descendant` lies at or under `ancestor` on JSON Pointer segment boundaries."""
     return descendant == ancestor or ancestor == "" or descendant.startswith(ancestor + "/")
+
+
+# §N or §§N–M citations in conformance/manifest.json.
+_SECTION_HEADING_RE = re.compile(r"^#{2,6}\s+(\d+(?:\.\d+)*)\b")
+_SECTION_CITATION_PREFIX_RE = re.compile(r"^§+")
+_RANGE_SEPARATOR = "–"
+
+
+def spec_section_numbers() -> set[str]:
+    """The section numbers that appear as headings in the Core specification."""
+    numbers: set[str] = set()
+    for line in SPEC_PATH.read_text(encoding="utf-8").splitlines():
+        match = _SECTION_HEADING_RE.match(line)
+        if match:
+            numbers.add(match.group(1))
+    return numbers
+
+
+def parse_spec_section(spec_section: str) -> list[str]:
+    """The individual section numbers named by one citation string.
+
+    Handles single sections (``§4``, ``§7.4``) and ranges (``§§2–7``); both
+    endpoints of a range are returned so each can be checked independently.
+    """
+    body = _SECTION_CITATION_PREFIX_RE.sub("", spec_section)
+    return [part.strip() for part in body.split(_RANGE_SEPARATOR) if part.strip()]
 
 
 def walk_schema_errors(error: Any) -> Iterable[Any]:
@@ -761,6 +788,25 @@ class RepositoryConformanceTests(unittest.TestCase):
         for path in sorted(on_disk - listed):
             with self.subTest(orphan=path):
                 self.fail(f"fixture {path!r} is named by no case")
+
+    def test_conformance_cases_cite_existing_spec_sections(self) -> None:
+        """Every document-conformance case's specSection resolves to a heading.
+
+        A citation is the only link a fixture has back to the prose it defends;
+        if the section number drifts or disappears, the case silently becomes
+        misleading. The manifest schema only checks that the field starts with
+        ``§``, so this test guards the cross-reference itself.
+        """
+        sections = spec_section_numbers()
+        for case in self.manifest["cases"]:
+            with self.subTest(case_id=case["id"]):
+                for number in parse_spec_section(case["specSection"]):
+                    self.assertIn(
+                        number,
+                        sections,
+                        f"case {case['id']!r} cites spec section {number!r} "
+                        f"which does not exist in {SPEC_PATH.name}",
+                    )
 
     def test_conformance_cases(self) -> None:
         for case in self.manifest["cases"]:
