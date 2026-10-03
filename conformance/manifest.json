@@ -490,6 +490,18 @@
       "specSection": "§2.2"
     },
     {
+      "id": "structural-decimal-operand-number",
+      "path": "structural/decimal-operand-number.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "ordered comparison rejects decimal operands written as JSON numbers",
+      "specSection": "§2.2"
+    },
+    {
       "id": "structural-invalid-in-operand",
       "path": "structural/invalid-in-operand.json",
       "layer": "structural",
@@ -842,6 +854,15 @@
       "expectedResult": "valid",
       "expectedDiagnostic": null,
       "focus": "ordered comparison accepts a high-precision decimal operand whose identity would change if parsed as a float",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "valid-decimal-operand-equals-number",
+      "path": "valid/decimal-operand-equals-number.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "equality comparison accepts a JSON number operand",
       "specSection": "§2.2"
     },
     {

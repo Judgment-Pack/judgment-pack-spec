@@ -261,6 +261,13 @@ def schema_diagnostic(error: Any) -> Diagnostic:
         and instance_path[-1:] == ["value"]
     ):
         code = "JPS-STRUCTURE-IN-OPERAND"
+    elif (
+        validator == "type"
+        and error.validator_value == "string"
+        and isinstance(error.schema, dict)
+        and error.schema.get("pattern") == r"^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$"
+    ):
+        code = "JPS-STRUCTURE-DECIMAL-OPERAND"
     elif validator == "minLength":
         code = "JPS-STRUCTURE-MIN-LENGTH"
     elif validator == "uniqueItems":

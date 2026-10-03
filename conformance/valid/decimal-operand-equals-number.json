@@ -1,0 +1,34 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.com/judgment-packs/decimal-operand-equals-number",
+  "version": "0.1.0",
+  "title": "Decimal operand equality JSON number",
+  "decision": {
+    "intent": "Exercise decimal operand grammar does not apply to equality.",
+    "question": "Does an equality comparison accept a JSON number operand?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "reject",
+      "label": "Reject"
+    }
+  ],
+  "rules": [
+    {
+      "id": "equals-rule",
+      "description": "Uses a JSON number operand with an equality comparison.",
+      "when": {
+        "op": "fact",
+        "path": "/amount",
+        "operator": "equals",
+        "value": 5000
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

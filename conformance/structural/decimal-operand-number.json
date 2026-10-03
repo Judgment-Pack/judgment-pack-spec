@@ -1,0 +1,34 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.com/judgment-packs/decimal-operand-number",
+  "version": "0.1.0",
+  "title": "Decimal operand JSON number",
+  "decision": {
+    "intent": "Exercise the ordered-operand decimal grammar.",
+    "question": "Is a JSON number decimal operand rejected?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "reject",
+      "label": "Reject"
+    }
+  ],
+  "rules": [
+    {
+      "id": "ordered-rule",
+      "description": "Uses a JSON number as an ordered comparison operand.",
+      "when": {
+        "op": "fact",
+        "path": "/amount",
+        "operator": "greater-than",
+        "value": 5000
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate"
+    }
+  ]
+}
