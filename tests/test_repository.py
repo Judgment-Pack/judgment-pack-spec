@@ -807,6 +807,26 @@ class RepositoryConformanceTests(unittest.TestCase):
                         f"case {case['id']!r} cites spec section {number!r} "
                         f"which does not exist in {SPEC_PATH.name}",
                     )
+    def test_conformance_cases_expect_diagnostics_from_their_layer(self) -> None:
+        layer_families = {
+            "carrier": {"CARRIER"},
+            "structural": {"STRUCTURE"},
+            "semantic": {"SEMANTIC", "CAPABILITY"},
+        }
+        for case in self.manifest["cases"]:
+            expected = case["expectedDiagnostic"]
+            if expected is None:
+                continue
+            with self.subTest(case_id=case["id"]):
+                code = expected["code"]
+                family = code.split("-")[1]
+                layer = case["layer"]
+                self.assertIn(
+                    family,
+                    layer_families.get(layer, set()),
+                    f"case {case['id']!r} filed under layer {layer!r} expects diagnostic "
+                    f"{code!r}, whose family {family!r} does not belong to that layer",
+                )
 
     def test_conformance_cases(self) -> None:
         for case in self.manifest["cases"]:
