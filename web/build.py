@@ -2496,7 +2496,9 @@ being listed here.</p>
     <p class="card-meta">Demo material · never authorization or production guidance</p>
   </article>
   <article class="card">
-    <p class="card-kicker">Open source · research preview · not integrated with the runtime</p>
+    <p class="card-kicker">Open source · research preview · runs its sources and receipts them apart
+    from the runtime; since v0.9.0 a decision policy can hold a write to a record signed by a
+    runtime key it trusts (ADR-0012)</p>
     <h2><a href="{html.escape(GATEWAY_URL)}" target="_blank" rel="noopener noreferrer">open reference gateway</a></h2>
     <p>The gateway acquires JSON results from operator-configured sources, content-addresses them,
     signs version-2 receipts with Ed25519, chains them per session, and seals the final count. A

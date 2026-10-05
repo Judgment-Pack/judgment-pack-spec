@@ -124,12 +124,14 @@ here.
   v0.27.0's refusal of a signing key another user could replace, with a link to the runtime guide's
   "Checking a trail, and handing over a checkpoint". The Runner's listing names its chain of runs
   and signatures, checked by `verify-run` (v0.5.0), and the gateway's a decision policy that
-  requires a signed record (v0.9.0, its ADR-0012). The presentation labels its receipt sentences as
-  the gateway's receipt store, unchanged, and gains a section on the decision record in runtime
-  ADR-0047's terms: a chain establishes consistency, not completeness; a signature, nothing against
-  the key holder; a held checkpoint, existence at hand-over if the holder is independent; a stamp,
-  existence by a time, not when a record was made. None of this is in JPS, and nothing normative
-  changes.
+  requires a signed record (v0.9.0, its ADR-0012). The gateway's top line said "not integrated with
+  the runtime"; it now says the gateway runs its sources and receipts them apart from the runtime,
+  and that such a policy can hold a write to a record a runtime key it trusts signed. The
+  presentation labels its receipt sentences as the gateway's receipt store, unchanged, and gains a
+  section on the decision record in runtime ADR-0047's terms: a chain establishes consistency, not
+  completeness; a signature, nothing against the key holder; a held checkpoint, existence at
+  hand-over if the holder is independent; a stamp, existence by a time, not when a record was made.
+  None of this is in JPS, and nothing normative changes.
 - The six published demo projects now pass `jpack packs lint`, the check the runtime offers for a
   project's producers. Each demo's `jpack.json` declares, for every fact pointer its pack reads and
   every evidence requirement it declares, the source in the demo's own `mapping/mapping.json` that
