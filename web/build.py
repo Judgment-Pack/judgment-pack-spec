@@ -43,6 +43,10 @@ GITHUB_ROOT = GITHUB_BLOB_ROOT + TAGGED_SOURCE_REF + "/"
 RUNTIME_URL = GITHUB_ORG_URL + "/judgment-pack-runtime"
 RUNTIME_RELEASES_URL = RUNTIME_URL + "/releases/latest"
 RUNTIME_BUILD_URL = RUNTIME_URL + "/blob/main/docs/building-with-packs.md"
+RUNTIME_TRAIL_URL = RUNTIME_BUILD_URL + "#checking-a-trail-and-handing-over-a-checkpoint"
+RUNTIME_RECORD_ADR_URL = (
+    RUNTIME_URL + "/blob/main/docs/adr/0047-make-a-decision-record-defensible.md"
+)
 RUNTIME_MCP_URL = RUNTIME_URL + "/blob/main/docs/mcp-clients.md"
 RUNTIME_CLAIM_URL = RUNTIME_URL + "/blob/main/CONFORMANCE.md"
 DEMO_URL = GITHUB_ORG_URL + "/judgment-pack-demo"
@@ -2408,6 +2412,10 @@ def build_implementations_index(output_root: Path) -> None:
     python_evaluator_url = EXPERIMENTS_URL + "/tree/main/python"
     gateway_spec_url = GATEWAY_URL + "/blob/main/SPEC.md"
     gateway_corpus_url = GATEWAY_URL + "/tree/main/corpus"
+    gateway_signed_record_url = (
+        GATEWAY_URL + "/blob/main/docs/adr/0012-hold-a-write-to-a-signed-record.md"
+    )
+    runner_chain_url = RUNNER_URL + "/blob/v0.5.0/docs/releases/v0.5.0.md"
     body = f"""
 <h1>Implementations</h1>
 <p class="lede">Independent tools that implement one or more JPS conformance classes or test the
@@ -2439,6 +2447,14 @@ establishes factual grounding, authorization, safety, or operational fitness.</d
       graph-composition workflow with its own matrices.</li>
       <li>Opt-in JSONL evaluation records and a deterministic reviewed-set lock that detects drift.
       Both are runtime conventions, not JPS audit or approval formats.</li>
+      <li>Since v0.26.0, evaluation records are chained over their exact bytes by default wherever a
+      project keeps them, can be signed in a sidecar with key rotation, can have their checkpoints
+      stamped by an RFC 3161 time-stamping authority, and can be checked with
+      <code>jpack audit verify</code> against the checkpoints a holder keeps; v0.27.0 refuses a
+      signing key kept where another user could remove or replace it. The guide's
+      <a href="{html.escape(RUNTIME_TRAIL_URL)}" target="_blank" rel="noopener noreferrer">Checking a
+      trail, and handing over a checkpoint</a> says what each establishes and what it does not; these
+      are runtime conventions too, not JPS audit or approval formats.</li>
     </ul>
     <div class="artifact-actions">
       <a class="button button-primary" href="{html.escape(RUNTIME_RELEASES_URL)}" target="_blank" rel="noopener noreferrer">Download latest release</a>
@@ -2485,6 +2501,11 @@ being listed here.</p>
     <p>The gateway acquires JSON results from operator-configured sources, content-addresses them,
     signs version-2 receipts with Ed25519, chains them per session, and seals the final count. A
     verifier with a separately pinned public key can check a store against the gateway-held registry.
+    Since v0.9.0, a decision policy can require the record it relies on to be signed by a runtime key
+    it trusts (<a href="{html.escape(gateway_signed_record_url)}" target="_blank"
+    rel="noopener noreferrer">ADR-0012</a>). What it establishes: a writer who cannot use a trusted
+    key cannot satisfy the policy with a record written by hand. What it does not: anything against
+    the operator, who holds the key.
     This is a localhost-only, single-operator reference with no authentication, high availability, or
     key rotation. It proves byte-lineage, never truth, source identity, authorization, or production
     readiness.</p>
@@ -2506,7 +2527,12 @@ being listed here.</p>
     <p>A local jobs runner. It turns a pack snapshot into a durable job: it checks a release, takes
     facts and evidence availability, runs the pinned runtime through its public CLI, and keeps the
     result and audit history on the local filesystem. It embeds no evaluator of its own. External
-    actions, graph execution, shared-user permissions, and agent loops are not implemented.</p>
+    actions, graph execution, shared-user permissions, and agent loops are not implemented.
+    Since <a href="{html.escape(runner_chain_url)}" target="_blank" rel="noopener noreferrer">v0.5.0</a>
+    it keeps a chain of the runs it completes, by the runtime's rules, and can have each run's record
+    signed with the installation's key; <code>verify-run</code> checks both. A chain or a signature
+    establishes nothing against the operator on its own: the chain needs a checkpoint held by someone
+    else, and the operator holds the signing key.</p>
     <p class="card-meta">Local jobs · separately governed · non-normative</p>
   </article>
 </div>
@@ -2797,7 +2823,7 @@ SLIDES: tuple[Slide, ...] = (
         lede=(
             "A Judgment Pack defines how rules are applied. It cannot guarantee the input data is "
             "factual — and an AI that can state a fact can also invent one. That gap is handled in a "
-            "separate layer."
+            "separate layer: a gateway, and the receipt store it keeps."
         ),
         points=(
             "<strong>A gateway fetches the data, not the AI.</strong> A configured source is run by the "
@@ -2836,8 +2862,51 @@ SLIDES: tuple[Slide, ...] = (
         ),
     ),
     Slide(
+        anchor="decision-record",
+        kicker="10 — Decision records",
+        heading="What a decision record shows, and what it does not",
+        lede=(
+            "The receipts in the last section are the gateway's receipt store. The record of a "
+            "decision is the runtime's own: one line per decision, in a trail a project chooses to "
+            "keep. Since runtime v0.26.0 that trail is chained by default, and its records can be "
+            "signed, checkpointed and stamped. What each establishes, and what it does not:"
+        ),
+        points=(
+            "<strong>A chain establishes consistency, not completeness.</strong> A line edited, "
+            "inserted, deleted or moved anywhere before the last breaks the link of the line after "
+            "it. That is consistency, not authenticated history. The last line can be edited without "
+            "breaking any link, and a trail cut short, or rewritten from any line on with its links "
+            "recomputed, is as consistent as the real one.",
+            "<strong>A signature establishes nothing against the key holder.</strong> What this "
+            "establishes: a holder of the key produced the record. What it does not establish: "
+            "anything against the operator, who holds the key; anything once the key is stolen.",
+            "<strong>A held checkpoint establishes existence at hand-over, if the holder is "
+            "independent.</strong> What a held checkpoint establishes, against an operator who does "
+            "not hold the holder's copy: the records up to it are the ones that existed when it was "
+            "handed over. It is as strong as the holder's independence and retention. What it does "
+            "not: anything about the records after the last checkpoint the holder kept, which are "
+            "unwitnessed.",
+            "<strong>A stamp bounds existence in time, not when a record was made.</strong> A token "
+            "establishes that the checkpoint existed by the stamp's time. It does not establish when "
+            "the decision was made. A record's <code>at</code> is still the operator's clock.",
+        ),
+        note=(
+            "Non-normative. These are runtime conventions, not JPS audit or approval formats: "
+            "runtime ADR-0047 calls them “this runtime's convention for now”, and nothing in the "
+            "specification defines a decision record. Runner v0.5.0 keeps a chain of the runs it "
+            "completes, by the runtime's rules, can have each run's record signed, and checks both "
+            "in <code>verify-run</code>; runtime v0.27.0 refuses a signing key kept where another user "
+            "could remove or replace it. After each point's heading, the wording is the runtime's "
+            "own, from ADR-0047 and its guide."
+        ),
+        actions=(
+            ("Read how to check a trail", RUNTIME_TRAIL_URL, False),
+            ("Read runtime ADR-0047", RUNTIME_RECORD_ADR_URL, True),
+        ),
+    ),
+    Slide(
         anchor="evidence",
-        kicker="10 — Open research",
+        kicker="11 — Open research",
         heading="We publish the results that went against us",
         quote=(
             "“An open standard earns trust by solving real problems simply, and being transparent "
@@ -2874,7 +2943,7 @@ SLIDES: tuple[Slide, ...] = (
     ),
     Slide(
         anchor="status",
-        kicker="11 — Project status",
+        kicker="12 — Project status",
         heading="What works today, and what comes next",
         lede=(
             "Current release: Core 0.2.0-draft. A practical foundation for testing and evaluation — "
@@ -2916,7 +2985,7 @@ SLIDES: tuple[Slide, ...] = (
     ),
     Slide(
         anchor="get-involved",
-        kicker="12 — Get involved",
+        kicker="13 — Get involved",
         heading="Help build the open standard for AI judgment",
         lede=(
             "This is a vendor-neutral specification with, today, a single maintainer and no independent "
@@ -3049,7 +3118,7 @@ def build_presentation(output_root: Path) -> None:
     )
     rendered = page_html(
         output=page_output,
-        title="Judgment Pack in twelve sections",
+        title="Judgment Pack in thirteen sections",
         description=(
             "A scroll-through overview of the Judgment Pack Specification: the problem, the format, who "
             "it is for, what checking does and does not establish, and where the project honestly "
