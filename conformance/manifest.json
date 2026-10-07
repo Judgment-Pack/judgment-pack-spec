@@ -178,6 +178,66 @@
       "specSection": "§6.8"
     },
     {
+      "id": "structural-number-pack-id",
+      "path": "structural/number-pack-id.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/id"
+      },
+      "focus": "pack identifier sent as a JSON number, which only `type` refuses",
+      "specSection": "§5"
+    },
+    {
+      "id": "structural-number-published-date",
+      "path": "structural/number-published-date.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/sources/0/publishedAt"
+      },
+      "focus": "source publication date sent as a JSON number, which only `type` refuses",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-number-created-at",
+      "path": "structural/number-created-at.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/createdAt"
+      },
+      "focus": "metadata creation timestamp sent as a JSON number, which only `type` refuses",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-number-reviewed-at",
+      "path": "structural/number-reviewed-at.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/reviews/0/reviewedAt"
+      },
+      "focus": "review timestamp sent as a JSON number, which only `type` refuses",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-date-only-reviewed-at",
+      "path": "structural/date-only-reviewed-at.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-FORMAT-DATE-TIME",
+        "path": "/metadata/reviews/0/reviewedAt"
+      },
+      "focus": "review timestamp format assertion, which no other case reaches",
+      "specSection": "§6.8"
+    },
+    {
       "id": "structural-invalid-local-id",
       "path": "structural/invalid-local-id.json",
       "layer": "structural",

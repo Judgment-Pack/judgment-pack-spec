@@ -1,0 +1,31 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.com/judgment-packs/number-published-date",
+  "version": "0.1.0",
+  "title": "Source publication date as a JSON number",
+  "decision": {
+    "intent": "Exercise publication-date type validation.",
+    "question": "Is a JSON number rejected where a formatted date is required?"
+  },
+  "sources": [
+    {
+      "id": "policy",
+      "title": "Example policy",
+      "publishedAt": 20260115,
+      "locator": { "kind": "uri", "value": "https://example.com/policy" }
+    }
+  ],
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}
