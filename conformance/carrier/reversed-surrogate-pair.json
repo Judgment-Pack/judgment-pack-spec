@@ -1,0 +1,23 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.com/judgment-packs/reversed-surrogate-pair",
+  "version": "0.1.0",
+  "title": "Reversed surrogate pair \uDC00\uD800",
+  "decision": {
+    "intent": "Exercise rejection of a reversed surrogate pair escape.",
+    "question": "Is a reversed surrogate pair rejected?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

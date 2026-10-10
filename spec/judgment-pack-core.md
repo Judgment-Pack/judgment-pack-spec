@@ -64,7 +64,9 @@ behavior cannot override any normative artifact.
 
 The normative carrier is a JSON text as defined by RFC 8259. In addition:
 
-- object member names MUST be unique; and
+- object member names MUST be unique;
+- a `\u` Unicode escape sequence that falls in the UTF-16 surrogate range (U+D800–U+DFFF) MUST form
+  a valid UTF-16 surrogate pair; an unpaired surrogate escape is malformed input; and
 - implementations MUST reject malformed or incomplete input and data exceeding their documented
   resource limits rather than process only a silent prefix.
 
@@ -102,8 +104,9 @@ class. It defines no execution conformance: applying an outcome remains outside 
 ### 3.1 Carrier-conforming document
 
 A serialized document is carrier conforming when it satisfies §2.1, including valid and complete
-RFC 8259 JSON, unique object member names, and explicit failure rather than silent partial
-processing when a documented resource limit is exceeded.
+RFC 8259 JSON, unique object member names, well-formed UTF-16 surrogate pairing for all `\u` escape
+sequences, and explicit failure rather than silent partial processing when a documented resource
+limit is exceeded.
 
 ### 3.2 Structurally conforming document
 

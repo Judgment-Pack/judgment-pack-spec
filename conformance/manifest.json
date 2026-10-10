@@ -55,6 +55,42 @@
       "specSection": "§2"
     },
     {
+      "id": "carrier-lone-high-surrogate",
+      "path": "carrier/lone-high-surrogate.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "unpaired high surrogate escape in string value is rejected",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-lone-low-surrogate",
+      "path": "carrier/lone-low-surrogate.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "unpaired low surrogate escape in string value is rejected",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-reversed-surrogate-pair",
+      "path": "carrier/reversed-surrogate-pair.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "reversed surrogate pair escape in string value is rejected",
+      "specSection": "§2"
+    },
+    {
       "id": "structural-missing-decision",
       "path": "structural/missing-decision.json",
       "layer": "structural",

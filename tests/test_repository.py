@@ -61,6 +61,11 @@ class DuplicateMemberError(ValueError):
         self.path = path
 
 
+class UnpairedSurrogateError(ValueError):
+    def __init__(self, message: str = "unpaired surrogate escape in JSON string"):
+        super().__init__(message)
+
+
 @dataclass(frozen=True)
 class Diagnostic:
     code: str
@@ -71,6 +76,46 @@ class Diagnostic:
 def pointer(parts: Iterable[Any]) -> str:
     encoded = [str(part).replace("~", "~0").replace("/", "~1") for part in parts]
     return "" if not encoded else "/" + "/".join(encoded)
+
+
+def assert_no_unpaired_surrogates(text: str) -> None:
+    """Refuse JSON string escapes that do not form a valid surrogate pair (§2.1)."""
+    in_string = False
+    i = 0
+    n = len(text)
+    while i < n:
+        c = text[i]
+        if not in_string:
+            if c == '"':
+                in_string = True
+            i += 1
+        else:
+            if c == '"':
+                in_string = False
+                i += 1
+            elif c == '\\':
+                if i + 1 < n and text[i + 1] == 'u':
+                    if i + 6 <= n:
+                        val = int(text[i + 2 : i + 6], 16)
+                        if 0xD800 <= val <= 0xDBFF:
+                            if i + 12 <= n and text[i + 6 : i + 8] == "\\u":
+                                low_val = int(text[i + 8 : i + 12], 16)
+                                if 0xDC00 <= low_val <= 0xDFFF:
+                                    i += 12
+                                    continue
+                            raise UnpairedSurrogateError(
+                                f"unpaired high surrogate escape \\u{text[i + 2 : i + 6]}"
+                            )
+                        elif 0xDC00 <= val <= 0xDFFF:
+                            raise UnpairedSurrogateError(
+                                f"unpaired low surrogate escape \\u{text[i + 2 : i + 6]}"
+                            )
+                        else:
+                            i += 6
+                            continue
+                i += 2
+            else:
+                i += 1
 
 
 def strict_json_loads(text: str) -> Any:
@@ -194,7 +239,9 @@ def strict_json_loads(text: str) -> Any:
     decoder.parse_object = custom_parse_object
     decoder.parse_array = custom_parse_array
     decoder.scan_once = json.scanner.py_make_scanner(decoder)
-    return decoder.decode(text)
+    result = decoder.decode(text)
+    assert_no_unpaired_surrogates(text)
+    return result
 
 
 def pointer_depth(ptr: str) -> int:
@@ -542,7 +589,7 @@ def evaluate_case(
         return "invalid", [
             Diagnostic("JPS-CARRIER-DUPLICATE-MEMBER", error.path, str(error))
         ]
-    except (UnicodeError, json.JSONDecodeError) as error:
+    except (UnicodeError, json.JSONDecodeError, UnpairedSurrogateError) as error:
         return "invalid", [Diagnostic("JPS-CARRIER-INVALID-JSON", "", str(error))]
 
     diagnostics = structural_diagnostics(validator, value)
@@ -743,6 +790,28 @@ class RepositoryConformanceTests(unittest.TestCase):
                     self.assertEqual(ctx.exception.path, expected_path)
                 else:
                     self.assertEqual(strict_json_loads(text), expected_result)
+
+    def test_strict_json_loads_unpaired_surrogate_detection(self) -> None:
+        cases = [
+            ("valid_string", '{"title": "valid string"}', True),
+            ("valid_surrogate_pair", '{"title": "\\uD83D\\uDE00"}', True),
+            ("mixed_case_pair", '{"title": "\\uD83d\\uDe00"}', True),
+            ("valid_surrogate_in_member_name", '{"\\uD83D\\uDE00": 1}', True),
+            ("escaped_backslash_before_u", '{"title": "\\\\uD800"}', True),
+            ("lone_high_surrogate", '{"title": "\\uD800"}', False),
+            ("lone_low_surrogate", '{"title": "\\uDC00"}', False),
+            ("reversed_surrogate_pair", '{"title": "\\uDC00\\uD800"}', False),
+            ("two_high_surrogates", '{"title": "\\uD800\\uD800"}', False),
+            ("high_surrogate_followed_by_non_surrogate", '{"title": "\\uD800abc"}', False),
+            ("unpaired_surrogate_in_member_name", '{"\\uD800": 1}', False),
+        ]
+        for name, text, should_pass in cases:
+            with self.subTest(case=name):
+                if should_pass:
+                    self.assertIsNotNone(strict_json_loads(text))
+                else:
+                    with self.assertRaises(UnpairedSurrogateError):
+                        strict_json_loads(text)
 
     def test_schemas_are_valid_draft_2020_12(self) -> None:
         Draft202012Validator.check_schema(self.schema)
