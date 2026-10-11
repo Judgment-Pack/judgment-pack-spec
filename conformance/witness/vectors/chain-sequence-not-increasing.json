@@ -1,0 +1,18 @@
+{
+  "name": "chain-sequence-not-increasing",
+  "family": "chain",
+  "note": "Two checkpoint statements at one sequence, 160: the sequences of a chain's checkpoint statements strictly increase.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:0bcaf90d1f4d66b2949d16ee0ee1d5771da0070859466a18feaccf1b65653b4b\",\"sequence\":160,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"5fa03e052d60376b7541f256b7d6d94115beae1f91e5033a65833ca486fab29ac63e2801efa8e2129d853acd5e31d486f6e51ccae59ed39de1debb96abec9b07\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:910d419ce3edaf51a0bf0b25f31684514b90829adf62debd1970c1a0a5bc5b94\",\"sequence\":160,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":1,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"5fa03e052d60376b7541f256b7d6d94115beae1f91e5033a65833ca486fab29ac63e2801efa8e2129d853acd5e31d486f6e51ccae59ed39de1debb96abec9b07\",\"signature\":\"24410318df60010bd0fb2674e90db172394c86930fcca014e49cdb67729e4e9980e5865eee0161fb6a1eada49dc5bc27c00dc6c92fe6caf4b9882118d408c606\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:01:00Z\"}\n"
+  ],
+  "expected": {
+    "ok": false,
+    "findings": [
+      "witness-chain-broken"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "valid-conflict-keeps-coverage",
+  "family": "valid",
+  "note": "Checkpoints at sequences 100 and 200, then a conflict statement at 100: a conflict's sequence is at or below the latest checkpoint statement's, and coverage is stated by the latest checkpoint statement, so it stays at 200 (SPEC.md §8.5). A conflict fails nothing by itself.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:557bcffbbab3f47c4d89faa7d2abf018610e04c31926a359844b0c095eb69a20\",\"sequence\":100,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"e3e81669d3e330fcbcfbe442b0c611fb4b5301874e833190c9e7a78ec7036d545927943bdf0a6d8e081fc50f22e69cc546985a228d51ee533565900465d41309\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:c7611a150966e3eb7555e4fd3517db3c8ca01159efdb98618c02a06a768f9247\",\"sequence\":200,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":1,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"e3e81669d3e330fcbcfbe442b0c611fb4b5301874e833190c9e7a78ec7036d545927943bdf0a6d8e081fc50f22e69cc546985a228d51ee533565900465d41309\",\"signature\":\"9f20066acb5b9a49a1ad9681e81d2850ab46146ca3d12e002572e8dd926954146fff786b8fcbb65cc4a2d94e45551fa90d4759dad58df2a84a4c0a5420606007\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:01:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:c3e1a972bace7eaead5918ffc898b0613b9b8a012d0be50df483037060889b66\",\"sequence\":100,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":2,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"conflict\",\"prevSignature\":\"9f20066acb5b9a49a1ad9681e81d2850ab46146ca3d12e002572e8dd926954146fff786b8fcbb65cc4a2d94e45551fa90d4759dad58df2a84a4c0a5420606007\",\"signature\":\"8a65fbd22d0e16a46b87e4c42a98443f559ccf4fc5af85b43abaceba2de0acbbe65a2ddebe6c109a7c5a98900e0900d1eb52dd8ea7c0c018b051e3f83d40710a\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:02:00Z\"}\n"
+  ],
+  "head": "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:c3e1a972bace7eaead5918ffc898b0613b9b8a012d0be50df483037060889b66\",\"sequence\":100,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":2,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"conflict\",\"prevSignature\":\"9f20066acb5b9a49a1ad9681e81d2850ab46146ca3d12e002572e8dd926954146fff786b8fcbb65cc4a2d94e45551fa90d4759dad58df2a84a4c0a5420606007\",\"signature\":\"8a65fbd22d0e16a46b87e4c42a98443f559ccf4fc5af85b43abaceba2de0acbbe65a2ddebe6c109a7c5a98900e0900d1eb52dd8ea7c0c018b051e3f83d40710a\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:02:00Z\"}\n",
+  "expected": {
+    "ok": true,
+    "findings": [],
+    "reading": "current",
+    "headIndex": 2,
+    "highestIndex": 2,
+    "latestCheckpoint": {
+      "index": 1,
+      "sequence": 200,
+      "witnessedAt": "2026-10-05T12:01:00Z"
+    },
+    "conflicts": [
+      100
+    ],
+    "retired": false
+  }
+}

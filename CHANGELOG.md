@@ -7,6 +7,20 @@ here.
 
 ### Added
 
+- [RFC 0017](rfcs/0017-checkpoint-witness-statement.md) (Draft): the checkpoint witness statement,
+  taken up from the reference gateway (`v0.11.0`, `SPEC.md` §8) as a proposed companion document of
+  the specification, with a reader conformance class of its own. The maintainer's decision on issue
+  #122 is that the statement is taken up, with its vectors the same bytes as the gateway's; the RFC
+  restates its
+  canonical form, signed bytes, key rule and equation, chain rule, reading, bounds, refusals,
+  findings and report sentences, changing no rule, and says what it resolves of RFC 0012's question
+  4 and RFC 0010 §4. The gateway's 54 witness vectors are imported byte for byte into
+  [`conformance/witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness),
+  with a manifest that records each one's SHA-256. They are in no corpus while the RFC is a draft:
+  no claim may cite them, the site does not serve them, and no release bundle carries them
+  (`.gitattributes`, `export-ignore`). The repository's tests hold their bytes, their form and their
+  counts; nothing here verifies a signature. Nothing in Core `0.2.0-draft`, its schema, its classes or
+  its corpora changes.
 - The field guide gains **When rules could disagree**, informative authoring guidance for a
   consequence of §8 that two independent encodings of real policy each had to discover: the format
   has no rule priority, so a pack that holds both an *allowed* rule and a *not allowed* rule answers

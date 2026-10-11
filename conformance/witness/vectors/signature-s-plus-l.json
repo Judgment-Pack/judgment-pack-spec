@@ -1,0 +1,18 @@
+{
+  "name": "signature-s-plus-l",
+  "family": "signature",
+  "note": "An honest signature with L added to S: [S]B is unchanged, and S is below 2^253, so a reader that reduces S modulo L or tests only its top bits accepts it. S of L or more is refused.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:1c39d1ad0ab644aa4cb9d3fd8a8eac159f05162025752159d6a1f1a64d4c4d6e\",\"sequence\":94,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"223e4790d0bd0e77fd4a5ca630a066ed3478a9be0d5b57c93dd0c35a4c8234d41156816dacf58323719039d44fa7d7dc080ec3544b45f71fe64d6d110a1bc014\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n"
+  ],
+  "expected": {
+    "ok": false,
+    "findings": [
+      "witness-signature-invalid"
+    ]
+  }
+}

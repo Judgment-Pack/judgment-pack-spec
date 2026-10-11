@@ -1,0 +1,492 @@
+{
+  "status": "proposed",
+  "proposedBy": "rfcs/0017-checkpoint-witness-statement.md",
+  "source": {
+    "repository": "https://github.com/Judgment-Pack/judgment-pack-gateway",
+    "tag": "v0.11.0",
+    "commit": "13349cafe33bb7618567e47ce7f6e1a4224231b0",
+    "path": "corpus/witness"
+  },
+  "cases": [
+    {
+      "id": "begins-late-index-one",
+      "path": "vectors/begins-late-index-one.json",
+      "family": "begins-late",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "8de068add500d95b60e8f115dcce7f501f17121296b2bddda1a34cbfc6851029"
+    },
+    {
+      "id": "begins-late-nothing-supplied",
+      "path": "vectors/begins-late-nothing-supplied.json",
+      "family": "begins-late",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "fb972f1632537fc5dfb0dd840c5615b7cdf7710a78988cc05abe63e550185e50"
+    },
+    {
+      "id": "begins-late-with-head",
+      "path": "vectors/begins-late-with-head.json",
+      "family": "begins-late",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "cf7fc60fe08d1c080866111d9f29d1c00c3a3daeba0c001b6d272ecf079d38e6"
+    },
+    {
+      "id": "bound-bytes-at-limit",
+      "path": "vectors/bound-bytes-at-limit.json",
+      "family": "bound",
+      "expectedResult": "reading",
+      "sha256": "c898c8cf8c1615eb1af10758338b0dbc859870b8f774eb1816f5699ef5e1c068"
+    },
+    {
+      "id": "bound-bytes-one-past",
+      "path": "vectors/bound-bytes-one-past.json",
+      "family": "bound",
+      "expectedResult": "refused",
+      "expectedRefusal": "bytes-over-bound",
+      "sha256": "5e0c6a2e520a40c7bf0c8d934a3b807b05c1cf24f0a92c96fb08862c22cce1c4"
+    },
+    {
+      "id": "bound-keys-at-limit",
+      "path": "vectors/bound-keys-at-limit.json",
+      "family": "bound",
+      "expectedResult": "reading",
+      "sha256": "cd7b1e9652aa3247fddc2f0023b7d874a0d1a13897ea6beaed1ab4b0c86deb28"
+    },
+    {
+      "id": "bound-keys-one-past",
+      "path": "vectors/bound-keys-one-past.json",
+      "family": "bound",
+      "expectedResult": "refused",
+      "expectedRefusal": "keys-over-bound",
+      "sha256": "29a6cb697a5242835f0e87001d87aa3a7ceca824a3fe652069cabf6cac01c809"
+    },
+    {
+      "id": "bound-statements-at-limit",
+      "path": "vectors/bound-statements-at-limit.json",
+      "family": "bound",
+      "expectedResult": "reading",
+      "sha256": "f4d5cd67077b9e003c8fb1a439fb513ef207a151879fc2955c0b9b8825351342"
+    },
+    {
+      "id": "bound-statements-many-short-lines",
+      "path": "vectors/bound-statements-many-short-lines.json",
+      "family": "bound",
+      "expectedResult": "refused",
+      "expectedRefusal": "statements-over-bound",
+      "sha256": "d24ae95c6dea6f8f5d937b9a1bfe5550d2f6897b4ea8b6502b51d796c5b51551"
+    },
+    {
+      "id": "bound-statements-one-past",
+      "path": "vectors/bound-statements-one-past.json",
+      "family": "bound",
+      "expectedResult": "refused",
+      "expectedRefusal": "statements-over-bound",
+      "sha256": "3ba4335b5659e8333a91a7814833a4beb15ede506d6376f66af9ed8121c27637"
+    },
+    {
+      "id": "chain-conflict-above-latest",
+      "path": "vectors/chain-conflict-above-latest.json",
+      "family": "chain",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "8a450536d45c3c63f2ef0b2bb8797c94fc44849a87b5eb25fd7b77b74169cc1c"
+    },
+    {
+      "id": "chain-conflict-first",
+      "path": "vectors/chain-conflict-first.json",
+      "family": "chain",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "eb5f6c9d25975431ec8bc7214555dfa298feae88e4e4fac5b18b01735a5b4ea7"
+    },
+    {
+      "id": "chain-first-names-a-previous",
+      "path": "vectors/chain-first-names-a-previous.json",
+      "family": "chain",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "8306a3e1186aa3f7797d2165cbe9129c2232490f54ad1f7cf44790756348b302"
+    },
+    {
+      "id": "chain-hole",
+      "path": "vectors/chain-hole.json",
+      "family": "chain",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "476945906ef5dd6cbbca4f6f6a1af64c1db5befc322b25036d9099bb6cd0f270"
+    },
+    {
+      "id": "chain-later-names-none",
+      "path": "vectors/chain-later-names-none.json",
+      "family": "chain",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "51736fe4496f3fb166634dfb39e0fc0f1f6b976f5ff87b37fafafe4e429719c4"
+    },
+    {
+      "id": "chain-previous-mismatch",
+      "path": "vectors/chain-previous-mismatch.json",
+      "family": "chain",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "2a3a19157f2f952670400371f82645a0d5b56f3d06d625d2e6aecd62febe0cc0"
+    },
+    {
+      "id": "chain-retirement-not-last",
+      "path": "vectors/chain-retirement-not-last.json",
+      "family": "chain",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "525b5cbc01f029559277813932d6900f52c506fdb50733aeedcc8a08d88cefe9"
+    },
+    {
+      "id": "chain-retirement-not-repeating",
+      "path": "vectors/chain-retirement-not-repeating.json",
+      "family": "chain",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "4d28301012483ffec4f16df1768d2f915af9c48fc86a858ce9e4c6937d201661"
+    },
+    {
+      "id": "chain-sequence-not-increasing",
+      "path": "vectors/chain-sequence-not-increasing.json",
+      "family": "chain",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "22cdcc72de6b92b2279dc524e9b74ed0b5cf16709ef71233871983caceb07725"
+    },
+    {
+      "id": "chain-skips-an-index",
+      "path": "vectors/chain-skips-an-index.json",
+      "family": "chain",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "d3eec63588eb6ec3add735fb536df8a56d679ac284937f41131a1e5bb0167492"
+    },
+    {
+      "id": "equivocation-head-differs",
+      "path": "vectors/equivocation-head-differs.json",
+      "family": "equivocation",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-equivocation"
+      ],
+      "sha256": "f3494023f14e7ec08c589f832d9d090ba9c3d543714b63e9dc44bc62da53db9a"
+    },
+    {
+      "id": "equivocation-two-at-one-index",
+      "path": "vectors/equivocation-two-at-one-index.json",
+      "family": "equivocation",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-equivocation"
+      ],
+      "sha256": "de2fd211204382c731b58cefce81ea552549302a3e3f7b493b6324dbed299855"
+    },
+    {
+      "id": "head-next-not-linked",
+      "path": "vectors/head-next-not-linked.json",
+      "family": "head",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-chain-broken"
+      ],
+      "sha256": "8c09ba4af6dfbc7a5f474858042ef0b8ce6f8bd833f24afe93ef4fc3e1001bfa"
+    },
+    {
+      "id": "head-unreached",
+      "path": "vectors/head-unreached.json",
+      "family": "head",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-head-unreached"
+      ],
+      "sha256": "9c8cc3bcfc488d8676cf85bb92ac5e563dd39a414f47d6733450174b2e967a4f"
+    },
+    {
+      "id": "key-mixed-order-accepted",
+      "path": "vectors/key-mixed-order-accepted.json",
+      "family": "key",
+      "expectedResult": "reading",
+      "sha256": "7467b29e0292bd5ad4a8cd435740b0fcd4651d6c9ccacd115b53c3e6c62a68f9"
+    },
+    {
+      "id": "key-not-canonical-identity",
+      "path": "vectors/key-not-canonical-identity.json",
+      "family": "key",
+      "expectedResult": "refused",
+      "expectedRefusal": "key-not-canonical",
+      "sha256": "126f83dea438b158c712de0f6ed05f666fede0d0dab2a7ae47e4835ed96e950d"
+    },
+    {
+      "id": "key-not-canonical-sign-bit",
+      "path": "vectors/key-not-canonical-sign-bit.json",
+      "family": "key",
+      "expectedResult": "refused",
+      "expectedRefusal": "key-not-canonical",
+      "sha256": "b39d6691c4e49b6b7557ce6ed4ce7e54f56fd152c1dfb3ea64584ec2ac8e09a6"
+    },
+    {
+      "id": "key-not-on-curve",
+      "path": "vectors/key-not-on-curve.json",
+      "family": "key",
+      "expectedResult": "refused",
+      "expectedRefusal": "key-not-on-curve",
+      "sha256": "a0141e630aeae807eab22c1153c14aecc65dc2cadf1c8e3e377d0493656aecd6"
+    },
+    {
+      "id": "key-small-order-all-zero",
+      "path": "vectors/key-small-order-all-zero.json",
+      "family": "key",
+      "expectedResult": "refused",
+      "expectedRefusal": "key-small-order",
+      "sha256": "d72e5ce3fa39b88bd0eca5f67f631eb5a6527de5d632e09c5ec85e85ef861f8b"
+    },
+    {
+      "id": "key-small-order-identity",
+      "path": "vectors/key-small-order-identity.json",
+      "family": "key",
+      "expectedResult": "refused",
+      "expectedRefusal": "key-small-order",
+      "sha256": "965bf657c612c6565a1d63a01c5da6a993c186055f12a26176a96f7e8f85b33d"
+    },
+    {
+      "id": "malformed-checkpoint-member",
+      "path": "vectors/malformed-checkpoint-member.json",
+      "family": "malformed",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-malformed"
+      ],
+      "sha256": "6c5216febd1f852369457374644f0eb8f2f74c88a895c0aec4e5cd2a0a14e5cc"
+    },
+    {
+      "id": "malformed-head-two-statements",
+      "path": "vectors/malformed-head-two-statements.json",
+      "family": "malformed",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-malformed"
+      ],
+      "sha256": "7c524c971919354bdb96ddf6d033f5ada83456534cd3868928b7d03e9a401d67"
+    },
+    {
+      "id": "malformed-index-minus-zero",
+      "path": "vectors/malformed-index-minus-zero.json",
+      "family": "malformed",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-malformed"
+      ],
+      "sha256": "da0cd1b619f9f4e7360da8b81ecacdd72a2b9df8bef7027362f584b7aec9657f"
+    },
+    {
+      "id": "malformed-signature-upper-case",
+      "path": "vectors/malformed-signature-upper-case.json",
+      "family": "malformed",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-malformed"
+      ],
+      "sha256": "be7b2412756ec29ec616ad2adcacbca76780cbeb5d1f66333693278346174b22"
+    },
+    {
+      "id": "malformed-unknown-member",
+      "path": "vectors/malformed-unknown-member.json",
+      "family": "malformed",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-malformed"
+      ],
+      "sha256": "15516216ca7dabe51363e13a9e5152498993318bcc5de3de2cbde62e9e748a46"
+    },
+    {
+      "id": "malformed-witness-version",
+      "path": "vectors/malformed-witness-version.json",
+      "family": "malformed",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-malformed"
+      ],
+      "sha256": "d5daff04bdbf322c8c6356b2c0fbd8c46b89aad707931c64b0c9053e5a6ade5d"
+    },
+    {
+      "id": "signature-altered-after-signing",
+      "path": "vectors/signature-altered-after-signing.json",
+      "family": "signature",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-signature-invalid"
+      ],
+      "sha256": "787f045913d29f9c8e93f037e08dcb2301450db6cf6eaafd17c7cd19508ad860"
+    },
+    {
+      "id": "signature-before-trail",
+      "path": "vectors/signature-before-trail.json",
+      "family": "signature",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-signature-invalid"
+      ],
+      "sha256": "df9981cbc31b5527c5e5083dee9cb5450c98f43dfa8705e3cdb2b0050b9715c8"
+    },
+    {
+      "id": "signature-cofactored-only-mixed-key",
+      "path": "vectors/signature-cofactored-only-mixed-key.json",
+      "family": "signature",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-signature-invalid"
+      ],
+      "sha256": "aa110cfb44ba057719d8f7f769551763d6643f71d8dc2359597813fdaf2507c3"
+    },
+    {
+      "id": "signature-cofactored-only-small-order-r",
+      "path": "vectors/signature-cofactored-only-small-order-r.json",
+      "family": "signature",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-signature-invalid"
+      ],
+      "sha256": "e9c3c588c118cab4760adb382c32d893377201119539941c1531176af7f97c30"
+    },
+    {
+      "id": "signature-identity-r-accepted",
+      "path": "vectors/signature-identity-r-accepted.json",
+      "family": "signature",
+      "expectedResult": "reading",
+      "sha256": "dfa34bc1ce2d79ef24e885ab441c12f7b4192d1df66e416d9dba719f86f86cca"
+    },
+    {
+      "id": "signature-key-id-names-another",
+      "path": "vectors/signature-key-id-names-another.json",
+      "family": "signature",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-signature-invalid"
+      ],
+      "sha256": "beb10e5f9ada7de8372e7d0005aae14c51eddfadfdc56f018d20c349e29fca4a"
+    },
+    {
+      "id": "signature-key-not-supplied",
+      "path": "vectors/signature-key-not-supplied.json",
+      "family": "signature",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-signature-invalid"
+      ],
+      "sha256": "4bbed35655455e888fb714bfafcdc3cd0095602fff82fbf64798d49229589bd1"
+    },
+    {
+      "id": "signature-s-plus-l",
+      "path": "vectors/signature-s-plus-l.json",
+      "family": "signature",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-signature-invalid"
+      ],
+      "sha256": "58c53d5b9a725ef1865ae5c8b56ae285722dcd47f420115cf5344d9b5f3248c3"
+    },
+    {
+      "id": "trail-mismatch",
+      "path": "vectors/trail-mismatch.json",
+      "family": "trail",
+      "expectedResult": "findings",
+      "expectedFindings": [
+        "witness-trail-mismatch"
+      ],
+      "sha256": "2318f517b1c4de35c1555b0a1f9b47d4d58d80fd455e8752ca9406afbc3d57be"
+    },
+    {
+      "id": "valid-chain-runs-past-head",
+      "path": "vectors/valid-chain-runs-past-head.json",
+      "family": "valid",
+      "expectedResult": "reading",
+      "sha256": "909e69152eab84c89c0bbbddf0c61d1bba1c323aa35fc0f6f502caba9d0ea3a4"
+    },
+    {
+      "id": "valid-conflict-keeps-coverage",
+      "path": "vectors/valid-conflict-keeps-coverage.json",
+      "family": "valid",
+      "expectedResult": "reading",
+      "sha256": "1ead1b51d4897fee33b5afcbfcfb0a40d3a92275ad80777178496309396518f8"
+    },
+    {
+      "id": "valid-current-at-head",
+      "path": "vectors/valid-current-at-head.json",
+      "family": "valid",
+      "expectedResult": "reading",
+      "sha256": "3868e29807894907251abaef3c77b9a8aa05831c49e084e133b79ab06e3586ea"
+    },
+    {
+      "id": "valid-files-in-any-order",
+      "path": "vectors/valid-files-in-any-order.json",
+      "family": "valid",
+      "expectedResult": "reading",
+      "sha256": "0a568e333e6ae62404d4ea139f3d5e4461804dbc3904f1b34d177a51720b3097"
+    },
+    {
+      "id": "valid-head-extends-chain",
+      "path": "vectors/valid-head-extends-chain.json",
+      "family": "valid",
+      "expectedResult": "reading",
+      "sha256": "62682209edec9aa481342bbacbc466536616653e8ed103099c49bf0f0772ebee"
+    },
+    {
+      "id": "valid-head-only",
+      "path": "vectors/valid-head-only.json",
+      "family": "valid",
+      "expectedResult": "reading",
+      "sha256": "eb1c3de91c3c1776fc23f1812e5fac9d7094ab1cb40bd7bdd468db730c51e184"
+    },
+    {
+      "id": "valid-one-statement",
+      "path": "vectors/valid-one-statement.json",
+      "family": "valid",
+      "expectedResult": "reading",
+      "sha256": "5f3c4b24dda01573e0c5d6b750d5571437b2f734a008dc449678d33af715c938"
+    },
+    {
+      "id": "valid-retired",
+      "path": "vectors/valid-retired.json",
+      "family": "valid",
+      "expectedResult": "reading",
+      "sha256": "07945e87108f2a845c81ba23191ba71f65931ff7329aa76f35f2d67de921b8d7"
+    },
+    {
+      "id": "valid-same-statement-respelled",
+      "path": "vectors/valid-same-statement-respelled.json",
+      "family": "valid",
+      "expectedResult": "reading",
+      "sha256": "b961a85ea566ddb42bfe64da32a6b220e6617cc39efb063c1cd8a3e9bc3e5af1"
+    }
+  ]
+}

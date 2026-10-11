@@ -15,6 +15,10 @@ ROOT = Path(__file__).resolve().parents[1]
 # Mirrors UNPUBLISHED_ARTIFACT_DIRECTORIES in web/build.py: rows staged for a later suiteVersion are
 # in no corpus, and the site serves nothing under this directory.
 STAGED_EVALUATION_ROWS = "conformance/evaluation/staged"
+# The checkpoint witness vectors RFC 0017 proposes are in no corpus while it is a draft, and the site
+# serves nothing under this directory either (conformance/witness/README.md).
+WITNESS_VECTORS = "conformance/witness"
+UNPUBLISHED_DIRECTORIES = (STAGED_EVALUATION_ROWS, WITNESS_VECTORS)
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
 # anywhere the site publishes. The tokens are assembled from fragments deliberately: the repository
@@ -188,7 +192,10 @@ class StaticSiteTests(unittest.TestCase):
         for directory in ("schema", "examples", "conformance"):
             for source in (ROOT / directory).rglob("*.json"):
                 relative = source.relative_to(ROOT)
-                if relative.as_posix().startswith(STAGED_EVALUATION_ROWS + "/"):
+                if any(
+                    relative.as_posix().startswith(directory + "/")
+                    for directory in UNPUBLISHED_DIRECTORIES
+                ):
                     continue
                 published = self.output / "artifacts" / relative
                 with self.subTest(relative=relative.as_posix()):
@@ -199,14 +206,22 @@ class StaticSiteTests(unittest.TestCase):
         # Staged rows are in no corpus (conformance/evaluation/staged/README.md) and that README says
         # the site does not serve them. A recursive copy of conformance/ would, so the claim is held
         # here: nothing under the staged directory is published, as an artifact or as a page.
-        staged = sorted((ROOT / STAGED_EVALUATION_ROWS).rglob("*"))
+        self._assert_nothing_published_under(STAGED_EVALUATION_ROWS)
+
+    def test_witness_vectors_are_not_published(self) -> None:
+        # RFC 0017 is a draft, and conformance/witness/README.md says the site does not serve the
+        # vectors it proposes; held as the staged rows' exclusion is.
+        self._assert_nothing_published_under(WITNESS_VECTORS)
+
+    def _assert_nothing_published_under(self, directory: str) -> None:
+        staged = sorted((ROOT / directory).rglob("*"))
         self.assertTrue(
             any(path.suffix == ".json" for path in staged),
-            "nothing is staged; this test and the exclusion it holds can go with the directory",
+            "nothing is here; this test and the exclusion it holds can go with the directory",
         )
         # Whole path components, not a substring: a sibling such as `staged-next/` is not this
         # directory, the build would publish it, and this test must not object.
-        staged_parts = tuple(STAGED_EVALUATION_ROWS.split("/"))
+        staged_parts = tuple(directory.split("/"))
 
         def is_under_staged(parts: tuple[str, ...]) -> bool:
             return any(

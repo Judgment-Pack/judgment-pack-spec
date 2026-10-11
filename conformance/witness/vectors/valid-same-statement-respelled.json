@@ -1,0 +1,27 @@
+{
+  "name": "valid-same-statement-respelled",
+  "family": "valid",
+  "note": "The statement at index 1 supplied twice: as served, and spelled with whitespace, its members in another order and a character of keyId escaped. A statement is read by its JSON value and signed over the canonical form of that value, so the two have the same canonical bytes and are one statement, not an equivocation.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:124e08fea046b5d73cbdf3ed891f968d761691f0ca78cef2793d16cada61a023\",\"sequence\":10,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"4ebdf71e6103fc94251cc07519a55d06da7d050ba3c9e78622d64a33744962e165cac31036779f454385d1bfa77a55e041b95c9a39fd6857365342534451a404\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:487450928de7d0a922deb0c7917797cb8d071890a8f83bfa73898859f7fd2afa\",\"sequence\":11,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":1,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"4ebdf71e6103fc94251cc07519a55d06da7d050ba3c9e78622d64a33744962e165cac31036779f454385d1bfa77a55e041b95c9a39fd6857365342534451a404\",\"signature\":\"076c84f1956c0dd579c367df2786f14c101dfbea8de190d8de6bd30842e5b78bdf02cb698d6bb4c9b76f9ee381e987c1c40aeaeac12d0d0a8e173c7788927809\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:01:00Z\"}\n",
+    "{ \"witnessVersion\" : \"1\" ,\t\"kind\":\"checkpoint\", \"index\":1, \"prevSignature\":\"4ebdf71e6103fc94251cc07519a55d06da7d050ba3c9e78622d64a33744962e165cac31036779f454385d1bfa77a55e041b95c9a39fd6857365342534451a404\", \"witnessedAt\":\"2026-10-05T12:01:00Z\", \"keyId\":\"\\u0064db406e95cad582adc111a7d6fbff25d\", \"signature\":\"076c84f1956c0dd579c367df2786f14c101dfbea8de190d8de6bd30842e5b78bdf02cb698d6bb4c9b76f9ee381e987c1c40aeaeac12d0d0a8e173c7788927809\", \"checkpoint\":{\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\",\"sequence\":11,\"recordDigest\":\"sha256:487450928de7d0a922deb0c7917797cb8d071890a8f83bfa73898859f7fd2afa\",\"checkpointVersion\":\"1\"} }\n"
+  ],
+  "expected": {
+    "ok": true,
+    "findings": [],
+    "reading": "historical",
+    "headIndex": null,
+    "highestIndex": 1,
+    "latestCheckpoint": {
+      "index": 1,
+      "sequence": 11,
+      "witnessedAt": "2026-10-05T12:01:00Z"
+    },
+    "conflicts": [],
+    "retired": false
+  }
+}

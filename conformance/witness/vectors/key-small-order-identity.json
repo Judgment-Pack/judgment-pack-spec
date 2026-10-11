@@ -1,0 +1,15 @@
+{
+  "name": "key-small-order-identity",
+  "family": "key",
+  "note": "The identity, canonically encoded: a point of small order, under which R the identity and S zero verify for every message. The reading is refused before any statement is read.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "0100000000000000000000000000000000000000000000000000000000000000"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:da5f1df36d3210d5ebb44ae33fabf581825060befcfc0f5d34f4b36c5f488f13\",\"sequence\":90,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"01d0fabd251fcbbe2b93b4b927b26ad2\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T13:00:00Z\"}\n"
+  ],
+  "expected": {
+    "refused": "key-small-order"
+  }
+}

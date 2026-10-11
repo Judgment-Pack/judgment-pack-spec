@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import collections
+import hashlib
 import json
 import json.scanner
 import re
@@ -785,7 +786,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             path.relative_to(CONFORMANCE).as_posix()
             for path in CONFORMANCE.rglob("*.json")
             if not (path.name.endswith(".schema.json") or path.name in ("manifest.json", "cases.json"))
-            and path.relative_to(CONFORMANCE).parts[0] != "evaluation"
+            and path.relative_to(CONFORMANCE).parts[0] not in ("evaluation", "witness")
         }
 
         for path in sorted(listed - on_disk):
@@ -1269,6 +1270,224 @@ class RepositoryConformanceTests(unittest.TestCase):
                 if not resolved.exists():
                     failures.append(f"{markdown_path.relative_to(ROOT)} -> {raw_target}")
         self.assertEqual([], failures)
+
+
+# The checkpoint witness vectors RFC 0017 proposes: the reference gateway's corpus/witness/ at
+# v0.11.0, byte for byte. They are in no corpus while the RFC is a draft
+# (conformance/witness/README.md). The repository owns no reader, so nothing here verifies a
+# signature or reads a chain: these tests hold the files to the digests the manifest records, each
+# vector to the gateway's form, each manifest row to the vector it names, and every statement of the
+# vectors' counts to the manifest.
+WITNESS = CONFORMANCE / "witness"
+WITNESS_VECTORS = WITNESS / "vectors"
+WITNESS_MANIFEST_PATH = WITNESS / "manifest.json"
+WITNESS_RFC = "rfcs/0017-checkpoint-witness-statement.md"
+WITNESS_SOURCE = {
+    "repository": "https://github.com/Judgment-Pack/judgment-pack-gateway",
+    "tag": "v0.11.0",
+    "commit": "13349cafe33bb7618567e47ce7f6e1a4224231b0",
+    "path": "corpus/witness",
+}
+WITNESS_FAMILIES = (
+    "valid",
+    "begins-late",
+    "equivocation",
+    "head",
+    "key",
+    "signature",
+    "trail",
+    "malformed",
+    "chain",
+    "bound",
+)
+# RFC 0017 §9: the refusals and findings a reader reports, by the names the vectors use.
+WITNESS_REFUSALS = {
+    "keys-over-bound",
+    "key-not-canonical",
+    "key-small-order",
+    "key-not-on-curve",
+    "bytes-over-bound",
+    "statements-over-bound",
+}
+WITNESS_FINDINGS = {
+    "witness-malformed",
+    "witness-signature-invalid",
+    "witness-trail-mismatch",
+    "witness-equivocation",
+    "witness-chain-broken",
+    "witness-head-unreached",
+}
+WITNESS_READING_MEMBERS = {
+    "ok",
+    "findings",
+    "reading",
+    "headIndex",
+    "highestIndex",
+    "latestCheckpoint",
+    "conflicts",
+    "retired",
+}
+HEX_32 = re.compile(r"[0-9a-f]{32}")
+HEX_64 = re.compile(r"[0-9a-f]{64}")
+WITNESSED_AT = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
+
+
+def is_count(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+class WitnessVectorTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.manifest = strict_json_loads(WITNESS_MANIFEST_PATH.read_text(encoding="utf-8"))
+        cls.vectors = {
+            row["path"]: strict_json_loads((WITNESS / row["path"]).read_text(encoding="utf-8"))
+            for row in cls.manifest["cases"]
+            if (WITNESS / row["path"]).is_file()
+        }
+
+    def test_manifest_names_its_status_proposal_and_source(self) -> None:
+        self.assertEqual({"status", "proposedBy", "source", "cases"}, set(self.manifest))
+        self.assertEqual("proposed", self.manifest["status"])
+        self.assertEqual(WITNESS_RFC, self.manifest["proposedBy"])
+        self.assertTrue((ROOT / WITNESS_RFC).is_file())
+        self.assertEqual(WITNESS_SOURCE, self.manifest["source"])
+        for row in self.manifest["cases"]:
+            with self.subTest(row=row.get("id")):
+                expected = {"id", "path", "family", "expectedResult", "sha256"}
+                if row.get("expectedResult") == "findings":
+                    expected.add("expectedFindings")
+                elif row.get("expectedResult") == "refused":
+                    expected.add("expectedRefusal")
+                else:
+                    self.assertEqual("reading", row.get("expectedResult"))
+                self.assertEqual(expected, set(row))
+                self.assertRegex(row["sha256"], HEX_64)
+
+    def test_vectors_are_the_gateways_bytes(self) -> None:
+        # Every file under vectors/, of any name, is a row, and every row a file whose SHA-256 is the
+        # one recorded from the gateway's release: a vector added, removed or changed by a byte fails.
+        rows = self.manifest["cases"]
+        self.assertEqual(len(rows), len({row["id"] for row in rows}), "a case id appears twice")
+        self.assertEqual(len(rows), len({row["path"] for row in rows}), "a case path appears twice")
+        listed = {row["path"] for row in rows}
+        on_disk = {
+            path.relative_to(WITNESS).as_posix() for path in WITNESS_VECTORS.rglob("*") if path.is_file()
+        }
+        self.assertEqual([], sorted(listed - on_disk), "rows that name no file")
+        self.assertEqual([], sorted(on_disk - listed), "files that no row names")
+        for row in rows:
+            with self.subTest(path=row["path"]):
+                self.assertTrue(row["path"].startswith("vectors/"))
+                digest = hashlib.sha256((WITNESS / row["path"]).read_bytes()).hexdigest()
+                self.assertEqual(row["sha256"], digest)
+
+    def _check_file(self, value: Any) -> None:
+        # A file is its text, or parts whose text is repeated `times` times, in order.
+        if isinstance(value, str):
+            return
+        self.assertIsInstance(value, dict)
+        self.assertEqual({"parts"}, set(value))
+        self.assertTrue(value["parts"])
+        for part in value["parts"]:
+            self.assertEqual({"text", "times"}, set(part))
+            self.assertIsInstance(part["text"], str)
+            self.assertTrue(is_count(part["times"]) and part["times"] >= 1)
+
+    def _check_expected(self, vector: dict[str, Any]) -> None:
+        expected = vector["expected"]
+        self.assertIsInstance(expected, dict)
+        if "refused" in expected:
+            self.assertEqual({"refused"}, set(expected))
+            self.assertIn(expected["refused"], WITNESS_REFUSALS)
+            return
+        if expected.get("ok") is False:
+            self.assertEqual({"ok", "findings"}, set(expected))
+            self.assertIsInstance(expected["findings"], list)
+            self.assertTrue(expected["findings"], "a reading that is not ok names a finding")
+            self.assertLessEqual(set(expected["findings"]), WITNESS_FINDINGS)
+            return
+        self.assertEqual(WITNESS_READING_MEMBERS, set(expected))
+        self.assertIs(True, expected["ok"])
+        self.assertEqual([], expected["findings"])
+        # Current with a head, historical without; the head's index exactly when there is a head.
+        self.assertEqual("current" if "head" in vector else "historical", expected["reading"])
+        if "head" in vector:
+            self.assertTrue(is_count(expected["headIndex"]))
+        else:
+            self.assertIsNone(expected["headIndex"])
+        self.assertTrue(is_count(expected["highestIndex"]))
+        latest = expected["latestCheckpoint"]
+        self.assertEqual({"index", "sequence", "witnessedAt"}, set(latest))
+        self.assertTrue(is_count(latest["index"]))
+        self.assertTrue(is_count(latest["sequence"]) and latest["sequence"] >= 1)
+        self.assertRegex(latest["witnessedAt"], WITNESSED_AT)
+        self.assertIsInstance(expected["conflicts"], list)
+        self.assertTrue(all(is_count(item) for item in expected["conflicts"]))
+        self.assertIsInstance(expected["retired"], bool)
+
+    def test_vectors_have_the_gateways_form(self) -> None:
+        for path, vector in sorted(self.vectors.items()):
+            with self.subTest(path=path):
+                self.assertIsInstance(vector, dict)
+                required = {"name", "family", "note", "trail", "keys", "witness", "expected"}
+                self.assertLessEqual(required, set(vector))
+                self.assertLessEqual(set(vector), required | {"head"})
+                self.assertEqual(Path(path).stem, vector["name"])
+                self.assertIn(vector["family"], WITNESS_FAMILIES)
+                self.assertTrue(isinstance(vector["note"], str) and vector["note"])
+                self.assertRegex(vector["trail"], HEX_32)
+                self.assertIsInstance(vector["keys"], list)
+                for key in vector["keys"]:
+                    self.assertRegex(key, HEX_64)
+                self.assertIsInstance(vector["witness"], list)
+                for item in vector["witness"]:
+                    self._check_file(item)
+                if "head" in vector:
+                    self._check_file(vector["head"])
+                self._check_expected(vector)
+
+    def test_rows_restate_their_vectors(self) -> None:
+        for row in self.manifest["cases"]:
+            with self.subTest(row=row["id"]):
+                vector = self.vectors.get(row["path"])
+                self.assertIsNotNone(vector, f"{row['path']} names no file")
+                assert vector is not None
+                self.assertEqual(vector["name"], row["id"])
+                self.assertEqual(vector["family"], row["family"])
+                expected = vector["expected"]
+                if "refused" in expected:
+                    self.assertEqual("refused", row["expectedResult"])
+                    self.assertEqual(expected["refused"], row["expectedRefusal"])
+                elif expected["ok"]:
+                    self.assertEqual("reading", row["expectedResult"])
+                else:
+                    self.assertEqual("findings", row["expectedResult"])
+                    self.assertEqual(sorted(set(expected["findings"])), row["expectedFindings"])
+
+    def test_vector_counts_match_the_manifest(self) -> None:
+        # The counts are repeated by hand in prose, so each statement of them is held here.
+        rows = self.manifest["cases"]
+        count = len(rows)
+        families = collections.Counter(row["family"] for row in rows)
+        self.assertEqual(set(WITNESS_FAMILIES), set(families), "a family with no vector, or an unknown one")
+        statements = [
+            ("conformance/witness/README.md", f"This directory holds {count} vectors"),
+            ("conformance/README.md", f"holds the {count} vectors"),
+            (WITNESS_RFC, f"The vectors are the gateway's {count}, imported unchanged"),
+        ]
+        for family in WITNESS_FAMILIES:
+            row = f"| `{family}` | {families[family]} |"
+            statements.append(("conformance/witness/README.md", row))
+            statements.append((WITNESS_RFC, row))
+        for relative, expected in statements:
+            with self.subTest(file=relative, statement=expected):
+                text = (ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn(
+                    expected,
+                    " ".join(text.split()),
+                    f"{relative} no longer states what conformance/witness/manifest.json holds",
+                )
 
 
 if __name__ == "__main__":

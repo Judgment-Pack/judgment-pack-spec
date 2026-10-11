@@ -57,6 +57,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0014](0014-lineage-record-and-action-binding.md) | The lineage record and the action binding — how a decision cites what it read, and an action cites what it decided | Accepted | Research line (cross-project artifact: gateway receipt version 3 + verifier join, runtime record and row citations; outside the specification) — a retrospective record; acceptance endorses the record only |
 | [0015](0015-reported-receipts.md) | What a reported receipt would have to specify — the engine signing a call it did not make | Draft | Research line (cross-project artifact: gateway receipt format, verifier and surface; a reporting plugin in an MCP gateway; outside the specification) |
 | [0016](0016-outcome-values.md) | Outcome values — a decision that states a quantity | Draft | Specification (a specification-defined extension, or Core — undecided) |
+| [0017](0017-checkpoint-witness-statement.md) | The checkpoint witness statement | Draft | Specification (a companion document beside Core, with a reader conformance class; its 54 vectors are imported from the reference gateway and held in no corpus until acceptance) |
 
 The "Belongs to" column records where each proposal would land if accepted. A format that
 independent tools must agree on is a candidate for the specification. An algorithm or engine belongs

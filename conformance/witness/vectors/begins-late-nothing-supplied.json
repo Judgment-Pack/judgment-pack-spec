@@ -1,0 +1,18 @@
+{
+  "name": "begins-late-nothing-supplied",
+  "family": "begins-late",
+  "note": "A statements file holding no statement, and no head: an empty set does not begin at index 0.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    ""
+  ],
+  "expected": {
+    "ok": false,
+    "findings": [
+      "witness-chain-broken"
+    ]
+  }
+}

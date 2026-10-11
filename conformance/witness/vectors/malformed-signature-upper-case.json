@@ -1,0 +1,18 @@
+{
+  "name": "malformed-signature-upper-case",
+  "family": "malformed",
+  "note": "A valid statement whose signature is written in upper case: a signature is 128 lowercase hexadecimal characters.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:8f4a7b3f96427e6273c8687f1128c274949ff0ad3d85d761b807f1099a470d04\",\"sequence\":114,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"CB87A0DF7B53619F8BDE9B04290E6026AC7F48BAEC9FA00DEAD26670F6D06F6EF76A8FFCE6580CCE0F211F4DDDD4141F29D5E7B667E7AC21EB5F9F627AA9DB0B\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n"
+  ],
+  "expected": {
+    "ok": false,
+    "findings": [
+      "witness-malformed"
+    ]
+  }
+}

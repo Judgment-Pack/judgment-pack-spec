@@ -3,3 +3,9 @@
 # so no bundle ever carries a staged row, whatever is staged when a release is cut.
 conformance/evaluation/staged export-ignore
 conformance/evaluation/staged/** export-ignore
+
+# Vectors proposed by a Draft RFC are in no corpus either (conformance/witness/README.md), so no
+# bundle carries them. They are the reference gateway's bytes, held to their SHA-256 digests, so no
+# checkout may convert a line ending in them either.
+conformance/witness export-ignore
+conformance/witness/** export-ignore -text

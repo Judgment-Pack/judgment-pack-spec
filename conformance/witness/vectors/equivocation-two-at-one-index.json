@@ -1,0 +1,18 @@
+{
+  "name": "equivocation-two-at-one-index",
+  "family": "equivocation",
+  "note": "Two statements at index 1, both signed under the key and both naming statement 0's signature, that differ: the witness signed two chains.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:3c7c36827ffdd234e6237d5196940302510f05d24ebf4a7c84495cea2d879643\",\"sequence\":50,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"8f37cf00b85b704f1ec5d250b7375c72712406cb1424da9cb49b6a07be0011c205facdc0d6de76d0a1b5e74a82a23790127166732a152b74350f434e7da83c02\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:5a431f9fad40cebc6010c10f324286998f197931e631e6f2ea2635e378f99c2d\",\"sequence\":51,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":1,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"8f37cf00b85b704f1ec5d250b7375c72712406cb1424da9cb49b6a07be0011c205facdc0d6de76d0a1b5e74a82a23790127166732a152b74350f434e7da83c02\",\"signature\":\"fe5e6210bd5dd95bbb5208f799060d83915d49a7156a5e7069142bc96e45a1a0c294d32edbeb0d59cea667ebbbc6718cdbd7e43823f81d1783a973260d90cc07\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:01:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:0cf6b4c13df8282e49a9ddc930ef47161c3a7bea2df4e70a9d75aaeabaa470d3\",\"sequence\":60,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":1,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"8f37cf00b85b704f1ec5d250b7375c72712406cb1424da9cb49b6a07be0011c205facdc0d6de76d0a1b5e74a82a23790127166732a152b74350f434e7da83c02\",\"signature\":\"0174df8448caa977464edb51fc86f5bd331eb17341cc4ff0940b0a5f3a235a8815f689ef34ca9d98e94a9100fc813d59578257259ee64408c5bc9b5141de0305\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:01:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:43d2948d32af752da45dfc82508b48f085bc8f9d7e43930eb91bbee43441ade9\",\"sequence\":52,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":2,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"fe5e6210bd5dd95bbb5208f799060d83915d49a7156a5e7069142bc96e45a1a0c294d32edbeb0d59cea667ebbbc6718cdbd7e43823f81d1783a973260d90cc07\",\"signature\":\"213ee244b45aa26e0b8e3afcd6bebd16fa49c58c21d5e8010a6d3e0e387cb2a5ac20036beebd41b62b5a99762f66ead9048a2c204f1edea28891f22b83e5b701\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:02:00Z\"}\n"
+  ],
+  "expected": {
+    "ok": false,
+    "findings": [
+      "witness-equivocation"
+    ]
+  }
+}

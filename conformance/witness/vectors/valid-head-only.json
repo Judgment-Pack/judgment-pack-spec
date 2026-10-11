@@ -1,0 +1,25 @@
+{
+  "name": "valid-head-only",
+  "family": "valid",
+  "note": "No statements file, and a head at index 0: the head alone is a chain that begins at index 0.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [],
+  "head": "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:461d55a3c2bf964f93b654626e5d115d8419b110b0dd297a907ad409cb9dcc43\",\"sequence\":40,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"98fbb4a2f8149f5693a1d0ed3ce735945aa334545cf22982b83b69a581ce17ee8a18f5e091dac7c9d7cdda0391f91b3e6e8731299135ab3eaba0dfec4598ba03\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n",
+  "expected": {
+    "ok": true,
+    "findings": [],
+    "reading": "current",
+    "headIndex": 0,
+    "highestIndex": 0,
+    "latestCheckpoint": {
+      "index": 0,
+      "sequence": 40,
+      "witnessedAt": "2026-10-05T12:00:00Z"
+    },
+    "conflicts": [],
+    "retired": false
+  }
+}

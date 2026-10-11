@@ -1,0 +1,19 @@
+{
+  "name": "begins-late-with-head",
+  "family": "begins-late",
+  "note": "Statements 2 and 3 of a valid chain, with statement 3 as the head: a head reached does not excuse a chain that begins late.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:5cd5f6e28ee869f68a1f1e296461e81c98dac4a024bd1f2c98b40a5e9aa51681\",\"sequence\":3,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":2,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"f8be1eefe69228f5a2b007c3c37a4f568589512a0290ace584dbff30bd671f52831c44882783fef8086b79267d55d4b2c89848d5a4e64a5b18cc6f17736e3309\",\"signature\":\"48255560e5cd3c7529dfca69cc444106d51bc7ccbeb33dde63ea19ec40d628476ca8f66ae608f575d49e67f4b9ed4a5952cd7c131615918690d5d33e68bf600a\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:02:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:4cfa012483b3b378c922d0a8966371f5e77f3c4112ddb42f9bd8bb1865c4cb90\",\"sequence\":4,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":3,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"48255560e5cd3c7529dfca69cc444106d51bc7ccbeb33dde63ea19ec40d628476ca8f66ae608f575d49e67f4b9ed4a5952cd7c131615918690d5d33e68bf600a\",\"signature\":\"cf4ce4eb93d6aad3741edbd333dfd57f543d597a7bda43d760c9a208ac879f70a602ff50221b10d5ab85b1c8b7a310a6a2471d771211142b494f8b49e9affb01\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:03:00Z\"}\n"
+  ],
+  "head": "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:4cfa012483b3b378c922d0a8966371f5e77f3c4112ddb42f9bd8bb1865c4cb90\",\"sequence\":4,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":3,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"48255560e5cd3c7529dfca69cc444106d51bc7ccbeb33dde63ea19ec40d628476ca8f66ae608f575d49e67f4b9ed4a5952cd7c131615918690d5d33e68bf600a\",\"signature\":\"cf4ce4eb93d6aad3741edbd333dfd57f543d597a7bda43d760c9a208ac879f70a602ff50221b10d5ab85b1c8b7a310a6a2471d771211142b494f8b49e9affb01\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:03:00Z\"}\n",
+  "expected": {
+    "ok": false,
+    "findings": [
+      "witness-chain-broken"
+    ]
+  }
+}

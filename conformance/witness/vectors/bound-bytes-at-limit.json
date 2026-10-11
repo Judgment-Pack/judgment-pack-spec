@@ -1,0 +1,38 @@
+{
+  "name": "bound-bytes-at-limit",
+  "family": "bound",
+  "note": "A statements file and a head file of 67108864 bytes together, the most a reading takes: the statement at index 0 and blank lines to fill the file, and the same statement as the head. Blank lines are no statements, and the two copies are one statement.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    {
+      "parts": [
+        {
+          "text": "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:f47f9591b99ff068119483cec05230a7e5a7b71e1d730ece3e3e9130c7e90499\",\"sequence\":1,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"0c2d37ba4cb79e098d5c813f2d00f2753ad36eeb6395fe00aea96c3eec6ef0e5908227bd1630b5447d680d3d9f182053e4c885ac7a48b4a9492742d34a9bc705\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n",
+          "times": 1
+        },
+        {
+          "text": "\n",
+          "times": 67107902
+        }
+      ]
+    }
+  ],
+  "head": "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:f47f9591b99ff068119483cec05230a7e5a7b71e1d730ece3e3e9130c7e90499\",\"sequence\":1,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"0c2d37ba4cb79e098d5c813f2d00f2753ad36eeb6395fe00aea96c3eec6ef0e5908227bd1630b5447d680d3d9f182053e4c885ac7a48b4a9492742d34a9bc705\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n",
+  "expected": {
+    "ok": true,
+    "findings": [],
+    "reading": "current",
+    "headIndex": 0,
+    "highestIndex": 0,
+    "latestCheckpoint": {
+      "index": 0,
+      "sequence": 1,
+      "witnessedAt": "2026-10-05T12:00:00Z"
+    },
+    "conflicts": [],
+    "retired": false
+  }
+}

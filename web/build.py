@@ -620,6 +620,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0017-checkpoint-witness-statement.md",
+        PurePosixPath("rfcs/0017-checkpoint-witness-statement/index.html"),
+        "RFC 0017: The checkpoint witness statement",
+        "Draft standards-track proposal to take the reference gateway's checkpoint witness statement into the specification as a companion document - its canonical form, key rule and equation, chain rule, head rule, bounds and findings, restated unchanged - with its 54 vectors imported byte for byte and held in no corpus until acceptance.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
@@ -2175,8 +2184,12 @@ def build_license(output_root: Path) -> None:
 
 # Rows staged for a later suiteVersion are in no corpus (conformance/evaluation/staged/README.md). The
 # site serves the specification and its released corpus, so it serves nothing under this directory;
-# the release bundle leaves it out by the same rule (.gitattributes, export-ignore).
-UNPUBLISHED_ARTIFACT_DIRECTORIES = (PurePosixPath("conformance/evaluation/staged"),)
+# the release bundle leaves it out by the same rule (.gitattributes, export-ignore). The checkpoint
+# witness vectors are in no corpus either while RFC 0017 is a draft (conformance/witness/README.md).
+UNPUBLISHED_ARTIFACT_DIRECTORIES = (
+    PurePosixPath("conformance/evaluation/staged"),
+    PurePosixPath("conformance/witness"),
+)
 
 
 def is_published_artifact(relative: Path) -> bool:

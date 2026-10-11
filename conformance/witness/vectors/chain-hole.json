@@ -1,0 +1,18 @@
+{
+  "name": "chain-hole",
+  "family": "chain",
+  "note": "Statements 0, 1 and 3 of a valid chain: the set must hold every index from 0 to its highest.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:cb69f8fff312405cdd940649f0ed1dbeeb413ea59332f4a81ce6b30ca0433186\",\"sequence\":120,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"413f1ebdac0e466e3e567e44fff8d676560c7120549e27128beb7e6afbee44e8c843315ace5d4c103adfe52a0eb266c2273d790f2628d0d1a5bd981bec3fd200\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:d6445480df009d517626305a5109faf6c32b4f769fa3ffddf6023e8e091004df\",\"sequence\":121,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":1,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"413f1ebdac0e466e3e567e44fff8d676560c7120549e27128beb7e6afbee44e8c843315ace5d4c103adfe52a0eb266c2273d790f2628d0d1a5bd981bec3fd200\",\"signature\":\"5bf5824a5189d62c5f8c79376890154d02ee7ddb1bafe1e37991034007c1f8faebbef66babf4fde20c99b9b838e16a3fd35dbe76e180861cccb83a998f157907\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:01:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:772d91a98361356de4302c8a8ab0ec2adcd89f81bd8c8cf2f80f006691d22c31\",\"sequence\":123,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":3,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"a7c0571fa7e2509e38713b518c35f93e0bdce3cf2080e05584ac4e5c5ccce5a2e511cc21cdff1c6cd8d2bb4d9313e30adcd3330608643967aee42c4322464704\",\"signature\":\"cfc77424e4f510e65a6f902a1de647e7053eb6d2c5b1c8734e982e872912dace8b654b7664f8b31a6e3b457821c91ea5f8723d5a41288ffd0ae13b798f7dcd03\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:03:00Z\"}\n"
+  ],
+  "expected": {
+    "ok": false,
+    "findings": [
+      "witness-chain-broken"
+    ]
+  }
+}

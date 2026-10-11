@@ -1,0 +1,18 @@
+{
+  "name": "signature-key-not-supplied",
+  "family": "signature",
+  "note": "A chain signed under the test key, read with only another key supplied: no statement's keyId names a key supplied.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "c9a3f86aae465f0e56513864510f3997561fa2c9e85ea21dc2292309f3cd6022"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:124a1a1e1a14b2950120c571cd407ee4feb74888411fdba3c9044734dd04d567\",\"sequence\":96,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"7308c9061fdc26443bdc0d0ae727d9d4628e713781737f4c6edbed3ea47c78000e4b66d7db4628cda3bc959c711d85bda3398c48200e79025e4892c4105ba609\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:509f79419e8545746728807f3f096c508a797fce2900fac70c03920df04ad3e8\",\"sequence\":97,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":1,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"7308c9061fdc26443bdc0d0ae727d9d4628e713781737f4c6edbed3ea47c78000e4b66d7db4628cda3bc959c711d85bda3398c48200e79025e4892c4105ba609\",\"signature\":\"4503cef48f79047d80424230cd0b544d90bcde4fe77d2a5fc00ef95c9a2edfaad0d1d34b9618f30d9790c3ecccae38fec56af79f94315f2aba37a32e1ea56805\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:01:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:b2829d00d76ed99c52481e7d0899e0998a8322410a0a30b1db0805f82dc23022\",\"sequence\":98,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":2,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"4503cef48f79047d80424230cd0b544d90bcde4fe77d2a5fc00ef95c9a2edfaad0d1d34b9618f30d9790c3ecccae38fec56af79f94315f2aba37a32e1ea56805\",\"signature\":\"a4603a21adbe79736e5b8f80f6696318f718c27976d7c7c50e9f1a462790715b764bed63db558c3b6531bde8c5a0a096dc00872ac7bd0e134573cd8065f9d001\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:02:00Z\"}\n"
+  ],
+  "expected": {
+    "ok": false,
+    "findings": [
+      "witness-signature-invalid"
+    ]
+  }
+}

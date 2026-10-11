@@ -1,0 +1,26 @@
+{
+  "name": "key-mixed-order-accepted",
+  "family": "key",
+  "note": "A key of mixed order, the test key plus the point of order 2: its order does not divide 8, so the key rule accepts it. The statement under it is signed with the test seed's scalar and a nonce for which h is even, so the equation holds.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "f15f564da9bf88727a6ac5a1e4b9e7347ddca9a490a9908c638cfcaf862897e4"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:7673c216feebbd1970dbe2dcfdee500ca102a67e44f966c715b5d2cac4d99e55\",\"sequence\":92,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"88d86de911051e4df76c68318a5d8850\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"47506a597f25c03781eafccab80924aa871def69d9f637e8543c9c5d57bcc084e58ae741d72df5b042228d6ea6203db55189003af807007ce83936ac71a9740d\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n"
+  ],
+  "expected": {
+    "ok": true,
+    "findings": [],
+    "reading": "historical",
+    "headIndex": null,
+    "highestIndex": 0,
+    "latestCheckpoint": {
+      "index": 0,
+      "sequence": 92,
+      "witnessedAt": "2026-10-05T12:00:00Z"
+    },
+    "conflicts": [],
+    "retired": false
+  }
+}

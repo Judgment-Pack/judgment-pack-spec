@@ -1,0 +1,18 @@
+{
+  "name": "signature-cofactored-only-mixed-key",
+  "family": "signature",
+  "note": "Under the key of mixed order of key-mixed-order-accepted, a statement signed with a nonce for which h is odd: it holds only up to the key's part of small order, which the cofactored check accepts and the equation does not.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "f15f564da9bf88727a6ac5a1e4b9e7347ddca9a490a9908c638cfcaf862897e4"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:7673c216feebbd1970dbe2dcfdee500ca102a67e44f966c715b5d2cac4d99e55\",\"sequence\":92,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"88d86de911051e4df76c68318a5d8850\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"9051dc0fb8c41c151c356fe153f8ee64c2fa2da31ef51fb8760d969d7d14ecd2f9fbfd4ea7fdf1f85642d40b1ccba49995568470cb5b6029ce1c93db59716e0f\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n"
+  ],
+  "expected": {
+    "ok": false,
+    "findings": [
+      "witness-signature-invalid"
+    ]
+  }
+}

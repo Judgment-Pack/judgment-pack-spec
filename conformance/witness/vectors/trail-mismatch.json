@@ -1,0 +1,19 @@
+{
+  "name": "trail-mismatch",
+  "family": "trail",
+  "note": "A valid chain of the trail being verified, and beside it a statement of another trail, signed under the key: every statement must be of the trail being verified.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:e2c69017872fb8cd50e4b531cf0cc909e7c7c611148acd86a414555067a5e279\",\"sequence\":101,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"330654a71bab27fcdf477936f83cf6227b74be95df633a534cdcce3735e87844781a53dcbd6fb41bab82a36c354090b28d02a08c156e029d5012400b437c130e\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:4bcbd5138b1c2e20e9687fdee672587bddf5f3d79df032831607fa77679a72b4\",\"sequence\":102,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":1,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":\"330654a71bab27fcdf477936f83cf6227b74be95df633a534cdcce3735e87844781a53dcbd6fb41bab82a36c354090b28d02a08c156e029d5012400b437c130e\",\"signature\":\"2676821a6b8a74c200e8ea23ab1d218c43d6300850c6cb0e72bd9efa8c21775113283ec96df7393aef694c40b9a698dd96f6001b61ada495887d0f16a09e9604\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:01:00Z\"}\n",
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:a0171bfd28ea4e0903bf086df8a70a8d5f6b273ec0c43a862ff055efd7d8b1f6\",\"sequence\":99,\"trail\":\"d0c1b2a3948576a7b8c9d0e1f2031425\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"097396472eccbb8951da5580649990b2114dec228cd58fe32d1a7c26f1039c641226cd9a9c7695ad4785f1bf5b408292d22dcbaa5692cd59316cf02b5c449406\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n"
+  ],
+  "expected": {
+    "ok": false,
+    "findings": [
+      "witness-trail-mismatch"
+    ]
+  }
+}

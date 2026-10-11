@@ -173,6 +173,55 @@ class ReleaseBuilderTests(unittest.TestCase):
                 with self.subTest(archived=path):
                     self.assertIn(path, members)
 
+    def test_release_bundle_leaves_the_witness_vectors_out(self) -> None:
+        # RFC 0017 is a draft, and the vectors it proposes are in no corpus
+        # (conformance/witness/README.md), so no bundle may carry them; .gitattributes marks their
+        # directory export-ignore, and -text, since a converted line ending would change their bytes.
+        # The document corpus beside them stays in the bundle, and is checked as the control.
+        witness_root = (ROOT / "conformance" / "witness").relative_to(ROOT).as_posix()
+        witness = sorted(
+            path.relative_to(ROOT).as_posix()
+            for path in (ROOT / witness_root).rglob("*")
+            if path.is_file()
+        )
+        self.assertTrue(witness, "no witness vector is here; this test can go with the directory")
+        released = ["conformance", "conformance/manifest.json", "conformance/README.md"]
+        try:
+            completed = subprocess.run(
+                ["git", "check-attr", "export-ignore", "text", "--", *witness, *released],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except (OSError, subprocess.CalledProcessError) as error:
+            self.skipTest(f"git cannot read attributes here: {error}")
+        attributes = {
+            tuple(line.rsplit(": ", 2)[:2]): line.rsplit(": ", 1)[1]
+            for line in completed.stdout.splitlines()
+        }
+        for path in witness:
+            with self.subTest(path=path):
+                self.assertEqual("set", attributes.get((path, "export-ignore")))
+                self.assertEqual("unset", attributes.get((path, "text")))
+        for path in released:
+            with self.subTest(path=path):
+                self.assertEqual("unspecified", attributes.get((path, "export-ignore")))
+
+        archived = subprocess.run(
+            ["git", "archive", "--format=tar", "HEAD", "conformance"],
+            cwd=ROOT,
+            capture_output=True,
+        )
+        if archived.returncode != 0:
+            return  # no commit here (a bare scratch repository); the attribute checks above stand
+        with tarfile.open(fileobj=io.BytesIO(archived.stdout)) as bundle:
+            members = set(bundle.getnames())
+        self.assertEqual(
+            [], sorted(name for name in members if name.startswith(witness_root + "/"))
+        )
+        self.assertIn("conformance/manifest.json", members)
+
     @staticmethod
     def _release_tree(directory: Path, version: str) -> Path:
         """A minimal, correctly pinned artifact tree for the version-pinning checks."""

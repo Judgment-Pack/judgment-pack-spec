@@ -1,0 +1,16 @@
+{
+  "name": "key-not-on-curve",
+  "family": "key",
+  "note": "Two keys supplied: the test key, under which the chain is signed, and 32 bytes whose y is 2, which encode no point of the curve. Every key supplied is held to the key rule before anything is read, so the reading is refused although the chain verifies under the first.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b",
+    "0200000000000000000000000000000000000000000000000000000000000000"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:d613b413425dcdbd530b6623f49ea5c2a154910ba6eebb5814c53527b41b5373\",\"sequence\":91,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"f911b07488d90930b8513e7e4aa5ee6691288d83d9df23a9f0d416bd74026c7fc4e07d03a79e4bd689b8d4738de917469af3317c0b263fcbb8ca787e84369c03\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n"
+  ],
+  "expected": {
+    "refused": "key-not-on-curve"
+  }
+}

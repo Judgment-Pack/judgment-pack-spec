@@ -1,0 +1,26 @@
+{
+  "name": "signature-identity-r-accepted",
+  "family": "signature",
+  "note": "A statement signed with the test seed and the nonce 0, so that R is the identity, a point of small order, and S is h times the secret scalar: [S]B - [h]A is the identity, whose canonical encoding is R, so the equation accepts it. A reader that refuses a signature for a small-order R refuses more than the equation does.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:3e76edf5bfaca00afe49e9dcd279209025ac51913fdf00c9028a3731b1204cd3\",\"sequence\":95,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"010000000000000000000000000000000000000000000000000000000000000086c133f224b90b7d90a1139ff29b71c8ba6ca25021a21b3428a9fe165e021004\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n"
+  ],
+  "expected": {
+    "ok": true,
+    "findings": [],
+    "reading": "historical",
+    "headIndex": null,
+    "highestIndex": 0,
+    "latestCheckpoint": {
+      "index": 0,
+      "sequence": 95,
+      "witnessedAt": "2026-10-05T12:00:00Z"
+    },
+    "conflicts": [],
+    "retired": false
+  }
+}

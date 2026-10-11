@@ -1,0 +1,31 @@
+{
+  "name": "bound-keys-one-past",
+  "family": "bound",
+  "note": "Seventeen keys, the base point times 1 to 16 and the test key: one more than a reading takes, refused before anything is read.",
+  "trail": "3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b",
+  "keys": [
+    "5866666666666666666666666666666666666666666666666666666666666666",
+    "c9a3f86aae465f0e56513864510f3997561fa2c9e85ea21dc2292309f3cd6022",
+    "d4b4f5784868c3020403246717ec169ff79e26608ea126a1ab69ee77d1b16712",
+    "2f1132ca61ab38dff00f2fea3228f24c6c71d58085b80e47e19515cb27e8d047",
+    "edc876d6831fd2105d0b4389ca2e283166469289146e2ce06faefe98b22548df",
+    "f47e49f9d07ad2c1606b4d94067c41f9777d4ffda709b71da1d88628fce34d85",
+    "b862409fb5c4c4123df2abf7462b88f041ad36dd6864ce872fd5472be363c5b1",
+    "b4b937fca95b2f1e93e41e62fc3c78818ff38a66096fad6e7973e5c90006d321",
+    "c0f1225584444ec730446e231390781ffdd2f256e9fcbeb2f40dddc2c2233d7f",
+    "2c7be86ab07488ba43e8e03d85a67625cfbf98c8544de4c877241b7aaafc7fe3",
+    "1337036ac32d8f30d4589c3c1c595812ce0fff40e37c6f5a97ab213f318290ad",
+    "f9e42d2edc81d23367967352b47e4856b82578634e6c1de72280ce8b60ce70c0",
+    "801f40eaaee1ef8723279a28b2cf4037b889dad222604678748b53ed0db0db92",
+    "39289c8998fd69835c26b619e89848a7bf02b7cb7ad1ba1581cbc4506f2550ce",
+    "df5c2eadc44c6d94a19a9aa118afe5ac3193d26401f76251f522ff042dfbcb92",
+    "eb2767c137ab7ad8279c078eff116ab0786ead3a2e0f989f72c37f82f2969670",
+    "fc9fa9b25640778d85953a5e1b4618cb8223565b6f566f739c73035079d7681b"
+  ],
+  "witness": [
+    "{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:f47f9591b99ff068119483cec05230a7e5a7b71e1d730ece3e3e9130c7e90499\",\"sequence\":1,\"trail\":\"3c5e1a7f9b2d4c6e8a0f1b3d5c7e9a2b\"},\"index\":0,\"keyId\":\"ddb406e95cad582adc111a7d6fbff25d\",\"kind\":\"checkpoint\",\"prevSignature\":null,\"signature\":\"0c2d37ba4cb79e098d5c813f2d00f2753ad36eeb6395fe00aea96c3eec6ef0e5908227bd1630b5447d680d3d9f182053e4c885ac7a48b4a9492742d34a9bc705\",\"witnessVersion\":\"1\",\"witnessedAt\":\"2026-10-05T12:00:00Z\"}\n"
+  ],
+  "expected": {
+    "refused": "keys-over-bound"
+  }
+}
