@@ -11,10 +11,11 @@ here.
   taken up from the reference gateway (`v0.11.0`, `SPEC.md` §8) as a proposed companion document of
   the specification, with a reader conformance class of its own. The maintainer's decision on issue
   #122 is that the statement is taken up, with its vectors the same bytes as the gateway's; the RFC
-  restates its
-  canonical form, signed bytes, key rule and equation, chain rule, reading, bounds, refusals,
-  findings and report sentences, changing no rule, and says what it resolves of RFC 0012's question
-  4 and RFC 0010 §4. The gateway's 54 witness vectors are imported byte for byte into
+  restates its canonical form, signed bytes, key rule and equation, chain rule, reading, bounds,
+  refusals, findings and report sentences, changing no rule a reader applies. It leaves to the
+  gateway one rule on the producer, that a gateway witness signs with the gateway's own seed, and
+  says what it resolves of RFC 0012's question 4 and RFC 0010 §4. The gateway's 54 witness vectors
+  are imported byte for byte into
   [`conformance/witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness),
   with a manifest that records each one's SHA-256. They are in no corpus while the RFC is a draft:
   no claim may cite them, the site does not serve them, and no release bundle carries them

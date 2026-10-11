@@ -64,7 +64,9 @@ the checkpoint a statement covers; its members and its canonical form; the bytes
 covers; the rule a reader holds a witness key to and the one equation it holds a signature to; the
 chain rule per trail; how a chain is read, from its first statement, with or without a head the
 reader fetched; the bounds of one reading; the refusals and findings a reader reports; and what a
-statement establishes and what it does not. Every rule is the gateway's, restated. One sentence of
+statement establishes and what it does not. Every rule a reader applies is the gateway's, restated.
+One rule on the producer is not carried: gateway §8.3 binds a gateway witness's key to the
+gateway's own signing seed, and this document leaves that rule to the gateway (§4). One sentence of
 the gateway's reading is made explicit where its vectors already decide it (§7, step 3). The 54
 vectors are imported unchanged.
 
@@ -249,9 +251,17 @@ judgment-pack-gateway/witness/1:{"checkpoint":{"checkpointVersion":"1","recordDi
 
 The prefix is neither the gateway receipt's nor its seal's, so none of the three can be replayed as
 another. It names the gateway because the gateway defined it; every statement that exists was
-signed over it, and this document keeps it unchanged. Which key a witness signs with is the
-witness's custody: the reference gateway signs with the seed that signs its receipts and seals
-(gateway §8.3), and nothing in a statement depends on that.
+signed over it, and this document keeps it unchanged.
+
+`keyId` is the key identifier (§1) of the key that signs. Gateway §8.3 adds a rule on the producer
+that this document does not carry: a gateway witness signs under the gateway's own signing seed,
+the seed that signs its receipts and seals, so a statement's `keyId` is the gateway's own, and a
+party that wants the witness's role apart from its receipts runs a second gateway with a seed of
+its own. That rule binds a gateway as a producer, and stays the gateway's. This document leaves the
+choice of key to the witness because a reader conformance class should not depend on which key a
+producer uses: a reader verifies under the keys it was given (§5), by one equation, and cannot tell
+from a statement what else its key signs. A witness that signs with a key of its own therefore
+conforms to this document and not to gateway §8.3, and every reader reads its statements alike.
 
 ### 5. The key rule and the equation
 
@@ -420,15 +430,18 @@ an output format this document requires.
 
 **The sentences.** A reader that states in words what a reading establishes MUST state no more
 than §10 allows, and SHOULD state it in these sentences, with N, T and K filled in. They are the
-fixed sentences of gateway ADR-0013 §6, which the reference runtime states verbatim.
+fixed sentences of gateway ADR-0013 §6, which the reference runtime states verbatim. N is the
+highest credited coverage, as ADR-0013 §6 states it: the highest sequence of a `checkpoint`
+statement of a reading with no finding (§7) whose checkpoint the copy of the trail matches, with no
+failed check of the trail at or before that sequence; T is that statement's `witnessedAt`. Any lower
+sequence would make the second sentence below false. The first two sentences apply only when such a
+statement exists; when none does, nothing is credited and neither is stated.
 
-- Establishes, for a reader that holds a copy of the trail, N being the sequence of a checkpoint
-  statement the copy matches with no failed check at or before it, and T that statement's
-  `witnessedAt`: "Lines 1 to N are the lines that existed when a witness under a key supplied
-  signed its statement for checkpoint N, which it states it did at T, if that witness is
-  independent of the trail's operator."
-- Does not establish, for the same reader: "Lines after N are covered by no statement of a witness
-  under a key supplied."
+- Establishes, for a reader that holds a copy of the trail: "Lines 1 to N are the lines that
+  existed when a witness under a key supplied signed its statement for checkpoint N, which it
+  states it did at T, if that witness is independent of the trail's operator."
+- Does not establish, for the same reader and the same N: "Lines after N are covered by no
+  statement of a witness under a key supplied."
 - Does not establish, for a current reading whose head is at index K: "That the witness's head for
   this trail is still index K: the head supplied is as current as the reader's fetch of it, and a
   signature does not say when it was fetched."
@@ -536,10 +549,14 @@ this class MUST NOT be described as establishing anything §10 says a statement 
 - **Packs, documents and evaluators.** Unchanged. No member of any pack, schema or disposition
   changes, and no Core class gains or loses a requirement.
 - **The gateway and the runtime.** Unchanged. This document restates the gateway's §8 and changes
-  no rule of it, so a statement that verifies under the gateway's §8 verifies here and a reading
-  gives the same answer. One sentence of §7, step 3, makes explicit what the gateway's wording
-  leaves to its vector `valid-head-only`: with no other statement, a head at index 0 is "more than
-  one past the index of every other statement" only vacuously, and the vector reads it as a chain.
+  no rule a reader applies, so a statement that verifies under the gateway's §8 verifies here and a
+  reading gives the same answer. It does not carry one rule on the producer: gateway §8.3 binds a
+  gateway witness's key to the gateway's own signing seed, and this document leaves that rule to the
+  gateway (§4). A statement signed under a key used for nothing else conforms here and not to
+  gateway §8.3, and a reader of either reads it alike. One sentence of §7, step 3, makes explicit
+  what the gateway's wording leaves to its vector `valid-head-only`: with no other statement, a
+  head at index 0 is "more than one past the index of every other statement" only vacuously, and
+  the vector reads it as a chain.
 - **Versioning.** The statement's member set is closed, and a new member is a new
   `witnessVersion`. A reader that knows version 1 refuses a statement of any other version as
   `witness-malformed`, so a later version cannot be skipped silently.

@@ -1354,15 +1354,25 @@ class WitnessVectorTests(unittest.TestCase):
         self.assertEqual(WITNESS_SOURCE, self.manifest["source"])
         for row in self.manifest["cases"]:
             with self.subTest(row=row.get("id")):
-                expected = {"id", "path", "family", "expectedResult", "sha256"}
-                if row.get("expectedResult") == "findings":
-                    expected.add("expectedFindings")
-                elif row.get("expectedResult") == "refused":
-                    expected.add("expectedRefusal")
-                else:
-                    self.assertEqual("reading", row.get("expectedResult"))
-                self.assertEqual(expected, set(row))
-                self.assertRegex(row["sha256"], HEX_64)
+                self._check_row_shape(row)
+
+    def _assert_whole(self, pattern: re.Pattern[str], value: Any) -> None:
+        # The form is the whole value: fullmatch, never search, so nothing may stand before or after.
+        self.assertIsInstance(value, str)
+        self.assertIsNotNone(
+            pattern.fullmatch(value), f"{value!r} is not, as a whole, of the form {pattern.pattern}"
+        )
+
+    def _check_row_shape(self, row: dict[str, Any]) -> None:
+        expected = {"id", "path", "family", "expectedResult", "sha256"}
+        if row.get("expectedResult") == "findings":
+            expected.add("expectedFindings")
+        elif row.get("expectedResult") == "refused":
+            expected.add("expectedRefusal")
+        else:
+            self.assertEqual("reading", row.get("expectedResult"))
+        self.assertEqual(expected, set(row))
+        self._assert_whole(HEX_64, row["sha256"])
 
     def test_vectors_are_the_gateways_bytes(self) -> None:
         # Every file under vectors/, of any name, is a row, and every row a file whose SHA-256 is the
@@ -1421,31 +1431,70 @@ class WitnessVectorTests(unittest.TestCase):
         self.assertEqual({"index", "sequence", "witnessedAt"}, set(latest))
         self.assertTrue(is_count(latest["index"]))
         self.assertTrue(is_count(latest["sequence"]) and latest["sequence"] >= 1)
-        self.assertRegex(latest["witnessedAt"], WITNESSED_AT)
+        self._assert_whole(WITNESSED_AT, latest["witnessedAt"])
         self.assertIsInstance(expected["conflicts"], list)
         self.assertTrue(all(is_count(item) for item in expected["conflicts"]))
         self.assertIsInstance(expected["retired"], bool)
 
+    def _check_vector_form(self, path: str, vector: Any) -> None:
+        self.assertIsInstance(vector, dict)
+        required = {"name", "family", "note", "trail", "keys", "witness", "expected"}
+        self.assertLessEqual(required, set(vector))
+        self.assertLessEqual(set(vector), required | {"head"})
+        self.assertEqual(Path(path).stem, vector["name"])
+        self.assertIn(vector["family"], WITNESS_FAMILIES)
+        self.assertTrue(isinstance(vector["note"], str) and vector["note"])
+        self._assert_whole(HEX_32, vector["trail"])
+        self.assertIsInstance(vector["keys"], list)
+        for key in vector["keys"]:
+            self._assert_whole(HEX_64, key)
+        self.assertIsInstance(vector["witness"], list)
+        for item in vector["witness"]:
+            self._check_file(item)
+        if "head" in vector:
+            self._check_file(vector["head"])
+        self._check_expected(vector)
+
     def test_vectors_have_the_gateways_form(self) -> None:
         for path, vector in sorted(self.vectors.items()):
             with self.subTest(path=path):
-                self.assertIsInstance(vector, dict)
-                required = {"name", "family", "note", "trail", "keys", "witness", "expected"}
-                self.assertLessEqual(required, set(vector))
-                self.assertLessEqual(set(vector), required | {"head"})
-                self.assertEqual(Path(path).stem, vector["name"])
-                self.assertIn(vector["family"], WITNESS_FAMILIES)
-                self.assertTrue(isinstance(vector["note"], str) and vector["note"])
-                self.assertRegex(vector["trail"], HEX_32)
-                self.assertIsInstance(vector["keys"], list)
-                for key in vector["keys"]:
-                    self.assertRegex(key, HEX_64)
-                self.assertIsInstance(vector["witness"], list)
-                for item in vector["witness"]:
-                    self._check_file(item)
-                if "head" in vector:
-                    self._check_file(vector["head"])
-                self._check_expected(vector)
+                self._check_vector_form(path, vector)
+
+    def test_form_checks_refuse_a_value_inside_other_characters(self) -> None:
+        # The control for the checks above: a trail, a key, a time or a digest with anything before
+        # or after it, a newline included, fails the same checks the unaltered vector and row pass.
+        path = "vectors/valid-one-statement.json"
+        vector = self.vectors[path]
+        row = next(row for row in self.manifest["cases"] if row["path"] == path)
+        self._check_vector_form(path, vector)
+        self._check_row_shape(row)
+
+        def set_trail(altered: dict[str, Any], value: str) -> None:
+            altered["trail"] = value
+
+        def set_key(altered: dict[str, Any], value: str) -> None:
+            altered["keys"][0] = value
+
+        def set_time(altered: dict[str, Any], value: str) -> None:
+            altered["expected"]["latestCheckpoint"]["witnessedAt"] = value
+
+        members = (
+            ("trail", vector["trail"], set_trail),
+            ("keys[0]", vector["keys"][0], set_key),
+            ("witnessedAt", vector["expected"]["latestCheckpoint"]["witnessedAt"], set_time),
+        )
+        affixes = (("INVALID", ""), ("", "!"), ("INVALID", "!"), ("", "\n"))
+        for before, after in affixes:
+            for member, value, assign in members:
+                with self.subTest(member=member, before=before, after=after):
+                    altered = json.loads(json.dumps(vector))
+                    assign(altered, before + value + after)
+                    with self.assertRaises(AssertionError):
+                        self._check_vector_form(path, altered)
+            with self.subTest(member="sha256", before=before, after=after):
+                altered_row = dict(row, sha256=before + row["sha256"] + after)
+                with self.assertRaises(AssertionError):
+                    self._check_row_shape(altered_row)
 
     def test_rows_restate_their_vectors(self) -> None:
         for row in self.manifest["cases"]:
