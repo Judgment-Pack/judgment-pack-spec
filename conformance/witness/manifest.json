@@ -1,5 +1,5 @@
 {
-  "status": "proposed",
+  "status": "research-preview",
   "proposedBy": "rfcs/0017-checkpoint-witness-statement.md",
   "source": {
     "repository": "https://github.com/Judgment-Pack/judgment-pack-gateway",

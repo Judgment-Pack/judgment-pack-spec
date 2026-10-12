@@ -335,6 +335,16 @@ PAGES = (
         "Normative prose",
     ),
     Page(
+        "spec/checkpoint-witness.md",
+        PurePosixPath("spec/checkpoint-witness/index.html"),
+        "The checkpoint witness statement",
+        "A companion document of the specification: the witness statement, its signature, key rule, chain and reading. Normative for the witness-statement reader only.",
+        "spec",
+        "Normative for the witness-statement reader class",
+        # Landed after the 0.2.0-draft tag, so its source is the branch's.
+        source_ref="main",
+    ),
+    Page(
         "docs/field-guide.md",
         PurePosixPath("field-guide/index.html"),
         "Field guide",
@@ -623,9 +633,9 @@ PAGES = (
         "rfcs/0017-checkpoint-witness-statement.md",
         PurePosixPath("rfcs/0017-checkpoint-witness-statement/index.html"),
         "RFC 0017: The checkpoint witness statement",
-        "Draft standards-track proposal to take the reference gateway's checkpoint witness statement into the specification as a companion document - its canonical form, key rule and equation, chain rule, head rule, bounds and findings, restated unchanged - with its 54 vectors imported byte for byte and held in no corpus until acceptance.",
+        "Accepted standards-track RFC: the design record for the checkpoint witness statement, taken up from the reference gateway as a companion document of the specification with a reader conformance class and 54 vectors of its own.",
         "proposals",
-        "Draft proposal",
+        "Accepted standards-track RFC",
         source_ref="main",
     ),
     Page(
@@ -660,6 +670,15 @@ PAGES = (
         "conformance",
         "Normative for the evaluator class",
         # Errata postdate the release they apply to, so this page tracks the branch, not the tag.
+        source_ref="main",
+    ),
+    Page(
+        "conformance/witness/README.md",
+        PurePosixPath("conformance/witness/index.html"),
+        "Checkpoint witness vectors",
+        "The 54 checkpoint witness vectors, the reference gateway's bytes — normative for the witness-statement reader class and for nothing else.",
+        "conformance",
+        "Normative for the witness-statement reader class",
         source_ref="main",
     ),
     Page(
@@ -1538,6 +1557,13 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
             "conformance/evaluation/manifest.schema.json": PurePosixPath(
                 "artifacts/conformance/evaluation/manifest.schema.json"
             ),
+            # The witness vectors likewise: one page, and the manifest and vectors from the artifact
+            # tree. A directory has no page of its own, so `vectors/` resolves to the repository's.
+            "conformance/witness": PurePosixPath("conformance/witness/index.html"),
+            "conformance/witness/manifest.json": PurePosixPath(
+                "artifacts/conformance/witness/manifest.json"
+            ),
+            "conformance/witness/vectors": GITHUB_URL + "/tree/main/conformance/witness/vectors",
             ".vscode/tasks.json": GITHUB_ROOT + ".vscode/tasks.json",
         }
     )
@@ -2183,13 +2209,11 @@ def build_license(output_root: Path) -> None:
 
 
 # Rows staged for a later suiteVersion are in no corpus (conformance/evaluation/staged/README.md). The
-# site serves the specification and its released corpus, so it serves nothing under this directory;
+# site serves the specification and its published corpora, so it serves nothing under this directory;
 # the release bundle leaves it out by the same rule (.gitattributes, export-ignore). The checkpoint
-# witness vectors are in no corpus either while RFC 0017 is a draft (conformance/witness/README.md).
-UNPUBLISHED_ARTIFACT_DIRECTORIES = (
-    PurePosixPath("conformance/evaluation/staged"),
-    PurePosixPath("conformance/witness"),
-)
+# witness vectors were excluded too while RFC 0017 was a draft; since its acceptance they are
+# published (conformance/witness/README.md).
+UNPUBLISHED_ARTIFACT_DIRECTORIES = (PurePosixPath("conformance/evaluation/staged"),)
 
 
 def is_published_artifact(relative: Path) -> bool:
@@ -2320,6 +2344,7 @@ conformance.
 - [Core JSON Schema]({guide_url(PurePosixPath("schema/0.2.0-draft/judgment-pack-core.schema.json"))}): normative structural schema
 - [Document-conformance corpus]({guide_url(PurePosixPath("conformance/index.html"))}): carrier, structural, and semantic cases
 - [Evaluation corpus]({guide_url(PurePosixPath("conformance/evaluation/index.html"))}): normative only for evaluator conformance
+- [The checkpoint witness statement]({guide_url(PurePosixPath("spec/checkpoint-witness/index.html"))}) and its [vectors]({guide_url(PurePosixPath("conformance/witness/index.html"))}): a companion document, normative only for the witness-statement reader class
 - [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
 
 ## Explanations and direct answers

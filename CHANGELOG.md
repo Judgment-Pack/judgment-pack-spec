@@ -7,6 +7,18 @@ here.
 
 ### Added
 
+- [RFC 0017](rfcs/0017-checkpoint-witness-statement.md) is `Accepted`, and the two things it
+  proposed land. Its Specification section, word for word apart from one pointer to the vectors,
+  is the companion document [`spec/checkpoint-witness.md`](spec/checkpoint-witness.md), normative
+  for a new conformance class, the *witness-statement reader*, and for nothing else. The gateway's
+  54 vectors in [`conformance/witness/`](conformance/witness/README.md), byte for byte unchanged,
+  join the published corpus, normative for that class only: the site serves them, and a release
+  bundle carries them from the next release. Core §1.1's list of normative artifacts gains the two,
+  and the architecture vision's sentence that nothing in the input-lineage research line is part of
+  JPS gains its first exception, the statement. They land beside the released Core `0.2.0-draft`,
+  which they do not change; whether the vectors take a `suiteVersion` of their own stays open
+  (the RFC's first unresolved question). The record of the RFC's first review round, as its pull
+  request carries it, is added under `rfcs/reviews/`.
 - [RFC 0017](rfcs/0017-checkpoint-witness-statement.md) (Draft): the checkpoint witness statement,
   taken up from the reference gateway (`v0.11.0`, `SPEC.md` §8) as a proposed companion document of
   the specification, with a reader conformance class of its own. The maintainer's decision on issue

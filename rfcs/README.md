@@ -12,6 +12,9 @@ standards-track RFC, the specification; for a cross-project exploratory record, 
 owns the artifact (see the closing note below). [RFC 0006](0006-evaluator-conformance.md)
 is accepted and landed in Core `0.2.0-draft`; the normative statement of the evaluator conformance
 class is [§3.4 of the Core specification](../spec/judgment-pack-core.md), not this directory.
+[RFC 0017](0017-checkpoint-witness-statement.md) is accepted and landed in the same merge, beside
+Core rather than in it: the normative statement of the checkpoint witness statement is the companion
+document [`spec/checkpoint-witness.md`](../spec/checkpoint-witness.md), not this directory.
 [RFC 0014](0014-lineage-record-and-action-binding.md) is the first accepted cross-project record,
 and a retrospective one: the gateway's `SPEC.md` and the runtime's decision records govern what it
 describes, and they did so before it was written.
@@ -57,7 +60,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0014](0014-lineage-record-and-action-binding.md) | The lineage record and the action binding — how a decision cites what it read, and an action cites what it decided | Accepted | Research line (cross-project artifact: gateway receipt version 3 + verifier join, runtime record and row citations; outside the specification) — a retrospective record; acceptance endorses the record only |
 | [0015](0015-reported-receipts.md) | What a reported receipt would have to specify — the engine signing a call it did not make | Draft | Research line (cross-project artifact: gateway receipt format, verifier and surface; a reporting plugin in an MCP gateway; outside the specification) |
 | [0016](0016-outcome-values.md) | Outcome values — a decision that states a quantity | Draft | Specification (a specification-defined extension, or Core — undecided) |
-| [0017](0017-checkpoint-witness-statement.md) | The checkpoint witness statement | Draft | Specification (a companion document beside Core, with a reader conformance class; its 54 vectors are imported from the reference gateway and held in no corpus until acceptance) |
+| [0017](0017-checkpoint-witness-statement.md) | The checkpoint witness statement | Accepted | Specification (a companion document beside Core, [`spec/checkpoint-witness.md`](../spec/checkpoint-witness.md), with a reader conformance class; its 54 vectors, the reference gateway's bytes, are normative for that class only) |
 
 The "Belongs to" column records where each proposal would land if accepted. A format that
 independent tools must agree on is a candidate for the specification. An algorithm or engine belongs

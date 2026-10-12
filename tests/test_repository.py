@@ -1351,8 +1351,9 @@ class RepositoryConformanceTests(unittest.TestCase):
         self.assertEqual([], failures)
 
 
-# The checkpoint witness vectors RFC 0017 proposes: the reference gateway's corpus/witness/ at
-# v0.11.0, byte for byte. They are in no corpus while the RFC is a draft
+# The checkpoint witness vectors RFC 0017 proposed: the reference gateway's corpus/witness/ at
+# v0.11.0, byte for byte. Since the RFC's acceptance they are published, normative for the
+# witness-statement reader class of spec/checkpoint-witness.md and for nothing else
 # (conformance/witness/README.md). The repository owns no reader, so nothing here verifies a
 # signature or reads a chain: these tests hold the files to the digests the manifest records, each
 # vector to the gateway's form, each manifest row to the vector it names, and every statement of the
@@ -1427,7 +1428,8 @@ class WitnessVectorTests(unittest.TestCase):
 
     def test_manifest_names_its_status_proposal_and_source(self) -> None:
         self.assertEqual({"status", "proposedBy", "source", "cases"}, set(self.manifest))
-        self.assertEqual("proposed", self.manifest["status"])
+        # "proposed" while RFC 0017 was a draft; the status the other two corpus manifests carry since.
+        self.assertEqual("research-preview", self.manifest["status"])
         self.assertEqual(WITNESS_RFC, self.manifest["proposedBy"])
         self.assertTrue((ROOT / WITNESS_RFC).is_file())
         self.assertEqual(WITNESS_SOURCE, self.manifest["source"])
@@ -1602,6 +1604,7 @@ class WitnessVectorTests(unittest.TestCase):
         statements = [
             ("conformance/witness/README.md", f"This directory holds {count} vectors"),
             ("conformance/README.md", f"holds the {count} vectors"),
+            ("README.md", f"{count} checkpoint witness vectors"),
             (WITNESS_RFC, f"The vectors are the gateway's {count}, imported unchanged"),
         ]
         for family in WITNESS_FAMILIES:

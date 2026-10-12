@@ -1,17 +1,17 @@
-# Checkpoint witness vectors (proposed)
+# Checkpoint witness vectors
 
-This directory holds 54 vectors for the checkpoint witness statement, proposed for the
-specification by [RFC 0017](../../rfcs/0017-checkpoint-witness-statement.md), which is a **Draft**.
-They are in no corpus.
+This directory holds 54 vectors for the checkpoint witness statement: the vectors of the
+witness-statement reader class that the companion document
+[`spec/checkpoint-witness.md`](../../spec/checkpoint-witness.md) defines. Its design record is
+[RFC 0017](../../rfcs/0017-checkpoint-witness-statement.md), accepted on 2026-10-12.
 
-- **Not part of any corpus or conformance class.** The witness-statement reader class exists only
-  in the RFC's proposed text, so no claim may cite these vectors, and nothing here changes Core
+- **Normative for one class, and for nothing else.** The manifest and the vectors, not this README,
+  are normative for the witness-statement reader class (Core §1.1). Nothing here changes Core
   `0.2.0-draft`, its schema, its four classes, or either of its corpora.
-- **Not published with the specification, and in no release bundle.** The site's build skips this
-  directory, as it skips the [staged evaluation rows](../evaluation/staged/README.md), and a test
-  holds that nothing under it is served. [`.gitattributes`](../../.gitattributes) marks it
-  `export-ignore`, so no `git archive` release bundle carries it, and `-text`, so no checkout
-  converts a line ending and changes a vector's bytes.
+- **Published with the specification.** The site serves the manifest and every vector, byte for
+  byte, and a test holds that it does. A release bundle carries them from the first release cut
+  after their landing; the `0.2.0-draft` bundle, cut before, does not. `.gitattributes` marks the
+  directory `-text`, so no checkout or archive converts a line ending and changes a vector's bytes.
 - **Not this repository's to change.** Each vector is the reference gateway's, byte for byte.
 
 ## Where they come from
@@ -70,8 +70,9 @@ keys only: multiples of the base point, a key of mixed order, and encodings the 
 
 ## The manifest
 
-[`manifest.json`](manifest.json) carries `"status": "proposed"`, the RFC that proposes the vectors
-(`proposedBy`), their `source`, and one row per vector: `id`, the vector's `name`; `path`; `family`;
+[`manifest.json`](manifest.json) carries `"status": "research-preview"`, as the specification's
+other two corpus manifests do, the RFC that proposed the vectors (`proposedBy`), their `source`,
+and one row per vector: `id`, the vector's `name`; `path`; `family`;
 `expectedResult`, which is `reading`, `findings` or `refused`; `expectedFindings`, the set of names,
 on a `findings` row; `expectedRefusal`, the name, on a `refused` row; and `sha256`, the SHA-256 of
 the file. The vectors' own `expected` members are the source of truth, and the row restates them so
@@ -94,9 +95,10 @@ To run a vector, give a reader the vector's `trail`, its `keys` in order, its `w
 its `head` file when there is one, writing out any file given in parts first, and compare its
 answer with `expected` as above.
 
-## How they land
+## How they landed
 
-If RFC 0017 is accepted, the landing pull request removes this directory from the site's and the
-release bundle's exclusions, and the vectors join the published corpus as the vectors of the
-witness-statement reader class, normative for that class and for nothing else. When that is, and
-under which version, is the RFC's first unresolved question.
+RFC 0017 was accepted on 2026-10-12, and the pull request that accepted it removed this directory
+from the site's and the release bundle's exclusions: the vectors joined the published corpus as the
+vectors of the witness-statement reader class, normative for that class and for nothing else. They
+landed beside the released Core `0.2.0-draft`, which they do not change, and carry no
+`suiteVersion`; whether they take one of their own is still the RFC's first unresolved question.

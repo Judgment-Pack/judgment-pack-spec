@@ -5,10 +5,9 @@ semantic requirements of Judgment Pack Core `0.2.0-draft`. It is versioned with 
 yet a complete or normative conformance suite. Evaluator behavior is out of scope *here*: it has its
 own corpus, in [`evaluation/`](evaluation/README.md), which is normative for the evaluator conformance
 class of §3.4. A document-conformance result never depends on it. Nor is the checkpoint witness
-statement in scope here:
-[`witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness)
-holds the 54 vectors [RFC 0017](../rfcs/0017-checkpoint-witness-statement.md) proposes, which are in
-no corpus while that RFC is a draft and which the site does not serve.
+statement in scope here: [`witness/`](witness/README.md) holds the 54 vectors of its companion
+document, [`spec/checkpoint-witness.md`](../spec/checkpoint-witness.md), which are normative for the
+witness-statement reader class and for nothing else.
 
 [`manifest.json`](manifest.json) is the machine-readable case index. Its shape is defined by
 [`manifest.schema.json`](manifest.schema.json).

@@ -115,7 +115,10 @@ inflates in retelling: the mechanism proves **byte-lineage, not truth**. It esta
 judgment was computed over. It establishes nothing about whether those bytes are accurate, whether
 the named source produced them, or whether acting on the result is authorized — the same three
 things [conformance never establishes](../../spec/judgment-pack-core.md). Nothing in this research
-line is part of JPS, and no RFC proposes the acquisition, receipt, seal, or admission formats as JPS
+line is part of JPS except the checkpoint witness statement, which
+[RFC 0017](../../rfcs/0017-checkpoint-witness-statement.md) took up as a
+[companion document](../../spec/checkpoint-witness.md) of the specification, normative for its
+reader class alone, and no RFC proposes the acquisition, receipt, seal, or admission formats as JPS
 today. The derivation-rule evidence is also bounded: a later probe showed that the set of fields a
 short-circuiting rule happened to read is not necessarily a sufficient policy basis. No portable
 repair has been selected.

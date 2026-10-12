@@ -1,13 +1,36 @@
 # RFC 0017: The checkpoint witness statement
 
-- Status: Draft
+- Status: Accepted
 - Type: Standards track (a companion document of the specification, with a reader conformance class
   and a vector corpus of its own)
 - Created: 2026-10-11
+- Accepted: 2026-10-12
 - Issue: [#122](https://github.com/Judgment-Pack/judgment-pack-spec/issues/122)
 
-> This is an open proposal, not part of the specification. See
-> [RFC 0000](0000-rfc-process.md) for the process and evidence bar.
+> **Adoption record.** This RFC is accepted by the single maintainer under the interim review
+> regime ([RFC 0009](0009-interim-review-regime.md)), at draft maturity: the two independent
+> implementations [RFC 0000](0000-rfc-process.md) asks of a stable feature do not exist, as
+> Evidence and Implementation below say. The proposal's cross-vendor review, round 1, is recorded
+> with its fixes on the pull request that opened it
+> ([pull request 132](https://github.com/Judgment-Pack/judgment-pack-spec/pull/132)) and under
+> [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews)
+> as `0017-round-1.md`; the review of this acceptance, with a written disposition for every
+> finding, is recorded on the pull request that makes it. The maintainer's decision that the
+> statement is taken up, with its vectors the same bytes as the gateway's at `v0.11.0`, commit
+> `13349cafe33bb7618567e47ce7f6e1a4224231b0`, is recorded on issue
+> [#122](https://github.com/Judgment-Pack/judgment-pack-spec/issues/122) on 2026-10-11.
+>
+> **What lands, and when.** What the scope note below names, and nothing else: the text under
+> Specification, §§1–11, as the companion document
+> [`spec/checkpoint-witness.md`](../spec/checkpoint-witness.md), and the 54 vectors under
+> `conformance/witness/`, unchanged, each normative for the witness-statement reader class and for
+> nothing else. With them the three texts Compatibility names change: Core §1.1's list of normative
+> artifacts, the architecture vision's sentence, and the published corpus, which the site now
+> serves and every release bundle cut from here on carries. They land with this acceptance, beside
+> the released Core `0.2.0-draft`, which they do not change, rather than waiting for the next
+> `specVersion`; that answers the first part of Unresolved 1. Its second part, whether the vectors
+> take a `suiteVersion` of their own, stays open. This document stays the record of the proposal:
+> the companion document is the normative text, and Core §1.1 makes an RFC informative in any case.
 >
 > **The decision this records.** Issue #122 asked whether the checkpoint witness's statement — a
 > format the reference gateway states in its `SPEC.md` §8, with 54 vectors under `corpus/witness/`,
