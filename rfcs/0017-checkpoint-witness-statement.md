@@ -15,7 +15,8 @@
 > ([pull request 132](https://github.com/Judgment-Pack/judgment-pack-spec/pull/132)) and under
 > [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews)
 > as `0017-round-1.md`; the review of this acceptance, with a written disposition for every
-> finding, is recorded on the pull request that makes it. The maintainer's decision that the
+> finding, is recorded on the pull request that makes it and under `rfcs/reviews/` as
+> `0017-round-2.md`. The maintainer's decision that the
 > statement is taken up, with its vectors the same bytes as the gateway's at `v0.11.0`, commit
 > `13349cafe33bb7618567e47ce7f6e1a4224231b0`, is recorded on issue
 > [#122](https://github.com/Judgment-Pack/judgment-pack-spec/issues/122) on 2026-10-11.
@@ -32,8 +33,22 @@
 > §1.1's list gains the companion document, and the architecture vision's sentence gains its
 > exception. The third, the published corpus, waits with the vectors. That answers the first part
 > of Unresolved 1: the vectors wait for the next `specVersion`. Its second part, whether they take a
-> `suiteVersion` of their own, stays open. This document stays the record of the proposal: the
-> companion document is the normative text, and Core §1.1 makes an RFC informative in any case.
+> `suiteVersion` of their own, stays open. Until a specification version publishes the vectors, no
+> witness-statement reader conformance claim is available: §11 holds a reader to the vectors
+> published with the version its claim names, and no version publishes these. This document stays
+> the record of the proposal: the companion document is the normative text, and Core §1.1 makes an
+> RFC informative in any case.
+>
+> **A lapse this acceptance discloses, and cannot undo.** GOVERNANCE's record of a review names the
+> drafting and reviewing models with their vendors and dates, quotes the prompt verbatim, and
+> includes the reviewer's complete unedited output. Pull request 132's record of round 1 carries
+> the round's summary, findings, dispositions and fixes, and not the prompt, the complete output or
+> the drafting model's identity; `0017-round-1.md` holds what the pull request carries and says
+> what it does not. That was a lapse, not an exemption, and nothing done now makes pull request
+> 132 have met its own merge requirement. What is done now is narrower: the omission is on the
+> record, and the review of this acceptance is recorded in full, as `0017-round-2.md`, over the
+> commit that carries the companion document, which is the proposal's text verbatim, so the
+> scrutiny the proposal's record lacks is no longer missing.
 >
 > **The decision this records.** Issue #122 asked whether the checkpoint witness's statement — a
 > format the reference gateway states in its `SPEC.md` §8, with 54 vectors under `corpus/witness/`,

@@ -12,7 +12,9 @@ Its 54 vectors, under
 [`conformance/witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness),
 are **staged** until the next `specVersion` opens: they are in no corpus, no claim may cite them,
 the site does not serve them, and no release bundle carries them. When that version opens they move
-into a corpus, normative for this class and for nothing else.
+into a corpus, normative for this class and for nothing else. Until a specification version
+publishes them, no witness-statement reader conformance claim is available: §11 holds a reader to
+the vectors published with the version its claim names, and no version publishes these.
 
 It specifies version `1` of the witness statement (`witnessVersion` `"1"`, §3). It is published
 beside the released Core `0.2.0-draft` and carries no `specVersion` of its own; whether its vectors
