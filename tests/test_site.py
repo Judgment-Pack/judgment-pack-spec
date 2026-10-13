@@ -15,10 +15,11 @@ ROOT = Path(__file__).resolve().parents[1]
 # Mirrors UNPUBLISHED_ARTIFACT_DIRECTORIES in web/build.py: rows staged for a later suiteVersion are
 # in no corpus, and the site serves nothing under this directory.
 STAGED_EVALUATION_ROWS = "conformance/evaluation/staged"
-UNPUBLISHED_DIRECTORIES = (STAGED_EVALUATION_ROWS,)
-# The checkpoint witness vectors were unpublished too while RFC 0017 was a draft. Since its acceptance
-# the site serves them, beside the companion document they belong to (conformance/witness/README.md).
+# The checkpoint witness vectors are staged since RFC 0017's acceptance, in no corpus until the next
+# specVersion opens, and the site serves nothing under this directory either
+# (conformance/witness/README.md). The companion document they belong to is published.
 WITNESS_VECTORS = "conformance/witness"
+UNPUBLISHED_DIRECTORIES = (STAGED_EVALUATION_ROWS, WITNESS_VECTORS)
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
 # anywhere the site publishes. The tokens are assembled from fragments deliberately: the repository
@@ -208,24 +209,14 @@ class StaticSiteTests(unittest.TestCase):
         # here: nothing under the staged directory is published, as an artifact or as a page.
         self._assert_nothing_published_under(STAGED_EVALUATION_ROWS)
 
-    def test_witness_vectors_and_their_document_are_published(self) -> None:
-        # RFC 0017 is accepted, and conformance/witness/README.md says the site serves the manifest
-        # and every vector byte for byte: every file under the directory but its README, which is a
-        # page. The companion document and the corpus each render as a page of their own.
-        sources = sorted(
-            path for path in (ROOT / WITNESS_VECTORS).rglob("*") if path.is_file()
-        )
-        files = [path for path in sources if path.name != "README.md"]
-        self.assertEqual(55, len(files), "the manifest and the 54 vectors")
-        for source in files:
-            relative = source.relative_to(ROOT).as_posix()
-            with self.subTest(relative=relative):
-                published = self.output / "artifacts" / relative
-                self.assertTrue(published.is_file())
-                self.assertEqual(source.read_bytes(), published.read_bytes())
-        corpus = (self.output / WITNESS_VECTORS / "index.html").read_text(encoding="utf-8")
-        self.assertIn("This directory holds 54 vectors", corpus)
-        self.assertIn("artifacts/conformance/witness/manifest.json", corpus)
+    def test_witness_vectors_are_not_published(self) -> None:
+        # The vectors are staged, and conformance/witness/README.md says the site does not serve
+        # them; held as the staged rows' exclusion is.
+        self._assert_nothing_published_under(WITNESS_VECTORS)
+
+    def test_witness_companion_document_is_published(self) -> None:
+        # RFC 0017 is accepted and its text landed: the companion document is a page of its own,
+        # normative for its reader class, and Core §1.1 links to it.
         document = (self.output / "spec" / "checkpoint-witness" / "index.html").read_text(
             encoding="utf-8"
         )
@@ -606,7 +597,6 @@ class StaticSiteTests(unittest.TestCase):
             "project/changelog/index.html": "CHANGELOG.md",
             "project/deployment/index.html": "web/DEPLOYMENT.md",
             "conformance/evaluation/index.html": "conformance/evaluation/README.md",
-            "conformance/witness/index.html": "conformance/witness/README.md",
             "spec/checkpoint-witness/index.html": "spec/checkpoint-witness.md",
         }
         for output, source in cases.items():

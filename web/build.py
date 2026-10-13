@@ -673,15 +673,6 @@ PAGES = (
         source_ref="main",
     ),
     Page(
-        "conformance/witness/README.md",
-        PurePosixPath("conformance/witness/index.html"),
-        "Checkpoint witness vectors",
-        "The 54 checkpoint witness vectors, the reference gateway's bytes — normative for the witness-statement reader class and for nothing else.",
-        "conformance",
-        "Normative for the witness-statement reader class",
-        source_ref="main",
-    ),
-    Page(
         "web/DEPLOYMENT.md",
         PurePosixPath("project/deployment/index.html"),
         "Static site deployment",
@@ -1557,13 +1548,6 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
             "conformance/evaluation/manifest.schema.json": PurePosixPath(
                 "artifacts/conformance/evaluation/manifest.schema.json"
             ),
-            # The witness vectors likewise: one page, and the manifest and vectors from the artifact
-            # tree. A directory has no page of its own, so `vectors/` resolves to the repository's.
-            "conformance/witness": PurePosixPath("conformance/witness/index.html"),
-            "conformance/witness/manifest.json": PurePosixPath(
-                "artifacts/conformance/witness/manifest.json"
-            ),
-            "conformance/witness/vectors": GITHUB_URL + "/tree/main/conformance/witness/vectors",
             ".vscode/tasks.json": GITHUB_ROOT + ".vscode/tasks.json",
         }
     )
@@ -2209,11 +2193,14 @@ def build_license(output_root: Path) -> None:
 
 
 # Rows staged for a later suiteVersion are in no corpus (conformance/evaluation/staged/README.md). The
-# site serves the specification and its published corpora, so it serves nothing under this directory;
+# site serves the specification and its released corpus, so it serves nothing under this directory;
 # the release bundle leaves it out by the same rule (.gitattributes, export-ignore). The checkpoint
-# witness vectors were excluded too while RFC 0017 was a draft; since its acceptance they are
-# published (conformance/witness/README.md).
-UNPUBLISHED_ARTIFACT_DIRECTORIES = (PurePosixPath("conformance/evaluation/staged"),)
+# witness vectors are staged too, since RFC 0017's acceptance, until the next specVersion opens
+# (conformance/witness/README.md); the companion document they belong to is published.
+UNPUBLISHED_ARTIFACT_DIRECTORIES = (
+    PurePosixPath("conformance/evaluation/staged"),
+    PurePosixPath("conformance/witness"),
+)
 
 
 def is_published_artifact(relative: Path) -> bool:
@@ -2344,7 +2331,7 @@ conformance.
 - [Core JSON Schema]({guide_url(PurePosixPath("schema/0.2.0-draft/judgment-pack-core.schema.json"))}): normative structural schema
 - [Document-conformance corpus]({guide_url(PurePosixPath("conformance/index.html"))}): carrier, structural, and semantic cases
 - [Evaluation corpus]({guide_url(PurePosixPath("conformance/evaluation/index.html"))}): normative only for evaluator conformance
-- [The checkpoint witness statement]({guide_url(PurePosixPath("spec/checkpoint-witness/index.html"))}) and its [vectors]({guide_url(PurePosixPath("conformance/witness/index.html"))}): a companion document, normative only for the witness-statement reader class
+- [The checkpoint witness statement]({guide_url(PurePosixPath("spec/checkpoint-witness/index.html"))}): a companion document, normative only for the witness-statement reader class; its vectors are staged until the next specVersion
 - [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
 
 ## Explanations and direct answers

@@ -1352,9 +1352,9 @@ class RepositoryConformanceTests(unittest.TestCase):
 
 
 # The checkpoint witness vectors RFC 0017 proposed: the reference gateway's corpus/witness/ at
-# v0.11.0, byte for byte. Since the RFC's acceptance they are published, normative for the
-# witness-statement reader class of spec/checkpoint-witness.md and for nothing else
-# (conformance/witness/README.md). The repository owns no reader, so nothing here verifies a
+# v0.11.0, byte for byte. The RFC is accepted and its text landed as spec/checkpoint-witness.md; the
+# vectors are staged, in no corpus, until the next specVersion opens (conformance/witness/README.md).
+# The repository owns no reader, so nothing here verifies a
 # signature or reads a chain: these tests hold the files to the digests the manifest records, each
 # vector to the gateway's form, each manifest row to the vector it names, and every statement of the
 # vectors' counts to the manifest.
@@ -1428,8 +1428,9 @@ class WitnessVectorTests(unittest.TestCase):
 
     def test_manifest_names_its_status_proposal_and_source(self) -> None:
         self.assertEqual({"status", "proposedBy", "source", "cases"}, set(self.manifest))
-        # "proposed" while RFC 0017 was a draft; the status the other two corpus manifests carry since.
-        self.assertEqual("research-preview", self.manifest["status"])
+        # "proposed" while RFC 0017 was a draft; since its acceptance "staged", as the staged
+        # evaluation rows' cases.json says, until the next specVersion opens.
+        self.assertEqual("staged", self.manifest["status"])
         self.assertEqual(WITNESS_RFC, self.manifest["proposedBy"])
         self.assertTrue((ROOT / WITNESS_RFC).is_file())
         self.assertEqual(WITNESS_SOURCE, self.manifest["source"])

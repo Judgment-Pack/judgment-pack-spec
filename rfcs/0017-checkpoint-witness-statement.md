@@ -20,17 +20,20 @@
 > `13349cafe33bb7618567e47ce7f6e1a4224231b0`, is recorded on issue
 > [#122](https://github.com/Judgment-Pack/judgment-pack-spec/issues/122) on 2026-10-11.
 >
-> **What lands, and when.** What the scope note below names, and nothing else: the text under
-> Specification, §§1–11, as the companion document
-> [`spec/checkpoint-witness.md`](../spec/checkpoint-witness.md), and the 54 vectors under
-> `conformance/witness/`, unchanged, each normative for the witness-statement reader class and for
-> nothing else. With them the three texts Compatibility names change: Core §1.1's list of normative
-> artifacts, the architecture vision's sentence, and the published corpus, which the site now
-> serves and every release bundle cut from here on carries. They land with this acceptance, beside
-> the released Core `0.2.0-draft`, which they do not change, rather than waiting for the next
-> `specVersion`; that answers the first part of Unresolved 1. Its second part, whether the vectors
-> take a `suiteVersion` of their own, stays open. This document stays the record of the proposal:
-> the companion document is the normative text, and Core §1.1 makes an RFC informative in any case.
+> **What lands, and when.** The text under Specification, §§1–11, lands now as the companion
+> document [`spec/checkpoint-witness.md`](../spec/checkpoint-witness.md), normative for the
+> witness-statement reader class and for nothing else, beside the released Core `0.2.0-draft`,
+> which it does not change. The 54 vectors, already in this repository under `conformance/witness/`
+> and unchanged, stay **staged** until the next `specVersion` opens, as RFC 0013's rows are: they
+> are in no corpus, no claim may cite them, the site does not serve them, and no release bundle
+> carries them; they are held to the same repository checks and can be run by hand. When that
+> version opens they move into a corpus, normative for the reader class only, and Core §1.1's list
+> of normative artifacts gains them. Of the three texts Compatibility names, two change now: Core
+> §1.1's list gains the companion document, and the architecture vision's sentence gains its
+> exception. The third, the published corpus, waits with the vectors. That answers the first part
+> of Unresolved 1: the vectors wait for the next `specVersion`. Its second part, whether they take a
+> `suiteVersion` of their own, stays open. This document stays the record of the proposal: the
+> companion document is the normative text, and Core §1.1 makes an RFC informative in any case.
 >
 > **The decision this records.** Issue #122 asked whether the checkpoint witness's statement — a
 > format the reference gateway states in its `SPEC.md` §8, with 54 vectors under `corpus/witness/`,

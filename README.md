@@ -150,7 +150,7 @@ reproducing its corpus version, its results, or its every-row statement.
 | [`conformance/`](conformance/)                                                   | 99 non-normative document-conformance test cases    |
 | [`conformance/evaluation/`](conformance/evaluation/README.md)                     | 20-case seed evaluation corpus (normative for §3.4) |
 | [`spec/checkpoint-witness.md`](spec/checkpoint-witness.md)                       | Normative prose for the witness-statement reader class, a companion document beside Core |
-| [`conformance/witness/`](conformance/witness/README.md)                           | 54 checkpoint witness vectors (normative for the witness-statement reader class) |
+| [`conformance/witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness) | 54 checkpoint witness vectors, staged until the next `specVersion` (in no corpus) |
 | [`TESTING.md`](TESTING.md)                                                       | A 10–15 minute external testing exercise            |
 | [`VERSIONING.md`](VERSIONING.md)                                                 | Release and compatibility policy                    |
 | [`CHANGELOG.md`](CHANGELOG.md)                                                   | Draft and published change history                  |

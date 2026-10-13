@@ -3,16 +3,21 @@
 ## Status
 
 This document is a companion document of the Judgment Pack specification. It is normative for one
-conformance class, the *witness-statement reader* (§11), and for nothing else, and so are its
-vectors: the manifest and vectors under [`conformance/witness/`](../conformance/witness/README.md),
-not its README ([Core §1.1](judgment-pack-core.md#11-normative-artifacts-and-precedence)). It
-changes nothing in Judgment Pack Core `0.2.0-draft`, its schema, its four conformance classes, or
-either of its corpora.
+conformance class, the *witness-statement reader* (§11), and for nothing else
+([Core §1.1](judgment-pack-core.md#11-normative-artifacts-and-precedence)). It changes nothing in
+Judgment Pack Core `0.2.0-draft`, its schema, its four conformance classes, or either of its
+corpora.
+
+Its 54 vectors, under
+[`conformance/witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness),
+are **staged** until the next `specVersion` opens: they are in no corpus, no claim may cite them,
+the site does not serve them, and no release bundle carries them. When that version opens they move
+into a corpus, normative for this class and for nothing else.
 
 It specifies version `1` of the witness statement (`witnessVersion` `"1"`, §3). It is published
-beside the released Core `0.2.0-draft` and carries no `specVersion` of its own; whether it and its
-vectors take a version of their own is the first unresolved question of its design record. Like
-Core, it is a research preview, at draft maturity.
+beside the released Core `0.2.0-draft` and carries no `specVersion` of its own; whether its vectors
+take a `suiteVersion` of their own is open in its design record (Unresolved 1). Like Core, it is a
+research preview, at draft maturity.
 
 Its design record is [RFC 0017](../rfcs/0017-checkpoint-witness-statement.md), accepted on
 2026-10-12, which is informative. Its text, §§1–11 below, is that RFC's Specification section. It
@@ -306,7 +311,7 @@ set: how many times, and in what order, a reader reports one is not normative. A
 finding MUST report: whether it is current or historical; the head's index, when a head was
 supplied; the chain's highest index; the latest witnessed checkpoint's index, sequence and
 `witnessedAt`; the sequence of each `conflict` statement, in index order; and whether the chain is
-retired. The vectors carry these as JSON (see [`conformance/witness/`](../conformance/witness/README.md)); that form is the vectors' carrier, not
+retired. The vectors carry these as JSON (see [`conformance/witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness)); that form is the vectors' carrier, not
 an output format this document requires.
 
 **The sentences.** A reader that states in words what a reading establishes MUST state no more

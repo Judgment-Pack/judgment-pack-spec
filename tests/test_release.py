@@ -173,13 +173,11 @@ class ReleaseBuilderTests(unittest.TestCase):
                 with self.subTest(archived=path):
                     self.assertIn(path, members)
 
-    def test_release_bundle_carries_the_witness_vectors(self) -> None:
-        # RFC 0017 is accepted, and the vectors it proposed are published with the companion
-        # document they belong to (conformance/witness/README.md), so a bundle carries both. While
-        # the RFC was a draft .gitattributes marked their directory export-ignore; it keeps -text,
-        # since a converted line ending would change the bytes their digests hold.
-        self.assertIn("conformance", BUILD_RELEASE.BUNDLE_PATHS)
-        self.assertIn("spec", BUILD_RELEASE.BUNDLE_PATHS)
+    def test_release_bundle_leaves_the_witness_vectors_out(self) -> None:
+        # The vectors RFC 0017 proposed are staged since its acceptance, in no corpus
+        # (conformance/witness/README.md), so no bundle may carry them; .gitattributes marks their
+        # directory export-ignore, and -text, since a converted line ending would change their bytes.
+        # The document corpus beside them stays in the bundle, and is checked as the control.
         witness_root = (ROOT / "conformance" / "witness").relative_to(ROOT).as_posix()
         witness = sorted(
             path.relative_to(ROOT).as_posix()
@@ -187,14 +185,10 @@ class ReleaseBuilderTests(unittest.TestCase):
             if path.is_file()
         )
         self.assertTrue(witness, "no witness vector is here; this test can go with the directory")
-        document = "spec/checkpoint-witness.md"
-        self.assertTrue((ROOT / document).is_file())
-        # `git archive` drops a whole directory that is export-ignored, whatever its files say, so
-        # the ancestors are checked as well as the files.
-        ancestors = ["conformance", witness_root, witness_root + "/vectors", "spec"]
+        released = ["conformance", "conformance/manifest.json", "conformance/README.md"]
         try:
             completed = subprocess.run(
-                ["git", "check-attr", "export-ignore", "text", "--", *witness, document, *ancestors],
+                ["git", "check-attr", "export-ignore", "text", "--", *witness, *released],
                 cwd=ROOT,
                 check=True,
                 capture_output=True,
@@ -206,18 +200,16 @@ class ReleaseBuilderTests(unittest.TestCase):
             tuple(line.rsplit(": ", 2)[:2]): line.rsplit(": ", 1)[1]
             for line in completed.stdout.splitlines()
         }
-        for path in [*witness, document, *ancestors]:
-            with self.subTest(path=path):
-                self.assertEqual("unspecified", attributes.get((path, "export-ignore")))
         for path in witness:
             with self.subTest(path=path):
+                self.assertEqual("set", attributes.get((path, "export-ignore")))
                 self.assertEqual("unset", attributes.get((path, "text")))
+        for path in released:
+            with self.subTest(path=path):
+                self.assertEqual("unspecified", attributes.get((path, "export-ignore")))
 
-        # The attributes are configuration; the archive is the fact. Where there is a commit to
-        # archive, every tracked witness file and the document are in what the builder's command
-        # would put in a bundle.
         archived = subprocess.run(
-            ["git", "archive", "--format=tar", "HEAD", "conformance", "spec"],
+            ["git", "archive", "--format=tar", "HEAD", "conformance"],
             cwd=ROOT,
             capture_output=True,
         )
@@ -225,20 +217,48 @@ class ReleaseBuilderTests(unittest.TestCase):
             return  # no commit here (a bare scratch repository); the attribute checks above stand
         with tarfile.open(fileobj=io.BytesIO(archived.stdout)) as bundle:
             members = set(bundle.getnames())
-        tracked = set(
-            subprocess.run(
-                ["git", "ls-tree", "-r", "--name-only", "HEAD", witness_root, document],
+        self.assertEqual(
+            [], sorted(name for name in members if name.startswith(witness_root + "/"))
+        )
+        self.assertIn("conformance/manifest.json", members)
+
+    def test_release_bundle_carries_the_witness_companion_document(self) -> None:
+        # The companion document landed with RFC 0017's acceptance; it is under spec/, which every
+        # bundle carries, and nothing marks it export-ignore.
+        self.assertIn("spec", BUILD_RELEASE.BUNDLE_PATHS)
+        document = "spec/checkpoint-witness.md"
+        self.assertTrue((ROOT / document).is_file())
+        try:
+            completed = subprocess.run(
+                ["git", "check-attr", "export-ignore", "--", document, "spec"],
                 cwd=ROOT,
                 check=True,
                 capture_output=True,
                 text=True,
-            ).stdout.splitlines()
+            )
+        except (OSError, subprocess.CalledProcessError) as error:
+            self.skipTest(f"git cannot read attributes here: {error}")
+        for line in completed.stdout.splitlines():
+            with self.subTest(line=line):
+                self.assertTrue(line.endswith(": export-ignore: unspecified"))
+        archived = subprocess.run(
+            ["git", "archive", "--format=tar", "HEAD", "spec"],
+            cwd=ROOT,
+            capture_output=True,
         )
-        for path in [*witness, document]:
-            if path in tracked:
-                with self.subTest(archived=path):
-                    self.assertIn(path, members)
-        self.assertIn("conformance/manifest.json", members)
+        if archived.returncode != 0:
+            return  # no commit here (a bare scratch repository); the attribute check above stands
+        tracked = subprocess.run(
+            ["git", "ls-tree", "--name-only", "HEAD", document],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.split()
+        with tarfile.open(fileobj=io.BytesIO(archived.stdout)) as bundle:
+            members = set(bundle.getnames())
+        if tracked:
+            self.assertIn(document, members)
 
     @staticmethod
     def _release_tree(directory: Path, version: str) -> Path:

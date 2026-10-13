@@ -4,7 +4,9 @@
 conformance/evaluation/staged export-ignore
 conformance/evaluation/staged/** export-ignore
 
-# The checkpoint witness vectors are published since RFC 0017's acceptance, so a release bundle
-# carries them. They are the reference gateway's bytes, held to their SHA-256 digests, so no
-# checkout or archive may convert a line ending in them (conformance/witness/README.md).
-conformance/witness/** -text
+# The checkpoint witness vectors are staged since RFC 0017's acceptance, in no corpus until the next
+# specVersion opens (conformance/witness/README.md), so no bundle carries them. They are the
+# reference gateway's bytes, held to their SHA-256 digests, so no checkout may convert a line ending
+# in them either.
+conformance/witness export-ignore
+conformance/witness/** export-ignore -text
