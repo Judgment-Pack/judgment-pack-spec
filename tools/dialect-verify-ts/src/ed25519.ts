@@ -1,5 +1,8 @@
-// Ed25519 as spec/dialect.md §1 states the equation: RFC 8032's check without the cofactor, with a
-// canonical scalar, written here from RFC 8032 §5.1 so that the check is exactly that and no library's.
+// The key rule and the equation spec/dialect.md §1 adopts from the checkpoint witness statement, its §5:
+// a key is the canonical encoding of a point whose order does not divide 8; a signature verifies when S is
+// below L and the canonical encoding of [S]B − [h]A is R, byte for byte (RFC 8032's check without the
+// cofactor, with a canonical scalar). Written here from those words and RFC 8032 §5.1, so that the check
+// is exactly that one and no library's.
 import { createHash } from "node:crypto";
 
 const P = 2n ** 255n - 19n;
@@ -23,7 +26,7 @@ const SQRT_M1 = pow(2n, (P - 1n) / 4n);
 type Point = { x: bigint; y: bigint; z: bigint; t: bigint };
 const IDENTITY: Point = { x: 0n, y: 1n, z: 1n, t: 0n };
 
-function add(p: Point, q: Point): Point {
+export function add(p: Point, q: Point): Point {
   const a = mod((p.y - p.x) * (q.y - q.x));
   const b = mod((p.y + p.x) * (q.y + q.x));
   const c = mod(p.t * 2n * D * q.t);
@@ -46,6 +49,22 @@ function mul(s: bigint, p: Point): Point {
   return r;
 }
 
+const negate = (p: Point): Point => ({ x: mod(-p.x), y: p.y, z: p.z, t: mod(-p.t) });
+
+/** The canonical encoding (RFC 8032 §5.1.2): y little-endian, the sign of x in the top bit. */
+export function encodePoint(p: Point): Uint8Array {
+  const zi = inv(p.z);
+  const x = mod(p.x * zi);
+  let y = mod(p.y * zi);
+  const out = new Uint8Array(32);
+  for (let k = 0; k < 32; k++) {
+    out[k] = Number(y & 0xffn);
+    y >>= 8n;
+  }
+  out[31] |= Number(x & 1n) << 7;
+  return out;
+}
+
 function same(p: Point, q: Point): boolean {
   return mod(p.x * q.z - q.x * p.z) === 0n && mod(p.y * q.z - q.y * p.z) === 0n;
 }
@@ -56,7 +75,10 @@ function leInt(b: Uint8Array): bigint {
   return r;
 }
 
-/** RFC 8032 §5.1.3 decoding; null when the encoding is not canonical or names no point. */
+/**
+ * RFC 8032 §5.1.3 decoding, the encoding read as written: null when y is p or more, when x is 0 and the
+ * sign bit is set, or when (y² − 1) / (d·y² + 1) has no square root modulo p.
+ */
 export function decodePoint(b: Uint8Array): Point | null {
   if (b.length !== 32) return null;
   const bytes = Uint8Array.from(b);
@@ -89,25 +111,24 @@ export function smallOrder(p: Point): boolean {
   return same(mul(8n, p), IDENTITY);
 }
 
-/**
- * The key rule as this reader takes it (README, "Where the text was not enough"): the 32 bytes decode as a
- * canonical encoding of a curve point, and that point is not of small order.
- */
+/** The key rule (witness statement §5): a canonical encoding of a point of the curve whose order does not divide 8. */
 export function keyAcceptable(key: Uint8Array): boolean {
   const a = decodePoint(key);
   return a !== null && !smallOrder(a);
 }
 
-/** RFC 8032 §5.1.7 without the cofactor: [S]B = R + [k]A, S below L, R and A canonical encodings. */
+/**
+ * The equation (witness statement §5): S below L, and the canonical encoding of [S]B − [h]A is R, byte for
+ * byte, h the SHA-512 of R ‖ A ‖ M reduced modulo L. R is not otherwise decoded.
+ */
 export function verify(key: Uint8Array, message: Uint8Array, signature: Uint8Array): boolean {
   if (signature.length !== 64) return false;
   const a = decodePoint(key);
   if (a === null) return false;
   const rBytes = signature.subarray(0, 32);
-  const r = decodePoint(rBytes);
-  if (r === null) return false;
   const s = leInt(signature.subarray(32));
   if (s >= L) return false;
-  const k = mod(leInt(createHash("sha512").update(rBytes).update(key).update(message).digest()), L);
-  return same(mul(s, BASE), add(r, mul(k, a)));
+  const h = mod(leInt(createHash("sha512").update(rBytes).update(key).update(message).digest()), L);
+  const computed = encodePoint(add(mul(s, BASE), negate(mul(h, a))));
+  return computed.every((b, k) => b === rBytes[k]);
 }

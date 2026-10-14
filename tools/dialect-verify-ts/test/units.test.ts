@@ -7,7 +7,7 @@ import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { scanBytes } from "../src/bounds.ts";
-import { keyAcceptable, verify as edVerify } from "../src/ed25519.ts";
+import { add, decodePoint, encodePoint, keyAcceptable, smallOrder, verify as edVerify } from "../src/ed25519.ts";
 import { NotRead, canon, isIntegerLiteral, member, num, obj, parse, preparationForm, read, resolve, str, utf8 } from "../src/json.ts";
 import type { JObj, JVal } from "../src/json.ts";
 import { instant } from "../src/time.ts";
@@ -102,14 +102,63 @@ test("a scalar that is not canonical (S + L) is refused", () => {
   assert.ok(!edVerify(profileKey, signedBytes, forged));
 });
 
-test("keys: a small-order point and a non-canonical encoding are refused, the vector's key is not", () => {
+// The key rule of the checkpoint witness statement, §5, which spec/dialect.md §1 adopts by reference.
+const SMALL_ORDER = [
+  "0100000000000000000000000000000000000000000000000000000000000000",
+  "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+  "0000000000000000000000000000000000000000000000000000000000000000",
+  "0000000000000000000000000000000000000000000000000000000000000080",
+  "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05",
+  "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc85",
+  "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a",
+  "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa",
+];
+const bytesOf = (h: string) => Uint8Array.from(Buffer.from(h, "hex"));
+
+test("the key rule (witness statement §5): the eight points of small order are refused, each by its canonical encoding", () => {
   assert.ok(keyAcceptable(profileKey));
-  const identity = new Uint8Array(32);
-  identity[0] = 1;
-  assert.ok(!keyAcceptable(identity));
-  const nonCanonical = new Uint8Array(32).fill(0xff);
-  nonCanonical[31] = 0x7f;
-  assert.ok(!keyAcceptable(nonCanonical));
+  for (const h of SMALL_ORDER) {
+    assert.notEqual(decodePoint(bytesOf(h)), null, h);
+    assert.ok(!keyAcceptable(bytesOf(h)), h);
+  }
+});
+
+test("the key rule: an encoding that is not canonical, and one that is no point, are refused; a key of mixed order is not", () => {
+  // y = p, which a lenient decoder reads as y = 0; and x = 0 (y = 1) with the sign bit set
+  const yP = new Uint8Array(32).fill(0xff);
+  yP[0] = 0xed;
+  yP[31] = 0x7f;
+  assert.ok(!keyAcceptable(yP));
+  const signedZero = bytesOf(SMALL_ORDER[0]);
+  signedZero[31] |= 0x80;
+  assert.ok(!keyAcceptable(signedZero));
+  // y = p + k for a small k whose canonical encoding is a point of large order: a lenient decoder would
+  // read it as that point, so only the canonical-encoding rule refuses it
+  const k = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].find((v) => {
+    const pt = decodePoint(Uint8Array.from([v, ...new Array(31).fill(0)]));
+    return pt !== null && !smallOrder(pt);
+  })!;
+  const lenient = new Uint8Array(32).fill(0xff);
+  lenient[0] = 0xed + k;
+  lenient[31] = 0x7f;
+  assert.ok(keyAcceptable(Uint8Array.from([k, ...new Array(31).fill(0)])));
+  assert.ok(!keyAcceptable(lenient));
+  // the first canonical y with no square root: no point
+  let y = 2;
+  for (; decodePoint(Uint8Array.from([y, ...new Array(31).fill(0)])) !== null; y++);
+  assert.ok(!keyAcceptable(Uint8Array.from([y, ...new Array(31).fill(0)])));
+  // the vector's key plus a point of order 8: of mixed order, so not refused
+  const mixed = encodePoint(add(decodePoint(profileKey)!, decodePoint(bytesOf(SMALL_ORDER[4]))!));
+  assert.ok(!smallOrder(decodePoint(mixed)!));
+  assert.ok(keyAcceptable(mixed));
+});
+
+test("the equation: R is compared as bytes with the canonical encoding of [S]B − [h]A", () => {
+  // R with its sign bit flipped encodes the negated point, and does not verify
+  const flipped = Buffer.from(signature);
+  flipped[31] ^= 0x80;
+  assert.ok(!edVerify(profileKey, signedBytes, flipped));
+  assert.ok(edVerify(profileKey, signedBytes, signature));
 });
 
 // ---- the refusals and findings, each from the valid vector by one change ----
@@ -245,4 +294,26 @@ test("unsignedParameters of the unsigned-parameters vector, as this reader reads
       '{"checks":["acquisition"],"source":"registry","targets":1}],"verifiedAt":"2026-10-01T22:32:47Z"}',
   );
   assert.equal(text(preparationForm(member(r.report, "targetsByClass")!)), '{"asserted":0,"generated":0,"record":3}');
+});
+
+test("probe: freshWithin whose asOf names a parameter declared string is false, not a refused rule", () => {
+  // The cross-vendor round's probe (spec PR 145). spec/dialect.md §6.3 makes the types part of the
+  // condition's truth ("N, of type timestamp, has an instant ... the value of M, of type integer"), and its
+  // sentence on a rule "not of this form" does not name a declared type: the rule is read, the condition is
+  // false, the first clause does not match, and the vendor source answers by its last clause.
+  const probe: Inputs = {
+    ...twoSources,
+    dialect: edit(
+      edit(twoSources.dialect, '"parameters":{"vendorId":"integer","window":"integer","runAt":"timestamp"}', '"parameters":{"vendorId":"integer","window":"integer","runAt":"timestamp","region":"string"}'),
+      '"asOf":"runAt"',
+      '"asOf":"region"',
+    ),
+  };
+  const r = verify(probe);
+  assert.equal(r.kind, "finding");
+  assert.equal((member(r.report, "finding") as { v: string }).v, "preparation-differs");
+  const vendor = (member(parse(text(r.recomputed!)), "outcomes") as { a: JObj[] }).a[1];
+  assert.equal((vendor.m.get("name") as { v: string }).v, "vendor");
+  assert.equal((vendor.m.get("reason") as { v: string }).v, "no-match");
+  assert.equal(text(preparationForm(member(vendor, "claim")!)), '{"acquisitionStatus":"unknown","basis":["/id","/observedAt"],"evidenceAvailability":{"intake-form":"unknown"},"facts":{},"reason":"no-match"}');
 });

@@ -73,69 +73,85 @@ Only these, under the independence protocol of its brief: `spec/dialect.md`, all
 directory under `conformance/dialect/vectors/`, as data; `rfcs/0000-rfc-process.md`; `GOVERNANCE.md`;
 `spec/judgment-pack-core.md`, §6.3 and §8.2, which the companion document cites; RFC 0018's title
 block; and the repository's `README.md`, `tests/test_site.py` and `.github/workflows/conformance.yml`.
+After the cross-vendor review round, and on the maintainer's disposition of it: that disposition, and
+`spec/checkpoint-witness.md` §5, which §1 adopts by reference for the key rule and the equation.
 Not read: the first reader or its test, the Runner's own README and manifest under
-`conformance/dialect/vectors/`, the rest of RFC 0018, any other repository, and any Go or Python source.
-The checkpoint witness statement, which §1 adopts by reference for the key rule and the signature
-equation, was not on the list and was not read either.
+`conformance/dialect/vectors/`, the rest of RFC 0018, the review round's record, any other repository,
+and any Go or Python source.
 
 ## Where the text was not enough
 
-Each point the text did not decide, and the reading taken. No vector decides any of them: every vector
-is answered the same under either reading of each.
+No vector depends on any point below: every vector gets the same answer under either reading of each.
 
-1. **The key rule.** §1 holds a key to the checkpoint witness statement's §5, which this reader did not
-   read. Taken: a key whose 32 bytes are not a canonical encoding of a curve point (RFC 8032 §5.1.3), or
-   whose point is of small order, is refused. The equation is the one §1 states: RFC 8032's check
-   without the cofactor, `S` below `L`, `R` decoded canonically.
-2. **The receipt's member forms.** §5.2's check 1 defers to gateway §1.2a, in another repository.
-   Taken: `receiptVersion` the string `"3"`, `kind` the string `"acquisition"`, `keyId` 32 and
-   `signature` 128 lowercase hexadecimal characters, `source` and `authority` strings, `acquisition` an
-   object, `argumentsCommitment` and `resultDigest` digests; `adapter`, `shape` and `endpoint` are held
-   only by check 3's comparison.
-3. **Receipt members outside check 1's list.** Taken: an `observedAt` or `servedAt` that is not a
-   timestamp with an instant is `acquisition-stale`; a `callIndex` that is not a non-negative integer,
-   or a `sessionId` that is not a string, is `acquisition-sessions`; `callIndex` values are compared by
-   value, so `-0` is `0`.
-4. **The report's form.** §11 lists what a reading reports, not its JSON. Taken: the form in the table
-   above; `result` takes the manifest's words `reading` and `finding`, and `refusal`.
-5. **Exit statuses.** The text gives none. Taken: those in the table above.
-6. **Levels of nesting** (§12). Taken: an object or an array opens a level, so `{}` is at one level and a
-   scalar at none; measured on bytes outside strings before a document is read, and as a value's depth
-   for a result.
-7. **A number literal's characters and exponent, measured on bytes.** Taken: a literal is a run outside
-   strings that starts with `-` or a digit and continues with digits, `+`, `-`, `.`, `e` and `E`; its
-   exponent's magnitude is the value of the digits after its first `e` or `E`, leading zeros ignored.
-8. **An unwrapped string's bytes** (§12, 200000). Taken: the UTF-8 bytes of the string's value, its
-   escapes read.
-9. **The record "written as one line"**, for an export of version 2 (the staging note). Taken: the bytes
-   of `run.audit` as `run.json` writes them, which is one line. No version-2 record in the vectors
-   carries a binding, so no binding's bytes depend on it.
-10. **"`binding` but for case"** (§11). Taken: ASCII case only: a top-level member of the record, other
-    than `binding`, whose name is `binding` once `A`–`Z` are lowercased, is refused.
-11. **A record without `inputs.facts` or `inputs.evidence`.** §11 gives `cites` an absent form, the empty
-    array, and these none. Taken: an absent one differs (`record-inputs-differ`). "Compared as JSON
-    values" is taken as §6.3's JSON-equal.
-12. **`freshWithin` whose `asOf` is not declared `timestamp`, or whose `maxAge` is not declared
-    `integer`.** Taken: the condition is false. §6.3's list of what refuses a rule does not name it.
-13. **A calculator's answer that is not of §7's form** (not an object whose `calculation` is an object
-    of exactly its members). §7 names no finding for it. Taken: `calculation-invalid`.
-14. **A source parameter with a value of the wrong type, beside another that has none.** Taken:
-    `parameter-invalid`; an absent value skips the source, a present value of the wrong type fails the
-    preparation whatever its other parameters hold.
-15. **A `selected-file` source's members** (§4.2), held in phase 4 before `kind-unread`. Taken:
-    `local-file` is exactly `name`, `kind`, `provider`, `read` and optionally `parameters`;
-    `google-drive` adds `profile`, `profileDigest`, `maxAge` and `arguments` as in §4.1. This reader
-    reads `operation` and the case, the kinds the vectors exercise, and answers `kind-unread` to the
-    rest.
-16. **Requirement ids in a claim form's `evidence`.** Taken: non-empty strings, as a copy's
-    `requirement` is.
-17. **A placeholder's extent** (§4.1). Taken: the leftmost `{{`, then the next `}}` after it; what lies
-    between is the name, which must be an `integer` parameter of the scope.
-18. **A rule's fact targets.** Taken: the set of pointers its claim forms write, over all clauses, so a
-    pointer written by two clauses is one target; two pointers of which one is a prefix of the other by
-    whole tokens are refused.
-19. **The lists of `admits`.** Taken: any array of the three class names, duplicates and the empty list
-    allowed; an empty list admits nothing.
+### Rules the companion document incorporates by reference
+
+1. **The key rule and the equation**, the checkpoint witness statement's §5 (§1: "A key is held to the
+   key rule of the checkpoint witness statement, its §5"). Read after the review round: the key rule this
+   reader implements is exactly that one. A key is refused when its 32 bytes are not the canonical
+   encoding of a point, read as written (`y` of p or more, or `x` 0 with the sign bit set), when the point's
+   order divides 8 (the eight points §5 lists), or when they name no point; a key of mixed order is not
+   refused. The equation is §5's as written: `S` below `L`, and the canonical encoding of [`S`]B − [h]A
+   equal to `R`, byte for byte, `R` not otherwise decoded. (The first version decoded `R` and compared
+   points, which gives the same answer for every signature; it now compares bytes, as §5 says.)
+2. **The receipt's member forms**, gateway §1.2a (§5.2, check 1: "each member this list reads is of the
+   form gateway §1.2a gives it"), in another repository and not read. Taken: `receiptVersion` the string
+   `"3"`, `kind` the string `"acquisition"`, `keyId` 32 and `signature` 128 lowercase hexadecimal
+   characters, `source` and `authority` strings, `acquisition` an object, `argumentsCommitment` and
+   `resultDigest` digests; `adapter`, `shape` and `endpoint` are held by check 3's comparison. The
+   citation's `callIndex` and `sessionId` are of the gateway's forms too; one that is not (a `callIndex`
+   that is not a non-negative integer, a `sessionId` that is not a string) is taken as
+   `acquisition-sessions`, the check that reads them, and `callIndex` values are compared by value.
+
+### Rules the text states
+
+These were listed as gaps in the first version; the text decides each.
+
+- **A receipt time with no instant** is `acquisition-stale`: §5.2, "`E.acquisition.observedAt` and
+  `E.servedAt` MUST each have an instant no more than the source's `maxAge` seconds before `verifiedAt`
+  and no more than 30 seconds after it; otherwise `acquisition-stale`."
+- **A record without `inputs.facts` or `inputs.evidence`** differs: §11, finding 6, "the record's
+  `inputs.facts` is not the facts document (§8.1), its `inputs.evidence` is not the
+  evidence-availability document, ... each compared as JSON values."
+- **A calculator's answer not of §7's form** is `calculation-invalid`: §7, "The value read MUST be an
+  object whose member `calculation` is an object of exactly ..." and "That answer is held to the
+  source, and any of these checks that fails is `calculation-invalid`".
+- **A source parameter of the wrong type beside one with no value** is `parameter-invalid`: §3, "A value
+  that is there and is not of type `T` fails the preparation, `parameter-invalid`."
+- **A placeholder's extent**: §4.1, "A placeholder is `{{`, a parameter name, and the next `}}`".
+- **A rule's fact targets** are every pointer of its claim forms over all clauses, and none may equal or
+  prefix another: §8, "for a rule, every pointer of every claim form's `facts` ... over all clauses";
+  §8.1, "No fact target of one source may equal another, or be a prefix of another by whole tokens".
+- **The lists of `admits`** are arrays of classes, with no further form: §8.2, "`admits`, an object of
+  `facts`, mapping fact targets to arrays of classes ... A target is admitted when its class is in its
+  list".
+- **A `selected-file` source's members**: §4.2, "`local-file` ... with no profile, no `maxAge` and no
+  request; or `google-drive` ... with `profile`, `profileDigest`, `maxAge` and `arguments` as in §4.1",
+  held in phase 4 by §11, "each of its sources against §4's members and its kind's, whichever its kind".
+  This reader reads `operation` and the case, and answers `kind-unread` to the rest.
+
+### The genuine choices
+
+1. **The report and exit representation.** §11 lists what a reading reports, not its JSON, and gives no
+   exit statuses. Taken: the form and the statuses in the table above; `result` takes the manifest's
+   words `reading` and `finding`, and `refusal`.
+2. **The byte-bound scans and the nesting convention** (§12). Taken: an object or an array opens a level,
+   so `{}` is at one level and a scalar at none, measured on bytes outside strings before a document is
+   read and as a value's depth for a result; a number literal is a run outside strings that starts with
+   `-` or a digit and continues with digits, `+`, `-`, `.`, `e` and `E`, its exponent's magnitude the
+   value of the digits after its first `e` or `E`, leading zeros ignored; an unwrapped string's bytes are
+   the UTF-8 bytes of its value, its escapes read.
+3. **The version-2 record's extraction** ("written as one line", the staging note). Taken: the bytes of
+   `run.audit` as `run.json` writes them, which is one line. No version-2 record in the vectors carries a
+   binding, so no binding's bytes depend on it.
+4. **"`binding` but for case"** (§11). Taken: ASCII case only: a top-level member of the record, other
+   than `binding`, whose name is `binding` once `A`–`Z` are lowercased, is refused.
+5. **`freshWithin` whose `asOf` is not declared `timestamp`, or whose `maxAge` is not declared
+   `integer`.** Taken: the rule is read and the condition is false. §6.3 makes the types part of the
+   condition's truth ("`N`, of type `timestamp`, has an instant ... the value of `M`, of type
+   `integer`"), and its sentence on a rule not of its form does not name a declared type. The probe in
+   [`test/units.test.ts`](test/units.test.ts) holds it.
+6. **Requirement ids in a claim form's `evidence`**, which §6.3 calls "requirement ids" without a form.
+   Taken: non-empty strings, as a copy's `requirement` is (§6.2).
 
 Two things this reader could not compare, because the protocol kept it from the Runner's manifest:
 
