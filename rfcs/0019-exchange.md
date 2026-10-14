@@ -203,7 +203,7 @@ names:
 
 - `entry.json` — a closed JSON object: `entryVersion` (`1`); `id` (`<publisher>.<name>`, lower-case
   letters, digits, `-` and `.`); `title`; `direction` (`"input"`, `"output"` or `"both"`); `pack`
-  (an object: `id`, the pack's id, and either `versions`, a version range, or `digests`, an array of
+  (an object: `id`, the pack's id, an absolute URI as Core §4 makes it, and either `versions`, a version range, or `digests`, an array of
   the pack digests the dialect was written against); `dialect` (an object: `path`, always
   `dialect.json`; `dialectVersion`; `digest`, the SHA-256 of the dialect document's canonical bytes
   as RFC 0018 defines them; required for direction `input` and `both`, absent for `output`);
