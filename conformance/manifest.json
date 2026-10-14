@@ -91,6 +91,51 @@
       "specSection": "§2"
     },
     {
+      "id": "carrier-trailing-non-whitespace",
+      "path": "carrier/trailing-non-whitespace.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "a complete JSON text followed by a non-whitespace character is rejected rather than read as its prefix",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-trailing-second-value",
+      "path": "carrier/trailing-second-value.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "a complete JSON text followed by a second JSON value is rejected rather than read as its first value",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-truncated-object",
+      "path": "carrier/truncated-object.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "an object that ends before its closing brace is rejected as incomplete input",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-trailing-whitespace",
+      "path": "carrier/trailing-whitespace.json",
+      "layer": "carrier",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "a valid document followed only by JSON whitespace is accepted",
+      "specSection": "§2"
+    },
+    {
       "id": "structural-missing-decision",
       "path": "structural/missing-decision.json",
       "layer": "structural",

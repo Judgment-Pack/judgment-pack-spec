@@ -147,7 +147,7 @@ reproducing its corpus version, its results, or its every-row statement.
 | [`spec/judgment-pack-core.md`](spec/judgment-pack-core.md)                       | Normative prose for document conformance            |
 | [`schema/judgment-pack-core.schema.json`](schema/judgment-pack-core.schema.json) | Normative Draft 2020-12 structural schema           |
 | [`examples/`](examples/)                                                         | Synthetic examples from unrelated domains           |
-| [`conformance/`](conformance/)                                                   | 99 non-normative document-conformance test cases    |
+| [`conformance/`](conformance/)                                                   | 103 non-normative document-conformance test cases    |
 | [`conformance/evaluation/`](conformance/evaluation/README.md)                     | 20-case seed evaluation corpus (normative for §3.4) |
 | [`spec/checkpoint-witness.md`](spec/checkpoint-witness.md)                       | Normative prose for the witness-statement reader class, a companion document beside Core |
 | [`conformance/witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness) | 54 checkpoint witness vectors, staged until the next `specVersion` (in no corpus) |
