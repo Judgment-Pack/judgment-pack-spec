@@ -1344,7 +1344,7 @@ class RepositoryConformanceTests(unittest.TestCase):
         for markdown_path in sorted(ROOT.rglob("*.md")):
             if ".git" in markdown_path.parts:
                 continue
-            if markdown_path.resolve().is_relative_to(runners_bytes):
+            if runners_bytes in markdown_path.resolve().parents:
                 continue
             text = markdown_path.read_text(encoding="utf-8")
             for raw_target in link_pattern.findall(text):

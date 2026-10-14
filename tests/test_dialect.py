@@ -31,6 +31,7 @@ SOURCE = {
     "pullRequest": 77,
     "commit": "05636eda96a9588279d61a6272625be859a28117",
     "path": "vectors/preparation",
+    "mergedAs": "82116bfab7705f74ca3e493c9722dd3831c7418f",
 }
 FINDINGS = {
     "profile-mismatch",
@@ -285,6 +286,96 @@ class DialectVectorTests(unittest.TestCase):
                 self.assertIn(alteration[0], inputs.record)
                 inputs.record = inputs.record.replace(*alteration)
                 self.assertEqual("record-inputs-differ", inputs.verify().answer.get("finding"))
+
+    # The review round's probes (pull request 144), one test each.
+
+    def test_an_absent_binding_is_unbound_and_a_null_one_is_foreign(self) -> None:
+        # Findings 7 and 8 are of a record that carries a binding; absence is not null.
+        member = b',"binding":{"kind":"judgment-pack-runner/preparation/1","digest":"sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d"}'
+        inputs = self.inputs("valid")
+        self.assertIn(member, inputs.record)
+        inputs.record = inputs.record.replace(member, b"")
+        self.assertEqual("unbound", inputs.verify().answer.get("finding"))
+        inputs.require_binding = False
+        self.assertEqual("absent", inputs.verify().answer["reading"]["binding"])
+        inputs.record = self.inputs("valid").record.replace(member, b',"binding":null')
+        self.assertEqual("binding-foreign-kind", inputs.verify().answer.get("finding"))
+
+    def test_a_citation_given_twice_is_one_member_of_the_set(self) -> None:
+        inputs = self.inputs("valid")
+        start = inputs.record.index(b'"cites":[') + len(b'"cites":[')
+        end = inputs.record.index(b"]", start)
+        citation = inputs.record[start:end]
+        inputs.record = inputs.record[:start] + citation + b"," + citation + inputs.record[end:]
+        self.assertEqual("matches", inputs.verify().answer["reading"]["binding"])
+
+    def test_a_result_nested_too_deep_is_over_a_bound_before_its_receipt_is_read(self) -> None:
+        inputs = self.inputs("valid")
+        sources = json.loads(inputs.acquisitions)
+        nested: Any = "deep"
+        for _ in range(33):
+            nested = [nested]
+        sources["fx"]["response"]["result"] = nested
+        inputs.acquisitions = json.dumps(sources).encode("utf-8")
+        self.assertEqual("input-over-bound", inputs.verify().answer.get("refused"))
+
+    def test_a_bound_on_bytes_comes_before_a_document_that_is_not_json(self) -> None:
+        inputs = self.inputs("escaped-strings")
+        inputs.dialect = b"{"
+        inputs.case = b"[" * 33 + b"]" * 33
+        self.assertEqual("input-over-bound", inputs.verify().answer.get("refused"))
+
+    def test_a_source_of_an_unread_kind_is_held_to_its_form_first(self) -> None:
+        inputs = self.inputs("escaped-strings")
+        dialect = json.loads(inputs.dialect)
+        dialect["sources"] = [{"name": "upload", "kind": "selected-file", "provider": "a-floppy-disk"}]
+        inputs.dialect = json.dumps(dialect).encode("utf-8")
+        self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+
+    def _with_rule_condition(self, alter: Any) -> Any:
+        inputs = self.inputs("unsigned-parameters")
+        dialect = json.loads(inputs.dialect)
+        alter(dialect["sources"][0]["read"]["rule"]["clauses"][0]["when"]["of"])
+        inputs.dialect = json.dumps(dialect).encode("utf-8")
+        return inputs.verify().answer
+
+    def test_rule_members_of_another_type_are_malformed(self) -> None:
+        # equalsParam is the first condition of the vendor rule's first clause, freshWithin the second.
+        probes = {
+            "op": lambda of: of[0].__setitem__("op", ["equalsParam"]),
+            "equalsParam.param": lambda of: of[0].__setitem__("param", ["vendorId"]),
+            "freshWithin.asOf": lambda of: of[1].__setitem__("asOf", {"name": "runAt"}),
+        }
+        for name, alter in probes.items():
+            with self.subTest(member=name):
+                self.assertEqual("input-malformed", self._with_rule_condition(alter).get("refused"))
+
+    def test_every_condition_member_of_another_type_is_refused_not_raised(self) -> None:
+        # Each member of each condition the vectors use, given a value of each other JSON type:
+        # the reading is refused or ends at a finding, and never raises.
+        for index, members in ((0, ("op", "field", "param")), (1, ("op", "field", "asOf", "maxAge"))):
+            for member in members:
+                for value in ([], {}, 1, None, True, ["x"], {"x": 1}):
+                    def alter(of: Any, index: int = index, member: str = member, value: Any = value) -> None:
+                        of[index][member] = value
+
+                    with self.subTest(condition=index, member=member, value=value):
+                        answer = self._with_rule_condition(alter)
+                        self.assertTrue({"refused", "finding"} & set(answer), answer)
+
+    def test_a_long_index_token_names_no_element(self) -> None:
+        token = "1" + "0" * 4999
+        self.assertIs(READER.ABSENT, READER.resolve([], "/" + token))
+        self.assertIs(READER.ABSENT, READER.resolve([[]], "/0/" + token))
+        self.assertEqual("x", READER.resolve(["a"] * 10 + ["x"], "/10"))
+        self.assertIs(READER.ABSENT, READER.resolve(["a"] * 10, "/10"))
+        claim = READER.copy_claim({"facts": [{"target": "/x", "source": "/" + token}], "evidence": []}, [])
+        self.assertEqual({}, claim["facts"])
+        inputs = self.inputs("escaped-strings")
+        dialect = json.loads(inputs.dialect)
+        dialect["case"]["facts"] = [{"target": "/request", "source": "/" + token}]
+        inputs.dialect, inputs.case = json.dumps(dialect).encode("utf-8"), b"[]"
+        self.assertEqual("preparation-differs", inputs.verify().answer.get("finding"))
 
     def test_a_key_of_small_order_is_refused(self) -> None:
         inputs = self.inputs("valid")

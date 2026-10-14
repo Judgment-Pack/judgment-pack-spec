@@ -5,7 +5,8 @@
     "repository": "https://github.com/Judgment-Pack/judgment-pack-runner",
     "pullRequest": 77,
     "commit": "05636eda96a9588279d61a6272625be859a28117",
-    "path": "vectors/preparation"
+    "path": "vectors/preparation",
+    "mergedAs": "82116bfab7705f74ca3e493c9722dd3831c7418f"
   },
   "runnerFiles": {
     "vectors/README.md": "e5679483c052e4433da8118649850e96ff09e6e5f7a93ab4b65746335da21ef2",

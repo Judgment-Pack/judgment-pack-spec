@@ -100,13 +100,51 @@ class Num:
         )
 
 
-def _number(literal: str) -> Num:
+def _number_bounds(literal: str) -> None:
     if len(literal) > MAX_NUMBER_CHARACTERS:
         raise Refused("input-over-bound", "a number literal of more than 128 characters")
     exponent = re.search(r"[eE]([+-]?[0-9]+)$", literal)
     if exponent and abs(int(exponent.group(1))) > MAX_EXPONENT:
         raise Refused("input-over-bound", "an exponent of magnitude over 308")
+
+
+def _number(literal: str) -> Num:
+    _number_bounds(literal)
     return Num(literal)
+
+
+def measure(data: bytes, what: str, max_depth: int) -> None:
+    """§12: the bounds measured on a document's bytes before it is read (§11, the first phase):
+    its nesting, and each number literal's characters and exponent, read outside strings. It reads
+    bytes, so it measures a document that is not JSON, or not UTF-8, as well as one that is."""
+    depth = 0
+    in_string = escaped = False
+    position, length = 0, len(data)
+    while position < length:
+        byte = data[position]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif byte == 0x5C:
+                escaped = True
+            elif byte == 0x22:
+                in_string = False
+        elif byte == 0x22:
+            in_string = True
+        elif byte in b"[{":
+            depth += 1
+            if depth > max_depth:
+                raise Refused("input-over-bound", f"{what} nests more than {max_depth} levels")
+        elif byte in b"]}":
+            depth -= 1
+        elif byte in b"-0123456789":
+            end = position
+            while end < length and data[end] in b"0123456789+-.eE":
+                end += 1
+            _number_bounds(data[position:end].decode("ascii"))
+            position = end
+            continue
+        position += 1
 
 
 def _no_constants(name: str) -> Any:
@@ -120,28 +158,6 @@ def _pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
             raise malformed("a member name given twice")
         result[name] = value
     return result
-
-
-def _depth(text: str) -> int:
-    """The deepest nesting of objects and arrays, read outside strings."""
-    depth = deepest = 0
-    in_string = escaped = False
-    for character in text:
-        if in_string:
-            if escaped:
-                escaped = False
-            elif character == "\\":
-                escaped = True
-            elif character == '"':
-                in_string = False
-        elif character == '"':
-            in_string = True
-        elif character in "[{":
-            depth += 1
-            deepest = max(deepest, depth)
-        elif character in "]}":
-            depth -= 1
-    return deepest
 
 
 def _well_formed(value: Any) -> None:
@@ -168,15 +184,14 @@ def value_depth(value: Any) -> int:
 
 
 def read_document(data: bytes, what: str, max_depth: int = MAX_DOCUMENT_DEPTH) -> Any:
-    """One JSON value, read strictly (§1)."""
+    """One JSON value, read strictly (§1), its bounds measured first."""
+    measure(data, what, max_depth)
     try:
         text = data.decode("utf-8")
     except UnicodeDecodeError as error:
         raise malformed(f"{what} is not UTF-8") from error
     if text.startswith("\ufeff"):
         raise malformed(f"{what} begins with a byte order mark")
-    if _depth(text) > max_depth:
-        raise Refused("input-over-bound", f"{what} nests more than {max_depth} levels")
     try:
         value = json.loads(
             text,
@@ -297,6 +312,18 @@ def is_pointer(value: Any) -> bool:
     return pointer_tokens(value) is not None
 
 
+def names_an_element(token: str, length: int) -> bool:
+    """§1: a token of decimal digits, with no leading zero but `0`, whose value is below the
+    array's length. The token is compared by its length first, so a token of any length is read
+    without converting it to a number: one longer than the length's own digits names no element."""
+    if re.fullmatch(r"0|[1-9][0-9]*", token) is None:
+        return False
+    bound = str(length)
+    if len(token) != len(bound):
+        return len(token) < len(bound)
+    return token < bound
+
+
 def resolve(document: Any, pointer: str) -> Any:
     """The value a pointer resolves to, or ABSENT (§1)."""
     tokens = pointer_tokens(pointer)
@@ -308,7 +335,7 @@ def resolve(document: Any, pointer: str) -> Any:
                 return ABSENT
             current = current[token]
         elif isinstance(current, list):
-            if not re.fullmatch(r"0|[1-9][0-9]*", token) or int(token) >= len(current):
+            if not names_an_element(token, len(current)):
                 return ABSENT
             current = current[int(token)]
         else:
@@ -684,8 +711,8 @@ def placeholders(text: str, what: str = "a $text") -> list[str]:
 
 
 def check_condition(condition: Any, declared: dict[str, str], what: str, depth: int = 0) -> None:
-    if not isinstance(condition, dict) or "op" not in condition:
-        raise malformed(f"{what}: a condition is not an object with an op")
+    if not isinstance(condition, dict) or not isinstance(condition.get("op"), str):
+        raise malformed(f"{what}: a condition is not an object with an op that is a string")
     op = condition["op"]
     shapes = {
         "always": set(),
@@ -706,6 +733,9 @@ def check_condition(condition: Any, declared: dict[str, str], what: str, depth: 
         raise malformed(f"{what}: a field that is not a pointer")
     if op == "equals" and not in_canon_domain(condition["to"]):
         raise malformed(f"{what}: a literal outside the canon domain")
+    for member in ("param", "asOf", "maxAge"):
+        if member in condition and not isinstance(condition[member], str):
+            raise malformed(f"{what}: {member} is not a string naming a parameter")
     if op == "equalsParam" and condition["param"] not in declared:
         raise malformed(f"{what}: equalsParam names a parameter the rule does not declare")
     if op == "freshWithin":
@@ -894,17 +924,37 @@ def parse_dialect(document: Any) -> Dialect:
         kind = raw.get("kind")
         if kind in ("http", "sql", "web", "research"):
             raise malformed(f"{what}: a kind of version 3 in a version-2 document")
-        if kind == "selected-file":
+        # Every kind's form is checked, its common members (§4) and its own, before a kind this
+        # reader does not read is refused (§11): `kind-unread` comes after every form.
+        if kind == "operation":
+            closed(
+                raw,
+                {"name", "kind", "read", "profile", "profileDigest", "maxAge", "arguments"},
+                {"parameters", "calculation"},
+                what,
+            )
+            acquired = True
+        elif kind == "selected-file":
+            closed(
+                raw,
+                {"name", "kind", "read", "provider"},
+                {"parameters", "profile", "profileDigest", "maxAge", "arguments"},
+                what,
+            )
+            drive = {"profile", "profileDigest", "maxAge", "arguments"}
+            if raw["provider"] == "local-file":
+                if drive & set(raw):
+                    raise malformed(f"{what}: a local file has no profile, maxAge or request")
+                acquired = False
+            elif raw["provider"] == "google-drive":
+                if not drive <= set(raw):
+                    raise malformed(f"{what}: a Drive file has a profile, maxAge and a request")
+                acquired = True
+            else:
+                raise malformed(f"{what}: a provider of another value")
             unread_kind = True
-            continue
-        if kind != "operation":
+        else:
             raise malformed(f"{what}: a kind this version does not list")
-        closed(
-            raw,
-            {"name", "kind", "read", "profile", "profileDigest", "maxAge", "arguments"},
-            {"parameters", "calculation"},
-            what,
-        )
         parameters: dict[str, Parameter] = {}
         declared = raw.get("parameters", {})
         if not isinstance(declared, dict):
@@ -924,43 +974,37 @@ def parse_dialect(document: Any) -> Dialect:
         scope.update({pname: p.type for pname, p in parameters.items()})
         if len(scope) > MAX_SCOPE:
             raise Refused("input-over-bound", f"{what}: more than 64 parameters in scope")
-        if not isinstance(raw["profile"], str) or not raw["profile"]:
-            raise malformed(f"{what}: profile is not a non-empty string")
-        if not is_digest(raw["profileDigest"]):
-            raise malformed(f"{what}: profileDigest is not a digest")
-        if not is_integer(raw["maxAge"]) or not 1 <= integer_of(raw["maxAge"]) <= 86400:
-            raise malformed(f"{what}: maxAge is not an integer from 1 to 86400")
-        arguments = closed(raw["arguments"], {"tool", "arguments"}, set(), f"{what} arguments")
-        if not isinstance(arguments["tool"], str) or not arguments["tool"]:
-            raise malformed(f"{what}: tool is not a non-empty string")
-        check_template(arguments["arguments"], scope, what)
-        calculation = None
+        source = Source(name=name, kind=kind, parameters=parameters, read=Read([], None, None, {}))
+        if acquired:
+            if not isinstance(raw["profile"], str) or not raw["profile"]:
+                raise malformed(f"{what}: profile is not a non-empty string")
+            if not is_digest(raw["profileDigest"]):
+                raise malformed(f"{what}: profileDigest is not a digest")
+            if not is_integer(raw["maxAge"]) or not 1 <= integer_of(raw["maxAge"]) <= 86400:
+                raise malformed(f"{what}: maxAge is not an integer from 1 to 86400")
+            arguments = closed(raw["arguments"], {"tool", "arguments"}, set(), f"{what} arguments")
+            if not isinstance(arguments["tool"], str) or not arguments["tool"]:
+                raise malformed(f"{what}: tool is not a non-empty string")
+            check_template(arguments["arguments"], scope, what)
+            source.profile_id = raw["profile"]
+            source.profile_digest = raw["profileDigest"]
+            source.max_age = integer_of(raw["maxAge"])
+            source.tool = arguments["tool"]
+            source.template = arguments["arguments"]
         if "calculation" in raw:
             calculation = closed(raw["calculation"], {"inputs", "tables"}, set(), f"{what} calculation")
             inputs, tables = calculation["inputs"], calculation["tables"]
             if not isinstance(inputs, dict) or not isinstance(tables, dict):
                 raise malformed(f"{what}: calculation inputs and tables are objects")
             for bound in inputs.values():
-                if bound == "runAt" or bound not in scope:
+                if not isinstance(bound, str) or bound == "runAt" or bound not in scope:
                     raise malformed(f"{what}: an input bound to no parameter in scope, or runAt")
             for limit in tables.values():
                 if not is_integer(limit) or not 1 <= integer_of(limit) <= 315360000:
                     raise malformed(f"{what}: a table limit of another form")
-        read = check_read(raw["read"], scope, what + " read")
-        sources.append(
-            Source(
-                name=name,
-                kind=kind,
-                parameters=parameters,
-                read=read,
-                profile_id=raw["profile"],
-                profile_digest=raw["profileDigest"],
-                max_age=integer_of(raw["maxAge"]),
-                tool=arguments["tool"],
-                template=arguments["arguments"],
-                calculation=calculation,
-            )
-        )
+            source.calculation = calculation
+        source.read = check_read(raw["read"], scope, what + " read")
+        sources.append(source)
     # A source parameter's pointer is a fact target of the source it comes from (§3).
     for source in sources:
         for parameter in source.parameters.values():
@@ -1005,6 +1049,90 @@ def parse_dialect(document: Any) -> Dialect:
     if unread_kind:
         raise Refused("kind-unread", "selected-file is defined and not read by this reader")
     return dialect
+
+
+def count_bounds(dialect: Any, acquisitions: Any) -> None:
+    """§12's counted bounds, and a result's nesting, taken on the documents read wherever the count
+    can be taken, before any form is checked (§11, the third phase)."""
+
+    def over(detail: str) -> Refused:
+        return Refused("input-over-bound", detail)
+
+    if isinstance(acquisitions, dict):
+        for name, member in acquisitions.items():
+            response = member.get("response") if isinstance(member, dict) else None
+            if isinstance(response, dict) and "result" in response:
+                if value_depth(response["result"]) > MAX_VALUE_DEPTH:
+                    raise over(f"acquisition {name}: a result nested more than 32 levels")
+    if not isinstance(dialect, dict):
+        return
+    facts: set[str] = set()
+    evidence: set[str] = set()
+
+    def entries(value: Any) -> list[Any]:
+        return value if isinstance(value, list) else []
+
+    def copy_targets(copy: Any) -> None:
+        if isinstance(copy, dict):
+            for entry in entries(copy.get("facts")):
+                if isinstance(entry, dict) and isinstance(entry.get("target"), str):
+                    facts.add(entry["target"])
+            for entry in entries(copy.get("evidence")):
+                if isinstance(entry, dict) and isinstance(entry.get("requirement"), str):
+                    evidence.add(entry["requirement"])
+
+    def listed(condition: Any) -> None:
+        if not isinstance(condition, dict):
+            return
+        if condition.get("op") in ("all", "any") and isinstance(condition.get("of"), list):
+            if len(condition["of"]) > MAX_LISTED:
+                raise over("more than 64 conditions listed")
+            for item in condition["of"]:
+                listed(item)
+        elif condition.get("op") == "not":
+            listed(condition.get("of"))
+
+    case = dialect.get("case")
+    case_parameters = case.get("parameters") if isinstance(case, dict) else None
+    in_case = len(case_parameters) if isinstance(case_parameters, dict) else 0
+    if in_case + 1 > MAX_SCOPE:
+        raise over("more than 64 parameters in the case's scope")
+    if isinstance(case, dict):
+        copy_targets({"facts": case.get("facts"), "evidence": case.get("evidence")})
+    sources = dialect.get("sources")
+    if isinstance(sources, list):
+        if len(sources) > MAX_SOURCES:
+            raise over("more than 16 sources")
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            own = source.get("parameters")
+            if isinstance(own, dict) and in_case + len(own) + 1 > MAX_SCOPE:
+                raise over("more than 64 parameters in a scope")
+            read = source.get("read")
+            if not isinstance(read, dict):
+                continue
+            if isinstance(read.get("unwrap"), list) and len(read["unwrap"]) > MAX_UNWRAP:
+                raise over("more than four unwrap pointers")
+            copy_targets(read.get("copy"))
+            rule = read.get("rule")
+            clauses = rule.get("clauses") if isinstance(rule, dict) else None
+            if isinstance(clauses, list):
+                if len(clauses) > MAX_CLAUSES:
+                    raise over("more than 64 clauses")
+                for clause in clauses:
+                    if not isinstance(clause, dict):
+                        continue
+                    listed(clause.get("when"))
+                    claim = clause.get("claim")
+                    if isinstance(claim, dict):
+                        for entry in entries(claim.get("facts")):
+                            if isinstance(entry, dict) and isinstance(entry.get("pointer"), str):
+                                facts.add(entry["pointer"])
+                        if isinstance(claim.get("evidence"), dict):
+                            evidence.update(claim["evidence"])
+    if len(facts) > MAX_FACT_TARGETS or len(evidence) > MAX_EVIDENCE_TARGETS:
+        raise over("more fact or evidence targets than the bounds")
 
 
 # ---------------------------------------------------------------------------------------------
@@ -1443,10 +1571,7 @@ def recompute(
         receipts.append(response["receipt"])
         if not sessions_in_a_form(receipts):
             raise Finding("acquisition-sessions", source.name)
-        value = response["result"]
-        if value_depth(value) > MAX_VALUE_DEPTH:
-            raise Refused("input-over-bound", f"{source.name}: a result nested more than 32 levels")
-        value = apply_unwrap(value, source.read.unwrap)
+        value = apply_unwrap(response["result"], source.read.unwrap)
         if source.calculation is not None:
             outcome.answer = check_calculation(source, profile, value, values, at)
             if outcome.answer["status"] != "computed":
@@ -1652,10 +1777,15 @@ class Record:
     binding: bytes | None
 
 
-def parse_record(data: bytes) -> Record:
+def read_record(data: bytes) -> Any:
+    """The record read as one line holding one JSON value (§11, the second phase)."""
     if b"\n" in data or b"\r" in data:
         raise malformed("the record is not one line")
-    value = read_document(data, "the record")
+    return read_document(data, "the record")
+
+
+def parse_record(data: bytes, value: Any) -> Record:
+    """The record's form (§11, the fourth phase), and its binding as the line writes it."""
     if not isinstance(value, dict) or not isinstance(value.get("inputs"), dict):
         raise malformed("the record is not an evaluation record with inputs")
     binding = None
@@ -1784,12 +1914,28 @@ def verify(
             raise Refused("input-over-bound", "the profiles")
         if len(preparation) > PREPARATION_BYTES or (record is not None and len(record) > RECORD_BYTES):
             raise Refused("input-over-bound", "the preparation or the record")
+        # §11's phases, in order: the bounds measured on bytes, on every document before any is
+        # read; every document read; the counted bounds; every form; the kinds; and only then the
+        # recomputation.
+        documents = [
+            (dialect, "the dialect", MAX_DOCUMENT_DEPTH),
+            (case, "the case", MAX_VALUE_DEPTH),
+            (acquisitions, "the acquisitions", MAX_DOCUMENT_DEPTH),
+            (profiles, "the profiles", MAX_DOCUMENT_DEPTH),
+            (preparation, "the preparation", MAX_DOCUMENT_DEPTH),
+        ]
+        if record is not None:
+            documents.append((record, "the record", MAX_DOCUMENT_DEPTH))
+        for data, what, depth in documents:
+            measure(data, what, depth)
         dialect_document = read_document(dialect, "the dialect")
         case_document = read_document(case, "the case", MAX_VALUE_DEPTH)
         acquisitions_document = read_document(acquisitions, "the acquisitions")
         profiles_document = read_document(profiles, "the profiles")
         given = read_document(preparation, "the preparation")
-        parsed_record = parse_record(record) if record is not None else None
+        record_document = read_record(record) if record is not None else None
+        count_bounds(dialect_document, acquisitions_document)
+        parsed_record = parse_record(record, record_document) if record is not None else None
         if not isinstance(acquisitions_document, dict):
             raise malformed("the acquisitions are not an object")
         for name, member in acquisitions_document.items():
@@ -1822,9 +1968,10 @@ def verify(
             inputs = parsed_record.value["inputs"]
             record_cites = parsed_record.value.get("cites", [])
             cites = computation.preparation["cites"]
+            # As sets: a citation either side gives twice is one member, and how many times one is
+            # given is not compared (§11, finding 6).
             same_cites = (
                 isinstance(record_cites, list)
-                and len(record_cites) == len(cites)
                 and all(any(json_equal(a, b) for b in cites) for a in record_cites)
                 and all(any(json_equal(a, b) for b in record_cites) for a in cites)
             )

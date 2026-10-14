@@ -15,7 +15,8 @@ corpora.
 Its nine vectors, under
 [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect),
 are the reference Runner's `vectors/preparation/`, byte for byte, at commit
-`05636eda96a9588279d61a6272625be859a28117` (Runner pull request 77). They are **staged**: in no
+`05636eda96a9588279d61a6272625be859a28117` (Runner pull request 77), which reached the Runner's
+`main` as commit `82116bfab7705f74ca3e493c9722dd3831c7418f` with the same files. They are **staged**: in no
 corpus, no claim may cite them, the site does not serve them, and no release bundle carries them.
 Until a specification version publishes them, no preparation-verifier conformance claim is
 available: §14 holds a verifier to the vectors published with the version its claim names, and no
@@ -77,6 +78,9 @@ requirement that a source writes.
 
 A **pointer** is an RFC 6901 JSON Pointer. A pointer **resolves** in a value when each of its
 tokens names a member or an index that exists; otherwise it yields **absent**, which is not `null`.
+A token names an array's element when it is `0`, or a digit other than `0` followed by any digits,
+and its value is below the array's length; a token of any other form, or of any length beyond the
+array's, names none, and no limit of an implementation's numbers applies to it.
 
 A **timestamp** is a string of the form `YYYY-MM-DDThh:mm:ssZ`, a digit where each letter but `T`
 and `Z` stands: UTC, whole seconds. Its **instant** is its count of seconds since
@@ -260,8 +264,10 @@ admits it to a claim states the snapshot's form first.
 Version 3 is version 2 with four kinds more. It is proposed: no preparer writes it, no verifier
 reads it, and no vector holds it. The forms below are what a writer, such as the Desk's inputs or an
 entry of the Exchange, needs to declare one; the first implementation's vectors will fix each
-request's exact bytes, and may change them. Each is acquired through a gateway source an input
-profile pins, with `profile`, `profileDigest` and `maxAge` as in §4.1, so §5's checks apply with the
+request's exact bytes, and may change them. A source of each of these kinds is an object of exactly
+the members of §4 — `name`, `kind`, `parameters` (its source parameters, as every source's) and
+`read` — with `profile`, `profileDigest` and `maxAge` as in §4.1, and the members its kind names
+below. Each is acquired through the gateway source its profile pins, so §5's checks apply with the
 shape the profile names, and the value it acquires is read as every value is (§6).
 
 - **`http`**, a request to a gateway source of shape `http` (the gateway's `adapter-http`):
@@ -273,9 +279,10 @@ shape the profile names, and the value it acquires is read as every value is (§
   "body"}`, as `adapter-http` reads one.
 - **`sql`**, a statement on a connection the profile names, such as the gateway's Databricks
   connection: `statement`, a fixed string and never a template, so that the statement's structure
-  and identifiers are fixed; and `parameters`, an array of `{"name", "type", "value"}`, each
-  `value` a `$param` form, which the connection binds as the provider's named parameters. No text
-  is substituted into a statement.
+  and identifiers are fixed; and `bindings`, an array of `{"name", "type", "value"}`, each `value` a
+  `$param` form, which the connection binds as the provider's named parameters. `bindings` is not
+  `parameters`, which declares the source's parameters as every source's does, so a `sql` source
+  can take a value from an earlier source and bind it. No text is substituted into a statement.
 - **`web`**, one public page by URL through the gateway's web source (`adapter-web`, shape
   `http`): `url`, a string, or a `$param` form naming a `string` parameter. The request is
   `{"url": url}`, and the value acquired is the attachment record the web source returns.
@@ -650,8 +657,8 @@ dialect**, version 1, is a JSON object of exactly `outputVersion`, the string `"
 non-empty string naming the catalog platform whose write tools it holds, as the gateway's engine
 configuration names one; and `policies`, an object mapping each write tool's name to a **decision
 policy** in the form the gateway's engine configuration gives an entry of a platform's
-`decisionPolicy` (the gateway's `docs/design/engine-config.md` at the release the dialect names, and
-gateway §1.2a, `policy`): `outcomes`, the outcome ids a record must have decided; optionally `packs`,
+`decisionPolicy` (the gateway's `docs/design/engine-config.md` at `v0.15.0`, the release the Status
+names, and gateway §1.2a, `policy`): `outcomes`, the outcome ids a record must have decided; optionally `packs`,
 `reviewed` and `requireSignedRecord`; `bind`, pairs of a pointer into the write's arguments and a
 pointer into the record's `inputs.facts`, whose values must be equal; `fix`, pairs of a pointer into
 the arguments and the value the argument there must be; and `closed`, whether every argument must be
@@ -684,12 +691,26 @@ A preparation verifier is given:
 - whether it **requires a binding**.
 
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
-the refusal, for the first of these: a document over a bound of §12, `input-over-bound`; a document
-not read as §1 reads one, or not of its form — the dialect against §§2–8, every rule they give it
-included, a profile against §5.1 and the key rule, the acquisitions against the form of §5.2, the
-preparation's `verifiedAt` against the timestamp form with an instant, the record against its
-reading below — `input-malformed`; and a dialect that names a kind the verifier does not read,
-`kind-unread`.
+the refusal, at the first of these phases that fails, in this order:
+
+1. the bounds of §12 that are measured on bytes — a document's size, its nesting (the case
+   document's at 32 levels), and each number literal's characters and exponent — taken on every
+   document before any is read: `input-over-bound`;
+2. every document read as §1 reads one, and the record as one line: `input-malformed`;
+3. the bounds of §12 that are counts — the sources, the parameters in a scope, the clauses of a
+   rule, the conditions one `all` or `any` lists, the `unwrap` pointers, the fact and evidence
+   targets — and the nesting of each acquisition's result, taken on the documents read wherever the
+   count can be taken, before any form is checked: `input-over-bound`;
+4. every document's form — the dialect against §§2–8, every rule they give it included, and each of
+   its sources against §4's members and its kind's, whichever its kind; a profile against §5.1 and
+   the key rule; the acquisitions against the form of §5.2; the preparation's `verifiedAt` against
+   the timestamp form with an instant; the record against its reading below: `input-malformed`;
+5. a dialect that names a kind the verifier does not read: `kind-unread`.
+
+One bound is measured later, because it cannot be measured sooner: an unwrapped string's bytes, and
+the nesting and the number literals of the value it holds, are measured when it is unwrapped (§6.1),
+during the recomputation, and over them the reading is refused there, `input-over-bound`, with
+nothing reported but the refusal.
 
 **Findings.** Otherwise it recomputes the preparation at the given preparation's `verifiedAt`, by
 §§3–9, and ends the reading at the first of these findings, in this order, reporting that one:
@@ -708,18 +729,24 @@ reading below — `input-malformed`; and a dialect that names a kind the verifie
    differs;
 6. with a record, **`record-inputs-differ`**: the record's `inputs.facts` is not the facts document
    (§8.1), its `inputs.evidence` is not the evidence-availability document, or its `cites`, absent
-   being the empty array, is not the preparation's `cites` as a set, each compared as JSON values;
-7. with a record, **`binding-foreign-kind`**: the record's `binding` is not an object whose `kind`
-   is the string `judgment-pack-runner/preparation/1`; no digest is compared;
-8. with a record, **`binding-mismatch`**: the bytes of the record's `binding` are not the
-   preparation's binding (§9.5), byte for byte: another digest, or the same members written
-   otherwise, in another order or with whitespace;
-9. **`unbound`**: a binding is required, and no record is given or the record carries no `binding`.
+   being the empty array, is not the preparation's `cites` as a set, each compared as JSON values.
+   The citations are compared as sets: a citation either side gives twice is one member of its set,
+   and how many times one is given is not compared;
+7. with a record that carries a `binding`, **`binding-foreign-kind`**: the record's `binding` is not
+   an object whose `kind` is the string `judgment-pack-runner/preparation/1`; no digest is compared;
+8. with a record that carries a `binding`, **`binding-mismatch`**: the bytes of the record's
+   `binding` are not the preparation's binding (§9.5), byte for byte: another digest, or the same
+   members written otherwise, in another order or with whitespace;
+9. **`unbound`**: a binding is required, and no record is given or the record carries no
+   `binding`.
 
 **Reading the record.** The record is one line, holding neither a line feed nor a carriage return,
 that is one JSON object read as §1 reads a document, with an object `inputs`. Its member `binding`
 is read by that exact name: a record that names a member `binding` but for case is refused, not read
-as one with no binding. The member's bytes are those of its value as the line writes them, from its
+as one with no binding. A record **carries** a binding when it has a member of that name, whatever
+its value: a `binding` that is `null` is carried, and is not of the binding's form (finding 7); a
+record with no member of that name carries none, which is no finding unless a binding is required
+(finding 9). The member's bytes are those of its value as the line writes them, from its
 first character to its last; nothing is canonicalised again. This document reads nothing else of the
 record. It does not check the record's signature, its chain or its witness, which the runtime's
 reader and the checkpoint witness statement's reader check; a binding commits a preparation only
@@ -783,8 +810,8 @@ A verifier holds its inputs to the Runner's bounds (Runner, "Numeric and resourc
   at most 308.
 
 Over any bound it refuses the reading, `input-over-bound`, and MUST NOT read part of it. The bytes are
-bounded first, by the documents' sizes, before any is read. A preparer refuses the same inputs
-before it writes a preparation.
+bounded first, by the documents' sizes, before any is read; §11 gives the order of the rest. A
+preparer refuses the same inputs before it writes a preparation.
 
 ## 13. What a preparation establishes, and what it does not
 

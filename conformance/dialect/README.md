@@ -27,8 +27,10 @@ hand — as the [checkpoint witness vectors](../witness/README.md) and the
 ## Where they come from
 
 [`vectors/`](vectors/) is the Runner's `vectors/preparation/` at commit
-`05636eda96a9588279d61a6272625be859a28117`, the head of Runner pull request 77: the same files,
-the same names, the same bytes, its own README and manifest among them. The Runner's README says
+`05636eda96a9588279d61a6272625be859a28117`, the head of Runner pull request 77, which they were
+copied from: the same files, the same names, the same bytes, its own README and manifest among
+them. The pull request was squash-merged, and reached the Runner's `main` as commit
+`82116bfab7705f74ca3e493c9722dd3831c7418f`, whose `vectors/preparation/` holds the same files. The Runner's README says
 what each file holds and how the vectors were generated, and its manifest gives every file's
 SHA-256, the binding the Runner passes for each preparation, the record's binding as recorded, and
 what the Runner's `verify-run` reports of each export. A change to a vector is a change to the
@@ -57,7 +59,8 @@ digest. The other files — `release-digest.txt`, `public-key.txt`, `checkpoints
 `verify-run`'s checks of an export, which are not this class's.
 
 [`manifest.json`](manifest.json), this repository's, carries `"status": "staged"`, the RFC that
-proposed the vectors (`proposedBy`), their `source`, the SHA-256 of the Runner's README and manifest
+proposed the vectors (`proposedBy`), their `source` (the commit they were copied from, and as
+`mergedAs` the Runner's `main` commit that holds the same files), the SHA-256 of the Runner's README and manifest
 (`runnerFiles`), and one row per vector: `id`; `path`; `requiresBinding`; and the answer the class
 gives, `expectedResult`, `reading` or `finding`, with `expectedBinding` for a reading and
 `expectedFinding` for a finding. The answers were written from the companion document's §11 and
