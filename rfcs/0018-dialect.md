@@ -33,8 +33,9 @@
 > word for word, so that a second reader could be written from a document of its own. The Runner's
 > nine preparation vectors are added byte for byte, **staged**, in
 > [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect).
-> And the second reader, `tools/dialect_verify.py`, is added, with tests that run it over every
-> vector. While this RFC is a draft the companion document is normative for nothing: Core §1.1 does
+> And a first reader, `tools/dialect_verify.py`, is added, with tests that run it over every
+> vector; a second, `tools/dialect-verify-ts/`, written from the companion document alone, followed
+> (Evidence). While this RFC is a draft the companion document is normative for nothing: Core §1.1 does
 > not list it, the site publishes its text only as this RFC, and no release bundle carries it or the
 > vectors (`.gitattributes`, `export-ignore`). That departs from [RFC 0017](0017-checkpoint-witness-statement.md),
 > whose companion document was added when it was accepted; the reason is the second reader, which
@@ -80,11 +81,11 @@ vectors deferred to a later RFC.
 What a preparation establishes is stated per part. A derivation is recomputable, and a verifier
 that recomputes it establishes it itself. An acquisition's bytes are not: they are held by their
 digest, and what they establish is the gateway receipt's business, byte lineage and not truth. A
-research record establishes the least of all. The Runner's nine vectors are staged byte for byte. A
-second reader, written from the text, recomputes all nine preparations byte for byte, and its
-reports agree with the Runner's on the surface the two share, the verification of a preparation; the
-one check it leaves out, of an export's retained result against its record, is the export's, not a
-preparation's.
+research record establishes the least of all. The Runner's nine vectors are staged byte for byte.
+Two readers, each written from the text, the second without sight of the first, recompute all nine
+preparations byte for byte and give every vector the same answer, and their reports agree with the
+Runner's on the surface they share, the verification of a preparation; the one check they leave out,
+of an export's retained result against its record, is the export's, not a preparation's.
 
 ## Problem
 
@@ -131,15 +132,24 @@ a companion document, with the gateway's vectors byte for byte. The same move ap
   a binding of another scheme; altered lineage; a retained result that differs from its record; two
   sources whose rules read parameters no receipt commits; a case-only run with the characters the
   canonical form escapes; and the case parameters `-0`, 2⁵³−1 and −(2⁵³−1), kept as written.
-- **A second reader, from the text.** `tools/dialect_verify.py` is a preparation verifier written
-  from the companion document's words, from the two sections of the checkpoint witness statement it
-  adopts, and from RFC 8032, and from nothing else: its author did not read the Runner's code. The
-  Runner's `verify-run` is the first reader. The second recomputes every vector's preparation byte
-  for byte equal to its `preparation.json`, with the digest its `preparation.sha256` states; gives
-  every vector the answer the staged manifest records; and, wherever the class reports them, agrees
-  with `verify-run`'s report on `targetsByClass`, `unsignedParameters` and `unsignedFreshness`, and
-  with the export on the facts and evidence-availability documents. It uses Python's standard
-  library alone, Ed25519 included.
+- **Two readers, from the text.** Two preparation verifiers in this repository are written from the
+  companion document's text, and they agree on all nine staged vectors byte for byte: each
+  recomputes every vector's preparation equal to its `preparation.json`, with the digest its
+  `preparation.sha256` states, and gives every vector the answer the staged manifest records; on the
+  five vectors that are readings, their reports are equal. The first reader's reports agree, wherever
+  the class reports them, with `verify-run`'s on `targetsByClass`, `unsignedParameters` and
+  `unsignedFreshness`, and with the export on the facts and evidence-availability documents.
+  - The first, `tools/dialect_verify.py` (commit `f821757`, corrected at `3c9520a`), was written by
+    the text's author, with the vectors in view, from the companion document, the two sections of the
+    checkpoint witness statement it adopts and RFC 8032; its author did not read the Runner's code. It
+    uses Python's standard library alone, Ed25519 included.
+  - The second, `tools/dialect-verify-ts/` (commit `e2d41c5`), was written by a different author, in
+    another language, TypeScript, from the companion document's text alone, under a protocol that
+    forbade sight of the first reader, its test, the reference Runner's words and this RFC's Evidence
+    and Implementation sections. It read the vectors as data and this repository's manifest of their
+    answers; its README and pull request #145 list what it read. It uses Node's built-ins alone, and
+    computes Ed25519's equation itself.
+  - The reference Runner's `verify-run` is a third reader of the same bytes, in its own repository.
 - **The output side.** The gateway's decision policy holds a write to its decision record: `bind`
   (gateway ADR-0011), `fix` and `closed` (gateway ADR-0016, gateway #258, released in `v0.14.0`), and
   `requireSignedRecord` (gateway ADR-0012), its digest carried by every action receipt it governs.
@@ -149,27 +159,46 @@ a companion document, with the gateway's vectors byte for byte. The same move ap
   admission. Neither is built as a writer of this format yet; the `research` kind is the form they
   would write.
 
-**The standing of that evidence.** The second reader is this project's, and its author is the text's:
-an AI coding agent, Anthropic's `claude-opus-5-5`, working from the maintainer's brief, which drafted
-the companion document from the Runner's documentation, the derivation rule's specification, the
-gateway's `SPEC.md` and the vectors, examined as files and with small scripts of its own that took
-their digests and checked their signatures, and then wrote the reader from the companion document
-alone, those scripts set aside. The text was written with the vectors in view. Their agreement is evidence that the
-text is precise enough for one author to implement on the surface the vectors exercise — the case
-and `operation` sources; copies, and rules of `all`, `equalsParam`, `freshWithin` and `always`;
-`$param` and `$text`; a calculator that computed; string and integer parameters; one and two
-acquisitions in one session — and not that it interoperates, nor that it is right where the vectors
-are silent. This RFC does not claim [RFC 0000](0000-rfc-process.md)'s bar of two independent
-implementations.
+**The standing of that evidence.** Both readers are this project's, and both authors are AI coding
+agents of one model, Anthropic's `claude-opus-5-5`, each working from a brief of its own. The first
+reader's author is the text's: it drafted the companion document from the Runner's documentation,
+the derivation rule's specification, the gateway's `SPEC.md` and the vectors, examined as files and
+with small scripts of its own that took their digests and checked their signatures, and then wrote
+the reader from the companion document alone, those scripts set aside. The second reader's author is
+another session, which did not draft the text and saw neither the first reader nor the Runner's
+words. A cross-vendor review that was allowed to read both readers, by OpenAI's `gpt-5.6-sol`, found
+no sign that the first reader was in view, and one affirmative sign that it was not: the readers
+disagreed on one case no vector holds, a `freshWithin` naming a declared parameter of the wrong type,
+which the text decided in the second reader's favour and to which the first reader was corrected in
+pull request #147. That round's record and the maintainer's disposition of each finding are on pull
+request #145, and the correction's note on #147.
 
-**What writing the reader found.** Three things the text did not say, each fixed in the text and not
-in the reader: whether a copy may name one evidence requirement twice (it may not); where a source
-parameter's `parameter-invalid` falls among a source's findings (first); and where a failure of the
-case's own read falls (after the case's parameters, before every source). And eight rules that
-neither the Runner's documentation nor its vectors decide, on which the text takes a position and
-says so (Unresolved question 1). One vector is answered otherwise than `verify-run` answers it, by
-design: `disposition-differs-from-audit` alters the Runner's export, not the preparation or the
-record (Conformance).
+**What that establishes, and what it does not.** For [RFC 0000](0000-rfc-process.md)'s evidence bar,
+it establishes that two implementations agree on the vectors, the second written from the text
+without sight of the first. The second's independence rests on the recorded protocol — its author's
+account of what it read, and what a reviewer could check from the code — and not on separate
+organisations: both readers are one project's, by agents of one model, under one maintainer. Nor
+does it show that the two interoperate where the vectors are silent: there each reader's tests are
+its own. The reference Runner's `verify-run` is a third reader of the same bytes, in its own
+repository and of the same project. What the bar still asks is Unresolved question 9.
+
+**What writing the readers found.** Writing the first found three things the text did not say, each
+fixed in the text and not in the reader: whether a copy may name one evidence requirement twice (it
+may not); where a source parameter's `parameter-invalid` falls among a source's findings (first); and
+where a failure of the case's own read falls (after the case's parameters, before every source). And
+eight rules that neither the Runner's documentation nor its vectors decide, on which the text takes a
+position and says so (Unresolved question 1). Writing the second found six points on which the text
+had left the readers a choice, which its README records, set apart by the cross-vendor round from the
+rules the text states or incorporates by reference. On those six the text, not the readers, now
+decides, as the maintainer decided them: the report's form and the exit statuses (§11);
+the byte-bound scans and the nesting convention (§12); the extraction of a version-2 record (§11);
+"but for case", ASCII case only (§11); a `freshWithin` naming a declared parameter of another type,
+which is false (§6.3); and a requirement id, a non-empty string of no other form (§6.3). Each of
+those sentences has a test in each reader, and where a reader did not follow one it was changed to
+it in the amendment that wrote them; that amendment's author read both readers, so those changes are
+the text's, and add nothing to the second reader's independence. One vector is answered otherwise than
+`verify-run` answers it, by design: `disposition-differs-from-audit` alters the Runner's export, not
+the preparation or the record (Conformance).
 
 ## Specification
 
@@ -572,10 +601,16 @@ the value read, and `N` and `M` name parameters the rule declares.
 mathematical value, so that `1` and `1.0` are equal; strings, booleans and `null` by value; arrays
 element by element, in order; objects as sets of members. A number and a string are never equal.
 
+That `N` and `M` name parameters the rule declares is a `freshWithin`'s form; their types are part of
+its truth. A `freshWithin` whose `asOf` names a declared parameter of a type other than `timestamp`,
+or whose `maxAge` names one of a type other than `integer`, is false, and the dialect is not
+malformed.
+
 A claim form is an object of exactly `facts`, an array of `{"pointer": P, "from": Q}`, each exactly
 those members, `P` a fact target and `Q` a pointer into the value read; `evidence`, an object mapping
 requirement ids to `present`, `absent` or `unknown`; and `acquisitionStatus`, one of `resolved`,
-`absent` and `unknown`.
+`absent` and `unknown`. A **requirement id**, in a claim form as in a copy (§6.2), is a non-empty
+string, and that unqualified form is its only form.
 
 **Deriving the claim.** The **match** is the first clause whose `when` is true; the last clause
 ensures there is one. A **leaf** is a condition other than `always`, `all`, `any` and `not`, and
@@ -811,7 +846,9 @@ A preparation verifier is given:
   the input profiles it trusts (§5.1);
 - the **preparation** to verify;
 - optionally, the **record**: the line of bytes, without its newline, of the runtime evaluation
-  record whose binding it holds to the preparation; and
+  record whose binding it holds to the preparation. A Runner export of version 2 carries the record
+  as the member `run.audit` of its `run.json`, and not its bytes: the line taken from such an export
+  is that member's value exactly as `run.json` writes it, with no re-encoding; and
 - whether it **requires a binding**.
 
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
@@ -867,7 +904,9 @@ nothing reported but the refusal.
 **Reading the record.** The record is one line, holding neither a line feed nor a carriage return,
 that is one JSON object read as §1 reads a document, with an object `inputs`. Its member `binding`
 is read by that exact name: a record that names a member `binding` but for case is refused, not read
-as one with no binding. A record **carries** a binding when it has a member of that name, whatever
+as one with no binding. Two member names differ **but for case** when they are not equal, and are
+equal once each of `A` to `Z` in them is mapped to `a` to `z` and nothing else is: ASCII case only,
+with no other folding. A record **carries** a binding when it has a member of that name, whatever
 its value: a `binding` that is `null` is carried, and is not of the binding's form (finding 7); a
 record with no member of that name carries none, which is no finding unless a binding is required
 (finding 9). The member's bytes are those of its value as the line writes them, from its
@@ -918,6 +957,17 @@ order of `sources`.
 source's targets. Each such freshness was judged against `verifiedAt`, which no receipt covers: a
 matching binding in a record whose signature verifies is what commits it (§13).
 
+**The report.** A verifier reports a reading, a refusal or a finding as one JSON object, written in
+the preparation's canonical form (§9.5), whose member `result` is `reading`, `refusal` or `finding`.
+A refusal is exactly `{"result": "refusal", "refusal": C}` and a finding exactly
+`{"result": "finding", "finding": C}`, `C` its code. A reading is `result` and the members listed
+above, exactly: `digest`; `binding`; `facts`, the facts document; `evidence`, the
+evidence-availability document; `targetsByClass`; and `unsignedParameters` and `unsignedFreshness`
+when they are not empty. A verifier that is a program writes the report on its standard output, as
+one line, and exits with status 0 for a reading, 1 for a refusal and 2 for a finding, and with
+status 3, writing no report, when it could not run at all, as on an argument it does not take or a
+file it cannot open. A verifier that is a library states the same three outcomes in its own idiom.
+
 ### 12. Bounds
 
 A verifier holds its inputs to the Runner's bounds (Runner, "Numeric and resource profile"):
@@ -932,6 +982,14 @@ A verifier holds its inputs to the Runner's bounds (Runner, "Numeric and resourc
   unwrapped value — and at most 64 in any document; and
 - number literals of at most 128 characters, whose exponent, when they have one, has a magnitude of
   at most 308.
+
+Nesting is counted from the document's root at zero, and every object and every array is one level
+of it: `{}` is at one level, `{"a": []}` at two, and a document that is a string, a number, `true`,
+`false` or `null` at none. On the bytes, a **number literal** is a maximal run, outside strings, of
+the characters `0` to `9`, `+`, `-`, `.`, `e` and `E`, and its **exponent** is the digits after its
+first `e` or `E`: the run of digits that follows it, or that follows the `+` or `-` after it; a
+literal with no such run has no exponent. An unwrapped string's bound is counted on the UTF-8 bytes
+of its decoded value.
 
 Over any bound it refuses the reading, `input-over-bound`, and MUST NOT read part of it. The bytes are
 bounded first, by the documents' sizes, before any is read; §11 gives the order of the rest. A
@@ -1061,8 +1119,8 @@ Until a specification version publishes the dialect vectors, no claim of this cl
   the scopes, the clauses, the conditions listed, the unwraps, the targets, the nesting and the
   number literals, and a reading over a bound is refused, never truncated. A rule's evaluation is
   bounded by its clauses and the conditions they list; a verification costs at most one Ed25519
-  check per acquisition, and at most 16 acquisitions. The second reader measures nesting before it
-  parses a document.
+  check per acquisition, and at most 16 acquisitions. Both readers measure nesting before they parse
+  a document.
 - **Confusion.** The two canonical forms differ in three characters and in `-0`, and a verifier that
   mixes them gets another digest: two vectors are there for it. A binding that matches, with no
   record signature checked, establishes nothing, and a verifier's report must not say otherwise.
@@ -1103,28 +1161,32 @@ kinds of version 3 and the output side have none, and are not claimable.
 
 **What no vector holds.** `unwrap`; source parameters and skipped sources; a calculator that did not
 compute; a `generated` class, generated influence and `admits`; timestamp parameters; a receipt that
-fails; a stale acquisition or table; a broken session form; a refusal at a bound; and the eight
-positions of Unresolved question 1. The repository's tests hold the second reader to some of these
+fails; a stale acquisition or table; a broken session form; a refusal at a bound; and the positions
+of Unresolved question 1, the six choices among them. The repository's tests hold the two readers to some of these
 with altered copies of a vector — a result changed by a byte, an instant past `maxAge`, a profile's
 digest, a reader that writes `-0` as `0` or `&` as it is — but those are this repository's checks of
-one reader, not vectors: they are not the Runner's bytes, and no claim could cite them.
+its readers, not vectors: they are not the Runner's bytes, and no claim could cite them.
 
 **What this repository checks.** Every vector file to the SHA-256 the Runner's manifest gives it, and
-the Runner's manifest and README to the SHA-256 this repository records; the second reader over every
+the Runner's manifest and README to the SHA-256 this repository records; both readers over every
 vector; the counts; and this section's equality with the companion document's §§1–14.
 
 ## Implementation
 
-1. **The Runner**, the reference preparer, with `verify-run`, the first reader, which reads every
-   vector through the Runner's own code.
-2. **`tools/dialect_verify.py`**, the second reader, written from the text by the text's author
-   (Evidence), which reads dialect version 2 and the kind `operation`, and refuses every other kind as
-   `kind-unread`.
-3. **The Desk's inputs**, a writer: its mapping editor and import recipes write version-2 documents
+1. **`tools/dialect_verify.py`**, the first reader, written from the text by the text's author with
+   the vectors in view (Evidence), at `f821757` and corrected at `3c9520a`. It reads dialect version
+   2 and the kind `operation`, and refuses every other kind as `kind-unread`.
+2. **`tools/dialect-verify-ts/`**, the second reader, written from the companion document's text
+   alone, in TypeScript, by a different author, under the protocol the Evidence records, at
+   `e2d41c5`. It reads the same version and kind, and refuses the rest as the first does.
+3. **The Runner**, the reference preparer, with `verify-run`, a third reader of the same bytes in its
+   own repository, which reads every vector through the Runner's own code.
+4. **The Desk's inputs**, a writer: its mapping editor and import recipes write version-2 documents
    for the Runner today, and the research line (Desk #369, #371) would write the `research` kind.
 
-All three are this project's. An independent verifier — by an auditor or a counterparty, written from
-this text and the vectors — is the evidence a stable class needs, and none exists.
+All four are this project's. The two readers here agree on the vectors, the second written without
+sight of the first; a reader by a third organisation — an auditor or a counterparty, written from
+this text and the vectors — would strengthen that evidence, and none exists.
 
 ## Unresolved questions
 
@@ -1135,7 +1197,10 @@ this text and the vectors — is the evidence a stable class needs, and none exi
    left out; generated influence; a skipped source's outcome and entries; and the order of the entries
    within one outcome. Each was taken without the Runner's code. The Runner's behaviour may differ, and
    a vector from the Runner for each is what settles it; until then a difference found is a defect in
-   the text.
+   the text. The six choices the two readers recorded (Evidence) are decided in the text now, by the
+   maintainer, and no vector decides them either; on the four that are rules of reading — the
+   byte-bound scans, "but for case", a `freshWithin` of another declared type and a requirement id's
+   form — the Runner's `verify-run` has not been compared.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
    version-3 kinds are proposed with no preparer. When a kind gets a preparer and vectors, and whether
    its request forms here survive the first implementation, is open.
@@ -1159,3 +1224,32 @@ this text and the vectors — is the evidence a stable class needs, and none exi
 8. **A preparer class.** This document defines a verifier and no preparer, as the checkpoint witness
    statement defines a reader and no witness. Whether a preparer class is wanted, and what it would be
    held to beyond the vectors, is open.
+9. **The evidence bar, what remains.** Two readers agree on the vectors, the second written from the
+   text alone (Evidence). What [RFC 0000](0000-rfc-process.md)'s bar still asks, as the maintainer's
+   decision on issue #141 states it, is a comment period, which has not run. A reader by a third
+   organisation would strengthen the evidence, which today rests on one project's protocol; none
+   exists.
+
+**Next revision.** The maintainer's decision of 2026-10-14 on issue #141 scopes dialect version 3.
+This is scope, not text: none of it is specified here.
+
+- **The record kind over every gateway source shape.** Version 2's `operation` reads an MCP-shaped
+  operation only, so an HTTP-shaped source, such as the gateway's Databricks and Azure DevOps
+  connections, cannot be prepared. Version 3 broadens the kind to every shape the gateway records,
+  `airbyte`, `mcp` and `http`: the retained record and its receipt carry the shape, and the preparer
+  recomputes from the retained bytes as it does today. The `http` and `sql` kinds of §4.3 then
+  describe how a request is formed, not how a configured source is read. The Runner's side is
+  [Judgment-Pack/judgment-pack-runner#79](https://github.com/Judgment-Pack/judgment-pack-runner/issues/79).
+- **An unbound source form, bound at import.** A source that pins an input profile by its digest
+  pins the installer's gateway key and endpoint, so a published dialect is bound to one
+  installation. Version 3 gives a source an unbound form — its kind, the catalog binding and
+  operation, the expected record shape and the derivations — which the installer binds to a profile
+  at import, the Desk's side being
+  [Judgment-Pack/judgment-pack-desk#398](https://github.com/Judgment-Pack/judgment-pack-desk/issues/398);
+  the Runner records the bound dialect's digest as it does today. The Exchange holds the unbound
+  form, an entry's digest covers it, and its fixtures are recorded under the publisher's own binding
+  and verify against it.
+- **Two documents per `both` entry.** An Exchange entry of direction `both` holds two documents, the
+  dialect and its output side, each with its own digest. That is the Exchange's entry format,
+  [Judgment-Pack/judgment-pack-exchange#2](https://github.com/Judgment-Pack/judgment-pack-exchange/issues/2),
+  and changes nothing in this document.

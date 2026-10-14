@@ -79,6 +79,11 @@ Not read: the first reader or its test, the Runner's own README and manifest und
 `conformance/dialect/vectors/`, the rest of RFC 0018, the review round's record, any other repository,
 and any Go or Python source.
 
+**Changed since.** The RFC 0018 amendment that wrote the six choices below into the text changed this
+reader on one of them, a number literal's start (choice 2), and added a test for each. Its author had
+read both readers; that change follows the text, takes no code from the first reader, and is no part
+of this reader's independence, which is the account above.
+
 ## Where the text was not enough
 
 No vector depends on any point below: every vector gets the same answer under either reading of each.
@@ -129,17 +134,24 @@ These were listed as gaps in the first version; the text decides each.
   held in phase 4 by §11, "each of its sources against §4's members and its kind's, whichever its kind".
   This reader reads `operation` and the case, and answers `kind-unread` to the rest.
 
-### The genuine choices
+### The genuine choices, which the text now decides
+
+These were the six points the text left this reader. The maintainer decided each, and the text now
+says it (RFC 0018, Evidence): §11 for the report, the record's extraction and "but for case", §12 for
+the bounds, §6.3 for `freshWithin` and requirement ids. This reader follows each sentence: its readings
+agreed with the decision on five of the six, and on the start of a number literal it was changed
+(choice 2).
 
 1. **The report and exit representation.** §11 lists what a reading reports, not its JSON, and gives no
    exit statuses. Taken: the form and the statuses in the table above; `result` takes the manifest's
    words `reading` and `finding`, and `refusal`.
 2. **The byte-bound scans and the nesting convention** (§12). Taken: an object or an array opens a level,
    so `{}` is at one level and a scalar at none, measured on bytes outside strings before a document is
-   read and as a value's depth for a result; a number literal is a run outside strings that starts with
-   `-` or a digit and continues with digits, `+`, `-`, `.`, `e` and `E`, its exponent's magnitude the
-   value of the digits after its first `e` or `E`, leading zeros ignored; an unwrapped string's bytes are
-   the UTF-8 bytes of its value, its escapes read.
+   read and as a value's depth for a result; a number literal is a maximal run outside strings of digits,
+   `+`, `-`, `.`, `e` and `E`, whatever it starts with (it first took a run that starts with `-` or a
+   digit, and was changed to the text's), its exponent's magnitude the value of the digits after its
+   first `e` or `E`, leading zeros ignored; an unwrapped string's bytes are the UTF-8 bytes of its value,
+   its escapes read.
 3. **The version-2 record's extraction** ("written as one line", the staging note). Taken: the bytes of
    `run.audit` as `run.json` writes them, which is one line. No version-2 record in the vectors carries a
    binding, so no binding's bytes depend on it.

@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """A preparation verifier written from the words of spec/dialect.md.
 
-This is the second reader RFC 0018 asks for: it recomputes a preparation from a dialect document,
-a case, the acquisitions and the trusted input profiles, at the preparation's own instant, writes it
-in the preparation's canonical form, takes its digest, and holds a runtime record's binding to it
-(spec/dialect.md §§3-11). It was written from that document's text, and from the two sections of
-the checkpoint witness statement it adopts (§1, the canonical form; §5, the key rule and the
-equation), and from nothing else: not the Runner's code, which is the first reader.
+This is the first of the two readers RFC 0018 records (its Evidence): it recomputes a preparation
+from a dialect document, a case, the acquisitions and the trusted input profiles, at the
+preparation's own instant, writes it in the preparation's canonical form, takes its digest, and
+holds a runtime record's binding to it (spec/dialect.md §§3-11). It was written from that
+document's text, and from the two sections of the checkpoint witness statement it adopts (§1, the
+canonical form; §5, the key rule and the equation), and from nothing else: not the Runner's code,
+whose `verify-run` is a third reader of the same bytes.
 
 It reads dialect version 2 and the kind `operation`, the only kind the staged vectors exercise, and
 refuses every other kind as `kind-unread` (spec/dialect.md §4: a kind without vectors is defined
@@ -16,12 +17,15 @@ and not claimable). It uses the Python standard library alone.
         --acquisitions sources.json --profiles profiles.json --preparation preparation.json \\
         [--record record.jsonl] [--require-binding]
 
-It prints one JSON object: {"refused": name}, {"finding": name}, or {"reading": {...}}.
+It prints the report §11 gives, one JSON object in the preparation's canonical form, and exits 0
+for a reading, 1 for a refusal and 2 for a finding; it exits 3, printing no report, when it could
+not run at all. The reason for a refusal or a finding goes to standard error.
 """
 
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import re
@@ -29,7 +33,7 @@ import sys
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 
 # ---------------------------------------------------------------------------------------------
 # Outcomes of a reading (§11)
@@ -100,11 +104,17 @@ class Num:
         )
 
 
+# §12: a literal's exponent is the run of digits after its first `e` or `E`, past a sign there; a
+# literal with no such run has none.
+EXPONENT = re.compile(r"[^eE]*[eE][+-]?([0-9]+)")
+LITERAL_CHARACTERS = b"0123456789+-.eE"
+
+
 def _number_bounds(literal: str) -> None:
     if len(literal) > MAX_NUMBER_CHARACTERS:
         raise Refused("input-over-bound", "a number literal of more than 128 characters")
-    exponent = re.search(r"[eE]([+-]?[0-9]+)$", literal)
-    if exponent and abs(int(exponent.group(1))) > MAX_EXPONENT:
+    exponent = EXPONENT.match(literal)
+    if exponent and int(exponent.group(1)) > MAX_EXPONENT:
         raise Refused("input-over-bound", "an exponent of magnitude over 308")
 
 
@@ -115,8 +125,10 @@ def _number(literal: str) -> Num:
 
 def measure(data: bytes, what: str, max_depth: int) -> None:
     """§12: the bounds measured on a document's bytes before it is read (§11, the first phase):
-    its nesting, and each number literal's characters and exponent, read outside strings. It reads
-    bytes, so it measures a document that is not JSON, or not UTF-8, as well as one that is."""
+    its nesting, every object and every array one level from zero at the root, and each number
+    literal's characters and exponent, a literal being a maximal run of the characters 0-9, +, -, .,
+    e and E outside strings. It reads bytes, so it measures a document that is not JSON, or not
+    UTF-8, as well as one that is."""
     depth = 0
     in_string = escaped = False
     position, length = 0, len(data)
@@ -137,9 +149,9 @@ def measure(data: bytes, what: str, max_depth: int) -> None:
                 raise Refused("input-over-bound", f"{what} nests more than {max_depth} levels")
         elif byte in b"]}":
             depth -= 1
-        elif byte in b"-0123456789":
+        elif byte in LITERAL_CHARACTERS:
             end = position
-            while end < length and data[end] in b"0123456789+-.eE":
+            while end < length and data[end] in LITERAL_CHARACTERS:
                 end += 1
             _number_bounds(data[position:end].decode("ascii"))
             position = end
@@ -1795,17 +1807,38 @@ def read_record(data: bytes) -> Any:
     return read_document(data, "the record")
 
 
+# §11: two names differ "but for case" when they are equal once A-Z are mapped to a-z, and nothing
+# else is: ASCII case only, no other folding.
+ASCII_LOWER = str.maketrans("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
+
+
 def parse_record(data: bytes, value: Any) -> Record:
     """The record's form (§11, the fourth phase), and its binding as the line writes it."""
     if not isinstance(value, dict) or not isinstance(value.get("inputs"), dict):
         raise malformed("the record is not an evaluation record with inputs")
     binding = None
     for name, raw in top_level_members(data.decode("utf-8")):
-        if name.lower() == "binding" and name != "binding":
+        if name.translate(ASCII_LOWER) == "binding" and name != "binding":
             raise malformed("a member named binding but for case")
         if name == "binding":
             binding = raw.encode("utf-8")
     return Record(value, binding)
+
+
+def record_of_export(run: bytes) -> bytes | None:
+    """The record line a Runner export's run.json holds (conformance/dialect/README.md): the bytes
+    `run.auditBytes` holds in standard base64; or, in an export of version 2, which carries no bytes,
+    the member `run.audit`'s value exactly as run.json writes it, with no re-encoding (§11). None when
+    it holds neither."""
+    document = read_document(run, "run.json")
+    if not isinstance(document, dict) or not isinstance(document.get("run"), dict):
+        return None
+    held = dict(top_level_members(dict(top_level_members(run.decode("utf-8")))["run"]))
+    if "auditBytes" in held:
+        return base64.b64decode(json.loads(held["auditBytes"]), validate=True)
+    if "audit" in held:
+        return held["audit"].encode("utf-8")
+    return None
 
 
 # ---------------------------------------------------------------------------------------------
@@ -2009,8 +2042,8 @@ def verify(
         reading: dict[str, Any] = {
             "digest": result.digest,
             "binding": binding,
-            "facts": result.facts,
-            "evidence": result.evidence,
+            "facts": computation.facts,
+            "evidence": computation.evidence,
             "targetsByClass": counts,
         }
         parameters = unsigned_parameters(parsed_dialect, computation)
@@ -2027,8 +2060,31 @@ def verify(
     return result
 
 
+def report(answer: dict[str, Any]) -> dict[str, Any]:
+    """§11, the report: one object whose `result` is `reading`, `refusal` or `finding`, with exactly
+    the members that form carries."""
+    if "reading" in answer:
+        return {"result": "reading", **answer["reading"]}
+    if "finding" in answer:
+        return {"result": "finding", "finding": answer["finding"]}
+    return {"result": "refusal", "refusal": answer["refused"]}
+
+
+# §11: a program exits 0 for a reading, 1 for a refusal, 2 for a finding, and 3 when it could not run.
+EXIT_STATUS = {"reading": 0, "refusal": 1, "finding": 2}
+COULD_NOT_RUN = 3
+
+
+class _Arguments(argparse.ArgumentParser):
+    def exit(self, status: int = 0, message: str | None = None) -> NoReturn:
+        # argparse leaves by this door when no reading was run, for its help or for an argument it
+        # does not take; §11 gives that one status, not argparse's 0 or 2, which are a reading's and
+        # a finding's.
+        super().exit(COULD_NOT_RUN, message)
+
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = _Arguments(description=__doc__.splitlines()[0])
     parser.add_argument("--dialect", required=True, type=Path)
     parser.add_argument("--case", required=True, type=Path)
     parser.add_argument("--acquisitions", type=Path, help="absent: no acquisitions, {}")
@@ -2037,17 +2093,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--record", type=Path, help="one record line, without its newline")
     parser.add_argument("--require-binding", action="store_true")
     arguments = parser.parse_args(argv)
-    outcome = verify(
-        arguments.dialect.read_bytes(),
-        arguments.case.read_bytes(),
-        arguments.acquisitions.read_bytes() if arguments.acquisitions else b"{}",
-        arguments.profiles.read_bytes(),
-        arguments.preparation.read_bytes(),
-        arguments.record.read_bytes() if arguments.record else None,
-        arguments.require_binding,
-    )
-    print(json.dumps(outcome.answer, ensure_ascii=False, sort_keys=True))
-    return 0 if "reading" in outcome.answer else 1
+    try:
+        documents = (
+            arguments.dialect.read_bytes(),
+            arguments.case.read_bytes(),
+            arguments.acquisitions.read_bytes() if arguments.acquisitions else b"{}",
+            arguments.profiles.read_bytes(),
+            arguments.preparation.read_bytes(),
+            arguments.record.read_bytes() if arguments.record else None,
+        )
+        outcome = verify(*documents, arguments.require_binding)
+        answer = report(outcome.answer)
+        line = preparation_bytes(answer) + b"\n"
+    except Exception as error:  # a file it cannot open, or a fault of its own: never 1 or 2
+        print(f"dialect_verify: could not run: {error!r}", file=sys.stderr)
+        return COULD_NOT_RUN
+    sys.stdout.buffer.write(line)
+    sys.stdout.flush()
+    if "detail" in outcome.answer:
+        print(f"dialect_verify: {outcome.answer['detail']}", file=sys.stderr)
+    return EXIT_STATUS[answer["result"]]
 
 
 if __name__ == "__main__":

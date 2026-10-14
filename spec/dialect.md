@@ -50,7 +50,11 @@ describe the Runner rather than the format, it says what the format is.
 
 Where neither the Runner's documentation nor its vectors decide a rule, this document takes a
 position and marks it: "(No vector decides this.)" RFC 0018 lists every such position as its first
-unresolved question.
+unresolved question. Six more rules, which two readers recorded as choices the text had left them,
+are decided here by the maintainer (RFC 0018, Evidence): the report's form and the exit statuses,
+the extraction of a version-2 record and "but for case" (§11), the byte-bound scans and the nesting
+convention (§12), and a `freshWithin` of another declared type and a requirement id's form (§6.3).
+No vector decides them either, and that question names them too.
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** and **MAY** are to
 be interpreted as described by BCP 14 when, and only when, they appear in all capitals.
@@ -448,10 +452,16 @@ the value read, and `N` and `M` name parameters the rule declares.
 mathematical value, so that `1` and `1.0` are equal; strings, booleans and `null` by value; arrays
 element by element, in order; objects as sets of members. A number and a string are never equal.
 
+That `N` and `M` name parameters the rule declares is a `freshWithin`'s form; their types are part of
+its truth. A `freshWithin` whose `asOf` names a declared parameter of a type other than `timestamp`,
+or whose `maxAge` names one of a type other than `integer`, is false, and the dialect is not
+malformed.
+
 A claim form is an object of exactly `facts`, an array of `{"pointer": P, "from": Q}`, each exactly
 those members, `P` a fact target and `Q` a pointer into the value read; `evidence`, an object mapping
 requirement ids to `present`, `absent` or `unknown`; and `acquisitionStatus`, one of `resolved`,
-`absent` and `unknown`.
+`absent` and `unknown`. A **requirement id**, in a claim form as in a copy (§6.2), is a non-empty
+string, and that unqualified form is its only form.
 
 **Deriving the claim.** The **match** is the first clause whose `when` is true; the last clause
 ensures there is one. A **leaf** is a condition other than `always`, `all`, `any` and `not`, and
@@ -687,7 +697,9 @@ A preparation verifier is given:
   the input profiles it trusts (§5.1);
 - the **preparation** to verify;
 - optionally, the **record**: the line of bytes, without its newline, of the runtime evaluation
-  record whose binding it holds to the preparation; and
+  record whose binding it holds to the preparation. A Runner export of version 2 carries the record
+  as the member `run.audit` of its `run.json`, and not its bytes: the line taken from such an export
+  is that member's value exactly as `run.json` writes it, with no re-encoding; and
 - whether it **requires a binding**.
 
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
@@ -743,7 +755,9 @@ nothing reported but the refusal.
 **Reading the record.** The record is one line, holding neither a line feed nor a carriage return,
 that is one JSON object read as §1 reads a document, with an object `inputs`. Its member `binding`
 is read by that exact name: a record that names a member `binding` but for case is refused, not read
-as one with no binding. A record **carries** a binding when it has a member of that name, whatever
+as one with no binding. Two member names differ **but for case** when they are not equal, and are
+equal once each of `A` to `Z` in them is mapped to `a` to `z` and nothing else is: ASCII case only,
+with no other folding. A record **carries** a binding when it has a member of that name, whatever
 its value: a `binding` that is `null` is carried, and is not of the binding's form (finding 7); a
 record with no member of that name carries none, which is no finding unless a binding is required
 (finding 9). The member's bytes are those of its value as the line writes them, from its
@@ -794,6 +808,17 @@ order of `sources`.
 source's targets. Each such freshness was judged against `verifiedAt`, which no receipt covers: a
 matching binding in a record whose signature verifies is what commits it (§13).
 
+**The report.** A verifier reports a reading, a refusal or a finding as one JSON object, written in
+the preparation's canonical form (§9.5), whose member `result` is `reading`, `refusal` or `finding`.
+A refusal is exactly `{"result": "refusal", "refusal": C}` and a finding exactly
+`{"result": "finding", "finding": C}`, `C` its code. A reading is `result` and the members listed
+above, exactly: `digest`; `binding`; `facts`, the facts document; `evidence`, the
+evidence-availability document; `targetsByClass`; and `unsignedParameters` and `unsignedFreshness`
+when they are not empty. A verifier that is a program writes the report on its standard output, as
+one line, and exits with status 0 for a reading, 1 for a refusal and 2 for a finding, and with
+status 3, writing no report, when it could not run at all, as on an argument it does not take or a
+file it cannot open. A verifier that is a library states the same three outcomes in its own idiom.
+
 ## 12. Bounds
 
 A verifier holds its inputs to the Runner's bounds (Runner, "Numeric and resource profile"):
@@ -808,6 +833,14 @@ A verifier holds its inputs to the Runner's bounds (Runner, "Numeric and resourc
   unwrapped value — and at most 64 in any document; and
 - number literals of at most 128 characters, whose exponent, when they have one, has a magnitude of
   at most 308.
+
+Nesting is counted from the document's root at zero, and every object and every array is one level
+of it: `{}` is at one level, `{"a": []}` at two, and a document that is a string, a number, `true`,
+`false` or `null` at none. On the bytes, a **number literal** is a maximal run, outside strings, of
+the characters `0` to `9`, `+`, `-`, `.`, `e` and `E`, and its **exponent** is the digits after its
+first `e` or `E`: the run of digits that follows it, or that follows the `+` or `-` after it; a
+literal with no such run has no exponent. An unwrapped string's bound is counted on the UTF-8 bytes
+of its decoded value.
 
 Over any bound it refuses the reading, `input-over-bound`, and MUST NOT read part of it. The bytes are
 bounded first, by the documents' sizes, before any is read; §11 gives the order of the rest. A

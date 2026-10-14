@@ -1,4 +1,4 @@
-"""The dialect vectors RFC 0018 stages, and the second reader written from the companion text.
+"""The dialect vectors RFC 0018 stages, and the first reader written from the companion text.
 
 The vectors are the reference Runner's `vectors/preparation/`, byte for byte, staged while the RFC
 is a draft (conformance/dialect/README.md). These tests hold their bytes to the digests the Runner's
@@ -9,13 +9,14 @@ and hold the RFC's Specification section to the companion document's text.
 
 from __future__ import annotations
 
-import base64
 import collections
 import hashlib
 import importlib.util
 import json
 import re
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from typing import Any
@@ -54,7 +55,7 @@ HEX_64 = re.compile(r"[0-9a-f]{64}")
 
 _SPEC = importlib.util.spec_from_file_location("dialect_verify", ROOT / "tools" / "dialect_verify.py")
 if _SPEC is None or _SPEC.loader is None:
-    raise RuntimeError("could not load the second reader")
+    raise RuntimeError("could not load the first reader")
 READER = importlib.util.module_from_spec(_SPEC)
 # Its dataclasses resolve their annotations through the module, so it is registered first.
 sys.modules[_SPEC.name] = READER
@@ -75,12 +76,11 @@ class Inputs:
         sources = directory / "sources.json"
         self.acquisitions = sources.read_bytes() if sources.is_file() else b"{}"
         self.profiles = (directory / "profiles.json").read_bytes()
-        self.run = READER.read_document((directory / "run.json").read_bytes(), "run.json")["run"]
+        run = (directory / "run.json").read_bytes()
+        self.run = READER.read_document(run, "run.json")["run"]
         self.preparation = READER.preparation_bytes(self.run["input"]["preparation"])
-        if "auditBytes" in self.run:
-            self.record = base64.b64decode(self.run["auditBytes"], validate=True)
-        else:  # a version-2 export carries the record, and not its bytes
-            self.record = READER.preparation_bytes(self.run["audit"])
+        # run.auditBytes; or, in a version-2 export, run.audit exactly as run.json writes it (§11)
+        self.record = READER.record_of_export(run)
         self.require_binding = require_binding
 
     def verify(self) -> Any:
@@ -177,7 +177,7 @@ class DialectVectorTests(unittest.TestCase):
                 text = " ".join((ROOT / relative).read_text(encoding="utf-8").split())
                 self.assertIn(expected, text)
 
-    def test_the_second_reader_recomputes_every_preparation(self) -> None:
+    def test_the_first_reader_recomputes_every_preparation(self) -> None:
         # The preparation's canonical bytes, recomputed from the dialect, the case, the acquisitions
         # and the profiles at the given preparation's instant, are the Runner's, byte for byte.
         for vector in self.runner["vectors"]:
@@ -191,7 +191,7 @@ class DialectVectorTests(unittest.TestCase):
                     vector["preparation"]["binding"].encode("ascii"), READER.binding_of(outcome.digest)
                 )
 
-    def test_the_second_reader_gives_each_vector_its_answer(self) -> None:
+    def test_the_first_reader_gives_each_vector_its_answer(self) -> None:
         for row in self.manifest["cases"]:
             with self.subTest(vector=row["id"]):
                 answer = self.inputs(row["id"]).verify().answer
@@ -224,7 +224,7 @@ class DialectVectorTests(unittest.TestCase):
             compared += 1
         self.assertGreaterEqual(compared, 4)
 
-    # Controls: what the second reader must not accept. They are this repository's checks of one
+    # Controls: what the first reader must not accept. They are this repository's checks of one
     # reader, with altered copies of a vector, and not vectors (RFC 0018, Conformance).
 
     def test_a_reader_that_writes_minus_zero_as_zero_fails_numeric_spellings(self) -> None:
@@ -467,11 +467,194 @@ class DialectVectorTests(unittest.TestCase):
         inputs.dialect = json.dumps(dialect).encode("utf-8")
         self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
 
+    # The six choices the text now decides (RFC 0018, Evidence), each held here as the text says.
+
+    def _program(self, *arguments: str) -> subprocess.CompletedProcess[bytes]:
+        return subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "dialect_verify.py"), *arguments],
+            capture_output=True,
+            timeout=300,
+        )
+
+    def _files(self, directory: Path, inputs: Inputs) -> list[str]:
+        names = {
+            "dialect": inputs.dialect,
+            "case": inputs.case,
+            "acquisitions": inputs.acquisitions,
+            "profiles": inputs.profiles,
+            "preparation": inputs.preparation,
+        }
+        if inputs.record is not None:
+            names["record"] = inputs.record
+        arguments = []
+        for name, data in names.items():
+            (directory / name).write_bytes(data)
+            arguments += [f"--{name}", str(directory / name)]
+        return arguments + (["--require-binding"] if inputs.require_binding else [])
+
+    def test_the_report_is_one_object_in_the_preparations_form_and_the_exit_status_says_which(self) -> None:
+        # §11, the report: `result` and the members its form carries, written as §9.5 writes; exit 0
+        # for a reading, 1 for a refusal, 2 for a finding, 3 with no report when it could not run.
+        with tempfile.TemporaryDirectory() as scratch:
+            directory = Path(scratch)
+            run = self._program(*self._files(directory, self.inputs("escaped-strings")))
+            self.assertEqual(0, run.returncode, run.stderr)
+            line = run.stdout.rstrip(b"\n")
+            self.assertEqual(run.stdout, line + b"\n")
+            self.assertNotIn(b"\n", line)
+            report = READER.read_document(line, "the report")
+            self.assertEqual(READER.preparation_bytes(report), line)
+            self.assertEqual({"result", "digest", "binding", "facts", "evidence", "targetsByClass"}, set(report))
+            self.assertEqual(("reading", "absent"), (report["result"], report["binding"]))
+            self.assertIn(b'"vendor":"A\\u0026B \\u003cx\\u003e caf\xc3\xa9 \xe2\x98\x83"', line)
+
+            run = self._program(*self._files(directory, self.inputs("recomputed-one-second-later")))
+            self.assertEqual((2, b'{"finding":"binding-mismatch","result":"finding"}\n'), (run.returncode, run.stdout))
+
+            inputs = self.inputs("valid")
+            inputs.dialect = b"{"
+            run = self._program(*self._files(directory, inputs))
+            self.assertEqual((1, b'{"refusal":"input-malformed","result":"refusal"}\n'), (run.returncode, run.stdout))
+
+            arguments = self._files(directory, self.inputs("valid"))
+            unopened = list(arguments)
+            unopened[unopened.index("--profiles") + 1] = str(directory / "no-such-file")
+            at = arguments.index("--case")
+            for name, broken in (
+                ("a file it cannot open", unopened),
+                ("an argument it does not take", arguments + ["--an-argument-it-does-not-take"]),
+                ("a required argument left out", arguments[:at] + arguments[at + 2 :]),
+            ):
+                with self.subTest(could_not_run=name):
+                    run = self._program(*broken)
+                    self.assertEqual((3, b""), (run.returncode, run.stdout))
+            # its help is no reading either
+            self.assertEqual(3, self._program("--help").returncode)
+
+    def test_a_reading_reports_each_number_as_its_literal(self) -> None:
+        # A case-only reading whose facts hold -0: the report keeps it, as §9.5 writes a number.
+        inputs = self.inputs("escaped-strings")
+        inputs.dialect = b'{"version":2,"case":{"facts":[{"target":"/n","source":"/n"}],"evidence":[]}}'
+        inputs.case = b'{"n":-0}'
+        inputs.record, inputs.require_binding = None, False
+        inputs.preparation = b'{"verifiedAt":"2026-10-14T00:00:00Z"}'
+        inputs.preparation = inputs.verify().preparation
+        with tempfile.TemporaryDirectory() as scratch:
+            run = self._program(*self._files(Path(scratch), inputs))
+        self.assertEqual(0, run.returncode, run.stderr)
+        self.assertIn(b'"facts":{"n":-0}', run.stdout)
+        self.assertIn(b'"binding":"not-checked"', run.stdout)
+
+    def test_nesting_counts_each_object_and_array_from_zero_at_the_root(self) -> None:
+        self.assertEqual(
+            [0, 0, 1, 1, 2, 2],
+            [READER.value_depth(v) for v in ("x", READER.Num("1"), {}, [], {"a": []}, [{}])],
+        )
+        READER.measure(b"{}", "a document", 1)
+        READER.measure(b'"{[{["', "a document", 0)
+        with self.assertRaises(READER.Refused):
+            READER.measure(b'{"a":[]}', "a document", 1)
+        # the case document at 32 levels is within its bound, at 33 over it
+        inputs = self.inputs("escaped-strings")
+        inputs.case = b"[" * 32 + b"]" * 32
+        self.assertNotEqual("input-over-bound", inputs.verify().answer.get("refused"))
+        inputs.case = b"[" * 33 + b"]" * 33
+        self.assertEqual("input-over-bound", inputs.verify().answer.get("refused"))
+
+    def test_a_number_literal_is_a_maximal_run_and_its_exponent_follows_the_first_e(self) -> None:
+        within = [b"[1e308,-1E-308,1e+0000308,true,false,null]", b"[1e5e999]", b"[1e+-999]", b"[" + b"9" * 128 + b"]"]
+        over = [b"[e999]", b"[E+999]", b"[.1e309]", b"[+1e309]", b"[1e999.5]", b"[." + b"1" * 128 + b"]", b"[1e309]"]
+        for data in within:
+            with self.subTest(within=data[:40]):
+                READER.measure(data, "a document", 64)
+        for data in over:
+            with self.subTest(over=data[:40]):
+                with self.assertRaises(READER.Refused) as refused:
+                    READER.measure(data, "a document", 64)
+                self.assertEqual("input-over-bound", refused.exception.name)
+        # through the reading: a run that starts with `e` is over its bound before the case is read
+        inputs = self.inputs("escaped-strings")
+        inputs.case = b"[e999]"
+        self.assertEqual("input-over-bound", inputs.verify().answer.get("refused"))
+        inputs.case = b"[1e5e999]"
+        self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+
+    def test_an_unwrapped_strings_bound_is_its_decoded_values_utf8_bytes(self) -> None:
+        # 200000 bytes of UTF-8 are within the bound and 200001 over it, though the string holds about
+        # 100000 characters.
+        def unwrapped(size: int) -> Any:
+            head, tail = '{"pad":"', '","id":7}'
+            room = size - len((head + tail).encode("utf-8"))
+            text = head + "é" * (room // 2) + "a" * (room % 2) + tail
+            self.assertEqual(size, len(text.encode("utf-8")))
+            self.assertLess(len(text), 100100)
+            return READER.apply_unwrap({"wrapped": text}, ["/wrapped"])
+
+        self.assertEqual(7, READER.integer_of(unwrapped(200000)["id"]))
+        with self.assertRaises(READER.Refused) as refused:
+            unwrapped(200001)
+        self.assertEqual("input-over-bound", refused.exception.name)
+
+    def test_a_version_2_record_is_run_audit_as_run_json_writes_it(self) -> None:
+        # An export of version 2 carries the record as run.audit, and no bytes. Written into such an
+        # export as it is, the valid vector's bound record still matches: its line is the member's
+        # value exactly as run.json writes it. Re-encoded, its binding's members would be reordered.
+        inputs = self.inputs("valid")
+        line = inputs.record
+        run = b'{"version":2,"run": {"input": {"preparation": ' + inputs.preparation + b'}, "audit": ' + line + b" }}"
+        self.assertEqual(line, READER.record_of_export(run))
+        inputs.record = READER.record_of_export(run)
+        self.assertEqual("matches", inputs.verify().answer["reading"]["binding"])
+        inputs.record = READER.preparation_bytes(READER.read_document(line, "the record"))
+        self.assertEqual("binding-mismatch", inputs.verify().answer.get("finding"))
+
+    def test_but_for_case_is_ascii_case_only(self) -> None:
+        refused = ("BINDING", "bInDiNg", "Binding")
+        not_refused = ("ｂｉｎｄｉｎｇ", "BİNDİNG", "bındıng", "bindinǵ", "bindings")
+        for name in refused + not_refused:
+            with self.subTest(name=name):
+                inputs = self.inputs("valid")
+                member = json.dumps(name, ensure_ascii=False).encode("utf-8")
+                inputs.record = inputs.record.replace(b'"inputs":', member + b':1,"inputs":', 1)
+                answer = inputs.verify().answer
+                if name in refused:
+                    self.assertEqual("input-malformed", answer.get("refused"), answer)
+                else:
+                    self.assertEqual("matches", answer["reading"]["binding"], answer)
+
+    def test_a_fresh_within_of_another_declared_type_is_false_and_the_rule_is_read(self) -> None:
+        # The vendor rule's freshWithin, `asOf` runAt and `maxAge` window: each given a declared
+        # parameter of another type, the condition is false, so the vendor answers by its last clause.
+        for member, name in (("maxAge", "runAt"), ("asOf", "window"), ("asOf", "vendorId")):
+            with self.subTest(member=member, names=name):
+                answer = self._with_rule_condition(lambda of: of[1].__setitem__(member, name))
+                self.assertEqual("preparation-differs", answer.get("finding"), answer)
+        # a parameter the rule does not declare is the form's, and refused
+        answer = self._with_rule_condition(lambda of: of[1].__setitem__("asOf", "region"))
+        self.assertEqual("input-malformed", answer.get("refused"), answer)
+
+    def test_a_requirement_id_is_a_non_empty_string_of_no_other_form(self) -> None:
+        inputs = self.inputs("unsigned-parameters")
+        dialect = json.loads(inputs.dialect)
+        evidence = dialect["sources"][0]["read"]["rule"]["clauses"][0]["claim"]["evidence"]
+        for requirement, answer in (("", ("refused", "input-malformed")), ("pack#1/intake form", ("finding", "preparation-differs"))):
+            with self.subTest(requirement=requirement):
+                evidence.clear()
+                evidence[requirement] = "present"
+                inputs.dialect = json.dumps(dialect).encode("utf-8")
+                result = inputs.verify().answer
+                self.assertEqual(answer[1], result.get(answer[0]), result)
+        inputs = self.inputs("valid")
+        dialect = json.loads(inputs.dialect)
+        dialect["sources"][0]["read"]["copy"]["evidence"][0]["requirement"] = ""
+        inputs.dialect = json.dumps(dialect).encode("utf-8")
+        self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+
 
 class DialectTextTests(unittest.TestCase):
     def test_the_rfcs_specification_is_the_companion_text(self) -> None:
         # RFC 0017's choice: the Specification section is the text proposed to land. Here the text
-        # is a file too, from which the second reader was written, so the two are held equal: the
+        # is a file too, from which the two readers were written, so the two are held equal: the
         # companion's §§1-14, word for word, each heading one level down in the RFC.
         companion = (ROOT / COMPANION).read_text(encoding="utf-8")
         rfc = (ROOT / RFC).read_text(encoding="utf-8")

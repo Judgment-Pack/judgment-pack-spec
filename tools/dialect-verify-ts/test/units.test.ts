@@ -2,7 +2,10 @@
 // readings of inputs no vector holds, each derived from the `valid` vector by one change. The second
 // group is this reader's, not the vectors': see README.md, "Where the text was not enough".
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { createHash, createPublicKey, generateKeyPairSync, sign as nodeSign, verify as nodeVerify } from "node:crypto";
+import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -316,4 +319,145 @@ test("probe: freshWithin whose asOf names a parameter declared string is false, 
   assert.equal((vendor.m.get("name") as { v: string }).v, "vendor");
   assert.equal((vendor.m.get("reason") as { v: string }).v, "no-match");
   assert.equal(text(preparationForm(member(vendor, "claim")!)), '{"acquisitionStatus":"unknown","basis":["/id","/observedAt"],"evidenceAvailability":{"intake-form":"unknown"},"facts":{},"reason":"no-match"}');
+});
+
+// ---- the six choices the text now decides (RFC 0018, Evidence), each held as the text says ----
+
+const verdict = (i: Inputs) => {
+  const r = verify(i);
+  return r.kind === "reading" ? `reading:${(member(r.report, "binding") as { v: string }).v}` : `${r.kind}:${(member(r.report, r.kind) as { v: string }).v}`;
+};
+
+test("§12: nesting counts every object and every array as one level, from zero at the root", () => {
+  for (const [doc, levels] of [['"x"', 0], ["1", 0], ["{}", 1], ["[]", 1], ['{"a":[]}', 2], ["[{}]", 2], ['"[[{{"', 0]] as const) {
+    assert.equal(scanBytes(utf8(doc)).nesting, levels, doc);
+  }
+  // the case document at 32 levels is within its bound, and at 33 over it
+  assert.notEqual(answer((i) => ({ ...i, case: utf8("[".repeat(32) + "]".repeat(32)) })), "refusal:input-over-bound");
+  assert.equal(answer((i) => ({ ...i, case: utf8("[".repeat(33) + "]".repeat(33)) })), "refusal:input-over-bound");
+});
+
+test("§12: a number literal is a maximal run of 0-9, +, -, ., e and E, its exponent the digits after the first e", () => {
+  for (const doc of ["[1e308,-1E-308,1e+0000308,true,false,null]", "[1e5e999]", "[1e+-999]", "[" + "9".repeat(128) + "]"]) {
+    assert.equal(scanBytes(utf8(doc)).numbersWithin, true, doc);
+  }
+  for (const doc of ["[e999]", "[E+999]", "[.1e309]", "[+1e309]", "[1e999.5]", "[." + "1".repeat(128) + "]", "[e" + "1".repeat(127) + "]"]) {
+    assert.equal(scanBytes(utf8(doc)).numbersWithin, false, doc);
+  }
+  // through the reading: a run that begins with `e` is over its bound before the case is read
+  assert.equal(answer((i) => ({ ...i, case: utf8("[e999]") })), "refusal:input-over-bound");
+  assert.equal(answer((i) => ({ ...i, case: utf8("[1e5e999]") })), "refusal:input-malformed");
+});
+
+test("§12: an unwrapped string's bound is counted on the UTF-8 bytes of its decoded value", () => {
+  // The vendor source's result, wrapped in a string of exactly `size` UTF-8 bytes, about half as many
+  // characters: within the bound at 200000 bytes, over it at 200001. Its quotes, escaped in the
+  // acquisitions document, take more bytes there than decoded, and do not count.
+  const wrapped = (size: number) =>
+    resigned({ ...twoSources, dialect: edit(twoSources.dialect, '"read":{"rule"', '"read":{"unwrap":["/wrapped"],"rule"') }, (name, result) => {
+      if (name !== "vendor") return;
+      const head = '{"pad":"';
+      const tail = '",' + text(canon(result)).slice(1);
+      const room = size - utf8(head + tail).length;
+      const inner = head + "é".repeat(Math.floor(room / 2)) + "a".repeat(room % 2) + tail;
+      assert.equal(utf8(inner).length, size);
+      assert.ok(inner.length < 100200);
+      assert.ok(canon(str(inner)).length - 2 > size); // its bytes as the acquisitions document writes them
+      for (const k of Array.from(result.m.keys())) result.m.delete(k);
+      result.m.set("wrapped", str(inner));
+    });
+  assert.equal(verdict(wrapped(200000)), "finding:preparation-differs");
+  assert.equal(verdict(wrapped(200001)), "refusal:input-over-bound");
+});
+
+test("§11: a version-2 export's record is run.audit exactly as run.json writes it", () => {
+  // The valid vector's bound record, written as run.audit into an export of version 2, which carries
+  // no bytes, with whitespace around it: the line read is the member's value as written, so the binding
+  // still matches.
+  const dir = mkdtempSync(join(tmpdir(), "dialect-verify-ts-"));
+  try {
+    for (const f of ["mapping.json", "case.json", "sources.json", "profiles.json"]) copyFileSync(join(VECTORS, "valid", f), join(dir, f));
+    writeFileSync(join(dir, "run.json"), `{"version":2,"run": {"input": {"preparation": ${text(valid.preparation)}}, "audit": ${text(valid.record!)} }}`);
+    const v2 = loadVector(dir, true);
+    assert.ok(Buffer.from(v2.record!).equals(Buffer.from(valid.record!)));
+    assert.equal(verdict(v2), "reading:matches");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("§11: two names differ but for case in ASCII case only", () => {
+  for (const name of ["BINDING", "bInDiNg"]) {
+    assert.equal(answer((i) => ({ ...i, record: edit(i.record!, '"inputs":', `${JSON.stringify(name)}:1,"inputs":`) })), "refusal:input-malformed", name);
+  }
+  // full-width letters, a dotted capital I, a dotless i, a combining accent, a longer name: no other folding
+  for (const name of ["ｂｉｎｄｉｎｇ", "BİNDİNG", "bındıng", "bindinǵ", "bindings"]) {
+    assert.equal(answer((i) => ({ ...i, record: edit(i.record!, '"inputs":', `${JSON.stringify(name)}:1,"inputs":`) })), "reading:matches", name);
+  }
+});
+
+test("§6.3: freshWithin naming a declared parameter of another type is false, and the rule is read", () => {
+  const fresh = (to: string) => verdict({ ...twoSources, dialect: edit(twoSources.dialect, '"asOf":"runAt","maxAge":"window"', to) });
+  assert.equal(fresh('"asOf":"runAt","maxAge":"runAt"'), "finding:preparation-differs");
+  assert.equal(fresh('"asOf":"window","maxAge":"window"'), "finding:preparation-differs");
+  assert.equal(fresh('"asOf":"vendorId","maxAge":"vendorId"'), "finding:preparation-differs");
+  // naming a parameter the rule does not declare is outside the form
+  assert.equal(fresh('"asOf":"region","maxAge":"window"'), "refusal:input-malformed");
+});
+
+test("§6.3: a requirement id is a non-empty string, and has no other form", () => {
+  const claim = (to: string) => verdict({ ...twoSources, dialect: edit(twoSources.dialect, '"evidence":{"intake-form":"present"}', to) });
+  assert.equal(claim('"evidence":{"":"present"}'), "refusal:input-malformed");
+  assert.equal(claim('"evidence":{"pack#1/intake form":"present"}'), "finding:preparation-differs");
+  assert.equal(answer((i) => ({ ...i, dialect: edit(i.dialect, '"requirement":"intake-form"', '"requirement":""') })), "refusal:input-malformed");
+});
+
+// ---- the program: its report and its exit status (§11, the report) ----
+
+const MAIN = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "main.ts");
+// The flags the repository's Python suite runs this reader's tests with, so a child runs under the same cap.
+const program = (...args: string[]) => spawnSync(process.execPath, ["--disable-wasm-trap-handler", "--no-warnings", MAIN, ...args], { encoding: "utf8", timeout: 120000 });
+
+test("the program prints the report in §9.5's form, one line, and exits 0, 1, 2, or 3 with no report", () => {
+  const reading = program(join(VECTORS, "escaped-strings"));
+  assert.equal(reading.status, 0, reading.stderr);
+  assert.ok(reading.stdout.endsWith("\n") && !reading.stdout.slice(0, -1).includes("\n"));
+  const line = reading.stdout.slice(0, -1);
+  const report = parse(line);
+  assert.equal(text(preparationForm(report)), line);
+  assert.deepEqual(Array.from((report as JObj).m.keys()).sort(), ["binding", "digest", "evidence", "facts", "result", "targetsByClass"]);
+  assert.ok(line.includes('"vendor":"A\\u0026B \\u003cx\\u003e café ☃"'), line);
+
+  const finding = program(join(VECTORS, "recomputed-one-second-later"), "--require-binding");
+  assert.deepEqual([finding.status, finding.stdout], [2, '{"finding":"binding-mismatch","result":"finding"}\n']);
+
+  const dir = mkdtempSync(join(tmpdir(), "dialect-verify-ts-"));
+  try {
+    const at = (name: string, bytes: Uint8Array | string) => {
+      writeFileSync(join(dir, name), bytes);
+      return join(dir, name);
+    };
+    const files = ["--dialect", at("dialect", "{"), "--case", at("case", valid.case), "--profiles", at("profiles", valid.profiles), "--preparation", at("preparation", valid.preparation)];
+    const refusal = program(...files);
+    assert.deepEqual([refusal.status, refusal.stdout], [1, '{"refusal":"input-malformed","result":"refusal"}\n']);
+    for (const args of [[join(dir, "no-such-vector")], [...files, "--an-option-it-does-not-take"], files.slice(2), [...files.slice(0, 7), join(dir, "no-such-file")]]) {
+      const run = program(...args);
+      assert.deepEqual([run.status, run.stdout], [3, ""], args.join(" "));
+    }
+
+    // a case-only reading whose facts hold -0: the report keeps the literal, as §9.5 writes a number
+    const minus = [
+      "--dialect", at("d", '{"version":2,"case":{"facts":[{"target":"/n","source":"/n"}],"evidence":[]}}'),
+      "--case", at("c", '{"n":-0}'),
+      "--profiles", at("p", "[]"),
+    ];
+    const first = program(...minus, "--preparation", at("given", '{"verifiedAt":"2026-10-14T00:00:00Z"}'), "--emit-preparation", join(dir, "recomputed"));
+    assert.equal(first.status, 2, first.stdout);
+    const second = program(...minus, "--preparation", join(dir, "recomputed"));
+    assert.equal(second.status, 0, second.stdout);
+    assert.ok(second.stdout.includes('"facts":{"n":-0}') && second.stdout.includes('"binding":"not-checked"'), second.stdout);
+    assert.equal(readFileSync(join(dir, "recomputed"), "utf8").includes('"n":-0'), true);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

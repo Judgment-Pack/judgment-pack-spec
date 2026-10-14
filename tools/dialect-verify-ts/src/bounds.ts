@@ -25,8 +25,9 @@ const isDigit = (c: number) => c >= 0x30 && c <= 0x39;
 const inLiteral = (c: number) => isDigit(c) || c === 0x2b || c === 0x2d || c === 0x2e || c === 0x45 || c === 0x65;
 
 /**
- * Scans bytes outside strings: the deepest nesting (an object or an array opens a level) and whether every
- * number literal is within its characters and its exponent's magnitude. Nothing is parsed.
+ * Scans bytes outside strings: the deepest nesting (an object or an array opens a level, the root at none) and
+ * whether every number literal is within its characters and its exponent's magnitude. A number literal is a
+ * maximal run of `0`–`9`, `+`, `-`, `.`, `e` and `E`, whatever it starts with (§12). Nothing is parsed.
  */
 export function scanBytes(b: Uint8Array): { nesting: number; numbersWithin: boolean } {
   let depth = 0;
@@ -46,7 +47,7 @@ export function scanBytes(b: Uint8Array): { nesting: number; numbersWithin: bool
       if (depth > nesting) nesting = depth;
     } else if (c === 0x7d || c === 0x5d) {
       depth--;
-    } else if (c === 0x2d || isDigit(c)) {
+    } else if (inLiteral(c)) {
       const start = k;
       while (k < b.length && inLiteral(b[k])) k++;
       if (!literalWithin(b.subarray(start, k))) numbersWithin = false;
@@ -57,6 +58,7 @@ export function scanBytes(b: Uint8Array): { nesting: number; numbersWithin: bool
   return { nesting, numbersWithin };
 }
 
+// The exponent is the run of digits after the literal's first `e` or `E`, past one sign; with none, there is none.
 function literalWithin(lit: Uint8Array): boolean {
   if (lit.length > BOUNDS.numberChars) return false;
   let e = lit.findIndex((c) => c === 0x45 || c === 0x65);

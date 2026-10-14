@@ -50,7 +50,7 @@ Each vector is a directory. Of its files, a preparation verifier reads:
 | `case.json` | the case document |
 | `sources.json` | the acquisitions; `{}` when the vector has no such file (a case-only run) |
 | `profiles.json` | the input profiles it trusts |
-| `run.json` | the preparation to verify, `run.input.preparation`; and the record: the bytes `run.auditBytes` holds in standard base64, or, in an export of version 2, which carries no bytes, the record `run.audit`, written as one line |
+| `run.json` | the preparation to verify, `run.input.preparation`; and the record: the bytes `run.auditBytes` holds in standard base64, or, in an export of version 2, which carries no bytes, the record `run.audit`, written as one line: that member's value exactly as `run.json` writes it, with no re-encoding (the companion document, §11) |
 
 It requires a binding exactly when the Runner's `verifyRun.arguments` hold `--require-bound`.
 `preparation.json` and `preparation.sha256` are what it must compute: the preparation's canonical
