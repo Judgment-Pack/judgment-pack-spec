@@ -1,0 +1,13 @@
+{
+  "name": "dialect-verify-ts",
+  "private": true,
+  "description": "An independent preparation verifier for the dialect (spec/dialect.md, RFC 0018), written from the companion document's text alone",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test test/vectors.test.ts test/units.test.ts"
+  }
+}
