@@ -7,6 +7,24 @@ here.
 
 ### Added
 
+- [RFC 0018](rfcs/0018-dialect.md) (Draft): the dialect, a pack's terms spoken in a system's —
+  how the facts and the evidence availability an evaluation takes are obtained and derived — taken
+  up from the reference Runner's mapping v2 as a proposed companion document, with a reader class
+  of its own, the *preparation verifier*, which recomputes a preparation and holds a runtime
+  record's binding to it. The maintainer's decision on issue #141 names it and scopes it to every
+  kind of acquisition, with an output side; #142 records the Exchange it serves. Version 2 of the
+  dialect document is the Runner's mapping v2 byte for byte, and the preparation's canonical form is
+  the Runner's, stated here; version 3, with the kinds `http`, `sql`, `web` and `research`, is
+  proposed and not claimable; the output side is the gateway's decision policy, by reference. The
+  RFC states what a preparation establishes per part: a derivation is recomputable, an acquisition
+  is held by its digest under its receipt, and a research record establishes the least. The
+  proposed text is added as `spec/dialect.md`, normative for nothing while the RFC is a draft and in
+  no release bundle (`.gitattributes`, `export-ignore`), so that a second reader could be written
+  from it: `tools/dialect_verify.py`, which the tests run over the Runner's 9 preparation vectors,
+  added byte for byte to
+  [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)
+  and **staged**: in no corpus, not served by the site, and in no release bundle. Nothing in Core
+  `0.2.0-draft`, its schema, its classes or its corpora changes.
 - [RFC 0017](rfcs/0017-checkpoint-witness-statement.md) is `Accepted`. Its Specification section,
   word for word apart from one pointer to the vectors, lands as the companion document
   [`spec/checkpoint-witness.md`](spec/checkpoint-witness.md), normative for a new conformance

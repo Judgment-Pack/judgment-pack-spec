@@ -1,0 +1,348 @@
+"""The dialect vectors RFC 0018 stages, and the second reader written from the companion text.
+
+The vectors are the reference Runner's `vectors/preparation/`, byte for byte, staged while the RFC
+is a draft (conformance/dialect/README.md). These tests hold their bytes to the digests the Runner's
+manifest gives them and the Runner's manifest and README to the digests this repository records;
+run tools/dialect_verify.py, a preparation verifier written from spec/dialect.md, over every vector;
+and hold the RFC's Specification section to the companion document's text.
+"""
+
+from __future__ import annotations
+
+import base64
+import collections
+import hashlib
+import importlib.util
+import json
+import re
+import sys
+import unittest
+from pathlib import Path
+from typing import Any
+from unittest import mock
+
+ROOT = Path(__file__).resolve().parents[1]
+DIALECT = ROOT / "conformance" / "dialect"
+VECTORS = DIALECT / "vectors"
+RFC = "rfcs/0018-dialect.md"
+COMPANION = "spec/dialect.md"
+SOURCE = {
+    "repository": "https://github.com/Judgment-Pack/judgment-pack-runner",
+    "pullRequest": 77,
+    "commit": "05636eda96a9588279d61a6272625be859a28117",
+    "path": "vectors/preparation",
+}
+FINDINGS = {
+    "profile-mismatch",
+    "parameter-invalid",
+    "acquisition-missing",
+    "acquisition-unexpected",
+    "acquisition-invalid",
+    "acquisition-stale",
+    "acquisition-sessions",
+    "calculation-invalid",
+    "read-failed",
+    "admission-refused",
+    "preparation-differs",
+    "record-inputs-differ",
+    "binding-foreign-kind",
+    "binding-mismatch",
+    "unbound",
+}
+HEX_64 = re.compile(r"[0-9a-f]{64}")
+
+_SPEC = importlib.util.spec_from_file_location("dialect_verify", ROOT / "tools" / "dialect_verify.py")
+if _SPEC is None or _SPEC.loader is None:
+    raise RuntimeError("could not load the second reader")
+READER = importlib.util.module_from_spec(_SPEC)
+# Its dataclasses resolve their annotations through the module, so it is registered first.
+sys.modules[_SPEC.name] = READER
+_SPEC.loader.exec_module(READER)
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+class Inputs:
+    """One vector's files, given to a verifier as conformance/dialect/README.md says."""
+
+    def __init__(self, name: str, require_binding: bool) -> None:
+        directory = VECTORS / name
+        self.dialect = (directory / "mapping.json").read_bytes()
+        self.case = (directory / "case.json").read_bytes()
+        sources = directory / "sources.json"
+        self.acquisitions = sources.read_bytes() if sources.is_file() else b"{}"
+        self.profiles = (directory / "profiles.json").read_bytes()
+        self.run = READER.read_document((directory / "run.json").read_bytes(), "run.json")["run"]
+        self.preparation = READER.preparation_bytes(self.run["input"]["preparation"])
+        if "auditBytes" in self.run:
+            self.record = base64.b64decode(self.run["auditBytes"], validate=True)
+        else:  # a version-2 export carries the record, and not its bytes
+            self.record = READER.preparation_bytes(self.run["audit"])
+        self.require_binding = require_binding
+
+    def verify(self) -> Any:
+        return READER.verify(
+            self.dialect,
+            self.case,
+            self.acquisitions,
+            self.profiles,
+            self.preparation,
+            self.record,
+            self.require_binding,
+        )
+
+
+class DialectVectorTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.manifest = json.loads((DIALECT / "manifest.json").read_text(encoding="utf-8"))
+        cls.runner = json.loads((VECTORS / "manifest.json").read_text(encoding="utf-8"))
+        cls.rows = {row["id"]: row for row in cls.manifest["cases"]}
+
+    def inputs(self, name: str) -> Inputs:
+        return Inputs(name, self.rows[name]["requiresBinding"])
+
+    def test_manifest_names_its_status_proposal_and_source(self) -> None:
+        self.assertEqual(
+            {"status", "proposedBy", "source", "runnerFiles", "cases"}, set(self.manifest)
+        )
+        self.assertEqual("staged", self.manifest["status"])
+        self.assertEqual(RFC, self.manifest["proposedBy"])
+        self.assertTrue((ROOT / RFC).is_file())
+        self.assertEqual(SOURCE, self.manifest["source"])
+        self.assertEqual({"vectors/README.md", "vectors/manifest.json"}, set(self.manifest["runnerFiles"]))
+        for row in self.manifest["cases"]:
+            with self.subTest(row=row.get("id")):
+                expected = {"id", "path", "requiresBinding", "expectedResult"}
+                if row["expectedResult"] == "finding":
+                    expected.add("expectedFinding")
+                    self.assertIn(row["expectedFinding"], FINDINGS)
+                else:
+                    self.assertEqual("reading", row["expectedResult"])
+                    expected.add("expectedBinding")
+                    self.assertIn(row["expectedBinding"], {"matches", "absent", "not-checked"})
+                self.assertEqual(expected, set(row))
+                self.assertEqual(f"vectors/{row['id']}", row["path"])
+                self.assertIsInstance(row["requiresBinding"], bool)
+
+    def test_vectors_are_the_runners_bytes(self) -> None:
+        # Every file is the Runner's: a vector's files to the digests the Runner's manifest gives,
+        # and that manifest and the Runner's README to the digests recorded here, so a file added,
+        # removed or changed by a byte fails.
+        for relative, digest in self.manifest["runnerFiles"].items():
+            with self.subTest(file=relative):
+                self.assertIsNotNone(HEX_64.fullmatch(digest))
+                self.assertEqual(digest, sha256(DIALECT / relative))
+        listed = {"README.md", "manifest.json"}
+        for vector in self.runner["vectors"]:
+            for name, digest in vector["files"].items():
+                relative = f"{vector['name']}/{name}"
+                listed.add(relative)
+                with self.subTest(file=relative):
+                    self.assertEqual(digest, "sha256:" + sha256(VECTORS / relative))
+        on_disk = {
+            path.relative_to(VECTORS).as_posix() for path in VECTORS.rglob("*") if path.is_file()
+        }
+        self.assertEqual([], sorted(on_disk - listed), "files that the Runner's manifest names not")
+        self.assertEqual([], sorted(listed - on_disk), "files that the Runner's manifest names, missing")
+
+    def test_rows_name_the_runners_vectors_in_order(self) -> None:
+        self.assertEqual(
+            [vector["name"] for vector in self.runner["vectors"]],
+            [row["id"] for row in self.manifest["cases"]],
+        )
+        for vector in self.runner["vectors"]:
+            with self.subTest(vector=vector["name"]):
+                self.assertEqual(
+                    "--require-bound" in vector["verifyRun"]["arguments"],
+                    self.rows[vector["name"]]["requiresBinding"],
+                )
+
+    def test_counts_match_the_manifest(self) -> None:
+        count = len(self.manifest["cases"])
+        statements = [
+            ("conformance/dialect/README.md", f"This directory holds {count} vectors"),
+            ("conformance/README.md", f"holds the reference Runner's {count} preparation vectors"),
+            ("README.md", f"{count} dialect vectors"),
+            ("rfcs/README.md", f"the reference Runner's {count} preparation vectors are staged"),
+            (RFC, "The vectors are the Runner's nine, staged"),
+            (COMPANION, "Its nine vectors"),
+        ]
+        self.assertEqual(9, count, "the RFC and the companion spell the count as a word")
+        for relative, expected in statements:
+            with self.subTest(file=relative):
+                text = " ".join((ROOT / relative).read_text(encoding="utf-8").split())
+                self.assertIn(expected, text)
+
+    def test_the_second_reader_recomputes_every_preparation(self) -> None:
+        # The preparation's canonical bytes, recomputed from the dialect, the case, the acquisitions
+        # and the profiles at the given preparation's instant, are the Runner's, byte for byte.
+        for vector in self.runner["vectors"]:
+            name = vector["name"]
+            with self.subTest(vector=name):
+                outcome = self.inputs(name).verify()
+                self.assertEqual((VECTORS / name / "preparation.json").read_bytes(), outcome.preparation)
+                self.assertEqual((VECTORS / name / "preparation.sha256").read_text(), outcome.digest)
+                self.assertEqual(vector["preparation"]["sha256"], outcome.digest)
+                self.assertEqual(
+                    vector["preparation"]["binding"].encode("ascii"), READER.binding_of(outcome.digest)
+                )
+
+    def test_the_second_reader_gives_each_vector_its_answer(self) -> None:
+        for row in self.manifest["cases"]:
+            with self.subTest(vector=row["id"]):
+                answer = self.inputs(row["id"]).verify().answer
+                if row["expectedResult"] == "finding":
+                    self.assertEqual(row["expectedFinding"], answer.get("finding"), answer)
+                else:
+                    self.assertIn("reading", answer, answer)
+                    self.assertEqual(row["expectedBinding"], answer["reading"]["binding"])
+
+    def test_readings_agree_with_the_runners_report_and_export(self) -> None:
+        # Where the class reports what verify-run reports, the two agree; and the facts and
+        # evidence-availability documents are the ones the Runner's export evaluated.
+        compared = 0
+        for vector in self.runner["vectors"]:
+            name = vector["name"]
+            inputs = self.inputs(name)
+            outcome = inputs.verify()
+            with self.subTest(vector=name):
+                self.assertEqual(READER.as_plain(inputs.run["input"]["facts"]), outcome.facts)
+                self.assertEqual(READER.as_plain(inputs.run["input"]["evidence"]), outcome.evidence)
+            report = json.loads(vector["verifyRun"]["report"]) if vector["verifyRun"]["report"] else None
+            if "reading" not in outcome.answer or report is None or "targetsByClass" not in report:
+                continue
+            reading = outcome.answer["reading"]
+            for member in ("targetsByClass", "unsignedParameters", "unsignedFreshness"):
+                with self.subTest(vector=name, member=member):
+                    self.assertEqual(report.get(member), reading.get(member))
+            with self.subTest(vector=name, member="binding"):
+                self.assertEqual(report["binding"]["status"], reading["binding"])
+            compared += 1
+        self.assertGreaterEqual(compared, 4)
+
+    # Controls: what the second reader must not accept. They are this repository's checks of one
+    # reader, with altered copies of a vector, and not vectors (RFC 0018, Conformance).
+
+    def test_a_reader_that_writes_minus_zero_as_zero_fails_numeric_spellings(self) -> None:
+        def normalising(value: Any) -> str:
+            return str(int(value.literal)) if isinstance(value, READER.Num) else str(value)
+
+        with mock.patch.object(READER, "write_number", normalising):
+            valid = self.inputs("valid").verify()
+            numeric = self.inputs("numeric-spellings").verify()
+        self.assertEqual((VECTORS / "valid" / "preparation.json").read_bytes(), valid.preparation)
+        self.assertNotEqual(
+            (VECTORS / "numeric-spellings" / "preparation.json").read_bytes(), numeric.preparation
+        )
+        # Such a reader writes the given preparation as it writes its own, so the two agree; the
+        # record's binding, the Runner's digest of the bytes as written, is what refuses it.
+        self.assertEqual("binding-mismatch", numeric.answer.get("finding"))
+
+    def test_a_reader_that_writes_ampersand_raw_fails_escaped_strings(self) -> None:
+        raw = {k: v for k, v in READER._PREPARATION_ESCAPES.items() if k not in "&<>"}
+        with mock.patch.object(READER, "_PREPARATION_ESCAPES", raw):
+            valid = self.inputs("valid").verify()
+            escaped = self.inputs("escaped-strings").verify()
+        self.assertEqual((VECTORS / "valid" / "preparation.json").read_bytes(), valid.preparation)
+        self.assertNotEqual(
+            (VECTORS / "escaped-strings" / "preparation.json").read_bytes(), escaped.preparation
+        )
+
+    def test_a_result_changed_by_a_byte_is_not_verified(self) -> None:
+        inputs = self.inputs("valid")
+        sources = json.loads(inputs.acquisitions)
+        sources["fx"]["response"]["result"]["facts"]["request"]["completeness"] = "complets"
+        inputs.acquisitions = json.dumps(sources).encode("utf-8")
+        self.assertEqual("acquisition-invalid", inputs.verify().answer.get("finding"))
+
+    def test_an_instant_past_the_maximum_age_is_stale(self) -> None:
+        inputs = self.inputs("valid")
+        preparation = json.loads(inputs.preparation)
+        preparation["verifiedAt"] = "2026-10-14T15:03:27Z"  # 301 seconds after the acquisition
+        inputs.preparation = json.dumps(preparation).encode("utf-8")
+        self.assertEqual("acquisition-stale", inputs.verify().answer.get("finding"))
+
+    def test_a_profile_other_than_the_one_the_dialect_names_is_a_mismatch(self) -> None:
+        inputs = self.inputs("valid")
+        profiles = json.loads(inputs.profiles)
+        profiles[0]["endpoint"] = "postgresql://another"
+        inputs.profiles = json.dumps(profiles).encode("utf-8")
+        self.assertEqual("profile-mismatch", inputs.verify().answer.get("finding"))
+
+    def test_a_record_of_other_inputs_is_not_the_preparations(self) -> None:
+        # The record must have evaluated the facts, the evidence and the citations the preparation
+        # derived; its binding alone would still match, so each is altered with the binding kept.
+        for alteration in (
+            (b'"type":"data-access"}},"evidence"', b'"type":"data-accesS"}},"evidence"'),
+            (b'"intake-form":"present","sponsor', b'"intake-form":"absent","sponsor'),
+            (b'"callIndex":0,"signature":"d9af', b'"callIndex":1,"signature":"d9af'),
+        ):
+            with self.subTest(alteration=alteration[1]):
+                inputs = self.inputs("valid")
+                self.assertIn(alteration[0], inputs.record)
+                inputs.record = inputs.record.replace(*alteration)
+                self.assertEqual("record-inputs-differ", inputs.verify().answer.get("finding"))
+
+    def test_a_key_of_small_order_is_refused(self) -> None:
+        inputs = self.inputs("valid")
+        profiles = json.loads(inputs.profiles)
+        profiles[0]["publicKey"] = "00" * 32
+        inputs.profiles = json.dumps(profiles).encode("utf-8")
+        self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+
+    def test_an_integer_parameter_written_with_a_fraction_is_invalid(self) -> None:
+        inputs = self.inputs("numeric-spellings")
+        inputs.case = inputs.case.replace(b'"zero":-0', b'"zero":0.0')
+        self.assertEqual("parameter-invalid", inputs.verify().answer.get("finding"))
+
+    def test_a_kind_without_vectors_is_not_read(self) -> None:
+        inputs = self.inputs("escaped-strings")
+        dialect = json.loads(inputs.dialect)
+        dialect["sources"] = [{"name": "upload", "kind": "selected-file", "provider": "local-file", "read": {"copy": {}}}]
+        inputs.dialect = json.dumps(dialect).encode("utf-8")
+        self.assertEqual("kind-unread", inputs.verify().answer.get("refused"))
+        dialect["sources"][0]["kind"] = "research"
+        inputs.dialect = json.dumps(dialect).encode("utf-8")
+        self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+
+
+class DialectTextTests(unittest.TestCase):
+    def test_the_rfcs_specification_is_the_companion_text(self) -> None:
+        # RFC 0017's choice: the Specification section is the text proposed to land. Here the text
+        # is a file too, from which the second reader was written, so the two are held equal: the
+        # companion's §§1-14, word for word, each heading one level down in the RFC.
+        companion = (ROOT / COMPANION).read_text(encoding="utf-8")
+        rfc = (ROOT / RFC).read_text(encoding="utf-8")
+        expected = companion[companion.index("\n## 1. ") + 1 :].rstrip("\n")
+        start = rfc.index("\n### 1. ") + 1
+        section = rfc[start : rfc.index("\n## Alternatives")].rstrip("\n")
+        promoted = "\n".join(
+            line[1:] if line.startswith("##") else line for line in section.splitlines()
+        )
+        self.assertEqual(expected, promoted)
+
+    def test_the_rfc_and_its_companion_are_drafts(self) -> None:
+        rfc = (ROOT / RFC).read_text(encoding="utf-8")
+        self.assertIn("- Status: Draft", rfc)
+        companion = (ROOT / COMPANION).read_text(encoding="utf-8")
+        self.assertIn("**proposed, and normative for nothing**", companion)
+        core = (ROOT / "spec" / "judgment-pack-core.md").read_text(encoding="utf-8")
+        normative = core[core.index("### 1.1") : core.index("## 2.")]
+        self.assertNotIn("dialect", normative)
+
+    def test_the_findings_the_tests_know_are_the_texts(self) -> None:
+        companion = (ROOT / COMPANION).read_text(encoding="utf-8")
+        section = companion[companion.index("## 11.") : companion.index("## 12.")]
+        named = set(re.findall(r"`([a-z]+(?:-[a-z]+)*)`", section))
+        refusals = {"input-over-bound", "input-malformed", "kind-unread"}
+        self.assertLessEqual(FINDINGS | refusals, named)
+        counts = collections.Counter(row["expectedFinding"] for row in json.loads(
+            (DIALECT / "manifest.json").read_text(encoding="utf-8"))["cases"] if "expectedFinding" in row)
+        self.assertLessEqual(set(counts), FINDINGS)
+
+
+if __name__ == "__main__":
+    unittest.main()

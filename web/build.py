@@ -639,6 +639,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0018-dialect.md",
+        PurePosixPath("rfcs/0018-dialect/index.html"),
+        "RFC 0018: The dialect",
+        "Draft standards-track RFC: how the facts and evidence a pack reads are obtained and derived, with a preparation verifier class and nine staged Runner vectors.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
@@ -2196,10 +2205,13 @@ def build_license(output_root: Path) -> None:
 # site serves the specification and its released corpus, so it serves nothing under this directory;
 # the release bundle leaves it out by the same rule (.gitattributes, export-ignore). The checkpoint
 # witness vectors are staged too, since RFC 0017's acceptance, until the next specVersion opens
-# (conformance/witness/README.md); the companion document they belong to is published.
+# (conformance/witness/README.md); the companion document they belong to is published. The dialect
+# vectors RFC 0018 proposes are staged while it is a draft (conformance/dialect/README.md), and the
+# companion document it proposes, spec/dialect.md, is no page: its text is the RFC's, which is.
 UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/evaluation/staged"),
     PurePosixPath("conformance/witness"),
+    PurePosixPath("conformance/dialect"),
 )
 
 

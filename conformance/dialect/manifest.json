@@ -1,0 +1,79 @@
+{
+  "status": "staged",
+  "proposedBy": "rfcs/0018-dialect.md",
+  "source": {
+    "repository": "https://github.com/Judgment-Pack/judgment-pack-runner",
+    "pullRequest": 77,
+    "commit": "05636eda96a9588279d61a6272625be859a28117",
+    "path": "vectors/preparation"
+  },
+  "runnerFiles": {
+    "vectors/README.md": "e5679483c052e4433da8118649850e96ff09e6e5f7a93ab4b65746335da21ef2",
+    "vectors/manifest.json": "9d5c43dede8d2252644f6ce2487f40cf8dfadb83a24e83d4981c0472ae57a765"
+  },
+  "cases": [
+    {
+      "id": "valid",
+      "path": "vectors/valid",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "recomputed-one-second-later",
+      "path": "vectors/recomputed-one-second-later",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "binding-mismatch"
+    },
+    {
+      "id": "unbound-record",
+      "path": "vectors/unbound-record",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "unbound"
+    },
+    {
+      "id": "foreign-binding-kind",
+      "path": "vectors/foreign-binding-kind",
+      "requiresBinding": false,
+      "expectedResult": "finding",
+      "expectedFinding": "binding-foreign-kind"
+    },
+    {
+      "id": "changed-table-lineage",
+      "path": "vectors/changed-table-lineage",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "preparation-differs"
+    },
+    {
+      "id": "disposition-differs-from-audit",
+      "path": "vectors/disposition-differs-from-audit",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "unsigned-parameters",
+      "path": "vectors/unsigned-parameters",
+      "requiresBinding": false,
+      "expectedResult": "reading",
+      "expectedBinding": "absent"
+    },
+    {
+      "id": "escaped-strings",
+      "path": "vectors/escaped-strings",
+      "requiresBinding": false,
+      "expectedResult": "reading",
+      "expectedBinding": "absent"
+    },
+    {
+      "id": "numeric-spellings",
+      "path": "vectors/numeric-spellings",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    }
+  ]
+}

@@ -8,7 +8,10 @@ class of §3.4. A document-conformance result never depends on it. Nor is the ch
 statement in scope here: [`witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness)
 holds the 54 vectors of its companion document,
 [`spec/checkpoint-witness.md`](../spec/checkpoint-witness.md), which are staged until the next
-`specVersion` opens: in no corpus, and not served by the site.
+`specVersion` opens: in no corpus, and not served by the site. Nor is the dialect:
+[`dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)
+holds the reference Runner's 9 preparation vectors for the companion document RFC 0018 proposes,
+staged while that RFC is a draft: in no corpus, and not served by the site.
 
 [`manifest.json`](manifest.json) is the machine-readable case index. Its shape is defined by
 [`manifest.schema.json`](manifest.schema.json).

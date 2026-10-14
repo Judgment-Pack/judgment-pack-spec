@@ -1,0 +1,1 @@
+[{"id":"vendors","publicKey":"15f9b604a1cc117897f424323f0f78979af3e818e81882870f050ccd1178ccc5","class":"record","source":"postgres/live","authority":"test","shape":"mcp","adapter":{"name":"dbhub","version":"1.2.3","digest":"sha256:ea83dcbd091666f3d176ac33faf2b3e43784580c4c509f49abef53690e3ff2a4"},"endpoint":"postgresql://vendor-records","tools":["execute_sql","lookup"]}]

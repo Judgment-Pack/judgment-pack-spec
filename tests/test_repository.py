@@ -865,7 +865,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             path.relative_to(CONFORMANCE).as_posix()
             for path in CONFORMANCE.rglob("*.json")
             if not (path.name.endswith(".schema.json") or path.name in ("manifest.json", "cases.json"))
-            and path.relative_to(CONFORMANCE).parts[0] not in ("evaluation", "witness")
+            and path.relative_to(CONFORMANCE).parts[0] not in ("evaluation", "witness", "dialect")
         }
 
         for path in sorted(listed - on_disk):
@@ -1337,8 +1337,14 @@ class RepositoryConformanceTests(unittest.TestCase):
     def test_relative_markdown_links_resolve(self) -> None:
         link_pattern = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
         failures: list[str] = []
+        # The dialect vectors are the Runner's bytes, its README among them, whose relative links
+        # are relative to the Runner's repository: they are not this repository's to resolve or
+        # to change (conformance/dialect/README.md).
+        runners_bytes = (ROOT / "conformance" / "dialect" / "vectors").resolve()
         for markdown_path in sorted(ROOT.rglob("*.md")):
             if ".git" in markdown_path.parts:
+                continue
+            if markdown_path.resolve().is_relative_to(runners_bytes):
                 continue
             text = markdown_path.read_text(encoding="utf-8")
             for raw_target in link_pattern.findall(text):

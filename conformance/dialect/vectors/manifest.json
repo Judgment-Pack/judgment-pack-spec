@@ -1,0 +1,390 @@
+{
+  "family": "preparation",
+  "bindingKind": "judgment-pack-runner/preparation/1",
+  "canonicalForm": "docs/MAPPING-V2.md, \"The canonical form of a preparation\"",
+  "generator": "tools/preparation-vectors, run once from the fixtures named by each vector's from; the vectors are not regenerated",
+  "vectors": [
+    {
+      "name": "valid",
+      "note": "A calculated run, signed, witnessed and bound, as Runner exported it (version 5). Its source is a calculator that computed, so its lineage carries a calculation and its freshness was judged by acquisition and by table. The record carries the binding Runner passed, whose digest is preparation.sha256: the SHA-256 of preparation.json, which is the preparation the Runner computes from mapping.json, case.json, sources.json and profiles.json at verifiedAt. A reader holding the record's binding to the preparation concludes that they match.",
+      "from": "internal/runner/testdata/mapping-v2-calculated-bound",
+      "altered": null,
+      "verifiedAt": "2026-10-14T14:58:26Z",
+      "files": {
+        "case.json": "sha256:84a6042529b5d316ec36a4757172742f36da61112a6920c1eee8ee6a88fbc5ba",
+        "checkpoints.jsonl": "sha256:e1f1fcca589fa9dd6216fbf4ee3033449edf759dfda9cc7ad781c09546d4e6ea",
+        "mapping.json": "sha256:d960dcd2423a07a478ee7defc4649072903141e99c39201466e58ec52d73efbe",
+        "preparation.json": "sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d",
+        "preparation.sha256": "sha256:764e9da81393595151f47ec0019f7006a00993ddd1e4bea5c7bbb66b53cd28e0",
+        "profiles.json": "sha256:b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:e647061201036faf3032fed33604fdad90dafef42a7b20fd69b1a83361616938",
+        "run.json": "sha256:8985e8ad2fb55a3664bce19e23f3d32d10b1301e66e5efff9591c83de2bf442b",
+        "sources.json": "sha256:d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8"
+      },
+      "preparation": {
+        "sha256": "sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d\"}",
+        "retained": "equal"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:72f00042d8e974e288cf42422324d5d82b454a63200a03c6ec7262bc6f5b7b09",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:0c1921ad274f151b1d4115720a6c7660bea491a91263fe45932ae1275e167679\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:ae3a1b35215f61316e8b6343cb51c2b12f1e6bfbf63eab414ca3394750565dd1\",\"sequence\":1,\"trail\":\"d9b38434067bc8b363875e2a4a437d1d\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-14T14:58:26Z\",\"sources\":[{\"source\":\"fx\",\"checks\":[\"acquisition\",\"calculation\"],\"targets\":3}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "recomputed-one-second-later",
+      "note": "preparation.json is what the Runner computes at the later instant, and the export retains it: every check of the inputs passes, and freshness is still within its limits. Its digest is not the one the record binds. A reader concludes binding-mismatch: the preparation, its instant included, is not the one the signed record binds.",
+      "from": "internal/runner/testdata/mapping-v2-calculated-bound",
+      "altered": "The export's preparation is recomputed one second later: its verifiedAt, and the runAt each outcome retains among its parameters. The record, its signature and its chain entry are as they were.",
+      "verifiedAt": "2026-10-14T14:58:27Z",
+      "files": {
+        "case.json": "sha256:84a6042529b5d316ec36a4757172742f36da61112a6920c1eee8ee6a88fbc5ba",
+        "checkpoints.jsonl": "sha256:e1f1fcca589fa9dd6216fbf4ee3033449edf759dfda9cc7ad781c09546d4e6ea",
+        "mapping.json": "sha256:d960dcd2423a07a478ee7defc4649072903141e99c39201466e58ec52d73efbe",
+        "preparation.json": "sha256:073ce95bf0d4391516a5b8dca8317a9b28e1472f054fd0191770a9ba04e65fcc",
+        "preparation.sha256": "sha256:3a8fe887e13853b2a5d764c3db959dff619f2f704141ccc920a06020539a9ec2",
+        "profiles.json": "sha256:b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:e647061201036faf3032fed33604fdad90dafef42a7b20fd69b1a83361616938",
+        "run.json": "sha256:b9fc6769e7bb9a2dbead4f2754a904bd3f82057afca73275e3396335d7547d3f",
+        "sources.json": "sha256:d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8"
+      },
+      "preparation": {
+        "sha256": "sha256:073ce95bf0d4391516a5b8dca8317a9b28e1472f054fd0191770a9ba04e65fcc",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:073ce95bf0d4391516a5b8dca8317a9b28e1472f054fd0191770a9ba04e65fcc\"}",
+        "retained": "equal"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:72f00042d8e974e288cf42422324d5d82b454a63200a03c6ec7262bc6f5b7b09",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": "binding-mismatch",
+        "report": "{\"binding\":{\"status\":\"mismatch\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:0c1921ad274f151b1d4115720a6c7660bea491a91263fe45932ae1275e167679\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:ae3a1b35215f61316e8b6343cb51c2b12f1e6bfbf63eab414ca3394750565dd1\",\"sequence\":1,\"trail\":\"d9b38434067bc8b363875e2a4a437d1d\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"binding-mismatch\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-14T14:58:27Z\",\"sources\":[{\"source\":\"fx\",\"checks\":[\"acquisition\",\"calculation\"],\"targets\":3}]}}",
+        "error": "binding-mismatch: the record's binding is not the SHA-256 of the export's preparation: the preparation, preparation.verifiedAt included, is not the one the record binds"
+      }
+    },
+    {
+      "name": "unbound-record",
+      "note": "A run Runner exported (version 2) before it passed a binding: its record carries none, as a Runtime before 0.31.0 records. Its preparation verifies. A reader concludes the binding is absent, and nothing in the record commits the preparation or its instant; --require-bound refuses it as unbound.",
+      "from": "internal/runner/testdata/mapping-v2-before-calculators",
+      "altered": null,
+      "verifiedAt": "2026-10-01T18:48:51Z",
+      "files": {
+        "case.json": "sha256:a3c90e3b7448d23d9eacebd0ebf15cae100e21f9b2c688f3f9d238edcd26d67f",
+        "mapping.json": "sha256:d92dbfc8d68781a4b1e2fefdf18ee08230103bc283fa913814577e410e1aafd3",
+        "preparation.json": "sha256:33e3dee53a4ecdd1b51527eabe3266fb3debc12e0c2ecf8814546aef86e73cf4",
+        "preparation.sha256": "sha256:ac47b64618ba048becbfa732260c6a81368e1adc1f9315ed2f62d9a99204b84d",
+        "profiles.json": "sha256:c0129bb1d9a3042b8bdbf5dbdfadd32bfd7253c818fb29840b79c15d3072bbca",
+        "release-digest.txt": "sha256:251d1a215fef9a7fd0cf7826b12eb966dcc257809d03561195b04c9955170972",
+        "run.json": "sha256:5b91b6e52da0c2f5859313628da138e02aca1be204f6d0e04ccc53e03262c4ac",
+        "sources.json": "sha256:3de14b0f664957af5a3d28e684a386e17fb91e4b1e3352d806badda6423167bb"
+      },
+      "preparation": {
+        "sha256": "sha256:33e3dee53a4ecdd1b51527eabe3266fb3debc12e0c2ecf8814546aef86e73cf4",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:33e3dee53a4ecdd1b51527eabe3266fb3debc12e0c2ecf8814546aef86e73cf4\"}",
+        "retained": "equal"
+      },
+      "recordBinding": null,
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:5be5c294a5d00f3eafb2a12fa7730da4e7b901837286553407a6b870b4542cea",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": "unbound",
+        "report": "{\"binding\":{\"status\":\"absent\"},\"exactBytes\":\"not-in-export\",\"exportVersion\":2,\"retainedDisposition\":\"matches-audit\",\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"status\":\"unbound\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-01T18:48:51Z\",\"sources\":[{\"source\":\"vendor\",\"checks\":[\"acquisition\"],\"targets\":3}]}}",
+        "error": "unbound: the run's audit record carries no binding of its preparation, and --require-bound refuses it: nothing in the record commits the preparation, or preparation.verifiedAt"
+      }
+    },
+    {
+      "name": "foreign-binding-kind",
+      "note": "The rewritten record's signature verifies. A reader concludes binding-foreign-kind before any digest is compared: a binding of another scheme commits nothing a reader of this scheme can check. A checkpoint held from before the rewrite would refuse the chain first, so none is supplied.",
+      "from": "internal/runner/testdata/mapping-v2-calculated-bound",
+      "altered": "The record's binding names another scheme, another-companion/preparation/1, with the preparation's digest; the record's chain entry and checkpoint are made again for the rewritten record, and the record is signed again under the fixture's key, as an operator who rewrote it would sign it.",
+      "verifiedAt": "2026-10-14T14:58:26Z",
+      "files": {
+        "case.json": "sha256:84a6042529b5d316ec36a4757172742f36da61112a6920c1eee8ee6a88fbc5ba",
+        "mapping.json": "sha256:d960dcd2423a07a478ee7defc4649072903141e99c39201466e58ec52d73efbe",
+        "preparation.json": "sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d",
+        "preparation.sha256": "sha256:764e9da81393595151f47ec0019f7006a00993ddd1e4bea5c7bbb66b53cd28e0",
+        "profiles.json": "sha256:b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:e647061201036faf3032fed33604fdad90dafef42a7b20fd69b1a83361616938",
+        "run.json": "sha256:c3473aae7ef5de35f3c67e867c117edb6340f0434fd42c289eb25be322aee121",
+        "sources.json": "sha256:d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8"
+      },
+      "preparation": {
+        "sha256": "sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d\"}",
+        "retained": "equal"
+      },
+      "recordBinding": "{\"kind\":\"another-companion/preparation/1\",\"digest\":\"sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:72f00042d8e974e288cf42422324d5d82b454a63200a03c6ec7262bc6f5b7b09",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed"
+        ],
+        "exit": 1,
+        "status": "binding-foreign-kind",
+        "report": "{\"binding\":{\"status\":\"foreign-kind\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:dd76a5f5d3099ce1913b0f66401648f61fa3d6ecdf65540ab4e64750d3ed251c\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:a26c47cdc679cf383a717ca28d4302cfb3203b14e7d0c19495d1a9ea0344acf6\",\"sequence\":1,\"trail\":\"d9b38434067bc8b363875e2a4a437d1d\"},\"findings\":[],\"findingsTotal\":0,\"scope\":\"one-supplied-entry\",\"status\":\"valid\",\"witnessed\":false},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"binding-foreign-kind\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-14T14:58:26Z\",\"sources\":[{\"source\":\"fx\",\"checks\":[\"acquisition\",\"calculation\"],\"targets\":3}]}}",
+        "error": "binding-foreign-kind: the record's binding is not of Runner's scheme, judgment-pack-runner/preparation/1, so it commits nothing verify-run can check, and no digest was compared"
+      }
+    },
+    {
+      "name": "changed-table-lineage",
+      "note": "preparation.json is what the Runner computes from the inputs; the export retains another. A reader concludes that the retained preparation is not the recomputation, and verify-run refuses it with no report.",
+      "from": "internal/runner/testdata/mapping-v2-calculated-bound",
+      "altered": "The export's retained lineage names another instant for the calculator's table: the first lineage entry's calculation.asOf, ecb-rates, is the preparation's verifiedAt.",
+      "verifiedAt": "2026-10-14T14:58:26Z",
+      "files": {
+        "case.json": "sha256:84a6042529b5d316ec36a4757172742f36da61112a6920c1eee8ee6a88fbc5ba",
+        "checkpoints.jsonl": "sha256:e1f1fcca589fa9dd6216fbf4ee3033449edf759dfda9cc7ad781c09546d4e6ea",
+        "mapping.json": "sha256:d960dcd2423a07a478ee7defc4649072903141e99c39201466e58ec52d73efbe",
+        "preparation.json": "sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d",
+        "preparation.sha256": "sha256:764e9da81393595151f47ec0019f7006a00993ddd1e4bea5c7bbb66b53cd28e0",
+        "profiles.json": "sha256:b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:e647061201036faf3032fed33604fdad90dafef42a7b20fd69b1a83361616938",
+        "run.json": "sha256:e1df6b269d02afad4156acbb3e27826dbb9dddc23243002a19f6290946414bd8",
+        "sources.json": "sha256:d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8"
+      },
+      "preparation": {
+        "sha256": "sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d\"}",
+        "retained": "altered"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:72f00042d8e974e288cf42422324d5d82b454a63200a03c6ec7262bc6f5b7b09",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": null,
+        "report": null,
+        "error": "retained lineage does not match recomputation"
+      }
+    },
+    {
+      "name": "disposition-differs-from-audit",
+      "note": "The preparation is unchanged and verifies. The retained disposition is checked first, independently of any re-execution: a reader concludes audit-disposition-mismatch.",
+      "from": "internal/runner/testdata/mapping-v2-calculated-bound",
+      "altered": "The run's retained result names another outcome, decline-redirect, than its audit record, proceed.",
+      "verifiedAt": "2026-10-14T14:58:26Z",
+      "files": {
+        "case.json": "sha256:84a6042529b5d316ec36a4757172742f36da61112a6920c1eee8ee6a88fbc5ba",
+        "checkpoints.jsonl": "sha256:e1f1fcca589fa9dd6216fbf4ee3033449edf759dfda9cc7ad781c09546d4e6ea",
+        "mapping.json": "sha256:d960dcd2423a07a478ee7defc4649072903141e99c39201466e58ec52d73efbe",
+        "preparation.json": "sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d",
+        "preparation.sha256": "sha256:764e9da81393595151f47ec0019f7006a00993ddd1e4bea5c7bbb66b53cd28e0",
+        "profiles.json": "sha256:b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:e647061201036faf3032fed33604fdad90dafef42a7b20fd69b1a83361616938",
+        "run.json": "sha256:9174c7080f495057a5f65f92ed7abc1399910ed954099eb7523ef01dce550b2d",
+        "sources.json": "sha256:d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8"
+      },
+      "preparation": {
+        "sha256": "sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d\"}",
+        "retained": "equal"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:2a058ca1490ee316a87ad5999a7460906699a6f8987c93369a344ae4614b7a6d\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:72f00042d8e974e288cf42422324d5d82b454a63200a03c6ec7262bc6f5b7b09",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": "audit-disposition-mismatch",
+        "report": "{\"retainedDisposition\":\"differs-from-audit\",\"status\":\"audit-disposition-mismatch\"}",
+        "error": "audit-disposition-mismatch: the retained result disposition differs from the audit record"
+      }
+    },
+    {
+      "name": "unsigned-parameters",
+      "note": "A run of two acquired sources whose rules read parameters their receipts do not commit, as Runner exported it (version 2), before it passed a binding. Its preparation verifies, and the report names the parameters: runAt for the first source, a case parameter and one carried in ambiguous text for the second.",
+      "from": "internal/runner/testdata/mapping-v2-unsigned-parameters",
+      "altered": null,
+      "verifiedAt": "2026-10-01T22:32:47Z",
+      "files": {
+        "case.json": "sha256:11061b9e553c3a20922046d7e4700c479ab4f4681be2f84811531a90c7938205",
+        "mapping.json": "sha256:34df9504b6f5468fb85d5b3e13bceff2d30ec5302c090c109e1ee036b111b125",
+        "preparation.json": "sha256:4488e0faf36a3839ecc108cd528832d1022f0693eba420a68d3e953e2ad24f02",
+        "preparation.sha256": "sha256:1132766f601aa77a93620dbc6c26184cc0bf6d6e935770f9f03374200aed8426",
+        "profiles.json": "sha256:3edffe6ba7eb89d324d3a0e4f3c92ef7377c0077782f2e403a91274c1d633695",
+        "release-digest.txt": "sha256:3c14db3130c1d96ef80e1736f21590d6c3711d08cb0daf9cd6811f88637e8f21",
+        "run.json": "sha256:88d40de91585e5915e20586a8e58879bb25b5dd11d290a1316b425a358c79279",
+        "sources.json": "sha256:435150b3ca677eeb3991fde5919838094323a04f1595eb47925b09f7dfac7a85"
+      },
+      "preparation": {
+        "sha256": "sha256:4488e0faf36a3839ecc108cd528832d1022f0693eba420a68d3e953e2ad24f02",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:4488e0faf36a3839ecc108cd528832d1022f0693eba420a68d3e953e2ad24f02\"}",
+        "retained": "equal"
+      },
+      "recordBinding": null,
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:b692fd68a98cceb65c9610d48e4c343b112ad3e50c5149fdb5527f5b05a2e313"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"absent\"},\"exactBytes\":\"not-in-export\",\"exportVersion\":2,\"retainedDisposition\":\"matches-audit\",\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-01T22:32:47Z\",\"sources\":[{\"source\":\"vendor\",\"checks\":[\"acquisition\"],\"targets\":2},{\"source\":\"registry\",\"checks\":[\"acquisition\"],\"targets\":1}]},\"unsignedParameters\":[{\"source\":\"vendor\",\"parameters\":[{\"name\":\"runAt\",\"kind\":\"runAt\"}],\"targets\":2},{\"source\":\"registry\",\"parameters\":[{\"name\":\"region\",\"kind\":\"case\"},{\"name\":\"vendorId\",\"kind\":\"ambiguous-text\"}],\"targets\":1}]}",
+        "error": null
+      }
+    },
+    {
+      "name": "escaped-strings",
+      "note": "A case-only run, as Runner exported it (version 2), before it passed a binding: every target is asserted, and nothing was acquired. A case value holds \u0026, \u003c, \u003e, a letter with an accent and a snowman, so preparation.json shows the canonical form's escaping: \u0026, \u003c and \u003e escaped as \\u0026, \\u003c and \\u003e, the others written as UTF-8.",
+      "from": "internal/runner/testdata/mapping-v2-before-exact-bytes",
+      "altered": null,
+      "verifiedAt": "2026-10-01T22:04:44Z",
+      "files": {
+        "case.json": "sha256:d69eb840add056db1aa02b0dc6deb4197a27234c616f1b946c0d09f29b7e6a86",
+        "mapping.json": "sha256:d8d9595c46111202401d3216906596c30b792970ec849c14a06500718920d635",
+        "preparation.json": "sha256:75c1dfdc014770aabc28930a63e2293cca5226f98b02213c8c3c20a3a93e70ca",
+        "preparation.sha256": "sha256:2de87a8f437884d9ee984421fcbd03a2c46656e8777ae7b8cf94474ebcb79173",
+        "profiles.json": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "release-digest.txt": "sha256:0c996937b049185acbb0ebb6c9bba871bad80aff71ed813b19453c9c1b68aaa3",
+        "run.json": "sha256:e7c100f2110ab271ded6bcc2e0c7169384cc18cc8a7b5ae3b76f48684f56af1b"
+      },
+      "preparation": {
+        "sha256": "sha256:75c1dfdc014770aabc28930a63e2293cca5226f98b02213c8c3c20a3a93e70ca",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:75c1dfdc014770aabc28930a63e2293cca5226f98b02213c8c3c20a3a93e70ca\"}",
+        "retained": "equal"
+      },
+      "recordBinding": null,
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:20a7ce450b6ca5253e9e64917f3c33a6dd63d1fd03ea54e0f17e58c6d81f0479"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"absent\"},\"exactBytes\":\"not-in-export\",\"exportVersion\":2,\"retainedDisposition\":\"matches-audit\",\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":0}}",
+        "error": null
+      }
+    },
+    {
+      "name": "numeric-spellings",
+      "note": "The valid case's mapping and inputs, run again with three integer case parameters more, which nothing reads: zero written -0, largest 9007199254740991 and least -9007199254740991, the largest and the least integers mapping v2 admits. Each outcome keeps them among its parameters as the case wrote them, and so does preparation.json: -0 is not 0, and neither large integer is written with an exponent. Numbers such as 1.00 and 1e+02, and integers beyond 2^53-1, are outside what mapping v2 admits (integers from -(2^53-1) to 2^53-1, with no fraction or exponent): preparation refuses them as a parameter and as a copied value, so no preparation holds them and no vector can. A reader concludes verified-inputs, the record's binding matching the preparation as written.",
+      "from": "internal/runner/testdata/mapping-v2-calculated-numeric",
+      "altered": null,
+      "verifiedAt": "2026-10-14T15:26:28Z",
+      "files": {
+        "case.json": "sha256:b3beb881f5fc73f7eb62c1c6d500233dfe1d2c5116505202cff56d76319ae8a8",
+        "checkpoints.jsonl": "sha256:4286a07c5e3e7610586d0aec64d2414e1bd9f7dbe4dd585703f7294433638235",
+        "mapping.json": "sha256:4c397caeee5f20de91fdc3da385fedfbbfc922240c78b446b4aa3d5a3011195c",
+        "preparation.json": "sha256:b7e3279bfdb0878bfbec0ee27acd4198e7a0c6c986226b5131d4902cfa688f65",
+        "preparation.sha256": "sha256:0dc443dd621792309d978a9e7c9b0d039e76e93ed26ca407e398c22156fdc170",
+        "profiles.json": "sha256:3e8368d72d781f99c15d1c0e6ba88449af8841ac0f33f41dbaf6dcd23b34ee00",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:0478dc9dd6fed42d22e1775d1a234eb2a69f874301f978fa29a23218d3e5c570",
+        "run.json": "sha256:5b1bf6b595cc43257e202ebd5ccffc583e0cc08f82b36b936ba1ffdf91e751d8",
+        "sources.json": "sha256:0ccb6c566a29dd12c5b76dda6cdc74523ab7a8e468c03353d46903ca308e7341"
+      },
+      "preparation": {
+        "sha256": "sha256:b7e3279bfdb0878bfbec0ee27acd4198e7a0c6c986226b5131d4902cfa688f65",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:b7e3279bfdb0878bfbec0ee27acd4198e7a0c6c986226b5131d4902cfa688f65\"}",
+        "retained": "equal"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:b7e3279bfdb0878bfbec0ee27acd4198e7a0c6c986226b5131d4902cfa688f65\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:2b615a5c6b1f2e5ff04570d14da4ae57d3d7769f4df4c01f1d6554eb8654da3b",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:65abaa0773a6072c75fd41c810d6b4bf97462587650c28574a2645d4a2cec437\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:f1e17f5868ec8b5d1f51f707564f36ba67840653a08e61f9a0918555eef334d8\",\"sequence\":1,\"trail\":\"b478af3ecc924f2a0f1e2beb7247818a\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-14T15:26:28Z\",\"sources\":[{\"source\":\"fx\",\"checks\":[\"acquisition\",\"calculation\"],\"targets\":3}]}}",
+        "error": null
+      }
+    }
+  ]
+}

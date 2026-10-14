@@ -19,7 +19,10 @@ STAGED_EVALUATION_ROWS = "conformance/evaluation/staged"
 # specVersion opens, and the site serves nothing under this directory either
 # (conformance/witness/README.md). The companion document they belong to is published.
 WITNESS_VECTORS = "conformance/witness"
-UNPUBLISHED_DIRECTORIES = (STAGED_EVALUATION_ROWS, WITNESS_VECTORS)
+# The dialect vectors RFC 0018 proposes are staged while it is a draft, and the site serves nothing
+# under this directory either (conformance/dialect/README.md).
+DIALECT_VECTORS = "conformance/dialect"
+UNPUBLISHED_DIRECTORIES = (STAGED_EVALUATION_ROWS, WITNESS_VECTORS, DIALECT_VECTORS)
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
 # anywhere the site publishes. The tokens are assembled from fragments deliberately: the repository
@@ -225,6 +228,23 @@ class StaticSiteTests(unittest.TestCase):
             self.assertIn(heading, document)
         core = (self.output / "spec" / "0.2.0-draft" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="../checkpoint-witness/"', core)
+
+    def test_dialect_vectors_are_not_published(self) -> None:
+        # Staged while RFC 0018 is a draft, and conformance/dialect/README.md says the site does
+        # not serve them; held as the other staged directories are.
+        self._assert_nothing_published_under(DIALECT_VECTORS)
+
+    def test_dialect_is_published_only_as_its_draft_rfc(self) -> None:
+        # The companion document RFC 0018 proposes is normative for nothing while the RFC is a
+        # draft, so it is no page of the specification; its text is the RFC's Specification
+        # section, which is published as the draft it is.
+        self.assertFalse((self.output / "spec" / "dialect").exists())
+        page = (self.output / "rfcs" / "0018-dialect" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("Draft proposal", page)
+        for heading in ("1. Terms and the canonical forms", "14. The preparation verifier"):
+            self.assertIn(heading, page)
+        index = (self.output / "rfcs" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="0018-dialect/"', index)
 
     def _assert_nothing_published_under(self, directory: str) -> None:
         staged = sorted((ROOT / directory).rglob("*"))

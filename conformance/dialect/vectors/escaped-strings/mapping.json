@@ -1,0 +1,1 @@
+{"case":{"facts":[{"target":"/request","source":"/facts/request"}],"evidence":[{"requirement":"intake-form","source":"/evidence/intake-form"},{"requirement":"sponsor-endorsement","source":"/evidence/sponsor-endorsement"}]},"unmappedEvidence":["sensitive-data-approvals"],"version":2,"provider":"","facts":null,"evidence":null}

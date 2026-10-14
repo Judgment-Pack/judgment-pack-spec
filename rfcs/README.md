@@ -62,6 +62,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0015](0015-reported-receipts.md) | What a reported receipt would have to specify — the engine signing a call it did not make | Draft | Research line (cross-project artifact: gateway receipt format, verifier and surface; a reporting plugin in an MCP gateway; outside the specification) |
 | [0016](0016-outcome-values.md) | Outcome values — a decision that states a quantity | Draft | Specification (a specification-defined extension, or Core — undecided) |
 | [0017](0017-checkpoint-witness-statement.md) | The checkpoint witness statement | Accepted | Specification (a companion document beside Core, [`spec/checkpoint-witness.md`](../spec/checkpoint-witness.md), with a reader conformance class; its 54 vectors, the reference gateway's bytes, are staged for the next `specVersion`, in no corpus) |
+| [0018](0018-dialect.md) | The dialect — how a pack's facts and evidence are obtained and derived, and what a preparation establishes per part | Draft | Specification (a proposed companion document beside Core, `spec/dialect.md`, with a preparation-verifier class; the reference Runner's 9 preparation vectors are staged, in no corpus) |
 
 The "Belongs to" column records where each proposal would land if accepted. A format that
 independent tools must agree on is a candidate for the specification. An algorithm or engine belongs
