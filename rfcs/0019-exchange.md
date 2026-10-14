@@ -98,7 +98,7 @@ fixtures its own author did not write.
 - **The format.** [RFC 0018](0018-dialect.md), the dialect, landed as a Draft in #144 (merge commit
   `f821757`). Version 2 of the dialect document is the Runner's mapping v2 byte for byte; version 3
   proposes the kinds `http`, `sql`, `web` and `research`, defined and not claimable; the output side
-  is the gateway's decision policy, by reference. Its second reader, `tools/dialect_verify.py`,
+  is the gateway's decision policy, by reference. Its first reader, `tools/dialect_verify.py`,
   reads dialect version 2 and the kind `operation`, and refuses every other kind as `kind-unread`.
 - **The vectors.** The Runner's nine preparation vectors are published (Runner #75, closed by Runner
   pull request 77, merged as `82116bf`, released in Runner v0.10.0) and staged byte for byte in
@@ -131,8 +131,9 @@ fixtures its own author did not write.
 
 - RFC 0018 landed as a Draft (#144), with the Runner's vectors staged. It is not accepted:
   acceptance waits on a reader written from its text by someone other than its author, agreeing on
-  the vectors, after a comment period (issue #141). The second reader in this repository is the
-  text's author's. An independent second reader is being written; none is published.
+  the vectors, after a comment period (issue #141). The first reader in this repository,
+  `tools/dialect_verify.py`, is the text's author's; the second, `tools/dialect-verify-ts/`, was
+  written from the text alone by a different author and added in #145 (RFC 0018's Evidence).
 - The vectors are published: Runner #75, in Runner v0.10.0.
 - Output dialects are expressible: gateway #258, in gateway v0.14.0. The gateway publishes no
   policy vectors, and RFC 0018 defers the output side's vectors to a later RFC.
@@ -193,7 +194,9 @@ that serves another manifest is caught only by a desk that pins the manifest by 
 
 The maintainer fixed the format for both this record and the repository. It is quoted here word for
 word, but for its last sentence, which the maintainer corrected in the disposition of this record's
-review (finding 2):
+review (finding 2), and for the `output` member, the `output.json` file and the manifest's
+`outputDigest`, which the maintainer's decision on exchange issue #2 added (below, and Unresolved
+question 6):
 
 An **entry** is one directory `entries/<publisher>/<name>/` holding, as separate files with these
 names:
@@ -203,7 +206,10 @@ names:
   (an object: `id`, the pack's id, and either `versions`, a version range, or `digests`, an array of
   the pack digests the dialect was written against); `dialect` (an object: `path`, always
   `dialect.json`; `dialectVersion`; `digest`, the SHA-256 of the dialect document's canonical bytes
-  as RFC 0018 defines them); `requires` (an object, members optional: `inputProfile` by digest,
+  as RFC 0018 defines them; required for direction `input` and `both`, absent for `output`);
+  `output` (an object: `path`, always `output.json`; `outputVersion`; `digest`, the SHA-256 of the
+  output document's canonical bytes as RFC 0018 §10 defines them; required for direction `output`
+  and `both`, absent for `input`); `requires` (an object, members optional: `inputProfile` by digest,
   `connectionProfile` by digest, `platform` by catalog binding name for an output dialect);
   `sourceKinds` (the kinds the dialect's sources use, from RFC 0018's list); `licence` (an SPDX
   identifier); `author` (a handle or organisation name as the author chooses to be named; never
@@ -213,14 +219,19 @@ names:
   `fixtures` (an array of `{name, path, preparationDigest}`); `verification` (an array, empty until
   verified, of `{date, runner, runtime, readers, result}` where `readers` names the preparation
   verifiers that agreed and `result` is `"agree"`).
-- `dialect.json` — the dialect document in RFC 0018's format.
+- `dialect.json` — the dialect document in RFC 0018's format; present exactly when `entry.json`
+  has a `dialect` member.
+- `output.json` — the output dialect in RFC 0018 §10's form; present exactly when `entry.json` has
+  an `output` member.
 - `fixtures/<name>/` — for each fixture, the recorded source records (as the Runner retains them)
   and `preparation.json`, the exact canonical bytes the dialect must produce from them; for a
   `research` source, the research record held by digest.
 - `README.md` — what the dialect is for, in the publisher's words; no credentials, no personal data.
 
-The repository root holds `manifest.json`, an array of `{id, path, entryDigest, dialectDigest}`
-pinning each entry by the SHA-256 of its `entry.json` and `dialect.json` bytes, in `id` order; a
+The repository root holds `manifest.json`, an array of `{id, path, entryDigest, dialectDigest,
+outputDigest}` pinning each entry by the SHA-256 of its `entry.json`, `dialect.json` and
+`output.json` bytes, in `id` order; `dialectDigest` is present exactly when the entry has a dialect
+document and `outputDigest` exactly when it has an output document; a
 test holds every entry to the manifest and every fixture to its `preparationDigest` by running the
 specification's preparation verifier over it. What a published entry establishes is the author's
 assertion above, under the Exchange's review; nothing about truth. CI refuses recognised credential
@@ -242,19 +253,23 @@ review gives them (finding 1):
 | `pack.id` | string | yes | an absolute URI (Core §4), at most 2048 characters |
 | `pack.versions` | string | exactly one of the two | 1 to 64 characters, in the pack's own versioning; a range syntax is an unresolved question (2) |
 | `pack.digests` | array of strings | exactly one of the two | 1 to 16 `sha256:` digests |
-| `dialect` | object, closed | yes | `path`, `dialectVersion` and `digest` |
-| `dialect.path` | string | yes | the literal `dialect.json` |
-| `dialect.dialectVersion` | integer | yes | 2 or more, equal to the dialect document's `version` |
-| `dialect.digest` | string | yes | a `sha256:` digest |
+| `dialect` | object, closed | for `input` and `both`; absent for `output` | `path`, `dialectVersion` and `digest` |
+| `dialect.path` | string | with `dialect` | the literal `dialect.json` |
+| `dialect.dialectVersion` | integer | with `dialect` | 2 or more, equal to the dialect document's `version` |
+| `dialect.digest` | string | with `dialect` | a `sha256:` digest |
+| `output` | object, closed | for `output` and `both`; absent for `input` | `path`, `outputVersion` and `digest` |
+| `output.path` | string | with `output` | the literal `output.json` |
+| `output.outputVersion` | integer | with `output` | 1 or more, equal to the integer the output document's own `outputVersion` spells |
+| `output.digest` | string | with `output` | a `sha256:` digest |
 | `requires` | object, closed | yes | its members optional |
 | `requires.inputProfile` | string | no | a `sha256:` digest |
 | `requires.connectionProfile` | string | no | a `sha256:` digest |
 | `requires.platform` | string | no | `^[a-z][a-z0-9-]*$`, at most 64 characters |
-| `sourceKinds` | array of strings | yes | 1 to 16, distinct, each a kind RFC 0018 lists for the document's `dialectVersion` (§4 there); a `dialectVersion` above 3 is read with version 3's list until a later RFC defines more |
+| `sourceKinds` | array of strings | yes | 1 to 16, distinct (empty for `output`), each a kind RFC 0018 lists for the document's `dialectVersion` (§4 there); a `dialectVersion` above 3 is read with version 3's list until a later RFC defines more |
 | `licence` | string | yes | one SPDX licence identifier matching `[A-Za-z0-9][A-Za-z0-9.+-]*`, or a `LicenseRef-` form of that grammar; no compound licence expressions; at most 64 characters |
 | `author` | string | yes | 1 to 100 characters |
 | `assertion` | string | yes | the fixed sentence (below), byte for byte |
-| `fixtures` | array of closed objects | yes | 1 to 64 |
+| `fixtures` | array of closed objects | yes | 1 to 64 (empty for `output`) |
 | `fixtures[].name` | string | yes | `^[a-z0-9]+(-[a-z0-9]+)*$`, at most 64 characters, distinct within the entry |
 | `fixtures[].path` | string | yes | `fixtures/<name>` |
 | `fixtures[].preparationDigest` | string | yes | a `sha256:` digest |
@@ -276,6 +291,13 @@ files are spelled as follows, as the repository's scaffold spells them.
 - **The assertion.** `assertion` is exactly this sentence: "The author asserts that these rules
   derive these facts and this evidence-availability from records of that shape, or these arguments
   from that disposition, and asserts nothing about any record's truth."
+- **Two documents.** An entry's `direction` follows from the documents it holds: `input` holds
+  `dialect.json`, `output` holds `output.json`, and `both` holds both, each with its own digest in
+  `entry.json` and in `manifest.json`; a document the direction does not give is refused, as is one
+  it gives and the entry lacks. `output.digest` is the digest of the output document's `canon` bytes
+  (RFC 0018 §1, §10); `outputDigest` is of the file's bytes, as it lies. `output.outputVersion` is an
+  integer equal to the integer the document's own `outputVersion` spells, which RFC 0018 §10 writes
+  as the string `"1"`. Output fixtures are held by their digests only until the gateway publishes policy vectors (RFC 0019, unresolved question 5): an output document has no preparation for a verifier to recompute, so an entry of direction `output` holds `sourceKinds` and `fixtures` as empty arrays, and an output document is pinned by `output.digest` and the manifest's `outputDigest` alone.
 - **Digests.** Every digest is written `sha256:` followed by 64 lower-case hexadecimal characters,
   as RFC 0018 §1 writes one. `dialect.digest` is the digest of the dialect document's `canon` bytes
   (RFC 0018 §1): its dialect digest (§2 there), which every preparation it produces carries as
@@ -300,11 +322,11 @@ files are spelled as follows, as the repository's scaffold spells them.
 A test in the repository, run on every push and pull request, holds:
 
 - **the manifest to the entries**: one row for each entry directory and one entry for each row, in
-  `id` order, each `id` its directory's `<publisher>.<name>`, and `entryDigest` and `dialectDigest`
-  over the files' bytes;
+  `id` order, each `id` its directory's `<publisher>.<name>`, and `entryDigest`, `dialectDigest` and
+  `outputDigest` over the files' bytes, the last two present as §3 gives them;
 - **each `entry.json` to the members' table (§3)**: each member's type, requiredness, grammar and
   bound, every object closed, and the `assertion` the fixed sentence exactly;
-- **`dialect.digest`** to the dialect document's `canon` bytes, and each fixture's
+- **`dialect.digest` and `output.digest`** to their documents' `canon` bytes, and each fixture's
   `preparation.json` to its `preparationDigest`;
 - **each fixture to the specification's preparation verifier**, `tools/dialect_verify.py` at the
   specification commit the repository's CI pins: the test gives it the entry's `dialect.json` and
@@ -533,9 +555,10 @@ after the run it records, and is a record of the bytes it was made on (§6).
      go through an MCP server the operator runs as a source of shape `mcp`, as the gateway's
      adapters README documents the organisation's local Azure DevOps server (Unresolved question 8).
 
-**The readers.** The Exchange's test runs `tools/dialect_verify.py`, the second reader of RFC 0018,
-written by that text's author; the Runner's `verify-run` is the first. Both are this project's, and
-RFC 0000's bar of two independent implementations is not claimed.
+**The readers.** The Exchange's test runs `tools/dialect_verify.py`, the first reader of RFC 0018,
+written by that text's author; the second reader, `tools/dialect-verify-ts/`, was written from the
+text alone by a different author (RFC 0018's Evidence), and the Runner's `verify-run` is a third.
+All are this project's, and RFC 0000's bar of two independent implementations is not claimed.
 
 ## Unresolved questions
 
@@ -570,6 +593,11 @@ RFC 0000's bar of two independent implementations is not claimed.
    byte for byte. The format holds one `dialect.json` with one `digest`. Whether a `both` entry
    holds one file per side, is two entries that name each other, or is one document of both, is
    open, and both seed entries are of this direction.
+   *Resolved by this revision (2026-10-14), on the maintainer's decision at exchange issue #2: a
+   `both` entry holds one file per side, `dialect.json` and `output.json`, each with its own digest,
+   in `entry.json` and in `manifest.json` (§3); the exchange's pull request is
+   [#3](https://github.com/Judgment-Pack/judgment-pack-exchange/pull/3).*
+
 7. **A dialect pins its installation.** An `operation` source names its input profile by id and
    digest (RFC 0018 §4.1), and a profile pins the gateway's key, source, authority, adapter, shape
    and endpoint (§5.1 there). An entry's dialect therefore pins the profile its fixtures were
