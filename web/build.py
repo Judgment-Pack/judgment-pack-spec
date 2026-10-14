@@ -648,6 +648,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0019-exchange.md",
+        PurePosixPath("rfcs/0019-exchange/index.html"),
+        "RFC 0019: The Judgment Exchange",
+        "Draft cross-project record of the Judgment Exchange, the shared place for dialects: a repository of entries pinned by digest, each held to its fixtures by the specification's preparation verifier, with what an entry establishes and does not, and a hosted registry later.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
