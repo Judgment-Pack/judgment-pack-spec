@@ -363,6 +363,74 @@ class DialectVectorTests(unittest.TestCase):
                         answer = self._with_rule_condition(alter)
                         self.assertTrue({"refused", "finding"} & set(answer), answer)
 
+    def test_a_fresh_within_of_another_declared_type_is_false_not_malformed(self) -> None:
+        # Found by the independent reader's round (#145): §6.3 makes `asOf`'s `timestamp` and
+        # `maxAge`'s `integer` part of the condition's truth, and names no declared type's mismatch
+        # among the forms that refuse a dialect. Over the valid vector's inputs, a rule whose
+        # freshWithin names a declared `string` as `asOf` derives its last clause's claim, so the
+        # reading ends in preparation-differs, not input-malformed.
+        inputs = self.inputs("valid")
+        dialect = json.loads(inputs.dialect)
+        dialect["sources"][0]["read"] = {
+            "rule": {
+                "ruleVersion": "1",
+                "parameters": {"invoiceCurrency": "string", "invoiceAmount": "string"},
+                "clauses": [
+                    {
+                        "when": {
+                            "op": "freshWithin",
+                            "field": "/calculation/asOf/ecb-rates",
+                            "asOf": "invoiceCurrency",
+                            "maxAge": "invoiceAmount",
+                        },
+                        "claim": {
+                            "facts": [{"pointer": "/request", "from": "/facts/request"}],
+                            "evidence": {"intake-form": "present"},
+                            "acquisitionStatus": "resolved",
+                        },
+                        "reason": "fresh",
+                    },
+                    {
+                        "when": {"op": "always"},
+                        "claim": {"facts": [], "evidence": {"intake-form": "unknown"}, "acquisitionStatus": "unknown"},
+                        "reason": "not-fresh",
+                    },
+                ],
+            }
+        }
+        inputs.dialect = json.dumps(dialect).encode("utf-8")
+        outcome = inputs.verify()
+        self.assertEqual("preparation-differs", outcome.answer.get("finding"), outcome.answer)
+        preparation = json.loads(outcome.preparation)
+        fx = next(o for o in preparation["outcomes"] if o["name"] == "fx")
+        self.assertEqual("not-fresh", fx["reason"])
+        self.assertEqual(["/calculation/asOf/ecb-rates"], fx["claim"]["basis"])
+
+        # The condition itself, with each type isolated: true only for a timestamp and an integer.
+        def fresh(declared: dict[str, str]) -> str:
+            rule = {
+                "ruleVersion": "1",
+                "parameters": declared,
+                "clauses": [
+                    {
+                        "when": {"op": "freshWithin", "field": "/at", "asOf": "stamp", "maxAge": "window"},
+                        "claim": {"facts": [], "evidence": {}, "acquisitionStatus": "resolved"},
+                        "reason": "fresh",
+                    },
+                    {
+                        "when": {"op": "always"},
+                        "claim": {"facts": [], "evidence": {}, "acquisitionStatus": "unknown"},
+                        "reason": "not-fresh",
+                    },
+                ],
+            }
+            scope = {"stamp": "2026-10-14T14:58:26Z", "window": READER.Num("300")}
+            return READER.rule_claim(rule, {"at": "2026-10-14T14:58:00Z"}, scope)["reason"]
+
+        self.assertEqual("fresh", fresh({"stamp": "timestamp", "window": "integer"}))
+        self.assertEqual("not-fresh", fresh({"stamp": "string", "window": "integer"}))
+        self.assertEqual("not-fresh", fresh({"stamp": "timestamp", "window": "string"}))
+
     def test_a_long_index_token_names_no_element(self) -> None:
         token = "1" + "0" * 4999
         self.assertIs(READER.ABSENT, READER.resolve([], "/" + token))

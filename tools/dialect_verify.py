@@ -739,10 +739,12 @@ def check_condition(condition: Any, declared: dict[str, str], what: str, depth: 
     if op == "equalsParam" and condition["param"] not in declared:
         raise malformed(f"{what}: equalsParam names a parameter the rule does not declare")
     if op == "freshWithin":
-        if declared.get(condition["asOf"]) != "timestamp":
-            raise malformed(f"{what}: asOf names no declared timestamp")
-        if declared.get(condition["maxAge"]) != "integer":
-            raise malformed(f"{what}: maxAge names no declared integer")
+        # §6.3: `asOf` and `maxAge` name parameters the rule declares, which is the condition's
+        # form; that the one is a `timestamp` and the other an `integer` is part of its truth, so a
+        # declared parameter of another type makes it false, not the dialect malformed.
+        for member in ("asOf", "maxAge"):
+            if condition[member] not in declared:
+                raise malformed(f"{what}: {member} names a parameter the rule does not declare")
     if op in ("all", "any"):
         if not isinstance(condition["of"], list) or len(condition["of"]) > MAX_LISTED:
             if isinstance(condition["of"], list):
@@ -1298,16 +1300,22 @@ def copy_claim(copy: dict[str, Any], value: Any) -> dict[str, Any]:
     }
 
 
-def evaluate(condition: dict[str, Any], value: Any, params: dict[str, Any], basis: set[str]) -> bool:
+def evaluate(
+    condition: dict[str, Any],
+    value: Any,
+    params: dict[str, Any],
+    basis: set[str],
+    declared: dict[str, str],
+) -> bool:
     op = condition["op"]
     if op == "always":
         return True
     if op == "all":
-        return all(evaluate(c, value, params, basis) for c in condition["of"])
+        return all(evaluate(c, value, params, basis, declared) for c in condition["of"])
     if op == "any":
-        return any(evaluate(c, value, params, basis) for c in condition["of"])
+        return any(evaluate(c, value, params, basis, declared) for c in condition["of"])
     if op == "not":
-        return not evaluate(condition["of"], value, params, basis)
+        return not evaluate(condition["of"], value, params, basis, declared)
     basis.add(condition["field"])
     found = resolve(value, condition["field"])
     if found is ABSENT:
@@ -1323,6 +1331,9 @@ def evaluate(condition: dict[str, Any], value: Any, params: dict[str, Any], basi
     if op == "isDecimalString":
         return isinstance(found, str) and re.fullmatch(r"0|[1-9][0-9]*", found) is not None
     if op == "freshWithin":
+        # True only for `N` of type `timestamp` and `M` of type `integer` (§6.3), as declared.
+        if declared[condition["asOf"]] != "timestamp" or declared[condition["maxAge"]] != "integer":
+            return False
         field_instant = instant(found)
         as_of = instant(params[condition["asOf"]])
         if field_instant is None or as_of is None:
@@ -1336,7 +1347,7 @@ def rule_claim(rule: dict[str, Any], value: Any, scope_values: dict[str, Any]) -
     basis: set[str] = set()
     match = None
     for clause in rule["clauses"]:
-        if evaluate(clause["when"], value, params, basis):
+        if evaluate(clause["when"], value, params, basis, rule["parameters"]):
             match = clause
             break
     assert match is not None
