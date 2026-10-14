@@ -71,9 +71,18 @@ function main(argv: string[]): number {
     throw e;
   }
   const result = verify(inputs);
+  // The file it was asked to write comes before the report: a program that cannot write it could not run,
+  // and exits 3 having written no report (§11, the report).
+  if (values.has("--emit-preparation") && result.recomputed !== undefined) {
+    try {
+      writeFileSync(values.get("--emit-preparation")!, result.recomputed);
+    } catch (e) {
+      process.stderr.write(`dialect-verify-ts: could not write the preparation: ${(e as Error).message}\n`);
+      return 3;
+    }
+  }
   process.stdout.write(Buffer.from(preparationForm(result.report)).toString("utf8") + "\n");
   if (flags.has("--explain") && result.why !== undefined) process.stderr.write(`dialect-verify-ts: ${result.why}\n`);
-  if (values.has("--emit-preparation") && result.recomputed !== undefined) writeFileSync(values.get("--emit-preparation")!, result.recomputed);
   return result.kind === "reading" ? 0 : result.kind === "refusal" ? 1 : 2;
 }
 

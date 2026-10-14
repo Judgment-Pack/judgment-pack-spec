@@ -444,6 +444,9 @@ test("the program prints the report in §9.5's form, one line, and exits 0, 1, 2
       const run = program(...args);
       assert.deepEqual([run.status, run.stdout], [3, ""], args.join(" "));
     }
+    // a preparation file it was asked to write and cannot open: it could not run, and writes no report
+    const unwritable = program(join(VECTORS, "escaped-strings"), "--emit-preparation", join(dir, "no-such-directory", "preparation.json"));
+    assert.deepEqual([unwritable.status, unwritable.stdout], [3, ""]);
 
     // a case-only reading whose facts hold -0: the report keeps the literal, as §9.5 writes a number
     const minus = [

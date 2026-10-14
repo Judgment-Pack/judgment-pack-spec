@@ -38,7 +38,7 @@ It prints one line of JSON, members ordered by code point and every number its l
 | a reading | `{"binding", "digest", "evidence", "facts", "result": "reading", "targetsByClass"}`, with `unsignedFreshness` and `unsignedParameters` when not empty | 0 |
 | a refusal | `{"refusal": <code>, "result": "refusal"}` | 1 |
 | a finding | `{"finding": <code>, "result": "finding"}` | 2 |
-| the program could not run: an argument, a file that cannot be opened, a vector directory without its files | nothing on standard output | 3 |
+| the program could not run: an argument, a file that cannot be opened, a vector directory without its files, a `--emit-preparation` file that cannot be written (written before the report) | nothing on standard output | 3 |
 
 `facts` and `evidence` are the facts document and the evidence-availability document (§8.1).
 
