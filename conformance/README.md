@@ -15,8 +15,10 @@ holds the 54 vectors of its companion document,
 
 ## Layers
 
-- `carrier/` contains inputs that must be rejected before schema validation. Some files are
-  deliberately malformed JSON, and duplicate-member cases must be parsed with duplicate detection.
+- `carrier/` contains inputs held at the carrier layer, before schema validation: most must be
+  rejected (malformed JSON, trailing data, truncated input; duplicate-member cases must be parsed
+  with duplicate detection), and a few are valid and show what the carrier accepts (trailing
+  whitespace, a valid surrogate pair).
 - `structural/` contains well-formed JSON documents that fail the normative JSON Schema. JPS testing
   asserts the schema's `uri`, `date`, and `date-time` formats even though some general-purpose JSON
   Schema libraries treat `format` as annotation-only by default.
