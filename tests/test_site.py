@@ -19,8 +19,9 @@ STAGED_EVALUATION_ROWS = "conformance/evaluation/staged"
 # specVersion opens, and the site serves nothing under this directory either
 # (conformance/witness/README.md). The companion document they belong to is published.
 WITNESS_VECTORS = "conformance/witness"
-# The dialect vectors RFC 0018 proposes are staged while it is a draft, and the site serves nothing
-# under this directory either (conformance/dialect/README.md).
+# The dialect vectors are staged since RFC 0018's acceptance, and the site serves nothing under this
+# directory either (conformance/dialect/README.md). The companion document they belong to is
+# published.
 DIALECT_VECTORS = "conformance/dialect"
 UNPUBLISHED_DIRECTORIES = (STAGED_EVALUATION_ROWS, WITNESS_VECTORS, DIALECT_VECTORS)
 
@@ -230,19 +231,21 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn('href="../checkpoint-witness/"', core)
 
     def test_dialect_vectors_are_not_published(self) -> None:
-        # Staged while RFC 0018 is a draft, and conformance/dialect/README.md says the site does
+        # Staged since RFC 0018's acceptance, and conformance/dialect/README.md says the site does
         # not serve them; held as the other staged directories are.
         self._assert_nothing_published_under(DIALECT_VECTORS)
 
-    def test_dialect_is_published_only_as_its_draft_rfc(self) -> None:
-        # The companion document RFC 0018 proposes is normative for nothing while the RFC is a
-        # draft, so it is no page of the specification; its text is the RFC's Specification
-        # section, which is published as the draft it is.
-        self.assertFalse((self.output / "spec" / "dialect").exists())
-        page = (self.output / "rfcs" / "0018-dialect" / "index.html").read_text(encoding="utf-8")
-        self.assertIn("Draft proposal", page)
+    def test_dialect_companion_document_is_published(self) -> None:
+        # RFC 0018 is accepted and its text landed: the companion document is a page of its own,
+        # normative for its reader class, and Core §1.1 links to it.
+        document = (self.output / "spec" / "dialect" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("Normative for the preparation-verifier reader class", document)
         for heading in ("1. Terms and the canonical forms", "14. The preparation verifier"):
-            self.assertIn(heading, page)
+            self.assertIn(heading, document)
+        core = (self.output / "spec" / "0.2.0-draft" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="../dialect/"', core)
+        page = (self.output / "rfcs" / "0018-dialect" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("Accepted standards-track RFC", page)
         index = (self.output / "rfcs" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="0018-dialect/"', index)
 
@@ -618,6 +621,7 @@ class StaticSiteTests(unittest.TestCase):
             "project/deployment/index.html": "web/DEPLOYMENT.md",
             "conformance/evaluation/index.html": "conformance/evaluation/README.md",
             "spec/checkpoint-witness/index.html": "spec/checkpoint-witness.md",
+            "spec/dialect/index.html": "spec/dialect.md",
         }
         for output, source in cases.items():
             with self.subTest(output=output):

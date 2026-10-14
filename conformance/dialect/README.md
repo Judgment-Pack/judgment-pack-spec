@@ -1,9 +1,9 @@
 # Dialect vectors (staged)
 
 This directory holds 9 vectors for the dialect, written for the preparation-verifier class that
-the proposed companion document [`spec/dialect.md`](../../spec/dialect.md) defines. Its design
-record, [RFC 0018](../../rfcs/0018-dialect.md), is a `Draft`, and the vectors are **staged**. They
-are in no corpus.
+the companion document [`spec/dialect.md`](../../spec/dialect.md) defines. Its design record,
+[RFC 0018](../../rfcs/0018-dialect.md), was accepted on 2026-10-15, and the vectors are **staged**
+until the next `specVersion` opens. They are in no corpus.
 
 This directory is where they wait — reviewed, held to the same checks as a corpus, and runnable by
 hand — as the [checkpoint witness vectors](../witness/README.md) and the
@@ -12,8 +12,7 @@ hand — as the [checkpoint witness vectors](../witness/README.md) and the
 - **Not part of any corpus.** The companion document's §14 holds a preparation verifier to the
   dialect vectors published with the specification version its claim names. No version publishes
   these, so no claim may cite them, and no conformance claim of the class is available until one
-  does. The RFC is a draft, and the companion document is normative for nothing until it is
-  accepted. Nothing here changes Core `0.2.0-draft`, its schema, its four classes, or either of its
+  does. Nothing here changes Core `0.2.0-draft`, its schema, its four classes, or either of its
   corpora.
 - **Not published with the specification, and in no release bundle.** The site's build skips this
   directory, as it skips the other staged directories, and a test holds that nothing under it is
@@ -113,8 +112,8 @@ python tools/dialect_verify.py --dialect mapping.json --case case.json --acquisi
 
 ## How they land
 
-If RFC 0018 is accepted, the companion document lands as the RFC's text, and the vectors wait for
-the next `specVersion`, as the checkpoint witness vectors do. When it opens, this directory leaves
+RFC 0018 was accepted on 2026-10-15, and its text landed then as the companion document. The
+vectors wait for the next `specVersion`, as the checkpoint witness vectors do. When it opens, this directory leaves
 the site's and the release bundle's exclusions, the vectors join a corpus as the vectors of the
 preparation-verifier class, normative for that class and for nothing else, and Core §1.1's list of
 normative artifacts gains them.

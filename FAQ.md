@@ -42,9 +42,11 @@ Three are about the document: carrier (valid JSON and encoding), structural (the
 conformance** (§3.4): what an evaluation of a pack *means* and the one portable result it produces
 (§8.3). §§7–8 are normative for that class and informative for everyone else, and the
 [evaluation corpus](conformance/evaluation/README.md) is normative for it and for nothing else.
-Beside Core, one companion document, [the checkpoint witness statement](spec/checkpoint-witness.md),
-defines a class that is not about a decision, the witness-statement reader, and is normative for
-that class and for nothing else; its [vectors](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness) are staged
+Beside Core, two companion documents, [the checkpoint witness statement](spec/checkpoint-witness.md)
+and [the dialect](spec/dialect.md), each define a class that is not about a decision, the
+witness-statement reader and the preparation verifier, and are normative for those classes and for
+nothing else; their vectors ([witness](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness),
+[dialect](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)) are staged
 until the next `specVersion`, in no corpus. Normative status stops there: outside the prose, the
 schema, and that corpus, nothing in the repository is normative (§1.1). See the [core specification](spec/judgment-pack-core.md).
 

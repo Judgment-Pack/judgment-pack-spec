@@ -11,10 +11,9 @@ conformance/evaluation/staged/** export-ignore
 conformance/witness export-ignore
 conformance/witness/** export-ignore -text
 
-# The dialect vectors RFC 0018 proposes are the reference Runner's bytes, staged while the RFC is a
-# draft and in no corpus (conformance/dialect/README.md), so no bundle carries them, and no checkout
-# may convert a line ending in them. The companion document the RFC proposes is normative for
-# nothing while the RFC is a draft, so no bundle carries it either; acceptance removes this line.
+# The dialect vectors are staged since RFC 0018's acceptance, in no corpus until the next
+# specVersion opens (conformance/dialect/README.md), so no bundle carries them. They are the
+# reference Runner's bytes, so no checkout may convert a line ending in them. The companion document
+# they belong to, spec/dialect.md, is published and no longer export-ignore.
 conformance/dialect export-ignore
 conformance/dialect/** export-ignore -text
-spec/dialect.md export-ignore

@@ -1,12 +1,12 @@
 # dialect-verify-ts: a second, independent preparation verifier
 
-This is a *preparation verifier*, the conformance class that the proposed companion document
+This is a *preparation verifier*, the conformance class that the companion document
 [`spec/dialect.md`](../../spec/dialect.md) defines (its §14), written in TypeScript from that
 document's text alone, so that [RFC 0018](../../rfcs/0018-dialect.md) can meet RFC 0000's evidence
 bar of two independent readers agreeing on the vectors. The repository's first reader was not read
 while this one was written; the files that were read are listed below.
 
-Like the companion document, it is normative for nothing. The vectors it reads are
+Like the reader the companion document's §14 describes, it is a reader and not the specification. The vectors it reads are
 [staged](../../conformance/dialect/README.md): in no corpus, and no conformance claim of the class is
 available until a specification version publishes them (§14). Agreement between two readers shows
 that they read the format alike, and no more; a reading never establishes anything §13 says a

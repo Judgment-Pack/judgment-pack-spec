@@ -1,14 +1,58 @@
 # RFC 0018: The dialect
 
-- Status: Draft
+- Status: Accepted
 - Type: Standards track (a companion document of the specification, with a reader conformance class
   and a vector corpus of its own)
 - Created: 2026-10-14
+- Accepted: 2026-10-15
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
-> This is an open proposal, not part of the specification. See
-> [RFC 0000](0000-rfc-process.md) for the process and evidence bar.
+> **Adoption record.** This RFC is accepted by the single maintainer under the interim review
+> regime ([RFC 0009](0009-interim-review-regime.md)), at draft maturity. The maintainer recorded the
+> decision on issue [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141) on
+> 2026-10-15. The evidence is what Evidence below records: two preparation verifiers agree on the
+> nine vectors, the second written from the text alone under a recorded protocol and in another
+> language, and the reference Runner's `verify-run` is a third reader of the same bytes. The
+> review rounds are recorded on the pull requests that made them and under
+> [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews):
+> the proposal's, on [pull request 144](https://github.com/Judgment-Pack/judgment-pack-spec/pull/144),
+> as `0018-round-1.md`; the second reader's, on
+> [pull request 145](https://github.com/Judgment-Pack/judgment-pack-spec/pull/145), as
+> `0018-round-2.md`; the amendment that decided in the text the six choices the readers recorded, on
+> [pull request 148](https://github.com/Judgment-Pack/judgment-pack-spec/pull/148), as
+> `0018-round-3.md`; and the review of this acceptance, with a written disposition for every
+> finding, on the pull request that makes it, as `0018-round-4.md`.
+>
+> **What lands, and when.** The text under Specification, §§1–14, lands now as the companion
+> document [`spec/dialect.md`](../spec/dialect.md), normative for the preparation-verifier reader
+> class and for nothing else, beside the released Core `0.2.0-draft`, which it does not change. The
+> nine vectors, already in this repository under `conformance/dialect/` and unchanged, stay
+> **staged** until the next `specVersion` opens, as RFC 0013's rows and RFC 0017's vectors are: they
+> are in no corpus, no claim may cite them, the site does not serve them, and no release bundle
+> carries them; they are held to the same repository checks and can be run by hand. When that
+> version opens they move into a corpus, normative for the reader class only, and Core §1.1's list
+> of normative artifacts gains them. Of the texts Compatibility names for acceptance, they all
+> change now except the vectors' corpus, which waits with them: Core §1.1's list gains the
+> companion document, its `export-ignore` is removed, the site publishes it as a page of its own,
+> and the architecture vision's sentence that nothing in the input-lineage research line is part of
+> JPS gains the companion document as a second exception. Until a specification version publishes the vectors, no preparation-verifier conformance
+> claim is available: §14 holds a verifier to the vectors published with the version its claim
+> names, and no version publishes these. Whether the vectors take a `suiteVersion` of their own
+> stays open (Unresolved 6). The paragraphs below describe the draft as it was proposed; the
+> companion document is now the normative text, and Core §1.1 makes an RFC informative in any case.
+>
+> **Departures this acceptance discloses.** [RFC 0000](0000-rfc-process.md) names a comment period
+> before acceptance. The maintainer waived it, because the project has no outside readers yet; it
+> was not run, and this is a departure from that process, not a formality it has met by another
+> route (Unresolved 9). The evidence bar's independence also rests on less than separate
+> organisations: both readers are this project's, written by agents of one model, and the first
+> reader's author is the text's, with the vectors in view; the second's independence rests on the
+> recorded protocol and on its different language (Evidence, "The standing of that evidence").
+> And the record of the proposal's review lapsed in one respect, which this pull request mends:
+> the round of pull request 144 was recorded only on that pull request, as two comments, and not
+> under `rfcs/reviews/`; this pull request copies it, with the rounds of pull requests 145 and 148,
+> verbatim, so that all three are in the repository.
 >
 > **The decision this records.** Issue #141 asked whether the input mapping and the preparation the
 > reference Runner defines become part of the specification as a companion document, normative for a

@@ -345,6 +345,16 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "spec/dialect.md",
+        PurePosixPath("spec/dialect/index.html"),
+        "The dialect",
+        "A companion document of the specification: how a pack's facts and evidence are obtained and derived, and how a preparation is verified. Normative for the preparation verifier only.",
+        "spec",
+        "Normative for the preparation-verifier reader class",
+        # Landed after the 0.2.0-draft tag, so its source is the branch's.
+        source_ref="main",
+    ),
+    Page(
         "docs/field-guide.md",
         PurePosixPath("field-guide/index.html"),
         "Field guide",
@@ -642,9 +652,9 @@ PAGES = (
         "rfcs/0018-dialect.md",
         PurePosixPath("rfcs/0018-dialect/index.html"),
         "RFC 0018: The dialect",
-        "Draft standards-track RFC: how the facts and evidence a pack reads are obtained and derived, with a preparation verifier class and nine staged Runner vectors.",
+        "Accepted standards-track RFC: the design record for the dialect, how the facts and evidence a pack reads are obtained and derived, taken up as a companion document of the specification with a preparation verifier class and nine staged Runner vectors.",
         "proposals",
-        "Draft proposal",
+        "Accepted standards-track RFC",
         source_ref="main",
     ),
     Page(
@@ -2215,8 +2225,8 @@ def build_license(output_root: Path) -> None:
 # the release bundle leaves it out by the same rule (.gitattributes, export-ignore). The checkpoint
 # witness vectors are staged too, since RFC 0017's acceptance, until the next specVersion opens
 # (conformance/witness/README.md); the companion document they belong to is published. The dialect
-# vectors RFC 0018 proposes are staged while it is a draft (conformance/dialect/README.md), and the
-# companion document it proposes, spec/dialect.md, is no page: its text is the RFC's, which is.
+# vectors are staged since RFC 0018's acceptance too (conformance/dialect/README.md), and the
+# companion document they belong to, spec/dialect.md, is published.
 UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/evaluation/staged"),
     PurePosixPath("conformance/witness"),
@@ -2353,6 +2363,7 @@ conformance.
 - [Document-conformance corpus]({guide_url(PurePosixPath("conformance/index.html"))}): carrier, structural, and semantic cases
 - [Evaluation corpus]({guide_url(PurePosixPath("conformance/evaluation/index.html"))}): normative only for evaluator conformance
 - [The checkpoint witness statement]({guide_url(PurePosixPath("spec/checkpoint-witness/index.html"))}): a companion document, normative only for the witness-statement reader class; its vectors are staged until the next specVersion
+- [The dialect]({guide_url(PurePosixPath("spec/dialect/index.html"))}): a companion document, normative only for the preparation-verifier reader class; its vectors are staged until the next specVersion
 - [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
 
 ## Explanations and direct answers

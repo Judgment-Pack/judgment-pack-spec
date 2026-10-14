@@ -2,29 +2,31 @@
 
 ## Status
 
-This document is **proposed, and normative for nothing**. It is the text that
-[RFC 0018](../rfcs/0018-dialect.md), a `Draft`, proposes as a companion document of the Judgment
-Pack specification: if that RFC is accepted, this document becomes normative for one conformance
-class, the *preparation verifier* (§14), and for nothing else. Until then Core §1.1 does not list
-it, no claim of its class is available, the site does not publish it, and no release bundle carries
-it (`.gitattributes`, `export-ignore`). It is in the repository before acceptance so that a second
-reader could be written from its words, and one was (RFC 0018, Evidence). Nothing here changes
+This document is a companion document of the Judgment Pack specification. It is normative for one
+conformance class, the *preparation verifier* (§14), and for nothing else
+([Core §1.1](judgment-pack-core.md#11-normative-artifacts-and-precedence)). It changes nothing in
 Judgment Pack Core `0.2.0-draft`, its schema, its four conformance classes, or either of its
 corpora.
+
+Its design record is [RFC 0018](../rfcs/0018-dialect.md), accepted on 2026-10-15 at draft maturity,
+which is informative; its Specification section, §§1–14 below, is that text. The comment period
+RFC 0000 names was waived by the maintainer, as the RFC's adoption record says.
 
 Its nine vectors, under
 [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect),
 are the reference Runner's `vectors/preparation/`, byte for byte, at commit
 `05636eda96a9588279d61a6272625be859a28117` (Runner pull request 77), which reached the Runner's
-`main` as commit `82116bfab7705f74ca3e493c9722dd3831c7418f` with the same files. They are **staged**: in no
-corpus, no claim may cite them, the site does not serve them, and no release bundle carries them.
-Until a specification version publishes them, no preparation-verifier conformance claim is
-available: §14 holds a verifier to the vectors published with the version its claim names, and no
-version publishes these.
+`main` as commit `82116bfab7705f74ca3e493c9722dd3831c7418f` with the same files. They are **staged**
+until the next `specVersion` opens: they are in no corpus, no claim may cite them, the site does
+not serve them, and no release bundle carries them. When that version opens they move into a corpus,
+normative for this class and for nothing else. Until a specification version publishes them, no
+preparation-verifier conformance claim is available: §14 holds a verifier to the vectors published
+with the version its claim names, and no version publishes these.
 
 It specifies version 2 of the dialect document and of the preparation, which are the Runner's
 mapping v2 and its preparation, restated; it proposes version 3 of the dialect document, which adds
-four source kinds (§4.3), and version 1 of the output side (§10). Like Core, it is a research
+four source kinds (§4.3), and version 1 of the output side (§10). It is published beside the
+released Core `0.2.0-draft` and carries no `specVersion` of its own. Like Core, it is a research
 preview, at draft maturity.
 
 **Its sources.** Where the Runner's words define the format, this document keeps them; where they

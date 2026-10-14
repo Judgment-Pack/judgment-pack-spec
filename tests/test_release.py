@@ -260,12 +260,12 @@ class ReleaseBuilderTests(unittest.TestCase):
         if tracked:
             self.assertIn(document, members)
 
-    def test_release_bundle_leaves_the_dialect_out(self) -> None:
-        # RFC 0018 is a draft: the companion document it proposes is normative for nothing, and the
-        # Runner's vectors it stages are in no corpus (conformance/dialect/README.md). So no bundle
-        # carries either: .gitattributes marks both export-ignore, and the vectors -text, since a
-        # converted line ending would change their bytes. The witness companion document and the
-        # document corpus stay in the bundle, and are checked as the control.
+    def test_release_bundle_leaves_the_dialect_vectors_out_and_carries_its_companion(self) -> None:
+        # The dialect vectors are staged since RFC 0018's acceptance, in no corpus
+        # (conformance/dialect/README.md), so no bundle carries them: .gitattributes marks them
+        # export-ignore, and -text, since a converted line ending would change their bytes. The
+        # companion document they belong to is published and under spec/, which every bundle
+        # carries. The witness companion document and the document corpus are the controls.
         dialect_root = "conformance/dialect"
         vectors = sorted(
             path.relative_to(ROOT).as_posix()
@@ -275,10 +275,16 @@ class ReleaseBuilderTests(unittest.TestCase):
         self.assertTrue(vectors, "no dialect vector is here; this test can go with the directory")
         companion = "spec/dialect.md"
         self.assertTrue((ROOT / companion).is_file())
-        released = ["spec", "spec/checkpoint-witness.md", "conformance", "conformance/manifest.json"]
+        released = [
+            "spec",
+            companion,
+            "spec/checkpoint-witness.md",
+            "conformance",
+            "conformance/manifest.json",
+        ]
         try:
             completed = subprocess.run(
-                ["git", "check-attr", "export-ignore", "text", "--", *vectors, companion, *released],
+                ["git", "check-attr", "export-ignore", "text", "--", *vectors, *released],
                 cwd=ROOT,
                 check=True,
                 capture_output=True,
@@ -294,7 +300,6 @@ class ReleaseBuilderTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertEqual("set", attributes.get((path, "export-ignore")))
                 self.assertEqual("unset", attributes.get((path, "text")))
-        self.assertEqual("set", attributes.get((companion, "export-ignore")))
         for path in released:
             with self.subTest(path=path):
                 self.assertEqual("unspecified", attributes.get((path, "export-ignore")))
@@ -306,12 +311,20 @@ class ReleaseBuilderTests(unittest.TestCase):
         )
         if archived.returncode != 0:
             return  # no commit here (a bare scratch repository); the attribute checks above stand
+        tracked = subprocess.run(
+            ["git", "ls-tree", "--name-only", "HEAD", companion],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.split()
         with tarfile.open(fileobj=io.BytesIO(archived.stdout)) as bundle:
             members = set(bundle.getnames())
         self.assertEqual(
             [], sorted(name for name in members if name.startswith(dialect_root + "/"))
         )
-        self.assertNotIn(companion, members)
+        if tracked:
+            self.assertIn(companion, members)
         self.assertIn("conformance/manifest.json", members)
 
     @staticmethod

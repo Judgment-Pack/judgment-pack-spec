@@ -1,7 +1,7 @@
 """The dialect vectors RFC 0018 stages, and the first reader written from the companion text.
 
-The vectors are the reference Runner's `vectors/preparation/`, byte for byte, staged while the RFC
-is a draft (conformance/dialect/README.md). These tests hold their bytes to the digests the Runner's
+The vectors are the reference Runner's `vectors/preparation/`, byte for byte, staged until the
+next specVersion opens (conformance/dialect/README.md). These tests hold their bytes to the digests the Runner's
 manifest gives them and the Runner's manifest and README to the digests this repository records;
 run tools/dialect_verify.py, a preparation verifier written from spec/dialect.md, over every vector;
 and hold the RFC's Specification section to the companion document's text.
@@ -666,14 +666,20 @@ class DialectTextTests(unittest.TestCase):
         )
         self.assertEqual(expected, promoted)
 
-    def test_the_rfc_and_its_companion_are_drafts(self) -> None:
+    def test_the_rfc_is_accepted_and_its_companion_is_listed_in_core(self) -> None:
         rfc = (ROOT / RFC).read_text(encoding="utf-8")
-        self.assertIn("- Status: Draft", rfc)
+        self.assertIn("- Status: Accepted", rfc)
+        self.assertIn("- Accepted: 2026-10-15", rfc)
+        self.assertIn("**Adoption record.**", rfc)
+        self.assertNotIn("This is an open proposal", rfc)
         companion = (ROOT / COMPANION).read_text(encoding="utf-8")
-        self.assertIn("**proposed, and normative for nothing**", companion)
+        self.assertIn("normative for one\nconformance class, the *preparation verifier* (§14)", companion)
+        self.assertNotIn("normative for nothing", companion)
         core = (ROOT / "spec" / "judgment-pack-core.md").read_text(encoding="utf-8")
         normative = core[core.index("### 1.1") : core.index("## 2.")]
-        self.assertNotIn("dialect", normative)
+        self.assertIn("[`spec/dialect.md`](dialect.md)", normative)
+        # The vectors wait for the next specVersion, so §1.1 does not list them yet.
+        self.assertNotIn("conformance/dialect", normative)
 
     def test_the_findings_the_tests_know_are_the_texts(self) -> None:
         companion = (ROOT / COMPANION).read_text(encoding="utf-8")

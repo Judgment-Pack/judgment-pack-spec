@@ -47,6 +47,8 @@ The artifacts in this repository have distinct roles:
   normative machine-readable projection of structural document constraints;
 - [`spec/checkpoint-witness.md`](checkpoint-witness.md), a companion document, is the normative
   prose for the witness-statement reader conformance class it defines, and for nothing else;
+- [`spec/dialect.md`](dialect.md), a companion document, is the normative prose for the
+  preparation-verifier reader conformance class it defines, and for nothing else;
 - the evaluation corpus — the manifest and case fixtures under
   [`conformance/evaluation/`](../conformance/evaluation/README.md), not its README — is normative for
   evaluator conformance (§3.4) and for nothing else. This is the normative status the bullet below
