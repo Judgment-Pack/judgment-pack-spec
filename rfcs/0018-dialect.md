@@ -22,7 +22,7 @@
 > `0018-round-2.md`; the amendment that decided in the text the six choices the readers recorded, on
 > [pull request 148](https://github.com/Judgment-Pack/judgment-pack-spec/pull/148), as
 > `0018-round-3.md`; and the review of this acceptance, with a written disposition for every
-> finding, on the pull request that makes it, as `0018-round-4.md`.
+> finding, on the pull request that makes it, recorded under `rfcs/reviews/` as `0018-round-4.md`.
 >
 > **What lands, and when.** The text under Specification, §§1–14, lands now as the companion
 > document [`spec/dialect.md`](../spec/dialect.md), normative for the preparation-verifier reader
