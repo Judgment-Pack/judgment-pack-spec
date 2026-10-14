@@ -29,7 +29,9 @@
 > names *dialect* and *Judgment Exchange*, and a shared place for dialects, a repository first and a
 > hosted registry later, filed as a record of its own once its prerequisites land. The maintainer
 > fixed the entry format for both this record and the repository, which was created the same day
-> and scaffolded from it in parallel; §3 quotes the format word for word. Under the
+> and scaffolded from it in parallel. §3 quotes the format word for word, but for one sentence the
+> maintainer corrected on review, and gives each member's type, requiredness, grammar and bound as
+> the maintainer's disposition of that review fixed them. Under the
 > [interim review regime](../GOVERNANCE.md#interim-review-regime), the pull request that merges this
 > record carries a cross-vendor adversarial review, with the maintainer's disposition of each
 > finding.
@@ -190,7 +192,8 @@ that serves another manifest is caught only by a desk that pins the manifest by 
 ### 3. The entry format
 
 The maintainer fixed the format for both this record and the repository. It is quoted here word for
-word:
+word, but for its last sentence, which the maintainer corrected in the disposition of this record's
+review (finding 2):
 
 An **entry** is one directory `entries/<publisher>/<name>/` holding, as separate files with these
 names:
@@ -220,12 +223,55 @@ The repository root holds `manifest.json`, an array of `{id, path, entryDigest, 
 pinning each entry by the SHA-256 of its `entry.json` and `dialect.json` bytes, in `id` order; a
 test holds every entry to the manifest and every fixture to its `preparationDigest` by running the
 specification's preparation verifier over it. What a published entry establishes is the author's
-assertion above, under the Exchange's review; nothing about truth. Credentials, tokens and personal
-data are refused by a test before anything is merged.
+assertion above, under the Exchange's review; nothing about truth. CI refuses recognised credential
+shapes and local paths; a maintainer must refuse credentials and personal data in every file of an
+entry before merge, recipe literals and receipt metadata included; and the scan's silence proves
+nothing.
 
-**How the format is spelled.** The format leaves some spellings open. The repository's scaffold
-settles the assertion's words, the digests, a fixture's files and `pack.versions` as follows, and
-this record says the same; what `pack.id` names follows from Core.
+**The members.** Every member and nested object of `entry.json` has a type, a requiredness, a
+grammar or a set of allowed values, and a bound, as the maintainer's disposition of this record's
+review gives them (finding 1):
+
+| Member | Type | Required | Grammar, allowed values and bound |
+| --- | --- | --- | --- |
+| `entryVersion` | integer | yes | `1` |
+| `id` | string | yes | `^[a-z0-9]+(\.[a-z0-9-]+)+$`, 3 to 128 characters, equal to the entry's path under `entries/` with `/` read as `.`: `entries/<publisher>/<name>/` holds the id `<publisher>.<name>` |
+| `title` | string | yes | 1 to 200 characters |
+| `direction` | string | yes | `input`, `output` or `both` |
+| `pack` | object, closed | yes | `id`, and exactly one of `versions` and `digests` |
+| `pack.id` | string | yes | an absolute URI (Core §4), at most 2048 characters |
+| `pack.versions` | string | exactly one of the two | 1 to 64 characters, in the pack's own versioning; a range syntax is an unresolved question (2) |
+| `pack.digests` | array of strings | exactly one of the two | 1 to 16 `sha256:` digests |
+| `dialect` | object, closed | yes | `path`, `dialectVersion` and `digest` |
+| `dialect.path` | string | yes | the literal `dialect.json` |
+| `dialect.dialectVersion` | integer | yes | 2 or more, equal to the dialect document's `version` |
+| `dialect.digest` | string | yes | a `sha256:` digest |
+| `requires` | object, closed | yes | its members optional |
+| `requires.inputProfile` | string | no | a `sha256:` digest |
+| `requires.connectionProfile` | string | no | a `sha256:` digest |
+| `requires.platform` | string | no | `^[a-z][a-z0-9-]*$`, at most 64 characters |
+| `sourceKinds` | array of strings | yes | 1 to 16, distinct, each a kind RFC 0018 lists for the document's `dialectVersion` (§4 there); a `dialectVersion` above 3 is read with version 3's list until a later RFC defines more |
+| `licence` | string | yes | one SPDX licence identifier matching `[A-Za-z0-9][A-Za-z0-9.+-]*`, or a `LicenseRef-` form of that grammar; no compound licence expressions; at most 64 characters |
+| `author` | string | yes | 1 to 100 characters |
+| `assertion` | string | yes | the fixed sentence (below), byte for byte |
+| `fixtures` | array of closed objects | yes | 1 to 64 |
+| `fixtures[].name` | string | yes | `^[a-z0-9]+(-[a-z0-9]+)*$`, at most 64 characters, distinct within the entry |
+| `fixtures[].path` | string | yes | `fixtures/<name>` |
+| `fixtures[].preparationDigest` | string | yes | a `sha256:` digest |
+| `verification` | array of closed objects | yes | at most 32; empty until verified |
+| `verification[].date` | string | yes | `YYYY-MM-DD` |
+| `verification[].runner` | string | yes | a release tag, `^v\d+\.\d+\.\d+$` |
+| `verification[].runtime` | string | yes | a release tag, `^v\d+\.\d+\.\d+$` |
+| `verification[].readers` | array of strings | yes | 1 to 8, each `<repository>/<path>@<commit>`, at most 200 characters |
+| `verification[].result` | string | yes | `agree` |
+
+`entry.json` and `README.md` are each at most 64 KiB, and a fixture directory at most 16 MiB;
+`dialect.json` is bounded as RFC 0018 §12 bounds a verifier's inputs. Every object is closed: a
+member the table does not list is refused. A member name given twice in one object is refused, as
+Core §2.1 refuses one.
+
+**How the format is spelled.** Beside the table, the assertion's words, the digests and a fixture's
+files are spelled as follows, as the repository's scaffold spells them.
 
 - **The assertion.** `assertion` is exactly this sentence: "The author asserts that these rules
   derive these facts and this evidence-availability from records of that shape, or these arguments
@@ -245,11 +291,6 @@ this record says the same; what `pack.id` names follows from Core.
   dialect taken from the entry's `dialect.json`. A fixture's `path` is `fixtures/<name>`, relative
   to the entry's directory. For a `research` source, `sources.json` holds the research record as the
   acquisition's result, held by its digest under its receipt, as every acquisition is.
-- **The pack.** `pack.id` is the pack's `id`, which Core gives as a stable absolute URI identifying
-  the pack series (Core §4), and not a name of the entry's choosing. `pack.versions` is a non-empty
-  string in the form the pack's own versioning gives; Core gives a pack's `version` as a
-  three-component `MAJOR.MINOR.PATCH` string and defines no range, so which range syntax is meant is
-  open (Unresolved question 2). `pack.digests` names packs exactly.
 - **The repository's own copy.** The repository's `docs/entry-format.md` repeats the format, with
   the spellings its tests make, and says that this record is normative for the repository when it
   lands (the scope note).
@@ -261,8 +302,8 @@ A test in the repository, run on every push and pull request, holds:
 - **the manifest to the entries**: one row for each entry directory and one entry for each row, in
   `id` order, each `id` its directory's `<publisher>.<name>`, and `entryDigest` and `dialectDigest`
   over the files' bytes;
-- **each `entry.json` to the format**: a closed object, the `assertion` the format's sentence
-  exactly, `dialect.path` `dialect.json`, and at least one fixture;
+- **each `entry.json` to the members' table (§3)**: each member's type, requiredness, grammar and
+  bound, every object closed, and the `assertion` the fixed sentence exactly;
 - **`dialect.digest`** to the dialect document's `canon` bytes, and each fixture's
   `preparation.json` to its `preparationDigest`;
 - **each fixture to the specification's preparation verifier**, `tools/dialect_verify.py` at the
@@ -271,7 +312,8 @@ A test in the repository, run on every push and pull request, holds:
   digest equals the fixture's `preparationDigest`. No record is given, so the reading's binding is
   `not-checked`, and a fixture says nothing about any runtime record; and
 - **every file to a scan** that refuses the common shapes of a credential, a token and a key, and a
-  local path, before anything is merged. A scan's silence is not a finding that none is there.
+  local path, before anything is merged. A scan's silence is not a finding that none is there:
+  credentials and personal data in every file are a maintainer's to refuse before merge (§3).
 
 **A fixture the verifier cannot recompute.** A fixture of a source kind the specification's verifier
 cannot recompute is held by its digests only: the test skips the recomputation and says why. Today
@@ -334,7 +376,9 @@ It does not establish:
 - **A recorded no is a decision.** An entry, a system or a source kind the Exchange declines is
   recorded with the reason and the condition that would reopen it, as the catalog records its own
   (gateway #259, #260).
-- **What the Exchange refuses.**
+- **What the Exchange refuses**, each before merge: CI where its test or its scan recognises the
+  case — a recognised credential shape, a local path, an entry with no fixture — and the maintainer
+  who reviews the entry for everything else, in every file of the entry.
   - Credentials, tokens and keys, of any kind and in any file. A dialect names an input profile by
     its id and digest, a connection by its name and a header by its name, never a value (RFC 0018,
     Security and privacy).
@@ -394,8 +438,9 @@ It does not establish:
   what the gateway signed of the read: the endpoint, which names an organisation's or a workspace's
   host; the caller, where a verified token named one; and the source and authority labels. A
   publisher records under a gateway and an identity it is content to name, and a reviewer checks
-  each fixture's receipts as well as its results. The repository's scan refuses common credential
-  shapes; personal data is the reviewer's to find.
+  each fixture's receipts as well as its results. CI's scan refuses recognised credential shapes and
+  local paths; a maintainer refuses credentials and personal data in every file of an entry before
+  merge, recipe literals and receipt metadata included (§3).
 - **A wrong dialect's effect.** Bounded, not prevented. An input dialect that reads the wrong member
   derives wrong facts faithfully: the Runner recomputes every preparation rather than trust an
   author's, the lineage records which pointer fed which target, admission refuses a class a target
@@ -426,7 +471,8 @@ It does not establish:
 
 **None of JPS's.** This record defines no conformance class, and no claim of any JPS class can cite
 an entry. An entry's check is the Exchange's own test (§4), at the specification commit the
-repository pins. The scaffold's tests hold it today: positively, an example entry built from this
+repository pins. The repository aligns its tests to §3's table by its own pull request. At
+`b516dd7`, the scaffold's tests held: positively, an example entry built from this
 repository's staged `valid` vector, which is not an entry and is not in the manifest, holds to every
 rule and gets a reading whose digest is its `preparationDigest`; negatively, a changed byte against
 either manifest digest, an assertion that is not the sentence, an `id` that is not its path's, an
@@ -436,11 +482,12 @@ the repository holds today; and adversarially, each credential shape and local p
 written for, and a relative link that does not resolve.
 
 **The verification record's form.** `verification` is an array, empty until an entry is verified,
-of `{date, runner, runtime, readers, result}`: `date`, the day the readers ran; `runner` and
-`runtime`, the Runner and runtime releases at which the fixtures hold; `readers`, the preparation
-verifiers that agreed, each named so that it can be found again — the Runner's `verify-run` at a
-release, the specification's `tools/dialect_verify.py` at a commit; and `result`, `"agree"`, the
-only value the format gives. A reader that disagrees adds no record: its disagreement is a finding
+of `{date, runner, runtime, readers, result}`, each member as §3's table gives it: `date`, the day
+the readers ran; `runner` and `runtime`, the release tags of the Runner and the runtime at which the
+fixtures hold; `readers`, the preparation verifiers that agreed, each named as
+`<repository>/<path>@<commit>` so that it can be found again — the Runner's `verify-run`, or the
+specification's `tools/dialect_verify.py`, at a commit; and `result`, `"agree"`, the only value the
+format gives. A reader that disagrees adds no record: its disagreement is a finding
 against the entry or the reader, recorded where it was found. A record is added by a pull request
 after the run it records, and is a record of the bytes it was made on (§6).
 
@@ -496,9 +543,10 @@ RFC 0000's bar of two independent implementations is not claimed.
    repository's history, and nothing is signed. Whether an author signs an entry, the Exchange signs
    the manifest, both or neither; with which key; and what a desk holds a signature to, are open. A
    hosted registry makes the question pressing.
-2. **Entry versions against pack versions.** `pack.versions` takes the form the pack's own
-   versioning gives, and Core gives a `MAJOR.MINOR.PATCH` version and no range: which range syntax,
-   if any, is open; the scaffold's example writes `>=0.1.0`. A published pack version SHOULD be
+2. **Entry versions against pack versions, and a range syntax for `pack.versions`.**
+   `pack.versions` takes the form the pack's own versioning gives, 1 to 64 characters, and Core
+   gives a `MAJOR.MINOR.PATCH` version and no range: which range syntax, if any, is open; the
+   scaffold's example writes `>=0.1.0`. A published pack version SHOULD be
    immutable (Core §11), not MUST, so a version names content less firmly than a digest. And how an
    entry follows a pack is open: a pack version that changes a fact pointer breaks a dialect, and
    whether its successor is a new entry, the same `id` with new digests, or an entry per pack
@@ -512,8 +560,9 @@ RFC 0000's bar of two independent implementations is not claimed.
    what a desk does when the registry and the repository disagree.
 5. **Output dialects before the gateway publishes policy vectors.** RFC 0018 defers the output
    side's vectors, and the gateway publishes none. An output dialect has no preparation, so a
-   fixture's `preparationDigest` has nothing to name for it, and `dialectVersion`, an integer in
-   the scaffold's test, meets the output side's string `outputVersion`, `"1"`. Whether the Exchange
+   fixture's `preparationDigest` has nothing to name for it, and `dialectVersion`, an integer of 2
+   or more equal to the document's `version`, has nothing to equal in an output dialect, whose
+   `outputVersion` is the string `"1"`. Whether the Exchange
    carries output dialects now, held by review and by the gateway's own tests of its policies, or
    waits for vectors, is open.
 6. **An entry of direction `both`.** RFC 0018 §10 keeps the input side and the output side as two
