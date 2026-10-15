@@ -1,7 +1,7 @@
 // Recomputing a preparation (§11, "Findings" 1–4) by §§3–9, at the given preparation's verifiedAt.
 import { BOUNDS, scanBytes } from "./bounds.ts";
 import { verify as edVerify } from "./ed25519.ts";
-import { DIGEST, Refusal, placeholders, profileDigestOf, sha256hex } from "./forms.ts";
+import { DIGEST, Refusal, placeholders, profileDigestOf, sha256hex, stringTemplate } from "./forms.ts";
 import type { Acquisition, ClaimForm, CopyRead, Dialect, ParamType, Profile, Rule, Source } from "./forms.ts";
 import {
   NotRead, OutsideDomain, arr, bool, canon, compareCodePoints, decode, inCanonDomain, isInteger, intValue, jsonEqual, member, num,
@@ -212,6 +212,27 @@ function commitments(t: JVal, committed: Set<string>, ambiguous: Set<string>): v
   for (const x of t.m.values()) commitments(x, committed, ambiguous);
 }
 
+/** §4.1: why a request does not fit its profile, or null. A tool call under `mcp`; under `http` and `airbyte`
+ * any object, but that `adapter-http`'s `query` is an object of string templates; nothing under `command`. */
+function requestMisfit(s: Source, p: Profile): string | null {
+  const request = s.template as JObj;
+  if (p.shape === "command") return "a profile of shape command serves no operation";
+  if (p.shape === "mcp") {
+    const keys = Array.from(request.m.keys()).sort();
+    const tool = request.m.get("tool");
+    const name = tool !== undefined && tool.t === "str" ? tool.v : undefined;
+    if (keys.join(",") !== "arguments,tool" || name === undefined || name === "") return "a request that is not a tool call, under a profile of shape mcp";
+    if (!(p.tools ?? []).includes(name)) return "a tool the profile does not allow";
+    return null;
+  }
+  const query = request.m.get("query");
+  if ((member(p.adapter, "name") as JStr).v === "adapter-http" && query !== undefined) {
+    const fits = query.t === "obj" && !Array.from(query.m.keys()).some((k) => k.startsWith("$")) && Array.from(query.m.values()).every((x) => stringTemplate(x, s.scope!));
+    if (!fits) return "a query that is not an object of string templates, under adapter-http";
+  }
+  return null;
+}
+
 // ---- acquisitions (§5.2) ----
 
 function checkReceipt(acq: Acquisition, profile: Profile, request: JObj, who: string): void {
@@ -338,9 +359,10 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     if (s.profile === undefined) continue;
     const p = profiles.find((x) => x.id === s.profile);
     if (p === undefined || profileDigestOf(p) !== s.profileDigest) finding("profile-mismatch", `${s.name}: no trusted profile of that id and digest`);
-    // §4.1: a request of the form of the profile's shape (no form is `command`'s), and a tool call's tool allowed
-    if (s.kind === "operation" && p!.shape !== s.form) finding("profile-mismatch", `${s.name}: a request of the ${s.form} form under a ${p!.shape} profile`);
-    if (s.kind === "operation" && s.form === "mcp" && !(p!.tools ?? []).includes(s.tool!)) finding("profile-mismatch", `${s.name}: a tool the profile does not allow`);
+    if (s.kind === "operation") {
+      const misfit = requestMisfit(s, p!);
+      if (misfit !== null) finding("profile-mismatch", `${s.name}: ${misfit}`);
+    }
     if ((p!.calculator !== undefined) !== (s.calculation !== undefined)) finding("profile-mismatch", `${s.name}: calculation and the profile's calculator`);
     profileOf.set(s.name, p!);
   }

@@ -37,8 +37,6 @@ export type Clause = { when: JObj; claim: ClaimForm; reason: string };
 export type Rule = { parameters: Map<string, ParamType>; clauses: Clause[] };
 export type Read = { raw: JVal; unwrap: string[]; copy?: CopyRead; rule?: Rule };
 export type Calculation = { inputs: Map<string, string>; tables: Map<string, number> };
-/** The shapes an `operation` reads, each with the form of its request (§4.1). */
-export type RequestForm = "mcp" | "http" | "airbyte";
 
 export type Source = {
   name: string;
@@ -49,9 +47,8 @@ export type Source = {
   profile?: string;
   profileDigest?: string;
   maxAge?: number;
-  form?: RequestForm; // the shape whose request form `arguments` take
-  tool?: string;
   template?: JVal; // `arguments`, the whole request template
+  scope?: Map<string, ParamType>; // its scope, for the profile's rules on the request (§4.1)
   calculation?: Calculation;
   factTargets: string[];
   evidenceTargets: string[];
@@ -383,15 +380,8 @@ function checkTemplate(v: JVal, scope: Scope, what: string): void {
   }
 }
 
-// §4.1: each form's members, required and then optional; the members name the form.
-const REQUEST_MEMBERS: [RequestForm, string[], string[]][] = [
-  ["mcp", ["tool", "arguments"], []],
-  ["http", ["method", "path"], ["query"]],
-  ["airbyte", ["stream"], ["namespace", "limit", "state"]],
-];
-
 /** A string template (§4.1): a string, a `$text`, or a `$param` naming a `string` or `timestamp` parameter. */
-function stringTemplate(v: JVal | undefined, scope: Scope): boolean {
+export function stringTemplate(v: JVal | undefined, scope: Map<string, ParamType>): boolean {
   if (v === undefined) return false;
   if (v.t === "str") return true;
   if (v.t !== "obj" || v.m.size !== 1) return false;
@@ -402,38 +392,13 @@ function stringTemplate(v: JVal | undefined, scope: Scope): boolean {
   return type === "string" || type === "timestamp";
 }
 
-/** An operation's `arguments` (§4.1): the template of a request in one shape's form. Whether that shape is the
- * profile's is a finding of the recomputation, `profile-mismatch`; a request of no form is refused here. */
-function readRequest(v: JVal | undefined, scope: Scope, what: string): { form: RequestForm; tool?: string } {
+/** An operation's `arguments` (§4.1): the template of its request, an object and not a template form, held to the
+ * rules of a template. What more it must be is the profile's to say, a finding of the recomputation. */
+function readRequest(v: JVal | undefined, scope: Scope, what: string): JObj {
   const o = object(v, what);
-  const names = Array.from(o.m.keys());
-  const match = REQUEST_MEMBERS.find(([, required, optional]) => required.every((k) => o.m.has(k)) && names.every((k) => required.includes(k) || optional.includes(k)));
-  if (match === undefined) return malformed(`${what} is of no request form (members ${names.join(", ")})`);
-  const form = match[0];
+  if (Array.from(o.m.keys()).some((k) => k.startsWith("$"))) malformed(`${what} is a template form, not an object`);
   checkTemplate(o, scope, what);
-  if (form === "mcp") return { form, tool: nonEmpty(o.m.get("tool"), `${what}.tool`) };
-  if (form === "http") {
-    const method = o.m.get("method")!;
-    if (method.t !== "str" || (method.v !== "GET" && method.v !== "POST")) malformed(`${what}.method is not GET or POST`);
-    if (!stringTemplate(o.m.get("path"), scope)) malformed(`${what}.path is not a string template`);
-    const query = o.m.get("query");
-    if (query !== undefined) {
-      if (query.t !== "obj" || Array.from(query.m.keys()).some((k) => k.startsWith("$"))) malformed(`${what}.query is not an object of string templates`);
-      for (const [k, x] of (query as JObj).m) if (!stringTemplate(x, scope)) malformed(`${what}.query.${k} is not a string template`);
-    }
-    return { form };
-  }
-  if (!stringTemplate(o.m.get("stream"), scope)) malformed(`${what}.stream is not a string template`);
-  const namespace = o.m.get("namespace");
-  if (namespace !== undefined && namespace.t !== "null" && !stringTemplate(namespace, scope)) malformed(`${what}.namespace is not a string template or null`);
-  const limit = o.m.get("limit");
-  if (limit !== undefined && !isInteger(limit)) {
-    const named = limit.t === "obj" && limit.m.size === 1 ? limit.m.get("$param") : undefined;
-    if (named === undefined || named.t !== "str" || scope.get(named.v) !== "integer") malformed(`${what}.limit is not an integer or a $param naming one`);
-  }
-  const state = o.m.get("state");
-  if (state !== undefined && !stringTemplate(state, scope)) malformed(`${what}.state is not a string template`);
-  return { form };
+  return o;
 }
 
 function targetsOf(read: Read): { facts: string[]; evidence: string[] } {
@@ -539,10 +504,8 @@ export function readDialect(d: JVal): Dialect {
       if (!DIGEST.test(digest)) malformed(`${what}.profileDigest is not a digest`);
       source.profileDigest = digest;
       source.maxAge = integerIn(so.m.get("maxAge"), 1, 86400, `${what}.maxAge`);
-      const request = readRequest(so.m.get("arguments"), scope, `${what}.arguments`);
-      source.form = request.form;
-      source.tool = request.tool;
-      source.template = so.m.get("arguments")!;
+      source.template = readRequest(so.m.get("arguments"), scope, `${what}.arguments`);
+      source.scope = scope;
     }
     if (so.m.has("calculation")) {
       const co = exact(so.m.get("calculation"), `${what}.calculation`, ["inputs", "tables"]);

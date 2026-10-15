@@ -12,7 +12,8 @@ whose `verify-run` is a third reader of the same bytes.
 It reads dialect version 2 and the kind `operation`, the only kind the staged vectors exercise, and
 refuses every other kind as `kind-unread` (spec/dialect.md §4: a kind without vectors is defined
 and not claimable). Since the amendment of 2026-10-15 it reads `operation` of the shapes `airbyte`,
-`mcp` and `http` (§4.1), each request in its shape's form. It does not read dialect version 3 — the
+`mcp` and `http` (§4.1): a tool call for `mcp`, and for the others the request the gateway source
+takes, held to being an object, the template rules and its commitment, and not to a set of members. It does not read dialect version 3 — the
 kinds of §4.3, and the unbound source form with its binding document (§4.4) — and refuses a dialect
 of that version as `version-unread` (§11), taking no binding document. It uses the Python standard
 library alone.
@@ -671,9 +672,8 @@ class Source:
     profile_id: str = ""
     profile_digest: str = ""
     max_age: int = 0
-    form: str = ""  # the shape whose request form `arguments` take (§4.1)
-    tool: str = ""
     template: Any = None  # `arguments`, the request's template, whole
+    scope: dict[str, str] = field(default_factory=dict)  # each parameter of its scope, by its type
     calculation: dict[str, Any] | None = None
 
 
@@ -712,14 +712,6 @@ def check_template(value: Any, scope: dict[str, str], what: str) -> None:
             check_template(item, scope, what)
 
 
-# §4.1: each shape's request form, by its members, required and optional. No two forms share a member.
-REQUEST_FORMS = {
-    "mcp": ({"tool", "arguments"}, set()),
-    "http": ({"method", "path"}, {"query"}),
-    "airbyte": ({"stream"}, {"namespace", "limit", "state"}),
-}
-
-
 def is_string_template(value: Any, scope: dict[str, str]) -> bool:
     """§4.1: a string, a $text, or a $param naming a parameter of type string or timestamp."""
     if isinstance(value, str):
@@ -733,44 +725,37 @@ def is_string_template(value: Any, scope: dict[str, str]) -> bool:
     return False
 
 
-def check_request(value: Any, scope: dict[str, str], what: str) -> str:
-    """§4.1: `arguments`, the template of a request, of one shape's form, which its members name. The
-    shape it is of is returned; whether it is the profile's is a finding, `profile-mismatch`."""
-    if not isinstance(value, dict):
-        raise malformed(f"{what}: arguments are not an object")
-    members = set(value)
-    forms = [shape for shape, (required, optional) in REQUEST_FORMS.items() if required <= members <= required | optional]
-    if not forms:
-        raise malformed(f"{what}: arguments of no request form, members {sorted(members)}")
-    shape = forms[0]
+def check_request(value: Any, scope: dict[str, str], what: str) -> None:
+    """§4.1: `arguments`, the template of a request: an object, not a template form, held to the rules
+    of a template. What more it must be depends on the profile's shape and adapter, a finding
+    (`request_misfit`)."""
+    if not isinstance(value, dict) or any(name.startswith("$") for name in value):
+        raise malformed(f"{what}: arguments are not an object, or are a template form")
     check_template(value, scope, what)
-    if shape == "mcp":
-        if not isinstance(value["tool"], str) or not value["tool"]:
-            raise malformed(f"{what}: tool is not a non-empty string")
-    elif shape == "http":
-        if value["method"] not in ("GET", "POST"):
-            raise malformed(f"{what}: method is not GET or POST")
-        if not is_string_template(value["path"], scope):
-            raise malformed(f"{what}: path is not a string template")
-        if "query" in value:
-            query = value["query"]
-            if not isinstance(query, dict) or any(name.startswith("$") for name in query):
-                raise malformed(f"{what}: query is not an object, or is a template form")
-            if not all(is_string_template(member, scope) for member in query.values()):
-                raise malformed(f"{what}: a query member is not a string template")
-    else:
-        if not is_string_template(value["stream"], scope):
-            raise malformed(f"{what}: stream is not a string template")
-        if "namespace" in value and value["namespace"] is not None and not is_string_template(value["namespace"], scope):
-            raise malformed(f"{what}: namespace is not a string template or null")
-        if "limit" in value:
-            limit = value["limit"]
-            named = isinstance(limit, dict) and scope.get(limit.get("$param")) == "integer"
-            if not (is_integer(limit) or named):
-                raise malformed(f"{what}: limit is not an integer or a $param naming one")
-        if "state" in value and not is_string_template(value["state"], scope):
-            raise malformed(f"{what}: state is not a string template")
-    return shape
+
+
+def request_misfit(source: Source, profile: dict[str, Any]) -> str | None:
+    """§4.1: why a source's request does not fit its profile, `profile-mismatch`; None when it fits. A
+    tool call for `mcp`; for `http` and `airbyte`, any object, but that under `adapter-http` a `query`
+    is an object of string templates. A profile of shape `command` serves no operation."""
+    request = source.template
+    if profile["shape"] == "command":
+        return "a profile of shape command serves no operation"
+    if profile["shape"] == "mcp":
+        tool = request.get("tool")
+        if set(request) != {"tool", "arguments"} or not isinstance(tool, str) or not tool:
+            return "a request that is not a tool call, under a profile of shape mcp"
+        if tool not in profile.get("tools", []):
+            return "a tool the profile does not allow"
+    elif profile["adapter"]["name"] == "adapter-http" and "query" in request:
+        query = request["query"]
+        if (
+            not isinstance(query, dict)
+            or any(name.startswith("$") for name in query)
+            or not all(is_string_template(member, source.scope) for member in query.values())
+        ):
+            return "a query that is not an object of string templates, under adapter-http"
+    return None
 
 
 def placeholders(text: str, what: str = "a $text") -> list[str]:
@@ -1063,12 +1048,12 @@ def parse_dialect(document: Any) -> Dialect:
                 raise malformed(f"{what}: profileDigest is not a digest")
             if not is_integer(raw["maxAge"]) or not 1 <= integer_of(raw["maxAge"]) <= 86400:
                 raise malformed(f"{what}: maxAge is not an integer from 1 to 86400")
-            source.form = check_request(raw["arguments"], scope, f"{what} arguments")
+            check_request(raw["arguments"], scope, f"{what} arguments")
             source.profile_id = raw["profile"]
             source.profile_digest = raw["profileDigest"]
             source.max_age = integer_of(raw["maxAge"])
-            source.tool = raw["arguments"]["tool"] if source.form == "mcp" else ""
             source.template = raw["arguments"]
+            source.scope = scope
         if "calculation" in raw:
             calculation = closed(raw["calculation"], {"inputs", "tables"}, set(), f"{what} calculation")
             inputs, tables = calculation["inputs"], calculation["tables"]
@@ -1605,12 +1590,9 @@ def recompute(
         profile = profiles.get(source.profile_id)
         if profile is None or digest_of(canon(profile)) != source.profile_digest:
             raise Finding("profile-mismatch", f"{source.name}: no trusted profile of that id and digest")
-        # §4.1: the request is of the profile's shape's form, and a profile of shape `command`
-        # serves no operation; a tool call names a tool the profile allows.
-        if profile["shape"] != source.form:
-            raise Finding("profile-mismatch", f"{source.name}: a request of the {source.form} form under a {profile['shape']} profile")
-        if source.form == "mcp" and source.tool not in profile.get("tools", []):
-            raise Finding("profile-mismatch", f"{source.name}: a tool the profile does not allow")
+        misfit = request_misfit(source, profile)
+        if misfit is not None:
+            raise Finding("profile-mismatch", f"{source.name}: {misfit}")
         if ("calculator" in profile) != (source.calculation is not None):
             raise Finding("profile-mismatch", f"{source.name}: calculation and calculator disagree")
     # 2. parameter-invalid, the case's first

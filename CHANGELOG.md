@@ -172,10 +172,11 @@ here.
 - [RFC 0018](rfcs/0018-dialect.md) is amended (2026-10-15), and
   [`spec/dialect.md`](spec/dialect.md) with it; its status stays `Accepted`. Version 2's
   `operation` reads a gateway source of shape `airbyte`, `mcp` or `http`, as the reference Runner's
-  mapping v2 does since its pull request 80: the record's `acquisition.shape` is the profile's, the
-  request takes its shape's form (a tool call for `mcp`; `adapter-http`'s method, path and query for
-  `http`; `adapter-airbyte`'s stream read for `airbyte`, defined and not claimable), and a receipt
-  that attests a page is refused whatever the shape. This changes accepted text as a compatible
+  mapping v2 does since its pull request 80: the record's `acquisition.shape` is the profile's; the
+  request is a tool call for `mcp`, and for `http` and `airbyte` the request the gateway source of
+  that shape takes, held to being an object, to the template rules and to the receipt's commitment,
+  not to a set of members (`airbyte` defined and not claimable); and a receipt that attests a page
+  is refused whatever the shape. This changes accepted text as a compatible
   extension: every version-2 dialect that was well-formed stays so, and the nine vectors keep their
   answers. Version 3 gains the unbound source form, an `operation` that names the catalog platform
   and operation it is read through in place of a profile, with a binding document and the bound

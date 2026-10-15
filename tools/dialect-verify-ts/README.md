@@ -85,9 +85,10 @@ read both readers; that change follows the text, takes no code from the first re
 of this reader's independence, which is the account above.
 
 **The amendment of 2026-10-15.** RFC 0018's amendment of that date extended this reader and the first,
-by one author who had read both: version 2's `operation` of the shapes `airbyte`, `mcp` and `http`, each
-request held to its shape's form and the form to the profile's shape (§4.1); a receipt that attests a
-page refused (§5.2); and a dialect of version 3 refused as `version-unread` (§11), its unbound source form
+by one author who had read both: version 2's `operation` of the shapes `airbyte`, `mcp` and `http`, a
+tool call under `mcp` and, under `http` and `airbyte`, any object held to the template rules and the
+receipt's commitment, with `adapter-http`'s `query` held to string templates (§4.1); a receipt that
+attests a page refused (§5.2); and a dialect of version 3 refused as `version-unread` (§11), its unbound source form
 and binding document (§4.4) not read and no binding document taken. The tests in
 [`test/units.test.ts`](test/units.test.ts) under "the shapes of an `operation`" hold each. That extension
 is no part of this reader's independence: the agreement of the two readers on the tenth vector,

@@ -148,9 +148,9 @@ never interchanged.
 
 The dialect document is one JSON object. Its version 2 is the Runner's mapping v2 document: a
 mapping v2 document the Runner accepts is a version-2 dialect document, with the same bytes and the
-same digest. The one exception is a request under a profile of shape `airbyte` or `http`, which the
-Runner holds to the rules of a template alone and this document to its shape's form as well (§4.1).
-Version 3 (§4.3, §4.4) is not the Runner's: no Runner reads it.
+same digest. The one exception is a request's `query` under a profile whose adapter is the gateway's
+`adapter-http`, which the Runner holds to the rules of a template alone and this document to string
+templates as well (§4.1). Version 3 (§4.3, §4.4) is not the Runner's: no Runner reads it.
 
 | Member | Form | Meaning |
 | --- | --- | --- |
@@ -241,31 +241,37 @@ An `operation` source has, besides the members of §4, exactly:
 | `profile` | a non-empty string: the `id` of an input profile (§5.1) |
 | `profileDigest` | a digest: that profile's digest |
 | `maxAge` | an integer from 1 to 86400: seconds |
-| `arguments` | the template of its request: an object of one of the three forms below |
+| `arguments` | the template of its request: an object, and not a template form (below) |
 | `calculation` | an object (§7), present exactly when the profile is a calculator's |
 
 An `operation` reads a gateway source of an adapter's shape, `airbyte`, `mcp` or `http`, which its
-profile's `shape` names; a profile of shape `command` serves none. Its `arguments` are of that
-shape's form, and each form's members tell it from the others:
+profile's `shape` names; a profile of shape `command` serves none. Its `arguments` are an object,
+and not a template form, held to the rules of a template (below); what more its request must be
+follows the shape:
 
 - **`mcp`**, a tool call: exactly `tool`, a non-empty string, and `arguments`, a template. `tool`
   MUST be among the profile's `tools`.
-- **`http`**, a request as the gateway's `adapter-http` reads one: exactly `method`, the string
-  `GET` or `POST`; `path`, a string template; and `query`, optional, an object that is not a
-  template form, each of whose members is a string template. `adapter-http`'s `body` is not of the
-  form. The path's own form is the gateway's to hold; the endpoint a receipt names, which for
-  `adapter-http` is the URL asked without its query, is held to the profile's (§5.2).
-- **`airbyte`**, a stream read as the gateway's `adapter-airbyte` reads one: exactly `stream`, a
-  string template; and, each optional, `namespace`, a string template or `null`; `limit`, an
-  integer, or a `$param` naming an `integer` parameter; and `state`, a string template. The
-  gateway's `adapter-airbyte` answers every read with a page, and an acquisition of a page is not
-  read (§5.2), so no acquisition of this shape is read today and no vector holds one: the form is
-  defined, and not claimable.
+- **`http`** and **`airbyte`**: the request the gateway source of that shape takes, as its adapter
+  or its connection defines it. The gateway's `adapter-http` takes `{method, path, query, body}`,
+  `query` and `body` optional and `query`, when present, an object of string values; a connection
+  takes the form its provider documents in the gateway's `adapters/README.md`, such as
+  `{connection, revision, read, …}`; and `adapter-airbyte` takes a stream read, `{stream, namespace,
+  limit, state}`. These are examples of the forms the gateway defines, and not a closed list: this
+  document holds such a request to being an object, to the rules of a template every request has,
+  and to the receipt's commitment to it (§5.2, check 4), and not to a set of members. One rule more
+  holds `adapter-http`'s `query`: under a profile whose adapter is `adapter-http`, by its
+  `adapter.name`, a request's `query`, when it has one, MUST be an object, not a template form,
+  each of whose members is a string template. The gateway's `adapter-airbyte` answers every read
+  with a page, and an acquisition of a page is not read (§5.2), so no acquisition of shape
+  `airbyte` is read today and no vector holds one: the shape is defined, and not claimable.
 
 A **string template** is a string, a `$text`, or a `$param` naming a parameter of type `string` or
-`timestamp`. An `arguments` of none of these forms is refused with the dialect (§11); one of a form
-other than its profile's shape's is `profile-mismatch` (§5.1). (No vector decides the `airbyte`
-form, `POST`, a template form in `path`, or a request with no `query`.)
+`timestamp`. An `arguments` that is not an object, or is a template form, is refused with the
+dialect (§11). A request that does not fit its profile — under a profile of shape `command`, any;
+under one of shape `mcp`, one that is not a tool call or names a tool the profile does not allow;
+under one whose adapter is `adapter-http`, a `query` of another form — is `profile-mismatch`
+(§5.1). (No vector decides the shape `airbyte`, a connection's request, `POST`, a `body`, a
+template form in `path`, or a request with no `query`.)
 
 **Templates.** A template is a JSON value in which an object one of whose member names begins with
 `$` is a **template form**, which MUST be exactly one of:
@@ -360,7 +366,7 @@ An unbound `operation` source has, besides the members of §4, exactly:
 | `shape` | `airbyte`, `mcp` or `http`: the shape that serves the operation |
 | `record` | a non-empty string: the program whose answer the read is written against, as a profile's `adapter.name` names it (§5.1) |
 | `maxAge` | as in §4.1 |
-| `arguments` | as in §4.1, of `shape`'s form |
+| `arguments` | as in §4.1 |
 | `calculation` | as in §4.1, optional |
 
 It has no `profile` and no `profileDigest`. The catalog's names are the gateway's
@@ -425,10 +431,10 @@ digest, and only an installation supplies one. A verifier is given the profiles 
 band, as one JSON array, and MUST NOT take a profile or a key from a preparation, an acquisition or
 an export. A source's **profile** is the trusted profile of its `profile` id, whose digest MUST be the
 source's `profileDigest`; otherwise, and when a source does not fit its profile — an `operation`
-whose `arguments` are not of its profile's shape's form, a profile of shape `command` among them
-(§4.1), a tool the profile does not allow, a calculator's profile without `calculation`,
-`calculation` without a calculator's profile, a profile bound to an unbound source of another shape
-or another record (§4.4) — the finding is `profile-mismatch`.
+whose request does not fit its profile's shape and adapter (§4.1), under a profile of shape
+`command` among them, a tool the profile does not allow, a calculator's profile without
+`calculation`, `calculation` without a calculator's profile, a profile bound to an unbound source of
+another shape or another record (§4.4) — the finding is `profile-mismatch`.
 
 What a profile pins — the gateway's key, source, authority, adapter, shape, endpoint, class and
 tools — is the installation's classification of a channel. It does not pin a credential, a
@@ -832,7 +838,7 @@ nothing reported but the refusal.
 **Findings.** Otherwise it recomputes the preparation at the given preparation's `verifiedAt`, by
 §§3–9, and ends the reading at the first of these findings, in this order, reporting that one:
 
-1. `profile-mismatch` (§5.1, §4.4), the sources taken in their order;
+1. `profile-mismatch` (§5.1, §4.1, §4.4), the sources taken in their order;
 2. for the case: `parameter-invalid` (§3), its parameters in their order, then `read-failed` for its
    read (§6.2);
 3. for each source in its order: `parameter-invalid` for a source parameter it declares, in their

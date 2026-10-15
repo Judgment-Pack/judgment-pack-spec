@@ -517,42 +517,60 @@ test("§4.1: the tenth vector's request is adapter-http's method, path and query
   assert.equal(text(preparationForm(member(intake, "arguments")!)), '{"method":"GET","path":"/intake/requests","query":{"id":"REQ-7"}}');
 });
 
-test("§4.1, §5.1: a request of a form other than its profile's shape's is profile-mismatch", () => {
-  // the http request under a profile of shape mcp; under one of shape command, which serves no operation
+test("§4.1, §5.1: a request that does not fit its profile is profile-mismatch", () => {
+  // the http request under a profile of shape mcp, and under one of shape command, which serves none
   assert.equal(verdict(alteredAndSigned(httpShaped, { profile: shapeOf("mcp", ["requests"]) })), "finding:profile-mismatch");
   assert.equal(verdict(alteredAndSigned(httpShaped, { profile: shapeOf("command") })), "finding:profile-mismatch");
-  // a tool call under the http profile
-  const toolCall = (d: JObj) => sourceOf(d).m.set("arguments", parse('{"tool":"requests","arguments":{"id":{"$param":"requestId"}}}'));
-  assert.equal(verdict(alteredAndSigned(httpShaped, { dialect: toolCall })), "finding:profile-mismatch");
-  // a tool call of the unsigned-parameters vector under profiles of shape http, as version 2 refused it before
-  // the amendment (the valid vector's profile is a calculator's, which is of shape mcp by its form)
-  assert.equal(verdict(alteredAndSigned(twoSources, { profile: shapeOf("http") })), "finding:profile-mismatch");
-  assert.equal(verdict(alteredAndSigned(valid, { profile: shapeOf("http") })), "refusal:input-malformed");
+  // under mcp, a request is exactly a tool call
+  for (const near of [
+    '{"tool":"requests","arguments":{"id":{"$param":"requestId"}},"path":"/intake/requests"}',
+    '{"tool":"requests"}',
+    '{"tool":{"$param":"requestId"},"arguments":{}}',
+  ]) {
+    const asked = (d: JObj) => sourceOf(d).m.set("arguments", parse(near));
+    assert.equal(verdict(alteredAndSigned(httpShaped, { profile: shapeOf("mcp", ["requests"]), dialect: asked })), "finding:profile-mismatch", near);
+  }
 });
 
-test("§4.1: an http request is method GET or POST, a path, and a query of string templates", () => {
+test("§4.1: an http request is an object held to the template rules and its commitment, not to a member set", () => {
   const request = (to: string) => verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"arguments":{"path":"/intake/requests","method":"GET","query":{"id":{"$param":"requestId"}}}', `"arguments":${to}`) });
-  for (const bad of [
-    '{"path":"/intake/requests","method":"GET","query":{"id":7}}',
-    '{"path":"/intake/requests","method":"GET","query":{"id":true}}',
-    '{"path":"/intake/requests","method":"GET","query":{"id":["REQ-7"]}}',
-    '{"path":"/intake/requests","method":"GET","query":{"$param":"requestId"}}',
-    '{"path":"/intake/requests","method":"PUT","query":{"id":"REQ-7"}}',
-    '{"path":"/intake/requests","method":"get","query":{"id":"REQ-7"}}',
-    '{"path":"/intake/requests","method":{"$param":"requestId"},"query":{"id":"REQ-7"}}',
-    '{"path":7,"method":"GET"}',
-    '{"path":"/intake/requests","method":"GET","body":{"id":"REQ-7"}}',
-    '{"path":"/intake/requests"}',
-  ]) {
+  // not an object, a template form, or outside the template rules: refused with the dialect
+  for (const bad of ['"/intake/requests"', "[]", '{"$param":"requestId"}', '{"path":{"$param":"nope"}}', '{"path":{"$param":"runAt"}}']) {
     assert.equal(request(bad), "refusal:input-malformed", bad);
   }
-  // a $param of an integer is no string template; a $text is, and so is a literal string
+  // any other object is of the form, and the receipt does not commit it (§5.2, check 4)
+  for (const other of [
+    '{"path":"/intake/requests","method":"GET","query":{"id":"REQ-8"}}',
+    '{"path":"/intake/requests","method":"GET"}',
+    '{"path":"/intake/requests","method":"PUT","query":{"id":"REQ-7"}}',
+    '{"path":"/intake/requests","method":"POST","query":{"id":"REQ-7"},"body":{"id":"REQ-7"}}',
+    '{"tool":"requests","arguments":{"id":{"$param":"requestId"}}}',
+    "{}",
+  ]) {
+    assert.equal(request(other), "finding:acquisition-invalid", other);
+  }
+  // under adapter-http, a query is an object of string templates
+  for (const query of ['{"id":7}', '{"id":true}', '{"id":["REQ-7"]}', '{"$param":"requestId"}', '"id=REQ-7"']) {
+    assert.equal(request(`{"path":"/intake/requests","method":"GET","query":${query}}`), "finding:profile-mismatch", query);
+  }
   const withInteger = edit(httpShaped.dialect, '"parameters":{"requestId":{"pointer":"/id","type":"string"}}', '"parameters":{"requestId":{"pointer":"/id","type":"string"},"n":{"pointer":"/n","type":"integer"}}');
   const integerQuery = (to: string) => verdict({ ...httpShaped, dialect: edit(withInteger, '"query":{"id":{"$param":"requestId"}}', `"query":${to}`) });
-  assert.equal(integerQuery('{"id":{"$param":"n"}}'), "refusal:input-malformed");
+  assert.equal(integerQuery('{"id":{"$param":"n"}}'), "finding:profile-mismatch");
   assert.equal(integerQuery('{"id":{"$text":"REQ-{{n}}"}}'), "finding:parameter-invalid"); // of the form; the case has no /n
-  assert.equal(request('{"path":"/intake/requests","method":"GET","query":{"id":"REQ-8"}}'), "finding:acquisition-invalid"); // another request, another commitment
-  assert.equal(request('{"path":"/intake/requests","method":"GET"}'), "finding:acquisition-invalid");
+});
+
+test("§4.1: a connection's request is read under its own adapter", () => {
+  // The form a gateway connection takes (adapters/README.md), whose `query` is a WIQL string.
+  const connection = '{"connection":"board","revision":"' + "0".repeat(64) + '","read":"workitems.query","query":"SELECT [System.Id] FROM WorkItems","top":50}';
+  const asked = (d: JObj) => sourceOf(d).m.set("arguments", parse(connection));
+  const adapterName = (name: string) => (p: JObj) => (p.m.get("adapter") as JObj).m.set("name", str(name));
+  const receiptAdapter = (name: string) => (r: JObj) => (member(r.m.get("acquisition"), "adapter") as JObj).m.set("name", str(name));
+  assert.equal(
+    verdict(alteredAndSigned(httpShaped, { profile: adapterName("adapter-sources"), dialect: asked, receipt: receiptAdapter("adapter-sources"), request: parse(connection) })),
+    "finding:preparation-differs",
+  );
+  // under adapter-http, its query is of another form
+  assert.equal(verdict(alteredAndSigned(httpShaped, { dialect: asked, request: parse(connection) })), "finding:profile-mismatch");
 });
 
 test("§5.2: the record's acquisition.shape is the profile's", () => {
@@ -569,8 +587,7 @@ test("§5.2: a receipt that attests a page is not read, whatever the shape", () 
 });
 
 test("§4.1: a stream read under a profile of shape airbyte is read as its shape gives it", () => {
-  const stream = '{"stream":"requests","namespace":null,"limit":10}';
-  const asAirbyte = (receipt?: (r: JObj) => void): Alteration => ({
+  const asAirbyte = (stream: string, receipt?: (r: JObj) => void): Alteration => ({
     profile: shapeOf("airbyte"),
     dialect: (d) => sourceOf(d).m.set("arguments", parse(stream)),
     receipt: (r) => {
@@ -579,15 +596,12 @@ test("§4.1: a stream read under a profile of shape airbyte is read as its shape
     },
     request: parse(stream),
   });
-  assert.equal(verdict(alteredAndSigned(httpShaped, asAirbyte())), "finding:preparation-differs");
   const paged = (r: JObj) => (r.m.get("acquisition") as JObj).m.set("pageItems", arr([]));
-  assert.equal(verdict(alteredAndSigned(httpShaped, asAirbyte(paged))), "finding:acquisition-invalid");
-  const form = (to: string) => verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"arguments":{"path":"/intake/requests","method":"GET","query":{"id":{"$param":"requestId"}}}', `"arguments":${to}`) });
-  for (const bad of ['{"stream":7}', '{"stream":"requests","limit":"10"}', '{"stream":"requests","limit":{"$param":"requestId"}}', '{"stream":"requests","namespace":7}', '{"stream":"requests","state":null}', '{"namespace":"public"}']) {
-    assert.equal(form(bad), "refusal:input-malformed", bad);
+  // adapter-airbyte's stream read, and an object of other members: the request is not a member set
+  for (const stream of ['{"stream":"requests","namespace":null,"limit":10}', '{"stream":"requests","syncMode":"full_refresh"}']) {
+    assert.equal(verdict(alteredAndSigned(httpShaped, asAirbyte(stream))), "finding:preparation-differs", stream);
+    assert.equal(verdict(alteredAndSigned(httpShaped, asAirbyte(stream, paged))), "finding:acquisition-invalid", stream);
   }
-  // of the form, under the http profile: a mismatch
-  assert.equal(form('{"stream":"requests","namespace":"public","limit":10,"state":{"$param":"requestId"}}'), "finding:profile-mismatch");
 });
 
 test("§11: a dialect of version 3 is refused as version-unread, before its form is checked", () => {

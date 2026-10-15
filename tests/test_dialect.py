@@ -561,7 +561,7 @@ class DialectVectorTests(unittest.TestCase):
         intake = json.loads(outcome.preparation)["outcomes"][1]
         self.assertEqual({"method": "GET", "path": "/intake/requests", "query": {"id": "REQ-7"}}, intake["arguments"])
 
-    def test_a_request_of_a_form_other_than_its_profiles_shape_is_a_mismatch(self) -> None:
+    def test_a_request_that_does_not_fit_its_profile_is_a_mismatch(self) -> None:
         def shape(value: str, tools: Any = None) -> Any:
             def alter(profile: dict[str, Any]) -> None:
                 profile["shape"] = value
@@ -575,45 +575,75 @@ class DialectVectorTests(unittest.TestCase):
         for profile in (shape("mcp", ["requests"]), shape("command")):
             answer = self._altered("http-shaped-source", profile=profile).verify().answer
             self.assertEqual("profile-mismatch", answer.get("finding"), answer)
-        # a tool call under the http profile
-        def tool_call(document: dict[str, Any]) -> None:
-            document["sources"][0]["arguments"] = {"tool": "requests", "arguments": {"id": {"$param": "requestId"}}}
+        # under mcp, a request is exactly a tool call
+        for arguments in (
+            {"tool": "requests", "arguments": {"id": {"$param": "requestId"}}, "path": "/intake/requests"},
+            {"tool": "requests"},
+            {"tool": {"$param": "requestId"}, "arguments": {}},
+        ):
+            with self.subTest(arguments=arguments):
+                answer = self._altered(
+                    "http-shaped-source",
+                    profile=shape("mcp", ["requests"]),
+                    dialect=lambda d, a=arguments: d["sources"][0].__setitem__("arguments", a),
+                ).verify().answer
+                self.assertEqual("profile-mismatch", answer.get("finding"), answer)
 
-        answer = self._altered("http-shaped-source", dialect=tool_call).verify().answer
-        self.assertEqual("profile-mismatch", answer.get("finding"), answer)
-        # the unsigned-parameters vector's tool calls under profiles of shape http, as version 2 refused them
-        answer = self._altered("unsigned-parameters", profile=shape("http")).verify().answer
-        self.assertEqual("profile-mismatch", answer.get("finding"), answer)
-
-    def test_an_http_request_is_a_method_a_path_and_a_query_of_string_templates(self) -> None:
-        refused = [
-            {"path": "/intake/requests", "method": "GET", "query": {"id": 7}},
-            {"path": "/intake/requests", "method": "GET", "query": {"id": True}},
-            {"path": "/intake/requests", "method": "GET", "query": {"id": ["REQ-7"]}},
-            {"path": "/intake/requests", "method": "GET", "query": {"$param": "requestId"}},
-            {"path": "/intake/requests", "method": "PUT", "query": {"id": "REQ-7"}},
-            {"path": "/intake/requests", "method": "get", "query": {"id": "REQ-7"}},
-            {"path": "/intake/requests", "method": {"$param": "requestId"}},
-            {"path": 7, "method": "GET"},
-            {"path": "/intake/requests", "method": "GET", "body": {"id": "REQ-7"}},
-            {"path": "/intake/requests"},
-        ]
-        for arguments in refused:
+    def test_an_http_request_is_an_object_held_to_its_commitment_not_to_a_member_set(self) -> None:
+        # not an object, a template form, or outside the template rules: refused with the dialect
+        for arguments in ("/intake/requests", [], {"$param": "requestId"}, {"path": {"$param": "nope"}}, {"path": {"$param": "runAt"}}):
             with self.subTest(arguments=arguments):
                 self.assertEqual("input-malformed", self._with_arguments(arguments).get("refused"))
-        integer = {"n": {"pointer": "/n", "type": "integer"}}
-        query = {"path": "/intake/requests", "method": "GET", "query": {"id": {"$param": "n"}}}
-        self.assertEqual("input-malformed", self._with_arguments(query, integer).get("refused"))
-        # a $text is a string template; the case has no /n, so the reading ends at the case's parameter
-        query["query"]["id"] = {"$text": "REQ-{{n}}"}
-        self.assertEqual("parameter-invalid", self._with_arguments(query, integer).get("finding"))
-        # of the form, another request: the receipt does not commit it
+        # any other object is of the form, and the receipt does not commit it (§5.2, check 4)
         for arguments in (
             {"path": "/intake/requests", "method": "GET", "query": {"id": "REQ-8"}},
             {"path": "/intake/requests", "method": "GET"},
+            {"path": "/intake/requests", "method": "PUT", "query": {"id": "REQ-7"}},
+            {"path": "/intake/requests", "method": "POST", "query": {"id": "REQ-7"}, "body": {"id": "REQ-7"}},
+            {"tool": "requests", "arguments": {"id": {"$param": "requestId"}}},
+            {},
         ):
             with self.subTest(arguments=arguments):
                 self.assertEqual("acquisition-invalid", self._with_arguments(arguments).get("finding"))
+        # under adapter-http, a query is an object of string templates
+        for query in ({"id": 7}, {"id": True}, {"id": ["REQ-7"]}, {"$param": "requestId"}, "id=REQ-7"):
+            with self.subTest(query=query):
+                arguments = {"path": "/intake/requests", "method": "GET", "query": query}
+                self.assertEqual("profile-mismatch", self._with_arguments(arguments).get("finding"))
+        integer = {"n": {"pointer": "/n", "type": "integer"}}
+        query = {"path": "/intake/requests", "method": "GET", "query": {"id": {"$param": "n"}}}
+        self.assertEqual("profile-mismatch", self._with_arguments(query, integer).get("finding"))
+        # a $text is a string template; the case has no /n, so the reading ends at the case's parameter
+        query["query"]["id"] = {"$text": "REQ-{{n}}"}
+        self.assertEqual("parameter-invalid", self._with_arguments(query, integer).get("finding"))
+
+    def test_a_connections_request_is_read_under_its_own_adapter(self) -> None:
+        # The form a gateway connection takes (adapters/README.md), whose `query` is a WIQL string: read
+        # under a profile of shape http whose adapter is the connection's; under adapter-http, its query
+        # is of another form.
+        request = {
+            "connection": "board",
+            "revision": "0" * 64,
+            "read": "workitems.query",
+            "query": "SELECT [System.Id] FROM WorkItems",
+            "top": 50,
+        }
+
+        def adapter(name: str) -> Any:
+            return lambda p: p["adapter"].__setitem__("name", name)
+
+        def receipt(name: str) -> Any:
+            return lambda r: r["acquisition"]["adapter"].__setitem__("name", name)
+
+        def with_request(d: dict[str, Any]) -> None:
+            d["sources"][0]["arguments"] = dict(request)
+
+        answer = self._altered(
+            "http-shaped-source", profile=adapter("adapter-sources"), dialect=with_request, receipt=receipt("adapter-sources"), request=request
+        ).verify().answer
+        self.assertEqual("preparation-differs", answer.get("finding"), answer)
+        answer = self._altered("http-shaped-source", dialect=with_request, request=request).verify().answer
+        self.assertEqual("profile-mismatch", answer.get("finding"), answer)
 
     def test_the_records_shape_is_the_profiles(self) -> None:
         answer = self._altered("http-shaped-source").verify().answer
@@ -635,9 +665,7 @@ class DialectVectorTests(unittest.TestCase):
                 self.assertEqual("acquisition-invalid", answer.get("finding"), answer)
 
     def test_a_stream_read_under_an_airbyte_profile_is_read_as_its_shape_gives_it(self) -> None:
-        stream = {"stream": "requests", "namespace": None, "limit": 10}
-
-        def as_airbyte(paged: bool) -> Any:
+        def as_airbyte(stream: dict[str, Any], paged: bool) -> Any:
             def receipt(r: dict[str, Any]) -> None:
                 r["acquisition"]["shape"] = "airbyte"
                 if paged:
@@ -651,21 +679,11 @@ class DialectVectorTests(unittest.TestCase):
                 request=stream,
             ).verify().answer
 
-        self.assertEqual("preparation-differs", as_airbyte(False).get("finding"))
-        self.assertEqual("acquisition-invalid", as_airbyte(True).get("finding"))
-        for arguments in (
-            {"stream": 7},
-            {"stream": "requests", "limit": "10"},
-            {"stream": "requests", "limit": {"$param": "requestId"}},
-            {"stream": "requests", "namespace": 7},
-            {"stream": "requests", "state": None},
-            {"namespace": "public"},
-        ):
-            with self.subTest(arguments=arguments):
-                self.assertEqual("input-malformed", self._with_arguments(arguments).get("refused"))
-        # of the form, under the http profile: a mismatch
-        arguments = {"stream": "requests", "namespace": "public", "limit": 10, "state": {"$param": "requestId"}}
-        self.assertEqual("profile-mismatch", self._with_arguments(arguments).get("finding"))
+        # adapter-airbyte's stream read, and an object of other members: the request is not a member set
+        for stream in ({"stream": "requests", "namespace": None, "limit": 10}, {"stream": "requests", "syncMode": "full_refresh"}):
+            with self.subTest(stream=stream):
+                self.assertEqual("preparation-differs", as_airbyte(stream, False).get("finding"))
+                self.assertEqual("acquisition-invalid", as_airbyte(stream, True).get("finding"))
 
     def test_a_dialect_of_version_3_is_refused_before_its_form(self) -> None:
         def answer(alter: Any, case: bytes | None = None) -> Any:
