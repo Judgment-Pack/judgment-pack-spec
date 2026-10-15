@@ -667,6 +667,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0020-workflow.md",
+        PurePosixPath("rfcs/0020-workflow/index.html"),
+        "RFC 0020: The workflow",
+        "Draft standards-track RFC: the workflow, a portable contract for staged research. Stages pin a dialect and a pack by digest, a selection between stages, one execution per selected record, output lineage back to the parent, with a reader class and fixtures from a recorded two-stage run still to come.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
