@@ -106,8 +106,10 @@ is of version 3, its `cites` in the order of `sources` (§9.1); an `operation` o
 with the binding document it is given (`--binding`), the bound dialect made of the two and read as every
 dialect is, a binding document of another form, of another dialect's digest, or that does not name
 exactly the unbound sources refused as `input-malformed`, and a profile bound of another shape or record
-`profile-mismatch` (§4.4); and a source of a kind of §4.3 held to the form its kind names and refused as
-`kind-unread`. Nothing is `version-unread` now: this reader reads both versions the text defines. The
+`profile-mismatch` (§4.4); a source of a kind of §4.3 held to the form its kind names and refused as
+`kind-unread`; and, as RFC 0018's amendment that read version 3 decided, a version-3 document that names
+`provider`, `facts` or `evidence`, or writes an optional member empty, refused as `input-malformed` (§2).
+Nothing is `version-unread` now: this reader reads both versions the text defines. The
 tests in [`test/units.test.ts`](test/units.test.ts) under "dialect version 3" hold each. That extension
 is no part of this reader's independence: the two readers' agreement on the eleventh and twelfth vectors
 is one author's.
@@ -166,15 +168,12 @@ These were listed as gaps in the first version; the text decides each.
 
 ### Version 3: what the text leaves open, as the extension's author read it
 
-No vector depends on either point; the first reader takes the same.
+No vector depends on it; the first reader takes the same, and RFC 0018's Evidence records it.
 
 - **The forms of version 3's kinds** (§4.3), where the text names a member without its form: `http`'s
   `path`, "a template that yields a path", is taken as a string template; its `headers`, "the names of
   the headers", `research`'s `evidence`, "the fields each answer MUST support", and a `sql` binding's
   `name` and `type`, as non-empty strings.
-- **`provider`, `facts` and `evidence` in version 3.** §2 lists them for the dialect document without a
-  version, so a version-3 document that writes them is read, under the digest that writing gives it. (The
-  Runner refuses them in version 3; the pull request that staged the vectors reports the sentence.)
 
 ### The genuine choices, which the text now decides
 

@@ -104,8 +104,8 @@ binds it to the profile `intake`; and `mapping.json` is the bound dialect the Ru
 whose digest the preparation carries as `mappingDigest`. A verifier is given `unbound.json` and
 `binding.json`, makes the bound dialect, and reads that. No vector holds an `operation` of shape
 `airbyte`, nor a kind of version 3 (§4.3): those are defined, and not claimable. The companion
-document's text, which says that no vector holds version 3, is not changed by the staging of these
-two: that waits for the maintainer.
+document was amended with their staging (RFC 0018, the amendment that read version 3), so that its
+text says what these two hold.
 
 One vector is answered otherwise than `verify-run` answers it. `disposition-differs-from-audit`
 alters the run's retained result, which is the Runner's export and no part of a preparation or a

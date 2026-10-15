@@ -34,6 +34,8 @@ const VERSION_3_KINDS = new Map<string, { required: string[]; optional: string[]
   ["web", { required: ["url"], optional: [] }],
   ["research", { required: ["question", "constraints", "model", "evidence"], optional: [] }],
 ]);
+// §2: the members of version 2 alone, which a document of version 3 carries none of.
+const VERSION_2_MEMBERS = ["provider", "facts", "evidence"];
 // §4.4: the catalog names of an unbound `operation`, which the binding removes.
 const UNBOUND_MEMBERS = ["platform", "operation", "shape", "record"];
 export const DIGEST = /^sha256:[0-9a-f]{64}$/;
@@ -107,6 +109,18 @@ function exact(v: JVal | undefined, what: string, required: string[], optional: 
   for (const r of required) if (!v.m.has(r)) malformed(`${what} lacks ${r}`);
   for (const k of v.m.keys()) if (!required.includes(k) && !optional.includes(k)) malformed(`${what} has the unknown member ${k}`);
   return v;
+}
+
+/** §2, version 3 written one way: an optional member whose absence means its empty value is left out when it is
+ * empty, and one written as the empty array or the empty object is refused. */
+function notWrittenEmpty(v: JVal | undefined, members: string[], what: string): void {
+  if (v === undefined || v.t !== "obj") return;
+  for (const k of members) {
+    const x = v.m.get(k);
+    if (x !== undefined && ((x.t === "arr" && x.a.length === 0) || (x.t === "obj" && x.m.size === 0))) {
+      malformed(`${what}.${k} is written empty, which version 3 leaves out`);
+    }
+  }
 }
 
 function string(v: JVal | undefined, what: string): string {
@@ -441,6 +455,11 @@ export function readDialect(d: JVal): Dialect {
   const version = o.m.get("version")!;
   if (version.t !== "num" || (version.lit !== "2" && version.lit !== "3")) malformed("the dialect's version is not the integer 2 or 3");
   const v = Number((version as { lit: string }).lit);
+  if (v === 3) {
+    for (const k of VERSION_2_MEMBERS) if (o.m.has(k)) malformed(`the dialect's ${k} is a member of version 2 alone`);
+    notWrittenEmpty(o, ["sources", "admits", "unmapped", "unmappedEvidence"], "the dialect");
+    notWrittenEmpty(o.m.get("case"), ["parameters"], "the case");
+  }
   if (o.m.has("provider") && string(o.m.get("provider"), "provider") !== "") malformed("provider is not the empty string");
   for (const k of ["facts", "evidence"]) if (o.m.has(k) && o.m.get(k)!.t !== "null") malformed(`the dialect's ${k} is not null`);
   if (o.m.has("unmapped")) {
@@ -508,6 +527,7 @@ export function readDialect(d: JVal): Dialect {
 
     const scope: Scope = new Map(caseScope);
     const parameters: SourceParam[] = [];
+    if (v === 3) notWrittenEmpty(so, ["parameters"], what);
     if (so.m.has("parameters")) {
       for (const [pname, decl] of object(so.m.get("parameters"), `${what}.parameters`).m) {
         if (pname === "" || pname === "runAt" || caseScope.has(pname)) malformed(`${what}.parameters names ${pname}`);
@@ -526,6 +546,7 @@ export function readDialect(d: JVal): Dialect {
     if (scope.size > BOUNDS.scopeParameters) throw new Refusal("input-over-bound", `${what}'s scope`);
 
     const read = readRead(so.m.get("read"), scope, `${what}.read`);
+    if (v === 3) notWrittenEmpty(member(so.m.get("read"), "copy"), ["facts", "evidence"], `${what}.read.copy`);
     const source: Source = { name, kind, parameters, read, factTargets: [], evidenceTargets: [] };
     if (kind === "selected-file") source.provider = string(so.m.get("provider"), "provider");
     // Each member as its kind's form, held above, gives it: an unbound operation names no profile (§4.4), and a
@@ -583,6 +604,7 @@ export function readDialect(d: JVal): Dialect {
   const admitsEvidence = new Map<string, string[]>();
   if (o.m.has("admits")) {
     const ad = exact(o.m.get("admits"), "admits", [], ["facts", "evidence"]);
+    if (v === 3) notWrittenEmpty(ad, ["facts", "evidence"], "admits");
     if (ad.m.has("facts")) {
       for (const [t, l] of object(ad.m.get("facts"), "admits.facts").m) {
         if (!allFacts.includes(t)) malformed(`admits names the fact target ${t}, which no source writes`);
@@ -643,6 +665,7 @@ function readVersion3Kind(so: JObj, kind: string, scope: Scope, what: string): v
       checkTemplate(so.m.get("body")!, scope, `${what}.body`);
     }
     if (so.m.has("headers")) names(so.m.get("headers"), `${what}.headers`);
+    notWrittenEmpty(so, ["headers"], what);
   } else if (kind === "sql") {
     string(so.m.get("statement"), `${what}.statement`); // a fixed string, never a template
     array(so.m.get("bindings"), `${what}.bindings`).forEach((x, k) => {

@@ -621,17 +621,21 @@ test("§4.1: a stream read under a profile of shape airbyte is read as its shape
 test("§11: a dialect of version 3 is read, and its form checked", () => {
   const unbound = '"platform":"intake","operation":"requests","shape":"http","record":"adapter-http","maxAge":300';
   const asUnbound = (b: Uint8Array) => edit(b, '"profile":"intake","profileDigest":"sha256:dec2468ef46d4026c7f813ff768aba66d2d8e7891e8b8ecb99fb099ef3fd363e","maxAge":300', unbound);
+  // written as version 3 is, without the members of version 2 alone (§2)
+  const v2Tail = '"version":2,"provider":"","facts":null,"evidence":null';
   // read as version 3: its preparation is another, of version 3 and another digest
-  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3') }), "finding:preparation-differs");
-  // its form is checked: an unbound source with no binding document, and a member of no form
-  assert.equal(verdict({ ...httpShaped, dialect: edit(asUnbound(httpShaped.dialect), '"version":2', '"version":3') }), "refusal:input-malformed");
-  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3,"Version":"x"') }), "refusal:input-malformed");
+  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, v2Tail, '"version":3') }), "finding:preparation-differs");
+  // its form is checked: the members of version 2 alone, an unbound source with no binding document, and a member
+  // of no form
+  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3') }), "refusal:input-malformed");
+  assert.equal(verdict({ ...httpShaped, dialect: edit(asUnbound(httpShaped.dialect), v2Tail, '"version":3') }), "refusal:input-malformed");
+  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, v2Tail, '"version":3,"Version":"x"') }), "refusal:input-malformed");
   // an unbound source in a version-2 dialect, and a version this document does not define
   assert.equal(verdict({ ...httpShaped, dialect: asUnbound(httpShaped.dialect) }), "refusal:input-malformed");
   assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":4') }), "refusal:input-malformed");
   assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3.0') }), "refusal:input-malformed");
   // the bounds measured before it come first
-  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3'), case: utf8("[".repeat(33) + "]".repeat(33)) }), "refusal:input-over-bound");
+  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, v2Tail, '"version":3'), case: utf8("[".repeat(33) + "]".repeat(33)) }), "refusal:input-over-bound");
 });
 
 const imported = loadVector(join(VECTORS, "unbound-bound-at-import"), true);
@@ -688,7 +692,10 @@ test("§9.1: version 3 cites in the order of sources, version 2 by callIndex", (
   const base = loadVector(join(VECTORS, "unsigned-parameters"), false);
   for (const [version, expected] of [["2", ["registry", "vendor"]], ["3", ["vendor", "registry"]]] as const) {
     const swapped = alteredAndSigned(base, {
-      dialect: (d) => d.m.set("version", num(version)),
+      dialect: (d) => {
+        d.m.set("version", num(version));
+        if (version === "3") for (const k of ["provider", "facts", "evidence"]) d.m.delete(k); // version 2's alone (§2)
+      },
       receipt: (rc) => rc.m.set("callIndex", num(String(1 - Number((rc.m.get("callIndex") as { lit: string }).lit)))),
     });
     const r = verify(swapped);
@@ -765,7 +772,7 @@ test("§4.3: a kind of version 3 is held to its form, and not read", () => {
     research: { question: '{"$text":"Which?"}', constraints: "{}", model: '"a-model"', evidence: '["excerpt"]' },
   };
   const malformedMembers: Record<string, [string, string][]> = {
-    http: [["method", '"PUT"'], ["path", '{"a":1}'], ["path", '{"$param":"runAt"}'], ["method", '"GET"'], ["query", '{"currency":7}'], ["headers", '"Accept"']],
+    http: [["method", '"PUT"'], ["path", '{"a":1}'], ["path", '{"$param":"runAt"}'], ["method", '"GET"'], ["query", '{"currency":7}'], ["headers", '"Accept"'], ["headers", "[]"]],
     sql: [["statement", '{"$text":"SELECT 1"}'], ["bindings", '[{"name":"c","type":"STRING","value":"EUR"}]'], ["bindings", `[{"name":"c","value":${param}}]`]],
     web: [["url", "7"], ["url", '{"$param":"nope"}'], ["url", '{"$text":"https://example.org/"}']],
     research: [["question", "7"], ["constraints", "[]"], ["model", "null"], ["evidence", '"excerpt"']],
@@ -800,11 +807,55 @@ test("§4.3: a kind of version 3 is held to its form, and not read", () => {
   assert.equal(verdict({ ...withWeb, binding: undefined }), "refusal:input-malformed");
 });
 
-test("§2: version 3 lists provider, facts and evidence as version 2 does", () => {
-  // Read, under another digest. (The Runner refuses them in version 3; the pull request that staged the vectors
-  // reports the sentence.)
-  const written = edit(v3bound.dialect, '"version":3}', '"version":3,"provider":"","facts":null,"evidence":null}');
-  assert.equal(verdict({ ...v3bound, dialect: written }), "finding:preparation-differs");
+test("§2: version 3 carries no member of version 2 alone: provider, facts and evidence", () => {
+  // refused in version 3; in version 2 each is read, as the version-2 vectors write all three
+  for (const [k, value] of [["provider", '""'], ["facts", "null"], ["evidence", "null"]]) {
+    for (const [version, expected] of [["3", "refusal:input-malformed"], ["2", "finding:preparation-differs"]]) {
+      const written = edit(v3bound.dialect, '"version":3}', `"version":${version},"${k}":${value}}`);
+      assert.equal(verdict({ ...v3bound, dialect: written }), expected, `${k} in version ${version}`);
+    }
+  }
+});
+
+test("§2: version 3 leaves an optional member out when it is empty", () => {
+  // Written as [] or {}, it is refused in version 3; each alteration is read in version 2, so that its emptiness
+  // alone is what version 3 refuses.
+  const source = (d: JObj) => (d.m.get("sources") as { a: JObj[] }).a[0];
+  const copy = (d: JObj) => member(source(d).m.get("read"), "copy") as JObj;
+  const alterations: [string, (d: JObj) => void][] = [
+    ["unmapped", (d) => d.m.set("unmapped", arr([]))],
+    ["unmappedEvidence", (d) => d.m.set("unmappedEvidence", arr([]))],
+    ["admits", (d) => d.m.set("admits", obj())],
+    ["admits.facts", (d) => d.m.set("admits", obj([["facts", obj()]]))],
+    ["admits.evidence", (d) => d.m.set("admits", obj([["evidence", obj()]]))],
+    ["a source's parameters", (d) => source(d).m.set("parameters", obj())],
+    ["a copy's facts", (d) => copy(d).m.set("facts", arr([]))],
+    ["a copy's evidence", (d) => copy(d).m.set("evidence", arr([]))],
+  ];
+  for (const [name, alter] of alterations) {
+    for (const [version, expected] of [["3", "refusal:input-malformed"], ["2", "finding:preparation-differs"]]) {
+      const d = parse(text(v3bound.dialect)) as JObj;
+      d.m.set("version", num(version));
+      alter(d);
+      assert.equal(verdict({ ...v3bound, dialect: canon(d) }), expected, `${name} in version ${version}`);
+    }
+  }
+  // A case-only dialect: `sources` and the case's `parameters` written empty. The case's own `facts` and
+  // `evidence` are required, not optional, and are written empty in every version.
+  const caseOnly = (version: string, more: string, caseMore = "") => ({
+    ...valid,
+    dialect: utf8(`{"version":${version},"case":{${caseMore}"facts":[],"evidence":[]}${more}}`),
+    acquisitions: utf8("{}"),
+    preparation: utf8('{"verifiedAt":"2026-10-14T00:00:00Z"}'),
+    record: undefined,
+    requireBinding: false,
+  });
+  for (const version of ["2", "3"]) {
+    assert.equal(verdict(caseOnly(version, "")), "finding:preparation-differs", version);
+    const refused = version === "3" ? "refusal:input-malformed" : "finding:preparation-differs";
+    assert.equal(verdict(caseOnly(version, ',"sources":[]')), refused, `sources in version ${version}`);
+    assert.equal(verdict(caseOnly(version, "", '"parameters":{},')), refused, `the case's parameters in version ${version}`);
+  }
 });
 
 test("the program takes --binding, and reads a vector bound at import from its directory", () => {

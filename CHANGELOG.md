@@ -21,8 +21,15 @@ here.
   record is `profile-mismatch`; a source of a kind of §4.3 is held to its form and refused as
   `kind-unread`. Both give the two vectors the Runner's answer, a reading whose binding `matches`.
   The extension is one author's, who read both readers, so for these two their agreement is not
-  independent. The companion document is unchanged: its sentences that no vector holds version 3
-  wait for the maintainer.
+  independent. RFC 0018 is amended with them (2026-10-15), and the companion document with it; its
+  status stays `Accepted`. The text now says what is so: the reference Runner reads version 3 since
+  its pull request 83 (`v0.12.0`), preparing `operation` and `selected-file` and refusing `http`,
+  `sql`, `web` and `research` by name, and two vectors hold version 3 (§§2, 4, 4.3, 4.4 and the
+  Status); §14's claim form admits a claim of version 3 beside version 2. Version 3 is written one
+  way (§2): a document of version 3 that names `provider`, `facts` or `evidence`, members of version
+  2 alone, or writes an optional member empty, is refused, and both readers refuse both. The
+  Evidence records the readings both readers take where the text names a member of a version-3
+  kind without a form.
 - [RFC 0018](rfcs/0018-dialect.md) is `Accepted`, at draft maturity, under the interim review
   regime; the maintainer waived the comment period RFC 0000 names, because the project has no
   outside readers yet, and the adoption record says so as a departure. The RFC taken up from the

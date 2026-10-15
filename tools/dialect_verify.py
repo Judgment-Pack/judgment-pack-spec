@@ -15,6 +15,7 @@ amendment of 2026-10-15 it reads `operation` of the shapes `airbyte`, `mcp` and 
 call for `mcp`, and for the others the request the gateway source takes, held to being an object, the
 template rules and its commitment, and not to a set of members. Since the Runner's version-3 vectors
 were staged it reads dialect versions 2 and 3. A document of version 3 is read as one of version 2,
+written one way (§2: no `provider`, `facts` or `evidence`, and no optional member written empty),
 its preparation of version 3 (§9.1); a source of a kind of §4.3 is held to the form its kind names and
 then refused as `kind-unread`; and an `operation` of the unbound form (§4.4) is read with the binding
 document it is given, by making the bound dialect of the two and reading that as every dialect is
@@ -250,6 +251,8 @@ VERSION_3_KINDS = {
     "web": ({"url"}, set()),
     "research": ({"question", "constraints", "model", "evidence"}, set()),
 }
+# §2: the members of version 2 alone, which a document of version 3 carries none of.
+VERSION_2_MEMBERS = ("provider", "facts", "evidence")
 # §4.4: an unbound `operation`'s catalog names, and the shapes that serve an operation (§4.1).
 UNBOUND_MEMBERS = ("platform", "operation", "shape", "record")
 OPERATION_SHAPES = ("airbyte", "mcp", "http")
@@ -947,6 +950,15 @@ def check_read(value: Any, scope: dict[str, str], what: str) -> Read:
     return result
 
 
+def not_written_empty(value: Any, members: tuple[str, ...], what: str) -> None:
+    """§2, version 3 written one way: an optional member whose absence means its empty value is left
+    out when it is empty, and one written as the empty array or the empty object is refused."""
+    if isinstance(value, dict):
+        for member in members:
+            if member in value and isinstance(value[member], (list, dict)) and not value[member]:
+                raise malformed(f"{what}: {member} is written empty, which version 3 leaves out")
+
+
 def check_parameter_name(name: Any, what: str) -> None:
     if not isinstance(name, str) or not name or name == "runAt":
         raise malformed(f"{what}: a parameter name that is empty or runAt")
@@ -964,6 +976,13 @@ def parse_dialect(document: Any) -> Dialect:
     version = integer_of(top["version"])
     if version not in DEFINED_VERSIONS:
         raise malformed("a dialect version this document does not define")
+    if version == 3:
+        # §2: version 3 is written one way.
+        for name in VERSION_2_MEMBERS:
+            if name in top:
+                raise malformed(f"{name} is a member of version 2 alone")
+        not_written_empty(top, ("sources", "admits", "unmapped", "unmappedEvidence"), "the dialect")
+        not_written_empty(top["case"], ("parameters",), "the case")
     if "provider" in top and top["provider"] != "":
         raise malformed("provider is not the empty string")
     for name in ("facts", "evidence"):
@@ -1080,6 +1099,8 @@ def parse_dialect(document: Any) -> Dialect:
         declared = raw.get("parameters", {})
         if not isinstance(declared, dict):
             raise malformed(f"{what}: parameters are not an object")
+        if version == 3:
+            not_written_empty(raw, ("parameters",), what)
         for pname, declaration in declared.items():
             check_parameter_name(pname, what)
             if pname in case_parameters:
@@ -1130,6 +1151,8 @@ def parse_dialect(document: Any) -> Dialect:
                     raise malformed(f"{what}: a table limit of another form")
             source.calculation = calculation
         source.read = check_read(raw["read"], scope, what + " read")
+        if version == 3:
+            not_written_empty(raw["read"].get("copy"), ("facts", "evidence"), what + " copy")
         sources.append(source)
     # A source parameter's pointer is a fact target of the source it comes from (§3).
     for source in sources:
@@ -1159,6 +1182,8 @@ def parse_dialect(document: Any) -> Dialect:
     admits: dict[tuple[str, str], list[str]] = {}
     if "admits" in top:
         raw_admits = closed(top["admits"], set(), {"facts", "evidence"}, "admits")
+        if version == 3:
+            not_written_empty(raw_admits, ("facts", "evidence"), "admits")
         written_facts = {t for r in [case_read] + [s.read for s in sources] for t in r.fact_targets}
         for member, kind, written in (("facts", "fact", written_facts), ("evidence", "evidence", set(evidence_sources))):
             entries = raw_admits.get(member, {})
@@ -1209,6 +1234,7 @@ def check_version_3_kind(raw: dict[str, Any], kind: str, scope: dict[str, str], 
             check_template(raw["body"], scope, f"{what} body")
         if "headers" in raw:
             names(raw["headers"], "headers")
+            not_written_empty(raw, ("headers",), what)
     elif kind == "sql":
         if not isinstance(raw["statement"], str):
             raise malformed(f"{what}: statement is not a string, and is never a template")

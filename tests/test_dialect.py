@@ -214,10 +214,8 @@ class DialectVectorTests(unittest.TestCase):
                 self.assertIn(expected, text)
 
     def test_the_companion_counts_the_vectors_of_the_commits_it_names(self) -> None:
-        # The companion's Status names the Runner commits its vectors were copied from, and counts them. The
-        # eleventh and twelfth, of dialect version 3, were staged without a change to the companion, whose
-        # text says no vector holds version 3 yet: its Status counts the vectors of the commits it names, ten,
-        # and an amendment that names the Runner's commit of the eleventh and twelfth counts twelve.
+        # The companion's Status names the Runner commits its vectors were copied from, and counts the vectors
+        # of the commits it names: twelve, from three commits, since the amendment that read version 3.
         text = " ".join((ROOT / COMPANION).read_text(encoding="utf-8").split())
         source = self.manifest["source"]
         self.assertIn(source["commit"], text)
@@ -743,17 +741,25 @@ class DialectVectorTests(unittest.TestCase):
         def version(value: Any) -> Any:
             return lambda d: d.__setitem__("version", value)
 
+        def version_3(document: dict[str, Any]) -> None:
+            # written as version 3 is: without the members of version 2 alone (§2)
+            document["version"] = 3
+            for member in ("provider", "facts", "evidence"):
+                document.pop(member, None)
+
         # read, as version 3: its preparation is another, of version 3 and another digest
-        self.assertEqual("preparation-differs", answer(version(3)).get("finding"))
-        # its form is checked: an unbound source with no binding document, and a member of no form
-        self.assertEqual("input-malformed", answer(lambda d: (unbound(d), d.__setitem__("version", 3))).get("refused"))
-        self.assertEqual("input-malformed", answer(lambda d: d.update({"version": 3, "Version": "x"})).get("refused"))
+        self.assertEqual("preparation-differs", answer(version_3).get("finding"))
+        # its form is checked: the members of version 2 alone, an unbound source with no binding document,
+        # and a member of no form
+        self.assertEqual("input-malformed", answer(version(3)).get("refused"))
+        self.assertEqual("input-malformed", answer(lambda d: (unbound(d), version_3(d))).get("refused"))
+        self.assertEqual("input-malformed", answer(lambda d: (version_3(d), d.update({"Version": "x"}))).get("refused"))
         # an unbound source in a version-2 dialect; versions this document does not define
         self.assertEqual("input-malformed", answer(unbound).get("refused"))
         self.assertEqual("input-malformed", answer(version(4)).get("refused"))
         self.assertEqual("input-malformed", answer(version("3")).get("refused"))
         # the bounds before it come first
-        self.assertEqual("input-over-bound", answer(version(3), b"[" * 33 + b"]" * 33).get("refused"))
+        self.assertEqual("input-over-bound", answer(version_3, b"[" * 33 + b"]" * 33).get("refused"))
 
     def test_the_vector_bound_at_import_is_the_runners_import(self) -> None:
         # The Runner's manifest marks the vector of a dialect bound at import and says which file is which; it
@@ -811,9 +817,15 @@ class DialectVectorTests(unittest.TestCase):
         # registry's call is the first.
         for version, expected in ((2, ["registry", "vendor"]), (3, ["vendor", "registry"])):
             with self.subTest(version=version):
+                def written(d: dict[str, Any], v: int = version) -> None:
+                    d["version"] = v
+                    if v == 3:  # without the members of version 2 alone (§2)
+                        for member in ("provider", "facts", "evidence"):
+                            d.pop(member, None)
+
                 inputs = self._altered(
                     "unsigned-parameters",
-                    dialect=lambda d, v=version: d.__setitem__("version", v),
+                    dialect=written,
                     receipt=lambda r: r.__setitem__("callIndex", 1 - r["callIndex"]),
                 )
                 outcome = inputs.verify()
@@ -927,7 +939,7 @@ class DialectVectorTests(unittest.TestCase):
             "research": {"question": {"$text": "Which?"}, "constraints": {}, "model": "a-model", "evidence": ["excerpt"]},
         }
         malformed = {
-            "http": [{"method": "PUT"}, {"path": {"a": 1}}, {"path": {"$param": "runAt"}}, {"method": "GET"}, {"query": {"currency": 7}}, {"headers": "Accept"}],
+            "http": [{"method": "PUT"}, {"path": {"a": 1}}, {"path": {"$param": "runAt"}}, {"method": "GET"}, {"query": {"currency": 7}}, {"headers": "Accept"}, {"headers": []}],
             "sql": [{"statement": {"$text": "SELECT 1"}}, {"bindings": [{"name": "c", "type": "STRING", "value": "EUR"}]}, {"bindings": [{"name": "c", "value": string}]}],
             "web": [{"url": 7}, {"url": {"$param": "nope"}}, {"url": {"$text": "https://example.org/"}}],
             "research": [{"question": 7}, {"constraints": []}, {"model": None}, {"evidence": "excerpt"}],
@@ -969,13 +981,62 @@ class DialectVectorTests(unittest.TestCase):
         inputs.binding = None
         self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
 
-    def test_version_3_lists_the_members_version_2_does(self) -> None:
-        # §2 lists `provider`, `facts` and `evidence` for the dialect document, of either version: a version-3
-        # document that writes them is read, under another digest. (The Runner refuses them in version 3; the
-        # pull request that staged this vector reports the sentence.)
-        inputs = self.inputs("version-3-bound")
-        inputs.dialect = inputs.dialect.replace(b'"version":3}', b'"version":3,"provider":"","facts":null,"evidence":null}')
-        self.assertEqual("preparation-differs", inputs.verify().answer.get("finding"))
+    def test_version_3_carries_no_member_of_version_2_alone(self) -> None:
+        # §2: `provider`, `facts` and `evidence` are members of version 2 alone; a document of version 3 that
+        # names one is refused. In version 2 each is read, as the version-2 vectors write all three.
+        for member, value in (("provider", '""'), ("facts", "null"), ("evidence", "null")):
+            for version, expected in ((3, ("refused", "input-malformed")), (2, ("finding", "preparation-differs"))):
+                with self.subTest(member=member, version=version):
+                    inputs = self.inputs("version-3-bound")
+                    written = f'"version":{version},"{member}":{value}}}'.encode()
+                    inputs.dialect = inputs.dialect.replace(b'"version":3}', written)
+                    answer = inputs.verify().answer
+                    self.assertEqual(expected[1], answer.get(expected[0]), answer)
+
+    def test_version_3_leaves_an_optional_member_out_when_it_is_empty(self) -> None:
+        # §2: in version 3 an optional member whose absence means its empty value is left out when it is empty;
+        # written as [] or {} it is refused. Each alteration is read in version 2, so that its emptiness alone is
+        # what version 3 refuses.
+        source = lambda d: d["sources"][0]  # noqa: E731
+        alterations = {
+            "unmapped": lambda d: d.__setitem__("unmapped", []),
+            "unmappedEvidence": lambda d: d.__setitem__("unmappedEvidence", []),
+            "admits": lambda d: d.__setitem__("admits", {}),
+            "admits.facts": lambda d: d.__setitem__("admits", {"facts": {}}),
+            "admits.evidence": lambda d: d.__setitem__("admits", {"evidence": {}}),
+            "a source's parameters": lambda d: source(d).__setitem__("parameters", {}),
+            "a copy's facts": lambda d: source(d)["read"]["copy"].__setitem__("facts", []),
+            "a copy's evidence": lambda d: source(d)["read"]["copy"].__setitem__("evidence", []),
+        }
+        for name, alter in alterations.items():
+            for version, expected in ((3, ("refused", "input-malformed")), (2, ("finding", "preparation-differs"))):
+                with self.subTest(member=name, version=version):
+                    inputs = self.inputs("version-3-bound")
+                    document = json.loads(inputs.dialect)
+                    document["version"] = version
+                    alter(document)
+                    inputs.dialect = json.dumps(document).encode("utf-8")
+                    answer = inputs.verify().answer
+                    self.assertEqual(expected[1], answer.get(expected[0]), answer)
+        # A case-only dialect: `sources` and the case's `parameters` written empty. The case's own `facts` and
+        # `evidence` are required, not optional, and are written empty in every version.
+        inputs = self.inputs("escaped-strings")
+        inputs.acquisitions, inputs.record, inputs.require_binding = b"{}", None, False
+        inputs.preparation = b'{"verifiedAt":"2026-10-14T00:00:00Z"}'
+        for written, refused in (
+            ({}, False),
+            ({"sources": []}, True),
+            ({"case": {"parameters": {}, "facts": [], "evidence": []}}, True),
+        ):
+            for version in (2, 3):
+                with self.subTest(written=written, version=version):
+                    document = {"version": version, "case": {"facts": [], "evidence": []}, **written}
+                    inputs.dialect = json.dumps(document).encode("utf-8")
+                    answer = inputs.verify().answer
+                    if refused and version == 3:
+                        self.assertEqual("input-malformed", answer.get("refused"), answer)
+                    else:
+                        self.assertEqual("preparation-differs", answer.get("finding"), answer)
 
     # The six choices the text now decides (RFC 0018, Evidence), each held here as the text says.
 
