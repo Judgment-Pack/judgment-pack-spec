@@ -1,0 +1,31 @@
+{
+  "id": "https://example.com/judgment-packs/missing-spec-version",
+  "version": "0.1.0",
+  "title": "Missing specVersion",
+  "decision": {
+    "intent": "Determine whether to accept or reject.",
+    "question": "Should this be accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "reject",
+      "label": "Reject"
+    }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}
