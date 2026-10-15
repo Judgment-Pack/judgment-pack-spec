@@ -363,8 +363,9 @@ Section 13's table is reformatted as a list, with the text unchanged but for the
 item. The new profile checks compare declared model and capabilities; they establish neither
 which model actually ran nor that its answer is right (§13). No Runner prepares this kind,
 and no research vector exists.
-Both readers hold the superseded research form until the follow-up pull request, as pull
-request 167 followed 164. This amendment changes the contract and fixture plans only.
+The readers followed in the pull request for issue #176, as pull request 167 followed 164: both
+read this contract since, extended by one author who had read both. This amendment changes the
+contract and fixture plans only.
 
 ## Summary
 
@@ -518,12 +519,19 @@ those sentences has a test in each reader, and where a reader did not follow one
 it in the amendment that wrote them; that amendment's author read both readers, so those changes are
 the text's, and add nothing to the second reader's independence. Beside them are the readings both
 readers take where the text names a member without a form, held by no vector: `http`'s `path` as a
-string template; `http`'s `headers` and `research`'s `evidence` as arrays of non-empty strings;
-and a `sql` binding's `name` and `type` as non-empty strings (the amendment of 2026-10-15 that
-read version 3). Both readers hold the superseded research form until the follow-up pull
-request implements this amendment's contract. One vector is answered otherwise than `verify-run`
-answers it, by design: `disposition-differs-from-audit` alters
-the Runner's export, not the preparation or the record (Conformance).
+string template; `http`'s `headers` as an array of non-empty strings; and a `sql` binding's `name`
+and `type` as non-empty strings (the amendment of 2026-10-15 that read version 3, which read
+`research`'s `evidence` so too, the form the research-contract amendment then gave it). Both
+readers read the research contract since the pull request for issue #176, one author's extension
+of both from the text, held to each other on hand-written documents and to no vector. Where that
+text leaves a choice they take one reading each: a plain read's `unwrap` pointers and a copy's
+`source` are held to the closed list as froms, never under `values`; no pointer descends below an
+observation's `value`; a reconciliation's conditions read only a named field's entry, its
+`status`, and its `value` or `values`; a decimal's 128 is counted in characters; a research
+source's question commits a parameter only under the record's own receipt; and an acquired record
+with no receipt at all is still listed in `unsignedFreshness`, its `receipts` empty. One vector
+is answered otherwise than `verify-run` answers it, by design: `disposition-differs-from-audit`
+alters the Runner's export, not the preparation or the record (Conformance).
 
 ## Specification
 
@@ -2114,8 +2122,9 @@ vector; the counts; and this section's equality with the companion document's §
    2 and the kind `operation`, and refuses every other kind as `kind-unread`. Since the amendment of
    2026-10-15 it reads `operation` of shapes `airbyte`, `mcp` and `http`. Since the eleventh and
    twelfth vectors were staged it reads dialect version 3 as well, the unbound form with its binding
-   document among it, and refuses the four kinds of §4.3 as `kind-unread` after checking their
-   forms; for `research` it still checks the superseded form.
+   document among it. Since the pull request for issue #176 it reads `research` as the
+   research-contract amendment defines it, bound directly or through a binding document, and
+   refuses `http`, `sql` and `web` as `kind-unread` after checking their forms.
 2. **`tools/dialect-verify-ts/`**, the second reader, written from the companion document's text
    alone, in TypeScript, by a different author, under the protocol the Evidence records, at
    `e2d41c5`. It reads the same versions and kind, and refuses the rest as the first does. The
@@ -2123,8 +2132,10 @@ vector; the counts; and this section's equality with the companion document's §
    nothing to its independence (the Amendment, "The evidence"); and so did the staging of the
    eleventh and twelfth vectors, which extended both readers to version 3, by one author who had
    read both.
-   Both readers hold the superseded research form until the follow-up pull request implements
-   the research-contract amendment; neither checks its new research forms yet.
+   The pull request for issue #176 extended both to read `research` as the research-contract
+   amendment defines it, by one author who had read both, from the text: that adds nothing to the
+   second's independence, and the two readers' agreement on the contract's hand-written documents
+   is that author's.
 3. **The Runner**, the reference preparer, with `verify-run`, a third reader of the same bytes in its
    own repository, which reads every vector through the Runner's own code.
 4. **The Desk's inputs**, a writer: its mapping editor and import recipes write version-2 documents

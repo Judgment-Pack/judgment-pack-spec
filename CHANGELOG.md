@@ -207,6 +207,25 @@ here.
 
 ### Changed
 
+- Both readers, `tools/dialect_verify.py` and `tools/dialect-verify-ts/`, now read the research
+  contract of RFC 0018's round 8 (issue #176) as [`spec/dialect.md`](spec/dialect.md) §§4.3, 4.4,
+  5.1, 5.2, 6.4, 9, 11 and 12 define it: a `research` source's requested `fields` and
+  `capabilities`, bound directly or through a binding document; the profiles it is bound to, each
+  the trusted one of its id and digest, of class `generated`, declaring the model and the
+  capability it serves, or `profile-mismatch`; the research record's typed answers, `found`,
+  `not-found`, `stale` and `conflicting`, and their citation indices; each retained response
+  replayed under its own profile, then the record's own receipt; a plain read's closed list of
+  pointers; the reconciliation read, its guards and its combined value; `cites` in the order of
+  `sources` and the lineage's `receipts`; and the research maxima of §12, counted before any form.
+  Neither refuses `research` as `kind-unread` now. The three answers the amendment said would
+  change, change: a research source without `fields` or `capabilities`, and a research record
+  without `fields`, are `input-malformed`, and a retained response through a trusted but
+  unassigned profile is `profile-mismatch`. Each reader's tests, and the repository's suite over
+  both, hold hand-written documents of every new form and refusal, and the two readers' reports
+  are equal on each. That agreement is one author's, who extended both from the text; no vector
+  holds the kind, no fixture is recorded and nothing is claimable. The companion's Status and RFC
+  0018's amendment, Evidence and Implementation say so now, and the Evidence records the readings
+  both readers take where the contract's text leaves a choice.
 - [RFC 0018](rfcs/0018-dialect.md) and [the dialect](spec/dialect.md) are amended for issue #171
   (2026-10-15, round 8): research declares bounded typed fields and records found, not-found,
   stale and conflicting answers with retained-response citations. Published recipes name model
@@ -222,9 +241,10 @@ here.
   profile now gives `profile-mismatch`. This resolves the dialect's research binding question
   deferred by issue #160. Workflow version 1 admits no stage with a research source; RFC 0020's
   contrary binding statements are superseded pending its own revision, with its operation
-  construction still due. Both readers hold the superseded research form until the follow-up
-  pull request. Round 8's twelve accepted findings clarify reads, reconciliation guards,
-  citation indices, generated claims and fixture variants; its review and dispositions are
+  construction still due. At that amendment both readers held the superseded research form;
+  they read the contract since the entry above. Round 8's twelve accepted findings clarify reads,
+  reconciliation guards, citation indices, generated claims and fixture variants; its review and
+  dispositions are
   [recorded verbatim][round-8]. No Core, preparation-form or conformance
   change is made, and no vector is claimed.
 

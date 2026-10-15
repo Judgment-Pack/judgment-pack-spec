@@ -4,10 +4,10 @@ import { verify as edVerify } from "./ed25519.ts";
 import { DIGEST, Refusal, placeholders, profileDigestOf, sha256hex, stringTemplate } from "./forms.ts";
 import type { Acquisition, ClaimForm, CopyRead, Dialect, ParamType, Profile, Rule, Source } from "./forms.ts";
 import {
-  NotRead, OutsideDomain, arr, bool, canon, compareCodePoints, decode, inCanonDomain, isInteger, intValue, jsonEqual, member, num,
-  obj, parse, resolve, sortedDistinct, str, utf8, writeAt,
+  NotRead, OutsideDomain, arr, bool, canon, compareCodePoints, decode, depth, inCanonDomain, isInteger, intValue, jsonEqual, member,
+  num, obj, parse, resolve, sortedDistinct, str, utf8, writeAt,
 } from "./json.ts";
-import type { JObj, JStr, JVal } from "./json.ts";
+import type { JArr, JObj, JStr, JVal } from "./json.ts";
 import { instant } from "./time.ts";
 
 /** A finding (§11): the reading ends at it, and reports it. */
@@ -50,6 +50,10 @@ export type Outcome = {
   evidenceTargets: string[];
   readDigest: string;
   candidateFrom: Map<string, string[]>; // "fact:" or "evidence:" + target
+  // of an acquired research source: its citations, each retained response's in order and then the record's own when
+  // it has one (§9.1, §9.3); and the research record itself, for a later reconciliation (§6.4)
+  citations?: JObj[];
+  record?: JVal;
 };
 
 export type Recomputed = {
@@ -278,6 +282,110 @@ function checkReceipt(acq: Acquisition, profile: Profile, request: JObj, who: st
   if (s("resultDigest") !== digestOf(acq.result)) invalid("resultDigest is not the result's");
 }
 
+/** §5.2, the sessions: a receipt joins the preparation's receipts so far, which must stay in one of the two forms; its
+ * citation is returned. */
+function joinSessions(E: JObj, sessions: { sessionId: string; callIndex: number }[], who: string): JObj {
+  const callIndex = E.m.get("callIndex");
+  const sessionId = E.m.get("sessionId");
+  if (!isInteger(callIndex) || intValue(callIndex) < 0 || sessionId === undefined || sessionId.t !== "str") {
+    finding("acquisition-sessions", `${who}: callIndex or sessionId is not of its form`);
+  }
+  sessions.push({ sessionId: (sessionId as JStr).v, callIndex: intValue(callIndex as never) });
+  if (!inOneForm(sessions)) finding("acquisition-sessions", `${who}: the acquisitions so far are in neither form`);
+  return obj([["callIndex", callIndex!], ["sessionId", sessionId!], ["signature", E.m.get("signature")!]]);
+}
+
+// ---- research (§4.3, §4.4, §5.1, §5.2, §6.4) ----
+
+/** §4.4, §5.1, finding 1: a research source's AI profile, its web profiles in `search`, `page` order, then each retained
+ * response's profile in order. Each assigned profile is the trusted one of its id and digest, of class `generated`,
+ * declaring the capability it serves and, when it declares a model, the source's; a retained response names one of
+ * the source's assignments. Returns the AI profile. */
+function researchMismatch(s: Source, profiles: Profile[], acq: Acquisition | undefined): Profile {
+  const r = s.research!;
+  const assigned = (id: string, digest: string, capability: string): Profile => {
+    const p = profiles.find((x) => x.id === id);
+    if (p === undefined || profileDigestOf(p) !== digest) return finding("profile-mismatch", `${s.name}: no trusted profile ${id} of that digest`);
+    if (p.class !== "generated") finding("profile-mismatch", `${s.name}: ${id} is not of class generated`);
+    if (p.research === undefined || !p.research.capabilities.includes(capability)) finding("profile-mismatch", `${s.name}: ${id} does not declare ${capability}`);
+    if (p.research!.model !== undefined && p.research!.model !== r.model) finding("profile-mismatch", `${s.name}: ${id} declares another model`);
+    return p;
+  };
+  const ai = assigned(s.profile!, s.profileDigest!, "answer");
+  const pairs: [string, string][] = [[s.profile!, s.profileDigest!]];
+  for (const c of ["search", "page"]) {
+    const w = r.web.get(c);
+    if (w === undefined) continue;
+    assigned(w.profile, w.profileDigest, c);
+    pairs.push([w.profile, w.profileDigest]);
+  }
+  if (acq === undefined) return ai;
+  (member(acq.result, "responses") as JArr).a.forEach((x, k) => {
+    const ref = member(x, "profile");
+    const id = (member(ref, "id") as JStr).v;
+    const digest = (member(ref, "digest") as JStr).v;
+    const p = profiles.find((y) => y.id === id);
+    if (p === undefined || profileDigestOf(p) !== digest) finding("profile-mismatch", `${s.name}: retained response ${k} names no trusted profile`);
+    if (!pairs.some(([i, d]) => i === id && d === digest) || p!.class !== "generated") finding("profile-mismatch", `${s.name}: retained response ${k} names no assignment`);
+  });
+  return ai;
+}
+
+/** §5.2, §11, finding 3 for research: each retained response in order, its checks completed before the next's, under
+ * its own trusted profile and over its own request; the record in the canon domain; then the record's own receipt, when
+ * it has one, under the source's profile and over the source's request. Every receipt joins the sessions in that order. */
+function acquireResearch(
+  s: Source, outcome: Outcome, acq: Acquisition, profiles: Profile[], ai: Profile, sessions: { sessionId: string; callIndex: number }[], at: number,
+): void {
+  const r = s.research!;
+  const request = obj([["question", instantiate(r.question, outcome.scope)], ...r.request]);
+  outcome.request = request;
+  const citations: JObj[] = [];
+  (member(acq.result, "responses") as JArr).a.forEach((x, k) => {
+    const who = `${s.name}: retained response ${k}`;
+    const retained = x as JObj;
+    const result = retained.m.get("result");
+    if (result === undefined) return finding("acquisition-missing", `${who} has no result`);
+    const profile = profiles.find((p) => p.id === (member(retained.m.get("profile"), "id") as JStr).v)!;
+    const held: Acquisition = { result, receipt: retained.m.get("receipt") as JObj, salts: retained.m.get("salts") as JObj, own: true };
+    checkReceipt(held, profile, retained.m.get("request") as JObj, who);
+    checkTimes(held.receipt, s.maxAge!, at, who);
+    citations.push(joinSessions(held.receipt, sessions, who));
+  });
+  if (!inCanonDomain(acq.result)) finding("acquisition-invalid", `${s.name}: the research record is outside the canon domain`);
+  if (acq.own) {
+    const who = `${s.name}: the research record's own receipt`;
+    checkReceipt(acq, ai, request, who);
+    checkTimes(acq.receipt, s.maxAge!, at, who);
+    outcome.citation = joinSessions(acq.receipt, sessions, who);
+    citations.push(outcome.citation);
+  }
+  outcome.citations = citations;
+  outcome.record = acq.result;
+  // §11: the source's own acquisition commits what its request commits only under the record's own receipt, the one
+  // receipt over the source's request (§5.2)
+  commitments(r.question, outcome.committed, outcome.ambiguous);
+  if (!acq.own) outcome.committed.clear();
+}
+
+/** §4.3, §6.4: a plain research read applies to `R`; a reconciliation to `{"current": C, "sources": U}`, each earlier
+ * source it names that was acquired holding its record, a skipped one absent, held to the nesting bound first. */
+function researchClaim(s: Source, outcome: Outcome, outcomes: Outcome[]): Claim {
+  let value: JVal;
+  if (s.read.sources === undefined) {
+    value = valueRead(outcome.record!, s.read.unwrap, s.name);
+  } else {
+    const held: [string, JVal][] = [];
+    for (const n of s.read.sources) {
+      const o = outcomes.find((x) => x.name === n)!;
+      if (!o.skipped) held.push([n, o.record!]);
+    }
+    value = obj([["current", outcome.record!], ["sources", obj(held)]]);
+    if (depth(value) > BOUNDS.readNesting) throw new Refusal("input-over-bound", `${s.name}: the combined value nests too deep`);
+  }
+  return s.read.copy ? applyCopy(s.read.copy, value, s.name) : applyRule(s.read.rule!, value, outcome.scope, s.name);
+}
+
 function checkTimes(E: JObj, maxAge: number, at: number, who: string): void {
   for (const v of [member(E.m.get("acquisition"), "observedAt"), E.m.get("servedAt")]) {
     const t = v !== undefined && v.t === "str" ? instant(v.v) : null;
@@ -356,6 +464,10 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
   // 1. profile-mismatch, the sources in their order
   const profileOf = new Map<string, Profile>();
   for (const s of d.sources) {
+    if (s.research !== undefined) {
+      profileOf.set(s.name, researchMismatch(s, profiles, acquisitions.get(s.name)));
+      continue;
+    }
     if (s.profile === undefined) continue;
     const p = profiles.find((x) => x.id === s.profile);
     if (p === undefined || profileDigestOf(p) !== s.profileDigest) finding("profile-mismatch", `${s.name}: no trusted profile of that id and digest`);
@@ -438,6 +550,13 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       if (acquisitions.has(s.name)) finding("acquisition-unexpected", `${s.name} is skipped and has an acquisition`);
       continue;
     }
+    if (s.research !== undefined) {
+      const held = acquisitions.get(s.name);
+      if (held === undefined) return finding("acquisition-missing", `${s.name} has no acquisition`);
+      acquireResearch(s, outcome, held, profiles, profile, sessions, at);
+      outcome.claim = researchClaim(s, outcome, outcomes);
+      continue;
+    }
     const request = instantiate(s.template!, scope) as JObj;
     outcome.request = request;
     commitments(s.template!, outcome.committed, outcome.ambiguous);
@@ -445,14 +564,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     if (acq === undefined) return finding("acquisition-missing", `${s.name} has no acquisition`);
     checkReceipt(acq, profile, request, s.name);
     checkTimes(acq.receipt, s.maxAge!, at, s.name);
-    const callIndex = acq.receipt.m.get("callIndex");
-    const sessionId = acq.receipt.m.get("sessionId");
-    if (!isInteger(callIndex) || intValue(callIndex) < 0 || sessionId === undefined || sessionId.t !== "str") {
-      finding("acquisition-sessions", `${s.name}: callIndex or sessionId is not of its form`);
-    }
-    sessions.push({ sessionId: (sessionId as JStr).v, callIndex: intValue(callIndex as never) });
-    if (!inOneForm(sessions)) finding("acquisition-sessions", `${s.name}: the acquisitions so far are in neither form`);
-    outcome.citation = obj([["callIndex", callIndex!], ["sessionId", sessionId!], ["signature", acq.receipt.m.get("signature")!]]);
+    outcome.citation = joinSessions(acq.receipt, sessions, s.name);
 
     const value = valueRead(acq.result, s.read.unwrap, s.name);
     if (outcome.isCalculator) {
@@ -489,14 +601,21 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
   }
 
   // the preparation (§9): in versions 2 and 3 alike, `cites` ordered by callIndex, those of one index in the order of
-  // `sources`, as the Runner writes it (§9.1); a `research` source, whose own order differs, is not read
+  // `sources`, as the Runner writes it (§9.1); in a preparation with a `research` source, in the order of `sources`
+  // instead, a research source adding its every citation in order, each other acquired source its one
   const order = new Map(d.sources.map((s, k) => [s.name, k]));
-  const cited = outcomes.filter((o) => o.citation !== undefined);
-  cited.sort((a, b) => {
-    const x = intValue(a.citation!.m.get("callIndex") as never);
-    const y = intValue(b.citation!.m.get("callIndex") as never);
-    return x !== y ? x - y : order.get(a.name)! - order.get(b.name)!;
-  });
+  let cites: JObj[];
+  if (d.sources.some((s) => s.research !== undefined)) {
+    cites = outcomes.flatMap((o) => o.citations ?? (o.citation !== undefined ? [o.citation] : []));
+  } else {
+    const cited = outcomes.filter((o) => o.citation !== undefined);
+    cited.sort((a, b) => {
+      const x = intValue(a.citation!.m.get("callIndex") as never);
+      const y = intValue(b.citation!.m.get("callIndex") as never);
+      return x !== y ? x - y : order.get(a.name)! - order.get(b.name)!;
+    });
+    cites = cited.map((o) => o.citation!);
+  }
   const lineage: JObj[] = [];
   for (const o of outcomes) {
     const entry = (kind: "fact" | "evidence", target: string): JObj => {
@@ -516,6 +635,8 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       if (cand !== undefined && cand.length > 0) e.push(["candidateFrom", arr(cand.map(str))]);
       e.push(["readDigest", str(o.readDigest)]);
       if (o.citation !== undefined) e.push(["receipt", o.citation]);
+      // §9.3, version 3: an acquired research source's citations, in the order `cites` has them
+      if (o.citations !== undefined) e.push(["receipts", arr(o.citations)]);
       if (o.calculation !== undefined) e.push(["calculation", o.calculation]);
       return obj(e);
     };
@@ -535,7 +656,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     ["verifiedAt", str(verifiedAt)],
     ["mappingDigest", str(digestOf(d.raw))],
     ["verification", str(VERIFICATION)],
-    ["cites", arr(cited.map((o) => o.citation!))],
+    ["cites", arr(cites)],
     ["lineage", arr(lineage)],
     ["outcomes", arr(outcomeValues)],
   ]);

@@ -10,6 +10,7 @@ and hold the RFC's Specification section to the companion document's text.
 from __future__ import annotations
 
 import collections
+import copy
 import hashlib
 import importlib.util
 import json
@@ -931,6 +932,7 @@ class DialectVectorTests(unittest.TestCase):
                 self.assertEqual("profile-mismatch", answer.get("finding"), answer)
 
     def test_a_kind_of_version_3_is_held_to_its_form_and_not_read(self) -> None:
+        # `http`, `sql` and `web`; `research` is read since the research-contract amendment (ResearchContractTests).
         bound = json.loads(self.inputs("version-3-bound").dialect)["sources"][0]
         common = {"profile": bound["profile"], "profileDigest": bound["profileDigest"], "maxAge": 300, "read": {"copy": {"facts": [], "evidence": []}}}
         string = {"$param": "invoiceCurrency"}
@@ -938,13 +940,11 @@ class DialectVectorTests(unittest.TestCase):
             "http": {"method": "POST", "path": "/requests", "query": {"currency": string}, "body": {"n": 1}, "headers": ["Accept"]},
             "sql": {"statement": "SELECT 1 WHERE c = :c", "bindings": [{"name": "c", "type": "STRING", "value": string}]},
             "web": {"url": string},
-            "research": {"question": {"$text": "Which?"}, "constraints": {}, "model": "a-model", "evidence": ["excerpt"]},
         }
         malformed = {
             "http": [{"method": "PUT"}, {"path": {"a": 1}}, {"path": {"$param": "runAt"}}, {"method": "GET"}, {"query": {"currency": 7}}, {"headers": "Accept"}],
             "sql": [{"statement": {"$text": "SELECT 1"}}, {"bindings": [{"name": "c", "type": "STRING", "value": "EUR"}]}, {"bindings": [{"name": "c", "value": string}]}],
             "web": [{"url": 7}, {"url": {"$param": "nope"}}, {"url": {"$text": "https://example.org/"}}],
-            "research": [{"question": 7}, {"constraints": []}, {"model": None}, {"evidence": "excerpt"}],
         }
 
         def answer(source: dict[str, Any], name: str = "version-3-bound", version: int = 3) -> Any:
@@ -1076,74 +1076,9 @@ class DialectVectorTests(unittest.TestCase):
                 inputs.binding = b"null"
                 self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
 
-    def _researched(self, acquisition: Any) -> Any:
-        """version-3-bound with a `research` source added, its acquisition the given member."""
-        inputs = self.inputs("version-3-bound")
-        document = json.loads(inputs.dialect)
-        bound = document["sources"][0]
-        document["sources"].append({
-            "name": "study", "kind": "research", "profile": bound["profile"], "profileDigest": bound["profileDigest"],
-            "maxAge": 300, "question": "Which?", "constraints": {}, "model": "a-model", "evidence": ["excerpt"],
-            "read": {"copy": {"facts": [], "evidence": []}},
-        })
-        inputs.dialect = json.dumps(document).encode("utf-8")
-        sources = json.loads(inputs.acquisitions)
-        sources["study"] = acquisition
-        inputs.acquisitions = json.dumps(sources).encode("utf-8")
-        return inputs.verify().answer
-
-    RETAINED = {
-        "profile": {"id": "fx", "digest": "sha256:" + "0" * 64},
-        "request": {"question": "Which?"},
-        "result": {"answer": "none"},
-        "receipt": {},
-        "salts": {"args": "0" * 64},
-    }
-
-    def test_a_research_record_holds_at_most_64_retained_responses(self) -> None:
-        # §§11 and 12: counted in the third phase, before any form; 64 are admitted, 65 are over the bound
-        # even when the one beyond is malformed (review round 7, finding 4).
-        record = lambda responses: {"response": {"result": {"responses": responses}}}  # noqa: E731
-        self.assertEqual("kind-unread", self._researched(record([self.RETAINED] * 64)).get("refused"))
-        self.assertEqual("input-over-bound", self._researched(record([self.RETAINED] * 65)).get("refused"))
-        self.assertEqual("input-over-bound", self._researched(record([self.RETAINED] * 64 + [{}])).get("refused"))
-        self.assertEqual("input-malformed", self._researched(record([self.RETAINED] * 63 + [{}])).get("refused"))
-
-    def test_a_research_acquisition_has_the_form_of_its_kind(self) -> None:
-        # §§4.3, 5.2 and 11 (review round 7, finding 5): the caller-assembled record needs no receipt of its own,
-        # both or neither of `receipt` and `salts`, and the record and each retained response held to their form
-        # before the kind is refused as unread.
-        own = {"receipt": {}, "salts": {"args": "0" * 64}}
-        retained = self.RETAINED
-        unretained = {k: v for k, v in retained.items() if k != "result"}
-        cases = {
-            "research-no-own-receipt": ({"response": {"result": {"responses": []}}}, "kind-unread"),
-            "research-own-receipt": ({"response": {"result": {"responses": [retained]}, **own}}, "kind-unread"),
-            "research-result-not-retained": ({"response": {"result": {"responses": [unretained]}}}, "kind-unread"),
-            "research-receipt-alone": ({"response": {"result": {"responses": []}, "receipt": {}}}, "input-malformed"),
-            "research-salts-alone": ({"response": {"result": {"responses": []}, "salts": own["salts"]}}, "input-malformed"),
-            "research-record-not-object": ({"response": {"result": ["x"]}}, "input-malformed"),
-            "research-record-missing-responses": ({"response": {"result": {}}}, "input-malformed"),
-            "research-record-bad-responses": ({"response": {"result": {"responses": {}}}}, "input-malformed"),
-            "research-record-extra-member": ({"response": {"result": {"responses": [], "more": 1}}}, "input-malformed"),
-        }
-        malformed_retained = {
-            "not an object": "x",
-            "a member more": {**retained, "more": 1},
-            "no profile": {k: v for k, v in retained.items() if k != "profile"},
-            "a profile of another form": {**retained, "profile": {"id": "fx"}},
-            "a profile digest of another form": {**retained, "profile": {"id": "fx", "digest": "sha256:XYZ"}},
-            "a request that is not an object": {**retained, "request": "Which?"},
-            "a receipt that is not an object": {**retained, "receipt": []},
-            "salts of another form": {**retained, "salts": {"args": "x"}},
-        }
-        for name, entry in malformed_retained.items():
-            cases[f"research-record-malformed-retained ({name})"] = (
-                {"response": {"result": {"responses": [entry]}}}, "input-malformed")
-        for name, (acquisition, expected) in cases.items():
-            with self.subTest(case=name):
-                self.assertEqual(expected, self._researched(acquisition).get("refused"))
-        # an acquisition of any other kind still has its receipt and salts
+    def test_an_operations_acquisition_has_its_receipt_and_salts(self) -> None:
+        # §5.2: only a research record may come back without a receipt and salts of its own (review round 7,
+        # finding 5); the research record's own form is ResearchContractTests'.
         inputs = self.inputs("version-3-bound")
         sources = json.loads(inputs.acquisitions)
         del sources["fx"]["response"]["receipt"], sources["fx"]["response"]["salts"]
@@ -1343,6 +1278,901 @@ class DialectVectorTests(unittest.TestCase):
         dialect["sources"][0]["read"]["copy"]["evidence"][0]["requirement"] = ""
         inputs.dialect = json.dumps(dialect).encode("utf-8")
         self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+
+
+# The research contract (RFC 0018, round 8, issue #176): hand-written documents of every new form and
+# refusal, signed under a key of the tests' own. No Runner prepares `research` and no vector holds it:
+# these are this repository's checks of its two readers, not vectors, and no claim could cite them. Each
+# case is answered by the first reader here and by the second in tests/test_dialect_ts.py, which holds
+# the two reports equal.
+
+RESEARCH_AT = "2026-10-15T12:00:00Z"
+RESEARCH_SERVED = "2026-10-15T11:59:00Z"
+RESEARCH_OBSERVED = "2026-10-15T11:58:30Z"
+RESEARCH_EXPIRED = "2026-10-15T11:40:00Z"  # 20 minutes before the instant, past every maxAge here
+RESEARCH_KEY = signer(b"the research tests' own key")
+RESEARCH_SALT = "5a" * 32
+COMPANY = "Synthetic Company 0001"
+
+
+def research_digest(value: Any) -> str:
+    return READER.digest_of(READER.canon(value))
+
+
+def research_profile(pid: str, source: str, adapter: str, research: Any = None, klass: str = "generated") -> dict[str, Any]:
+    profile = {
+        "id": pid,
+        "publicKey": RESEARCH_KEY[0].hex(),
+        "class": klass,
+        "source": source,
+        "authority": "research.example.test",
+        "shape": "http",
+        "adapter": {"name": adapter, "version": "1.0.0", "digest": "sha256:" + "ab" * 32},
+        "endpoint": None,
+    }
+    if research is not None:
+        profile["research"] = research
+    return profile
+
+
+def research_profiles() -> list[dict[str, Any]]:
+    """The installation's trusted profiles: an AI profile for model-a, and a web profile for search and
+    page; and, for the refusals, one of another model, one of search alone, one of class record, one with
+    no research declaration, and a web profile that declares another model."""
+    return [
+        research_profile("ai", "ai-answers", "adapter-ai", {"capabilities": ["answer"], "model": "model-a"}),
+        research_profile("web", "web-pages", "adapter-web", {"capabilities": ["search", "page"]}),
+        research_profile("ai-b", "ai-answers", "adapter-ai", {"capabilities": ["answer"], "model": "model-b"}),
+        research_profile("ai-2", "ai-answers-2", "adapter-ai", {"capabilities": ["answer"], "model": "model-a"}),
+        research_profile("web-search", "web-pages", "adapter-web", {"capabilities": ["search"]}),
+        research_profile("web-record", "web-pages", "adapter-web", {"capabilities": ["search", "page"]}, "record"),
+        research_profile("web-b", "web-pages", "adapter-web", {"capabilities": ["answer", "search", "page"], "model": "model-b"}),
+        research_profile("plain", "ai-answers", "adapter-ai"),
+    ]
+
+
+def company_fields() -> list[dict[str, Any]]:
+    """`gtm-company-person`'s company, all six types (§11's first example list); synthetic."""
+    return [
+        {"name": "company-id", "type": "text", "required": True, "description": "A synthetic company identifier."},
+        {"name": "employee-count", "type": "integer", "required": True, "description": "Employees, as cited."},
+        {"name": "revenue", "type": "decimal", "required": False, "description": "Annual revenue, a decimal string."},
+        {"name": "active", "type": "boolean", "required": False, "description": "Whether the company trades."},
+        {"name": "roles", "type": "text-list", "required": False, "description": "Roles the company hires for."},
+        {"name": "employee-range", "type": "range", "required": False, "description": "The band of employees."},
+    ]
+
+
+def research_source(name: str, read: Any, fields: Any = None, capabilities: Any = None) -> dict[str, Any]:
+    """A bound research source; `profile`, `profileDigest` and `webProfiles` are given the trusted
+    profiles' digests when the documents are built."""
+    capabilities = ["answer", "search", "page"] if capabilities is None else capabilities
+    return {
+        "name": name,
+        "kind": "research",
+        "maxAge": 600,
+        "question": {"$param": "company"},
+        "constraints": {"region": "EU", "synthetic": True},
+        "model": "model-a",
+        "evidence": ["the page that states the headcount"],
+        "fields": company_fields() if fields is None else fields,
+        "capabilities": capabilities,
+        "profile": "ai",
+        "profileDigest": "ai",
+        "webProfiles": {c: {"profile": "web", "profileDigest": "web"} for c in capabilities if c != "answer"},
+        "read": read,
+    }
+
+
+def answer_response(model: str = "model-a") -> dict[str, Any]:
+    return {"profile": "ai", "request": {"prompt": f"Which company? ({model})"}, "result": {"text": "Synthetic Company 0001 employs no one."}}
+
+
+def search_response() -> dict[str, Any]:
+    return {"profile": "web", "request": {"query": "Synthetic Company 0001"}, "result": {"hits": ["https://company.example.test/about"]}}
+
+
+def page_response() -> dict[str, Any]:
+    return {"profile": "web", "request": {"url": "https://company.example.test/about"}, "result": {"page": "Headcount: 0."}}
+
+
+def company_answers() -> dict[str, Any]:
+    """Every type, found: integer zero, a negative decimal of scale two, `false`, the empty list, and a
+    decimal range whose endpoints are equal by value and spelled apart."""
+    return {
+        "company-id": {"status": "found", "value": "synthetic-company-0001", "cites": [0]},
+        "employee-count": {"status": "found", "value": 0, "cites": [0, 2]},
+        "revenue": {"status": "found", "value": "-12.50", "cites": [2]},
+        "active": {"status": "found", "value": False, "cites": [0]},
+        "roles": {"status": "found", "value": [], "cites": [1]},
+        "employee-range": {"status": "found", "value": {"min": "1.0", "max": "1.00"}, "cites": [2]},
+    }
+
+
+def copy_fields(name: str) -> dict[str, Any]:
+    return {"copy": {"facts": [{"target": f"/{name}/fields", "source": "/fields"}], "evidence": []}}
+
+
+def status_guard(entry: str, status: str) -> dict[str, Any]:
+    return {"op": "equals", "field": f"{entry}/status", "to": status}
+
+
+def absence_guard(entry: str) -> dict[str, Any]:
+    return {"op": "not", "of": {"op": "exists", "field": entry}}
+
+
+def unavailable(entry: str) -> dict[str, Any]:
+    return {"op": "any", "of": [absence_guard(entry), status_guard(entry, "not-found"), status_guard(entry, "stale")]}
+
+
+def clause(when: Any, reason: str, target: str | None = None, source: str | None = None, status: str = "unknown") -> dict[str, Any]:
+    facts = [{"pointer": target, "from": source}] if target is not None else []
+    return {"when": when, "claim": {"facts": facts, "evidence": {}, "acquisitionStatus": status}, "reason": reason}
+
+
+PRIMARY = "/sources/primary/fields/employee-count"
+SECONDARY = "/sources/secondary/fields/employee-count"
+CURRENT = "/current/fields/employee-count"
+COUNT_TARGET = "/company/employee-count"
+
+
+def reconciliation_rule() -> dict[str, Any]:
+    """§6.4's example extended to a third source (§11, `failed-fallback`): the primary's found value
+    first, then the secondary's, a conflict anywhere unknown, then the source's own found value, and
+    unknown when no candidate is left; each absence, not-found, stale and conflicting status named."""
+    return {
+        "ruleVersion": "1",
+        "parameters": {},
+        "clauses": [
+            clause(status_guard(PRIMARY, "found"), "the primary found it", COUNT_TARGET, PRIMARY + "/value", "resolved"),
+            clause({"op": "all", "of": [unavailable(PRIMARY), status_guard(SECONDARY, "found")]}, "the secondary found it", COUNT_TARGET, SECONDARY + "/value", "resolved"),
+            clause({"op": "any", "of": [status_guard(e, "conflicting") for e in (PRIMARY, SECONDARY, CURRENT)]}, "a conflict is not chosen"),
+            clause({"op": "all", "of": [unavailable(SECONDARY), status_guard(CURRENT, "found")]}, "this source found it", COUNT_TARGET, CURRENT + "/value", "resolved"),
+            clause(unavailable(CURRENT), "no candidate is left"),
+            clause({"op": "always"}, "otherwise"),
+        ],
+    }
+
+
+def count_only() -> list[dict[str, Any]]:
+    return [{"name": "employee-count", "type": "integer", "required": False, "description": "Employees, as cited."}]
+
+
+def observed(name: str) -> dict[str, Any]:
+    return {"copy": {"facts": [{"target": f"/observed/{name}", "source": "/fields/employee-count/status"}], "evidence": []}}
+
+
+def count_answer(status: str, value: Any = 7, cites: Any = None) -> dict[str, Any]:
+    if status == "found":
+        return {"employee-count": {"status": "found", "value": value, "cites": [0] if cites is None else cites}}
+    if status == "conflicting":
+        return {"employee-count": {"status": "conflicting", "cites": [], "values": [{"value": 7, "cites": [0]}, {"value": 9, "cites": [0]}]}}
+    if status == "absent":
+        return {}
+    return {"employee-count": {"status": status, "cites": [] if cites is None else cites}}
+
+
+class ResearchScenario:
+    """One hand-written research run: a version-3 dialect, its case, the trusted profiles, and for each
+    research source its record's answers and the responses it retains, signed when built. A test alters
+    any part before the documents are built (`documents`)."""
+
+    def __init__(self, kind: str = "company") -> None:
+        self.profiles = research_profiles()
+        self.case = {"company": COMPANY}
+        self.admits: dict[str, list[str]] = {}
+        self.admits_evidence: dict[str, list[str]] = {}
+        self.records: dict[str, dict[str, Any]] = {}
+        self.own: set[str] = set()  # the sources whose record has a receipt of its own
+        self.unbound: set[str] = set()  # the sources published unbound, bound by a binding document
+        self.call_indices: dict[str, list[int]] = {}  # each source's receipts' callIndex, when not in turn
+        self.require_binding = False
+        sources: list[dict[str, Any]]
+        if kind == "company":
+            sources = [research_source("company", copy_fields("company"))]
+            self.admits = {"/company/fields": ["generated"]}
+            self.records = {"company": {"fields": company_answers(), "responses": [answer_response(), search_response(), page_response()]}}
+        elif kind == "reconcile":
+            sources = [
+                research_source("primary", observed("primary"), count_only(), ["answer"]),
+                research_source("secondary", observed("secondary"), count_only(), ["answer", "page"]),
+                research_source("combined", {"sources": ["primary", "secondary"], "rule": reconciliation_rule()}, count_only(), ["answer"]),
+            ]
+            self.admits = {**{f"/observed/{n}": ["generated"] for n in ("primary", "secondary")}, COUNT_TARGET: ["generated"]}
+            self.records = {
+                "primary": {"fields": count_answer("found", 7), "responses": [answer_response()]},
+                "secondary": {"fields": count_answer("found", 9), "responses": [answer_response(), page_response()]},
+                "combined": {"fields": count_answer("not-found"), "responses": []},
+            }
+        else:
+            raise AssertionError(kind)
+        self.dialect = {
+            "version": 3,
+            "case": {
+                "parameters": {"company": {"pointer": "/company", "type": "string"}},
+                "facts": [{"target": "/case/company", "source": "/company"}],
+                "evidence": [],
+            },
+            "sources": sources,
+        }
+        # applied to each receipt before it is signed: (source name, response index or "own", receipt)
+        self.receipt_hooks: list[Any] = []
+        # applied to the documents once every receipt is signed: (documents)
+        self.after_hooks: list[Any] = []
+        # applied to the documents' bytes last: (document, bytes written, bytes in their place)
+        self.replacements: list[tuple[str, bytes, bytes]] = []
+
+    def source(self, name: str) -> dict[str, Any]:
+        return next(s for s in self.dialect["sources"] if s["name"] == name)
+
+    def documents(self, preparation: bytes | None = None) -> "HandInputs":
+        profiles = copy.deepcopy(self.profiles)
+        by_id = {p["id"]: p for p in profiles}
+        digests = {p["id"]: research_digest(p) for p in profiles}
+        dialect = copy.deepcopy(self.dialect)
+        admits = {member: dict(lists) for member, lists in (("facts", self.admits), ("evidence", self.admits_evidence)) if lists}
+        if admits:
+            dialect["admits"] = admits
+        for source in dialect["sources"]:
+            if source.get("kind") != "research":
+                if source.get("profileDigest") in digests:
+                    source["profileDigest"] = digests[source["profileDigest"]]
+                continue
+            if source.get("profileDigest") in digests:
+                source["profileDigest"] = digests[source["profileDigest"]]
+            for assignment in (source.get("webProfiles") or {}).values():
+                if isinstance(assignment, dict) and assignment.get("profileDigest") in digests:
+                    assignment["profileDigest"] = digests[assignment["profileDigest"]]
+        case_values = {"company": self.case.get("company")}
+        acquisitions: dict[str, Any] = {}
+        call = 0
+        for source in dialect["sources"]:
+            name = source.get("name")
+            if name not in self.records:
+                continue
+            spec = self.records[name]
+            indices = iter(self.call_indices.get(name, []))
+            responses = []
+            for index, response in enumerate(spec.get("responses", [])):
+                profile = by_id.get(response["profile"], profiles[0])
+                entry = {
+                    "profile": {"id": response["profile"], "digest": response.get("digest", digests.get(response["profile"], "sha256:" + "0" * 64))},
+                    "request": response["request"],
+                    "result": response["result"],
+                    "receipt": self._receipt(name, index, profile, response["request"], response["result"], next(indices, call)),
+                    "salts": {"args": RESEARCH_SALT},
+                }
+                call += 1
+                responses.append(entry)
+            record = {"fields": spec["fields"], "responses": responses}
+            member: dict[str, Any] = {"result": record}
+            if name in self.own:
+                request = {
+                    "question": READER.instantiate(source["question"], case_values),
+                    **{k: source[k] for k in ("constraints", "model", "evidence", "fields", "capabilities")},
+                }
+                member["receipt"] = self._receipt(name, "own", by_id[source["profile"]], request, record, next(indices, call))
+                member["salts"] = {"args": RESEARCH_SALT}
+                call += 1
+            acquisitions[name] = {"response": member}
+        binding = None
+        if self.unbound:
+            assignments = {}
+            for source in dialect["sources"]:
+                if source.get("name") in self.unbound:
+                    assignments[source["name"]] = {k: source.pop(k) for k in ("profile", "profileDigest", "webProfiles")}
+            binding = {"dialect": research_digest(dialect), "sources": assignments}
+        documents = {"dialect": dialect, "case": self.case, "acquisitions": acquisitions, "profiles": profiles, "binding": binding}
+        for hook in self.after_hooks:
+            hook(documents)
+        written = {name: None if value is None else json.dumps(value).encode("utf-8") for name, value in documents.items()}
+        for name, old, new in self.replacements:
+            assert old in written[name], old
+            written[name] = written[name].replace(old, new)
+        return HandInputs(
+            written["dialect"],
+            written["case"],
+            written["acquisitions"],
+            written["profiles"],
+            preparation if preparation is not None else ('{"verifiedAt":"%s"}' % RESEARCH_AT).encode("ascii"),
+            written["binding"],
+            self.require_binding,
+        )
+
+    def _receipt(self, name: str, index: Any, profile: dict[str, Any], request: Any, result: Any, call: int) -> dict[str, Any]:
+        receipt = {
+            "receiptVersion": "3",
+            "kind": "acquisition",
+            "keyId": hashlib.sha256(RESEARCH_KEY[0]).hexdigest()[:32],
+            "source": profile["source"],
+            "authority": profile["authority"],
+            "sessionId": "research-session",
+            "callIndex": call,
+            "argumentsCommitment": "sha256:" + hashlib.sha256(bytes.fromhex(RESEARCH_SALT) + b"args:" + READER.canon(request)).hexdigest(),
+            "resultDigest": research_digest(result),
+            "servedAt": RESEARCH_SERVED,
+            "acquisition": {"adapter": profile["adapter"], "shape": profile["shape"], "endpoint": profile["endpoint"], "observedAt": RESEARCH_OBSERVED},
+        }
+        for hook in self.receipt_hooks:
+            hook(name, index, receipt)
+        message = b"judgment-pack-gateway/receipt/3:" + READER.canon(receipt)
+        receipt["signature"] = RESEARCH_KEY[1](message).hex()
+        return receipt
+
+    def prepared(self) -> "HandInputs":
+        """The documents, with the preparation the first reader recomputes from them."""
+        inputs = self.documents()
+        recomputed = inputs.verify()
+        if recomputed.preparation is None:
+            raise AssertionError(f"no preparation was recomputed: {recomputed.answer}")
+        inputs.preparation = recomputed.preparation
+        return inputs
+
+
+class HandInputs:
+    """Hand-written documents, given to a verifier as Inputs gives a vector's."""
+
+    def __init__(self, dialect: bytes, case: bytes, acquisitions: bytes, profiles: bytes, preparation: bytes, binding: bytes | None, require_binding: bool) -> None:
+        self.dialect, self.case, self.acquisitions, self.profiles = dialect, case, acquisitions, profiles
+        self.preparation, self.binding, self.require_binding = preparation, binding, require_binding
+        self.record: bytes | None = None
+
+    def verify(self) -> Any:
+        return READER.verify(
+            self.dialect, self.case, self.acquisitions, self.profiles, self.preparation, self.record, self.require_binding, self.binding
+        )
+
+
+def assign(source: dict[str, Any], ai: str | None = None, **web: str) -> None:
+    """Bind a research source to other trusted profiles, each named by its id (its digest filled in)."""
+    if ai is not None:
+        source["profile"], source["profileDigest"] = ai, ai
+    for capability, pid in web.items():
+        source["webProfiles"][capability] = {"profile": pid, "profileDigest": pid}
+
+
+def gate(scenario: ResearchScenario) -> None:
+    """An earlier research source whose rule leaves its claim `absent`, and the primary taking a parameter from
+    it: the primary is skipped (§3, §9.2), and its record not acquired."""
+    rule = {
+        "ruleVersion": "1",
+        "parameters": {},
+        "clauses": [
+            clause(status_guard("/fields/employee-count", "found"), "found", "/gate/count", "/fields/employee-count/value", "resolved"),
+            clause({"op": "always"}, "nothing to go on", status="absent"),
+        ],
+    }
+    scenario.dialect["sources"].insert(0, research_source("gate", {"rule": rule}, count_only(), ["answer"]))
+    scenario.source("primary")["parameters"] = {"gateCount": {"from": "gate", "pointer": "/gate/count", "type": "integer"}}
+    scenario.admits["/gate/count"] = ["generated"]
+    scenario.records["gate"] = {"fields": count_answer("not-found"), "responses": []}
+    del scenario.records["primary"]
+
+
+def guarded_rule(*, without: tuple[str, str] | None = None) -> dict[str, Any]:
+    """The reconciliation rule with one guard of the primary's taken out: `(status, entry)`."""
+    rule = reconciliation_rule()
+    if without is None:
+        return rule
+    status, entry = without
+
+    def keep(condition: dict[str, Any]) -> bool:
+        if status == "absent":
+            return condition != absence_guard(entry)
+        return condition != status_guard(entry, status)
+
+    def prune(condition: dict[str, Any]) -> dict[str, Any]:
+        if condition["op"] in ("all", "any"):
+            return {**condition, "of": [prune(c) for c in condition["of"] if keep(c)]}
+        return condition
+
+    for item in rule["clauses"]:
+        item["when"] = prune(item["when"])
+    return rule
+
+
+def research_cases() -> list[tuple[str, str, Any]]:
+    """Every new form and every refusal the research contract names, as `(name, expected answer, build)`:
+    `build()` gives the documents; the answer is `reading`, `refusal:<code>` or `finding:<code>`. A reading is
+    built with the preparation the first reader recomputes, so that the second's must be byte for byte equal."""
+    cases: list[tuple[str, str, Any]] = []
+
+    def add(name: str, expected: str, alter: Any = None, kind: str = "company", fixed: Any = None) -> None:
+        """`fixed`: the alteration whose documents give the preparation held fixed, None for the unaltered."""
+
+        def build() -> HandInputs:
+            scenario = ResearchScenario(kind)
+            if alter is not None:
+                alter(scenario)
+            if expected == "reading" and fixed is None:
+                return scenario.prepared()
+            if fixed is not None:
+                base = ResearchScenario(kind)
+                if fixed is not True:
+                    fixed(base)
+                return scenario.documents(base.prepared().preparation)
+            return scenario.documents()
+
+        cases.append((name, expected, build))
+
+    company = lambda s: s.source("company")  # noqa: E731
+    answers = lambda s: s.records["company"]["fields"]  # noqa: E731
+    declaration = lambda s, name: next(d for d in s.source("company")["fields"] if d["name"] == name)  # noqa: E731
+    malformed, over = "refusal:input-malformed", "refusal:input-over-bound"
+
+    def set_in(getter: Any, key: Any, value: Any) -> Any:
+        return lambda s: getter(s).__setitem__(key, value)
+
+    def drop(getter: Any, key: Any) -> Any:
+        return lambda s: getter(s).pop(key)
+
+    def both(*alterations: Any) -> Any:
+        def alter(s: ResearchScenario) -> None:
+            for a in alterations:
+                a(s)
+        return alter
+
+    def after(change: Any) -> Any:
+        return lambda s: s.after_hooks.append(change)
+
+    def record(documents: dict[str, Any], name: str = "company") -> dict[str, Any]:
+        return documents["acquisitions"][name]["response"]["result"]
+
+    def answer_alone(s: ResearchScenario) -> None:
+        company(s)["capabilities"] = ["answer"]
+        company(s)["webProfiles"] = {}
+        s.records["company"]["responses"] = [answer_response()]
+        for entry in answers(s).values():
+            entry["cites"] = [0]
+
+    def rule_read(s: ResearchScenario) -> None:
+        company(s)["read"] = {"rule": {"ruleVersion": "1", "parameters": {}, "clauses": [
+            {"when": status_guard("/fields/employee-count", "found"), "claim": {"facts": [{"pointer": COUNT_TARGET, "from": "/fields/employee-count/value"}], "evidence": {"company-headcount": "present"}, "acquisitionStatus": "resolved"}, "reason": "found"},
+            {"when": {"op": "exists", "field": "/fields/employee-count/values/0/value"}, "claim": {"facts": [], "evidence": {"company-headcount": "unknown"}, "acquisitionStatus": "unknown"}, "reason": "observations conflict"},
+            {"when": {"op": "always"}, "claim": {"facts": [], "evidence": {"company-headcount": "absent"}, "acquisitionStatus": "absent"}, "reason": "not found"},
+        ]}}
+        s.admits = {COUNT_TARGET: ["generated"]}
+        s.admits_evidence = {"company-headcount": ["generated"]}
+
+    def parameter_rule(s: ResearchScenario) -> None:
+        rule_read(s)
+        rule = company(s)["read"]["rule"]
+        rule["parameters"] = {"company": "string"}
+        rule["clauses"][0]["when"] = {"op": "all", "of": [status_guard("/fields/employee-count", "found"), {"op": "equalsParam", "field": "/fields/company-id/value", "param": "company"}]}
+        answers(s)["company-id"]["value"] = COMPANY
+
+    # ---- readings: every new form ----
+    add("valid-types: answer, search and page, all six types found", "reading")
+    add("valid-types: a source asking for answer alone", "reading", answer_alone)
+    add("the record with a receipt of its own", "reading", lambda s: s.own.add("company"))
+    add("bound through a binding document", "reading", lambda s: s.unbound.add("company"))
+    add("bound through a binding document, the record with a receipt of its own", "reading", both(lambda s: s.unbound.add("company"), lambda s: s.own.add("company")))
+    add("presence: every optional entry omitted", "reading", lambda s: [answers(s).pop(n) for n in ("revenue", "active", "roles", "employee-range")])
+    add("presence: a required entry not-found", "reading", set_in(answers, "employee-count", {"status": "not-found", "cites": [1]}))
+    add("presence: integer -0, decimal 0, text empty, boolean false", "reading", both(
+        set_in(answers, "company-id", {"status": "found", "value": "", "cites": [0]}),
+        set_in(answers, "revenue", {"status": "found", "value": "0", "cites": [0]}),
+        lambda s: answers(s)["employee-count"].__setitem__("value", 424242),
+        lambda s: s.replacements.append(("acquisitions", b'"value": 424242', b'"value": -0')),
+    ))
+    add("stale with no citation, conflicting with separate citations", "reading", both(
+        set_in(answers, "active", {"status": "stale", "cites": []}),
+        set_in(answers, "roles", {"status": "conflicting", "cites": [], "values": [{"value": ["buyer", "buyer", ""], "cites": [0]}, {"value": ["buyer"], "cites": [1, 2]}]}),
+    ))
+    add("an integer range, a list with duplicates and empty strings, decimals spelled apart", "reading", both(
+        set_in(answers, "employee-range", {"status": "conflicting", "cites": [], "values": [{"value": {"min": -3, "max": 12}, "cites": [0]}, {"value": {"min": -3, "max": 12, }, "cites": [1]}, {"value": {"min": 0, "max": 0}, "cites": [2]}]}),
+        set_in(answers, "roles", {"status": "found", "value": ["x", "x", ""], "cites": [0]}),
+        set_in(answers, "revenue", {"status": "conflicting", "cites": [], "values": [{"value": "1.0", "cites": [0]}, {"value": "1.00", "cites": [2]}]}),
+    ))
+    add("a rule guards the found value, and a condition reads an observation", "reading", rule_read)
+    add("a rule over a conflict reads an observation and resolves nothing", "reading", both(rule_read, set_in(answers, "employee-count", {"status": "conflicting", "cites": [], "values": [{"value": 1, "cites": [0]}, {"value": 2, "cites": [2]}]})))
+    add("a rule names a parameter no receipt commits", "reading", parameter_rule)
+    add("a rule names a parameter the record's own receipt commits", "reading", both(parameter_rule, lambda s: s.own.add("company")))
+    add("no retained response and no receipt", "reading", both(
+        lambda s: s.records["company"].__setitem__("responses", []),
+        lambda s: s.records["company"].__setitem__("fields", {"company-id": {"status": "not-found", "cites": []}, "employee-count": {"status": "stale", "cites": []}}),
+    ))
+    add("reconciliation: the primary's found value", "reading", kind="reconcile")
+    add("reconciliation: the secondary's, the primary not-found", "reading", lambda s: s.records["primary"].__setitem__("fields", count_answer("not-found")), "reconcile")
+    add("reconciliation: a conflict derives unknown (failed-fallback)", "reading", both(
+        lambda s: s.records["primary"].__setitem__("fields", count_answer("not-found")),
+        lambda s: s.records["secondary"].__setitem__("fields", count_answer("stale")),
+        lambda s: s.records["combined"].update({"fields": count_answer("conflicting"), "responses": [answer_response()]}),
+    ), "reconcile")
+    add("reconciliation: every candidate unavailable", "reading", both(
+        lambda s: s.records["primary"].__setitem__("fields", count_answer("not-found")),
+        lambda s: s.records["secondary"].__setitem__("fields", count_answer("stale")),
+    ), "reconcile")
+    add("reconciliation: an absent entry, and this source's own found value", "reading", both(
+        lambda s: s.records["primary"].__setitem__("fields", count_answer("absent")),
+        lambda s: s.records["secondary"].__setitem__("fields", count_answer("not-found")),
+        lambda s: s.records["combined"].update({"fields": count_answer("found", 11), "responses": [answer_response()]}),
+    ), "reconcile")
+    add("reconciliation: a skipped earlier source is absent from the combined value", "reading", gate, "reconcile")
+    add("cites follow the sources, not callIndex, in a preparation with research", "reading", lambda s: s.call_indices.update({"primary": [5], "secondary": [0, 1]}), "reconcile")
+    add("a field no read uses changes, with no receipt for the record", "reading", both(rule_read, set_in(answers, "roles", {"status": "found", "value": ["other"], "cites": [0]})), fixed=rule_read)
+
+    # ---- findings ----
+    add("a read field changes, with no receipt for the record", "finding:preparation-differs", lambda s: answers(s)["employee-count"].__setitem__("value", 1), fixed=True)
+    add("responses reordered, their indices updated to cite the same", "finding:preparation-differs", both(
+        rule_read,
+        lambda s: s.records["company"].__setitem__("responses", [page_response(), answer_response(), search_response()]),
+        lambda s: s.call_indices.__setitem__("company", [2, 0, 1]),
+        lambda s: [e.__setitem__("cites", [{0: 1, 1: 2, 2: 0}[i] for i in e["cites"]]) for e in answers(s).values()],
+    ), fixed=rule_read)
+    add("a second installation binds another AI profile", "finding:preparation-differs", both(
+        lambda s: s.unbound.add("company"), lambda s: assign(company(s), "ai-2"),
+        lambda s: s.records["company"]["responses"][0].__setitem__("profile", "ai-2"),
+    ), fixed=lambda s: s.unbound.add("company"))
+    add("an AI profile of another model", "finding:profile-mismatch", lambda s: assign(company(s), "ai-b"))
+    add("an AI profile lacking answer", "finding:profile-mismatch", lambda s: assign(company(s), "web-search"))
+    add("an AI profile with no research declaration", "finding:profile-mismatch", lambda s: assign(company(s), "plain"))
+    add("a web profile lacking the capability it serves", "finding:profile-mismatch", lambda s: assign(company(s), page="web-search"))
+    add("a web profile not of class generated", "finding:profile-mismatch", lambda s: assign(company(s), search="web-record"))
+    add("a web profile that declares another model", "finding:profile-mismatch", lambda s: assign(company(s), search="web-b"))
+    add("an old profile digest", "finding:profile-mismatch", lambda s: company(s).__setitem__("profileDigest", "sha256:" + "0" * 64))
+    add("an untrusted profile", "finding:profile-mismatch", lambda s: company(s).__setitem__("profile", "elsewhere"))
+    add("a binding naming an old profile digest", "finding:profile-mismatch", both(lambda s: s.unbound.add("company"), after(lambda d: d["binding"]["sources"]["company"]["webProfiles"]["page"].__setitem__("profileDigest", "sha256:" + "0" * 64))))
+    add("a binding naming a profile of another model", "finding:profile-mismatch", both(lambda s: s.unbound.add("company"), lambda s: assign(company(s), "ai-b")))
+    add("a retained response through a trusted, unassigned profile", "finding:profile-mismatch", lambda s: s.records["company"]["responses"][1].__setitem__("profile", "web-search"))
+    add("a retained response naming an untrusted profile", "finding:profile-mismatch", lambda s: s.records["company"]["responses"][1].__setitem__("profile", "elsewhere"))
+    add("a retained response naming another digest", "finding:profile-mismatch", lambda s: s.records["company"]["responses"][2].__setitem__("digest", "sha256:" + "0" * 64))
+    add("the research record not acquired", "finding:acquisition-missing", after(lambda d: d["acquisitions"].pop("company")))
+    add("a cited response whose bytes are not retained", "finding:acquisition-missing", after(lambda d: record(d)["responses"][2].pop("result")))
+    add("a retained result changed", "finding:acquisition-invalid", after(lambda d: record(d)["responses"][1]["result"].__setitem__("hits", [])))
+    add("a retained request changed", "finding:acquisition-invalid", after(lambda d: record(d)["responses"][0]["request"].__setitem__("prompt", "Which?")))
+    add("the fields changed under the record's own receipt", "finding:acquisition-invalid", both(lambda s: s.own.add("company"), after(lambda d: record(d)["fields"]["employee-count"].__setitem__("value", 1))))
+    add("the record's own receipt over another request", "finding:acquisition-invalid", both(lambda s: s.own.add("company"), lambda s: s.receipt_hooks.append(lambda n, i, r: r.__setitem__("argumentsCommitment", "sha256:" + "0" * 64) if i == "own" else None)))
+    add("a retained receipt of another source", "finding:acquisition-invalid", lambda s: s.receipt_hooks.append(lambda n, i, r: r.__setitem__("source", "elsewhere") if i == 1 else None))
+    add("an expired retained receipt", "finding:acquisition-stale", lambda s: s.receipt_hooks.append(lambda n, i, r: r["acquisition"].__setitem__("observedAt", RESEARCH_EXPIRED) if i == 1 else None))
+    add("the record's own receipt expired", "finding:acquisition-stale", both(lambda s: s.own.add("company"), lambda s: s.receipt_hooks.append(lambda n, i, r: r.__setitem__("servedAt", RESEARCH_EXPIRED) if i == "own" else None)))
+    add("two retained responses at one callIndex", "finding:acquisition-sessions", lambda s: s.call_indices.__setitem__("company", [0, 0, 1]))
+    add("the record's own receipt at a retained response's callIndex", "finding:acquisition-sessions", both(lambda s: s.own.add("company"), lambda s: s.call_indices.__setitem__("company", [0, 1, 2, 1])))
+    add("a skipped research source with a record", "finding:acquisition-unexpected", both(gate, lambda s: s.records.__setitem__("primary", {"fields": count_answer("not-found"), "responses": []})), "reconcile")
+    add("a matched clause's value pointer that does not resolve", "finding:read-failed", lambda s: s.source("combined")["read"]["rule"]["clauses"][0]["claim"]["facts"][0].__setitem__("from", PRIMARY + "/value/min"), "reconcile")
+    add("a plain rule's from that does not resolve", "finding:read-failed", both(
+        lambda s: company(s).__setitem__("read", {"rule": {"ruleVersion": "1", "parameters": {}, "clauses": [{"when": {"op": "always"}, "claim": {"facts": [{"pointer": "/company/revenue", "from": "/fields/revenue/value"}], "evidence": {}, "acquisitionStatus": "resolved"}, "reason": "always"}]}}),
+        lambda s: s.__setattr__("admits", {"/company/revenue": ["generated"]}),
+        lambda s: answers(s).__setitem__("revenue", {"status": "not-found", "cites": []}),
+    ))
+    add("a research target that does not admit generated", "finding:admission-refused", lambda s: s.__setattr__("admits", {"/company/fields": ["record"]}))
+    add("the combined value nested beyond 32 levels", over, lambda s: s.records["primary"]["responses"][0].__setitem__("result", json.loads("[" * 29 + "]" * 29)), "reconcile")
+
+    # ---- refusals: the recipe's form ----
+    add("a source without fields (pull request 164's form)", malformed, drop(company, "fields"))
+    add("a source without capabilities", malformed, drop(company, "capabilities"))
+    # Each declaration refusal leaves the record answering only declared fields, so that no other check refuses it.
+    unanswered = drop(answers, "revenue")
+    add("an empty declaration list", malformed, both(set_in(company, "fields", []), lambda s: s.records["company"].__setitem__("fields", {})))
+    add("a declaration of another type", malformed, both(unanswered, lambda s: declaration(s, "revenue").__setitem__("type", "number")))
+    add("a declaration whose required is not a boolean", malformed, lambda s: declaration(s, "revenue").__setitem__("required", "no"))
+    add("a declaration named case", malformed, both(unanswered, lambda s: declaration(s, "revenue").__setitem__("name", "case")))
+    add("a declaration with an empty description", malformed, lambda s: declaration(s, "revenue").__setitem__("description", ""))
+    add("a declaration with a member more", malformed, lambda s: declaration(s, "revenue").__setitem__("unit", "EUR"))
+    add("a field declared twice", malformed, both(unanswered, lambda s: declaration(s, "revenue").__setitem__("name", "active")))
+    add("evidence that is not an array", malformed, set_in(company, "evidence", "the page that states the headcount"))
+    add("an empty evidence instruction", malformed, set_in(company, "evidence", [""]))
+    add("capabilities without answer", malformed, set_in(company, "capabilities", ["search", "page"]))
+    add("capabilities out of order", malformed, set_in(company, "capabilities", ["answer", "page", "search"]))
+    add("a capability named twice", malformed, both(set_in(company, "capabilities", ["answer", "search", "search"]), lambda s: company(s)["webProfiles"].pop("page")))
+    add("answer named twice", malformed, both(set_in(company, "capabilities", ["answer", "answer"]), set_in(company, "webProfiles", {})))
+    add("an unknown capability", malformed, set_in(company, "capabilities", ["answer", "browse"]))
+    add("no capability", malformed, set_in(company, "capabilities", []))
+    add("the bound form without webProfiles", malformed, drop(company, "webProfiles"))
+    add("webProfiles missing a requested capability", malformed, lambda s: company(s)["webProfiles"].pop("page"))
+    add("webProfiles assigning an unrequested capability", malformed, set_in(company, "capabilities", ["answer", "search"]))
+    add("a web assignment with a member more", malformed, lambda s: company(s)["webProfiles"]["page"].__setitem__("model", "model-a"))
+    add("a web assignment whose digest is not a digest", malformed, lambda s: company(s)["webProfiles"]["page"].__setitem__("profileDigest", "sha256:XYZ"))
+    add("an operation's catalog member", malformed, set_in(company, "platform", "research"))
+    add("a question naming no parameter in scope", malformed, set_in(company, "question", {"$param": "elsewhere"}))
+    add("a question that is a number", malformed, set_in(company, "question", 7))
+    add("a question that is an object, not a template form", malformed, set_in(company, "question", {"text": "Which?"}))
+    add("constraints that are not an object", malformed, set_in(company, "constraints", ["EU"]))
+    add("an empty model", malformed, set_in(company, "model", ""))
+    add("research in a version-2 dialect", malformed, lambda s: s.dialect.__setitem__("version", 2))
+    add("an unbound source with no binding document", malformed, both(lambda s: s.unbound.add("company"), after(lambda d: d.__setitem__("binding", None))))
+    add("a binding for another published digest", malformed, both(lambda s: s.unbound.add("company"), after(lambda d: d["binding"].__setitem__("dialect", "sha256:" + "0" * 64))))
+    add("a binding without webProfiles", malformed, both(lambda s: s.unbound.add("company"), after(lambda d: d["binding"]["sources"]["company"].pop("webProfiles"))))
+    add("a binding assigning an unrequested capability", malformed, both(lambda s: s.unbound.add("company"), set_in(company, "capabilities", ["answer", "search"])))
+    add("a binding's web assignment of another form", malformed, both(lambda s: s.unbound.add("company"), after(lambda d: d["binding"]["sources"]["company"]["webProfiles"]["search"].pop("profileDigest"))))
+    add("a profile's model without answer", malformed, lambda s: s.profiles[1]["research"].__setitem__("model", "model-a"))
+    add("a profile serving answer with no model", malformed, lambda s: s.profiles[0]["research"].pop("model"))
+    add("a profile's empty capabilities", malformed, lambda s: s.profiles[1]["research"].__setitem__("capabilities", []))
+    add("a profile's research with a member more", malformed, lambda s: s.profiles[1]["research"].__setitem__("weights", "x"))
+
+    # ---- refusals: the record's answers (§4.3, §11's `presence` and `bounds-and-cites`) ----
+    add("a record without fields (pull request 164's form)", malformed, after(lambda d: record(d).pop("fields")))
+    add("a required entry omitted", malformed, drop(answers, "employee-count"))
+    add("an answer for an undeclared field", malformed, set_in(answers, "headcount", {"status": "not-found", "cites": []}))
+    add("a null entry", malformed, set_in(answers, "revenue", None))
+    add("a null value", malformed, lambda s: answers(s)["revenue"].__setitem__("value", None))
+    add("an integer of another type", malformed, lambda s: answers(s)["employee-count"].__setitem__("value", "12"))
+    add("an integer with a fraction", malformed, lambda s: answers(s)["employee-count"].__setitem__("value", 12.5))
+    add("a numeric decimal", malformed, lambda s: answers(s)["revenue"].__setitem__("value", 12))
+    for spelling in ("012", "+1", "1e2", "", "1.", ".5", "1,5"):
+        add(f"a decimal spelled {spelling!r}", malformed, lambda s, v=spelling: answers(s)["revenue"].__setitem__("value", v))
+    add("a boolean written as a string", malformed, lambda s: answers(s)["active"].__setitem__("value", "false"))
+    add("a text that is not a string", malformed, lambda s: answers(s)["company-id"].__setitem__("value", 1))
+    add("a null list item", malformed, lambda s: answers(s)["roles"].__setitem__("value", ["buyer", None]))
+    add("a null range endpoint", malformed, lambda s: answers(s)["employee-range"].__setitem__("value", {"min": None, "max": "2"}))
+    add("mixed range endpoints", malformed, lambda s: answers(s)["employee-range"].__setitem__("value", {"min": 1, "max": "2"}))
+    add("a reversed decimal range", malformed, lambda s: answers(s)["employee-range"].__setitem__("value", {"min": "2.5", "max": "2.25"}))
+    add("a reversed integer range", malformed, lambda s: answers(s)["employee-range"].__setitem__("value", {"min": 3, "max": -3}))
+    add("a range with a unit", malformed, lambda s: answers(s)["employee-range"].__setitem__("value", {"min": 1, "max": 2, "unit": "people"}))
+    add("a found entry without cites", malformed, lambda s: answers(s)["revenue"].pop("cites"))
+    add("a found entry citing nothing", malformed, lambda s: answers(s)["revenue"].__setitem__("cites", []))
+    add("a value on a not-found entry", malformed, lambda s: answers(s)["revenue"].__setitem__("status", "not-found"))
+    add("values on a found entry", malformed, lambda s: answers(s)["revenue"].__setitem__("values", [{"value": "1", "cites": [0]}, {"value": "2", "cites": [0]}]))
+    add("a conflicting entry with no observation", malformed, set_in(answers, "revenue", {"status": "conflicting", "cites": [], "values": []}))
+    add("a conflicting entry of one value", malformed, set_in(answers, "revenue", {"status": "conflicting", "cites": [], "values": [{"value": "1", "cites": [0]}]}))
+    add("a conflicting entry whose values do not differ", malformed, set_in(answers, "employee-count", {"status": "conflicting", "cites": [], "values": [{"value": 7, "cites": [0]}, {"value": 7, "cites": [1]}]}))
+    add("a conflicting entry with cites of its own", malformed, set_in(answers, "revenue", {"status": "conflicting", "cites": [0], "values": [{"value": "1", "cites": [0]}, {"value": "2", "cites": [1]}]}))
+    add("an observation citing nothing", malformed, set_in(answers, "revenue", {"status": "conflicting", "cites": [], "values": [{"value": "1", "cites": []}, {"value": "2", "cites": [1]}]}))
+    add("an observation with a member more", malformed, set_in(answers, "revenue", {"status": "conflicting", "cites": [], "values": [{"value": "1", "cites": [0], "url": "https://company.example.test/about"}, {"value": "2", "cites": [1]}]}))
+    add("an unknown status", malformed, set_in(answers, "revenue", {"status": "guessed", "cites": []}))
+    add("an index -0", malformed, both(lambda s: answers(s)["revenue"].__setitem__("cites", [424242]), lambda s: s.replacements.append(("acquisitions", b"[424242]", b"[-0]"))))
+    add("an index at the responses' length", malformed, lambda s: answers(s)["revenue"].__setitem__("cites", [3]))
+    add("a negative index", malformed, lambda s: answers(s)["revenue"].__setitem__("cites", [-1]))
+    add("an index written with a fraction", malformed, lambda s: answers(s)["revenue"].__setitem__("cites", [1.0]))
+    add("an index cited twice", malformed, lambda s: answers(s)["revenue"].__setitem__("cites", [2, 2]))
+    add("a URL in place of an index", malformed, lambda s: answers(s)["revenue"].__setitem__("cites", ["https://company.example.test/about"]))
+
+    # ---- refusals: a plain research read's pointers (§4.3, "Reading fields") ----
+    read_rule = lambda s: company(s)["read"]["rule"]  # noqa: E731
+    add("a plain rule's from under values", malformed, both(rule_read, lambda s: read_rule(s)["clauses"][0]["claim"]["facts"][0].__setitem__("from", "/fields/employee-count/values/0/value")))
+    add("a copy from under values", malformed, lambda s: company(s)["read"]["copy"]["facts"][0].__setitem__("source", "/fields/roles/values/0/value"))
+    add("a copy of a retained response", malformed, lambda s: company(s)["read"]["copy"]["facts"][0].__setitem__("source", "/responses/0/result"))
+    add("a copy of the whole record", malformed, lambda s: company(s)["read"]["copy"]["facts"][0].__setitem__("source", ""))
+    add("a condition on an undeclared field", malformed, both(rule_read, lambda s: read_rule(s)["clauses"][1].__setitem__("when", {"op": "exists", "field": "/fields/headcount/status"})))
+    add("a pointer below a status", malformed, both(rule_read, lambda s: read_rule(s)["clauses"][1].__setitem__("when", {"op": "exists", "field": "/fields/employee-count/status/0"})))
+    add("an observation pointer of another form", malformed, both(rule_read, lambda s: read_rule(s)["clauses"][1].__setitem__("when", {"op": "exists", "field": "/fields/employee-count/values/00/value"})))
+    add("an unwrap outside the closed list", malformed, lambda s: company(s)["read"].__setitem__("unwrap", ["/responses/0/result/text"]))
+
+    # ---- refusals: the reconciliation read (§6.4) ----
+    combined_read = lambda s: s.source("combined")["read"]  # noqa: E731
+    clauses = lambda s: combined_read(s)["rule"]["clauses"]  # noqa: E731
+    web_source = {"name": "page", "kind": "web", "profile": "web", "profileDigest": "web", "maxAge": 600, "url": "https://company.example.test/about", "read": {"copy": {"facts": [], "evidence": []}}}
+    current_only = {"ruleVersion": "1", "parameters": {}, "clauses": [
+        clause(status_guard(CURRENT, "found"), "this source found it", COUNT_TARGET, CURRENT + "/value", "resolved"),
+        clause({"op": "any", "of": [absence_guard(CURRENT)] + [status_guard(CURRENT, s) for s in ("not-found", "stale", "conflicting")]}, "not found"),
+        clause({"op": "always"}, "otherwise"),
+    ]}
+    add("no earlier source named", malformed, lambda s: combined_read(s).update({"sources": [], "rule": copy.deepcopy(current_only)}), "reconcile")
+    add("a reconciliation of the current source alone", "reading", lambda s: combined_read(s).update({"sources": ["primary"], "rule": copy.deepcopy(current_only)}), "reconcile")
+    add("an earlier source named twice", malformed, lambda s: combined_read(s).__setitem__("sources", ["primary", "secondary", "primary"]), "reconcile")
+    add("the current source named", malformed, lambda s: combined_read(s).__setitem__("sources", ["primary", "secondary", "combined"]), "reconcile")
+    add("a later source named", malformed, lambda s: s.dialect["sources"].insert(1, s.dialect["sources"].pop(2)), "reconcile")
+    add("a source that does not exist named", malformed, lambda s: combined_read(s).__setitem__("sources", ["primary", "secondary", "elsewhere"]), "reconcile")
+    add("a non-research source named", malformed, both(lambda s: s.dialect["sources"].insert(0, copy.deepcopy(web_source)), lambda s: combined_read(s)["sources"].append("page")), "reconcile")
+    add("a non-research source beside, not named", "refusal:kind-unread", lambda s: s.dialect["sources"].insert(0, copy.deepcopy(web_source)), "reconcile")
+    add("a reconciliation on another kind", malformed, lambda s: s.dialect["sources"].append({**copy.deepcopy(web_source), "read": copy.deepcopy(combined_read(s))}), "reconcile")
+    add("a reconciliation with an unwrap", malformed, lambda s: combined_read(s).__setitem__("unwrap", ["/current"]), "reconcile")
+    add("a reconciliation with a copy", malformed, lambda s: combined_read(s).__setitem__("copy", {"facts": [], "evidence": []}), "reconcile")
+    add("a reconciliation's from under values", malformed, lambda s: clauses(s)[0]["claim"]["facts"][0].__setitem__("from", PRIMARY + "/values/0/value"), "reconcile")
+    add("a reconciliation's from outside the admissible set", malformed, lambda s: clauses(s)[0]["claim"]["facts"][0].__setitem__("from", PRIMARY + "/status"), "reconcile")
+    add("a reconciliation's from of a field its source does not declare", malformed, lambda s: clauses(s)[0]["claim"]["facts"][0].__setitem__("from", "/sources/primary/fields/revenue/value"), "reconcile")
+    add("a reconciliation's from of a source it does not name", malformed, lambda s: combined_read(s).__setitem__("sources", ["primary"]), "reconcile")
+    add("a selecting clause without its found guard", malformed, lambda s: clauses(s)[0].__setitem__("when", {"op": "exists", "field": PRIMARY + "/value"}), "reconcile")
+    add("a found guard nested below an all", malformed, lambda s: clauses(s)[1].__setitem__("when", {"op": "all", "of": [unavailable(PRIMARY), {"op": "any", "of": [status_guard(SECONDARY, "found")]}]}), "reconcile")
+    for missing in ("not-found", "stale", "conflicting", "absent"):
+        add(f"a selected field without its {missing} guard", malformed, lambda s, m=missing: combined_read(s).__setitem__("rule", guarded_rule(without=(m, PRIMARY))), "reconcile")
+    add("a reconciliation claim that writes evidence", malformed, both(lambda s: clauses(s)[2]["claim"].__setitem__("evidence", {"company-headcount": "unknown"})), "reconcile")
+    add("a last clause that resolves", malformed, lambda s: clauses(s)[-1]["claim"].__setitem__("acquisitionStatus", "resolved"), "reconcile")
+    add("a condition outside the reconciliation's pointers", malformed, lambda s: clauses(s)[4].__setitem__("when", {"op": "any", "of": [unavailable(CURRENT), {"op": "exists", "field": "/sources/primary/responses"}]}), "reconcile")
+    add("a reconciliation's target that overlaps another's", malformed, lambda s: [c["claim"]["facts"][0].__setitem__("pointer", "/observed/primary/count") for c in clauses(s) if c["claim"]["facts"]], "reconcile")
+    add("16 earlier sources named", over, lambda s: combined_read(s).__setitem__("sources", ["primary"] * 16), "reconcile")
+
+    # ---- the maxima of §12: one over each, and every maximum reached (§11's `bounds-and-cites`) ----
+    long = lambda n: "x" * n  # noqa: E731
+    add("65 fields declared", over, lambda s: company(s)["fields"].extend({"name": f"extra-{i}", "type": "integer", "required": False, "description": "An extra."} for i in range(59)))
+    add("65 answer entries, one undeclared", over, lambda s: answers(s).update({f"extra-{i}": {"status": "not-found", "cites": []} for i in range(59)}))
+    add("a field name of 65 bytes", over, lambda s: declaration(s, "revenue").__setitem__("name", long(65)))
+    add("a description of 2049 bytes", over, lambda s: declaration(s, "revenue").__setitem__("description", long(2049)))
+    add("a model of 257 bytes", over, set_in(company, "model", long(257)))
+    add("an evidence instruction of 4097 bytes", over, set_in(company, "evidence", [long(4097)]))
+    add("a text of 8193 bytes", over, lambda s: answers(s)["company-id"].__setitem__("value", "é" * 4096 + "x"))
+    add("a text-list of 65 items", over, lambda s: answers(s)["roles"].__setitem__("value", ["r"] * 65))
+    add("a text-list item of 1025 bytes", over, lambda s: answers(s)["roles"].__setitem__("value", [long(1025)]))
+    add("a decimal of 129 characters", over, lambda s: answers(s)["revenue"].__setitem__("value", "1" * 129))
+    add("a range endpoint of 129 characters", over, lambda s: answers(s)["employee-range"].__setitem__("value", {"min": "1", "max": "1" * 129}))
+    add("65 conflicting observations", over, set_in(answers, "employee-count", {"status": "conflicting", "cites": [], "values": [{"value": i, "cites": [0]} for i in range(65)]}))
+    add("65 indices in a citation", over, lambda s: answers(s)["revenue"].__setitem__("cites", list(range(65))))
+    add("65 indices in an observation's citation", over, set_in(answers, "employee-count", {"status": "conflicting", "cites": [], "values": [{"value": 1, "cites": list(range(65))}, {"value": 2, "cites": [0]}]}))
+    add("four capabilities", over, set_in(company, "capabilities", ["answer", "search", "page", "page"]))
+    add("a profile of four capabilities", over, lambda s: s.profiles[1]["research"].__setitem__("capabilities", ["search", "page", "page", "page"]))
+    add("a profile's model of 257 bytes", over, lambda s: s.profiles[0]["research"].__setitem__("model", long(257)))
+    add("three web assignments", over, lambda s: company(s)["webProfiles"].__setitem__("answer", {"profile": "ai", "profileDigest": "ai"}))
+    add("three web assignments in a binding", over, both(lambda s: s.unbound.add("company"), after(lambda d: d["binding"]["sources"]["company"]["webProfiles"].__setitem__("answer", {}))))
+    add("65 retained responses", over, lambda s: s.records["company"]["responses"].extend([answer_response()] * 62))
+
+    def every_maximum(s: ResearchScenario) -> None:
+        source = company(s)
+        source["fields"].extend({"name": f"extra-{i:02}", "type": "integer", "required": False, "description": "An extra."} for i in range(57))
+        source["fields"].append({"name": long(64), "type": "integer", "required": False, "description": long(2048)})
+        source["model"] = long(256)
+        source["evidence"] = [long(4096)]
+        s.profiles[0]["research"]["model"] = long(256)
+        s.records["company"]["responses"] = [answer_response() for _ in range(62)] + [search_response(), page_response()]
+        entries = answers(s)
+        entries["company-id"]["value"] = "é" * 4096
+        entries["roles"]["value"] = ["é" * 512] * 64
+        entries["revenue"]["value"] = "-" + "1" * 125 + ".5"
+        entries["employee-range"]["value"] = {"min": "1" * 128, "max": "2" + "0" * 127}
+        entries["employee-count"] = {"status": "conflicting", "cites": [], "values": [{"value": i, "cites": list(range(64))} for i in range(64)]}
+        entries.update({f"extra-{i:02}": {"status": "found", "value": i, "cites": [0]} for i in range(57)})
+        entries[long(64)] = {"status": "not-found", "cites": list(range(64))}
+
+    add("every maximum reached", "reading", every_maximum)
+    return cases
+
+
+def answer_code(answer: dict[str, Any]) -> str:
+    if "reading" in answer:
+        return "reading"
+    if "finding" in answer:
+        return "finding:" + answer["finding"]
+    return "refusal:" + answer["refused"]
+
+
+class ResearchContractTests(unittest.TestCase):
+    """The research contract of RFC 0018's round 8 (spec/dialect.md §§4.3, 4.4, 5.1, 5.2, 6.4, 9, 11, 12), on
+    hand-written documents: the first reader's answers here, the second's held equal to them in
+    tests/test_dialect_ts.py."""
+
+    def test_every_case_has_the_answer_the_text_gives(self) -> None:
+        for name, expected, build in research_cases():
+            with self.subTest(case=name):
+                answer = build().verify().answer
+                self.assertEqual(expected, answer_code(answer), answer.get("detail"))
+
+    def _reading(self, inputs: HandInputs) -> tuple[dict[str, Any], dict[str, Any]]:
+        result = inputs.verify()
+        self.assertIn("reading", result.answer, result.answer)
+        return result.answer["reading"], READER.read_document(result.preparation, "the preparation")
+
+    def test_a_reading_of_every_type(self) -> None:
+        # §4.3: the record's fields, copied whole, are the facts; every target is generated, with generated
+        # influence (§8.2); the request is the recipe's members, the question instantiated; the lineage's
+        # `receipts` are the retained responses' citations, in order, and the record has no `receipt` (§9.3).
+        scenario = ResearchScenario()
+        reading, preparation = self._reading(scenario.prepared())
+        facts = READER.as_plain(reading["facts"])
+        self.assertEqual(READER.as_plain(json.loads(json.dumps(company_answers()))), facts["company"]["fields"])
+        self.assertEqual({"asserted": 1, "record": 0, "generated": 1}, reading["targetsByClass"])
+        outcome = preparation["outcomes"][1]
+        self.assertEqual(COMPANY, outcome["arguments"]["question"])
+        self.assertEqual({"question", "constraints", "model", "evidence", "fields", "capabilities"}, set(outcome["arguments"]))
+        entry = preparation["lineage"][1]
+        self.assertEqual(("generated", True), (entry["class"], entry["generatedInfluence"]))
+        self.assertNotIn("receipt", entry)
+        self.assertEqual(preparation["cites"], entry["receipts"])
+        self.assertEqual([0, 1, 2], [READER.integer_of(c["callIndex"]) for c in entry["receipts"]])
+        self.assertEqual(["acquisition"], reading["unsignedFreshness"]["sources"][0]["checks"])
+
+    def test_the_records_own_receipt_is_its_receipt_and_its_last_citation(self) -> None:
+        scenario = ResearchScenario()
+        scenario.own.add("company")
+        _, preparation = self._reading(scenario.prepared())
+        entry = preparation["lineage"][1]
+        self.assertEqual(entry["receipts"][-1], entry["receipt"])
+        self.assertEqual([0, 1, 2, 3], [READER.integer_of(c["callIndex"]) for c in preparation["cites"]])
+
+    def test_cites_follow_the_sources_in_a_preparation_with_research(self) -> None:
+        # §9.1: in the order of `sources`, a research source adding each retained response's citation in order;
+        # not by `callIndex`, as a preparation with no research source is ordered.
+        scenario = ResearchScenario("reconcile")
+        scenario.call_indices = {"primary": [5], "secondary": [0, 1]}
+        _, preparation = self._reading(scenario.prepared())
+        self.assertEqual([5, 0, 1], [READER.integer_of(c["callIndex"]) for c in preparation["cites"]])
+        receipts = [e.get("receipts") for e in preparation["lineage"]]
+        self.assertEqual([None, preparation["cites"][:1], preparation["cites"][1:], []], receipts)
+
+    def test_a_binding_document_yields_the_dialect_bound_directly(self) -> None:
+        # §4.4: the bound dialect is the published one with the three assignment members added; a preparation
+        # commits it alone, so one bound through a binding document and one given bound have one digest.
+        direct = ResearchScenario()
+        bound = ResearchScenario()
+        bound.unbound.add("company")
+        inputs = bound.prepared()
+        published = json.loads(inputs.dialect)
+        self.assertFalse({"profile", "profileDigest", "webProfiles"} & set(published["sources"][0]))
+        reading, preparation = self._reading(inputs)
+        self.assertEqual(self._reading(direct.prepared())[0]["digest"], reading["digest"])
+        self.assertEqual(research_digest(json.loads(direct.documents().dialect)), preparation["mappingDigest"])
+
+    def test_reconciliation_derives_the_declared_precedence(self) -> None:
+        def count(alter: Any) -> Any:
+            scenario = ResearchScenario("reconcile")
+            alter(scenario)
+            reading, preparation = self._reading(scenario.prepared())
+            claim = preparation["outcomes"][-1]["claim"]
+            return READER.as_plain(reading["facts"]).get("company", {}).get("employee-count"), claim["acquisitionStatus"], claim["reason"]
+
+        records = lambda s: s.records  # noqa: E731
+        self.assertEqual((7, "resolved", "the primary found it"), count(lambda s: None))
+        self.assertEqual((9, "resolved", "the secondary found it"), count(lambda s: records(s)["primary"].__setitem__("fields", count_answer("not-found"))))
+        self.assertEqual((9, "resolved", "the secondary found it"), count(gate))
+
+        def failed(s: ResearchScenario) -> None:
+            records(s)["primary"]["fields"] = count_answer("not-found")
+            records(s)["secondary"]["fields"] = count_answer("stale")
+            records(s)["combined"] = {"fields": count_answer("conflicting"), "responses": [answer_response()]}
+
+        self.assertEqual((None, "unknown", "a conflict is not chosen"), count(failed))
+
+    def test_a_research_rule_names_a_parameter_only_the_records_receipt_commits(self) -> None:
+        # §11, unsignedParameters: the question commits the case parameter only under the record's own receipt.
+        expected = [{"source": "company", "parameters": [{"name": "company", "kind": "case"}], "targets": 2}]
+        cases = {name: build for name, _, build in research_cases()}
+        reading, _ = self._reading(cases["a rule names a parameter no receipt commits"]())
+        self.assertEqual(expected, READER.as_plain(reading["unsignedParameters"]))
+        reading, _ = self._reading(cases["a rule names a parameter the record's own receipt commits"]())
+        self.assertNotIn("unsignedParameters", reading)
+
+    def test_an_integer_answer_of_minus_zero_keeps_its_literal(self) -> None:
+        cases = {name: build for name, _, build in research_cases()}
+        inputs = cases["presence: integer -0, decimal 0, text empty, boolean false"]()
+        line = READER.preparation_bytes(READER.report(inputs.verify().answer))
+        self.assertIn(b'"employee-count":{"cites":[0,2],"status":"found","value":-0}', line)
+
+    def test_a_record_with_no_response_and_no_receipt_is_acquired(self) -> None:
+        cases = {name: build for name, _, build in research_cases()}
+        reading, preparation = self._reading(cases["no retained response and no receipt"]())
+        self.assertEqual([], preparation["lineage"][1]["receipts"])
+        self.assertEqual([], preparation["cites"])
+        self.assertEqual("company", reading["unsignedFreshness"]["sources"][0]["source"])
+
+    # Review round 7's research refusals (findings 4 and 5), on the contract's form.
+
+    def test_a_research_record_holds_at_most_64_retained_responses(self) -> None:
+        # §§11 and 12: counted in the third phase, before any form; 64 are admitted, 65 are over the bound
+        # even when the one beyond is malformed (review round 7, finding 4).
+        def answer(retained: int, malformed: bool) -> str:
+            scenario = ResearchScenario()
+            scenario.records["company"]["responses"].extend([answer_response()] * (retained - 3))
+            if malformed:
+                scenario.after_hooks.append(lambda d: d["acquisitions"]["company"]["response"]["result"]["responses"].append({}))
+            return answer_code(scenario.documents().verify().answer)
+
+        self.assertEqual("finding:preparation-differs", answer(64, False))
+        self.assertEqual("refusal:input-over-bound", answer(65, False))
+        self.assertEqual("refusal:input-over-bound", answer(64, True))
+        self.assertEqual("refusal:input-malformed", answer(63, True))
+
+    def test_a_research_acquisition_has_the_form_of_its_kind(self) -> None:
+        # §§4.3, 5.2 and 11 (review round 7, finding 5): the caller-assembled record needs no receipt of its own,
+        # both or neither of `receipt` and `salts`, and the record and each retained response held to their form.
+        def answer(change: Any = None, own: bool = False) -> str:
+            scenario = ResearchScenario()
+            if own:
+                scenario.own.add("company")
+            if change is not None:
+                scenario.after_hooks.append(lambda d: change(d["acquisitions"]["company"]["response"]))
+            return answer_code(scenario.documents().verify().answer)
+
+        retained = lambda r: r["result"]["responses"][0]  # noqa: E731
+        cases = {
+            "research-no-own-receipt": (None, "finding:preparation-differs"),
+            "research-result-not-retained": (lambda r: retained(r).pop("result"), "finding:acquisition-missing"),
+            "research-salts-alone": (lambda r: r.__setitem__("salts", {"args": "0" * 64}), "refusal:input-malformed"),
+            "research-record-not-object": (lambda r: r.__setitem__("result", ["x"]), "refusal:input-malformed"),
+            "research-record-missing-responses": (lambda r: r["result"].pop("responses"), "refusal:input-malformed"),
+            "research-record-bad-responses": (lambda r: r["result"].__setitem__("responses", {}), "refusal:input-malformed"),
+            "research-record-extra-member": (lambda r: r["result"].__setitem__("more", 1), "refusal:input-malformed"),
+            "not an object": (lambda r: r["result"]["responses"].__setitem__(0, "x"), "refusal:input-malformed"),
+            "a member more": (lambda r: retained(r).__setitem__("more", 1), "refusal:input-malformed"),
+            "no profile": (lambda r: retained(r).pop("profile"), "refusal:input-malformed"),
+            "a profile of another form": (lambda r: retained(r).__setitem__("profile", {"id": "ai"}), "refusal:input-malformed"),
+            "a profile digest of another form": (lambda r: retained(r)["profile"].__setitem__("digest", "sha256:XYZ"), "refusal:input-malformed"),
+            "a request that is not an object": (lambda r: retained(r).__setitem__("request", "Which?"), "refusal:input-malformed"),
+            "a receipt that is not an object": (lambda r: retained(r).__setitem__("receipt", []), "refusal:input-malformed"),
+            "salts of another form": (lambda r: retained(r).__setitem__("salts", {"args": "x"}), "refusal:input-malformed"),
+        }
+        for name, (change, expected) in cases.items():
+            with self.subTest(case=name):
+                self.assertEqual(expected, answer(change))
+        self.assertEqual("finding:preparation-differs", answer(own=True))
+        self.assertEqual("refusal:input-malformed", answer(lambda r: r.pop("salts"), own=True))
 
 
 class DialectTextTests(unittest.TestCase):

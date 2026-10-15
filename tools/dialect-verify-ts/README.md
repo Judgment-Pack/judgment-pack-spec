@@ -60,11 +60,15 @@ It prints one line of JSON, members ordered by code point and every number its l
 - [`test/units.test.ts`](test/units.test.ts) holds the forms the text fixes (§1, §9.5, §12) and this
   reader's answers to inputs no vector holds, each made from a vector by one change; some re-sign the
   receipts under a key generated in the test, to reach the checks after a receipt's. Those answers are
-  this reader's readings of the text, not the vectors'.
+  this reader's readings of the text, not the vectors'. Under "the research contract", it builds
+  hand-written research documents of every new form and refusal, signed under a key generated in the
+  test, each with the answer the text gives.
 
-The repository's Python suite runs both through `tests/test_dialect_ts.py`, with
-`--disable-wasm-trap-handler`: Node strips types with a WebAssembly module, which cannot reserve its
-memory under an address-space limit (`ulimit -v`) without that flag.
+The repository's Python suite runs both through `tests/test_dialect_ts.py`, and gives this reader
+the first reader's hand-written research documents (`tests/test_dialect.py`), holding the two
+readers' reports equal on each, with `--disable-wasm-trap-handler`: Node strips types with a
+WebAssembly module, which cannot reserve its memory under an address-space limit (`ulimit -v`)
+without that flag.
 
 There is no `typecheck` script: a type-check needs Node's type declarations as well as TypeScript, and
 this directory installs nothing. The sources were checked with TypeScript 5.9 and Node 22's
@@ -117,6 +121,22 @@ tests in [`test/units.test.ts`](test/units.test.ts) under "dialect version 3" ho
 is no part of this reader's independence: the two readers' agreement on the eleventh and twelfth vectors
 is one author's.
 
+**The research contract.** The pull request for issue #176 extended this reader and the first to
+read `research` as RFC 0018's round-8 amendment defines it, by one author who had read both, from
+the text (§§4.3, 4.4, 5.1, 5.2, 6.4, 9, 11, 12): the recipe's `fields` and `capabilities`, bound
+directly or through a binding document (`webProfiles` among the assignment's members); each assigned
+profile the trusted one of its id and digest, of class `generated`, declaring the capability it
+serves and, when it declares a model, the source's, or `profile-mismatch`, then each retained
+response's profile; the research record's typed answers and their citation indices; each retained
+response checked under its own profile and over its own request, in order, then the record's own
+receipt; a plain read's closed list of pointers; the reconciliation read, its guards, its evidence
+and its last clause, and its combined value held to the nesting bound; `cites` in the order of
+`sources` in a preparation with a `research` source, and the lineage's `receipts`; and the research
+maxima of §12 in phase 3. `http`, `sql` and `web` are still held to their forms and answered
+`kind-unread`. The tests in [`test/units.test.ts`](test/units.test.ts) under "the research contract"
+hold each. No vector holds the kind; the two readers' agreement on its hand-written documents is one
+author's.
+
 ## Where the text was not enough
 
 No vector depends on any point below: every vector gets the same answer under either reading of each.
@@ -162,21 +182,50 @@ These were listed as gaps in the first version; the text decides each.
 - **The lists of `admits`** are arrays of classes, with no further form: §8.2, "`admits`, an object of
   `facts`, mapping fact targets to arrays of classes ... A target is admitted when its class is in its
   list".
-- **A `selected-file` source's members**: §4.2, "`local-file` ... with no profile, no `maxAge` and no
-  request; or `google-drive` ... with `profile`, `profileDigest`, `maxAge` and `arguments` as in §4.1",
-  held in phase 4 by §11, "each of its sources against §4's members and its kind's, whichever its kind".
-  This reader reads `operation` and the case, and answers `kind-unread` to the rest; since the amendment
-  of 2026-10-15, `operation` of the shapes `airbyte`, `mcp` and `http`; and since the eleventh and twelfth
-  vectors, dialect version 3, whose four kinds of §4.3 it holds to their forms and answers `kind-unread`.
+- **A `selected-file` source's members**: §4.2, "`local-file` ... with no profile, no `maxAge` and
+  no request; or `google-drive` ... with `profile`, `profileDigest`, `maxAge` and `arguments` as in
+  §4.1", held in phase 4 by §11, "each of its sources against §4's members and its kind's, whichever
+  its kind". This reader reads `operation` and the case, and answers `kind-unread` to the rest;
+  since the amendment of 2026-10-15, `operation` of the shapes `airbyte`, `mcp` and `http`; since
+  the eleventh and twelfth vectors, dialect version 3, whose kinds `http`, `sql` and `web` it holds
+  to their forms and answers `kind-unread`; and since issue #176, `research`.
 
 ### Version 3: what the text leaves open, as the extension's author read it
 
 No vector depends on it; the first reader takes the same, and RFC 0018's Evidence records it.
 
-- **The forms of version 3's kinds** (§4.3), where the text names a member without its form: `http`'s
-  `path`, "a template that yields a path", is taken as a string template; its `headers`, "the names of
-  the headers", `research`'s `evidence`, "the fields each answer MUST support", and a `sql` binding's
-  `name` and `type`, as non-empty strings.
+- **The forms of version 3's kinds** (§4.3), where the text names a member without its form:
+  `http`'s `path`, "a template that yields a path", is taken as a string template; its `headers`,
+  "the names of the headers", and a `sql` binding's `name` and `type`, as non-empty strings.
+  `research`'s `evidence` was read so too; the research-contract amendment gave it that form.
+
+### The research contract: what the text leaves open, as the extension's author read it
+
+No vector holds the kind; the first reader takes the same readings, and RFC 0018's Evidence records
+them.
+
+- **A plain read's pointers** (§4.3, "Reading fields"): an `unwrap` pointer, which takes the value
+  read from where it points, and a copy's `source` are held to the closed list as a `from` is, and
+  so are never under `values`; `/fields/<name>/values/<index>/value` has no descendants, where
+  `/fields/<name>/value` has; `<name>` is a declared field's, and `<index>` an array index's form
+  (§1).
+- **A reconciliation's conditions** (§6.4, "Pointers are ..."): a condition reads only a field entry
+  of a declared field of the current source or of a source the read names, that entry's `status`, or
+  its `value` or `values` and their descendants; the text closes the set of `from`s and lists these
+  pointers without saying the list is closed for conditions.
+- **The units of a maximum** (§12): a decimal string's 128 is counted in characters; every other
+  string maximum in UTF-8 bytes. A field declared twice is measured, in phase 3, by its first
+  declaration.
+- **`unsignedParameters` of a research source** (§11): the source's own acquisition commits what its
+  question commits only when the record has a receipt of its own, the one receipt over the source's
+  request (§5.2); without one, a parameter a condition names is unsigned.
+- **An acquired research source with no receipt at all**: it is listed in `unsignedFreshness` ("for
+  each source acquired"), and its lineage's `receipts` is the empty array ("for an acquired
+  `research` source"). A preparation "with" a `research` source, whose `cites` follow `sources`, is
+  one whose dialect has one, skipped or not.
+- **The record in the canon domain** (§5.2) is checked after the retained responses and before the
+  record's own receipt; no input distinguishes that from after it, since a record outside the domain
+  fails an earlier check first.
 
 ### The genuine choices, which the text now decides
 

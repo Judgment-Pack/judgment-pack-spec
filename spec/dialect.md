@@ -49,7 +49,9 @@ fields, portable AI and web profile binding, explicit reconciliation and two fix
 Verification still replays retained bytes without calling a model or the web. The amendment
 names the three changed answers to accepted research inputs; `evidence` remains an array of
 non-empty strings. These new members have no preparer or recorded vector. Both repository
-readers hold the superseded research form until the follow-up pull request implements this one.
+readers read them since issue #176: each recomputes a preparation with a `research` source, and
+the two agree on every hand-written document of the contract's forms and refusals. That agreement
+is one author's, and no vector or claim rests on it.
 
 **Its sources.** Where the Runner's words define the format, this document keeps them; where they
 describe the Runner rather than the format, it says what the format is.

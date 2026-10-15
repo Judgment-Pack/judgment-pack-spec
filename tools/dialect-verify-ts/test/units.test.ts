@@ -768,7 +768,7 @@ test("§4.4, §5.1: a profile bound of another shape or record is profile-mismat
   for (const [name, change] of probes) assert.equal(verdict(importedWith(change)), "finding:profile-mismatch", name);
 });
 
-test("§4.3: a kind of version 3 is held to its form, and not read", () => {
+test("§4.3: http, sql and web are held to their forms, and not read (research is read: below)", () => {
   const fx = sourceOf(parse(text(v3bound.dialect)) as JObj);
   const common = `"profile":"fx","profileDigest":${JSON.stringify((fx.m.get("profileDigest") as { v: string }).v)},"maxAge":300,"read":{"copy":{"facts":[],"evidence":[]}}`;
   const param = '{"$param":"invoiceCurrency"}';
@@ -776,13 +776,11 @@ test("§4.3: a kind of version 3 is held to its form, and not read", () => {
     http: { method: '"POST"', path: '"/requests"', query: `{"currency":${param}}`, body: '{"n":1}', headers: '["Accept"]' },
     sql: { statement: '"SELECT 1 WHERE c = :c"', bindings: `[{"name":"c","type":"STRING","value":${param}}]` },
     web: { url: param },
-    research: { question: '{"$text":"Which?"}', constraints: "{}", model: '"a-model"', evidence: '["excerpt"]' },
   };
   const malformedMembers: Record<string, [string, string][]> = {
     http: [["method", '"PUT"'], ["path", '{"a":1}'], ["path", '{"$param":"runAt"}'], ["method", '"GET"'], ["query", '{"currency":7}'], ["headers", '"Accept"']],
     sql: [["statement", '{"$text":"SELECT 1"}'], ["bindings", '[{"name":"c","type":"STRING","value":"EUR"}]'], ["bindings", `[{"name":"c","value":${param}}]`]],
     web: [["url", "7"], ["url", '{"$param":"nope"}'], ["url", '{"$text":"https://example.org/"}']],
-    research: [["question", "7"], ["constraints", "[]"], ["model", "null"], ["evidence", '"excerpt"']],
   };
   const source = (kind: string, members: Record<string, string>) =>
     `{"name":"more","kind":"${kind}",${common}${Object.entries(members).map(([k, v]) => `,"${k}":${v}`).join("")}}`;
@@ -924,56 +922,757 @@ test("§4.4, §11: a binding document of null is refused, not taken as absent", 
   assert.equal(verdict({ ...imported, binding: utf8("null") }), "refusal:input-malformed");
 });
 
-const RETAINED = `{"profile":{"id":"fx","digest":"sha256:${"0".repeat(64)}"},"request":{"question":"Which?"},"result":{"answer":"none"},"receipt":{},"salts":{"args":"${"0".repeat(64)}"}}`;
+// ---- the research contract (RFC 0018, round 8, issue #176) ----
+// Hand-written documents of every new form and refusal, signed under a key generated here. No Runner prepares
+// `research` and no vector holds it: these are this reader's checks of its readings, not vectors. The repository's
+// suite gives the first reader's cases (tests/test_dialect.py) to both readers and holds their reports equal.
 
-/** version-3-bound with a `research` source added, its acquisition the given member. */
-function researched(acquisition: string): string {
-  const fx = sourceOf(parse(text(v3bound.dialect)) as JObj);
-  const study = `{"name":"study","kind":"research","profile":"fx","profileDigest":${JSON.stringify((fx.m.get("profileDigest") as { v: string }).v)},"maxAge":300,"question":"Which?","constraints":{},"model":"a-model","evidence":["excerpt"],"read":{"copy":{"facts":[],"evidence":[]}}}`;
-  const acquisitions = text(v3bound.acquisitions);
-  return verdict({
-    ...v3bound,
-    dialect: edit(v3bound.dialect, '"sources":[', `"sources":[${study},`),
-    acquisitions: utf8(`${acquisitions.slice(0, -1)},"study":${acquisition}}`),
-  });
+type J = any;
+const R_AT = "2026-10-15T12:00:00Z";
+const R_SERVED = "2026-10-15T11:59:00Z";
+const R_OBSERVED = "2026-10-15T11:58:30Z";
+const R_EXPIRED = "2026-10-15T11:40:00Z"; // 20 minutes before the instant, past every maxAge here
+const R_SALT = "5a".repeat(32);
+const COMPANY = "Synthetic Company 0001";
+const rKeys = generateKeyPairSync("ed25519");
+const rPublic = Buffer.from(rKeys.publicKey.export({ format: "jwk" }).x as string, "base64url");
+const jcopy = <T>(x: T): T => JSON.parse(JSON.stringify(x));
+const asJ = (x: J): JVal => parse(JSON.stringify(x));
+const rDigest = (x: J) => "sha256:" + sha(canon(asJ(x)));
+
+function rProfile(id: string, source: string, adapter: string, research?: J, klass = "generated"): J {
+  const p: J = {
+    id,
+    publicKey: rPublic.toString("hex"),
+    class: klass,
+    source,
+    authority: "research.example.test",
+    shape: "http",
+    adapter: { name: adapter, version: "1.0.0", digest: "sha256:" + "ab".repeat(32) },
+    endpoint: null,
+  };
+  if (research !== undefined) p.research = research;
+  return p;
 }
 
+/** The trusted profiles: an AI profile for model-a and a web profile for search and page; and, for the refusals, one
+ * of another model, one of search alone, one of class record, one with no declaration, and a web one of another model. */
+const rProfiles = (): J[] => [
+  rProfile("ai", "ai-answers", "adapter-ai", { capabilities: ["answer"], model: "model-a" }),
+  rProfile("web", "web-pages", "adapter-web", { capabilities: ["search", "page"] }),
+  rProfile("ai-b", "ai-answers", "adapter-ai", { capabilities: ["answer"], model: "model-b" }),
+  rProfile("ai-2", "ai-answers-2", "adapter-ai", { capabilities: ["answer"], model: "model-a" }),
+  rProfile("web-search", "web-pages", "adapter-web", { capabilities: ["search"] }),
+  rProfile("web-record", "web-pages", "adapter-web", { capabilities: ["search", "page"] }, "record"),
+  rProfile("web-b", "web-pages", "adapter-web", { capabilities: ["answer", "search", "page"], model: "model-b" }),
+  rProfile("plain", "ai-answers", "adapter-ai"),
+];
+
+/** `gtm-company-person`'s company: all six types (§11's first example list); synthetic. */
+const companyFields = (): J[] => [
+  { name: "company-id", type: "text", required: true, description: "A synthetic company identifier." },
+  { name: "employee-count", type: "integer", required: true, description: "Employees, as cited." },
+  { name: "revenue", type: "decimal", required: false, description: "Annual revenue, a decimal string." },
+  { name: "active", type: "boolean", required: false, description: "Whether the company trades." },
+  { name: "roles", type: "text-list", required: false, description: "Roles the company hires for." },
+  { name: "employee-range", type: "range", required: false, description: "The band of employees." },
+];
+
+/** A bound research source; each `profileDigest` names a profile by its id until the documents are built. */
+function rSource(name: string, read: J, fields?: J[], capabilities = ["answer", "search", "page"]): J {
+  return {
+    name,
+    kind: "research",
+    maxAge: 600,
+    question: { $param: "company" },
+    constraints: { region: "EU", synthetic: true },
+    model: "model-a",
+    evidence: ["the page that states the headcount"],
+    fields: fields ?? companyFields(),
+    capabilities,
+    profile: "ai",
+    profileDigest: "ai",
+    webProfiles: Object.fromEntries(capabilities.filter((c) => c !== "answer").map((c) => [c, { profile: "web", profileDigest: "web" }])),
+    read,
+  };
+}
+
+const answerResponse = (): J => ({ profile: "ai", request: { prompt: "Which company? (model-a)" }, result: { text: "Synthetic Company 0001 employs no one." } });
+const searchResponse = (): J => ({ profile: "web", request: { query: "Synthetic Company 0001" }, result: { hits: ["https://company.example.test/about"] } });
+const pageResponse = (): J => ({ profile: "web", request: { url: "https://company.example.test/about" }, result: { page: "Headcount: 0." } });
+const companyAnswers = (): J => ({
+  "company-id": { status: "found", value: "synthetic-company-0001", cites: [0] },
+  "employee-count": { status: "found", value: 0, cites: [0, 2] },
+  revenue: { status: "found", value: "-12.50", cites: [2] },
+  active: { status: "found", value: false, cites: [0] },
+  roles: { status: "found", value: [], cites: [1] },
+  "employee-range": { status: "found", value: { min: "1.0", max: "1.00" }, cites: [2] },
+});
+const copyFields = (name: string): J => ({ copy: { facts: [{ target: `/${name}/fields`, source: "/fields" }], evidence: [] } });
+const statusGuard = (entry: string, status: string): J => ({ op: "equals", field: `${entry}/status`, to: status });
+const absenceGuard = (entry: string): J => ({ op: "not", of: { op: "exists", field: entry } });
+const unavailable = (entry: string): J => ({ op: "any", of: [absenceGuard(entry), statusGuard(entry, "not-found"), statusGuard(entry, "stale")] });
+const clause = (when: J, reason: string, target?: string, from?: string, status = "unknown"): J => ({
+  when,
+  claim: { facts: target === undefined ? [] : [{ pointer: target, from }], evidence: {}, acquisitionStatus: status },
+  reason,
+});
+const PRIMARY = "/sources/primary/fields/employee-count";
+const SECONDARY = "/sources/secondary/fields/employee-count";
+const CURRENT = "/current/fields/employee-count";
+const COUNT_TARGET = "/company/employee-count";
+
+/** §6.4's example extended to a third source (§11, `failed-fallback`). */
+const reconciliationRule = (): J => ({
+  ruleVersion: "1",
+  parameters: {},
+  clauses: [
+    clause(statusGuard(PRIMARY, "found"), "the primary found it", COUNT_TARGET, PRIMARY + "/value", "resolved"),
+    clause({ op: "all", of: [unavailable(PRIMARY), statusGuard(SECONDARY, "found")] }, "the secondary found it", COUNT_TARGET, SECONDARY + "/value", "resolved"),
+    clause({ op: "any", of: [PRIMARY, SECONDARY, CURRENT].map((e) => statusGuard(e, "conflicting")) }, "a conflict is not chosen"),
+    clause({ op: "all", of: [unavailable(SECONDARY), statusGuard(CURRENT, "found")] }, "this source found it", COUNT_TARGET, CURRENT + "/value", "resolved"),
+    clause(unavailable(CURRENT), "no candidate is left"),
+    clause({ op: "always" }, "otherwise"),
+  ],
+});
+const countOnly = (): J[] => [{ name: "employee-count", type: "integer", required: false, description: "Employees, as cited." }];
+const observed = (name: string): J => ({ copy: { facts: [{ target: `/observed/${name}`, source: "/fields/employee-count/status" }], evidence: [] } });
+function countAnswer(status: string, value = 7): J {
+  if (status === "found") return { "employee-count": { status, value, cites: [0] } };
+  if (status === "conflicting") return { "employee-count": { status, cites: [], values: [{ value: 7, cites: [0] }, { value: 9, cites: [0] }] } };
+  if (status === "absent") return {};
+  return { "employee-count": { status, cites: [] } };
+}
+
+/** One hand-written research run; a test alters any part before `documents()` builds and signs them. */
+class Scenario {
+  profiles: J[] = rProfiles();
+  case: J = { company: COMPANY };
+  admits: J = {};
+  admitsEvidence: J = {};
+  records: J = {};
+  own = new Set<string>();
+  unbound = new Set<string>();
+  callIndices: Record<string, number[]> = {};
+  receiptHooks: ((name: string, index: number | "own", receipt: J) => void)[] = [];
+  afterHooks: ((documents: J) => void)[] = [];
+  replacements: [string, string, string][] = [];
+  dialect: J;
+  constructor(kind: "company" | "reconcile" = "company") {
+    let sources: J[];
+    if (kind === "company") {
+      sources = [rSource("company", copyFields("company"))];
+      this.admits = { "/company/fields": ["generated"] };
+      this.records = { company: { fields: companyAnswers(), responses: [answerResponse(), searchResponse(), pageResponse()] } };
+    } else {
+      sources = [
+        rSource("primary", observed("primary"), countOnly(), ["answer"]),
+        rSource("secondary", observed("secondary"), countOnly(), ["answer", "page"]),
+        rSource("combined", { sources: ["primary", "secondary"], rule: reconciliationRule() }, countOnly(), ["answer"]),
+      ];
+      this.admits = { "/observed/primary": ["generated"], "/observed/secondary": ["generated"], [COUNT_TARGET]: ["generated"] };
+      this.records = {
+        primary: { fields: countAnswer("found", 7), responses: [answerResponse()] },
+        secondary: { fields: countAnswer("found", 9), responses: [answerResponse(), pageResponse()] },
+        combined: { fields: countAnswer("not-found"), responses: [] },
+      };
+    }
+    this.dialect = {
+      version: 3,
+      case: { parameters: { company: { pointer: "/company", type: "string" } }, facts: [{ target: "/case/company", source: "/company" }], evidence: [] },
+      sources,
+    };
+  }
+
+  source(name: string): J {
+    return this.dialect.sources.find((s: J) => s.name === name);
+  }
+
+  receipt(name: string, index: number | "own", profile: J, request: J, result: J, call: number): J {
+    const receipt: J = {
+      receiptVersion: "3",
+      kind: "acquisition",
+      keyId: sha(rPublic).slice(0, 32),
+      source: profile.source,
+      authority: profile.authority,
+      sessionId: "research-session",
+      callIndex: call,
+      argumentsCommitment: "sha256:" + sha(Buffer.concat([Buffer.from(R_SALT, "hex"), Buffer.from("args:"), canon(asJ(request))])),
+      resultDigest: rDigest(result),
+      servedAt: R_SERVED,
+      acquisition: { adapter: profile.adapter, shape: profile.shape, endpoint: profile.endpoint, observedAt: R_OBSERVED },
+    };
+    for (const hook of this.receiptHooks) hook(name, index, receipt);
+    const message = Buffer.concat([Buffer.from("judgment-pack-gateway/receipt/3:"), canon(asJ(receipt))]);
+    receipt.signature = Buffer.from(nodeSign(null, message, rKeys.privateKey)).toString("hex");
+    return receipt;
+  }
+
+  documents(preparation?: Uint8Array): Inputs {
+    const profiles = jcopy(this.profiles);
+    const byId = new Map<string, J>(profiles.map((p: J) => [p.id, p]));
+    const digests = new Map<string, string>(profiles.map((p: J) => [p.id, rDigest(p)]));
+    const dialect = jcopy(this.dialect);
+    const admits: J = {};
+    if (Object.keys(this.admits).length > 0) admits.facts = { ...this.admits };
+    if (Object.keys(this.admitsEvidence).length > 0) admits.evidence = { ...this.admitsEvidence };
+    if (Object.keys(admits).length > 0) dialect.admits = admits;
+    for (const s of dialect.sources) {
+      if (digests.has(s.profileDigest)) s.profileDigest = digests.get(s.profileDigest);
+      if (s.kind !== "research") continue;
+      for (const a of Object.values(s.webProfiles ?? {}) as J[]) if (a !== null && typeof a === "object" && digests.has(a.profileDigest)) a.profileDigest = digests.get(a.profileDigest);
+    }
+    const acquisitions: J = {};
+    let call = 0;
+    for (const s of dialect.sources) {
+      const spec = this.records[s.name];
+      if (spec === undefined) continue;
+      const indices = [...(this.callIndices[s.name] ?? [])];
+      const next = () => (indices.length > 0 ? indices.shift()! : call);
+      const responses = spec.responses.map((r: J, k: number) => {
+        const profile = byId.get(r.profile) ?? profiles[0];
+        const entry = {
+          profile: { id: r.profile, digest: r.digest ?? digests.get(r.profile) ?? "sha256:" + "0".repeat(64) },
+          request: r.request,
+          result: r.result,
+          receipt: this.receipt(s.name, k, profile, r.request, r.result, next()),
+          salts: { args: R_SALT },
+        };
+        call++;
+        return entry;
+      });
+      const record = { fields: spec.fields, responses };
+      const member: J = { result: record };
+      if (this.own.has(s.name)) {
+        const q = s.question;
+        const question = typeof q === "string" ? q : this.case[q.$param];
+        const request = { question, constraints: s.constraints, model: s.model, evidence: s.evidence, fields: s.fields, capabilities: s.capabilities };
+        member.receipt = this.receipt(s.name, "own", byId.get(s.profile), request, record, next());
+        member.salts = { args: R_SALT };
+        call++;
+      }
+      acquisitions[s.name] = { response: member };
+    }
+    let binding: J = null;
+    if (this.unbound.size > 0) {
+      const assignments: J = {};
+      for (const s of dialect.sources) {
+        if (!this.unbound.has(s.name)) continue;
+        assignments[s.name] = { profile: s.profile, profileDigest: s.profileDigest, webProfiles: s.webProfiles };
+        delete s.profile;
+        delete s.profileDigest;
+        delete s.webProfiles;
+      }
+      binding = { dialect: rDigest(dialect), sources: assignments };
+    }
+    const documents: J = { dialect, case: this.case, acquisitions, profiles, binding };
+    for (const hook of this.afterHooks) hook(documents);
+    const written: Record<string, string | undefined> = {};
+    for (const [k, v] of Object.entries(documents)) written[k] = v === null ? undefined : JSON.stringify(v);
+    for (const [k, from, to] of this.replacements) {
+      assert.ok(written[k]!.includes(from), from);
+      written[k] = written[k]!.replace(from, to);
+    }
+    const bytes = (k: string) => (written[k] === undefined ? undefined : utf8(written[k]!));
+    return {
+      dialect: bytes("dialect")!,
+      case: bytes("case")!,
+      acquisitions: bytes("acquisitions")!,
+      profiles: bytes("profiles")!,
+      preparation: preparation ?? utf8(`{"verifiedAt":"${R_AT}"}`),
+      binding: bytes("binding"),
+      requireBinding: false,
+    };
+  }
+
+  /** The documents, with the preparation this reader recomputes from them. */
+  prepared(): Inputs {
+    const inputs = this.documents();
+    const r = verify(inputs);
+    assert.ok(r.recomputed !== undefined, `no preparation was recomputed: ${r.why}`);
+    return { ...inputs, preparation: r.recomputed! };
+  }
+}
+
+const codeOf = (r: ReturnType<typeof verify>) => (r.kind === "reading" ? "reading" : `${r.kind}:${(member(r.report, r.kind) as { v: string }).v}`);
+
+function assign(source: J, ai?: string, web: Record<string, string> = {}): void {
+  if (ai !== undefined) {
+    source.profile = ai;
+    source.profileDigest = ai;
+  }
+  for (const [c, id] of Object.entries(web)) source.webProfiles[c] = { profile: id, profileDigest: id };
+}
+
+/** An earlier research source whose rule leaves its claim `absent`, from which the primary takes a parameter: the
+ * primary is skipped (§3, §9.2), and its record not acquired. */
+function gate(s: Scenario): void {
+  const rule = {
+    ruleVersion: "1",
+    parameters: {},
+    clauses: [
+      clause(statusGuard("/fields/employee-count", "found"), "found", "/gate/count", "/fields/employee-count/value", "resolved"),
+      clause({ op: "always" }, "nothing to go on", undefined, undefined, "absent"),
+    ],
+  };
+  s.dialect.sources.unshift(rSource("gate", { rule }, countOnly(), ["answer"]));
+  s.source("primary").parameters = { gateCount: { from: "gate", pointer: "/gate/count", type: "integer" } };
+  s.admits["/gate/count"] = ["generated"];
+  s.records.gate = { fields: countAnswer("not-found"), responses: [] };
+  delete s.records.primary;
+}
+
+/** The reconciliation rule with one guard of the primary's taken out. */
+function guardedRule(status: string): J {
+  const rule = reconciliationRule();
+  const guard = status === "absent" ? absenceGuard(PRIMARY) : statusGuard(PRIMARY, status);
+  const same = (a: J, b: J) => JSON.stringify(a) === JSON.stringify(b);
+  const prune = (c: J): J => (c.op === "all" || c.op === "any" ? { ...c, of: c.of.filter((x: J) => !same(x, guard)).map(prune) } : c);
+  for (const cl of rule.clauses) cl.when = prune(cl.when);
+  return rule;
+}
+
+type Case = [string, string, () => Inputs];
+
+function researchCases(): Case[] {
+  const cases: Case[] = [];
+  const add = (name: string, expected: string, alter?: (s: Scenario) => void, kind: "company" | "reconcile" = "company", fixed?: ((s: Scenario) => void) | true) => {
+    cases.push([name, expected, () => {
+      const s = new Scenario(kind);
+      alter?.(s);
+      if (fixed !== undefined) {
+        const base = new Scenario(kind);
+        if (fixed !== true) fixed(base);
+        return s.documents(base.prepared().preparation);
+      }
+      return expected === "reading" ? s.prepared() : s.documents();
+    }]);
+  };
+  const company = (s: Scenario) => s.source("company");
+  const answers = (s: Scenario) => s.records.company.fields;
+  const declared = (s: Scenario, name: string) => company(s).fields.find((d: J) => d.name === name);
+  const both = (...alterations: ((s: Scenario) => void)[]) => (s: Scenario) => alterations.forEach((a) => a(s));
+  const after = (change: (d: J) => void) => (s: Scenario) => s.afterHooks.push(change);
+  const recordOf = (d: J, name = "company") => d.acquisitions[name].response.result;
+  const malformed = "refusal:input-malformed";
+  const over = "refusal:input-over-bound";
+  const ruleRead = (s: Scenario) => {
+    company(s).read = { rule: { ruleVersion: "1", parameters: {}, clauses: [
+      { when: statusGuard("/fields/employee-count", "found"), claim: { facts: [{ pointer: COUNT_TARGET, from: "/fields/employee-count/value" }], evidence: { "company-headcount": "present" }, acquisitionStatus: "resolved" }, reason: "found" },
+      { when: { op: "exists", field: "/fields/employee-count/values/0/value" }, claim: { facts: [], evidence: { "company-headcount": "unknown" }, acquisitionStatus: "unknown" }, reason: "observations conflict" },
+      { when: { op: "always" }, claim: { facts: [], evidence: { "company-headcount": "absent" }, acquisitionStatus: "absent" }, reason: "not found" },
+    ] } };
+    s.admits = { [COUNT_TARGET]: ["generated"] };
+    s.admitsEvidence = { "company-headcount": ["generated"] };
+  };
+  const parameterRule = (s: Scenario) => {
+    ruleRead(s);
+    const rule = company(s).read.rule;
+    rule.parameters = { company: "string" };
+    rule.clauses[0].when = { op: "all", of: [statusGuard("/fields/employee-count", "found"), { op: "equalsParam", field: "/fields/company-id/value", param: "company" }] };
+    answers(s)["company-id"].value = COMPANY;
+  };
+  const answerAlone = (s: Scenario) => {
+    company(s).capabilities = ["answer"];
+    company(s).webProfiles = {};
+    s.records.company.responses = [answerResponse()];
+    for (const e of Object.values(answers(s)) as J[]) e.cites = [0];
+  };
+
+  // readings: every new form
+  add("valid-types: answer, search and page, all six types found", "reading");
+  add("valid-types: a source asking for answer alone", "reading", answerAlone);
+  add("the record with a receipt of its own", "reading", (s) => s.own.add("company"));
+  add("bound through a binding document", "reading", (s) => s.unbound.add("company"));
+  add("bound through a binding document, the record with a receipt of its own", "reading", (s) => (s.unbound.add("company"), s.own.add("company")));
+  add("presence: every optional entry omitted", "reading", (s) => ["revenue", "active", "roles", "employee-range"].forEach((n) => delete answers(s)[n]));
+  add("presence: a required entry not-found", "reading", (s) => (answers(s)["employee-count"] = { status: "not-found", cites: [1] }));
+  add("presence: integer -0, decimal 0, text empty, boolean false", "reading", (s) => {
+    answers(s)["company-id"] = { status: "found", value: "", cites: [0] };
+    answers(s).revenue = { status: "found", value: "0", cites: [0] };
+    answers(s)["employee-count"].value = 424242;
+    s.replacements.push(["acquisitions", '"value":424242', '"value":-0']);
+  });
+  add("stale with no citation, conflicting with separate citations", "reading", (s) => {
+    answers(s).active = { status: "stale", cites: [] };
+    answers(s).roles = { status: "conflicting", cites: [], values: [{ value: ["buyer", "buyer", ""], cites: [0] }, { value: ["buyer"], cites: [1, 2] }] };
+  });
+  add("an integer range, a list with duplicates and empty strings, decimals spelled apart", "reading", (s) => {
+    answers(s)["employee-range"] = { status: "conflicting", cites: [], values: [{ value: { min: -3, max: 12 }, cites: [0] }, { value: { min: -3, max: 12 }, cites: [1] }, { value: { min: 0, max: 0 }, cites: [2] }] };
+    answers(s).roles = { status: "found", value: ["x", "x", ""], cites: [0] };
+    answers(s).revenue = { status: "conflicting", cites: [], values: [{ value: "1.0", cites: [0] }, { value: "1.00", cites: [2] }] };
+  });
+  add("a rule guards the found value, and a condition reads an observation", "reading", ruleRead);
+  add("a rule over a conflict reads an observation and resolves nothing", "reading", both(ruleRead, (s) => (answers(s)["employee-count"] = { status: "conflicting", cites: [], values: [{ value: 1, cites: [0] }, { value: 2, cites: [2] }] })));
+  add("a rule names a parameter no receipt commits", "reading", parameterRule);
+  add("a rule names a parameter the record's own receipt commits", "reading", both(parameterRule, (s) => s.own.add("company")));
+  add("no retained response and no receipt", "reading", (s) => {
+    s.records.company.responses = [];
+    s.records.company.fields = { "company-id": { status: "not-found", cites: [] }, "employee-count": { status: "stale", cites: [] } };
+  });
+  add("reconciliation: the primary's found value", "reading", undefined, "reconcile");
+  add("reconciliation: the secondary's, the primary not-found", "reading", (s) => (s.records.primary.fields = countAnswer("not-found")), "reconcile");
+  add("reconciliation: a conflict derives unknown (failed-fallback)", "reading", (s) => {
+    s.records.primary.fields = countAnswer("not-found");
+    s.records.secondary.fields = countAnswer("stale");
+    s.records.combined = { fields: countAnswer("conflicting"), responses: [answerResponse()] };
+  }, "reconcile");
+  add("reconciliation: every candidate unavailable", "reading", (s) => {
+    s.records.primary.fields = countAnswer("not-found");
+    s.records.secondary.fields = countAnswer("stale");
+  }, "reconcile");
+  add("reconciliation: an absent entry, and this source's own found value", "reading", (s) => {
+    s.records.primary.fields = countAnswer("absent");
+    s.records.secondary.fields = countAnswer("not-found");
+    s.records.combined = { fields: countAnswer("found", 11), responses: [answerResponse()] };
+  }, "reconcile");
+  add("reconciliation: a skipped earlier source is absent from the combined value", "reading", gate, "reconcile");
+  add("cites follow the sources, not callIndex, in a preparation with research", "reading", (s) => (s.callIndices = { primary: [5], secondary: [0, 1] }), "reconcile");
+  add("a field no read uses changes, with no receipt for the record", "reading", both(ruleRead, (s) => (answers(s).roles = { status: "found", value: ["other"], cites: [0] })), "company", ruleRead);
+
+  // findings
+  add("a read field changes, with no receipt for the record", "finding:preparation-differs", (s) => (answers(s)["employee-count"].value = 1), "company", true);
+  add("responses reordered, their indices updated to cite the same", "finding:preparation-differs", both(ruleRead, (s) => {
+    s.records.company.responses = [pageResponse(), answerResponse(), searchResponse()];
+    s.callIndices.company = [2, 0, 1];
+    const moved: Record<number, number> = { 0: 1, 1: 2, 2: 0 };
+    for (const e of Object.values(answers(s)) as J[]) e.cites = e.cites.map((i: number) => moved[i]);
+  }), "company", ruleRead);
+  add("a second installation binds another AI profile", "finding:preparation-differs", (s) => {
+    s.unbound.add("company");
+    assign(company(s), "ai-2");
+    s.records.company.responses[0].profile = "ai-2";
+  }, "company", (s) => s.unbound.add("company"));
+  add("an AI profile of another model", "finding:profile-mismatch", (s) => assign(company(s), "ai-b"));
+  add("an AI profile lacking answer", "finding:profile-mismatch", (s) => assign(company(s), "web-search"));
+  add("an AI profile with no research declaration", "finding:profile-mismatch", (s) => assign(company(s), "plain"));
+  add("a web profile lacking the capability it serves", "finding:profile-mismatch", (s) => assign(company(s), undefined, { page: "web-search" }));
+  add("a web profile not of class generated", "finding:profile-mismatch", (s) => assign(company(s), undefined, { search: "web-record" }));
+  add("a web profile that declares another model", "finding:profile-mismatch", (s) => assign(company(s), undefined, { search: "web-b" }));
+  add("an old profile digest", "finding:profile-mismatch", (s) => (company(s).profileDigest = "sha256:" + "0".repeat(64)));
+  add("an untrusted profile", "finding:profile-mismatch", (s) => (company(s).profile = "elsewhere"));
+  add("a binding naming an old profile digest", "finding:profile-mismatch", both((s) => s.unbound.add("company"), after((d) => (d.binding.sources.company.webProfiles.page.profileDigest = "sha256:" + "0".repeat(64)))));
+  add("a binding naming a profile of another model", "finding:profile-mismatch", (s) => (s.unbound.add("company"), assign(company(s), "ai-b")));
+  add("a retained response through a trusted, unassigned profile", "finding:profile-mismatch", (s) => (s.records.company.responses[1].profile = "web-search"));
+  add("a retained response naming an untrusted profile", "finding:profile-mismatch", (s) => (s.records.company.responses[1].profile = "elsewhere"));
+  add("a retained response naming another digest", "finding:profile-mismatch", (s) => (s.records.company.responses[2].digest = "sha256:" + "0".repeat(64)));
+  add("the research record not acquired", "finding:acquisition-missing", after((d) => delete d.acquisitions.company));
+  add("a cited response whose bytes are not retained", "finding:acquisition-missing", after((d) => delete recordOf(d).responses[2].result));
+  add("a retained result changed", "finding:acquisition-invalid", after((d) => (recordOf(d).responses[1].result.hits = [])));
+  add("a retained request changed", "finding:acquisition-invalid", after((d) => (recordOf(d).responses[0].request.prompt = "Which?")));
+  add("the fields changed under the record's own receipt", "finding:acquisition-invalid", both((s) => s.own.add("company"), after((d) => (recordOf(d).fields["employee-count"].value = 1))));
+  add("the record's own receipt over another request", "finding:acquisition-invalid", (s) => {
+    s.own.add("company");
+    s.receiptHooks.push((_, i, r) => { if (i === "own") r.argumentsCommitment = "sha256:" + "0".repeat(64); });
+  });
+  add("a retained receipt of another source", "finding:acquisition-invalid", (s) => s.receiptHooks.push((_, i, r) => { if (i === 1) r.source = "elsewhere"; }));
+  add("an expired retained receipt", "finding:acquisition-stale", (s) => s.receiptHooks.push((_, i, r) => { if (i === 1) r.acquisition.observedAt = R_EXPIRED; }));
+  add("the record's own receipt expired", "finding:acquisition-stale", (s) => {
+    s.own.add("company");
+    s.receiptHooks.push((_, i, r) => { if (i === "own") r.servedAt = R_EXPIRED; });
+  });
+  add("two retained responses at one callIndex", "finding:acquisition-sessions", (s) => (s.callIndices.company = [0, 0, 1]));
+  add("the record's own receipt at a retained response's callIndex", "finding:acquisition-sessions", (s) => (s.own.add("company"), (s.callIndices.company = [0, 1, 2, 1])));
+  add("a skipped research source with a record", "finding:acquisition-unexpected", both(gate, (s) => (s.records.primary = { fields: countAnswer("not-found"), responses: [] })), "reconcile");
+  add("a matched clause's value pointer that does not resolve", "finding:read-failed", (s) => (s.source("combined").read.rule.clauses[0].claim.facts[0].from = PRIMARY + "/value/min"), "reconcile");
+  add("a plain rule's from that does not resolve", "finding:read-failed", (s) => {
+    company(s).read = { rule: { ruleVersion: "1", parameters: {}, clauses: [{ when: { op: "always" }, claim: { facts: [{ pointer: "/company/revenue", from: "/fields/revenue/value" }], evidence: {}, acquisitionStatus: "resolved" }, reason: "always" }] } };
+    s.admits = { "/company/revenue": ["generated"] };
+    answers(s).revenue = { status: "not-found", cites: [] };
+  });
+  add("a research target that does not admit generated", "finding:admission-refused", (s) => (s.admits = { "/company/fields": ["record"] }));
+  add("the combined value nested beyond 32 levels", over, (s) => (s.records.primary.responses[0].result = JSON.parse("[".repeat(29) + "]".repeat(29))), "reconcile");
+
+  // refusals: the recipe's form
+  add("a source without fields (pull request 164's form)", malformed, (s) => delete company(s).fields);
+  add("a source without capabilities", malformed, (s) => delete company(s).capabilities);
+  // each declaration refusal leaves the record answering only declared fields, so that no other check refuses it
+  const unanswered = (s: Scenario) => delete answers(s).revenue;
+  add("an empty declaration list", malformed, (s) => ((company(s).fields = []), (s.records.company.fields = {})));
+  add("a declaration of another type", malformed, both(unanswered, (s) => (declared(s, "revenue").type = "number")));
+  add("a declaration whose required is not a boolean", malformed, (s) => (declared(s, "revenue").required = "no"));
+  add("a declaration named case", malformed, both(unanswered, (s) => (declared(s, "revenue").name = "case")));
+  add("a declaration with an empty description", malformed, (s) => (declared(s, "revenue").description = ""));
+  add("a declaration with a member more", malformed, (s) => (declared(s, "revenue").unit = "EUR"));
+  add("a field declared twice", malformed, both(unanswered, (s) => (declared(s, "revenue").name = "active")));
+  add("evidence that is not an array", malformed, (s) => (company(s).evidence = "the page that states the headcount"));
+  add("an empty evidence instruction", malformed, (s) => (company(s).evidence = [""]));
+  add("capabilities without answer", malformed, (s) => (company(s).capabilities = ["search", "page"]));
+  add("capabilities out of order", malformed, (s) => (company(s).capabilities = ["answer", "page", "search"]));
+  add("a capability named twice", malformed, (s) => ((company(s).capabilities = ["answer", "search", "search"]), delete company(s).webProfiles.page));
+  add("answer named twice", malformed, (s) => ((company(s).capabilities = ["answer", "answer"]), (company(s).webProfiles = {})));
+  add("an unknown capability", malformed, (s) => (company(s).capabilities = ["answer", "browse"]));
+  add("no capability", malformed, (s) => (company(s).capabilities = []));
+  add("the bound form without webProfiles", malformed, (s) => delete company(s).webProfiles);
+  add("webProfiles missing a requested capability", malformed, (s) => delete company(s).webProfiles.page);
+  add("webProfiles assigning an unrequested capability", malformed, (s) => (company(s).capabilities = ["answer", "search"]));
+  add("a web assignment with a member more", malformed, (s) => (company(s).webProfiles.page.model = "model-a"));
+  add("a web assignment whose digest is not a digest", malformed, (s) => (company(s).webProfiles.page.profileDigest = "sha256:XYZ"));
+  add("an operation's catalog member", malformed, (s) => (company(s).platform = "research"));
+  add("a question naming no parameter in scope", malformed, (s) => (company(s).question = { $param: "elsewhere" }));
+  add("a question that is a number", malformed, (s) => (company(s).question = 7));
+  add("a question that is an object, not a template form", malformed, (s) => (company(s).question = { text: "Which?" }));
+  add("constraints that are not an object", malformed, (s) => (company(s).constraints = ["EU"]));
+  add("an empty model", malformed, (s) => (company(s).model = ""));
+  add("research in a version-2 dialect", malformed, (s) => (s.dialect.version = 2));
+  add("an unbound source with no binding document", malformed, both((s) => s.unbound.add("company"), after((d) => (d.binding = null))));
+  add("a binding for another published digest", malformed, both((s) => s.unbound.add("company"), after((d) => (d.binding.dialect = "sha256:" + "0".repeat(64)))));
+  add("a binding without webProfiles", malformed, both((s) => s.unbound.add("company"), after((d) => delete d.binding.sources.company.webProfiles)));
+  add("a binding assigning an unrequested capability", malformed, (s) => (s.unbound.add("company"), (company(s).capabilities = ["answer", "search"])));
+  add("a binding's web assignment of another form", malformed, both((s) => s.unbound.add("company"), after((d) => delete d.binding.sources.company.webProfiles.search.profileDigest)));
+  add("a profile's model without answer", malformed, (s) => (s.profiles[1].research.model = "model-a"));
+  add("a profile serving answer with no model", malformed, (s) => delete s.profiles[0].research.model);
+  add("a profile's empty capabilities", malformed, (s) => (s.profiles[1].research.capabilities = []));
+  add("a profile's research with a member more", malformed, (s) => (s.profiles[1].research.weights = "x"));
+
+  // refusals: the record's answers (§4.3, §11's `presence` and `bounds-and-cites`)
+  add("a record without fields (pull request 164's form)", malformed, after((d) => delete recordOf(d).fields));
+  add("a required entry omitted", malformed, (s) => delete answers(s)["employee-count"]);
+  add("an answer for an undeclared field", malformed, (s) => (answers(s).headcount = { status: "not-found", cites: [] }));
+  add("a null entry", malformed, (s) => (answers(s).revenue = null));
+  add("a null value", malformed, (s) => (answers(s).revenue.value = null));
+  add("an integer of another type", malformed, (s) => (answers(s)["employee-count"].value = "12"));
+  add("an integer with a fraction", malformed, (s) => (answers(s)["employee-count"].value = 12.5));
+  add("a numeric decimal", malformed, (s) => (answers(s).revenue.value = 12));
+  for (const spelling of ["012", "+1", "1e2", "", "1.", ".5", "1,5"]) add(`a decimal spelled '${spelling}'`, malformed, (s) => (answers(s).revenue.value = spelling));
+  add("a boolean written as a string", malformed, (s) => (answers(s).active.value = "false"));
+  add("a text that is not a string", malformed, (s) => (answers(s)["company-id"].value = 1));
+  add("a null list item", malformed, (s) => (answers(s).roles.value = ["buyer", null]));
+  add("a null range endpoint", malformed, (s) => (answers(s)["employee-range"].value = { min: null, max: "2" }));
+  add("mixed range endpoints", malformed, (s) => (answers(s)["employee-range"].value = { min: 1, max: "2" }));
+  add("a reversed decimal range", malformed, (s) => (answers(s)["employee-range"].value = { min: "2.5", max: "2.25" }));
+  add("a reversed integer range", malformed, (s) => (answers(s)["employee-range"].value = { min: 3, max: -3 }));
+  add("a range with a unit", malformed, (s) => (answers(s)["employee-range"].value = { min: 1, max: 2, unit: "people" }));
+  add("a found entry without cites", malformed, (s) => delete answers(s).revenue.cites);
+  add("a found entry citing nothing", malformed, (s) => (answers(s).revenue.cites = []));
+  add("a value on a not-found entry", malformed, (s) => (answers(s).revenue.status = "not-found"));
+  add("values on a found entry", malformed, (s) => (answers(s).revenue.values = [{ value: "1", cites: [0] }, { value: "2", cites: [0] }]));
+  add("a conflicting entry with no observation", malformed, (s) => (answers(s).revenue = { status: "conflicting", cites: [], values: [] }));
+  add("a conflicting entry of one value", malformed, (s) => (answers(s).revenue = { status: "conflicting", cites: [], values: [{ value: "1", cites: [0] }] }));
+  add("a conflicting entry whose values do not differ", malformed, (s) => (answers(s)["employee-count"] = { status: "conflicting", cites: [], values: [{ value: 7, cites: [0] }, { value: 7, cites: [1] }] }));
+  add("a conflicting entry with cites of its own", malformed, (s) => (answers(s).revenue = { status: "conflicting", cites: [0], values: [{ value: "1", cites: [0] }, { value: "2", cites: [1] }] }));
+  add("an observation citing nothing", malformed, (s) => (answers(s).revenue = { status: "conflicting", cites: [], values: [{ value: "1", cites: [] }, { value: "2", cites: [1] }] }));
+  add("an observation with a member more", malformed, (s) => (answers(s).revenue = { status: "conflicting", cites: [], values: [{ value: "1", cites: [0], url: "https://company.example.test/about" }, { value: "2", cites: [1] }] }));
+  add("an unknown status", malformed, (s) => (answers(s).revenue = { status: "guessed", cites: [] }));
+  add("an index -0", malformed, (s) => ((answers(s).revenue.cites = [424242]), s.replacements.push(["acquisitions", "[424242]", "[-0]"])));
+  add("an index at the responses' length", malformed, (s) => (answers(s).revenue.cites = [3]));
+  add("a negative index", malformed, (s) => (answers(s).revenue.cites = [-1]));
+  add("an index written with a fraction", malformed, (s) => ((answers(s).revenue.cites = [424242]), s.replacements.push(["acquisitions", "[424242]", "[1.0]"])));
+  add("an index cited twice", malformed, (s) => (answers(s).revenue.cites = [2, 2]));
+  add("a URL in place of an index", malformed, (s) => (answers(s).revenue.cites = ["https://company.example.test/about"]));
+
+  // refusals: a plain research read's pointers (§4.3, "Reading fields")
+  const readRule = (s: Scenario) => company(s).read.rule;
+  add("a plain rule's from under values", malformed, both(ruleRead, (s) => (readRule(s).clauses[0].claim.facts[0].from = "/fields/employee-count/values/0/value")));
+  add("a copy from under values", malformed, (s) => (company(s).read.copy.facts[0].source = "/fields/roles/values/0/value"));
+  add("a copy of a retained response", malformed, (s) => (company(s).read.copy.facts[0].source = "/responses/0/result"));
+  add("a copy of the whole record", malformed, (s) => (company(s).read.copy.facts[0].source = ""));
+  add("a condition on an undeclared field", malformed, both(ruleRead, (s) => (readRule(s).clauses[1].when = { op: "exists", field: "/fields/headcount/status" })));
+  add("a pointer below a status", malformed, both(ruleRead, (s) => (readRule(s).clauses[1].when = { op: "exists", field: "/fields/employee-count/status/0" })));
+  add("an observation pointer of another form", malformed, both(ruleRead, (s) => (readRule(s).clauses[1].when = { op: "exists", field: "/fields/employee-count/values/00/value" })));
+  add("an unwrap outside the closed list", malformed, (s) => (company(s).read.unwrap = ["/responses/0/result/text"]));
+
+  // refusals: the reconciliation read (§6.4)
+  const combinedRead = (s: Scenario) => s.source("combined").read;
+  const clauses = (s: Scenario) => combinedRead(s).rule.clauses;
+  const webSource = (): J => ({ name: "page", kind: "web", profile: "web", profileDigest: "web", maxAge: 600, url: "https://company.example.test/about", read: { copy: { facts: [], evidence: [] } } });
+  const currentOnly = (): J => ({ ruleVersion: "1", parameters: {}, clauses: [
+    clause(statusGuard(CURRENT, "found"), "this source found it", COUNT_TARGET, CURRENT + "/value", "resolved"),
+    clause({ op: "any", of: [absenceGuard(CURRENT), ...["not-found", "stale", "conflicting"].map((x) => statusGuard(CURRENT, x))] }, "not found"),
+    clause({ op: "always" }, "otherwise"),
+  ] });
+  add("no earlier source named", malformed, (s) => Object.assign(combinedRead(s), { sources: [], rule: currentOnly() }), "reconcile");
+  add("a reconciliation of the current source alone", "reading", (s) => Object.assign(combinedRead(s), { sources: ["primary"], rule: currentOnly() }), "reconcile");
+  add("an earlier source named twice", malformed, (s) => (combinedRead(s).sources = ["primary", "secondary", "primary"]), "reconcile");
+  add("the current source named", malformed, (s) => (combinedRead(s).sources = ["primary", "secondary", "combined"]), "reconcile");
+  add("a later source named", malformed, (s) => s.dialect.sources.splice(1, 0, s.dialect.sources.pop()), "reconcile");
+  add("a source that does not exist named", malformed, (s) => (combinedRead(s).sources = ["primary", "secondary", "elsewhere"]), "reconcile");
+  add("a non-research source named", malformed, (s) => (s.dialect.sources.unshift(webSource()), combinedRead(s).sources.push("page")), "reconcile");
+  add("a non-research source beside, not named", "refusal:kind-unread", (s) => s.dialect.sources.unshift(webSource()), "reconcile");
+  add("a reconciliation on another kind", malformed, (s) => s.dialect.sources.push({ ...webSource(), read: jcopy(combinedRead(s)) }), "reconcile");
+  add("a reconciliation with an unwrap", malformed, (s) => (combinedRead(s).unwrap = ["/current"]), "reconcile");
+  add("a reconciliation with a copy", malformed, (s) => (combinedRead(s).copy = { facts: [], evidence: [] }), "reconcile");
+  add("a reconciliation's from under values", malformed, (s) => (clauses(s)[0].claim.facts[0].from = PRIMARY + "/values/0/value"), "reconcile");
+  add("a reconciliation's from outside the admissible set", malformed, (s) => (clauses(s)[0].claim.facts[0].from = PRIMARY + "/status"), "reconcile");
+  add("a reconciliation's from of a field its source does not declare", malformed, (s) => (clauses(s)[0].claim.facts[0].from = "/sources/primary/fields/revenue/value"), "reconcile");
+  add("a reconciliation's from of a source it does not name", malformed, (s) => (combinedRead(s).sources = ["primary"]), "reconcile");
+  add("a selecting clause without its found guard", malformed, (s) => (clauses(s)[0].when = { op: "exists", field: PRIMARY + "/value" }), "reconcile");
+  add("a found guard nested below an all", malformed, (s) => (clauses(s)[1].when = { op: "all", of: [unavailable(PRIMARY), { op: "any", of: [statusGuard(SECONDARY, "found")] }] }), "reconcile");
+  for (const missing of ["not-found", "stale", "conflicting", "absent"]) {
+    add(`a selected field without its ${missing} guard`, malformed, (s) => (combinedRead(s).rule = guardedRule(missing)), "reconcile");
+  }
+  add("a reconciliation claim that writes evidence", malformed, (s) => (clauses(s)[2].claim.evidence = { "company-headcount": "unknown" }), "reconcile");
+  add("a last clause that resolves", malformed, (s) => (clauses(s)[clauses(s).length - 1].claim.acquisitionStatus = "resolved"), "reconcile");
+  add("a condition outside the reconciliation's pointers", malformed, (s) => (clauses(s)[4].when = { op: "any", of: [unavailable(CURRENT), { op: "exists", field: "/sources/primary/responses" }] }), "reconcile");
+  add("a reconciliation's target that overlaps another's", malformed, (s) => clauses(s).filter((c: J) => c.claim.facts.length > 0).forEach((c: J) => (c.claim.facts[0].pointer = "/observed/primary/count")), "reconcile");
+  add("16 earlier sources named", over, (s) => (combinedRead(s).sources = Array(16).fill("primary")), "reconcile");
+
+  // the maxima of §12: one over each, and every maximum reached (§11's `bounds-and-cites`)
+  const long = (n: number) => "x".repeat(n);
+  add("65 fields declared", over, (s) => company(s).fields.push(...Array.from({ length: 59 }, (_, i) => ({ name: `extra-${i}`, type: "integer", required: false, description: "An extra." }))));
+  add("65 answer entries, one undeclared", over, (s) => Array.from({ length: 59 }, (_, i) => (answers(s)[`extra-${i}`] = { status: "not-found", cites: [] })));
+  add("a field name of 65 bytes", over, (s) => (declared(s, "revenue").name = long(65)));
+  add("a description of 2049 bytes", over, (s) => (declared(s, "revenue").description = long(2049)));
+  add("a model of 257 bytes", over, (s) => (company(s).model = long(257)));
+  add("an evidence instruction of 4097 bytes", over, (s) => (company(s).evidence = [long(4097)]));
+  add("a text of 8193 bytes", over, (s) => (answers(s)["company-id"].value = "é".repeat(4096) + "x"));
+  add("a text-list of 65 items", over, (s) => (answers(s).roles.value = Array(65).fill("r")));
+  add("a text-list item of 1025 bytes", over, (s) => (answers(s).roles.value = [long(1025)]));
+  add("a decimal of 129 characters", over, (s) => (answers(s).revenue.value = "1".repeat(129)));
+  add("a range endpoint of 129 characters", over, (s) => (answers(s)["employee-range"].value = { min: "1", max: "1".repeat(129) }));
+  add("65 conflicting observations", over, (s) => (answers(s)["employee-count"] = { status: "conflicting", cites: [], values: Array.from({ length: 65 }, (_, i) => ({ value: i, cites: [0] })) }));
+  add("65 indices in a citation", over, (s) => (answers(s).revenue.cites = Array.from({ length: 65 }, (_, i) => i)));
+  add("65 indices in an observation's citation", over, (s) => (answers(s)["employee-count"] = { status: "conflicting", cites: [], values: [{ value: 1, cites: Array.from({ length: 65 }, (_, i) => i) }, { value: 2, cites: [0] }] }));
+  add("four capabilities", over, (s) => (company(s).capabilities = ["answer", "search", "page", "page"]));
+  add("a profile of four capabilities", over, (s) => (s.profiles[1].research.capabilities = ["search", "page", "page", "page"]));
+  add("a profile's model of 257 bytes", over, (s) => (s.profiles[0].research.model = long(257)));
+  add("three web assignments", over, (s) => (company(s).webProfiles.answer = { profile: "ai", profileDigest: "ai" }));
+  add("three web assignments in a binding", over, both((s) => s.unbound.add("company"), after((d) => (d.binding.sources.company.webProfiles.answer = {}))));
+  add("65 retained responses", over, (s) => s.records.company.responses.push(...Array.from({ length: 62 }, answerResponse)));
+  add("every maximum reached", "reading", (s) => {
+    const source = company(s);
+    source.fields.push(...Array.from({ length: 57 }, (_, i) => ({ name: `extra-${String(i).padStart(2, "0")}`, type: "integer", required: false, description: "An extra." })));
+    source.fields.push({ name: long(64), type: "integer", required: false, description: long(2048) });
+    source.model = long(256);
+    source.evidence = [long(4096)];
+    s.profiles[0].research.model = long(256);
+    s.records.company.responses = [...Array.from({ length: 62 }, answerResponse), searchResponse(), pageResponse()];
+    const entries = answers(s);
+    entries["company-id"].value = "é".repeat(4096);
+    entries.roles.value = Array(64).fill("é".repeat(512));
+    entries.revenue.value = "-" + "1".repeat(125) + ".5";
+    entries["employee-range"].value = { min: "1".repeat(128), max: "2" + "0".repeat(127) };
+    entries["employee-count"] = { status: "conflicting", cites: [], values: Array.from({ length: 64 }, (_, i) => ({ value: i, cites: Array.from({ length: 64 }, (_, k) => k) })) };
+    for (let i = 0; i < 57; i++) entries[`extra-${String(i).padStart(2, "0")}`] = { status: "found", value: i, cites: [0] };
+    entries[long(64)] = { status: "not-found", cites: Array.from({ length: 64 }, (_, k) => k) };
+  });
+  return cases;
+}
+
+test("research (§§4.3, 4.4, 5.1, 5.2, 6.4, 11, 12): every hand-written case has the answer the text gives", () => {
+  for (const [name, expected, build] of researchCases()) {
+    const r = verify(build());
+    assert.equal(codeOf(r), expected, `${name}: ${r.why ?? ""}`);
+  }
+});
+
+const researchReading = (inputs: Inputs) => {
+  const r = verify(inputs);
+  assert.equal(r.kind, "reading", r.why);
+  return { report: r.report, preparation: parse(text(r.recomputed!)) as JObj };
+};
+const callIndices = (cites: JVal | undefined) => (cites as { a: JObj[] }).a.map((c) => (c.m.get("callIndex") as { lit: string }).lit);
+
+test("research §§4.3, 8.2, 9.3: a reading of every type: the fields copied, generated targets, the request, the receipts", () => {
+  const { report, preparation } = researchReading(new Scenario().prepared());
+  assert.deepEqual(JSON.parse(text(preparationForm(resolve(report, "/facts/company/fields")!))), JSON.parse(JSON.stringify(companyAnswers())));
+  assert.equal(text(preparationForm(member(report, "targetsByClass")!)), '{"asserted":1,"generated":1,"record":0}');
+  const outcome = resolve(preparation, "/outcomes/1") as JObj;
+  assert.equal((resolve(outcome, "/arguments/question") as { v: string }).v, COMPANY);
+  assert.deepEqual(Array.from((outcome.m.get("arguments") as JObj).m.keys()).sort(), ["capabilities", "constraints", "evidence", "fields", "model", "question"]);
+  const entry = resolve(preparation, "/lineage/1") as JObj;
+  assert.equal((entry.m.get("class") as { v: string }).v, "generated");
+  assert.equal(entry.m.has("receipt"), false);
+  assert.deepEqual(callIndices(entry.m.get("receipts")), ["0", "1", "2"]);
+  assert.equal(text(canon(entry.m.get("receipts")!)), text(canon(member(preparation, "cites")!)));
+});
+
+test("research §9.1, §9.3: the record's own receipt is its receipt and its last citation; cites follow the sources", () => {
+  const own = new Scenario();
+  own.own.add("company");
+  const entry = resolve(researchReading(own.prepared()).preparation, "/lineage/1") as JObj;
+  assert.equal(text(canon(entry.m.get("receipt")!)), text(canon((entry.m.get("receipts") as { a: JVal[] }).a[3])));
+  const ordered = new Scenario("reconcile");
+  ordered.callIndices = { primary: [5], secondary: [0, 1] };
+  const { preparation } = researchReading(ordered.prepared());
+  assert.deepEqual(callIndices(member(preparation, "cites")), ["5", "0", "1"]);
+  assert.deepEqual((member(preparation, "lineage") as { a: JObj[] }).a.map((e) => (e.m.has("receipts") ? callIndices(e.m.get("receipts")) : null)), [null, ["5"], ["0", "1"], []]);
+});
+
+test("research §4.4: a binding document yields the dialect bound directly, which the preparation commits", () => {
+  const direct = new Scenario();
+  const bound = new Scenario();
+  bound.unbound.add("company");
+  const inputs = bound.prepared();
+  const published = parse(text(inputs.dialect));
+  assert.equal(resolve(published, "/sources/0/webProfiles"), undefined);
+  const reading = researchReading(inputs);
+  assert.equal((member(reading.report, "digest") as { v: string }).v, (member(researchReading(direct.prepared()).report, "digest") as { v: string }).v);
+  assert.equal((member(reading.preparation, "mappingDigest") as { v: string }).v, "sha256:" + sha(canon(parse(text(direct.documents().dialect)))));
+});
+
+test("research §6.4: reconciliation derives the declared precedence", () => {
+  const count = (alter: (s: Scenario) => void) => {
+    const s = new Scenario("reconcile");
+    alter(s);
+    const { report, preparation } = researchReading(s.prepared());
+    const value = resolve(report, "/facts/company/employee-count");
+    const claim = resolve(preparation, "/outcomes/" + String((member(preparation, "outcomes") as { a: JVal[] }).a.length - 1) + "/claim");
+    return [value === undefined ? null : (value as { lit: string }).lit, (resolve(claim!, "/acquisitionStatus") as { v: string }).v, (resolve(claim!, "/reason") as { v: string }).v];
+  };
+  assert.deepEqual(count(() => {}), ["7", "resolved", "the primary found it"]);
+  assert.deepEqual(count((s) => (s.records.primary.fields = countAnswer("not-found"))), ["9", "resolved", "the secondary found it"]);
+  assert.deepEqual(count(gate), ["9", "resolved", "the secondary found it"]);
+  assert.deepEqual(count((s) => {
+    s.records.primary.fields = countAnswer("not-found");
+    s.records.secondary.fields = countAnswer("stale");
+    s.records.combined = { fields: countAnswer("conflicting"), responses: [answerResponse()] };
+  }), [null, "unknown", "a conflict is not chosen"]);
+});
+
+test("research §11: a rule names a parameter that only the record's own receipt commits; -0 keeps its literal", () => {
+  const cases = new Map(researchCases().map(([name, , build]) => [name, build]));
+  const uncommitted = researchReading(cases.get("a rule names a parameter no receipt commits")!());
+  assert.equal(text(preparationForm(member(uncommitted.report, "unsignedParameters")!)), '[{"parameters":[{"kind":"case","name":"company"}],"source":"company","targets":2}]');
+  assert.equal(member(researchReading(cases.get("a rule names a parameter the record's own receipt commits")!()).report, "unsignedParameters"), undefined);
+  const zero = verify(cases.get("presence: integer -0, decimal 0, text empty, boolean false")!());
+  assert.ok(text(preparationForm(zero.report)).includes('"employee-count":{"cites":[0,2],"status":"found","value":-0}'));
+  const none = researchReading(cases.get("no retained response and no receipt")!());
+  assert.equal(text(canon(resolve(none.preparation, "/lineage/1/receipts")!)), "[]");
+  assert.equal((resolve(none.report, "/unsignedFreshness/sources/0/source") as { v: string }).v, "company");
+});
+
 test("§§11, 12: a research record holds at most 64 retained responses, counted before any form", () => {
-  const record = (n: number, tail = "") => `{"response":{"result":{"responses":[${Array(n).fill(RETAINED).join(",")}${tail}]}}}`;
-  assert.equal(researched(record(64)), "refusal:kind-unread");
-  assert.equal(researched(record(65)), "refusal:input-over-bound");
-  assert.equal(researched(record(64, ",{}")), "refusal:input-over-bound");
-  assert.equal(researched(record(63, ",{}")), "refusal:input-malformed");
+  const answer = (retained: number, malformedOne: boolean) => {
+    const s = new Scenario();
+    s.records.company.responses.push(...Array.from({ length: retained - 3 }, answerResponse));
+    if (malformedOne) s.afterHooks.push((d) => d.acquisitions.company.response.result.responses.push({}));
+    return codeOf(verify(s.documents()));
+  };
+  assert.equal(answer(64, false), "finding:preparation-differs");
+  assert.equal(answer(65, false), "refusal:input-over-bound");
+  assert.equal(answer(64, true), "refusal:input-over-bound");
+  assert.equal(answer(63, true), "refusal:input-malformed");
 });
 
 test("§§4.3, 5.2, 11: a research acquisition has the form of its kind", () => {
-  const salts = `{"args":"${"0".repeat(64)}"}`;
-  const unretained = RETAINED.replace(',"result":{"answer":"none"}', "");
-  const cases: [string, string, string][] = [
-    ["research-no-own-receipt", '{"response":{"result":{"responses":[]}}}', "refusal:kind-unread"],
-    ["research-own-receipt", `{"response":{"result":{"responses":[${RETAINED}]},"receipt":{},"salts":${salts}}}`, "refusal:kind-unread"],
-    ["research-result-not-retained", `{"response":{"result":{"responses":[${unretained}]}}}`, "refusal:kind-unread"],
-    ["research-receipt-alone", '{"response":{"result":{"responses":[]},"receipt":{}}}', "refusal:input-malformed"],
-    ["research-salts-alone", `{"response":{"result":{"responses":[]},"salts":${salts}}}`, "refusal:input-malformed"],
-    ["research-record-not-object", '{"response":{"result":["x"]}}', "refusal:input-malformed"],
-    ["research-record-missing-responses", '{"response":{"result":{}}}', "refusal:input-malformed"],
-    ["research-record-bad-responses", '{"response":{"result":{"responses":{}}}}', "refusal:input-malformed"],
-    ["research-record-extra-member", '{"response":{"result":{"responses":[],"more":1}}}', "refusal:input-malformed"],
+  const answer = (change?: (r: J) => void, own = false) => {
+    const s = new Scenario();
+    if (own) s.own.add("company");
+    if (change !== undefined) s.afterHooks.push((d) => change(d.acquisitions.company.response));
+    return codeOf(verify(s.documents()));
+  };
+  const retained = (r: J) => r.result.responses[0];
+  const cases: [string, ((r: J) => void) | undefined, string][] = [
+    ["research-no-own-receipt", undefined, "finding:preparation-differs"],
+    ["research-result-not-retained", (r) => delete retained(r).result, "finding:acquisition-missing"],
+    ["research-salts-alone", (r) => (r.salts = { args: "0".repeat(64) }), "refusal:input-malformed"],
+    ["research-record-not-object", (r) => (r.result = ["x"]), "refusal:input-malformed"],
+    ["research-record-missing-responses", (r) => delete r.result.responses, "refusal:input-malformed"],
+    ["research-record-bad-responses", (r) => (r.result.responses = {}), "refusal:input-malformed"],
+    ["research-record-extra-member", (r) => (r.result.more = 1), "refusal:input-malformed"],
+    ["not an object", (r) => (r.result.responses[0] = "x"), "refusal:input-malformed"],
+    ["a member more", (r) => (retained(r).more = 1), "refusal:input-malformed"],
+    ["no profile", (r) => delete retained(r).profile, "refusal:input-malformed"],
+    ["a profile of another form", (r) => (retained(r).profile = { id: "ai" }), "refusal:input-malformed"],
+    ["a profile digest of another form", (r) => (retained(r).profile.digest = "sha256:XYZ"), "refusal:input-malformed"],
+    ["a request that is not an object", (r) => (retained(r).request = "Which?"), "refusal:input-malformed"],
+    ["a receipt that is not an object", (r) => (retained(r).receipt = []), "refusal:input-malformed"],
+    ["salts of another form", (r) => (retained(r).salts = { args: "x" }), "refusal:input-malformed"],
   ];
-  const malformedRetained: [string, string][] = [
-    ["not an object", '"x"'],
-    ["a member more", RETAINED.replace(/}$/, ',"more":1}')],
-    ["no profile", RETAINED.replace(/^\{"profile":\{[^}]*\},/, "{")],
-    ["a profile of another form", RETAINED.replace(/"profile":\{[^}]*\}/, '"profile":{"id":"fx"}')],
-    ["a profile digest of another form", RETAINED.replace(/"digest":"[^"]*"/, '"digest":"sha256:XYZ"')],
-    ["a request that is not an object", RETAINED.replace('"request":{"question":"Which?"}', '"request":"Which?"')],
-    ["a receipt that is not an object", RETAINED.replace('"receipt":{}', '"receipt":[]')],
-    ["salts of another form", RETAINED.replace(/"salts":\{[^}]*\}/, '"salts":{"args":"x"}')],
-  ];
-  for (const [name, entry] of malformedRetained) {
-    cases.push([`research-record-malformed-retained (${name})`, `{"response":{"result":{"responses":[${entry}]}}}`, "refusal:input-malformed"]);
-  }
-  for (const [name, acquisition, expected] of cases) assert.equal(researched(acquisition), expected, name);
+  for (const [name, change, expected] of cases) assert.equal(answer(change), expected, name);
+  assert.equal(answer(undefined, true), "finding:preparation-differs");
+  assert.equal(answer((r) => delete r.salts, true), "refusal:input-malformed");
   // an acquisition of any other kind still has its receipt and salts
   const acquisitions = parse(text(v3bound.acquisitions)) as JObj;
   const response = member(acquisitions.m.get("fx"), "response") as JObj;

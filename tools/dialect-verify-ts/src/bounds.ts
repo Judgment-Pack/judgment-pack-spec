@@ -21,6 +21,21 @@ export const BOUNDS = {
   documentNesting: 64,
   numberChars: 128,
   exponent: 308,
+  // the research maxima of §4.3, §4.4, §5.1 and §6.4 (§12), strings counted after JSON decoding
+  fields: 64, // declared fields per source, and answer entries per record
+  fieldNameBytes: 64,
+  descriptionBytes: 2048,
+  modelBytes: 256,
+  evidenceBytes: 4096,
+  textBytes: 8192,
+  listItems: 64,
+  itemBytes: 1024,
+  decimalCharacters: 128, // a decimal string, a range endpoint included, in characters
+  observations: 64,
+  cites: 64, // indices per citation array
+  capabilities: 3, // per source or profile
+  webAssignments: 2,
+  readSources: 15, // earlier sources one reconciliation reads
 } as const;
 
 const isDigit = (c: number) => c >= 0x30 && c <= 0x39;

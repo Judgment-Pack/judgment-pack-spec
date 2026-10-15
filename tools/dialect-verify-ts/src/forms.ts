@@ -2,8 +2,8 @@
 import { createHash } from "node:crypto";
 import { BOUNDS } from "./bounds.ts";
 import { keyAcceptable } from "./ed25519.ts";
-import { arr, canon, depth, inCanonDomain, isInteger, isPointer, intValue, member, obj } from "./json.ts";
-import type { JObj, JVal } from "./json.ts";
+import { arr, canon, depth, inCanonDomain, isInteger, isPointer, intValue, jsonEqual, member, obj, tokens, utf8 } from "./json.ts";
+import type { JNum, JObj, JStr, JVal } from "./json.ts";
 import { instant } from "./time.ts";
 
 /** A refusal (§11): the reading reports nothing but its code. */
@@ -26,14 +26,22 @@ const AVAILABILITY = new Set(["present", "absent", "unknown"]);
 const STATUSES = new Set(["resolved", "absent", "unknown"]);
 const SHAPES = new Set(["airbyte", "mcp", "http", "command"]);
 const OPERATION_SHAPES = new Set(["airbyte", "mcp", "http"]); // the shapes that serve an operation (§4.1)
-// §4.3: the kinds version 3 adds, and the members each names beside §4's, `profile`, `profileDigest` and
-// `maxAge`: those it requires, and those it may give.
+// §4.3: the kinds version 3 adds but `research`, and the members each names beside §4's, `profile`,
+// `profileDigest` and `maxAge`: those it requires, and those it may give.
 const VERSION_3_KINDS = new Map<string, { required: string[]; optional: string[] }>([
   ["http", { required: ["method", "path"], optional: ["query", "body", "headers"] }],
   ["sql", { required: ["statement", "bindings"], optional: [] }],
   ["web", { required: ["url"], optional: [] }],
-  ["research", { required: ["question", "constraints", "model", "evidence"], optional: [] }],
 ]);
+// §4.3, §4.4: a `research` source's members beside §4's, and its three binding members, all or none.
+const RESEARCH_MEMBERS = ["maxAge", "question", "constraints", "model", "evidence", "fields", "capabilities"];
+const RESEARCH_BINDING = ["profile", "profileDigest", "webProfiles"];
+const FIELD_TYPES = new Set(["integer", "decimal", "boolean", "text", "text-list", "range"]);
+const CAPABILITIES = ["answer", "search", "page"];
+const WEB_CAPABILITIES = ["search", "page"];
+// Core §2.2's decimal grammar, matched whole by a `decimal` answer (§4.3).
+const DECIMAL = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$/;
+const INDEX_TOKEN = /^(?:0|[1-9][0-9]*)$/;
 // §2: the members of version 2 alone, which a document of version 3 carries none of.
 const VERSION_2_MEMBERS = ["provider", "facts", "evidence"];
 // §4.4: the catalog names of an unbound `operation`, which the binding removes.
@@ -47,7 +55,19 @@ export type CopyRead = { facts: { target: string; source: string }[]; evidence: 
 export type ClaimForm = { facts: { pointer: string; from: string }[]; evidence: Map<string, string>; acquisitionStatus: string };
 export type Clause = { when: JObj; claim: ClaimForm; reason: string };
 export type Rule = { parameters: Map<string, ParamType>; clauses: Clause[] };
-export type Read = { raw: JVal; unwrap: string[]; copy?: CopyRead; rule?: Rule };
+// `sources`: a reconciliation's earlier research sources, in their order (§6.4)
+export type Read = { raw: JVal; unwrap: string[]; copy?: CopyRead; rule?: Rule; sources?: string[] };
+/** A research recipe (§4.3): its question, its declared fields' types by name, its capabilities and model, the
+ * members of its request but the question, and, bound, each web capability's profile and digest (§4.4). */
+export type Research = {
+  question: JVal;
+  fields: { name: string; type: string; required: boolean }[];
+  types: Map<string, string>;
+  capabilities: string[];
+  model: string;
+  request: [string, JVal][];
+  web: Map<string, { profile: string; profileDigest: string }>;
+};
 export type Calculation = { inputs: Map<string, string>; tables: Map<string, number> };
 
 export type Source = {
@@ -62,6 +82,7 @@ export type Source = {
   template?: JVal; // `arguments`, the whole request template
   scope?: Map<string, ParamType>; // its scope, for the profile's rules on the request (§4.1)
   calculation?: Calculation;
+  research?: Research;
   factTargets: string[];
   evidenceTargets: string[];
 };
@@ -72,7 +93,8 @@ export type Catalog = { shape: string; record: string };
 export type Dialect = {
   raw: JVal;
   version: number; // 2 or 3 (§2)
-  unbound: Map<string, Catalog>; // each unbound source by its name (§4.4)
+  unbound: Map<string, Catalog>; // each unbound operation by its name (§4.4)
+  unboundResearch: Map<string, string[]>; // each unbound research source by its name: the web capabilities it requests
   boundFrom: Map<string, Catalog>; // of a bound dialect: each source the binding document bound
   caseParams: CaseParam[];
   caseCopy: CopyRead;
@@ -98,9 +120,11 @@ export type Profile = {
   endpoint: JVal;
   tools?: string[];
   calculator?: JVal;
+  research?: { capabilities: string[]; model?: string }; // §5.1
 };
 
-export type Acquisition = { result: JVal; receipt: JObj; salts: JObj };
+// `own`: whether a research record came back with a receipt of its own (§5.2); every other acquisition has one
+export type Acquisition = { result: JVal; receipt: JObj; salts: JObj; own: boolean };
 
 // ---- helpers ----
 
@@ -173,8 +197,95 @@ function integerIn(v: JVal | undefined, lo: number, hi: number, what: string): n
 
 // ---- phase 3: the counts ----
 
+const byteLength = (s: string) => utf8(s).length;
+const characters = (s: string) => Array.from(s).length;
+
+/** §11's phase 3: a value measured by its field's declared type, when that is one of §4.3's six, against §12's
+ * maxima; a value of another form is measured by nothing here. A decimal string is counted in characters. */
+function overByType(v: JVal | undefined, type: string | undefined): boolean {
+  if (v === undefined) return false;
+  if (type === "text") return v.t === "str" && byteLength(v.v) > BOUNDS.textBytes;
+  if (type === "text-list") return v.t === "arr" && (v.a.length > BOUNDS.listItems || v.a.some((x) => x.t === "str" && byteLength(x.v) > BOUNDS.itemBytes));
+  if (type === "decimal") return v.t === "str" && characters(v.v) > BOUNDS.decimalCharacters;
+  if (type === "range") return v.t === "obj" && ["min", "max"].some((k) => { const e = v.m.get(k); return e !== undefined && e.t === "str" && characters(e.v) > BOUNDS.decimalCharacters; });
+  return false;
+}
+
+/** §12's research maxima (§4.3, §4.4, §5.1, §6.4), counted wherever they can be measured before any form (§11,
+ * phase 3): on the dialect's `research` sources, the profiles' research declarations, the binding document's research
+ * assignments and each research record. */
+function researchWithin(dialect: JVal, acquisitions: JVal, profiles: JVal | undefined, binding: JVal | undefined): boolean {
+  const longer = (v: JVal | undefined, limit: number) => v !== undefined && v.t === "str" && byteLength(v.v) > limit;
+  const more = (v: JVal | undefined, limit: number) => v !== undefined && ((v.t === "arr" && v.a.length > limit) || (v.t === "obj" && v.m.size > limit));
+  const declared = new Map<string, Map<string, string>>(); // each research source's fields' types, a name's first
+  const sources = member(dialect, "sources");
+  for (const s of sources?.t === "arr" ? sources.a : []) {
+    const kind = member(s, "kind");
+    if (kind?.t !== "str" || kind.v !== "research") continue;
+    const types = new Map<string, string>();
+    const fields = member(s, "fields");
+    if (fields?.t === "arr") {
+      if (fields.a.length > BOUNDS.fields) return false;
+      for (const d of fields.a) {
+        if (d.t !== "obj") continue;
+        const name = member(d, "name");
+        if (longer(name, BOUNDS.fieldNameBytes) || longer(member(d, "description"), BOUNDS.descriptionBytes)) return false;
+        const type = member(d, "type");
+        if (name?.t === "str" && !types.has(name.v) && type?.t === "str" && FIELD_TYPES.has(type.v)) types.set(name.v, type.v);
+      }
+    }
+    if (longer(member(s, "model"), BOUNDS.modelBytes)) return false;
+    const evidence = member(s, "evidence");
+    if (evidence?.t === "arr" && evidence.a.some((x) => longer(x, BOUNDS.evidenceBytes))) return false;
+    if (member(s, "capabilities")?.t === "arr" && more(member(s, "capabilities"), BOUNDS.capabilities)) return false;
+    if (member(s, "webProfiles")?.t === "obj" && more(member(s, "webProfiles"), BOUNDS.webAssignments)) return false;
+    const names = member(member(s, "read"), "sources");
+    if (names?.t === "arr" && names.a.length > BOUNDS.readSources) return false;
+    const name = member(s, "name");
+    if (name?.t === "str" && !declared.has(name.v)) declared.set(name.v, types);
+  }
+  for (const p of profiles?.t === "arr" ? profiles.a : []) {
+    const research = member(p, "research");
+    if (research?.t !== "obj") continue;
+    if (member(research, "capabilities")?.t === "arr" && more(member(research, "capabilities"), BOUNDS.capabilities)) return false;
+    if (longer(member(research, "model"), BOUNDS.modelBytes)) return false;
+  }
+  const assigned = member(binding, "sources");
+  if (assigned?.t === "obj") {
+    for (const [name, entry] of assigned.m) {
+      const web = declared.has(name) ? member(entry, "webProfiles") : undefined;
+      if (web?.t === "obj" && web.m.size > BOUNDS.webAssignments) return false;
+    }
+  }
+  if (acquisitions.t === "obj") {
+    for (const [name, a] of acquisitions.m) {
+      const types = declared.get(name);
+      if (types === undefined) continue;
+      const answers = member(member(member(a, "response"), "result"), "fields");
+      if (answers?.t !== "obj") continue;
+      if (answers.m.size > BOUNDS.fields) return false;
+      for (const [field, entry] of answers.m) {
+        if (entry.t !== "obj") continue;
+        const type = types.get(field);
+        const cites = member(entry, "cites");
+        if ((cites?.t === "arr" && cites.a.length > BOUNDS.cites) || overByType(member(entry, "value"), type)) return false;
+        const values = member(entry, "values");
+        if (values?.t !== "arr") continue;
+        if (values.a.length > BOUNDS.observations) return false;
+        for (const o of values.a) {
+          if (o.t !== "obj") continue;
+          const oc = member(o, "cites");
+          if ((oc?.t === "arr" && oc.a.length > BOUNDS.cites) || overByType(member(o, "value"), type)) return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
 /** The counts of §12 taken on the documents read, wherever the count can be taken (§11, phase 3). */
-export function countsWithin(dialect: JVal, acquisitions: JVal): boolean {
+export function countsWithin(dialect: JVal, acquisitions: JVal, profiles?: JVal, binding?: JVal): boolean {
+  if (!researchWithin(dialect, acquisitions, profiles, binding)) return false;
   const caseObj = member(dialect, "case");
   const caseParams = member(caseObj, "parameters");
   const nCase = caseParams?.t === "obj" ? caseParams.m.size : 0;
@@ -511,6 +622,7 @@ export function readDialect(d: JVal): Dialect {
   // §4: the sources
   const sources: Source[] = [];
   const unbound = new Map<string, Catalog>();
+  const unboundResearch = new Map<string, string[]>();
   const rawSources = o.m.has("sources") ? array(o.m.get("sources"), "sources") : [];
   if (rawSources.length > BOUNDS.sources) throw new Refusal("input-over-bound", "sources");
   rawSources.forEach((raw, i) => {
@@ -540,6 +652,12 @@ export function readDialect(d: JVal): Dialect {
       if (v === 2) malformed(`${what} names the version-3 kind ${kind} in a version-2 dialect`);
       const members = VERSION_3_KINDS.get(kind)!;
       exact(so, what, [...base, "profile", "profileDigest", "maxAge", ...members.required], ["parameters", ...members.optional]);
+    } else if (kind === "research") {
+      // §4.3, §4.4: published unbound, with none of the three binding members, or bound, with all three
+      if (v === 2) malformed(`${what} names the version-3 kind ${kind} in a version-2 dialect`);
+      exact(so, what, [...base, ...RESEARCH_MEMBERS], ["parameters", ...RESEARCH_BINDING]);
+      const given = RESEARCH_BINDING.filter((k) => so.m.has(k)).length;
+      if (given !== 0 && given !== RESEARCH_BINDING.length) malformed(`${what} has some but not all of profile, profileDigest and webProfiles`);
     } else {
       malformed(`${what} names the unknown kind ${kind}`);
     }
@@ -566,8 +684,12 @@ export function readDialect(d: JVal): Dialect {
     scope.set("runAt", "timestamp");
     if (scope.size > BOUNDS.scopeParameters) throw new Refusal("input-over-bound", `${what}'s scope`);
 
-    const read = readRead(so.m.get("read"), scope, `${what}.read`);
-    const source: Source = { name, kind, parameters, read, factTargets: [], evidenceTargets: [] };
+    const research = kind === "research" ? readResearch(so, scope, what) : undefined;
+    const read =
+      research === undefined
+        ? readRead(so.m.get("read"), scope, `${what}.read`)
+        : readResearchRead(so.m.get("read"), scope, `${what}.read`, research, sources);
+    const source: Source = { name, kind, parameters, read, research, factTargets: [], evidenceTargets: [] };
     if (kind === "selected-file") source.provider = string(so.m.get("provider"), "provider");
     // Each member as its kind's form, held above, gives it: an unbound operation names no profile (§4.4), and a
     // kind of version 3 has no `arguments` but members of its own (§4.3).
@@ -584,6 +706,7 @@ export function readDialect(d: JVal): Dialect {
     }
     if (VERSION_3_KINDS.has(kind)) readVersion3Kind(so, kind, scope, what);
     if (catalog !== undefined) unbound.set(name, catalog);
+    if (research !== undefined && !so.m.has("profile")) unboundResearch.set(name, research.capabilities.filter((c) => WEB_CAPABILITIES.includes(c)));
     if (so.m.has("calculation")) {
       const co = exact(so.m.get("calculation"), `${what}.calculation`, ["inputs", "tables"]);
       const inputs = new Map<string, string>();
@@ -644,6 +767,7 @@ export function readDialect(d: JVal): Dialect {
     raw: d,
     version: v,
     unbound,
+    unboundResearch,
     boundFrom: new Map(),
     caseParams,
     caseCopy,
@@ -658,11 +782,10 @@ export function readDialect(d: JVal): Dialect {
 }
 
 /**
- * §4.3: the members a kind of version 3 names, held to the forms the text gives them; the kind is then not read
+ * §4.3: the members `http`, `sql` and `web` name, held to the forms the text gives them; the kind is then not read
  * (`kind-unread`). Where the text names a member without its form — `http`'s `path`, "a template that yields a
- * path", and `headers`, "the names of the headers"; `research`'s `evidence`, "the fields each answer MUST support";
- * a `sql` binding's `name` and `type` — this reader takes a string template for a path and non-empty strings for
- * names. (No vector decides this.)
+ * path", and `headers`, "the names of the headers"; a `sql` binding's `name` and `type` — this reader takes a string
+ * template for a path and non-empty strings for names. (No vector decides this.) `research` is read (readResearch).
  */
 function readVersion3Kind(so: JObj, kind: string, scope: Scope, what: string): void {
   const stringTemplateOf = (v: JVal | undefined, w: string) => {
@@ -704,23 +827,199 @@ function readVersion3Kind(so: JObj, kind: string, scope: Scope, what: string): v
       checkTemplate(p, scope, `${what}.url`);
       if (scope.get((p.m.get("$param") as { v: string }).v) !== "string") malformed(`${what}.url names a parameter that is not a string`);
     }
-  } else {
-    stringTemplateOf(so.m.get("question"), `${what}.question`);
-    object(so.m.get("constraints"), `${what}.constraints`);
-    string(so.m.get("model"), `${what}.model`);
-    names(so.m.get("evidence"), `${what}.evidence`);
   }
+}
+
+// ---- phase 4: the research recipe (§4.3), its bound form (§4.4), and its reads (§4.3, §6.4) ----
+
+/** §4.3, §5.1: distinct names from `answer`, `search` and `page`, in that order, one at least; more than three is
+ * over a maximum (§12), counted before any form. */
+function readCapabilities(v: JVal | undefined, what: string): string[] {
+  const names = array(v, what).map((x, k) => string(x, `${what}[${k}]`));
+  if (names.length === 0) malformed(`${what} is empty`);
+  if (!names.every((n) => CAPABILITIES.includes(n))) malformed(`${what} names a capability other than answer, search and page`);
+  for (let k = 1; k < names.length; k++) {
+    if (CAPABILITIES.indexOf(names[k - 1]) >= CAPABILITIES.indexOf(names[k])) malformed(`${what} is not distinct, in the order answer, search, page`);
+  }
+  return names;
+}
+
+/** §4.4: exactly `profile`, a non-empty string, and `profileDigest`, a digest. */
+function readAssignment(v: JVal | undefined, what: string): { profile: string; profileDigest: string } {
+  const o = exact(v, what, ["profile", "profileDigest"]);
+  const profile = nonEmpty(o.m.get("profile"), `${what}.profile`);
+  const profileDigest = string(o.m.get("profileDigest"), `${what}.profileDigest`);
+  if (!DIGEST.test(profileDigest)) malformed(`${what}.profileDigest is not a digest`);
+  return { profile, profileDigest };
+}
+
+/** §4.4: `webProfiles`, exactly the `search` and `page` capabilities requested as keys, each an assignment. */
+function readWebProfiles(v: JVal | undefined, capabilities: string[], what: string): Map<string, { profile: string; profileDigest: string }> {
+  const o = object(v, what);
+  const requested = capabilities.filter((c) => WEB_CAPABILITIES.includes(c));
+  if (o.m.size !== requested.length || !requested.every((c) => o.m.has(c))) malformed(`${what} does not assign exactly the web capabilities requested`);
+  return new Map(requested.map((c) => [c, readAssignment(o.m.get(c), `${what}.${c}`)]));
+}
+
+/** §4.3: a research recipe's members, each of its form and minimum; its maxima are phase 3's (researchWithin). */
+function readResearch(so: JObj, scope: Scope, what: string): Research {
+  const question = so.m.get("question")!;
+  checkTemplate(question, scope, `${what}.question`);
+  if (!stringTemplate(question, scope)) malformed(`${what}.question is not a string template`);
+  object(so.m.get("constraints"), `${what}.constraints`);
+  const model = nonEmpty(so.m.get("model"), `${what}.model`);
+  array(so.m.get("evidence"), `${what}.evidence`).forEach((x, k) => nonEmpty(x, `${what}.evidence[${k}]`));
+  const declarations = array(so.m.get("fields"), `${what}.fields`);
+  if (declarations.length === 0) malformed(`${what}.fields declares no field`);
+  const types = new Map<string, string>();
+  const fields = declarations.map((x, k) => {
+    const w = `${what}.fields[${k}]`;
+    const d = exact(x, w, ["name", "type", "required", "description"]);
+    const name = nonEmpty(d.m.get("name"), `${w}.name`);
+    if (name === "case") malformed(`${w}.name is case`);
+    if (types.has(name)) malformed(`${w}.name ${name} is given twice`);
+    const type = string(d.m.get("type"), `${w}.type`);
+    if (!FIELD_TYPES.has(type)) malformed(`${w}.type is not one of the six`);
+    const required = d.m.get("required")!;
+    if (required.t !== "bool") malformed(`${w}.required is not a boolean`);
+    nonEmpty(d.m.get("description"), `${w}.description`);
+    types.set(name, type);
+    return { name, type, required: (required as { v: boolean }).v };
+  });
+  const capabilities = readCapabilities(so.m.get("capabilities"), `${what}.capabilities`);
+  if (capabilities[0] !== "answer") malformed(`${what}.capabilities lacks answer, which is required`);
+  const request: [string, JVal][] = ["constraints", "model", "evidence", "fields", "capabilities"].map((k) => [k, so.m.get(k)!]);
+  const web = so.m.has("webProfiles") ? readWebProfiles(so.m.get("webProfiles"), capabilities, `${what}.webProfiles`) : new Map();
+  return { question, fields, types, capabilities, model, request, web };
+}
+
+/** A condition and every condition within it, at any depth. */
+function conditionsOf(c: JObj): JObj[] {
+  const op = (c.m.get("op") as JStr).v;
+  if (op === "all" || op === "any") return [c, ...(c.m.get("of") as { a: JObj[] }).a.flatMap(conditionsOf)];
+  if (op === "not") return [c, ...conditionsOf(c.m.get("of") as JObj)];
+  return [c];
+}
+
+function leavesOf(rule: Rule): JObj[] {
+  return rule.clauses.flatMap((cl) => conditionsOf(cl.when)).filter((c) => !["always", "all", "any", "not"].includes((c.m.get("op") as JStr).v));
+}
+
+const sameTokens = (a: string[], b: string[]) => a.length === b.length && a.every((x, k) => x === b[k]);
+
+/** §4.3, "Reading fields": a plain research read reads `R` through a closed list of pointers and takes no value from
+ * under `values`; or the read is a reconciliation (§6.4). */
+function readResearchRead(v: JVal | undefined, scope: Scope, what: string, research: Research, earlier: Source[]): Read {
+  if (v !== undefined && v.t === "obj" && v.m.has("sources")) return readReconciliation(v, scope, what, research, earlier);
+  const read = readRead(v, scope, what);
+  const readable = (p: string, taken: boolean) => {
+    const t = tokens(p);
+    if (sameTokens(t, ["fields"])) return;
+    if (t.length >= 2 && t[0] === "fields" && research.types.has(t[1])) {
+      const rest = t.slice(2);
+      if (rest.length === 0 || rest[0] === "value" || sameTokens(rest, ["status"]) || sameTokens(rest, ["cites"])) return;
+      if (rest.length === 3 && rest[0] === "values" && INDEX_TOKEN.test(rest[1]) && rest[2] === "value") {
+        if (taken) malformed(`${what} takes a value from under values`);
+        return;
+      }
+    }
+    malformed(`${what} reads ${p}, outside a research read's closed list`);
+  };
+  // An unwrap pointer takes the value read from where it points: this reader holds it as a from.
+  for (const p of read.unwrap) readable(p, true);
+  if (read.copy) {
+    for (const f of read.copy.facts) readable(f.source, true);
+    for (const e of read.copy.evidence) readable(e.source, true);
+  } else {
+    for (const c of leavesOf(read.rule!)) readable((c.m.get("field") as JStr).v, false);
+    for (const cl of read.rule!.clauses) for (const f of cl.claim.facts) readable(f.from, true);
+  }
+  return read;
+}
+
+/** §6.4: exactly `{"op":"equals","field":"<entry>/status","to":S}`. */
+function isStatusGuard(c: JVal, entry: string[], status: string): boolean {
+  if (c.t !== "obj" || c.m.size !== 3) return false;
+  const op = c.m.get("op");
+  const field = c.m.get("field");
+  const to = c.m.get("to");
+  return op?.t === "str" && op.v === "equals" && to?.t === "str" && to.v === status && field?.t === "str" && sameTokens(tokens(field.v), [...entry, "status"]);
+}
+
+/** §6.4: exactly `{"op":"not","of":{"op":"exists","field":"<entry>"}}`. */
+function isAbsenceGuard(c: JVal, entry: string[]): boolean {
+  if (c.t !== "obj" || c.m.size !== 2) return false;
+  const op = c.m.get("op");
+  const of = c.m.get("of");
+  if (op?.t !== "str" || op.v !== "not" || of?.t !== "obj" || of.m.size !== 2) return false;
+  const inner = of.m.get("op");
+  const field = of.m.get("field");
+  return inner?.t === "str" && inner.v === "exists" && field?.t === "str" && sameTokens(tokens(field.v), entry);
+}
+
+/** §6.4: `{"sources": [S, ...], "rule": R}` on a version-3 research source, its pointers, froms, guards, evidence and
+ * last clause held to the section's forms. */
+function readReconciliation(v: JObj, scope: Scope, what: string, research: Research, earlier: Source[]): Read {
+  const o = exact(v, what, ["sources", "rule"]);
+  const names = array(o.m.get("sources"), `${what}.sources`);
+  if (names.length === 0) malformed(`${what}.sources names no source`);
+  const declared = new Map<string, Map<string, string>>();
+  for (const [k, x] of names.entries()) {
+    const n = string(x, `${what}.sources[${k}]`);
+    const s = earlier.find((e) => e.name === n);
+    if (s === undefined || s.research === undefined) malformed(`${what}.sources[${k}] is not an earlier research source`);
+    if (declared.has(n)) malformed(`${what}.sources names ${n} twice`);
+    declared.set(n, s!.research!.types);
+  }
+  const rule = readRule(o.m.get("rule"), scope, `${what}.rule`);
+  const entryOf = (p: string): { entry: string[]; rest: string[] } | null => {
+    const t = tokens(p);
+    if (t.length >= 3 && t[0] === "current" && t[1] === "fields" && research.types.has(t[2])) return { entry: t.slice(0, 3), rest: t.slice(3) };
+    if (t.length >= 4 && t[0] === "sources" && declared.has(t[1]) && t[2] === "fields" && declared.get(t[1])!.has(t[3])) return { entry: t.slice(0, 4), rest: t.slice(4) };
+    return null;
+  };
+  for (const c of leavesOf(rule)) {
+    const e = entryOf((c.m.get("field") as JStr).v);
+    if (e === null || !(e.rest.length === 0 || sameTokens(e.rest, ["status"]) || e.rest[0] === "value" || e.rest[0] === "values")) {
+      malformed(`${what} has a condition outside the reconciliation's pointers`);
+    }
+  }
+  const selected: string[][] = [];
+  for (const cl of rule.clauses) {
+    if (cl.claim.evidence.size !== 0) malformed(`${what} has a claim that writes evidence`);
+    for (const f of cl.claim.facts) {
+      const e = entryOf(f.from);
+      if (e === null || e.rest.length === 0 || e.rest[0] !== "value") malformed(`${what} takes ${f.from}, outside the admissible froms`);
+      const op = (cl.when.m.get("op") as JStr).v;
+      const guarded = isStatusGuard(cl.when, e!.entry, "found") || (op === "all" && (cl.when.m.get("of") as { a: JVal[] }).a.some((x) => isStatusGuard(x, e!.entry, "found")));
+      if (!guarded) malformed(`${what} selects ${f.from} in a clause that does not guard it as found`);
+      if (!selected.some((s) => sameTokens(s, e!.entry))) selected.push(e!.entry);
+    }
+  }
+  const every = rule.clauses.flatMap((cl) => conditionsOf(cl.when));
+  for (const entry of selected) {
+    for (const status of ["not-found", "stale", "conflicting"]) {
+      if (!every.some((c) => isStatusGuard(c, entry, status))) malformed(`${what} has no ${status} guard for a selected field`);
+    }
+    if (!every.some((c) => isAbsenceGuard(c, entry))) malformed(`${what} has no absence guard for a selected field`);
+  }
+  const last = rule.clauses[rule.clauses.length - 1].claim;
+  if (last.facts.length !== 0 || (last.acquisitionStatus !== "unknown" && last.acquisitionStatus !== "absent")) {
+    malformed(`${what}'s last clause writes a fact, or is neither unknown nor absent`);
+  }
+  return { raw: o, unwrap: [], rule, sources: names.map((x) => (x as JStr).v) };
 }
 
 // ---- phase 4: the binding document and the bound dialect (§4.4) ----
 
-/** The binding document: exactly `dialect`, a digest, and `sources`, mapping names to objects of exactly `profile`, a
- * non-empty string, and `profileDigest`, a digest. */
+/** The binding document: exactly `dialect`, a digest, and `sources`, mapping names to assignments: for an `operation`
+ * exactly `profile`, a non-empty string, and `profileDigest`, a digest; for `research` those and `webProfiles`. Which
+ * form an entry has is the kind of the source it binds (readBound). */
 export function readBinding(v: JVal): JObj {
   const o = exact(v, "the binding document", ["dialect", "sources"]);
   if (!DIGEST.test(string(o.m.get("dialect"), "the binding document's dialect"))) malformed("the binding document's dialect is not a digest");
   for (const [name, entry] of object(o.m.get("sources"), "the binding document's sources").m) {
-    const e = exact(entry, `the binding document's sources.${name}`, ["profile", "profileDigest"]);
+    const e = exact(entry, `the binding document's sources.${name}`, ["profile", "profileDigest"], ["webProfiles"]);
     nonEmpty(e.m.get("profile"), `the binding document's sources.${name}.profile`);
     if (!DIGEST.test(string(e.m.get("profileDigest"), `the binding document's sources.${name}.profileDigest`))) {
       malformed(`the binding document's sources.${name}.profileDigest is not a digest`);
@@ -729,8 +1028,9 @@ export function readBinding(v: JVal): JObj {
   return o;
 }
 
-/** The bound dialect: each source the binding document names with its catalog names removed and the profile and its
- * digest the binding gives it added, every other member kept as written. */
+/** The bound dialect: each operation the binding document names with its catalog names removed and the profile and
+ * its digest the binding gives it added; each research source with the three assignment members added; every other
+ * member kept as written. */
 export function bindDialect(d: JObj, binding: JObj): JObj {
   const entries = (binding.m.get("sources") as JObj).m;
   const sources = (member(d, "sources") as { a: JVal[] }).a.map((s) => {
@@ -738,7 +1038,10 @@ export function bindDialect(d: JObj, binding: JObj): JObj {
     const entry = entries.get(name);
     if (entry === undefined) return s;
     const kept: [string, JVal][] = Array.from((s as JObj).m).filter(([k]) => !UNBOUND_MEMBERS.includes(k));
-    return obj([...kept, ["profile", member(entry, "profile")!], ["profileDigest", member(entry, "profileDigest")!]]);
+    const added: [string, JVal][] = [["profile", member(entry, "profile")!], ["profileDigest", member(entry, "profileDigest")!]];
+    const web = member(entry, "webProfiles");
+    if (web !== undefined) added.push(["webProfiles", web]);
+    return obj([...kept, ...added]);
   });
   return obj(Array.from(d.m).map(([k, x]): [string, JVal] => [k, k === "sources" ? arr(sources) : x]));
 }
@@ -750,7 +1053,8 @@ export function bindDialect(d: JObj, binding: JObj): JObj {
  */
 export function readBound(dialect: Dialect, bindingValue: JVal | undefined): Dialect {
   const binding = bindingValue === undefined ? undefined : readBinding(bindingValue);
-  if (dialect.unbound.size === 0) {
+  const unboundCount = dialect.unbound.size + dialect.unboundResearch.size;
+  if (unboundCount === 0) {
     if (binding !== undefined) malformed("a binding document beside a dialect with no unbound source");
     return dialect;
   }
@@ -758,9 +1062,20 @@ export function readBound(dialect: Dialect, bindingValue: JVal | undefined): Dia
   if ((binding.m.get("dialect") as { v: string }).v !== "sha256:" + sha256hex(canon(dialect.raw))) {
     malformed("the binding document's dialect is not the given dialect's digest");
   }
-  const named = Array.from((binding.m.get("sources") as JObj).m.keys());
-  if (named.length !== dialect.unbound.size || !named.every((n) => dialect.unbound.has(n))) {
+  const entries = (binding.m.get("sources") as JObj).m;
+  const named = Array.from(entries.keys());
+  if (named.length !== unboundCount || !named.every((n) => dialect.unbound.has(n) || dialect.unboundResearch.has(n))) {
     malformed("the binding document does not name exactly the dialect's unbound sources");
+  }
+  for (const [name, entry] of entries) {
+    const what = `the binding document's sources.${name}`;
+    if (dialect.unbound.has(name)) {
+      exact(entry, what, ["profile", "profileDigest"]);
+    } else {
+      // §4.4: for research, exactly `profile`, `profileDigest` and `webProfiles`, the web capabilities requested
+      const e = exact(entry, what, ["profile", "profileDigest", "webProfiles"]);
+      readWebProfiles(e.m.get("webProfiles"), dialect.unboundResearch.get(name)!, `${what}.webProfiles`);
+    }
   }
   const bound = readDialect(bindDialect(dialect.raw as JObj, binding));
   bound.boundFrom = dialect.unbound;
@@ -773,7 +1088,7 @@ export function readProfiles(v: JVal): Profile[] {
   const out: Profile[] = [];
   array(v, "the profiles").forEach((raw, k) => {
     const what = `profiles[${k}]`;
-    const o = exact(raw, what, ["id", "publicKey", "class", "source", "authority", "shape", "adapter", "endpoint"], ["tools", "calculator"]);
+    const o = exact(raw, what, ["id", "publicKey", "class", "source", "authority", "shape", "adapter", "endpoint"], ["tools", "calculator", "research"]);
     const id = nonEmpty(o.m.get("id"), `${what}.id`);
     if (out.some((p) => p.id === id)) malformed(`${what}.id is not distinct`);
     const publicKey = string(o.m.get("publicKey"), `${what}.publicKey`);
@@ -806,7 +1121,15 @@ export function readProfiles(v: JVal): Profile[] {
       if (cls !== "record" || shape !== "mcp") malformed(`${what} is a calculator's and not of class record and shape mcp`);
       calculator = co;
     }
-    out.push({ id, raw, key, publicKey, class: cls, source, authority, shape, adapter, endpoint, tools, calculator });
+    let research: { capabilities: string[]; model?: string } | undefined;
+    if (o.m.has("research")) {
+      // §5.1: a closed object of `capabilities` and, exactly when they include `answer`, `model`
+      const ro = exact(o.m.get("research"), `${what}.research`, ["capabilities"], ["model"]);
+      const capabilities = readCapabilities(ro.m.get("capabilities"), `${what}.research.capabilities`);
+      if (capabilities.includes("answer") !== ro.m.has("model")) malformed(`${what}.research names a model exactly when it serves answer`);
+      research = { capabilities, model: ro.m.has("model") ? nonEmpty(ro.m.get("model"), `${what}.research.model`) : undefined };
+    }
+    out.push({ id, raw, key, publicKey, class: cls, source, authority, shape, adapter, endpoint, tools, calculator, research });
   });
   return out;
 }
@@ -827,28 +1150,118 @@ function readSalts(v: JVal | undefined, what: string): JObj {
   return salts;
 }
 
+/** The exact value of a decimal literal or an integer's, compared without binary floating point: -1, 0 or 1. */
+export function compareDecimals(a: string, b: string): number {
+  const parts = (s: string) => {
+    const m = /^(-?)([0-9]+)(?:\.([0-9]+))?$/.exec(s)!;
+    const whole = m[2].replace(/^0+(?=[0-9])/, "");
+    const fraction = (m[3] ?? "").replace(/0+$/, "");
+    const zero = /^0*$/.test(m[2]) && fraction === "";
+    return { negative: m[1] === "-" && !zero, whole, fraction };
+  };
+  const x = parts(a);
+  const y = parts(b);
+  if (x.negative !== y.negative) return x.negative ? -1 : 1;
+  const sign = x.negative ? -1 : 1;
+  if (x.whole.length !== y.whole.length) return (x.whole.length < y.whole.length ? -1 : 1) * sign;
+  if (x.whole !== y.whole) return (x.whole < y.whole ? -1 : 1) * sign;
+  const n = Math.max(x.fraction.length, y.fraction.length);
+  const fx = x.fraction.padEnd(n, "0");
+  const fy = y.fraction.padEnd(n, "0");
+  return fx === fy ? 0 : (fx < fy ? -1 : 1) * sign;
+}
+
+/** §4.3: a value of a field's declared type in its exact encoding; `null` is never one. Maxima are phase 3's. */
+function typed(v: JVal | undefined, type: string, what: string): void {
+  let ok: boolean;
+  if (v === undefined) ok = false;
+  else if (type === "integer") ok = isInteger(v);
+  else if (type === "decimal") ok = v.t === "str" && DECIMAL.test(v.v);
+  else if (type === "boolean") ok = v.t === "bool";
+  else if (type === "text") ok = v.t === "str";
+  else if (type === "text-list") ok = v.t === "arr" && v.a.every((x) => x.t === "str");
+  else if (v.t === "obj" && v.m.size === 2 && v.m.has("min") && v.m.has("max")) {
+    const lo = v.m.get("min")!;
+    const hi = v.m.get("max")!;
+    if (isInteger(lo) && isInteger(hi)) ok = compareDecimals((lo as JNum).lit, (hi as JNum).lit) <= 0;
+    else if (lo.t === "str" && hi.t === "str" && DECIMAL.test(lo.v) && DECIMAL.test(hi.v)) ok = compareDecimals(lo.v, hi.v) <= 0;
+    else ok = false;
+  } else ok = false;
+  if (!ok) malformed(`${what} is not a value of the declared type ${type}`);
+}
+
+/** §4.3: distinct indices into the record's `responses`, integers from 0 below their number, never `-0`. */
+function cites(v: JVal | undefined, responses: number, least: number, what: string): void {
+  const items = array(v, what);
+  if (items.length < least) malformed(`${what} cites fewer than ${least}`);
+  const seen = new Set<number>();
+  for (const x of items) {
+    if (!isInteger(x) || x.lit === "-0" || intValue(x) < 0 || intValue(x) >= responses) malformed(`${what} holds something other than an index into responses`);
+    if (seen.has(intValue(x as JNum))) malformed(`${what} cites an index twice`);
+    seen.add(intValue(x as JNum));
+  }
+}
+
+/** §4.3, "Answers": `R.fields`, an entry for each field it answers, each declared, every required one among them. */
+function readAnswers(v: JVal | undefined, research: Research, responses: number, what: string): void {
+  const answers = object(v, what);
+  for (const name of answers.m.keys()) if (!research.types.has(name)) malformed(`${what} answers ${name}, which is not declared`);
+  for (const f of research.fields) if (f.required && !answers.m.has(f.name)) malformed(`${what} has no entry for the required field ${f.name}`);
+  for (const [name, entry] of answers.m) {
+    const w = `${what}.${name}`;
+    const type = research.types.get(name)!;
+    const status = member(entry, "status");
+    const s = status?.t === "str" ? status.v : undefined;
+    if (s === "found") {
+      const e = exact(entry, w, ["status", "cites", "value"]);
+      cites(e.m.get("cites"), responses, 1, `${w}.cites`);
+      typed(e.m.get("value"), type, `${w}.value`);
+    } else if (s === "conflicting") {
+      const e = exact(entry, w, ["status", "cites", "values"]);
+      const outer = e.m.get("cites")!;
+      if (outer.t !== "arr" || outer.a.length !== 0) malformed(`${w}.cites of a conflicting entry is not []`);
+      const values = array(e.m.get("values"), `${w}.values`);
+      if (values.length < 2) malformed(`${w}.values holds fewer than two observations`);
+      values.forEach((x, k) => {
+        const o = exact(x, `${w}.values[${k}]`, ["value", "cites"]);
+        typed(o.m.get("value"), type, `${w}.values[${k}].value`);
+        cites(o.m.get("cites"), responses, 1, `${w}.values[${k}].cites`);
+      });
+      const first = member(values[0], "value")!;
+      if (values.every((x) => jsonEqual(first, member(x, "value")!))) malformed(`${w}.values has no two that differ`);
+    } else if (s === "not-found" || s === "stale") {
+      const e = exact(entry, w, ["status", "cites"]);
+      cites(e.m.get("cites"), responses, 0, `${w}.cites`);
+    } else {
+      malformed(`${w} is not an entry of a known status`);
+    }
+  }
+}
+
 /**
  * §5.2: each acquisition's form. A `research` source's response may lack `receipt` and `salts`, both or neither; its
- * result is the research record, of §4.3's form, each retained response held to its form here, where a missing
- * `result` is no refusal of form but `acquisition-missing` (§5.2). A research source is not read (`kind-unread`), so
- * its acquisition is checked for its form and never as a receipt: one with no receipt of its own carries empty ones.
+ * result is the research record, of §4.3's form, its answers held to the source's declarations and each retained
+ * response to its form here, where a missing `result` is no refusal of form but `acquisition-missing` (§5.2). A record
+ * with no receipt of its own carries empty ones, and `own` false.
  */
-export function readAcquisitions(v: JVal, research: Set<string> = new Set()): Map<string, Acquisition> {
+export function readAcquisitions(v: JVal, research: Map<string, Research> = new Map()): Map<string, Acquisition> {
   const o = object(v, "the acquisitions");
   const out = new Map<string, Acquisition>();
   for (const [name, a] of o.m) {
     const what = `acquisitions.${name}`;
     const response = exact(a, what, ["response"]).m.get("response");
-    if (!research.has(name)) {
+    const recipe = research.get(name);
+    if (recipe === undefined) {
       const r = exact(response, `${what}.response`, ["result", "receipt", "salts"]);
       const receipt = object(r.m.get("receipt"), `${what}.response.receipt`);
-      out.set(name, { result: r.m.get("result")!, receipt, salts: readSalts(r.m.get("salts"), `${what}.response.salts`) });
+      out.set(name, { result: r.m.get("result")!, receipt, salts: readSalts(r.m.get("salts"), `${what}.response.salts`), own: true });
       continue;
     }
     const r = exact(response, `${what}.response`, ["result"], ["receipt", "salts"]);
     if (r.m.has("receipt") !== r.m.has("salts")) malformed(`${what}.response has one of receipt and salts`);
-    const record = exact(r.m.get("result"), `${what}.response.result`, ["responses"]);
-    array(record.m.get("responses"), `${what}.response.result.responses`).forEach((x, k) => {
+    const record = exact(r.m.get("result"), `${what}.response.result`, ["fields", "responses"]);
+    const retainedResponses = array(record.m.get("responses"), `${what}.response.result.responses`);
+    retainedResponses.forEach((x, k) => {
       const w = `${what}.response.result.responses[${k}]`;
       const retained = exact(x, w, ["profile", "request", "receipt", "salts"], ["result"]);
       const p = exact(retained.m.get("profile"), `${w}.profile`, ["id", "digest"]);
@@ -859,9 +1272,10 @@ export function readAcquisitions(v: JVal, research: Set<string> = new Set()): Ma
       object(retained.m.get("receipt"), `${w}.receipt`);
       readSalts(retained.m.get("salts"), `${w}.salts`);
     });
+    readAnswers(record.m.get("fields"), recipe, retainedResponses.length, `${what}.response.result.fields`);
     const receipt = r.m.has("receipt") ? object(r.m.get("receipt"), `${what}.response.receipt`) : obj();
     const salts = r.m.has("salts") ? readSalts(r.m.get("salts"), `${what}.response.salts`) : obj();
-    out.set(name, { result: r.m.get("result")!, receipt, salts });
+    out.set(name, { result: r.m.get("result")!, receipt, salts, own: r.m.has("receipt") });
   }
   return out;
 }

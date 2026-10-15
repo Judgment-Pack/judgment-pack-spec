@@ -1,7 +1,7 @@
 // A preparation verifier (spec/dialect.md §11, §14): the refusals in their phases, the findings in their
 // order, and the reading.
 import { BOUNDS, scanBytes } from "./bounds.ts";
-import { Refusal, countsWithin, readAcquisitions, readBound, readDialect, readProfiles, readRecord, readVerifiedAt, researchSources, sha256hex } from "./forms.ts";
+import { Refusal, countsWithin, readAcquisitions, readBound, readDialect, readProfiles, readRecord, readVerifiedAt, sha256hex } from "./forms.ts";
 import { NotRead, OutsideDomain, arr, compareCodePoints, intValue, isInteger, jsonEqual, member, num, obj, preparationForm, read, str, utf8 } from "./json.ts";
 import type { JObj, JVal } from "./json.ts";
 import { Finding, conditionParameters, recompute } from "./prepare.ts";
@@ -94,7 +94,9 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
   const record = parsed.get("the record");
 
   // phase 3: the counts
-  if (!countsWithin(dialectValue, acquisitionsValue)) over("a count of the dialect or the nesting of a result");
+  if (!countsWithin(dialectValue, acquisitionsValue, parsed.get("the profiles")!.value, parsed.get("the binding document")?.value)) {
+    over("a count of the dialect, a research maximum or the nesting of a result");
+  }
 
   // phase 4: a version this verifier does not read. It reads both the text defines, 2 and 3.
   const version = member(dialectValue, "version");
@@ -107,12 +109,16 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
   // bound dialect (§4.4)
   const dialect = readBound(readDialect(dialectValue), parsed.get("the binding document")?.value);
   const profiles = readProfiles(parsed.get("the profiles")!.value);
-  const acquisitions = readAcquisitions(acquisitionsValue, researchSources(dialectValue));
+  // each acquisition of its source's kind's form: a research record's answers held to the source's declarations
+  const recipes = new Map(dialect.sources.filter((s) => s.research !== undefined).map((s) => [s.name, s.research!]));
+  const acquisitions = readAcquisitions(acquisitionsValue, recipes);
   const verifiedAt = readVerifiedAt(preparationValue);
   const recordObj = record === undefined ? undefined : readRecord(record.value);
 
   // phase 6: a kind this verifier does not read
-  for (const s of dialect.sources) if (s.kind !== "operation") throw new Refusal("kind-unread", `${s.name} is of the kind ${s.kind}`);
+  for (const s of dialect.sources) {
+    if (s.kind !== "operation" && s.kind !== "research") throw new Refusal("kind-unread", `${s.name} is of the kind ${s.kind}`);
+  }
 
   // findings 1–4, by recomputation
   const r = recompute(dialect, caseValue, acquisitions, profiles, verifiedAt);
