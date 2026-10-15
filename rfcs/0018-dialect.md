@@ -6,7 +6,7 @@
 - Created: 2026-10-14
 - Accepted: 2026-10-15
 - Amended: 2026-10-15 (every gateway source shape, in version 2; the unbound source form, in
-  version 3)
+  version 3; research replay)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -197,17 +197,35 @@ by the maintainer's decision of 2026-10-15; and, added with 13 after review roun
 published dialect's and the binding document's digests should be carried in the committed form.
 The `research`, `http`, `sql` and `web` kinds still have no preparer.
 
-**Research replay, 2026-10-15.** Issue
-[#161](https://github.com/Judgment-Pack/judgment-pack-spec/issues/161) decides the research fixture's
-rule: a `research` source's acquisition is the retained responses, the AI connection's answers and
-the web reads it made, each named by its digest and held by its receipt. A verifier replays the
-derivation over that set and reports `acquisition-invalid` when a retained response's digest or
-receipt does not hold. The recipe — the question, the constraints, the connection and the model by
-name — is compared as text and never re-executed; identical model output is neither required nor
-expected. The rule lands in §4.3 and §11 below and in the companion document's same sections; §11
-states the fixture's layout in the staging README's terms. No vector is added, and the Evidence
-is unchanged. The rule is resolved, and the first fixture waits for a Runner that prepares the
-kind (Unresolved question 14).
+## Amendment of 2026-10-15: research replay
+
+This amendment records the maintainer's decision of 2026-10-15, filed as issue
+[#161](https://github.com/Judgment-Pack/judgment-pack-spec/issues/161), on
+[pull request 164](https://github.com/Judgment-Pack/judgment-pack-spec/pull/164). Its review is
+round 6 of this RFC, `0018-round-6.md`; the maintainer accepted all seven MEDIUM and five LOW
+findings, applied below. The status stays Accepted.
+
+A `research` source's acquisition is the research record `R` the caller assembles, carried as
+`response.result`. Its `responses` array retains the AI connection's answers and the web reads
+retained with it, each with its own profile reference, request, result, receipt and salts. The
+verifier checks each response under its own trusted profile and over its own request, including
+times and sessions, in the record's order. The record's own receipt and salts are present when it
+came back through a gateway source, and absent otherwise. The read applies to `R`. Membership and
+order are the caller's assertion; a missing named response is `acquisition-missing`, an unnamed
+retained response is `acquisition-unexpected`, and a failed digest or receipt check is
+`acquisition-invalid` (§4.3, §5.2, §11).
+
+The recipe's `question`, `constraints`, `model` and `evidence` are recorded in the dialect and
+under its digest, never re-executed. The model's and the connection's names are recorded and
+checked against nothing a verifier is given. No model output is produced or compared. Every
+retained response's citation, then the record's own when present, enters `cites` and version 3's
+lineage member `receipts` (§9). A page cited by URL alone is no retained response; the claim it
+supports is the answer's say (§13). At most 64 responses are retained per research source (§12).
+
+The research replay rule and fixture layout are fixed, and marked as positions no vector decides;
+§11 states the layout in the staging README's terms, with the expected answer in the staging
+manifest. No vector is added, and the Evidence is unchanged. The first fixture waits for a
+preparer of the `research` kind (Unresolved questions 1–3 and 14).
 
 ## Summary
 
@@ -378,9 +396,10 @@ preparation by recomputing it from the same inputs (§11).
 
 A **source** is one declared acquisition, of one **kind** (§4). An **acquisition** is what one call
 for a source returned: for an acquired kind, a gateway's answer and the receipt it signed (§5); for
-the case, and for a file the operator selected, bytes the operator supplied. Every source has a
-**class** (§8.2): `asserted`, `record` or `generated`. A **target** is a fact pointer or an evidence
-requirement that a source writes.
+the case, and for a file the operator selected, bytes the operator supplied. A `research` source's
+acquisition is instead the research record the caller assembles from retained responses (§4.3).
+Every source has a **class** (§8.2): `asserted`, `record` or `generated`. A **target** is a fact
+pointer or an evidence requirement that a source writes.
 
 A **pointer** is an RFC 6901 JSON Pointer. A pointer **resolves** in a value when each of its
 tokens names a member or an index that exists; otherwise it yields **absent**, which is not `null`.
@@ -607,9 +626,10 @@ reads a source of each adapter shape (§4.1), the `http` and `sql` kinds describ
 formed — a body and headers, a statement and its bindings — and not how a configured source is
 read. A source of each of these kinds is an object of exactly the members of §4 — `name`, `kind`,
 `parameters` (its source parameters, as every source's) and `read` — with `profile`,
-`profileDigest` and `maxAge` as in §4.1, and the members its kind names below. Each is acquired
-through the gateway source its profile pins, so §5's checks apply with the shape the profile names,
-and the value it acquires is read as every value is (§6).
+`profileDigest` and `maxAge` as in §4.1, and the members its kind names below. Except for `research`,
+each is acquired through the gateway source its profile pins, so §5's checks apply with the shape
+the profile names. A `research` source retains responses acquired through the gateway sources
+their own profiles pin, as below. The value acquired is read as every value is (§6).
 
 - **`http`**, a request to a gateway source of shape `http` (the gateway's `adapter-http`):
   `method`, `GET` or `POST`; `path`, a template that yields a path under the profile's endpoint;
@@ -629,19 +649,34 @@ and the value it acquires is read as every value is (§6).
   `{"url": url}`, and the value acquired is the attachment record the web source returns.
 - **`research`**, an AI-assisted research recipe asked of a gateway source whose profile is of
   class `generated`: the AI connection, by the profile's `source`, and its model. Its members are
-  `question`, a string template; `constraints`, an object; `model`, the model's name, which MUST be
-  the one the profile's source is configured to call; and `evidence`, the fields each answer MUST
-  support with a source reference: a retrieved page's receipt or URL, an excerpt and a retrieval
-  time. The request is the recipe. The source's acquisition is the retained response set: the AI
-  connection's answers and the web reads it made, each named by its digest and held by its receipt
-  (§5.2). The **research record** retains that set for the source's read (§6), and is held by its
-  digest as every value acquired is. A verifier replays the derivation over the retained set and
-  reports `acquisition-invalid` when a retained response's digest or receipt does not hold. The
-  recipe — the question, the constraints, the connection and the model by name — is compared as
-  text and never re-executed. Identical model output is neither required nor expected. A profile of
-  another class is refused. A research record that did not come back through a gateway source is
-  no acquisition: it can enter a dialect only as a selected file, asserted. The kind is defined,
-  and not claimable: no vector holds one (§11).
+  `question`, a string template; `constraints`, an object; `model`, the model's name, a string;
+  and `evidence`, the fields each answer MUST support with a source reference: a retrieved page's
+  receipt or URL, an excerpt and a retrieval time. The source's request is the recipe, with its
+  `question` template instantiated. The recipe is part of the dialect and under its digest;
+  its `question`, `constraints`, `model` and `evidence`
+  are recorded, never re-executed. The model's name and the connection's name are recorded and
+  checked against nothing a verifier is given. Each retained response's own `request`, below, is
+  what its receipt commits to. No model output is produced or compared.
+
+  The source's acquisition is the **research record**, `R`, an object the caller assembles, with
+  exactly one member, `responses`: an array of at most 64 retained responses, the AI connection's
+  answers and the web reads retained with it, in the order the run made them. Each response is an
+  object of exactly `profile`, `request`, `result`, `receipt` and `salts`. `profile` is an object of
+  exactly `id`, a non-empty string, and `digest`, a digest, naming the trusted input profile the
+  response came through (§5.1). `request` is the request made, an object in the `canon` domain;
+  `result` is the returned JSON value; `receipt` and `salts` have §5.2's forms. The receipt's
+  `resultDigest` names the result by its digest. A named response whose result bytes are not
+  retained is `acquisition-missing`; a retained response that `R` does not name is
+  `acquisition-unexpected` (§5.2).
+
+  `R` is carried as the source's `response.result` (§5.2), and the source's read (§6) starts from
+  `R`, not from each response's result separately. The record's own `receipt` and `salts` are
+  present beside `result` in that `response` when `R` came back through a gateway source, and
+  absent otherwise. Membership and order in `responses` are the caller's assertion: verification
+  uses `R`'s order and does not establish that assertion (§13). A page cited by URL alone is no
+  retained response; the claim it supports is the answer's say. A profile of another class is
+  refused. The kind is defined, and not claimable: no vector holds one (§11).
+  (No vector decides this.)
 
 #### 4.4 The unbound source form (version 3)
 
@@ -735,6 +770,11 @@ whose request does not fit its profile's shape and adapter (§4.1), under a prof
 `calculation`, `calculation` without a calculator's profile, a profile bound to an unbound source of
 another shape or another record (§4.4) — the finding is `profile-mismatch`.
 
+Each retained response of a `research` source names its own trusted profile by `profile.id` and
+`profile.digest` (§4.3). That id MUST be among the profiles given out of band, and its digest MUST
+match; otherwise `profile-mismatch`. The reference in the response supplies neither a profile nor
+a key. The source's profile does not substitute for a retained response's profile.
+
 What a profile pins — the gateway's key, source, authority, adapter, shape, endpoint, class and
 tools — is the installation's classification of a channel. It does not pin a credential, a
 tenant's configuration or a model's weights, and an installation replaces a profile when a change
@@ -743,12 +783,24 @@ of those makes its classification wrong (Runner, "Decisions and ownership").
 #### 5.2 Acquisitions
 
 The **acquisitions** are one JSON object with a member for each source acquired, named by the
-source's name, of the form `{"response": {"result": R, "receipt": E, "salts": S}}`, exactly: the
-gateway's acquire answer (gateway §6) as the preparer kept it. `R` is any JSON value; `E` is an
-object, a version-3 receipt (gateway §1.2a); `S` is an object of `args` and, optionally, `statement`,
+source's name, of the form `{"response": {"result": R, "receipt": E, "salts": S}}`, exactly, except
+for `research` as below: the gateway's acquire answer (gateway §6) as the preparer kept it.
+`R` is any JSON value; `E` is an object, a version-3 receipt (gateway §1.2a);
+`S` is an object of `args` and, optionally, `statement`,
 each 64 hexadecimal characters. A source to be acquired that has no member is
 `acquisition-missing`; a member for a source that is skipped (§9.2), for a `local-file` source, or
 for no source is `acquisition-unexpected`.
+
+A `research` source is the one source whose `response` may lack `receipt` and `salts`: its member
+is exactly `{"response": {"result": R}}` when the caller's research record did not come back through
+a gateway source, and has the ordinary form above when it did. Both `receipt` and `salts` are
+present or both are absent. `R` has §4.3's form. For a response named in `R.responses`, a missing
+`result` means its bytes were not retained and is `acquisition-missing`, rather than a refusal of
+the acquisition's form.
+A retained response that `R` does not name is `acquisition-unexpected`. The order is `R.responses`'s
+own; a different order is a different caller assertion, not a finding for disagreement with an
+external order. When the record has its own receipt, that receipt also commits `R`'s bytes,
+including the array's order, by check 5.
 
 An acquisition is held to its source and its profile, and any of these checks that fails is
 `acquisition-invalid`:
@@ -768,16 +820,28 @@ An acquisition is held to its source and its profile, and any of these checks th
    encodes, then the ASCII bytes `args:`, then the `canon` bytes of the source's request (§4.1).
 5. `E.resultDigest` is the digest of `R`'s `canon` bytes; an `R` outside the `canon` domain fails.
 
+For each retained response of a `research` source, checks 1–5 apply under that response's trusted
+profile, with `E` its `receipt`, `S` its `salts` and `R` its `result`. Check 4 opens the commitment
+over that response's own `request`, not the research source's recipe. A failed check is
+`acquisition-invalid`. When the research record has its own receipt, checks 1–5 apply to it too,
+under the research source's profile and over the source's request and the whole research record.
+After the retained responses' checks and before the source's read, the whole record MUST be in
+the `canon` domain even when it has no receipt of its own; otherwise `acquisition-invalid`.
+
 Then its times, against the preparation's instant, `verifiedAt`: `E.acquisition.observedAt` and
 `E.servedAt` MUST each have an instant no more than the source's `maxAge` seconds before
 `verifiedAt` and no more than 30 seconds after it; otherwise `acquisition-stale`.
+For research, this applies to every retained response and to the record's own receipt when
+present, each using the research source's `maxAge`.
 
-Then the sessions. The acquisitions of one preparation are in one of two forms: **they share a
+Then the sessions. The receipted calls of one preparation are in one of two forms: **they share a
 session**, one `sessionId` at `callIndex` values that differ; or **each is alone in a session of its
-own and is its session's first call**, each `sessionId` distinct, each `callIndex` 0. One acquisition
-alone is in both. Taken in the order of `sources`, the first acquisition with which the acquisitions
-so far are in neither form is `acquisition-sessions`. The form is read from the receipts and from
-nothing else.
+own and is its session's first call**, each `sessionId` distinct, each `callIndex` 0. One call
+alone is in both. Taken in the order of `sources`, the first receipt with which the receipts so far
+are in neither form is `acquisition-sessions`. Within a `research` source, every retained
+response's receipt participates, in `R.responses` order, followed by the record's own receipt when
+present. A record with no receipt adds none of its own. The form is read from the receipts and
+from nothing else.
 
 An acquisition's **citation** is `{"callIndex", "sessionId", "signature"}`, those three members of
 its receipt.
@@ -979,9 +1043,15 @@ A preparation is a JSON object of exactly:
 | `verifiedAt` | a timestamp | the instant: the one every freshness check is held to, and the value of `runAt` |
 | `mappingDigest` | a digest | the dialect digest (§2) |
 | `verification` | the string `verified acquisitions; session sealing and input truth are not established` | the preparer's account of its checks, the same in every preparation of this version |
-| `cites` | an array | every acquisition's citation (§5.2), ordered by `callIndex`, those of one index in the order of `sources` |
+| `cites` | an array | every acquisition's citations (§5.2), in the order below |
 | `lineage` | an array | §9.3 |
 | `outcomes` | an array | §9.2 |
+
+In version 2, `cites` is ordered by `callIndex`, those of one index in the order of `sources`.
+In version 3, sources contribute citations in the order of `sources`: a `research` source adds
+every retained response's citation in `R.responses` order, followed by the record's own citation
+when it has one; every other acquired source adds its one citation. The case, a local file and a
+skipped source contribute none. The research list is also its lineage entries' `receipts` (§9.3).
 
 #### 9.2 Outcomes
 
@@ -1017,7 +1087,8 @@ ordered by code point. (No vector decides the order within one outcome.) An entr
 | `basis` | the claim's `basis`, or `[]` for a skipped source |
 | `candidateFrom` | the pointers of the value read that the dialect could copy to the target, distinct, ordered by code point: a copy entry's `source`, or each `from` of a claim form that writes the target; absent when there is none, as for a rule's evidence target |
 | `readDigest` | the read digest (§6) |
-| `receipt` | the acquisition's citation; absent for the case, a local file and a skipped source |
+| `receipt` | the acquisition's citation; for `research`, the record's own citation when it has one; absent for the case, a local file, a skipped source and a research record with no receipt of its own |
+| `receipts` | added in version 3: for an acquired `research` source, the same ordered list of citations it adds to `cites` (§9.1), including the record's own when present; absent otherwise |
 | `calculation` | §7, for a calculated source that was acquired; absent otherwise |
 
 `candidateFrom` lists what the dialect could read into a target, and not what was read; `basis`
@@ -1109,14 +1180,18 @@ A preparation verifier is given:
   is that member's value exactly as `run.json` writes it, with no re-encoding; and
 - whether it **requires a binding**.
 
-**Replaying research.** For a `research` source (§4.3), the verifier replays the derivation over
-the retained responses, the AI connection's answers and the web reads it made, at the given
-preparation's `verifiedAt`. Each retained response is named by its digest and held by its receipt;
-a retained response whose digest or receipt does not hold is `acquisition-invalid`, before its
-value is read. The recipe — the question, the constraints, the connection and the model by name —
-is compared as text and never re-executed: verification calls neither the model nor the web.
-Identical model output is neither required nor expected. A replay establishes only what §13 says
-a derivation and an acquisition establish.
+**Replaying research.** For a `research` source (§4.3), the verifier replays the source's read over
+the caller-assembled research record `R`, carried as `response.result`, at the given preparation's
+`verifiedAt`. `R.responses` retains the AI connection's answers and the web reads retained with it.
+Before the read applies to `R`, each retained response is checked under its own trusted profile,
+over its own request and result, with §5.2's checks 1–5, times and sessions; the record's own
+receipt, when present, is checked too. The findings below run per source and, within it, per
+response in `R.responses` order, then for the record's own receipt when present. The recipe's
+`question`, `constraints`, `model` and `evidence` are recorded in the dialect and under its digest;
+the model's and the connection's names are checked against nothing a verifier is given. The recipe
+is never re-executed: verification calls neither the model nor the web. No model output is produced
+or compared. A replay establishes only what §13 says a derivation and an acquisition establish.
+(No vector decides this.)
 
 **A research fixture.** In the terms of the staging README
 ([`conformance/dialect/README.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/conformance/dialect/README.md)),
@@ -1126,16 +1201,18 @@ one fixture is a directory holding:
 | --- | --- |
 | `mapping.json` | the dialect document, with the research recipe and its read |
 | `case.json` | the case document, including the recipe's case parameters |
-| `sources.json` | the acquisitions: the research record with the retained response set, every response's digest and receipt, and the salts that open the receipts' request commitments (§5.2) |
-| `profiles.json` | the input profiles the fixture was prepared under; the verifier trusts profiles out of band (§5.1), never by their presence in a fixture |
+| `sources.json` | the acquisitions: each research record `R` as `response.result`, its `responses` array with every response's `profile`, `request`, `result`, `receipt` and `salts`, and the record's own `receipt` and `salts` beside `result` when present (§4.3, §5.2) |
+| `profiles.json` | the input profiles the fixture was prepared under, including every profile a retained response names; the verifier trusts profiles out of band (§5.1), never by their presence in a fixture |
 | `run.json` | the preparation, `run.input.preparation`, and the evaluation record: the bytes `run.auditBytes` holds in standard base64, or, in an export of version 2, `run.audit` exactly as `run.json` writes it, with no re-encoding |
 
 `preparation.json` and `preparation.sha256` hold what the verifier must compute: the preparation's
 canonical bytes and their digest, recomputed from the retained inputs at its `verifiedAt`. The
-record is the runtime evaluation record, distinct from the research record in `sources.json`;
-whether a binding is required is given as for every staged vector. This is the fixture's layout,
-not a vector: no Runner prepares the `research` kind and no vector holds one. It is defined, and
-not claimable; the first fixture waits for a Runner that prepares it.
+record is the runtime evaluation record, distinct from the research record in `sources.json`.
+The staging manifest gives `requiresBinding` and the expected answer, `expectedResult` with
+`expectedBinding` for a reading or `expectedFinding` for a finding, as for every staged vector.
+The fixture layout is fixed, but no Runner prepares the `research` kind and no vector holds one.
+It is defined, and not claimable; the first fixture waits for a preparer of the `research` kind.
+(No vector decides this.)
 
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
 the refusal, at the first of these phases that fails, in this order:
@@ -1146,8 +1223,9 @@ the refusal, at the first of these phases that fails, in this order:
 2. every document read as §1 reads one, and the record as one line: `input-malformed`;
 3. the bounds of §12 that are counts — the sources, the parameters in a scope, the clauses of a
    rule, the conditions one `all` or `any` lists, the `unwrap` pointers, the fact and evidence
-   targets — and the nesting of each acquisition's result, taken on the documents read wherever the
-   count can be taken, before any form is checked: `input-over-bound`;
+   targets, the retained responses per `research` source (at most 64) — and the nesting of each
+   acquisition's result, taken on the documents read wherever the count can be taken, before any
+   form is checked: `input-over-bound`;
 4. a dialect document that is an object whose `version` is an integer of a version this document
    defines, `2` or `3`, that the verifier does not read: `version-unread`;
 5. every document's form — the dialect against §§2–8, every rule they give it included, and each of
@@ -1165,14 +1243,18 @@ nothing reported but the refusal.
 **Findings.** Otherwise it recomputes the preparation at the given preparation's `verifiedAt`, by
 §§3–9, and ends the reading at the first of these findings, in this order, reporting that one:
 
-1. `profile-mismatch` (§5.1, §4.1, §4.4), the sources taken in their order;
+1. `profile-mismatch` (§5.1, §4.1, §4.4), the sources taken in their order, and within a `research`
+   source its own profile first, then each retained response's profile in `R.responses` order;
 2. for the case: `parameter-invalid` (§3), its parameters in their order, then `read-failed` for its
    read (§6.2);
 3. for each source in its order: `parameter-invalid` for a source parameter it declares, in their
    order (§3); then, for its acquisition and its read, `acquisition-missing`,
    `acquisition-unexpected`, `acquisition-invalid`, `acquisition-stale`, `acquisition-sessions`
-   (§5.2), `calculation-invalid` (§7) and `read-failed` (§6), in that order; and, after the last
-   source, `acquisition-unexpected` for a member of the acquisitions that names no source;
+   (§5.2), `calculation-invalid` (§7) and `read-failed` (§6), in that order. For a `research` source,
+   check for a missing or unexpected source member first, then apply the acquisition findings to
+   each retained response in `R.responses` order, completing one response's checks before the next;
+   then check the record's own receipt when present, and apply the source's read to `R`. After the
+   last source, `acquisition-unexpected` for a member of the acquisitions that names no source;
 4. `admission-refused` (§8.2);
 5. **`preparation-differs`**: the recomputed preparation's canonical bytes (§9.5) are not the given
    preparation's, written in that form; a given preparation that cannot be written in that form
@@ -1259,14 +1341,15 @@ file it cannot open. A verifier that is a library states the same three outcomes
 
 ### 12. Bounds
 
-A verifier holds its inputs to the Runner's bounds (Runner, "Numeric and resource profile"):
+A verifier holds its inputs to the Runner's bounds (Runner, "Numeric and resource profile"), with
+version 3's bound on retained research responses added:
 
 - the dialect at most 131072 bytes; the dialect, the case and the acquisitions together at most
   2097152 bytes; the profiles, and a binding document, each at most 65536 bytes; and the preparation
   and the record each at most 8388608 bytes;
-- at most 16 sources; 64 parameters in one scope; 64 clauses in one rule; 64 conditions listed by
-  one `all` or `any`; four `unwrap` pointers; 200000 bytes in one unwrapped string; and 256 fact
-  targets and 128 evidence targets;
+- at most 16 sources; 64 retained responses per `research` source; 64 parameters in one scope;
+  64 clauses in one rule; 64 conditions listed by one `all` or `any`; four `unwrap` pointers;
+  200000 bytes in one unwrapped string; and 256 fact targets and 128 evidence targets;
 - at most 32 levels of nesting in a value a read applies to — the case document, a result, an
   unwrapped value — and at most 64 in any document; and
 - number literals of at most 128 characters, whose exponent, when they have one, has a magnitude of
@@ -1291,15 +1374,19 @@ A preparation has parts of three natures, and what it establishes differs by par
 preparation's form and its digest — is recomputable: a verifier that recomputes it establishes it
 itself, from the inputs, trusting no one for it. An **acquisition**'s bytes are not recomputable:
 they are held by their digest, under a receipt, and what they establish is the receipt's business,
-which is byte lineage and not truth, the stance Core §6.3 takes of a source. An **asserted** input
-is the operator's say, and recomputation shows only that it was carried faithfully.
+which is byte lineage and not truth, the stance Core §6.3 takes of a source. For research, each
+retained response is held this way, and the record itself only when it has its own receipt. The
+caller assembles the research record: membership and order are the caller's assertion, even when a
+receipt commits the assembled record's bytes. An **asserted** input is the operator's say, and
+recomputation shows only that it was carried faithfully. A page cited by URL alone is no retained
+response; the claim it supports is the answer's say.
 
 | Part | Establishes, to a verifier that recomputed the preparation | Does not establish |
 | --- | --- | --- |
 | The facts and the evidence availability a copy or a rule derived | that these facts and this evidence availability were derived from those bytes by these rules, at that instant | that the rule is right for the pack, or reads what its author meant; that a target with no value has none in the system |
 | A calculated value's lineage | that the calculator's answer, in the bytes acquired, echoed the inputs bound to this case, and reported its tables as of instants within the dialect's limits before `verifiedAt` | that the calculator is deterministic or calls no model; that its arithmetic or its tables are right; that it used only what it echoes; that an `asOf` is true |
 | An acquisition of class `record`, verified under a trusted profile | byte lineage: the holder of the gateway key the profile pins signed a receipt that names these bytes by their digest, this request by its commitment, this adapter, shape and endpoint, at these times; what more the receipt says is the gateway's (gateway §1.2a, §5) | that the system's record is true, current or complete; that the adapter reported its acquisition truly; that the session is sealed or complete, or that the caller did not choose among answers; anything once the gateway's key is copied |
-| An acquisition of class `generated`, a research record above all | the least: that this request — a recipe, its question and the model as named — was asked of the gateway source the profile names, and that these bytes came back under that receipt | that the answer is right, complete or current, or the model's own; that a candidate it names exists; that a page it cites says what it quotes, beyond a receipt for that page |
+| An acquisition of class `generated`, a research record above all | the least: that each receipt holds its request and returned bytes under its trusted profile; for research, this applies to every retained response, and to the record itself when it has its own receipt; the model's and the connection's names are recorded, not checked against anything a verifier is given | that the answer is right, complete or current, or the model's own; that a candidate it names exists; that a page it cites says what it quotes, beyond a receipt for that page; that the retained set is every answer and every read the run made; that the caller did not choose among runs or responses; that the model made a read retained with the answer; that the caller's asserted membership and order describe the run |
 | An asserted input: the case, a local file, a parameter no receipt commits | that the preparation carried what the operator supplied, faithfully | anything about it: an asserted input rewritten with its preparation recomputed verifies as the original did; `unsignedParameters` names the parameters a rule read on the operator's say |
 | A binding document (§4.4), and the bound dialect it yields | that the bound dialect is the published one with each unbound source bound to the profile the binding document names | that that profile is the one the publisher meant, or reads the system the publisher's fixtures were recorded from: the binding document is the installation's statement; a record commits the bound dialect, its profile assignments included, and neither the binding document's digest, nor the published dialect's, nor the catalog names the binding removes |
 | `verifiedAt` | that every freshness check holds against it | that it was the instant of admission: without a binding no signature covers it, and a preparation recomputed at another instant verifies as the original does |
@@ -1406,11 +1493,12 @@ Until a specification version publishes the dialect vectors, no claim of this cl
   published with it are synthetic. A publisher strips those before publishing, and a reviewer of an
   entry checks that it did.
 - **Resource use.** A verifier reads documents it did not author. §12 bounds the bytes, the sources,
-  the scopes, the clauses, the conditions listed, the unwraps, the targets, the nesting and the
-  number literals, and a reading over a bound is refused, never truncated. A rule's evaluation is
-  bounded by its clauses and the conditions they list; a verification costs at most one Ed25519
-  check per acquisition, and at most 16 acquisitions. Both readers measure nesting before they parse
-  a document.
+  the retained research responses, the scopes, the clauses, the conditions listed, the unwraps, the
+  targets, the nesting and the number literals, and a reading over a bound is refused, never
+  truncated. A rule's evaluation is bounded by its clauses and the conditions they list. Receipt
+  verification costs at most one Ed25519 check per receipt: at most 16 sources, each with at most
+  64 retained responses when it is `research`, plus the record's own receipt when present, hence
+  at most 1040 receipt signature checks. Both readers measure nesting before they parse a document.
 - **Confusion.** The two canonical forms differ in three characters and in `-0`, and a verifier that
   mixes them gets another digest: two vectors are there for it. A binding that matches, with no
   record signature checked, establishes nothing, and a verifier's report must not say otherwise.
@@ -1502,15 +1590,18 @@ this text and the vectors — would strengthen that evidence, and none exists.
    positions of its own, each marked: the shape `airbyte`; a connection's request, `POST`, a `body`,
    a template form in `path` and a request with no `query`; the rule that holds `adapter-http`'s
    `query` to string templates; a paged acquisition refused whatever the shape, which is the
-   Runner's rule and which no vector shows; and every rule of the unbound form.
+   Runner's rule and which no vector shows; and every rule of the unbound form. The research
+   amendment adds the research replay rule and the fixture layout, also marked as positions no
+   vector decides.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
    version-3 kinds are proposed with no preparer. When a kind gets a preparer and vectors, and whether
    its request forms here survive the first implementation, is open. So for `operation` of shape
    `airbyte`, and for the unbound form (questions 10 and 11). The research replay rule and fixture
-   layout are decided; its first fixture is still pending (question 14).
+   layout are fixed; the `research` kind's first fixture still waits on a preparer (question 14).
 3. **Whether `research` belongs in the first version that adds kinds.** It establishes the least, its
-   record's form is the Desk's to settle (#369), and the Runner defers model calls over HTTP; it could
-   wait for both rather than enter version 3.
+   record's form and fixture layout are fixed here (§4.3, §5.2, §11), and its first fixture waits on
+   a preparer. The Desk's research work (#369) and the Runner's deferred model calls over HTTP
+   still leave open when the kind is implemented and exercised by a vector.
 4. **The output side's vectors**, deferred to a later RFC, and whether a reader class should hold an
    output dialect at all, when the gateway holds every write to its policy at the moment of the write.
    And a **release selector**: an output dialect is read in the decision-policy form of the gateway
@@ -1562,14 +1653,15 @@ this text and the vectors — would strengthen that evidence, and none exists.
     published dialect's and the binding document's digests should be carried in the committed form,
     so that a record names the published identity, as the Exchange may want, is open; carrying them
     would change the preparation's form, and so its version.
-
 14. **A research fixture.** Whether verification must reproduce a model's answer is resolved
-    2026-10-15 by issue [#161](https://github.com/Judgment-Pack/judgment-pack-spec/issues/161): the
-    acquisition is the retained response set, each response held by its digest and receipt, and a
-    verifier replays the derivation over it (§4.3, §11). The recipe is compared as text and never
-    re-executed; identical model output is neither required nor expected. The fixture layout is
-    stated in §11. The first fixture still waits for a Runner that prepares the `research` kind;
-    no vector holds it, and it remains defined and not claimable.
+    by the maintainer's decision of 2026-10-15, filed as issue
+    [#161](https://github.com/Judgment-Pack/judgment-pack-spec/issues/161): the acquisition is the
+    caller-assembled research record `R`, whose retained responses are checked under their own
+    trusted profiles, over their own requests and results, before the read applies to `R`
+    (§4.3, §5.2, §11). The recipe is recorded in the dialect and under its digest, never
+    re-executed. No model output is produced or compared. The fixture layout is fixed in §11,
+    including the staging manifest's expected answer. The `research` kind's first fixture still
+    waits on a preparer; no vector holds it, and it remains defined and not claimable.
 
 **Next revision.** The maintainer's decision of 2026-10-14 on issue #141 scoped dialect version 3
 in three parts. The first two are specified by the amendment of 2026-10-15 (above): the record kind
