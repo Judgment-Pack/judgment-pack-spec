@@ -7,6 +7,14 @@ here.
 
 ### Added
 
+- [RFC 0020](rfcs/0020-workflow.md) (Draft): the workflow, a proposed companion document beside
+  Core, with a `workflow-verifier` reader class. It defines pinned stages, a selection between
+  stages, one instance per selected record, projected cases, output lineage and an execution
+  inventory. The proposed text is added as `spec/workflow.md`, held equal to the RFC's
+  Specification, normative for nothing while the RFC is a draft and in no release bundle
+  (`.gitattributes`, `export-ignore`). Its two-stage run and independent readers remain to be
+  recorded and implemented; no workflow fixture or conformance claim exists. Nothing in Core,
+  the dialect or the conformance corpora changes.
 - [RFC 0018](rfcs/0018-dialect.md) is `Accepted`, at draft maturity, under the interim review
   regime; the maintainer waived the comment period RFC 0000 names, because the project has no
   outside readers yet, and the adoption record says so as a departure. The RFC taken up from the

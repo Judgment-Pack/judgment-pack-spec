@@ -17,3 +17,7 @@ conformance/witness/** export-ignore -text
 # they belong to, spec/dialect.md, is published and no longer export-ignore.
 conformance/dialect export-ignore
 conformance/dialect/** export-ignore -text
+
+# The companion document RFC 0020 proposes is normative for nothing while the RFC is a draft,
+# so no bundle carries it; acceptance removes this line, as for RFC 0018's Draft.
+spec/workflow.md export-ignore

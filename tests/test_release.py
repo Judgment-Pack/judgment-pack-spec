@@ -327,6 +327,45 @@ class ReleaseBuilderTests(unittest.TestCase):
             self.assertIn(companion, members)
         self.assertIn("conformance/manifest.json", members)
 
+    def test_release_bundle_leaves_the_workflow_companion_out(self) -> None:
+        # As for RFC 0018's Draft: the proposed companion is normative for nothing and excluded
+        # until acceptance. Published companions and the spec directory are the controls.
+        self.assertIn("spec", BUILD_RELEASE.BUNDLE_PATHS)
+        companion = "spec/workflow.md"
+        self.assertTrue((ROOT / companion).is_file())
+        released = ["spec", "spec/dialect.md", "spec/checkpoint-witness.md"]
+        try:
+            completed = subprocess.run(
+                ["git", "check-attr", "export-ignore", "--", companion, *released],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except (OSError, subprocess.CalledProcessError) as error:
+            self.skipTest(f"git cannot read attributes here: {error}")
+        attributes = dict(
+            line.rsplit(": export-ignore: ", 1) for line in completed.stdout.splitlines()
+        )
+        self.assertEqual("set", attributes.get(companion))
+        for path in released:
+            with self.subTest(path=path):
+                self.assertEqual("unspecified", attributes.get(path))
+
+        # Use the attributes under review even before they have been committed.
+        archived = subprocess.run(
+            ["git", "archive", "--worktree-attributes", "--format=tar", "HEAD", "spec"],
+            cwd=ROOT,
+            capture_output=True,
+        )
+        if archived.returncode != 0:
+            return  # no commit here; the attribute checks above stand
+        with tarfile.open(fileobj=io.BytesIO(archived.stdout)) as bundle:
+            members = set(bundle.getnames())
+        self.assertNotIn(companion, members)
+        self.assertIn("spec/dialect.md", members)
+        self.assertIn("spec/checkpoint-witness.md", members)
+
     @staticmethod
     def _release_tree(directory: Path, version: str) -> Path:
         """A minimal, correctly pinned artifact tree for the version-pinning checks."""

@@ -670,7 +670,10 @@ PAGES = (
         "rfcs/0020-workflow.md",
         PurePosixPath("rfcs/0020-workflow/index.html"),
         "RFC 0020: The workflow",
-        "Draft standards-track RFC: the workflow, a portable contract for staged research. Stages pin a dialect and a pack by digest, a selection between stages, one execution per selected record, output lineage back to the parent, with a reader class and fixtures from a recorded two-stage run still to come.",
+        "Draft standards-track RFC: the workflow, a portable contract for staged research. "
+        "Stages pin a dialect and a pack by digest. A selection between stages determines "
+        "one instance per selected record, with output lineage back to the parent. "
+        "A reader class is proposed; fixtures from a recorded two-stage run are still to come.",
         "proposals",
         "Draft proposal",
         source_ref="main",
