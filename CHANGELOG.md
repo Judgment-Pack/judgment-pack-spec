@@ -215,10 +215,21 @@ here.
   the prohibition of overlapping targets. The GTM company/person and work-item triage fixture
   lists include changed bindings, retained responses and the workflow's selected parent/child
   case; none is recorded because no Runner prepares `research`. Replay never calls a model or
-  the web, and establishes retained bytes, not answer correctness. This resolves the research
-  binding question deferred by issue #160 without changing RFC 0020's operation construction.
-  Both readers' support follows separately; no Core, preparation-form or conformance change is
-  made, and no vector is claimed.
+  the web, and establishes retained bytes, not answer correctness. `evidence` keeps its accepted
+  form, an array of non-empty strings. Three accepted answers change: a research source of pull
+  request 164's form without `fields` or `capabilities` is now `input-malformed`; a research record
+  without `fields` is now `input-malformed`; a retained response through a trusted but unassigned
+  profile now gives `profile-mismatch`. This resolves the dialect's research binding question
+  deferred by issue #160. Workflow version 1 admits no stage with a research source; RFC 0020's
+  contrary binding statements are superseded pending its own revision, with its operation
+  construction still due. Both readers hold the superseded research form until the follow-up
+  pull request. Round 8's twelve accepted findings clarify reads, reconciliation guards,
+  citation indices, generated claims and fixture variants; its review and dispositions are
+  [recorded verbatim][round-8]. No Core, preparation-form or conformance
+  change is made, and no vector is claimed.
+
+[round-8]:
+  https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0018-round-8.md
 
 - [RFC 0018](rfcs/0018-dialect.md) is amended (2026-10-15), and
   [`spec/dialect.md`](spec/dialect.md) with it; its status stays `Accepted`. Version 2's

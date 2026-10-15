@@ -295,25 +295,36 @@ resolved, and question 2 updated.
 
 ## Amendment of 2026-10-15: the portable research contract
 
-This amendment records the maintainer's four decisions on issue
-[#171](https://github.com/Judgment-Pack/judgment-pack-spec/issues/171), on this pull request,
-**RFC 0018: portable research contracts**. Its review is round 8 of this RFC, to be recorded as
-`0018-round-8.md` under
+This amendment records the maintainer's four decisions on
+[issue #171](https://github.com/Judgment-Pack/judgment-pack-spec/issues/171), on
+[pull request 173](https://github.com/Judgment-Pack/judgment-pack-spec/pull/173),
+**RFC 0018: portable research contracts**. Its review is round 8 of this RFC, recorded as
+[`0018-round-8.md`][round-8] under
 [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews),
-with the maintainer's disposition of each finding. That review follows this draft; no review
-findings or disposition are claimed here. The status stays Accepted.
+with the maintainer's disposition of each finding, as round 7 is recorded there. All seven
+MEDIUM and five LOW findings are accepted and applied below. The status stays Accepted.
 
-**Where it comes from.** The evidence is the maintainer's review of the Desk's GTM recipe,
-dated 2026-10-15: requested fields, acquisition requirements and their derivation must travel
-with a recipe, while connection identifiers and workspace state belong to the installation. The
+[round-8]:
+  https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0018-round-8.md
+
+**Where it comes from.** The evidence is the maintainer's review of the Desk's GTM recipe
+([issue #171](https://github.com/Judgment-Pack/judgment-pack-spec/issues/171)), dated 2026-10-15:
+requested fields, acquisition requirements and their derivation must travel with a recipe, while
+connection identifiers and workspace state belong to the installation. The
 requested fields and typed observations described there motivate §4.3, not an import of the
-Desk's workspace schema. `judgment-pack-desk web/src/research/ledger.ts` retains search and page
-requests, exact responses, receipts and excerpts, and distinguishes retrieval time from a
-page's claimed dates. `judgment-pack-desk web/src/research/run.ts` traces citations to retained
-excerpts and writes a `researchRecord` with source responses and citations. Those files are
-evidence of retention and citation handling; they do not implement this result contract or a
+Desk's workspace schema. The Desk's `web/src/research/ledger.ts` ([source][desk-ledger]) at commit
+`6b8a46c` retains search and page requests, exact responses, receipts and excerpts, and
+distinguishes retrieval time from a page's claimed dates. Its `web/src/research/run.ts`
+([source][desk-run]) at the same commit traces citations to retained excerpts and writes a
+`researchRecord` with source responses and citations. Those files are evidence of retention and
+citation handling; they do not implement this result contract or a
 company/person workflow. The Runner's `docs/MAPPING-V2.md` at `89cf441`, "Dialect version 3",
 supplies the operation binding model extended here and still refuses `research` by name.
+
+[desk-ledger]:
+  https://github.com/Judgment-Pack/judgment-pack-desk/blob/6b8a46c/web/src/research/ledger.ts
+[desk-run]:
+  https://github.com/Judgment-Pack/judgment-pack-desk/blob/6b8a46c/web/src/research/run.ts
 
 **The four decisions.** The result contract is an ordered, bounded `fields` declaration, with
 six exact encodings and a per-field answer in `R.fields`: required means an answer entry, not a
@@ -333,18 +344,27 @@ for that whole record, an unread field can change without changing the preparati
 states that limit. Version 3's one-spelling rule, operation binding and the preparation's form
 stay unchanged. Every new refusal uses an existing code, and every new maximum is finite.
 
-This resolves the research binding question here and the portable-research-binding question
-that issue #160's decision deferred (Unresolved question 15). It does not change RFC 0020's
-version-1 operation construction or claim its required two-stage demonstration. Its stage
+This resolves the dialect's research binding question deferred by issue #160 (Unresolved
+question 15). Workflow version 1 still admits no stage whose dialect has a research source;
+RFC 0020's contrary binding statements await its own revision, as fixture 8 and question 15
+record. Its version-1 operation construction and required two-stage demonstration remain. Its stage
 outputs still come from prepared facts, and its selected payload projects into the next case
 under its own rules; no workflow or record-collection member is added to a dialect.
 
-The replay rule adopted in pull request 164 remains: verification replays retained responses
-under the profiles then bound and never asks a model or the web again. The new profile checks
-compare declared model and capabilities; they establish neither which model actually ran nor
-that its answer is right (§13). No Runner prepares this kind, and no research vector exists.
-Both readers' support for the new members follows in a separate pull request, as pull request
-167 followed 164. This amendment changes the contract and fixture plans only.
+The replay mechanism adopted in pull request 164 remains: verification replays retained
+responses under the profiles then bound and never asks a model or the web again. `evidence`
+keeps its accepted form, an array of non-empty strings. Three answers the accepted text gave
+change. A research source of pull request 164's form without `fields` or `capabilities`,
+previously well-formed, is now `input-malformed`. A research record without `fields`, previously
+well-formed, is now `input-malformed`. A retained response through a trusted but unassigned
+profile, previously read, now gives `profile-mismatch`.
+
+Section 13's table is reformatted as a list, with the text unchanged but for the `generated`
+item. The new profile checks compare declared model and capabilities; they establish neither
+which model actually ran nor that its answer is right (§13). No Runner prepares this kind,
+and no research vector exists.
+Both readers hold the superseded research form until the follow-up pull request, as pull
+request 167 followed 164. This amendment changes the contract and fixture plans only.
 
 ## Summary
 
@@ -498,9 +518,11 @@ those sentences has a test in each reader, and where a reader did not follow one
 it in the amendment that wrote them; that amendment's author read both readers, so those changes are
 the text's, and add nothing to the second reader's independence. Beside them are the readings both
 readers take where the text names a member without a form, held by no vector: `http`'s `path` as a
-string template; and `http`'s `headers`, `research`'s `evidence`, and a `sql` binding's `name` and
-`type` as non-empty strings (the amendment of 2026-10-15 that read version 3). One vector is
-answered otherwise than `verify-run` answers it, by design: `disposition-differs-from-audit` alters
+string template; `http`'s `headers` and `research`'s `evidence` as arrays of non-empty strings;
+and a `sql` binding's `name` and `type` as non-empty strings (the amendment of 2026-10-15 that
+read version 3). Both readers hold the superseded research form until the follow-up pull
+request implements this amendment's contract. One vector is answered otherwise than `verify-run`
+answers it, by design: `disposition-differs-from-audit` alters
 the Runner's export, not the preparation or the record (Conformance).
 
 ## Specification
@@ -677,7 +699,7 @@ The kinds:
 | `http` | 3, proposed | the profile's | a request to a gateway HTTP source: method, path, query and body templates, header names (§4.3) | none |
 | `sql` | 3, proposed | the profile's | a statement on a connection, with its bound parameters (§4.3) | none |
 | `web` | 3, proposed | the profile's | a public page by URL, through the gateway's web source (§4.3) | none |
-| `research` | 3, proposed | `generated` | an AI-assisted research recipe (§4.3) | none |
+| `research` | 3, proposed | `generated` | a recipe (§4.3), also unbound (§4.4) | none |
 
 A version-2 document that names a kind of version 3, or has an unbound source (§4.4), is refused.
 **A kind without vectors is defined, and not claimable**: a verifier's claim names the kinds it
@@ -800,11 +822,11 @@ their own profiles pin, as below. The value acquired is read as every value is (
 - **`research`**, an AI-assisted research recipe, of class `generated`. Besides §4's members,
   `maxAge` and its profile assignments (§4.4), it has exactly `question`, a string template;
   `constraints`, an object in the `canon` domain; `model`, a non-empty string of at most 256 UTF-8
-  bytes; `evidence`, a non-empty string of at most 4096 UTF-8 bytes describing the evidence to
-  retain; `fields`, the requested fields below; and `capabilities`, an array of distinct names
-  from the closed set `answer`, `search`, `page`. `answer` is REQUIRED; the others name the web
-  capabilities needed. The array follows that order and has one to three entries. A published
-  source is unbound (§4.4), carrying no installation identifier.
+  bytes; `evidence`, an array of non-empty strings, each at most 4096 UTF-8 bytes, describing
+  the evidence to retain; `fields`, the requested fields below; and `capabilities`, an array of
+  distinct names from the closed set `answer`, `search`, `page`. `answer` is REQUIRED; the others
+  name the web capabilities needed. The array follows that order and has one to three entries.
+  A published source is unbound (§4.4), carrying no installation identifier.
 
   The source's request is exactly `{"question", "constraints", "model", "evidence", "fields",
   "capabilities"}`, with `question` instantiated as a template. These members, the fields' order
@@ -867,19 +889,22 @@ An entry is a closed object with `status` and `cites`, and the conditional `valu
 - `not-found`: neither `value` nor `values` is present. `cites` has 0 to 64 distinct indices,
   naming retained responses about the unsuccessful search when any are given.
 - `stale`: neither `value` nor `values` is present. `cites` has 0 to 64 distinct indices. The
-  observed values remain in the retained responses for review; none is a resolved value here.
+  caller asserts that an observation was made; it is cited when `cites` names it. No observation
+  is a resolved value here.
 - `conflicting`: `value` is absent; `values` is an array of 2 to 64 closed objects, each exactly
   `{"value", "cites"}`. Each `value` has the declared type and each `cites` has 1 to 64 distinct
   response indices. At least two values differ under §6.3's JSON equality. Observations remain
   in their recorded order, without choosing one or coercing them. The entry's outer `cites` is
   `[]`; citations belong to each observation and are not replaced by a common list.
 
-An index is an integer from 0 to 63 and below `responses`' length; it names the whole retained
-response, not a URL, an excerpt id or the preparation's `cites`. Its order is kept. A cited
-response with missing bytes still gives `acquisition-missing` (§5.2); a bad index or a URL in
-place of one is `input-malformed`. A receipt holds the cited bytes; it does not establish that
-they support the value. An answer's status is the caller's assertion. In particular, `stale`
-describes an observation's currency, not an exception to receipt freshness: an expired retained
+An index is an integer from `0` below `responses`' length, written without `-0`; indices in
+each citation array are distinct by value. Any other index, a repeated value or a URL in place
+of an index is `input-malformed`. This range is a form, not a §12 maximum. An index names the
+whole retained response, not a URL, an excerpt id or the preparation's `cites`. Array order is
+kept. A cited response with missing bytes still gives `acquisition-missing` (§5.2).
+A receipt holds the cited bytes; it does not establish that they support the value. An answer's
+status is the caller's assertion. In particular, `stale` describes an observation's currency,
+not an exception to receipt freshness: an expired retained
 receipt still fails as `acquisition-stale` (§5.2).
 
 Absence is permitted only for an optional entry and for the conditional members just stated.
@@ -891,12 +916,17 @@ type, unknown member or status, misplaced `value` or `values`, reversed range, r
 name or invalid citation is `input-malformed`; exceeding a maximum is `input-over-bound` (§11).
 The same rules hold every entry, whether or not the read uses it. (No vector decides this.)
 
-**Reading fields.** A copy or rule reads `/fields/<name>/value`, `/fields/<name>/status`,
-`/fields/<name>/values/<index>/value` or `/fields/<name>/cites`, escaping the name as one RFC 6901
-token. A range's endpoints append `/min` and `/max`; a text-list item appends its index. These
-are pointers into `R`, not pack targets. A copy of a missing `value` writes nothing (§6.2); a
-rule guards a value with its status and follows §6.3. A read may retain the whole field entry
-for review, but MUST NOT present a conflicting observation as a `found` value by coercion.
+**Reading fields.** In a plain research read, the pointers a copy or rule may read form a closed
+list: `/fields`, `/fields/<name>`, `/fields/<name>/value` and its descendants,
+`/fields/<name>/status`,
+`/fields/<name>/values/<index>/value`, and `/fields/<name>/cites`. The name is escaped as one
+RFC 6901 token. A range's endpoints append `/min` and `/max` to `value`; a text-list item appends
+its index. These are pointers into `R`, not pack targets. Any other read pointer is
+`input-malformed`; `/responses/...` is not readable by a read. Retained responses are for replay.
+A copy of a missing `value` writes nothing (§6.2); a rule guards a value with its status and
+follows §6.3. A read may retain the whole field entry for review. A plain research read MUST NOT
+take a `from` under `values`; that `from` is `input-malformed`, as in §6.4. That section defines
+reconciliation's combined value and pointers.
 Deterministic sources keep their target declarations and gain no `fields` member.
 
 `R.fields`, every status, value, observation and citation index, and `R.responses` in its order
@@ -949,9 +979,9 @@ a digest: an input profile of the installation's gateway, by its `id` and its di
 exactly the requested web capabilities. Its digest is the digest of all its `canon` bytes.
 It is neither the record's `binding` (§9.5) nor a binding of the gateway's catalog.
 
-**The bound dialect** is the unbound dialect with the binding applied: each unbound source with its
-`platform`, `operation`, `shape` and `record` removed and the `profile` and `profileDigest` the
-binding document gives it added, for an `operation`, every other member kept as written. For
+**The bound dialect** is the unbound dialect with the binding applied. For each unbound
+`operation`, `platform`, `operation`, `shape` and `record` are removed, and the binding document's
+`profile` and `profileDigest` are added; every other member is kept as written. For
 `research`, the three assignment members are added, and every other member is kept as written:
 there are no operation catalog names to remove, and `model`, `capabilities` and `fields` remain.
 It is a document of version 3 with no unbound source, and its digest (§2) is the one a
@@ -961,7 +991,7 @@ Exchange names `dialect.digest` (RFC 0019 §3); the bound dialect's is the insta
 dialect bound under two installations' profiles has two.
 
 **Verifying it.** A verifier given a dialect with an unbound source is given its binding document
-too, and reads the bound dialect as this document reads every dialect, with two checks more. A
+too, and reads the bound dialect as this document reads every dialect, with these added checks. A
 binding document whose `dialect` is not the given dialect's digest, or whose `sources` do not name
 exactly its unbound sources, is refused with the dialect, as is a dialect with an unbound source
 and no binding document, and a binding document beside a dialect with none (§11). For an
@@ -970,7 +1000,7 @@ and no binding document, and a binding document beside a dialect with none (§11
 an unbound dialect carries the binding document it was recorded under, and verifies against the
 bound dialect.
 
-The binding checks of §5.1 hold research too, including a bound document given directly. Its AI
+The binding checks of §5.1 hold research too, including a bound dialect given directly. Its AI
 profile MUST declare the exact `model` and capability `answer`; each assigned web profile MUST
 declare the capability it serves. Every assigned profile MUST be `generated`; a profile that
 declares a model MUST name the source's model. A missing profile, digest mismatch, missing
@@ -1018,6 +1048,7 @@ exactly
 | `endpoint` | a string, or `null` |
 | `tools` | an array of distinct non-empty strings, optional, which a profile of shape `mcp` MUST give and MUST NOT give empty |
 | `calculator` | an object of exactly `name` and `version`, strings, optional: the profile is a calculator's (§7) |
+| `research` | an optional closed object of `capabilities` and conditional `model`, as below |
 
 Its **digest** is the digest of its `canon` bytes. A calculator's profile MUST be of class `record`
 and shape `mcp`. A profile whose key the key rule refuses is refused.
@@ -1029,6 +1060,10 @@ profiles name no model. This whole declaration enters the profile digest. Malfor
 are `input-malformed`; a well-formed profile without the declaration or with unsuitable
 capabilities, model or class is `profile-mismatch` when bound to research (§4.4). This extension
 changes no operation binding check and makes no claim about model weights or execution.
+
+A profile bound to a research source's capability serves the model's answer and is classed
+`generated` for that binding. The same gateway web source bound to a `web` source is `record`;
+its profile for that binding carries that class.
 
 A profile is the installation's, never the dialect's: a dialect names a profile by its `id` and its
 digest, and only an installation supplies one. A verifier is given the profiles it trusts, out of
@@ -1253,13 +1288,22 @@ and `/current/fields/<field>/status` and its siblings, each name escaped as one 
 and claim forms keep §6.3's semantics; the first matching clause is the declared precedence.
 The rule MUST explicitly test a `found` status before selecting a value and name in its clauses
 what absence, `not-found`, `stale` and `conflicting` do: advance to another source, or produce
-an `absent` or `unknown` claim with no value for that target. Each fact `from` selects a field's
-`value` or a descendant of it; selecting from `values` is `input-malformed`. Its clause's
-condition is that field's `equals` guard for status `found`, or an `all` with that guard as a
-direct member. Each selected field MUST be declared by the source it names; otherwise
-`input-malformed`. Every field so selected also has an `equals` guard for each other status and a
-`not` of `exists` for its entry's absence somewhere in the rule's conditions. Missing guards
-are `input-malformed`. The last `always` clause has no facts and status `unknown` or `absent`.
+an `absent` or `unknown` claim with no value for that target. The admissible fact `from` set is
+closed: `/sources/<source>/fields/<field>/value`, `/current/fields/<field>/value`, or a descendant
+of either. Any other `from`, including one under `values`, is `input-malformed`. Each selected
+field MUST be declared by the source it names; otherwise `input-malformed`.
+
+Let `<entry>` be that field entry's pointer, `/sources/<source>/fields/<field>` or
+`/current/fields/<field>`. Its status guard is exactly
+`{"op":"equals","field":"<entry>/status","to":S}`. The selecting clause's condition is that
+guard with `S` equal to `"found"`, or an `all` with that guard as a direct member. Every selected
+field also has that exact guard for each of `"not-found"`, `"stale"` and `"conflicting"`, and
+the exact absence guard `{"op":"not","of":{"op":"exists","field":"<entry>"}}`.
+These other-status and absence guards count anywhere in any clause's condition, at any depth
+and polarity, whether or not evaluation reaches them. Missing guards are `input-malformed`.
+In this version a reconciliation claim writes fact targets only: every claim form's `evidence`
+MUST be `{}`, otherwise `input-malformed`. The last `always` clause has no facts and status
+`unknown` or `absent`.
 `all`, `any` and `not` combine the guards using §6.3; no new rule operator is added.
 
 For example, a rule on `secondary`, with `sources: ["primary"]`, first guards primary's field
@@ -1534,11 +1578,18 @@ one fixture is a directory holding:
 
 | File | Given to the verifier as |
 | --- | --- |
-| `mapping.json` | the dialect document, with the research recipe and its read |
+| `mapping.json` | the bound dialect, with the research recipe and its read (§4.4) |
+| `unbound.json` | beside it, the published dialect with unbound research sources |
+| `binding.json` | beside it, the binding document used to make `mapping.json` |
 | `case.json` | the case document, including the recipe's case parameters |
-| `sources.json` | the acquisitions: each research record `R` as `response.result`, its `responses` array with every response's `profile`, `request`, `result`, `receipt` and `salts`, and the record's own `receipt` and `salts` beside `result` when present (§4.3, §5.2) |
-| `profiles.json` | the input profiles the fixture was prepared under, including every profile a retained response names; the verifier trusts profiles out of band (§5.1), never by their presence in a fixture |
+| `sources.json` | the acquisitions: each `R`, including `R.fields` and `R.responses` (§4.3, §5.2) |
+| `profiles.json` | every assigned AI and web profile, including assignments no response uses |
 | `run.json` | the preparation, `run.input.preparation`, and the evaluation record: the bytes `run.auditBytes` holds in standard base64, or, in an export of version 2, `run.audit` exactly as `run.json` writes it, with no re-encoding |
+
+In `sources.json`, each `R` is carried as `response.result`. Its `responses` array retains every
+response's `profile`, `request`, `result`, `receipt` and `salts`; the record's own `receipt` and
+`salts` sit beside `result` when present. Every retained response names an assigned profile.
+The verifier trusts profiles out of band (§5.1), never by their presence in a fixture.
 
 `preparation.json` and `preparation.sha256` hold what the verifier must compute: the preparation's
 canonical bytes and their digest, recomputed from the retained inputs at its `verifiedAt`. The
@@ -1549,10 +1600,13 @@ The fixture layout is fixed, but no Runner prepares the `research` kind and no v
 It is defined, and not claimable; the first fixture waits for a preparer of the `research` kind.
 (No vector decides this.)
 
-**The two fixture lists to record.** Each item below calls for a separate fixture directory in
-that layout for each of two examples. No such fixture is recorded: no Runner prepares the kind,
-and neither a synthetic expected digest nor a hand-written receipt stands in for a recording.
-No research vector or conformance claim is made. These are the planned names and inputs:
+**The two fixture lists to record.** Each reading or finding variant below calls for a separate
+fixture directory in that layout for each of two examples, named `<example>-<item>-<variant>`.
+`<example>` and `<item>` are the names below; `<variant>` identifies the individual case, such
+as `work-item-triage-presence-optional-omitted`. Refusal variants are reader tests, not fixtures,
+until the staging README defines a refusal row form. No such fixture is recorded: no Runner
+prepares the kind, and neither a synthetic expected digest nor a hand-written receipt stands
+in for a recording. No research vector or conformance claim is made. The examples are:
 
 - `gtm-company-person`: a company's `company-id` (`text`), `employee-count` (`integer`),
   `revenue` (`decimal`), `active` (`boolean`), `roles` (`text-list`) and `employee-range`
@@ -1566,7 +1620,7 @@ No research vector or conformance claim is made. These are the planned names and
   a selected item leads to a child follow-up record of the same types, with its own id. No
   company-domain or person-specific identity rule is built into these fields.
 
-For both examples the directory suffixes and expected checks are:
+For both examples the item names and expected checks are:
 
 1. `valid-types`: all six types, both integer and decimal ranges, empty and non-empty lists,
    decimal signs and scales, with retained citations and generated admissions; a reading with
@@ -1579,13 +1633,15 @@ For both examples the directory suffixes and expected checks are:
    `input-malformed`. No absent, null or false value is replaced by a default.
 3. `bounds-and-cites`: recordings at every new maximum and refusal inputs one over each:
    `input-over-bound`. Include an empty declaration list, empty found citation list, duplicate
-   field, invalid index and URL-only citation, all `input-malformed`; missing cited response
-   bytes give `acquisition-missing`. Keep the existing document and nesting bounds in force.
+   field, invalid index (including `-0` or one at or above `responses`' length), duplicate index
+   and URL-only citation, all `input-malformed`; the index range is no §12 maximum. Missing
+   cited response bytes give `acquisition-missing`. Keep document and nesting bounds in force.
 4. `stale-and-conflicting`: fresh receipts carrying an explicitly stale observation, and two
    conflicting typed values with separate citations, yield the declared unknown or fallback
-   claim and a reading. The observations remain retained. An actually expired receipt gives
-   `acquisition-stale`; replacing conflict by a coerced resolved value without its declared
-   form gives `input-malformed`. This does not test the truth of a claimed `found` status.
+   claim and a reading. A stale entry may have no cited observation. An actually expired receipt
+   gives `acquisition-stale`; a plain research rule with a fact `from` of
+   `/fields/<name>/values/0/value` gives `input-malformed` (§4.3). This does not test the truth
+   of a claimed `found` status.
 5. `failed-fallback`: primary `not-found`, secondary `stale`, and a third source's `conflicting`
    entry. The third source's rule names the earlier two, tests their statuses in declared order,
    and derives `unknown` with no resolved target. Include success from secondary, all candidates
@@ -1595,9 +1651,11 @@ For both examples the directory suffixes and expected checks are:
    a matched rule's missing value pointer `read-failed`; none silently tries another source.
 6. `changed-binding`: retain `unbound.json` and `binding.json` beside `mapping.json`, the bound
    dialect, as the staging README requires. A second installation changes one generated AI or
-   web assignment and its matching trusted profile. With the old preparation fixed, the valid
-   new bound document gives `preparation-differs`; an old profile digest, wrong model, missing
-   capability or non-generated profile gives `profile-mismatch`. A binding for another published
+   web assignment and its matching trusted profile. Every retained response's profile reference
+   names its new assignment, and its receipt verifies under that profile; all earlier checks
+   pass. With the old preparation fixed, the valid new bound dialect gives `preparation-differs`;
+   an old profile digest, wrong model, missing capability or non-generated profile gives
+   `profile-mismatch`. A binding for another published
    digest, a partial assignment or an extra capability gives `input-malformed`. A separately
    recorded preparation under the second binding may read; the first is not relabelled.
 7. `changed-response`: change a retained result with its receipt and the independent expected
@@ -1615,11 +1673,14 @@ For both examples the directory suffixes and expected checks are:
    generated influence, closed offered sets and parentage use its rules. Its §11 acceptance
    construction remains the two-stage `operation` run; this research plan neither replaces
    that demonstration nor changes the workflow's version or refusal codes. The analogous
-   research recordings wait for research support, including a workflow reader that admits it.
+   research recordings wait for research support. Workflow version 1 (RFC 0020 §4) admits no
+   stage whose dialect has a research source. RFC 0020 §4's sentences that only `operation` has
+   an unbound form and that portable research binding is deferred, and its question 2, are
+   superseded pending its own revision. The coordinator is to file that revision as an issue.
 
 The staging manifest's existing `reading` and `finding` rows keep their meanings. Malformed
-and over-bound variants are reader refusal checks under §11, with the exact refusal report as
-expected output; they are not new manifest rows of a form the staging README does not define.
+and over-bound variants are reader tests under §11, with the exact refusal report as expected
+output, not fixtures, until the staging README defines a refusal row form.
 No manifest or file under `conformance/` is added by this plan. (No vector decides this.)
 
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
@@ -1633,15 +1694,17 @@ the refusal, at the first of these phases that fails, in this order:
    rule, the conditions one `all` or `any` lists, the `unwrap` pointers, the fact and evidence
    targets, the retained responses per `research` source (at most 64), and every research field,
    text, list, observation, citation, capability and read-source maximum in §12 — and the nesting
-   of each acquisition's result, taken wherever measurable before any form: `input-over-bound`;
+   of each acquisition's result, taken wherever measurable before any form: `input-over-bound`.
+   Type-dependent maxima measure each value by its field's declared `type` when that `type`
+   is one of §4.3's six types, and not otherwise;
 4. a dialect document that is an object whose `version` is an integer of a version this document
    defines, `2` or `3`, that the verifier does not read: `version-unread`;
 5. every document's form — the dialect against §§2–8, every rule they give it included, and each of
-   its sources against §4's members and its kind's, whichever its kind; the binding document against
-   §4.4; a profile against §5.1 and the key rule; the acquisitions against §5.2, including every
-   research field entry against its declaration (§4.3) and reconciliation read (§6.4); the
-   preparation's `verifiedAt` against the timestamp form with an instant; the record against its
-   reading below: `input-malformed`;
+   its sources against §4's members and its kind's, whichever its kind, and each reconciliation
+   read against §6.4; the binding document against §4.4; a profile against §5.1 and the key rule;
+   the acquisitions against §5.2, including every research field entry against its declaration
+   (§4.3); the preparation's `verifiedAt` against the timestamp form with an instant; the record
+   against its reading below: `input-malformed`;
 6. a dialect that names a kind the verifier does not read: `kind-unread`.
 
 Some bounds are measured later, because they cannot be measured sooner: an unwrapped string's
@@ -1835,7 +1898,9 @@ cited by URL alone is no retained response; the claim it supports is the answer'
   candidate it names exists; that a page it cites says what it quotes, beyond a receipt for that
   page; that the retained set is every answer and every read the run made; that the caller did not
   choose among runs or responses; that the model made a read retained with the answer; that the
-  caller's asserted membership and order describe the run.
+  caller's asserted membership and order describe the run; that a field's status, value or
+  citation indices are the model's rather than the caller's say; that a cited response supports
+  the value it is cited for; that a `stale` or `not-found` status is right; which model answered.
 
 - **An asserted input: the case, a local file, a parameter no receipt commits.** Establishes: that
   the preparation carried what the operator supplied, faithfully.
@@ -1962,20 +2027,25 @@ Until a specification version publishes the dialect vectors, no claim of this cl
   acquisitions hold the results and the salts, and a salt opens its commitment to whoever holds both.
   A verifier given them learns all of it; the Runner's own guidance stands: "distribute it only to
   intended reviewers".
-- **A research recipe can carry personal data**, in its question, its constraints and the people,
-  roles and contact details its answers name. A dialect published to the Exchange, or to anyone, MUST
-  carry no case, no acquisition and no research record; its recipe's `question` and `constraints`
+- **A research recipe can carry personal data**, in `question`, `constraints`,
+  `fields[].description`, `evidence` and the people, roles and contact details its answers name.
+  A dialect published to the Exchange, or to anyone, MUST carry no case, no acquisition and no
+  research record; its recipe's `question`, `constraints`, `fields[].description` and `evidence`
   carry the criteria and leave every literal that names a person, a customer or an account — a name,
   an email address, a profile URL, an internal identifier — to a case parameter; and the fixtures
   published with it are synthetic. A publisher strips those before publishing, and a reviewer of an
   entry checks that it did.
 - **Resource use.** A verifier reads documents it did not author. §12 bounds the bytes, the sources,
   the retained research responses, the scopes, the clauses, the conditions listed, the unwraps, the
-  targets, the nesting and the number literals, and a reading over a bound is refused, never
-  truncated. A rule's evaluation is bounded by its clauses and the conditions they list. Receipt
-  verification costs at most one Ed25519 check per receipt: at most 16 sources, each with at most
-  64 retained responses when it is `research`, plus the record's own receipt when present, hence
-  at most 1040 receipt signature checks. Both readers measure nesting before they parse a document.
+  targets, the nesting and the number literals. Research has at most 64 declared fields and
+  64 answer entries per source, 64 bytes per field name, 2048 per description, 256 per model name,
+  4096 per evidence instruction, 8192 per text value, 64 list items of 1024 bytes each, 128 ASCII
+  characters per decimal string or decimal range endpoint, 64 conflicting observations per entry
+  and 64 indices per citation array. String byte bounds use UTF-8. A reading over a bound is
+  refused, never truncated. A rule's evaluation is bounded by its clauses and their conditions.
+  Receipt verification costs at most one Ed25519 check per receipt: at most 16 sources, each with
+  at most 64 retained responses when it is `research`, plus the record's own receipt when present.
+  That is at most 1040 receipt signature checks. Both readers measure nesting before parsing.
 - **Confusion.** The two canonical forms differ in three characters and in `-0`, and a verifier that
   mixes them gets another digest: two vectors are there for it. A binding that matches, with no
   record signature checked, establishes nothing, and a verifier's report must not say otherwise.
@@ -2044,8 +2114,8 @@ vector; the counts; and this section's equality with the companion document's §
    2 and the kind `operation`, and refuses every other kind as `kind-unread`. Since the amendment of
    2026-10-15 it reads `operation` of shapes `airbyte`, `mcp` and `http`. Since the eleventh and
    twelfth vectors were staged it reads dialect version 3 as well, the unbound form with its binding
-   document among it, and refuses the four kinds of §4.3, once their forms are checked, as
-   `kind-unread`.
+   document among it, and refuses the four kinds of §4.3 as `kind-unread` after checking their
+   forms; for `research` it still checks the superseded form.
 2. **`tools/dialect-verify-ts/`**, the second reader, written from the companion document's text
    alone, in TypeScript, by a different author, under the protocol the Evidence records, at
    `e2d41c5`. It reads the same versions and kind, and refuses the rest as the first does. The
@@ -2053,6 +2123,8 @@ vector; the counts; and this section's equality with the companion document's §
    nothing to its independence (the Amendment, "The evidence"); and so did the staging of the
    eleventh and twelfth vectors, which extended both readers to version 3, by one author who had
    read both.
+   Both readers hold the superseded research form until the follow-up pull request implements
+   the research-contract amendment; neither checks its new research forms yet.
 3. **The Runner**, the reference preparer, with `verify-run`, a third reader of the same bytes in its
    own repository, which reads every vector through the Runner's own code.
 4. **The Desk's inputs**, a writer: its mapping editor and import recipes write version-2 documents
@@ -2172,7 +2244,17 @@ this text and the vectors — would strengthen that evidence, and none exists.
     `profile-mismatch`. The preparation commits the bound dialect alone; replay checks retained
     bytes under those profiles and never establishes answer correctness. The result contract
     and reconciliation are decisions 1 and 3; the still-unrecorded fixtures are decision 4.
-    RFC 0020's operation demonstration remains due, and its version is not changed here.
+    Workflow version 1 (RFC 0020 §4) admits no stage whose dialect has a research source.
+    RFC 0020 §4's sentences that only `operation` has an unbound form and that portable research
+    binding is deferred, and its question 2, are superseded pending its own revision. The
+    coordinator is to file that revision as an issue. Its operation demonstration remains due,
+    and its version is not changed here.
+16. **Reconciliation's limits.** Partners are research sources only: an `operation` cannot be a
+    fallback partner. The reconciler is always acquired, even when an earlier source found the
+    value; if the reconciler is skipped, its target is unwritten. Independent per-field fallback
+    does not scale beyond a few fields within the 64-clause and 16-source bounds. Whether to
+    admit other source kinds, conditional acquisition or a form that scales to more fields is
+    open.
 
 **Next revision.** The maintainer's decision of 2026-10-14 on issue #141 scoped dialect version 3
 in three parts. The first two are specified by the amendment of 2026-10-15 (above): the record kind
