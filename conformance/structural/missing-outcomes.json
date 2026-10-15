@@ -1,0 +1,22 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.com/judgment-packs/missing-outcomes",
+  "version": "0.1.0",
+  "title": "Missing outcomes",
+  "decision": {
+    "intent": "Determine whether to accept or reject.",
+    "question": "Should this be accepted?"
+  },
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "A structurally minimal rule.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

@@ -136,6 +136,78 @@
       "specSection": "§2"
     },
     {
+      "id": "structural-missing-spec-version",
+      "path": "structural/missing-spec-version.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/specVersion"
+      },
+      "focus": "missing required root member specVersion is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-id",
+      "path": "structural/missing-id.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/id"
+      },
+      "focus": "missing required root member id is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-version",
+      "path": "structural/missing-version.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/version"
+      },
+      "focus": "missing required root member version is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-title",
+      "path": "structural/missing-title.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/title"
+      },
+      "focus": "missing required root member title is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-outcomes",
+      "path": "structural/missing-outcomes.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/outcomes"
+      },
+      "focus": "missing required root member outcomes is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-rules",
+      "path": "structural/missing-rules.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/rules"
+      },
+      "focus": "missing required root member rules is rejected",
+      "specSection": "§4"
+    },
+    {
       "id": "structural-missing-decision",
       "path": "structural/missing-decision.json",
       "layer": "structural",
