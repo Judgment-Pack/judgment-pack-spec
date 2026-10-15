@@ -207,6 +207,15 @@ here.
 
 ### Changed
 
+- [RFC 0020](rfcs/0020-workflow.md) (Draft) and `spec/workflow.md` are amended
+  for issue #174 (2026-10-15, round 2): a stage may bind a `research` source at import under
+  RFC 0018 round 8, naming its generated AI and web profiles and retaining the published
+  dialect's admission at model-served targets. Question 2 is resolved. The two-stage operation
+  construction remains; a research stage may replace one once the Runner prepares the kind
+  (judgment-pack-runner#88) and the dialect's readers read the contract (judgment-pack-spec#176),
+  following RFC 0018 §11's fixture 8 plan. Workflow version 1's document form gains no member,
+  and replay still checks retained bytes without a model or web call. The companion stays equal
+  to the RFC's Specification; no workflow fixture or conformance claim is added.
 - [RFC 0018](rfcs/0018-dialect.md) and [the dialect](spec/dialect.md) are amended for issue #171
   (2026-10-15, round 8): research declares bounded typed fields and records found, not-found,
   stale and conflicting answers with retained-response citations. Published recipes name model

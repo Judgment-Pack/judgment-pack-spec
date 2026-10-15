@@ -4,11 +4,28 @@
 - Type: Standards track (a companion document of the specification, with a reader conformance
   class; fixtures recorded from a two-stage run)
 - Created: 2026-10-15
+- Amended: 2026-10-15 (a research stage)
 - Issue: [#160](https://github.com/Judgment-Pack/judgment-pack-spec/issues/160)
 
 This is an open proposal. Its companion text is present for review, normative for nothing.
 No implementation or workflow fixture exists. The Type names the evidence to obtain, not evidence
 already held. [RFC 0000](0000-rfc-process.md) governs its review and acceptance.
+
+## Amendment of 2026-10-15: a research stage
+
+This amendment records the maintainer's four decisions on
+[issue #174](https://github.com/Judgment-Pack/judgment-pack-spec/issues/174) in this pull request,
+**RFC 0020: a research stage**. Its review is round 2 of this RFC, with the maintainer's
+disposition of each finding to be recorded on the pull request. The status stays Draft.
+
+This is the workflow revision anticipated by RFC 0018's round-8 amendment,
+[the research contract](0018-dialect.md#amendment-of-2026-10-15-the-portable-research-contract).
+Section 4 admits a stage whose dialect binds a `research` source at import, with generated AI
+and web profiles under that contract; question 2 is resolved. The published dialect's own
+admission holds its model-served targets. Section 11 keeps the operation construction and names
+the implementation work needed before a research stage may replace it. Workflow version 1's
+document form is unchanged. Replay checks retained bytes under the profiles then bound and
+never asks a model or the web again.
 
 ## Summary
 
@@ -76,9 +93,7 @@ components, not workflow verification already implemented.
 delivered by judgment-pack-runner #83, merged as `89cf441` and released as the Runner's
 `v0.12.0`: the reference Runner reads a version-3 document and binds an unbound source at import
 through a binding document. This Draft does not claim to have run that implementation. The first
-recording must use that version-3 binder. The dialect's statements that no Runner reads version 3
-predate Runner pull request 83; specification pull request 167 corrects them. This Draft leaves
-`spec/dialect.md` unchanged pending that amendment and the rebase onto it.
+recording must use that version-3 binder.
 
 The Runner's `docs/MAPPING-V2.md` at `89cf441`, "Dialect version 3" and "Release checks, runtime
 and offline verification", documents the binder and run-export form used in §§1 and 7.
@@ -92,9 +107,9 @@ and records the reference Runner's failure-envelope retention limit; question 8 
 **Condition 2's path.** This Draft chooses to demonstrate the chain through `operation` sources.
 Specification §11 gives the concrete two-stage construction, including the generated profiles,
 projections, reviewer selection and empty child. It is a construction to record, not a recorded
-demonstration. It uses the unbound form RFC 0018 §4.4 already defines; portable binding of a
-published `research` recipe to an installation's AI source is deferred. Condition 2's empirical
-demonstration remains due with the acceptance fixture. The published dialects' generated-only
+demonstration. It uses RFC 0018 §4.4's operation binding; that section's round-8 extension also
+defines the research binding admitted by §4 below. Condition 2's empirical demonstration remains
+due with the acceptance fixture. The published dialects' generated-only
 admissions refuse record-class bindings using the existing dialect, without extending it. The
 installation still classifies what each channel actually serves; the verifier cannot detect an
 undeclared model behind a channel the installation calls a record source.
@@ -269,17 +284,22 @@ record. The label declares provenance, not a verified identity, employment or ot
 ### 4. Bindings and influence across stages
 
 Before the root runs, the installation freezes each stage's published dialect, binding document
-when required, resulting bound dialect and release (§7). Unbound sources are expanded exactly as
-the dialect §4.4 specifies. Only `operation` has that unbound form. This version does not extend
-it to `research`. A dialect with no unbound source has a null binding-document digest and an
-unchanged bound digest; a superfluous binding document is refused as in §4.4.
+when required, resulting bound dialect and release (§7). Unbound `operation` and `research`
+sources are bound at import and expanded exactly as RFC 0018 §4.4, extended by its round-8
+amendment, specifies. An operation's expansion names its bound profile; a research source's
+expansion names its bound AI profile and web profiles, all of class `generated`. Its `fields`,
+`model` and `capabilities` remain as published. The dialect's model, capability and class checks
+apply, with incompatible research profiles giving `profile-mismatch` (§§4.4 and 5.1).
+A dialect with no unbound source has a null binding-document digest and an unchanged bound
+digest; a superfluous binding document is refused as in §4.4.
 
 The two-stage construction in §11 takes the `operation` path of issue #160's condition 2.
-Portable binding of a published `research` recipe to an installation's AI source is deferred.
 An operation's profile declares the installation's classification of its channel. A published
 dialect whose source serves a model's answers MUST declare `admits` exactly `["generated"]` at
-every target of that source. A record-class binding then fails the dialect's §8.2 admission at
-preparation; §9's check 1 confirms the bound profile's class against that published admission.
+every target of that source. For an operation, a record-class binding then fails the dialect's
+§8.2 admission at preparation; §9's check 1 confirms the bound profile's class against that
+published admission. The `generated` class and this admission rule apply to outputs from a
+stage's research source as they do to an operation serving a model's answers.
 This checks declared classes, not whether the channel actually serves a model: that still depends
 on the installation's classification. Using the operation kind does not establish authorship.
 
@@ -576,8 +596,15 @@ undeclared model behind a record-class channel (§4; dialect §5.1).
 ### 11. The two-stage fixture to record
 
 Nothing in this section is recorded yet. The first fixture is a run from the Desk's research
-line using two version-3 unbound `operation` dialects, bound by the Runner at import. This is the
-operation path, not an unbound research recipe. The concrete construction to demonstrate is:
+line using two version-3 unbound `operation` dialects, bound by the Runner at import.
+A research stage may replace an operation stage once a Runner prepares the kind
+([Judgment-Pack/judgment-pack-runner#88][research-preparer]) and the dialect's readers read the
+contract ([judgment-pack-spec#176][research-readers]); the research recording is fixture 8,
+`selected-parent-child`, of [RFC 0018 §11](../rfcs/0018-dialect.md#11-verifying-a-preparation)'s
+plan. The concrete operation construction to demonstrate is:
+
+[research-preparer]: https://github.com/Judgment-Pack/judgment-pack-runner/issues/88
+[research-readers]: https://github.com/Judgment-Pack/judgment-pack-spec/issues/176
 
 - `organisations`: root, `once`, pack and published dialect independently pinned; a case `query`
   parameter supplies an operation request. Platform `research-test`, operation `organisations`,
@@ -660,6 +687,10 @@ This layout supplies no evidence of those runs today.
   profile would put it under a reader that does not acquire or iterate records.
 
 ## Compatibility
+
+This amendment leaves workflow version 1's document form unchanged and adds no member. A
+research stage uses the existing stage, binding and record forms, with RFC 0018 round 8's
+research contract; its outputs still come from prepared facts under §3.
 
 Core, the dialect, the graph and the Runner's existing API are unchanged. A standalone pack or
 dialect keeps its existing meaning. This RFC defines documents and records, not new endpoints,
@@ -758,11 +789,12 @@ producing-stage selection rule, with the runtime-form question retained. Accepta
    that the signed preparation and record came from that dialect under that binding (§4).
    Existing preparation binding remains unchanged; reviewer authentication is separate. The record
    has an execution id so a future outer commitment need not introduce a digest cycle.
-2. **Published research binding, deferred through operations.** How does a published `research`
-   recipe bind to an installation's AI source? This RFC chooses condition 2's operation path and
-   defines the construction to record in §11; it does not settle research binding or extend its
-   unbound form. The actual two-stage operation demonstration is still missing. What subsequent
-   dialect revision will give research sources a portable binding contract remains open.
+2. **Published research binding.** How does a published `research` recipe bind to an
+   installation's AI source?
+   *Resolved 2026-10-15:* RFC 0018's round-8 amendment defines the research binding in §4.4:
+   the binding document assigns AI and web profiles, all of class `generated`, against the
+   published model and capabilities. Section 4 admits that binding for a workflow stage, as
+   issue #174 requires. The two-stage operation demonstration remains due under §11.
 3. **Selection beyond one output per evaluated case.** Version 1 permits a closed disposition
    predicate only for `one`. A many-output case judges the collection; per-candidate decisions
    need separately prepared cases. Whether to specify a richer rule or a stage for such decisions

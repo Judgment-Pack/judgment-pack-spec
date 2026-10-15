@@ -152,17 +152,22 @@ record. The label declares provenance, not a verified identity, employment or ot
 ## 4. Bindings and influence across stages
 
 Before the root runs, the installation freezes each stage's published dialect, binding document
-when required, resulting bound dialect and release (§7). Unbound sources are expanded exactly as
-the dialect §4.4 specifies. Only `operation` has that unbound form. This version does not extend
-it to `research`. A dialect with no unbound source has a null binding-document digest and an
-unchanged bound digest; a superfluous binding document is refused as in §4.4.
+when required, resulting bound dialect and release (§7). Unbound `operation` and `research`
+sources are bound at import and expanded exactly as RFC 0018 §4.4, extended by its round-8
+amendment, specifies. An operation's expansion names its bound profile; a research source's
+expansion names its bound AI profile and web profiles, all of class `generated`. Its `fields`,
+`model` and `capabilities` remain as published. The dialect's model, capability and class checks
+apply, with incompatible research profiles giving `profile-mismatch` (§§4.4 and 5.1).
+A dialect with no unbound source has a null binding-document digest and an unchanged bound
+digest; a superfluous binding document is refused as in §4.4.
 
 The two-stage construction in §11 takes the `operation` path of issue #160's condition 2.
-Portable binding of a published `research` recipe to an installation's AI source is deferred.
 An operation's profile declares the installation's classification of its channel. A published
 dialect whose source serves a model's answers MUST declare `admits` exactly `["generated"]` at
-every target of that source. A record-class binding then fails the dialect's §8.2 admission at
-preparation; §9's check 1 confirms the bound profile's class against that published admission.
+every target of that source. For an operation, a record-class binding then fails the dialect's
+§8.2 admission at preparation; §9's check 1 confirms the bound profile's class against that
+published admission. The `generated` class and this admission rule apply to outputs from a
+stage's research source as they do to an operation serving a model's answers.
 This checks declared classes, not whether the channel actually serves a model: that still depends
 on the installation's classification. Using the operation kind does not establish authorship.
 
@@ -459,8 +464,15 @@ undeclared model behind a record-class channel (§4; dialect §5.1).
 ## 11. The two-stage fixture to record
 
 Nothing in this section is recorded yet. The first fixture is a run from the Desk's research
-line using two version-3 unbound `operation` dialects, bound by the Runner at import. This is the
-operation path, not an unbound research recipe. The concrete construction to demonstrate is:
+line using two version-3 unbound `operation` dialects, bound by the Runner at import.
+A research stage may replace an operation stage once a Runner prepares the kind
+([Judgment-Pack/judgment-pack-runner#88][research-preparer]) and the dialect's readers read the
+contract ([judgment-pack-spec#176][research-readers]); the research recording is fixture 8,
+`selected-parent-child`, of [RFC 0018 §11](../rfcs/0018-dialect.md#11-verifying-a-preparation)'s
+plan. The concrete operation construction to demonstrate is:
+
+[research-preparer]: https://github.com/Judgment-Pack/judgment-pack-runner/issues/88
+[research-readers]: https://github.com/Judgment-Pack/judgment-pack-spec/issues/176
 
 - `organisations`: root, `once`, pack and published dialect independently pinned; a case `query`
   parameter supplies an operation request. Platform `research-test`, operation `organisations`,
