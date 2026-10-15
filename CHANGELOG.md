@@ -212,15 +212,26 @@ here.
   research stage once a Runner pins its release form and encoding (judgment-pack-runner#88),
   with its recording beside the operation demonstration. Section 4.3 now records that both
   repository readers read `research` since #181; no preparer writes any of the four proposed
-  kinds, no vector holds one, and no reader reads `http`, `sql` or `web`. Reconciliation
-  conditions name only a field entry, its `status`, and its `value` or `values`; another pointer
-  is `input-malformed`. Acquisitions carry exactly the responses the research record names, by
-  form, with missing result bytes still `acquisition-missing`; `acquisition-unexpected` remains
-  for unexpected source members. Receipt form precedes time and session checks: malformed time
+  kinds, and no vector holds one. Neither repository reader reads `http`, `sql` or `web`: each
+  holds one to its form and refuses it as `kind-unread`; the reference Runner refuses all four
+  by name. Reconciliation conditions name only a field entry, its `status`, its `value` or
+  `values`, or descendants of `/value` or `/values`, for listed sources and their declared fields
+  or this source's declared fields under `/current`; another pointer is `input-malformed`.
+  This matches both readers' existing answers. Acquisitions carry exactly the responses the
+  research record names, by form, with missing result bytes still `acquisition-missing`;
+  `acquisition-unexpected` remains for unexpected source members. Receipt form precedes time
+  and session checks: malformed time
   or session members are `acquisition-invalid`, `acquisition-stale` names only a present instant
   outside the window, and `acquisition-sessions` only a well-formed set that fails the session
-  rule. The Evidence records the reader corrections that follow separately. No reader or vector
-  changes, and no research fixture or conformance claim is added.
+  rule. `sessionId` is a string, without the gateway's token restriction. The three changed
+  answers in versions 2 and 3 are a non-string time, a string with no instant, and a malformed
+  `callIndex` or `sessionId`, all now `acquisition-invalid`; no vector's answer changes.
+  The receipt positions carry the no-vector markers. The Evidence limits the readers' follow-up
+  to those receipt answers and the TypeScript README's quotation of the removed sentence; the
+  condition and response decisions need no reader change. The amendment links pull request 183,
+  question 14
+  uses the preparer link, and the Amended line follows the earlier entries' form. No reader or
+  vector changes here, and no research fixture or conformance claim is added.
 - Both readers, `tools/dialect_verify.py` and `tools/dialect-verify-ts/`, now read the research
   contract of RFC 0018's round 8 (issue #176) as [`spec/dialect.md`](spec/dialect.md) §§4.3, 4.4,
   5.1, 5.2, 6.4, 9, 11 and 12 define it: a `research` source's requested `fields` and

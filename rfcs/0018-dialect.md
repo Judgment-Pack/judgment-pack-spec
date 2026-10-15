@@ -8,7 +8,7 @@
 - Amended: 2026-10-15 (every gateway source shape, in version 2; the unbound source form, in
   version 3; research replay; version 3 as the reference Runner reads it, its two vectors staged;
   the research result contract, binding, reconciliation and fixture lists, issue #171;
-  research-stage admission and reader rules, issues #179 and #182, round 9)
+  research-stage admission and reader rules, issues #179 and #182)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -374,8 +374,9 @@ contract and fixture plans only.
 
 This amendment records the maintainer's decisions on
 [issue #179](https://github.com/Judgment-Pack/judgment-pack-spec/issues/179) and
-[issue #182](https://github.com/Judgment-Pack/judgment-pack-spec/issues/182), on the pull request
-that makes it, **RFC 0018: research stages and reader rules**. Its review is round 9 of this RFC;
+[issue #182](https://github.com/Judgment-Pack/judgment-pack-spec/issues/182), on
+[pull request 183](https://github.com/Judgment-Pack/judgment-pack-spec/pull/183),
+**RFC 0018: research stages and reader rules**. Its review is round 9 of this RFC;
 the cross-vendor adversarial review follows, run by the coordinator, with the maintainer's
 disposition of each finding on that pull request, to be recorded under
 [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
@@ -390,12 +391,16 @@ research recording is beside the two-stage operation demonstration, not in place
 Issue #182 item 1 corrects §4.3's account of the four proposed kinds: both repository readers
 read `research` since
 [judgment-pack-spec#181](https://github.com/Judgment-Pack/judgment-pack-spec/pull/181); no
-preparer writes any of the four, no vector holds one, and no reader reads `http`, `sql` or `web`.
+preparer writes any of the four, and no vector holds one. Neither repository reader reads `http`,
+`sql` or `web`: each holds one to its form and refuses it as `kind-unread`; the reference Runner
+refuses all four by name.
 
 Issue #182 item 2 closes §6.4's condition pointers to a named field entry, its `status`, and its
-`value` or `values`. Any other condition pointer is `input-malformed`. The Evidence's recorded
-reading becomes the rule and is removed from that list. Claim `from` pointers keep their own
-closed set and guards; this decision widens neither.
+`value` or `values`, including descendants of `/value` or `/values`. The source must be listed
+in the read's `sources`, and the field declared by that source; for `/current`, the field must
+be declared by this source. Any other condition pointer is `input-malformed`. The Evidence's
+recorded reading becomes the rule and is removed from that list; neither reader's answer changes.
+Claim `from` pointers keep their own closed set and guards; this decision widens neither.
 
 Issue #182 item 3 removes the finding for a retained response that `R` does not name: the
 acquisitions carry exactly the responses `R` names, by form (§4.3, §5.2). A named response whose
@@ -407,13 +412,15 @@ Issue #182 item 4 decides receipt form before time and session checks (§5.2, §
 or `observedAt` that is not a string with an instant, or a malformed `callIndex` or `sessionId`,
 is `acquisition-invalid`. `acquisition-stale` names only a present instant outside the window;
 `acquisition-sessions` names only a well-formed session set that fails §5.2's session rule.
+`sessionId` is a string, not held to the gateway's token form, as both readers already read it.
 The rule holds operation receipts, every retained research response and the record's own
 receipt when present. No vector decides these receipt cases.
 
 **What changes for a reader.** The closed condition list decides a choice both readers had
 already made; removing the impossible response case adds no acquisition form. The receipt rule
-settles a disagreement and changes findings where the time or session check previously read a
-malformed member. The Evidence records the reader corrections that follow separately. No reader
+changes three accepted answers in versions 2 and 3: a time that is not a string, a string with no
+instant, and a malformed `callIndex` or `sessionId` now all give `acquisition-invalid`; no vector's
+answer changes. The Evidence records the reader corrections that follow separately. No reader
 is changed here, no fixture is recorded, and no vector or conformance claim is added. Rounds 6–8's
 replay, binding and preparation forms remain: verification calls neither a model nor the web,
 and a preparation commits the bound dialect alone (§4.4, §13).
@@ -583,16 +590,19 @@ with no receipt at all is still listed in `unsignedFreshness`, its `receipts` em
 declared twice is `input-malformed` once forms are checked, but before that phase 3 measures its
 answers by the first declaration of the name whose `type` is one of the six.
 
-Round 9, issue #182 item 2, makes the reconciliation condition list the rule (§6.4), so it is
-no longer a reading left to the readers. Item 3 removes a response case the acquisitions cannot
-carry. The updates for both decisions follow in a separate readers' pull request. Item 4 settles
-a disagreement no vector holds, also present on operation receipts: a non-string `servedAt` or
-`observedAt` gives `acquisition-invalid` in the first reader and `acquisition-stale` in the second;
+Round 9, issue #182 item 2, makes the reconciliation condition list the rule (§6.4), including
+descendants of `/value` and `/values` and the restrictions on listed sources and declared fields,
+so it is no longer a reading left to the readers; neither reader's answer changes. Item 3 removes
+a response case the acquisitions cannot carry; neither reader implements that case. The separate
+readers' follow-up updates only the receipt rule in both readers for the three answers below
+and the TypeScript README's quotation of the removed "Pointers are …" sentence. Amendment
+decisions 3 and 4 require no reader change. Issue #182 item 4 settles a disagreement no vector
+holds, also present on operation receipts: a non-string `servedAt` or `observedAt` gives
+`acquisition-invalid` in the first reader and `acquisition-stale` in the second;
 a malformed `callIndex` or `sessionId` gives `acquisition-invalid` in the first and
-`acquisition-sessions` in the second. The second reader's correction follows in its own pull
-request. Both readers also currently give `acquisition-stale` for a string with no instant; the
-separate correction must apply round 9's present-instant rule to both. None of these corrections
-is claimed here, and none supplies a vector.
+`acquisition-sessions` in the second. Both readers also currently give `acquisition-stale` for a
+string with no instant. The follow-up holds all three cases to `acquisition-invalid` in versions
+2 and 3. None of these corrections is claimed here, and none supplies a vector.
 
 One vector is answered otherwise than `verify-run` answers it, by design:
 `disposition-differs-from-audit` alters the Runner's export, not the preparation or the record
@@ -862,11 +872,13 @@ admits it to a claim states the snapshot's form first.
 Version 3 is version 2 with four kinds more, and with the unbound source form (§4.4); a document
 of version 3 has `version` `3`, and so has its preparation (§9.1). The reference Runner reads
 version 3 since its pull request 83 (`v0.12.0`), and prepares its `operation` and `selected-file` as
-it prepares version 2's; it refuses each of the four kinds below by name. Those four are proposed:
-no preparer writes any of them, and no vector holds one. Both repository readers read `research`
-since judgment-pack-spec#181; no reader reads `http`, `sql` or `web`. The forms below are what a
-writer, such as the Desk's inputs or an entry of the Exchange, needs to declare one; the first
-implementation's vectors will fix each request's exact bytes, and may change them. Since version
+it prepares version 2's. Those four are proposed: no preparer writes any of them, and no vector
+holds one. Both repository readers read `research`
+since judgment-pack-spec#181; neither repository reader reads `http`, `sql` or `web`: each holds
+one to its form and refuses it as `kind-unread`; the reference Runner refuses all four by name.
+The forms below are what a writer, such as the Desk's inputs or an entry of the Exchange, needs
+to declare one; the first implementation's vectors will fix each request's exact bytes, and may
+change them. Since version
 2's `operation` reads a source of each adapter shape (§4.1), the `http` and `sql` kinds describe how
 a request is formed — a body and headers, a statement and its bindings — and not how a configured
 source is read. A source of each of these kinds is an object of exactly the members of §4 —
@@ -1185,11 +1197,13 @@ An acquisition is held to its source and its profile, and any of these checks th
 `acquisition-invalid`:
 
 1. `E.receiptVersion` is `"3"` and `E.kind` is `"acquisition"`, and each member checks 1–5 or the
-   time and session rules below read is of the form gateway §1.2a gives it. In particular,
-   `E.servedAt` and `E.acquisition.observedAt` are strings with instants (§1), `E.callIndex` is
-   an integer (§1) at least zero, and `E.sessionId` is a string. A member of another type or form
-   makes the receipt malformed, `acquisition-invalid`; these form checks precede the time and
-   session rules. `E.acquisition` has no member `pageItems`. A receipt with
+   time and session rules below read, except `E.sessionId`, is of the form gateway §1.2a gives it,
+   and, beyond gateway §1.2a's forms, `E.servedAt` and `E.acquisition.observedAt` have instants
+   (§1).
+   `E.callIndex` is an integer (§1) at least zero. `E.sessionId` is a string; this document does
+   not hold it to gateway §3a's token form. A member of another type or form makes the receipt
+   malformed, `acquisition-invalid`; these form checks precede the time and session rules.
+   `E.acquisition` has no member `pageItems`. A receipt with
    `pageItems` attests a page, which no preparation reads, whatever the source's shape, as the
    Runner reads none (Runner, "Deferred scope"). (No vector decides this.)
 2. `E.keyId` is the key identifier of the profile's `publicKey`, and `E.signature`, 128 hexadecimal
@@ -1215,7 +1229,7 @@ Then its times, against the preparation's instant, `verifiedAt`: the instants of
 `E.acquisition.observedAt` and `E.servedAt` MUST each be no more than the source's `maxAge`
 seconds before `verifiedAt` and no more than 30 seconds after it; otherwise `acquisition-stale`.
 That finding names a present instant outside this window only; a time with no instant is
-`acquisition-invalid`.
+`acquisition-invalid`. (No vector decides this.)
 For research, this applies to every retained response and to the record's own receipt when
 present, each using the research source's `maxAge`.
 
@@ -1227,7 +1241,8 @@ are in neither form is `acquisition-sessions`. Within a `research` source, every
 response's receipt participates, in `R.responses` order, followed by the record's own receipt when
 present. A record with no receipt adds none of its own. `acquisition-sessions` names only a
 well-formed session set that fails this rule; a malformed `callIndex` or `sessionId` is
-`acquisition-invalid`. The form is read from the receipts and from nothing else.
+`acquisition-invalid`. (No vector decides this.)
+The form is read from the receipts and from nothing else.
 
 An acquisition's **citation** is `{"callIndex", "sessionId", "signature"}`, those three members of
 its receipt.
@@ -1365,7 +1380,10 @@ otherwise; references do not duplicate input bytes in the combined document-size
 
 In a condition, the pointer list is closed: `/sources/<source>/fields/<field>` or
 `/current/fields/<field>`, and either pointer followed by `/status`, `/value` or `/values`,
-each name escaped as one token. Any other pointer in a condition is `input-malformed`.
+or a descendant of either pointer's `/value` or `/values`, each name escaped as one token.
+Here `<source>` is a name the read's `sources` lists and `<field>` a field that source declares;
+for `/current`, it is a field this source declares. An unlisted source, an undeclared field or
+any other pointer in a condition is `input-malformed`.
 Conditions and claim forms keep §6.3's semantics; the first matching clause is the declared
 precedence.
 The rule MUST explicitly test a `found` status before selecting a value and name in its clauses
@@ -1817,11 +1835,12 @@ when it is formed, before its rule runs, with the same refusal.
    each retained response in `R.responses` order, completing one response's checks before the next;
    then check the record's own receipt when present, and apply the source's read to `R`. Each
    receipt is first held to §5.2's form rules: `servedAt` and `acquisition.observedAt` are strings
-   with instants, `callIndex` is an integer at least zero, and `sessionId` is a string; otherwise
-   `acquisition-invalid`, before the time and session rules. `acquisition-stale` names only a
-   present instant outside the window; `acquisition-sessions` names only a well-formed session
-   set that fails §5.2's session rule. After the last source, `acquisition-unexpected` for a member
-   of the acquisitions that names no source;
+   with instants, `callIndex` is an integer at least zero, and `sessionId` is a string, not held
+   to gateway §3a's token form; otherwise `acquisition-invalid`, before the time and session rules.
+   `acquisition-stale` names only a present instant outside the window. (No vector decides this.)
+   `acquisition-sessions` names only a well-formed session set that fails §5.2's session rule.
+   (No vector decides this.) After the last source, `acquisition-unexpected` for a member of the
+   acquisitions that names no source;
 4. `admission-refused` (§8.2);
 5. **`preparation-differs`**: the recomputed preparation's canonical bytes (§9.5) are not the given
    preparation's, written in that form; a given preparation that cannot be written in that form
@@ -2334,7 +2353,7 @@ this text and the vectors — would strengthen that evidence, and none exists.
     adds the GTM company/person and work-item triage fixture lists, including typed results,
     bindings, fallback and selected parent/child records, with none recorded (§11). Round 9 aligns
     fixture 8 with RFC 0020's round 2: its additional research recording waits for a Runner to pin
-    the research stage's release form and encoding (judgment-pack-runner#88).
+    the research stage's release form and encoding ([judgment-pack-runner#88][research-preparer]).
 15. **Binding a published research recipe.** Which installation profiles can serve its named
     model and its AI and web capabilities, without publishing local identifiers, was left open
     by §4.3 and by issue #160's decision on the workflow prerequisite.
