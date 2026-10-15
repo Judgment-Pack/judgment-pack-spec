@@ -5,6 +5,7 @@ import hashlib
 import json
 import json.scanner
 import re
+import tempfile
 import unittest
 from dataclasses import dataclass
 from json.decoder import WHITESPACE, WHITESPACE_STR, JSONDecodeError, scanstring
@@ -65,6 +66,11 @@ class DuplicateMemberError(ValueError):
 class UnpairedSurrogateError(ValueError):
     def __init__(self, message: str = "unpaired surrogate escape in JSON string"):
         super().__init__(message)
+
+
+class NonJSONConstantError(ValueError):
+    def __init__(self, token: str):
+        super().__init__(f"non-JSON numeric constant: {token}")
 
 
 @dataclass(frozen=True)
@@ -236,7 +242,10 @@ def strict_json_loads(text: str) -> Any:
             end = _w(s, end).end()
         return values, end
 
-    decoder = json.JSONDecoder()
+    def reject_constant(token: str) -> Any:
+        raise NonJSONConstantError(token)
+
+    decoder = json.JSONDecoder(parse_constant=reject_constant)
     decoder.parse_object = custom_parse_object
     decoder.parse_array = custom_parse_array
     decoder.scan_once = json.scanner.py_make_scanner(decoder)
@@ -590,7 +599,7 @@ def evaluate_case(
         return "invalid", [
             Diagnostic("JPS-CARRIER-DUPLICATE-MEMBER", error.path, str(error))
         ]
-    except (UnicodeError, json.JSONDecodeError, UnpairedSurrogateError) as error:
+    except (UnicodeError, json.JSONDecodeError, UnpairedSurrogateError, NonJSONConstantError) as error:
         return "invalid", [Diagnostic("JPS-CARRIER-INVALID-JSON", "", str(error))]
 
     diagnostics = structural_diagnostics(validator, value)
@@ -823,6 +832,37 @@ class RepositoryConformanceTests(unittest.TestCase):
                 else:
                     with self.assertRaises(UnpairedSurrogateError):
                         strict_json_loads(text)
+
+    def test_strict_json_loads_rejects_non_json_constants(self) -> None:
+        for token in ("NaN", "Infinity", "-Infinity"):
+            for text in (token, '{"value": ' + token + '}', '[' + token + ']'):
+                with self.subTest(text=text):
+                    with self.assertRaises(NonJSONConstantError):
+                        strict_json_loads(text)
+
+        self.assertEqual("NaN", strict_json_loads('"NaN"'))
+        self.assertEqual(-1500.0, strict_json_loads("-1.5e3"))
+
+    def test_evaluate_case_reports_non_json_constants_as_carrier_failures(self) -> None:
+        text = (CONFORMANCE / "valid" / "minimal-expense-approval.json").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(1, text.count('"value": "employee-expense"'))
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "non-json-constant.json"
+            for token in ("NaN", "Infinity", "-Infinity"):
+                for document in (
+                    text.replace('"value": "employee-expense"', '"value": ' + token),
+                    token,
+                ):
+                    with self.subTest(token=token, root=document == token):
+                        path.write_text(document, encoding="utf-8")
+                        result, diagnostics = evaluate_case(path, self.validator, [])
+                        self.assertEqual("invalid", result)
+                        self.assertEqual(
+                            [("JPS-CARRIER-INVALID-JSON", "")],
+                            [(item.code, item.path) for item in diagnostics],
+                        )
 
     def test_schemas_are_valid_draft_2020_12(self) -> None:
         Draft202012Validator.check_schema(self.schema)
