@@ -29,7 +29,12 @@ It specifies version 2 of the dialect document and of the preparation, which are
 mapping v2 and its preparation, restated. Since the amendment of 2026-10-15 (RFC 0018, its
 Amendment), version 2's `operation` reads a gateway source of shape `airbyte`, `mcp` or `http`, as
 the Runner's mapping v2 does since its pull request 80: the vectors hold `mcp`, in nine, and
-`http`, in the tenth, and `airbyte` is defined and not claimable (§4.1). It proposes version 3 of the
+`http`, in the tenth, and `airbyte` is defined and not claimable (§4.1). That amendment is a
+compatible extension of the record kind to every adapter shape, and one restriction: a receipt that
+attests a page (`pageItems`) is refused, whatever the shape (§5.2). The restriction changes one
+answer the accepted text gave: a signed acquisition of shape `mcp` whose receipt carried
+`pageItems` was read, and is `acquisition-invalid` now. The Runner has never prepared a paged
+acquisition, and no preparation over one exists. It proposes version 3 of the
 dialect document, which adds four source kinds (§4.3) and the unbound source form (§4.4), defined
 and not claimable: no preparer writes it and no vector holds it; and version 1 of the output side
 (§10). It is published beside the released Core `0.2.0-draft` and carries no `specVersion` of its
@@ -398,8 +403,12 @@ document it was recorded under, and verifies against the bound dialect.
 
 **What it establishes.** Nothing beyond what an `operation` that names its profile establishes
 (§13). The binding document is the installation's statement of which profile each source was bound
-to; a preparation commits it only through the bound dialect's digest, and a record that binds the
-preparation commits that under the record's signature, the installation's own key. No preparer
+to. A preparation commits the bound dialect, by its digest, and with it the profile each source was
+bound to; it commits neither the binding document's digest, nor the published dialect's digest, nor
+the catalog names the binding removes (`platform`, `operation`, `shape` and `record`). Two published
+dialects that differ only in those names, bound to the same profiles, have one bound dialect and one
+digest. A record that binds the preparation commits what the preparation commits, under the
+record's signature, the installation's own key. No preparer
 writes version 3, the Runner included, so no Runner records a bound dialect's digest yet, and no
 vector holds the form: it is defined, and not claimable. (No vector decides any rule of this
 section.)
@@ -974,7 +983,7 @@ is the operator's say, and recomputation shows only that it was carried faithful
 | An acquisition of class `record`, verified under a trusted profile | byte lineage: the holder of the gateway key the profile pins signed a receipt that names these bytes by their digest, this request by its commitment, this adapter, shape and endpoint, at these times; what more the receipt says is the gateway's (gateway §1.2a, §5) | that the system's record is true, current or complete; that the adapter reported its acquisition truly; that the session is sealed or complete, or that the caller did not choose among answers; anything once the gateway's key is copied |
 | An acquisition of class `generated`, a research record above all | the least: that this request — a recipe, its question and the model as named — was asked of the gateway source the profile names, and that these bytes came back under that receipt | that the answer is right, complete or current, or the model's own; that a candidate it names exists; that a page it cites says what it quotes, beyond a receipt for that page |
 | An asserted input: the case, a local file, a parameter no receipt commits | that the preparation carried what the operator supplied, faithfully | anything about it: an asserted input rewritten with its preparation recomputed verifies as the original did; `unsignedParameters` names the parameters a rule read on the operator's say |
-| A binding document (§4.4), and the bound dialect it yields | that the bound dialect is the published one with each unbound source bound to the profile the binding document names | that that profile is the one the publisher meant, or reads the system the publisher's fixtures were recorded from: the binding document is the installation's statement, and a record commits it only through the bound dialect's digest |
+| A binding document (§4.4), and the bound dialect it yields | that the bound dialect is the published one with each unbound source bound to the profile the binding document names | that that profile is the one the publisher meant, or reads the system the publisher's fixtures were recorded from: the binding document is the installation's statement; a record commits the bound dialect, its profile assignments included, and neither the binding document's digest, nor the published dialect's, nor the catalog names the binding removes |
 | `verifiedAt` | that every freshness check holds against it | that it was the instant of admission: without a binding no signature covers it, and a preparation recomputed at another instant verifies as the original does |
 | A binding that matches, in a record whose signature verifies (a check this document does not make) | that the preparation, its instant included, is the one committed in the record when its key's holder signed it | anything against the operator, who holds the key and the clock and can recompute, write and sign again, which only a checkpoint held independently from before the change shows; when anything was prepared: a binding carries no time |
 | A binding that matches, with no signature checked | nothing, by itself | — |

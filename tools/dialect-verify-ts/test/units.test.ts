@@ -586,6 +586,15 @@ test("§5.2: a receipt that attests a page is not read, whatever the shape", () 
   assert.equal(verdict(alteredAndSigned(valid, { receipt: paged })), "finding:acquisition-invalid");
 });
 
+test("§5.2: a paged mcp receipt is refused, the amendment's one restriction (review round 5, finding 1)", () => {
+  // Read under the accepted text, refused under the amendment: the one answer it changes for an input that was
+  // read before. The valid vector, signed again: without the page every check passes, with it the acquisition
+  // is refused.
+  assert.equal(verdict(alteredAndSigned(valid, {})), "finding:preparation-differs");
+  const paged = (r: JObj) => (r.m.get("acquisition") as JObj).m.set("pageItems", arr([r.m.get("resultDigest")!]));
+  assert.equal(verdict(alteredAndSigned(valid, { receipt: paged })), "finding:acquisition-invalid");
+});
+
 test("§4.1: a stream read under a profile of shape airbyte is read as its shape gives it", () => {
   const asAirbyte = (stream: string, receipt?: (r: JObj) => void): Alteration => ({
     profile: shapeOf("airbyte"),

@@ -176,9 +176,11 @@ here.
   request is a tool call for `mcp`, and for `http` and `airbyte` the request the gateway source of
   that shape takes, held to being an object, to the template rules and to the receipt's commitment,
   not to a set of members (`airbyte` defined and not claimable); and a receipt that attests a page
-  is refused whatever the shape. This changes accepted text as a compatible
-  extension: every version-2 dialect that was well-formed stays so, and the nine vectors keep their
-  answers. Version 3 gains the unbound source form, an `operation` that names the catalog platform
+  is refused whatever the shape. This changes accepted text in two ways: a compatible extension of
+  the record kind to every adapter shape, under which every version-2 dialect that was well-formed
+  stays so and the nine vectors keep their answers; and one restriction, the refusal of a paged
+  acquisition, which changes one answer the accepted text gave: a signed `mcp` acquisition whose
+  receipt carried `pageItems` was read and is refused now. The Runner has never prepared one. Version 3 gains the unbound source form, an `operation` that names the catalog platform
   and operation it is read through in place of a profile, with a binding document and the bound
   dialect it yields; it is defined and not claimable, since no Runner reads version 3. A verifier
   that does not read a dialect's version refuses it, `version-unread`. The Runner's tenth

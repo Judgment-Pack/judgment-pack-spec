@@ -107,7 +107,12 @@
 This amendment changes the accepted text in place, as the gateway amends its records: the
 Specification below, and the companion document with it, say what it decided, and the sections
 after the Specification say what changed. The status stays Accepted. The maintainer's decisions
-are recorded on the pull request that makes it.
+are recorded on the pull request that makes it,
+[pull request 151](https://github.com/Judgment-Pack/judgment-pack-spec/pull/151), and its review is
+round 5 of this RFC, recorded under
+[`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
+`0018-round-5.md` with the maintainer's disposition of each finding; the two findings accepted there
+are applied below.
 
 **Where it comes from.** The maintainer's decision of 2026-10-14 on issue
 [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141) scoped dialect version 3
@@ -138,10 +143,10 @@ has and to the receipt's commitment to it, and not to a set of members; under `a
 claimable: that adapter answers every read with a page, a paged acquisition is refused, and so no
 `airbyte` vector exists. The maintainer decided the widening of `http` and `airbyte` on 2026-10-15,
 before this amendment's review round, in place of a fixed `{method, path, query}` form that
-admitted neither `adapter-http`'s `body` nor the gateway's connections (Unresolved question 12). The derivations, the calculated values,
-the lineage, the canonical form and the digest are those of every shape: the Runner's pull request
-80 showed that a preparation's bytes do not depend on its source's shape, and the tenth vector's
-preparation has the form of the other nine.
+admitted neither `adapter-http`'s `body` nor the gateway's connections (Unresolved question 12).
+The derivations, the calculated values, the lineage, the canonical form and the digest are those of
+every shape: the Runner's pull request 80 showed that a preparation's bytes do not depend on its
+source's shape, and the tenth vector's preparation has the form of the other nine.
 
 **The second decision: the unbound source form, in version 3.** A dialect may be published
 unbound: its `operation` names, in place of a profile's id and digest, the catalog platform and
@@ -152,18 +157,24 @@ by its name to a profile of the installation's gateway. The bound dialect is a d
 entry's `dialect.digest` (RFC 0019 §3), is the unbound one's. A reader given an unbound dialect and
 its binding document verifies the bound form, and a fixture of an unbound dialect carries the
 binding document it was recorded under. What the form establishes is nothing beyond version 2's:
-the binding document is the installation's statement of which profile each source was bound to,
-committed under the installation's own key when a record binds the preparation. Version 3 keeps the
+the binding document is the installation's statement of which profile each source was bound to. A
+preparation commits the bound dialect, its profile assignments included, under the installation's
+own key when a record binds the preparation; it commits neither the binding document's digest, nor
+the published dialect's digest, nor the catalog names the binding removes, so a record cannot name
+the published identity (Unresolved question 13; review round 5, finding 2). Version 3 keeps the
 four kinds of §4.3. No Runner reads version 3, so none records a bound dialect's digest yet, and no
 vector holds the form: it is defined, and not claimable, as the staging README says.
 
-**What changes for a reader of version 2.** This changes accepted text of version 2, as a
-compatible extension. Every version-2 dialect that was well-formed stays well-formed, and every
-input that was read is read with the same answer but one: a receipt that attests a page
-(`pageItems`), which the text did not refuse and the Runner always has, is `acquisition-invalid`
-now, whatever its shape (§5.2); no vector holds one. The nine vectors are unchanged, with their
-answers. What is new is read only where it was refused before: an `operation` under a profile of
-shape `airbyte` or `http`, with a request of that shape's form. A dialect of version 3, which a
+**What changes for a reader of version 2.** This changes accepted text of version 2 in two
+ways: a compatible extension of the record kind to every adapter shape, and one restriction (review
+round 5, finding 1). The extension: every version-2 dialect that was well-formed stays well-formed,
+the nine vectors are unchanged with their answers, and what is new is read only where it was
+refused before, an `operation` under a profile of shape `airbyte` or `http`. The restriction: a
+receipt that attests a page (`E.acquisition.pageItems`), of any shape, is `acquisition-invalid`
+(§5.2). It changes one answer the accepted text gave, and only one: a signed acquisition of shape
+`mcp` whose receipt carried `pageItems` was a reading, and is refused now. The rule stays, because
+the reference Runner has never prepared a paged acquisition, so no preparation over one exists to
+verify, and no vector holds one. A dialect of version 3, which a
 verifier refused as `input-malformed`, is refused by one that does not read version 3 as
 `version-unread` (§11). And one rule is narrower than the Runner's: the Runner holds a request under
 a profile of shape `http` to the template rules alone, and this text holds a `query` under a profile
@@ -181,9 +192,10 @@ later.
 
 **What it leaves open.** Unresolved questions 1 and 2 are updated, and 10 to 12 added: a vector of
 shape `airbyte`; a vector of the unbound form, which needs a Runner that reads version 3 and binds a
-dialect at import; and the requests of `http`-shaped sources that are not `adapter-http`'s, resolved
-by the maintainer's decision of 2026-10-15. The `research`, `http`, `sql` and `web` kinds still have
-no preparer.
+dialect at import; the requests of `http`-shaped sources that are not `adapter-http`'s, resolved
+by the maintainer's decision of 2026-10-15; and, added with 13 after review round 5, whether the
+published dialect's and the binding document's digests should be carried in the committed form.
+The `research`, `http`, `sql` and `web` kinds still have no preparer.
 
 ## Summary
 
@@ -663,8 +675,12 @@ document it was recorded under, and verifies against the bound dialect.
 
 **What it establishes.** Nothing beyond what an `operation` that names its profile establishes
 (§13). The binding document is the installation's statement of which profile each source was bound
-to; a preparation commits it only through the bound dialect's digest, and a record that binds the
-preparation commits that under the record's signature, the installation's own key. No preparer
+to. A preparation commits the bound dialect, by its digest, and with it the profile each source was
+bound to; it commits neither the binding document's digest, nor the published dialect's digest, nor
+the catalog names the binding removes (`platform`, `operation`, `shape` and `record`). Two published
+dialects that differ only in those names, bound to the same profiles, have one bound dialect and one
+digest. A record that binds the preparation commits what the preparation commits, under the
+record's signature, the installation's own key. No preparer
 writes version 3, the Runner included, so no Runner records a bound dialect's digest yet, and no
 vector holds the form: it is defined, and not claimable. (No vector decides any rule of this
 section.)
@@ -1239,7 +1255,7 @@ is the operator's say, and recomputation shows only that it was carried faithful
 | An acquisition of class `record`, verified under a trusted profile | byte lineage: the holder of the gateway key the profile pins signed a receipt that names these bytes by their digest, this request by its commitment, this adapter, shape and endpoint, at these times; what more the receipt says is the gateway's (gateway §1.2a, §5) | that the system's record is true, current or complete; that the adapter reported its acquisition truly; that the session is sealed or complete, or that the caller did not choose among answers; anything once the gateway's key is copied |
 | An acquisition of class `generated`, a research record above all | the least: that this request — a recipe, its question and the model as named — was asked of the gateway source the profile names, and that these bytes came back under that receipt | that the answer is right, complete or current, or the model's own; that a candidate it names exists; that a page it cites says what it quotes, beyond a receipt for that page |
 | An asserted input: the case, a local file, a parameter no receipt commits | that the preparation carried what the operator supplied, faithfully | anything about it: an asserted input rewritten with its preparation recomputed verifies as the original did; `unsignedParameters` names the parameters a rule read on the operator's say |
-| A binding document (§4.4), and the bound dialect it yields | that the bound dialect is the published one with each unbound source bound to the profile the binding document names | that that profile is the one the publisher meant, or reads the system the publisher's fixtures were recorded from: the binding document is the installation's statement, and a record commits it only through the bound dialect's digest |
+| A binding document (§4.4), and the bound dialect it yields | that the bound dialect is the published one with each unbound source bound to the profile the binding document names | that that profile is the one the publisher meant, or reads the system the publisher's fixtures were recorded from: the binding document is the installation's statement; a record commits the bound dialect, its profile assignments included, and neither the binding document's digest, nor the published dialect's, nor the catalog names the binding removes |
 | `verifiedAt` | that every freshness check holds against it | that it was the instant of admission: without a binding no signature covers it, and a preparation recomputed at another instant verifies as the original does |
 | A binding that matches, in a record whose signature verifies (a check this document does not make) | that the preparation, its instant included, is the one committed in the record when its key's holder signed it | anything against the operator, who holds the key and the clock and can recompute, write and sign again, which only a checkpoint held independently from before the change shows; when anything was prepared: a binding carries no time |
 | A binding that matches, with no signature checked | nothing, by itself | — |
@@ -1491,6 +1507,14 @@ this text and the vectors — would strengthen that evidence, and none exists.
     of that shape takes, as its adapter or connection defines it, and the text holds it to being an
     object, to the template rules and to the receipt's commitment, and not to a set of members
     (§4.1); `adapter-http`'s `query`, when present, stays held to string templates.
+13. **The published identity in the committed form.** A preparation commits the bound dialect, its
+    profile assignments included, and neither the binding document's digest, nor the published
+    dialect's digest, nor the catalog names the binding removes (§4.4): a record that binds it
+    cannot name the published dialect or its binding, and two published dialects that differ only
+    in their catalog names, bound to the same profiles, prepare under one bound digest. Whether the
+    published dialect's and the binding document's digests should be carried in the committed form,
+    so that a record names the published identity, as the Exchange may want, is open; carrying them
+    would change the preparation's form, and so its version.
 
 **Next revision.** The maintainer's decision of 2026-10-14 on issue #141 scoped dialect version 3
 in three parts. The first two are specified by the amendment of 2026-10-15 (above): the record kind

@@ -664,6 +664,18 @@ class DialectVectorTests(unittest.TestCase):
                 answer = self._altered(name, receipt=paged).verify().answer
                 self.assertEqual("acquisition-invalid", answer.get("finding"), answer)
 
+    def test_a_paged_mcp_receipt_is_refused_the_amendments_one_restriction(self) -> None:
+        # Review round 5, finding 1: a signed acquisition of shape mcp whose receipt carries pageItems was
+        # read under the accepted text; the amendment refuses it (§5.2), the one answer it changes for an
+        # input that was read before. The valid vector, signed again: without the page every check passes,
+        # with it the acquisition is refused.
+        unpaged = self._altered("valid").verify().answer
+        self.assertEqual("preparation-differs", unpaged.get("finding"), unpaged)
+        paged = self._altered(
+            "valid", receipt=lambda r: r["acquisition"].__setitem__("pageItems", [r["resultDigest"]])
+        ).verify().answer
+        self.assertEqual("acquisition-invalid", paged.get("finding"), paged)
+
     def test_a_stream_read_under_an_airbyte_profile_is_read_as_its_shape_gives_it(self) -> None:
         def as_airbyte(stream: dict[str, Any], paged: bool) -> Any:
             def receipt(r: dict[str, Any]) -> None:
