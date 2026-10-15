@@ -84,6 +84,15 @@ reader on one of them, a number literal's start (choice 2), and added a test for
 read both readers; that change follows the text, takes no code from the first reader, and is no part
 of this reader's independence, which is the account above.
 
+**The amendment of 2026-10-15.** RFC 0018's amendment of that date extended this reader and the first,
+by one author who had read both: version 2's `operation` of the shapes `airbyte`, `mcp` and `http`, each
+request held to its shape's form and the form to the profile's shape (§4.1); a receipt that attests a
+page refused (§5.2); and a dialect of version 3 refused as `version-unread` (§11), its unbound source form
+and binding document (§4.4) not read and no binding document taken. The tests in
+[`test/units.test.ts`](test/units.test.ts) under "the shapes of an `operation`" hold each. That extension
+is no part of this reader's independence: the agreement of the two readers on the tenth vector,
+`http-shaped-source`, is one author's.
+
 ## Where the text was not enough
 
 No vector depends on any point below: every vector gets the same answer under either reading of each.
@@ -132,7 +141,9 @@ These were listed as gaps in the first version; the text decides each.
 - **A `selected-file` source's members**: §4.2, "`local-file` ... with no profile, no `maxAge` and no
   request; or `google-drive` ... with `profile`, `profileDigest`, `maxAge` and `arguments` as in §4.1",
   held in phase 4 by §11, "each of its sources against §4's members and its kind's, whichever its kind".
-  This reader reads `operation` and the case, and answers `kind-unread` to the rest.
+  This reader reads `operation` and the case, and answers `kind-unread` to the rest; since the amendment
+  of 2026-10-15, `operation` of the shapes `airbyte`, `mcp` and `http`, and `version-unread` to a dialect
+  of version 3.
 
 ### The genuine choices, which the text now decides
 

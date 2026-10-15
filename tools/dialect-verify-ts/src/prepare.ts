@@ -227,6 +227,8 @@ function checkReceipt(acq: Acquisition, profile: Profile, request: JObj, who: st
   if (s("source") === null || s("authority") === null) invalid("source or authority is not a string");
   const acquisition = E.m.get("acquisition");
   if (acquisition === undefined || acquisition.t !== "obj") invalid("acquisition is not an object");
+  // a receipt that attests a page is not read, whatever the shape
+  if (member(acquisition, "pageItems") !== undefined) invalid("the receipt attests a page (pageItems)");
   for (const k of ["argumentsCommitment", "resultDigest"]) if (!DIGEST.test(s(k) ?? "")) invalid(`${k} is not a digest`);
   // 2. the key and the signature
   if (keyId !== sha256hex(profile.key).slice(0, 32)) invalid("keyId is not the profile key's identifier");
@@ -336,7 +338,9 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     if (s.profile === undefined) continue;
     const p = profiles.find((x) => x.id === s.profile);
     if (p === undefined || profileDigestOf(p) !== s.profileDigest) finding("profile-mismatch", `${s.name}: no trusted profile of that id and digest`);
-    if (s.kind === "operation" && (p!.shape !== "mcp" || !(p!.tools ?? []).includes(s.tool!))) finding("profile-mismatch", `${s.name}: the profile's shape or tools`);
+    // §4.1: a request of the form of the profile's shape (no form is `command`'s), and a tool call's tool allowed
+    if (s.kind === "operation" && p!.shape !== s.form) finding("profile-mismatch", `${s.name}: a request of the ${s.form} form under a ${p!.shape} profile`);
+    if (s.kind === "operation" && s.form === "mcp" && !(p!.tools ?? []).includes(s.tool!)) finding("profile-mismatch", `${s.name}: a tool the profile does not allow`);
     if ((p!.calculator !== undefined) !== (s.calculation !== undefined)) finding("profile-mismatch", `${s.name}: calculation and the profile's calculator`);
     profileOf.set(s.name, p!);
   }
@@ -407,7 +411,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       if (acquisitions.has(s.name)) finding("acquisition-unexpected", `${s.name} is skipped and has an acquisition`);
       continue;
     }
-    const request = obj([["tool", str(s.tool!)], ["arguments", instantiate(s.template!, scope)]]);
+    const request = instantiate(s.template!, scope) as JObj;
     outcome.request = request;
     commitments(s.template!, outcome.committed, outcome.ambiguous);
     const acq = acquisitions.get(s.name);

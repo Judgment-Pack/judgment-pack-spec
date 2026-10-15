@@ -17,7 +17,9 @@ the Runner's tests keep under `internal/runner/testdata`, and they are **not
 regenerated**: the generator refuses to write into a directory that exists, and CI
 does not run it. The ninth vector, `numeric-spellings`, was added afterwards by the
 same generator, run into a new directory: it wrote the first eight again byte for
-byte, and only the new vector and its manifest entry were taken from that run. Changing a vector is a change of the contract a second reader is held
+byte, and only the new vector and its manifest entry were taken from that run. The
+tenth, `http-shaped-source`, was added the same way: the run wrote the first nine again
+byte for byte. Changing a vector is a change of the contract a second reader is held
 to, and needs the same justification as changing
 [`docs/MAPPING-V2.md`](../../docs/MAPPING-V2.md#the-canonical-form-of-a-preparation).
 If a vector looks wrong, the question is whether the documented form is wrong, not
@@ -95,6 +97,7 @@ The record a binding is read from is in `run.json`: the record's exact bytes,
 | `unsigned-parameters` | `mapping-v2-unsigned-parameters` | nothing | `verified-inputs`, naming the parameters no receipt commits |
 | `escaped-strings` | `mapping-v2-before-exact-bytes` | nothing: a case-only run whose case holds `&`, `<`, `>` and non-ASCII letters | `verified-inputs` |
 | `numeric-spellings` | `mapping-v2-calculated-numeric` | nothing: the valid case's mapping and inputs with three integer case parameters more, `-0`, `9007199254740991` and `-9007199254740991` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `http-shaped-source` | `mapping-v2-http-shaped` | nothing: one source of shape `http`, its record recorded from a stand-in of a gateway `http` source in the test's process | `verified-inputs`, binding `matches`, signed and witnessed |
 
 The valid case is also the calculated-values case: its one source is a calculator
 that computed. Its preparation's digest is the digest its record binds, so a reader
@@ -106,7 +109,12 @@ and the largest and the least integers mapping v2 admits without an exponent. Nu
 such as `1.00` and `1e+02`, and integers beyond 2^53−1, are outside what mapping v2
 admits (integers from −(2^53−1) to 2^53−1, with no fraction or exponent): preparation
 refuses them as a parameter and as a copied value, so no preparation holds them and no
-vector can (`TestAPreparationKeepsItsNumbersAsWritten`).
+vector can (`TestAPreparationKeepsItsNumbersAsWritten`). `http-shaped-source` is there for
+the source's shape: its one source is a gateway source of shape `http`, whose request is
+a path, a method and a query rather than a tool call, and whose result is the adapter's
+status, headers and body. Its preparation has the form of every other vector's: a
+preparation does not name its source's shape, which the profile the mapping pins by
+digest and the receipt it cites carry, and nothing in it depends on the shape.
 
 ## The canonical form
 
@@ -140,6 +148,14 @@ in them are those of the run that wrote them, and are data now.
   for that run, standing in for a gateway: its public key is in
   `profiles.json`, and its private key was not kept. The calculator's answer is the
   test's.
+- `mapping-v2-http-shaped` was written as `mapping-v2-calculated-bound` was, under the
+  published Runtime 0.31.0, by `TestAnHTTPShapedRunIsSignedWitnessedAndBound` with
+  `JPACK_V2_HTTP_EXPORT_DIR` set. Its source's record was recorded from a stand-in, in
+  the test's process, of a gateway source its operator declared `http`: an endpoint the
+  test served over TLS on the loopback address its profile names, read as the gateway's
+  `adapter-http` reads one, and a receipt the stand-in signed as a gateway signs one. No
+  live service was asked; the profile names the adapter `adapter-http`, version
+  `stand-in`.
 - `mapping-v2-before-calculators`, `mapping-v2-unsigned-parameters` and
   `mapping-v2-before-exact-bytes` were written before Runner passed a binding: their
   records carry none.

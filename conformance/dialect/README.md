@@ -1,6 +1,6 @@
 # Dialect vectors (staged)
 
-This directory holds 9 vectors for the dialect, written for the preparation-verifier class that
+This directory holds 10 vectors for the dialect, written for the preparation-verifier class that
 the companion document [`spec/dialect.md`](../../spec/dialect.md) defines. Its design record,
 [RFC 0018](../../rfcs/0018-dialect.md), was accepted on 2026-10-15, and the vectors are **staged**
 until the next `specVersion` opens. They are in no corpus.
@@ -25,11 +25,15 @@ hand — as the [checkpoint witness vectors](../witness/README.md) and the
 
 ## Where they come from
 
-[`vectors/`](vectors/) is the Runner's `vectors/preparation/` at commit
-`05636eda96a9588279d61a6272625be859a28117`, the head of Runner pull request 77, which they were
-copied from: the same files, the same names, the same bytes, its own README and manifest among
-them. The pull request was squash-merged, and reached the Runner's `main` as commit
-`82116bfab7705f74ca3e493c9722dd3831c7418f`, whose `vectors/preparation/` holds the same files. The Runner's README says
+[`vectors/`](vectors/) is the Runner's `vectors/preparation/`: the same files, the same names, the
+same bytes, its own README and manifest among them. The first nine vectors were copied from commit
+`05636eda96a9588279d61a6272625be859a28117`, the head of Runner pull request 77, which was
+squash-merged and reached the Runner's `main` as commit
+`82116bfab7705f74ca3e493c9722dd3831c7418f`, whose `vectors/preparation/` holds the same files. The
+tenth, `http-shaped-source`, and the Runner's README and manifest as they now are, were copied from
+the Runner's `main` at commit `c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9`, Runner pull request 80
+squash-merged, whose generator wrote the first nine again byte for byte; this repository's manifest
+records it as `source.extendedBy`. The Runner's README says
 what each file holds and how the vectors were generated, and its manifest gives every file's
 SHA-256, the binding the Runner passes for each preparation, the record's binding as recorded, and
 what the Runner's `verify-run` reports of each export. A change to a vector is a change to the
@@ -58,9 +62,10 @@ digest. The other files — `release-digest.txt`, `public-key.txt`, `checkpoints
 `verify-run`'s checks of an export, which are not this class's.
 
 [`manifest.json`](manifest.json), this repository's, carries `"status": "staged"`, the RFC that
-proposed the vectors (`proposedBy`), their `source` (the commit they were copied from, and as
-`mergedAs` the Runner's `main` commit that holds the same files), the SHA-256 of the Runner's README and manifest
-(`runnerFiles`), and one row per vector: `id`; `path`; `requiresBinding`; and the answer the class
+proposed the vectors (`proposedBy`), their `source` (the commit the first nine were copied from;
+as `mergedAs`, the Runner's `main` commit that holds the same files; and as `extendedBy`, the
+Runner's pull request, `main` commit and vector of the tenth), the SHA-256 of the Runner's README
+and manifest (`runnerFiles`), and one row per vector: `id`; `path`; `requiresBinding`; and the answer the class
 gives, `expectedResult`, `reading` or `finding`, with `expectedBinding` for a reading and
 `expectedFinding` for a finding. The answers were written from the companion document's §11 and
 the Runner's manifest:
@@ -76,6 +81,14 @@ the Runner's manifest:
 | `unsigned-parameters` | `verified-inputs` | a reading, binding `absent` |
 | `escaped-strings` | `verified-inputs` | a reading, binding `absent` |
 | `numeric-spellings` | `verified-inputs` | a reading, binding `matches` |
+| `http-shaped-source` | `verified-inputs` | a reading, binding `matches` |
+
+The tenth, `http-shaped-source`, is the vectors' one source of shape `http`: version 2's `operation`
+reads a gateway source of shape `airbyte`, `mcp` or `http` since the amendment of 2026-10-15
+(the companion document, §4.1), and its request is `adapter-http`'s method, path and query rather
+than a tool call. Its preparation has the form of the other nine. No vector holds an `operation` of
+shape `airbyte`, nor a dialect of version 3, its four kinds or the unbound source form (§4.3,
+§4.4): those are defined, and not claimable.
 
 One vector is answered otherwise than `verify-run` answers it. `disposition-differs-from-audit`
 alters the run's retained result, which is the Runner's export and no part of a preparation or a

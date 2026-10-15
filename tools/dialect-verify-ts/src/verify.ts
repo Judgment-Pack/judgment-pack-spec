@@ -2,7 +2,7 @@
 // order, and the reading.
 import { BOUNDS, scanBytes } from "./bounds.ts";
 import { Refusal, countsWithin, readAcquisitions, readDialect, readProfiles, readRecord, readVerifiedAt, sha256hex } from "./forms.ts";
-import { NotRead, OutsideDomain, arr, compareCodePoints, jsonEqual, num, obj, preparationForm, read, str, utf8 } from "./json.ts";
+import { NotRead, OutsideDomain, arr, compareCodePoints, intValue, isInteger, jsonEqual, member, num, obj, preparationForm, read, str, utf8 } from "./json.ts";
 import type { JObj, JVal } from "./json.ts";
 import { Finding, conditionParameters, recompute } from "./prepare.ts";
 import type { Outcome, Recomputed } from "./prepare.ts";
@@ -89,14 +89,20 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
   // phase 3: the counts
   if (!countsWithin(dialectValue, acquisitionsValue)) over("a count of the dialect or the nesting of a result");
 
-  // phase 4: every document's form
+  // phase 4: a version this verifier does not read. Version 3 (§4.3, §4.4) is defined and not read here.
+  const version = member(dialectValue, "version");
+  if (dialectValue.t === "obj" && isInteger(version) && intValue(version) === 3) {
+    throw new Refusal("version-unread", "dialect version 3, its unbound source form and binding document (§4.4) and the kinds of §4.3, is not read by this verifier");
+  }
+
+  // phase 5: every document's form
   const dialect = readDialect(dialectValue);
   const profiles = readProfiles(parsed.get("the profiles")!.value);
   const acquisitions = readAcquisitions(acquisitionsValue);
   const verifiedAt = readVerifiedAt(preparationValue);
   const recordObj = record === undefined ? undefined : readRecord(record.value);
 
-  // phase 5: a kind this verifier does not read
+  // phase 6: a kind this verifier does not read
   for (const s of dialect.sources) if (s.kind !== "operation") throw new Refusal("kind-unread", `${s.name} is of the kind ${s.kind}`);
 
   // findings 1–4, by recomputation

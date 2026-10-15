@@ -12,22 +12,28 @@ Its design record is [RFC 0018](../rfcs/0018-dialect.md), accepted on 2026-10-15
 which is informative; its Specification section, §§1–14 below, is that text. The comment period
 RFC 0000 names was waived by the maintainer, as the RFC's adoption record says.
 
-Its nine vectors, under
+Its ten vectors, under
 [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect),
-are the reference Runner's `vectors/preparation/`, byte for byte, at commit
+are the reference Runner's `vectors/preparation/`, byte for byte: nine at commit
 `05636eda96a9588279d61a6272625be859a28117` (Runner pull request 77), which reached the Runner's
-`main` as commit `82116bfab7705f74ca3e493c9722dd3831c7418f` with the same files. They are **staged**
-until the next `specVersion` opens: they are in no corpus, no claim may cite them, the site does
-not serve them, and no release bundle carries them. When that version opens they move into a corpus,
-normative for this class and for nothing else. Until a specification version publishes them, no
+`main` as commit `82116bfab7705f74ca3e493c9722dd3831c7418f` with the same files, and the tenth,
+`http-shaped-source`, at the Runner's `main` commit `c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9`
+(Runner pull request 80), which holds the nine unchanged. They are **staged** until the next
+`specVersion` opens: they are in no corpus, no claim may cite them, the site does not serve them,
+and no release bundle carries them. When that version opens they move into a corpus, normative for
+this class and for nothing else. Until a specification version publishes them, no
 preparation-verifier conformance claim is available: §14 holds a verifier to the vectors published
 with the version its claim names, and no version publishes these.
 
 It specifies version 2 of the dialect document and of the preparation, which are the Runner's
-mapping v2 and its preparation, restated; it proposes version 3 of the dialect document, which adds
-four source kinds (§4.3), and version 1 of the output side (§10). It is published beside the
-released Core `0.2.0-draft` and carries no `specVersion` of its own. Like Core, it is a research
-preview, at draft maturity.
+mapping v2 and its preparation, restated. Since the amendment of 2026-10-15 (RFC 0018, its
+Amendment), version 2's `operation` reads a gateway source of shape `airbyte`, `mcp` or `http`, as
+the Runner's mapping v2 does since its pull request 80: the vectors hold `mcp`, in nine, and
+`http`, in the tenth, and `airbyte` is defined and not claimable (§4.1). It proposes version 3 of the
+dialect document, which adds four source kinds (§4.3) and the unbound source form (§4.4), defined
+and not claimable: no preparer writes it and no vector holds it; and version 1 of the output side
+(§10). It is published beside the released Core `0.2.0-draft` and carries no `specVersion` of its
+own. Like Core, it is a research preview, at draft maturity.
 
 **Its sources.** Where the Runner's words define the format, this document keeps them; where they
 describe the Runner rather than the format, it says what the format is.
@@ -37,14 +43,19 @@ describe the Runner rather than the format, it says what the format is.
   at that commit, its subsection "The canonical form of a preparation" above all, and its design
   record
   [`docs/design/calculated-values.md`](https://github.com/Judgment-Pack/judgment-pack-runner/blob/05636eda96a9588279d61a6272625be859a28117/docs/design/calculated-values.md).
-  "Runner, *name*" below means the section of `MAPPING-V2.md` of that name, at that commit.
+  "Runner, *name*" below means the section of `MAPPING-V2.md` of that name, at that commit. For
+  the shapes of an `operation` (§4.1), the same document at the Runner's commit
+  `c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9`, whose section on the source kinds the Runner's pull
+  request 80 changed.
 - The portable derivation rule the Runner vendors,
   [`derivation-rule/SPEC.md`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/96fa95874bfaa4d5a01c0c111fd8b5b6613c881c/derivation-rule/SPEC.md)
   at commit `96fa95874bfaa4d5a01c0c111fd8b5b6613c881c`, restated in §6.3.
 - The reference gateway's
   [`SPEC.md`](https://github.com/Judgment-Pack/judgment-pack-gateway/blob/v0.15.0/SPEC.md) at
   `v0.15.0`: its canonical form (§1.1), its version-3 receipt (§1.2a) and its acquire answer (§6).
-  "Gateway §n" below means a section of that document at that release.
+  "Gateway §n" below means a section of that document at that release. At the same release, the
+  request forms its adapters read (`adapters/README.md`, "adapter-http" and "adapter-airbyte") and
+  the names its catalog's bindings give (`catalog/README.md`).
 - The reference runtime's ADR-0050, under which an evaluation record carries a caller's binding as
   given and never interpreted.
 - The checkpoint witness statement, [`spec/checkpoint-witness.md`](checkpoint-witness.md), whose
@@ -137,11 +148,13 @@ never interchanged.
 
 The dialect document is one JSON object. Its version 2 is the Runner's mapping v2 document: a
 mapping v2 document the Runner accepts is a version-2 dialect document, with the same bytes and the
-same digest.
+same digest. The one exception is a request under a profile of shape `airbyte` or `http`, which the
+Runner holds to the rules of a template alone and this document to its shape's form as well (§4.1).
+Version 3 (§4.3, §4.4) is not the Runner's: no Runner reads it.
 
 | Member | Form | Meaning |
 | --- | --- | --- |
-| `version` | the integer `2` | the dialect version, per which the source kinds (§4) and every form of this document are closed |
+| `version` | the integer `2`, or `3` (§4.3, §4.4) | the dialect version, per which the source kinds (§4) and every form of this document are closed |
 | `case` | an object (§3), REQUIRED | the case's parameters, and the facts and evidence copied from the case |
 | `sources` | an array of at most 16 sources (§4), optional | absent is the empty array |
 | `admits` | an object (§8.2), optional | the classes a target admits, where they are not the default |
@@ -206,17 +219,18 @@ The kinds:
 
 | Kind | Version | Class | What is declared | Vectors |
 | --- | --- | --- | --- | --- |
-| `operation` | 2 | the profile's | a tool of a gateway source an input profile pins, and a template of its arguments (§4.1) | yes |
+| `operation` | 2 | the profile's | a read of a gateway source of shape `airbyte`, `mcp` or `http` that an input profile pins, and a template of its request (§4.1); in version 3, also unbound (§4.4) | of shapes `mcp` and `http` |
 | `selected-file` | 2 | `asserted` for `local-file`, the profile's for `google-drive` | a document the operator selected (§4.2) | none |
 | `http` | 3, proposed | the profile's | a request to a gateway HTTP source: method, path, query and body templates, header names (§4.3) | none |
 | `sql` | 3, proposed | the profile's | a statement on a connection, with its bound parameters (§4.3) | none |
 | `web` | 3, proposed | the profile's | a public page by URL, through the gateway's web source (§4.3) | none |
 | `research` | 3, proposed | `generated` | an AI-assisted research recipe (§4.3) | none |
 
-A version-2 document that names a kind of version 3 is refused. **A kind without vectors is
-defined, and not claimable**: a verifier's claim names the kinds it reads (§14), and may name only
-kinds that the vectors published with its specification version exercise. Today the staged
-vectors exercise `operation` and the case, and none is published.
+A version-2 document that names a kind of version 3, or has an unbound source (§4.4), is refused.
+**A kind without vectors is defined, and not claimable**: a verifier's claim names the kinds it
+reads (§14), and may name only kinds that the vectors published with its specification version
+exercise; and so with the shapes of an `operation`, and with a version. Today the staged vectors
+exercise the case and `operation` of shapes `mcp` and `http`, in version 2, and none is published.
 
 ### 4.1 `operation`
 
@@ -227,10 +241,31 @@ An `operation` source has, besides the members of §4, exactly:
 | `profile` | a non-empty string: the `id` of an input profile (§5.1) |
 | `profileDigest` | a digest: that profile's digest |
 | `maxAge` | an integer from 1 to 86400: seconds |
-| `arguments` | an object of exactly `tool`, a non-empty string, and `arguments`, a template |
+| `arguments` | the template of its request: an object of one of the three forms below |
 | `calculation` | an object (§7), present exactly when the profile is a calculator's |
 
-The profile's `shape` MUST be `mcp`, and `tool` MUST be among the profile's `tools`.
+An `operation` reads a gateway source of an adapter's shape, `airbyte`, `mcp` or `http`, which its
+profile's `shape` names; a profile of shape `command` serves none. Its `arguments` are of that
+shape's form, and each form's members tell it from the others:
+
+- **`mcp`**, a tool call: exactly `tool`, a non-empty string, and `arguments`, a template. `tool`
+  MUST be among the profile's `tools`.
+- **`http`**, a request as the gateway's `adapter-http` reads one: exactly `method`, the string
+  `GET` or `POST`; `path`, a string template; and `query`, optional, an object that is not a
+  template form, each of whose members is a string template. `adapter-http`'s `body` is not of the
+  form. The path's own form is the gateway's to hold; the endpoint a receipt names, which for
+  `adapter-http` is the URL asked without its query, is held to the profile's (§5.2).
+- **`airbyte`**, a stream read as the gateway's `adapter-airbyte` reads one: exactly `stream`, a
+  string template; and, each optional, `namespace`, a string template or `null`; `limit`, an
+  integer, or a `$param` naming an `integer` parameter; and `state`, a string template. The
+  gateway's `adapter-airbyte` answers every read with a page, and an acquisition of a page is not
+  read (§5.2), so no acquisition of this shape is read today and no vector holds one: the form is
+  defined, and not claimable.
+
+A **string template** is a string, a `$text`, or a `$param` naming a parameter of type `string` or
+`timestamp`. An `arguments` of none of these forms is refused with the dialect (§11); one of a form
+other than its profile's shape's is `profile-mismatch` (§5.1). (No vector decides the `airbyte`
+form, `POST`, a template form in `path`, or a request with no `query`.)
 
 **Templates.** A template is a JSON value in which an object one of whose member names begins with
 `$` is a **template form**, which MUST be exactly one of:
@@ -246,8 +281,9 @@ The profile's `shape` MUST be `mcp`, and `tool` MUST be among the profile's `too
 Every other value of a template is literal, taken as it is, an object or an array member by member.
 A name a template form gives MUST be in the source's scope, and MUST NOT be `runAt`, which no request
 can carry. A literal object whose only member's name begins with `$` cannot be written. The
-**request** of an `operation` source is `{"tool": tool, "arguments": A}`, `A` its instantiated
-template, and MUST be in the `canon` domain.
+**request** of an `operation` source is its `arguments` instantiated as a template — of shape `mcp`,
+`{"tool": tool, "arguments": A}`, `A` its instantiated template — and MUST be in the `canon`
+domain.
 
 A request **commits** a parameter when it carries it unambiguously: as a whole value, `$param`,
 anywhere in it, or in a `$text` whose placeholders name it and no other parameter. A `$text` whose
@@ -267,14 +303,18 @@ admits it to a claim states the snapshot's form first.
 
 ### 4.3 Kinds proposed for version 3
 
-Version 3 is version 2 with four kinds more. It is proposed: no preparer writes it, no verifier
-reads it, and no vector holds it. The forms below are what a writer, such as the Desk's inputs or an
-entry of the Exchange, needs to declare one; the first implementation's vectors will fix each
-request's exact bytes, and may change them. A source of each of these kinds is an object of exactly
-the members of §4 — `name`, `kind`, `parameters` (its source parameters, as every source's) and
-`read` — with `profile`, `profileDigest` and `maxAge` as in §4.1, and the members its kind names
-below. Each is acquired through the gateway source its profile pins, so §5's checks apply with the
-shape the profile names, and the value it acquires is read as every value is (§6).
+Version 3 is version 2 with four kinds more, and with the unbound source form (§4.4); a document
+of version 3 has `version` `3`, and so has its preparation (§9.1). It is proposed: no preparer
+writes it, no verifier reads it, and no vector holds it. The forms below are what a writer, such as
+the Desk's inputs or an entry of the Exchange, needs to declare one; the first implementation's
+vectors will fix each request's exact bytes, and may change them. Since version 2's `operation`
+reads a source of each adapter shape (§4.1), the `http` and `sql` kinds describe how a request is
+formed — a body and headers, a statement and its bindings — and not how a configured source is
+read. A source of each of these kinds is an object of exactly the members of §4 — `name`, `kind`,
+`parameters` (its source parameters, as every source's) and `read` — with `profile`,
+`profileDigest` and `maxAge` as in §4.1, and the members its kind names below. Each is acquired
+through the gateway source its profile pins, so §5's checks apply with the shape the profile names,
+and the value it acquires is read as every value is (§6).
 
 - **`http`**, a request to a gateway source of shape `http` (the gateway's `adapter-http`):
   `method`, `GET` or `POST`; `path`, a template that yields a path under the profile's endpoint;
@@ -301,6 +341,62 @@ shape the profile names, and the value it acquires is read as every value is (§
   digest as every value acquired is. A profile of another class is refused. A research record that
   did not come back through a gateway source is no acquisition: it can enter a dialect only as a
   selected file, asserted.
+
+### 4.4 The unbound source form (version 3)
+
+An `operation` that names its profile by its digest pins the installation it was written under: the
+gateway's key, its source and authority, its adapter and its endpoint (§5.1). Version 3 gives an
+`operation` an **unbound** form, which names instead what an installation binds it to: the catalog
+binding and operation it is read through, the shape that serves it, and the record it is written
+against. A dialect is published unbound, as an entry of the Exchange holds one, and bound by the
+installation that adopts it.
+
+An unbound `operation` source has, besides the members of §4, exactly:
+
+| Member | Form |
+| --- | --- |
+| `platform` | a non-empty string: a platform of the gateway's catalog, as its binding names it (`platform`) |
+| `operation` | a non-empty string: an operation of that binding, as its `operations` name it |
+| `shape` | `airbyte`, `mcp` or `http`: the shape that serves the operation |
+| `record` | a non-empty string: the program whose answer the read is written against, as a profile's `adapter.name` names it (§5.1) |
+| `maxAge` | as in §4.1 |
+| `arguments` | as in §4.1, of `shape`'s form |
+| `calculation` | as in §4.1, optional |
+
+It has no `profile` and no `profileDigest`. The catalog's names are the gateway's
+(`catalog/README.md`), and a verifier holds them to their form and to nothing else.
+
+**The binding document.** An installation binds an unbound dialect with a **binding document**: one
+JSON object of exactly `dialect`, the unbound dialect's digest (§2), and `sources`, an object
+mapping the name of each unbound source of that dialect, and no other name, to an object of exactly
+`profile`, a non-empty string, and `profileDigest`, a digest: an input profile of the installation's
+gateway, by its `id` and its digest. Its digest is the digest of its `canon` bytes. It is neither
+the record's `binding` (§9.5) nor a binding of the gateway's catalog.
+
+**The bound dialect** is the unbound dialect with the binding applied: each unbound source with its
+`platform`, `operation`, `shape` and `record` removed and the `profile` and `profileDigest` the
+binding document gives it added, every other member kept as written. It is a document of version 3
+with no unbound source, and its digest (§2) is the one a preparation of it carries as
+`mappingDigest`. The unbound dialect's digest is the one its publisher names, as an entry of the
+Exchange names `dialect.digest` (RFC 0019 §3); the bound dialect's is the installation's, and one
+dialect bound under two installations' profiles has two.
+
+**Verifying it.** A verifier given a dialect with an unbound source is given its binding document
+too, and reads the bound dialect as this document reads every dialect, with two checks more. A
+binding document whose `dialect` is not the given dialect's digest, or whose `sources` do not name
+exactly its unbound sources, is refused with the dialect, as is a dialect with an unbound source
+and no binding document, and a binding document beside a dialect with none (§11). And a profile the
+binding document names whose `shape` is not the unbound source's `shape`, or whose `adapter.name` is
+not its `record`, is `profile-mismatch` (§5.1). A fixture of an unbound dialect carries the binding
+document it was recorded under, and verifies against the bound dialect.
+
+**What it establishes.** Nothing beyond what an `operation` that names its profile establishes
+(§13). The binding document is the installation's statement of which profile each source was bound
+to; a preparation commits it only through the bound dialect's digest, and a record that binds the
+preparation commits that under the record's signature, the installation's own key. No preparer
+writes version 3, the Runner included, so no Runner records a bound dialect's digest yet, and no
+vector holds the form: it is defined, and not claimable. (No vector decides any rule of this
+section.)
 
 ## 5. Input profiles and acquisitions
 
@@ -329,9 +425,10 @@ digest, and only an installation supplies one. A verifier is given the profiles 
 band, as one JSON array, and MUST NOT take a profile or a key from a preparation, an acquisition or
 an export. A source's **profile** is the trusted profile of its `profile` id, whose digest MUST be the
 source's `profileDigest`; otherwise, and when a source does not fit its profile — an `operation`
-whose profile's shape is not `mcp`, a tool the profile does not allow, a calculator's profile
-without `calculation`, `calculation` without a calculator's profile — the finding is
-`profile-mismatch`.
+whose `arguments` are not of its profile's shape's form, a profile of shape `command` among them
+(§4.1), a tool the profile does not allow, a calculator's profile without `calculation`,
+`calculation` without a calculator's profile, a profile bound to an unbound source of another shape
+or another record (§4.4) — the finding is `profile-mismatch`.
 
 What a profile pins — the gateway's key, source, authority, adapter, shape, endpoint, class and
 tools — is the installation's classification of a channel. It does not pin a credential, a
@@ -352,7 +449,9 @@ An acquisition is held to its source and its profile, and any of these checks th
 `acquisition-invalid`:
 
 1. `E.receiptVersion` is `"3"` and `E.kind` is `"acquisition"`, and each member this list reads is
-   of the form gateway §1.2a gives it.
+   of the form gateway §1.2a gives it; and `E.acquisition` has no member `pageItems`. A receipt with
+   `pageItems` attests a page, which no preparation reads, whatever the source's shape, as the
+   Runner reads none (Runner, "Deferred scope"). (No vector decides this.)
 2. `E.keyId` is the key identifier of the profile's `publicKey`, and `E.signature`, 128 hexadecimal
    characters, verifies under that key by the equation (§1), over the ASCII bytes
    `judgment-pack-gateway/receipt/3:` followed by the `canon` bytes of `E` with its top-level
@@ -571,7 +670,7 @@ A preparation is a JSON object of exactly:
 
 | Member | Form | Meaning |
 | --- | --- | --- |
-| `version` | the integer `2` | the preparation's version, the dialect's |
+| `version` | the integer `2`, or `3` | the preparation's version, its dialect's `version` |
 | `verifiedAt` | a timestamp | the instant: the one every freshness check is held to, and the value of `runAt` |
 | `mappingDigest` | a digest | the dialect digest (§2) |
 | `verification` | the string `verified acquisitions; session sealing and input truth are not established` | the preparer's account of its checks, the same in every preparation of this version |
@@ -695,8 +794,9 @@ vectors are deferred to a later RFC.
 
 A preparation verifier is given:
 
-- the dialect document; the case document; the acquisitions (§5.2), `{}` when there are none; and
-  the input profiles it trusts (§5.1);
+- the dialect document; the case document; the acquisitions (§5.2), `{}` when there are none; the
+  input profiles it trusts (§5.1); and, for a dialect with an unbound source, its binding document
+  (§4.4);
 - the **preparation** to verify;
 - optionally, the **record**: the line of bytes, without its newline, of the runtime evaluation
   record whose binding it holds to the preparation. A Runner export of version 2 carries the record
@@ -715,11 +815,14 @@ the refusal, at the first of these phases that fails, in this order:
    rule, the conditions one `all` or `any` lists, the `unwrap` pointers, the fact and evidence
    targets — and the nesting of each acquisition's result, taken on the documents read wherever the
    count can be taken, before any form is checked: `input-over-bound`;
-4. every document's form — the dialect against §§2–8, every rule they give it included, and each of
-   its sources against §4's members and its kind's, whichever its kind; a profile against §5.1 and
-   the key rule; the acquisitions against the form of §5.2; the preparation's `verifiedAt` against
-   the timestamp form with an instant; the record against its reading below: `input-malformed`;
-5. a dialect that names a kind the verifier does not read: `kind-unread`.
+4. a dialect document that is an object whose `version` is an integer of a version this document
+   defines, `2` or `3`, that the verifier does not read: `version-unread`;
+5. every document's form — the dialect against §§2–8, every rule they give it included, and each of
+   its sources against §4's members and its kind's, whichever its kind; the binding document against
+   §4.4; a profile against §5.1 and the key rule; the acquisitions against the form of §5.2; the
+   preparation's `verifiedAt` against the timestamp form with an instant; the record against its
+   reading below: `input-malformed`;
+6. a dialect that names a kind the verifier does not read: `kind-unread`.
 
 One bound is measured later, because it cannot be measured sooner: an unwrapped string's bytes, and
 the nesting and the number literals of the value it holds, are measured when it is unwrapped (§6.1),
@@ -729,7 +832,7 @@ nothing reported but the refusal.
 **Findings.** Otherwise it recomputes the preparation at the given preparation's `verifiedAt`, by
 §§3–9, and ends the reading at the first of these findings, in this order, reporting that one:
 
-1. `profile-mismatch` (§5.1), the sources taken in their order;
+1. `profile-mismatch` (§5.1, §4.4), the sources taken in their order;
 2. for the case: `parameter-invalid` (§3), its parameters in their order, then `read-failed` for its
    read (§6.2);
 3. for each source in its order: `parameter-invalid` for a source parameter it declares, in their
@@ -826,8 +929,8 @@ file it cannot open. A verifier that is a library states the same three outcomes
 A verifier holds its inputs to the Runner's bounds (Runner, "Numeric and resource profile"):
 
 - the dialect at most 131072 bytes; the dialect, the case and the acquisitions together at most
-  2097152 bytes; the profiles at most 65536 bytes; and the preparation and the record each at most
-  8388608 bytes;
+  2097152 bytes; the profiles, and a binding document, each at most 65536 bytes; and the preparation
+  and the record each at most 8388608 bytes;
 - at most 16 sources; 64 parameters in one scope; 64 clauses in one rule; 64 conditions listed by
   one `all` or `any`; four `unwrap` pointers; 200000 bytes in one unwrapped string; and 256 fact
   targets and 128 evidence targets;
@@ -865,6 +968,7 @@ is the operator's say, and recomputation shows only that it was carried faithful
 | An acquisition of class `record`, verified under a trusted profile | byte lineage: the holder of the gateway key the profile pins signed a receipt that names these bytes by their digest, this request by its commitment, this adapter, shape and endpoint, at these times; what more the receipt says is the gateway's (gateway §1.2a, §5) | that the system's record is true, current or complete; that the adapter reported its acquisition truly; that the session is sealed or complete, or that the caller did not choose among answers; anything once the gateway's key is copied |
 | An acquisition of class `generated`, a research record above all | the least: that this request — a recipe, its question and the model as named — was asked of the gateway source the profile names, and that these bytes came back under that receipt | that the answer is right, complete or current, or the model's own; that a candidate it names exists; that a page it cites says what it quotes, beyond a receipt for that page |
 | An asserted input: the case, a local file, a parameter no receipt commits | that the preparation carried what the operator supplied, faithfully | anything about it: an asserted input rewritten with its preparation recomputed verifies as the original did; `unsignedParameters` names the parameters a rule read on the operator's say |
+| A binding document (§4.4), and the bound dialect it yields | that the bound dialect is the published one with each unbound source bound to the profile the binding document names | that that profile is the one the publisher meant, or reads the system the publisher's fixtures were recorded from: the binding document is the installation's statement, and a record commits it only through the bound dialect's digest |
 | `verifiedAt` | that every freshness check holds against it | that it was the instant of admission: without a binding no signature covers it, and a preparation recomputed at another instant verifies as the original does |
 | A binding that matches, in a record whose signature verifies (a check this document does not make) | that the preparation, its instant included, is the one committed in the record when its key's holder signed it | anything against the operator, who holds the key and the clock and can recompute, write and sign again, which only a checkpoint held independently from before the change shows; when anything was prepared: a binding carries no time |
 | A binding that matches, with no signature checked | nothing, by itself | — |
@@ -881,11 +985,11 @@ An implementation is a *conforming preparation verifier* when, for every reading
 the refusal, the finding or the reading §11 defines, and when it gives every vector's expected answer
 in the dialect vectors published with the specification version it names. Its claim takes the form
 "a preparation verifier conforming to `spec/dialect.md` of specVersion *X*, reading dialect version
-2 and the kinds *K*", and names only kinds that the vectors published with that version exercise
-(§4). The class is independent of Core's four classes and of the witness-statement reader: none
-implies it, and it implies none. It says nothing about a preparer, which this document does not
-define as a class: a verifier's agreement with a preparer shows that the two read the format alike,
-and no more. A claim of this class MUST NOT be described as establishing anything §13 says a
+2 and the kinds *K*, and `operation` of the shapes *S*", and names only versions, kinds and shapes
+that the vectors published with that version exercise (§4). The class is independent of Core's
+four classes and of the witness-statement reader: none implies it, and it implies none. It says
+nothing about a preparer, which this document does not define as a class: a verifier's agreement
+with a preparer shows that the two read the format alike, and no more. A claim of this class MUST NOT be described as establishing anything §13 says a
 preparation does not establish.
 
 Until a specification version publishes the dialect vectors, no claim of this class is available.

@@ -385,6 +385,52 @@
         "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:65abaa0773a6072c75fd41c810d6b4bf97462587650c28574a2645d4a2cec437\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:f1e17f5868ec8b5d1f51f707564f36ba67840653a08e61f9a0918555eef334d8\",\"sequence\":1,\"trail\":\"b478af3ecc924f2a0f1e2beb7247818a\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-14T15:26:28Z\",\"sources\":[{\"source\":\"fx\",\"checks\":[\"acquisition\",\"calculation\"],\"targets\":3}]}}",
         "error": null
       }
+    },
+    {
+      "name": "http-shaped-source",
+      "note": "A run whose one source is of shape http, as Runner exported it (version 5), signed, witnessed and bound. Its retained record, {result, receipt, salts}, was recorded from a stand-in, in the test's process, of a gateway source its operator declared http: an endpoint the test served over TLS, read as adapter-http reads one, and a receipt naming acquisition.shape http, the shape the profile pins, signed under the profile's key. No live service was asked. The request is the mapping's path, method and query, not a tool call; the result is the adapter's status, headers, bodyEncoding and body, and the rule reads it as any source's result is read. preparation.json has the form of every other vector's preparation: nothing in it depends on the source's shape, and nothing in it names the shape, which the profile the mapping pins by digest and the receipt it cites carry. A reader concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/mapping-v2-http-shaped",
+      "altered": null,
+      "verifiedAt": "2026-10-14T19:36:52Z",
+      "files": {
+        "case.json": "sha256:780718de39758469b8395dbaca2db1f75eea1e6af644fe4f54b507aef331572f",
+        "checkpoints.jsonl": "sha256:3f6e26de534e01ca2ca30aee4c49f816cb78c91945b73d2cb2e7ed927cac7e4f",
+        "mapping.json": "sha256:5a7704446bfbc7f0c3d1e170276bf559932b2ac8f801d85324288ab5e40931ef",
+        "preparation.json": "sha256:41a8f827a735bfd85fedc4298bf979a1f0ff07d287a8fd3130c4b5ed4e6d0306",
+        "preparation.sha256": "sha256:b7ef0c26668da9200e7961fc5103542543b57fcb72343d72fde364c8af85a8db",
+        "profiles.json": "sha256:6e1f67cabbe801093b31ae2c7ce0dad86b764f4f404b9843257bcd7eeb01bc9c",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:720b1c43a328ed71ff43b7b793ccc4a15b34292b1949125e0b651281aabb5258",
+        "run.json": "sha256:c8c12f9ab2a475bba1372b33ce1336a1ea49164b4ce58caaeb0d0029e3d451e4",
+        "sources.json": "sha256:9d64b30badbde4ef719b488f2915ecde9b00ae62393f820a45f67c292d9fc349"
+      },
+      "preparation": {
+        "sha256": "sha256:41a8f827a735bfd85fedc4298bf979a1f0ff07d287a8fd3130c4b5ed4e6d0306",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:41a8f827a735bfd85fedc4298bf979a1f0ff07d287a8fd3130c4b5ed4e6d0306\"}",
+        "retained": "equal"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:41a8f827a735bfd85fedc4298bf979a1f0ff07d287a8fd3130c4b5ed4e6d0306\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:56a9f452b6234067b0cbfc331305e935e5b17ea543a38f555f3693662625de2d",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:f7b684591e80eb089b2b52bb475a404f46a392a56e7d01365d0ec4f5551d433e\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:8928fc143d7a9ceca47accf0e07bd928248d314744ee009dec030ec82b20956a\",\"sequence\":1,\"trail\":\"b5871f76337d6285a238dac1419ce190\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-14T19:36:52Z\",\"sources\":[{\"source\":\"intake\",\"checks\":[\"acquisition\"],\"targets\":3}]}}",
+        "error": null
+      }
     }
   ]
 }
