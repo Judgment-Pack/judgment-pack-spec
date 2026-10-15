@@ -27,9 +27,16 @@ here.
   `sql`, `web` and `research` by name, and two vectors hold version 3 (§§2, 4, 4.3, 4.4 and the
   Status); §14's claim form admits a claim of version 3 beside version 2. Version 3 is written one
   way (§2): a document of version 3 that names `provider`, `facts` or `evidence`, members of version
-  2 alone, or writes an optional member empty, is refused, and both readers refuse both. The
-  Evidence records the readings both readers take where the text names a member of a version-3
-  kind without a form.
+  2 alone, or writes empty a member the Runner's encoding leaves out when empty (`sources`,
+  `unmapped`, `unmappedEvidence`, the case's and a source's `parameters`, and `admits`' `facts` and
+  `evidence`), is refused, and both readers refuse both. The Evidence records the readings both
+  readers take where the text names a member of a version-3 kind without a form. The amendment's
+  review, round 7, recorded in `rfcs/reviews/0018-round-7.md`, brought two rules more to the
+  Runner's: `cites` is ordered by `callIndex` in versions 2 and 3 alike (§9.1), and a copy's
+  `facts` and `evidence` are both required in every version (§6.2), which changes one answer the
+  accepted text gave: a copy that left an array out was read and is refused now. Both readers now
+  refuse a binding document of `null`, count a research record's 64 retained responses before any
+  form (§12), and hold a `research` acquisition to its own form (§§4.3, 5.2).
 - [RFC 0018](rfcs/0018-dialect.md) is `Accepted`, at draft maturity, under the interim review
   regime; the maintainer waived the comment period RFC 0000 names, because the project has no
   outside readers yet, and the adoption record says so as a departure. The RFC taken up from the
@@ -205,7 +212,9 @@ here.
   acquisition, which changes one answer the accepted text gave: a signed `mcp` acquisition whose
   receipt carried `pageItems` was read and is refused now. The Runner has never prepared one. Version 3 gains the unbound source form, an `operation` that names the catalog platform
   and operation it is read through in place of a profile, with a binding document and the bound
-  dialect it yields; it is defined and not claimable, since no Runner reads version 3. A verifier
+  dialect it yields; it is defined and not claimable, since, at that amendment, no Runner read
+  version 3 (the Runner reads it since its pull request 83: see the entry of the eleventh and
+  twelfth vectors above). A verifier
   that does not read a dialect's version refuses it, `version-unread`. The Runner's tenth
   preparation vector, `http-shaped-source`, is staged byte for byte beside the nine, and both
   readers, `tools/dialect_verify.py` and `tools/dialect-verify-ts/`, read it to the Runner's answer;

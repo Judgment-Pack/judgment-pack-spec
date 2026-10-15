@@ -234,7 +234,8 @@ This amendment records the maintainer's decisions of 2026-10-15 on
 Runner's eleventh and twelfth vectors and extends both readers to version 3. Its review is round 7
 of this RFC, recorded under
 [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
-`0018-round-7.md` with the maintainer's disposition of each finding. The status stays Accepted.
+`0018-round-7.md` with the maintainer's disposition of each finding; the seven findings accepted
+there are applied below. The status stays Accepted.
 
 **Where it comes from.** The reference Runner reads version 3 since its pull request 83, merged as
 `89cf44109ad3a9862ab0386811bef63d8a9a1657` and released in `v0.12.0`
@@ -256,12 +257,29 @@ these sentences.
 
 **The second decision: version 3 is written one way** (§2). `provider`, `facts` and `evidence` are
 members of version 2 alone: a document of version 3 that names one is refused, `input-malformed`.
-And an optional member whose absence means its empty value is left out in version 3 when it is
-empty: written as the empty array or the empty object, it is refused, since the canonical form
-admits one spelling of a document and its digest is of the document as written. This is the
-Runner's rule for version 3, and it changes no answer a vector gives. Before this pull request no
-verifier read version 3, so no answer an accepted text gave changes either. No vector decides
-either refusal.
+And version 3 is held to the Runner's encoding rule: a member its encoding leaves out when empty —
+`sources`, `unmapped` and `unmappedEvidence` written as `[]`, the case's and a source's `parameters`
+and `admits`' `facts` and `evidence` written as `{}` — is refused written empty, since the Runner
+keeps a document of version 3 only as its encoding writes it. Every other member written empty is
+read, as the Runner reads it: `admits`, a copy's arrays, and the kinds' members, `query`, `body`
+and `headers` among them (review round 7, finding 2, which corrected a first list that was not the
+Runner's). This changes no answer a vector gives. Before this pull request no verifier read version
+3, so no answer an accepted text gave changes either. No vector decides either refusal.
+
+**The review's findings, applied.** Round 7 found that the text and both readers differed from the
+Runner in two rules more, and the maintainer decided both as the Runner has them. `cites` is
+ordered by `callIndex` in versions 2 and 3 alike (§9.1), as the Runner writes it; the order in
+`sources` the first draft of this amendment gave version 3 stays the rule of a preparation with a
+`research` source, that kind's own, which no vector holds. And a copy's `facts` and `evidence` are
+both required, in every version (§6.2), as the Runner requires them ("copy requires facts and
+evidence arrays"). That changes one answer the accepted text gave: a copy that left an array out
+was read, and is refused now; the Runner has never read one, so no preparation over one exists. The
+round found three refusals more that the text already gave and the readers did not make, now made
+by both: a binding document supplied as `null` (§4.4, §11); more than 64 retained responses in a
+research record (§12), counted before any form; and a `research` source's acquisition held to its
+own form (§§4.3, 5.2), its envelope admitted without a receipt and salts of its own, one of the two
+alone refused, and the research record and each retained response held to their forms before the
+kind is refused as unread.
 
 **The third decision: two readings, recorded.** Where the text names a member of a version-3 kind
 without its form, both readers take one reading, and no vector holds it (Evidence, "What writing
@@ -539,13 +557,15 @@ included. The same document with an optional member written out, as the Runner's
 as it was given and adds or removes nothing. A document outside the `canon` domain is refused.
 
 **Version 3 is written one way.** `provider`, `facts` and `evidence` are members of version 2 alone:
-a document of version 3 carries none of them, and one that names one is refused. And in version 3 an
-optional member whose absence means its empty value — `sources`, `admits` and its `facts` and
-`evidence`, `unmapped`, `unmappedEvidence`, the case's and a source's `parameters`, a copy's `facts`
-and `evidence` (§6.2), and an `http` source's `headers` (§4.3) — is left out when it is empty: one
-written as the empty array or the empty object is refused, since the canonical form admits one
-spelling of a document and its digest is of the document as written. (No vector decides either
-refusal.)
+a document of version 3 carries none of them, and one that names one is refused. And version 3 is
+held to the reference Runner's encoding rule: the Runner keeps a document of version 3 only as its
+encoding writes it, and its encoding leaves out a member it holds empty where the member is optional
+and of an array or object type that it omits when empty. So, in version 3, `sources`, `unmapped` and
+`unmappedEvidence` written as the empty array, and the case's `parameters`, a source's `parameters`,
+and the `facts` and `evidence` of `admits` written as the empty object, are refused, since a document
+so written would be kept under another digest than its own. Every other member written empty is kept
+as written and read: `admits` itself, a copy's `facts` and `evidence` (§6.2), and the members of the
+kinds of §4.3, `query`, `body` and `headers` among them. (No vector decides either refusal.)
 
 Version 1 is no dialect: the Runner's version-1 file mapping has no preparation. The numbering is
 the Runner's, kept so that every mapping v2 document is a version-2 dialect document byte for byte.
@@ -948,11 +968,11 @@ For a source whose profile is a calculator's, the value read is held to §7 befo
 
 #### 6.2 Copy
 
-`copy` is an object of `facts`, an array of `{"target": P, "source": Q}`, and `evidence`, an array
-of `{"requirement": I, "source": Q}`, each entry exactly those members; each array is optional, and
-absent is the empty array. `P` is a fact target (§8.1), `I` a non-empty string, `Q` a pointer. A
-copy names each requirement at most once, and one that names a requirement twice is refused with the
-dialect. (No vector decides this.) The claim:
+`copy` is an object of exactly `facts`, an array of `{"target": P, "source": Q}`, and `evidence`, an
+array of `{"requirement": I, "source": Q}`, each entry exactly those members; both arrays are
+REQUIRED, as the Runner requires them, and either may be empty. `P` is a fact target (§8.1), `I` a
+non-empty string, `Q` a pointer. A copy names each requirement at most once, and one that names a
+requirement twice is refused with the dialect. (No vector decides this.) The claim:
 
 - `facts` starts as `{}`; for each entry whose `Q` resolves in the value read, that value is written
   at `P` (§8.1). An entry whose `Q` does not resolve writes nothing. (No vector decides this.)
@@ -1120,11 +1140,14 @@ A preparation is a JSON object of exactly:
 | `lineage` | an array | §9.3 |
 | `outcomes` | an array | §9.2 |
 
-In version 2, `cites` is ordered by `callIndex`, those of one index in the order of `sources`.
-In version 3, sources contribute citations in the order of `sources`: a `research` source adds
-every retained response's citation in `R.responses` order, followed by the record's own citation
-when it has one; every other acquired source adds its one citation. The case, a local file and a
-skipped source contribute none. The research list is also its lineage entries' `receipts` (§9.3).
+In versions 2 and 3 alike, `cites` is ordered by `callIndex`, those of one index in the order of
+`sources`, as the reference Runner writes it: each acquired source adds its one citation, and the
+case, a local file and a skipped source contribute none. A `research` source has a rule of its own,
+which no vector holds: in a preparation with one, `cites` is in the order of `sources` instead, the
+`research` source adding every retained response's citation in `R.responses` order, followed by the
+record's own citation when it has one, and every other acquired source its one citation. The
+research list is also its lineage entries' `receipts` (§9.3). (No vector decides the rule of
+`research`.)
 
 #### 9.2 Outcomes
 
@@ -1678,7 +1701,8 @@ this text and the vectors — would strengthen that evidence, and none exists.
    `query` to string templates; a paged acquisition refused whatever the shape, which is the
    Runner's rule and which no vector shows; and every rule of the unbound form but the bound dialect
    and its digest, which a vector now holds. The amendment that read version 3 adds two refusals,
-   of a version-2 member and of an optional member written empty in version 3. The research
+   of a version-2 member and of a member written empty in version 3 that the Runner's encoding leaves
+   out, and the order of `cites` in a preparation with a `research` source. The research
    amendment adds the research replay rule and the fixture layout, also marked as positions no
    vector decides.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four

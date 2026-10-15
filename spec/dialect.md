@@ -186,13 +186,15 @@ included. The same document with an optional member written out, as the Runner's
 as it was given and adds or removes nothing. A document outside the `canon` domain is refused.
 
 **Version 3 is written one way.** `provider`, `facts` and `evidence` are members of version 2 alone:
-a document of version 3 carries none of them, and one that names one is refused. And in version 3 an
-optional member whose absence means its empty value — `sources`, `admits` and its `facts` and
-`evidence`, `unmapped`, `unmappedEvidence`, the case's and a source's `parameters`, a copy's `facts`
-and `evidence` (§6.2), and an `http` source's `headers` (§4.3) — is left out when it is empty: one
-written as the empty array or the empty object is refused, since the canonical form admits one
-spelling of a document and its digest is of the document as written. (No vector decides either
-refusal.)
+a document of version 3 carries none of them, and one that names one is refused. And version 3 is
+held to the reference Runner's encoding rule: the Runner keeps a document of version 3 only as its
+encoding writes it, and its encoding leaves out a member it holds empty where the member is optional
+and of an array or object type that it omits when empty. So, in version 3, `sources`, `unmapped` and
+`unmappedEvidence` written as the empty array, and the case's `parameters`, a source's `parameters`,
+and the `facts` and `evidence` of `admits` written as the empty object, are refused, since a document
+so written would be kept under another digest than its own. Every other member written empty is kept
+as written and read: `admits` itself, a copy's `facts` and `evidence` (§6.2), and the members of the
+kinds of §4.3, `query`, `body` and `headers` among them. (No vector decides either refusal.)
 
 Version 1 is no dialect: the Runner's version-1 file mapping has no preparation. The numbering is
 the Runner's, kept so that every mapping v2 document is a version-2 dialect document byte for byte.
@@ -595,11 +597,11 @@ For a source whose profile is a calculator's, the value read is held to §7 befo
 
 ### 6.2 Copy
 
-`copy` is an object of `facts`, an array of `{"target": P, "source": Q}`, and `evidence`, an array
-of `{"requirement": I, "source": Q}`, each entry exactly those members; each array is optional, and
-absent is the empty array. `P` is a fact target (§8.1), `I` a non-empty string, `Q` a pointer. A
-copy names each requirement at most once, and one that names a requirement twice is refused with the
-dialect. (No vector decides this.) The claim:
+`copy` is an object of exactly `facts`, an array of `{"target": P, "source": Q}`, and `evidence`, an
+array of `{"requirement": I, "source": Q}`, each entry exactly those members; both arrays are
+REQUIRED, as the Runner requires them, and either may be empty. `P` is a fact target (§8.1), `I` a
+non-empty string, `Q` a pointer. A copy names each requirement at most once, and one that names a
+requirement twice is refused with the dialect. (No vector decides this.) The claim:
 
 - `facts` starts as `{}`; for each entry whose `Q` resolves in the value read, that value is written
   at `P` (§8.1). An entry whose `Q` does not resolve writes nothing. (No vector decides this.)
@@ -767,11 +769,14 @@ A preparation is a JSON object of exactly:
 | `lineage` | an array | §9.3 |
 | `outcomes` | an array | §9.2 |
 
-In version 2, `cites` is ordered by `callIndex`, those of one index in the order of `sources`.
-In version 3, sources contribute citations in the order of `sources`: a `research` source adds
-every retained response's citation in `R.responses` order, followed by the record's own citation
-when it has one; every other acquired source adds its one citation. The case, a local file and a
-skipped source contribute none. The research list is also its lineage entries' `receipts` (§9.3).
+In versions 2 and 3 alike, `cites` is ordered by `callIndex`, those of one index in the order of
+`sources`, as the reference Runner writes it: each acquired source adds its one citation, and the
+case, a local file and a skipped source contribute none. A `research` source has a rule of its own,
+which no vector holds: in a preparation with one, `cites` is in the order of `sources` instead, the
+`research` source adding every retained response's citation in `R.responses` order, followed by the
+record's own citation when it has one, and every other acquired source its one citation. The
+research list is also its lineage entries' `receipts` (§9.3). (No vector decides the rule of
+`research`.)
 
 ### 9.2 Outcomes
 

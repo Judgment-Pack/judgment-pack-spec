@@ -506,7 +506,7 @@ class DialectVectorTests(unittest.TestCase):
     def test_a_kind_without_vectors_is_not_read(self) -> None:
         inputs = self.inputs("escaped-strings")
         dialect = json.loads(inputs.dialect)
-        dialect["sources"] = [{"name": "upload", "kind": "selected-file", "provider": "local-file", "read": {"copy": {}}}]
+        dialect["sources"] = [{"name": "upload", "kind": "selected-file", "provider": "local-file", "read": {"copy": {"facts": [], "evidence": []}}}]
         inputs.dialect = json.dumps(dialect).encode("utf-8")
         self.assertEqual("kind-unread", inputs.verify().answer.get("refused"))
         dialect["sources"][0]["kind"] = "research"
@@ -811,11 +811,11 @@ class DialectVectorTests(unittest.TestCase):
             del given[member], recomputed[member]
         self.assertEqual(given, recomputed)
 
-    def test_version_3_cites_in_the_order_of_sources(self) -> None:
-        # §9.1: version 2 orders `cites` by callIndex, version 3 by the order of sources. The two sources of
-        # unsigned-parameters, vendor then registry, their receipts' callIndex swapped and signed again, so that
-        # registry's call is the first.
-        for version, expected in ((2, ["registry", "vendor"]), (3, ["vendor", "registry"])):
+    def test_cites_are_ordered_by_call_index_in_versions_2_and_3(self) -> None:
+        # §9.1: in versions 2 and 3 alike, `cites` is ordered by callIndex, as the Runner writes it (review round
+        # 7, finding 1). The two sources of unsigned-parameters, vendor then registry, their receipts' callIndex
+        # swapped and signed again: in the order of sources the indices are [1, 0], and `cites` is [0, 1].
+        for version, expected in ((2, ["registry", "vendor"]), (3, ["registry", "vendor"])):
             with self.subTest(version=version):
                 def written(d: dict[str, Any], v: int = version) -> None:
                     d["version"] = v
@@ -834,6 +834,8 @@ class DialectVectorTests(unittest.TestCase):
                 receipts = {entry["source"]: entry["receipt"] for entry in preparation["lineage"] if "receipt" in entry}
                 order = [next(name for name, receipt in receipts.items() if receipt == c) for c in preparation["cites"]]
                 self.assertEqual(expected, order)
+                self.assertEqual([1, 0], [receipts[name]["callIndex"] for name in ("vendor", "registry")])
+                self.assertEqual([0, 1], [c["callIndex"] for c in preparation["cites"]])
 
     def _imported(self, unbound: Any = None, binding: Any = None) -> Inputs:
         """The import vector's inputs, its published dialect altered and the binding document's `dialect` written
@@ -930,7 +932,7 @@ class DialectVectorTests(unittest.TestCase):
 
     def test_a_kind_of_version_3_is_held_to_its_form_and_not_read(self) -> None:
         bound = json.loads(self.inputs("version-3-bound").dialect)["sources"][0]
-        common = {"profile": bound["profile"], "profileDigest": bound["profileDigest"], "maxAge": 300, "read": {"copy": {}}}
+        common = {"profile": bound["profile"], "profileDigest": bound["profileDigest"], "maxAge": 300, "read": {"copy": {"facts": [], "evidence": []}}}
         string = {"$param": "invoiceCurrency"}
         well_formed = {
             "http": {"method": "POST", "path": "/requests", "query": {"currency": string}, "body": {"n": 1}, "headers": ["Accept"]},
@@ -939,7 +941,7 @@ class DialectVectorTests(unittest.TestCase):
             "research": {"question": {"$text": "Which?"}, "constraints": {}, "model": "a-model", "evidence": ["excerpt"]},
         }
         malformed = {
-            "http": [{"method": "PUT"}, {"path": {"a": 1}}, {"path": {"$param": "runAt"}}, {"method": "GET"}, {"query": {"currency": 7}}, {"headers": "Accept"}, {"headers": []}],
+            "http": [{"method": "PUT"}, {"path": {"a": 1}}, {"path": {"$param": "runAt"}}, {"method": "GET"}, {"query": {"currency": 7}}, {"headers": "Accept"}],
             "sql": [{"statement": {"$text": "SELECT 1"}}, {"bindings": [{"name": "c", "type": "STRING", "value": "EUR"}]}, {"bindings": [{"name": "c", "value": string}]}],
             "web": [{"url": 7}, {"url": {"$param": "nope"}}, {"url": {"$text": "https://example.org/"}}],
             "research": [{"question": 7}, {"constraints": []}, {"model": None}, {"evidence": "excerpt"}],
@@ -965,12 +967,17 @@ class DialectVectorTests(unittest.TestCase):
             for alteration in malformed[kind]:
                 with self.subTest(kind=kind, alteration=alteration):
                     self.assertEqual("input-malformed", answer({**source, **alteration}).get("refused"))
+        # the members of version 3's kinds that the Runner's encoding keeps written empty are read so
+        http = {"name": "more", "kind": "http", **common, **well_formed["http"]}
+        for member, empty in (("headers", []), ("query", {}), ("body", {})):
+            with self.subTest(written_empty=member):
+                self.assertEqual("kind-unread", answer({**http, member: empty}).get("refused"))
         # a kind of another type is refused, not raised
         for kind in (["web"], {"web": 1}, 3, None):
             with self.subTest(kind=kind):
                 self.assertEqual("input-malformed", answer({"name": "more", "kind": kind, **common, "url": "x"}).get("refused"))
         # selected-file is of version 3 too, and not read
-        local = {"name": "upload", "kind": "selected-file", "provider": "local-file", "read": {"copy": {}}}
+        local = {"name": "upload", "kind": "selected-file", "provider": "local-file", "read": {"copy": {"facts": [], "evidence": []}}}
         self.assertEqual("kind-unread", answer(local).get("refused"))
         # every form comes first: the binding document's too
         web = {"name": "page", "kind": "web", **common, "url": "https://example.org/"}
@@ -997,19 +1004,24 @@ class DialectVectorTests(unittest.TestCase):
         # §2: in version 3 an optional member whose absence means its empty value is left out when it is empty;
         # written as [] or {} it is refused. Each alteration is read in version 2, so that its emptiness alone is
         # what version 3 refuses.
+        # The members are those the Runner's encoding leaves out when empty (review round 7, finding 2); the
+        # members it keeps written empty are read in both versions.
         source = lambda d: d["sources"][0]  # noqa: E731
-        alterations = {
+        refused = {
             "unmapped": lambda d: d.__setitem__("unmapped", []),
             "unmappedEvidence": lambda d: d.__setitem__("unmappedEvidence", []),
-            "admits": lambda d: d.__setitem__("admits", {}),
             "admits.facts": lambda d: d.__setitem__("admits", {"facts": {}}),
             "admits.evidence": lambda d: d.__setitem__("admits", {"evidence": {}}),
             "a source's parameters": lambda d: source(d).__setitem__("parameters", {}),
+        }
+        kept = {
+            "admits": lambda d: d.__setitem__("admits", {}),
             "a copy's facts": lambda d: source(d)["read"]["copy"].__setitem__("facts", []),
             "a copy's evidence": lambda d: source(d)["read"]["copy"].__setitem__("evidence", []),
         }
-        for name, alter in alterations.items():
-            for version, expected in ((3, ("refused", "input-malformed")), (2, ("finding", "preparation-differs"))):
+        for name, alter in list(refused.items()) + list(kept.items()):
+            in_version_3 = ("refused", "input-malformed") if name in refused else ("finding", "preparation-differs")
+            for version, expected in ((3, in_version_3), (2, ("finding", "preparation-differs"))):
                 with self.subTest(member=name, version=version):
                     inputs = self.inputs("version-3-bound")
                     document = json.loads(inputs.dialect)
@@ -1037,6 +1049,106 @@ class DialectVectorTests(unittest.TestCase):
                         self.assertEqual("input-malformed", answer.get("refused"), answer)
                     else:
                         self.assertEqual("preparation-differs", answer.get("finding"), answer)
+
+    def test_a_copy_has_both_its_arrays_in_every_version(self) -> None:
+        # §6.2: both arrays are required, as the Runner requires them (review round 7, finding 2); either may be
+        # empty, and a copy that leaves one out is refused in versions 2 and 3.
+        for version in (2, 3):
+            for copy, refused in (({}, True), ({"facts": []}, True), ({"evidence": []}, True), ({"facts": [], "evidence": []}, False)):
+                with self.subTest(version=version, copy=copy):
+                    inputs = self.inputs("version-3-bound")
+                    document = json.loads(inputs.dialect)
+                    document["version"] = version
+                    document["sources"][0]["read"]["copy"] = copy
+                    inputs.dialect = json.dumps(document).encode("utf-8")
+                    answer = inputs.verify().answer
+                    if refused:
+                        self.assertEqual("input-malformed", answer.get("refused"), answer)
+                    else:
+                        self.assertEqual("preparation-differs", answer.get("finding"), answer)
+
+    def test_a_binding_document_of_null_is_refused(self) -> None:
+        # §4.4, §11: a binding document supplied is held to its form, `null` included; it is not taken as
+        # absent (review round 7, finding 3).
+        for name in ("version-3-bound", "unbound-bound-at-import"):
+            with self.subTest(vector=name):
+                inputs = self.inputs(name)
+                inputs.binding = b"null"
+                self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+
+    def _researched(self, acquisition: Any) -> Any:
+        """version-3-bound with a `research` source added, its acquisition the given member."""
+        inputs = self.inputs("version-3-bound")
+        document = json.loads(inputs.dialect)
+        bound = document["sources"][0]
+        document["sources"].append({
+            "name": "study", "kind": "research", "profile": bound["profile"], "profileDigest": bound["profileDigest"],
+            "maxAge": 300, "question": "Which?", "constraints": {}, "model": "a-model", "evidence": ["excerpt"],
+            "read": {"copy": {"facts": [], "evidence": []}},
+        })
+        inputs.dialect = json.dumps(document).encode("utf-8")
+        sources = json.loads(inputs.acquisitions)
+        sources["study"] = acquisition
+        inputs.acquisitions = json.dumps(sources).encode("utf-8")
+        return inputs.verify().answer
+
+    RETAINED = {
+        "profile": {"id": "fx", "digest": "sha256:" + "0" * 64},
+        "request": {"question": "Which?"},
+        "result": {"answer": "none"},
+        "receipt": {},
+        "salts": {"args": "0" * 64},
+    }
+
+    def test_a_research_record_holds_at_most_64_retained_responses(self) -> None:
+        # §§11 and 12: counted in the third phase, before any form; 64 are admitted, 65 are over the bound
+        # even when the one beyond is malformed (review round 7, finding 4).
+        record = lambda responses: {"response": {"result": {"responses": responses}}}  # noqa: E731
+        self.assertEqual("kind-unread", self._researched(record([self.RETAINED] * 64)).get("refused"))
+        self.assertEqual("input-over-bound", self._researched(record([self.RETAINED] * 65)).get("refused"))
+        self.assertEqual("input-over-bound", self._researched(record([self.RETAINED] * 64 + [{}])).get("refused"))
+        self.assertEqual("input-malformed", self._researched(record([self.RETAINED] * 63 + [{}])).get("refused"))
+
+    def test_a_research_acquisition_has_the_form_of_its_kind(self) -> None:
+        # §§4.3, 5.2 and 11 (review round 7, finding 5): the caller-assembled record needs no receipt of its own,
+        # both or neither of `receipt` and `salts`, and the record and each retained response held to their form
+        # before the kind is refused as unread.
+        own = {"receipt": {}, "salts": {"args": "0" * 64}}
+        retained = self.RETAINED
+        unretained = {k: v for k, v in retained.items() if k != "result"}
+        cases = {
+            "research-no-own-receipt": ({"response": {"result": {"responses": []}}}, "kind-unread"),
+            "research-own-receipt": ({"response": {"result": {"responses": [retained]}, **own}}, "kind-unread"),
+            "research-result-not-retained": ({"response": {"result": {"responses": [unretained]}}}, "kind-unread"),
+            "research-receipt-alone": ({"response": {"result": {"responses": []}, "receipt": {}}}, "input-malformed"),
+            "research-salts-alone": ({"response": {"result": {"responses": []}, "salts": own["salts"]}}, "input-malformed"),
+            "research-record-not-object": ({"response": {"result": ["x"]}}, "input-malformed"),
+            "research-record-missing-responses": ({"response": {"result": {}}}, "input-malformed"),
+            "research-record-bad-responses": ({"response": {"result": {"responses": {}}}}, "input-malformed"),
+            "research-record-extra-member": ({"response": {"result": {"responses": [], "more": 1}}}, "input-malformed"),
+        }
+        malformed_retained = {
+            "not an object": "x",
+            "a member more": {**retained, "more": 1},
+            "no profile": {k: v for k, v in retained.items() if k != "profile"},
+            "a profile of another form": {**retained, "profile": {"id": "fx"}},
+            "a profile digest of another form": {**retained, "profile": {"id": "fx", "digest": "sha256:XYZ"}},
+            "a request that is not an object": {**retained, "request": "Which?"},
+            "a receipt that is not an object": {**retained, "receipt": []},
+            "salts of another form": {**retained, "salts": {"args": "x"}},
+        }
+        for name, entry in malformed_retained.items():
+            cases[f"research-record-malformed-retained ({name})"] = (
+                {"response": {"result": {"responses": [entry]}}}, "input-malformed")
+        for name, (acquisition, expected) in cases.items():
+            with self.subTest(case=name):
+                self.assertEqual(expected, self._researched(acquisition).get("refused"))
+        # an acquisition of any other kind still has its receipt and salts
+        inputs = self.inputs("version-3-bound")
+        sources = json.loads(inputs.acquisitions)
+        del sources["fx"]["response"]["receipt"], sources["fx"]["response"]["salts"]
+        inputs.acquisitions = json.dumps(sources).encode("utf-8")
+        self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
 
     # The six choices the text now decides (RFC 0018, Evidence), each held here as the text says.
 

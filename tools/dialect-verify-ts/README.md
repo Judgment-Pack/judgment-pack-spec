@@ -102,13 +102,16 @@ is no part of this reader's independence: the agreement of the two readers on th
 **Dialect version 3.** The staging of the Runner's eleventh and twelfth vectors, `version-3-bound` and
 `unbound-bound-at-import`, extended this reader and the first to dialect version 3, by one author who
 had read both, from the text: a document of version 3 is read as one of version 2, and its preparation
-is of version 3, its `cites` in the order of `sources` (§9.1); an `operation` of the unbound form is read
+is of version 3, its `cites` ordered by `callIndex` as version 2's are (§9.1); an `operation` of the unbound form is read
 with the binding document it is given (`--binding`), the bound dialect made of the two and read as every
 dialect is, a binding document of another form, of another dialect's digest, or that does not name
 exactly the unbound sources refused as `input-malformed`, and a profile bound of another shape or record
 `profile-mismatch` (§4.4); a source of a kind of §4.3 held to the form its kind names and refused as
 `kind-unread`; and, as RFC 0018's amendment that read version 3 decided, a version-3 document that names
-`provider`, `facts` or `evidence`, or writes an optional member empty, refused as `input-malformed` (§2).
+`provider`, `facts` or `evidence`, or writes empty a member the Runner's encoding leaves out when empty,
+refused as `input-malformed` (§2). After the review of round 7, a copy's two arrays are required in every
+version (§6.2), a binding document of `null` is refused, the 64 retained responses of a research record are
+counted before any form (§12), and a `research` source's acquisition is held to its own form (§§4.3, 5.2).
 Nothing is `version-unread` now: this reader reads both versions the text defines. The
 tests in [`test/units.test.ts`](test/units.test.ts) under "dialect version 3" hold each. That extension
 is no part of this reader's independence: the two readers' agreement on the eleventh and twelfth vectors

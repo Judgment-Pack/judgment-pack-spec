@@ -192,7 +192,7 @@ test("refusals, by phase (§11)", () => {
   assert.equal(answer((i) => ({ ...i, dialect: edit(i.dialect, '"maxAge":300', '"maxAge":300,"Name":"x"') })), "refusal:input-malformed");
   assert.equal(answer((i) => ({ ...i, preparation: edit(i.preparation, '"verifiedAt":"2026-10-14T14:58:26Z"', '"verifiedAt":"2026-02-30T14:58:26Z"') })), "refusal:input-malformed");
   assert.equal(
-    answer((i) => ({ ...i, dialect: edit(i.dialect, '"sources":[', '"sources":[{"name":"file","kind":"selected-file","provider":"local-file","read":{"copy":{}}},') })),
+    answer((i) => ({ ...i, dialect: edit(i.dialect, '"sources":[', '"sources":[{"name":"file","kind":"selected-file","provider":"local-file","read":{"copy":{"facts":[],"evidence":[]}}},') })),
     "refusal:kind-unread",
   );
 });
@@ -687,10 +687,11 @@ test("§9.1: a version-3 document is read as version 2's, its preparation of ver
   assert.deepEqual(recomputed, given);
 });
 
-test("§9.1: version 3 cites in the order of sources, version 2 by callIndex", () => {
-  // unsigned-parameters' two sources, vendor then registry, their callIndex swapped and signed again
+test("§9.1: cites are ordered by callIndex in versions 2 and 3 alike, as the Runner writes them", () => {
+  // Review round 7, finding 1. unsigned-parameters' two sources, vendor then registry, their callIndex swapped and
+  // signed again: in the order of sources the indices are [1, 0], and cites is [0, 1].
   const base = loadVector(join(VECTORS, "unsigned-parameters"), false);
-  for (const [version, expected] of [["2", ["registry", "vendor"]], ["3", ["vendor", "registry"]]] as const) {
+  for (const [version, expected] of [["2", ["registry", "vendor"]], ["3", ["registry", "vendor"]]] as const) {
     const swapped = alteredAndSigned(base, {
       dialect: (d) => {
         d.m.set("version", num(version));
@@ -700,9 +701,15 @@ test("§9.1: version 3 cites in the order of sources, version 2 by callIndex", (
     });
     const r = verify(swapped);
     assert.equal(r.kind, "finding", version);
-    const preparation = JSON.parse(text(r.recomputed!)) as { lineage: { source: string; receipt?: { signature: string } }[]; cites: { signature: string }[] };
+    const preparation = JSON.parse(text(r.recomputed!)) as {
+      lineage: { source: string; receipt?: { signature: string; callIndex: number } }[];
+      cites: { signature: string; callIndex: number }[];
+    };
     const sourceOfCite = new Map(preparation.lineage.filter((e) => e.receipt !== undefined).map((e) => [e.receipt!.signature, e.source]));
+    const indexOf = new Map(preparation.lineage.filter((e) => e.receipt !== undefined).map((e) => [e.source, e.receipt!.callIndex]));
     assert.deepEqual(preparation.cites.map((c) => sourceOfCite.get(c.signature)), expected, version);
+    assert.deepEqual([indexOf.get("vendor"), indexOf.get("registry")], [1, 0], version);
+    assert.deepEqual(preparation.cites.map((c) => c.callIndex), [0, 1], version);
   }
 });
 
@@ -763,7 +770,7 @@ test("§4.4, §5.1: a profile bound of another shape or record is profile-mismat
 
 test("§4.3: a kind of version 3 is held to its form, and not read", () => {
   const fx = sourceOf(parse(text(v3bound.dialect)) as JObj);
-  const common = `"profile":"fx","profileDigest":${JSON.stringify((fx.m.get("profileDigest") as { v: string }).v)},"maxAge":300,"read":{"copy":{}}`;
+  const common = `"profile":"fx","profileDigest":${JSON.stringify((fx.m.get("profileDigest") as { v: string }).v)},"maxAge":300,"read":{"copy":{"facts":[],"evidence":[]}}`;
   const param = '{"$param":"invoiceCurrency"}';
   const wellFormed: Record<string, Record<string, string>> = {
     http: { method: '"POST"', path: '"/requests"', query: `{"currency":${param}}`, body: '{"n":1}', headers: '["Accept"]' },
@@ -772,7 +779,7 @@ test("§4.3: a kind of version 3 is held to its form, and not read", () => {
     research: { question: '{"$text":"Which?"}', constraints: "{}", model: '"a-model"', evidence: '["excerpt"]' },
   };
   const malformedMembers: Record<string, [string, string][]> = {
-    http: [["method", '"PUT"'], ["path", '{"a":1}'], ["path", '{"$param":"runAt"}'], ["method", '"GET"'], ["query", '{"currency":7}'], ["headers", '"Accept"'], ["headers", "[]"]],
+    http: [["method", '"PUT"'], ["path", '{"a":1}'], ["path", '{"$param":"runAt"}'], ["method", '"GET"'], ["query", '{"currency":7}'], ["headers", '"Accept"']],
     sql: [["statement", '{"$text":"SELECT 1"}'], ["bindings", '[{"name":"c","type":"STRING","value":"EUR"}]'], ["bindings", `[{"name":"c","value":${param}}]`]],
     web: [["url", "7"], ["url", '{"$param":"nope"}'], ["url", '{"$text":"https://example.org/"}']],
     research: [["question", "7"], ["constraints", "[]"], ["model", "null"], ["evidence", '"excerpt"']],
@@ -793,12 +800,16 @@ test("§4.3: a kind of version 3 is held to its form, and not read", () => {
       assert.equal(withSource(v3bound, source(kind, { ...members, [k]: v })), "refusal:input-malformed", `${kind}.${k} ${v}`);
     }
   }
+  // the members of version 3's kinds that the Runner's encoding keeps written empty are read so
+  for (const [k, empty] of [["headers", "[]"], ["query", "{}"], ["body", "{}"]]) {
+    assert.equal(withSource(v3bound, source("http", { ...wellFormed.http, [k]: empty })), "refusal:kind-unread", `http.${k} ${empty}`);
+  }
   // a kind of another type is refused
   for (const kind of ['["web"]', '{"web":1}', "3", "null"]) {
     assert.equal(withSource(v3bound, `{"name":"more","kind":${kind},${common},"url":"x"}`), "refusal:input-malformed", kind);
   }
   // selected-file is of version 3 too, and not read
-  assert.equal(withSource(v3bound, '{"name":"upload","kind":"selected-file","provider":"local-file","read":{"copy":{}}}'), "refusal:kind-unread");
+  assert.equal(withSource(v3bound, '{"name":"upload","kind":"selected-file","provider":"local-file","read":{"copy":{"facts":[],"evidence":[]}}}'), "refusal:kind-unread");
   // every form comes first, the binding document's too: a binding of the dialect as it was is refused before the kind
   const web = `{"name":"page","kind":"web",${common},"url":"https://example.org/"}`;
   assert.equal(withSource(imported, web), "refusal:input-malformed");
@@ -818,22 +829,26 @@ test("§2: version 3 carries no member of version 2 alone: provider, facts and e
 });
 
 test("§2: version 3 leaves an optional member out when it is empty", () => {
-  // Written as [] or {}, it is refused in version 3; each alteration is read in version 2, so that its emptiness
-  // alone is what version 3 refuses.
+  // Written as [] or {}, a member the Runner's encoding leaves out when empty is refused in version 3 (review round 7,
+  // finding 2); each alteration is read in version 2, so that its emptiness alone is what version 3 refuses. The
+  // members the encoding keeps written empty are read in both versions.
   const source = (d: JObj) => (d.m.get("sources") as { a: JObj[] }).a[0];
   const copy = (d: JObj) => member(source(d).m.get("read"), "copy") as JObj;
-  const alterations: [string, (d: JObj) => void][] = [
+  const refused: [string, (d: JObj) => void][] = [
     ["unmapped", (d) => d.m.set("unmapped", arr([]))],
     ["unmappedEvidence", (d) => d.m.set("unmappedEvidence", arr([]))],
-    ["admits", (d) => d.m.set("admits", obj())],
     ["admits.facts", (d) => d.m.set("admits", obj([["facts", obj()]]))],
     ["admits.evidence", (d) => d.m.set("admits", obj([["evidence", obj()]]))],
     ["a source's parameters", (d) => source(d).m.set("parameters", obj())],
+  ];
+  const kept: [string, (d: JObj) => void][] = [
+    ["admits", (d) => d.m.set("admits", obj())],
     ["a copy's facts", (d) => copy(d).m.set("facts", arr([]))],
     ["a copy's evidence", (d) => copy(d).m.set("evidence", arr([]))],
   ];
-  for (const [name, alter] of alterations) {
-    for (const [version, expected] of [["3", "refusal:input-malformed"], ["2", "finding:preparation-differs"]]) {
+  for (const [name, alter] of [...refused, ...kept]) {
+    const inVersion3 = refused.some(([n]) => n === name) ? "refusal:input-malformed" : "finding:preparation-differs";
+    for (const [version, expected] of [["3", inVersion3], ["2", "finding:preparation-differs"]]) {
       const d = parse(text(v3bound.dialect)) as JObj;
       d.m.set("version", num(version));
       alter(d);
@@ -883,4 +898,86 @@ test("the program takes --binding, and reads a vector bound at import from its d
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
+});
+
+// ---- review round 7: a copy's arrays, a binding of null, and research acquisitions (§§4.3, 5.2, 6.2, 11, 12) ----
+
+test("§6.2: a copy has both its arrays, in every version", () => {
+  for (const version of ["2", "3"]) {
+    for (const [written, expected] of [
+      ["{}", "refusal:input-malformed"],
+      ['{"facts":[]}', "refusal:input-malformed"],
+      ['{"evidence":[]}', "refusal:input-malformed"],
+      ['{"facts":[],"evidence":[]}', "finding:preparation-differs"],
+    ]) {
+      const d = parse(text(v3bound.dialect)) as JObj;
+      d.m.set("version", num(version));
+      (member(sourceOf(d).m.get("read"), "copy") as JObj).m.clear();
+      for (const [k, x] of (parse(written) as JObj).m) (member(sourceOf(d).m.get("read"), "copy") as JObj).m.set(k, x);
+      assert.equal(verdict({ ...v3bound, dialect: canon(d) }), expected, `${written} in version ${version}`);
+    }
+  }
+});
+
+test("§4.4, §11: a binding document of null is refused, not taken as absent", () => {
+  assert.equal(verdict({ ...v3bound, binding: utf8("null") }), "refusal:input-malformed");
+  assert.equal(verdict({ ...imported, binding: utf8("null") }), "refusal:input-malformed");
+});
+
+const RETAINED = `{"profile":{"id":"fx","digest":"sha256:${"0".repeat(64)}"},"request":{"question":"Which?"},"result":{"answer":"none"},"receipt":{},"salts":{"args":"${"0".repeat(64)}"}}`;
+
+/** version-3-bound with a `research` source added, its acquisition the given member. */
+function researched(acquisition: string): string {
+  const fx = sourceOf(parse(text(v3bound.dialect)) as JObj);
+  const study = `{"name":"study","kind":"research","profile":"fx","profileDigest":${JSON.stringify((fx.m.get("profileDigest") as { v: string }).v)},"maxAge":300,"question":"Which?","constraints":{},"model":"a-model","evidence":["excerpt"],"read":{"copy":{"facts":[],"evidence":[]}}}`;
+  const acquisitions = text(v3bound.acquisitions);
+  return verdict({
+    ...v3bound,
+    dialect: edit(v3bound.dialect, '"sources":[', `"sources":[${study},`),
+    acquisitions: utf8(`${acquisitions.slice(0, -1)},"study":${acquisition}}`),
+  });
+}
+
+test("§§11, 12: a research record holds at most 64 retained responses, counted before any form", () => {
+  const record = (n: number, tail = "") => `{"response":{"result":{"responses":[${Array(n).fill(RETAINED).join(",")}${tail}]}}}`;
+  assert.equal(researched(record(64)), "refusal:kind-unread");
+  assert.equal(researched(record(65)), "refusal:input-over-bound");
+  assert.equal(researched(record(64, ",{}")), "refusal:input-over-bound");
+  assert.equal(researched(record(63, ",{}")), "refusal:input-malformed");
+});
+
+test("§§4.3, 5.2, 11: a research acquisition has the form of its kind", () => {
+  const salts = `{"args":"${"0".repeat(64)}"}`;
+  const unretained = RETAINED.replace(',"result":{"answer":"none"}', "");
+  const cases: [string, string, string][] = [
+    ["research-no-own-receipt", '{"response":{"result":{"responses":[]}}}', "refusal:kind-unread"],
+    ["research-own-receipt", `{"response":{"result":{"responses":[${RETAINED}]},"receipt":{},"salts":${salts}}}`, "refusal:kind-unread"],
+    ["research-result-not-retained", `{"response":{"result":{"responses":[${unretained}]}}}`, "refusal:kind-unread"],
+    ["research-receipt-alone", '{"response":{"result":{"responses":[]},"receipt":{}}}', "refusal:input-malformed"],
+    ["research-salts-alone", `{"response":{"result":{"responses":[]},"salts":${salts}}}`, "refusal:input-malformed"],
+    ["research-record-not-object", '{"response":{"result":["x"]}}', "refusal:input-malformed"],
+    ["research-record-missing-responses", '{"response":{"result":{}}}', "refusal:input-malformed"],
+    ["research-record-bad-responses", '{"response":{"result":{"responses":{}}}}', "refusal:input-malformed"],
+    ["research-record-extra-member", '{"response":{"result":{"responses":[],"more":1}}}', "refusal:input-malformed"],
+  ];
+  const malformedRetained: [string, string][] = [
+    ["not an object", '"x"'],
+    ["a member more", RETAINED.replace(/}$/, ',"more":1}')],
+    ["no profile", RETAINED.replace(/^\{"profile":\{[^}]*\},/, "{")],
+    ["a profile of another form", RETAINED.replace(/"profile":\{[^}]*\}/, '"profile":{"id":"fx"}')],
+    ["a profile digest of another form", RETAINED.replace(/"digest":"[^"]*"/, '"digest":"sha256:XYZ"')],
+    ["a request that is not an object", RETAINED.replace('"request":{"question":"Which?"}', '"request":"Which?"')],
+    ["a receipt that is not an object", RETAINED.replace('"receipt":{}', '"receipt":[]')],
+    ["salts of another form", RETAINED.replace(/"salts":\{[^}]*\}/, '"salts":{"args":"x"}')],
+  ];
+  for (const [name, entry] of malformedRetained) {
+    cases.push([`research-record-malformed-retained (${name})`, `{"response":{"result":{"responses":[${entry}]}}}`, "refusal:input-malformed"]);
+  }
+  for (const [name, acquisition, expected] of cases) assert.equal(researched(acquisition), expected, name);
+  // an acquisition of any other kind still has its receipt and salts
+  const acquisitions = parse(text(v3bound.acquisitions)) as JObj;
+  const response = member(acquisitions.m.get("fx"), "response") as JObj;
+  response.m.delete("receipt");
+  response.m.delete("salts");
+  assert.equal(verdict({ ...v3bound, acquisitions: canon(acquisitions) }), "refusal:input-malformed");
 });

@@ -488,13 +488,13 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     for (const r of o.evidenceTargets) if (!admitted(d.admitsEvidence.get(r))) finding("admission-refused", `${o.name}: requirement ${r}`);
   }
 
-  // the preparation (§9): in version 2, `cites` ordered by callIndex, those of one index in the order of `sources`;
-  // in version 3, in the order of `sources` (§9.1)
+  // the preparation (§9): in versions 2 and 3 alike, `cites` ordered by callIndex, those of one index in the order of
+  // `sources`, as the Runner writes it (§9.1); a `research` source, whose own order differs, is not read
   const order = new Map(d.sources.map((s, k) => [s.name, k]));
   const cited = outcomes.filter((o) => o.citation !== undefined);
   cited.sort((a, b) => {
-    const x = d.version === 2 ? intValue(a.citation!.m.get("callIndex") as never) : 0;
-    const y = d.version === 2 ? intValue(b.citation!.m.get("callIndex") as never) : 0;
+    const x = intValue(a.citation!.m.get("callIndex") as never);
+    const y = intValue(b.citation!.m.get("callIndex") as never);
     return x !== y ? x - y : order.get(a.name)! - order.get(b.name)!;
   });
   const lineage: JObj[] = [];

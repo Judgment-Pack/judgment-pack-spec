@@ -111,8 +111,10 @@ function exact(v: JVal | undefined, what: string, required: string[], optional: 
   return v;
 }
 
-/** §2, version 3 written one way: an optional member whose absence means its empty value is left out when it is
- * empty, and one written as the empty array or the empty object is refused. */
+/** §2, version 3 written one way, by the Runner's encoding rule: of the members its encoding leaves out when empty,
+ * one written as the empty array or the empty object is refused. They are `sources`, `unmapped` and
+ * `unmappedEvidence`, the case's and a source's `parameters`, and the `facts` and `evidence` of `admits`; every other
+ * member written empty is read. */
 function notWrittenEmpty(v: JVal | undefined, members: string[], what: string): void {
   if (v === undefined || v.t !== "obj") return;
   for (const k of members) {
@@ -233,12 +235,30 @@ export function countsWithin(dialect: JVal, acquisitions: JVal): boolean {
   }
   if (facts > BOUNDS.factTargets || evidence > BOUNDS.evidenceTargets) return false;
   if (acquisitions.t === "obj") {
-    for (const a of acquisitions.m.values()) {
+    const research = researchSources(dialect);
+    for (const [name, a] of acquisitions.m) {
       const r = member(member(a, "response"), "result");
       if (r !== undefined && depth(r) > BOUNDS.readNesting) return false;
+      // the retained responses of a `research` source, at most 64 (§12)
+      const responses = member(r, "responses");
+      if (research.has(name) && responses?.t === "arr" && responses.a.length > BOUNDS.retainedResponses) return false;
     }
   }
   return true;
+}
+
+/** The names of the dialect's sources of kind `research`, read wherever they can be, before any form is checked: their
+ * acquisitions have a form of their own (§4.3, §5.2). */
+export function researchSources(dialect: JVal): Set<string> {
+  const out = new Set<string>();
+  const sources = member(dialect, "sources");
+  if (dialect.t !== "obj" || sources?.t !== "arr") return out;
+  for (const s of sources.a) {
+    const kind = member(s, "kind");
+    const name = member(s, "name");
+    if (kind?.t === "str" && kind.v === "research" && name?.t === "str") out.add(name.v);
+  }
+  return out;
 }
 
 // ---- phase 4: the dialect (§§2–8) ----
@@ -365,7 +385,8 @@ function readRead(v: JVal | undefined, scope: Scope, what: string): Read {
     if (u.length < 1 || u.length > BOUNDS.unwraps) malformed(`${what}.unwrap has ${u.length} pointers`);
     unwrap = u.map((p, k) => pointer(p, `${what}.unwrap[${k}]`));
   }
-  if (hasCopy) return { raw: o, unwrap, copy: readCopy(o.m.get("copy"), `${what}.copy`, false) };
+  // §6.2: a copy's `facts` and `evidence` are both required, as the Runner requires them; either may be empty
+  if (hasCopy) return { raw: o, unwrap, copy: readCopy(o.m.get("copy"), `${what}.copy`, true) };
   return { raw: o, unwrap, rule: readRule(o.m.get("rule"), scope, `${what}.rule`) };
 }
 
@@ -457,7 +478,7 @@ export function readDialect(d: JVal): Dialect {
   const v = Number((version as { lit: string }).lit);
   if (v === 3) {
     for (const k of VERSION_2_MEMBERS) if (o.m.has(k)) malformed(`the dialect's ${k} is a member of version 2 alone`);
-    notWrittenEmpty(o, ["sources", "admits", "unmapped", "unmappedEvidence"], "the dialect");
+    notWrittenEmpty(o, ["sources", "unmapped", "unmappedEvidence"], "the dialect");
     notWrittenEmpty(o.m.get("case"), ["parameters"], "the case");
   }
   if (o.m.has("provider") && string(o.m.get("provider"), "provider") !== "") malformed("provider is not the empty string");
@@ -546,7 +567,6 @@ export function readDialect(d: JVal): Dialect {
     if (scope.size > BOUNDS.scopeParameters) throw new Refusal("input-over-bound", `${what}'s scope`);
 
     const read = readRead(so.m.get("read"), scope, `${what}.read`);
-    if (v === 3) notWrittenEmpty(member(so.m.get("read"), "copy"), ["facts", "evidence"], `${what}.read.copy`);
     const source: Source = { name, kind, parameters, read, factTargets: [], evidenceTargets: [] };
     if (kind === "selected-file") source.provider = string(so.m.get("provider"), "provider");
     // Each member as its kind's form, held above, gives it: an unbound operation names no profile (§4.4), and a
@@ -665,7 +685,6 @@ function readVersion3Kind(so: JObj, kind: string, scope: Scope, what: string): v
       checkTemplate(so.m.get("body")!, scope, `${what}.body`);
     }
     if (so.m.has("headers")) names(so.m.get("headers"), `${what}.headers`);
-    notWrittenEmpty(so, ["headers"], what);
   } else if (kind === "sql") {
     string(so.m.get("statement"), `${what}.statement`); // a fixed string, never a template
     array(so.m.get("bindings"), `${what}.bindings`).forEach((x, k) => {
@@ -802,15 +821,46 @@ export function sha256hex(b: Uint8Array): string {
 
 // ---- phase 4: the acquisitions (§5.2) ----
 
-export function readAcquisitions(v: JVal): Map<string, Acquisition> {
+function readSalts(v: JVal | undefined, what: string): JObj {
+  const salts = exact(v, what, ["args"], ["statement"]);
+  for (const [k, s] of salts.m) if (!HEX64.test(string(s, `${what}.${k}`))) malformed(`${what}.${k} is not 64 hexadecimal characters`);
+  return salts;
+}
+
+/**
+ * §5.2: each acquisition's form. A `research` source's response may lack `receipt` and `salts`, both or neither; its
+ * result is the research record, of §4.3's form, each retained response held to its form here, where a missing
+ * `result` is no refusal of form but `acquisition-missing` (§5.2). A research source is not read (`kind-unread`), so
+ * its acquisition is checked for its form and never as a receipt: one with no receipt of its own carries empty ones.
+ */
+export function readAcquisitions(v: JVal, research: Set<string> = new Set()): Map<string, Acquisition> {
   const o = object(v, "the acquisitions");
   const out = new Map<string, Acquisition>();
   for (const [name, a] of o.m) {
     const what = `acquisitions.${name}`;
-    const r = exact(exact(a, what, ["response"]).m.get("response"), `${what}.response`, ["result", "receipt", "salts"]);
-    const receipt = object(r.m.get("receipt"), `${what}.response.receipt`);
-    const salts = exact(r.m.get("salts"), `${what}.response.salts`, ["args"], ["statement"]);
-    for (const [k, s] of salts.m) if (!HEX64.test(string(s, `${what}.response.salts.${k}`))) malformed(`${what}.response.salts.${k} is not 64 hexadecimal characters`);
+    const response = exact(a, what, ["response"]).m.get("response");
+    if (!research.has(name)) {
+      const r = exact(response, `${what}.response`, ["result", "receipt", "salts"]);
+      const receipt = object(r.m.get("receipt"), `${what}.response.receipt`);
+      out.set(name, { result: r.m.get("result")!, receipt, salts: readSalts(r.m.get("salts"), `${what}.response.salts`) });
+      continue;
+    }
+    const r = exact(response, `${what}.response`, ["result"], ["receipt", "salts"]);
+    if (r.m.has("receipt") !== r.m.has("salts")) malformed(`${what}.response has one of receipt and salts`);
+    const record = exact(r.m.get("result"), `${what}.response.result`, ["responses"]);
+    array(record.m.get("responses"), `${what}.response.result.responses`).forEach((x, k) => {
+      const w = `${what}.response.result.responses[${k}]`;
+      const retained = exact(x, w, ["profile", "request", "receipt", "salts"], ["result"]);
+      const p = exact(retained.m.get("profile"), `${w}.profile`, ["id", "digest"]);
+      nonEmpty(p.m.get("id"), `${w}.profile.id`);
+      if (!DIGEST.test(string(p.m.get("digest"), `${w}.profile.digest`))) malformed(`${w}.profile.digest is not a digest`);
+      const request = object(retained.m.get("request"), `${w}.request`);
+      if (!inCanonDomain(request)) malformed(`${w}.request is outside the canon domain`);
+      object(retained.m.get("receipt"), `${w}.receipt`);
+      readSalts(retained.m.get("salts"), `${w}.salts`);
+    });
+    const receipt = r.m.has("receipt") ? object(r.m.get("receipt"), `${what}.response.receipt`) : obj();
+    const salts = r.m.has("salts") ? readSalts(r.m.get("salts"), `${what}.response.salts`) : obj();
     out.set(name, { result: r.m.get("result")!, receipt, salts });
   }
   return out;

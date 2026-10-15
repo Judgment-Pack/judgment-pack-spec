@@ -1,7 +1,7 @@
 // A preparation verifier (spec/dialect.md §11, §14): the refusals in their phases, the findings in their
 // order, and the reading.
 import { BOUNDS, scanBytes } from "./bounds.ts";
-import { Refusal, countsWithin, readAcquisitions, readBound, readDialect, readProfiles, readRecord, readVerifiedAt, sha256hex } from "./forms.ts";
+import { Refusal, countsWithin, readAcquisitions, readBound, readDialect, readProfiles, readRecord, readVerifiedAt, researchSources, sha256hex } from "./forms.ts";
 import { NotRead, OutsideDomain, arr, compareCodePoints, intValue, isInteger, jsonEqual, member, num, obj, preparationForm, read, str, utf8 } from "./json.ts";
 import type { JObj, JVal } from "./json.ts";
 import { Finding, conditionParameters, recompute } from "./prepare.ts";
@@ -107,7 +107,7 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
   // bound dialect (§4.4)
   const dialect = readBound(readDialect(dialectValue), parsed.get("the binding document")?.value);
   const profiles = readProfiles(parsed.get("the profiles")!.value);
-  const acquisitions = readAcquisitions(acquisitionsValue);
+  const acquisitions = readAcquisitions(acquisitionsValue, researchSources(dialectValue));
   const verifiedAt = readVerifiedAt(preparationValue);
   const recordObj = record === undefined ? undefined : readRecord(record.value);
 
