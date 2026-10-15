@@ -10,7 +10,7 @@ holds the 54 vectors of its companion document,
 [`spec/checkpoint-witness.md`](../spec/checkpoint-witness.md), which are staged until the next
 `specVersion` opens: in no corpus, and not served by the site. Nor is the dialect:
 [`dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)
-holds the reference Runner's 10 preparation vectors for its companion document,
+holds the reference Runner's 12 preparation vectors for its companion document,
 [`spec/dialect.md`](../spec/dialect.md), staged until the next `specVersion` opens: in no corpus,
 and not served by the site.
 

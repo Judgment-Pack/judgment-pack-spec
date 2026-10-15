@@ -2,7 +2,7 @@
 import { createHash } from "node:crypto";
 import { BOUNDS } from "./bounds.ts";
 import { keyAcceptable } from "./ed25519.ts";
-import { canon, depth, inCanonDomain, isInteger, isPointer, intValue, member } from "./json.ts";
+import { arr, canon, depth, inCanonDomain, isInteger, isPointer, intValue, member, obj } from "./json.ts";
 import type { JObj, JVal } from "./json.ts";
 import { instant } from "./time.ts";
 
@@ -25,7 +25,19 @@ const CLASSES = new Set(["asserted", "record", "generated"]);
 const AVAILABILITY = new Set(["present", "absent", "unknown"]);
 const STATUSES = new Set(["resolved", "absent", "unknown"]);
 const SHAPES = new Set(["airbyte", "mcp", "http", "command"]);
-const VERSION_3_KINDS = new Set(["http", "sql", "web", "research"]);
+const OPERATION_SHAPES = new Set(["airbyte", "mcp", "http"]); // the shapes that serve an operation (§4.1)
+// §4.3: the kinds version 3 adds, and the members each names beside §4's, `profile`, `profileDigest` and
+// `maxAge`: those it requires, and those it may give.
+const VERSION_3_KINDS = new Map<string, { required: string[]; optional: string[] }>([
+  ["http", { required: ["method", "path"], optional: ["query", "body", "headers"] }],
+  ["sql", { required: ["statement", "bindings"], optional: [] }],
+  ["web", { required: ["url"], optional: [] }],
+  ["research", { required: ["question", "constraints", "model", "evidence"], optional: [] }],
+]);
+// §2: the members of version 2 alone, which a document of version 3 carries none of.
+const VERSION_2_MEMBERS = ["provider", "facts", "evidence"];
+// §4.4: the catalog names of an unbound `operation`, which the binding removes.
+const UNBOUND_MEMBERS = ["platform", "operation", "shape", "record"];
 export const DIGEST = /^sha256:[0-9a-f]{64}$/;
 const HEX64 = /^[0-9a-f]{64}$/;
 
@@ -54,8 +66,14 @@ export type Source = {
   evidenceTargets: string[];
 };
 
+/** An unbound source's `shape` and `record` (§4.4), which the profile it is bound to must serve. */
+export type Catalog = { shape: string; record: string };
+
 export type Dialect = {
   raw: JVal;
+  version: number; // 2 or 3 (§2)
+  unbound: Map<string, Catalog>; // each unbound source by its name (§4.4)
+  boundFrom: Map<string, Catalog>; // of a bound dialect: each source the binding document bound
   caseParams: CaseParam[];
   caseCopy: CopyRead;
   caseFacts: JVal; // the case's `facts` and `evidence`, as written, for the case's read
@@ -91,6 +109,20 @@ function exact(v: JVal | undefined, what: string, required: string[], optional: 
   for (const r of required) if (!v.m.has(r)) malformed(`${what} lacks ${r}`);
   for (const k of v.m.keys()) if (!required.includes(k) && !optional.includes(k)) malformed(`${what} has the unknown member ${k}`);
   return v;
+}
+
+/** §2, version 3 written one way, by the Runner's encoding rule: of the members its encoding leaves out when empty,
+ * one written as the empty array or the empty object is refused. They are `sources`, `unmapped` and
+ * `unmappedEvidence`, the case's and a source's `parameters`, and the `facts` and `evidence` of `admits`; every other
+ * member written empty is read. */
+function notWrittenEmpty(v: JVal | undefined, members: string[], what: string): void {
+  if (v === undefined || v.t !== "obj") return;
+  for (const k of members) {
+    const x = v.m.get(k);
+    if (x !== undefined && ((x.t === "arr" && x.a.length === 0) || (x.t === "obj" && x.m.size === 0))) {
+      malformed(`${what}.${k} is written empty, which version 3 leaves out`);
+    }
+  }
 }
 
 function string(v: JVal | undefined, what: string): string {
@@ -203,12 +235,30 @@ export function countsWithin(dialect: JVal, acquisitions: JVal): boolean {
   }
   if (facts > BOUNDS.factTargets || evidence > BOUNDS.evidenceTargets) return false;
   if (acquisitions.t === "obj") {
-    for (const a of acquisitions.m.values()) {
+    const research = researchSources(dialect);
+    for (const [name, a] of acquisitions.m) {
       const r = member(member(a, "response"), "result");
       if (r !== undefined && depth(r) > BOUNDS.readNesting) return false;
+      // the retained responses of a `research` source, at most 64 (§12)
+      const responses = member(r, "responses");
+      if (research.has(name) && responses?.t === "arr" && responses.a.length > BOUNDS.retainedResponses) return false;
     }
   }
   return true;
+}
+
+/** The names of the dialect's sources of kind `research`, read wherever they can be, before any form is checked: their
+ * acquisitions have a form of their own (§4.3, §5.2). */
+export function researchSources(dialect: JVal): Set<string> {
+  const out = new Set<string>();
+  const sources = member(dialect, "sources");
+  if (dialect.t !== "obj" || sources?.t !== "arr") return out;
+  for (const s of sources.a) {
+    const kind = member(s, "kind");
+    const name = member(s, "name");
+    if (kind?.t === "str" && kind.v === "research" && name?.t === "str") out.add(name.v);
+  }
+  return out;
 }
 
 // ---- phase 4: the dialect (§§2–8) ----
@@ -335,7 +385,8 @@ function readRead(v: JVal | undefined, scope: Scope, what: string): Read {
     if (u.length < 1 || u.length > BOUNDS.unwraps) malformed(`${what}.unwrap has ${u.length} pointers`);
     unwrap = u.map((p, k) => pointer(p, `${what}.unwrap[${k}]`));
   }
-  if (hasCopy) return { raw: o, unwrap, copy: readCopy(o.m.get("copy"), `${what}.copy`, false) };
+  // §6.2: a copy's `facts` and `evidence` are both required, as the Runner requires them; either may be empty
+  if (hasCopy) return { raw: o, unwrap, copy: readCopy(o.m.get("copy"), `${what}.copy`, true) };
   return { raw: o, unwrap, rule: readRule(o.m.get("rule"), scope, `${what}.rule`) };
 }
 
@@ -423,8 +474,13 @@ function classList(v: JVal | undefined, what: string): string[] {
 export function readDialect(d: JVal): Dialect {
   const o = exact(d, "the dialect", ["version", "case"], ["sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"]);
   const version = o.m.get("version")!;
-  // A version-3 dialect was refused before any form was checked (verify.ts, `version-unread`).
-  if (version.t !== "num" || version.lit !== "2") malformed("the dialect's version is not the integer 2");
+  if (version.t !== "num" || (version.lit !== "2" && version.lit !== "3")) malformed("the dialect's version is not the integer 2 or 3");
+  const v = Number((version as { lit: string }).lit);
+  if (v === 3) {
+    for (const k of VERSION_2_MEMBERS) if (o.m.has(k)) malformed(`the dialect's ${k} is a member of version 2 alone`);
+    notWrittenEmpty(o, ["sources", "unmapped", "unmappedEvidence"], "the dialect");
+    notWrittenEmpty(o.m.get("case"), ["parameters"], "the case");
+  }
   if (o.m.has("provider") && string(o.m.get("provider"), "provider") !== "") malformed("provider is not the empty string");
   for (const k of ["facts", "evidence"]) if (o.m.has(k) && o.m.get(k)!.t !== "null") malformed(`the dialect's ${k} is not null`);
   if (o.m.has("unmapped")) {
@@ -454,6 +510,7 @@ export function readDialect(d: JVal): Dialect {
 
   // §4: the sources
   const sources: Source[] = [];
+  const unbound = new Map<string, Catalog>();
   const rawSources = o.m.has("sources") ? array(o.m.get("sources"), "sources") : [];
   if (rawSources.length > BOUNDS.sources) throw new Refusal("input-over-bound", "sources");
   rawSources.forEach((raw, i) => {
@@ -461,7 +518,18 @@ export function readDialect(d: JVal): Dialect {
     const so = object(raw, what);
     const kind = string(so.m.get("kind"), `${what}.kind`);
     const base = ["name", "kind", "read"];
-    if (kind === "operation") {
+    // §4.4: the unbound form, of version 3 alone; a version-2 source that names one of its members is refused as
+    // naming a member its kind does not list.
+    const unboundForm = kind === "operation" && v === 3 && UNBOUND_MEMBERS.some((k) => so.m.has(k));
+    let catalog: Catalog | undefined;
+    if (unboundForm) {
+      exact(so, what, [...base, ...UNBOUND_MEMBERS, "maxAge", "arguments"], ["parameters", "calculation"]);
+      nonEmpty(so.m.get("platform"), `${what}.platform`);
+      nonEmpty(so.m.get("operation"), `${what}.operation`);
+      const shape = string(so.m.get("shape"), `${what}.shape`);
+      if (!OPERATION_SHAPES.has(shape)) malformed(`${what}.shape is not airbyte, mcp or http`);
+      catalog = { shape, record: nonEmpty(so.m.get("record"), `${what}.record`) };
+    } else if (kind === "operation") {
       exact(so, what, [...base, "profile", "profileDigest", "maxAge", "arguments"], ["parameters", "calculation"]);
     } else if (kind === "selected-file") {
       const provider = string(so.m.get("provider"), `${what}.provider`);
@@ -469,7 +537,9 @@ export function readDialect(d: JVal): Dialect {
       else if (provider === "google-drive") exact(so, what, [...base, "provider", "profile", "profileDigest", "maxAge", "arguments"], ["parameters"]);
       else malformed(`${what}.provider is not a provider`);
     } else if (VERSION_3_KINDS.has(kind)) {
-      malformed(`${what} names the version-3 kind ${kind} in a version-2 dialect`);
+      if (v === 2) malformed(`${what} names the version-3 kind ${kind} in a version-2 dialect`);
+      const members = VERSION_3_KINDS.get(kind)!;
+      exact(so, what, [...base, "profile", "profileDigest", "maxAge", ...members.required], ["parameters", ...members.optional]);
     } else {
       malformed(`${what} names the unknown kind ${kind}`);
     }
@@ -478,6 +548,7 @@ export function readDialect(d: JVal): Dialect {
 
     const scope: Scope = new Map(caseScope);
     const parameters: SourceParam[] = [];
+    if (v === 3) notWrittenEmpty(so, ["parameters"], what);
     if (so.m.has("parameters")) {
       for (const [pname, decl] of object(so.m.get("parameters"), `${what}.parameters`).m) {
         if (pname === "" || pname === "runAt" || caseScope.has(pname)) malformed(`${what}.parameters names ${pname}`);
@@ -498,15 +569,21 @@ export function readDialect(d: JVal): Dialect {
     const read = readRead(so.m.get("read"), scope, `${what}.read`);
     const source: Source = { name, kind, parameters, read, factTargets: [], evidenceTargets: [] };
     if (kind === "selected-file") source.provider = string(so.m.get("provider"), "provider");
+    // Each member as its kind's form, held above, gives it: an unbound operation names no profile (§4.4), and a
+    // kind of version 3 has no `arguments` but members of its own (§4.3).
     if (so.m.has("profile")) {
       source.profile = nonEmpty(so.m.get("profile"), `${what}.profile`);
       const digest = string(so.m.get("profileDigest"), `${what}.profileDigest`);
       if (!DIGEST.test(digest)) malformed(`${what}.profileDigest is not a digest`);
       source.profileDigest = digest;
-      source.maxAge = integerIn(so.m.get("maxAge"), 1, 86400, `${what}.maxAge`);
+    }
+    if (so.m.has("maxAge")) source.maxAge = integerIn(so.m.get("maxAge"), 1, 86400, `${what}.maxAge`);
+    if (so.m.has("arguments")) {
       source.template = readRequest(so.m.get("arguments"), scope, `${what}.arguments`);
       source.scope = scope;
     }
+    if (VERSION_3_KINDS.has(kind)) readVersion3Kind(so, kind, scope, what);
+    if (catalog !== undefined) unbound.set(name, catalog);
     if (so.m.has("calculation")) {
       const co = exact(so.m.get("calculation"), `${what}.calculation`, ["inputs", "tables"]);
       const inputs = new Map<string, string>();
@@ -547,6 +624,7 @@ export function readDialect(d: JVal): Dialect {
   const admitsEvidence = new Map<string, string[]>();
   if (o.m.has("admits")) {
     const ad = exact(o.m.get("admits"), "admits", [], ["facts", "evidence"]);
+    if (v === 3) notWrittenEmpty(ad, ["facts", "evidence"], "admits");
     if (ad.m.has("facts")) {
       for (const [t, l] of object(ad.m.get("facts"), "admits.facts").m) {
         if (!allFacts.includes(t)) malformed(`admits names the fact target ${t}, which no source writes`);
@@ -564,6 +642,9 @@ export function readDialect(d: JVal): Dialect {
   if (!inCanonDomain(d)) malformed("the dialect is outside the canon domain");
   return {
     raw: d,
+    version: v,
+    unbound,
+    boundFrom: new Map(),
     caseParams,
     caseCopy,
     caseFacts: c.m.get("facts")!,
@@ -574,6 +655,116 @@ export function readDialect(d: JVal): Dialect {
     admitsFacts,
     admitsEvidence,
   };
+}
+
+/**
+ * §4.3: the members a kind of version 3 names, held to the forms the text gives them; the kind is then not read
+ * (`kind-unread`). Where the text names a member without its form — `http`'s `path`, "a template that yields a
+ * path", and `headers`, "the names of the headers"; `research`'s `evidence`, "the fields each answer MUST support";
+ * a `sql` binding's `name` and `type` — this reader takes a string template for a path and non-empty strings for
+ * names. (No vector decides this.)
+ */
+function readVersion3Kind(so: JObj, kind: string, scope: Scope, what: string): void {
+  const stringTemplateOf = (v: JVal | undefined, w: string) => {
+    if (v === undefined) return malformed(`${w} is absent`);
+    checkTemplate(v, scope, w);
+    if (!stringTemplate(v, scope)) malformed(`${w} is not a string template`);
+  };
+  const names = (v: JVal | undefined, w: string) => array(v, w).forEach((x, k) => nonEmpty(x, `${w}[${k}]`));
+  if (kind === "http") {
+    const method = string(so.m.get("method"), `${what}.method`);
+    if (method !== "GET" && method !== "POST") malformed(`${what}.method is not GET or POST`);
+    stringTemplateOf(so.m.get("path"), `${what}.path`);
+    if (so.m.has("query")) {
+      const query = object(so.m.get("query"), `${what}.query`);
+      if (Array.from(query.m.keys()).some((k) => k.startsWith("$"))) malformed(`${what}.query is a template form, not an object`);
+      for (const [k, x] of query.m) stringTemplateOf(x, `${what}.query.${k}`);
+    }
+    if (so.m.has("body")) {
+      if (method === "GET") malformed(`${what} has a body beside GET`);
+      checkTemplate(so.m.get("body")!, scope, `${what}.body`);
+    }
+    if (so.m.has("headers")) names(so.m.get("headers"), `${what}.headers`);
+  } else if (kind === "sql") {
+    string(so.m.get("statement"), `${what}.statement`); // a fixed string, never a template
+    array(so.m.get("bindings"), `${what}.bindings`).forEach((x, k) => {
+      const w = `${what}.bindings[${k}]`;
+      const e = exact(x, w, ["name", "type", "value"]);
+      nonEmpty(e.m.get("name"), `${w}.name`);
+      nonEmpty(e.m.get("type"), `${w}.type`);
+      const value = object(e.m.get("value"), `${w}.value`);
+      if (value.m.size !== 1 || !value.m.has("$param")) malformed(`${w}.value is not a $param form`);
+      checkTemplate(value, scope, `${w}.value`);
+    });
+  } else if (kind === "web") {
+    const url = so.m.get("url")!;
+    if (url.t !== "str") {
+      const p = object(url, `${what}.url`);
+      if (p.m.size !== 1 || !p.m.has("$param")) malformed(`${what}.url is not a string or a $param form`);
+      checkTemplate(p, scope, `${what}.url`);
+      if (scope.get((p.m.get("$param") as { v: string }).v) !== "string") malformed(`${what}.url names a parameter that is not a string`);
+    }
+  } else {
+    stringTemplateOf(so.m.get("question"), `${what}.question`);
+    object(so.m.get("constraints"), `${what}.constraints`);
+    string(so.m.get("model"), `${what}.model`);
+    names(so.m.get("evidence"), `${what}.evidence`);
+  }
+}
+
+// ---- phase 4: the binding document and the bound dialect (§4.4) ----
+
+/** The binding document: exactly `dialect`, a digest, and `sources`, mapping names to objects of exactly `profile`, a
+ * non-empty string, and `profileDigest`, a digest. */
+export function readBinding(v: JVal): JObj {
+  const o = exact(v, "the binding document", ["dialect", "sources"]);
+  if (!DIGEST.test(string(o.m.get("dialect"), "the binding document's dialect"))) malformed("the binding document's dialect is not a digest");
+  for (const [name, entry] of object(o.m.get("sources"), "the binding document's sources").m) {
+    const e = exact(entry, `the binding document's sources.${name}`, ["profile", "profileDigest"]);
+    nonEmpty(e.m.get("profile"), `the binding document's sources.${name}.profile`);
+    if (!DIGEST.test(string(e.m.get("profileDigest"), `the binding document's sources.${name}.profileDigest`))) {
+      malformed(`the binding document's sources.${name}.profileDigest is not a digest`);
+    }
+  }
+  return o;
+}
+
+/** The bound dialect: each source the binding document names with its catalog names removed and the profile and its
+ * digest the binding gives it added, every other member kept as written. */
+export function bindDialect(d: JObj, binding: JObj): JObj {
+  const entries = (binding.m.get("sources") as JObj).m;
+  const sources = (member(d, "sources") as { a: JVal[] }).a.map((s) => {
+    const name = (member(s, "name") as { v: string }).v;
+    const entry = entries.get(name);
+    if (entry === undefined) return s;
+    const kept: [string, JVal][] = Array.from((s as JObj).m).filter(([k]) => !UNBOUND_MEMBERS.includes(k));
+    return obj([...kept, ["profile", member(entry, "profile")!], ["profileDigest", member(entry, "profileDigest")!]]);
+  });
+  return obj(Array.from(d.m).map(([k, x]): [string, JVal] => [k, k === "sources" ? arr(sources) : x]));
+}
+
+/**
+ * §4.4, verifying it: a dialect with an unbound source is read with its binding document, as the bound dialect, with
+ * two checks more. The first is here: the binding is for this dialect, by its digest, and names exactly its unbound
+ * sources; and there is a binding document exactly when there is an unbound source. The second is a finding.
+ */
+export function readBound(dialect: Dialect, bindingValue: JVal | undefined): Dialect {
+  const binding = bindingValue === undefined ? undefined : readBinding(bindingValue);
+  if (dialect.unbound.size === 0) {
+    if (binding !== undefined) malformed("a binding document beside a dialect with no unbound source");
+    return dialect;
+  }
+  if (binding === undefined) return malformed("a dialect with an unbound source and no binding document");
+  if ((binding.m.get("dialect") as { v: string }).v !== "sha256:" + sha256hex(canon(dialect.raw))) {
+    malformed("the binding document's dialect is not the given dialect's digest");
+  }
+  const named = Array.from((binding.m.get("sources") as JObj).m.keys());
+  if (named.length !== dialect.unbound.size || !named.every((n) => dialect.unbound.has(n))) {
+    malformed("the binding document does not name exactly the dialect's unbound sources");
+  }
+  const bound = readDialect(bindDialect(dialect.raw as JObj, binding));
+  bound.boundFrom = dialect.unbound;
+  return bound;
 }
 
 // ---- phase 4: the profiles (§5.1) ----
@@ -630,15 +821,46 @@ export function sha256hex(b: Uint8Array): string {
 
 // ---- phase 4: the acquisitions (§5.2) ----
 
-export function readAcquisitions(v: JVal): Map<string, Acquisition> {
+function readSalts(v: JVal | undefined, what: string): JObj {
+  const salts = exact(v, what, ["args"], ["statement"]);
+  for (const [k, s] of salts.m) if (!HEX64.test(string(s, `${what}.${k}`))) malformed(`${what}.${k} is not 64 hexadecimal characters`);
+  return salts;
+}
+
+/**
+ * §5.2: each acquisition's form. A `research` source's response may lack `receipt` and `salts`, both or neither; its
+ * result is the research record, of §4.3's form, each retained response held to its form here, where a missing
+ * `result` is no refusal of form but `acquisition-missing` (§5.2). A research source is not read (`kind-unread`), so
+ * its acquisition is checked for its form and never as a receipt: one with no receipt of its own carries empty ones.
+ */
+export function readAcquisitions(v: JVal, research: Set<string> = new Set()): Map<string, Acquisition> {
   const o = object(v, "the acquisitions");
   const out = new Map<string, Acquisition>();
   for (const [name, a] of o.m) {
     const what = `acquisitions.${name}`;
-    const r = exact(exact(a, what, ["response"]).m.get("response"), `${what}.response`, ["result", "receipt", "salts"]);
-    const receipt = object(r.m.get("receipt"), `${what}.response.receipt`);
-    const salts = exact(r.m.get("salts"), `${what}.response.salts`, ["args"], ["statement"]);
-    for (const [k, s] of salts.m) if (!HEX64.test(string(s, `${what}.response.salts.${k}`))) malformed(`${what}.response.salts.${k} is not 64 hexadecimal characters`);
+    const response = exact(a, what, ["response"]).m.get("response");
+    if (!research.has(name)) {
+      const r = exact(response, `${what}.response`, ["result", "receipt", "salts"]);
+      const receipt = object(r.m.get("receipt"), `${what}.response.receipt`);
+      out.set(name, { result: r.m.get("result")!, receipt, salts: readSalts(r.m.get("salts"), `${what}.response.salts`) });
+      continue;
+    }
+    const r = exact(response, `${what}.response`, ["result"], ["receipt", "salts"]);
+    if (r.m.has("receipt") !== r.m.has("salts")) malformed(`${what}.response has one of receipt and salts`);
+    const record = exact(r.m.get("result"), `${what}.response.result`, ["responses"]);
+    array(record.m.get("responses"), `${what}.response.result.responses`).forEach((x, k) => {
+      const w = `${what}.response.result.responses[${k}]`;
+      const retained = exact(x, w, ["profile", "request", "receipt", "salts"], ["result"]);
+      const p = exact(retained.m.get("profile"), `${w}.profile`, ["id", "digest"]);
+      nonEmpty(p.m.get("id"), `${w}.profile.id`);
+      if (!DIGEST.test(string(p.m.get("digest"), `${w}.profile.digest`))) malformed(`${w}.profile.digest is not a digest`);
+      const request = object(retained.m.get("request"), `${w}.request`);
+      if (!inCanonDomain(request)) malformed(`${w}.request is outside the canon domain`);
+      object(retained.m.get("receipt"), `${w}.receipt`);
+      readSalts(retained.m.get("salts"), `${w}.salts`);
+    });
+    const receipt = r.m.has("receipt") ? object(r.m.get("receipt"), `${what}.response.receipt`) : obj();
+    const salts = r.m.has("salts") ? readSalts(r.m.get("salts"), `${what}.response.salts`) : obj();
     out.set(name, { result: r.m.get("result")!, receipt, salts });
   }
   return out;

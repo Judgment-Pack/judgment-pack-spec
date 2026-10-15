@@ -1,7 +1,7 @@
 // A preparation verifier (spec/dialect.md §11, §14): the refusals in their phases, the findings in their
 // order, and the reading.
 import { BOUNDS, scanBytes } from "./bounds.ts";
-import { Refusal, countsWithin, readAcquisitions, readDialect, readProfiles, readRecord, readVerifiedAt, sha256hex } from "./forms.ts";
+import { Refusal, countsWithin, readAcquisitions, readBound, readDialect, readProfiles, readRecord, readVerifiedAt, researchSources, sha256hex } from "./forms.ts";
 import { NotRead, OutsideDomain, arr, compareCodePoints, intValue, isInteger, jsonEqual, member, num, obj, preparationForm, read, str, utf8 } from "./json.ts";
 import type { JObj, JVal } from "./json.ts";
 import { Finding, conditionParameters, recompute } from "./prepare.ts";
@@ -15,7 +15,12 @@ export type Inputs = {
   preparation: Uint8Array;
   record?: Uint8Array; // the line, without its newline
   requireBinding: boolean;
+  binding?: Uint8Array; // the binding document of a dialect with an unbound source (§4.4)
 };
+
+// §2: the dialect versions the text defines, and those this verifier reads: both (§11, `version-unread`).
+const DEFINED_VERSIONS = ["2", "3"];
+const READ_VERSIONS = ["2", "3"];
 
 export type Result = {
   kind: "reading" | "finding" | "refusal";
@@ -50,6 +55,7 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
     ["the profiles", inputs.profiles],
     ["the preparation", inputs.preparation],
     ["the record", inputs.record],
+    ["the binding document", inputs.binding],
   ];
 
   // phase 1: the bounds measured on bytes, on every document before any is read
@@ -58,6 +64,7 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
   if (inputs.profiles.length > BOUNDS.profilesBytes) over("the profiles' size");
   if (inputs.preparation.length > BOUNDS.preparationBytes) over("the preparation's size");
   if (inputs.record !== undefined && inputs.record.length > BOUNDS.recordBytes) over("the record's size");
+  if (inputs.binding !== undefined && inputs.binding.length > BOUNDS.bindingBytes) over("the binding document's size");
   for (const [what, bytes] of docs) {
     if (bytes === undefined) continue;
     const scan = scanBytes(bytes);
@@ -89,16 +96,18 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
   // phase 3: the counts
   if (!countsWithin(dialectValue, acquisitionsValue)) over("a count of the dialect or the nesting of a result");
 
-  // phase 4: a version this verifier does not read. Version 3 (§4.3, §4.4) is defined and not read here.
+  // phase 4: a version this verifier does not read. It reads both the text defines, 2 and 3.
   const version = member(dialectValue, "version");
-  if (dialectValue.t === "obj" && isInteger(version) && intValue(version) === 3) {
-    throw new Refusal("version-unread", "dialect version 3, its unbound source form and binding document (§4.4) and the kinds of §4.3, is not read by this verifier");
+  if (dialectValue.t === "obj" && isInteger(version)) {
+    const v = String(intValue(version));
+    if (DEFINED_VERSIONS.includes(v) && !READ_VERSIONS.includes(v)) throw new Refusal("version-unread", `dialect version ${v} is not read by this verifier`);
   }
 
-  // phase 5: every document's form
-  const dialect = readDialect(dialectValue);
+  // phase 5: every document's form; a dialect with an unbound source is read with its binding document, as the
+  // bound dialect (§4.4)
+  const dialect = readBound(readDialect(dialectValue), parsed.get("the binding document")?.value);
   const profiles = readProfiles(parsed.get("the profiles")!.value);
-  const acquisitions = readAcquisitions(acquisitionsValue);
+  const acquisitions = readAcquisitions(acquisitionsValue, researchSources(dialectValue));
   const verifiedAt = readVerifiedAt(preparationValue);
   const recordObj = record === undefined ? undefined : readRecord(record.value);
 

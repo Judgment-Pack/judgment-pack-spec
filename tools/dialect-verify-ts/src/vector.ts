@@ -1,7 +1,8 @@
 // Turning one staged vector directory into a verifier's inputs, as conformance/dialect/README.md lists
 // them: mapping.json, case.json, sources.json (`{}` when absent), profiles.json, and from run.json the
 // preparation `run.input.preparation` and the record (`run.auditBytes` in standard base64, or else
-// `run.audit` as the export writes it).
+// `run.audit` as the export writes it). A vector of a dialect bound at import holds binding.json: its
+// dialect is then unbound.json, given with binding.json, and mapping.json is the bound dialect (§4.4).
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { NotRead, member, read, utf8 } from "./json.ts";
@@ -34,8 +35,10 @@ export function loadVector(dir: string, requireBinding: boolean): Inputs {
   } else if (audit !== undefined) {
     record = slice(audit);
   }
+  const imported = existsSync(join(dir, "binding.json"));
   return {
-    dialect: file("mapping.json"),
+    dialect: file(imported ? "unbound.json" : "mapping.json"),
+    binding: imported ? file("binding.json") : undefined,
     case: file("case.json"),
     acquisitions: existsSync(sources) ? file("sources.json") : utf8("{}"),
     profiles: file("profiles.json"),

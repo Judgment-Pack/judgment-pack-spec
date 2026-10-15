@@ -12,13 +12,16 @@ Its design record is [RFC 0018](../rfcs/0018-dialect.md), accepted on 2026-10-15
 which is informative; its Specification section, §§1–14 below, is that text. The comment period
 RFC 0000 names was waived by the maintainer, as the RFC's adoption record says.
 
-Its ten vectors, under
+Its twelve vectors, under
 [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect),
 are the reference Runner's `vectors/preparation/`, byte for byte: nine at commit
 `05636eda96a9588279d61a6272625be859a28117` (Runner pull request 77), which reached the Runner's
-`main` as commit `82116bfab7705f74ca3e493c9722dd3831c7418f` with the same files, and the tenth,
+`main` as commit `82116bfab7705f74ca3e493c9722dd3831c7418f` with the same files; the tenth,
 `http-shaped-source`, at the Runner's `main` commit `c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9`
-(Runner pull request 80), which holds the nine unchanged. They are **staged** until the next
+(Runner pull request 80), which holds the nine unchanged; and the eleventh and twelfth,
+`version-3-bound` and `unbound-bound-at-import`, the first of dialect version 3, at the Runner's
+`main` commit `89cf44109ad3a9862ab0386811bef63d8a9a1657` (Runner pull request 83, released in
+`v0.12.0`), which holds the ten unchanged. They are **staged** until the next
 `specVersion` opens: they are in no corpus, no claim may cite them, the site does not serve them,
 and no release bundle carries them. When that version opens they move into a corpus, normative for
 this class and for nothing else. Until a specification version publishes them, no
@@ -28,17 +31,18 @@ with the version its claim names, and no version publishes these.
 It specifies version 2 of the dialect document and of the preparation, which are the Runner's
 mapping v2 and its preparation, restated. Since the amendment of 2026-10-15 (RFC 0018, its
 Amendment), version 2's `operation` reads a gateway source of shape `airbyte`, `mcp` or `http`, as
-the Runner's mapping v2 does since its pull request 80: the vectors hold `mcp`, in nine, and
-`http`, in the tenth, and `airbyte` is defined and not claimable (§4.1). That amendment is a
+the Runner's mapping v2 does since its pull request 80: the vectors of version 2 hold `mcp`, in
+nine, and `http`, in the tenth, and `airbyte` is defined and not claimable (§4.1). That amendment is a
 compatible extension of the record kind to every adapter shape, and one restriction: a receipt that
 attests a page (`pageItems`) is refused, whatever the shape (§5.2). The restriction changes one
 answer the accepted text gave: a signed acquisition of shape `mcp` whose receipt carried
 `pageItems` was read, and is `acquisition-invalid` now. The Runner has never prepared a paged
-acquisition, and no preparation over one exists. It proposes version 3 of the
-dialect document, which adds four source kinds (§4.3) and the unbound source form (§4.4), defined
-and not claimable: no preparer writes it and no vector holds it; and version 1 of the output side
-(§10). It is published beside the released Core `0.2.0-draft` and carries no `specVersion` of its
-own. Like Core, it is a research preview, at draft maturity.
+acquisition, and no preparation over one exists. It specifies version 3 of the dialect document
+too, which adds four source kinds (§4.3) and the unbound source form (§4.4): the reference Runner
+reads version 3 since its pull request 83 (`v0.12.0`), and two of the vectors hold it, while the
+four kinds are proposed, and no preparer writes them and no vector holds them (§4.3). It proposes
+version 1 of the output side (§10). It is published beside the released Core `0.2.0-draft` and
+carries no `specVersion` of its own. Like Core, it is a research preview, at draft maturity.
 
 **Its sources.** Where the Runner's words define the format, this document keeps them; where they
 describe the Runner rather than the format, it says what the format is.
@@ -51,7 +55,8 @@ describe the Runner rather than the format, it says what the format is.
   "Runner, *name*" below means the section of `MAPPING-V2.md` of that name, at that commit. For
   the shapes of an `operation` (§4.1), the same document at the Runner's commit
   `c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9`, whose section on the source kinds the Runner's pull
-  request 80 changed.
+  request 80 changed. For version 3 as the Runner reads it (§2, §4.3, §4.4), the same document's
+  section "Dialect version 3" at the Runner's commit `89cf44109ad3a9862ab0386811bef63d8a9a1657`.
 - The portable derivation rule the Runner vendors,
   [`derivation-rule/SPEC.md`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments/blob/96fa95874bfaa4d5a01c0c111fd8b5b6613c881c/derivation-rule/SPEC.md)
   at commit `96fa95874bfaa4d5a01c0c111fd8b5b6613c881c`, restated in §6.3.
@@ -156,7 +161,9 @@ The dialect document is one JSON object. Its version 2 is the Runner's mapping v
 mapping v2 document the Runner accepts is a version-2 dialect document, with the same bytes and the
 same digest. The one exception is a request's `query` under a profile whose adapter is the gateway's
 `adapter-http`, which the Runner holds to the rules of a template alone and this document to string
-templates as well (§4.1). Version 3 (§4.3, §4.4) is not the Runner's: no Runner reads it.
+templates as well (§4.1). Version 3 (§4.3, §4.4) is read by the reference Runner since its pull
+request 83, released in `v0.12.0`: it prepares an `operation`, bound or unbound and bound at import,
+and a `selected-file`, and refuses each of the other four kinds by name.
 
 | Member | Form | Meaning |
 | --- | --- | --- |
@@ -166,8 +173,8 @@ templates as well (§4.1). Version 3 (§4.3, §4.4) is not the Runner's: no Runn
 | `admits` | an object (§8.2), optional | the classes a target admits, where they are not the default |
 | `unmapped` | an array of distinct pointers, optional | fact pointers a pack reads that the author acknowledges are not mapped |
 | `unmappedEvidence` | an array of distinct non-empty strings, optional | evidence requirements a pack declares that the author acknowledges are not mapped |
-| `provider` | the string `""`, optional | a member of the Runner's version-1 mapping, which its encoding of a version-2 document carries empty |
-| `facts`, `evidence` | `null`, optional | the same |
+| `provider` | the string `""`, optional, of version 2 only | a member of the Runner's version-1 mapping, which its encoding of a version-2 document carries empty |
+| `facts`, `evidence` | `null`, optional, of version 2 only | the same |
 
 `unmapped` and `unmappedEvidence` are for review of a dialect against a pack's inventory (Runner,
 "Release checks, runtime and offline verification"): no preparation reads them, and a verifier
@@ -177,6 +184,17 @@ The **dialect digest** is the digest of the document's `canon` bytes, every memb
 included. The same document with an optional member written out, as the Runner's encoding writes
 `provider`, `facts` and `evidence`, or left out, has another digest: a verifier takes the document
 as it was given and adds or removes nothing. A document outside the `canon` domain is refused.
+
+**Version 3 is written one way.** `provider`, `facts` and `evidence` are members of version 2 alone:
+a document of version 3 carries none of them, and one that names one is refused. And version 3 is
+held to the reference Runner's encoding rule: the Runner keeps a document of version 3 only as its
+encoding writes it, and its encoding leaves out a member it holds empty where the member is optional
+and of an array or object type that it omits when empty. So, in version 3, `sources`, `unmapped` and
+`unmappedEvidence` written as the empty array, and the case's `parameters`, a source's `parameters`,
+and the `facts` and `evidence` of `admits` written as the empty object, are refused, since a document
+so written would be kept under another digest than its own. Every other member written empty is kept
+as written and read: `admits` itself, a copy's `facts` and `evidence` (§6.2), and the members of the
+kinds of §4.3, `query`, `body` and `headers` among them. (No vector decides either refusal.)
 
 Version 1 is no dialect: the Runner's version-1 file mapping has no preparation. The numbering is
 the Runner's, kept so that every mapping v2 document is a version-2 dialect document byte for byte.
@@ -225,7 +243,7 @@ The kinds:
 
 | Kind | Version | Class | What is declared | Vectors |
 | --- | --- | --- | --- | --- |
-| `operation` | 2 | the profile's | a read of a gateway source of shape `airbyte`, `mcp` or `http` that an input profile pins, and a template of its request (§4.1); in version 3, also unbound (§4.4) | of shapes `mcp` and `http` |
+| `operation` | 2 | the profile's | a read of a gateway source of shape `airbyte`, `mcp` or `http` that an input profile pins, and a template of its request (§4.1); in version 3, also unbound (§4.4) | of shapes `mcp` and `http`; in version 3, of shape `mcp` bound and of shape `http` unbound |
 | `selected-file` | 2 | `asserted` for `local-file`, the profile's for `google-drive` | a document the operator selected (§4.2) | none |
 | `http` | 3, proposed | the profile's | a request to a gateway HTTP source: method, path, query and body templates, header names (§4.3) | none |
 | `sql` | 3, proposed | the profile's | a statement on a connection, with its bound parameters (§4.3) | none |
@@ -236,7 +254,9 @@ A version-2 document that names a kind of version 3, or has an unbound source (�
 **A kind without vectors is defined, and not claimable**: a verifier's claim names the kinds it
 reads (§14), and may name only kinds that the vectors published with its specification version
 exercise; and so with the shapes of an `operation`, and with a version. Today the staged vectors
-exercise the case and `operation` of shapes `mcp` and `http`, in version 2, and none is published.
+exercise the case and `operation` of shapes `mcp` and `http` in version 2, and in version 3 the case
+and `operation` of shape `mcp`, bound, and of shape `http`, unbound and bound at import (§4.4); none
+is published.
 
 ### 4.1 `operation`
 
@@ -316,14 +336,16 @@ admits it to a claim states the snapshot's form first.
 ### 4.3 Kinds proposed for version 3
 
 Version 3 is version 2 with four kinds more, and with the unbound source form (§4.4); a document
-of version 3 has `version` `3`, and so has its preparation (§9.1). It is proposed: no preparer
-writes it, no verifier reads it, and no vector holds it. The forms below are what a writer, such as
-the Desk's inputs or an entry of the Exchange, needs to declare one; the first implementation's
-vectors will fix each request's exact bytes, and may change them. Since version 2's `operation`
-reads a source of each adapter shape (§4.1), the `http` and `sql` kinds describe how a request is
-formed — a body and headers, a statement and its bindings — and not how a configured source is
-read. A source of each of these kinds is an object of exactly the members of §4 — `name`, `kind`,
-`parameters` (its source parameters, as every source's) and `read` — with `profile`,
+of version 3 has `version` `3`, and so has its preparation (§9.1). The reference Runner reads
+version 3 since its pull request 83 (`v0.12.0`), and prepares its `operation` and `selected-file` as
+it prepares version 2's; it refuses each of the four kinds below by name. Those four are proposed: no
+preparer writes them, no verifier reads them, and no vector holds them. The forms below are what a
+writer, such as the Desk's inputs or an entry of the Exchange, needs to declare one; the first
+implementation's vectors will fix each request's exact bytes, and may change them. Since version
+2's `operation` reads a source of each adapter shape (§4.1), the `http` and `sql` kinds describe how
+a request is formed — a body and headers, a statement and its bindings — and not how a configured
+source is read. A source of each of these kinds is an object of exactly the members of §4 —
+`name`, `kind`, `parameters` (its source parameters, as every source's) and `read` — with `profile`,
 `profileDigest` and `maxAge` as in §4.1, and the members its kind names below. Except for `research`,
 each is acquired through the gateway source its profile pins, so §5's checks apply with the shape
 the profile names. A `research` source retains responses acquired through the gateway sources
@@ -431,10 +453,12 @@ bound to; it commits neither the binding document's digest, nor the published di
 the catalog names the binding removes (`platform`, `operation`, `shape` and `record`). Two published
 dialects that differ only in those names, bound to the same profiles, have one bound dialect and one
 digest. A record that binds the preparation commits what the preparation commits, under the
-record's signature, the installation's own key. No preparer
-writes version 3, the Runner included, so no Runner records a bound dialect's digest yet, and no
-vector holds the form: it is defined, and not claimable. (No vector decides any rule of this
-section.)
+record's signature, the installation's own key. The reference Runner
+writes version 3 since its pull request 83 (`v0.12.0`): it binds an unbound dialect at import, with a
+binding document the operator supplies, and records the bound dialect's digest. The staged vector
+`unbound-bound-at-import` holds the form, with its binding document; no specification version
+publishes it, so the form is not claimable yet (§14). (That vector decides the bound dialect and its
+digest; no vector decides the refusals of this section.)
 
 ## 5. Input profiles and acquisitions
 
@@ -573,11 +597,11 @@ For a source whose profile is a calculator's, the value read is held to §7 befo
 
 ### 6.2 Copy
 
-`copy` is an object of `facts`, an array of `{"target": P, "source": Q}`, and `evidence`, an array
-of `{"requirement": I, "source": Q}`, each entry exactly those members; each array is optional, and
-absent is the empty array. `P` is a fact target (§8.1), `I` a non-empty string, `Q` a pointer. A
-copy names each requirement at most once, and one that names a requirement twice is refused with the
-dialect. (No vector decides this.) The claim:
+`copy` is an object of exactly `facts`, an array of `{"target": P, "source": Q}`, and `evidence`, an
+array of `{"requirement": I, "source": Q}`, each entry exactly those members; both arrays are
+REQUIRED, as the Runner requires them, and either may be empty. `P` is a fact target (§8.1), `I` a
+non-empty string, `Q` a pointer. A copy names each requirement at most once, and one that names a
+requirement twice is refused with the dialect. (No vector decides this.) The claim:
 
 - `facts` starts as `{}`; for each entry whose `Q` resolves in the value read, that value is written
   at `P` (§8.1). An entry whose `Q` does not resolve writes nothing. (No vector decides this.)
@@ -745,11 +769,14 @@ A preparation is a JSON object of exactly:
 | `lineage` | an array | §9.3 |
 | `outcomes` | an array | §9.2 |
 
-In version 2, `cites` is ordered by `callIndex`, those of one index in the order of `sources`.
-In version 3, sources contribute citations in the order of `sources`: a `research` source adds
-every retained response's citation in `R.responses` order, followed by the record's own citation
-when it has one; every other acquired source adds its one citation. The case, a local file and a
-skipped source contribute none. The research list is also its lineage entries' `receipts` (§9.3).
+In versions 2 and 3 alike, `cites` is ordered by `callIndex`, those of one index in the order of
+`sources`, as the reference Runner writes it: each acquired source adds its one citation, and the
+case, a local file and a skipped source contribute none. A `research` source has a rule of its own,
+which no vector holds: in a preparation with one, `cites` is in the order of `sources` instead, the
+`research` source adding every retained response's citation in `R.responses` order, followed by the
+record's own citation when it has one, and every other acquired source its one citation. The
+research list is also its lineage entries' `receipts` (§9.3). (No vector decides the rule of
+`research`.)
 
 ### 9.2 Outcomes
 
@@ -1103,11 +1130,12 @@ An implementation is a *conforming preparation verifier* when, for every reading
 the refusal, the finding or the reading §11 defines, and when it gives every vector's expected answer
 in the dialect vectors published with the specification version it names. Its claim takes the form
 "a preparation verifier conforming to `spec/dialect.md` of specVersion *X*, reading dialect version
-2 and the kinds *K*, and `operation` of the shapes *S*", and names only versions, kinds and shapes
-that the vectors published with that version exercise (§4). The class is independent of Core's
-four classes and of the witness-statement reader: none implies it, and it implies none. It says
-nothing about a preparer, which this document does not define as a class: a verifier's agreement
-with a preparer shows that the two read the format alike, and no more. A claim of this class MUST NOT be described as establishing anything §13 says a
-preparation does not establish.
+2, or versions 2 and 3, and the kinds *K*, and `operation` of the shapes *S*", and names only
+versions, kinds and shapes that the vectors published with that version exercise (§4). The class is
+independent of Core's four classes and of the witness-statement reader: none implies it, and it
+implies none. It says nothing about a preparer, which this document does not define as a class: a
+verifier's agreement with a preparer shows that the two read the format alike, and no more. A claim
+of this class MUST NOT be described as establishing anything §13 says a preparation does not
+establish.
 
 Until a specification version publishes the dialect vectors, no claim of this class is available.

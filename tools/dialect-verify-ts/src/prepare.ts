@@ -359,6 +359,11 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     if (s.profile === undefined) continue;
     const p = profiles.find((x) => x.id === s.profile);
     if (p === undefined || profileDigestOf(p) !== s.profileDigest) finding("profile-mismatch", `${s.name}: no trusted profile of that id and digest`);
+    // §4.4: a profile the binding document names serves the unbound source's shape and record
+    const catalog = d.boundFrom.get(s.name);
+    if (catalog !== undefined && (p!.shape !== catalog.shape || (member(p!.adapter, "name") as JStr).v !== catalog.record)) {
+      finding("profile-mismatch", `${s.name}: bound to a profile of another shape or record`);
+    }
     if (s.kind === "operation") {
       const misfit = requestMisfit(s, p!);
       if (misfit !== null) finding("profile-mismatch", `${s.name}: ${misfit}`);
@@ -483,7 +488,8 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     for (const r of o.evidenceTargets) if (!admitted(d.admitsEvidence.get(r))) finding("admission-refused", `${o.name}: requirement ${r}`);
   }
 
-  // the preparation (§9)
+  // the preparation (§9): in versions 2 and 3 alike, `cites` ordered by callIndex, those of one index in the order of
+  // `sources`, as the Runner writes it (§9.1); a `research` source, whose own order differs, is not read
   const order = new Map(d.sources.map((s, k) => [s.name, k]));
   const cited = outcomes.filter((o) => o.citation !== undefined);
   cited.sort((a, b) => {
@@ -525,7 +531,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     return obj(e);
   });
   const preparation = obj([
-    ["version", num("2")],
+    ["version", num(String(d.version))],
     ["verifiedAt", str(verifiedAt)],
     ["mappingDigest", str(digestOf(d.raw))],
     ["verification", str(VERIFICATION)],

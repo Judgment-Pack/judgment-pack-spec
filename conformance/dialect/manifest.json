@@ -7,17 +7,27 @@
     "commit": "05636eda96a9588279d61a6272625be859a28117",
     "path": "vectors/preparation",
     "mergedAs": "82116bfab7705f74ca3e493c9722dd3831c7418f",
-    "extendedBy": {
-      "pullRequest": 80,
-      "commit": "c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9",
-      "vectors": [
-        "http-shaped-source"
-      ]
-    }
+    "extendedBy": [
+      {
+        "pullRequest": 80,
+        "commit": "c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9",
+        "vectors": [
+          "http-shaped-source"
+        ]
+      },
+      {
+        "pullRequest": 83,
+        "commit": "89cf44109ad3a9862ab0386811bef63d8a9a1657",
+        "vectors": [
+          "version-3-bound",
+          "unbound-bound-at-import"
+        ]
+      }
+    ]
   },
   "runnerFiles": {
-    "vectors/README.md": "69d3a8ec8e1f178bbad21b8e6c5d403a11620305bd4ce29712cc5bfd0e15854a",
-    "vectors/manifest.json": "db6487fadcb9f6161c243f1aae18dc4627614c5c6093d988e2f07aace12dfbeb"
+    "vectors/README.md": "dc5ec9ec8483ed67554bf60b1f972eaa747a86774f0c5100762fd7d5e8bbf887",
+    "vectors/manifest.json": "5d33c2865ef77e3cd6c32b7b92c0be587ffac570b8496d80c78411c4dd5ac026"
   },
   "cases": [
     {
@@ -86,6 +96,20 @@
     {
       "id": "http-shaped-source",
       "path": "vectors/http-shaped-source",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "version-3-bound",
+      "path": "vectors/version-3-bound",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "unbound-bound-at-import",
+      "path": "vectors/unbound-bound-at-import",
       "requiresBinding": true,
       "expectedResult": "reading",
       "expectedBinding": "matches"

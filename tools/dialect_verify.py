@@ -9,18 +9,22 @@ document's text, and from the two sections of the checkpoint witness statement i
 canonical form; §5, the key rule and the equation), and from nothing else: not the Runner's code,
 whose `verify-run` is a third reader of the same bytes.
 
-It reads dialect version 2 and the kind `operation`, the only kind the staged vectors exercise, and
-refuses every other kind as `kind-unread` (spec/dialect.md §4: a kind without vectors is defined
-and not claimable). Since the amendment of 2026-10-15 it reads `operation` of the shapes `airbyte`,
-`mcp` and `http` (§4.1): a tool call for `mcp`, and for the others the request the gateway source
-takes, held to being an object, the template rules and its commitment, and not to a set of members. It does not read dialect version 3 — the
-kinds of §4.3, and the unbound source form with its binding document (§4.4) — and refuses a dialect
-of that version as `version-unread` (§11), taking no binding document. It uses the Python standard
-library alone.
+It reads the kind `operation`, the only kind the staged vectors exercise, and refuses every other kind
+as `kind-unread` (spec/dialect.md §4: a kind without vectors is defined and not claimable). Since the
+amendment of 2026-10-15 it reads `operation` of the shapes `airbyte`, `mcp` and `http` (§4.1): a tool
+call for `mcp`, and for the others the request the gateway source takes, held to being an object, the
+template rules and its commitment, and not to a set of members. Since the Runner's version-3 vectors
+were staged it reads dialect versions 2 and 3. A document of version 3 is read as one of version 2,
+written one way (§2: no `provider`, `facts` or `evidence`, and no member written empty that the
+Runner's encoding leaves out when empty),
+its preparation of version 3 (§9.1); a source of a kind of §4.3 is held to the form its kind names and
+then refused as `kind-unread`; and an `operation` of the unbound form (§4.4) is read with the binding
+document it is given, by making the bound dialect of the two and reading that as every dialect is
+read. It uses the Python standard library alone.
 
     python tools/dialect_verify.py --dialect mapping.json --case case.json \\
         --acquisitions sources.json --profiles profiles.json --preparation preparation.json \\
-        [--record record.jsonl] [--require-binding]
+        [--binding binding.json] [--record record.jsonl] [--require-binding]
 
 It prints the report §11 gives, one JSON object in the preparation's canonical form, and exits 0
 for a reading, 1 for a refusal and 2 for a finding; it exits 3, printing no report, when it could
@@ -70,9 +74,11 @@ def malformed(detail: str) -> Refused:
 DIALECT_BYTES = 131072
 ENVELOPE_BYTES = 2097152
 PROFILES_BYTES = 65536
+BINDING_BYTES = 65536
 PREPARATION_BYTES = 8388608
 RECORD_BYTES = 8388608
 MAX_SOURCES = 16
+MAX_RETAINED_RESPONSES = 64
 MAX_SCOPE = 64
 MAX_CLAUSES = 64
 MAX_LISTED = 64
@@ -236,6 +242,22 @@ TYPES = ("string", "integer", "timestamp")
 AVAILABILITY = ("present", "absent", "unknown")
 STATUSES = ("resolved", "absent", "unknown")
 BINDING_KIND = "judgment-pack-runner/preparation/1"
+# §2: the dialect versions this document defines; this reader reads each (§11, `version-unread`).
+DEFINED_VERSIONS = (2, 3)
+READ_VERSIONS = (2, 3)
+# §4.3: the kinds version 3 adds, each defined and not read here; and the members each names beside
+# §4's, `profile`, `profileDigest` and `maxAge`: those it requires, and those it may give.
+VERSION_3_KINDS = {
+    "http": ({"method", "path"}, {"query", "body", "headers"}),
+    "sql": ({"statement", "bindings"}, set()),
+    "web": ({"url"}, set()),
+    "research": ({"question", "constraints", "model", "evidence"}, set()),
+}
+# §2: the members of version 2 alone, which a document of version 3 carries none of.
+VERSION_2_MEMBERS = ("provider", "facts", "evidence")
+# §4.4: an unbound `operation`'s catalog names, and the shapes that serve an operation (§4.1).
+UNBOUND_MEMBERS = ("platform", "operation", "shape", "record")
+OPERATION_SHAPES = ("airbyte", "mcp", "http")
 VERIFICATION = "verified acquisitions; session sealing and input truth are not established"
 
 
@@ -684,6 +706,14 @@ class Dialect:
     case_read: Read
     sources: list[Source]
     admits: dict[tuple[str, str], list[str]]
+    version: int = 2
+    # the kinds of its sources this reader does not read, in their order (§11, `kind-unread`)
+    unread: list[str] = field(default_factory=list)
+    # each unbound source (§4.4) by its name: the `shape` and `record` it names
+    unbound: dict[str, tuple[str, str]] = field(default_factory=dict)
+    # of a bound dialect, each source bound by the binding document: the unbound source's `shape` and
+    # `record`, which the profile it is bound to must serve (§4.4, §5.1)
+    bound_from: dict[str, tuple[str, str]] = field(default_factory=dict)
 
 
 def check_template(value: Any, scope: dict[str, str], what: str) -> None:
@@ -839,9 +869,10 @@ def check_read(value: Any, scope: dict[str, str], what: str) -> Read:
             raise malformed(f"{what}: an unwrap entry that is not a pointer")
     result = Read(unwrap=list(unwrap), copy=None, rule=None, as_written=read)
     if "copy" in read:
-        copy = closed(read["copy"], set(), {"facts", "evidence"}, what + " copy")
-        facts = copy.get("facts", [])
-        evidence = copy.get("evidence", [])
+        # §6.2: both arrays are required, as the Runner requires them, and either may be empty.
+        copy = closed(read["copy"], {"facts", "evidence"}, set(), what + " copy")
+        facts = copy["facts"]
+        evidence = copy["evidence"]
         if not isinstance(facts, list) or not isinstance(evidence, list):
             raise malformed(f"{what}: copy facts and evidence are arrays")
         for entry in facts:
@@ -922,6 +953,17 @@ def check_read(value: Any, scope: dict[str, str], what: str) -> Read:
     return result
 
 
+def not_written_empty(value: Any, members: tuple[str, ...], what: str) -> None:
+    """§2, version 3 written one way, by the Runner's encoding rule: of the members its encoding leaves
+    out when empty, one written as the empty array or the empty object is refused. They are `sources`,
+    `unmapped` and `unmappedEvidence`, the case's and a source's `parameters`, and the `facts` and
+    `evidence` of `admits`; every other member written empty is read."""
+    if isinstance(value, dict):
+        for member in members:
+            if member in value and isinstance(value[member], (list, dict)) and not value[member]:
+                raise malformed(f"{what}: {member} is written empty, which version 3 leaves out")
+
+
 def check_parameter_name(name: Any, what: str) -> None:
     if not isinstance(name, str) or not name or name == "runAt":
         raise malformed(f"{what}: a parameter name that is empty or runAt")
@@ -936,9 +978,16 @@ def parse_dialect(document: Any) -> Dialect:
     )
     if not (isinstance(top["version"], Num) and top["version"].is_integer()):
         raise malformed("the dialect's version is not an integer")
-    if integer_of(top["version"]) != 2:
-        # Version 3 was refused before any form was checked (§11, `version-unread`).
+    version = integer_of(top["version"])
+    if version not in DEFINED_VERSIONS:
         raise malformed("a dialect version this document does not define")
+    if version == 3:
+        # §2: version 3 is written one way.
+        for name in VERSION_2_MEMBERS:
+            if name in top:
+                raise malformed(f"{name} is a member of version 2 alone")
+        not_written_empty(top, ("sources", "unmapped", "unmappedEvidence"), "the dialect")
+        not_written_empty(top["case"], ("parameters",), "the case")
     if "provider" in top and top["provider"] != "":
         raise malformed("provider is not the empty string")
     for name in ("facts", "evidence"):
@@ -979,7 +1028,8 @@ def parse_dialect(document: Any) -> Dialect:
         raise malformed("sources is not an array")
     if len(raw_sources) > MAX_SOURCES:
         raise Refused("input-over-bound", "more than 16 sources")
-    unread_kind = False
+    unread: list[str] = []
+    unbound: dict[str, tuple[str, str]] = {}
     for index, raw in enumerate(raw_sources):
         what = f"source {index}"
         if not isinstance(raw, dict) or not isinstance(raw.get("name"), str):
@@ -988,11 +1038,30 @@ def parse_dialect(document: Any) -> Dialect:
         if not name or name == "case" or any(s.name == name for s in sources):
             raise malformed(f"{what}: a name that is empty, case, or given twice")
         kind = raw.get("kind")
-        if kind in ("http", "sql", "web", "research"):
+        if not isinstance(kind, str):
+            raise malformed(f"{what}: a kind that is not a string")
+        if kind in VERSION_3_KINDS and version == 2:
             raise malformed(f"{what}: a kind of version 3 in a version-2 document")
         # Every kind's form is checked, its common members (§4) and its own, before a kind this
         # reader does not read is refused (§11): `kind-unread` comes after every form.
-        if kind == "operation":
+        catalog: tuple[str, str] | None = None
+        if kind == "operation" and version == 3 and any(member in raw for member in UNBOUND_MEMBERS):
+            # §4.4: the unbound form, of version 3 alone. A version-2 source that names one of its
+            # members is refused below, as one that names a member its kind does not list (§4).
+            closed(
+                raw,
+                {"name", "kind", "read", "platform", "operation", "shape", "record", "maxAge", "arguments"},
+                {"parameters", "calculation"},
+                what,
+            )
+            for member in ("platform", "operation", "record"):
+                if not isinstance(raw[member], str) or not raw[member]:
+                    raise malformed(f"{what}: {member} is not a non-empty string")
+            if raw["shape"] not in OPERATION_SHAPES:
+                raise malformed(f"{what}: a shape other than airbyte, mcp and http")
+            catalog = (raw["shape"], raw["record"])
+            acquired = True
+        elif kind == "operation":
             closed(
                 raw,
                 {"name", "kind", "read", "profile", "profileDigest", "maxAge", "arguments"},
@@ -1018,13 +1087,25 @@ def parse_dialect(document: Any) -> Dialect:
                 acquired = True
             else:
                 raise malformed(f"{what}: a provider of another value")
-            unread_kind = True
+            unread.append(kind)
+        elif kind in VERSION_3_KINDS:
+            required, optional = VERSION_3_KINDS[kind]
+            closed(
+                raw,
+                {"name", "kind", "read", "profile", "profileDigest", "maxAge"} | required,
+                {"parameters"} | optional,
+                what,
+            )
+            acquired = True
+            unread.append(kind)
         else:
             raise malformed(f"{what}: a kind this version does not list")
         parameters: dict[str, Parameter] = {}
         declared = raw.get("parameters", {})
         if not isinstance(declared, dict):
             raise malformed(f"{what}: parameters are not an object")
+        if version == 3:
+            not_written_empty(raw, ("parameters",), what)
         for pname, declaration in declared.items():
             check_parameter_name(pname, what)
             if pname in case_parameters:
@@ -1042,18 +1123,26 @@ def parse_dialect(document: Any) -> Dialect:
             raise Refused("input-over-bound", f"{what}: more than 64 parameters in scope")
         source = Source(name=name, kind=kind, parameters=parameters, read=Read([], None, None, {}))
         if acquired:
-            if not isinstance(raw["profile"], str) or not raw["profile"]:
-                raise malformed(f"{what}: profile is not a non-empty string")
-            if not is_digest(raw["profileDigest"]):
-                raise malformed(f"{what}: profileDigest is not a digest")
+            # Every acquired source names its profile but an unbound one, which the binding document
+            # binds to one (§4.4).
+            if catalog is None:
+                if not isinstance(raw["profile"], str) or not raw["profile"]:
+                    raise malformed(f"{what}: profile is not a non-empty string")
+                if not is_digest(raw["profileDigest"]):
+                    raise malformed(f"{what}: profileDigest is not a digest")
+                source.profile_id = raw["profile"]
+                source.profile_digest = raw["profileDigest"]
             if not is_integer(raw["maxAge"]) or not 1 <= integer_of(raw["maxAge"]) <= 86400:
                 raise malformed(f"{what}: maxAge is not an integer from 1 to 86400")
-            check_request(raw["arguments"], scope, f"{what} arguments")
-            source.profile_id = raw["profile"]
-            source.profile_digest = raw["profileDigest"]
             source.max_age = integer_of(raw["maxAge"])
-            source.template = raw["arguments"]
             source.scope = scope
+            if kind in VERSION_3_KINDS:
+                check_version_3_kind(raw, kind, scope, what)
+            else:
+                check_request(raw["arguments"], scope, f"{what} arguments")
+                source.template = raw["arguments"]
+        if catalog is not None:
+            unbound[name] = catalog
         if "calculation" in raw:
             calculation = closed(raw["calculation"], {"inputs", "tables"}, set(), f"{what} calculation")
             inputs, tables = calculation["inputs"], calculation["tables"]
@@ -1096,6 +1185,8 @@ def parse_dialect(document: Any) -> Dialect:
     admits: dict[tuple[str, str], list[str]] = {}
     if "admits" in top:
         raw_admits = closed(top["admits"], set(), {"facts", "evidence"}, "admits")
+        if version == 3:
+            not_written_empty(raw_admits, ("facts", "evidence"), "admits")
         written_facts = {t for r in [case_read] + [s.read for s in sources] for t in r.fact_targets}
         for member, kind, written in (("facts", "fact", written_facts), ("evidence", "evidence", set(evidence_sources))):
             entries = raw_admits.get(member, {})
@@ -1108,10 +1199,174 @@ def parse_dialect(document: Any) -> Dialect:
                     raise malformed("admits gives a list of another form")
                 admits[(kind, target)] = list(classes)
 
-    dialect = Dialect(top, case_parameters, case_read, sources, admits)
-    if unread_kind:
-        raise Refused("kind-unread", "selected-file is defined and not read by this reader")
-    return dialect
+    # A kind this reader does not read is refused by the caller once every form is checked, the binding
+    # document's among them (§11, the fifth and sixth phases).
+    return Dialect(top, case_parameters, case_read, sources, admits, version, unread, unbound)
+
+
+def check_version_3_kind(raw: dict[str, Any], kind: str, scope: dict[str, str], what: str) -> None:
+    """§4.3: the members a kind of version 3 names, held to the forms the text gives them. A source of
+    such a kind is held to its form, as every source is, and then not read (`kind-unread`). Where the
+    text names a member without a form — `http`'s `path` "a template that yields a path" and its
+    `headers` "the names of the headers", `research`'s `evidence` "the fields each answer MUST
+    support", and a `sql` binding's `name` and `type` — this reader takes the form a name or a path
+    has: a string template for a path, and non-empty strings for names. (No vector decides this.)"""
+
+    def string_template(value: Any, member: str) -> None:
+        check_template(value, scope, f"{what} {member}")
+        if not is_string_template(value, scope):
+            raise malformed(f"{what}: {member} is not a string template")
+
+    def names(value: Any, member: str) -> None:
+        if not isinstance(value, list) or not all(isinstance(item, str) and item for item in value):
+            raise malformed(f"{what}: {member} is not an array of non-empty strings")
+
+    if kind == "http":
+        if raw["method"] not in ("GET", "POST"):
+            raise malformed(f"{what}: a method other than GET and POST")
+        string_template(raw["path"], "path")
+        if "query" in raw:
+            query = raw["query"]
+            if not isinstance(query, dict) or any(name.startswith("$") for name in query):
+                raise malformed(f"{what}: query is not an object of string templates")
+            for name, member in query.items():
+                string_template(member, f"query {name}")
+        if "body" in raw:
+            if raw["method"] == "GET":
+                raise malformed(f"{what}: a body beside GET")
+            check_template(raw["body"], scope, f"{what} body")
+        if "headers" in raw:
+            names(raw["headers"], "headers")
+    elif kind == "sql":
+        if not isinstance(raw["statement"], str):
+            raise malformed(f"{what}: statement is not a string, and is never a template")
+        if not isinstance(raw["bindings"], list):
+            raise malformed(f"{what}: bindings is not an array")
+        for binding in raw["bindings"]:
+            closed(binding, {"name", "type", "value"}, set(), f"{what} binding")
+            names([binding["name"], binding["type"]], "a binding's name and type")
+            value = binding["value"]
+            if not isinstance(value, dict) or set(value) != {"$param"}:
+                raise malformed(f"{what}: a binding's value is not a $param form")
+            check_template(value, scope, f"{what} binding")
+    elif kind == "web":
+        url = raw["url"]
+        if not isinstance(url, str):
+            if not isinstance(url, dict) or set(url) != {"$param"}:
+                raise malformed(f"{what}: url is not a string or a $param form")
+            check_template(url, scope, f"{what} url")
+            if scope.get(url["$param"]) != "string":
+                raise malformed(f"{what}: url names a parameter that is not a string")
+    else:
+        string_template(raw["question"], "question")
+        if not isinstance(raw["constraints"], dict):
+            raise malformed(f"{what}: constraints is not an object")
+        if not isinstance(raw["model"], str):
+            raise malformed(f"{what}: model is not a string")
+        names(raw["evidence"], "evidence")
+
+
+def parse_binding(document: Any) -> dict[str, Any]:
+    """§4.4: the binding document, one object of exactly `dialect`, a digest, and `sources`, an object
+    mapping names to objects of exactly `profile`, a non-empty string, and `profileDigest`, a digest."""
+    binding = closed(document, {"dialect", "sources"}, set(), "the binding document")
+    if not is_digest(binding["dialect"]):
+        raise malformed("the binding document's dialect is not a digest")
+    if not isinstance(binding["sources"], dict):
+        raise malformed("the binding document's sources are not an object")
+    for name, entry in binding["sources"].items():
+        closed(entry, {"profile", "profileDigest"}, set(), f"the binding document's entry {name}")
+        if not isinstance(entry["profile"], str) or not entry["profile"]:
+            raise malformed(f"the binding document's entry {name}: profile is not a non-empty string")
+        if not is_digest(entry["profileDigest"]):
+            raise malformed(f"the binding document's entry {name}: profileDigest is not a digest")
+    return binding
+
+
+def bind(document: dict[str, Any], binding: dict[str, Any]) -> dict[str, Any]:
+    """§4.4: the bound dialect, the unbound dialect with the binding applied: each source the binding
+    document names with its `platform`, `operation`, `shape` and `record` removed and the `profile` and
+    `profileDigest` the binding gives it added, every other member kept as written."""
+    sources = []
+    for source in document.get("sources", []):
+        entry = binding["sources"].get(source["name"])
+        if entry is not None:
+            source = {name: member for name, member in source.items() if name not in UNBOUND_MEMBERS}
+            source["profile"] = entry["profile"]
+            source["profileDigest"] = entry["profileDigest"]
+        sources.append(source)
+    return {**document, "sources": sources}
+
+
+def read_bound(dialect: Dialect, binding_document: Any, given: bool) -> Dialect:
+    """§4.4, verifying it: a dialect with an unbound source is read with its binding document, as the
+    bound dialect, with two checks more; the first here, the second a finding (`profile-mismatch`).
+    `given` says whether a binding document was supplied, whatever it holds: a document of `null` is
+    one, and not of the binding document's form."""
+    binding = parse_binding(binding_document) if given else None
+    if not dialect.unbound:
+        if binding is not None:
+            raise malformed("a binding document beside a dialect with no unbound source")
+        return dialect
+    if binding is None:
+        raise malformed("a dialect with an unbound source and no binding document")
+    if binding["dialect"] != digest_of(canon(dialect.document)):
+        raise malformed("the binding document's dialect is not the given dialect's digest")
+    if set(binding["sources"]) != set(dialect.unbound):
+        raise malformed("the binding document does not name exactly the dialect's unbound sources")
+    bound = parse_dialect(bind(dialect.document, binding))
+    bound.bound_from = dict(dialect.unbound)
+    return bound
+
+
+def research_sources(dialect: Any) -> set[str]:
+    """The names of the dialect's sources of kind `research`, read wherever they can be, before any form
+    is checked: their acquisitions have a form of their own (§4.3, §5.2)."""
+    if not isinstance(dialect, dict) or not isinstance(dialect.get("sources"), list):
+        return set()
+    return {
+        source["name"]
+        for source in dialect["sources"]
+        if isinstance(source, dict) and source.get("kind") == "research" and isinstance(source.get("name"), str)
+    }
+
+
+def check_salts(value: Any, what: str) -> None:
+    salts = closed(value, {"args"}, {"statement"}, f"{what} salts")
+    if not all(is_hex(salt, 64) for salt in salts.values()):
+        raise malformed(f"{what}: a salt of another form")
+
+
+def check_acquisition_form(name: str, member: Any, research: bool) -> None:
+    """§5.2: an acquisition's form. A `research` source's response may lack `receipt` and `salts`, both
+    or neither; its result is the research record, of §4.3's form, each retained response held to its
+    form here, where a missing `result` is no refusal of form but `acquisition-missing` (§5.2)."""
+    what = f"acquisition {name}"
+    closed(member, {"response"}, set(), what)
+    if not research:
+        response = closed(member["response"], {"result", "receipt", "salts"}, set(), what)
+    else:
+        response = closed(member["response"], {"result"}, {"receipt", "salts"}, what)
+        if ("receipt" in response) != ("salts" in response):
+            raise malformed(f"{what}: a research record's receipt and salts are both present or both absent")
+        record = closed(response["result"], {"responses"}, set(), f"{what}: the research record")
+        if not isinstance(record["responses"], list):
+            raise malformed(f"{what}: the research record's responses are not an array")
+        for index, entry in enumerate(record["responses"]):
+            where = f"{what} retained response {index}"
+            retained = closed(entry, {"profile", "request", "receipt", "salts"}, {"result"}, where)
+            profile = closed(retained["profile"], {"id", "digest"}, set(), f"{where} profile")
+            if not isinstance(profile["id"], str) or not profile["id"] or not is_digest(profile["digest"]):
+                raise malformed(f"{where}: a profile reference of another form")
+            if not isinstance(retained["request"], dict) or not in_canon_domain(retained["request"]):
+                raise malformed(f"{where}: a request that is not an object in the canon domain")
+            if not isinstance(retained["receipt"], dict):
+                raise malformed(f"{where}: the receipt is not an object")
+            check_salts(retained["salts"], where)
+    if "receipt" in response:
+        if not isinstance(response["receipt"], dict):
+            raise malformed(f"{what}: the receipt is not an object")
+        check_salts(response["salts"], what)
 
 
 def count_bounds(dialect: Any, acquisitions: Any) -> None:
@@ -1122,11 +1377,17 @@ def count_bounds(dialect: Any, acquisitions: Any) -> None:
         return Refused("input-over-bound", detail)
 
     if isinstance(acquisitions, dict):
+        research = research_sources(dialect)
         for name, member in acquisitions.items():
             response = member.get("response") if isinstance(member, dict) else None
             if isinstance(response, dict) and "result" in response:
                 if value_depth(response["result"]) > MAX_VALUE_DEPTH:
                     raise over(f"acquisition {name}: a result nested more than 32 levels")
+                # the retained responses of a `research` source, at most 64 (§12)
+                record = response["result"]
+                if name in research and isinstance(record, dict) and isinstance(record.get("responses"), list):
+                    if len(record["responses"]) > MAX_RETAINED_RESPONSES:
+                        raise over(f"acquisition {name}: more than 64 retained responses")
     if not isinstance(dialect, dict):
         return
     facts: set[str] = set()
@@ -1590,6 +1851,10 @@ def recompute(
         profile = profiles.get(source.profile_id)
         if profile is None or digest_of(canon(profile)) != source.profile_digest:
             raise Finding("profile-mismatch", f"{source.name}: no trusted profile of that id and digest")
+        # §4.4: a profile the binding document names serves the unbound source's shape and record.
+        catalog = dialect.bound_from.get(source.name)
+        if catalog is not None and (profile["shape"], profile["adapter"]["name"]) != catalog:
+            raise Finding("profile-mismatch", f"{source.name}: bound to a profile of another shape or record")
         misfit = request_misfit(source, profile)
         if misfit is not None:
             raise Finding("profile-mismatch", f"{source.name}: {misfit}")
@@ -1710,11 +1975,14 @@ def calculation_lineage(dialect: Dialect, outcome: Outcome) -> dict[str, Any]:
 
 
 def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Computation:
+    # §9.1: in versions 2 and 3 alike, `cites` is ordered by `callIndex`, those of one index in the order
+    # of `sources`, as the Runner writes it. (A `research` source, whose own order differs, is not read.)
     cites_order = []
     for position, outcome in enumerate(outcomes):
         if outcome.receipt is not None:
             cites_order.append((integer_of(outcome.receipt["callIndex"]), position, citation(outcome.receipt)))
-    cites = [entry for _, _, entry in sorted(cites_order, key=lambda item: (item[0], item[1]))]
+    cites_order.sort(key=lambda item: (item[0], item[1]))
+    cites = [entry for _, _, entry in cites_order]
 
     lineage = []
     out_outcomes = []
@@ -1769,8 +2037,9 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
                 if kind == "evidence" and present:
                     evidence_document[target] = claim["evidenceAvailability"][target]
     preparation = {
-        "version": 2,
+        "version": dialect.version,
         "verifiedAt": verified_at,
+        # the dialect digest (§2); of a dialect with an unbound source, the bound dialect's (§4.4)
         "mappingDigest": digest_of(canon(dialect.document)),
         "verification": VERIFICATION,
         "cites": cites,
@@ -2000,14 +2269,18 @@ def verify(
     preparation: bytes,
     record: bytes | None = None,
     require_binding: bool = False,
+    binding: bytes | None = None,
 ) -> Verification:
-    """§11: a refusal, a finding, or a reading."""
+    """§11: a refusal, a finding, or a reading. `binding` is the binding document of a dialect with an
+    unbound source (§4.4), and None when none is given."""
     result = Verification(answer={})
     try:
         if len(dialect) > DIALECT_BYTES or len(dialect) + len(case) + len(acquisitions) > ENVELOPE_BYTES:
             raise Refused("input-over-bound", "the dialect, case and acquisitions")
         if len(profiles) > PROFILES_BYTES:
             raise Refused("input-over-bound", "the profiles")
+        if binding is not None and len(binding) > BINDING_BYTES:
+            raise Refused("input-over-bound", "the binding document")
         if len(preparation) > PREPARATION_BYTES or (record is not None and len(record) > RECORD_BYTES):
             raise Refused("input-over-bound", "the preparation or the record")
         # §11's phases, in order: the bounds measured on bytes, on every document before any is
@@ -2022,6 +2295,8 @@ def verify(
         ]
         if record is not None:
             documents.append((record, "the record", MAX_DOCUMENT_DEPTH))
+        if binding is not None:
+            documents.append((binding, "the binding document", MAX_DOCUMENT_DEPTH))
         for data, what, depth in documents:
             measure(data, what, depth)
         dialect_document = read_document(dialect, "the dialect")
@@ -2030,31 +2305,27 @@ def verify(
         profiles_document = read_document(profiles, "the profiles")
         given = read_document(preparation, "the preparation")
         record_document = read_record(record) if record is not None else None
+        binding_document = read_document(binding, "the binding document") if binding is not None else None
         count_bounds(dialect_document, acquisitions_document)
         # §11, the fourth phase: a dialect of a version this reader does not read is refused before any
-        # form is checked. Version 3 is defined (§4.3, §4.4) and not read here.
+        # form is checked. It reads both versions the text defines, 2 and 3.
         if isinstance(dialect_document, dict) and is_integer(dialect_document.get("version")):
-            if integer_of(dialect_document["version"]) == 3:
-                raise Refused(
-                    "version-unread",
-                    "dialect version 3 — the unbound source form and its binding document (§4.4), and "
-                    "the kinds of §4.3 — is defined, and not read by this reader",
-                )
+            version = integer_of(dialect_document["version"])
+            if version in DEFINED_VERSIONS and version not in READ_VERSIONS:
+                raise Refused("version-unread", f"dialect version {version} is not read by this reader")
         parsed_record = parse_record(record, record_document) if record is not None else None
         if not isinstance(acquisitions_document, dict):
             raise malformed("the acquisitions are not an object")
+        research = research_sources(dialect_document)
         for name, member in acquisitions_document.items():
-            closed(member, {"response"}, set(), f"acquisition {name}")
-            response = closed(member["response"], {"result", "receipt", "salts"}, set(), f"acquisition {name}")
-            if not isinstance(response["receipt"], dict):
-                raise malformed(f"acquisition {name}: the receipt is not an object")
-            salts = closed(response["salts"], {"args"}, {"statement"}, f"acquisition {name} salts")
-            if not all(is_hex(salt, 64) for salt in salts.values()):
-                raise malformed(f"acquisition {name}: a salt of another form")
+            check_acquisition_form(name, member, name in research)
         if not isinstance(given, dict) or instant(given.get("verifiedAt")) is None:
             raise malformed("the preparation's verifiedAt is not a timestamp with an instant")
         trusted = parse_profiles(profiles_document)
-        parsed_dialect = parse_dialect(dialect_document)
+        parsed_dialect = read_bound(parse_dialect(dialect_document), binding_document, binding is not None)
+        # §11, the sixth phase, once every form is checked: a kind this reader does not read.
+        if parsed_dialect.unread:
+            raise Refused("kind-unread", f"{parsed_dialect.unread[0]} is defined and not read by this reader")
         verified_at = given["verifiedAt"]
 
         computation = recompute(parsed_dialect, case_document, acquisitions_document, trusted, verified_at)
@@ -2151,6 +2422,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--acquisitions", type=Path, help="absent: no acquisitions, {}")
     parser.add_argument("--profiles", required=True, type=Path)
     parser.add_argument("--preparation", required=True, type=Path)
+    parser.add_argument("--binding", type=Path, help="the binding document of a dialect with an unbound source")
     parser.add_argument("--record", type=Path, help="one record line, without its newline")
     parser.add_argument("--require-binding", action="store_true")
     arguments = parser.parse_args(argv)
@@ -2163,7 +2435,8 @@ def main(argv: list[str] | None = None) -> int:
             arguments.preparation.read_bytes(),
             arguments.record.read_bytes() if arguments.record else None,
         )
-        outcome = verify(*documents, arguments.require_binding)
+        binding = arguments.binding.read_bytes() if arguments.binding else None
+        outcome = verify(*documents, arguments.require_binding, binding)
         answer = report(outcome.answer)
         line = preparation_bytes(answer) + b"\n"
     except Exception as error:  # a file it cannot open, or a fault of its own: never 1 or 2

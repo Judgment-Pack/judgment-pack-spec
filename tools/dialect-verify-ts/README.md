@@ -18,13 +18,17 @@ Node 22.18 or later on `PATH`; no dependencies and no build step (Node strips th
 
 ```text
 node src/main.ts <vector directory> [--require-binding]
-node src/main.ts --dialect F --case F [--acquisitions F] --profiles F --preparation F [--record F] [--require-binding]
+node src/main.ts --dialect F --case F [--acquisitions F] --profiles F --preparation F [--binding F] [--record F] [--require-binding]
 ```
 
 A vector directory is read as the [staging note](../../conformance/dialect/README.md) lists:
 `mapping.json`, `case.json`, `sources.json` (`{}` when absent), `profiles.json`, and from `run.json`
 the preparation `run.input.preparation` and the record (`run.auditBytes`, standard base64, or else
-`run.audit`). Whether a binding is required is the caller's to say: the vectors' answers are in
+`run.audit`). A directory that holds `binding.json` is a dialect bound at import: its dialect is then
+`unbound.json`, read with `binding.json` as its binding document (§4.4). With the second form,
+`--binding` names the binding document of a dialect with an unbound source.
+
+Whether a binding is required is the caller's to say: the vectors' answers are in
 [`manifest.json`](../../conformance/dialect/manifest.json), `requiresBinding`. With the second form,
 `--record` names a file holding the record line; one trailing line feed is removed, and nothing else.
 
@@ -50,7 +54,8 @@ It prints one line of JSON, members ordered by code point and every number its l
   manifest's row (`expectedResult`, and `expectedBinding` or `expectedFinding`); the recomputed
   preparation to the vector's `preparation.json`, byte for byte, and a reading's digest to
   `preparation.sha256`; and a reading's facts and evidence-availability documents to the export's
-  `run.input.facts` and `run.input.evidence`. A vector this reader could not answer from the text would
+  `run.input.facts` and `run.input.evidence`; and, for a vector of a dialect bound at import, the bound
+  dialect this reader makes to the vector's `mapping.json`. A vector this reader could not answer from the text would
   be listed there as a known disagreement, with its reason; there is none.
 - [`test/units.test.ts`](test/units.test.ts) holds the forms the text fixes (§1, §9.5, §12) and this
   reader's answers to inputs no vector holds, each made from a vector by one change; some re-sign the
@@ -93,6 +98,24 @@ and binding document (§4.4) not read and no binding document taken. The tests i
 [`test/units.test.ts`](test/units.test.ts) under "the shapes of an `operation`" hold each. That extension
 is no part of this reader's independence: the agreement of the two readers on the tenth vector,
 `http-shaped-source`, is one author's.
+
+**Dialect version 3.** The staging of the Runner's eleventh and twelfth vectors, `version-3-bound` and
+`unbound-bound-at-import`, extended this reader and the first to dialect version 3, by one author who
+had read both, from the text: a document of version 3 is read as one of version 2, and its preparation
+is of version 3, its `cites` ordered by `callIndex` as version 2's are (§9.1); an `operation` of the unbound form is read
+with the binding document it is given (`--binding`), the bound dialect made of the two and read as every
+dialect is, a binding document of another form, of another dialect's digest, or that does not name
+exactly the unbound sources refused as `input-malformed`, and a profile bound of another shape or record
+`profile-mismatch` (§4.4); a source of a kind of §4.3 held to the form its kind names and refused as
+`kind-unread`; and, as RFC 0018's amendment that read version 3 decided, a version-3 document that names
+`provider`, `facts` or `evidence`, or writes empty a member the Runner's encoding leaves out when empty,
+refused as `input-malformed` (§2). After the review of round 7, a copy's two arrays are required in every
+version (§6.2), a binding document of `null` is refused, the 64 retained responses of a research record are
+counted before any form (§12), and a `research` source's acquisition is held to its own form (§§4.3, 5.2).
+Nothing is `version-unread` now: this reader reads both versions the text defines. The
+tests in [`test/units.test.ts`](test/units.test.ts) under "dialect version 3" hold each. That extension
+is no part of this reader's independence: the two readers' agreement on the eleventh and twelfth vectors
+is one author's.
 
 ## Where the text was not enough
 
@@ -143,8 +166,17 @@ These were listed as gaps in the first version; the text decides each.
   request; or `google-drive` ... with `profile`, `profileDigest`, `maxAge` and `arguments` as in §4.1",
   held in phase 4 by §11, "each of its sources against §4's members and its kind's, whichever its kind".
   This reader reads `operation` and the case, and answers `kind-unread` to the rest; since the amendment
-  of 2026-10-15, `operation` of the shapes `airbyte`, `mcp` and `http`, and `version-unread` to a dialect
-  of version 3.
+  of 2026-10-15, `operation` of the shapes `airbyte`, `mcp` and `http`; and since the eleventh and twelfth
+  vectors, dialect version 3, whose four kinds of §4.3 it holds to their forms and answers `kind-unread`.
+
+### Version 3: what the text leaves open, as the extension's author read it
+
+No vector depends on it; the first reader takes the same, and RFC 0018's Evidence records it.
+
+- **The forms of version 3's kinds** (§4.3), where the text names a member without its form: `http`'s
+  `path`, "a template that yields a path", is taken as a string template; its `headers`, "the names of
+  the headers", `research`'s `evidence`, "the fields each answer MUST support", and a `sql` binding's
+  `name` and `type`, as non-empty strings.
 
 ### The genuine choices, which the text now decides
 

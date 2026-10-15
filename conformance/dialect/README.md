@@ -1,6 +1,6 @@
 # Dialect vectors (staged)
 
-This directory holds 10 vectors for the dialect, written for the preparation-verifier class that
+This directory holds 12 vectors for the dialect, written for the preparation-verifier class that
 the companion document [`spec/dialect.md`](../../spec/dialect.md) defines. Its design record,
 [RFC 0018](../../rfcs/0018-dialect.md), was accepted on 2026-10-15, and the vectors are **staged**
 until the next `specVersion` opens. They are in no corpus.
@@ -30,10 +30,14 @@ same bytes, its own README and manifest among them. The first nine vectors were 
 `05636eda96a9588279d61a6272625be859a28117`, the head of Runner pull request 77, which was
 squash-merged and reached the Runner's `main` as commit
 `82116bfab7705f74ca3e493c9722dd3831c7418f`, whose `vectors/preparation/` holds the same files. The
-tenth, `http-shaped-source`, and the Runner's README and manifest as they now are, were copied from
-the Runner's `main` at commit `c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9`, Runner pull request 80
-squash-merged, whose generator wrote the first nine again byte for byte; this repository's manifest
-records it as `source.extendedBy`. The Runner's README says
+tenth, `http-shaped-source`, was copied from the Runner's `main` at commit
+`c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9`, Runner pull request 80 squash-merged, whose generator
+wrote the first nine again byte for byte. The eleventh and twelfth, `version-3-bound` and
+`unbound-bound-at-import`, the first of dialect version 3, and the Runner's README and manifest as
+they now are, were copied from the Runner's `main` at commit
+`89cf44109ad3a9862ab0386811bef63d8a9a1657`, Runner pull request 83 squash-merged, whose generator
+wrote the first ten again byte for byte. This repository's manifest records each extension, in
+order, in `source.extendedBy`. The Runner's README says
 what each file holds and how the vectors were generated, and its manifest gives every file's
 SHA-256, the binding the Runner passes for each preparation, the record's binding as recorded, and
 what the Runner's `verify-run` reports of each export. A change to a vector is a change to the
@@ -49,7 +53,9 @@ Each vector is a directory. Of its files, a preparation verifier reads:
 
 | File | Given to the verifier as |
 | --- | --- |
-| `mapping.json` | the dialect document |
+| `mapping.json` | the dialect document; in a vector that holds `binding.json`, the bound dialect, which the verifier must make of the two files below (the companion document, §4.4) |
+| `unbound.json` | in a vector of a dialect bound at import only: the dialect document, of version 3, with an unbound source |
+| `binding.json` | in a vector of a dialect bound at import only: its binding document |
 | `case.json` | the case document |
 | `sources.json` | the acquisitions; `{}` when the vector has no such file (a case-only run) |
 | `profiles.json` | the input profiles it trusts |
@@ -63,9 +69,9 @@ digest. The other files — `release-digest.txt`, `public-key.txt`, `checkpoints
 
 [`manifest.json`](manifest.json), this repository's, carries `"status": "staged"`, the RFC that
 proposed the vectors (`proposedBy`), their `source` (the commit the first nine were copied from;
-as `mergedAs`, the Runner's `main` commit that holds the same files; and as `extendedBy`, the
-Runner's pull request, `main` commit and vector of the tenth), the SHA-256 of the Runner's README
-and manifest (`runnerFiles`), and one row per vector: `id`; `path`; `requiresBinding`; and the answer the class
+as `mergedAs`, the Runner's `main` commit that holds the same files; and as `extendedBy`, for each
+later extension in order, the Runner's pull request, `main` commit and vectors), the SHA-256 of the
+Runner's README and manifest (`runnerFiles`), and one row per vector: `id`; `path`; `requiresBinding`; and the answer the class
 gives, `expectedResult`, `reading` or `finding`, with `expectedBinding` for a reading and
 `expectedFinding` for a finding. The answers were written from the companion document's §11 and
 the Runner's manifest:
@@ -82,13 +88,24 @@ the Runner's manifest:
 | `escaped-strings` | `verified-inputs` | a reading, binding `absent` |
 | `numeric-spellings` | `verified-inputs` | a reading, binding `matches` |
 | `http-shaped-source` | `verified-inputs` | a reading, binding `matches` |
+| `version-3-bound` | `verified-inputs` | a reading, binding `matches` |
+| `unbound-bound-at-import` | `verified-inputs` | a reading, binding `matches` |
 
 The tenth, `http-shaped-source`, is the vectors' one source of shape `http`: version 2's `operation`
 reads a gateway source of shape `airbyte`, `mcp` or `http` since the amendment of 2026-10-15
 (the companion document, §4.1), and its request is `adapter-http`'s method, path and query rather
-than a tool call. Its preparation has the form of the other nine. No vector holds an `operation` of
-shape `airbyte`, nor a dialect of version 3, its four kinds or the unbound source form (§4.3,
-§4.4): those are defined, and not claimable.
+than a tool call. Its preparation has the form of the other nine.
+
+The eleventh and twelfth are dialect version 3. `version-3-bound` is the valid case's dialect written
+as version 3, its source bound, and its preparation is of version 3 (§9.1). `unbound-bound-at-import`
+is a dialect published with its one source unbound (§4.4): `unbound.json` names the catalog platform
+and operation, the shape `http` and the record `adapter-http`, and no input profile; `binding.json`
+binds it to the profile `intake`; and `mapping.json` is the bound dialect the Runner made of them,
+whose digest the preparation carries as `mappingDigest`. A verifier is given `unbound.json` and
+`binding.json`, makes the bound dialect, and reads that. No vector holds an `operation` of shape
+`airbyte`, nor a kind of version 3 (§4.3): those are defined, and not claimable. The companion
+document was amended with their staging (RFC 0018, the amendment that read version 3), so that its
+text says what these two hold.
 
 One vector is answered otherwise than `verify-run` answers it. `disposition-differs-from-audit`
 alters the run's retained result, which is the Runner's export and no part of a preparation or a
@@ -109,6 +126,8 @@ vector. They hold:
   this repository's manifest records, so a vector added, removed or changed by a byte fails;
 - each vector's recomputed preparation to `preparation.json`, byte for byte, and its digest to
   `preparation.sha256`;
+- the bound dialect made of `unbound.json` and `binding.json` to `mapping.json`, and `binding.json` to
+  the vector the Runner's manifest marks as bound at import;
 - each vector's answer to the row of this repository's manifest, and each reading's members to the
   Runner's report and export, as above;
 - that a verifier which writes `-0` as `0` fails `numeric-spellings`, and one which writes `&`,
@@ -122,6 +141,8 @@ python tools/dialect_verify.py --dialect mapping.json --case case.json --acquisi
     --profiles profiles.json --preparation <run.input.preparation> --record <the record line> \
     [--require-binding]
 ```
+
+For `unbound-bound-at-import`, `--dialect unbound.json --binding binding.json`.
 
 ## How they land
 

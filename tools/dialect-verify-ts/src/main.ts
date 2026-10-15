@@ -1,7 +1,7 @@
 // The command line: one reading of one preparation, its report printed as one line of JSON.
 //
 //   node src/main.ts <vector directory> [--require-binding]
-//   node src/main.ts --dialect F --case F [--acquisitions F] --profiles F --preparation F [--record F] [--require-binding]
+//   node src/main.ts --dialect F --case F [--acquisitions F] --profiles F --preparation F [--binding F] [--record F] [--require-binding]
 //
 // Options for either form: --emit-preparation F writes the recomputed preparation's canonical bytes (§9.5),
 // when recomputation completed; --explain writes the reason for a refusal or a finding to standard error.
@@ -14,14 +14,14 @@ import type { Inputs } from "./verify.ts";
 
 const USAGE =
   "usage: node src/main.ts <vector directory> [--require-binding] [--emit-preparation F] [--explain]\n" +
-  "       node src/main.ts --dialect F --case F [--acquisitions F] --profiles F --preparation F [--record F]\n" +
+  "       node src/main.ts --dialect F --case F [--acquisitions F] --profiles F --preparation F [--binding F] [--record F]\n" +
   "                        [--require-binding] [--emit-preparation F] [--explain]\n";
 
 function main(argv: string[]): number {
   const flags = new Set<string>();
   const values = new Map<string, string>();
   const positional: string[] = [];
-  const valued = new Set(["--dialect", "--case", "--acquisitions", "--profiles", "--preparation", "--record", "--emit-preparation"]);
+  const valued = new Set(["--dialect", "--case", "--acquisitions", "--profiles", "--preparation", "--binding", "--record", "--emit-preparation"]);
   for (let k = 0; k < argv.length; k++) {
     const a = argv[k];
     if (valued.has(a)) {
@@ -39,7 +39,7 @@ function main(argv: string[]): number {
   let inputs: Inputs;
   try {
     if (positional.length === 1) {
-      for (const k of ["--dialect", "--case", "--acquisitions", "--profiles", "--preparation", "--record"]) {
+      for (const k of ["--dialect", "--case", "--acquisitions", "--profiles", "--preparation", "--binding", "--record"]) {
         if (values.has(k)) return usage(`${k} is not taken with a vector directory`);
       }
       inputs = loadVector(positional[0], requireBinding);
@@ -59,6 +59,7 @@ function main(argv: string[]): number {
         preparation: file("--preparation"),
         record,
         requireBinding,
+        binding: values.has("--binding") ? file("--binding") : undefined,
       };
     } else {
       return usage("one vector directory at most");
