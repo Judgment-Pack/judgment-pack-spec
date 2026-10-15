@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Type: Exploratory (a cross-project exploratory record — the `judgment-pack-exchange` repository,
-  a desk's browse of it, and a hosted registry later; outside JPS)
+  a desk's browse of it; a hosted registry is out of scope (Unresolved question 4); outside JPS)
 - Created: 2026-10-14
 - Issue: [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142); the dialect an
   entry holds is [RFC 0018](0018-dialect.md)
@@ -16,22 +16,25 @@
 > another repository of the project: the entry format, the manifest, the test and the contribution
 > rules in the repository
 > [`judgment-pack-exchange`](https://github.com/Judgment-Pack/judgment-pack-exchange) (its
-> `docs/entry-format.md`, `CONTRIBUTING.md` and `tests/`); a desk's browse of the manifest in the
-> [Desk](https://github.com/Judgment-Pack/judgment-pack-desk); and a hosted registry, later, in the
-> hosted application, as that application's question. Acceptance endorses this record as written
+> `docs/entry-format.md`, `docs/release-contract.md`, `CONTRIBUTING.md` and `tests/`); a desk's browse
+> of the manifest in the [Desk](https://github.com/Judgment-Pack/judgment-pack-desk); a hosted registry
+> is out of scope (Unresolved question 4). Acceptance endorses this record as written
 > and confers no authority over any of them, each of which adopts its part by its own process. The
-> repository has made one such decision already: its `docs/entry-format.md` repeats the entry format
-> and says that this record "is normative when it lands", and that where the two differ once it
-> lands, "the RFC is right and this page is a bug". That is the repository's adoption, made by its
-> own process, and not an authority this record claims.
+> repository has made one such decision already: its `docs/entry-format.md` holds its copy of the
+> entry format and says that this record "is normative when it lands", and that where the two
+> differ once it lands, "the RFC is right and this page is a bug". That is the repository's adoption,
+> made by its own process, and not an authority this record claims.
 >
 > **The decision this records.** Issue #142 records the maintainer's direction of 2026-10-14: the
-> names *dialect* and *Judgment Exchange*, and a shared place for dialects, a repository first and a
-> hosted registry later, filed as a record of its own once its prerequisites land. The maintainer
-> fixed the entry format for both this record and the repository, which was created the same day
-> and scaffolded from it in parallel. §3 quotes the format word for word, but for one sentence the
-> maintainer corrected on review, and gives each member's type, requiredness, grammar and bound as
-> the maintainer's disposition of that review fixed them. Under the
+> names *dialect* and *Judgment Exchange*, and a shared place for dialects, filed as a record of its
+> own once its prerequisites land. The maintainer's decision of 2026-10-15 makes an Exchange any
+> repository in the entry format with a manifest a desk can read, for reuse between installations;
+> the organisation's repository is the first such catalog. That decision states:
+> "public submission, its review load and the hosted registry stay out of scope (RFC 0019's unresolved question 4 stays open)".
+> The maintainer fixed the entry format for both this record and the repository, which was created
+> on 2026-10-14 and scaffolded from it in parallel. §3 gives that format with the maintainer's review corrections
+> and this revision's additions, crediting the six proposed metadata rows and their bounds and
+> range grammar to this revision. Under the
 > [interim review regime](../GOVERNANCE.md#interim-review-regime), the pull request that merges this
 > record carries a cross-vendor adversarial review, with the maintainer's disposition of each
 > finding.
@@ -44,17 +47,17 @@ dialect binds a disposition to a write's arguments. An **Exchange** is any repos
 format, with a manifest a desk can read. The organisation's `judgment-pack-exchange` is the first
 such catalog, holding the entries the organisation verifies, as the gateway's catalog holds
 bindings. The format exists for reuse between installations: import from any catalog, bind locally
-and run the same fixtures; export an installation's dialect as an entry. Public submission and its
-review load are out of scope, and a hosted registry remains an unresolved question (§2). A
+and run the same fixtures; export an installation's dialect as an entry. The maintainer's decision
+states: "public submission, its review load and the hosted registry stay out of scope (RFC 0019's unresolved question 4 stays open)" (§2). A
 catalog's release contract (§7) holds import to a tagged state and an update to an explicit,
 reviewed upgrade.
 
 An entry carries a dialect document, the pack it was written against, what it requires, its source
 kinds, its licence, its author, one fixed sentence its author asserts, its fixtures and its
-verification records. What a published entry establishes is that assertion, under the Exchange's
-review, and that its fixtures hold at the Runner and runtime a verification record names: nothing
-about any record's truth, nothing about an operator's intent, and, for a research source, nothing
-about the answer's correctness.
+verification records. What a published entry establishes is that assertion, under the review of the
+catalog that holds it, and that its fixtures hold at the Runner and runtime a verification record
+names: nothing about any record's truth, nothing about an operator's intent, and, for a research
+source, nothing about the answer's correctness.
 
 Two seed entries are planned, each with its write-back: Azure DevOps work items into a triage pack,
 and a Databricks table into a pack. Neither is written or verified. Their verification records wait
@@ -175,9 +178,9 @@ such catalog.
 [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142): an Exchange is any
 repository in the entry format with a manifest a desk can read. The organisation's
 `judgment-pack-exchange` is the first such catalog, holding the entries the organisation verifies,
-in the manner the gateway's catalog holds bindings. It is not a place users upload to. Public
-submission and its review load stay out of scope; the hosted registry stays an unresolved
-question. The format exists for reuse between installations: import from any catalog, bind
+in the manner the gateway's catalog holds bindings. It is not a place users upload to. The decision
+states: "public submission, its review load and the hosted registry stay out of scope (RFC 0019's unresolved question 4 stays open)".
+The format exists for reuse between installations: import from any catalog, bind
 locally, run the same fixtures; export an installation's dialect as an entry.
 
 **A catalog's manifest.** A desk browses it through the connection-catalog pattern: it reads one
@@ -189,7 +192,8 @@ own; publishing there requires no upload to the organisation's catalog. The orga
 contribution rules and recorded decisions (§6) govern its catalog, and do not make it the reviewer
 of every other catalog.
 
-**A hosted registry**, if the product warrants one, could serve a catalog's manifest and files:
+**A hosted registry** is out of scope (Unresolved question 4). If the product warrants one, it could
+serve a catalog's manifest and files:
 the same bytes and digests, with listing, search and download at a stable address. The repository
 would remain where its entries are written, reviewed, pinned, verified and declined. A consumer
 would still hold each file to the release it chose; another manifest is detected only if the
@@ -198,11 +202,13 @@ its identity remain open (Unresolved questions 1 and 4).
 
 ### 3. The entry format
 
-The maintainer fixed the format for both this record and the repository. It is quoted here word for
-word, but for its last sentence, which the maintainer corrected in the disposition of this record's
-review (finding 2), and for the `output` member, the `output.json` file and the manifest's
-`outputDigest`, which the maintainer's decision on exchange issue #2 added (below, and Unresolved
-question 6):
+The maintainer fixed the original format for both this record and the repository. The format is
+that of any catalog — a repository in it with a manifest a desk can read — and exists for reuse
+between installations. This section includes the maintainer's correction to the original's last
+sentence on review (finding 2), scopes review to the catalog that holds the entry, and includes the
+`output` member, the `output.json` file and the manifest's `outputDigest` added by the maintainer's
+decision on exchange issue #2 (below, and Unresolved question 6); this revision's additions follow
+the original format below.
 
 An **entry** is one directory `entries/<publisher>/<name>/` holding, as separate files with these
 names:
@@ -240,34 +246,44 @@ outputDigest}` pinning each entry by the SHA-256 of its `entry.json`, `dialect.j
 document and `outputDigest` exactly when it has an output document; a
 test holds every entry to the manifest and every fixture to its `preparationDigest` by running the
 specification's preparation verifier over it. What a published entry establishes is the author's
-assertion above, under the Exchange's review; nothing about truth. CI refuses recognised credential
-shapes and local paths; a maintainer must refuse credentials and personal data in every file of an
-entry before merge, recipe literals and receipt metadata included; and the scan's silence proves
-nothing.
+assertion above, under the review of the catalog that holds the entry; nothing about truth. CI
+refuses recognised credential shapes and local paths; a maintainer must refuse credentials and
+personal data in every file of an entry before merge, recipe literals and receipt metadata included;
+and the scan's silence proves nothing.
 
-**Authoring metadata, added 2026-10-15.** Alongside the format above, this revision adds
-`description`, `compatibility` and `upgrade`, as
+**Authoring metadata, proposed by this revision, 2026-10-15.** Alongside the format above, this
+revision proposes `description`, `compatibility` and `upgrade`, as
 [exchange #6](https://github.com/Judgment-Pack/judgment-pack-exchange/issues/6) requests. They are
 optional members of `entry.json`, included in its `entryDigest` when present. `description` says
 what the entry is for; `compatibility` names the desk and runner releases its author says it fits;
 `upgrade` gives review notes keyed by the previous entry's digest, the manifest's `entryDigest`,
 not a dialect digest. These are authoring statements, not verification records or permissions.
 
+The six metadata rows below, their bounds and the compatibility-range grammar are this revision's
+proposal. RFC 0019 defines the format and the exchange enforces it: where its page differs once
+this RFC lands, the page is a bug, as the exchange's adoption rule states. The exchange's text and
+tests do not hold these six rows until
+[exchange #6](https://github.com/Judgment-Pack/judgment-pack-exchange/issues/6) lands them.
+
+Authors should account for verification records changing `entryDigest`: an upgrade note may need
+to name each intermediate entry digest, even when the dialect is unchanged.
+
 **The members.** Every member and nested object of `entry.json` has a type, a requiredness, a
-grammar or a set of allowed values, and a bound, as the maintainer's disposition of this record's
-review gives them (finding 1):
+grammar or a set of allowed values, and a bound. The original rows follow the maintainer's
+disposition of this record's review (finding 1); the six metadata rows are marked as this revision's
+proposal:
 
 | Member | Type | Required | Grammar, allowed values and bound |
 | --- | --- | --- | --- |
 | `entryVersion` | integer | yes | `1` |
 | `id` | string | yes | `^[a-z0-9]+(\.[a-z0-9-]+)+$`, 3 to 128 characters, equal to the entry's path under `entries/` with `/` read as `.`: `entries/<publisher>/<name>/` holds the id `<publisher>.<name>` |
 | `title` | string | yes | 1 to 200 characters |
-| `description` | string | no | 1 to 4096 characters |
-| `compatibility` | object, closed | no | exactly `desk` and `runner` |
-| `compatibility.desk` | string | with `compatibility` | 1 to 64 characters; a release tag or a range of release tags, as defined below |
-| `compatibility.runner` | string | with `compatibility` | 1 to 64 characters; a release tag or a range of release tags, as defined below |
-| `upgrade` | object keyed by entry digest | no | at most 32 members; each key a `sha256:` digest of a previous `entry.json`'s stored bytes, each value a note below |
-| `upgrade.<entryDigest>` | string | for each key in `upgrade` | 1 to 4096 characters: notes for review when moving from that entry digest to this entry |
+| `description` | string | no | Proposed in this revision: 1 to 4096 characters |
+| `compatibility` | object, closed | no | Proposed in this revision: exactly `desk` and `runner` |
+| `compatibility.desk` | string | with `compatibility` | Proposed in this revision: 1 to 64 characters; a release tag or range, as defined below, naming the releases of any desk that reads catalogs |
+| `compatibility.runner` | string | with `compatibility` | Proposed in this revision: 1 to 64 characters; a release tag or a range of release tags, as defined below |
+| `upgrade` | object keyed by entry digest | no | Proposed in this revision: 1 to 32 members; each key a `sha256:` digest of a previous `entry.json`'s stored bytes, each value a note below |
+| `upgrade.<entryDigest>` | string | for each key in `upgrade` | Proposed in this revision: 1 to 2048 characters: notes for review when moving from that entry digest to this entry |
 | `direction` | string | yes | `input`, `output` or `both` |
 | `pack` | object, closed | yes | `id`, and exactly one of `versions` and `digests` |
 | `pack.id` | string | yes | an absolute URI (Core §4), at most 2048 characters |
@@ -295,8 +311,8 @@ review gives them (finding 1):
 | `fixtures[].preparationDigest` | string | yes | a `sha256:` digest |
 | `verification` | array of closed objects | yes | at most 32; empty until verified |
 | `verification[].date` | string | yes | `YYYY-MM-DD` |
-| `verification[].runner` | string | yes | a release tag, `^v\d+\.\d+\.\d+$` |
-| `verification[].runtime` | string | yes | a release tag, `^v\d+\.\d+\.\d+$` |
+| `verification[].runner` | string | yes | a release tag, in the grammar below |
+| `verification[].runtime` | string | yes | a release tag, in the grammar below |
 | `verification[].readers` | array of strings | yes | 1 to 8, each `<repository>/<path>@<commit>`, at most 200 characters |
 | `verification[].result` | string | yes | `agree` |
 
@@ -304,9 +320,12 @@ review gives them (finding 1):
 `dialect.json` is bounded as RFC 0018 §12 bounds a verifier's inputs. Every object is closed: a
 member the table does not list is refused. A member name given twice in one object is refused, as
 Core §2.1 refuses one.
+The 64 KiB file bound governs even when every member is within its individual bound; the maxima
+are not a promise that all maximum-length values fit together.
 
-**Compatibility ranges.** A release tag has the form `^v\d+\.\d+\.\d+$`, as a verification
-record's tags do. A compatibility value is either one such tag, naming that release alone, or
+**Compatibility ranges.** A release tag has the form
+`^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$`, as a verification record's tags do.
+A compatibility value is either one such tag, naming that release alone, or
 two comparisons: `>=` followed by the lower tag and `<` followed by the upper tag, with exactly
 one space between them, `>=v0.10.0 <v0.11.0`, for example. The lower bound is inclusive and
 the upper bound exclusive; tags are ordered by their three integer components, and the upper
@@ -314,8 +333,29 @@ bound must exceed the lower. No other range syntax is admitted. An absent `compa
 no compatibility statement; an absent `upgrade`, or no note for the previous digest, supplies no
 upgrade guidance. None of these absences approves an import or an upgrade (§7).
 
+**Manifest form, specified by this revision.** `manifest.json` is at most 1 MiB (1,048,576 bytes)
+and contains at most 1,024 rows. Each row adds `fixtures` to the original form above and is a closed
+object with exactly `id`, `path`, `entryDigest`, `fixtures`, and `dialectDigest` and `outputDigest`
+when the entry's direction requires them. Duplicate member names are refused. Rows have distinct
+`id` values and are ordered by those ids as byte strings (their UTF-8 bytes). The `id` has the
+grammar and bound in the entry table;
+each digest has the form given below. The row's `path` is exactly `entries/<publisher>/<name>`,
+without a trailing slash: split `id` at its first `.` for `<publisher>` and `<name>`, leaving any
+further dots in `<name>`. A path that differs, or an entry whose `id` differs from the row's, is
+refused. There is exactly one row per entry directory in the release's tree and one entry per row.
+
+The row's `fixtures` is an array of closed `{name, files}` objects, one per fixture in `entry.json`
+in the same order (empty for an output-only entry). Each `name` equals that fixture's name, and
+`files` is an array of 3 to 5 distinct strings listing its complete file set by basename.
+`case.json`, `profiles.json` and `preparation.json` are required; `sources.json` is optional;
+`binding.json` is required exactly when the entry's dialect has an unbound source. No other file
+is admitted in a fixture directory. A consumer knows from this list which files to fetch under
+`<path>/fixtures/<name>/` over any transport; a listed file that cannot be fetched is a failure,
+not an absent optional file. The consumer checks that the list equals the file set in the release's
+tree. These manifest additions are defined here for the exchange to implement through exchange #6.
+
 **How the format is spelled.** Beside the table, the assertion's words, the digests and a fixture's
-files are spelled as follows, as the repository's scaffold spells them.
+files are spelled as follows; this revision adds the closed fixture file set and `binding.json`.
 
 - **The assertion.** `assertion` is exactly this sentence: "The author asserts that these rules
   derive these facts and this evidence-availability from records of that shape, or these arguments
@@ -337,22 +377,27 @@ files are spelled as follows, as the repository's scaffold spells them.
   (RFC 0018 §9.5), so its `preparationDigest` is the preparation's digest.
 - **A fixture's files.** A fixture directory holds `case.json`, the case document; `sources.json`,
   the acquisitions, optional and absent for a case-only fixture; `profiles.json`, the input profiles
-  the fixture was prepared under; and `preparation.json`. They are the files the specification's
-  preparation verifier reads (RFC 0018 §11), named as the Runner's vectors name them, with the
-  dialect taken from the entry's `dialect.json`. A fixture's `path` is `fixtures/<name>`, relative
-  to the entry's directory. For a `research` source, `sources.json` holds the research record as the
+  the fixture was prepared under; `preparation.json`; and, exactly for a dialect with an unbound
+  source, `binding.json`, the binding document the fixture was recorded under (RFC 0018 §4.4).
+  This file set is closed and listed in the manifest row as above. The first four names follow the
+  Runner's vectors; `binding.json` is this revision's name for RFC 0018 §4.4's document. A verifier
+  reads these inputs under RFC 0018 §11, with the dialect taken from the entry's `dialect.json`.
+  A fixture's `path` is `fixtures/<name>`, relative to the entry's directory. For a `research`
+  source, `sources.json` holds the research record as the
   acquisition's result, held by its digest under its receipt, as every acquisition is.
-- **The repository's own copy.** The repository's `docs/entry-format.md` repeats the format, with
-  the spellings its tests make, and says that this record is normative for the repository when it
-  lands (the scope note).
+- **The repository's own copy.** The repository's `docs/entry-format.md` adopts this RFC as the
+  format's definition when it lands: where the page differs, the page is a bug (the scope note).
+  This revision's six metadata rows and manifest additions await exchange #6 in that page and its
+  tests; the exchange enforces the format defined here, rather than defining it for the RFC to copy.
 
 ### 4. The Exchange's test
 
-A test in the repository, run on every push and pull request, holds:
+A catalog's test, run on every push and pull request in its repository, holds:
 
 - **the manifest to the entries**: one row for each entry directory and one entry for each row, in
-  `id` order, each `id` its directory's `<publisher>.<name>`, and `entryDigest`, `dialectDigest` and
-  `outputDigest` over the files' bytes, the last two present as §3 gives them;
+  `id` byte order, with the bounds, closed rows, matching paths and fixture file lists of §3, and
+  `entryDigest`, `dialectDigest` and `outputDigest` over the files' bytes, the last two present as
+  §3 gives them;
 - **each `entry.json` to the members' table (§3)**: each member's type, requiredness, grammar and
   bound, every object closed, and the `assertion` the fixed sentence exactly;
 - **`dialect.digest` and `output.digest`** to their documents' `canon` bytes, and each fixture's
@@ -375,13 +420,14 @@ dialect (Unresolved question 3).
 
 ### 5. What an entry establishes, and what it does not
 
-An entry establishes, to a reader who runs the Exchange's test:
+An entry establishes, to a reader who performs the checks in §7:
 
 - **The author's assertion**, the format's one sentence (§3): that these rules derive these facts
   and this evidence availability from records of that shape, or these arguments from that
-  disposition. It stands under the Exchange's review: a maintainer's read of every entry, and, for
-  a material entry, a recorded cross-vendor review round with the maintainer's disposition of each
-  finding.
+  disposition. It stands under the review of the catalog that holds the entry. In the
+  organisation's catalog that means the maintainer's read of every entry and, for a material entry,
+  a recorded cross-vendor review round with the maintainer's disposition of each finding (§6).
+  Another catalog's review is its own; the organisation's review does not extend to its entries.
 - **That its fixtures hold at the named Runner and runtime**, as each verification record states:
   on its date, each reader it names recomputed every fixture's preparation from the entry's dialect
   and the fixture's files, byte for byte equal to `preparation.json`. For those fixtures, that is
@@ -405,6 +451,10 @@ It does not establish:
 
 ### 6. The repository's rules
 
+These are the rules of the organisation's `judgment-pack-exchange` catalog (§2).
+
+- **Contributions.** The contribution rules are the other repositories': a DCO sign-off on every
+  commit, one review round, and the thank-you bot.
 - **Review.** A new entry and a changed dialect are material; a change to a README or a title is
   not; any other change is classified on its pull request, out loud. One entry per pull request. A
   material change gets a maintainer's read and one recorded cross-vendor round, with the
@@ -441,48 +491,84 @@ It does not establish:
 
 ### 7. A catalog's release contract
 
-A **release** is a tagged state of a catalog's `main`, with a `manifest.json` whose entries are
-pinned by their digests (§3). The tag has the release-tag form above, `vMAJOR.MINOR.PATCH`. A
-consumer resolves the chosen tag to a commit and keeps that commit and manifest for the import;
-every file it fetches belongs to that same state. A later state of `main`, or a moved tag, does
-not replace what the installation has imported. A catalog with no entries may release the empty
-manifest, `[]`.
+A **catalog location** is a git repository URL or a local directory containing the catalog's git
+repository. A **release** is a tag resolved to the commit it names, with an annotated tag peeled to
+its commit; a tag that does not resolve to a commit is refused. Its tag has §3's release-tag grammar,
+`vMAJOR.MINOR.PATCH`. No branch ancestry is checked. The consumer reads `manifest.json` and every
+entry file as the blob in that commit's tree, byte for byte, with no conversion, including no
+checkout line-ending conversion. Every fetched file therefore belongs to that same commit.
 
-**Before import.** A consumer fetches the release's manifest, reads it within bounds and checks
-its form (§3). For each entry it would offer for import, it fetches the entry's files from that
-release and verifies:
+The consumer retains the catalog location, tag, resolved commit and manifest for the import.
+A later repository state does not replace what the installation imported. A tag that now resolves
+to a commit different from the one retained for that tag is refused. A catalog with no entries
+may release the empty manifest, `[]`.
+
+**Before import.** The consumer performs these checks itself, independently of a catalog's CI.
+It fetches the release's manifest within the 1 MiB and 1,024-row bounds, checks its form (§3), and
+checks one row per entry directory in the commit's tree and one entry per row, distinct ids in
+byte order, closed rows and the exact `id`-to-`path` match. For each entry it would offer for import,
+it fetches the entry's files from that release, using the manifest's fixture file lists, and verifies:
 
 - `entry.json` against the manifest's `entryDigest`, and its members against §3, including its
-  `id`, path, direction and authoring metadata;
+  `id`, direction and authoring metadata, with the row's path matching its `id`;
 - `dialect.json` against the manifest's `dialectDigest` over the stored bytes and `dialect.digest`
   over the document's canonical bytes (RFC 0018 §1, §2), when the entry has an input dialect;
 - `output.json` against `outputDigest` over the stored bytes and `output.digest` over the
-  document's canonical bytes (RFC 0018 §10), when the entry has an output dialect; and
-- each fixture's `preparation.json` against its `preparationDigest`, with the fixture's remaining
-  files checked as §4 states. A fixture the verifier cannot recompute is reported as such, never
-  as a successful replay.
+  document's canonical bytes (RFC 0018 §10), when the entry has an output dialect;
+- each fixture's `preparation.json` against its `preparationDigest`, and its closed file set against
+  the manifest list and §3, with every listed file fetched successfully;
+- every pinned digest against the fetched bytes it names, including the profiles and acquisitions
+  checked by the reader, using canonical bytes only where that digest's definition requires them;
+- each file's bounds (§3 and RFC 0018 §12), and every file against the credential and local-path
+  scan described in §4; a recognised credential or local path refuses the entry, and a scan's
+  silence establishes no absence of credentials or personal data; and
+- each recomputable fixture by replay with the consumer's own preparation reader, using the
+  entry's own dialect, the fixture's own `profiles.json` and remaining inputs, and, for an unbound
+  version-3 dialect, that fixture's `binding.json` (RFC 0018 §4.4). The reader must return a reading
+  with no finding and a digest equal to `preparationDigest`. No record is supplied, so its binding
+  is `not-checked`. A fixture outside the reader's supported versions or kinds is reported as not
+  recomputable, with the reason, never as a successful replay (§4).
 
-A failed digest or form check refuses the entry before it is offered for import. File digests and
-canonical digests are distinct checks, even when they happen to be equal. The manifest gives no
-separate digest for `README.md` or each fixture input: those files are fetched from the same
-tagged state, and §4 states what their checks establish. Verification runs no entry-supplied code
-and re-executes no research recipe.
+A failed digest, form, file-set, bound or scan check refuses the entry before it is offered for
+import; a malformed manifest refuses the catalog's import. A replay disagreement, finding or
+verifier refusal also refuses the entry. File digests and canonical digests are distinct checks,
+even when they happen to be equal. The manifest gives no separate digest for `README.md` or each
+fixture input: those files are fetched as blobs from the same commit. For a fixture not recomputed,
+the checks establish only the pinned bytes, not the derivation. Verification runs no entry-supplied
+code and re-executes no research recipe.
 
-**An update** is an explicit, reviewed upgrade from one release to another. The consumer verifies
-the new release as above, shows the changed entry and its compatibility statement, and shows the
-`upgrade` note keyed by the previously imported entry's digest, if one exists. Neither a newer tag
-nor an author's compatibility statement replaces the installation's review.
+**An update** is an explicit, reviewed upgrade from one release to another. A lower tag, ordered
+by its three integer components (§3), is refused, as is a moved tag. The consumer verifies the new
+release as above. An entry is changed if any file under its path is added, removed or differs in
+bytes between the two commits, including its README, fixture inputs and binding documents, even
+when no pinned digest changes. A change of direction is a change to the entry and is shown for
+review with the changed files. An entry absent from the new release stays imported at its previous
+commit and is shown as withdrawn; it is not silently removed or replaced.
 
-**Importing enables no execution and grants no permission.** The installation binds connections
-and parameters locally (RFC 0018 §4.4); an entry's requirements and suggested limits are data for
-that review, never allowances. Import does not bind a connection, call a source, schedule a run or
-authorise a write. The installation chooses its bindings and parameters and runs the same fixtures
-under the dialect's rules. It may export its dialect as an entry in any catalog (§2).
+The consumer shows the changed entry, its compatibility statement, and the `upgrade` note keyed
+by the previously imported entry's digest, if one exists. A compatibility range excluding the
+consumer's own release informs the review and does not block the upgrade. The review records who
+approved it (the reviewer's identifier), when, and both the previously imported and new commits;
+only that explicit approval replaces the imported entry. Neither a newer tag nor an author's
+compatibility statement replaces the installation's review.
+
+**Importing enables no execution and grants no permission.** Local binding means the binding
+document of RFC 0018 §4.4 for a version-3 dialect with unbound sources, mapping those sources to
+the installation's input profiles. Its fixture replay uses the fixture's own binding document
+and profiles, not the installation's replacement bindings. A version-2 entry is imported as
+published and re-verified under its own dialect with its fixtures' own profiles. Using it against
+the installation's sources means re-authoring, which remains Unresolved question 7; import does
+not substitute profiles in version 2.
+
+An entry's requirements and suggested limits are data for review, never allowances. Import does
+not bind a connection, call a source, schedule a run or authorise a write. The installation chooses
+its local bindings and parameters separately. It may export its dialect as an entry in any catalog
+(§2).
 
 This contract and the authoring metadata are proposed here and land in the catalog's
 `docs/release-contract.md` and entry-format rules by its own process
 ([exchange #6](https://github.com/Judgment-Pack/judgment-pack-exchange/issues/6)). This revision
-records no release, attestation or implemented importer. Signing remains an unresolved question.
+records no release, attestation or implemented importer. Signing remains Unresolved question 1.
 
 ## Alternatives
 
@@ -499,8 +585,8 @@ records no release, attestation or implemented importer. Signing remains an unre
   author's pack would need that author.
 - **A registry only.** A hosted service with no repository would hold entries, their review and
   their history in its own store: nothing to clone or pin by commit, no public review record beside
-  the bytes, and the service's operator to trust for both. It may come second, serving the
-  repository's manifest (§2); it is not a substitute for it.
+  the bytes, and the service's operator to trust for both. A hosted registry is out of scope
+  (Unresolved question 4); §2 describes the open question of serving a catalog's manifest.
 - **No shared place.** The status quo: each deployment writes its own dialect and verifies it
   against nothing but its own runs. A counterparty can hold a preparation to its dialect (RFC 0018),
   but has no published dialect to compare it with, and a second reader has no fixtures but the
@@ -519,9 +605,10 @@ records no release, attestation or implemented importer. Signing remains an unre
   operator adopts one by review. The Desk producing the dialect format is Desk #398.
 - **The Runner and the gateway** are unchanged. The Runner prepares from an adopted input dialect
   as from any mapping v2 document; the gateway holds a write to an adopted policy as to any policy.
-  Adopting an input dialect with an `operation` source points its `profile` and `profileDigest` at
-  the installation's own input profile, which changes the dialect's bytes and its digest
-  (Unresolved question 7).
+  A version-2 entry stays as published for import and fixture replay. Pointing its `profile` and
+  `profileDigest` at the installation's own input profile changes its bytes and digest and is
+  re-authoring (Unresolved question 7). Version 3's unbound form uses RFC 0018 §4.4's binding
+  document; fixture replay uses the fixture's own binding and profiles (§7).
 
 ## Security and privacy
 
@@ -560,8 +647,9 @@ records no release, attestation or implemented importer. Signing remains an unre
 - **The manifest and its host.** A desk trusts what it pins. Pinned by commit, the manifest is the
   repository's; served by a registry, it is whatever the registry serves, until something signs it
   (Unresolved questions 1 and 4).
-- **Resource use.** A desk reads the manifest within bounds, as it reads the connection catalog, and
-  a verifier reads an entry's documents within RFC 0018 §12's bounds, refusing what exceeds them.
+- **Resource use.** A desk reads the manifest within §3's 1 MiB and 1,024-row bounds, not the
+  connection catalog's 32 KiB bound. It holds entry files to §3's bounds and a verifier's inputs to
+  RFC 0018 §12's bounds, refusing what exceeds them.
 
 ## Conformance
 
@@ -594,13 +682,15 @@ after the run it records, and is a record of the bytes it was made on (§6).
    `tests/test_entries.py`, the example entry, the contribution rules, the licence and the thank-you
    bot. Its CI job, `entries`, checks out this repository at `f821757`, the merge of RFC 0018, and
    runs the tests; it passed on that commit. It holds no entries.
-2. **A desk's browse.** Proposed, not built, and tracked by no issue yet. The Desk would read the
-   manifest at a pinned commit through the connection-catalog pattern (§2); show each entry's title,
+2. **A desk's browse and importer.** Proposed, not built, and tracked by
+   [judgment-pack-desk#400](https://github.com/Judgment-Pack/judgment-pack-desk/issues/400). It takes
+   a catalog location, a git repository URL or local directory (§7), and a release tag. The Desk
+   would read the manifest as blob bytes at the tag's resolved commit; show each entry's title,
    direction, pack, requirements, source kinds, licence, author, assertion and verification records
-   as the entry gives them; fetch an entry's files and hold them to the manifest's digests; and hand
+   as the entry gives them; fetch and check an entry's files under §7; and hand
    an entry the operator adopts to its inputs, which produce the dialect format (Desk #398). It runs
    nothing an entry holds.
-3. **A hosted registry**, later (§2).
+3. **A hosted registry** is out of scope (Unresolved question 4).
 4. **The seed entries, planned and not verified.** Neither is written. Each is an input dialect with
    its write-back, so each is of direction `both` (Unresolved question 6). Their verification
    records are added after the maintainer's first live checks of the two connections, on gateway
@@ -655,8 +745,8 @@ All are this project's, and RFC 0000's bar of two independent implementations is
    research record, a model's answer, never is, and is held by its digest as every acquisition is.
 4. **The hosted registry and its identity.** Whether to host one, who runs it, under what name and
    key, how a desk pins it, and what a desk does when the registry and the catalog disagree. The
-   maintainer's decision of 2026-10-15 leaves these open; any repository in the entry format can
-   already be a catalog (§2), without a hosted registry.
+   maintainer's decision of 2026-10-15 leaves these open and the hosted registry out of scope; any
+   repository in the entry format can already be a catalog (§2), without a hosted registry.
 5. **Output dialects before the gateway publishes policy vectors.** RFC 0018 defers the output
    side's vectors, and the gateway publishes none. An output dialect has no preparation, so a
    fixture's `preparationDigest` has nothing to name for it, and `dialectVersion`, an integer of 2
@@ -674,13 +764,15 @@ All are this project's, and RFC 0000's bar of two independent implementations is
    in `entry.json` and in `manifest.json` (§3); the exchange's pull request is
    [#3](https://github.com/Judgment-Pack/judgment-pack-exchange/pull/3).*
 
-7. **A dialect pins its installation.** An `operation` source names its input profile by id and
-   digest (RFC 0018 §4.1), and a profile pins the gateway's key, source, authority, adapter, shape
-   and endpoint (§5.1 there). An entry's dialect therefore pins the profile its fixtures were
-   recorded under, and an operator who adopts it under another profile changes its bytes and its
-   digest: the Exchange's verification is of the entry's bytes, not of the adopted copy. Whether
-   adoption is defined as that one substitution and a desk checks that nothing else changed, or a
-   dialect names its profile otherwise, which RFC 0018 does not provide, is open.
+7. **Re-authoring a version-2 dialect for another installation.** A version-2 `operation` source
+   names its input profile by id and digest (RFC 0018 §4.1), and a profile pins the gateway's key,
+   source, authority, adapter, shape and endpoint (§5.1 there). Import keeps that dialect as
+   published and re-verifies its fixtures with their own profiles (§7). Using it against the
+   installation's sources requires re-authoring: changing the profile changes the dialect's bytes
+   and digest, and the catalog's verification does not cover that copy. Whether a desk can constrain
+   such re-authoring to a profile substitution, and what checks and new fixtures it needs, remains
+   open. RFC 0018 §4.4 now defines a binding document for version 3's unbound source form; that
+   procedure does not apply to a version-2 entry, and version 3 remains defined and not claimable.
 8. **The seed entries' source kind.** Through the two connections as they stand, neither seed's
    input is a kind the Exchange's test can recompute (Implementation). Whether the seeds wait for
    version 3 and a preparer that writes `sql` and a kind for the Azure DevOps connection's reads, or
