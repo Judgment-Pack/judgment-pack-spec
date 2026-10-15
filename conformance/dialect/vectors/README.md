@@ -1,6 +1,7 @@
 # Preparation vectors
 
-Vectors for a second reader of mapping v2's preparation: given a mapping, a case,
+Vectors for a second reader of mapping v2's preparation, and of dialect version 3's
+(`docs/MAPPING-V2.md`, "Dialect version 3"): given a mapping, a case,
 the source records and the trusted input profiles, compute the preparation the
 Runner computes, byte for byte, take its SHA-256, and hold a Runtime audit record's
 binding (runtime ADR-0050) to it. The specification takes this format up as a
@@ -19,7 +20,9 @@ does not run it. The ninth vector, `numeric-spellings`, was added afterwards by 
 same generator, run into a new directory: it wrote the first eight again byte for
 byte, and only the new vector and its manifest entry were taken from that run. The
 tenth, `http-shaped-source`, was added the same way: the run wrote the first nine again
-byte for byte. Changing a vector is a change of the contract a second reader is held
+byte for byte. So were the eleventh and twelfth, `version-3-bound` and
+`unbound-bound-at-import`, the first of dialect version 3: the run wrote the first ten
+again byte for byte. Changing a vector is a change of the contract a second reader is held
 to, and needs the same justification as changing
 [`docs/MAPPING-V2.md`](../../docs/MAPPING-V2.md#the-canonical-form-of-a-preparation).
 If a vector looks wrong, the question is whether the documented form is wrong, not
@@ -55,6 +58,8 @@ its SHA-256.
 | `case.json` | The case, `run.input.source.case`, as the export holds it. |
 | `sources.json` | The source records as the Runner retains them, `run.input.source.sources`: for each source acquired, its response, `{result, receipt, salts}`. Absent for a case-only mapping, which has none. |
 | `profiles.json` | The trusted input profiles, which the mapping names by digest and `verify-run` is given as `--profiles`. |
+| `unbound.json` | For a dialect bound at import only: the published dialect, of version 3, whose unbound sources name no profile, `run.input.source.import.dialect`, as the export holds it. |
+| `binding.json` | For a dialect bound at import only: the binding document that binds its unbound sources to the profiles, `run.input.source.import.binding`, as the export holds it. `mapping.json` is then the bound dialect Runner made of the two. |
 | `preparation.json` | The preparation the Runner computes from the files above at the vector's `verifiedAt`, in its canonical form: `verifiedAt` included, no newline. |
 | `preparation.sha256` | `sha256:` and the 64 lowercase hexadecimal characters of the SHA-256 of `preparation.json`, no newline. |
 | `run.json` | The verification export `verify-run` reads (`--file`), as the Runner wrote it or, for an altered vector, with the one alteration the manifest names. |
@@ -76,6 +81,11 @@ The record a binding is read from is in `run.json`: the record's exact bytes,
 - `preparation`: its `sha256`; the `binding` Runner passes the Runtime for it, the
   exact bytes; and `retained`, `equal` when the export retains this preparation and
   `altered` when it retains another.
+- `import`, for a dialect bound at import only, which file is which: `published`, the
+  published dialect (`unbound.json`); `binding`, the binding document
+  (`binding.json`); and `bound`, the bound dialect Runner made of them
+  (`mapping.json`), whose digest the preparation names as `mappingDigest`. Absent for
+  every other vector.
 - `recordBinding`, the record's binding as recorded, the exact bytes of its member
   named `binding`, or `null` when it carries none.
 - `verifyRun`: the `arguments` given to `jpack-runner verify-run`, where `--file`,
@@ -98,6 +108,8 @@ The record a binding is read from is in `run.json`: the record's exact bytes,
 | `escaped-strings` | `mapping-v2-before-exact-bytes` | nothing: a case-only run whose case holds `&`, `<`, `>` and non-ASCII letters | `verified-inputs` |
 | `numeric-spellings` | `mapping-v2-calculated-numeric` | nothing: the valid case's mapping and inputs with three integer case parameters more, `-0`, `9007199254740991` and `-9007199254740991` | `verified-inputs`, binding `matches`, signed and witnessed |
 | `http-shaped-source` | `mapping-v2-http-shaped` | nothing: one source of shape `http`, its record recorded from a stand-in of a gateway `http` source in the test's process | `verified-inputs`, binding `matches`, signed and witnessed |
+| `version-3-bound` | `mapping-v3-bound` | nothing: the valid case's mapping written as a dialect document of version 3, its source bound | `verified-inputs`, binding `matches`, signed and witnessed |
+| `unbound-bound-at-import` | `mapping-v3-imported` | nothing: a published version-3 dialect whose source is unbound, its binding document, and the bound dialect Runner made of them at import, with a source of shape `http` as in `http-shaped-source` | `verified-inputs`, binding `matches`, signed and witnessed |
 
 The valid case is also the calculated-values case: its one source is a calculator
 that computed. Its preparation's digest is the digest its record binds, so a reader
@@ -115,6 +127,19 @@ a path, a method and a query rather than a tool call, and whose result is the ad
 status, headers and body. Its preparation has the form of every other vector's: a
 preparation does not name its source's shape, which the profile the mapping pins by
 digest and the receipt it cites carry, and nothing in it depends on the shape.
+
+The last two are dialect version 3 (`docs/MAPPING-V2.md`, "Dialect version 3").
+`version-3-bound` is there for the version: its mapping is written as a version-3
+document, with no `provider`, `facts` or `evidence`, which Runner writes empty in a
+version-2 document only, so its `mappingDigest` is the digest of `mapping.json`'s
+canonical bytes as it is; its preparation has the form of the version-2 vectors', its
+`version` 3. `unbound-bound-at-import` is there for the binding: a reader binds
+`unbound.json` with `binding.json` under `profiles.json` (each unbound source's
+`platform`, `operation`, `shape` and `record` removed and the profile the binding
+names added, every other member as written) and must get `mapping.json`; the profile
+must be of the source's `shape`, and its `adapter.name` the source's `record`. The
+preparation commits `mapping.json` by its digest, and neither `unbound.json`'s nor
+`binding.json`'s: the run keeps them beside it, and no preparation holds them.
 
 ## The canonical form
 
@@ -156,6 +181,15 @@ in them are those of the run that wrote them, and are data now.
   `adapter-http` reads one, and a receipt the stand-in signed as a gateway signs one. No
   live service was asked; the profile names the adapter `adapter-http`, version
   `stand-in`.
+- `mapping-v3-bound` was written as `mapping-v2-calculated-bound` was, under the
+  published Runtime 0.31.0, by `TestAVersion3RunIsSignedWitnessedAndBound` with
+  `JPACK_V3_BOUND_EXPORT_DIR` set: the valid case's run, its mapping of version 3.
+- `mapping-v3-imported` was written the same way, by
+  `TestAnImportedRunIsSignedWitnessedAndBound` with `JPACK_V3_IMPORT_EXPORT_DIR` set:
+  the run of `mapping-v2-http-shaped`'s mapping, published as version 3 with its source
+  unbound and bound at import to the stand-in's profile. Its record was recorded from
+  the stand-in as `mapping-v2-http-shaped`'s was; no live service was asked, and the
+  catalog names it binds, `intake-api` and `requests.read`, name no real catalog.
 - `mapping-v2-before-calculators`, `mapping-v2-unsigned-parameters` and
   `mapping-v2-before-exact-bytes` were written before Runner passed a binding: their
   records carry none.

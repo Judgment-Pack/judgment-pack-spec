@@ -11,6 +11,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { scanBytes } from "../src/bounds.ts";
 import { add, decodePoint, encodePoint, keyAcceptable, smallOrder, verify as edVerify } from "../src/ed25519.ts";
+import { bindDialect, readBinding } from "../src/forms.ts";
 import { NotRead, arr, canon, isIntegerLiteral, member, num, obj, parse, preparationForm, read, resolve, str, utf8 } from "../src/json.ts";
 import type { JObj, JVal } from "../src/json.ts";
 import { instant } from "../src/time.ts";
@@ -613,17 +614,222 @@ test("§4.1: a stream read under a profile of shape airbyte is read as its shape
   }
 });
 
-test("§11: a dialect of version 3 is refused as version-unread, before its form is checked", () => {
+// ---- dialect version 3 (§4.3, §4.4, §9.1), the Runner's eleventh and twelfth vectors ----
+// Written by the author who extended both readers to version 3, who had read both: no part of this reader's
+// independence.
+
+test("§11: a dialect of version 3 is read, and its form checked", () => {
   const unbound = '"platform":"intake","operation":"requests","shape":"http","record":"adapter-http","maxAge":300';
   const asUnbound = (b: Uint8Array) => edit(b, '"profile":"intake","profileDigest":"sha256:dec2468ef46d4026c7f813ff768aba66d2d8e7891e8b8ecb99fb099ef3fd363e","maxAge":300', unbound);
-  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3') }), "refusal:version-unread");
-  assert.equal(verdict({ ...httpShaped, dialect: edit(asUnbound(httpShaped.dialect), '"version":2', '"version":3') }), "refusal:version-unread");
-  // malformed beside it: still version-unread, since the form is not checked
-  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3,"Version":"x"') }), "refusal:version-unread");
+  // read as version 3: its preparation is another, of version 3 and another digest
+  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3') }), "finding:preparation-differs");
+  // its form is checked: an unbound source with no binding document, and a member of no form
+  assert.equal(verdict({ ...httpShaped, dialect: edit(asUnbound(httpShaped.dialect), '"version":2', '"version":3') }), "refusal:input-malformed");
+  assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3,"Version":"x"') }), "refusal:input-malformed");
   // an unbound source in a version-2 dialect, and a version this document does not define
   assert.equal(verdict({ ...httpShaped, dialect: asUnbound(httpShaped.dialect) }), "refusal:input-malformed");
   assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":4') }), "refusal:input-malformed");
   assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3.0') }), "refusal:input-malformed");
   // the bounds measured before it come first
   assert.equal(verdict({ ...httpShaped, dialect: edit(httpShaped.dialect, '"version":2', '"version":3'), case: utf8("[".repeat(33) + "]".repeat(33)) }), "refusal:input-over-bound");
+});
+
+const imported = loadVector(join(VECTORS, "unbound-bound-at-import"), true);
+const v3bound = loadVector(join(VECTORS, "version-3-bound"), true);
+const sha = (b: Uint8Array) => createHash("sha256").update(b).digest("hex");
+
+/** The import vector's inputs, its published dialect altered and the binding document's `dialect` written again as its
+ * digest; then the binding document altered. */
+function importedWith(change: { unbound?: (d: JObj) => void; binding?: (b: JObj) => void }): Inputs {
+  const dialect = parse(text(imported.dialect)) as JObj;
+  change.unbound?.(dialect);
+  const binding = parse(text(imported.binding!)) as JObj;
+  binding.m.set("dialect", str("sha256:" + sha(canon(dialect))));
+  change.binding?.(binding);
+  return { ...imported, dialect: canon(dialect), binding: canon(binding) };
+}
+
+test("§4.4: the bound dialect is the vector's mapping.json, and the preparation commits it alone", () => {
+  const dir = join(VECTORS, "unbound-bound-at-import");
+  const dialect = parse(text(imported.dialect)) as JObj;
+  const binding = readBinding(parse(text(imported.binding!)));
+  const mapping = parse(readFileSync(join(dir, "mapping.json"), "utf8"));
+  assert.equal((binding.m.get("dialect") as { v: string }).v, "sha256:" + sha(canon(dialect)));
+  assert.equal(text(canon(bindDialect(dialect, binding))), text(canon(mapping)));
+  const r = verify(imported);
+  assert.equal(r.kind, "reading");
+  const preparation = text(r.recomputed!);
+  assert.ok(preparation.includes(`"mappingDigest":"sha256:${sha(canon(mapping))}"`) && preparation.endsWith('"version":3}'));
+  // neither the published dialect's digest, nor the binding document's, nor the catalog names
+  for (const absent of [(binding.m.get("dialect") as { v: string }).v, sha(canon(binding)), "intake-api", "requests.read"]) {
+    assert.ok(!preparation.includes(absent), absent);
+  }
+  // the bound dialect, given as the dialect with no binding document, is read alike
+  const direct = verify({ ...imported, dialect: Uint8Array.from(readFileSync(join(dir, "mapping.json"))), binding: undefined });
+  assert.equal(direct.kind, "reading");
+  assert.ok(Buffer.from(direct.recomputed!).equals(readFileSync(join(dir, "preparation.json"))));
+});
+
+test("§9.1: a version-3 document is read as version 2's, its preparation of version 3", () => {
+  const r = verify({ ...v3bound, dialect: edit(v3bound.dialect, '"version":3', '"version":2') });
+  assert.equal(r.kind, "finding");
+  const given = JSON.parse(readFileSync(join(VECTORS, "version-3-bound", "preparation.json"), "utf8")) as Record<string, unknown>;
+  const recomputed = JSON.parse(text(r.recomputed!)) as Record<string, unknown>;
+  assert.equal(recomputed.version, 2);
+  for (const k of ["version", "mappingDigest"]) {
+    delete given[k];
+    delete recomputed[k];
+  }
+  assert.deepEqual(recomputed, given);
+});
+
+test("§9.1: version 3 cites in the order of sources, version 2 by callIndex", () => {
+  // unsigned-parameters' two sources, vendor then registry, their callIndex swapped and signed again
+  const base = loadVector(join(VECTORS, "unsigned-parameters"), false);
+  for (const [version, expected] of [["2", ["registry", "vendor"]], ["3", ["vendor", "registry"]]] as const) {
+    const swapped = alteredAndSigned(base, {
+      dialect: (d) => d.m.set("version", num(version)),
+      receipt: (rc) => rc.m.set("callIndex", num(String(1 - Number((rc.m.get("callIndex") as { lit: string }).lit)))),
+    });
+    const r = verify(swapped);
+    assert.equal(r.kind, "finding", version);
+    const preparation = JSON.parse(text(r.recomputed!)) as { lineage: { source: string; receipt?: { signature: string } }[]; cites: { signature: string }[] };
+    const sourceOfCite = new Map(preparation.lineage.filter((e) => e.receipt !== undefined).map((e) => [e.receipt!.signature, e.source]));
+    assert.deepEqual(preparation.cites.map((c) => sourceOfCite.get(c.signature)), expected, version);
+  }
+});
+
+test("§4.4: the binding document is held to its form and to the dialect it binds", () => {
+  assert.equal(verdict(importedWith({})), "reading:matches");
+  const entry = (b: JObj) => member(b.m.get("sources"), "intake") as JObj;
+  const probes: [string, (b: JObj) => void][] = [
+    ["a binding for another dialect", (b) => b.m.set("dialect", str("sha256:" + "0".repeat(64)))],
+    ["a source more", (b) => (b.m.get("sources") as JObj).m.set("other", entry(b))],
+    ["no source", (b) => b.m.set("sources", obj())],
+    ["a name but for case", (b) => b.m.set("sources", obj([["Intake", entry(b)]]))],
+    ["a member more", (b) => b.m.set("version", num("1"))],
+    ["an entry member more", (b) => entry(b).m.set("shape", str("http"))],
+    ["an empty profile", (b) => entry(b).m.set("profile", str(""))],
+    ["a profileDigest that is not a digest", (b) => entry(b).m.set("profileDigest", str("sha256:XYZ"))],
+    ["a dialect that is not a digest", (b) => b.m.set("dialect", str((b.m.get("dialect") as { v: string }).v.toUpperCase()))],
+    ["sources that are an array", (b) => b.m.set("sources", arr([entry(b)]))],
+  ];
+  for (const [name, alter] of probes) assert.equal(verdict(importedWith({ binding: alter })), "refusal:input-malformed", name);
+  // the published dialect changed under a binding of the dialect as it was
+  assert.equal(verdict({ ...imported, dialect: edit(imported.dialect, '"maxAge":300', '"maxAge":301') }), "refusal:input-malformed");
+  // an unbound source and no binding document; a binding document beside a dialect with none
+  assert.equal(verdict({ ...imported, binding: undefined }), "refusal:input-malformed");
+  assert.equal(verdict({ ...v3bound, binding: imported.binding }), "refusal:input-malformed");
+  assert.equal(verdict({ ...valid, binding: imported.binding }), "refusal:input-malformed");
+  // read as a document; its bounds measured on bytes first (§12)
+  assert.equal(verdict({ ...imported, binding: utf8("{") }), "refusal:input-malformed");
+  const padded = (n: number) => utf8(text(imported.binding!) + " ".repeat(n - imported.binding!.length));
+  assert.equal(verdict({ ...imported, binding: padded(65536) }), "reading:matches");
+  assert.equal(verdict({ ...imported, binding: padded(65537) }), "refusal:input-over-bound");
+  assert.equal(verdict({ ...imported, binding: utf8("[".repeat(65) + "]".repeat(65)) }), "refusal:input-over-bound");
+});
+
+test("§4.4: an unbound source is held to its form", () => {
+  const source = (d: JObj) => (d.m.get("sources") as { a: JObj[] }).a[0];
+  const probes: [string, (d: JObj) => void][] = [
+    ["a shape of command", (d) => source(d).m.set("shape", str("command"))],
+    ["an empty platform", (d) => source(d).m.set("platform", str(""))],
+    ["a record that is not a string", (d) => source(d).m.set("record", num("7"))],
+    ["a profile beside the catalog names", (d) => source(d).m.set("profile", str("intake"))],
+    ["no operation", (d) => source(d).m.delete("operation")],
+    ["a version-2 document", (d) => d.m.set("version", num("2"))],
+  ];
+  for (const [name, alter] of probes) assert.equal(verdict(importedWith({ unbound: alter })), "refusal:input-malformed", name);
+});
+
+test("§4.4, §5.1: a profile bound of another shape or record is profile-mismatch", () => {
+  const source = (d: JObj) => (d.m.get("sources") as { a: JObj[] }).a[0];
+  const entry = (b: JObj) => member(b.m.get("sources"), "intake") as JObj;
+  const probes: [string, { unbound?: (d: JObj) => void; binding?: (b: JObj) => void }][] = [
+    ["another shape", { unbound: (d) => source(d).m.set("shape", str("mcp")) }],
+    ["another record", { unbound: (d) => source(d).m.set("record", str("adapter-airbyte")) }],
+    ["an untrusted profile", { binding: (b) => entry(b).m.set("profile", str("another")) }],
+    ["another profile digest", { binding: (b) => entry(b).m.set("profileDigest", str("sha256:" + "1".repeat(64))) }],
+  ];
+  for (const [name, change] of probes) assert.equal(verdict(importedWith(change)), "finding:profile-mismatch", name);
+});
+
+test("§4.3: a kind of version 3 is held to its form, and not read", () => {
+  const fx = sourceOf(parse(text(v3bound.dialect)) as JObj);
+  const common = `"profile":"fx","profileDigest":${JSON.stringify((fx.m.get("profileDigest") as { v: string }).v)},"maxAge":300,"read":{"copy":{}}`;
+  const param = '{"$param":"invoiceCurrency"}';
+  const wellFormed: Record<string, Record<string, string>> = {
+    http: { method: '"POST"', path: '"/requests"', query: `{"currency":${param}}`, body: '{"n":1}', headers: '["Accept"]' },
+    sql: { statement: '"SELECT 1 WHERE c = :c"', bindings: `[{"name":"c","type":"STRING","value":${param}}]` },
+    web: { url: param },
+    research: { question: '{"$text":"Which?"}', constraints: "{}", model: '"a-model"', evidence: '["excerpt"]' },
+  };
+  const malformedMembers: Record<string, [string, string][]> = {
+    http: [["method", '"PUT"'], ["path", '{"a":1}'], ["path", '{"$param":"runAt"}'], ["method", '"GET"'], ["query", '{"currency":7}'], ["headers", '"Accept"']],
+    sql: [["statement", '{"$text":"SELECT 1"}'], ["bindings", '[{"name":"c","type":"STRING","value":"EUR"}]'], ["bindings", `[{"name":"c","value":${param}}]`]],
+    web: [["url", "7"], ["url", '{"$param":"nope"}'], ["url", '{"$text":"https://example.org/"}']],
+    research: [["question", "7"], ["constraints", "[]"], ["model", "null"], ["evidence", '"excerpt"']],
+  };
+  const source = (kind: string, members: Record<string, string>) =>
+    `{"name":"more","kind":"${kind}",${common}${Object.entries(members).map(([k, v]) => `,"${k}":${v}`).join("")}}`;
+  const withSource = (base: Inputs, s: string, version = "3") =>
+    verdict({ ...base, dialect: edit(edit(base.dialect, '"version":3', `"version":${version}`), '"sources":[', `"sources":[${s},`) });
+  for (const [kind, members] of Object.entries(wellFormed)) {
+    assert.equal(withSource(v3bound, source(kind, members)), "refusal:kind-unread", kind);
+    // in a version-2 document, a kind of version 3 is refused
+    assert.equal(withSource(v3bound, source(kind, members), "2"), "refusal:input-malformed", kind);
+    // a member more, and one of its own left out
+    assert.equal(withSource(v3bound, source(kind, { ...members, arguments: "{}" })), "refusal:input-malformed", kind);
+    const first = Object.keys(members)[0];
+    assert.equal(withSource(v3bound, source(kind, Object.fromEntries(Object.entries(members).filter(([k]) => k !== first)))), "refusal:input-malformed", kind);
+    for (const [k, v] of malformedMembers[kind]) {
+      assert.equal(withSource(v3bound, source(kind, { ...members, [k]: v })), "refusal:input-malformed", `${kind}.${k} ${v}`);
+    }
+  }
+  // a kind of another type is refused
+  for (const kind of ['["web"]', '{"web":1}', "3", "null"]) {
+    assert.equal(withSource(v3bound, `{"name":"more","kind":${kind},${common},"url":"x"}`), "refusal:input-malformed", kind);
+  }
+  // selected-file is of version 3 too, and not read
+  assert.equal(withSource(v3bound, '{"name":"upload","kind":"selected-file","provider":"local-file","read":{"copy":{}}}'), "refusal:kind-unread");
+  // every form comes first, the binding document's too: a binding of the dialect as it was is refused before the kind
+  const web = `{"name":"page","kind":"web",${common},"url":"https://example.org/"}`;
+  assert.equal(withSource(imported, web), "refusal:input-malformed");
+  const withWeb = importedWith({ unbound: (d) => (d.m.get("sources") as { a: JVal[] }).a.push(parse(web)) });
+  assert.equal(verdict(withWeb), "refusal:kind-unread");
+  assert.equal(verdict({ ...withWeb, binding: undefined }), "refusal:input-malformed");
+});
+
+test("§2: version 3 lists provider, facts and evidence as version 2 does", () => {
+  // Read, under another digest. (The Runner refuses them in version 3; the pull request that staged the vectors
+  // reports the sentence.)
+  const written = edit(v3bound.dialect, '"version":3}', '"version":3,"provider":"","facts":null,"evidence":null}');
+  assert.equal(verdict({ ...v3bound, dialect: written }), "finding:preparation-differs");
+});
+
+test("the program takes --binding, and reads a vector bound at import from its directory", () => {
+  const dir = join(VECTORS, "unbound-bound-at-import");
+  const fromDirectory = program(dir, "--require-binding");
+  assert.equal(fromDirectory.status, 0, fromDirectory.stderr);
+  assert.ok(fromDirectory.stdout.includes('"binding":"matches"'), fromDirectory.stdout);
+  const tmp = mkdtempSync(join(tmpdir(), "dialect-verify-ts-"));
+  try {
+    const at = (name: string, bytes: Uint8Array) => {
+      writeFileSync(join(tmp, name), bytes);
+      return join(tmp, name);
+    };
+    const files = [
+      "--dialect", at("d", imported.dialect), "--case", at("c", imported.case), "--acquisitions", at("a", imported.acquisitions),
+      "--profiles", at("p", imported.profiles), "--preparation", at("g", imported.preparation), "--record", at("r", imported.record!), "--require-binding",
+    ];
+    const withBinding = program(...files, "--binding", at("b", imported.binding!));
+    assert.equal(withBinding.status, 0, withBinding.stderr);
+    const without = program(...files);
+    assert.deepEqual([without.status, without.stdout], [1, '{"refusal":"input-malformed","result":"refusal"}\n']);
+    // a binding document is not taken beside a vector directory, which names its own
+    const beside = program(dir, "--binding", join(tmp, "b"));
+    assert.deepEqual([beside.status, beside.stdout], [3, ""]);
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
 });

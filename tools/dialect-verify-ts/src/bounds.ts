@@ -5,6 +5,7 @@ export const BOUNDS = {
   dialectBytes: 131072,
   inputBytes: 2097152, // the dialect, the case and the acquisitions together
   profilesBytes: 65536,
+  bindingBytes: 65536, // a binding document (§4.4)
   preparationBytes: 8388608,
   recordBytes: 8388608,
   sources: 16,

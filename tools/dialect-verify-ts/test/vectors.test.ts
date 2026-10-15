@@ -3,12 +3,13 @@
 // preparation.json, its digest to preparation.sha256, and a reading's facts and evidence-availability
 // documents to the export's run.input.facts and run.input.evidence (conformance/dialect/README.md).
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { bindDialect, readBinding } from "../src/forms.ts";
 import { member, preparationForm, read } from "../src/json.ts";
-import type { JVal } from "../src/json.ts";
+import type { JObj, JVal } from "../src/json.ts";
 import { loadVector } from "../src/vector.ts";
 import { verify } from "../src/verify.ts";
 
@@ -28,7 +29,7 @@ test("the manifest names every vector directory, and nothing else", () => {
     .filter((d) => statSync(join(ROOT, "vectors", d)).isDirectory())
     .sort();
   assert.deepEqual(manifest.cases.map((c) => c.path.replace(/^vectors\//, "")).sort(), dirs);
-  assert.equal(manifest.cases.length, 10);
+  assert.equal(manifest.cases.length, 12);
 });
 
 for (const row of manifest.cases) {
@@ -54,6 +55,16 @@ for (const row of manifest.cases) {
       const input = member(member(run, "run"), "input");
       assert.equal(written(member(report, "facts")), written(member(input, "facts")), `${row.id}: the facts document`);
       assert.equal(written(member(report, "evidence")), written(member(input, "evidence")), `${row.id}: the evidence-availability document`);
+    }
+
+    // a vector of a dialect bound at import: the bound dialect is its mapping.json, which, given as the dialect with
+    // no binding document, is read alike (§4.4)
+    if (existsSync(join(dir, "binding.json"))) {
+      const bound = bindDialect(read(Uint8Array.from(readFileSync(join(dir, "unbound.json")))).value as JObj, readBinding(read(Uint8Array.from(readFileSync(join(dir, "binding.json")))).value));
+      assert.equal(written(bound), written(read(Uint8Array.from(readFileSync(join(dir, "mapping.json")))).value), `${row.id}: the bound dialect`);
+      const direct = verify({ ...loadVector(dir, row.requiresBinding), dialect: Uint8Array.from(readFileSync(join(dir, "mapping.json"))), binding: undefined });
+      assert.equal(direct.kind, row.expectedResult, `${row.id}: mapping.json given as the dialect`);
+      assert.ok(Buffer.from(direct.recomputed!).equals(readFileSync(join(dir, "preparation.json"))), `${row.id}: mapping.json given as the dialect`);
     }
   });
 }

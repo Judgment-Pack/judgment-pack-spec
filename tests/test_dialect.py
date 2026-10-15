@@ -33,13 +33,23 @@ SOURCE = {
     "commit": "05636eda96a9588279d61a6272625be859a28117",
     "path": "vectors/preparation",
     "mergedAs": "82116bfab7705f74ca3e493c9722dd3831c7418f",
-    # The tenth vector, from the Runner's main after its pull request 80 (the amendment of 2026-10-15).
-    "extendedBy": {
-        "pullRequest": 80,
-        "commit": "c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9",
-        "vectors": ["http-shaped-source"],
-    },
+    # The tenth vector, from the Runner's main after its pull request 80 (the amendment of 2026-10-15); the
+    # eleventh and twelfth, of dialect version 3, from its main after its pull request 83.
+    "extendedBy": [
+        {
+            "pullRequest": 80,
+            "commit": "c84e8e64e5d30c835f8d8e6370cd48e2bfd35ee9",
+            "vectors": ["http-shaped-source"],
+        },
+        {
+            "pullRequest": 83,
+            "commit": "89cf44109ad3a9862ab0386811bef63d8a9a1657",
+            "vectors": ["version-3-bound", "unbound-bound-at-import"],
+        },
+    ],
 }
+# The count as the RFC and the companion spell it.
+WORDS = {9: "nine", 10: "ten", 11: "eleven", 12: "twelve"}
 FINDINGS = {
     "profile-mismatch",
     "parameter-invalid",
@@ -94,7 +104,11 @@ class Inputs:
 
     def __init__(self, name: str, require_binding: bool) -> None:
         directory = VECTORS / name
-        self.dialect = (directory / "mapping.json").read_bytes()
+        # A vector of a dialect bound at import holds the published dialect, unbound.json, and its binding
+        # document, binding.json, which a verifier is given; mapping.json is then the bound dialect (§4.4).
+        imported = (directory / "binding.json").is_file()
+        self.dialect = (directory / ("unbound.json" if imported else "mapping.json")).read_bytes()
+        self.binding = (directory / "binding.json").read_bytes() if imported else None
         self.case = (directory / "case.json").read_bytes()
         sources = directory / "sources.json"
         self.acquisitions = sources.read_bytes() if sources.is_file() else b"{}"
@@ -115,6 +129,7 @@ class Inputs:
             self.preparation,
             self.record,
             self.require_binding,
+            self.binding,
         )
 
 
@@ -191,14 +206,24 @@ class DialectVectorTests(unittest.TestCase):
             ("conformance/README.md", f"holds the reference Runner's {count} preparation vectors"),
             ("README.md", f"{count} dialect vectors"),
             ("rfcs/README.md", f"the reference Runner's {count} preparation vectors are staged"),
-            (RFC, "The vectors are the Runner's ten, staged"),
-            (COMPANION, "Its ten vectors"),
+            (RFC, f"The vectors are the Runner's {WORDS[count]}, staged"),
         ]
-        self.assertEqual(10, count, "the RFC and the companion spell the count as a word")
         for relative, expected in statements:
             with self.subTest(file=relative):
                 text = " ".join((ROOT / relative).read_text(encoding="utf-8").split())
                 self.assertIn(expected, text)
+
+    def test_the_companion_counts_the_vectors_of_the_commits_it_names(self) -> None:
+        # The companion's Status names the Runner commits its vectors were copied from, and counts them. The
+        # eleventh and twelfth, of dialect version 3, were staged without a change to the companion, whose
+        # text says no vector holds version 3 yet: its Status counts the vectors of the commits it names, ten,
+        # and an amendment that names the Runner's commit of the eleventh and twelfth counts twelve.
+        text = " ".join((ROOT / COMPANION).read_text(encoding="utf-8").split())
+        source = self.manifest["source"]
+        self.assertIn(source["commit"], text)
+        count = len(self.manifest["cases"]) - sum(len(e["vectors"]) for e in source["extendedBy"])
+        count += sum(len(e["vectors"]) for e in source["extendedBy"] if e["commit"] in text)
+        self.assertIn(f"Its {WORDS[count]} vectors", text)
 
     def test_the_first_reader_recomputes_every_preparation(self) -> None:
         # The preparation's canonical bytes, recomputed from the dialect, the case, the acquisitions
@@ -697,7 +722,10 @@ class DialectVectorTests(unittest.TestCase):
                 self.assertEqual("preparation-differs", as_airbyte(stream, False).get("finding"))
                 self.assertEqual("acquisition-invalid", as_airbyte(stream, True).get("finding"))
 
-    def test_a_dialect_of_version_3_is_refused_before_its_form(self) -> None:
+    # Dialect version 3 (§4.3, §4.4, §9.1), from the Runner's eleventh and twelfth vectors. Written by the author
+    # who extended both readers to it, as the amendment of 2026-10-15's author extended both before.
+
+    def test_a_dialect_of_version_3_is_read_and_its_form_checked(self) -> None:
         def answer(alter: Any, case: bytes | None = None) -> Any:
             inputs = self.inputs("http-shaped-source")
             document = json.loads(inputs.dialect)
@@ -715,15 +743,239 @@ class DialectVectorTests(unittest.TestCase):
         def version(value: Any) -> Any:
             return lambda d: d.__setitem__("version", value)
 
-        self.assertEqual("version-unread", answer(version(3)).get("refused"))
-        self.assertEqual("version-unread", answer(lambda d: (unbound(d), d.__setitem__("version", 3))).get("refused"))
-        self.assertEqual("version-unread", answer(lambda d: d.update({"version": 3, "Version": "x"})).get("refused"))
+        # read, as version 3: its preparation is another, of version 3 and another digest
+        self.assertEqual("preparation-differs", answer(version(3)).get("finding"))
+        # its form is checked: an unbound source with no binding document, and a member of no form
+        self.assertEqual("input-malformed", answer(lambda d: (unbound(d), d.__setitem__("version", 3))).get("refused"))
+        self.assertEqual("input-malformed", answer(lambda d: d.update({"version": 3, "Version": "x"})).get("refused"))
         # an unbound source in a version-2 dialect; versions this document does not define
         self.assertEqual("input-malformed", answer(unbound).get("refused"))
         self.assertEqual("input-malformed", answer(version(4)).get("refused"))
         self.assertEqual("input-malformed", answer(version("3")).get("refused"))
         # the bounds before it come first
         self.assertEqual("input-over-bound", answer(version(3), b"[" * 33 + b"]" * 33).get("refused"))
+
+    def test_the_vector_bound_at_import_is_the_runners_import(self) -> None:
+        # The Runner's manifest marks the vector of a dialect bound at import and says which file is which; it
+        # is the one vector that holds a binding document, and the one this repository reads unbound.json of.
+        for vector in self.runner["vectors"]:
+            with self.subTest(vector=vector["name"]):
+                held = (VECTORS / vector["name"] / "binding.json").is_file()
+                self.assertEqual(held, "import" in vector)
+                if held:
+                    self.assertEqual(
+                        {"published": "unbound.json", "binding": "binding.json", "bound": "mapping.json"}, vector["import"]
+                    )
+
+    def test_the_bound_dialect_is_the_vectors_mapping_and_the_preparation_commits_it_alone(self) -> None:
+        directory = VECTORS / "unbound-bound-at-import"
+        unbound = READER.read_document((directory / "unbound.json").read_bytes(), "unbound.json")
+        binding = READER.parse_binding(READER.read_document((directory / "binding.json").read_bytes(), "binding.json"))
+        mapping = READER.read_document((directory / "mapping.json").read_bytes(), "mapping.json")
+        self.assertEqual(READER.digest_of(READER.canon(unbound)), binding["dialect"])
+        self.assertEqual(READER.canon(mapping), READER.canon(READER.bind(unbound, binding)))
+        preparation = (directory / "preparation.json").read_bytes()
+        self.assertIn(b'"mappingDigest":"' + READER.digest_of(READER.canon(mapping)).encode() + b'"', preparation)
+        self.assertIn(b'"version":3}', preparation)
+        # neither the published dialect's digest, nor the binding document's, nor the catalog names (§4.4)
+        for absent in (binding["dialect"], READER.digest_of(READER.canon(binding)), "intake-api", "requests.read"):
+            self.assertNotIn(absent.encode(), preparation)
+        # The bound dialect given as the dialect, with no binding document, is a version-3 document with no
+        # unbound source, and is read alike.
+        inputs = self.inputs("unbound-bound-at-import")
+        inputs.dialect, inputs.binding = (directory / "mapping.json").read_bytes(), None
+        outcome = inputs.verify()
+        self.assertEqual("matches", outcome.answer["reading"]["binding"], outcome.answer)
+        self.assertEqual(preparation, outcome.preparation)
+
+    def test_a_version_3_document_is_read_as_version_2s_its_preparation_of_version_3(self) -> None:
+        # version-3-bound is the valid case's mapping written as version 3. Read as a document of version 2, its
+        # preparation differs in its version and its digest, and in nothing else (§9.1).
+        inputs = self.inputs("version-3-bound")
+        document = json.loads(inputs.dialect)
+        document["version"] = 2
+        inputs.dialect = json.dumps(document).encode("utf-8")
+        outcome = inputs.verify()
+        self.assertEqual("preparation-differs", outcome.answer.get("finding"), outcome.answer)
+        given = json.loads((VECTORS / "version-3-bound" / "preparation.json").read_bytes())
+        recomputed = json.loads(outcome.preparation)
+        self.assertEqual(2, recomputed["version"])
+        self.assertEqual(READER.digest_of(READER.canon(READER.read_document(inputs.dialect, "the dialect"))), recomputed["mappingDigest"])
+        for member in ("version", "mappingDigest"):
+            del given[member], recomputed[member]
+        self.assertEqual(given, recomputed)
+
+    def test_version_3_cites_in_the_order_of_sources(self) -> None:
+        # §9.1: version 2 orders `cites` by callIndex, version 3 by the order of sources. The two sources of
+        # unsigned-parameters, vendor then registry, their receipts' callIndex swapped and signed again, so that
+        # registry's call is the first.
+        for version, expected in ((2, ["registry", "vendor"]), (3, ["vendor", "registry"])):
+            with self.subTest(version=version):
+                inputs = self._altered(
+                    "unsigned-parameters",
+                    dialect=lambda d, v=version: d.__setitem__("version", v),
+                    receipt=lambda r: r.__setitem__("callIndex", 1 - r["callIndex"]),
+                )
+                outcome = inputs.verify()
+                self.assertEqual("preparation-differs", outcome.answer.get("finding"), outcome.answer)
+                preparation = json.loads(outcome.preparation)
+                receipts = {entry["source"]: entry["receipt"] for entry in preparation["lineage"] if "receipt" in entry}
+                order = [next(name for name, receipt in receipts.items() if receipt == c) for c in preparation["cites"]]
+                self.assertEqual(expected, order)
+
+    def _imported(self, unbound: Any = None, binding: Any = None) -> Inputs:
+        """The import vector's inputs, its published dialect altered and the binding document's `dialect` written
+        again as its digest; then the binding document altered."""
+        inputs = self.inputs("unbound-bound-at-import")
+        document = json.loads(inputs.dialect)
+        if unbound is not None:
+            unbound(document)
+        inputs.dialect = json.dumps(document).encode("utf-8")
+        written = json.loads(inputs.binding)
+        written["dialect"] = READER.digest_of(READER.canon(READER.read_document(inputs.dialect, "the dialect")))
+        if binding is not None:
+            binding(written)
+        inputs.binding = json.dumps(written).encode("utf-8")
+        return inputs
+
+    def test_the_binding_document_is_held_to_its_form_and_to_the_dialect_it_binds(self) -> None:
+        unchanged = self._imported().verify().answer
+        self.assertEqual("matches", unchanged["reading"]["binding"], unchanged)
+        entry = lambda b: b["sources"]["intake"]  # noqa: E731
+        probes = {
+            # §4.4: refused with the dialect (§11)
+            "a binding for another dialect": lambda b: b.__setitem__("dialect", "sha256:" + "0" * 64),
+            "a source more": lambda b: b["sources"].__setitem__("other", dict(entry(b))),
+            "no source": lambda b: b.__setitem__("sources", {}),
+            "a name but for case": lambda b: b.__setitem__("sources", {"Intake": entry(b)}),
+            # its form
+            "a member more": lambda b: b.__setitem__("version", 1),
+            "an entry member more": lambda b: entry(b).__setitem__("shape", "http"),
+            "an empty profile": lambda b: entry(b).__setitem__("profile", ""),
+            "a profileDigest that is not a digest": lambda b: entry(b).__setitem__("profileDigest", "sha256:XYZ"),
+            "a dialect that is not a digest": lambda b: b.__setitem__("dialect", b["dialect"].upper()),
+            "sources that are an array": lambda b: b.__setitem__("sources", [entry(b)]),
+        }
+        for name, alter in probes.items():
+            with self.subTest(probe=name):
+                answer = self._imported(binding=alter).verify().answer
+                self.assertEqual("input-malformed", answer.get("refused"), answer)
+        # the published dialect changed under a binding of the dialect as it was
+        inputs = self.inputs("unbound-bound-at-import")
+        inputs.dialect = inputs.dialect.replace(b'"maxAge":300', b'"maxAge":301')
+        self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+        # a dialect with an unbound source and no binding document, and one beside a dialect with none
+        inputs = self.inputs("unbound-bound-at-import")
+        inputs.binding = None
+        self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+        for name in ("version-3-bound", "valid"):
+            with self.subTest(beside=name):
+                inputs = self.inputs(name)
+                inputs.binding = self.inputs("unbound-bound-at-import").binding
+                self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+        # read as a document: not one JSON value; and its bounds, measured on bytes first (§12)
+        inputs = self.inputs("unbound-bound-at-import")
+        for data, refusal in (
+            (b"{", "input-malformed"),
+            (inputs.binding + b" " * (65536 - len(inputs.binding)), "matches"),
+            (inputs.binding + b" " * (65537 - len(inputs.binding)), "input-over-bound"),
+            (b"[" * 65 + b"]" * 65, "input-over-bound"),
+        ):
+            with self.subTest(binding=data[:20], size=len(data)):
+                inputs.binding = data
+                answer = inputs.verify().answer
+                self.assertEqual(refusal, answer.get("refused") or answer["reading"]["binding"], answer)
+
+    def test_an_unbound_source_is_held_to_its_form(self) -> None:
+        source = lambda d: d["sources"][0]  # noqa: E731
+        probes = {
+            "a shape of command": lambda d: source(d).__setitem__("shape", "command"),
+            "an empty platform": lambda d: source(d).__setitem__("platform", ""),
+            "a record that is not a string": lambda d: source(d).__setitem__("record", 7),
+            "a profile beside the catalog names": lambda d: source(d).__setitem__("profile", "intake"),
+            "no operation": lambda d: source(d).pop("operation"),
+            "a version-2 document": lambda d: d.__setitem__("version", 2),
+        }
+        for name, alter in probes.items():
+            with self.subTest(probe=name):
+                answer = self._imported(unbound=alter).verify().answer
+                self.assertEqual("input-malformed", answer.get("refused"), answer)
+
+    def test_a_profile_bound_of_another_shape_or_record_is_a_mismatch(self) -> None:
+        # §4.4, §5.1: the profile the binding document names serves the unbound source's shape and record. The
+        # source names another, or is bound to a profile the verifier does not trust by that id and digest.
+        source = lambda d: d["sources"][0]  # noqa: E731
+        entry = lambda b: b["sources"]["intake"]  # noqa: E731
+        for name, unbound, binding in (
+            ("another shape", lambda d: source(d).__setitem__("shape", "mcp"), None),
+            ("another record", lambda d: source(d).__setitem__("record", "adapter-airbyte"), None),
+            ("an untrusted profile", None, lambda b: entry(b).__setitem__("profile", "another")),
+            ("another profile digest", None, lambda b: entry(b).__setitem__("profileDigest", "sha256:" + "1" * 64)),
+        ):
+            with self.subTest(probe=name):
+                answer = self._imported(unbound=unbound, binding=binding).verify().answer
+                self.assertEqual("profile-mismatch", answer.get("finding"), answer)
+
+    def test_a_kind_of_version_3_is_held_to_its_form_and_not_read(self) -> None:
+        bound = json.loads(self.inputs("version-3-bound").dialect)["sources"][0]
+        common = {"profile": bound["profile"], "profileDigest": bound["profileDigest"], "maxAge": 300, "read": {"copy": {}}}
+        string = {"$param": "invoiceCurrency"}
+        well_formed = {
+            "http": {"method": "POST", "path": "/requests", "query": {"currency": string}, "body": {"n": 1}, "headers": ["Accept"]},
+            "sql": {"statement": "SELECT 1 WHERE c = :c", "bindings": [{"name": "c", "type": "STRING", "value": string}]},
+            "web": {"url": string},
+            "research": {"question": {"$text": "Which?"}, "constraints": {}, "model": "a-model", "evidence": ["excerpt"]},
+        }
+        malformed = {
+            "http": [{"method": "PUT"}, {"path": {"a": 1}}, {"path": {"$param": "runAt"}}, {"method": "GET"}, {"query": {"currency": 7}}, {"headers": "Accept"}],
+            "sql": [{"statement": {"$text": "SELECT 1"}}, {"bindings": [{"name": "c", "type": "STRING", "value": "EUR"}]}, {"bindings": [{"name": "c", "value": string}]}],
+            "web": [{"url": 7}, {"url": {"$param": "nope"}}, {"url": {"$text": "https://example.org/"}}],
+            "research": [{"question": 7}, {"constraints": []}, {"model": None}, {"evidence": "excerpt"}],
+        }
+
+        def answer(source: dict[str, Any], name: str = "version-3-bound", version: int = 3) -> Any:
+            inputs = self.inputs(name)
+            document = json.loads(inputs.dialect)
+            document["version"] = version
+            document["sources"].append(source)
+            inputs.dialect = json.dumps(document).encode("utf-8")
+            return inputs.verify().answer
+
+        for kind, members in well_formed.items():
+            source = {"name": "more", "kind": kind, **common, **members}
+            with self.subTest(kind=kind):
+                self.assertEqual("kind-unread", answer(source).get("refused"))
+                # in a version-2 document, a kind of version 3 is refused
+                self.assertEqual("input-malformed", answer(source, version=2).get("refused"))
+                # a member more, and one of its own left out
+                self.assertEqual("input-malformed", answer({**source, "arguments": {}}).get("refused"))
+                self.assertEqual("input-malformed", answer({k: v for k, v in source.items() if k != next(iter(members))}).get("refused"))
+            for alteration in malformed[kind]:
+                with self.subTest(kind=kind, alteration=alteration):
+                    self.assertEqual("input-malformed", answer({**source, **alteration}).get("refused"))
+        # a kind of another type is refused, not raised
+        for kind in (["web"], {"web": 1}, 3, None):
+            with self.subTest(kind=kind):
+                self.assertEqual("input-malformed", answer({"name": "more", "kind": kind, **common, "url": "x"}).get("refused"))
+        # selected-file is of version 3 too, and not read
+        local = {"name": "upload", "kind": "selected-file", "provider": "local-file", "read": {"copy": {}}}
+        self.assertEqual("kind-unread", answer(local).get("refused"))
+        # every form comes first: the binding document's too
+        web = {"name": "page", "kind": "web", **common, "url": "https://example.org/"}
+        # a binding document of the dialect as it was, before the source was added, is refused before the kind
+        self.assertEqual("input-malformed", answer(web, "unbound-bound-at-import").get("refused"))
+        inputs = self._imported(unbound=lambda d: d["sources"].append(web))
+        self.assertEqual("kind-unread", inputs.verify().answer.get("refused"))
+        inputs.binding = None
+        self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+
+    def test_version_3_lists_the_members_version_2_does(self) -> None:
+        # §2 lists `provider`, `facts` and `evidence` for the dialect document, of either version: a version-3
+        # document that writes them is read, under another digest. (The Runner refuses them in version 3; the
+        # pull request that staged this vector reports the sentence.)
+        inputs = self.inputs("version-3-bound")
+        inputs.dialect = inputs.dialect.replace(b'"version":3}', b'"version":3,"provider":"","facts":null,"evidence":null}')
+        self.assertEqual("preparation-differs", inputs.verify().answer.get("finding"))
 
     # The six choices the text now decides (RFC 0018, Evidence), each held here as the text says.
 
@@ -744,6 +996,8 @@ class DialectVectorTests(unittest.TestCase):
         }
         if inputs.record is not None:
             names["record"] = inputs.record
+        if inputs.binding is not None:
+            names["binding"] = inputs.binding
         arguments = []
         for name, data in names.items():
             (directory / name).write_bytes(data)
@@ -788,6 +1042,15 @@ class DialectVectorTests(unittest.TestCase):
                     self.assertEqual((3, b""), (run.returncode, run.stdout))
             # its help is no reading either
             self.assertEqual(3, self._program("--help").returncode)
+
+            # a dialect bound at import, with its binding document; and without it, refused
+            arguments = self._files(directory, self.inputs("unbound-bound-at-import"))
+            run = self._program(*arguments)
+            self.assertEqual(0, run.returncode, run.stderr)
+            self.assertIn(b'"binding":"matches"', run.stdout)
+            at = arguments.index("--binding")
+            run = self._program(*(arguments[:at] + arguments[at + 2 :]))
+            self.assertEqual((1, b'{"refusal":"input-malformed","result":"refusal"}\n'), (run.returncode, run.stdout))
 
     def test_a_reading_reports_each_number_as_its_literal(self) -> None:
         # A case-only reading whose facts hold -0: the report keeps it, as §9.5 writes a number.

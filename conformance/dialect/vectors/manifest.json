@@ -431,6 +431,105 @@
         "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:f7b684591e80eb089b2b52bb475a404f46a392a56e7d01365d0ec4f5551d433e\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:8928fc143d7a9ceca47accf0e07bd928248d314744ee009dec030ec82b20956a\",\"sequence\":1,\"trail\":\"b5871f76337d6285a238dac1419ce190\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-14T19:36:52Z\",\"sources\":[{\"source\":\"intake\",\"checks\":[\"acquisition\"],\"targets\":3}]}}",
         "error": null
       }
+    },
+    {
+      "name": "version-3-bound",
+      "note": "The valid case's mapping written as a dialect document of version 3, its one source bound: it names its input profile by id and digest, as a source of version 2 does. Runner writes a document of version 3 without provider, facts and evidence, the members of its version-1 mapping that its encoding of a version-2 document carries empty, so mappingDigest is the digest of the canon bytes of mapping.json as it is. The run, as Runner exported it (version 5), is signed, witnessed and bound. preparation.json has the form of the version-2 vectors' preparations, its version 3, the document's: a source of version 3 that is bound is prepared as one of version 2 is. A reader concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/mapping-v3-bound",
+      "altered": null,
+      "verifiedAt": "2026-10-15T15:44:12Z",
+      "files": {
+        "case.json": "sha256:84a6042529b5d316ec36a4757172742f36da61112a6920c1eee8ee6a88fbc5ba",
+        "checkpoints.jsonl": "sha256:9ebdaebb241f55c8a0b6ce15d1a668d26056d1251263c5153c2bdb99b0c01950",
+        "mapping.json": "sha256:4e35d541fd747e504bd6ddb9fa9a4908b7240e6fb6f16923ac6f665e268f8d7f",
+        "preparation.json": "sha256:b6b12f55994a8960d331b1a88b9f414ea1099b9ef99d8abeb8088d79a16bda4c",
+        "preparation.sha256": "sha256:8c23b21248f7c19021fbb6428ce825828db44c01daaad2316ff308ae49fd8e5a",
+        "profiles.json": "sha256:decb22f176d60994312961b60ad1db7207c0aef858b20f6de0a44ffedb4f6778",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:39728d4f0e7579247aa3c1cf0519b10f16b6b585a3a240f6e6676e47b4ec2c94",
+        "run.json": "sha256:2cfbb2ba795b0f04ec5d2da156a93bbb74fbf43cf899f8b631301f7a291ffc21",
+        "sources.json": "sha256:76fc5e1922acab82aa9e6ee1eb0f74e51f142dae77a6c37565c53ebb85582663"
+      },
+      "preparation": {
+        "sha256": "sha256:b6b12f55994a8960d331b1a88b9f414ea1099b9ef99d8abeb8088d79a16bda4c",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:b6b12f55994a8960d331b1a88b9f414ea1099b9ef99d8abeb8088d79a16bda4c\"}",
+        "retained": "equal"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:b6b12f55994a8960d331b1a88b9f414ea1099b9ef99d8abeb8088d79a16bda4c\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:3428991e4090c6439c53ba9d079d43ef22cddef3a28a2bf62337dbefdf86599c",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:4c72c6d9d2d69c6146908a5a6bd9e302ccd9de89a5fba9317ff2f48bd701293e\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:53469ac85b06b1e99654756be054348a706224e8aee42f922944a24e1d0b57a5\",\"sequence\":1,\"trail\":\"a8fc523612057f7ee8d0273f3cd41c8c\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-15T15:44:12Z\",\"sources\":[{\"source\":\"fx\",\"checks\":[\"acquisition\",\"calculation\"],\"targets\":3}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "unbound-bound-at-import",
+      "note": "A dialect of version 3 published with its one source unbound, unbound.json: the source names the catalog platform intake-api and operation requests.read, the shape http and the record adapter-http, and no input profile. The binding document, binding.json, names that dialect by the digest of its canon bytes and binds the source to the installation's profile intake, by its id and digest. Runner bound them at import, as the run's request asked (source.import), and made the bound dialect, mapping.json: the published dialect with the source's platform, operation, shape and record removed and the profile and its digest added, every other member as written. The run keeps the bound dialect as its mapping and the two documents beside it, as given, and verify-run binds them again under the profiles it is given and holds the mapping to the result. The preparation's mappingDigest is the bound dialect's digest; it holds neither document's digest nor the names the binding removed. The source's record was recorded from a stand-in, in the test's process, of a gateway source of shape http, as http-shaped-source's was. A reader binds unbound.json with binding.json under profiles.json, holds the result to mapping.json, prepares it, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/mapping-v3-imported",
+      "altered": null,
+      "verifiedAt": "2026-10-15T15:44:12Z",
+      "files": {
+        "binding.json": "sha256:29e89b730e2eb8d825cf538a271ac63440ff2e236970f57fcf9c730c821ec01e",
+        "case.json": "sha256:780718de39758469b8395dbaca2db1f75eea1e6af644fe4f54b507aef331572f",
+        "checkpoints.jsonl": "sha256:16fbadabd7ded8da257570004b0028d2c8ef6d375cab70675c656972cf4420e8",
+        "mapping.json": "sha256:393417d4eb5cebe299097c05f89669a44d36f7093c9f150dc4569ccaa6e04241",
+        "preparation.json": "sha256:396b22972ff7a0dcffc912519cfe9f27ff298232516e67577630fa9f1fa9f915",
+        "preparation.sha256": "sha256:1a3519284a3132f06ae9baa0c23d34da6bc15f0bb273720e0c5ff46e0b4d7376",
+        "profiles.json": "sha256:d8c1936b0821dfa586380a641ddf9485f00b36e5ccf81cc1d0a858d9a5ea9bf8",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:7d44821a275c7602c0bfbe262357e370defdd7c4cba7b7f91a4b633c1f64314e",
+        "run.json": "sha256:d8811b721dde33c60744f0bf6d69a0973ad6afbb3839ecf4c65035d7c3b24ef4",
+        "sources.json": "sha256:455a29ae1c72b6654d3ef918edc0e6d9065afc1b2a8ba600f082a51e99b9527d",
+        "unbound.json": "sha256:8766f0c7f02f031e5af8d362e0e96d2965cb647c23bd6bf02186595278517950"
+      },
+      "preparation": {
+        "sha256": "sha256:396b22972ff7a0dcffc912519cfe9f27ff298232516e67577630fa9f1fa9f915",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:396b22972ff7a0dcffc912519cfe9f27ff298232516e67577630fa9f1fa9f915\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:396b22972ff7a0dcffc912519cfe9f27ff298232516e67577630fa9f1fa9f915\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:1df11049dbadd966a3f6655743114ddcc2125cf7cec3e262308b8eeffd16119c",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:764c0b61055ff2ec9d4ee05473bff1bce6447e7184b39886a2a7c779c2b2a3bc\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:7d4e5686f51115afa6b799fb3a3323b95265a5891f3dfac11c65645cbbf3716d\",\"sequence\":1,\"trail\":\"6d5fd7266fa8871be890a5d20b4aa347\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-15T15:44:12Z\",\"sources\":[{\"source\":\"intake\",\"checks\":[\"acquisition\"],\"targets\":3}]}}",
+        "error": null
+      }
     }
   ]
 }

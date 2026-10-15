@@ -7,6 +7,22 @@ here.
 
 ### Added
 
+- The reference Runner's eleventh and twelfth preparation vectors, the first of dialect version 3,
+  are staged byte for byte in
+  [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)
+  beside the ten, from the Runner's pull request 83: `version-3-bound`, the valid case's dialect
+  written as version 3, and `unbound-bound-at-import`, a dialect published with its source unbound,
+  with its binding document and the bound dialect the Runner made of them. Both readers,
+  `tools/dialect_verify.py` and `tools/dialect-verify-ts/`, now read dialect version 3 as
+  [`spec/dialect.md`](spec/dialect.md) §§4.3, 4.4 and 9.1 define it: a document of version 3 is read
+  as one of version 2, and its preparation is of version 3; an unbound source is read with its
+  binding document, as the bound dialect, and a binding document of another dialect, or one that
+  does not name exactly the unbound sources, is refused, and a profile bound of another shape or
+  record is `profile-mismatch`; a source of a kind of §4.3 is held to its form and refused as
+  `kind-unread`. Both give the two vectors the Runner's answer, a reading whose binding `matches`.
+  The extension is one author's, who read both readers, so for these two their agreement is not
+  independent. The companion document is unchanged: its sentences that no vector holds version 3
+  wait for the maintainer.
 - [RFC 0018](rfcs/0018-dialect.md) is `Accepted`, at draft maturity, under the interim review
   regime; the maintainer waived the comment period RFC 0000 names, because the project has no
   outside readers yet, and the adoption record says so as a departure. The RFC taken up from the
