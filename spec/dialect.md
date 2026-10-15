@@ -348,10 +348,16 @@ and the value it acquires is read as every value is (§6).
   `question`, a string template; `constraints`, an object; `model`, the model's name, which MUST be
   the one the profile's source is configured to call; and `evidence`, the fields each answer MUST
   support with a source reference: a retrieved page's receipt or URL, an excerpt and a retrieval
-  time. The request is the recipe, and the value acquired is the **research record**, held by its
-  digest as every value acquired is. A profile of another class is refused. A research record that
-  did not come back through a gateway source is no acquisition: it can enter a dialect only as a
-  selected file, asserted.
+  time. The request is the recipe. The source's acquisition is the retained response set: the AI
+  connection's answers and the web reads it made, each named by its digest and held by its receipt
+  (§5.2). The **research record** retains that set for the source's read (§6), and is held by its
+  digest as every value acquired is. A verifier replays the derivation over the retained set and
+  reports `acquisition-invalid` when a retained response's digest or receipt does not hold. The
+  recipe — the question, the constraints, the connection and the model by name — is compared as
+  text and never re-executed. Identical model output is neither required nor expected. A profile of
+  another class is refused. A research record that did not come back through a gateway source is
+  no acquisition: it can enter a dialect only as a selected file, asserted. The kind is defined,
+  and not claimable: no vector holds one (§11).
 
 ### 4.4 The unbound source form (version 3)
 
@@ -818,6 +824,34 @@ A preparation verifier is given:
   as the member `run.audit` of its `run.json`, and not its bytes: the line taken from such an export
   is that member's value exactly as `run.json` writes it, with no re-encoding; and
 - whether it **requires a binding**.
+
+**Replaying research.** For a `research` source (§4.3), the verifier replays the derivation over
+the retained responses, the AI connection's answers and the web reads it made, at the given
+preparation's `verifiedAt`. Each retained response is named by its digest and held by its receipt;
+a retained response whose digest or receipt does not hold is `acquisition-invalid`, before its
+value is read. The recipe — the question, the constraints, the connection and the model by name —
+is compared as text and never re-executed: verification calls neither the model nor the web.
+Identical model output is neither required nor expected. A replay establishes only what §13 says
+a derivation and an acquisition establish.
+
+**A research fixture.** In the terms of the staging README
+([`conformance/dialect/README.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/conformance/dialect/README.md)),
+one fixture is a directory holding:
+
+| File | Given to the verifier as |
+| --- | --- |
+| `mapping.json` | the dialect document, with the research recipe and its read |
+| `case.json` | the case document, including the recipe's case parameters |
+| `sources.json` | the acquisitions: the research record with the retained response set, every response's digest and receipt, and the salts that open the receipts' request commitments (§5.2) |
+| `profiles.json` | the input profiles the fixture was prepared under; the verifier trusts profiles out of band (§5.1), never by their presence in a fixture |
+| `run.json` | the preparation, `run.input.preparation`, and the evaluation record: the bytes `run.auditBytes` holds in standard base64, or, in an export of version 2, `run.audit` exactly as `run.json` writes it, with no re-encoding |
+
+`preparation.json` and `preparation.sha256` hold what the verifier must compute: the preparation's
+canonical bytes and their digest, recomputed from the retained inputs at its `verifiedAt`. The
+record is the runtime evaluation record, distinct from the research record in `sources.json`;
+whether a binding is required is given as for every staged vector. This is the fixture's layout,
+not a vector: no Runner prepares the `research` kind and no vector holds one. It is defined, and
+not claimable; the first fixture waits for a Runner that prepares it.
 
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
 the refusal, at the first of these phases that fails, in this order:

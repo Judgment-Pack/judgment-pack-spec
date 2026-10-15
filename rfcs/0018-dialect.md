@@ -197,6 +197,18 @@ by the maintainer's decision of 2026-10-15; and, added with 13 after review roun
 published dialect's and the binding document's digests should be carried in the committed form.
 The `research`, `http`, `sql` and `web` kinds still have no preparer.
 
+**Research replay, 2026-10-15.** Issue
+[#161](https://github.com/Judgment-Pack/judgment-pack-spec/issues/161) decides the research fixture's
+rule: a `research` source's acquisition is the retained responses, the AI connection's answers and
+the web reads it made, each named by its digest and held by its receipt. A verifier replays the
+derivation over that set and reports `acquisition-invalid` when a retained response's digest or
+receipt does not hold. The recipe — the question, the constraints, the connection and the model by
+name — is compared as text and never re-executed; identical model output is neither required nor
+expected. The rule lands in §4.3 and §11 below and in the companion document's same sections; §11
+states the fixture's layout in the staging README's terms. No vector is added, and the Evidence
+is unchanged. The rule is resolved, and the first fixture waits for a Runner that prepares the
+kind (Unresolved question 14).
+
 ## Summary
 
 A **dialect** is a pack's terms spoken in a system's: the declared, reusable translation between a
@@ -620,10 +632,16 @@ and the value it acquires is read as every value is (§6).
   `question`, a string template; `constraints`, an object; `model`, the model's name, which MUST be
   the one the profile's source is configured to call; and `evidence`, the fields each answer MUST
   support with a source reference: a retrieved page's receipt or URL, an excerpt and a retrieval
-  time. The request is the recipe, and the value acquired is the **research record**, held by its
-  digest as every value acquired is. A profile of another class is refused. A research record that
-  did not come back through a gateway source is no acquisition: it can enter a dialect only as a
-  selected file, asserted.
+  time. The request is the recipe. The source's acquisition is the retained response set: the AI
+  connection's answers and the web reads it made, each named by its digest and held by its receipt
+  (§5.2). The **research record** retains that set for the source's read (§6), and is held by its
+  digest as every value acquired is. A verifier replays the derivation over the retained set and
+  reports `acquisition-invalid` when a retained response's digest or receipt does not hold. The
+  recipe — the question, the constraints, the connection and the model by name — is compared as
+  text and never re-executed. Identical model output is neither required nor expected. A profile of
+  another class is refused. A research record that did not come back through a gateway source is
+  no acquisition: it can enter a dialect only as a selected file, asserted. The kind is defined,
+  and not claimable: no vector holds one (§11).
 
 #### 4.4 The unbound source form (version 3)
 
@@ -1091,6 +1109,34 @@ A preparation verifier is given:
   is that member's value exactly as `run.json` writes it, with no re-encoding; and
 - whether it **requires a binding**.
 
+**Replaying research.** For a `research` source (§4.3), the verifier replays the derivation over
+the retained responses, the AI connection's answers and the web reads it made, at the given
+preparation's `verifiedAt`. Each retained response is named by its digest and held by its receipt;
+a retained response whose digest or receipt does not hold is `acquisition-invalid`, before its
+value is read. The recipe — the question, the constraints, the connection and the model by name —
+is compared as text and never re-executed: verification calls neither the model nor the web.
+Identical model output is neither required nor expected. A replay establishes only what §13 says
+a derivation and an acquisition establish.
+
+**A research fixture.** In the terms of the staging README
+([`conformance/dialect/README.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/conformance/dialect/README.md)),
+one fixture is a directory holding:
+
+| File | Given to the verifier as |
+| --- | --- |
+| `mapping.json` | the dialect document, with the research recipe and its read |
+| `case.json` | the case document, including the recipe's case parameters |
+| `sources.json` | the acquisitions: the research record with the retained response set, every response's digest and receipt, and the salts that open the receipts' request commitments (§5.2) |
+| `profiles.json` | the input profiles the fixture was prepared under; the verifier trusts profiles out of band (§5.1), never by their presence in a fixture |
+| `run.json` | the preparation, `run.input.preparation`, and the evaluation record: the bytes `run.auditBytes` holds in standard base64, or, in an export of version 2, `run.audit` exactly as `run.json` writes it, with no re-encoding |
+
+`preparation.json` and `preparation.sha256` hold what the verifier must compute: the preparation's
+canonical bytes and their digest, recomputed from the retained inputs at its `verifiedAt`. The
+record is the runtime evaluation record, distinct from the research record in `sources.json`;
+whether a binding is required is given as for every staged vector. This is the fixture's layout,
+not a vector: no Runner prepares the `research` kind and no vector holds one. It is defined, and
+not claimable; the first fixture waits for a Runner that prepares it.
+
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
 the refusal, at the first of these phases that fails, in this order:
 
@@ -1460,7 +1506,8 @@ this text and the vectors — would strengthen that evidence, and none exists.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
    version-3 kinds are proposed with no preparer. When a kind gets a preparer and vectors, and whether
    its request forms here survive the first implementation, is open. So for `operation` of shape
-   `airbyte`, and for the unbound form (questions 10 and 11).
+   `airbyte`, and for the unbound form (questions 10 and 11). The research replay rule and fixture
+   layout are decided; its first fixture is still pending (question 14).
 3. **Whether `research` belongs in the first version that adds kinds.** It establishes the least, its
    record's form is the Desk's to settle (#369), and the Runner defers model calls over HTTP; it could
    wait for both rather than enter version 3.
@@ -1515,6 +1562,14 @@ this text and the vectors — would strengthen that evidence, and none exists.
     published dialect's and the binding document's digests should be carried in the committed form,
     so that a record names the published identity, as the Exchange may want, is open; carrying them
     would change the preparation's form, and so its version.
+
+14. **A research fixture.** Whether verification must reproduce a model's answer is resolved
+    2026-10-15 by issue [#161](https://github.com/Judgment-Pack/judgment-pack-spec/issues/161): the
+    acquisition is the retained response set, each response held by its digest and receipt, and a
+    verifier replays the derivation over it (§4.3, §11). The recipe is compared as text and never
+    re-executed; identical model output is neither required nor expected. The fixture layout is
+    stated in §11. The first fixture still waits for a Runner that prepares the `research` kind;
+    no vector holds it, and it remains defined and not claimable.
 
 **Next revision.** The maintainer's decision of 2026-10-14 on issue #141 scoped dialect version 3
 in three parts. The first two are specified by the amendment of 2026-10-15 (above): the record kind
