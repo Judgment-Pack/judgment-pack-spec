@@ -207,17 +207,29 @@ here.
 
 ### Changed
 
-- [RFC 0019](rfcs/0019-exchange.md) is amended (2026-10-15), still Draft, for #166's seven
-  sentences and #172's option A. Entry format version 2 requires `kind`, `dialect` or `preset`;
-  a preset is input-only, has no pack or fixtures, and establishes its recipe's identity and
-  form, nothing about a preparation. A desk pairs it with a pack locally before any run;
-  display metadata and suggested budgets grant no execution permission. The manifest row
+- [RFC 0019](rfcs/0019-exchange.md) is amended by pull request #178 (2026-10-15), still Draft,
+  for #166's seven sentences and #172's option A. Entry format version 2 requires `kind`,
+  `dialect` or `preset`; a preset is input-only, has no pack or fixtures, and establishes its
+  recipe's identity and form, nothing about a preparation. A desk pairs it with a pack locally
+  before any run;
+  display metadata and README budget suggestions grant no execution permission. The format
+  carries no budget; research `constraints` is part of the request, not a budget. The manifest row
   names the kind, with its bounds unchanged. The text names every manifest pin and fixture
-  list, the verifier's dialect byte bound, upgrade keys from a previous release and the
-  limit of form-only checks, RFC 0018's unbound definition and the reader-locator grammar.
+  list, the verifier's dialect byte bound, upgrade keys matched to the same entry's earlier
+  releases fetched by CI, RFC 0018's full unbound classification and the reader-locator grammar.
   Replay, tag, withdrawal and review checks belong to consumer tests; the producer may require
   tags on `main`, while the consumer checks no ancestry. Catalog implementation belongs to
   judgment-pack-exchange#8. Core, the dialect, RFC 0020 and the conformance corpora are unchanged.
+  Pull request #178 also follows RFC 0018's amendments in §1's gateway shapes, Evidence's reader
+  status, Implementation item 4's seeds and Compatibility's Accepted status at draft maturity,
+  resolves question 8 and updates questions 3 and 7.
+  Its nineteen accepted review dispositions name the catalog's and consumer's own form checkers
+  for RFC 0018 §§2–8 and 12 as round 8 amends them, for both entry kinds even when replay skips;
+  close presets to version 3, unbound eligible sources, three files and no profile requirements;
+  state mutual refusal of version-1 and version-2 entries and non-empty manifests; gate research
+  publication on #176 and workflow use on RFC 0020's condition (#177); assign the Desk's preset
+  duties and coordinator handoff; and clarify budgets, synthetic research fixtures, review
+  claims, locators, the index and revision attribution to pull requests #150, #163 and #178.
 
 - [RFC 0018](rfcs/0018-dialect.md) and [the dialect](spec/dialect.md) are amended for issue #171
   (2026-10-15, round 8): research declares bounded typed fields and records found, not-found,

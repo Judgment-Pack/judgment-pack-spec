@@ -34,32 +34,46 @@
 > unresolved question 4 stays open)".
 > The maintainer fixed the entry format for both this record and the repository, which was created
 > on 2026-10-14 and scaffolded from it in parallel. §3 gives that format with the maintainer's
-> review corrections and the earlier revision's additions, crediting its six proposed metadata
-> members, their bounds and range grammar to that revision. Under the
+> review corrections in [pull request #150][pr-150], the six proposed metadata members, their
+> bounds and range grammar in [pull request #163][pr-163], and entry format version 2 in
+> [pull request #178][pr-178]. Under the
 > [interim review regime](../GOVERNANCE.md#interim-review-regime), the pull request that merges this
 > record carries a cross-vendor adversarial review, with the maintainer's disposition of each
 > finding.
 
-## Revision of 2026-10-15: the seven sentences and presets
+## Revision in pull request #178: the seven sentences and presets
 
-This revision records the maintainer's decisions on [issue #166][issue-166] and
+Pull request #178 records the maintainer's decisions on [issue #166][issue-166] and
 [issue #172][issue-172], option A. Section 3 gains entry format version 2 and its required `kind`,
 `dialect` or `preset`. A preset carries a recipe without a pack or preparation fixtures; its
 identity and form establish nothing about a preparation (§5). The seven sentences are settled in
 §§3, 6 and 7: the manifest's pins, the verifier's byte bound, previous-release upgrade keys, the
 dialect's definition of unbound, reader locators, the consumer's tests and the producer's branch
-rule. The manifest's bounds and the release contract stay unchanged apart from the row's `kind`
-and the checks conditional on it. RFC 0019 stays a Draft.
+rule. The manifest's bounds stay unchanged; the release contract gains the row's `kind`, form
+checks and the consumer's preset duties. RFC 0019 stays a Draft.
+
+Pull request #178 also follows RFC 0018's amendments in §1's gateway shapes, Evidence's reader
+status, Implementation item 4's seeds and Compatibility's Accepted status at draft maturity,
+resolves question 8 and updates questions 3 and 7.
+
+The review's nineteen accepted dispositions fix upgrade history, checker ownership and scope,
+binding classification, preset closure, version coexistence, research and workflow gates, budget
+wording, revision attribution and consumer duties, with locator, index and fixture corrections.
 
 The catalog at `v0.1.0` records its enforcement in `judgment-pack-exchange`,
 `docs/entry-format.md`, `docs/release-contract.md`, `docs/releasing.md` and
 `tests/test_entries.py`. Those files are evidence of what it holds today, not a definition this
-RFC copies. Its implementation of this revision belongs to [judgment-pack-exchange#8][exchange-8].
+RFC copies. Its implementation of #178 belongs to [judgment-pack-exchange#8][exchange-8].
 Nothing here adds a workflow entry or changes [RFC 0020](0020-workflow.md).
 
 [issue-166]: https://github.com/Judgment-Pack/judgment-pack-spec/issues/166
 [issue-172]: https://github.com/Judgment-Pack/judgment-pack-spec/issues/172
 [exchange-8]: https://github.com/Judgment-Pack/judgment-pack-exchange/issues/8
+[pr-150]: https://github.com/Judgment-Pack/judgment-pack-spec/pull/150
+[pr-163]: https://github.com/Judgment-Pack/judgment-pack-spec/pull/163
+[pr-178]: https://github.com/Judgment-Pack/judgment-pack-spec/pull/178
+[spec-176]: https://github.com/Judgment-Pack/judgment-pack-spec/issues/176
+[spec-177]: https://github.com/Judgment-Pack/judgment-pack-spec/issues/177
 
 ## Summary
 
@@ -67,9 +81,9 @@ A **dialect** is a pack's terms spoken in a system's ([RFC 0018](0018-dialect.md
 dialect derives a pack's facts and evidence availability from a system's records, and an output
 dialect binds a disposition to a write's arguments. An **Exchange** is any repository in the entry
 format, with a manifest a desk can read. The organisation's `judgment-pack-exchange` is the first
-such catalog, holding the entries the organisation verifies, as the gateway's catalog holds
-bindings. The format exists for reuse between installations: import from any catalog, bind locally
-and run the same fixtures; export an installation's dialect as an entry. The maintainer's decision
+such catalog, holding the entries the organisation reviews and checks (§4), as the gateway's
+catalog holds bindings. The format exists for reuse between installations: import from any catalog,
+bind locally and run the same fixtures; export an installation's dialect as an entry. The decision
 states: "public submission, its review load and the hosted registry stay out of scope (RFC 0019's
 unresolved question 4 stays open)" (§2). A catalog's release contract (§7) holds import to a
 tagged state and an update to an explicit, reviewed upgrade.
@@ -127,10 +141,10 @@ the update following it distinguish the current readers from that original pin.
 
 - **The format.** [RFC 0018](0018-dialect.md), the dialect, landed as a Draft in #144 (merge
   commit `f821757`). Version 2 of the dialect document is the Runner's mapping v2 byte for byte;
-  version 3 proposes the kinds `http`, `sql`, `web` and `research`, defined and not claimable; the
-  output side is the gateway's decision policy, by reference. Its first reader,
-  `tools/dialect_verify.py`, reads dialect version 2 and the kind `operation`, and refuses every
-  other kind as `kind-unread`.
+  version 3 proposes source kinds `http`, `sql`, `web` and `research`, defined and not claimable;
+  the output side is the gateway's decision policy, by reference. Its first reader,
+  `tools/dialect_verify.py`, reads dialect version 2 and source kind `operation`, and refuses every
+  other source kind as `kind-unread`.
 - **The vectors.** The Runner's nine preparation vectors are published (Runner #75, closed by
   Runner pull request 77, merged as `82116bf`, released in Runner v0.10.0) and staged byte for
   byte in [`conformance/dialect/`][dialect-vectors]. They are the pattern an entry's fixture
@@ -207,12 +221,12 @@ the organisation's `judgment-pack-exchange`, is the first such catalog.
 **The maintainer's decision of 2026-10-15**, on issue
 [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142): an Exchange is any
 repository in the entry format with a manifest a desk can read. The organisation's
-`judgment-pack-exchange` is the first such catalog, holding the entries the organisation verifies,
-in the manner the gateway's catalog holds bindings. It is not a place users upload to. The
-decision states: "public submission, its review load and the hosted registry stay out of scope
-(RFC 0019's unresolved question 4 stays open)". The format exists for reuse between installations:
-import from any catalog, bind locally, run the same fixtures; export an installation's dialect as
-an entry.
+`judgment-pack-exchange` is the first such catalog, holding the entries the organisation reviews
+and checks (§4), in the manner the gateway's catalog holds bindings. It is not a place users upload
+to. The decision states: "public submission, its review load and the hosted registry stay out of
+scope (RFC 0019's unresolved question 4 stays open)". The format exists for reuse between
+installations: import from any catalog, bind locally, run the same fixtures; export an
+installation's dialect as an entry.
 
 **A catalog's manifest.** A desk browses it through the connection-catalog pattern: it reads one
 document within bounds, holds it to its shape before showing anything, holds each entry it fetches
@@ -238,33 +252,40 @@ that of any catalog — a repository in it with a manifest a desk can read — a
 between installations. This section includes the maintainer's correction to the original's last
 sentence on review (finding 2), scopes review to the catalog that holds the entry, and includes
 the `output` member, the `output.json` file and the manifest's `outputDigest` added by the
-maintainer's decision on exchange issue #2 (below, and Unresolved question 6); this revision's
-additions follow the original format below. Entry format version 2 is version 1 with a required
-`kind` member, `dialect` or `preset`, and the conditional members below. `dialect` retains the
-pack and fixture rules of version 1; `preset` has direction `input`, omits `pack` and `fixtures`,
-and holds no fixture directory. Its required `verification` is `[]`: no preparation was verified.
+maintainer's decision on exchange issue #2 in pull request #150 (Unresolved question 6); #163's
+additions follow the original format below. Pull request #178 adds entry format version 2:
+version 1 with a required `kind` member, `dialect` or `preset`, and the conditional members below.
+Kind `dialect` retains the pack and fixture rules of version 1; kind `preset` has direction
+`input`, omits `pack` and `fixtures`, and holds no fixture directory. Its required `verification`
+is `[]`: no preparation was verified.
 It has a `dialect` member and `dialect.json`, and no `output` member or `output.json`.
 
 A missing or unknown `kind`, a wrong direction for a preset, a pack or fixtures on a preset, or a
 non-empty preset `verification` refuses the entry. A version-1 reader refuses `entryVersion: 2`;
-it must not infer a pack or a verification from a preset. Entry format versions are separate from
-dialect document versions: version 2 entries may carry dialect version 2 or 3. A reader refuses an
-entry format version it does not implement.
+it must not infer a pack or a verification from a preset. A version-2 reader refuses a version-1
+entry and a version-1 manifest: their closed forms lack the required `kind`. Conversely, a
+version-1 reader refuses the version-2 manifest's rows, whose `kind` it does not admit. The empty
+manifest, `[]`, has no rows and fits both forms. Entry format versions are separate from dialect
+document versions: a version-2 entry of kind `dialect` may declare `dialectVersion` of 2 or more,
+as the members list permits; kind `preset` requires exactly 3. Declaring a version does not make
+it readable by a form checker or verifier. A reader refuses an entry format it does not implement.
 
-A preset's `dialect.json` is a dialect document, held to RFC 0018's form, including version 3's
-one-spelling rule. Its sources may be unbound under §4.4 there and may be `research` under §4.3 as
-amended in round 8: fields, model and capability requirements travel with the recipe; AI and web
-profile assignments belong to local binding. No binding document is required to publish a preset.
-A published research source is unbound, as §4.4 requires. A preset supplies no preparation,
-acquisition or workflow. The catalog checks its document's form and digest and the scans only
-(§4); it never runs the recipe or treats those checks as preparation verification.
+A preset's `dialect.json` is a version-3 dialect document, held to the whole document form of
+RFC 0018 §§2–8 and 12 as round 8 amends them, including version 3's one-spelling rule. Every
+source that has an unbound form under §4.4 is unbound. Sources may be `research` under §4.3:
+fields, model and capability requirements travel with the recipe; AI and web profile assignments
+belong to local binding. A preset's directory holds exactly `entry.json`, `dialect.json` and
+`README.md`, with no other file or directory; it holds no binding document. Its `requires` names
+no profile. A preset supplies no preparation, acquisition or workflow. The catalog checks its
+document's form and digest and the scans only (§4); it never runs the recipe or treats those
+checks as preparation verification.
 
 An **entry** is one directory `entries/<publisher>/<name>/` holding, as separate files with these
 names:
 
 - `entry.json` — a closed JSON object: `entryVersion` (`2`); `kind` (`"dialect"` or `"preset"`);
   `id` (`<publisher>.<name>`, lower-case letters, digits, `-` and `.`); `title`; `direction`
-  (`"input"`, `"output"` or `"both"`); `pack` (required for `dialect`, absent for `preset`; an
+  (`"input"`, `"output"` or `"both"`); `pack` (required for kind `dialect`, absent for `preset`; an
   object: `id`, the pack's id, an absolute URI as Core §4 makes it, and either `versions`, a
   version range, or `digests`, an array of the pack digests the dialect was written against);
   `dialect` (an object: `path`, always `dialect.json`; `dialectVersion`; `digest`, the SHA-256 of
@@ -273,7 +294,7 @@ names:
   `outputVersion`; `digest`, the SHA-256 of the output document's canonical bytes as RFC 0018 §10
   defines them; required for direction `output` and `both`, absent for `input`); `requires` (an
   object, members optional: `inputProfile` by digest, `connectionProfile` by digest, `platform` by
-  catalog binding name for an output dialect); `sourceKinds` (the kinds the dialect's sources use,
+  catalog binding name for an output dialect); `sourceKinds` (the source kinds the dialect uses,
   from RFC 0018's list); `licence` (an SPDX identifier); `author` (a handle or organisation name
   as the author chooses to be named; never required to be a personal name); `assertion` (the one
   fixed sentence the format gives: that the author asserts these rules derive these facts and this
@@ -299,12 +320,12 @@ by the SHA-256 of its `entry.json`, `dialect.json` and `output.json` bytes, in `
 exactly when it has an output document; a test holds every entry to the manifest and every fixture
 to its `preparationDigest` by running the specification's preparation verifier over it. A preset
 row has `fixtures: []` and no `outputDigest`; its `kind` equals the entry's. Section 5 states what
-each kind establishes, under the review of the catalog that holds it; neither establishes truth.
+each entry kind establishes under the holding catalog's review; neither establishes truth.
 CI refuses recognised credential shapes and local paths; a maintainer must refuse credentials and
 personal data in every file of an entry before merge, recipe literals and receipt metadata
 included; and the scan's silence proves nothing.
 
-**Authoring metadata, proposed by the earlier revision of 2026-10-15.** That revision added
+**Authoring metadata, proposed by pull request #163.** Pull request #163 added
 `description`, `compatibility` and `upgrade`, as
 [exchange #6](https://github.com/Judgment-Pack/judgment-pack-exchange/issues/6) requests. They are
 optional members of `entry.json`, included in its `entryDigest` when present. `description` says
@@ -312,19 +333,21 @@ what the entry is for; `compatibility` names the desk and runner releases its au
 `upgrade` gives review notes keyed by the previous entry's digest, the manifest's `entryDigest`,
 not a dialect digest. These are authoring statements, not verification records or permissions.
 
-The six metadata members below, their bounds and the compatibility-range grammar came from that
-revision. RFC 0019 defines the format and the exchange enforces it: where its page differs once
+The six metadata members below, their bounds and the compatibility-range grammar came from #163.
+RFC 0019 defines the format and the exchange enforces it: where its page differs once
 this RFC lands, the page is a bug, as the exchange's adoption rule states. The catalog's `v0.1.0`
-text and tests hold those additions since exchange #6; this revision settles the upgrade keys'
+text and tests hold those additions since exchange #6; pull request #178 settles the upgrade keys'
 meaning and the checks that establish it (#166).
 
-Each `upgrade` key names an `entryDigest` appearing in a previous release's manifest of the same
-catalog. A digest of unpublished intermediate bytes is not such a key. When the repository holds
-the previous release's manifest, the catalog's CI checks the key against that manifest and refuses
-a key absent from it. This establishes that the digest was listed in that release. Otherwise CI
-checks the digest's form only; that establishes no prior publication. The author remains
-responsible for the historical claim. A verification record changes `entryDigest`, so upgrade
-notes name the released entry's stored bytes, even when its dialect is unchanged.
+Each `upgrade` key equals the `entryDigest` of the row with this entry's `id` in the manifest of
+some release of this catalog lower in tag order (§3's three integer components) than the release
+being made. The catalog's CI fetches the catalog's tags and refuses a key found in none of those
+rows. A catalog with no earlier release admits no `upgrade`. A pull request is compared against
+the releases that exist when it is checked. For this history check, CI reads the earlier
+manifest's rows' `id` and `entryDigest` whatever its form, including version 1; it does not import
+that manifest as version 2. A digest of unpublished intermediate bytes or another entry's bytes
+is not such a key. A verification record changes `entryDigest`, so upgrade notes name the
+released entry's stored bytes, even when its dialect is unchanged.
 
 **The members.** Every object is closed. Members are required unless stated otherwise; conditional
 members are absent outside their condition. The following list retains the original types and
@@ -344,29 +367,30 @@ integer values and release tags, fit within the finite file bound below:
   release's `entry.json` stored bytes, as above; each value is a string of 1 to 2048 characters, a
   note for review when moving from that entry digest to this entry.
 - `direction`: string, `input`, `output` or `both`; exactly `input` for `preset`.
-- `pack`: closed object, required for `dialect`, absent for `preset`; exactly `id` and one of
+- `pack`: closed object, required for kind `dialect`, absent for `preset`; exactly `id` and one of
   `versions` and `digests`. `id` is an absolute URI (Core §4), at most 2048 characters. `versions`
   is a string of 1 to 64 characters in the pack's own versioning; its range syntax stays
   Unresolved question 2. `digests` is an array of 1 to 16 `sha256:` digests.
 - `dialect`: closed object for directions `input` and `both`, absent for `output`; exactly `path`,
   `dialectVersion` and `digest`. `path` is the string `dialect.json`; `dialectVersion` is an
-  integer of 2 or more, equal to the document's `version`; `digest` is a `sha256:` digest.
+  integer of 2 or more, exactly 3 for a preset, equal to the document's `version`; `digest` is a
+  `sha256:` digest.
 - `output`: closed object for directions `output` and `both`, absent for `input`; exactly `path`,
   `outputVersion` and `digest`. `path` is the string `output.json`; `outputVersion` is an integer
   of 1 or more, equal to the integer the document's `outputVersion` spells; `digest` is a
   `sha256:` digest.
 - `requires`: closed object whose members are optional: `inputProfile` and `connectionProfile`,
   each a `sha256:` digest, and `platform`, a string of at most 64 characters matching
-  `^[a-z][a-z0-9-]*$`.
-- `sourceKinds`: an array of 1 to 16 distinct strings, empty for `output`; each a kind RFC 0018 §4
-  lists for the document's `dialectVersion`. A version above 3 uses version 3's list until a later
-  RFC defines more. This list does not make a version readable by a verifier.
+  `^[a-z][a-z0-9-]*$`. For a preset, `inputProfile` and `connectionProfile` are absent.
+- `sourceKinds`: an array of 1 to 16 distinct strings, empty for `output`; each a source kind
+  RFC 0018 §4 lists for the document's `dialectVersion`. A version above 3 uses version 3's list
+  until a later RFC defines more. This list does not make a version readable by a verifier.
 - `licence`: one SPDX licence identifier matching `[A-Za-z0-9][A-Za-z0-9.+-]*`, or a `LicenseRef-`
   form of that grammar, at most 64 characters; no compound licence expressions.
 - `author`: string, 1 to 100 characters.
 - `assertion`: string, the fixed sentence below, byte for byte. For a preset it remains the
   author's statement; no preparation or pack fit is verified by it (§5).
-- `fixtures`: required for `dialect`, absent for `preset`; an array of 1 to 64 closed objects,
+- `fixtures`: required for kind `dialect`, absent for `preset`; an array of 1 to 64 closed objects,
   empty for `output`. Each has exactly `name`, `path` and `preparationDigest`. `name` is a string
   of at most 64 characters matching `^[a-z0-9]+(-[a-z0-9]+)*$`, distinct within the entry; `path`
   is `fixtures/<name>`; `preparationDigest` is a `sha256:` digest.
@@ -378,22 +402,27 @@ integer values and release tags, fit within the finite file bound below:
   reader-locator grammar below.
 
 **Reader locators** (#166). Each is `<owner>/<name>/<path>@<commit>`. Owner and name are each 1 to
-100 characters of `[A-Za-z0-9_.-]`. The path is non-empty, with no empty segment and no `..`
-segment, splitting on `/`. The commit is 7 to 40 lowercase hexadecimal digits. The last `@`
-separates the commit from the locator. The whole locator's 200-character bound still holds; a
-wrong form or an exceeded bound refuses the verification record and its entry.
+100 characters of `[A-Za-z0-9_.-]`. The path has one or more `/`-separated segments, each matching
+`[A-Za-z0-9_.-]+`, with no empty, `.` or `..` segment. The commit is 7 to 40 lowercase
+hexadecimal digits. The last `@` separates the commit from the locator. The whole locator's
+200-character bound still holds; a wrong form or an exceeded bound refuses the verification record
+and its entry.
 
 `entry.json` and `README.md` are each at most 64 KiB, and a fixture directory at most 16 MiB;
 `dialect.json` is at most 131,072 bytes, RFC 0018 §12's bound. When CI reads a fixture, it relies
 on the pinned preparation verifier to hold that bound, refusing the reading as `input-over-bound`
 if exceeded. For fixture replay, the catalog holds no separate byte check. A skipped fixture
-establishes no verifier byte check. For a preset, the document-form check is held to RFC 0018
-§§2–4 and 12,
-including that bound, without a preparation replay; passing a digest and scan alone cannot stand
-in for the form check. A malformed dialect or one over a bound refuses the preset; a form checker
-that cannot read its version refuses it as unread. Every object is closed: a member the list does
-not give is refused. A member name given twice in one object is refused, as Core §2.1 refuses one.
-The 64 KiB file bound governs even when every member is within its individual bound; the maxima
+establishes no verifier byte check. Independently, the catalog's own form checker, written to
+RFC 0018's text, checks the whole document form of §§2–8 and 12 as round 8 amends them, including
+that byte bound, for each `dialect.json` of either entry kind, even if every fixture is skipped.
+A malformed document, a bound exceeded, or a version or source kind the form checker does not
+read refuses the entry. Passing a digest and scan alone cannot stand in for this form check.
+The specification's preparation verifier is not used for a preset: it requires fixture inputs
+and a binding document for unbound sources. A research preset therefore waits for a form checker
+that reads round 8; the specification readers' support is [judgment-pack-spec#176][spec-176],
+which the catalog's checker follows through exchange #8. Every object is closed: a member the
+list does not give is refused. A member name given twice in one object is refused, as Core §2.1
+refuses one. The 64 KiB file bound governs even when each member is within its own bound; the maxima
 are not a promise that all maximum-length values fit together.
 
 **Compatibility ranges.** A release tag has the form
@@ -406,10 +435,10 @@ bound must exceed the lower. No other range syntax is admitted. An absent `compa
 no compatibility statement; an absent `upgrade`, or no note for the previous digest, supplies no
 upgrade guidance. None of these absences approves an import or an upgrade (§7).
 
-**Manifest form, specified by this revision.** `manifest.json` is at most 1 MiB (1,048,576 bytes)
-and contains at most 1,024 rows. Each row is a closed object with exactly `id`, `kind`, `path`,
-`entryDigest`, `fixtures`, and `dialectDigest` and `outputDigest` when the entry's direction
-requires them. Duplicate member names are refused. Rows have distinct `id` values and are ordered
+**Manifest form, specified by #163 and amended by #178.** `manifest.json` is at most 1 MiB
+(1,048,576 bytes) and contains at most 1,024 rows. Each row is a closed object with exactly `id`,
+`kind`, `path`, `entryDigest`, `fixtures`, and `dialectDigest` and `outputDigest` when the entry's
+direction requires them. Duplicate member names are refused. Rows have distinct `id` values, ordered
 by those ids as byte strings (their UTF-8 bytes). The `id` has the grammar and bound in the
 members list; `kind` is `dialect` or `preset` and equals the entry's; each digest has the form
 given below. The row's `path` is exactly `entries/<publisher>/<name>`, without a trailing slash:
@@ -423,20 +452,32 @@ omits `fixtures`). A wrong or mismatched `kind`, or a non-empty preset fixture l
 row. Each `name` equals that fixture's name, and `files` is an array of 3 to 5 distinct strings
 listing its complete file set by basename. `case.json`, `profiles.json` and `preparation.json` are
 required; `sources.json` is optional; `binding.json` is required exactly when the entry's dialect
-has an unbound source under RFC 0018 §4.4. That is the definition of unbound, including round 8's
-research form. Both specification readers read version 3 and its unbound operation form since the
-version-3 staging; their round-8 research implementation is still due. The catalog's temporary
-reading, an `operation` with neither `profile` nor `profileDigest`, is retired (#166). A partial
-or malformed binding is refused under §4.4, not treated as an unbound source by missing members
-alone. A fixture lacking a required binding, or carrying one when the dialect has no unbound
-source, is refused. No other file is admitted in a fixture directory. A consumer knows from this
-list which files to fetch under `<path>/fixtures/<name>/` over any transport; a listed file that
-cannot be fetched is a failure, not an absent optional file. The consumer checks that the list
-equals the file set in the release's tree. The fixture lists landed through exchange #6; this
-revision adds the row's `kind` through exchange #8, leaving the manifest's bounds unchanged.
+has an unbound source under RFC 0018 §4.4, including round 8's research form:
 
-**How the format is spelled.** The assertion's words, digests and fixture files follow. The
-earlier revision defined the closed fixture file set and named its `binding.json`.
+- An `operation` is unbound when it has all of `platform`, `operation`, `shape` and `record`,
+  and neither binding member `profile` nor `profileDigest`. Its bound form has both binding
+  members and none of those four catalog members. Some but not all of either set, a mixture of
+  the two forms, or neither complete form is `input-malformed`.
+- A `research` source is unbound when it has none of the binding members `profile`,
+  `profileDigest` and `webProfiles`; its bound form has all three. Some but not all of that set,
+  or any operation catalog member, is `input-malformed`.
+
+The catalog's own test checks this classification and the binding members' forms for every
+fixture, whether or not the preparation verifier reads it (§4). It also checks each binding
+document's form, bound, dialect digest and exact source assignments under RFC 0018 §4.4. A partial
+or malformed binding document is refused by the catalog. A fixture lacking a required binding
+document, or carrying one when the dialect has no unbound source, is refused. Both specification
+readers read version 3's unbound operation form; their round-8 research implementation is still
+due (#176). The catalog's temporary operation-only classification is retired (#166); correcting
+its `tests/fixtures/unread-version-entry` example belongs to judgment-pack-exchange#8.
+No other file is admitted in a fixture directory. A consumer knows from this list which files to
+fetch under `<path>/fixtures/<name>/` over any transport; a listed file that
+cannot be fetched is a failure, not an absent optional file. The consumer checks that the list
+equals the file set in the release's tree. The fixture lists landed through exchange #6; #178
+adds the row's `kind` through exchange #8, leaving the manifest's bounds unchanged.
+
+**How the format is spelled.** The assertion's words, digests and fixture files follow. Pull
+request #163 defined the closed fixture file set and named its `binding.json`.
 
 - **The assertion.** `assertion` is exactly this sentence: "The author asserts that these rules
   derive these facts and this evidence-availability from records of that shape, or these arguments
@@ -476,7 +517,7 @@ earlier revision defined the closed fixture file set and named its `binding.json
   membership and order remain the caller's assertion. No whole-record commitment is invented.
 - **The repository's own copy.** The repository's `docs/entry-format.md` adopts this RFC as the
   format's definition when it lands: where the page differs, the page is a bug (the scope note).
-  Its `v0.1.0` page and tests hold exchange #6's metadata and fixture lists. This revision's
+  Its `v0.1.0` page and tests hold exchange #6's metadata and fixture lists. Pull request #178's
   changes follow through exchange #8; the exchange enforces the format defined here.
 
 ### 4. The Exchange's test
@@ -484,12 +525,20 @@ earlier revision defined the closed fixture file set and named its `binding.json
 A catalog's test, run on every push and pull request in its repository, holds:
 
 - **the manifest to the entries**: one row for each entry directory and one entry for each row, in
-  `id` byte order, with the bounds, closed rows, matching kinds and paths and fixture lists of §3,
+  `id` byte order, with §3's bounds, closed rows, matching entry kinds, paths and fixture lists,
   and `entryDigest`, `dialectDigest` and `outputDigest` over the files' bytes, the last two
   present as §3 gives them;
 - **each `entry.json` to the members list (§3)**: each member's type, requiredness, grammar and
   bound, every object closed, and the `assertion` the fixed sentence exactly; upgrade keys are
-  checked against the previous release's manifest when held, otherwise for form only (§3);
+  checked against the same entry's rows in earlier releases' manifests, fetching tags as §3
+  requires, with no form-only fallback;
+- **each `dialect.json` to the whole document form of RFC 0018 §§2–8 and 12 as round 8 amends
+  them**, by the catalog's own form checker (§3), for both kind `dialect` and kind `preset`,
+  whether or not any fixture is replayed;
+- **each fixture's source classification and binding document to RFC 0018 §4.4**, by the
+  catalog's own test under §3, including partial binding members, the required or forbidden
+  `binding.json`, and that document's form, bound, dialect digest and exact source assignments,
+  whether or not the preparation verifier reads the fixture;
 - **`dialect.digest` and `output.digest`** to their documents' `canon` bytes, and each fixture's
   `preparation.json` to its `preparationDigest`;
 - **each fixture to the specification's preparation verifier**, `tools/dialect_verify.py` at the
@@ -501,19 +550,24 @@ A catalog's test, run on every push and pull request in its repository, holds:
   a local path, before anything is merged. A scan's silence is not a finding that none is there:
   credentials and personal data in every file are a maintainer's to refuse before merge (§3).
 
-**A preset.** The catalog checks its entry and manifest form, its dialect document's form under
-RFC 0018 (including round 8 and the bounds), its file and canonical digests, and the same scans.
+**A preset.** The catalog checks its entry and manifest form, the whole document form of RFC 0018
+§§2–8 and 12 as round 8 amends them, its file and canonical digests, and the same scans.
 There are no fixtures to replay and no preparation-verification record to add. A form, digest,
 bound or scan failure refuses it. These checks establish only the recipe's identity and form.
 
-**A fixture the verifier cannot recompute.** A fixture of a source kind the specification's
-verifier cannot recompute is held by its digests only: the test skips the recomputation and says
-why. Today that includes `research`, `http`, `sql` and `web`, which the specification readers
-refuse as `kind-unread`. Both now read version 3's operation form. The catalog at `v0.1.0` pins an
-older verifier; its supported versions and kinds follow that pin, not the availability of a newer
-reader. An unread version or kind is reported by name, never as a successful replay. What such a
-fixture establishes is only that these bytes were recorded and pinned; it is no check of the
-dialect (Unresolved question 3).
+**A fixture the verifier cannot recompute.** After the catalog's form check passes, a fixture
+whose source kind the specification's verifier refuses as `kind-unread` is held by its digests
+only: the test skips recomputation and says why. The same applies to an unread dialect version,
+identified by the verifier's unread-version detail; every other refusal fails the entry.
+The readers currently refuse `http`, `sql` and `web` as `kind-unread`, but round-8 `research`
+as `input-malformed`: they still read the superseded research form. An entry with a round-8
+research source cannot be published while the readers refuse it. Once #176 lands and the catalog
+pins a reader of round 8, its research fixtures are verified as any other fixture; no recipe is
+re-executed. Both readers already read version 3's operation form. The catalog at `v0.1.0` pins
+an older verifier; its supported versions and source kinds follow that pin. An unread version or
+source kind is reported by name, never as a successful replay. A skipped fixture establishes
+only that its bytes were recorded and pinned; the independent form check still holds the
+dialect's document form (Unresolved question 3).
 
 ### 5. What an entry establishes, and what it does not
 
@@ -532,13 +586,16 @@ An entry of kind `dialect` establishes, to a reader who performs the checks in �
   availability were derived from those bytes by these rules.
 
 A **preset** establishes the recipe's identity and form only: the published bytes have their
-stated digest and the document has the dialect's form. Its fixed assertion is the author's
+stated digest and the document has the form of those sections: the whole document form of
+RFC 0018 §§2–8 and 12 as round 8 amends them (§§3–4 here). Its fixed assertion is the author's
 statement under the catalog's review, not an established derivation. A preset establishes nothing
 about any preparation, pack fit, acquisition or answer. Its `verification` stays empty; no
 preparation fixtures exist to support a claim. A desk pairs it with a pack locally before any run.
-Display metadata and suggested budgets grant no execution permission, for either kind.
+The format carries no budget; a README may describe one. A research source's `constraints` is
+part of the request and is not a budget. Display metadata and README budget suggestions grant no
+execution permission, for either entry kind.
 
-Neither kind establishes:
+Neither entry kind establishes:
 
 - anything about any record's truth: the stance Core §6.3 takes of a source and the gateway's
   catalog takes of a binding;
@@ -591,6 +648,8 @@ These are the rules of the organisation's `judgment-pack-exchange` catalog (§2)
     its id and digest, a connection by its name and a header by its name, never a value (RFC 0018,
     Security and privacy).
   - Personal data, in a dialect, a fixture or a README.
+  - Non-synthetic fixtures for an entry with a `research` source: every fixture published with
+    such an entry is synthetic, under RFC 0018's round-8 Security and privacy rule.
   - Code of any kind. A dialect is declarative (RFC 0018 §1), and an entry holds no program,
     script, executable, image or package. The catalog runs its form, digest and scan checks (§4),
     and replays fixtures with the specification's verifier at the commit its CI pins.
@@ -617,20 +676,24 @@ to a commit different from the one retained for that tag is refused. A catalog w
 may release the empty manifest, `[]`.
 
 **Who holds these duties** (#166). `judgment-pack-exchange/tests/test_entries.py` holds the
-catalog's manifest, entries, fixtures and scans (§4). Its `docs/release-contract.md` documents all
-the consumer duties below; those are held by the consumer's own tests. For the Desk, the
+catalog's manifest, entries, fixtures and scans (§4). Its `docs/release-contract.md` will document
+all the consumer duties below; those are to be held by the consumer's own tests. For the Desk, the
 repository is `Judgment-Pack/judgment-pack-desk`, tracked by
 [judgment-pack-desk#400](https://github.com/Judgment-Pack/judgment-pack-desk/issues/400):
 
-- The Desk's tests hold import replay with the consumer's reader and the fixture's own inputs.
-- The Desk's tests hold refusal of lower tags and of tags moved from their retained commits.
-- The Desk's tests hold withdrawal: the imported commit stays and the entry is shown as withdrawn.
-- The Desk's tests hold review records: reviewer, time, old and new commits, and explicit approval
-  before replacement.
+- The Desk's tests are to hold import replay with its reader and the fixture's own inputs.
+- The Desk's tests are to hold refusal of lower tags and tags moved from their retained commits.
+- The Desk's tests are to hold withdrawal: the imported commit stays and shows the withdrawal.
+- The Desk's tests are to hold review records: reviewer, time, old and new commits, and explicit
+  approval before replacement.
+- The Desk's tests are to hold matching entry kinds in the manifest row and `entry.json`.
+- The Desk's tests are to hold a preset's document-form check by its own checker (§§3–4).
+- The Desk's tests are to hold refusal to run an unpaired preset.
 
-These name the repository responsible for each duty, not a claim that an importer or its tests
-have shipped. Another consumer holds each duty in its own repository's tests. The catalog's CI
-cannot establish that a consumer fetched, replayed or reviewed anything.
+The coordinator is to carry this complete list to Desk #400. These name the repository responsible
+for each duty, not a claim that an importer or its tests have shipped. Another consumer holds each
+duty in its own repository's tests. The catalog's CI cannot establish that a consumer fetched,
+replayed or reviewed anything.
 
 **Before import.** The consumer performs these checks itself, independently of a catalog's CI. It
 fetches the release's manifest within the 1 MiB and 1,024-row bounds, checks its form (§3), and
@@ -641,13 +704,15 @@ and verifies:
 
 - `entry.json` against the manifest's `entryDigest`, and its members against §3, including its
   `id`, `kind`, direction and authoring metadata, with the row's `kind` matching its `kind` and
-  its path matching its `id`; a preset is held to its document's form as in §4;
+  its path matching its `id`; each input dialect, of either entry kind, is held to its document's
+  form as in §4 by the consumer's own form checker, written to RFC 0018's text;
 - `dialect.json` against the manifest's `dialectDigest` over the stored bytes and `dialect.digest`
   over the document's canonical bytes (RFC 0018 §1, §2), when the entry has an input dialect;
 - `output.json` against `outputDigest` over the stored bytes and `output.digest` over the
   document's canonical bytes (RFC 0018 §10), when the entry has an output dialect;
 - each fixture's `preparation.json` against its `preparationDigest`, and its closed file set
-  against the manifest list and §3, with every listed file fetched successfully;
+  against the manifest list and §3, with every listed file fetched successfully and the source
+  classification and binding document checked even when the preparation reader skips it;
 - every pinned digest against the fetched bytes it names, including the profiles and acquisitions
   checked by the reader, using canonical bytes only where that digest's definition requires them;
 - each file's bounds (§3 and RFC 0018 §12), and every file against the credential and local-path
@@ -657,22 +722,23 @@ and verifies:
   entry's own dialect, the fixture's own `profiles.json` and remaining inputs, and, for an unbound
   version-3 dialect, that fixture's `binding.json` (RFC 0018 §4.4). The reader must return a
   reading with no finding and a digest equal to `preparationDigest`. No record is supplied, so its
-  binding is `not-checked`. A fixture outside the reader's supported versions or kinds is reported
-  as not recomputable, with the reason, never as a successful replay (§4).
+  binding is `not-checked`. A fixture outside the reader's supported versions or source kinds is
+  reported as not recomputable, with the reason, never as a successful replay (§4).
 
 A failed digest, form, file-set, bound or scan check refuses the entry before it is offered for
 import; a malformed manifest refuses the catalog's import. A replay disagreement, finding or
 verifier refusal also refuses the entry. File digests and canonical digests are distinct checks,
 even when they happen to be equal. The manifest gives no separate digest for `README.md` or each
 fixture input: those files are fetched as blobs from the same commit. For a fixture not recomputed,
-the checks establish only the pinned bytes, not the derivation. Verification runs no entry-supplied
-code and re-executes no research recipe.
+its checks establish only the pinned fixture bytes, not the derivation; the dialect's document
+form is checked independently. Verification runs no entry-supplied code and re-executes no research
+recipe.
 
 **An update** is an explicit, reviewed upgrade from one release to another. A lower tag, ordered
 by its three integer components (§3), is refused, as is a moved tag. The consumer verifies the new
 release as above. An entry is changed if any file under its path is added, removed or differs in
 bytes between the two commits, including its README, fixture inputs and binding documents, even
-when no pinned digest changes. A change of kind or direction is a change to the entry and is shown
+when no pinned digest changes. A change of entry kind or direction is a change to the entry, shown
 for review with the changed files. An entry absent from the new release stays imported at its
 previous commit and is shown as withdrawn; it is not silently removed or replaced.
 
@@ -696,14 +762,15 @@ is refused for running. It chooses parameters and, where required, binds sources
 §4.4. This local pairing is not a catalog-verified preparation and adds no verification record to
 the published preset. A preset's lack of fixtures is not a successful replay.
 
-An entry's display metadata, requirements and suggested budgets are data for review, never
-allowances. Import does not bind a connection, call a source, schedule a run or authorise a write.
-The installation chooses its local bindings and parameters separately. It may export its dialect
-as an entry in any catalog (§2).
+The format carries no budget; a README may describe one. A research source's `constraints` is
+part of the request, not a budget. Display metadata, requirements and README suggestions are data
+for review, never allowances. Import does not bind a connection, call a source, schedule a run or
+authorise a write. The installation chooses its local bindings and parameters separately and may
+export its dialect as an entry in any catalog (§2).
 
-The catalog's `docs/release-contract.md` and entry-format rules adopted the earlier revision
-through exchange #6 and hold it at `v0.1.0`. This revision leaves that release contract and its
-bounds unchanged apart from the manifest row's `kind` and its conditional checks; the catalog's
+The catalog's `docs/release-contract.md` and entry-format rules adopted pull request #163 through
+exchange #6 and hold it at `v0.1.0`. Pull request #178 preserves the manifest's bounds and adds
+the row's `kind`, form checks and the consumer's preset duties to that contract; the catalog's
 implementation follows through exchange #8. This amendment records no implemented importer.
 Signing remains Unresolved question 1.
 
@@ -748,11 +815,18 @@ Signing remains Unresolved question 1.
   bytes and digest and is re-authoring (Unresolved question 7). Version 3's unbound form uses RFC
   0018 §4.4's binding document; fixture replay uses the fixture's own binding and profiles (§7).
 
-Entry format version 2 requires `kind`; a version-1 reader refuses it. This is an entry-format
-change, not a dialect document version bump. Presets add neither a workflow entry kind nor a
-workflow member: [RFC 0020](0020-workflow.md) still requires a later decision for that. Local
-pairing grants no workflow execution; workflow version 1 still admits no research-source stage, as
-RFC 0018's round-8 amendment records.
+Entry format version 2 requires `kind`; a version-1 reader refuses its entries and its manifest
+rows, so it refuses the whole non-empty catalog, kind `dialect` included. A version-2 reader
+likewise refuses version-1 entries and manifest rows under the closed forms (§3). The
+organisation's catalog has released only the empty manifest, which fits both forms; nothing
+published is stranded. The upgrade-history check reads earlier rows' `id` and `entryDigest`
+whatever their form (§3). This changes the entry and manifest forms, not the dialect's version.
+
+Presets add neither a workflow entry kind nor a workflow member: [RFC 0020](0020-workflow.md)
+still requires a later decision for that. A workflow stage may pin a preset's published dialect
+digest with its own pack (RFC 0020 §3); that is a local pairing and grants nothing by itself.
+A preset with a `research` source cannot be a stage of workflow version 1 until RFC 0020's
+condition is met; its revision is [judgment-pack-spec#177][spec-177], following RFC 0018 round 8.
 
 ## Security and privacy
 
@@ -767,7 +841,8 @@ RFC 0018's round-8 amendment records.
   publisher records under a gateway and an identity it is content to name, and a reviewer checks
   each fixture's receipts as well as its results. CI's scan refuses recognised credential shapes and
   local paths; a maintainer refuses credentials and personal data in every file of an entry before
-  merge, recipe literals and receipt metadata included (§3).
+  merge, recipe literals and receipt metadata included (§3). An entry with a `research` source
+  publishes synthetic fixtures only (§6).
 - **A wrong dialect's effect.** Bounded, not prevented. An input dialect that reads the wrong member
   derives wrong facts faithfully: the Runner recomputes every preparation rather than trust an
   author's, the lineage records which pointer fed which target, admission refuses a class a target
@@ -813,12 +888,21 @@ written for, and a relative link that does not resolve.
 of `{date, runner, runtime, readers, result}`, each member as §3's list gives it: `date`, the day
 the readers ran; `runner` and `runtime`, the release tags of the Runner and the runtime at which
 the fixtures hold; `readers`, the preparation verifiers that agreed, each named as
-`<owner>/<name>/<path>@<commit>` in §3's grammar so that it can be found again — the Runner's
-`verify-run`, or the specification's `tools/dialect_verify.py`, at a commit; and `result`,
+`<owner>/<name>/<path>@<commit>` in §3's grammar so that it can be found again — for example,
+`Judgment-Pack/judgment-pack-runner/cmd/verify-run@82116bf`; and `result`,
 `"agree"`, the only value the format gives. A reader that disagrees adds no record: its
 disagreement is a finding against the entry or the reader, recorded where it was found. A record
 is added by a pull request after the run it records, and is a record of the bytes it was made on
 (§6). A preset has no such run or record; its `verification` is the empty array.
+
+**The catalog's form checker.** Exchange #8 is to hold both entry kinds to §§3–4 with passing
+version-3 unbound operation documents and, once supported, round-8 research documents. Refusal
+cases include malformed reads, rules, reconciliation and admission forms, partial binding
+members, a version or source kind the checker does not read, and exceeded bounds. The same
+cases hold kind `dialect` even when every fixture's replay is skipped. Preset cases also hold
+version 3, every eligible source unbound, the exact three-file directory and no profile in
+`requires`. These are duties for the catalog's checker and the consumer's own checker, not
+preparation-verifier tests or a claim that either checker has shipped.
 
 ## Implementation
 
@@ -828,13 +912,13 @@ is added by a pull request after the run it records, and is a record of the byte
    thank-you bot. Its CI job, `entries`, checks out this repository at `f821757`, the merge of RFC
    0018, and runs the tests; it passed on that commit. At `v0.1.0`, its `docs/entry-format.md`,
    `docs/release-contract.md`, `docs/releasing.md` and `tests/test_entries.py` hold version 1,
-   metadata, fixture lists and its release practice. Entry version 2 and this revision's
+   metadata, fixture lists and its release practice. Entry version 2 and pull request #178's
    enforcement changes belong to judgment-pack-exchange#8; they are not implemented here.
 2. **A desk's browse and importer.** Proposed, not built, and tracked by
    [judgment-pack-desk#400](https://github.com/Judgment-Pack/judgment-pack-desk/issues/400). It
    takes a catalog location, a git repository URL or local directory (§7), and a release tag. The
    Desk would read the manifest as blob bytes at the tag's resolved commit; show each entry's
-   title, kind, direction, pack when present, requirements, source kinds, licence, author,
+   title, entry kind, direction, pack when present, requirements, source kinds, licence, author,
    assertion and verification records as the entry gives them; fetch and check an entry's files
    under §7; and hand an entry the operator adopts to its inputs, which produce the dialect format
    (Desk #398). It runs nothing an entry holds. It pairs an imported preset with a pack locally
@@ -862,7 +946,8 @@ is added by a pull request after the run it records, and is a record of the byte
      be edited afterwards (Security and privacy); and a source kind the Exchange's test can
      recompute. Both connections declare their reads of shape `http`. RFC 0018 §4.1 now admits
      that shape through `operation`, with the connection's request object; no new `sql` or `http`
-     kind is needed for that route. The seed fixtures and live checks are still due (question 8).
+     source kind is needed for that route. The seed fixtures and live checks are still due
+     (question 8).
      A catalog pinned to a verifier that cannot read them reports that limit under §4.
 
 **The readers.** The Exchange's test runs `tools/dialect_verify.py`, the first reader of RFC 0018,
@@ -884,10 +969,12 @@ All are this project's, and RFC 0000's bar of two independent implementations is
    is open: a pack version that changes a fact pointer breaks a dialect, and whether its successor
    is a new entry, the same `id` with new digests, or an entry per pack version, is undecided.
 3. **Fixtures the verifier cannot recompute.** Such a fixture is held by its digests only, and
-   establishes that its bytes were recorded. Whether an entry of kind `dialect` none of whose
-   fixtures is recomputed is published at all, or published and marked, is open. Presets are
-   separately settled by question 10; they have no preparation fixtures. For `research` it stays
-   partly so for good: once a reader reads the kind, a research fixture's derivation is
+   establishes that its bytes were recorded; its dialect document still passes the catalog's
+   own form check (§4). Whether an entry of kind `dialect` none of whose fixtures is recomputed
+   is published at all, or published and marked, is open. A round-8 research entry is refused
+   until the readers implement it (#176), as §4 requires. Presets are separately settled by
+   question 10; they have no preparation fixtures. For `research` it stays
+   partly so for good: once a reader reads the source kind, a research fixture's derivation is
    recomputable, but a model's answer is never reproduced by verification. Round 8 holds each
    retained response under its receipt; a whole research record without its own receipt remains
    partly the caller's assertion (§3).
@@ -905,7 +992,7 @@ All are this project's, and RFC 0000's bar of two independent implementations is
    documents, each with its own digest, so that a version-2 dialect stays the Runner's mapping v2
    byte for byte. The format holds one `dialect.json` with one `digest`. Whether a `both` entry
    holds one file per side, is two entries that name each other, or is one document of both, is
-   open, and both seed entries are of this direction. *Resolved by this revision (2026-10-14), on
+   open, and both seed entries are of this direction. *Resolved by pull request #150, on
    the maintainer's decision at exchange issue #2: a `both` entry holds one file per side,
    `dialect.json` and `output.json`, each with its own digest, in `entry.json` and in
    `manifest.json` (§3); the exchange's pull request is
@@ -922,14 +1009,14 @@ All are this project's, and RFC 0000's bar of two independent implementations is
    source form; that procedure does not apply to a dialect of version 2. Both readers now read the
    version-3 operation form; its vectors are staged and no released specification version
    publishes them.
-8. **The seed entries' source kind.** The earlier question was whether to wait for new kinds or
-   publish over `mcp`. *Resolved as a format question by RFC 0018 §4.1's amendment of 2026-10-15:
+8. **The seed entries' source kind.** The earlier question was whether to wait for new source kinds
+   or publish over `mcp`. *Resolved as a format question by RFC 0018 §4.1's amendment of 2026-10-15:
    `operation` admits the connections' `http` shape and request objects. The seeds still need
    their live checks and fixtures, and the catalog a reader pinned to that form. This records no
    verified seed.*
 9. **Public submission and its review load.** Out of scope by the maintainer's decision of
-   2026-10-15 on issue #142 (§2). The organisation's catalog holds the entries it verifies; it is
-   not a place users upload to. Reuse between installations uses any catalog in the entry format,
+   2026-10-15 on issue #142 (§2). The organisation's catalog holds the entries it reviews and
+   checks (§4); it is not a place users upload to. Reuse uses any catalog in the entry format,
    with local binding and the same fixtures, and an installation can export its dialect as an
    entry. This is a scope decision, not a submission queue waiting for a review policy.
 
@@ -937,13 +1024,15 @@ All are this project's, and RFC 0000's bar of two independent implementations is
     version 2 adds required `kind`; `preset` is input-only, without a pack or fixtures, checked
     for document form, digests and scans. Its manifest row names the kind. It establishes the
     recipe's identity and form, nothing about a preparation; a desk pairs it with a pack locally
-    before any run. Metadata and suggested budgets grant no execution permission (§§3–5, 7).
+    before any run. The format carries no budget; README suggestions and metadata grant no
+    execution permission, and `constraints` is part of the request, not a budget (§§3–5, 7).
 11. **The catalog's seven sentences.** *Resolved on 2026-10-15 by #166:* §6 names all manifest
     pins and the fixture list; §3 specifies reliance on the verifier's dialect bound, previous
-    release upgrade keys and the limit of a form-only check, RFC 0018 §4.4's unbound definition,
+    release upgrade keys matched to the same entry's history, RFC 0018 §4.4's full classification,
     and reader locators; §7 assigns replay, tag, withdrawal and review checks to the consumer's
     tests and distinguishes the producer's branch rule. The catalog's implementation follows
-    through judgment-pack-exchange#8. None remains an open interpretation of this format.
+    through judgment-pack-exchange#8. These decisions settle the seven questions for #178;
+    their implementation and tests remain the catalog's and each consumer's duties.
 
 [dialect-vectors]:
   https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect
