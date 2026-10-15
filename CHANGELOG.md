@@ -207,6 +207,19 @@ here.
 
 ### Changed
 
+- [RFC 0018](rfcs/0018-dialect.md) and [the dialect](spec/dialect.md) are amended for issue #171
+  (2026-10-15, round 8): research declares bounded typed fields and records found, not-found,
+  stale and conflicting answers with retained-response citations. Published recipes name model
+  and capability requirements; binding assigns generated AI and web profiles by id and digest,
+  with mismatches refused. Reconciliation is a declared rule over research results, retaining
+  the prohibition of overlapping targets. The GTM company/person and work-item triage fixture
+  lists include changed bindings, retained responses and the workflow's selected parent/child
+  case; none is recorded because no Runner prepares `research`. Replay never calls a model or
+  the web, and establishes retained bytes, not answer correctness. This resolves the research
+  binding question deferred by issue #160 without changing RFC 0020's operation construction.
+  Both readers' support follows separately; no Core, preparation-form or conformance change is
+  made, and no vector is claimed.
+
 - [RFC 0018](rfcs/0018-dialect.md) is amended (2026-10-15), and
   [`spec/dialect.md`](spec/dialect.md) with it; its status stays `Accepted`. Version 2's
   `operation` reads a gateway source of shape `airbyte`, `mcp` or `http`, as the reference Runner's

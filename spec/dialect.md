@@ -44,6 +44,11 @@ four kinds are proposed, and no preparer writes them and no vector holds them (�
 version 1 of the output side (§10). It is published beside the released Core `0.2.0-draft` and
 carries no `specVersion` of its own. Like Core, it is a research preview, at draft maturity.
 
+The research-contract amendment of 2026-10-15 (issue #171, RFC 0018 round 8) adds typed result
+fields, portable AI and web profile binding, explicit reconciliation and two fixture lists.
+The research replay rule remains the rule adopted in pull request 164. These new members have
+no preparer or recorded vector; both repository readers' support follows separately.
+
 **Its sources.** Where the Runner's words define the format, this document keeps them; where they
 describe the Runner rather than the format, it says what the format is.
 
@@ -346,7 +351,8 @@ implementation's vectors will fix each request's exact bytes, and may change the
 a request is formed — a body and headers, a statement and its bindings — and not how a configured
 source is read. A source of each of these kinds is an object of exactly the members of §4 —
 `name`, `kind`, `parameters` (its source parameters, as every source's) and `read` — with `profile`,
-`profileDigest` and `maxAge` as in §4.1, and the members its kind names below. Except for `research`,
+`profileDigest` and `maxAge` as in §4.1, and the members its kind names below. A `research` source
+instead has §4.4's bound or unbound profile assignments, and keeps `maxAge`. Except for `research`,
 each is acquired through the gateway source its profile pins, so §5's checks apply with the shape
 the profile names. A `research` source retains responses acquired through the gateway sources
 their own profiles pin, as below. The value acquired is read as every value is (§6).
@@ -367,21 +373,29 @@ their own profiles pin, as below. The value acquired is read as every value is (
 - **`web`**, one public page by URL through the gateway's web source (`adapter-web`, shape
   `http`): `url`, a string, or a `$param` form naming a `string` parameter. The request is
   `{"url": url}`, and the value acquired is the attachment record the web source returns.
-- **`research`**, an AI-assisted research recipe asked of a gateway source whose profile is of
-  class `generated`: the AI connection, by the profile's `source`, and its model. Its members are
-  `question`, a string template; `constraints`, an object; `model`, the model's name, a string;
-  and `evidence`, the fields each answer MUST support with a source reference: a retrieved page's
-  receipt or URL, an excerpt and a retrieval time. The source's request is the recipe, with its
-  `question` template instantiated. The recipe is part of the dialect and under its digest;
-  its `question`, `constraints`, `model` and `evidence`
-  are recorded, never re-executed. The model's name and the connection's name are recorded and
-  checked against nothing a verifier is given. Each retained response's own `request`, below, is
-  what its receipt commits to. No model output is produced or compared.
+- **`research`**, an AI-assisted research recipe, of class `generated`. Besides §4's members,
+  `maxAge` and its profile assignments (§4.4), it has exactly `question`, a string template;
+  `constraints`, an object in the `canon` domain; `model`, a non-empty string of at most 256 UTF-8
+  bytes; `evidence`, a non-empty string of at most 4096 UTF-8 bytes describing the evidence to
+  retain; `fields`, the requested fields below; and `capabilities`, an array of distinct names
+  from the closed set `answer`, `search`, `page`. `answer` is REQUIRED; the others name the web
+  capabilities needed. The array follows that order and has one to three entries. A published
+  source is unbound (§4.4), carrying no installation identifier.
+
+  The source's request is exactly `{"question", "constraints", "model", "evidence", "fields",
+  "capabilities"}`, with `question` instantiated as a template. These members, the fields' order
+  and every field declaration, the read and its source order (§6.4), and all supplied profile
+  assignments enter the dialect digest (§2). No defaults are inserted. The recipe is recorded,
+  never re-executed by verification. Its model and capabilities are checked against the profiles
+  then bound (§5.1); this checks declarations, not the actual model or its answer. Each retained
+  response's own `request`, below, is what its receipt commits. No model output is produced or
+  compared. `evidence` cannot weaken the citation requirements below.
 
   The source's acquisition is the **research record**, `R`, an object the caller assembles, with
-  exactly one member, `responses`: an array of at most 64 retained responses, the AI connection's
-  answers and the web reads retained with it, in the order the run made them. Each response is an
-  object of exactly `profile`, `request`, `result`, `receipt` and `salts`. `profile` is an object of
+  exactly two members: `fields`, the answers below, and `responses`, an array of at most 64
+  retained responses, the AI connection's answers and the web reads retained with it, in the order
+  the run made them. Each response is an object of exactly `profile`, `request`, `result`,
+  `receipt` and `salts`. `profile` is an object of
   exactly `id`, a non-empty string, and `digest`, a digest, naming the trusted input profile the
   response came through (§5.1). `request` is the request made, an object in the `canon` domain;
   `result` is the returned JSON value; `receipt` and `salts` have §5.2's forms. The receipt's
@@ -395,8 +409,77 @@ their own profiles pin, as below. The value acquired is read as every value is (
   absent otherwise. Membership and order in `responses` are the caller's assertion: verification
   uses `R`'s order and does not establish that assertion (§13). A page cited by URL alone is no
   retained response; the claim it supports is the answer's say. A profile of another class is
-  refused. The kind is defined, and not claimable: no vector holds one (§11).
+  `profile-mismatch` (§5.1). The kind is defined, and not claimable: no vector holds one (§11).
   (No vector decides this.)
+
+**Requested fields.** A research source's `fields` is an ordered array of 1 to 64 closed objects,
+each exactly `{"name", "type", "required", "description"}`. `name` has §4's source-name form: a
+non-empty string other than `case`, here bounded to 64 UTF-8 bytes and distinct within this array.
+It is a stable identifier, not a display label; changing it changes the contract. `description`
+is a non-empty string of at most 2048 UTF-8 bytes. `required` is a boolean: it requires an answer
+entry, never a value. `type` is exactly one of the following strings, with these JSON encodings:
+
+- `integer`: an integer in §1's domain, including `0` and `-0`; no fraction or exponent.
+- `decimal`: a string of at most 128 ASCII characters in Core §2.2's decimal grammar,
+  `-?(0|[1-9][0-9]*)(\.[0-9]+)?`, matching the whole string. A JSON number, exponent, leading
+  plus, leading zero or empty string is not a decimal. Signs, scale and trailing zeroes are
+  retained: `"1.0"` and `"1.00"` remain distinct strings under §6.3's equality. This adopts Core's
+  lexical form only and adds no coercion, units or decimal operators to a rule.
+- `boolean`: JSON `true` or `false`, never a string or a number.
+- `text`: a well-formed JSON string of 0 to 8192 UTF-8 bytes; the empty string is a value.
+- `text-list`: an array of 0 to 64 well-formed strings, each of 0 to 1024 UTF-8 bytes. Order,
+  duplicates and empty strings are kept; an empty list is a value, not an absent answer.
+- `range`: a closed object of exactly `min` and `max`, both integers as above or both decimal
+  strings as above, never mixed; `min` is at most `max` by exact mathematical comparison.
+  Comparison uses the decimal digits, never binary floating point, and changes no spelling.
+  An equal-endpoint range is allowed. No open endpoint, `null` endpoint or extra unit is allowed.
+
+**Answers.** `R.fields` is an object of at most 64 members, keyed by declared field name. An
+undeclared name is refused. Every required field has an entry; an optional field may be absent.
+An entry is a closed object with `status` and `cites`, and the conditional `value` or `values`:
+
+- `found`: `value` is present, of the declared type; `values` is absent. `cites` has 1 to 64
+  distinct indices into this record's `responses`.
+- `not-found`: neither `value` nor `values` is present. `cites` has 0 to 64 distinct indices,
+  naming retained responses about the unsuccessful search when any are given.
+- `stale`: neither `value` nor `values` is present. `cites` has 0 to 64 distinct indices. The
+  observed values remain in the retained responses for review; none is a resolved value here.
+- `conflicting`: `value` is absent; `values` is an array of 2 to 64 closed objects, each exactly
+  `{"value", "cites"}`. Each `value` has the declared type and each `cites` has 1 to 64 distinct
+  response indices. At least two values differ under §6.3's JSON equality. Observations remain
+  in their recorded order, without choosing one or coercing them. The entry's outer `cites` is
+  `[]`; citations belong to each observation and are not replaced by a common list.
+
+An index is an integer from 0 to 63 and below `responses`' length; it names the whole retained
+response, not a URL, an excerpt id or the preparation's `cites`. Its order is kept. A cited
+response with missing bytes still gives `acquisition-missing` (§5.2); a bad index or a URL in
+place of one is `input-malformed`. A receipt holds the cited bytes; it does not establish that
+they support the value. An answer's status is the caller's assertion. In particular, `stale`
+describes an observation's currency, not an exception to receipt freshness: an expired retained
+receipt still fails as `acquisition-stale` (§5.2).
+
+Absence is permitted only for an optional entry and for the conditional members just stated.
+`null` is never an entry or a value, including a conflicting value, list item or range endpoint.
+It may occur in a retained response's arbitrary result, where it remains evidence, not a typed
+answer. Zero, `false` and `""` are present values only of their declared types; none means
+`not-found`. A required entry may have any of the four statuses. A missing required entry, wrong
+type, unknown member or status, misplaced `value` or `values`, reversed range, repeated field
+name or invalid citation is `input-malformed`; exceeding a maximum is `input-over-bound` (§11).
+The same rules hold every entry, whether or not the read uses it. (No vector decides this.)
+
+**Reading fields.** A copy or rule reads `/fields/<name>/value`, `/fields/<name>/status`,
+`/fields/<name>/values/<index>/value` or `/fields/<name>/cites`, escaping the name as one RFC 6901
+token. A range's endpoints append `/min` and `/max`; a text-list item appends its index. These
+are pointers into `R`, not pack targets. A copy of a missing `value` writes nothing (§6.2); a
+rule guards a value with its status and follows §6.3. A read may retain the whole field entry
+for review, but MUST NOT present a conflicting observation as a `found` value by coercion.
+Deterministic sources keep their target declarations and gain no `fields` member.
+
+`R.fields`, every status, value, observation and citation index, and `R.responses` in its order
+are all in `R`'s `canon` bytes. The record's receipt commits all of them when present; without
+one, fields as well as response membership and order are the caller's assertion. The preparation
+commits the bound dialect, derived claims and receipt citations in §9's existing form; it gains
+no whole-record digest. A change to an unread, unreceipted field need not change that preparation.
 
 ### 4.4 The unbound source form (version 3)
 
@@ -422,18 +505,34 @@ An unbound `operation` source has, besides the members of §4, exactly:
 It has no `profile` and no `profileDigest`. The catalog's names are the gateway's
 (`catalog/README.md`), and a verifier holds them to their form and to nothing else.
 
+**Research binding.** A published `research` source has §4.3's members, including `model` and
+`capabilities`, and none of `profile`, `profileDigest` and `webProfiles`: it is unbound. It names
+requirements, with no connection id, endpoint, credential or other installation identifier.
+Its bound form adds all three members. `profile` and `profileDigest`, as in §4.1, name the AI
+profile for `answer`. `webProfiles` is a closed object with exactly the `search` and `page`
+capabilities the source requests as keys; each value is exactly `{"profile", "profileDigest"}`,
+of those same forms. It has zero to two members and is REQUIRED even when empty. One profile may
+serve more than one capability; every assigned profile is of class `generated`. A source with
+only some of the three binding members, or any operation catalog member, is `input-malformed`.
+The new required members stay written when empty; §2's one-spelling rule is unchanged.
+
 **The binding document.** An installation binds an unbound dialect with a **binding document**: one
 JSON object of exactly `dialect`, the unbound dialect's digest (§2), and `sources`, an object
-mapping the name of each unbound source of that dialect, and no other name, to an object of exactly
-`profile`, a non-empty string, and `profileDigest`, a digest: an input profile of the installation's
-gateway, by its `id` and its digest. Its digest is the digest of its `canon` bytes. It is neither
-the record's `binding` (§9.5) nor a binding of the gateway's catalog.
+mapping the name of each unbound source of that dialect, and no other name, to its assignment.
+For an `operation` that assignment is exactly `profile`, a non-empty string, and `profileDigest`,
+a digest: an input profile of the installation's gateway, by its `id` and its digest. For
+`research` it is exactly `profile`, `profileDigest` and `webProfiles`, of the forms above, with
+exactly the requested web capabilities. Its digest is the digest of all its `canon` bytes.
+It is neither the record's `binding` (§9.5) nor a binding of the gateway's catalog.
 
 **The bound dialect** is the unbound dialect with the binding applied: each unbound source with its
 `platform`, `operation`, `shape` and `record` removed and the `profile` and `profileDigest` the
-binding document gives it added, every other member kept as written. It is a document of version 3
-with no unbound source, and its digest (§2) is the one a preparation of it carries as
-`mappingDigest`. The unbound dialect's digest is the one its publisher names, as an entry of the
+binding document gives it added, for an `operation`, every other member kept as written. For
+`research`, the three assignment members are added, and every other member is kept as written:
+there are no operation catalog names to remove, and `model`, `capabilities` and `fields` remain.
+It is a document of version 3 with no unbound source, and its digest (§2) is the one a
+preparation of it carries as `mappingDigest`. The unbound dialect's digest is the one its
+publisher names, as an entry of the
 Exchange names `dialect.digest` (RFC 0019 §3); the bound dialect's is the installation's, and one
 dialect bound under two installations' profiles has two.
 
@@ -441,10 +540,19 @@ dialect bound under two installations' profiles has two.
 too, and reads the bound dialect as this document reads every dialect, with two checks more. A
 binding document whose `dialect` is not the given dialect's digest, or whose `sources` do not name
 exactly its unbound sources, is refused with the dialect, as is a dialect with an unbound source
-and no binding document, and a binding document beside a dialect with none (§11). And a profile the
-binding document names whose `shape` is not the unbound source's `shape`, or whose `adapter.name` is
-not its `record`, is `profile-mismatch` (§5.1). A fixture of an unbound dialect carries the binding
-document it was recorded under, and verifies against the bound dialect.
+and no binding document, and a binding document beside a dialect with none (§11). For an
+`operation`, a profile the binding document names whose `shape` is not the unbound source's
+`shape`, or whose `adapter.name` is not its `record`, is `profile-mismatch` (§5.1). A fixture of
+an unbound dialect carries the binding document it was recorded under, and verifies against the
+bound dialect.
+
+The binding checks of §5.1 hold research too, including a bound document given directly. Its AI
+profile MUST declare the exact `model` and capability `answer`; each assigned web profile MUST
+declare the capability it serves. Every assigned profile MUST be `generated`; a profile that
+declares a model MUST name the source's model. A missing profile, digest mismatch, missing
+research declaration, wrong model, missing capability or wrong class is `profile-mismatch`.
+Extra or missing assignment members, a capability assigned twice, or an assignment for an
+unrequested capability is `input-malformed`. No substitution of another model is implicit.
 
 **What it establishes.** Nothing beyond what an `operation` that names its profile establishes
 (§13). The binding document is the installation's statement of which profile each source was bound
@@ -459,6 +567,14 @@ binding document the operator supplies, and records the bound dialect's digest. 
 `unbound-bound-at-import` holds the form, with its binding document; no specification version
 publishes it, so the form is not claimable yet (§14). (That vector decides the bound dialect and its
 digest; no vector decides the refusals of this section.)
+
+For research, the same commitment holds: the preparation commits only the bound dialect's
+digest, including all AI and web profile ids and digests, the model, capabilities, fields and
+read. Neither the published digest nor the binding-document digest is added to §9.1. Rebinding
+one assignment changes the bound digest. Replay uses the profiles then bound and the retained
+bytes, never a live connection or a new model answer; it establishes no answer's correctness
+(§13). The reference Runner still refuses `research` by name. No research binding or result
+vector is recorded. (No vector decides this.)
 
 ## 5. Input profiles and acquisitions
 
@@ -482,6 +598,14 @@ exactly
 Its **digest** is the digest of its `canon` bytes. A calculator's profile MUST be of class `record`
 and shape `mcp`. A profile whose key the key rule refuses is refused.
 
+A profile may additionally declare `research`, a closed object of `capabilities` and, exactly
+when they include `answer`, `model`. `capabilities` is a non-empty array of distinct names from
+`answer`, `search`, `page`, in that order, at most three; `model` has §4.3's form. Web-only
+profiles name no model. This whole declaration enters the profile digest. Malformed members
+are `input-malformed`; a well-formed profile without the declaration or with unsuitable
+capabilities, model or class is `profile-mismatch` when bound to research (§4.4). This extension
+changes no operation binding check and makes no claim about model weights or execution.
+
 A profile is the installation's, never the dialect's: a dialect names a profile by its `id` and its
 digest, and only an installation supplies one. A verifier is given the profiles it trusts, out of
 band, as one JSON array, and MUST NOT take a profile or a key from a preparation, an acquisition or
@@ -489,18 +613,19 @@ an export. A source's **profile** is the trusted profile of its `profile` id, wh
 source's `profileDigest`; otherwise, and when a source does not fit its profile — an `operation`
 whose request does not fit its profile's shape and adapter (§4.1), under a profile of shape
 `command` among them, a tool the profile does not allow, a calculator's profile without
-`calculation`, `calculation` without a calculator's profile, a profile bound to an unbound source of
-another shape or another record (§4.4) — the finding is `profile-mismatch`.
+`calculation`, `calculation` without a calculator's profile, a profile bound to an unbound
+`operation` of another shape or another record (§4.4) — the finding is `profile-mismatch`.
 
 Each retained response of a `research` source names its own trusted profile by `profile.id` and
 `profile.digest` (§4.3). That id MUST be among the profiles given out of band, and its digest MUST
-match; otherwise `profile-mismatch`. The reference in the response supplies neither a profile nor
-a key. The source's profile does not substitute for a retained response's profile.
+match. The pair MUST be the source's AI assignment or one of its web assignments, each of class
+`generated`; otherwise `profile-mismatch`. The reference in the response supplies neither a
+profile nor a key. The source's profile does not substitute for a retained response's profile.
 
-What a profile pins — the gateway's key, source, authority, adapter, shape, endpoint, class and
-tools — is the installation's classification of a channel. It does not pin a credential, a
-tenant's configuration or a model's weights, and an installation replaces a profile when a change
-of those makes its classification wrong (Runner, "Decisions and ownership").
+What a profile pins — the gateway's key, source, authority, adapter, shape, endpoint, class, tools
+and any research declaration — is the installation's classification of a channel. It does not pin
+a credential, a tenant's configuration or a model's weights, and an installation replaces a
+profile when a change of those makes its classification wrong (Runner, "Decisions and ownership").
 
 ### 5.2 Acquisitions
 
@@ -580,6 +705,7 @@ A **read** turns the **value read** into a **claim**, an object of exactly `fact
 `evidenceAvailability`, `acquisitionStatus`, `reason` and `basis`. A source's `read` is an object of
 `unwrap`, optional, and exactly one of `copy` and `rule`. The case's read is
 `{"copy": {"facts": F, "evidence": V}}`, `F` and `V` the case's `facts` and `evidence`.
+For research only, §6.4 also admits the form `{"sources": [S, ...], "rule": R}`.
 
 The **read digest** of a source is the digest of its `read`'s `canon` bytes, as the dialect writes
 it; the case's is the digest of the case's read, so built.
@@ -672,6 +798,64 @@ each leaf that is evaluated looks up its `field`. The claim is:
 A rule not of this form — a member, a condition or a claim form outside it, an unknown `op`, a type
 other than the three, a literal outside the `canon` domain, a last clause that is not `always` — is
 refused with the dialect (§11).
+
+### 6.4 Reconciliation of research sources
+
+Section 8.1 still says: "No fact target of one source may equal another, or be a prefix of another
+by whole tokens, of the same source or another, the case included". Overlapping fact targets are
+`input-malformed`; last-writer-wins is not a reading of that text. A field name within a research
+record is not a fact target: several sources may observe the same logical field, while only one
+read writes the pack's target for it.
+
+The one additional read form is `{"sources": [S, ...], "rule": R}`, exactly those two members,
+on a version-3 `research` source. `sources` is an ordered array of 1 to 15 distinct names of
+earlier `research` sources in the dialect; `R` is exactly the version-1 rule of §6.3. No `copy`
+or `unwrap` is present. A missing, repeated, current, later or non-research source name, use on
+another kind or version, or an extra member is `input-malformed`; a count over 15 is
+`input-over-bound`. This dependency reads results, not source parameters, and adds no parameter
+type or implicit fact target. Unavailable parameter values still skip their own source (§3).
+
+The value read is the closed object `{"current": C, "sources": U}`. `C` is this source's `R`;
+`U` is an object whose keys are the declared earlier names, each holding that source's retained
+`R` after its acquisition checks. A skipped source's key is absent; no `null` or invented
+`not-found` entry fills it. No other source is visible. A needed acquisition that is missing or
+fails §5.2 ends preparation with that finding; fallback never catches invalid receipts or
+`acquisition-stale`. Both acquired and skipped inputs count toward the declared source bound.
+The derived value is held to §12's nesting bound before the rule applies, `input-over-bound`
+otherwise; references do not duplicate input bytes in the combined document-size bound.
+
+Pointers are `/sources/<source>/fields/<field>/status` and its sibling `value` or `values`,
+and `/current/fields/<field>/status` and its siblings, each name escaped as one token. Conditions
+and claim forms keep §6.3's semantics; the first matching clause is the declared precedence.
+The rule MUST explicitly test a `found` status before selecting a value and name in its clauses
+what absence, `not-found`, `stale` and `conflicting` do: advance to another source, or produce
+an `absent` or `unknown` claim with no value for that target. Each fact `from` selects a field's
+`value` or a descendant of it; selecting from `values` is `input-malformed`. Its clause's
+condition is that field's `equals` guard for status `found`, or an `all` with that guard as a
+direct member. Each selected field MUST be declared by the source it names; otherwise
+`input-malformed`. Every field so selected also has an `equals` guard for each other status and a
+`not` of `exists` for its entry's absence somewhere in the rule's conditions. Missing guards
+are `input-malformed`. The last `always` clause has no facts and status `unknown` or `absent`.
+`all`, `any` and `not` combine the guards using §6.3; no new rule operator is added.
+
+For example, a rule on `secondary`, with `sources: ["primary"]`, first guards primary's field
+as `found` and copies its `value`. A second clause guards primary as absent, `not-found` or
+`stale`, and secondary as `found`, then copies secondary's value. A third guards either as
+`conflicting` and yields `unknown` with no fact. A fourth guards secondary as absent,
+`not-found` or `stale` and yields `unknown` with no fact. The final `always` clause yields
+`unknown` with no fact. The missing-entry guards are `not` of `exists` on each field entry.
+The first clause therefore wins even if secondary conflicts; that order is part of this
+example's declared policy. Authors may choose another order, but must write it in the rule.
+Each clause's `reason` states its choice. A missing `from` pointer in a matched claim remains
+`read-failed`, not permission to try the next clause. Non-found answers do not invent defaults.
+
+The source list and whole rule enter the read digest and the dialect digest, in their written
+order. The rule's `basis` and lineage's `candidateFrom` use the pointers into the combined value.
+The target belongs to this source alone, of class `generated`, with generated influence; it
+must admit `generated` (§8.2). The earlier sources retain their own outcomes and receipt lists;
+§9.1's citations and §9.3's `receipts` are unchanged, and are not duplicated into the later
+source's list. A rule reading several results establishes only the declared derivation from
+those checked bytes (§13). (No vector decides this.)
 
 ## 7. Calculated values
 
@@ -912,11 +1096,13 @@ Before the read applies to `R`, each retained response is checked under its own 
 over its own request and result, with §5.2's checks 1–5, times and sessions; the record's own
 receipt, when present, is checked too. The findings below run per source and, within it, per
 response in `R.responses` order, then for the record's own receipt when present. The recipe's
-`question`, `constraints`, `model` and `evidence` are recorded in the dialect and under its digest;
-the model's and the connection's names are checked against nothing a verifier is given. The recipe
-is never re-executed: verification calls neither the model nor the web. No model output is produced
-or compared. A replay establishes only what §13 says a derivation and an acquisition establish.
-(No vector decides this.)
+`question`, `constraints`, `model`, `evidence`, `fields` and `capabilities` are recorded in the
+dialect and under its digest. The model and required capabilities are held to the trusted
+profiles then bound (§4.4, §5.1), not to the model's actual execution. The recipe is never
+re-executed: verification calls neither the model nor the web. No model output is produced
+or compared. For §6.4's read, the same checked record and the declared earlier results form the
+combined value; those earlier acquisitions have already passed their own checks. A replay
+establishes only what §13 says a derivation and an acquisition establish. (No vector decides this.)
 
 **A research fixture.** In the terms of the staging README
 ([`conformance/dialect/README.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/conformance/dialect/README.md)),
@@ -939,6 +1125,79 @@ The fixture layout is fixed, but no Runner prepares the `research` kind and no v
 It is defined, and not claimable; the first fixture waits for a preparer of the `research` kind.
 (No vector decides this.)
 
+**The two fixture lists to record.** Each item below calls for a separate fixture directory in
+that layout for each of two examples. No such fixture is recorded: no Runner prepares the kind,
+and neither a synthetic expected digest nor a hand-written receipt stands in for a recording.
+No research vector or conformance claim is made. These are the planned names and inputs:
+
+- `gtm-company-person`: a company's `company-id` (`text`), `employee-count` (`integer`),
+  `revenue` (`decimal`), `active` (`boolean`), `roles` (`text-list`) and `employee-range`
+  (`range`); a person's corresponding record has `person-id`, `experience-years`, `allocation`,
+  `contactable`, `roles` and `experience-range`, of those same six types. All identifiers and
+  observations are synthetic. A copy can write the whole `R.fields` object to a facts target;
+  a rule can instead write a found value to a qualification target. The declarations and reads
+  are distinct: fields describe research, while the pack still defines qualification policy.
+- `work-item-triage`: a work item's `item-id` (`text`), `points` (`integer`), `estimate`
+  (`decimal`), `blocked` (`boolean`), `labels` (`text-list`) and `effort-range` (`range`);
+  a selected item leads to a child follow-up record of the same types, with its own id. No
+  company-domain or person-specific identity rule is built into these fields.
+
+For both examples the directory suffixes and expected checks are:
+
+1. `valid-types`: all six types, both integer and decimal ranges, empty and non-empty lists,
+   decimal signs and scales, with retained citations and generated admissions; a reading with
+   `expectedBinding: "matches"`. Test a source asking for `answer` alone, and one also asking
+   for `search` and `page`; both use their assigned profiles and §9's citation order.
+2. `presence`: separate valid readings for an omitted optional entry, required `not-found`,
+   integer zero, decimal `"0"`, boolean `false` and text `""`. Separate refusals for an omitted
+   required entry, `null` entry or value, `null` list item or range endpoint, a numeric decimal,
+   mixed or reversed range endpoints, an unknown field and a value on a non-found entry:
+   `input-malformed`. No absent, null or false value is replaced by a default.
+3. `bounds-and-cites`: recordings at every new maximum and refusal inputs one over each:
+   `input-over-bound`. Include an empty declaration list, empty found citation list, duplicate
+   field, invalid index and URL-only citation, all `input-malformed`; missing cited response
+   bytes give `acquisition-missing`. Keep the existing document and nesting bounds in force.
+4. `stale-and-conflicting`: fresh receipts carrying an explicitly stale observation, and two
+   conflicting typed values with separate citations, yield the declared unknown or fallback
+   claim and a reading. The observations remain retained. An actually expired receipt gives
+   `acquisition-stale`; replacing conflict by a coerced resolved value without its declared
+   form gives `input-malformed`. This does not test the truth of a claimed `found` status.
+5. `failed-fallback`: primary `not-found`, secondary `stale`, and a third source's `conflicting`
+   entry. The third source's rule names the earlier two, tests their statuses in declared order,
+   and derives `unknown` with no resolved target. Include success from secondary, all candidates
+   unavailable, and a skipped earlier source with no acquisition, each handled by explicit
+   clauses. A needed response absent gives `acquisition-missing`, a bad receipt
+   `acquisition-invalid`, a later-source reference or overlapping target `input-malformed`, and
+   a matched rule's missing value pointer `read-failed`; none silently tries another source.
+6. `changed-binding`: retain `unbound.json` and `binding.json` beside `mapping.json`, the bound
+   dialect, as the staging README requires. A second installation changes one generated AI or
+   web assignment and its matching trusted profile. With the old preparation fixed, the valid
+   new bound document gives `preparation-differs`; an old profile digest, wrong model, missing
+   capability or non-generated profile gives `profile-mismatch`. A binding for another published
+   digest, a partial assignment or an extra capability gives `input-malformed`. A separately
+   recorded preparation under the second binding may read; the first is not relabelled.
+7. `changed-response`: change a retained result with its receipt and the independent expected
+   preparation fixed: `acquisition-invalid`. Change `R.fields` under its own fixed receipt:
+   the same finding. Without that receipt, a field change affecting a derived claim gives
+   `preparation-differs`; a well-formed change to an unread field need not give a finding.
+   With no record receipt, reorder responses, updating indices to cite the same responses,
+   with the preparation fixed: the changed citation order gives `preparation-differs`. Replay
+   makes no model or web call.
+8. `selected-parent-child`: retain the selected parent and the resulting child using
+   [RFC 0020](../rfcs/0020-workflow.md) §§3–5 and §11's output, selection and execution records.
+   A stage's output pointer resolves in prepared facts, never directly in `R`; `cardinality`
+   `one` can project the copied fields object. The selected payload's `/company-id/value` or
+   `/item-id/value` projects to the next case under that workflow's typed bindings. Presence,
+   generated influence, closed offered sets and parentage use its rules. Its §11 acceptance
+   construction remains the two-stage `operation` run; this research plan neither replaces
+   that demonstration nor changes the workflow's version or refusal codes. The analogous
+   research recordings wait for research support, including a workflow reader that admits it.
+
+The staging manifest's existing `reading` and `finding` rows keep their meanings. Malformed
+and over-bound variants are reader refusal checks under §11, with the exact refusal report as
+expected output; they are not new manifest rows of a form the staging README does not define.
+No manifest or file under `conformance/` is added by this plan. (No vector decides this.)
+
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
 the refusal, at the first of these phases that fails, in this order:
 
@@ -948,28 +1207,31 @@ the refusal, at the first of these phases that fails, in this order:
 2. every document read as §1 reads one, and the record as one line: `input-malformed`;
 3. the bounds of §12 that are counts — the sources, the parameters in a scope, the clauses of a
    rule, the conditions one `all` or `any` lists, the `unwrap` pointers, the fact and evidence
-   targets, the retained responses per `research` source (at most 64) — and the nesting of each
-   acquisition's result, taken on the documents read wherever the count can be taken, before any
-   form is checked: `input-over-bound`;
+   targets, the retained responses per `research` source (at most 64), and every research field,
+   text, list, observation, citation, capability and read-source maximum in §12 — and the nesting
+   of each acquisition's result, taken wherever measurable before any form: `input-over-bound`;
 4. a dialect document that is an object whose `version` is an integer of a version this document
    defines, `2` or `3`, that the verifier does not read: `version-unread`;
 5. every document's form — the dialect against §§2–8, every rule they give it included, and each of
    its sources against §4's members and its kind's, whichever its kind; the binding document against
-   §4.4; a profile against §5.1 and the key rule; the acquisitions against the form of §5.2; the
+   §4.4; a profile against §5.1 and the key rule; the acquisitions against §5.2, including every
+   research field entry against its declaration (§4.3) and reconciliation read (§6.4); the
    preparation's `verifiedAt` against the timestamp form with an instant; the record against its
    reading below: `input-malformed`;
 6. a dialect that names a kind the verifier does not read: `kind-unread`.
 
-One bound is measured later, because it cannot be measured sooner: an unwrapped string's bytes, and
-the nesting and the number literals of the value it holds, are measured when it is unwrapped (§6.1),
-during the recomputation, and over them the reading is refused there, `input-over-bound`, with
-nothing reported but the refusal.
+Some bounds are measured later, because they cannot be measured sooner: an unwrapped string's
+bytes, and the nesting and number literals of the value it holds, are measured when it is
+unwrapped (§6.1), during recomputation. Over them the reading is refused, `input-over-bound`, with
+nothing reported but the refusal. The nesting of §6.4's combined value is likewise measured
+when it is formed, before its rule runs, with the same refusal.
 
 **Findings.** Otherwise it recomputes the preparation at the given preparation's `verifiedAt`, by
 §§3–9, and ends the reading at the first of these findings, in this order, reporting that one:
 
 1. `profile-mismatch` (§5.1, §4.1, §4.4), the sources taken in their order, and within a `research`
-   source its own profile first, then each retained response's profile in `R.responses` order;
+   source its AI profile first, its web profiles in `search`, `page` order when assigned, then
+   each retained response's profile in `R.responses` order;
 2. for the case: `parameter-invalid` (§3), its parameters in their order, then `read-failed` for its
    read (§6.2);
 3. for each source in its order: `parameter-invalid` for a source parameter it declares, in their
@@ -1067,7 +1329,7 @@ file it cannot open. A verifier that is a library states the same three outcomes
 ## 12. Bounds
 
 A verifier holds its inputs to the Runner's bounds (Runner, "Numeric and resource profile"), with
-version 3's bound on retained research responses added:
+version 3's research bounds added:
 
 - the dialect at most 131072 bytes; the dialect, the case and the acquisitions together at most
   2097152 bytes; the profiles, and a binding document, each at most 65536 bytes; and the preparation
@@ -1079,6 +1341,16 @@ version 3's bound on retained research responses added:
   unwrapped value — and at most 64 in any document; and
 - number literals of at most 128 characters, whose exponent, when they have one, has a magnitude of
   at most 308.
+
+For research, §4.3's maxima also hold: 64 declared fields and 64 answer entries per source;
+64 UTF-8 bytes per field name; 2048 per description; 256 per model name; 4096 per evidence
+instruction; 8192 per text value; 64 items per text-list, each at most 1024 UTF-8 bytes;
+128 ASCII characters per decimal string, a range endpoint included; 64 conflicting observations
+per entry; 64 indices per citation array; three capabilities per source or profile; two web
+assignments per source; and 15 earlier sources per reconciliation read (§6.4). Count strings
+after JSON decoding. Wrong forms and unmet minima are `input-malformed`; exceeding these maxima
+is `input-over-bound`. The document-size and nesting bounds still hold arbitrary retained
+results, requests, constraints and the combined value of §6.4. Nothing is truncated to fit.
 
 Nesting is counted from the document's root at zero, and every object and every array is one level
 of it: `{}` is at one level, `{"a": []}` at two, and a document that is a string, a number, `true`,
@@ -1094,35 +1366,89 @@ preparer refuses the same inputs before it writes a preparation.
 
 ## 13. What a preparation establishes, and what it does not
 
-A preparation has parts of three natures, and what it establishes differs by part. A **derivation**
-— a copy, a rule, a calculated value's lineage, the facts and evidence-availability documents, the
-preparation's form and its digest — is recomputable: a verifier that recomputes it establishes it
-itself, from the inputs, trusting no one for it. An **acquisition**'s bytes are not recomputable:
-they are held by their digest, under a receipt, and what they establish is the receipt's business,
-which is byte lineage and not truth, the stance Core §6.3 takes of a source. For research, each
-retained response is held this way, and the record itself only when it has its own receipt. The
-caller assembles the research record: membership and order are the caller's assertion, even when a
-receipt commits the assembled record's bytes. An **asserted** input is the operator's say, and
-recomputation shows only that it was carried faithfully. A page cited by URL alone is no retained
-response; the claim it supports is the answer's say.
+A preparation has parts of three natures, and what it establishes differs by part. A
+**derivation** — a copy, a rule, a calculated value's lineage, the facts and evidence-availability
+documents, the preparation's form and its digest — is recomputable: a verifier that recomputes it
+establishes it itself, from the inputs, trusting no one for it. An **acquisition**'s bytes are not
+recomputable: they are held by their digest, under a receipt, and what they establish is the
+receipt's business, which is byte lineage and not truth, the stance Core §6.3 takes of a source.
+For research, each retained response is held this way, and the record itself only when it has its
+own receipt. The caller assembles the research record: fields, membership and order are the
+caller's assertion, even when a receipt commits the assembled record's bytes. An **asserted**
+input is the operator's say, and recomputation shows only that it was carried faithfully. A page
+cited by URL alone is no retained response; the claim it supports is the answer's say.
 
-| Part | Establishes, to a verifier that recomputed the preparation | Does not establish |
-| --- | --- | --- |
-| The facts and the evidence availability a copy or a rule derived | that these facts and this evidence availability were derived from those bytes by these rules, at that instant | that the rule is right for the pack, or reads what its author meant; that a target with no value has none in the system |
-| A calculated value's lineage | that the calculator's answer, in the bytes acquired, echoed the inputs bound to this case, and reported its tables as of instants within the dialect's limits before `verifiedAt` | that the calculator is deterministic or calls no model; that its arithmetic or its tables are right; that it used only what it echoes; that an `asOf` is true |
-| An acquisition of class `record`, verified under a trusted profile | byte lineage: the holder of the gateway key the profile pins signed a receipt that names these bytes by their digest, this request by its commitment, this adapter, shape and endpoint, at these times; what more the receipt says is the gateway's (gateway §1.2a, §5) | that the system's record is true, current or complete; that the adapter reported its acquisition truly; that the session is sealed or complete, or that the caller did not choose among answers; anything once the gateway's key is copied |
-| An acquisition of class `generated`, a research record above all | the least: that each receipt holds its request and returned bytes under its trusted profile; for research, this applies to every retained response, and to the record itself when it has its own receipt; the model's and the connection's names are recorded, not checked against anything a verifier is given | that the answer is right, complete or current, or the model's own; that a candidate it names exists; that a page it cites says what it quotes, beyond a receipt for that page; that the retained set is every answer and every read the run made; that the caller did not choose among runs or responses; that the model made a read retained with the answer; that the caller's asserted membership and order describe the run |
-| An asserted input: the case, a local file, a parameter no receipt commits | that the preparation carried what the operator supplied, faithfully | anything about it: an asserted input rewritten with its preparation recomputed verifies as the original did; `unsignedParameters` names the parameters a rule read on the operator's say |
-| A binding document (§4.4), and the bound dialect it yields | that the bound dialect is the published one with each unbound source bound to the profile the binding document names | that that profile is the one the publisher meant, or reads the system the publisher's fixtures were recorded from: the binding document is the installation's statement; a record commits the bound dialect, its profile assignments included, and neither the binding document's digest, nor the published dialect's, nor the catalog names the binding removes |
-| `verifiedAt` | that every freshness check holds against it | that it was the instant of admission: without a binding no signature covers it, and a preparation recomputed at another instant verifies as the original does |
-| A binding that matches, in a record whose signature verifies (a check this document does not make) | that the preparation, its instant included, is the one committed in the record when its key's holder signed it | anything against the operator, who holds the key and the clock and can recompute, write and sign again, which only a checkpoint held independently from before the change shows; when anything was prepared: a binding carries no time |
-| A binding that matches, with no signature checked | nothing, by itself | — |
+- **The facts and the evidence availability a copy or a rule derived.** Establishes: that these
+  facts and this evidence availability were derived from those bytes by these rules, at that
+  instant.
+
+  Does not establish: that the rule is right for the pack, or reads what its author meant; that a
+  target with no value has none in the system.
+
+- **A calculated value's lineage.** Establishes: that the calculator's answer, in the bytes
+  acquired, echoed the inputs bound to this case, and reported its tables as of instants within
+  the dialect's limits before `verifiedAt`.
+
+  Does not establish: that the calculator is deterministic or calls no model; that its arithmetic
+  or its tables are right; that it used only what it echoes; that an `asOf` is true.
+
+- **An acquisition of class `record`, verified under a trusted profile.** Establishes: byte
+  lineage: the holder of the gateway key the profile pins signed a receipt that names these bytes
+  by their digest, this request by its commitment, this adapter, shape and endpoint, at these
+  times; what more the receipt says is the gateway's (gateway §1.2a, §5).
+
+  Does not establish: that the system's record is true, current or complete; that the adapter
+  reported its acquisition truly; that the session is sealed or complete, or that the caller did
+  not choose among answers; anything once the gateway's key is copied.
+
+- **An acquisition of class `generated`, a research record above all.** Establishes: the least:
+  that each receipt holds its request and returned bytes under its trusted profile; for research,
+  this applies to every retained response, and to the record itself when it has its own receipt;
+  the declared model and capabilities match the profiles then bound, without establishing actual
+  model use.
+
+  Does not establish: that the answer is right, complete or current, or the model's own; that a
+  candidate it names exists; that a page it cites says what it quotes, beyond a receipt for that
+  page; that the retained set is every answer and every read the run made; that the caller did not
+  choose among runs or responses; that the model made a read retained with the answer; that the
+  caller's asserted membership and order describe the run.
+
+- **An asserted input: the case, a local file, a parameter no receipt commits.** Establishes: that
+  the preparation carried what the operator supplied, faithfully.
+
+  Does not establish: anything about it: an asserted input rewritten with its preparation
+  recomputed verifies as the original did; `unsignedParameters` names the parameters a rule read
+  on the operator's say.
+
+- **A binding document (§4.4), and the bound dialect it yields.** Establishes: that the bound
+  dialect is the published one with each unbound source bound to the profile the binding document
+  names.
+
+  Does not establish: that that profile is the one the publisher meant, or reads the system the
+  publisher's fixtures were recorded from: the binding document is the installation's statement; a
+  record commits the bound dialect, its profile assignments included, and neither the binding
+  document's digest, nor the published dialect's, nor the catalog names the binding removes.
+
+- **`verifiedAt`.** Establishes: that every freshness check holds against it.
+
+  Does not establish: that it was the instant of admission: without a binding no signature covers
+  it, and a preparation recomputed at another instant verifies as the original does.
+
+- **A binding that matches, in a record whose signature verifies (a check this document does not
+  make).** Establishes: that the preparation, its instant included, is the one committed in the
+  record when its key's holder signed it.
+
+  Does not establish: anything against the operator, who holds the key and the clock and can
+  recompute, write and sign again, which only a checkpoint held independently from before the
+  change shows; when anything was prepared: a binding carries no time.
+
+- **A binding that matches, with no signature checked.** Establishes nothing by itself.
 
 Nothing establishes an operator's intent, a source's truth, a model's correctness, or anything the
 dialect does not name: a target the dialect does not map is unknown to the evaluation, which its
 omission does not guarantee (Runner, "Release checks, runtime and offline verification"). A reading,
-and a report built on one, MUST NOT be described as establishing anything the right-hand column
-names.
+and a report built on one, MUST NOT be described as establishing anything listed above as not
+established.
 
 ## 14. The preparation verifier
 
