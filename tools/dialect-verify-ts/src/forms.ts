@@ -217,7 +217,9 @@ function overByType(v: JVal | undefined, type: string | undefined): boolean {
 function researchWithin(dialect: JVal, acquisitions: JVal, profiles: JVal | undefined, binding: JVal | undefined): boolean {
   const longer = (v: JVal | undefined, limit: number) => v !== undefined && v.t === "str" && byteLength(v.v) > limit;
   const more = (v: JVal | undefined, limit: number) => v !== undefined && ((v.t === "arr" && v.a.length > limit) || (v.t === "obj" && v.m.size > limit));
-  const declared = new Map<string, Map<string, string>>(); // each research source's fields' types, a name's first
+  // each research source's fields' types: a name declared twice is input-malformed once forms are checked; before
+  // that, its answers are measured by the first declaration whose `type` is one of the six
+  const declared = new Map<string, Map<string, string>>();
   const sources = member(dialect, "sources");
   for (const s of sources?.t === "arr" ? sources.a : []) {
     const kind = member(s, "kind");
@@ -264,6 +266,8 @@ function researchWithin(dialect: JVal, acquisitions: JVal, profiles: JVal | unde
       const answers = member(member(member(a, "response"), "result"), "fields");
       if (answers?.t !== "obj") continue;
       if (answers.m.size > BOUNDS.fields) return false;
+      // every answer's name, declared or not, before any entry is inspected or its declaration looked up
+      for (const field of answers.m.keys()) if (byteLength(field) > BOUNDS.fieldNameBytes) return false;
       for (const [field, entry] of answers.m) {
         if (entry.t !== "obj") continue;
         const type = types.get(field);

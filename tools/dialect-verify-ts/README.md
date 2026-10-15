@@ -214,8 +214,9 @@ them.
   its `value` or `values` and their descendants; the text closes the set of `from`s and lists these
   pointers without saying the list is closed for conditions.
 - **The units of a maximum** (§12): a decimal string's 128 is counted in characters; every other
-  string maximum in UTF-8 bytes. A field declared twice is measured, in phase 3, by its first
-  declaration.
+  string maximum in UTF-8 bytes, an answer's field name among them, declared or not.
+- **A field declared twice** is `input-malformed` once forms are checked; before that, phase 3
+  measures its answers by the first declaration of the name whose `type` is one of the six.
 - **`unsignedParameters` of a research source** (§11): the source's own acquisition commits what its
   question commits only when the record has a receipt of its own, the one receipt over the source's
   request (§5.2); without one, a parameter a condition names is unsigned.

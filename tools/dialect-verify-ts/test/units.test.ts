@@ -1512,6 +1512,18 @@ function researchCases(): Case[] {
   add("65 fields declared", over, (s) => company(s).fields.push(...Array.from({ length: 59 }, (_, i) => ({ name: `extra-${i}`, type: "integer", required: false, description: "An extra." }))));
   add("65 answer entries, one undeclared", over, (s) => Array.from({ length: 59 }, (_, i) => (answers(s)[`extra-${i}`] = { status: "not-found", cites: [] })));
   add("a field name of 65 bytes", over, (s) => (declared(s, "revenue").name = long(65)));
+  // an answer's name is measured before its entry, or whether it is declared (review M1)
+  add("an answer named by 65 bytes, undeclared", over, (s) => (answers(s)[long(65)] = { status: "not-found", cites: [] }));
+  add("an answer named by 64 bytes, undeclared", malformed, (s) => (answers(s)[long(64)] = { status: "not-found", cites: [] }));
+  add("an answer named by 65 bytes, its entry malformed", over, (s) => (answers(s)[long(65)] = null));
+  // a name declared twice: phase 3 measures by the first declaration whose type is one of the six (review M2)
+  const twice = (first: string) => (s: Scenario) => company(s).fields.push(
+    { name: "notes", type: first, required: false, description: "Notes." },
+    { name: "notes", type: "text", required: false, description: "Notes again." },
+  );
+  const longNotes = (s: Scenario) => (answers(s).notes = { status: "found", value: long(8193), cites: [0] });
+  add("a name declared twice, first of an unknown type: measured as the second, text", over, both(twice("number"), longNotes));
+  add("a name declared twice, first an integer: measured as the first, and refused as declared twice", malformed, both(twice("integer"), longNotes));
   add("a description of 2049 bytes", over, (s) => (declared(s, "revenue").description = long(2049)));
   add("a model of 257 bytes", over, (s) => (company(s).model = long(257)));
   add("an evidence instruction of 4097 bytes", over, (s) => (company(s).evidence = [long(4097)]));

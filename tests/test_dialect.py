@@ -1967,6 +1967,18 @@ def research_cases() -> list[tuple[str, str, Any]]:
     add("65 fields declared", over, lambda s: company(s)["fields"].extend({"name": f"extra-{i}", "type": "integer", "required": False, "description": "An extra."} for i in range(59)))
     add("65 answer entries, one undeclared", over, lambda s: answers(s).update({f"extra-{i}": {"status": "not-found", "cites": []} for i in range(59)}))
     add("a field name of 65 bytes", over, lambda s: declaration(s, "revenue").__setitem__("name", long(65)))
+    # an answer's name is measured before its entry, or whether it is declared (review M1)
+    add("an answer named by 65 bytes, undeclared", over, set_in(answers, long(65), {"status": "not-found", "cites": []}))
+    add("an answer named by 64 bytes, undeclared", malformed, set_in(answers, long(64), {"status": "not-found", "cites": []}))
+    add("an answer named by 65 bytes, its entry malformed", over, set_in(answers, long(65), None))
+    # a name declared twice: phase 3 measures by the first declaration whose type is one of the six (review M2)
+    twice = lambda first: lambda s: company(s)["fields"].extend([  # noqa: E731
+        {"name": "notes", "type": first, "required": False, "description": "Notes."},
+        {"name": "notes", "type": "text", "required": False, "description": "Notes again."},
+    ])
+    long_notes = set_in(answers, "notes", {"status": "found", "value": long(8193), "cites": [0]})
+    add("a name declared twice, first of an unknown type: measured as the second, text", over, both(twice("number"), long_notes))
+    add("a name declared twice, first an integer: measured as the first, and refused as declared twice", malformed, both(twice("integer"), long_notes))
     add("a description of 2049 bytes", over, lambda s: declaration(s, "revenue").__setitem__("description", long(2049)))
     add("a model of 257 bytes", over, set_in(company, "model", long(257)))
     add("an evidence instruction of 4097 bytes", over, set_in(company, "evidence", [long(4097)]))

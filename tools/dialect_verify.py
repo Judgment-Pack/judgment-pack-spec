@@ -1806,7 +1806,8 @@ def research_bounds(dialect: Any, acquisitions: Any, profiles: Any, binding: Any
     def cites_over(value: Any) -> bool:
         return isinstance(value, list) and len(value) > MAX_CITES
 
-    # each research source's declared types, by its name: a field's first declaration
+    # each research source's declared types, by its name: a name declared twice is input-malformed once forms are
+    # checked; before that, its answers are measured by the first declaration whose `type` is one of the six
     declared: dict[str, dict[str, Any]] = {}
     sources = dialect.get("sources") if isinstance(dialect, dict) else None
     for source in sources if isinstance(sources, list) else []:
@@ -1864,6 +1865,9 @@ def research_bounds(dialect: Any, acquisitions: Any, profiles: Any, binding: Any
             continue
         if len(answers) > MAX_FIELDS:
             raise over("more than 64 answer entries")
+        # every answer's name, declared or not, before any entry is inspected or its declaration looked up
+        if any(utf8_length(field_name) > MAX_FIELD_NAME_BYTES for field_name in answers):
+            raise over("an answer's field name of more than 64 bytes")
         for field_name, entry in answers.items():
             if not isinstance(entry, dict):
                 continue

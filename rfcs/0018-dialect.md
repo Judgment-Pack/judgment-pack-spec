@@ -528,8 +528,10 @@ text leaves a choice they take one reading each: a plain read's `unwrap` pointer
 `source` are held to the closed list as froms, never under `values`; no pointer descends below an
 observation's `value`; a reconciliation's conditions read only a named field's entry, its
 `status`, and its `value` or `values`; a decimal's 128 is counted in characters; a research
-source's question commits a parameter only under the record's own receipt; and an acquired record
-with no receipt at all is still listed in `unsignedFreshness`, its `receipts` empty. One vector
+source's question commits a parameter only under the record's own receipt; an acquired record
+with no receipt at all is still listed in `unsignedFreshness`, its `receipts` empty; and a field
+declared twice is `input-malformed` once forms are checked, but before that phase 3 measures its
+answers by the first declaration of the name whose `type` is one of the six. One vector
 is answered otherwise than `verify-run` answers it, by design: `disposition-differs-from-audit`
 alters the Runner's export, not the preparation or the record (Conformance).
 
