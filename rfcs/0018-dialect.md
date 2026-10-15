@@ -7,7 +7,8 @@
 - Accepted: 2026-10-15
 - Amended: 2026-10-15 (every gateway source shape, in version 2; the unbound source form, in
   version 3; research replay; version 3 as the reference Runner reads it, its two vectors staged;
-  the research result contract, binding, reconciliation and fixture lists, issue #171)
+  the research result contract, binding, reconciliation and fixture lists, issue #171;
+  research-stage admission and reader rules, issues #179 and #182, round 9)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -212,9 +213,9 @@ retained with it, each with its own profile reference, request, result, receipt 
 verifier checks each response under its own trusted profile and over its own request, including
 times and sessions, in the record's order. The record's own receipt and salts are present when it
 came back through a gateway source, and absent otherwise. The read applies to `R`. Membership and
-order are the caller's assertion; a missing named response is `acquisition-missing`, an unnamed
-retained response is `acquisition-unexpected`, and a failed digest or receipt check is
-`acquisition-invalid` (§4.3, §5.2, §11).
+order are the caller's assertion; a missing named response is `acquisition-missing`, and a failed
+digest or receipt check is `acquisition-invalid` (§4.3, §5.2, §11). Round 9 removes this round's
+finding for an unnamed retained response: the acquisitions' form has no place for one.
 
 The recipe's `question`, `constraints`, `model` and `evidence` are recorded in the dialect and
 under its digest, never re-executed. The model's and the connection's names are recorded and
@@ -345,11 +346,13 @@ states that limit. Version 3's one-spelling rule, operation binding and the prep
 stay unchanged. Every new refusal uses an existing code, and every new maximum is finite.
 
 This resolves the dialect's research binding question deferred by issue #160 (Unresolved
-question 15). Workflow version 1 still admits no stage whose dialect has a research source;
-RFC 0020's contrary binding statements await its own revision, as fixture 8 and question 15
-record. Its version-1 operation construction and required two-stage demonstration remain. Its stage
-outputs still come from prepared facts, and its selected payload projects into the next case
-under its own rules; no workflow or record-collection member is added to a dialect.
+question 15). RFC 0020's round 2 ([judgment-pack-spec#177][workflow-round-2]) has since admitted
+a research stage under its §4 once a Runner pins the stage's release form and encoding
+([judgment-pack-runner#88][research-preparer]); until then none can be frozen or verified.
+Its version-1 operation construction and required two-stage demonstration remain, with a research
+recording beside them. Its stage outputs still come from prepared facts, and its selected payload
+projects into the next case under its own rules; no workflow or record-collection member is added
+to a dialect.
 
 The replay mechanism adopted in pull request 164 remains: verification replays retained
 responses under the profiles then bound and never asks a model or the web again. `evidence`
@@ -366,6 +369,54 @@ and no research vector exists.
 The readers followed in the pull request for issue #176, as pull request 167 followed 164: both
 read this contract since, extended by one author who had read both. This amendment changes the
 contract and fixture plans only.
+
+## Amendment of 2026-10-15: research stages and reader rules
+
+This amendment records the maintainer's decisions on
+[issue #179](https://github.com/Judgment-Pack/judgment-pack-spec/issues/179) and
+[issue #182](https://github.com/Judgment-Pack/judgment-pack-spec/issues/182), on the pull request
+that makes it, **RFC 0018: research stages and reader rules**. Its review is round 9 of this RFC;
+the cross-vendor adversarial review follows, run by the coordinator, with the maintainer's
+disposition of each finding on that pull request, to be recorded under
+[`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
+`0018-round-9.md`. The status stays Accepted. The Specification and companion are amended equally.
+
+**The five decisions.** Issue #179 brings §11's fixture 8, question 15 and the round-8 paragraph
+above into agreement with RFC 0020's round 2 ([judgment-pack-spec#177][workflow-round-2]): a
+research stage is admitted under its §4 once a Runner pins the stage's release form and encoding
+([judgment-pack-runner#88][research-preparer]). Until then none can be frozen or verified. The
+research recording is beside the two-stage operation demonstration, not in place of it.
+
+Issue #182 item 1 corrects §4.3's account of the four proposed kinds: both repository readers
+read `research` since
+[judgment-pack-spec#181](https://github.com/Judgment-Pack/judgment-pack-spec/pull/181); no
+preparer writes any of the four, no vector holds one, and no reader reads `http`, `sql` or `web`.
+
+Issue #182 item 2 closes §6.4's condition pointers to a named field entry, its `status`, and its
+`value` or `values`. Any other condition pointer is `input-malformed`. The Evidence's recorded
+reading becomes the rule and is removed from that list. Claim `from` pointers keep their own
+closed set and guards; this decision widens neither.
+
+Issue #182 item 3 removes the finding for a retained response that `R` does not name: the
+acquisitions carry exactly the responses `R` names, by form (§4.3, §5.2). A named response whose
+result bytes are missing is still `acquisition-missing`. `acquisition-unexpected` stays in §11's
+findings: §5.2 still uses it for an acquisition member for a skipped source, a `local-file`
+source or no source. Section 9.5's canonical form is unchanged, and no code is retired.
+
+Issue #182 item 4 decides receipt form before time and session checks (§5.2, §11): a `servedAt`
+or `observedAt` that is not a string with an instant, or a malformed `callIndex` or `sessionId`,
+is `acquisition-invalid`. `acquisition-stale` names only a present instant outside the window;
+`acquisition-sessions` names only a well-formed session set that fails §5.2's session rule.
+The rule holds operation receipts, every retained research response and the record's own
+receipt when present. No vector decides these receipt cases.
+
+**What changes for a reader.** The closed condition list decides a choice both readers had
+already made; removing the impossible response case adds no acquisition form. The receipt rule
+settles a disagreement and changes findings where the time or session check previously read a
+malformed member. The Evidence records the reader corrections that follow separately. No reader
+is changed here, no fixture is recorded, and no vector or conformance claim is added. Rounds 6–8's
+replay, binding and preparation forms remain: verification calls neither a model nor the web,
+and a preparation commits the bound dialect alone (§4.4, §13).
 
 ## Summary
 
@@ -522,18 +573,30 @@ readers take where the text names a member without a form, held by no vector: `h
 string template; `http`'s `headers` as an array of non-empty strings; and a `sql` binding's `name`
 and `type` as non-empty strings (the amendment of 2026-10-15 that read version 3, which read
 `research`'s `evidence` so too, the form the research-contract amendment then gave it). Both
-readers read the research contract since the pull request for issue #176, one author's extension
+readers read the research contract since pull request #181 for issue #176, one author's extension
 of both from the text, held to each other on hand-written documents and to no vector. Where that
 text leaves a choice they take one reading each: a plain read's `unwrap` pointers and a copy's
 `source` are held to the closed list as froms, never under `values`; no pointer descends below an
-observation's `value`; a reconciliation's conditions read only a named field's entry, its
-`status`, and its `value` or `values`; a decimal's 128 is counted in characters; a research
+observation's `value`; a decimal's 128 is counted in characters; a research
 source's question commits a parameter only under the record's own receipt; an acquired record
 with no receipt at all is still listed in `unsignedFreshness`, its `receipts` empty; and a field
 declared twice is `input-malformed` once forms are checked, but before that phase 3 measures its
-answers by the first declaration of the name whose `type` is one of the six. One vector
-is answered otherwise than `verify-run` answers it, by design: `disposition-differs-from-audit`
-alters the Runner's export, not the preparation or the record (Conformance).
+answers by the first declaration of the name whose `type` is one of the six.
+
+Round 9, issue #182 item 2, makes the reconciliation condition list the rule (§6.4), so it is
+no longer a reading left to the readers. Item 3 removes a response case the acquisitions cannot
+carry. The updates for both decisions follow in a separate readers' pull request. Item 4 settles
+a disagreement no vector holds, also present on operation receipts: a non-string `servedAt` or
+`observedAt` gives `acquisition-invalid` in the first reader and `acquisition-stale` in the second;
+a malformed `callIndex` or `sessionId` gives `acquisition-invalid` in the first and
+`acquisition-sessions` in the second. The second reader's correction follows in its own pull
+request. Both readers also currently give `acquisition-stale` for a string with no instant; the
+separate correction must apply round 9's present-instant rule to both. None of these corrections
+is claimed here, and none supplies a vector.
+
+One vector is answered otherwise than `verify-run` answers it, by design:
+`disposition-differs-from-audit` alters the Runner's export, not the preparation or the record
+(Conformance).
 
 ## Specification
 
@@ -799,8 +862,9 @@ admits it to a claim states the snapshot's form first.
 Version 3 is version 2 with four kinds more, and with the unbound source form (§4.4); a document
 of version 3 has `version` `3`, and so has its preparation (§9.1). The reference Runner reads
 version 3 since its pull request 83 (`v0.12.0`), and prepares its `operation` and `selected-file` as
-it prepares version 2's; it refuses each of the four kinds below by name. Those four are proposed: no
-preparer writes them, no verifier reads them, and no vector holds them. The forms below are what a
+it prepares version 2's; it refuses each of the four kinds below by name. Those four are proposed:
+no preparer writes any of them, and no vector holds one. Both repository readers read `research`
+since judgment-pack-spec#181; no reader reads `http`, `sql` or `web`. The forms below are what a
 writer, such as the Desk's inputs or an entry of the Exchange, needs to declare one; the first
 implementation's vectors will fix each request's exact bytes, and may change them. Since version
 2's `operation` reads a source of each adapter shape (§4.1), the `http` and `sql` kinds describe how
@@ -855,9 +919,9 @@ their own profiles pin, as below. The value acquired is read as every value is (
   exactly `id`, a non-empty string, and `digest`, a digest, naming the trusted input profile the
   response came through (§5.1). `request` is the request made, an object in the `canon` domain;
   `result` is the returned JSON value; `receipt` and `salts` have §5.2's forms. The receipt's
-  `resultDigest` names the result by its digest. A named response whose result bytes are not
-  retained is `acquisition-missing`; a retained response that `R` does not name is
-  `acquisition-unexpected` (§5.2).
+  `resultDigest` names the result by its digest. The acquisitions carry exactly the responses `R`
+  names, by form; a response `R` names whose result bytes the acquisitions lack is
+  `acquisition-missing` (§5.2).
 
   `R` is carried as the source's `response.result` (§5.2), and the source's read (§6) starts from
   `R`, not from each response's result separately. The record's own `receipt` and `salts` are
@@ -1110,10 +1174,9 @@ for no source is `acquisition-unexpected`.
 A `research` source is the one source whose `response` may lack `receipt` and `salts`: its member
 is exactly `{"response": {"result": R}}` when the caller's research record did not come back through
 a gateway source, and has the ordinary form above when it did. Both `receipt` and `salts` are
-present or both are absent. `R` has §4.3's form. For a response named in `R.responses`, a missing
-`result` means its bytes were not retained and is `acquisition-missing`, rather than a refusal of
-the acquisition's form.
-A retained response that `R` does not name is `acquisition-unexpected`. The order is `R.responses`'s
+present or both are absent. `R` has §4.3's form. The acquisitions carry exactly the responses `R`
+names, by form; a response named in `R.responses` whose `result` is missing gives
+`acquisition-missing`, rather than a refusal of the acquisition's form. The order is `R.responses`'s
 own; a different order is a different caller assertion, not a finding for disagreement with an
 external order. When the record has its own receipt, that receipt also commits `R`'s bytes,
 including the array's order, by check 5.
@@ -1121,8 +1184,12 @@ including the array's order, by check 5.
 An acquisition is held to its source and its profile, and any of these checks that fails is
 `acquisition-invalid`:
 
-1. `E.receiptVersion` is `"3"` and `E.kind` is `"acquisition"`, and each member this list reads is
-   of the form gateway §1.2a gives it; and `E.acquisition` has no member `pageItems`. A receipt with
+1. `E.receiptVersion` is `"3"` and `E.kind` is `"acquisition"`, and each member checks 1–5 or the
+   time and session rules below read is of the form gateway §1.2a gives it. In particular,
+   `E.servedAt` and `E.acquisition.observedAt` are strings with instants (§1), `E.callIndex` is
+   an integer (§1) at least zero, and `E.sessionId` is a string. A member of another type or form
+   makes the receipt malformed, `acquisition-invalid`; these form checks precede the time and
+   session rules. `E.acquisition` has no member `pageItems`. A receipt with
    `pageItems` attests a page, which no preparation reads, whatever the source's shape, as the
    Runner reads none (Runner, "Deferred scope"). (No vector decides this.)
 2. `E.keyId` is the key identifier of the profile's `publicKey`, and `E.signature`, 128 hexadecimal
@@ -1144,9 +1211,11 @@ under the research source's profile and over the source's request and the whole 
 After the retained responses' checks and before the source's read, the whole record MUST be in
 the `canon` domain even when it has no receipt of its own; otherwise `acquisition-invalid`.
 
-Then its times, against the preparation's instant, `verifiedAt`: `E.acquisition.observedAt` and
-`E.servedAt` MUST each have an instant no more than the source's `maxAge` seconds before
-`verifiedAt` and no more than 30 seconds after it; otherwise `acquisition-stale`.
+Then its times, against the preparation's instant, `verifiedAt`: the instants of
+`E.acquisition.observedAt` and `E.servedAt` MUST each be no more than the source's `maxAge`
+seconds before `verifiedAt` and no more than 30 seconds after it; otherwise `acquisition-stale`.
+That finding names a present instant outside this window only; a time with no instant is
+`acquisition-invalid`.
 For research, this applies to every retained response and to the record's own receipt when
 present, each using the research source's `maxAge`.
 
@@ -1156,8 +1225,9 @@ own and is its session's first call**, each `sessionId` distinct, each `callInde
 alone is in both. Taken in the order of `sources`, the first receipt with which the receipts so far
 are in neither form is `acquisition-sessions`. Within a `research` source, every retained
 response's receipt participates, in `R.responses` order, followed by the record's own receipt when
-present. A record with no receipt adds none of its own. The form is read from the receipts and
-from nothing else.
+present. A record with no receipt adds none of its own. `acquisition-sessions` names only a
+well-formed session set that fails this rule; a malformed `callIndex` or `sessionId` is
+`acquisition-invalid`. The form is read from the receipts and from nothing else.
 
 An acquisition's **citation** is `{"callIndex", "sessionId", "signature"}`, those three members of
 its receipt.
@@ -1293,9 +1363,11 @@ fails §5.2 ends preparation with that finding; fallback never catches invalid r
 The derived value is held to §12's nesting bound before the rule applies, `input-over-bound`
 otherwise; references do not duplicate input bytes in the combined document-size bound.
 
-Pointers are `/sources/<source>/fields/<field>/status` and its sibling `value` or `values`,
-and `/current/fields/<field>/status` and its siblings, each name escaped as one token. Conditions
-and claim forms keep §6.3's semantics; the first matching clause is the declared precedence.
+In a condition, the pointer list is closed: `/sources/<source>/fields/<field>` or
+`/current/fields/<field>`, and either pointer followed by `/status`, `/value` or `/values`,
+each name escaped as one token. Any other pointer in a condition is `input-malformed`.
+Conditions and claim forms keep §6.3's semantics; the first matching clause is the declared
+precedence.
 The rule MUST explicitly test a `found` status before selecting a value and name in its clauses
 what absence, `not-found`, `stale` and `conflicting` do: advance to another source, or produce
 an `absent` or `unknown` claim with no value for that target. The admissible fact `from` set is
@@ -1683,10 +1755,15 @@ For both examples the item names and expected checks are:
    generated influence, closed offered sets and parentage use its rules. Its §11 acceptance
    construction remains the two-stage `operation` run; this research plan neither replaces
    that demonstration nor changes the workflow's version or refusal codes. The analogous
-   research recordings wait for research support. Workflow version 1 (RFC 0020 §4) admits no
-   stage whose dialect has a research source. RFC 0020 §4's sentences that only `operation` has
-   an unbound form and that portable research binding is deferred, and its question 2, are
-   superseded pending its own revision. The coordinator is to file that revision as an issue.
+   research recordings wait for research support. Workflow version 1 admits a research stage
+   under RFC 0020 §4 once a Runner pins the stage's release form and encoding
+   ([judgment-pack-runner#88][research-preparer]), as RFC 0020's round 2
+   ([judgment-pack-spec#177][workflow-round-2]) decides; until then no research stage can be
+   frozen or verified. The research recording is beside the operation demonstration, not in
+   place of it.
+
+[research-preparer]: https://github.com/Judgment-Pack/judgment-pack-runner/issues/88
+[workflow-round-2]: https://github.com/Judgment-Pack/judgment-pack-spec/pull/177
 
 The staging manifest's existing `reading` and `finding` rows keep their meanings. Malformed
 and over-bound variants are reader tests under §11, with the exact refusal report as expected
@@ -1713,8 +1790,9 @@ the refusal, at the first of these phases that fails, in this order:
    its sources against §4's members and its kind's, whichever its kind, and each reconciliation
    read against §6.4; the binding document against §4.4; a profile against §5.1 and the key rule;
    the acquisitions against §5.2, including every research field entry against its declaration
-   (§4.3); the preparation's `verifiedAt` against the timestamp form with an instant; the record
-   against its reading below: `input-malformed`;
+   (§4.3), with receipt members checked under finding 3 below; the preparation's `verifiedAt`
+   against the timestamp form with an instant; the record against its reading below:
+   `input-malformed`;
 6. a dialect that names a kind the verifier does not read: `kind-unread`.
 
 Some bounds are measured later, because they cannot be measured sooner: an unwrapped string's
@@ -1737,8 +1815,13 @@ when it is formed, before its rule runs, with the same refusal.
    (§5.2), `calculation-invalid` (§7) and `read-failed` (§6), in that order. For a `research` source,
    check for a missing or unexpected source member first, then apply the acquisition findings to
    each retained response in `R.responses` order, completing one response's checks before the next;
-   then check the record's own receipt when present, and apply the source's read to `R`. After the
-   last source, `acquisition-unexpected` for a member of the acquisitions that names no source;
+   then check the record's own receipt when present, and apply the source's read to `R`. Each
+   receipt is first held to §5.2's form rules: `servedAt` and `acquisition.observedAt` are strings
+   with instants, `callIndex` is an integer at least zero, and `sessionId` is a string; otherwise
+   `acquisition-invalid`, before the time and session rules. `acquisition-stale` names only a
+   present instant outside the window; `acquisition-sessions` names only a well-formed session
+   set that fails §5.2's session rule. After the last source, `acquisition-unexpected` for a member
+   of the acquisitions that names no source;
 4. `admission-refused` (§8.2);
 5. **`preparation-differs`**: the recomputed preparation's canonical bytes (§9.5) are not the given
    preparation's, written in that form; a given preparation that cannot be written in that form
@@ -2170,6 +2253,8 @@ this text and the vectors — would strengthen that evidence, and none exists.
    amendment adds the research replay rule and the fixture layout, also marked as positions no
    vector decides. Issue #171's result types, field statuses and citations, research profile
    bindings, reconciliation read and fixture lists are likewise decisions no vector holds.
+   Round 9 settles the closed condition list and receipt findings of issue #182, and removes
+   the impossible unnamed-response case; no vector decides those rules either.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
    version-3 kinds are proposed with no preparer. When a kind gets a preparer and vectors, and whether
    its request forms here survive the first implementation, is open. So for `operation` of shape
@@ -2247,7 +2332,9 @@ this text and the vectors — would strengthen that evidence, and none exists.
     including the staging manifest's expected answer. The `research` kind's first fixture still
     waits on a preparer; no vector holds it, and it remains defined and not claimable. Issue #171
     adds the GTM company/person and work-item triage fixture lists, including typed results,
-    bindings, fallback and selected parent/child records, with none recorded (§11).
+    bindings, fallback and selected parent/child records, with none recorded (§11). Round 9 aligns
+    fixture 8 with RFC 0020's round 2: its additional research recording waits for a Runner to pin
+    the research stage's release form and encoding (judgment-pack-runner#88).
 15. **Binding a published research recipe.** Which installation profiles can serve its named
     model and its AI and web capabilities, without publishing local identifiers, was left open
     by §4.3 and by issue #160's decision on the workflow prerequisite.
@@ -2257,17 +2344,18 @@ this text and the vectors — would strengthen that evidence, and none exists.
     `profile-mismatch`. The preparation commits the bound dialect alone; replay checks retained
     bytes under those profiles and never establishes answer correctness. The result contract
     and reconciliation are decisions 1 and 3; the still-unrecorded fixtures are decision 4.
-    Workflow version 1 (RFC 0020 §4) admits no stage whose dialect has a research source.
-    RFC 0020 §4's sentences that only `operation` has an unbound form and that portable research
-    binding is deferred, and its question 2, are superseded pending its own revision. The
-    coordinator is to file that revision as an issue. Its operation demonstration remains due,
-    and its version is not changed here.
+    RFC 0020's round 2 ([judgment-pack-spec#177][workflow-round-2]) resolves its deferral and
+    admits a research stage under its §4 once a Runner pins the stage's release form and encoding
+    ([judgment-pack-runner#88][research-preparer]); until then none can be frozen or verified.
+    Round 9 records that rule here for issue #179. Its operation demonstration remains due;
+    the research recording is beside it, not in place of it, and its version is unchanged.
 16. **Reconciliation's limits.** Partners are research sources only: an `operation` cannot be a
     fallback partner. The reconciler is always acquired, even when an earlier source found the
     value; if the reconciler is skipped, its target is unwritten. Independent per-field fallback
     does not scale beyond a few fields within the 64-clause and 16-source bounds. Whether to
     admit other source kinds, conditional acquisition or a form that scales to more fields is
-    open.
+    open. Round 9 decides the condition pointers as a closed list (§6.4), with any other pointer
+    `input-malformed`; it leaves these limits unchanged.
 
 **Next revision.** The maintainer's decision of 2026-10-14 on issue #141 scoped dialect version 3
 in three parts. The first two are specified by the amendment of 2026-10-15 (above): the record kind

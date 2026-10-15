@@ -207,6 +207,20 @@ here.
 
 ### Changed
 
+- [RFC 0018](rfcs/0018-dialect.md) and [the dialect](spec/dialect.md) are amended for
+  issues #179 and #182 (2026-10-15, round 9): fixture 8 follows RFC 0020's round 2, admitting a
+  research stage once a Runner pins its release form and encoding (judgment-pack-runner#88),
+  with its recording beside the operation demonstration. Section 4.3 now records that both
+  repository readers read `research` since #181; no preparer writes any of the four proposed
+  kinds, no vector holds one, and no reader reads `http`, `sql` or `web`. Reconciliation
+  conditions name only a field entry, its `status`, and its `value` or `values`; another pointer
+  is `input-malformed`. Acquisitions carry exactly the responses the research record names, by
+  form, with missing result bytes still `acquisition-missing`; `acquisition-unexpected` remains
+  for unexpected source members. Receipt form precedes time and session checks: malformed time
+  or session members are `acquisition-invalid`, `acquisition-stale` names only a present instant
+  outside the window, and `acquisition-sessions` only a well-formed set that fails the session
+  rule. The Evidence records the reader corrections that follow separately. No reader or vector
+  changes, and no research fixture or conformance claim is added.
 - Both readers, `tools/dialect_verify.py` and `tools/dialect-verify-ts/`, now read the research
   contract of RFC 0018's round 8 (issue #176) as [`spec/dialect.md`](spec/dialect.md) §§4.3, 4.4,
   5.1, 5.2, 6.4, 9, 11 and 12 define it: a `research` source's requested `fields` and
