@@ -152,17 +152,31 @@ record. The label declares provenance, not a verified identity, employment or ot
 ## 4. Bindings and influence across stages
 
 Before the root runs, the installation freezes each stage's published dialect, binding document
-when required, resulting bound dialect and release (§7). Unbound sources are expanded exactly as
-the dialect §4.4 specifies. Only `operation` has that unbound form. This version does not extend
-it to `research`. A dialect with no unbound source has a null binding-document digest and an
-unchanged bound digest; a superfluous binding document is refused as in §4.4.
+when required, resulting bound dialect and release (§7). Unbound `operation` and `research`
+sources are bound at import and expanded exactly as the dialect §4.4 specifies. An operation's
+expansion names its bound profile; a research source's expansion names its bound AI profile
+and any web profiles, all of class `generated`. Its `fields`, `model` and `capabilities` remain
+as published. The dialect's declared model, capability and class checks apply, with incompatible
+research profiles giving `profile-mismatch` (dialect §§4.4 and 5.1). The workflow verifier reports
+that finding as `preparation-mismatch` when it arises in a preparation and as
+`stage-binding-mismatch` from §9's check 1. A workflow runner refuses to freeze a stage with
+incompatible research profiles, so no instance is admitted.
+A dialect with no unbound source has a null binding-document digest and an unchanged bound
+digest; a superfluous binding document is refused as in the dialect §4.4.
 
-The two-stage construction in §11 takes the `operation` path of issue #160's condition 2.
-Portable binding of a published `research` recipe to an installation's AI source is deferred.
+Research-stage admission is conditional: its release form and encoding are pinned when a
+Runner prepares the kind ([judgment-pack-runner#88][research-preparer]). Until then no research
+stage can be frozen or verified under §§1 and 7; the release encoding at `89cf441` cannot retain
+the research contract's members.
+
+The two-stage operation construction in §11 remains the acceptance demonstration of issue #160's
+condition 2; the research recording is additional, beside it.
 An operation's profile declares the installation's classification of its channel. A published
 dialect whose source serves a model's answers MUST declare `admits` exactly `["generated"]` at
-every target of that source. A record-class binding then fails the dialect's §8.2 admission at
-preparation; §9's check 1 confirms the bound profile's class against that published admission.
+every target of that source. A record-class binding then fails the dialect's
+§8.2 admission at preparation; §9's check 1 confirms the bound profile's class against that
+published admission. A published dialect MUST declare `admits` exactly `["generated"]` at every
+target of a `research` source; §9's check 1 confirms it (`stage-binding-mismatch`).
 This checks declared classes, not whether the channel actually serves a model: that still depends
 on the installation's classification. Using the operation kind does not establish authorship.
 
@@ -265,6 +279,9 @@ Read the release's `packDigest` and `runtimeDigest`, and its embedded `inputMapp
 digest member. Compute `boundDialectDigest` from that mapping's dialect `canon` bytes under its
 version's encoding: version 2 writes `provider`, `facts` and `evidence`; version 3 omits those
 legacy members. The release form and encoding are pinned by §1; do not normalize the two alike.
+A research stage's release form and encoding are pinned when a Runner prepares the kind
+([judgment-pack-runner#88][research-preparer]); until then no research stage can be frozen or
+verified under §§1 and 7, as §4 requires.
 
 `instances` holds 1 to `limits.maxInstances` entries, ordered by stage, then selected parent
 order. Each is exactly `{id, stage, parentRecord, selectionDigest, inputDigest, caseDigest,
@@ -397,10 +414,10 @@ and attempt order, at its own saved `verifiedAt`, with its acquisitions, trusted
 audit when present. Require binding for completed attempts and every audit given; an unsuccessful
 attempt without an audit checks derivation only. Preparation refusals retain their codes and
 precede all semantic findings; report the first refusal in instance and attempt order. If there
-is none, the first preparation finding maps to `preparation-mismatch`, including disagreement
-with audit facts, evidence or citations. Only after every preparation passes do the checks below
-run. Influence uses the recomputed lineage, never the unchecked retained lineage. No freshness
-check substitutes today's clock.
+is none, the first preparation finding maps to `preparation-mismatch`, including the dialect's
+`profile-mismatch` and disagreement with audit facts, evidence or citations. Only after every
+preparation passes do the checks below run. Influence uses the recomputed lineage, never the
+unchecked retained lineage. No freshness check substitutes today's clock.
 
 Then perform checks 1 to 4 in order, stopping at the first finding. Within each check use stage
 order, then instance and attempt order; finish one instance's listed clauses before the next.
@@ -411,6 +428,12 @@ check 3, an earlier instance's `influence-mismatch` precedes a later one's `case
 1. The workflow and record digests and every artifact pin (`digest-mismatch`); frozen published
    dialect expansion against each binding, profile, bound digest and release, including the
    bound profile's class against the published dialect's admission (`stage-binding-mismatch`).
+   For a `research` source, check each assigned AI and web profile against the dialect §4.4's
+   declared model, capability and class rules under the trusted profiles, and confirm `admits`
+   is exactly `["generated"]` at every target of that source. These checks cover every frozen
+   stage, with or without a preparation; failures, including the dialect's `profile-mismatch`,
+   give `stage-binding-mismatch`. A workflow runner refuses to freeze a stage with incompatible
+   research profiles, so no instance is admitted (§4).
 2. Each selection's full offered set, revision and exact ordered membership; recompute the closed
    disposition predicate against the retained Core disposition (`selection-mismatch`).
 3. Every projected case against its parent and bindings, including expected projection failures
@@ -451,16 +474,26 @@ consistently: the definitions, preparations, offered sets, projections, inventor
 agree. A partial reading names incomplete work. Without authentication, rewriting the whole
 recorded bundle consistently can yield another reading. No reading establishes good research,
 a real person's approval, completeness of discovery, true identities, current policy, correct
-model answers, or exactly-once execution. Digest pins establish content identity, not currency.
-Generated-only admission checks a profile's declared class. The installation's classification
-of what its channel actually serves remains a trust assumption; a reading cannot detect an
-undeclared model behind a record-class channel (§4; dialect §5.1).
+model answers, which model answered, or exactly-once execution. Digest pins establish content
+identity, not currency. Generated-only admission checks a profile's declared class. The
+installation's classification of what its channel actually serves remains a trust assumption; a
+reading cannot detect an undeclared model behind a record-class channel (§4; dialect §5.1).
 
 ## 11. The two-stage fixture to record
 
 Nothing in this section is recorded yet. The first fixture is a run from the Desk's research
-line using two version-3 unbound `operation` dialects, bound by the Runner at import. This is the
-operation path, not an unbound research recipe. The concrete construction to demonstrate is:
+line using two version-3 unbound `operation` dialects, bound by the Runner at import. This remains
+the acceptance construction for issue #160's condition 2. An additional research-stage recording
+follows fixture 8's `selected-parent-child` plan in
+[RFC 0018 §11](../rfcs/0018-dialect.md#11-verifying-a-preparation) beside that demonstration.
+Its layout is the workflow bundle below, with fixture 8's `gtm-company-person` and
+`work-item-triage` examples as its dialects. It waits until a Runner prepares the kind
+([judgment-pack-runner#88][research-preparer]), with its release form and encoding pinned under
+§§4 and 7, and the dialect's readers read the contract
+([judgment-pack-spec#176][research-readers]). The concrete operation construction to demonstrate is:
+
+[research-preparer]: https://github.com/Judgment-Pack/judgment-pack-runner/issues/88
+[research-readers]: https://github.com/Judgment-Pack/judgment-pack-spec/issues/176
 
 - `organisations`: root, `once`, pack and published dialect independently pinned; a case `query`
   parameter supplies an operation request. Platform `research-test`, operation `organisations`,

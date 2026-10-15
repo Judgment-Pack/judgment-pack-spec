@@ -231,6 +231,19 @@ here.
   duties and coordinator handoff; and clarify budgets, synthetic research fixtures, review
   claims, locators, the index and revision attribution to pull requests #150, #163 and #178.
 
+- [RFC 0020](rfcs/0020-workflow.md) (Draft) and `spec/workflow.md` are amended for issue #174
+  (2026-10-15, round 2): research-stage admission is conditional on pinning its release form and
+  encoding when a Runner prepares the kind (judgment-pack-runner#88); until then no research
+  stage can be frozen or verified. Binding names generated AI and any web profiles under the
+  dialect §4.4. Check 1 checks every frozen stage's research profiles and generated-only target
+  admissions, with or without a preparation; profile findings map to the workflow's existing
+  codes. Question 2 is resolved. The two-stage operation acceptance demonstration remains due;
+  an additional research recording follows RFC 0018 §11's fixture 8 plan in the workflow bundle
+  layout, once a Runner prepares the kind and the dialect's readers read the contract
+  (judgment-pack-spec#176). The contrary dialect admission statement is superseded pending
+  judgment-pack-spec#179. Workflow version 1's document form gains no member, and replay still
+  checks retained bytes without a model or web call. The companion stays equal to the RFC's
+  Specification; no workflow fixture or conformance claim is added.
 - [RFC 0018](rfcs/0018-dialect.md) and [the dialect](spec/dialect.md) are amended for issue #171
   (2026-10-15, round 8): research declares bounded typed fields and records found, not-found,
   stale and conflicting answers with retained-response citations. Published recipes name model
