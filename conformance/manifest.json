@@ -604,6 +604,54 @@
       "specSection": "§4"
     },
     {
+      "id": "structural-unknown-source-locator-member",
+      "path": "structural/unknown-source-locator-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/sources/0/locator/unexpected"
+      },
+      "focus": "unknown members on a source locator are rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-source-citation-member",
+      "path": "structural/unknown-source-citation-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/sources/0/citation/unexpected"
+      },
+      "focus": "unknown members on a source citation are rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-escalation-target-member",
+      "path": "structural/unknown-escalation-target-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/escalation/target/unexpected"
+      },
+      "focus": "unknown members on an escalation target are rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-metadata-review-member",
+      "path": "structural/unknown-metadata-review-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/metadata/reviews/0/unexpected"
+      },
+      "focus": "unknown members on a metadata review are rejected",
+      "specSection": "§4"
+    },
+    {
       "id": "structural-empty-escalation-triggers",
       "path": "structural/empty-escalation-triggers.json",
       "layer": "structural",
