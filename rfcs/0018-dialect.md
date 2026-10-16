@@ -430,7 +430,7 @@ and a preparation commits the bound dialect alone (§4.4, §13).
 
 This amendment records the maintainer's decision of 2026-10-16 on
 [issue #184](https://github.com/Judgment-Pack/judgment-pack-spec/issues/184), on
-[pull request NNN](https://github.com/Judgment-Pack/judgment-pack-spec/pull/NNN). Its review is
+[pull request 188](https://github.com/Judgment-Pack/judgment-pack-spec/pull/188). Its review is
 round 10 of this RFC; the cross-vendor review follows, run by the coordinator. The status stays
 Accepted. The Specification and companion are amended equally, in §4.4, and nothing else changes.
 
