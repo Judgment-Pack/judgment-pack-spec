@@ -37,7 +37,7 @@ SOURCE = {
     # The tenth vector, from the Runner's main after its pull request 80 (the amendment of
     # 2026-10-15); the eleventh and twelfth, of dialect version 3, from its main after its pull
     # request 83; and the twenty-six research vectors, of the two examples of §11's fixture plan,
-    # from its main after its pull request 97.
+    # from its main after its pull request 97; the skipped-source vector from pull request 105.
     "extendedBy": [
         {
             "pullRequest": 80,
@@ -81,10 +81,16 @@ SOURCE = {
                 "work-item-triage-changed-response-record-fields",
             ],
         },
+        {
+            "pullRequest": 105,
+            "commit": "ed1bc2a",
+            "vectors": ["skipped-source-dependency-unavailable"],
+        },
     ],
 }
 # The count as the RFC and the companion spell it.
-WORDS = {9: "nine", 10: "ten", 11: "eleven", 12: "twelve", 38: "thirty-eight"}
+WORDS = {9: "nine", 10: "ten", 11: "eleven", 12: "twelve",
+         38: "thirty-eight", 39: "thirty-nine"}
 # The Runner's manifest says what each vector's export retains (its README, "What a vector holds"):
 # `equal`, the preparation the Runner computes from the vector's inputs, which is preparation.json;
 # `altered`, another, while preparation.json is still that computation; and `recorded`, the
@@ -239,6 +245,40 @@ def vector_cases() -> list[tuple[str, str, Any]]:
             return Inputs(row["id"], row["requiresBinding"])
 
         cases.append((f"vector {row['id']}", expected, build))
+    return cases
+
+
+def skipped_source_cases() -> list[tuple[str, str, Any]]:
+    """Round 12: the recorded form, and retained members changed one at a time."""
+    def build(change: Any = None, reverse_parameters: bool = False) -> Inputs:
+        inputs = Inputs("skipped-source-dependency-unavailable", True)
+        if reverse_parameters:
+            dialect = json.loads(inputs.dialect)
+            source = dialect["sources"][-1]
+            source["parameters"] = dict(reversed(list(source["parameters"].items())))
+            inputs.dialect = json.dumps(dialect).encode()
+        if change is not None:
+            preparation = json.loads(inputs.preparation)
+            change(preparation)
+            inputs.preparation = json.dumps(preparation).encode()
+        return inputs
+
+    changes = {
+        "claim absent": lambda p: p["outcomes"][-1].pop("claim"),
+        "outcome status": lambda p: p["outcomes"][-1].update(status="dependency-unavailable"),
+        "lineage status": lambda p: p["lineage"][-1].update(status="dependency-unavailable"),
+        "dependencies absent": lambda p: p["lineage"][-1].pop("dependencies"),
+        "dependencies reversed": lambda p: p["lineage"][-1]["dependencies"].reverse(),
+        "only the parameter without a value": lambda p: p["lineage"][-1]["dependencies"].pop(),
+        "dependencies on an acquired source": lambda p: p["lineage"][-3].update(
+            dependencies=p["lineage"][-1]["dependencies"]
+        ),
+    }
+    cases = [("skipped source: reverse parameter declarations", "reading",
+              lambda: build(reverse_parameters=True))]
+    for name, change in changes.items():
+        cases.append((f"skipped source: {name}", "finding:preparation-differs",
+                      lambda change=change: build(change)))
     return cases
 
 
@@ -404,8 +444,7 @@ class DialectVectorTests(unittest.TestCase):
 
     def test_the_companion_counts_the_vectors_of_the_commits_it_names(self) -> None:
         # The companion's Status names the Runner commits its vectors were copied from, and counts
-        # the vectors of the commits it names: thirty-eight, from four commits, since the amendment
-        # that staged the research vectors.
+        # the vectors of the commits it names: thirty-nine, from five commits, since round 12.
         text = " ".join((ROOT / COMPANION).read_text(encoding="utf-8").split())
         source = self.manifest["source"]
         self.assertIn(source["commit"], text)
@@ -487,6 +526,44 @@ class DialectVectorTests(unittest.TestCase):
                 else:
                     self.assertIn("reading", answer, answer)
                     self.assertEqual(row["expectedBinding"], answer["reading"]["binding"])
+
+    def test_a_skipped_source_keeps_its_claim_and_every_declared_dependency(self) -> None:
+        name = "skipped-source-dependency-unavailable"
+        result = self.inputs(name).verify()
+        self.assertEqual((VECTORS / name / "preparation.json").read_bytes(), result.preparation)
+        self.assertEqual("matches", result.answer["reading"]["binding"])
+        preparation = json.loads(result.preparation)
+        self.assertEqual({
+            "name": "endorsement",
+            "parameters": {"requestId": "REQ-7", "requestType": "data-access",
+                           "runAt": preparation["verifiedAt"]},
+            "claim": {"acquisitionStatus": "unknown", "basis": [], "evidenceAvailability": {},
+                      "facts": {}, "reason": "dependency-unavailable"},
+            "status": "unknown", "reason": "dependency-unavailable",
+        }, preparation["outcomes"][-1])
+        dependencies = [
+            {"parameter": "approver", "source": "sponsor", "pointer": "/sponsor/id"},
+            {"parameter": "requestType", "source": "intake", "pointer": "/intake/type"},
+        ]
+        skipped = []
+        for entry in preparation["lineage"]:
+            if entry["source"] != "endorsement":
+                self.assertNotIn("dependencies", entry)
+                continue
+            skipped.append(entry["target"])
+            self.assertEqual(dependencies, entry["dependencies"])
+            self.assertEqual(("unknown", "dependency-unavailable", False, []),
+                             (entry["status"], entry["reason"], entry["present"], entry["basis"]))
+            self.assertNotIn("receipt", entry)
+            self.assertNotIn("receipts", entry)
+            self.assertNotIn("calculation", entry)
+        self.assertEqual(["/endorsement", "sponsor-endorsement"], skipped)
+        self.assertEqual(2, len(preparation["cites"]))
+
+    def test_skipped_source_forms_have_the_answers_the_text_gives(self) -> None:
+        for name, expected, build in skipped_source_cases():
+            with self.subTest(case=name):
+                self.assertEqual(expected, answer_code(build().verify().answer))
 
     def test_readings_agree_with_the_runners_report_and_export(self) -> None:
         # Where the class reports what verify-run reports, the two agree; and the facts and

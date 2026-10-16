@@ -91,7 +91,8 @@ class SecondDialectReaderTest(unittest.TestCase):
         # The research contract of RFC 0018's round 8 (issue #176): every hand-written case of
         # tests/test_dialect.py, each new form and each refusal, given to both readers; round 9's
         # receipt answers (issue #182 item 4) on operation receipts, in versions 2 and 3, each a
-        # vector signed again; and every staged vector, the Runner's research vectors among them, as
+        # vector signed again; round 12's skipped-source members, each altered alone; and every
+        # staged vector, the Runner's research and skipped-source vectors among them, as
         # conformance/dialect/README.md gives it to a verifier. Their reports must be equal byte for
         # byte, and the answer the text, or the staged manifest, gives. A disagreement is a finding
         # about the readers or the text, and is reported here, never papered over.
@@ -100,6 +101,7 @@ class SecondDialectReaderTest(unittest.TestCase):
         batch, names = [], []
         from test_dialect_artifact import artifact_cases
         cases = first.research_cases() + first.receipt_cases() + list(artifact_cases())
+        cases += first.skipped_source_cases()
         cases += first.vector_cases()
         for name, expected, build in cases:
             inputs = build()

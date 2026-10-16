@@ -54,12 +54,19 @@
           "work-item-triage-changed-binding-old-preparation",
           "work-item-triage-changed-response-record-fields"
         ]
+      },
+      {
+        "pullRequest": 105,
+        "commit": "ed1bc2a",
+        "vectors": [
+          "skipped-source-dependency-unavailable"
+        ]
       }
     ]
   },
   "runnerFiles": {
-    "vectors/README.md": "017ab2aa39ba59911b07cb474cda4f88bf1bd6a0fe9d9c0afdfef747007bf59d",
-    "vectors/manifest.json": "62dd8998b30ca89688e78fcc83ecde4a2535df1a84e30d7f9feb43f00babd179"
+    "vectors/README.md": "af0f6c7cc0a0350be67bca74609d5b7e23562ea547a162d48727cf534a8a45af",
+    "vectors/manifest.json": "6649057d739e78047b618c3d2e61ab1fa33a3b27ac16eae06dc49548893c8b64"
   },
   "cases": [
     {
@@ -327,6 +334,13 @@
       "requiresBinding": true,
       "expectedResult": "finding",
       "expectedFinding": "acquisition-invalid"
+    },
+    {
+      "id": "skipped-source-dependency-unavailable",
+      "path": "vectors/skipped-source-dependency-unavailable",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
     }
   ]
 }

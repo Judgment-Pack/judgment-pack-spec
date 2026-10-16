@@ -23,7 +23,9 @@ tenth, `http-shaped-source`, was added the same way: the run wrote the first nin
 byte for byte. So were the eleventh and twelfth, `version-3-bound` and
 `unbound-bound-at-import`, the first of dialect version 3: the run wrote the first ten
 again byte for byte. So were the research vectors, the twenty-six after them, the first
-of the kind `research`: the run wrote the first twelve again byte for byte. Changing a
+of the kind `research`: the run wrote the first twelve again byte for byte. So was the
+thirty-ninth, `skipped-source-dependency-unavailable`, the first to hold a skipped
+source: the run wrote the first thirty-eight again byte for byte. Changing a
 vector is a change of the contract a second reader is held to, and needs the same
 justification as changing
 [`docs/MAPPING-V2.md`](../../docs/MAPPING-V2.md#the-canonical-form-of-a-preparation).
@@ -141,6 +143,7 @@ The record a binding is read from is in `run.json`: the record's exact bytes,
 | `work-item-triage-changed-binding-second-installation` | `research/work-item-triage-changed-binding-second-installation` | nothing: valid-types as a second installation binds it, one assignment and its profile changed | `verified-inputs`, binding `matches`, signed and witnessed |
 | `work-item-triage-changed-binding-old-preparation` | `research/work-item-triage-changed-binding-second-installation` | the export retains valid-types' preparation, recorded under the first installation's binding | refused: `retained lineage does not match recomputation` |
 | `work-item-triage-changed-response-record-fields` | `research/work-item-triage-valid-types-all-six` | the follow-up record's answer for points changed under the record's own receipt; the receipt and the recorded preparation as they were | refused: `Source follow-up: the record's own receipt, through the profile assistant: result digest failed (acquisition-invalid). …` |
+| `skipped-source-dependency-unavailable` | `mapping-v2-skipped-source` | nothing: three operations, the third skipped because a source it waits on is not `resolved` | `verified-inputs`, binding `matches`, signed and witnessed |
 
 The valid case is also the calculated-values case: its one source is a calculator
 that computed. Its preparation's digest is the digest its record binds, so a reader
@@ -188,10 +191,38 @@ The plan's items that are refusals, a malformed or over-bound recipe, record or
 binding, are reader tests and not vectors (spec/dialect.md §11), until the staging
 README of the specification defines a refusal row; Runner's tests hold them
 (`internal/runner/research_test.go`). Not recorded: a skipped earlier source in a
-reconciliation, whose outcome and lineage Runner writes otherwise than the
-specification's §9.2 and §9.3 (its outcome's `claim` and `status`, and a lineage
-entry's `dependencies`), as it does for every kind, and which no vector holds; and the
-parent and child of `selected-parent-child`, which are the workflow's (RFC 0020).
+reconciliation, which Runner skips as it skips a source of every kind, in the form
+`skipped-source-dependency-unavailable` holds; and the parent and child of
+`selected-parent-child`, which are the workflow's (RFC 0020).
+
+`skipped-source-dependency-unavailable` is there for a skipped source
+(`docs/MAPPING-V2.md`: "Missing/unknown/absent upstream outputs skip the dependent
+source and record `dependency-unavailable`"). Its mapping has three operations of one
+profile: `intake` resolves the case's request and its type; `sponsor`'s record names no
+sponsor, so its claim is `unknown`; and `endorsement` declares two source parameters,
+each a fact target of an earlier source, `approver`, `sponsor`'s `/sponsor/id`, and
+`requestType`, `intake`'s `/intake/type`, and is skipped, since `sponsor`'s claim is not
+`resolved`. A skipped source is not acquired: `sources.json` holds no record of it,
+`cites` no citation, and its read does not apply.
+Runner writes four members of a skipped source, of every kind, otherwise than the
+specification's §9.2 and §9.3 state them, until its amendment for
+judgment-pack-spec#189 takes Runner's form:
+
+- the outcome's `claim`, present: `{"acquisitionStatus": "unknown", "basis": [],
+  "evidenceAvailability": {}, "facts": {}, "reason": "dependency-unavailable"}` (the
+  text: absent);
+- the outcome's `status`, `unknown` (the text: `dependency-unavailable`);
+- each lineage entry's `status`, `unknown` (the text: the outcome's,
+  `dependency-unavailable`);
+- each lineage entry's `dependencies`, the source parameters it waited on, as objects
+  `{"parameter", "source", "pointer"}` in the order of the parameters' names,
+  `approver` before `requestType`, though `intake` comes before `sponsor` among the
+  sources (the text: no such member).
+
+Its other members are as the text states them: the outcome's `reason`
+`dependency-unavailable`, no `arguments`, and as `parameters` those that have a value
+(`runAt`, `requestId`, `requestType`, and not `approver`); each lineage entry's
+`reason` `dependency-unavailable`, `present` false, `basis` `[]` and no `receipt`.
 
 The last two of the first twelve are dialect version 3 (`docs/MAPPING-V2.md`, "Dialect version 3").
 `version-3-bound` is there for the version: its mapping is written as a version-3
@@ -258,6 +289,14 @@ in them are those of the run that wrote them, and are data now.
 - `mapping-v2-before-calculators`, `mapping-v2-unsigned-parameters` and
   `mapping-v2-before-exact-bytes` were written before Runner passed a binding: their
   records carry none.
+- `mapping-v2-skipped-source` was written as `mapping-v2-calculated-bound` was, by
+  `TestASkippedSourceRunIsSignedWitnessedAndBound` with `JPACK_V2_SKIPPED_EXPORT_DIR`
+  set, under the Runtime CI pins (commit `015949ca`), which takes a binding. Its record
+  is signed under the seed of RFC 8032's first test vector, whose public key is
+  `public-key.txt`. Its two acquisition receipts were signed by the test with a key made
+  for the run, standing in for a gateway: the public key is in `profiles.json`, and the
+  private key was not kept. The profile names the adapter `adapter-mcp`, version
+  `stand-in`; no live service was asked, and every identifier is synthetic.
 
 - Each run under `research/` was written as `mapping-v2-calculated-bound` was, by
   `TestResearchRunsAreSignedWitnessedAndBound` with `JPACK_RESEARCH_EXPORT_DIR` set,

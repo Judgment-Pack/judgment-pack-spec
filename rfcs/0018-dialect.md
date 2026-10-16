@@ -9,7 +9,8 @@
   version 3; research replay; version 3 as the reference Runner reads it, its two vectors staged;
   the research result contract, binding, reconciliation and fixture lists, issue #171;
   research-stage admission and reader rules, issues #179 and #182), 2026-10-16 (the name an
-  unbound operation's record carries; the research vectors staged, issue #190)
+  unbound operation's record carries; the research vectors staged, issue #190;
+  the skipped source's form, issue #189, option A)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -502,8 +503,22 @@ own. The repository's tests recompute those two at the vector's `verifiedAt` by 
 pull request 181, by one author who had read both, before the Runner recorded them. Each recomputes
 every preparation that can be recomputed byte for byte and gives every vector the staged manifest's
 answer, and the cross-reader test holds their reports on every vector equal, byte for byte. The
-two readers' agreement is that author's. No skipped-source vector is recorded
-([issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189)).
+two readers' agreement is that author's. At round 11 no skipped-source vector was recorded
+([issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189)); round 12 stages it.
+
+## Amendment of 2026-10-16: the skipped source's form
+
+This amendment records the maintainer's decision on
+[issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189), option A, on pull
+request #NNN: the Specification and companion take the Runner's form in §§9.2–9.3, the outcome
+keeping its five-member claim and status `unknown`, each lineage entry having status `unknown`
+and `dependencies`, all declared source parameters in parameter-name order, including those
+that have a value. Both readers follow, and the thirty-ninth vector,
+`skipped-source-dependency-unavailable`, is staged byte for byte from Runner commit `ed1bc2a`,
+pull request 105, with a reading whose binding `matches`; no Runner change is needed, and the
+status stays Accepted.
+
+its review is round 12 of this RFC; the cross-vendor review follows, run by the coordinator.
 
 ## Summary
 
@@ -534,11 +549,12 @@ a later RFC.
 What a preparation establishes is stated per part. A derivation is recomputable, and a verifier
 that recomputes it establishes it itself. An acquisition's bytes are not: they are held by their
 digest, and what they establish is the gateway receipt's business, byte lineage and not truth. A
-research record establishes the least of all. The Runner's thirty-eight vectors are staged byte for
+research record establishes the least of all. The Runner's thirty-nine vectors are staged byte for
 byte. Two readers, each written from the text, the second without sight of the first, recompute
-every preparation that can be recomputed, thirty-six, byte for byte, the last twenty-nine through
-extensions one author made to both, and give every vector the same answer, and their reports agree
-with the Runner's on the surface they share, the verification of a preparation; the one check they
+every preparation that can be recomputed, thirty-seven, byte for byte, with the extensions since
+the first nine and the skipped-source correction made to both, and give every vector the same
+answer, and their reports agree with the Runner's on the surface they share, the verification of a
+preparation; the one check they
 leave out, of an export's retained result against its record, is the export's, not a preparation's.
 
 ## Problem
@@ -591,17 +607,17 @@ a companion document, with the gateway's vectors byte for byte. The same move ap
   unbound and bound at import with its binding document (`unbound-bound-at-import`); and, added
   with the amendment that staged them, twenty-six research vectors, the runs of §11's two
   examples, among them two whose inputs were changed after the run, their recorded preparation held
-  fixed (`retained: "recorded"`).
+  fixed (`retained: "recorded"`); and the thirty-ninth,
+  `skipped-source-dependency-unavailable`, whose skipped outcome and entries keep the Runner's form.
 - **Two readers, from the text.** Two preparation verifiers in this repository are written from the
-  companion document's text, and they agree on all thirty-eight staged vectors byte for byte: each
+  companion document's text, and they agree on all thirty-nine staged vectors byte for byte: each
   recomputes every preparation that can be recomputed equal to its `preparation.json`, with the
   digest its `preparation.sha256` states, and gives every vector the answer the staged manifest
   records; their reports are equal on every vector. On the tenth, on the eleventh and twelfth,
-  `version-3-bound` and `unbound-bound-at-import`, and on the twenty-six research vectors, that
-  agreement is one author's: each reader was extended to them by one author who had read both
-  (Implementation). The first
-  reader's reports agree, wherever
-  the class reports them, with `verify-run`'s on `targetsByClass`, `unsignedParameters` and
+  `version-3-bound` and `unbound-bound-at-import`, on the twenty-six research vectors and on the
+  thirty-ninth, that agreement adds no independence: each change was made to both readers by an
+  author who had read both (Implementation). The first reader's reports agree, wherever the class
+  reports them, with `verify-run`'s on `targetsByClass`, `unsignedParameters` and
   `unsignedFreshness`, and with the export on the facts and evidence-availability documents.
   - The first, `tools/dialect_verify.py` (commit `f821757`, corrected at `3c9520a`), was written by
     the text's author, with the vectors in view, from the companion document, the two sections of the
@@ -1697,11 +1713,13 @@ its read does not apply. An outcome is an object of:
 - `parameters`: an object giving each parameter of the scope (§3), `runAt` included, its value, with
   the literal the case or the earlier source wrote; for a skipped source, those that have a value;
 - `arguments`: the source's request (§4.1), for a source acquired, and absent otherwise;
-- `claim`: the claim (§§6–7), and absent for a skipped source;
-- `status`: the claim's `acquisitionStatus`, or `dependency-unavailable` for a skipped source;
-- `reason`: the claim's `reason`, or `dependency-unavailable` for a skipped source.
+- `claim`: the claim (§§6–7); for a skipped source, the object of exactly `acquisitionStatus`
+  `"unknown"`, `basis` `[]`, `evidenceAvailability` `{}`, `facts` `{}` and `reason`
+  `"dependency-unavailable"`, giving no fact and no availability;
+- `status`: the claim's `acquisitionStatus`, so `unknown` for a skipped source;
+- `reason`: the claim's `reason`, so `dependency-unavailable` for a skipped source.
 
-(No vector holds a skipped source, so none decides the form of its outcome or its entries.)
+The vector `skipped-source-dependency-unavailable` holds this form.
 
 #### 9.3 Lineage
 
@@ -1719,6 +1737,7 @@ ordered by code point. (No vector decides the order within one outcome.) An entr
 | `present` | `true` when the claim gives the target a value — a value at the pointer, or any availability for the requirement — and `false` otherwise |
 | `status`, `reason` | the outcome's |
 | `basis` | the claim's `basis`, or `[]` for a skipped source |
+| `dependencies` | all source parameters for a skipped source, as below; absent otherwise |
 | `candidateFrom` | the pointers of the value read that the dialect could copy to the target, distinct, ordered by code point: a copy entry's `source`, or each `from` of a claim form that writes the target; absent when there is none, as for a rule's evidence target |
 | `readDigest` | the read digest (§6) |
 | `receipt` | the acquisition's citation; for `research`, the record's own citation when it has one; absent for the case, a local file, a skipped source and a research record with no receipt of its own |
@@ -1727,6 +1746,14 @@ ordered by code point. (No vector decides the order within one outcome.) An entr
 
 `candidateFrom` lists what the dialect could read into a target, and not what was read; `basis`
 lists what was read to decide.
+
+`dependencies` is present on every target entry of a skipped source. It is an array of every
+source parameter the source declares (§3), including those that have a value, ordered by
+`parameter` by code point. Each element is an object of exactly `parameter`, the parameter's
+name; `source`, the earlier source's name; and `pointer`, the fact target read. In
+`skipped-source-dependency-unavailable`, both `approver` from `sponsor` and `requestType` from
+`intake` appear, in that order, though `requestType` has a value and `intake` is the first source.
+No acquired source's entry carries `dependencies`, including one whose claim is `unknown`.
 
 #### 9.4 What derives a preparation
 
@@ -1863,6 +1890,13 @@ The staging manifest gives `requiresBinding` and the expected answer, `expectedR
 The fixture layout is fixed. The reference Runner prepares the `research` kind since its pull
 request 97, and twenty-six fixtures it recorded in this layout are staged; the kind is defined,
 and not claimable until a specification version publishes them (§14).
+
+The thirty-ninth vector, `skipped-source-dependency-unavailable`, recorded in Runner pull request
+105 at commit `ed1bc2a`, holds §§9.2–9.3's skipped-source form. Its three sources are operations:
+`intake` resolves, `sponsor` is acquired but unknown, and `endorsement` is skipped because its
+`approver` parameter has no value. It gives a reading with binding `matches`; its preparation
+recomputes byte for byte. This holds the common skipped-source form; item 5's recording of a
+skipped earlier research source in a reconciliation remains to be recorded.
 
 **The two fixture lists to record.** Each reading or finding variant below calls for a separate
 fixture directory in that layout for each of two examples, named `<example>-<item>-<variant>`.
@@ -2332,14 +2366,16 @@ Until a specification version publishes the dialect vectors, no claim of this cl
 
 ## Conformance
 
-The vectors are the Runner's thirty-eight, staged in
+The vectors are the Runner's thirty-nine, staged in
 [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)
 byte for byte: nine copied from the Runner's commit `05636ed`, the same files as at its `main`
 commit `82116bf`; the tenth, added by the amendment of 2026-10-15, from its `main` commit
 `c84e8e6`; the eleventh and twelfth, `version-3-bound` and `unbound-bound-at-import`, of dialect
 version 3, from its `main` commit `89cf441`; and the twenty-six research vectors, added by the
-amendment of 2026-10-16, from its `main` commit `4352763`; each run as its README says: the
-dialect, the case, the acquisitions and the profiles, and for a dialect bound at import its binding
+amendment of 2026-10-16, from its `main` commit `4352763`; and the thirty-ninth,
+`skipped-source-dependency-unavailable`, from commit `ed1bc2a` (Runner pull request 105);
+each run as its README says: the dialect, the case, the acquisitions and the profiles, and for a
+dialect bound at import its binding
 document; the preparation to verify and the record, from the Runner's export; and whether a binding
 is required.
 The answer expected of the class is in this repository's manifest of them.
@@ -2378,6 +2414,12 @@ vectors, a retained result or the record's answers changed under a receipt held 
 adversarial, `acquisition-invalid`, their preparation the one the run recorded
 (`retained: "recorded"`).
 
+The thirty-ninth, `skipped-source-dependency-unavailable`, is positive, a reading whose binding
+`matches`. Its skipped source keeps the claim, status `unknown` and reason
+`dependency-unavailable`; each of its two target entries names both declared source parameters,
+including the one with a value, in `dependencies`, in parameter-name order. It has no acquisition
+or citation, and its entries have no receipt. The acquired sources' entries have no `dependencies`.
+
 **Kinds.** The vectors exercise the case and `operation`, of shapes `mcp` and `http`, in version 2,
 and in version 3 an `operation` bound and one unbound, of shape `http`, with its binding document,
 and `research`, unbound and bound at import to AI and web profiles; and no other kind:
@@ -2385,9 +2427,9 @@ and `research`, unbound and bound at import to AI and web profiles; and no other
 none. No specification version publishes any of the vectors, so none is
 claimable.
 
-**What no vector holds.** `unwrap`; source parameters and skipped sources; a calculator that did not
-compute; timestamp parameters; a receipt that fails, but over a result changed after the run (the
-two `changed-response` vectors); a stale acquisition or table; a broken session form; a refusal at
+**What no vector holds.** `unwrap`; a calculator that did not compute; timestamp parameters;
+a receipt that fails, but over a result changed after the run (the two `changed-response` vectors);
+a stale acquisition or table; a broken session form; a refusal at
 a bound; a paged acquisition; a request of shape `http` other than the tenth vector's — by `POST`,
 with a `body`, with no `query`, or a connection's; a kind of version 3 other than `research`, and a
 binding document or a profile bound that is refused; and the positions of Unresolved question 1,
@@ -2410,7 +2452,8 @@ vector; the counts; and this section's equality with the companion document's §
    document among it. Since the pull request for issue #176 it reads `research` as the
    research-contract amendment defines it, bound directly or through a binding document, and
    refuses `http`, `sql` and `web` as `kind-unread` after checking their forms. Since the pull
-   request for issue #185 it gives round 9's receipt answers (§5.2, §11).
+   request for issue #185 it gives round 9's receipt answers (§5.2, §11). Round 12 corrects its
+   skipped-source form to the Runner's, which the thirty-ninth vector holds (§§9.2–9.3).
 2. **`tools/dialect-verify-ts/`**, the second reader, written from the companion document's text
    alone, in TypeScript, by a different author, under the protocol the Evidence records, at
    `e2d41c5`. It reads the same versions and kind, and refuses the rest as the first does. The
@@ -2422,7 +2465,9 @@ vector; the counts; and this section's equality with the companion document's §
    amendment defines it, by one author who had read both, from the text: that adds nothing to the
    second's independence, and the two readers' agreement on the contract's hand-written documents
    is that author's. The pull request for issue #185 corrected both to round 9's receipt answers
-   (§5.2, §11), by one author who had read both, which adds nothing to it either.
+   (§5.2, §11), by one author who had read both, which adds nothing to it either. Round 12
+   corrects both readers to the Runner's skipped-source form, with both in view; their agreement
+   on the thirty-ninth vector adds no independence.
 3. **The Runner**, the reference preparer, with `verify-run`, a third reader of the same bytes in its
    own repository, which reads every vector through the Runner's own code.
 4. **The Desk's inputs**, a writer: its mapping editor and import recipes write version-2 documents
@@ -2434,13 +2479,13 @@ this text and the vectors — would strengthen that evidence, and none exists.
 
 ## Unresolved questions
 
-1. **The rules no vector decides.** The text takes a position, and marks it, on eight rules that
+1. **The rules no vector decides.** The text takes a position, and marks it, on seven rules that
    neither the Runner's documentation nor its vectors decide: a `{{` with no `}}` and a stray `}}` in a
    `$text`; a copy entry whose source does not resolve, for a fact and for an availability; a copy
    that names a requirement twice; `unknown` written in the evidence-availability document rather than
-   left out; generated influence; a skipped source's outcome and entries; and the order of the entries
-   within one outcome. Each was taken without the Runner's code. The Runner's behaviour may differ, and
-   a vector from the Runner for each is what settles it; until then a difference found is a defect in
+   left out; generated influence; and the order of the entries within one outcome. Each was taken
+   without the Runner's code. The Runner's behaviour may differ, and a vector from the Runner for
+   each is what settles it; until then a difference found is a defect in
    the text. The six choices the two readers recorded (Evidence) are decided in the text now, by the
    maintainer, and no vector decides them either; on the four that are rules of reading — the
    byte-bound scans, "but for case", a `freshWithin` of another declared type and a requirement id's
@@ -2457,12 +2502,13 @@ this text and the vectors — would strengthen that evidence, and none exists.
    in it (the amendment of 2026-10-16). Issue #171's result types, field statuses and citations,
    research profile bindings, reconciliation read and fixture lists were, when it decided them,
    decisions no vector held. The Runner's research vectors hold them since the amendment of
-   2026-10-16, but for four points they do not distinguish: the order of a research
+   2026-10-16, but for three points they do not distinguish: the order of a research
    preparation's `cites` against the `callIndex` order, which in those vectors is one order
-   (§9.1); a skipped source's outcome and lineage, which no vector records
-   ([issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189)); the research
-   maxima at their bounds (§12); and the fixture lists' refusal variants, which are reader tests
-   and not vectors (§11).
+   (§9.1); the research maxima at their bounds (§12); and the fixture lists' refusal variants,
+   which are reader tests and not vectors (§11). The skipped source's outcome and entries are
+   resolved by issue #189,
+   option A, in round 12: the text takes the Runner's form, held by
+   `skipped-source-dependency-unavailable` (§§9.2–9.3).
    Round 9 settles the closed condition list and receipt findings of issue #182, and removes
    the impossible unnamed-response case; no vector decides those rules either.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
@@ -2549,10 +2595,10 @@ this text and the vectors — would strengthen that evidence, and none exists.
     the research stage's release form and encoding ([judgment-pack-runner#88][research-preparer]).
     *Resolved in part 2026-10-16:* the reference Runner prepares `research` since its pull request
     97, and twenty-six fixtures of §11's two examples, recorded by it, are staged (the amendment of
-    2026-10-16). They are not claimable until a specification version publishes them (§14); a
-    skipped-source fixture
-    ([issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189)) and fixture 8's
-    recording stay open.
+    2026-10-16). They are not claimable until a specification version publishes them (§14).
+    Round 12 resolves the common skipped-source form with the operation vector
+    `skipped-source-dependency-unavailable` (issue #189, option A); item 5's recording of a
+    skipped earlier research source in a reconciliation and fixture 8's recording stay open.
 15. **Binding a published research recipe.** Which installation profiles can serve its named
     model and its AI and web capabilities, without publishing local identifiers, was left open
     by §4.3 and by issue #160's decision on the workflow prerequisite.

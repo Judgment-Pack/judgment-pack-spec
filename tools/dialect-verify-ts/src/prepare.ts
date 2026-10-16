@@ -563,6 +563,10 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     outcomes.push(outcome);
     if (skipped) {
       if (acquisitions.has(s.name)) finding("acquisition-unexpected", `${s.name} is skipped and has an acquisition`);
+      outcome.claim = {
+        facts: obj(), evidence: new Map(), status: "unknown",
+        reason: "dependency-unavailable", basis: [],
+      };
       continue;
     }
     if (s.research !== undefined) {
@@ -652,6 +656,13 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       // §9.3, version 3: an acquired research source's citations, in the order `cites` has them
       if (o.citations !== undefined) e.push(["receipts", arr(o.citations)]);
       if (o.calculation !== undefined) e.push(["calculation", o.calculation]);
+      if (o.skipped) {
+        const parameters = [...o.source!.parameters].sort((a, b) =>
+          compareCodePoints(a.name, b.name));
+        e.push(["dependencies", arr(parameters.map((p) => obj([
+          ["parameter", str(p.name)], ["source", str(p.from)], ["pointer", str(p.pointer)],
+        ])))]);
+      }
       return obj(e);
     };
     for (const t of [...o.factTargets].sort(compareCodePoints)) lineage.push(entry("fact", t));
@@ -690,10 +701,10 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
 }
 
 function statusOf(o: Outcome): string {
-  return o.claim === undefined ? "dependency-unavailable" : o.claim.status;
+  return o.claim!.status;
 }
 function reasonOf(o: Outcome): string {
-  return o.claim === undefined ? "dependency-unavailable" : o.claim.reason;
+  return o.claim!.reason;
 }
 
 function claimValue(c: Claim): JObj {

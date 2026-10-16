@@ -2455,6 +2455,13 @@ def recompute(
             outcome.skipped = True
             if source.name in acquisitions:
                 raise Finding("acquisition-unexpected", source.name)
+            outcome.claim = {
+                "acquisitionStatus": "unknown",
+                "basis": [],
+                "evidenceAvailability": {},
+                "facts": {},
+                "reason": "dependency-unavailable",
+            }
             continue
         if source.name not in acquisitions:
             raise Finding("acquisition-missing", source.name)
@@ -2657,20 +2664,20 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
     facts_document: dict[str, Any] = {}
     evidence_document: dict[str, Any] = {}
     for outcome in outcomes:
-        status = "dependency-unavailable" if outcome.skipped else outcome.claim["acquisitionStatus"]
-        reason = "dependency-unavailable" if outcome.skipped else outcome.claim["reason"]
+        assert outcome.claim is not None
+        claim = outcome.claim
+        status = claim["acquisitionStatus"]
+        reason = claim["reason"]
         entry_outcome: dict[str, Any] = {
             "name": outcome.name,
             "parameters": dict(outcome.parameters),
+            "claim": claim,
             "status": status,
             "reason": reason,
         }
         if outcome.request is not None:
             entry_outcome["arguments"] = outcome.request
-        if outcome.claim is not None:
-            entry_outcome["claim"] = outcome.claim
         out_outcomes.append(entry_outcome)
-        claim = outcome.claim or {"facts": {}, "evidenceAvailability": {}, "basis": []}
         for kind, targets in (
             ("fact", sorted(outcome.read.fact_targets)),
             ("evidence", sorted(outcome.read.evidence_targets)),
@@ -2689,9 +2696,16 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
                     "present": present,
                     "status": status,
                     "reason": reason,
-                    "basis": [] if outcome.skipped else list(claim["basis"]),
+                    "basis": list(claim["basis"]),
                     "readDigest": read_digest(outcome.read),
                 }
+                if outcome.skipped:
+                    assert outcome.source is not None
+                    entry["dependencies"] = [
+                        {"parameter": name, "source": parameter.origin,
+                         "pointer": parameter.pointer}
+                        for name, parameter in sorted(outcome.source.parameters.items())
+                    ]
                 candidates = sorted(set(outcome.read.candidates.get((kind, target), [])))
                 if candidates:
                     entry["candidateFrom"] = candidates

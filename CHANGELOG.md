@@ -7,6 +7,14 @@ here.
 
 ### Added
 
+- The thirty-ninth dialect vector, `skipped-source-dependency-unavailable`, from Runner commit
+  `ed1bc2a`, pull request 105, staged byte for byte beside the thirty-eight unchanged vectors.
+  RFC 0018 and its companion record issue #189, option A (2026-10-16, round 12): a skipped
+  source's outcome keeps its five-member claim and status `unknown`; each lineage entry has
+  status `unknown` and `dependencies`, all declared source parameters in parameter-name order,
+  including those that have a value (§§9.2–9.3). Both readers follow, recompute its preparation
+  byte for byte and give a reading whose binding `matches`. The Runner is unchanged; the vectors
+  remain staged until the next `specVersion` opens, in no corpus.
 - The reference Runner's twenty-six research vectors, the first of the kind `research`, are staged
   byte for byte in [`conformance/dialect/`][staged-dialect] beside the twelve, from the Runner's
   pull request 97 (issue #190): the runs of the two examples of [`spec/dialect.md`](spec/dialect.md)

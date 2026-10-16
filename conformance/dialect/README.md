@@ -1,6 +1,6 @@
 # Dialect vectors (staged)
 
-This directory holds 38 vectors for the dialect, written for the preparation-verifier class that
+This directory holds 39 vectors for the dialect, written for the preparation-verifier class that
 the companion document [`spec/dialect.md`](../../spec/dialect.md) defines. Its design record,
 [RFC 0018](../../rfcs/0018-dialect.md), was accepted on 2026-10-15, and the vectors are **staged**
 until the next `specVersion` opens. They are in no corpus.
@@ -36,9 +36,12 @@ wrote the first nine again byte for byte. The eleventh and twelfth, `version-3-b
 `unbound-bound-at-import`, the first of dialect version 3, were copied from the Runner's `main` at
 commit `89cf44109ad3a9862ab0386811bef63d8a9a1657`, Runner pull request 83 squash-merged, whose
 generator wrote the first ten again byte for byte. The twenty-six after them, the research vectors,
-the first of the kind `research`, and the Runner's README and manifest as they now are, were copied
+the first of the kind `research`, were copied
 from the Runner's `main` at commit `4352763e22489ca80ffbf5df338b7e7cb61319e2`, Runner pull request
-97 squash-merged, whose generator wrote the first twelve again byte for byte. This repository's
+97 squash-merged, whose generator wrote the first twelve again byte for byte. The thirty-ninth,
+`skipped-source-dependency-unavailable`, and the Runner's README and manifest as they now are,
+were copied from commit `ed1bc2a`, Runner pull request 105, whose generator wrote the first
+thirty-eight again byte for byte. This repository's
 manifest records each extension, in order, in `source.extendedBy`. The Runner's README says
 what each file holds and how the vectors were generated, and its manifest gives every file's
 SHA-256, the binding the Runner passes for each preparation, the record's binding as recorded, and
@@ -148,11 +151,26 @@ Each item names the vector of each example:
   `acquisition-invalid`, and the verifier gives the finding `acquisition-invalid`.
 
 None is a refusal: the plan's refusal items are reader tests, and not vectors, until this README
-defines a refusal row (§11). No vector holds a skipped source, whose outcome and lineage the Runner
-writes otherwise than §§9.2 and 9.3 (issue #189), nor the plan's `selected-parent-child`, which is
-the workflow's (RFC 0020). The companion document was amended with their staging (RFC 0018, the
+defines a refusal row (§11). No vector holds a skipped earlier research source in a reconciliation
+or the plan's `selected-parent-child`, which is the workflow's (RFC 0020). The companion document
+was amended with their staging (RFC 0018, the
 amendment of 2026-10-16 that staged the research vectors), so that §11 says what a fixture whose
 inputs were changed after the run holds.
+
+The thirty-ninth, `skipped-source-dependency-unavailable`, holds the common skipped-source form
+(§§9.2–9.3, issue #189, option A). Three operations use one profile: `intake` resolves the request
+and its type; `sponsor` is acquired but its record names no sponsor, so its claim is `unknown`;
+`endorsement` is skipped because its `approver` parameter has no value. Its outcome retains the
+claim of exactly `acquisitionStatus` `unknown`, `basis` `[]`, `evidenceAvailability` `{}`, `facts`
+`{}` and `reason` `dependency-unavailable`; its status is `unknown`, its reason
+`dependency-unavailable`, its arguments absent and its parameters those that have a value.
+Both target entries, `/endorsement` and `sponsor-endorsement`, have status `unknown`, reason
+`dependency-unavailable`, `present` false, `basis` `[]`, no receipt and `dependencies`: every
+declared source parameter, including the one with a value, in parameter-name order. Each element
+has exactly `parameter`, `source` and `pointer`: `approver`, `sponsor`, `/sponsor/id`, then
+`requestType`, `intake`, `/intake/type`. The acquired sources' entries have no `dependencies`.
+The skipped source has no acquisition or citation. Both readers recompute `preparation.json`
+byte for byte and give a reading, binding `matches`, as `verify-run` reports `verified-inputs`.
 
 One vector is answered otherwise than `verify-run` answers it. `disposition-differs-from-audit`
 alters the run's retained result, which is the Runner's export and no part of a preparation or a

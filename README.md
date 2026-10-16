@@ -152,7 +152,7 @@ reproducing its corpus version, its results, or its every-row statement.
 | [`spec/checkpoint-witness.md`](spec/checkpoint-witness.md)                       | Normative prose for the witness-statement reader class, a companion document beside Core |
 | [`conformance/witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness) | 54 checkpoint witness vectors, staged until the next `specVersion` (in no corpus) |
 | [`spec/dialect.md`](spec/dialect.md) | Normative prose for the preparation-verifier class, a companion document beside Core |
-| [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect) | 38 dialect vectors, the reference Runner's, staged until the next `specVersion` (in no corpus) |
+| [Dialect vectors][staged-dialect] | 39 dialect vectors; staged (see below) |
 | [`TESTING.md`](TESTING.md)                                                       | A 10–15 minute external testing exercise            |
 | [`VERSIONING.md`](VERSIONING.md)                                                 | Release and compatibility policy                    |
 | [`CHANGELOG.md`](CHANGELOG.md)                                                   | Draft and published change history                  |
@@ -162,6 +162,12 @@ reproducing its corpus version, its results, or its every-row statement.
 | [`ROADMAP.md`](ROADMAP.md)                                                       | Evidence-gated path toward a specification          |
 | [`web/`](web/)                                                                   | Static documentation site and deployment guide      |
 | [`.vscode/tasks.json`](.vscode/tasks.json)                                       | One-command local documentation preview             |
+
+[staged-dialect]:
+  https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect
+
+The 39 dialect vectors are the reference Runner's, staged until the next `specVersion`, in no
+corpus.
 
 The `docs/` directory records the specification's design constraints, its explicit non-goals, and
 how the spec stays independent of any implementation. The specification defines the portable

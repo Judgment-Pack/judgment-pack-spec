@@ -12,7 +12,7 @@ Its design record is [RFC 0018](../rfcs/0018-dialect.md), accepted on 2026-10-15
 which is informative; its Specification section, §§1–14 below, is that text. The comment period
 RFC 0000 names was waived by the maintainer, as the RFC's adoption record says.
 
-Its thirty-eight vectors, under
+Its thirty-nine vectors, under
 [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect),
 are the reference Runner's `vectors/preparation/`, byte for byte: nine at commit
 `05636eda96a9588279d61a6272625be859a28117` (Runner pull request 77), which reached the Runner's
@@ -24,8 +24,10 @@ are the reference Runner's `vectors/preparation/`, byte for byte: nine at commit
 `v0.12.0`), which holds the ten unchanged; and the twenty-six research vectors, the first of the
 kind `research`, the runs of §11's two examples, at the Runner's `main` commit
 `4352763e22489ca80ffbf5df338b7e7cb61319e2` (Runner pull request 97, not yet released), which holds
-the twelve unchanged. They are **staged** until the next
-`specVersion` opens: they are in no corpus, no claim may cite them, the site does not serve them,
+the twelve unchanged; and the thirty-ninth, `skipped-source-dependency-unavailable`, at the Runner's
+commit `ed1bc2a` (Runner pull request 105), which holds the thirty-eight unchanged.
+They are **staged** until the next `specVersion` opens: they are in no corpus, no claim may cite
+them, the site does not serve them,
 and no release bundle carries them. When that version opens they move into a corpus, normative for
 this class and for nothing else. Until a specification version publishes them, no
 preparation-verifier conformance claim is available: §14 holds a verifier to the vectors published
@@ -35,8 +37,9 @@ It specifies version 2 of the dialect document and of the preparation, which are
 mapping v2 and its preparation, restated. Since the amendment of 2026-10-15 (RFC 0018, its
 Amendment), version 2's `operation` reads a gateway source of shape `airbyte`, `mcp` or `http`, as
 the Runner's mapping v2 does since its pull request 80: the vectors of version 2 hold `mcp`, in
-nine, and `http`, in the tenth, and `airbyte` is defined and not claimable (§4.1). That amendment is a
-compatible extension of the record kind to every adapter shape, and one restriction: a receipt that
+nine and the thirty-ninth, and `http`, in the tenth; `airbyte` is defined and not claimable (§4.1).
+That amendment is a compatible extension of the record kind to every adapter shape, and one
+restriction: a receipt that
 attests a page (`pageItems`) is refused, whatever the shape (§5.2). The restriction changes one
 answer the accepted text gave: a signed acquisition of shape `mcp` whose receipt carried
 `pageItems` was read, and is `acquisition-invalid` now. The Runner has never prepared a paged
@@ -59,6 +62,11 @@ each recomputes a preparation with a `research` source, and the two agree on eve
 document of the contract's forms and refusals, and on the twenty-six vectors, which the Runner
 recorded after both readers were written, neither reader changed to read them. The two readers'
 agreement is one author's, and no claim rests on it.
+
+The skipped-source amendment of 2026-10-16 (issue #189, option A, RFC 0018 round 12) takes the
+Runner's form in §§9.2–9.3: a skipped outcome keeps its claim and status `unknown`, and each of
+its lineage entries has status `unknown` and names every declared source parameter in
+`dependencies`. Both readers follow; the thirty-ninth vector holds the form.
 
 The named-artifact amendment (RFC 0021, §2.1) adds exact format selectors `2.0.0` and `3.0.0`
 with independent artifact identities. It preserves both integer formats and all historical vectors.
@@ -1092,11 +1100,13 @@ its read does not apply. An outcome is an object of:
 - `parameters`: an object giving each parameter of the scope (§3), `runAt` included, its value, with
   the literal the case or the earlier source wrote; for a skipped source, those that have a value;
 - `arguments`: the source's request (§4.1), for a source acquired, and absent otherwise;
-- `claim`: the claim (§§6–7), and absent for a skipped source;
-- `status`: the claim's `acquisitionStatus`, or `dependency-unavailable` for a skipped source;
-- `reason`: the claim's `reason`, or `dependency-unavailable` for a skipped source.
+- `claim`: the claim (§§6–7); for a skipped source, the object of exactly `acquisitionStatus`
+  `"unknown"`, `basis` `[]`, `evidenceAvailability` `{}`, `facts` `{}` and `reason`
+  `"dependency-unavailable"`, giving no fact and no availability;
+- `status`: the claim's `acquisitionStatus`, so `unknown` for a skipped source;
+- `reason`: the claim's `reason`, so `dependency-unavailable` for a skipped source.
 
-(No vector holds a skipped source, so none decides the form of its outcome or its entries.)
+The vector `skipped-source-dependency-unavailable` holds this form.
 
 ### 9.3 Lineage
 
@@ -1114,6 +1124,7 @@ ordered by code point. (No vector decides the order within one outcome.) An entr
 | `present` | `true` when the claim gives the target a value — a value at the pointer, or any availability for the requirement — and `false` otherwise |
 | `status`, `reason` | the outcome's |
 | `basis` | the claim's `basis`, or `[]` for a skipped source |
+| `dependencies` | all source parameters for a skipped source, as below; absent otherwise |
 | `candidateFrom` | the pointers of the value read that the dialect could copy to the target, distinct, ordered by code point: a copy entry's `source`, or each `from` of a claim form that writes the target; absent when there is none, as for a rule's evidence target |
 | `readDigest` | the read digest (§6) |
 | `receipt` | the acquisition's citation; for `research`, the record's own citation when it has one; absent for the case, a local file, a skipped source and a research record with no receipt of its own |
@@ -1122,6 +1133,14 @@ ordered by code point. (No vector decides the order within one outcome.) An entr
 
 `candidateFrom` lists what the dialect could read into a target, and not what was read; `basis`
 lists what was read to decide.
+
+`dependencies` is present on every target entry of a skipped source. It is an array of every
+source parameter the source declares (§3), including those that have a value, ordered by
+`parameter` by code point. Each element is an object of exactly `parameter`, the parameter's
+name; `source`, the earlier source's name; and `pointer`, the fact target read. In
+`skipped-source-dependency-unavailable`, both `approver` from `sponsor` and `requestType` from
+`intake` appear, in that order, though `requestType` has a value and `intake` is the first source.
+No acquired source's entry carries `dependencies`, including one whose claim is `unknown`.
 
 ### 9.4 What derives a preparation
 
@@ -1258,6 +1277,13 @@ The staging manifest gives `requiresBinding` and the expected answer, `expectedR
 The fixture layout is fixed. The reference Runner prepares the `research` kind since its pull
 request 97, and twenty-six fixtures it recorded in this layout are staged; the kind is defined,
 and not claimable until a specification version publishes them (§14).
+
+The thirty-ninth vector, `skipped-source-dependency-unavailable`, recorded in Runner pull request
+105 at commit `ed1bc2a`, holds §§9.2–9.3's skipped-source form. Its three sources are operations:
+`intake` resolves, `sponsor` is acquired but unknown, and `endorsement` is skipped because its
+`approver` parameter has no value. It gives a reading with binding `matches`; its preparation
+recomputes byte for byte. This holds the common skipped-source form; item 5's recording of a
+skipped earlier research source in a reconciliation remains to be recorded.
 
 **The two fixture lists to record.** Each reading or finding variant below calls for a separate
 fixture directory in that layout for each of two examples, named `<example>-<item>-<variant>`.
