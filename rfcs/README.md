@@ -78,7 +78,12 @@ manifest, tests and contribution rules, and a desk's browse. Amended 2026-10-15 
 [issue #166](https://github.com/Judgment-Pack/judgment-pack-spec/issues/166) and
 [issue #172](https://github.com/Judgment-Pack/judgment-pack-spec/issues/172): entry version 2
 distinguishes kind `dialect` from pack-free kind `preset`; the seven enforcement
-sentences are settled. A hosted registry remains out of scope (Unresolved question 4).
+sentences are settled. Amended 2026-10-16 for
+[issue #192](https://github.com/Judgment-Pack/judgment-pack-spec/issues/192), option A: entry
+version 3 checks named-format references and artifact identities under RFC 0021, with immutable
+pairs across catalog history and unchanged manifest rows. The catalog's checker and fixtures
+follow in their own pull request on `judgment-pack-exchange`. RFC 0019 stays a Draft; a hosted
+registry remains out of scope (Unresolved question 4).
 
 RFC 0020 proposes `spec/workflow.md` beside Core, with a reader class and fixtures from a
 two-stage run, none recorded yet.
