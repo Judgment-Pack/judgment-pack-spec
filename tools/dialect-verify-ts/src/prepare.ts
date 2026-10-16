@@ -254,6 +254,16 @@ function checkReceipt(acq: Acquisition, profile: Profile, request: JObj, who: st
   if (acquisition === undefined || acquisition.t !== "obj") invalid("acquisition is not an object");
   // a receipt that attests a page is not read, whatever the shape
   if (member(acquisition, "pageItems") !== undefined) invalid("the receipt attests a page (pageItems)");
+  // the members the time and session rules read (round 9, issue #182 item 4): each time a string with an instant (§1),
+  // `callIndex` an integer at least zero, `sessionId` a string not held to the gateway's token form; a member of another
+  // type or form makes the receipt malformed, before the time and session rules
+  const served = s("servedAt");
+  const observed = s("observedAt", member(acquisition, "observedAt"));
+  if (served === null || instant(served) === null) invalid("servedAt is not a timestamp with an instant");
+  if (observed === null || instant(observed) === null) invalid("acquisition.observedAt is not a timestamp with an instant");
+  const callIndex = E.m.get("callIndex");
+  if (!isInteger(callIndex) || intValue(callIndex) < 0) invalid("callIndex is not an integer at least zero");
+  if (s("sessionId") === null) invalid("sessionId is not a string");
   for (const k of ["argumentsCommitment", "resultDigest"]) if (!DIGEST.test(s(k) ?? "")) invalid(`${k} is not a digest`);
   // 2. the key and the signature
   if (keyId !== sha256hex(profile.key).slice(0, 32)) invalid("keyId is not the profile key's identifier");
@@ -283,13 +293,11 @@ function checkReceipt(acq: Acquisition, profile: Profile, request: JObj, who: st
 }
 
 /** §5.2, the sessions: a receipt joins the preparation's receipts so far, which must stay in one of the two forms; its
- * citation is returned. */
+ * citation is returned. Check 1 held its `callIndex` and `sessionId` to their forms (`checkReceipt`), so
+ * `acquisition-sessions` names only a well-formed session set that fails the rule. */
 function joinSessions(E: JObj, sessions: { sessionId: string; callIndex: number }[], who: string): JObj {
   const callIndex = E.m.get("callIndex");
   const sessionId = E.m.get("sessionId");
-  if (!isInteger(callIndex) || intValue(callIndex) < 0 || sessionId === undefined || sessionId.t !== "str") {
-    finding("acquisition-sessions", `${who}: callIndex or sessionId is not of its form`);
-  }
   sessions.push({ sessionId: (sessionId as JStr).v, callIndex: intValue(callIndex as never) });
   if (!inOneForm(sessions)) finding("acquisition-sessions", `${who}: the acquisitions so far are in neither form`);
   return obj([["callIndex", callIndex!], ["sessionId", sessionId!], ["signature", E.m.get("signature")!]]);
@@ -386,10 +394,12 @@ function researchClaim(s: Source, outcome: Outcome, outcomes: Outcome[]): Claim 
   return s.read.copy ? applyCopy(s.read.copy, value, s.name) : applyRule(s.read.rule!, value, outcome.scope, s.name);
 }
 
+/** §5.2, the times: check 1 left a present instant in each (`checkReceipt`), so `acquisition-stale` names only one
+ * outside the window. */
 function checkTimes(E: JObj, maxAge: number, at: number, who: string): void {
   for (const v of [member(E.m.get("acquisition"), "observedAt"), E.m.get("servedAt")]) {
-    const t = v !== undefined && v.t === "str" ? instant(v.v) : null;
-    if (t === null || t < at - maxAge || t > at + 30) finding("acquisition-stale", `${who}: a time is outside the source's window`);
+    const t = instant((v as JStr).v) as number;
+    if (t < at - maxAge || t > at + 30) finding("acquisition-stale", `${who}: a time is outside the source's window`);
   }
 }
 

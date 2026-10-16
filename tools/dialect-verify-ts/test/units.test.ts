@@ -713,6 +713,61 @@ test("§9.1: cites are ordered by callIndex in versions 2 and 3 alike, as the Ru
   }
 });
 
+// Round 9 of RFC 0018 (issue #182 item 4; §5.2, check 1, and §11, finding 3): the cases of tests/test_dialect.py's
+// receipt_cases(), each receipt signed again, so that the member named is the one change the later checks see.
+test("§5.2, §11 (round 9): a receipt member of another form is acquisition-invalid before the time and session rules, in versions 2 and 3", () => {
+  const invalid = "finding:acquisition-invalid";
+  const differs = "finding:preparation-differs";
+  type Put = (r: JObj) => void;
+  const put = (k: string, v?: JVal): Put => (r) => void (v === undefined ? r.m.delete(k) : r.m.set(k, v));
+  const observed = (v: JVal): Put => (r) => void (r.m.get("acquisition") as JObj).m.set("observedAt", v);
+  // each vector's servedAt 301 seconds before its verifiedAt, past the source's maxAge of 300
+  for (const [vector, base, old] of [["valid", valid, "2026-10-14T14:53:25Z"], ["version-3-bound", v3bound, "2026-10-15T15:39:11Z"]] as const) {
+    const cases: [string, string, Put][] = [
+      ["servedAt a number", invalid, put("servedAt", num("1760453906"))],
+      ["servedAt null", invalid, put("servedAt", parse("null"))],
+      ["servedAt absent", invalid, put("servedAt")],
+      ["servedAt a string of another form", invalid, put("servedAt", str("2026-10-14T14:58:26.000Z"))],
+      ["observedAt a string that names no time", invalid, observed(str("2026-02-30T14:58:26Z"))],
+      ["observedAt a number", invalid, observed(num("0"))],
+      ["callIndex a string", invalid, put("callIndex", str("0"))],
+      ["callIndex below zero", invalid, put("callIndex", num("-1"))],
+      ["callIndex true", invalid, put("callIndex", parse("true"))],
+      ["callIndex absent", invalid, put("callIndex")],
+      ["sessionId a number", invalid, put("sessionId", num("0"))],
+      ["sessionId null", invalid, put("sessionId", parse("null"))],
+      ["sessionId absent", invalid, put("sessionId")],
+      // any string: not held to the gateway's token form
+      ["sessionId empty", differs, put("sessionId", str(""))],
+      ["sessionId of no token form", differs, put("sessionId", str("a session, not a token: \u00fcn\u00efcode"))],
+      // a present instant outside the window is still stale; a malformed member beside it is the form first
+      ["servedAt expired", "finding:acquisition-stale", put("servedAt", str(old))],
+      ["observedAt expired and callIndex a string: the form first", invalid, (r) => (observed(str(old))(r), put("callIndex", str("0"))(r))],
+    ];
+    for (const [name, expected, change] of cases) {
+      assert.equal(answer(() => resigned(base, (_, __, r) => change(r))), expected, `${vector}: ${name}`);
+    }
+  }
+  // two receipts, vendor at callIndex 0 and registry at 1 of one session: a well-formed set in neither form is
+  // acquisition-sessions; a malformed member of the second receipt is acquisition-invalid
+  const registry = (id: JVal, index: JVal) => (name: string, _: JObj, r: JObj) => {
+    if (name !== "registry") return;
+    r.m.set("sessionId", id);
+    r.m.set("callIndex", index);
+  };
+  const cases: [string, string, JVal, JVal][] = [
+    ["a second session whose call is not its first", "finding:acquisition-sessions", str("another.session"), num("1")],
+    ["one session, one callIndex twice", "finding:acquisition-sessions", str("mapping.session"), num("0")],
+    ["each alone in a session of its own, each its first call", differs, str("another.session"), num("0")],
+    ["the second receipt's callIndex a string", invalid, str("mapping.session"), str("1")],
+    ["the second receipt's callIndex below zero", invalid, str("mapping.session"), num("-1")],
+    ["the second receipt's sessionId a number", invalid, num("1"), num("1")],
+  ];
+  for (const [name, expected, id, index] of cases) {
+    assert.equal(answer(() => resigned(twoSources, registry(id, index))), expected, `unsigned-parameters: ${name}`);
+  }
+});
+
 test("§4.4: the binding document is held to its form and to the dialect it binds", () => {
   assert.equal(verdict(importedWith({})), "reading:matches");
   const entry = (b: JObj) => member(b.m.get("sources"), "intake") as JObj;
@@ -1373,6 +1428,34 @@ function researchCases(): Case[] {
   });
   add("two retained responses at one callIndex", "finding:acquisition-sessions", (s) => (s.callIndices.company = [0, 0, 1]));
   add("the record's own receipt at a retained response's callIndex", "finding:acquisition-sessions", (s) => (s.own.add("company"), (s.callIndices.company = [0, 1, 2, 1])));
+  // Round 9 (issue #182 item 4): each receipt's members are held to their forms before the time and session rules, a
+  // retained response's and the record's own alike; `sessionId` is any string.
+  const receiptOf = (index: number | "own", members: J) => (s: Scenario) => {
+    s.receiptHooks.push((_, i, r) => {
+      if (i !== index) return;
+      for (const [k, v] of Object.entries(members)) {
+        if (k === "observedAt") r.acquisition[k] = v;
+        else r[k] = v;
+      }
+    });
+  };
+  const own = (s: Scenario) => void s.own.add("company");
+  const invalid = "finding:acquisition-invalid";
+  add("a retained receipt's servedAt that is not a string", invalid, receiptOf(1, { servedAt: 1760529540 }));
+  add("a retained receipt's observedAt with no instant", invalid, receiptOf(2, { observedAt: "2026-10-15T11:58:30.5Z" }));
+  add("the record's own receipt's servedAt that names no time", invalid, both(own, receiptOf("own", { servedAt: "2026-02-30T11:59:00Z" })));
+  add("the record's own receipt's observedAt that is null", invalid, both(own, receiptOf("own", { observedAt: null })));
+  add("a retained receipt's callIndex that is a string", invalid, receiptOf(1, { callIndex: "1" }));
+  add("a retained receipt's callIndex below zero", invalid, receiptOf(0, { callIndex: -1 }));
+  add("a retained receipt's sessionId that is not a string", invalid, receiptOf(2, { sessionId: 2 }));
+  add("the record's own receipt's sessionId that is null", invalid, both(own, receiptOf("own", { sessionId: null })));
+  add("an expired retained receipt whose callIndex is a string: the form first", invalid, receiptOf(1, { observedAt: R_EXPIRED, callIndex: "1" }));
+  add("an expired response before a malformed one: one response's checks complete first", "finding:acquisition-stale", both(
+    receiptOf(0, { servedAt: R_EXPIRED }), receiptOf(1, { callIndex: "1" }),
+  ));
+  add("a sessionId of no token form, shared by every receipt", "reading", both(
+    own, (s) => void s.receiptHooks.push((_, __, r) => (r.sessionId = "a session, not a token: \u00fcn\u00efcode")),
+  ));
   add("a skipped research source with a record", "finding:acquisition-unexpected", both(gate, (s) => (s.records.primary = { fields: countAnswer("not-found"), responses: [] })), "reconcile");
   add("a matched clause's value pointer that does not resolve", "finding:read-failed", (s) => (s.source("combined").read.rule.clauses[0].claim.facts[0].from = PRIMARY + "/value/min"), "reconcile");
   add("a plain rule's from that does not resolve", "finding:read-failed", (s) => {

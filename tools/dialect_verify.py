@@ -2228,7 +2228,12 @@ def check_acquisition(
     def invalid(detail: str) -> Finding:
         return Finding("acquisition-invalid", f"{source.name}: {detail}")
 
+    # Check 1, the members the time and session rules read among them (round 9, issue #182 item 4):
+    # each time a string with an instant (§1), `callIndex` an integer at least zero, and `sessionId` a
+    # string, not held to the gateway's token form. A member of another type or form makes the
+    # receipt malformed, before the time and session rules.
     acquisition = receipt.get("acquisition")
+    served = instant(receipt.get("servedAt"))
     forms = (
         receipt.get("receiptVersion") == "3",
         receipt.get("kind") == "acquisition",
@@ -2240,16 +2245,17 @@ def check_acquisition(
         is_integer(receipt.get("callIndex")) and integer_of(receipt["callIndex"]) >= 0,
         is_digest(receipt.get("argumentsCommitment")),
         is_digest(receipt.get("resultDigest")),
-        isinstance(receipt.get("servedAt"), str),
+        served is not None,
         isinstance(acquisition, dict),
     )
     if not all(forms):
         raise invalid("a receipt member not of its form")
+    observed = instant(acquisition.get("observedAt"))
     if not (
         isinstance(acquisition.get("adapter"), dict)
         and isinstance(acquisition.get("shape"), str)
         and (acquisition.get("endpoint") is None or isinstance(acquisition.get("endpoint"), str))
-        and isinstance(acquisition.get("observedAt"), str)
+        and observed is not None
     ):
         raise invalid("an acquisition member not of its form")
     if "pageItems" in acquisition:
@@ -2278,13 +2284,17 @@ def check_acquisition(
         raise invalid("a result outside the canon domain") from error
     if receipt["resultDigest"] != result_digest:
         raise invalid("resultDigest is not the result's")
-    for moment in (acquisition["observedAt"], receipt["servedAt"]):
-        seconds = instant(moment)
-        if seconds is None or not at - source.max_age <= seconds <= at + 30:
+    # The time rule: check 1 left a present instant in each, so `acquisition-stale` names only one
+    # outside the window.
+    assert served is not None and observed is not None
+    for seconds in (observed, served):
+        if not at - source.max_age <= seconds <= at + 30:
             raise Finding("acquisition-stale", source.name)
 
 
 def sessions_in_a_form(receipts: list[dict[str, Any]]) -> bool:
+    """§5.2's session rule, over receipts check 1 held to their forms: `acquisition-sessions` names only
+    a well-formed session set that fails it."""
     sessions = [r["sessionId"] for r in receipts]
     indexes = [integer_of(r["callIndex"]) for r in receipts]
     shared = len(set(sessions)) == 1 and len(set(indexes)) == len(indexes)

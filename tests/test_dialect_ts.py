@@ -87,15 +87,16 @@ class SecondDialectReaderTest(unittest.TestCase):
         # TODO), which is reported and does not fail; every other test must have run and passed.
         self.assertTrue(re.search(r"(?m)^# pass [1-9][0-9]*$", run.stdout) and re.search(r"(?m)^# fail 0$", run.stdout), run.stdout[-2000:])
 
-    def test_both_readers_answer_every_research_case_alike(self) -> None:
+    def test_both_readers_answer_every_hand_written_case_alike(self) -> None:
         # The research contract of RFC 0018's round 8 (issue #176): every hand-written case of
-        # tests/test_dialect.py, each new form and each refusal, given to both readers. Their reports must be
-        # equal byte for byte, and the answer the text gives. A disagreement is a finding about the readers or
-        # the text, and is reported here, never papered over.
+        # tests/test_dialect.py, each new form and each refusal, given to both readers; and round 9's receipt
+        # answers (issue #182 item 4) on operation receipts, in versions 2 and 3, each a vector signed again.
+        # Their reports must be equal byte for byte, and the answer the text gives. A disagreement is a finding
+        # about the readers or the text, and is reported here, never papered over.
         node = self.node()
         first = first_reader_tests()
         batch, names = [], []
-        for name, expected, build in first.research_cases():
+        for name, expected, build in first.research_cases() + first.receipt_cases():
             inputs = build()
             report = first.READER.preparation_bytes(first.READER.report(inputs.verify().answer)).decode("utf-8")
             encoded = {

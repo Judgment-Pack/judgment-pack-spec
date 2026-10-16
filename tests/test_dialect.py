@@ -134,6 +134,128 @@ class Inputs:
         )
 
 
+REQUIRES_BINDING = {row["id"]: row["requiresBinding"] for row in json.loads((DIALECT / "manifest.json").read_text(encoding="utf-8"))["cases"]}
+
+
+def altered_vector(
+    name: str,
+    profile: Any = None,
+    dialect: Any = None,
+    receipt: Any = None,
+    request: Any = None,
+    only: str | None = None,
+) -> Inputs:
+    """The vector's inputs altered: each profile, then the dialect, each source's profileDigest set to its
+    profile's, then each receipt (with `only`, that source's alone), committed to `request` when one is given
+    and signed again under a key of the test's own."""
+    inputs = Inputs(name, REQUIRES_BINDING[name])
+    public, sign = signer(b"the dialect tests' own key")
+    profiles = json.loads(inputs.profiles)
+    for item in profiles:
+        if profile is not None:
+            profile(item)
+        item["publicKey"] = public.hex()
+    digests = {
+        item["id"]: READER.digest_of(READER.canon(READER.read_document(json.dumps(item).encode(), "a profile")))
+        for item in profiles
+    }
+    document = json.loads(inputs.dialect)
+    if dialect is not None:
+        dialect(document)
+    for source in document["sources"]:
+        source["profileDigest"] = digests[source["profile"]]
+    sources = json.loads(inputs.acquisitions)
+    for source_name, member in sources.items():
+        response = member["response"]
+        signed = response["receipt"]
+        if receipt is not None and only in (None, source_name):
+            receipt(signed)
+        if request is not None:
+            salt = bytes.fromhex(response["salts"]["args"])
+            signed["argumentsCommitment"] = READER.digest_of(salt + b"args:" + READER.canon(request))
+        signed["keyId"] = hashlib.sha256(public).hexdigest()[:32]
+        del signed["signature"]
+        message = b"judgment-pack-gateway/receipt/3:" + READER.canon(READER.read_document(json.dumps(signed).encode(), "a receipt"))
+        signed["signature"] = sign(message).hex()
+    inputs.profiles = json.dumps(profiles).encode("utf-8")
+    inputs.dialect = json.dumps(document).encode("utf-8")
+    inputs.acquisitions = json.dumps(sources).encode("utf-8")
+    return inputs
+
+
+# Round 9 of RFC 0018 (issue #182 item 4; spec/dialect.md §5.2, check 1, and §11, finding 3): a receipt's
+# `servedAt` or `acquisition.observedAt` that is not a string with an instant, a `callIndex` that is not an
+# integer at least zero, or a `sessionId` that is not a string, is malformed, `acquisition-invalid`, before the
+# time and session rules; `sessionId` is any string. Each receipt is signed again, so that the member named is
+# the one change the checks after the signature's can see.
+EXPIRED = {"valid": "2026-10-14T14:53:25Z", "version-3-bound": "2026-10-15T15:39:11Z"}  # 301 seconds old
+
+
+def receipt_cases() -> list[tuple[str, str, Any]]:
+    """Round 9's receipt answers on `operation` receipts, in dialect versions 2 (`valid`) and 3
+    (`version-3-bound`) alike, and the session rule over two sources (`unsigned-parameters`), as `(name,
+    expected answer, build)` in research_cases()'s form. Signed again, an acquisition whose checks all pass
+    leaves the given preparation differing, `finding:preparation-differs`."""
+    cases: list[tuple[str, str, Any]] = []
+    invalid, differs = "finding:acquisition-invalid", "finding:preparation-differs"
+
+    def add(name: str, expected: str, vector: str, change: Any, only: str | None = None) -> None:
+        cases.append((f"{vector}: {name}", expected, lambda: altered_vector(vector, receipt=change, only=only)))
+
+    def put(*path: str, value: Any = None, drop: bool = False) -> Any:
+        def change(receipt: dict[str, Any]) -> None:
+            *parents, last = path
+            holder = receipt
+            for key in parents:
+                holder = holder[key]
+            if drop:
+                del holder[last]
+            else:
+                holder[last] = value
+
+        return change
+
+    for vector in ("valid", "version-3-bound"):
+        add("servedAt a number", invalid, vector, put("servedAt", value=1760453906))
+        add("servedAt null", invalid, vector, put("servedAt", value=None))
+        add("servedAt absent", invalid, vector, put("servedAt", drop=True))
+        add("servedAt a string of another form", invalid, vector, put("servedAt", value="2026-10-14T14:58:26.000Z"))
+        add("observedAt a string that names no time", invalid, vector, put("acquisition", "observedAt", value="2026-02-30T14:58:26Z"))
+        add("observedAt a number", invalid, vector, put("acquisition", "observedAt", value=0))
+        add("callIndex a string", invalid, vector, put("callIndex", value="0"))
+        add("callIndex below zero", invalid, vector, put("callIndex", value=-1))
+        add("callIndex true", invalid, vector, put("callIndex", value=True))
+        add("callIndex absent", invalid, vector, put("callIndex", drop=True))
+        add("sessionId a number", invalid, vector, put("sessionId", value=0))
+        add("sessionId null", invalid, vector, put("sessionId", value=None))
+        add("sessionId absent", invalid, vector, put("sessionId", drop=True))
+        # any string: not held to the gateway's token form
+        add("sessionId empty", differs, vector, put("sessionId", value=""))
+        add("sessionId of no token form", differs, vector, put("sessionId", value="a session, not a token: \u00fcn\u00efcode"))
+        # a present instant outside the window is still stale; a malformed member beside it is the form first
+        add("servedAt expired", "finding:acquisition-stale", vector, put("servedAt", value=EXPIRED[vector]))
+
+        def expired_and_malformed(receipt: dict[str, Any], vector: str = vector) -> None:
+            receipt["acquisition"]["observedAt"] = EXPIRED[vector]
+            receipt["callIndex"] = "0"
+
+        add("observedAt expired and callIndex a string: the form first", invalid, vector, expired_and_malformed)
+    # Two receipts, `vendor` at callIndex 0 and `registry` at 1 of one session: a well-formed set in neither form is
+    # `acquisition-sessions`; a malformed member of the second receipt is `acquisition-invalid`.
+    two = "unsigned-parameters"
+
+    def session(sid: Any, index: Any) -> Any:
+        return lambda r: r.update({"sessionId": sid, "callIndex": index})
+
+    add("a second session whose call is not its first", "finding:acquisition-sessions", two, session("another.session", 1), "registry")
+    add("one session, one callIndex twice", "finding:acquisition-sessions", two, session("mapping.session", 0), "registry")
+    add("each alone in a session of its own, each its first call", differs, two, session("another.session", 0), "registry")
+    add("the second receipt's callIndex a string", invalid, two, session("mapping.session", "1"), "registry")
+    add("the second receipt's callIndex below zero", invalid, two, session("mapping.session", -1), "registry")
+    add("the second receipt's sessionId a number", invalid, two, session(1, 1), "registry")
+    return cases
+
+
 class DialectVectorTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -525,42 +647,7 @@ class DialectVectorTests(unittest.TestCase):
         receipt: Any = None,
         request: Any = None,
     ) -> Inputs:
-        """The vector's inputs altered: each profile, then the dialect, each source's profileDigest set to its
-        profile's, then each receipt, committed to `request` when one is given and signed again under a key of
-        the test's own."""
-        inputs = self.inputs(name)
-        public, sign = signer(b"the dialect tests' own key")
-        profiles = json.loads(inputs.profiles)
-        for item in profiles:
-            if profile is not None:
-                profile(item)
-            item["publicKey"] = public.hex()
-        digests = {
-            item["id"]: READER.digest_of(READER.canon(READER.read_document(json.dumps(item).encode(), "a profile")))
-            for item in profiles
-        }
-        document = json.loads(inputs.dialect)
-        if dialect is not None:
-            dialect(document)
-        for source in document["sources"]:
-            source["profileDigest"] = digests[source["profile"]]
-        sources = json.loads(inputs.acquisitions)
-        for member in sources.values():
-            response = member["response"]
-            signed = response["receipt"]
-            if receipt is not None:
-                receipt(signed)
-            if request is not None:
-                salt = bytes.fromhex(response["salts"]["args"])
-                signed["argumentsCommitment"] = READER.digest_of(salt + b"args:" + READER.canon(request))
-            signed["keyId"] = hashlib.sha256(public).hexdigest()[:32]
-            del signed["signature"]
-            message = b"judgment-pack-gateway/receipt/3:" + READER.canon(READER.read_document(json.dumps(signed).encode(), "a receipt"))
-            signed["signature"] = sign(message).hex()
-        inputs.profiles = json.dumps(profiles).encode("utf-8")
-        inputs.dialect = json.dumps(document).encode("utf-8")
-        inputs.acquisitions = json.dumps(sources).encode("utf-8")
-        return inputs
+        return altered_vector(name, profile, dialect, receipt, request)
 
     def _with_arguments(self, arguments: Any, parameters: Any = None) -> Any:
         inputs = self.inputs("http-shaped-source")
@@ -687,6 +774,14 @@ class DialectVectorTests(unittest.TestCase):
             with self.subTest(vector=name):
                 answer = self._altered(name, receipt=paged).verify().answer
                 self.assertEqual("acquisition-invalid", answer.get("finding"), answer)
+
+    def test_a_receipt_member_of_another_form_is_invalid_before_the_time_and_session_rules(self) -> None:
+        # Round 9 (issue #182 item 4) on operation receipts, in versions 2 and 3: receipt_cases(), which the
+        # cross-reader test gives the second reader too.
+        for name, expected, build in receipt_cases():
+            with self.subTest(case=name):
+                answer = build().verify().answer
+                self.assertEqual(expected, answer_code(answer), answer.get("detail"))
 
     def test_a_paged_mcp_receipt_is_refused_the_amendments_one_restriction(self) -> None:
         # Review round 5, finding 1: a signed acquisition of shape mcp whose receipt carries pageItems was
@@ -1828,6 +1923,36 @@ def research_cases() -> list[tuple[str, str, Any]]:
     add("the record's own receipt expired", "finding:acquisition-stale", both(lambda s: s.own.add("company"), lambda s: s.receipt_hooks.append(lambda n, i, r: r.__setitem__("servedAt", RESEARCH_EXPIRED) if i == "own" else None)))
     add("two retained responses at one callIndex", "finding:acquisition-sessions", lambda s: s.call_indices.__setitem__("company", [0, 0, 1]))
     add("the record's own receipt at a retained response's callIndex", "finding:acquisition-sessions", both(lambda s: s.own.add("company"), lambda s: s.call_indices.__setitem__("company", [0, 1, 2, 1])))
+    # Round 9 (issue #182 item 4): each receipt's members are held to their forms before the time and session
+    # rules, a retained response's and the record's own alike; `sessionId` is any string.
+    def receipt_of(index: Any, **members: Any) -> Any:
+        def change(n: str, i: Any, r: dict[str, Any]) -> None:
+            if i == index:
+                for key, value in members.items():
+                    if key == "observedAt":
+                        r["acquisition"][key] = value
+                    else:
+                        r[key] = value
+
+        return lambda s: s.receipt_hooks.append(change)
+
+    own = lambda s: s.own.add("company")  # noqa: E731
+    invalid = "finding:acquisition-invalid"
+    add("a retained receipt's servedAt that is not a string", invalid, receipt_of(1, servedAt=1760529540))
+    add("a retained receipt's observedAt with no instant", invalid, receipt_of(2, observedAt="2026-10-15T11:58:30.5Z"))
+    add("the record's own receipt's servedAt that names no time", invalid, both(own, receipt_of("own", servedAt="2026-02-30T11:59:00Z")))
+    add("the record's own receipt's observedAt that is null", invalid, both(own, receipt_of("own", observedAt=None)))
+    add("a retained receipt's callIndex that is a string", invalid, receipt_of(1, callIndex="1"))
+    add("a retained receipt's callIndex below zero", invalid, receipt_of(0, callIndex=-1))
+    add("a retained receipt's sessionId that is not a string", invalid, receipt_of(2, sessionId=2))
+    add("the record's own receipt's sessionId that is null", invalid, both(own, receipt_of("own", sessionId=None)))
+    add("an expired retained receipt whose callIndex is a string: the form first", invalid, receipt_of(1, observedAt=RESEARCH_EXPIRED, callIndex="1"))
+    add("an expired response before a malformed one: one response's checks complete first", "finding:acquisition-stale", both(
+        receipt_of(0, servedAt=RESEARCH_EXPIRED), receipt_of(1, callIndex="1"),
+    ))
+    add("a sessionId of no token form, shared by every receipt", "reading", both(
+        own, lambda s: s.receipt_hooks.append(lambda n, i, r: r.__setitem__("sessionId", "a session, not a token: \u00fcn\u00efcode")),
+    ))
     add("a skipped research source with a record", "finding:acquisition-unexpected", both(gate, lambda s: s.records.__setitem__("primary", {"fields": count_answer("not-found"), "responses": []})), "reconcile")
     add("a matched clause's value pointer that does not resolve", "finding:read-failed", lambda s: s.source("combined")["read"]["rule"]["clauses"][0]["claim"]["facts"][0].__setitem__("from", PRIMARY + "/value/min"), "reconcile")
     add("a plain rule's from that does not resolve", "finding:read-failed", both(

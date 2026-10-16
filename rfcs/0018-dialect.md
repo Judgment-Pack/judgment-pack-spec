@@ -593,16 +593,20 @@ answers by the first declaration of the name whose `type` is one of the six.
 Round 9, issue #182 item 2, makes the reconciliation condition list the rule (§6.4), including
 descendants of `/value` and `/values` and the restrictions on listed sources and declared fields,
 so it is no longer a reading left to the readers; neither reader's answer changes. Item 3 removes
-a response case the acquisitions cannot carry; neither reader implements that case. The separate
-readers' follow-up updates only the receipt rule in both readers for the three answers below
-and the TypeScript README's quotation of the removed "Pointers are …" sentence. Amendment
-decisions 3 and 4 require no reader change. Issue #182 item 4 settles a disagreement no vector
-holds, also present on operation receipts: a non-string `servedAt` or `observedAt` gives
-`acquisition-invalid` in the first reader and `acquisition-stale` in the second;
-a malformed `callIndex` or `sessionId` gives `acquisition-invalid` in the first and
-`acquisition-sessions` in the second. Both readers also currently give `acquisition-stale` for a
-string with no instant. The follow-up holds all three cases to `acquisition-invalid` in versions
-2 and 3. None of these corrections is claimed here, and none supplies a vector.
+a response case the acquisitions cannot carry; neither reader implements that case. Amendment
+decisions 3 and 4 require no reader change. Issue #182 item 4 settled a disagreement no vector
+holds, also present on operation receipts: a non-string `servedAt` or `observedAt` gave
+`acquisition-invalid` in the first reader and `acquisition-stale` in the second; a malformed
+`callIndex` or `sessionId` gave `acquisition-invalid` in the first and `acquisition-sessions` in
+the second; and both gave `acquisition-stale` for a string with no instant. The pull request for
+issue #185 corrected both readers to the text, by one author who had read both: all three cases
+are `acquisition-invalid` in each, before the time and session rules, in versions 2 and 3, on
+operation receipts, every retained research response and the record's own receipt, and a
+`sessionId` is otherwise any string. The TypeScript README now gives §6.4's closed condition list
+in place of the removed "Pointers are …" sentence. Each reader has a unit case for each answer,
+and the cross-reader test gives both readers the same cases, their reports equal byte for byte;
+the twelve vectors' answers do not change. That correction adds nothing to the second reader's
+independence, and supplies no vector.
 
 One vector is answered otherwise than `verify-run` answers it, by design:
 `disposition-differs-from-audit` alters the Runner's export, not the preparation or the record
@@ -2228,7 +2232,8 @@ vector; the counts; and this section's equality with the companion document's §
    twelfth vectors were staged it reads dialect version 3 as well, the unbound form with its binding
    document among it. Since the pull request for issue #176 it reads `research` as the
    research-contract amendment defines it, bound directly or through a binding document, and
-   refuses `http`, `sql` and `web` as `kind-unread` after checking their forms.
+   refuses `http`, `sql` and `web` as `kind-unread` after checking their forms. Since the pull
+   request for issue #185 it gives round 9's receipt answers (§5.2, §11).
 2. **`tools/dialect-verify-ts/`**, the second reader, written from the companion document's text
    alone, in TypeScript, by a different author, under the protocol the Evidence records, at
    `e2d41c5`. It reads the same versions and kind, and refuses the rest as the first does. The
@@ -2239,7 +2244,8 @@ vector; the counts; and this section's equality with the companion document's §
    The pull request for issue #176 extended both to read `research` as the research-contract
    amendment defines it, by one author who had read both, from the text: that adds nothing to the
    second's independence, and the two readers' agreement on the contract's hand-written documents
-   is that author's.
+   is that author's. The pull request for issue #185 corrected both to round 9's receipt answers
+   (§5.2, §11), by one author who had read both, which adds nothing to it either.
 3. **The Runner**, the reference preparer, with `verify-run`, a third reader of the same bytes in its
    own repository, which reads every vector through the Runner's own code.
 4. **The Desk's inputs**, a writer: its mapping editor and import recipes write version-2 documents

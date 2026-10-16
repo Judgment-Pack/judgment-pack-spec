@@ -137,6 +137,18 @@ maxima of §12 in phase 3. `http`, `sql` and `web` are still held to their forms
 hold each. No vector holds the kind; the two readers' agreement on its hand-written documents is one
 author's.
 
+**Round 9.** RFC 0018's round 9 (issue #182 item 4) decided the receipt members the time and
+session rules read, and the pull request for issue #185 corrected this reader and the first to it,
+by one author who had read both, from the text (§5.2, check 1; §11, finding 3): a `servedAt` or
+`acquisition.observedAt` that is not a string with an instant, a `callIndex` that is not an integer
+at least zero, or a `sessionId` that is not a string is `acquisition-invalid`, before the time and
+session rules, in versions 2 and 3 and on `operation` and `research` receipts alike; a `sessionId`
+is otherwise any string. This reader had given `acquisition-stale` for such a time and
+`acquisition-sessions` for such a `callIndex` or `sessionId`; both had given `acquisition-stale`
+for a string with no instant. The tests in [`test/units.test.ts`](test/units.test.ts) marked
+"round 9" hold each, and the first reader's tests give both readers the same cases. That
+correction is no part of this reader's independence.
+
 ## Where the text was not enough
 
 No vector depends on any point below: every vector gets the same answer under either reading of each.
@@ -151,22 +163,35 @@ No vector depends on any point below: every vector gets the same answer under ei
    refused. The equation is §5's as written: `S` below `L`, and the canonical encoding of [`S`]B − [h]A
    equal to `R`, byte for byte, `R` not otherwise decoded. (The first version decoded `R` and compared
    points, which gives the same answer for every signature; it now compares bytes, as §5 says.)
-2. **The receipt's member forms**, gateway §1.2a (§5.2, check 1: "each member this list reads is of the
-   form gateway §1.2a gives it"), in another repository and not read. Taken: `receiptVersion` the string
-   `"3"`, `kind` the string `"acquisition"`, `keyId` 32 and `signature` 128 lowercase hexadecimal
-   characters, `source` and `authority` strings, `acquisition` an object, `argumentsCommitment` and
+2. **The receipt's member forms**, gateway §1.2a (§5.2, check 1: "each member checks 1–5 or the
+   time and session rules below read, except `E.sessionId`, is of the form gateway §1.2a gives
+   it"), in another repository and not read. Taken: `receiptVersion` the string `"3"`, `kind` the
+   string `"acquisition"`, `keyId` 32 and `signature` 128 lowercase hexadecimal characters,
+   `source` and `authority` strings, `acquisition` an object, `argumentsCommitment` and
    `resultDigest` digests; `adapter`, `shape` and `endpoint` are held by check 3's comparison. The
-   citation's `callIndex` and `sessionId` are of the gateway's forms too; one that is not (a `callIndex`
-   that is not a non-negative integer, a `sessionId` that is not a string) is taken as
-   `acquisition-sessions`, the check that reads them, and `callIndex` values are compared by value.
+   members the time and session rules read have the forms the text itself gives them since round 9
+   (below, "Rules the text states"), and `callIndex` values are compared by value.
 
 ### Rules the text states
 
-These were listed as gaps in the first version; the text decides each.
+These were listed as gaps in the first version or in an extension; the text decides each.
 
-- **A receipt time with no instant** is `acquisition-stale`: §5.2, "`E.acquisition.observedAt` and
-  `E.servedAt` MUST each have an instant no more than the source's `maxAge` seconds before `verifiedAt`
-  and no more than 30 seconds after it; otherwise `acquisition-stale`."
+- **A receipt member the time and session rules read, of another type or form**, is
+  `acquisition-invalid`, before those rules: §5.2, check 1, as round 9 writes it, "`E.servedAt` and
+  `E.acquisition.observedAt` have instants (§1). `E.callIndex` is an integer (§1) at least zero.
+  `E.sessionId` is a string; this document does not hold it to gateway §3a's token form. A member
+  of another type or form makes the receipt malformed, `acquisition-invalid`; these form checks
+  precede the time and session rules." So `acquisition-stale` names only a present instant outside
+  the window, and `acquisition-sessions` only a well-formed session set that fails the session
+  rule. Until the pull request for issue #185, this reader took a time with no instant, or not a
+  string, as `acquisition-stale`, and a malformed `callIndex` or `sessionId` as
+  `acquisition-sessions`.
+- **A reconciliation's condition pointers** are a closed list: §6.4, as round 9 writes it, "In a
+  condition, the pointer list is closed": a field entry, `/sources/<source>/fields/<field>` or
+  `/current/fields/<field>`, its `status`, or its `value` or `values` and their descendants, where
+  `<source>` is a source the read's `sources` lists and `<field>` a field that source declares (for
+  `/current`, this source); any other pointer in a condition is `input-malformed`. Both readers had
+  read the list as closed before the text said so, and neither answer changed.
 - **A record without `inputs.facts` or `inputs.evidence`** differs: §11, finding 6, "the record's
   `inputs.facts` is not the facts document (§8.1), its `inputs.evidence` is not the
   evidence-availability document, ... each compared as JSON values."
@@ -209,10 +234,6 @@ them.
   so are never under `values`; `/fields/<name>/values/<index>/value` has no descendants, where
   `/fields/<name>/value` has; `<name>` is a declared field's, and `<index>` an array index's form
   (§1).
-- **A reconciliation's conditions** (§6.4, "Pointers are ..."): a condition reads only a field entry
-  of a declared field of the current source or of a source the read names, that entry's `status`, or
-  its `value` or `values` and their descendants; the text closes the set of `from`s and lists these
-  pointers without saying the list is closed for conditions.
 - **The units of a maximum** (§12): a decimal string's 128 is counted in characters; every other
   string maximum in UTF-8 bytes, an answer's field name among them, declared or not.
 - **A field declared twice** is `input-malformed` once forms are checked; before that, phase 3

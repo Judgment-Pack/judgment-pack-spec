@@ -207,6 +207,26 @@ here.
 
 ### Changed
 
+- Both readers, `tools/dialect_verify.py` and `tools/dialect-verify-ts/`, now give RFC 0018's
+  round-9 receipt answers (issue #185, and with it issue #182): a receipt's `servedAt` or
+  `acquisition.observedAt` that is not a string with an instant, a `callIndex` that is not an
+  integer at least zero, or a `sessionId` that is not a string is `acquisition-invalid`, before
+  the time and session rules ([`spec/dialect.md`](spec/dialect.md) §5.2, check 1, and §11,
+  finding 3), in versions 2 and 3, on `operation` receipts, every retained `research` response
+  and a research record's own receipt; a `sessionId` is otherwise any string, not held to the
+  gateway's token form. `acquisition-stale` now names only a present instant outside the window,
+  and `acquisition-sessions` only a well-formed session set that fails the session rule. Before,
+  the second reader gave `acquisition-stale` for a time that was not a string and
+  `acquisition-sessions` for a malformed `callIndex` or `sessionId`, and both gave
+  `acquisition-stale` for a string with no instant. Each reader has a unit case for each answer:
+  `tests/test_dialect.py` adds cases on `operation` receipts, signed again over the `valid`,
+  `version-3-bound` and `unsigned-parameters` vectors, and on research receipts, and the
+  cross-reader test gives both readers all of them, their reports equal byte for byte. The twelve
+  staged vectors' answers do not change. The TypeScript reader's README gives §6.4's closed
+  condition list in place of the removed "Pointers are …" sentence, and the round-9 receipt rule
+  in place of its old receipt readings; RFC 0018's Evidence and Implementation say what is now
+  so. No sentence of §§1–14 changes. The correction is one author's, who read both readers, and
+  adds nothing to the second reader's independence.
 - [RFC 0018](rfcs/0018-dialect.md) and [the dialect](spec/dialect.md) are amended for
   issues #179 and #182 (2026-10-15, round 9): fixture 8 follows RFC 0020's round 2, admitting a
   research stage once a Runner pins its release form and encoding (judgment-pack-runner#88),
