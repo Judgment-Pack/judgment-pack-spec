@@ -510,7 +510,7 @@ two readers' agreement is that author's. At round 11 no skipped-source vector wa
 
 This amendment records the maintainer's decision on
 [issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189), option A, on pull
-request #NNN: the Specification and companion take the Runner's form in §§9.2–9.3, the outcome
+request #194: the Specification and companion take the Runner's form in §§9.2–9.3, the outcome
 keeping its five-member claim and status `unknown`, each lineage entry having status `unknown`
 and `dependencies`, all declared source parameters in parameter-name order, including those
 that have a value. Both readers follow, and the thirty-ninth vector,
