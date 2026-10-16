@@ -569,7 +569,7 @@ the preparation commits the bound dialect alone, and verification establishes no
 
 This amendment records the maintainer's decision on
 [issue #197](https://github.com/Judgment-Pack/judgment-pack-spec/issues/197), option A, on
-[pull request NNN](https://github.com/Judgment-Pack/judgment-pack-spec/pull/NNN).
+[pull request 198](https://github.com/Judgment-Pack/judgment-pack-spec/pull/198).
 Its review is round 14 of this RFC; the cross-vendor review follows, run by the coordinator.
 The status stays Accepted. The Specification and companion are amended equally.
 
