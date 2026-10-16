@@ -1244,12 +1244,15 @@ response's `profile`, `request`, `result`, `receipt` and `salts`; the record's o
 The verifier trusts profiles out of band (§5.1), never by their presence in a fixture.
 
 `preparation.json` and `preparation.sha256` hold what the verifier must compute: the preparation's
-canonical bytes and their digest, recomputed from the retained inputs at its `verifiedAt`. A
-fixture whose inputs were changed after the run, so that no preparation can be computed from
-them, as in item 7's `acquisition-invalid` variants, holds instead the preparation the run
-recorded, fixed, and expects the finding the change gives; the Runner's manifest marks it
-`retained` `recorded`. The record is the runtime evaluation record, distinct from the research
-record in `sources.json`.
+canonical bytes and their digest, recomputed from the retained inputs at the fixture's instant, the
+`verifiedAt` of the preparation `preparation.json` holds, which the Runner's manifest gives as the
+fixture's `verifiedAt`; an export that retains another preparation in its place, as item 6's old
+preparation, may name another instant, one second earlier in the two staged
+`changed-binding-old-preparation` vectors. A fixture whose inputs were changed after the run, so
+that no preparation can be computed from them, as in item 7's `acquisition-invalid` variants, holds
+instead the preparation the run recorded, fixed, and expects the finding the change gives; the
+Runner's manifest marks it `retained` `recorded`. The record is the runtime evaluation record,
+distinct from the research record in `sources.json`.
 The staging manifest gives `requiresBinding` and the expected answer, `expectedResult` with
 `expectedBinding` for a reading or `expectedFinding` for a finding, as for every staged vector.
 The fixture layout is fixed. The reference Runner prepares the `research` kind since its pull

@@ -23,8 +23,8 @@ given, by making the bound dialect of the two and reading that as every dialect 
 research-contract amendment (RFC 0018, round 8) it reads `research` as §§4.3, 4.4, 5.1, 5.2, 6.4, 9 and
 11 define it: the requested fields and capabilities, the research record's typed answers and their
 citations, the profiles a source is bound to, each retained response replayed under its own profile,
-and the reconciliation read; the Runner's twenty-six research vectors hold the kind. It uses the Python
-standard library alone.
+and the reconciliation read; the Runner's twenty-six research vectors hold the kind. It uses the
+Python standard library alone.
 
     python tools/dialect_verify.py --dialect mapping.json --case case.json \\
         --acquisitions sources.json --profiles profiles.json --preparation preparation.json \\

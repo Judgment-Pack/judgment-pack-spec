@@ -34,9 +34,10 @@ SOURCE = {
     "commit": "05636eda96a9588279d61a6272625be859a28117",
     "path": "vectors/preparation",
     "mergedAs": "82116bfab7705f74ca3e493c9722dd3831c7418f",
-    # The tenth vector, from the Runner's main after its pull request 80 (the amendment of 2026-10-15); the
-    # eleventh and twelfth, of dialect version 3, from its main after its pull request 83; and the twenty-six
-    # research vectors, of the two examples of §11's fixture plan, from its main after its pull request 97.
+    # The tenth vector, from the Runner's main after its pull request 80 (the amendment of
+    # 2026-10-15); the eleventh and twelfth, of dialect version 3, from its main after its pull
+    # request 83; and the twenty-six research vectors, of the two examples of §11's fixture plan,
+    # from its main after its pull request 97.
     "extendedBy": [
         {
             "pullRequest": 80,
@@ -84,11 +85,12 @@ SOURCE = {
 }
 # The count as the RFC and the companion spell it.
 WORDS = {9: "nine", 10: "ten", 11: "eleven", 12: "twelve", 38: "thirty-eight"}
-# The Runner's manifest says what each vector's export retains (its README, "What a vector holds"): `equal`, the
-# preparation the Runner computes from the vector's inputs, which is preparation.json; `altered`, another, while
-# preparation.json is still that computation; and `recorded`, the preparation the run recorded, held fixed as
-# preparation.json, when the vector's inputs were changed after the run, so that no preparation can be computed
-# from them (conformance/dialect/README.md).
+# The Runner's manifest says what each vector's export retains (its README, "What a vector holds"):
+# `equal`, the preparation the Runner computes from the vector's inputs, which is preparation.json;
+# `altered`, another, while preparation.json is still that computation; and `recorded`, the
+# preparation the run recorded, held fixed as preparation.json, when the vector's inputs were
+# changed after the run, so that no preparation can be computed from them
+# (conformance/dialect/README.md).
 RETAINED = {"equal", "altered", "recorded"}
 FINDINGS = {
     "profile-mismatch",
@@ -223,13 +225,20 @@ def altered_vector(
 
 
 def vector_cases() -> list[tuple[str, str, Any]]:
-    """Every staged vector as research_cases() gives a case, `(name, expected answer, build)`, its answer the
-    row of this repository's manifest: tests/test_dialect_ts.py gives each to both readers and holds their
-    reports equal, byte for byte."""
+    """Every staged vector as research_cases() gives a case, `(name, expected answer, build)`, its
+    answer the row of this repository's manifest: tests/test_dialect_ts.py gives each to both
+    readers and holds their reports equal, byte for byte."""
     cases: list[tuple[str, str, Any]] = []
     for row in json.loads((DIALECT / "manifest.json").read_text(encoding="utf-8"))["cases"]:
-        expected = "reading" if row["expectedResult"] == "reading" else f"finding:{row['expectedFinding']}"
-        cases.append((f"vector {row['id']}", expected, lambda row=row: Inputs(row["id"], row["requiresBinding"])))
+        if row["expectedResult"] == "reading":
+            expected = "reading"
+        else:
+            expected = f"finding:{row['expectedFinding']}"
+
+        def build(row: dict[str, Any] = row) -> Inputs:
+            return Inputs(row["id"], row["requiresBinding"])
+
+        cases.append((f"vector {row['id']}", expected, build))
     return cases
 
 
@@ -394,9 +403,9 @@ class DialectVectorTests(unittest.TestCase):
                 self.assertIn(expected, text)
 
     def test_the_companion_counts_the_vectors_of_the_commits_it_names(self) -> None:
-        # The companion's Status names the Runner commits its vectors were copied from, and counts the vectors
-        # of the commits it names: thirty-eight, from four commits, since the amendment that staged the
-        # research vectors.
+        # The companion's Status names the Runner commits its vectors were copied from, and counts
+        # the vectors of the commits it names: thirty-eight, from four commits, since the amendment
+        # that staged the research vectors.
         text = " ".join((ROOT / COMPANION).read_text(encoding="utf-8").split())
         source = self.manifest["source"]
         self.assertIn(source["commit"], text)
@@ -406,11 +415,12 @@ class DialectVectorTests(unittest.TestCase):
 
     def test_the_first_reader_recomputes_every_preparation(self) -> None:
         # The preparation's canonical bytes, recomputed from the dialect, the case, the acquisitions
-        # and the profiles at the vector's verifiedAt, are the Runner's, byte for byte. That instant is
-        # the given preparation's in every vector but the two `changed-binding-old-preparation`, whose
-        # export retains the first installation's preparation, of an earlier instant (`altered`): there
-        # the reader is given preparation.json, of the vector's own. A vector retained `recorded` is not
-        # recomputed: its inputs were changed after the run (test_a_recorded_preparation_is_held_fixed).
+        # and the profiles at the vector's verifiedAt, are the Runner's, byte for byte. That instant
+        # is the given preparation's in every vector but the two `changed-binding-old-preparation`,
+        # whose export retains the first installation's preparation, of an earlier instant
+        # (`altered`): there the reader is given preparation.json, of the vector's own. A vector
+        # retained `recorded` is not recomputed: its inputs were changed after the run
+        # (test_a_recorded_preparation_is_held_fixed).
         for vector in self.runner["vectors"]:
             name = vector["name"]
             with self.subTest(vector=name):
@@ -434,8 +444,9 @@ class DialectVectorTests(unittest.TestCase):
         # `retained: "recorded"` (RETAINED): the vector's inputs were changed after the run, so no
         # preparation can be computed from them. Its preparation.json is the preparation the run
         # recorded, which the export retains: it is held to the digest and the binding the Runner's
-        # manifest gives, as it is, and not recomputed. The reader gives the finding this repository's
-        # manifest records, the code the Runner's refusal names, and computes no preparation.
+        # manifest gives, as it is, and not recomputed. The reader gives the finding this
+        # repository's manifest records, the code the Runner's refusal names, and computes no
+        # preparation.
         recorded = []
         for vector in self.runner["vectors"]:
             name, retained = vector["name"], vector["preparation"]["retained"]
@@ -448,17 +459,22 @@ class DialectVectorTests(unittest.TestCase):
                 digest = "sha256:" + hashlib.sha256(held).hexdigest()
                 self.assertEqual(vector["preparation"]["sha256"], digest)
                 self.assertEqual((VECTORS / name / "preparation.sha256").read_text(), digest)
-                self.assertEqual(vector["preparation"]["binding"].encode("ascii"), READER.binding_of(digest))
+                binding = vector["preparation"]["binding"].encode("ascii")
+                self.assertEqual(binding, READER.binding_of(digest))
                 inputs = self.inputs(name)
                 self.assertEqual(held, inputs.preparation)
                 row = self.rows[name]
                 self.assertEqual("finding", row["expectedResult"])
                 self.assertIn(f"({row['expectedFinding']})", vector["verifyRun"]["error"])
                 outcome = inputs.verify()
-                self.assertEqual(row["expectedFinding"], outcome.answer.get("finding"), outcome.answer)
+                finding = outcome.answer.get("finding")
+                self.assertEqual(row["expectedFinding"], finding, outcome.answer)
                 self.assertIsNone(outcome.preparation)
         self.assertEqual(
-            ["gtm-company-person-changed-response-retained-result", "work-item-triage-changed-response-record-fields"],
+            [
+                "gtm-company-person-changed-response-retained-result",
+                "work-item-triage-changed-response-record-fields",
+            ],
             recorded,
         )
 
@@ -962,9 +978,10 @@ class DialectVectorTests(unittest.TestCase):
         self.assertEqual("input-over-bound", answer(version_3, b"[" * 33 + b"]" * 33).get("refused"))
 
     def test_the_vector_bound_at_import_is_the_runners_import(self) -> None:
-        # The Runner's manifest marks each vector of a dialect bound at import and says which file is which;
-        # those are the vectors that hold a binding document, and the ones this repository reads unbound.json of.
-        # Each one's bound dialect, made of unbound.json and binding.json (§4.4), is its mapping.json.
+        # The Runner's manifest marks each vector of a dialect bound at import and says which file
+        # is which; those are the vectors that hold a binding document, and the ones this repository
+        # reads unbound.json of. Each one's bound dialect, made of unbound.json and binding.json
+        # (§4.4), is its mapping.json.
         for vector in self.runner["vectors"]:
             with self.subTest(vector=vector["name"]):
                 directory = VECTORS / vector["name"]
@@ -974,11 +991,14 @@ class DialectVectorTests(unittest.TestCase):
                     self.assertEqual(
                         {"published": "unbound.json", "binding": "binding.json", "bound": "mapping.json"}, vector["import"]
                     )
-                    unbound = READER.read_document((directory / "unbound.json").read_bytes(), "unbound.json")
-                    binding = READER.parse_binding(READER.read_document((directory / "binding.json").read_bytes(), "binding.json"))
-                    mapping = READER.read_document((directory / "mapping.json").read_bytes(), "mapping.json")
+                    def document(file: str) -> Any:
+                        return READER.read_document((directory / file).read_bytes(), file)
+
+                    unbound, mapping = document("unbound.json"), document("mapping.json")
+                    binding = READER.parse_binding(document("binding.json"))
                     self.assertEqual(READER.digest_of(READER.canon(unbound)), binding["dialect"])
-                    self.assertEqual(READER.canon(mapping), READER.canon(READER.bind(unbound, binding)))
+                    bound = READER.bind(unbound, binding)
+                    self.assertEqual(READER.canon(mapping), READER.canon(bound))
 
     def test_the_bound_dialect_is_the_vectors_mapping_and_the_preparation_commits_it_alone(self) -> None:
         directory = VECTORS / "unbound-bound-at-import"
@@ -1486,11 +1506,11 @@ class DialectVectorTests(unittest.TestCase):
         self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
 
 
-# The research contract (RFC 0018, round 8, issue #176): hand-written documents of every new form and
-# refusal, signed under a key of the tests' own. The Runner's twenty-six research vectors hold the kind as
-# it records it; these are this repository's checks of its two readers, not vectors, and no claim could
-# cite them. Each case is answered by the first reader here and by the second in tests/test_dialect_ts.py,
-# which holds the two reports equal.
+# The research contract (RFC 0018, round 8, issue #176): hand-written documents of every new form
+# and refusal, signed under a key of the tests' own. The Runner's twenty-six research vectors hold
+# the kind as it records it; these are this repository's checks of its two readers, not vectors, and
+# no claim could cite them. Each case is answered by the first reader here and by the second in
+# tests/test_dialect_ts.py, which holds the two reports equal.
 
 RESEARCH_AT = "2026-10-15T12:00:00Z"
 RESEARCH_SERVED = "2026-10-15T11:59:00Z"

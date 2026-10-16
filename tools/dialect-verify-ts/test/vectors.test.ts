@@ -2,8 +2,9 @@
 // conformance/dialect/manifest.json; and, byte for byte, the recomputed preparation to the vector's
 // preparation.json, its digest to preparation.sha256, and a reading's facts and evidence-availability
 // documents to the export's run.input.facts and run.input.evidence (conformance/dialect/README.md).
-// A vector the Runner's manifest marks `retained: "recorded"` is not recomputed: its inputs were changed
-// after the run, and its preparation.json, the preparation the run recorded, is held to the manifest's digest.
+// A vector the Runner's manifest marks `retained: "recorded"` is not recomputed: its inputs were
+// changed after the run, and its preparation.json, the preparation the run recorded, is held to the
+// manifest's digest.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
@@ -21,12 +22,17 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "co
 const manifest = JSON.parse(readFileSync(join(ROOT, "manifest.json"), "utf8")) as {
   cases: { id: string; path: string; requiresBinding: boolean; expectedResult: string; expectedBinding?: string; expectedFinding?: string }[];
 };
-// The Runner's manifest, for two of its members alone: the vector's `verifiedAt`, and what its export retains,
-// `preparation.retained` (`equal`, `altered` or `recorded`) with the digest `preparation.sha256`. The reader
-// reads nothing of it.
+// The Runner's manifest, for two of its members alone: the vector's `verifiedAt`, and what its
+// export retains, `preparation.retained` (`equal`, `altered` or `recorded`) with the digest
+// `preparation.sha256`. The reader reads nothing of it.
+type RunnerVector = {
+  name: string;
+  verifiedAt: string;
+  preparation: { sha256: string; retained: string };
+};
 const runner = new Map(
   (JSON.parse(readFileSync(join(ROOT, "vectors", "manifest.json"), "utf8")) as {
-    vectors: { name: string; verifiedAt: string; preparation: { sha256: string; retained: string } }[];
+    vectors: RunnerVector[];
   }).vectors.map((v) => [v.name, v]),
 );
 
@@ -63,23 +69,30 @@ for (const row of manifest.cases) {
     const vector = runner.get(row.id)!;
     const expected = readFileSync(join(dir, "preparation.json"));
     const recorded = vector.preparation.retained === "recorded";
-    assert.ok(["equal", "altered", "recorded"].includes(vector.preparation.retained), `${row.id}: retained`);
-    // The recomputation preparation.json holds is at the vector's verifiedAt: the given preparation's, but in an
-    // export that retains an earlier run's preparation (`altered`), where this reader is given preparation.json,
-    // of the vector's own instant.
-    const shifted = JSON.parse(Buffer.from(inputs.preparation).toString("utf8")).verifiedAt !== vector.verifiedAt;
-    if (shifted) assert.equal(vector.preparation.retained, "altered", `${row.id}: a preparation of another instant`);
+    const retainedValues = ["equal", "altered", "recorded"];
+    assert.ok(retainedValues.includes(vector.preparation.retained), `${row.id}: retained`);
+    // The recomputation preparation.json holds is at the vector's verifiedAt: the given
+    // preparation's, but in an export that retains an earlier run's preparation (`altered`), where
+    // this reader is given preparation.json, of the vector's own instant.
+    const givenAt = JSON.parse(Buffer.from(inputs.preparation).toString("utf8")).verifiedAt;
+    const shifted = givenAt !== vector.verifiedAt;
+    if (shifted) {
+      const what = `${row.id}: a preparation of another instant`;
+      assert.equal(vector.preparation.retained, "altered", what);
+    }
     const recomputedAt = (given: Inputs, first: Result) =>
       (shifted ? verify({ ...given, preparation: Uint8Array.from(expected) }) : first).recomputed;
 
     if (recorded) {
-      // the preparation the run recorded, held fixed: its digest is the manifest's, and nothing is recomputed
+      // the preparation the run recorded, held fixed: its digest is the manifest's, and nothing is
+      // recomputed
       const digest = "sha256:" + createHash("sha256").update(expected).digest("hex");
-      assert.equal(digest, vector.preparation.sha256, `${row.id}: the recorded preparation's digest`);
-      assert.equal(readFileSync(join(dir, "preparation.sha256"), "utf8"), digest, `${row.id}: preparation.sha256`);
+      assert.equal(digest, vector.preparation.sha256, `${row.id}: the recorded digest`);
+      const file = readFileSync(join(dir, "preparation.sha256"), "utf8");
+      assert.equal(file, digest, `${row.id}: preparation.sha256`);
       const retained = preparationForm(read(inputs.preparation).value);
-      assert.ok(Buffer.from(retained).equals(expected), `${row.id}: the export retains the recorded preparation`);
-      assert.equal(result.recomputed, undefined, `${row.id}: a preparation computed from inputs changed after the run`);
+      assert.ok(Buffer.from(retained).equals(expected), `${row.id}: the export retains it`);
+      assert.equal(result.recomputed, undefined, `${row.id}: a preparation from changed inputs`);
     } else {
       // the recomputed preparation's canonical bytes, and their digest
       const recomputed = recomputedAt(inputs, result);
@@ -99,11 +112,13 @@ for (const row of manifest.cases) {
     if (existsSync(join(dir, "binding.json"))) {
       const bound = bindDialect(read(Uint8Array.from(readFileSync(join(dir, "unbound.json")))).value as JObj, readBinding(read(Uint8Array.from(readFileSync(join(dir, "binding.json")))).value));
       assert.equal(written(bound), written(read(Uint8Array.from(readFileSync(join(dir, "mapping.json")))).value), `${row.id}: the bound dialect`);
-      const given: Inputs = { ...inputs, dialect: Uint8Array.from(readFileSync(join(dir, "mapping.json"))), binding: undefined };
+      const mapping = Uint8Array.from(readFileSync(join(dir, "mapping.json")));
+      const given: Inputs = { ...inputs, dialect: mapping, binding: undefined };
       const direct = verify(given);
-      assert.equal(direct.kind, row.expectedResult, `${row.id}: mapping.json given as the dialect`);
-      if (recorded) assert.equal(direct.recomputed, undefined, `${row.id}: mapping.json given as the dialect`);
-      else assert.ok(Buffer.from(recomputedAt(given, direct)!).equals(expected), `${row.id}: mapping.json given as the dialect`);
+      const what = `${row.id}: mapping.json given as the dialect`;
+      assert.equal(direct.kind, row.expectedResult, what);
+      if (recorded) assert.equal(direct.recomputed, undefined, what);
+      else assert.ok(Buffer.from(recomputedAt(given, direct)!).equals(expected), what);
     }
   });
 }

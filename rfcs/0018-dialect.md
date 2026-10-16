@@ -452,10 +452,10 @@ tool copies the `adapter`, never the contract's `record`. No vector changes: the
 This amendment records the staging of the reference Runner's twenty-six research vectors for
 [issue #190](https://github.com/Judgment-Pack/judgment-pack-spec/issues/190), on
 [pull request 191](https://github.com/Judgment-Pack/judgment-pack-spec/pull/191). Its review is
-round 11 of this RFC; the cross-vendor round follows, run by the coordinator, with the maintainer's
-disposition of each finding on that pull request, to be recorded under
+round 11 of this RFC, recorded under
 [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
-`0018-round-11.md`. The status stays Accepted. The Specification and companion are amended equally.
+`0018-round-11.md` with the maintainer's disposition (two MEDIUM, both applied). The status stays
+Accepted. The Specification and companion are amended equally.
 
 **Where they come from.** The reference Runner prepares `research` since its pull request 97,
 merged as `4352763e22489ca80ffbf5df338b7e7cb61319e2` and not yet released
@@ -487,8 +487,10 @@ the research vectors hold through a source's class and through no source paramet
 research rule for `cites` no vector tells apart from the `callIndex` order, since in the research
 vectors the two orders are one; §11, of the fixture layout, whose "(No vector decides this.)" is
 withdrawn, and of the fixture lists; and the companion document's Status, which counts
-thirty-eight vectors from four Runner commits. No rule a reader applies changes with these
-sentences.
+thirty-eight vectors from four Runner commits. And §11's sentence on what `preparation.json`
+holds names the fixture's instant, the `verifiedAt` of the preparation it holds, where it said
+"its `verifiedAt`": a wording change, taken from the review's confirmations. No rule a reader
+applies changes with these sentences.
 
 **What the staging found.** The two `changed-binding-old-preparation` vectors retain the first
 installation's preparation, recorded a second before the vector's run, so that a verifier given it
@@ -664,7 +666,8 @@ string template; `http`'s `headers` as an array of non-empty strings; and a `sql
 and `type` as non-empty strings (the amendment of 2026-10-15 that read version 3, which read
 `research`'s `evidence` so too, the form the research-contract amendment then gave it). Both
 readers read the research contract since pull request #181 for issue #176, one author's extension
-of both from the text, held to each other on hand-written documents and to no vector. Where that
+of both from the text, held to each other on hand-written documents and, until the amendment of
+2026-10-16, to no vector. Where that
 text leaves a choice they take one reading each: a plain read's `unwrap` pointers and a copy's
 `source` are held to the closed list as froms, never under `values`; no pointer descends below an
 observation's `value`; a decimal's 128 is counted in characters; a research
@@ -1846,12 +1849,15 @@ response's `profile`, `request`, `result`, `receipt` and `salts`; the record's o
 The verifier trusts profiles out of band (§5.1), never by their presence in a fixture.
 
 `preparation.json` and `preparation.sha256` hold what the verifier must compute: the preparation's
-canonical bytes and their digest, recomputed from the retained inputs at its `verifiedAt`. A
-fixture whose inputs were changed after the run, so that no preparation can be computed from
-them, as in item 7's `acquisition-invalid` variants, holds instead the preparation the run
-recorded, fixed, and expects the finding the change gives; the Runner's manifest marks it
-`retained` `recorded`. The record is the runtime evaluation record, distinct from the research
-record in `sources.json`.
+canonical bytes and their digest, recomputed from the retained inputs at the fixture's instant, the
+`verifiedAt` of the preparation `preparation.json` holds, which the Runner's manifest gives as the
+fixture's `verifiedAt`; an export that retains another preparation in its place, as item 6's old
+preparation, may name another instant, one second earlier in the two staged
+`changed-binding-old-preparation` vectors. A fixture whose inputs were changed after the run, so
+that no preparation can be computed from them, as in item 7's `acquisition-invalid` variants, holds
+instead the preparation the run recorded, fixed, and expects the finding the change gives; the
+Runner's manifest marks it `retained` `recorded`. The record is the runtime evaluation record,
+distinct from the research record in `sources.json`.
 The staging manifest gives `requiresBinding` and the expected answer, `expectedResult` with
 `expectedBinding` for a reading or `expectedFinding` for a finding, as for every staged vector.
 The fixture layout is fixed. The reference Runner prepares the `research` kind since its pull
@@ -2449,8 +2455,14 @@ this text and the vectors — would strengthen that evidence, and none exists.
    amendment adds the research replay rule and the fixture layout, also marked as positions no
    vector decides; the fixture layout is no longer one, since the Runner's research vectors are
    in it (the amendment of 2026-10-16). Issue #171's result types, field statuses and citations,
-   research profile bindings, reconciliation read and fixture lists are likewise decisions no
-   vector holds.
+   research profile bindings, reconciliation read and fixture lists were, when it decided them,
+   decisions no vector held. The Runner's research vectors hold them since the amendment of
+   2026-10-16, but for four points they do not distinguish: the order of a research
+   preparation's `cites` against the `callIndex` order, which in those vectors is one order
+   (§9.1); a skipped source's outcome and lineage, which no vector records
+   ([issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189)); the research
+   maxima at their bounds (§12); and the fixture lists' refusal variants, which are reader tests
+   and not vectors (§11).
    Round 9 settles the closed condition list and receipt findings of issue #182, and removes
    the impossible unnamed-response case; no vector decides those rules either.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
@@ -2528,10 +2540,11 @@ this text and the vectors — would strengthen that evidence, and none exists.
     trusted profiles, over their own requests and results, before the read applies to `R`
     (§4.3, §5.2, §11). The recipe is recorded in the dialect and under its digest, never
     re-executed. No model output is produced or compared. The fixture layout is fixed in §11,
-    including the staging manifest's expected answer. The `research` kind's first fixture still
-    waits on a preparer; no vector holds it, and it remains defined and not claimable. Issue #171
-    adds the GTM company/person and work-item triage fixture lists, including typed results,
-    bindings, fallback and selected parent/child records, with none recorded (§11). Round 9 aligns
+    including the staging manifest's expected answer. Until the amendment of 2026-10-16 the
+    `research` kind's first fixture waited on a preparer and no vector held it; it remains defined
+    and not claimable. Issue #171 adds the GTM company/person and work-item triage fixture lists,
+    including typed results, bindings, fallback and selected parent/child records, none of them
+    recorded then (§11). Round 9 aligns
     fixture 8 with RFC 0020's round 2: its additional research recording waits for a Runner to pin
     the research stage's release form and encoding ([judgment-pack-runner#88][research-preparer]).
     *Resolved in part 2026-10-16:* the reference Runner prepares `research` since its pull request
@@ -2548,7 +2561,7 @@ this text and the vectors — would strengthen that evidence, and none exists.
     and web profiles by id and digest, all of class `generated`. An incompatible profile gives
     `profile-mismatch`. The preparation commits the bound dialect alone; replay checks retained
     bytes under those profiles and never establishes answer correctness. The result contract
-    and reconciliation are decisions 1 and 3; the still-unrecorded fixtures are decision 4.
+    and reconciliation are decisions 1 and 3; the fixtures, unrecorded then, are decision 4.
     RFC 0020's round 2 ([judgment-pack-spec#177][workflow-round-2]) resolves its deferral and
     admits a research stage under its §4 once a Runner pins the stage's release form and encoding
     ([judgment-pack-runner#88][research-preparer]); until then none can be frozen or verified.

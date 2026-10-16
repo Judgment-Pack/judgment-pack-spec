@@ -984,9 +984,10 @@ test("§4.4, §11: a binding document of null is refused, not taken as absent", 
 });
 
 // ---- the research contract (RFC 0018, round 8, issue #176) ----
-// Hand-written documents of every new form and refusal, signed under a key generated here. The Runner's research
-// vectors hold the kind as it records it; these are this reader's checks of its readings, not vectors. The repository's
-// suite gives the first reader's cases (tests/test_dialect.py) to both readers and holds their reports equal.
+// Hand-written documents of every new form and refusal, signed under a key generated here. The
+// Runner's research vectors hold the kind as it records it; these are this reader's checks of its
+// readings, not vectors. The repository's suite gives the first reader's cases
+// (tests/test_dialect.py) to both readers and holds their reports equal.
 
 type J = any;
 const R_AT = "2026-10-15T12:00:00Z";
