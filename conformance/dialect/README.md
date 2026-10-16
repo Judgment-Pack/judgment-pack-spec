@@ -40,9 +40,10 @@ the first of the kind `research`, were copied
 from the Runner's `main` at commit `4352763e22489ca80ffbf5df338b7e7cb61319e2`, Runner pull request
 97 squash-merged, whose generator wrote the first twelve again byte for byte. The thirty-ninth,
 `skipped-source-dependency-unavailable`, and the Runner's README and manifest as they now are,
-were copied from commit `ed1bc2a`, Runner pull request 105, whose generator wrote the first
-thirty-eight again byte for byte. This repository's
-manifest records each extension, in order, in `source.extendedBy`. The Runner's README says
+were copied from the Runner's `main` at commit `ed1bc2a7a02b7475e96178915c36df412e536314`, Runner
+pull request 105, whose generator wrote the first thirty-eight again byte for byte. This
+repository's manifest records each extension, in order, in `source.extendedBy`.
+The Runner's README says
 what each file holds and how the vectors were generated, and its manifest gives every file's
 SHA-256, the binding the Runner passes for each preparation, the record's binding as recorded, and
 what the Runner's `verify-run` reports of each export. A change to a vector is a change to the

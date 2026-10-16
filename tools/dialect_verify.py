@@ -2699,8 +2699,7 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
                     "basis": list(claim["basis"]),
                     "readDigest": read_digest(outcome.read),
                 }
-                if outcome.skipped:
-                    assert outcome.source is not None
+                if outcome.source is not None and outcome.source.parameters:
                     entry["dependencies"] = [
                         {"parameter": name, "source": parameter.origin,
                          "pointer": parameter.pointer}

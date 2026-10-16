@@ -9,12 +9,7 @@ here.
 
 - The thirty-ninth dialect vector, `skipped-source-dependency-unavailable`, from Runner commit
   `ed1bc2a`, pull request 105, staged byte for byte beside the thirty-eight unchanged vectors.
-  RFC 0018 and its companion record issue #189, option A (2026-10-16, round 12): a skipped
-  source's outcome keeps its five-member claim and status `unknown`; each lineage entry has
-  status `unknown` and `dependencies`, all declared source parameters in parameter-name order,
-  including those that have a value (§§9.2–9.3). Both readers follow, recompute its preparation
-  byte for byte and give a reading whose binding `matches`. The Runner is unchanged; the vectors
-  remain staged until the next `specVersion` opens, in no corpus.
+  The vectors remain staged until the next `specVersion` opens, in no corpus.
 - The reference Runner's twenty-six research vectors, the first of the kind `research`, are staged
   byte for byte in [`conformance/dialect/`][staged-dialect] beside the twelve, from the Runner's
   pull request 97 (issue #190): the runs of the two examples of [`spec/dialect.md`](spec/dialect.md)
@@ -236,6 +231,15 @@ here.
 
 ### Changed
 
+- RFC 0018 and its companion record issue #189, option A (2026-10-16, round 12): a skipped
+  source's outcome keeps its five-member claim and status `unknown`; each of its lineage entries
+  has status `unknown`. Every source that declares a source parameter, acquired or skipped,
+  carries `dependencies`, all declared source parameters in parameter-name order, including those
+  that have a value (§§9.2–9.3); the member is absent for the case, a local file and a source that
+  declares none. Both readers follow, recompute the thirty-ninth vector's preparation byte for
+  byte and give a reading whose binding `matches`. A reader of the accepted text answered
+  `preparation-differs` on the Runner's skipped-source bytes and now gives a reading, and the old
+  form now gives `preparation-differs`. The Runner is unchanged.
 - [RFC 0019](rfcs/0019-exchange.md) stays a Draft and records issue #192, option A: entry format
   version 3 carries checked named-format references and `artifact: {id, version}` under RFC 0021.
   Integer references and kind rules remain; presets stay integer-only. Named identity includes

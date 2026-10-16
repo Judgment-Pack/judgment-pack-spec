@@ -656,8 +656,8 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       // §9.3, version 3: an acquired research source's citations, in the order `cites` has them
       if (o.citations !== undefined) e.push(["receipts", arr(o.citations)]);
       if (o.calculation !== undefined) e.push(["calculation", o.calculation]);
-      if (o.skipped) {
-        const parameters = [...o.source!.parameters].sort((a, b) =>
+      if (o.source !== undefined && o.source.parameters.length > 0) {
+        const parameters = [...o.source.parameters].sort((a, b) =>
           compareCodePoints(a.name, b.name));
         e.push(["dependencies", arr(parameters.map((p) => obj([
           ["parameter", str(p.name)], ["source", str(p.from)], ["pointer", str(p.pointer)],

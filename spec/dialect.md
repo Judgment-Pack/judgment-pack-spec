@@ -25,7 +25,8 @@ are the reference Runner's `vectors/preparation/`, byte for byte: nine at commit
 kind `research`, the runs of §11's two examples, at the Runner's `main` commit
 `4352763e22489ca80ffbf5df338b7e7cb61319e2` (Runner pull request 97, not yet released), which holds
 the twelve unchanged; and the thirty-ninth, `skipped-source-dependency-unavailable`, at the Runner's
-commit `ed1bc2a` (Runner pull request 105), which holds the thirty-eight unchanged.
+`main` commit `ed1bc2a7a02b7475e96178915c36df412e536314` (Runner pull request 105), which holds
+the thirty-eight unchanged.
 They are **staged** until the next `specVersion` opens: they are in no corpus, no claim may cite
 them, the site does not serve them,
 and no release bundle carries them. When that version opens they move into a corpus, normative for
@@ -66,7 +67,9 @@ agreement is one author's, and no claim rests on it.
 The skipped-source amendment of 2026-10-16 (issue #189, option A, RFC 0018 round 12) takes the
 Runner's form in §§9.2–9.3: a skipped outcome keeps its claim and status `unknown`, and each of
 its lineage entries has status `unknown` and names every declared source parameter in
-`dependencies`. Both readers follow; the thirty-ninth vector holds the form.
+`dependencies`. Both readers follow; the thirty-ninth vector holds the form. A reader of the
+accepted text answered `preparation-differs` on the Runner's skipped-source bytes and now gives
+a reading, and the old form now gives `preparation-differs`.
 
 The named-artifact amendment (RFC 0021, §2.1) adds exact format selectors `2.0.0` and `3.0.0`
 with independent artifact identities. It preserves both integer formats and all historical vectors.
@@ -1112,7 +1115,7 @@ The vector `skipped-source-dependency-unavailable` holds this form.
 
 There is one lineage entry for each target of the case and of each source, in the order of the
 outcomes; within one outcome, its fact targets ordered by code point, then its evidence targets
-ordered by code point. (No vector decides the order within one outcome.) An entry is an object of:
+ordered by code point. (No vector decides facts before evidence.) An entry is an object of:
 
 | Member | Value |
 | --- | --- |
@@ -1124,7 +1127,7 @@ ordered by code point. (No vector decides the order within one outcome.) An entr
 | `present` | `true` when the claim gives the target a value — a value at the pointer, or any availability for the requirement — and `false` otherwise |
 | `status`, `reason` | the outcome's |
 | `basis` | the claim's `basis`, or `[]` for a skipped source |
-| `dependencies` | all source parameters for a skipped source, as below; absent otherwise |
+| `dependencies` | the source's declared source parameters, as below, for every source that declares one, acquired or skipped; absent for the case, a local file and a source that declares none |
 | `candidateFrom` | the pointers of the value read that the dialect could copy to the target, distinct, ordered by code point: a copy entry's `source`, or each `from` of a claim form that writes the target; absent when there is none, as for a rule's evidence target |
 | `readDigest` | the read digest (§6) |
 | `receipt` | the acquisition's citation; for `research`, the record's own citation when it has one; absent for the case, a local file, a skipped source and a research record with no receipt of its own |
@@ -1134,13 +1137,15 @@ ordered by code point. (No vector decides the order within one outcome.) An entr
 `candidateFrom` lists what the dialect could read into a target, and not what was read; `basis`
 lists what was read to decide.
 
-`dependencies` is present on every target entry of a skipped source. It is an array of every
-source parameter the source declares (§3), including those that have a value, ordered by
-`parameter` by code point. Each element is an object of exactly `parameter`, the parameter's
-name; `source`, the earlier source's name; and `pointer`, the fact target read. In
+`dependencies` is present on every target entry of a source that declares a source parameter,
+acquired or skipped. It is an array of every source parameter the source declares (§3),
+including those that have a value, ordered by `parameter` by code point. Each element is an
+object of exactly `parameter`, the parameter's name; `source`, the earlier source's name; and
+`pointer`, the fact target read. In
 `skipped-source-dependency-unavailable`, both `approver` from `sponsor` and `requestType` from
 `intake` appear, in that order, though `requestType` has a value and `intake` is the first source.
-No acquired source's entry carries `dependencies`, including one whose claim is `unknown`.
+An acquired source whose parameters all have values carries them too, including one whose
+claim is `unknown`.
 
 ### 9.4 What derives a preparation
 

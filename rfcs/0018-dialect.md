@@ -509,16 +509,23 @@ two readers' agreement is that author's. At round 11 no skipped-source vector wa
 ## Amendment of 2026-10-16: the skipped source's form
 
 This amendment records the maintainer's decision on
-[issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189), option A, on pull
-request #194: the Specification and companion take the Runner's form in §§9.2–9.3, the outcome
-keeping its five-member claim and status `unknown`, each lineage entry having status `unknown`
-and `dependencies`, all declared source parameters in parameter-name order, including those
-that have a value. Both readers follow, and the thirty-ninth vector,
-`skipped-source-dependency-unavailable`, is staged byte for byte from Runner commit `ed1bc2a`,
-pull request 105, with a reading whose binding `matches`; no Runner change is needed, and the
-status stays Accepted.
-
-its review is round 12 of this RFC; the cross-vendor review follows, run by the coordinator.
+[issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189), option A, on
+[pull request 194](https://github.com/Judgment-Pack/judgment-pack-spec/pull/194): the Specification
+and companion take the Runner's form in §§9.2–9.3, the skipped outcome keeping its five-member
+claim and status `unknown`, each of its lineage entries having status `unknown`; `dependencies`
+lists all declared source parameters in parameter-name order, including those that have a value,
+for every source that declares one, acquired or skipped, and is absent for the case, a local file
+and a source that declares none. Both readers follow, and the thirty-ninth vector,
+`skipped-source-dependency-unavailable`, is staged byte for byte from the Runner's `main` commit
+`ed1bc2a7a02b7475e96178915c36df412e536314`, pull request 105, with a reading whose binding
+`matches`; no Runner change is needed, and the status stays Accepted. A reader of the accepted
+text answered `preparation-differs` on the Runner's skipped-source bytes and now gives a reading,
+and the old form now gives `preparation-differs`.
+A vector of an acquired dependent source is asked of judgment-pack-runner in a Runner issue.
+Its review is round 12 of this RFC, recorded under
+[`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
+`0018-round-12.md` with the maintainer's disposition of each finding (one HIGH, one MEDIUM, four
+LOW, all applied).
 
 ## Summary
 
@@ -1725,7 +1732,7 @@ The vector `skipped-source-dependency-unavailable` holds this form.
 
 There is one lineage entry for each target of the case and of each source, in the order of the
 outcomes; within one outcome, its fact targets ordered by code point, then its evidence targets
-ordered by code point. (No vector decides the order within one outcome.) An entry is an object of:
+ordered by code point. (No vector decides facts before evidence.) An entry is an object of:
 
 | Member | Value |
 | --- | --- |
@@ -1737,7 +1744,7 @@ ordered by code point. (No vector decides the order within one outcome.) An entr
 | `present` | `true` when the claim gives the target a value — a value at the pointer, or any availability for the requirement — and `false` otherwise |
 | `status`, `reason` | the outcome's |
 | `basis` | the claim's `basis`, or `[]` for a skipped source |
-| `dependencies` | all source parameters for a skipped source, as below; absent otherwise |
+| `dependencies` | the source's declared source parameters, as below, for every source that declares one, acquired or skipped; absent for the case, a local file and a source that declares none |
 | `candidateFrom` | the pointers of the value read that the dialect could copy to the target, distinct, ordered by code point: a copy entry's `source`, or each `from` of a claim form that writes the target; absent when there is none, as for a rule's evidence target |
 | `readDigest` | the read digest (§6) |
 | `receipt` | the acquisition's citation; for `research`, the record's own citation when it has one; absent for the case, a local file, a skipped source and a research record with no receipt of its own |
@@ -1747,13 +1754,15 @@ ordered by code point. (No vector decides the order within one outcome.) An entr
 `candidateFrom` lists what the dialect could read into a target, and not what was read; `basis`
 lists what was read to decide.
 
-`dependencies` is present on every target entry of a skipped source. It is an array of every
-source parameter the source declares (§3), including those that have a value, ordered by
-`parameter` by code point. Each element is an object of exactly `parameter`, the parameter's
-name; `source`, the earlier source's name; and `pointer`, the fact target read. In
+`dependencies` is present on every target entry of a source that declares a source parameter,
+acquired or skipped. It is an array of every source parameter the source declares (§3),
+including those that have a value, ordered by `parameter` by code point. Each element is an
+object of exactly `parameter`, the parameter's name; `source`, the earlier source's name; and
+`pointer`, the fact target read. In
 `skipped-source-dependency-unavailable`, both `approver` from `sponsor` and `requestType` from
 `intake` appear, in that order, though `requestType` has a value and `intake` is the first source.
-No acquired source's entry carries `dependencies`, including one whose claim is `unknown`.
+An acquired source whose parameters all have values carries them too, including one whose
+claim is `unknown`.
 
 #### 9.4 What derives a preparation
 
@@ -2428,6 +2437,8 @@ none. No specification version publishes any of the vectors, so none is
 claimable.
 
 **What no vector holds.** `unwrap`; a calculator that did not compute; timestamp parameters;
+an acquired source with source parameters (its entries' `dependencies`, a parameter carried into
+a request);
 a receipt that fails, but over a result changed after the run (the two `changed-response` vectors);
 a stale acquisition or table; a broken session form; a refusal at
 a bound; a paged acquisition; a request of shape `http` other than the tenth vector's — by `POST`,
@@ -2483,7 +2494,7 @@ this text and the vectors — would strengthen that evidence, and none exists.
    neither the Runner's documentation nor its vectors decide: a `{{` with no `}}` and a stray `}}` in a
    `$text`; a copy entry whose source does not resolve, for a fact and for an availability; a copy
    that names a requirement twice; `unknown` written in the evidence-availability document rather than
-   left out; generated influence; and the order of the entries within one outcome. Each was taken
+   left out; generated influence; and facts before evidence. Each was taken
    without the Runner's code. The Runner's behaviour may differ, and a vector from the Runner for
    each is what settles it; until then a difference found is a defect in
    the text. The six choices the two readers recorded (Evidence) are decided in the text now, by the

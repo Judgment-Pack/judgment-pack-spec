@@ -83,7 +83,7 @@ SOURCE = {
         },
         {
             "pullRequest": 105,
-            "commit": "ed1bc2a",
+            "commit": "ed1bc2a7a02b7475e96178915c36df412e536314",
             "vectors": ["skipped-source-dependency-unavailable"],
         },
     ],
@@ -270,7 +270,7 @@ def skipped_source_cases() -> list[tuple[str, str, Any]]:
         "dependencies absent": lambda p: p["lineage"][-1].pop("dependencies"),
         "dependencies reversed": lambda p: p["lineage"][-1]["dependencies"].reverse(),
         "only the parameter without a value": lambda p: p["lineage"][-1]["dependencies"].pop(),
-        "dependencies on an acquired source": lambda p: p["lineage"][-3].update(
+        "dependencies on a source without source parameters": lambda p: p["lineage"][-3].update(
             dependencies=p["lineage"][-1]["dependencies"]
         ),
     }
@@ -280,6 +280,61 @@ def skipped_source_cases() -> list[tuple[str, str, Any]]:
         cases.append((f"skipped source: {name}", "finding:preparation-differs",
                       lambda change=change: build(change)))
     return cases
+
+
+def acquired_dependent_source(resolved: bool = True) -> Inputs:
+    """The skipped vector's sponsor resolves; endorsement is acquired, signed with our own key."""
+    inputs = altered_vector("skipped-source-dependency-unavailable")
+    document = json.loads(inputs.dialect)
+    source = document["sources"][-1]
+    source["parameters"] = dict(reversed(list(source["parameters"].items())))
+    inputs.dialect = json.dumps(document).encode()
+    sources = json.loads(inputs.acquisitions)
+    sponsor = sources["sponsor"]["response"]
+    sponsor["result"]["sponsor"] = {"id": "S-1"}
+    endorsement = copy.deepcopy(sponsor)
+    endorsement["result"] = {"approver": "S-1", "requestType": "data-access"}
+    if resolved:
+        endorsement["result"]["endorsement"] = {"approved": True}
+    request = {"tool": "lookup", "arguments": {
+        "table": "endorsements", "approver": "S-1", "requestType": "data-access",
+    }}
+    endorsement["receipt"]["callIndex"] = 2
+    endorsement["receipt"]["argumentsCommitment"] = READER.digest_of(
+        bytes.fromhex(endorsement["salts"]["args"]) + b"args:" + READER.canon(request)
+    )
+    sources["endorsement"] = {"response": endorsement}
+    _, sign = signer(b"the dialect tests' own key")
+    for response in (sponsor, endorsement):
+        receipt = response["receipt"]
+        receipt["resultDigest"] = READER.digest_of(READER.canon(response["result"]))
+        del receipt["signature"]
+        receipt["signature"] = sign(
+            b"judgment-pack-gateway/receipt/3:" + READER.canon(receipt)
+        ).hex()
+    inputs.acquisitions = json.dumps(sources).encode()
+    inputs.record, inputs.require_binding = None, False
+    computed = inputs.verify().preparation
+    assert computed is not None, inputs.verify().answer
+    preparation = json.loads(computed)
+    # Hold this member independently of the reader's computation, including under a mutation.
+    for entry in preparation["lineage"]:
+        if entry["source"] == "endorsement":
+            entry["dependencies"] = [
+                {"parameter": "approver", "source": "sponsor", "pointer": "/sponsor/id"},
+                {"parameter": "requestType", "source": "intake", "pointer": "/intake/type"},
+            ]
+    inputs.preparation = READER.preparation_bytes(preparation)
+    return inputs
+
+
+def acquired_source_cases() -> list[tuple[str, str, Any]]:
+    """An acquired dependent source, including one whose claim is unknown."""
+    return [
+        (f"acquired dependent source: {status}", "reading",
+         lambda resolved=resolved: acquired_dependent_source(resolved))
+        for status, resolved in (("resolved", True), ("unknown", False))
+    ]
 
 
 # Round 9 of RFC 0018 (issue #182 item 4; spec/dialect.md §5.2, check 1, and §11, finding 3): a receipt's
@@ -526,6 +581,36 @@ class DialectVectorTests(unittest.TestCase):
                 else:
                     self.assertIn("reading", answer, answer)
                     self.assertEqual(row["expectedBinding"], answer["reading"]["binding"])
+
+    def test_an_acquired_source_keeps_every_declared_dependency(self) -> None:
+        for resolved in (True, False):
+            with self.subTest(resolved=resolved):
+                inputs = acquired_dependent_source(resolved)
+                result = inputs.verify()
+                self.assertIn("reading", result.answer, result.answer)
+                self.assertEqual(inputs.preparation, result.preparation)
+                preparation = json.loads(result.preparation)
+                self.assertEqual("resolved", preparation["outcomes"][-2]["status"])
+                outcome = preparation["outcomes"][-1]
+                self.assertEqual("resolved" if resolved else "unknown", outcome["status"])
+                self.assertEqual("S-1", outcome["parameters"]["approver"])
+                self.assertEqual("data-access", outcome["parameters"]["requestType"])
+                self.assertEqual({"tool": "lookup", "arguments": {
+                    "table": "endorsements", "approver": "S-1", "requestType": "data-access",
+                }}, outcome["arguments"])
+                entries = []
+                for entry in preparation["lineage"]:
+                    if entry["source"] != "endorsement":
+                        self.assertNotIn("dependencies", entry)
+                        continue
+                    entries.append(entry["target"])
+                    self.assertEqual([
+                        {"parameter": "approver", "source": "sponsor", "pointer": "/sponsor/id"},
+                        {"parameter": "requestType", "source": "intake", "pointer": "/intake/type"},
+                    ], entry["dependencies"])
+                    self.assertEqual(outcome["status"], entry["status"])
+                    self.assertIn("receipt", entry)
+                self.assertEqual(["/endorsement", "sponsor-endorsement"], entries)
 
     def test_a_skipped_source_keeps_its_claim_and_every_declared_dependency(self) -> None:
         name = "skipped-source-dependency-unavailable"
