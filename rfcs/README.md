@@ -81,9 +81,13 @@ distinguishes kind `dialect` from pack-free kind `preset`; the seven enforcement
 sentences are settled. Amended 2026-10-16 for
 [issue #192](https://github.com/Judgment-Pack/judgment-pack-spec/issues/192), option A: entry
 version 3 checks named-format references and artifact identities under RFC 0021, with immutable
-pairs across catalog history and unchanged manifest rows. The catalog's checker and fixtures
-follow in their own pull request on `judgment-pack-exchange`. RFC 0019 stays a Draft; a hosted
-registry remains out of scope (Unresolved question 4).
+pairs across catalog history and unchanged manifest rows. Catalog CI fetches tags and reads every
+previous release's manifest and pinned entries as blobs, refusing unreadable history as
+`artifact-history-invalid`, with no form-only fallback. Only a consumer checks form alone when
+it does not hold the previous manifest, reporting `artifact-history-unchecked`. Identical content
+under a pair is admitted in another entry under its kind's rules; presets stay integer-only.
+The catalog's checker and fixtures follow in their own pull request on `judgment-pack-exchange`.
+RFC 0019 stays a Draft; a hosted registry remains out of scope (Unresolved question 4).
 
 RFC 0020 proposes `spec/workflow.md` beside Core, with a reader class and fixtures from a
 two-stage run, none recorded yet.

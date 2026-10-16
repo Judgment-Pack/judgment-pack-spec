@@ -230,9 +230,13 @@ here.
 
 - [RFC 0019](rfcs/0019-exchange.md) stays a Draft and records issue #192, option A: entry format
   version 3 carries checked named-format references and `artifact: {id, version}` under RFC 0021.
-  Integer references and kind rules remain; named identity includes the whole canonical document.
-  Duplicate pairs and changed canonical content under an existing pair are refused within a
-  release and against available catalog history, with the limits of unavailable history stated.
+  Integer references and kind rules remain; presets stay integer-only. Named identity includes
+  the whole canonical document. Changed canonical content under an existing pair is refused
+  within a release and across catalog history; identical content is admitted in another entry
+  under its kind's rules. Catalog CI fetches tags and reads every previous release's manifest and
+  pinned entries as blobs, refusing unreadable history as `artifact-history-invalid`, with no
+  form-only fallback. Only a consumer checks form alone when it does not hold the previous
+  manifest, reporting `artifact-history-unchecked`.
   Manifest rows are unchanged and upgrade keys remain released entry digests. Reader compatibility,
   publication and binding limits, and catalog and consumer test duties are recorded. The checker
   and fixtures follow in their own pull request on `judgment-pack-exchange`; the Desk's publication
