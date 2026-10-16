@@ -521,7 +521,8 @@ and a source that declares none. Both readers follow, and the thirty-ninth vecto
 `matches`; no Runner change is needed, and the status stays Accepted. A reader of the accepted
 text answered `preparation-differs` on the Runner's skipped-source bytes and now gives a reading,
 and the old form now gives `preparation-differs`.
-A vector of an acquired dependent source is asked of judgment-pack-runner in a Runner issue.
+A vector of an acquired dependent source is asked of the Runner in
+[judgment-pack-runner#107](https://github.com/Judgment-Pack/judgment-pack-runner/issues/107).
 Its review is round 12 of this RFC, recorded under
 [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
 `0018-round-12.md` with the maintainer's disposition of each finding (one HIGH, one MEDIUM, four
