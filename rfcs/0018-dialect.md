@@ -532,7 +532,7 @@ LOW, all applied).
 ## Amendment of 2026-10-17: the class a binding takes, by kind
 
 This amendment records the maintainer's two decisions on
-[issue #195](https://github.com/Judgment-Pack/judgment-pack-spec/issues/195), on pull request #NNN.
+[issue #195](https://github.com/Judgment-Pack/judgment-pack-spec/issues/195), on pull request #196.
 Its review is round 13 of this RFC; the cross-vendor review follows, run by the coordinator.
 The status stays Accepted. The Specification and companion are amended equally.
 
