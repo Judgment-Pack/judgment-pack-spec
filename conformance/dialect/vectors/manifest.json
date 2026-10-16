@@ -530,6 +530,1384 @@
         "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:764c0b61055ff2ec9d4ee05473bff1bce6447e7184b39886a2a7c779c2b2a3bc\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:7d4e5686f51115afa6b799fb3a3323b95265a5891f3dfac11c65645cbbf3716d\",\"sequence\":1,\"trail\":\"6d5fd7266fa8871be890a5d20b4aa347\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-15T15:44:12Z\",\"sources\":[{\"source\":\"intake\",\"checks\":[\"acquisition\"],\"targets\":3}]}}",
         "error": null
       }
+    },
+    {
+      "name": "gtm-company-person-valid-types-all-six",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. Its company source asks for answer alone, retaining one answer, and its read copies the record's whole fields object to /company. Its person source asks for answer, search and page, retaining an answer, a search's links and a page, each through its assigned profile, and its rule writes the person's id and the qualification /qualification/contactable from found values. All six types are answered: text, an integer, a decimal of scale two and a signed one, booleans, a list with values and an empty one, an integer range and a decimal range whose endpoints have different scales; every target is generated, with generated influence. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-valid-types-all-six",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:42Z",
+      "files": {
+        "binding.json": "sha256:3c34211981885533662ef2651c5b569f9b2f8d2b82625576dcdb09dd72dea8dd",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:53c421d07dd883dd151075be790b01afedc993592ec377d7beaa3de75ece2418",
+        "mapping.json": "sha256:12fb8aa610cf5b9e8f187645e8cceb36cd5322a7a30e82f5308b27fc3d34da97",
+        "preparation.json": "sha256:5da9526acae81dbe695dba2d927c5716fa9240a60c26695d93a40e0377ae9f2e",
+        "preparation.sha256": "sha256:7db00882b493c0516ef6897f88d75fdf3db708f07061bceef3fc4d21756b3e52",
+        "profiles.json": "sha256:f0af1c7745f7211ce7217f47b13ad721305816c702e7341a5a719d94c844fb8e",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:d00ba322433a9dd716705f82e285273184b8fd3bb7561f777050886fb61660c7",
+        "run.json": "sha256:c985c15048f648a68b20f7faf4c6b8ed9c08f8170a49a848468f79cf27bd6bc5",
+        "sources.json": "sha256:2a2750146931ce718c39cca28d07fb3ac7a89c5faaebc86f6d217f940f47fa02",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:5da9526acae81dbe695dba2d927c5716fa9240a60c26695d93a40e0377ae9f2e",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:5da9526acae81dbe695dba2d927c5716fa9240a60c26695d93a40e0377ae9f2e\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:5da9526acae81dbe695dba2d927c5716fa9240a60c26695d93a40e0377ae9f2e\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:64e79eea06624b436b69130820f45076cc818142fa0cc8921db82ff4b9de8f78",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:49e504d34d588974bdae5097826ca20ea2ed1f8b46c5fb65545466326b200541\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:bf668289d9c8fe82c9ebb1ade34698e1ea14e9881b64ff92a63a5e77826552b8\",\"sequence\":1,\"trail\":\"ce786da9037fe0c5fb41927ee3d1ddee\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:42Z\",\"sources\":[{\"source\":\"company\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"person\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-presence-optional-omitted",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with every optional entry omitted: the company's and the person's roles and ranges. The copy writes the entries there are. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-presence-optional-omitted",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:44Z",
+      "files": {
+        "binding.json": "sha256:5a6fb0e87a53b2de8217c22de8dbbccdb451fb6fb4f18d27d6b6b15a5d421063",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:857cdd1089c202edccb31a874f1e9c7de0af786fa09117997b301de6e9d0a8f9",
+        "mapping.json": "sha256:36d313a457a60590452c0344fb83f5bf6877ff3bba6340a1ba518eecf6d930b8",
+        "preparation.json": "sha256:2bb53b7860fdbd741c63ba658bb954ab514c42bc01b2548cfe73d4a6f3c48ec1",
+        "preparation.sha256": "sha256:5ccf22a72b14ff6df136235ce72a63f3bfc1ba5d5b9313eb8e590288d9724c67",
+        "profiles.json": "sha256:8350e7e45f202a3a6c724f079de264ef68d4be083668801335ab7f9d45a3bbec",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:b84b0dff6fd542ff9c6cfa4cebee055f61b800b56a325511e3be91d2a214635c",
+        "run.json": "sha256:a648becf817aa2a68a6026d2ee6c07be87bb4a749b94be5fe9b7205747c51033",
+        "sources.json": "sha256:9a9218ef10385aa193be15a94a136de9003f4fee51fa0e9e19c389b5ce38326c",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:2bb53b7860fdbd741c63ba658bb954ab514c42bc01b2548cfe73d4a6f3c48ec1",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:2bb53b7860fdbd741c63ba658bb954ab514c42bc01b2548cfe73d4a6f3c48ec1\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:2bb53b7860fdbd741c63ba658bb954ab514c42bc01b2548cfe73d4a6f3c48ec1\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:00a0c60b11966f4d536353a18de5fc07fd2ef588b8a752b09b741b3fc1480d9a",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:73625ac10b575a63601392bc24e5dfd94c975a5da2f8505067f30b6e2e8aa7c6\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:1e53d85ba485f511b682746839204caadf39af34232b8fa1f724979c0480ca33\",\"sequence\":1,\"trail\":\"991c8016011835613c5494b4a55ced84\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:44Z\",\"sources\":[{\"source\":\"company\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"person\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-presence-required-not-found",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with a required entry not-found in each source, citing the response about the unsuccessful search: the company's headcount, which the copy keeps as recorded, and the person's contactability, so that the rule's found clause does not match and its last derives unknown, with no fact. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-presence-required-not-found",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:45Z",
+      "files": {
+        "binding.json": "sha256:8a1ba625488f7ac6ec49b26b1e5f09ead3f356aab8fe7fc31736450e382e18d0",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:a83a0ff831e2a5f5a46a38eee6f6b9b863c45a0f891e6d85ce99ac7ab968fcf0",
+        "mapping.json": "sha256:d5f143aa1dedb978b6e132531451d0b01e17115d2165459238eeee55790f7331",
+        "preparation.json": "sha256:6449dc7ee6bfe5c73b9d4515ab2074dba3420a74c14cf83dacfb47dd25a420da",
+        "preparation.sha256": "sha256:e007ca982b947f16d4335148ddc5e9c6f26435f3ab2bee4192afc4c11f494931",
+        "profiles.json": "sha256:1d871a6c2a4655ba0cacdb5edd46b46bf1e0a1d2015f7873ec41d0237d5ade96",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:bd350bfeb4bc1854f59c27b50c160600ff5ecefe81682f9e3d4909d7d7d5a839",
+        "run.json": "sha256:e0efdc1433a5f77db52da93dbc081e49fc3a5adc00a48dad60f1a6a4f0dbcdeb",
+        "sources.json": "sha256:f1f3da4f45e9cd419340b648a5b68f70d61a12f8889f82e387fdd6016b79bbb1",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:6449dc7ee6bfe5c73b9d4515ab2074dba3420a74c14cf83dacfb47dd25a420da",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:6449dc7ee6bfe5c73b9d4515ab2074dba3420a74c14cf83dacfb47dd25a420da\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:6449dc7ee6bfe5c73b9d4515ab2074dba3420a74c14cf83dacfb47dd25a420da\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:aa4846b730d4dcbb11a6e4e20cb1995f87f6e5dfd1e93af15dae6cd57bde3401",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:0ce435b0549f4fd365345814d044864bf77409f3eac89b6c12d43df1707fc181\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:2617d5f25e7ea0be549f2d8dd17c6118f6bfaab80d2811a451e4bedf2ba51418\",\"sequence\":1,\"trail\":\"61be9f9afdf4a24833368acdac661261\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:45Z\",\"sources\":[{\"source\":\"company\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"person\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-presence-integer-zero",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with integer zero: the company's headcount and the person's years of experience, each found. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-presence-integer-zero",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:46Z",
+      "files": {
+        "binding.json": "sha256:512fa7a5492646c0491eede79eea75cdf99fc6aa2848179f5427577b27b184c1",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:72fd5a02a9c846ad18036e53f26c3fcc40b90f70e2d75c3e2fb7a3198afbd28b",
+        "mapping.json": "sha256:489b991e5de1731cb2e624b4e0a879dc6eb6ac8aefe40438090403c9b7a3b34c",
+        "preparation.json": "sha256:fc239a161560440780ebbab858bfb833481ccfe069b7f37d7ccac9ff68544c03",
+        "preparation.sha256": "sha256:5c1e8b6add7b0ed1607fa015cd183347f42bc40b9998ab72cb87f0498e28eeee",
+        "profiles.json": "sha256:bf27543aa46c931ac057ec1a480b474e8dd6e0aef4ddda01321da556518b4eca",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:95c7879481697589824605140ab978ec1f5c27ce742411281e27e931d9ffae00",
+        "run.json": "sha256:5bf931c4f44c0da5227c9d46384940ffd245b3582125a15ef4ed85c536be4e53",
+        "sources.json": "sha256:292e099e8034ad6e7c5fee777f10dbd7b4cb2d002dd037a3ca11e536c37c7a7b",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:fc239a161560440780ebbab858bfb833481ccfe069b7f37d7ccac9ff68544c03",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:fc239a161560440780ebbab858bfb833481ccfe069b7f37d7ccac9ff68544c03\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:fc239a161560440780ebbab858bfb833481ccfe069b7f37d7ccac9ff68544c03\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:98df2ccd55583a3619cb1c169664674424ea3215f74728b1a19775b95e065884",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:d286264d7cd1f5e38a96e875cd2f333d9862e49e865b4650b0e3ec476e34ba9c\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:b9e6281dfc018c7f18ccdc7b9d3e6aaed591d7659eccfc065de69d78cff66c47\",\"sequence\":1,\"trail\":\"89252b87973a3f542157ac39fddb11cd\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:46Z\",\"sources\":[{\"source\":\"company\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"person\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-presence-decimal-zero",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with the decimal \"0\": the company's revenue and the person's allocation, each found. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-presence-decimal-zero",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:47Z",
+      "files": {
+        "binding.json": "sha256:5a938a31969292791d7b0fd4afa646dfe49e1d6883a9f968e6be0aef264bd2bb",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:35014af6831e829b40884d14bbbf7028af9abd9fb3e5a62ac7abd1f5755f1560",
+        "mapping.json": "sha256:8d17b3f672e6f631d120392af5e9e386496ac2c0917c4fd906e89602197f5edc",
+        "preparation.json": "sha256:ebc835f776abbb0a57907035c7d621a184f9e654f6235c5c3635fd527d10f1d2",
+        "preparation.sha256": "sha256:d7179c94071dfa5a0d693a9a7b95d360dd2d88cc16c9ad94d3cfe50d4f92263c",
+        "profiles.json": "sha256:b1deaf45eea706c22542c310904a4214c6ed449041fdb941e1060b265821408f",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:92365dbe952812a3c162d3202e75e8a66190f975edd3ab5816f0bbb35823f548",
+        "run.json": "sha256:8d08afbd4567ed78df77881491436d7b45ef5dfe44bfce4ade970e0df87b779e",
+        "sources.json": "sha256:f042db20a1bbeeb5823fdfdce81e83ee70c7a51c31cd13edf52beaafeba6f65f",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:ebc835f776abbb0a57907035c7d621a184f9e654f6235c5c3635fd527d10f1d2",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:ebc835f776abbb0a57907035c7d621a184f9e654f6235c5c3635fd527d10f1d2\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:ebc835f776abbb0a57907035c7d621a184f9e654f6235c5c3635fd527d10f1d2\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:0d3be360c5e3f437c276a5f8271977e976ab84418b0f535ed89912652a1ef497",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:8543e59f81aedd3a7af2493fa0313e2ab2c0d09252c6208150fd6438b6f27cd6\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:b0fb5fa899f6824ffb9c75834b75ea970a606c39f074b99cd5e90d9769dd2786\",\"sequence\":1,\"trail\":\"99e98b06d963952daf9778838e9ba237\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:47Z\",\"sources\":[{\"source\":\"company\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"person\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-presence-boolean-false",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with false: the company is not active, and the person may not be contacted, which the rule writes as /qualification/contactable false. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-presence-boolean-false",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:47Z",
+      "files": {
+        "binding.json": "sha256:8068339ceb40b2e6c924c6366f66c3a0a4e0c844098d2bcdb468f6ee2f678bd9",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:f537f993fb975690dc2e5e62aa4d7204ccd3cdc6ca8fe6468f5286369fbcfdaf",
+        "mapping.json": "sha256:da1f4a6eddfa9d204d50f62bd3201c75525b90dfc6bab6d0b2f951e9c62f11e0",
+        "preparation.json": "sha256:66be8825ac992fc13a0c13500b1964e125e68f8f742f3bcdfea031f192cf049d",
+        "preparation.sha256": "sha256:0eb54da67803cd4278b6bdfe5a868cd9b7c300e35837b6a886e4fe8436fae27e",
+        "profiles.json": "sha256:bd02b663808b8ca7f16a67a69a3655201024622d34bb76d82fb78bd1f3933e1e",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:0602dbfdd0b3e3fc2f0c459a5b5711cc985eadff533389b6acd73f49be42d9d9",
+        "run.json": "sha256:df6b718a451b6fa1374470c2ba3ab6a5261765baff20acf19bf866f6a2c97d2b",
+        "sources.json": "sha256:7a4fadebf2cc64e2a24dd98c9bd96b5260fb356b8cc27a3ab6ae7ef51fd592e0",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:66be8825ac992fc13a0c13500b1964e125e68f8f742f3bcdfea031f192cf049d",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:66be8825ac992fc13a0c13500b1964e125e68f8f742f3bcdfea031f192cf049d\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:66be8825ac992fc13a0c13500b1964e125e68f8f742f3bcdfea031f192cf049d\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:66f754638936793cba8109e9e5613517866d222ab11b392ac7f588db5b4865e5",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:7514ace4a00c9f91daf90b1247fc5210c7adc822727b5f3ee5890367c09f55f3\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:b7ed48f757fce6924a7f276b93007fd43007388201b4dbfd23a29b3450bc96ff\",\"sequence\":1,\"trail\":\"f537c8253d74a7f9496cd0628bdd5473\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:47Z\",\"sources\":[{\"source\":\"company\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"person\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-presence-text-empty",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with the empty text: the company's id and the person's, which the rule writes as /person/id \"\". Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-presence-text-empty",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:48Z",
+      "files": {
+        "binding.json": "sha256:6e557a475b857f815ef15becd7c6135fd7e084b33cf390886e97a61762b3f6f7",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:a40440ee9fef0e80274e6d42eeeed55728b2c899fcca5ea0e919c00f4aa9624b",
+        "mapping.json": "sha256:434dddf55e6af84cf598e230f8f8486d5e795b89af19a7e2297d29ff8d70d3cd",
+        "preparation.json": "sha256:b295029019c8e6250e7245989e5d51129df61113929a4c39d19e7c8ac5112cfb",
+        "preparation.sha256": "sha256:cb5924aa18e9f35b21a6ab2a62b4405c462f71f6a6ba7db649c4f211c060218b",
+        "profiles.json": "sha256:ac461eadc7ef5d5fa2ec772569dd7c0e079b5fdddcf9294c14923e1edc966ae3",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:92bc8e3a31c4395a10400e6e5a50db64d7b42273e4ef05f9ea5f7b3dbe6cd2ca",
+        "run.json": "sha256:40baa6b07665a2f89e82bdc75ab5c36287da286dfddf067e6fba37f5f0f14be7",
+        "sources.json": "sha256:8a6565909a3009da54ed9d7b34c4cda7c8745c141041bc2d9633f51f8a6ccae7",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:b295029019c8e6250e7245989e5d51129df61113929a4c39d19e7c8ac5112cfb",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:b295029019c8e6250e7245989e5d51129df61113929a4c39d19e7c8ac5112cfb\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:b295029019c8e6250e7245989e5d51129df61113929a4c39d19e7c8ac5112cfb\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:b66753718e210ff590c9b1369d374ac1b4f0d99f65cb5e6d9312c5cf0580c19b",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:5a0471a4232404511049b0b59d3d19a305119c376a75bee6da32f6cf91db569a\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:c5b30319442ff5664b83bc4eab2cede69a43f07a24a112b4d1c9fe9f7807e91b\",\"sequence\":1,\"trail\":\"05d0adf4908cb63783eefaaf6437a50b\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:48Z\",\"sources\":[{\"source\":\"company\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"person\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-stale-and-conflicting-unknown",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run, its receipts fresh, with explicitly stale observations, one citing nothing and one citing the search, and conflicting typed values, each observation with its own citations: the company's headcount stale and its revenue conflicting, which the copy keeps as recorded; the person's experience stale and its contactability conflicting, true on the answer and false on the page, so that the rule's clause reading an observation derives unknown, choosing neither. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-stale-and-conflicting-unknown",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:48Z",
+      "files": {
+        "binding.json": "sha256:96aa66b0cf7ed4d3a3180f76beecaa36510803acd99d39b9d767e873189409ce",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:9a837c7037b30ef6a7ac398891c4b304811fb297d5af85fc4abf0a18303c4064",
+        "mapping.json": "sha256:c5fef9a5d55eac1c75786417764bb3762ed518e43f63d83008f6a24e435d617d",
+        "preparation.json": "sha256:482c88852e6319a77294b00aec40b51014d3d35ae12993ade9e8212958280fb7",
+        "preparation.sha256": "sha256:0d62314de014f7d227448f70daa875796333b790f8a3f812de8e0e8e62dacf53",
+        "profiles.json": "sha256:196706656f373a9260bf851a9abb43690b8faa7f9aa5eb96e8f4c988fce4987f",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:9339426b787f18bb3a1522b22255504e71226469083843ce342bfbdf73c4ae12",
+        "run.json": "sha256:c8d80ce4c9ee698b59ce0ceb4da0ce71f145ebc0284c9c723c0fdfe41a04825d",
+        "sources.json": "sha256:3b4bc71c9774e9ccfa4069f763d026d92862c4f1365273be0ace2b6a1b6f1ce6",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:482c88852e6319a77294b00aec40b51014d3d35ae12993ade9e8212958280fb7",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:482c88852e6319a77294b00aec40b51014d3d35ae12993ade9e8212958280fb7\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:482c88852e6319a77294b00aec40b51014d3d35ae12993ade9e8212958280fb7\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:4df009a73194ed1589215d4d104a06ee9691626fe99b7b909d24d32e24fa6d00",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:69662f2745fcfdc87f6ad17757729d519915810806b3a8f25a635568101c1172\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:b1f1b0ee1742ff294bd9fb2f209af46f07fd25396ade01d35f9f1a3a68d44169\",\"sequence\":1,\"trail\":\"b9c27629e3dae7fa0e7b42d4bcff5e17\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:48Z\",\"sources\":[{\"source\":\"company\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"person\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-failed-fallback-all-unavailable",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. Three research sources each ask for answer alone and declare the example's count field: the primary and the secondary copy their entry's status, and the third reconciles the two before it and itself (section 6.4) by a rule that tests their statuses in a declared order: the primary's found value, then the secondary's, a conflict anywhere unknown, then its own found value, and unknown when no candidate is left; each absence, not-found, stale and conflicting status is named by an exact guard. The reconciliation's citations are its own response's; the earlier sources keep theirs. The primary answers not-found, the secondary stale and the third conflicting: the failed fallback derives unknown, with no resolved target. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-failed-fallback-all-unavailable",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:49Z",
+      "files": {
+        "binding.json": "sha256:b3cb3ef65b143de29fd83ee5ddb320b4068c6c2204d97088275d5e533bb79b5b",
+        "case.json": "sha256:2f9db886cd9afb64ecae1fe941c205c98aba75898097ebd14274c6a908325655",
+        "checkpoints.jsonl": "sha256:4d5274370163273fc109e9548492d6ab8490a18b8dfe7a6d218c63ee26a75a43",
+        "mapping.json": "sha256:af10fa99354b6248c866558d44f04dadfa97719711cc43384f66138ede694f81",
+        "preparation.json": "sha256:6d10c1995ee584d31632cf5061d4e4f75f3947645a2c157c2f28f853e83c3f8c",
+        "preparation.sha256": "sha256:bb9e71fefd3fe6a152b5e67283a6dc85c1d6ec145b3a4d839eecda53f728f904",
+        "profiles.json": "sha256:e1eb23e2865f3fc868f567b1bb30c32ae22fd92e528f88def264de0fbff95274",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:28d1ff49f140ae415d74cd36d1aeadc2a04ab66f09cfeb7edcaf805bcbab11cc",
+        "run.json": "sha256:38105a3755fe7a47a1f787969b4b1c745da07266047963201f2a961ec8095bea",
+        "sources.json": "sha256:877685c2686ae849e60a7dc343e2b53ac86a4ad10f1e379a7582a3578beb1d22",
+        "unbound.json": "sha256:b245e20c5eb8e09161ae7fb4dbf9de1bbff53a4645c7fbbdfde4762c969129b9"
+      },
+      "preparation": {
+        "sha256": "sha256:6d10c1995ee584d31632cf5061d4e4f75f3947645a2c157c2f28f853e83c3f8c",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:6d10c1995ee584d31632cf5061d4e4f75f3947645a2c157c2f28f853e83c3f8c\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:6d10c1995ee584d31632cf5061d4e4f75f3947645a2c157c2f28f853e83c3f8c\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:2c8ef71453f61e62f6672d1014110e6e690d5a18526bc47cfa01789576f0a074",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:911527c8e248c98aa26bb7c0a32ab636f47c087f32de03b5e886063da9b66884\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:5fa775aca0a595649e0f83bcc47df0da05beb113d834b6acd5ef5c2f1256f6dc\",\"sequence\":1,\"trail\":\"ab121be5a505966f4edc7506ae1564d5\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:49Z\",\"sources\":[{\"source\":\"company-primary\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"company-secondary\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"company-reconciled\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-failed-fallback-secondary-found",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. Three research sources each ask for answer alone and declare the example's count field: the primary and the secondary copy their entry's status, and the third reconciles the two before it and itself (section 6.4) by a rule that tests their statuses in a declared order: the primary's found value, then the secondary's, a conflict anywhere unknown, then its own found value, and unknown when no candidate is left; each absence, not-found, stale and conflicting status is named by an exact guard. The reconciliation's citations are its own response's; the earlier sources keep theirs. The primary answers not-found and the secondary found: the reconciliation resolves the target from the secondary's value. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-failed-fallback-secondary-found",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:50Z",
+      "files": {
+        "binding.json": "sha256:a436875ad10066f5f7dbde065a95f6936e5edae78d7060cd6bdf35d7eb18a5e6",
+        "case.json": "sha256:2f9db886cd9afb64ecae1fe941c205c98aba75898097ebd14274c6a908325655",
+        "checkpoints.jsonl": "sha256:f35493b7207a1301ebca922dc2fb2f7ea6a916ce45bc70aef3d113e9d24cf0ba",
+        "mapping.json": "sha256:f72588b6850c29df177701fe6f4e3f4926d1bbb01b770b5d8e772b629e035dcc",
+        "preparation.json": "sha256:d511fc46b919d386e1e14f2d62bf8f29c985dcbd59176aaf0590af8ed217ab69",
+        "preparation.sha256": "sha256:c4cf598e8abb1f3e931b22181c37dee0aaf61ac9f40fd4971cf75e2725649248",
+        "profiles.json": "sha256:3bdc33562db1cd73960ff36d7790a467fdae7c57104d7654864f751b8dc9f783",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:12c51a4297324a630ceabccfeb05388ea8e7dd5620d0c8e0b68210430497ff5b",
+        "run.json": "sha256:836c1d83f6366077b80124829420e6070a109e16882a907516ec69c82b6aadfa",
+        "sources.json": "sha256:db343f2575474cbbd964ba3ff0c6db79a15180020b8fdd0d6ba436bb0f4f345b",
+        "unbound.json": "sha256:b245e20c5eb8e09161ae7fb4dbf9de1bbff53a4645c7fbbdfde4762c969129b9"
+      },
+      "preparation": {
+        "sha256": "sha256:d511fc46b919d386e1e14f2d62bf8f29c985dcbd59176aaf0590af8ed217ab69",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:d511fc46b919d386e1e14f2d62bf8f29c985dcbd59176aaf0590af8ed217ab69\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:d511fc46b919d386e1e14f2d62bf8f29c985dcbd59176aaf0590af8ed217ab69\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:0fe37d958fff8a24c0532af1ea500e51240c8a0369007006c5670be7501efbbf",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:6af41e64fb9df6d51bed71bc86b6aa68d7b29086452ba52fa36e8a78e1ab7f3d\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:2fb535e3ee73b4b6127a1d0f98889e1402056029acef192274fc027806b98c5b\",\"sequence\":1,\"trail\":\"979215cd9f215cf75617b2cc155e7095\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:50Z\",\"sources\":[{\"source\":\"company-primary\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"company-secondary\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"company-reconciled\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-changed-binding-second-installation",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run as a second installation binds it: the same published dialect, the person's page bound to the profile reader, of the same gateway at another endpoint, in place of page. Every response through it names reader, and its receipt verifies under reader; the bound dialect and its digest differ from the first installation's, and nothing else does but the responses, asked again in a session of the gateway's own. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/gtm-company-person-changed-binding-second-installation",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:43Z",
+      "files": {
+        "binding.json": "sha256:14944e790139004d6bf8922cab7aa06e199c397014a8c31e00755fa53e4e9a49",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:26213a419e618b92db71a6d104e84ec3f7260f1938f4f0ac8e48b883e6371714",
+        "mapping.json": "sha256:f1c3fdce621b627bf87dfa2fc0b575c74c988b85b761bac5df6ddeca6508d798",
+        "preparation.json": "sha256:c8cddbe81753a68ec2f80b994e632c644fa17fea2cbac32dcec8a2622229cb38",
+        "preparation.sha256": "sha256:7a7ca39b8dff981f5d9c206e63e6d48a5b8f64b62daa7b1833cfb01cf8944582",
+        "profiles.json": "sha256:1750d5cb829ecebfbbc7558dae4b93bd0613adc8eca5bbb4f7b895236d609b95",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:57882d697fdee27c549a3ed7e9aa1a25e2510f288c1f704fe58052d969757dad",
+        "run.json": "sha256:dcaa2e72ad57f7042e8b1be0e4d9edbd981aef09a492600a46e9cb1ca0a2625f",
+        "sources.json": "sha256:ec9ec2f89921ef72d9cda83ec4e3d53b2bc3264749fedc251f9e0bf387b884fa",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:c8cddbe81753a68ec2f80b994e632c644fa17fea2cbac32dcec8a2622229cb38",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:c8cddbe81753a68ec2f80b994e632c644fa17fea2cbac32dcec8a2622229cb38\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:c8cddbe81753a68ec2f80b994e632c644fa17fea2cbac32dcec8a2622229cb38\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:8b5428380a44a2b7a38a045736fed799f3a53dd62c97b764d103a1b8c5c8a7b7",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:36386bf99f2701b64ef2e04567236c29ea8a21ea087af67ac40f5a09e4d9025e\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:1ec88f36927e8dbcecfc3b28e405be2db787b06a12ece0f147438519a721382c\",\"sequence\":1,\"trail\":\"eb6c3483039d5d74bcbc1dfa5dedde73\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:43Z\",\"sources\":[{\"source\":\"company\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"person\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "gtm-company-person-changed-binding-old-preparation",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run as a second installation binds it: the same published dialect, the person's page bound to the profile reader, of the same gateway at another endpoint, in place of page. Every response through it names reader, and its receipt verifies under reader; the bound dialect and its digest differ from the first installation's, and nothing else does but the responses, asked again in a session of the gateway's own. Its export retains the first installation's preparation instead, the old preparation held fixed: preparation.json is what the Runner computes from the second installation's inputs, which differs. A reader given the retained preparation recomputes the second installation's at its verifiedAt, under its bound dialect, and concludes preparation-differs; verify-run refuses it with no report.",
+      "from": "internal/runner/testdata/research/gtm-company-person-changed-binding-second-installation",
+      "altered": "The export of gtm-company-person-changed-binding-second-installation retains, in place of its own preparation, the preparation of gtm-company-person-valid-types-all-six, recorded under the first installation's binding seconds before.",
+      "verifiedAt": "2026-10-16T11:44:43Z",
+      "files": {
+        "binding.json": "sha256:14944e790139004d6bf8922cab7aa06e199c397014a8c31e00755fa53e4e9a49",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:26213a419e618b92db71a6d104e84ec3f7260f1938f4f0ac8e48b883e6371714",
+        "mapping.json": "sha256:f1c3fdce621b627bf87dfa2fc0b575c74c988b85b761bac5df6ddeca6508d798",
+        "preparation.json": "sha256:c8cddbe81753a68ec2f80b994e632c644fa17fea2cbac32dcec8a2622229cb38",
+        "preparation.sha256": "sha256:7a7ca39b8dff981f5d9c206e63e6d48a5b8f64b62daa7b1833cfb01cf8944582",
+        "profiles.json": "sha256:1750d5cb829ecebfbbc7558dae4b93bd0613adc8eca5bbb4f7b895236d609b95",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:57882d697fdee27c549a3ed7e9aa1a25e2510f288c1f704fe58052d969757dad",
+        "run.json": "sha256:a5d2d40e6d5d82cdcd82ef5232caa04d8fe790b9e0aa7669ced2ea910ece406f",
+        "sources.json": "sha256:ec9ec2f89921ef72d9cda83ec4e3d53b2bc3264749fedc251f9e0bf387b884fa",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:c8cddbe81753a68ec2f80b994e632c644fa17fea2cbac32dcec8a2622229cb38",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:c8cddbe81753a68ec2f80b994e632c644fa17fea2cbac32dcec8a2622229cb38\"}",
+        "retained": "altered"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:c8cddbe81753a68ec2f80b994e632c644fa17fea2cbac32dcec8a2622229cb38\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:8b5428380a44a2b7a38a045736fed799f3a53dd62c97b764d103a1b8c5c8a7b7",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": null,
+        "report": null,
+        "error": "retained lineage does not match recomputation"
+      }
+    },
+    {
+      "name": "gtm-company-person-changed-response-retained-result",
+      "note": "A run of the example gtm-company-person of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with one retained result changed and its receipt and the expected preparation held fixed: preparation.json is the preparation the run recorded, which the export retains, and the Runner computes none from the changed inputs. A reader replays the third response under its profile and concludes acquisition-invalid: its result is not the bytes its receipt names; verify-run refuses it with no report.",
+      "from": "internal/runner/testdata/research/gtm-company-person-valid-types-all-six",
+      "altered": "In the export's research record of the source person, the result of the third retained response, the page, says person-0013 where it said person-0012; its receipt is as it was.",
+      "verifiedAt": "2026-10-16T11:44:42Z",
+      "files": {
+        "binding.json": "sha256:3c34211981885533662ef2651c5b569f9b2f8d2b82625576dcdb09dd72dea8dd",
+        "case.json": "sha256:15b6158d4847e593d85c69d77b6a269bda1e29ff6c4cd384ce77985881562424",
+        "checkpoints.jsonl": "sha256:53c421d07dd883dd151075be790b01afedc993592ec377d7beaa3de75ece2418",
+        "mapping.json": "sha256:12fb8aa610cf5b9e8f187645e8cceb36cd5322a7a30e82f5308b27fc3d34da97",
+        "preparation.json": "sha256:5da9526acae81dbe695dba2d927c5716fa9240a60c26695d93a40e0377ae9f2e",
+        "preparation.sha256": "sha256:7db00882b493c0516ef6897f88d75fdf3db708f07061bceef3fc4d21756b3e52",
+        "profiles.json": "sha256:f0af1c7745f7211ce7217f47b13ad721305816c702e7341a5a719d94c844fb8e",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:d00ba322433a9dd716705f82e285273184b8fd3bb7561f777050886fb61660c7",
+        "run.json": "sha256:60bd5cbe39903e77c634bec696dddeea73e0bf9ab7e44f775edcd77af0cc05e8",
+        "sources.json": "sha256:cac4074f1bd61aaa681bbdef31b8fd77f03b9ceea1fd893412fa7af80a371e59",
+        "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
+      },
+      "preparation": {
+        "sha256": "sha256:5da9526acae81dbe695dba2d927c5716fa9240a60c26695d93a40e0377ae9f2e",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:5da9526acae81dbe695dba2d927c5716fa9240a60c26695d93a40e0377ae9f2e\"}",
+        "retained": "recorded"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:5da9526acae81dbe695dba2d927c5716fa9240a60c26695d93a40e0377ae9f2e\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:64e79eea06624b436b69130820f45076cc818142fa0cc8921db82ff4b9de8f78",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": null,
+        "report": null,
+        "error": "Source person: retained response 2, through the profile page: result digest failed (acquisition-invalid). No decision was requested."
+      }
+    },
+    {
+      "name": "work-item-triage-valid-types-all-six",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. Its item source asks for answer, search and page, its search served by its AI profile and its page by a web profile, and its rule writes the item's id, its points and /triage/blocked from found values. Its follow-up source asks for answer alone, its question a $param, its record came back through the AI connection with a receipt of its own over the source's request and the whole record, and its read copies the record's whole fields object to /follow-up; its lineage names that receipt, and its receipts end with it. All six types are answered: text, integers, decimals, booleans, a list with duplicates and an empty string, an empty list, a decimal range with a signed endpoint and an integer range. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-valid-types-all-six",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:50Z",
+      "files": {
+        "binding.json": "sha256:49fe4d4b05341fe62adfcaab0b735e4ad4c3874ff66575ccba5294ec14d8f7db",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:c0a0d1349f828b8956aedddb6ad81e4d55f492c98a33dd55f39426ed924d95bf",
+        "mapping.json": "sha256:31e27a27701f91d49ba3e23de95a40099fe983c42764e0bba4adabf4b639b5fb",
+        "preparation.json": "sha256:feeba958c8fcc482175f51f646d3f49284b5f860079c7fdb19643f4b44a0ec8c",
+        "preparation.sha256": "sha256:c1f4cd78bac9e5c954ade5e7873f47612beaae02f4c22e098151d3d67ddf178c",
+        "profiles.json": "sha256:afc79c90a7c133b4a97ae12421160513bc14cdbdcb1222c99c17711b36829b1a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:638a048896ed0660491183d1c130758c2e467e0bc0c0ef2af01f16f392cfac67",
+        "run.json": "sha256:ca9824478a6b37d4702a5415482708c17563f4c3c7c7f134e21cb2208612f561",
+        "sources.json": "sha256:0968b79fb7f025729a8f06608c8a8e4f23b3f84bde182f559a30ef07389e813f",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:feeba958c8fcc482175f51f646d3f49284b5f860079c7fdb19643f4b44a0ec8c",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:feeba958c8fcc482175f51f646d3f49284b5f860079c7fdb19643f4b44a0ec8c\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:feeba958c8fcc482175f51f646d3f49284b5f860079c7fdb19643f4b44a0ec8c\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:93e0e52028947433df319673d50aeb6406a00f035b15beedf545c274dd73d624",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:7a01b588f5df7db1d9d37c92f86778b5f3dbe157cfd482f96ffae1944ad7bbb6\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:1ab7f4e6160b202b68a38286d59b5aa9e9ff2a4620ac24ddc3995d63f12e09b4\",\"sequence\":1,\"trail\":\"7d9b653d48f46b9ce98d2cff55bac220\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":4},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:50Z\",\"sources\":[{\"source\":\"item\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"follow-up\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-presence-optional-omitted",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with every optional entry omitted: the item's labels and range, and every follow-up field but its id. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-presence-optional-omitted",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:52Z",
+      "files": {
+        "binding.json": "sha256:03a9cdaddfc887e98b6a13fc393cf955ac9eb64c76abd15202057952d450bc6c",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:cea388b04f5eb5acc1cd4a58d165a59d21246ee2721e2c6c9ad536152fc62de4",
+        "mapping.json": "sha256:fe712ad19aaa415f6c9e1e127ac81944553690bb23c7db99b0d157aee191ea74",
+        "preparation.json": "sha256:93e836b7bd8377101bebef1af63743f49d5d00c316cd576b08473376ed3e7ca6",
+        "preparation.sha256": "sha256:a20bb6819a82f778fc25abc75871573b1c10ad57f182dbf6cd36f70fc388edd6",
+        "profiles.json": "sha256:25b029671d7e2d11260efcb7f38773291c2293eccb6bcd913fe4391882cc1c54",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:14482ee30b21403cc8c54ea28971388de55e80bc89dc1408ef026ab563ed657a",
+        "run.json": "sha256:7870bd9a62c3fbc9dc682d0836302a7167e145ae0df2a6c4f8c775e9b4246b59",
+        "sources.json": "sha256:919924031802e47f29429f249e2a00804f8c5395c774855923ac62cc4f2c8b2f",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:93e836b7bd8377101bebef1af63743f49d5d00c316cd576b08473376ed3e7ca6",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:93e836b7bd8377101bebef1af63743f49d5d00c316cd576b08473376ed3e7ca6\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:93e836b7bd8377101bebef1af63743f49d5d00c316cd576b08473376ed3e7ca6\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:25cb13204b926e675c58c1e1ec16cd374cd35e159653e10c788f581e0a98170f",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:bae482bcdc886c0f93f062f4b0b636062148e51aa07f610ffb24a20e9436000a\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:9a812789c77158dce4386c7129ff54d9f9e9a4d5ff3c16e3115847682b52d08d\",\"sequence\":1,\"trail\":\"676e08e1ba5c1188c98f3a97c771975c\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":4},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:52Z\",\"sources\":[{\"source\":\"item\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"follow-up\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-presence-required-not-found",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with a required entry not-found in each source: whether the item is blocked, citing the page, so that the rule derives unknown, and the follow-up's id, citing nothing. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-presence-required-not-found",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:52Z",
+      "files": {
+        "binding.json": "sha256:95c57c4eb6540d95fed2f67742f9b2b21acb5509e1719a783678b3e47caa4a44",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:7c820bae574050d159510b7727aff0b35db0205c132477dc57edab3e4d68dd14",
+        "mapping.json": "sha256:cad9ae120ff055bed91757dec5edaa1a02b9236fb18addd66fbddc20b4cd3bf3",
+        "preparation.json": "sha256:ca690dadf8d34053379c5d02d38af1de8b85549863f9ea9f542b169a6c9b992a",
+        "preparation.sha256": "sha256:a3ebdd13013ffee174a6b73106c8f2e87b7ee5d5d4012ab6c66162614779a839",
+        "profiles.json": "sha256:c4b8c669e271fa2fd1bf823d52193f340b8ee3216808b992dd75b95af809bdee",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:2adee9b8ed3618ed68b70578c60b213ebe7aad60ac1d448d3cb9804b3ee2b985",
+        "run.json": "sha256:8c09dd0e4dce243ff1d99cc20dfdf42ce2efbf23ce2b1b2b9620bfce58ec70b3",
+        "sources.json": "sha256:af608b389ddb33751ab786b3a0cfffed649517cf5117ded51fd5afa3503a9c8c",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:ca690dadf8d34053379c5d02d38af1de8b85549863f9ea9f542b169a6c9b992a",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:ca690dadf8d34053379c5d02d38af1de8b85549863f9ea9f542b169a6c9b992a\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:ca690dadf8d34053379c5d02d38af1de8b85549863f9ea9f542b169a6c9b992a\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:47eebdf9b2083a654c8806d67acda2687e942709f663da85d819f0674d9b9b73",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:503bc4c6782337b415b86b428056736d5dc0cd00a761d0e6623b244ef7aaced7\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:a2d0044a592c26efdc2060cf48e949e5918f62f4cde4f8b38ad66f1a701ee491\",\"sequence\":1,\"trail\":\"c0f177d9d6b9b7ff9420e1598e9e2321\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":4},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:52Z\",\"sources\":[{\"source\":\"item\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"follow-up\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-presence-integer-zero",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with integer zero: the item's points, which the rule writes, and the follow-up's. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-presence-integer-zero",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:53Z",
+      "files": {
+        "binding.json": "sha256:bd8da1f2af70f33085060bcd9833cfec6cfa1f42d464a1fd6d9f34850799d5ef",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:807e44b2cbd0b7930f5f8996c9c22fc4179772e09dfe8ce0b2a6cf0d5828c974",
+        "mapping.json": "sha256:02a6510697003c4a221289832470ce5e13eab787981ce06112024a61894b86d4",
+        "preparation.json": "sha256:e84a63abd18b5a61864106b51dcbb8dc5a602511b37fd3e946383d98c1384db1",
+        "preparation.sha256": "sha256:7e88532a22ac68b6057cce2731da37e753a298ca040d3740a46eca3b0410b6ec",
+        "profiles.json": "sha256:a62b627c0ee8d8897fb778ee599471de96dddac1e774f760eca7ed7e892fa3ee",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:e244da5851f86fb153798abc5a2a04a2d009efaf87957becf1b9df6f64491d26",
+        "run.json": "sha256:c15339f630f8c9dc4167565b13adee41e4163738f6435d72040aa6b646410cdf",
+        "sources.json": "sha256:a359e26481a6e069a504b9be649fc8aef5e3d5efff3f6334974f6d5033d34025",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:e84a63abd18b5a61864106b51dcbb8dc5a602511b37fd3e946383d98c1384db1",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:e84a63abd18b5a61864106b51dcbb8dc5a602511b37fd3e946383d98c1384db1\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:e84a63abd18b5a61864106b51dcbb8dc5a602511b37fd3e946383d98c1384db1\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:bfafc585f1a9c9d7f823d27befcdedde22dd2b1153c1fc93215a19e0b6e32d5f",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:d592fc4a164e3428bd5eccd692d82c520e58e9268e68435d96c818df2d71204b\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:c9894e90494d80fd692d37b631bc218a2db0d8d0c829b282fed81417786585e3\",\"sequence\":1,\"trail\":\"b3f7497a3131877fa595c532a67b8727\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":4},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:53Z\",\"sources\":[{\"source\":\"item\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"follow-up\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-presence-decimal-zero",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with the decimal \"0\": the item's estimate and the follow-up's. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-presence-decimal-zero",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:53Z",
+      "files": {
+        "binding.json": "sha256:a5778bb000778755376436dc26665c655e52b0f35192d2e1b242282781d42534",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:4cc6479d5153558132ac7c2830c3bbd49c4343e07c9e7fc90ea18c30b0fe577c",
+        "mapping.json": "sha256:4ad0b609eee57c3ffc364c0e8a1b6a3f0cb3e9a02ddc8af6eae1ba04e272d657",
+        "preparation.json": "sha256:0c4a61525ef3b51c2beb6499a699f816f7292d96cb262edf9ac3aca4684d1bfe",
+        "preparation.sha256": "sha256:b2db451b4b12dbc35cf08fa476dd811433471e08c29de0e920a8056b829265a9",
+        "profiles.json": "sha256:ac67bafcf6c98f9a8abe8299610d981e150803ea9e790d85b2b4624f39818d1e",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:24181c14dffb632378aa13610d5abf6729dd657928d0dcb0dc373da9248c74b2",
+        "run.json": "sha256:eff2d7b864e1d0de4ef76121993436e4ded42c536a656da10af4b985f34ccc86",
+        "sources.json": "sha256:cfa9b3ad40cd54a57df6db1e21165655416d953dbfc0729adcbca92fb308f316",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:0c4a61525ef3b51c2beb6499a699f816f7292d96cb262edf9ac3aca4684d1bfe",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:0c4a61525ef3b51c2beb6499a699f816f7292d96cb262edf9ac3aca4684d1bfe\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:0c4a61525ef3b51c2beb6499a699f816f7292d96cb262edf9ac3aca4684d1bfe\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:45b142064647df1083c7ccef3c2b073e27e2fe5904d04b1d905ffa51cd2073ee",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:a01c191e8c21121dbf020c03b866fc52e8fbd732151bd3f2398c32f3334d59f0\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:0d838f853705823ac5f34c1b8821066c65c8dc528abc59aeaf7b368b9b7016c5\",\"sequence\":1,\"trail\":\"263d708d511a94d1f6a90307f8c97da4\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":4},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:53Z\",\"sources\":[{\"source\":\"item\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"follow-up\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-presence-boolean-false",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with false: the item is not blocked, which the rule writes as /triage/blocked false, and neither is the follow-up. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-presence-boolean-false",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:54Z",
+      "files": {
+        "binding.json": "sha256:98b018e84ff887c1c67a470552e2f6fc32a1e128bcc0a85ccaf3a759db3b1b16",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:d5734fc8814a77f70aba3aa6d064e766bde11d79a261e510ec72ee01a977fb0a",
+        "mapping.json": "sha256:7ce49f40f95fd6d2467943c02873f3a924f12047181116bad6fefd7ec2e142d2",
+        "preparation.json": "sha256:d5b091f591346a57b47d9bf6a3a5978995e18e8cdb2e2694459f47f85c2adab4",
+        "preparation.sha256": "sha256:a608d37c45250f0d28752beb01279b4cbc8433e96d847c3f7df7b9cff785ed69",
+        "profiles.json": "sha256:93293b2cd91f35c6db25907b36be282ddf72b59e89f3ee75812aca2eff3278fc",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:10654c190e4d4da2c7c2f0e3812fcae820cd46bd894709e618464786ce116e5f",
+        "run.json": "sha256:ccfd02dbc752114c5704020e3e0ddd5b72684543dca9d3666382c60826aa14e4",
+        "sources.json": "sha256:45e6998d42bb39f04dfa7303c467cba2a249b3ad02c35e24428e8a8a632967e1",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:d5b091f591346a57b47d9bf6a3a5978995e18e8cdb2e2694459f47f85c2adab4",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:d5b091f591346a57b47d9bf6a3a5978995e18e8cdb2e2694459f47f85c2adab4\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:d5b091f591346a57b47d9bf6a3a5978995e18e8cdb2e2694459f47f85c2adab4\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:76c97f84fb5c38113788131ee2f4a2f42e309a0d7563b0b3dff5902f2fad0e05",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:f4a05b0545032d2cabb2d458e8720e6ecc1b8b738bbfb1b2c557aaad7fd3c501\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:6714e8b82b0559b1c11d279d238c8b798366c387723be6ce1368400363f312b6\",\"sequence\":1,\"trail\":\"bb94fcb3c64975a7884e59b5fb1d9655\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":4},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:54Z\",\"sources\":[{\"source\":\"item\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"follow-up\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-presence-text-empty",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with the empty text: the item's id, which the rule writes as /work-item/id \"\", and the follow-up's. Nothing absent, null or false is replaced by a default. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-presence-text-empty",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:54Z",
+      "files": {
+        "binding.json": "sha256:9ad1ceb03977bdfccda12eabbd65c6f06f38636a4532f6c4f44ce933781fd713",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:dc6e9f1b3140e6a11d98f947ccc1328e07a45f49450f36279363f490742eeea4",
+        "mapping.json": "sha256:204f2a3b467ccd81327f56e581255af48424c215a33e663b87a36a7c87bf47c5",
+        "preparation.json": "sha256:8cc70ac0db9431cab84401c8959a34ecf10a9ca6c63f7ef6fe7ab2c2ff03633d",
+        "preparation.sha256": "sha256:2b5ae2c3410b03a7120d0fa20bd082a20b5a98438bb5cb0136db6017e97de4b9",
+        "profiles.json": "sha256:b9b3b56b100918d15c6a6b58cac00c147746a14ac4864d997e1c945b399a0ab4",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:06b231b64afaf463c358cb2dd18aae6d85b7069266f705d8a277c6dbb813d99a",
+        "run.json": "sha256:98bb14d26a45aeccc7c93955373dd4f0cb0d2eccf3b1752dd598c033fdd6d489",
+        "sources.json": "sha256:372d6b9c500ee9c5cd708edefb87cad1a24e9346007b5da601f6aa76d4db7082",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:8cc70ac0db9431cab84401c8959a34ecf10a9ca6c63f7ef6fe7ab2c2ff03633d",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:8cc70ac0db9431cab84401c8959a34ecf10a9ca6c63f7ef6fe7ab2c2ff03633d\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:8cc70ac0db9431cab84401c8959a34ecf10a9ca6c63f7ef6fe7ab2c2ff03633d\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:eda84b2f1301b3d967c3b1b98b7efbf466ded6ef0340347e57e596a7611e0aad",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:fef28ad1188555032e113fe1f55aea2e0fae0a1a03e0b6f2f50d6ab7173c021f\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:c911c6946b8528865c81ca189bf44bc28b30c25ff9314dbca665d7658b51d7a0\",\"sequence\":1,\"trail\":\"8440754e9af24d32f38ca624f6bd9d6f\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":4},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:54Z\",\"sources\":[{\"source\":\"item\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"follow-up\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-stale-and-conflicting-unknown",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run, its receipts fresh, with explicitly stale observations, one citing nothing and one citing the search, and conflicting typed values, each observation with its own citations: the item's points stale and whether it is blocked conflicting, so that the rule derives unknown, choosing neither; the follow-up's estimate conflicting between \"1.0\" and \"1.00\", spelled apart, and its labels stale, which the copy keeps as recorded. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-stale-and-conflicting-unknown",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:55Z",
+      "files": {
+        "binding.json": "sha256:eaaf5e2fb7095fbce95820aa543b9d0dde6ef24ac3dfc769fd77b568eecfb0b2",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:28e02fc5722701920d3a487b150b1695c39ebb0db689b0cbce579770bc71e75d",
+        "mapping.json": "sha256:fae128d39ab31fb737d7c74395407f72e22014575c53a7f985f0794d94d38f4e",
+        "preparation.json": "sha256:74632170b20ae8ae9e8aa8012dbe0b2612f096a64b528ad9b4c3750fe6ebffb1",
+        "preparation.sha256": "sha256:4ded3f3b23aa87529c5fc4d3133d33adcb80ac7591afb186ab61d580a79fbf75",
+        "profiles.json": "sha256:6ae11502b22ec1671b340380d01d4b93e3b50f63d64cb5d9cc21f584fa7eca10",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:8ba10c2b0ae2ba74bcb1eef5d5efb589194fbe8338f005c48fbd827e7e134fe5",
+        "run.json": "sha256:e4de1ed93d92df3d7064508c0f56ebb44584f9a560ded517cc19569737d4bc34",
+        "sources.json": "sha256:13401c3e646097921fc01e6d2fbaf0232ca598098113f044d7f65563918a7289",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:74632170b20ae8ae9e8aa8012dbe0b2612f096a64b528ad9b4c3750fe6ebffb1",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:74632170b20ae8ae9e8aa8012dbe0b2612f096a64b528ad9b4c3750fe6ebffb1\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:74632170b20ae8ae9e8aa8012dbe0b2612f096a64b528ad9b4c3750fe6ebffb1\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:88d37a36842415a3802cd7d1edee4bf123366ac1fb3bed09530ce68f31f6620d",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:44ea91ebc9cdf1b0192647951af0e7e921a1ed9e98e7bc329e4c2034a47f1bfa\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:4aca4fed9fac1284effc2b67bbcb296e29170df853cc1e8862157abf981a339d\",\"sequence\":1,\"trail\":\"479b2582f91ed021d068686e506997dd\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":4},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:55Z\",\"sources\":[{\"source\":\"item\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"follow-up\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-failed-fallback-all-unavailable",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. Three research sources each ask for answer alone and declare the example's count field: the primary and the secondary copy their entry's status, and the third reconciles the two before it and itself (section 6.4) by a rule that tests their statuses in a declared order: the primary's found value, then the secondary's, a conflict anywhere unknown, then its own found value, and unknown when no candidate is left; each absence, not-found, stale and conflicting status is named by an exact guard. The reconciliation's citations are its own response's; the earlier sources keep theirs. The primary answers not-found, the secondary stale and the third conflicting: the failed fallback derives unknown, with no resolved target. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-failed-fallback-all-unavailable",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:56Z",
+      "files": {
+        "binding.json": "sha256:8f382536f9fc6be08f2abf2908e7c19fd32cc51d30072f47f4b4b87b1a62170b",
+        "case.json": "sha256:a17f11460ec8d51649e814b66464ec77e88d92de9d08ba546c82e4ec7752af1a",
+        "checkpoints.jsonl": "sha256:ce49343abf250e40075a3923574d2ca07976810cf133d4b6b7a012ac4d7b8c2b",
+        "mapping.json": "sha256:6920a0c161b400923464d4e81ef13cc9ead6e5966b587875fdc3cb0147a69987",
+        "preparation.json": "sha256:3080503325fa7a215c27fbaccce05095431d4c5add93b44dbd0262e5d035941c",
+        "preparation.sha256": "sha256:68150d4506cc99c68ee61e37bca16be92891bd5d827fd63d7061d3baa29ec730",
+        "profiles.json": "sha256:3ded2f4e605e74b1cd54704ddf697338368e34c65bbd236d95be26c1e60ca29f",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:374d055d69c07c48104bcab75cd32f1c22b84bfa6b92ef2480be73b687aaf261",
+        "run.json": "sha256:c164ecf82f66ed58becbaef2124e8114edd7a320c6a757521ab0411bfd93c4be",
+        "sources.json": "sha256:643142b5717284f636ea738cbba22088222b9fc5487841a5231f491d1bd74dfb",
+        "unbound.json": "sha256:233ab6152ad8de2e3107e003b46819aff0fa9f427eb55d23c99b60730a8380de"
+      },
+      "preparation": {
+        "sha256": "sha256:3080503325fa7a215c27fbaccce05095431d4c5add93b44dbd0262e5d035941c",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:3080503325fa7a215c27fbaccce05095431d4c5add93b44dbd0262e5d035941c\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:3080503325fa7a215c27fbaccce05095431d4c5add93b44dbd0262e5d035941c\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:de6b3e38efb7f80840c19a91948422bbdf4173ea922131aff3df7257f944b0c1",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:16954aa990dc85941106fe12418e11c335848a1443b3d385e81230aee2b78bca\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:5e6cf16ec0d5c47634f66fecb3ea9eed768a4db462ffab2fe682d7896208cef5\",\"sequence\":1,\"trail\":\"b77d4df03b6242ec2d9fe9b4d5367e8c\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:56Z\",\"sources\":[{\"source\":\"item-primary\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"item-secondary\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"item-reconciled\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-failed-fallback-secondary-found",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. Three research sources each ask for answer alone and declare the example's count field: the primary and the secondary copy their entry's status, and the third reconciles the two before it and itself (section 6.4) by a rule that tests their statuses in a declared order: the primary's found value, then the secondary's, a conflict anywhere unknown, then its own found value, and unknown when no candidate is left; each absence, not-found, stale and conflicting status is named by an exact guard. The reconciliation's citations are its own response's; the earlier sources keep theirs. The primary answers not-found and the secondary found: the reconciliation resolves the target from the secondary's value. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-failed-fallback-secondary-found",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:56Z",
+      "files": {
+        "binding.json": "sha256:57d2104b2e915a80fb871dba107cb38cdec2b87db87fb4aea5d211c10452fb70",
+        "case.json": "sha256:a17f11460ec8d51649e814b66464ec77e88d92de9d08ba546c82e4ec7752af1a",
+        "checkpoints.jsonl": "sha256:006478de212c6af1def93453a2993aa9d0fa81e71970a9faaff8f9ccab24d0be",
+        "mapping.json": "sha256:054e39bd4966fe850a51556c33cc34ecf32f82bc05209b8fb5535fd532510998",
+        "preparation.json": "sha256:984e9be8f3851ee5b790bb4a4f39ac3108afb9e50e722ce53824b34c3a7c1b8e",
+        "preparation.sha256": "sha256:e15ac1ad397974fc4c0f4b107213ac7206a2b6e66f445469aa49c4701c9c4e85",
+        "profiles.json": "sha256:06b599bcfdad6b717cdccce56bbbd5c5a9657cf22404775fa0bc97fbe87f96c3",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:3e960fb0122a80ce63cd94aedb7a73df1da857952254bbae4ec3cf827b8a6002",
+        "run.json": "sha256:789307c62e33bfa1a6572b8b45fe38eff3c2544d2b661e3488826ae07dff6d6c",
+        "sources.json": "sha256:b121038b614c9a0b2066c1c660f495358b7fa11207b1eae45f62763acd0e75d5",
+        "unbound.json": "sha256:233ab6152ad8de2e3107e003b46819aff0fa9f427eb55d23c99b60730a8380de"
+      },
+      "preparation": {
+        "sha256": "sha256:984e9be8f3851ee5b790bb4a4f39ac3108afb9e50e722ce53824b34c3a7c1b8e",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:984e9be8f3851ee5b790bb4a4f39ac3108afb9e50e722ce53824b34c3a7c1b8e\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:984e9be8f3851ee5b790bb4a4f39ac3108afb9e50e722ce53824b34c3a7c1b8e\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:843e919cfe07efe843e199c340ce537737d317113cc8dc4e01e353b05647dee5",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:1393d88e6a0f57af2b5fbcb0fb9d92797060ab67fed2bc1fdf241a145a33e605\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:ddaa18d8cd89d4446f21011cec9bc93e5e6581575276a02da4e7ba0030246cf6\",\"sequence\":1,\"trail\":\"5f671063a1113088417105cb76ea803e\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":3},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:56Z\",\"sources\":[{\"source\":\"item-primary\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"item-secondary\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"item-reconciled\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-changed-binding-second-installation",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run as a second installation binds it: the same published dialect, the follow-up's AI profile assistant-2, of the same gateway at another endpoint, in place of assistant. Every response through it, and the record's own receipt, name assistant-2 and verify under it; the bound dialect and its digest differ from the first installation's, and nothing else does but the responses, asked again in a session of the gateway's own. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, with the record's own receipt when it has one, recomputes the preparation from the records, its cites in the order of the sources, and concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/research/work-item-triage-changed-binding-second-installation",
+      "altered": null,
+      "verifiedAt": "2026-10-16T11:44:51Z",
+      "files": {
+        "binding.json": "sha256:2ecbbcaa1e3b45f4a597d5dbd585e072e23bee326b8482e4134b0b12db7b2062",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:fcbe4f0bd5b6bfd9058ef295d2b9facb25fd92addce5fe78379aac133f377f4c",
+        "mapping.json": "sha256:4c0e0d406eaa373d4a08e57169576f9dc0c8ce332deb3bdced54ae0b8af18c63",
+        "preparation.json": "sha256:d54c2b970e684e5a7481c50ce55b2948947851d8b502c19d7fd6daa484d97a64",
+        "preparation.sha256": "sha256:fc553db5bb9ca5a22d0100ec617e688b7a52ed9c21af00eba7613b600438e295",
+        "profiles.json": "sha256:7de30db6d6aec102a226818e19be8fc4ee4afc6e420bf3033e1f89efb03d153f",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:c17afe5f60636d5fe40afc93041dc9ff914fef0a048bf011de79c3062fd3d15f",
+        "run.json": "sha256:729f42d843a322056535d586f2da8a3e9821b57f9be96ad7de80d8480acb5b2c",
+        "sources.json": "sha256:585be5bcfa506cc698536e940793416b11ba4728808025fcb03eff4a0bb44bf2",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:d54c2b970e684e5a7481c50ce55b2948947851d8b502c19d7fd6daa484d97a64",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:d54c2b970e684e5a7481c50ce55b2948947851d8b502c19d7fd6daa484d97a64\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:d54c2b970e684e5a7481c50ce55b2948947851d8b502c19d7fd6daa484d97a64\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:edf112612b48853d3f50bad2c9466e13d271db2e8aa28a1cfe6dcb970e27cc3a",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:3ea9292731ca3189ad9deb4e844063bb002d29b8bef37641c8f6a4415d3ed242\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:7004e67e8c7840fe495ddd455137a5f732fd3cb50019ce0a7039442863a9d245\",\"sequence\":1,\"trail\":\"c08e164f6bf4544e8959339a8f7f687c\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":4},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T11:44:51Z\",\"sources\":[{\"source\":\"item\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"follow-up\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "work-item-triage-changed-binding-old-preparation",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run as a second installation binds it: the same published dialect, the follow-up's AI profile assistant-2, of the same gateway at another endpoint, in place of assistant. Every response through it, and the record's own receipt, name assistant-2 and verify under it; the bound dialect and its digest differ from the first installation's, and nothing else does but the responses, asked again in a session of the gateway's own. Its export retains the first installation's preparation instead, the old preparation held fixed: preparation.json is what the Runner computes from the second installation's inputs, which differs. A reader given the retained preparation recomputes the second installation's at its verifiedAt, under its bound dialect, and concludes preparation-differs; verify-run refuses it with no report.",
+      "from": "internal/runner/testdata/research/work-item-triage-changed-binding-second-installation",
+      "altered": "The export of work-item-triage-changed-binding-second-installation retains, in place of its own preparation, the preparation of work-item-triage-valid-types-all-six, recorded under the first installation's binding seconds before.",
+      "verifiedAt": "2026-10-16T11:44:51Z",
+      "files": {
+        "binding.json": "sha256:2ecbbcaa1e3b45f4a597d5dbd585e072e23bee326b8482e4134b0b12db7b2062",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:fcbe4f0bd5b6bfd9058ef295d2b9facb25fd92addce5fe78379aac133f377f4c",
+        "mapping.json": "sha256:4c0e0d406eaa373d4a08e57169576f9dc0c8ce332deb3bdced54ae0b8af18c63",
+        "preparation.json": "sha256:d54c2b970e684e5a7481c50ce55b2948947851d8b502c19d7fd6daa484d97a64",
+        "preparation.sha256": "sha256:fc553db5bb9ca5a22d0100ec617e688b7a52ed9c21af00eba7613b600438e295",
+        "profiles.json": "sha256:7de30db6d6aec102a226818e19be8fc4ee4afc6e420bf3033e1f89efb03d153f",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:c17afe5f60636d5fe40afc93041dc9ff914fef0a048bf011de79c3062fd3d15f",
+        "run.json": "sha256:e4a53af9f16107379f6670f4608f02b42a3c640e5c162f746642c529f93bf058",
+        "sources.json": "sha256:585be5bcfa506cc698536e940793416b11ba4728808025fcb03eff4a0bb44bf2",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:d54c2b970e684e5a7481c50ce55b2948947851d8b502c19d7fd6daa484d97a64",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:d54c2b970e684e5a7481c50ce55b2948947851d8b502c19d7fd6daa484d97a64\"}",
+        "retained": "altered"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:d54c2b970e684e5a7481c50ce55b2948947851d8b502c19d7fd6daa484d97a64\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:edf112612b48853d3f50bad2c9466e13d271db2e8aa28a1cfe6dcb970e27cc3a",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": null,
+        "report": null,
+        "error": "retained lineage does not match recomputation"
+      }
+    },
+    {
+      "name": "work-item-triage-changed-response-record-fields",
+      "note": "A run of the example work-item-triage of the specification's fixture plan (spec/dialect.md, section 11), as Runner exported it (version 5), signed, witnessed and bound. Its dialect, of version 3, was published with its research sources unbound (unbound.json), naming no profile, and bound at import by the binding document (binding.json) to the installation's AI profile and web profiles, each of class generated and declaring the capabilities it serves and the model (profiles.json); mapping.json is the bound dialect. Each research source's acquisition (sources.json) is the research record its caller assembled: the responses retained, each with the profile it came through, its request, its result, the receipt a gateway signed and the salts, and the typed answers, each citing the responses by their indexes. The responses were served, in the test's process, by a stand-in of a gateway over TLS, an AI connection's answer, a search connection's links and a public page, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session. No model was asked, no page outside the test's process was read, and every identifier and observation is synthetic. The valid-types run with the follow-up record's fields changed under the record's own receipt, which is held fixed, and the expected preparation held fixed: preparation.json is the preparation the run recorded, which the export retains, and the Runner computes none from the changed inputs. A reader replays the record's own receipt over the whole record and concludes acquisition-invalid; verify-run refuses it with no report.",
+      "from": "internal/runner/testdata/research/work-item-triage-valid-types-all-six",
+      "altered": "In the export's research record of the source follow-up, the answer for points is 3 where it was 2; the record's own receipt is as it was.",
+      "verifiedAt": "2026-10-16T11:44:50Z",
+      "files": {
+        "binding.json": "sha256:49fe4d4b05341fe62adfcaab0b735e4ad4c3874ff66575ccba5294ec14d8f7db",
+        "case.json": "sha256:25feaf04342573e2b3c8022ebaf91e559791685935e0ca055e8fc6a2048deca5",
+        "checkpoints.jsonl": "sha256:c0a0d1349f828b8956aedddb6ad81e4d55f492c98a33dd55f39426ed924d95bf",
+        "mapping.json": "sha256:31e27a27701f91d49ba3e23de95a40099fe983c42764e0bba4adabf4b639b5fb",
+        "preparation.json": "sha256:feeba958c8fcc482175f51f646d3f49284b5f860079c7fdb19643f4b44a0ec8c",
+        "preparation.sha256": "sha256:c1f4cd78bac9e5c954ade5e7873f47612beaae02f4c22e098151d3d67ddf178c",
+        "profiles.json": "sha256:afc79c90a7c133b4a97ae12421160513bc14cdbdcb1222c99c17711b36829b1a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:638a048896ed0660491183d1c130758c2e467e0bc0c0ef2af01f16f392cfac67",
+        "run.json": "sha256:25fbcc34c52d90b4e826f92117b73f573595457fad72b8190ef0a98ae2255ab9",
+        "sources.json": "sha256:88d7fbaa63ae8658840ad3bdbad1ced5c07b0be56646d3d3f55c4a4ee6ef6a80",
+        "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
+      },
+      "preparation": {
+        "sha256": "sha256:feeba958c8fcc482175f51f646d3f49284b5f860079c7fdb19643f4b44a0ec8c",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:feeba958c8fcc482175f51f646d3f49284b5f860079c7fdb19643f4b44a0ec8c\"}",
+        "retained": "recorded"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:feeba958c8fcc482175f51f646d3f49284b5f860079c7fdb19643f4b44a0ec8c\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:93e0e52028947433df319673d50aeb6406a00f035b15beedf545c274dd73d624",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": null,
+        "report": null,
+        "error": "Source follow-up: the record's own receipt, through the profile assistant: result digest failed (acquisition-invalid). No decision was requested."
+      }
     }
   ]
 }

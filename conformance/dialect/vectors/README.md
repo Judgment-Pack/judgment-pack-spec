@@ -22,8 +22,10 @@ byte, and only the new vector and its manifest entry were taken from that run. T
 tenth, `http-shaped-source`, was added the same way: the run wrote the first nine again
 byte for byte. So were the eleventh and twelfth, `version-3-bound` and
 `unbound-bound-at-import`, the first of dialect version 3: the run wrote the first ten
-again byte for byte. Changing a vector is a change of the contract a second reader is held
-to, and needs the same justification as changing
+again byte for byte. So were the research vectors, the twenty-six after them, the first
+of the kind `research`: the run wrote the first twelve again byte for byte. Changing a
+vector is a change of the contract a second reader is held to, and needs the same
+justification as changing
 [`docs/MAPPING-V2.md`](../../docs/MAPPING-V2.md#the-canonical-form-of-a-preparation).
 If a vector looks wrong, the question is whether the documented form is wrong, not
 whether the code disagrees with it.
@@ -80,7 +82,10 @@ The record a binding is read from is in `run.json`: the record's exact bytes,
 - `files`, each file's SHA-256.
 - `preparation`: its `sha256`; the `binding` Runner passes the Runtime for it, the
   exact bytes; and `retained`, `equal` when the export retains this preparation and
-  `altered` when it retains another.
+  `altered` when it retains another; or `recorded` when the vector's inputs were
+  changed after the run, so that the Runner computes no preparation from them and
+  refuses them as `verify-run` does: `preparation.json` is then the preparation the
+  run recorded, held fixed, which the export retains.
 - `import`, for a dialect bound at import only, which file is which: `published`, the
   published dialect (`unbound.json`); `binding`, the binding document
   (`binding.json`); and `bound`, the bound dialect Runner made of them
@@ -110,6 +115,32 @@ The record a binding is read from is in `run.json`: the record's exact bytes,
 | `http-shaped-source` | `mapping-v2-http-shaped` | nothing: one source of shape `http`, its record recorded from a stand-in of a gateway `http` source in the test's process | `verified-inputs`, binding `matches`, signed and witnessed |
 | `version-3-bound` | `mapping-v3-bound` | nothing: the valid case's mapping written as a dialect document of version 3, its source bound | `verified-inputs`, binding `matches`, signed and witnessed |
 | `unbound-bound-at-import` | `mapping-v3-imported` | nothing: a published version-3 dialect whose source is unbound, its binding document, and the bound dialect Runner made of them at import, with a source of shape `http` as in `http-shaped-source` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-valid-types-all-six` | `research/gtm-company-person-valid-types-all-six` | nothing: a research run of all six field types, bound at import, its responses recorded from the stand-in | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-presence-optional-omitted` | `research/gtm-company-person-presence-optional-omitted` | nothing: every optional entry omitted | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-presence-required-not-found` | `research/gtm-company-person-presence-required-not-found` | nothing: a required entry `not-found` in each source | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-presence-integer-zero` | `research/gtm-company-person-presence-integer-zero` | nothing: integer zero | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-presence-decimal-zero` | `research/gtm-company-person-presence-decimal-zero` | nothing: the decimal `"0"` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-presence-boolean-false` | `research/gtm-company-person-presence-boolean-false` | nothing: `false` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-presence-text-empty` | `research/gtm-company-person-presence-text-empty` | nothing: the empty text | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-stale-and-conflicting-unknown` | `research/gtm-company-person-stale-and-conflicting-unknown` | nothing: stale observations and conflicting values, each observation cited | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-failed-fallback-all-unavailable` | `research/gtm-company-person-failed-fallback-all-unavailable` | nothing: a reconciliation of three sources, `not-found`, `stale` and `conflicting`, deriving `unknown` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-failed-fallback-secondary-found` | `research/gtm-company-person-failed-fallback-secondary-found` | nothing: the same reconciliation taking the secondary's found value | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-changed-binding-second-installation` | `research/gtm-company-person-changed-binding-second-installation` | nothing: valid-types as a second installation binds it, one assignment and its profile changed | `verified-inputs`, binding `matches`, signed and witnessed |
+| `gtm-company-person-changed-binding-old-preparation` | `research/gtm-company-person-changed-binding-second-installation` | the export retains valid-types' preparation, recorded under the first installation's binding | refused: `retained lineage does not match recomputation` |
+| `gtm-company-person-changed-response-retained-result` | `research/gtm-company-person-valid-types-all-six` | the person's retained page says another thing; its receipt and the recorded preparation as they were | refused: `Source person: retained response 2, through the profile page: result digest failed (acquisition-invalid). …` |
+| `work-item-triage-valid-types-all-six` | `research/work-item-triage-valid-types-all-six` | nothing: a research run of all six field types, bound at import, its responses recorded from the stand-in | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-presence-optional-omitted` | `research/work-item-triage-presence-optional-omitted` | nothing: every optional entry omitted | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-presence-required-not-found` | `research/work-item-triage-presence-required-not-found` | nothing: a required entry `not-found` in each source | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-presence-integer-zero` | `research/work-item-triage-presence-integer-zero` | nothing: integer zero | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-presence-decimal-zero` | `research/work-item-triage-presence-decimal-zero` | nothing: the decimal `"0"` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-presence-boolean-false` | `research/work-item-triage-presence-boolean-false` | nothing: `false` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-presence-text-empty` | `research/work-item-triage-presence-text-empty` | nothing: the empty text | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-stale-and-conflicting-unknown` | `research/work-item-triage-stale-and-conflicting-unknown` | nothing: stale observations and conflicting values, each observation cited | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-failed-fallback-all-unavailable` | `research/work-item-triage-failed-fallback-all-unavailable` | nothing: a reconciliation of three sources, `not-found`, `stale` and `conflicting`, deriving `unknown` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-failed-fallback-secondary-found` | `research/work-item-triage-failed-fallback-secondary-found` | nothing: the same reconciliation taking the secondary's found value | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-changed-binding-second-installation` | `research/work-item-triage-changed-binding-second-installation` | nothing: valid-types as a second installation binds it, one assignment and its profile changed | `verified-inputs`, binding `matches`, signed and witnessed |
+| `work-item-triage-changed-binding-old-preparation` | `research/work-item-triage-changed-binding-second-installation` | the export retains valid-types' preparation, recorded under the first installation's binding | refused: `retained lineage does not match recomputation` |
+| `work-item-triage-changed-response-record-fields` | `research/work-item-triage-valid-types-all-six` | the follow-up record's answer for points changed under the record's own receipt; the receipt and the recorded preparation as they were | refused: `Source follow-up: the record's own receipt, through the profile assistant: result digest failed (acquisition-invalid). …` |
 
 The valid case is also the calculated-values case: its one source is a calculator
 that computed. Its preparation's digest is the digest its record binds, so a reader
@@ -128,7 +159,41 @@ status, headers and body. Its preparation has the form of every other vector's: 
 preparation does not name its source's shape, which the profile the mapping pins by
 digest and the receipt it cites carry, and nothing in it depends on the shape.
 
-The last two are dialect version 3 (`docs/MAPPING-V2.md`, "Dialect version 3").
+The research vectors are the kind `research` (`docs/MAPPING-V2.md`, "Research
+sources"), the runs of the two examples of the specification's fixture plan
+(spec/dialect.md §11), named by its form `<example>-<item>-<variant>`. Each is a
+dialect of version 3 published with its research sources unbound, `unbound.json`,
+bound at import by `binding.json` to the installation's AI and web profiles,
+`profiles.json`, each of class `generated` and declaring the capabilities it serves and
+the model; `mapping.json` is the bound dialect. `sources.json` holds each research
+source's research record, `{"response": {"result": R}}`, and, for the follow-up of
+`work-item-triage`, the record's own receipt and salts beside it: `R.responses` are the
+responses retained, each with the profile it came through, its request, its result, its
+receipt and its salts, and `R.fields` the typed answers, citing them by index. A reader
+binds `unbound.json` with `binding.json` under `profiles.json` and must get
+`mapping.json`; replays each retained response under the profile it names, over its own
+request, and the record's own receipt over the source's request and the whole record;
+derives each target from `R` by the source's read; and must get `preparation.json`,
+whose `cites` follow the order of sources and whose lineage names each research
+source's citations as `receipts`. Nothing asks a model or reads a page. The two
+`changed-binding` vectors are the second installation's run, which reads, and its
+export holding the first installation's preparation, which a reader recomputes, at its
+`verifiedAt`, as another preparation (`preparation-differs`). The two
+`changed-response` vectors change one retained result, or the answers under the
+record's own receipt, with the receipts and the recorded preparation held fixed: a
+reader replaying them finds `acquisition-invalid`, and `preparation.json` is the
+preparation the run recorded (`retained`: `recorded`).
+
+The plan's items that are refusals, a malformed or over-bound recipe, record or
+binding, are reader tests and not vectors (spec/dialect.md §11), until the staging
+README of the specification defines a refusal row; Runner's tests hold them
+(`internal/runner/research_test.go`). Not recorded: a skipped earlier source in a
+reconciliation, whose outcome and lineage Runner writes otherwise than the
+specification's §9.2 and §9.3 (its outcome's `claim` and `status`, and a lineage
+entry's `dependencies`), as it does for every kind, and which no vector holds; and the
+parent and child of `selected-parent-child`, which are the workflow's (RFC 0020).
+
+The last two of the first twelve are dialect version 3 (`docs/MAPPING-V2.md`, "Dialect version 3").
 `version-3-bound` is there for the version: its mapping is written as a version-3
 document, with no `provider`, `facts` or `evidence`, which Runner writes empty in a
 version-2 document only, so its `mappingDigest` is the digest of `mapping.json`'s
@@ -193,6 +258,20 @@ in them are those of the run that wrote them, and are data now.
 - `mapping-v2-before-calculators`, `mapping-v2-unsigned-parameters` and
   `mapping-v2-before-exact-bytes` were written before Runner passed a binding: their
   records carry none.
+
+- Each run under `research/` was written as `mapping-v2-calculated-bound` was, by
+  `TestResearchRunsAreSignedWitnessedAndBound` with `JPACK_RESEARCH_EXPORT_DIR` set,
+  under the Runtime CI pins (commit `4ea33155`), which takes a binding. Its research
+  records were recorded from a stand-in, in the test's process, of a gateway serving
+  three channels over TLS on the loopback address its profiles name: an AI
+  connection's answer, a search connection's links and a public page, each read as
+  `adapter-http` reads an endpoint, each receipt signed by the stand-in as a gateway
+  signs one, under a key made for the run, at call indexes of one session. The
+  profiles name the adapters `adapter-sources` and `adapter-web`, version `stand-in`,
+  and a model, `synthetic-research-model-1`, which is a name and no model. No model was
+  asked and no live service was read; every identifier and observation is synthetic.
+  Each `changed-binding-second-installation` run was recorded right after its
+  example's `valid-types-all-six`, by the same stand-in in a session of its own.
 
 The families `v1-file-mapping-run` and `no-mapping-run` are not here: a run without a
 mapping v2 has no preparation.

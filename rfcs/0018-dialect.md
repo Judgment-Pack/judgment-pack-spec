@@ -9,7 +9,7 @@
   version 3; research replay; version 3 as the reference Runner reads it, its two vectors staged;
   the research result contract, binding, reconciliation and fixture lists, issue #171;
   research-stage admission and reader rules, issues #179 and #182), 2026-10-16 (the name an
-  unbound operation's record carries)
+  unbound operation's record carries; the research vectors staged, issue #190)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -447,6 +447,62 @@ shape `airbyte`, `mcp` and `http`, and omits it for its two `command`-shaped sou
 tool copies the `adapter`, never the contract's `record`. No vector changes: the staged vector
 `unbound-bound-at-import` already carries `record: "adapter-http"`.
 
+## Amendment of 2026-10-16: the research vectors staged
+
+This amendment records the staging of the reference Runner's twenty-six research vectors for
+[issue #190](https://github.com/Judgment-Pack/judgment-pack-spec/issues/190), on
+[pull request 191](https://github.com/Judgment-Pack/judgment-pack-spec/pull/191). Its review is
+round 11 of this RFC; the cross-vendor round follows, run by the coordinator, with the maintainer's
+disposition of each finding on that pull request, to be recorded under
+[`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
+`0018-round-11.md`. The status stays Accepted. The Specification and companion are amended equally.
+
+**Where they come from.** The reference Runner prepares `research` since its pull request 97,
+merged as `4352763e22489ca80ffbf5df338b7e7cb61319e2` and not yet released
+([runner #88](https://github.com/Judgment-Pack/judgment-pack-runner/issues/88)). Its twenty-six
+research vectors are the runs of §11's two examples, `gtm-company-person` and `work-item-triage`,
+thirteen of each, recorded from a stand-in of a gateway: each a dialect of version 3 published with
+its research sources unbound and bound at import to AI and web profiles of class `generated`. They
+are staged byte for byte beside the twelve, which the Runner's run wrote again unchanged, and both
+readers give each the answer the staged manifest records: a reading whose binding `matches` for
+twenty-two, `preparation-differs` for the two `changed-binding-old-preparation`, and
+`acquisition-invalid` for the two `changed-response`.
+
+**The rule: a recorded preparation** (§11). The two `changed-response` vectors carry a value of the
+Runner's manifest the staging harness did not know, `retained: "recorded"`: their inputs were
+changed after the run, so that no preparation can be computed from them, and their
+`preparation.json` is the preparation the run recorded, held fixed, which the export retains. §11
+said that a fixture's `preparation.json` holds what the verifier must compute, and item 7 that a
+`changed-response` fixture holds "the independent expected preparation fixed". One sentence now
+says that a fixture whose inputs were changed after the run, so that no preparation can be computed
+from them, holds instead the preparation the run recorded, and expects the finding the change
+gives. That is what a fixture holds; no answer a verifier gives changes. The staging README defines
+the value, and the repository's tests hold such a vector's `preparation.json` to the Runner's digest
+as it is, recompute nothing from its inputs, and require each reader's finding.
+
+**The text says what is now so.** Sentences that said no Runner prepares `research`, that no
+vector holds it and that its first fixture waits for a preparer are corrected to the present:
+§4.3, of the four kinds and of the research kind's claimability; §8.2, whose generated influence
+the research vectors hold through a source's class and through no source parameter; §9.1, whose
+research rule for `cites` no vector tells apart from the `callIndex` order, since in the research
+vectors the two orders are one; §11, of the fixture layout, whose "(No vector decides this.)" is
+withdrawn, and of the fixture lists; and the companion document's Status, which counts
+thirty-eight vectors from four Runner commits. No rule a reader applies changes with these
+sentences.
+
+**What the staging found.** The two `changed-binding-old-preparation` vectors retain the first
+installation's preparation, recorded a second before the vector's run, so that a verifier given it
+recomputes at that earlier instant, and `preparation.json` is the recomputation at the vector's
+own. The repository's tests recompute those two at the vector's `verifiedAt` by giving each reader
+`preparation.json`; the answer, `preparation-differs`, is given on the retained preparation.
+
+**The evidence.** Neither reader was changed to read the twenty-six: both read `research` since
+pull request 181, by one author who had read both, before the Runner recorded them. Each recomputes
+every preparation that can be recomputed byte for byte and gives every vector the staged manifest's
+answer, and the cross-reader test holds their reports on every vector equal, byte for byte. The
+two readers' agreement is that author's. No skipped-source vector is recorded
+([issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189)).
+
 ## Summary
 
 A **dialect** is a pack's terms spoken in a system's: the declared, reusable translation between a
@@ -466,8 +522,9 @@ case, the acquisitions and the input profiles it trusts, and holds a record's bi
 Version 2 of the dialect document is the Runner's mapping v2, byte for byte, and the preparation's
 canonical form is the Runner's, stated here. Version 3, which the reference Runner reads, adds an
 unbound form of an `operation`, bound at import, and four source kinds more — `http`, `sql`, `web`
-and `research` — defined and not claimable, since nothing implements them and no vector holds
-them. The research-contract amendment adds typed research fields, generated AI and web bindings,
+and `research` — defined and not claimable: the reference Runner prepares `research`, whose
+twenty-six vectors are staged, and nothing implements the other three. The research-contract
+amendment adds typed research fields, generated AI and web bindings,
 and declared reconciliation over earlier research results; no preparation or vector is claimed.
 The output side is defined by reference to the gateway's decision policy, its vectors deferred to
 a later RFC.
@@ -475,12 +532,12 @@ a later RFC.
 What a preparation establishes is stated per part. A derivation is recomputable, and a verifier
 that recomputes it establishes it itself. An acquisition's bytes are not: they are held by their
 digest, and what they establish is the gateway receipt's business, byte lineage and not truth. A
-research record establishes the least of all. The Runner's twelve vectors are staged byte for byte.
-Two readers, each written from the text, the second without sight of the first, recompute all
-twelve preparations byte for byte, the last three through extensions one author made to both, and
-give every vector the same answer, and their reports agree with the
-Runner's on the surface they share, the verification of a preparation; the one check they leave out,
-of an export's retained result against its record, is the export's, not a preparation's.
+research record establishes the least of all. The Runner's thirty-eight vectors are staged byte for
+byte. Two readers, each written from the text, the second without sight of the first, recompute
+every preparation that can be recomputed, thirty-six, byte for byte, the last twenty-nine through
+extensions one author made to both, and give every vector the same answer, and their reports agree
+with the Runner's on the surface they share, the verification of a preparation; the one check they
+leave out, of an export's retained result against its record, is the export's, not a preparation's.
 
 ## Problem
 
@@ -520,7 +577,7 @@ a companion document, with the gateway's vectors byte for byte. The same move ap
   derivation rule; calculated values (the Runner's issue #14); admission by class. The Runner passes
   the preparation's binding to the runtime on every operational evaluation since its `v0.9.0`, and
   the runtime records it since its `v0.31.0` (ADR-0050).
-- **The vectors.** Twelve, generated by the Runner from fixtures its tests write with a released
+- **The vectors.** Thirty-eight, generated by the Runner from fixtures its tests write with a real
   runtime, and frozen: the Runner calls them "hand-maintained normative data". Two of the Runner's
   tests hold it to them, byte for byte, and run `verify-run` on each. They are a calculated run,
   signed, witnessed and bound; the same recomputed a second later; a record from before the binding;
@@ -529,14 +586,18 @@ a companion document, with the gateway's vectors byte for byte. The same move ap
   canonical form escapes; the case parameters `-0`, 2⁵³−1 and −(2⁵³−1), kept as written; and, added
   since, one source of shape `http` (`http-shaped-source`), and the first two of dialect version 3:
   the calculated run's dialect written as version 3 (`version-3-bound`), and a dialect published
-  unbound and bound at import with its binding document (`unbound-bound-at-import`).
+  unbound and bound at import with its binding document (`unbound-bound-at-import`); and, added
+  with the amendment that staged them, twenty-six research vectors, the runs of §11's two
+  examples, among them two whose inputs were changed after the run, their recorded preparation held
+  fixed (`retained: "recorded"`).
 - **Two readers, from the text.** Two preparation verifiers in this repository are written from the
-  companion document's text, and they agree on all twelve staged vectors byte for byte: each
-  recomputes every vector's preparation equal to its `preparation.json`, with the digest its
-  `preparation.sha256` states, and gives every vector the answer the staged manifest records; on the
-  eight vectors that are readings, their reports are equal. On the tenth, and on the eleventh and
-  twelfth, `version-3-bound` and `unbound-bound-at-import`, that agreement is one author's: each
-  reader was extended to them by one author who had read both (Implementation). The first
+  companion document's text, and they agree on all thirty-eight staged vectors byte for byte: each
+  recomputes every preparation that can be recomputed equal to its `preparation.json`, with the
+  digest its `preparation.sha256` states, and gives every vector the answer the staged manifest
+  records; their reports are equal on every vector. On the tenth, on the eleventh and twelfth,
+  `version-3-bound` and `unbound-bound-at-import`, and on the twenty-six research vectors, that
+  agreement is one author's: each reader was extended to them by one author who had read both
+  (Implementation). The first
   reader's reports agree, wherever
   the class reports them, with `verify-run`'s on `targetsByClass`, `unsignedParameters` and
   `unsignedFreshness`, and with the export on the facts and evidence-availability documents.
@@ -955,10 +1016,11 @@ admits it to a claim states the snapshot's form first.
 Version 3 is version 2 with four kinds more, and with the unbound source form (§4.4); a document
 of version 3 has `version` `3`, and so has its preparation (§9.1). The reference Runner reads
 version 3 since its pull request 83 (`v0.12.0`), and prepares its `operation` and `selected-file` as
-it prepares version 2's. Those four are proposed: no preparer writes any of them, and no vector
-holds one. Both repository readers read `research`
+it prepares version 2's. Those four are proposed. The reference Runner prepares `research` since
+its pull request 97, and twenty-six staged vectors hold it (§11); no preparer writes the other
+three, and no vector holds one. Both repository readers read `research`
 since judgment-pack-spec#181; neither repository reader reads `http`, `sql` or `web`: each holds
-one to its form and refuses it as `kind-unread`; the reference Runner refuses all four by name.
+one to its form and refuses it as `kind-unread`; the reference Runner refuses those three by name.
 The forms below are what a writer, such as the Desk's inputs or an entry of the Exchange, needs
 to declare one; the first implementation's vectors will fix each request's exact bytes, and may
 change them. Since version
@@ -1024,7 +1086,8 @@ their own profiles pin, as below. The value acquired is read as every value is (
   absent otherwise. Membership and order in `responses` are the caller's assertion: verification
   uses `R`'s order and does not establish that assertion (§13). A page cited by URL alone is no
   retained response; the claim it supports is the answer's say. A profile of another class is
-  `profile-mismatch` (§5.1). The kind is defined, and not claimable: no vector holds one (§11).
+  `profile-mismatch` (§5.1). The kind is defined, and not claimable: its vectors are staged (§11,
+  §14).
   (No vector decides this.)
 
 **Requested fields.** A research source's `fields` is an ordered array of 1 to 64 closed objects,
@@ -1586,8 +1649,8 @@ authorship or truth of every byte the system holds; `generated` names a model's 
 
 A source's **generated influence** is true when its class is `generated`, or when a source parameter
 it declares comes from a source whose generated influence is true; each of its targets carries it.
-A dependency so cannot erase a model's influence. (No vector holds a generated source, so no vector
-decides this.)
+A dependency so cannot erase a model's influence. (The research vectors hold generated sources and
+no source parameter, so no vector decides this.)
 
 Each target **admits** `asserted` and `record` by default. `admits`, an object of `facts`, mapping
 fact targets to arrays of classes, and `evidence`, mapping requirements to arrays of classes, both
@@ -1615,11 +1678,11 @@ A preparation is a JSON object of exactly:
 In versions 2 and 3 alike, `cites` is ordered by `callIndex`, those of one index in the order of
 `sources`, as the reference Runner writes it: each acquired source adds its one citation, and the
 case, a local file and a skipped source contribute none. A `research` source has a rule of its own,
-which no vector holds: in a preparation with one, `cites` is in the order of `sources` instead, the
-`research` source adding every retained response's citation in `R.responses` order, followed by the
-record's own citation when it has one, and every other acquired source its one citation. The
-research list is also its lineage entries' `receipts` (§9.3). (No vector decides the rule of
-`research`.)
+which no vector tells apart from that one: in a preparation with one, `cites` is in the order of
+`sources` instead, the `research` source adding every retained response's citation in
+`R.responses` order, followed by the record's own citation when it has one, and every other
+acquired source its one citation. The research list is also its lineage entries' `receipts`
+(§9.3). (No vector decides the rule of `research`.)
 
 #### 9.2 Outcomes
 
@@ -1783,21 +1846,26 @@ response's `profile`, `request`, `result`, `receipt` and `salts`; the record's o
 The verifier trusts profiles out of band (§5.1), never by their presence in a fixture.
 
 `preparation.json` and `preparation.sha256` hold what the verifier must compute: the preparation's
-canonical bytes and their digest, recomputed from the retained inputs at its `verifiedAt`. The
-record is the runtime evaluation record, distinct from the research record in `sources.json`.
+canonical bytes and their digest, recomputed from the retained inputs at its `verifiedAt`. A
+fixture whose inputs were changed after the run, so that no preparation can be computed from
+them, as in item 7's `acquisition-invalid` variants, holds instead the preparation the run
+recorded, fixed, and expects the finding the change gives; the Runner's manifest marks it
+`retained` `recorded`. The record is the runtime evaluation record, distinct from the research
+record in `sources.json`.
 The staging manifest gives `requiresBinding` and the expected answer, `expectedResult` with
 `expectedBinding` for a reading or `expectedFinding` for a finding, as for every staged vector.
-The fixture layout is fixed, but no Runner prepares the `research` kind and no vector holds one.
-It is defined, and not claimable; the first fixture waits for a preparer of the `research` kind.
-(No vector decides this.)
+The fixture layout is fixed. The reference Runner prepares the `research` kind since its pull
+request 97, and twenty-six fixtures it recorded in this layout are staged; the kind is defined,
+and not claimable until a specification version publishes them (§14).
 
 **The two fixture lists to record.** Each reading or finding variant below calls for a separate
 fixture directory in that layout for each of two examples, named `<example>-<item>-<variant>`.
 `<example>` and `<item>` are the names below; `<variant>` identifies the individual case, such
 as `work-item-triage-presence-optional-omitted`. Refusal variants are reader tests, not fixtures,
-until the staging README defines a refusal row form. No such fixture is recorded: no Runner
-prepares the kind, and neither a synthetic expected digest nor a hand-written receipt stands
-in for a recording. No research vector or conformance claim is made. The examples are:
+until the staging README defines a refusal row form. A fixture is a recording: neither a
+synthetic expected digest nor a hand-written receipt stands in for one. The reference Runner
+recorded twenty-six, thirteen of each example, in its pull request 97; they are staged, the rest
+are not recorded, and no conformance claim is made. The examples are:
 
 - `gtm-company-person`: a company's `company-id` (`text`), `employee-count` (`integer`),
   `revenue` (`decimal`), `active` (`boolean`), `roles` (`text-list`) and `employee-range`
@@ -2258,14 +2326,16 @@ Until a specification version publishes the dialect vectors, no claim of this cl
 
 ## Conformance
 
-The vectors are the Runner's twelve, staged in
+The vectors are the Runner's thirty-eight, staged in
 [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)
 byte for byte: nine copied from the Runner's commit `05636ed`, the same files as at its `main`
 commit `82116bf`; the tenth, added by the amendment of 2026-10-15, from its `main` commit
-`c84e8e6`; and the eleventh and twelfth, `version-3-bound` and `unbound-bound-at-import`, of dialect
-version 3, from its `main` commit `89cf441`; each run as its README says: the dialect, the case, the
-acquisitions and the profiles, and for a dialect bound at import its binding document; the
-preparation to verify and the record, from the Runner's export; and whether a binding is required.
+`c84e8e6`; the eleventh and twelfth, `version-3-bound` and `unbound-bound-at-import`, of dialect
+version 3, from its `main` commit `89cf441`; and the twenty-six research vectors, added by the
+amendment of 2026-10-16, from its `main` commit `4352763`; each run as its README says: the
+dialect, the case, the acquisitions and the profiles, and for a dialect bound at import its binding
+document; the preparation to verify and the record, from the Runner's export; and whether a binding
+is required.
 The answer expected of the class is in this repository's manifest of them.
 
 | Vector | What it holds | The class's answer |
@@ -2291,17 +2361,31 @@ being what an operator who rewrote a record would do). `disposition-differs-from
 it alters the Runner's export, whose retained result is no part of a preparation or a record, and the
 class reads its preparation and its record as the valid case's.
 
+The twenty-six research vectors, named `<example>-<item>-<variant>`, are thirteen runs of each of
+§11's two examples, `gtm-company-person` and `work-item-triage`, each a dialect of version 3 bound
+at import, its responses recorded from a stand-in of a gateway. `valid-types-all-six`, the six
+`presence-` variants, `stale-and-conflicting-unknown`, the two `failed-fallback-` variants and
+`changed-binding-second-installation` are positive, each a reading, binding `matches`;
+`changed-binding-old-preparation`, the second installation's export retaining the first
+installation's preparation, is negative, `preparation-differs`; and the two `changed-response`
+vectors, a retained result or the record's answers changed under a receipt held fixed, are
+adversarial, `acquisition-invalid`, their preparation the one the run recorded
+(`retained: "recorded"`).
+
 **Kinds.** The vectors exercise the case and `operation`, of shapes `mcp` and `http`, in version 2,
-and in version 3 an `operation` bound and one unbound, of shape `http`, with its binding document;
-and no other kind: `selected-file`, `operation` of shape `airbyte`, the four kinds of version 3 and
-the output side have none. No specification version publishes any of the vectors, so none is
+and in version 3 an `operation` bound and one unbound, of shape `http`, with its binding document,
+and `research`, unbound and bound at import to AI and web profiles; and no other kind:
+`selected-file`, `operation` of shape `airbyte`, `http`, `sql` and `web`, and the output side have
+none. No specification version publishes any of the vectors, so none is
 claimable.
 
 **What no vector holds.** `unwrap`; source parameters and skipped sources; a calculator that did not
-compute; a `generated` class, generated influence and `admits`; timestamp parameters; a receipt that
-fails; a stale acquisition or table; a broken session form; a refusal at a bound; a paged
-acquisition; a request of shape `http` other than the tenth vector's — by `POST`, with a `body`,
-with no `query`, or a connection's; a kind of version 3, and a binding document or a profile bound that is refused; and the positions of Unresolved question 1, the six choices among them. The repository's tests hold the two readers to some of these
+compute; timestamp parameters; a receipt that fails, but over a result changed after the run (the
+two `changed-response` vectors); a stale acquisition or table; a broken session form; a refusal at
+a bound; a paged acquisition; a request of shape `http` other than the tenth vector's — by `POST`,
+with a `body`, with no `query`, or a connection's; a kind of version 3 other than `research`, and a
+binding document or a profile bound that is refused; and the positions of Unresolved question 1,
+the six choices among them. The repository's tests hold the two readers to some of these
 with altered copies of a vector — a result changed by a byte, an instant past `maxAge`, a profile's
 digest, a reader that writes `-0` as `0` or `&` as it is — but those are this repository's checks of
 its readers, not vectors: they are not the Runner's bytes, and no claim could cite them.
@@ -2363,21 +2447,24 @@ this text and the vectors — would strengthen that evidence, and none exists.
    of a version-2 member and of a member written empty in version 3 that the Runner's encoding leaves
    out, and the order of `cites` in a preparation with a `research` source. The research
    amendment adds the research replay rule and the fixture layout, also marked as positions no
-   vector decides. Issue #171's result types, field statuses and citations, research profile
-   bindings, reconciliation read and fixture lists are likewise decisions no vector holds.
+   vector decides; the fixture layout is no longer one, since the Runner's research vectors are
+   in it (the amendment of 2026-10-16). Issue #171's result types, field statuses and citations,
+   research profile bindings, reconciliation read and fixture lists are likewise decisions no
+   vector holds.
    Round 9 settles the closed condition list and receipt findings of issue #182, and removes
    the impossible unnamed-response case; no vector decides those rules either.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
-   version-3 kinds are proposed with no preparer. When a kind gets a preparer and vectors, and whether
-   its request forms here survive the first implementation, is open. So for `operation` of shape
-   `airbyte` (question 10); the unbound form has both (question 11). The research replay rule and
-   fixture layout are fixed; the `research` kind's first fixture still waits on a preparer
-   (question 14).
+   version-3 kinds are proposed, `research` alone with a preparer. When a kind gets a preparer and
+   vectors, and whether its request forms here survive the first implementation, is open. So for
+   `operation` of shape `airbyte` (question 10); the unbound form has both (question 11). The
+   research replay rule and fixture layout are fixed, and `research` has both since the amendment
+   of 2026-10-16 (question 14); `http`, `sql` and `web` have neither.
 3. **Whether `research` belongs in the first version that adds kinds.** It establishes the least, its
-   record's form and fixture layout are fixed here (§4.3, §5.2, §11), and its first fixture waits on
-   a preparer. Its result and portable binding contracts are resolved by issue #171 (question 15).
-   The Desk's research work (#369) and the Runner's deferred model calls over HTTP
-   still leave open when the kind is implemented and exercised by a vector.
+   record's form and fixture layout are fixed here (§4.3, §5.2, §11), and the reference Runner's
+   first twenty-six fixtures of it are staged (the amendment of 2026-10-16). Its result and
+   portable binding contracts are resolved by issue #171 (question 15). The Desk's research work
+   (#369) and the Runner's deferred model calls over HTTP still leave open when a research record
+   is made by a live call rather than a stand-in.
 4. **The output side's vectors**, deferred to a later RFC, and whether a reader class should hold an
    output dialect at all, when the gateway holds every write to its policy at the moment of the write.
    And a **release selector**: an output dialect is read in the decision-policy form of the gateway
@@ -2447,6 +2534,12 @@ this text and the vectors — would strengthen that evidence, and none exists.
     bindings, fallback and selected parent/child records, with none recorded (§11). Round 9 aligns
     fixture 8 with RFC 0020's round 2: its additional research recording waits for a Runner to pin
     the research stage's release form and encoding ([judgment-pack-runner#88][research-preparer]).
+    *Resolved in part 2026-10-16:* the reference Runner prepares `research` since its pull request
+    97, and twenty-six fixtures of §11's two examples, recorded by it, are staged (the amendment of
+    2026-10-16). They are not claimable until a specification version publishes them (§14); a
+    skipped-source fixture
+    ([issue #189](https://github.com/Judgment-Pack/judgment-pack-spec/issues/189)) and fixture 8's
+    recording stay open.
 15. **Binding a published research recipe.** Which installation profiles can serve its named
     model and its AI and web capabilities, without publishing local identifiers, was left open
     by §4.3 and by issue #160's decision on the workflow prerequisite.

@@ -9,7 +9,7 @@ document's text, and from the two sections of the checkpoint witness statement i
 canonical form; §5, the key rule and the equation), and from nothing else: not the Runner's code,
 whose `verify-run` is a third reader of the same bytes.
 
-It reads the kind `operation`, the only kind the staged vectors exercise, and the kind `research`,
+It reads the kind `operation` and the kind `research`, the two kinds the staged vectors exercise,
 and refuses every other kind as `kind-unread` (spec/dialect.md §4: a kind without vectors is defined
 and not claimable; reading one claims nothing). Since the amendment of 2026-10-15 it reads `operation`
 of the shapes `airbyte`, `mcp` and `http` (§4.1): a tool call for `mcp`, and for the others the request
@@ -23,7 +23,8 @@ given, by making the bound dialect of the two and reading that as every dialect 
 research-contract amendment (RFC 0018, round 8) it reads `research` as §§4.3, 4.4, 5.1, 5.2, 6.4, 9 and
 11 define it: the requested fields and capabilities, the research record's typed answers and their
 citations, the profiles a source is bound to, each retained response replayed under its own profile,
-and the reconciliation read; no vector holds the kind. It uses the Python standard library alone.
+and the reconciliation read; the Runner's twenty-six research vectors hold the kind. It uses the Python
+standard library alone.
 
     python tools/dialect_verify.py --dialect mapping.json --case case.json \\
         --acquisitions sources.json --profiles profiles.json --preparation preparation.json \\

@@ -7,6 +7,27 @@ here.
 
 ### Added
 
+- The reference Runner's twenty-six research vectors, the first of the kind `research`, are staged
+  byte for byte in
+  [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)
+  beside the twelve, from the Runner's pull request 97 (issue #190): the runs of the two examples of
+  [`spec/dialect.md`](spec/dialect.md) §11's fixture plan, `gtm-company-person` and
+  `work-item-triage`, each a dialect of version 3 bound at import, its responses recorded from a
+  stand-in of a gateway. Both readers, unchanged, give each the Runner's answer: a reading whose
+  binding `matches` for twenty-two, `preparation-differs` for the two
+  `changed-binding-old-preparation`, and `acquisition-invalid` for the two `changed-response`, and
+  the cross-reader test now holds the two readers' reports equal on every staged vector. Those two
+  carry a value of the Runner's manifest new here, `retained: "recorded"`: their inputs were changed
+  after the run, so no preparation can be computed from them, and their `preparation.json` is the
+  preparation the run recorded, held fixed. The staging README defines it, and the repository's
+  tests hold such a file to the Runner's digest as it is and recompute nothing from its inputs. They
+  recompute the two `changed-binding-old-preparation`, whose export retains a preparation of an
+  earlier instant, at the vector's own `verifiedAt`. RFC 0018 is amended with them (2026-10-16,
+  round 11), and the companion document with it; its status stays `Accepted`. §11 says that a
+  fixture whose inputs were changed after the run holds the recorded preparation fixed and expects
+  the finding the change gives; and the text says what is now so: the Runner prepares `research`,
+  twenty-six vectors hold it, and the companion's Status counts thirty-eight vectors (§§4.3, 8.2,
+  9.1, 11 and the Status). No answer a reader gives changes.
 - [RFC 0020](rfcs/0020-workflow.md) (Draft): the workflow, a proposed companion document beside
   Core, with a `workflow-verifier` reader class. It defines pinned stages, a selection between
   stages, one instance per selected record, projected cases, output lineage and an execution

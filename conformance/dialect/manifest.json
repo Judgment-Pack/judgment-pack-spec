@@ -22,12 +22,44 @@
           "version-3-bound",
           "unbound-bound-at-import"
         ]
+      },
+      {
+        "pullRequest": 97,
+        "commit": "4352763e22489ca80ffbf5df338b7e7cb61319e2",
+        "vectors": [
+          "gtm-company-person-valid-types-all-six",
+          "gtm-company-person-presence-optional-omitted",
+          "gtm-company-person-presence-required-not-found",
+          "gtm-company-person-presence-integer-zero",
+          "gtm-company-person-presence-decimal-zero",
+          "gtm-company-person-presence-boolean-false",
+          "gtm-company-person-presence-text-empty",
+          "gtm-company-person-stale-and-conflicting-unknown",
+          "gtm-company-person-failed-fallback-all-unavailable",
+          "gtm-company-person-failed-fallback-secondary-found",
+          "gtm-company-person-changed-binding-second-installation",
+          "gtm-company-person-changed-binding-old-preparation",
+          "gtm-company-person-changed-response-retained-result",
+          "work-item-triage-valid-types-all-six",
+          "work-item-triage-presence-optional-omitted",
+          "work-item-triage-presence-required-not-found",
+          "work-item-triage-presence-integer-zero",
+          "work-item-triage-presence-decimal-zero",
+          "work-item-triage-presence-boolean-false",
+          "work-item-triage-presence-text-empty",
+          "work-item-triage-stale-and-conflicting-unknown",
+          "work-item-triage-failed-fallback-all-unavailable",
+          "work-item-triage-failed-fallback-secondary-found",
+          "work-item-triage-changed-binding-second-installation",
+          "work-item-triage-changed-binding-old-preparation",
+          "work-item-triage-changed-response-record-fields"
+        ]
       }
     ]
   },
   "runnerFiles": {
-    "vectors/README.md": "dc5ec9ec8483ed67554bf60b1f972eaa747a86774f0c5100762fd7d5e8bbf887",
-    "vectors/manifest.json": "5d33c2865ef77e3cd6c32b7b92c0be587ffac570b8496d80c78411c4dd5ac026"
+    "vectors/README.md": "017ab2aa39ba59911b07cb474cda4f88bf1bd6a0fe9d9c0afdfef747007bf59d",
+    "vectors/manifest.json": "62dd8998b30ca89688e78fcc83ecde4a2535df1a84e30d7f9feb43f00babd179"
   },
   "cases": [
     {
@@ -113,6 +145,188 @@
       "requiresBinding": true,
       "expectedResult": "reading",
       "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-valid-types-all-six",
+      "path": "vectors/gtm-company-person-valid-types-all-six",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-optional-omitted",
+      "path": "vectors/gtm-company-person-presence-optional-omitted",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-required-not-found",
+      "path": "vectors/gtm-company-person-presence-required-not-found",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-integer-zero",
+      "path": "vectors/gtm-company-person-presence-integer-zero",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-decimal-zero",
+      "path": "vectors/gtm-company-person-presence-decimal-zero",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-boolean-false",
+      "path": "vectors/gtm-company-person-presence-boolean-false",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-text-empty",
+      "path": "vectors/gtm-company-person-presence-text-empty",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-stale-and-conflicting-unknown",
+      "path": "vectors/gtm-company-person-stale-and-conflicting-unknown",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-failed-fallback-all-unavailable",
+      "path": "vectors/gtm-company-person-failed-fallback-all-unavailable",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-failed-fallback-secondary-found",
+      "path": "vectors/gtm-company-person-failed-fallback-secondary-found",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-changed-binding-second-installation",
+      "path": "vectors/gtm-company-person-changed-binding-second-installation",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-changed-binding-old-preparation",
+      "path": "vectors/gtm-company-person-changed-binding-old-preparation",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "preparation-differs"
+    },
+    {
+      "id": "gtm-company-person-changed-response-retained-result",
+      "path": "vectors/gtm-company-person-changed-response-retained-result",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "acquisition-invalid"
+    },
+    {
+      "id": "work-item-triage-valid-types-all-six",
+      "path": "vectors/work-item-triage-valid-types-all-six",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-optional-omitted",
+      "path": "vectors/work-item-triage-presence-optional-omitted",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-required-not-found",
+      "path": "vectors/work-item-triage-presence-required-not-found",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-integer-zero",
+      "path": "vectors/work-item-triage-presence-integer-zero",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-decimal-zero",
+      "path": "vectors/work-item-triage-presence-decimal-zero",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-boolean-false",
+      "path": "vectors/work-item-triage-presence-boolean-false",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-text-empty",
+      "path": "vectors/work-item-triage-presence-text-empty",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-stale-and-conflicting-unknown",
+      "path": "vectors/work-item-triage-stale-and-conflicting-unknown",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-failed-fallback-all-unavailable",
+      "path": "vectors/work-item-triage-failed-fallback-all-unavailable",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-failed-fallback-secondary-found",
+      "path": "vectors/work-item-triage-failed-fallback-secondary-found",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-changed-binding-second-installation",
+      "path": "vectors/work-item-triage-changed-binding-second-installation",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-changed-binding-old-preparation",
+      "path": "vectors/work-item-triage-changed-binding-old-preparation",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "preparation-differs"
+    },
+    {
+      "id": "work-item-triage-changed-response-record-fields",
+      "path": "vectors/work-item-triage-changed-response-record-fields",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "acquisition-invalid"
     }
   ]
 }

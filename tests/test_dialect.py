@@ -35,7 +35,8 @@ SOURCE = {
     "path": "vectors/preparation",
     "mergedAs": "82116bfab7705f74ca3e493c9722dd3831c7418f",
     # The tenth vector, from the Runner's main after its pull request 80 (the amendment of 2026-10-15); the
-    # eleventh and twelfth, of dialect version 3, from its main after its pull request 83.
+    # eleventh and twelfth, of dialect version 3, from its main after its pull request 83; and the twenty-six
+    # research vectors, of the two examples of §11's fixture plan, from its main after its pull request 97.
     "extendedBy": [
         {
             "pullRequest": 80,
@@ -47,10 +48,48 @@ SOURCE = {
             "commit": "89cf44109ad3a9862ab0386811bef63d8a9a1657",
             "vectors": ["version-3-bound", "unbound-bound-at-import"],
         },
+        {
+            "pullRequest": 97,
+            "commit": "4352763e22489ca80ffbf5df338b7e7cb61319e2",
+            "vectors": [
+                "gtm-company-person-valid-types-all-six",
+                "gtm-company-person-presence-optional-omitted",
+                "gtm-company-person-presence-required-not-found",
+                "gtm-company-person-presence-integer-zero",
+                "gtm-company-person-presence-decimal-zero",
+                "gtm-company-person-presence-boolean-false",
+                "gtm-company-person-presence-text-empty",
+                "gtm-company-person-stale-and-conflicting-unknown",
+                "gtm-company-person-failed-fallback-all-unavailable",
+                "gtm-company-person-failed-fallback-secondary-found",
+                "gtm-company-person-changed-binding-second-installation",
+                "gtm-company-person-changed-binding-old-preparation",
+                "gtm-company-person-changed-response-retained-result",
+                "work-item-triage-valid-types-all-six",
+                "work-item-triage-presence-optional-omitted",
+                "work-item-triage-presence-required-not-found",
+                "work-item-triage-presence-integer-zero",
+                "work-item-triage-presence-decimal-zero",
+                "work-item-triage-presence-boolean-false",
+                "work-item-triage-presence-text-empty",
+                "work-item-triage-stale-and-conflicting-unknown",
+                "work-item-triage-failed-fallback-all-unavailable",
+                "work-item-triage-failed-fallback-secondary-found",
+                "work-item-triage-changed-binding-second-installation",
+                "work-item-triage-changed-binding-old-preparation",
+                "work-item-triage-changed-response-record-fields",
+            ],
+        },
     ],
 }
 # The count as the RFC and the companion spell it.
-WORDS = {9: "nine", 10: "ten", 11: "eleven", 12: "twelve"}
+WORDS = {9: "nine", 10: "ten", 11: "eleven", 12: "twelve", 38: "thirty-eight"}
+# The Runner's manifest says what each vector's export retains (its README, "What a vector holds"): `equal`, the
+# preparation the Runner computes from the vector's inputs, which is preparation.json; `altered`, another, while
+# preparation.json is still that computation; and `recorded`, the preparation the run recorded, held fixed as
+# preparation.json, when the vector's inputs were changed after the run, so that no preparation can be computed
+# from them (conformance/dialect/README.md).
+RETAINED = {"equal", "altered", "recorded"}
 FINDINGS = {
     "profile-mismatch",
     "parameter-invalid",
@@ -181,6 +220,17 @@ def altered_vector(
     inputs.dialect = json.dumps(document).encode("utf-8")
     inputs.acquisitions = json.dumps(sources).encode("utf-8")
     return inputs
+
+
+def vector_cases() -> list[tuple[str, str, Any]]:
+    """Every staged vector as research_cases() gives a case, `(name, expected answer, build)`, its answer the
+    row of this repository's manifest: tests/test_dialect_ts.py gives each to both readers and holds their
+    reports equal, byte for byte."""
+    cases: list[tuple[str, str, Any]] = []
+    for row in json.loads((DIALECT / "manifest.json").read_text(encoding="utf-8"))["cases"]:
+        expected = "reading" if row["expectedResult"] == "reading" else f"finding:{row['expectedFinding']}"
+        cases.append((f"vector {row['id']}", expected, lambda row=row: Inputs(row["id"], row["requiresBinding"])))
+    return cases
 
 
 # Round 9 of RFC 0018 (issue #182 item 4; spec/dialect.md §5.2, check 1, and §11, finding 3): a receipt's
@@ -345,7 +395,8 @@ class DialectVectorTests(unittest.TestCase):
 
     def test_the_companion_counts_the_vectors_of_the_commits_it_names(self) -> None:
         # The companion's Status names the Runner commits its vectors were copied from, and counts the vectors
-        # of the commits it names: twelve, from three commits, since the amendment that read version 3.
+        # of the commits it names: thirty-eight, from four commits, since the amendment that staged the
+        # research vectors.
         text = " ".join((ROOT / COMPANION).read_text(encoding="utf-8").split())
         source = self.manifest["source"]
         self.assertIn(source["commit"], text)
@@ -355,17 +406,61 @@ class DialectVectorTests(unittest.TestCase):
 
     def test_the_first_reader_recomputes_every_preparation(self) -> None:
         # The preparation's canonical bytes, recomputed from the dialect, the case, the acquisitions
-        # and the profiles at the given preparation's instant, are the Runner's, byte for byte.
+        # and the profiles at the vector's verifiedAt, are the Runner's, byte for byte. That instant is
+        # the given preparation's in every vector but the two `changed-binding-old-preparation`, whose
+        # export retains the first installation's preparation, of an earlier instant (`altered`): there
+        # the reader is given preparation.json, of the vector's own. A vector retained `recorded` is not
+        # recomputed: its inputs were changed after the run (test_a_recorded_preparation_is_held_fixed).
         for vector in self.runner["vectors"]:
             name = vector["name"]
             with self.subTest(vector=name):
-                outcome = self.inputs(name).verify()
-                self.assertEqual((VECTORS / name / "preparation.json").read_bytes(), outcome.preparation)
+                expected = (VECTORS / name / "preparation.json").read_bytes()
+                self.assertEqual(vector["verifiedAt"], json.loads(expected)["verifiedAt"])
+                if vector["preparation"]["retained"] == "recorded":
+                    continue
+                inputs = self.inputs(name)
+                if json.loads(inputs.preparation)["verifiedAt"] != vector["verifiedAt"]:
+                    self.assertEqual("altered", vector["preparation"]["retained"])
+                    inputs.preparation = expected
+                outcome = inputs.verify()
+                self.assertEqual(expected, outcome.preparation)
                 self.assertEqual((VECTORS / name / "preparation.sha256").read_text(), outcome.digest)
                 self.assertEqual(vector["preparation"]["sha256"], outcome.digest)
                 self.assertEqual(
                     vector["preparation"]["binding"].encode("ascii"), READER.binding_of(outcome.digest)
                 )
+
+    def test_a_recorded_preparation_is_held_fixed(self) -> None:
+        # `retained: "recorded"` (RETAINED): the vector's inputs were changed after the run, so no
+        # preparation can be computed from them. Its preparation.json is the preparation the run
+        # recorded, which the export retains: it is held to the digest and the binding the Runner's
+        # manifest gives, as it is, and not recomputed. The reader gives the finding this repository's
+        # manifest records, the code the Runner's refusal names, and computes no preparation.
+        recorded = []
+        for vector in self.runner["vectors"]:
+            name, retained = vector["name"], vector["preparation"]["retained"]
+            with self.subTest(vector=name):
+                self.assertIn(retained, RETAINED)
+                if retained != "recorded":
+                    continue
+                recorded.append(name)
+                held = (VECTORS / name / "preparation.json").read_bytes()
+                digest = "sha256:" + hashlib.sha256(held).hexdigest()
+                self.assertEqual(vector["preparation"]["sha256"], digest)
+                self.assertEqual((VECTORS / name / "preparation.sha256").read_text(), digest)
+                self.assertEqual(vector["preparation"]["binding"].encode("ascii"), READER.binding_of(digest))
+                inputs = self.inputs(name)
+                self.assertEqual(held, inputs.preparation)
+                row = self.rows[name]
+                self.assertEqual("finding", row["expectedResult"])
+                self.assertIn(f"({row['expectedFinding']})", vector["verifyRun"]["error"])
+                outcome = inputs.verify()
+                self.assertEqual(row["expectedFinding"], outcome.answer.get("finding"), outcome.answer)
+                self.assertIsNone(outcome.preparation)
+        self.assertEqual(
+            ["gtm-company-person-changed-response-retained-result", "work-item-triage-changed-response-record-fields"],
+            recorded,
+        )
 
     def test_the_first_reader_gives_each_vector_its_answer(self) -> None:
         for row in self.manifest["cases"]:
@@ -383,6 +478,8 @@ class DialectVectorTests(unittest.TestCase):
         compared = 0
         for vector in self.runner["vectors"]:
             name = vector["name"]
+            if vector["preparation"]["retained"] == "recorded":
+                continue  # nothing is computed from inputs changed after the run
             inputs = self.inputs(name)
             outcome = inputs.verify()
             with self.subTest(vector=name):
@@ -865,16 +962,23 @@ class DialectVectorTests(unittest.TestCase):
         self.assertEqual("input-over-bound", answer(version_3, b"[" * 33 + b"]" * 33).get("refused"))
 
     def test_the_vector_bound_at_import_is_the_runners_import(self) -> None:
-        # The Runner's manifest marks the vector of a dialect bound at import and says which file is which; it
-        # is the one vector that holds a binding document, and the one this repository reads unbound.json of.
+        # The Runner's manifest marks each vector of a dialect bound at import and says which file is which;
+        # those are the vectors that hold a binding document, and the ones this repository reads unbound.json of.
+        # Each one's bound dialect, made of unbound.json and binding.json (§4.4), is its mapping.json.
         for vector in self.runner["vectors"]:
             with self.subTest(vector=vector["name"]):
-                held = (VECTORS / vector["name"] / "binding.json").is_file()
+                directory = VECTORS / vector["name"]
+                held = (directory / "binding.json").is_file()
                 self.assertEqual(held, "import" in vector)
                 if held:
                     self.assertEqual(
                         {"published": "unbound.json", "binding": "binding.json", "bound": "mapping.json"}, vector["import"]
                     )
+                    unbound = READER.read_document((directory / "unbound.json").read_bytes(), "unbound.json")
+                    binding = READER.parse_binding(READER.read_document((directory / "binding.json").read_bytes(), "binding.json"))
+                    mapping = READER.read_document((directory / "mapping.json").read_bytes(), "mapping.json")
+                    self.assertEqual(READER.digest_of(READER.canon(unbound)), binding["dialect"])
+                    self.assertEqual(READER.canon(mapping), READER.canon(READER.bind(unbound, binding)))
 
     def test_the_bound_dialect_is_the_vectors_mapping_and_the_preparation_commits_it_alone(self) -> None:
         directory = VECTORS / "unbound-bound-at-import"
@@ -1383,10 +1487,10 @@ class DialectVectorTests(unittest.TestCase):
 
 
 # The research contract (RFC 0018, round 8, issue #176): hand-written documents of every new form and
-# refusal, signed under a key of the tests' own. No Runner prepares `research` and no vector holds it:
-# these are this repository's checks of its two readers, not vectors, and no claim could cite them. Each
-# case is answered by the first reader here and by the second in tests/test_dialect_ts.py, which holds
-# the two reports equal.
+# refusal, signed under a key of the tests' own. The Runner's twenty-six research vectors hold the kind as
+# it records it; these are this repository's checks of its two readers, not vectors, and no claim could
+# cite them. Each case is answered by the first reader here and by the second in tests/test_dialect_ts.py,
+# which holds the two reports equal.
 
 RESEARCH_AT = "2026-10-15T12:00:00Z"
 RESEARCH_SERVED = "2026-10-15T11:59:00Z"

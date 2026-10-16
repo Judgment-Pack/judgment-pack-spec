@@ -55,7 +55,14 @@ It prints one line of JSON, members ordered by code point and every number its l
   preparation to the vector's `preparation.json`, byte for byte, and a reading's digest to
   `preparation.sha256`; and a reading's facts and evidence-availability documents to the export's
   `run.input.facts` and `run.input.evidence`; and, for a vector of a dialect bound at import, the bound
-  dialect this reader makes to the vector's `mapping.json`. A vector this reader could not answer from the text would
+  dialect this reader makes to the vector's `mapping.json`. It takes two members of the Runner's
+  manifest, the test and not the reader: a vector's `verifiedAt`, at which `preparation.json` is
+  recomputed (the given preparation's, but in the two `changed-binding-old-preparation`, whose
+  export retains a preparation of an earlier instant, where this reader is given
+  `preparation.json`); and `preparation.retained`, by which a vector marked `recorded`, whose inputs
+  were changed after the run, is not recomputed: its `preparation.json`, the preparation the run
+  recorded, is held to the manifest's digest, and the reader must give the manifest's finding and
+  compute no preparation. A vector this reader could not answer from the text would
   be listed there as a known disagreement, with its reason; there is none.
 - [`test/units.test.ts`](test/units.test.ts) holds the forms the text fixes (§1, §9.5, §12) and this
   reader's answers to inputs no vector holds, each made from a vector by one change; some re-sign the
@@ -134,8 +141,9 @@ and its last clause, and its combined value held to the nesting bound; `cites` i
 `sources` in a preparation with a `research` source, and the lineage's `receipts`; and the research
 maxima of §12 in phase 3. `http`, `sql` and `web` are still held to their forms and answered
 `kind-unread`. The tests in [`test/units.test.ts`](test/units.test.ts) under "the research contract"
-hold each. No vector holds the kind; the two readers' agreement on its hand-written documents is one
-author's.
+hold each. When it was made no vector held the kind; this reader reads the Runner's twenty-six
+research vectors, staged since, unchanged. The two readers' agreement on the hand-written documents
+and on those vectors is one author's.
 
 **Round 9.** RFC 0018's round 9 (issue #182 item 4) decided the receipt members the time and
 session rules read, and the pull request for issue #185 corrected this reader and the first to it,
@@ -226,8 +234,8 @@ No vector depends on it; the first reader takes the same, and RFC 0018's Evidenc
 
 ### The research contract: what the text leaves open, as the extension's author read it
 
-No vector holds the kind; the first reader takes the same readings, and RFC 0018's Evidence records
-them.
+They were taken when no vector held the kind; the first reader takes the same readings, and RFC
+0018's Evidence records them.
 
 - **A plain read's pointers** (§4.3, "Reading fields"): an `unwrap` pointer, which takes the value
   read from where it points, and a copy's `source` are held to the closed list as a `from` is, and
