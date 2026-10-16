@@ -240,6 +240,13 @@ def receipt_cases() -> list[tuple[str, str, Any]]:
             receipt["callIndex"] = "0"
 
         add("observedAt expired and callIndex a string: the form first", invalid, vector, expired_and_malformed)
+
+        # review round of pull request 186: the time is read in `acquisition` alone; one moved to the receipt's
+        # top level leaves `acquisition.observedAt` absent
+        def misplaced(receipt: dict[str, Any]) -> None:
+            receipt["observedAt"] = receipt["acquisition"].pop("observedAt")
+
+        add("observedAt moved to the receipt's top level", invalid, vector, misplaced)
     # Two receipts, `vendor` at callIndex 0 and `registry` at 1 of one session: a well-formed set in neither form is
     # `acquisition-sessions`; a malformed member of the second receipt is `acquisition-invalid`.
     two = "unsigned-parameters"
@@ -1950,6 +1957,16 @@ def research_cases() -> list[tuple[str, str, Any]]:
     add("an expired response before a malformed one: one response's checks complete first", "finding:acquisition-stale", both(
         receipt_of(0, servedAt=RESEARCH_EXPIRED), receipt_of(1, callIndex="1"),
     ))
+    # review round of pull request 186: `acquisition.observedAt` moved to the receipt's top level is absent
+    def misplaced_at(index: Any) -> Any:
+        def change(n: str, i: Any, r: dict[str, Any]) -> None:
+            if i == index:
+                r["observedAt"] = r["acquisition"].pop("observedAt")
+
+        return lambda s: s.receipt_hooks.append(change)
+
+    add("a retained receipt's observedAt moved to the receipt's top level", invalid, misplaced_at(1))
+    add("the record's own receipt's observedAt moved to the receipt's top level", invalid, both(own, misplaced_at("own")))
     add("a sessionId of no token form, shared by every receipt", "reading", both(
         own, lambda s: s.receipt_hooks.append(lambda n, i, r: r.__setitem__("sessionId", "a session, not a token: \u00fcn\u00efcode")),
     ))

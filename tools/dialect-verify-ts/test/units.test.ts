@@ -743,6 +743,12 @@ test("§5.2, §11 (round 9): a receipt member of another form is acquisition-inv
       // a present instant outside the window is still stale; a malformed member beside it is the form first
       ["servedAt expired", "finding:acquisition-stale", put("servedAt", str(old))],
       ["observedAt expired and callIndex a string: the form first", invalid, (r) => (observed(str(old))(r), put("callIndex", str("0"))(r))],
+      // review round of pull request 186: the time is read in `acquisition` alone; one moved to the top level is absent
+      ["observedAt moved to the receipt's top level", invalid, (r) => {
+        const a = r.m.get("acquisition") as JObj;
+        r.m.set("observedAt", a.m.get("observedAt")!);
+        a.m.delete("observedAt");
+      }],
     ];
     for (const [name, expected, change] of cases) {
       assert.equal(answer(() => resigned(base, (_, __, r) => change(r))), expected, `${vector}: ${name}`);
@@ -1453,6 +1459,16 @@ function researchCases(): Case[] {
   add("an expired response before a malformed one: one response's checks complete first", "finding:acquisition-stale", both(
     receiptOf(0, { servedAt: R_EXPIRED }), receiptOf(1, { callIndex: "1" }),
   ));
+  // review round of pull request 186: `acquisition.observedAt` moved to the receipt's top level is absent
+  const misplacedAt = (index: number | "own") => (s: Scenario) => {
+    s.receiptHooks.push((_, i, r) => {
+      if (i !== index) return;
+      r.observedAt = r.acquisition.observedAt;
+      delete r.acquisition.observedAt;
+    });
+  };
+  add("a retained receipt's observedAt moved to the receipt's top level", invalid, misplacedAt(1));
+  add("the record's own receipt's observedAt moved to the receipt's top level", invalid, both(own, misplacedAt("own")));
   add("a sessionId of no token form, shared by every receipt", "reading", both(
     own, (s) => void s.receiptHooks.push((_, __, r) => (r.sessionId = "a session, not a token: \u00fcn\u00efcode")),
   ));
