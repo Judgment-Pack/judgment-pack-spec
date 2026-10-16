@@ -42,7 +42,7 @@
 > record carries a cross-vendor adversarial review, with the maintainer's disposition of each
 > finding.
 
-## Revision in pull request #NNN: references for named Dialect artifacts
+## Revision in pull request #193: references for named Dialect artifacts
 
 This revision records the maintainer's decision of 2026-10-16 on [issue #192][issue-192],
 option A, for [RFC 0021](0021-dialect-artifact-identity.md). Entry format version 3 keeps version
