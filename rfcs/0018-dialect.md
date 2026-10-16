@@ -431,8 +431,12 @@ and a preparation commits the bound dialect alone (§4.4, §13).
 This amendment records the maintainer's decision of 2026-10-16 on
 [issue #184](https://github.com/Judgment-Pack/judgment-pack-spec/issues/184), on
 [pull request 188](https://github.com/Judgment-Pack/judgment-pack-spec/pull/188). Its review is
-round 10 of this RFC; the cross-vendor review follows, run by the coordinator. The status stays
-Accepted. The Specification and companion are amended equally, in §4.4, and nothing else changes.
+round 10 of this RFC, recorded under
+[`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
+`0018-round-10.md` with the maintainer's disposition (no finding at any severity). The round-9
+record, which pull request 183 named and did not carry, is carried here as `0018-round-9.md`. The
+status stays Accepted. The Specification and companion are amended equally, in §4.4, and nothing
+else changes.
 
 **The decision.** Option A: the `record` of an unbound `operation` source is the program's name, as
 an installation's profile names it in `adapter.name` and as the receipt the gateway writes carries

@@ -211,7 +211,9 @@ here.
   source names the program, as a profile's `adapter.name` and the gateway's receipt carry it, and
   never a catalog's result-contract name. [`spec/dialect.md`](spec/dialect.md) §4.4 gains the
   paragraph, equal to the RFC's; the gateway's catalog version 4 carries the program under
-  `adapter`. No vector changes.
+  `adapter`. No vector changes. The review records of rounds 9 and 10 are added under
+  [`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews)
+  as `0018-round-9.md` and `0018-round-10.md`.
 - Both readers, `tools/dialect_verify.py` and `tools/dialect-verify-ts/`, now give RFC 0018's
   round-9 receipt answers (issue #185, and with it issue #182): a receipt's `servedAt` or
   `acquisition.observedAt` that is not a string with an instant, a `callIndex` that is not an
