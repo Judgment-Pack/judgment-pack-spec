@@ -236,7 +236,8 @@ here.
   is `record`; a profile of class `generated` bound to it is `profile-mismatch` (§§4, 4.2 and 5.1).
   The reference Runner already enforces this rule. Neither repository reader reads the kind,
   and no vector holds it; §5.1 marks the rule as a position no vector decides. No reader changes,
-  and no vector is changed or claimed.
+  and no vector is changed or claimed; the review and the maintainer's disposition are recorded
+  in `rfcs/reviews/0018-round-14.md` (six LOW, five applied and one noted).
 - RFC 0018 and its companion record issue #195 (2026-10-16, round 13): §5.1 states which class
   a binding takes, by kind, with references from §§4, 4.4 and 8.2. An `operation` of any admitted
   shape takes its profile's class; research capability bindings take `generated`, and `web`

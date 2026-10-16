@@ -548,9 +548,9 @@ is `record`. A profile of the other class on a research or `web` binding is `pro
 The research refusal was §4.4's and is now stated once in §5.1; the `web` refusal is named here
 for the first time. This round does not decide the file kinds' classes (§4's table and §4.2).
 The divergence between §4's table and the Runner's `record`-only admission for Drive is filed as
-[issue #197](https://github.com/Judgment-Pack/judgment-pack-spec/issues/197). The profile's class
-remains the installation's classification of its channel, and a binding takes it only where
-its kind admits it.
+[issue #197](https://github.com/Judgment-Pack/judgment-pack-spec/issues/197).
+Round 14 decides it, option A. The profile's class remains the installation's classification of
+its channel, and a binding takes it only where its kind admits it.
 
 **The second decision.** The profile assigned to `answer` serves the model's answer; a profile
 assigned to `search` or `page` serves the web reads retained with the answer — the links found,
@@ -570,7 +570,10 @@ the preparation commits the bound dialect alone, and verification establishes no
 This amendment records the maintainer's decision on
 [issue #197](https://github.com/Judgment-Pack/judgment-pack-spec/issues/197), option A, on
 [pull request 198](https://github.com/Judgment-Pack/judgment-pack-spec/pull/198).
-Its review is round 14 of this RFC; the cross-vendor review follows, run by the coordinator.
+Its review is round 14 of this RFC, recorded under
+[`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
+`0018-round-14.md` with the maintainer's disposition of each finding (six LOW, five applied and
+one noted).
 The status stays Accepted. The Specification and companion are amended equally.
 
 **The decision.** A `selected-file` of provider `google-drive` requires a `drive` input profile
@@ -1084,9 +1087,9 @@ it renders `12` and `3`.
 
 A `selected-file` source names a document the operator selected, by its member `provider`:
 `local-file`, a file on the operator's machine, of class `asserted`, with no profile, no `maxAge` and
-no request; or `google-drive`, a Drive file read through a gateway source a `drive` input profile
-of class `record` (§5.1) pins, with `profile`, `profileDigest`, `maxAge` and `arguments` as in §4.1,
-its `fileId` and the consumed selection `grant` resolved from typed case parameters. Its
+no request; or `google-drive`, a Drive file read through a gateway source that a `drive` input
+profile of class `record` (§5.1) pins, with `profile`, `profileDigest`, `maxAge` and `arguments` as
+in §4.1, its `fileId` and the consumed selection `grant` resolved from typed case parameters. Its
 acquisition is the Runner's selected snapshot (Runner, "Supported input and trust configuration"),
 whose form this document does not restate. The kind is defined, and not claimable: no vector holds
 one, and a version that admits it to a claim states the snapshot's form first.
@@ -1387,8 +1390,9 @@ that class. An `operation`, of any shape §4.1 admits, takes its profile's class
 `generated`, as do the `http` and `sql` kinds (§4). `local-file` is `asserted` and has no profile
 (§4.2). A `selected-file` of provider `google-drive` requires a `drive` input profile of class
 `record`; the binding is `record`, and a profile of class `generated` bound to it is
-`profile-mismatch`. (No vector decides this.) For the file kinds, see §4's table and §4.2. The
-Vectors column of §4's table says which bindings the staged vectors hold.
+`profile-mismatch` (Runner, "Supported input and trust configuration"). (No vector decides this.)
+§4.2 gives each provider's members. The Vectors column of §4's table says which bindings the
+staged vectors hold.
 
 For a `research` source, the profile assigned to `answer` serves the model's answer; a profile
 assigned to `search` or `page` serves the web reads retained with the answer — the links found,
@@ -2593,9 +2597,9 @@ this text and the vectors — would strengthen that evidence, and none exists.
    Round 9 settles the closed condition list and receipt findings of issue #182, and removes
    the impossible unnamed-response case; no vector decides those rules either.
    Round 13 adds the `web` refusal of a `generated` profile (§5.1), which no vector decides.
-   Round 14 adds the `record` class required of a `google-drive` selected-file's `drive` profile
-   and binding, and the refusal of a `generated` profile (§5.1; issue #197, option A), which no
-   vector decides.
+   Round 14 adds the `record` class required of a `google-drive` `selected-file`'s `drive` profile
+   and binding, and the refusal of a `generated` profile (§5.1; issue #197, option A), which is the
+   Runner's rule (Runner, "Supported input and trust configuration") and which no vector decides.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
    version-3 kinds are proposed, `research` alone with a preparer. When a kind gets a preparer and
    vectors, and whether its request forms here survive the first implementation, is open. So for
