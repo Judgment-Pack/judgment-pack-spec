@@ -90,3 +90,6 @@ boundary, and saying so early is part of the design. A record whose every part l
 repository of the project is a cross-project exploratory record (see
 [RFC 0000](0000-rfc-process.md)): acceptance endorses the record, and adoption stays with that
 repository.
+
+RFC 0021 adds [named Dialect artifact identities](0021-dialect-artifact-identity.md) through
+exact `formatVersion` selectors, with unchanged historical formats and separate binding digests.

@@ -587,11 +587,23 @@ function classList(v: JVal | undefined, what: string): string[] {
 }
 
 export function readDialect(d: JVal): Dialect {
-  const o = exact(d, "the dialect", ["version", "case"], ["sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"]);
+  const named = d.t === "obj" && d.m.has("formatVersion");
+  const o = exact(d, "the dialect", named ? ["formatVersion", "id", "version", "case"] : ["version", "case"], ["sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"]);
   const version = o.m.get("version")!;
-  if (version.t !== "num" || (version.lit !== "2" && version.lit !== "3")) malformed("the dialect's version is not the integer 2 or 3");
-  const v = Number((version as { lit: string }).lit);
-  if (v === 3) {
+  let v: number;
+  if (named) {
+    const format = string(o.m.get("formatVersion"), "formatVersion");
+    if (format !== "2.0.0" && format !== "3.0.0") malformed("unknown formatVersion");
+    const id = string(o.m.get("id"), "id");
+    if (!id || utf8(id).length > 1024 || /[\u0000-\u0020\u007f]/u.test(id)) malformed("invalid dialect id");
+    const artifact = string(version, "version");
+    if (artifact.match(/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/)?.[0] !== artifact) malformed("invalid artifact version");
+    v = format === "2.0.0" ? 2 : 3;
+  } else {
+    if (version.t !== "num" || (version.lit !== "2" && version.lit !== "3")) malformed("the dialect's version is not the integer 2 or 3");
+    v = Number((version as { lit: string }).lit);
+  }
+  if (v === 3 || named) {
     for (const k of VERSION_2_MEMBERS) if (o.m.has(k)) malformed(`the dialect's ${k} is a member of version 2 alone`);
     notWrittenEmpty(o, ["sources", "unmapped", "unmappedEvidence"], "the dialect");
     notWrittenEmpty(o.m.get("case"), ["parameters"], "the case");
@@ -670,7 +682,7 @@ export function readDialect(d: JVal): Dialect {
 
     const scope: Scope = new Map(caseScope);
     const parameters: SourceParam[] = [];
-    if (v === 3) notWrittenEmpty(so, ["parameters"], what);
+    if (v === 3 || named) notWrittenEmpty(so, ["parameters"], what);
     if (so.m.has("parameters")) {
       for (const [pname, decl] of object(so.m.get("parameters"), `${what}.parameters`).m) {
         if (pname === "" || pname === "runAt" || caseScope.has(pname)) malformed(`${what}.parameters names ${pname}`);
@@ -751,7 +763,7 @@ export function readDialect(d: JVal): Dialect {
   const admitsEvidence = new Map<string, string[]>();
   if (o.m.has("admits")) {
     const ad = exact(o.m.get("admits"), "admits", [], ["facts", "evidence"]);
-    if (v === 3) notWrittenEmpty(ad, ["facts", "evidence"], "admits");
+    if (v === 3 || named) notWrittenEmpty(ad, ["facts", "evidence"], "admits");
     if (ad.m.has("facts")) {
       for (const [t, l] of object(ad.m.get("facts"), "admits.facts").m) {
         if (!allFacts.includes(t)) malformed(`admits names the fact target ${t}, which no source writes`);

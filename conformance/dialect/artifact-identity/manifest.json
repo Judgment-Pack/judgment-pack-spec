@@ -1,0 +1,46 @@
+{
+  "status": "staged; not a published conformance corpus",
+  "rfc": 21,
+  "cases": [
+    {
+      "name": "named-valid",
+      "files": {
+        "dialect.json": "77a5597a0e6d8c51c1494d88318454f855d5c7f45f658e4309d9fd3920415fcb",
+        "case.json": "84a6042529b5d316ec36a4757172742f36da61112a6920c1eee8ee6a88fbc5ba",
+        "sources.json": "d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8",
+        "profiles.json": "b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
+        "preparation.json": "fe8e02b09a8d41236c6f603f06f30f15f00886e8f53323b49eab5969465d2cbd",
+        "dialect.canonical.json": "d2adfc2a5e881b3249a3ccf0ea0807efadd26f8e688dfe8c950e503252f12858"
+      },
+      "dialectDigest": "sha256:d2adfc2a5e881b3249a3ccf0ea0807efadd26f8e688dfe8c950e503252f12858",
+      "preparationDigest": "sha256:fe8e02b09a8d41236c6f603f06f30f15f00886e8f53323b49eab5969465d2cbd"
+    },
+    {
+      "name": "named-version-3-bound",
+      "files": {
+        "dialect.json": "8d874f38a514469de0b584273afb8f7a4820a01e9a5a58af7a5dec10c4bcdbf8",
+        "case.json": "84a6042529b5d316ec36a4757172742f36da61112a6920c1eee8ee6a88fbc5ba",
+        "sources.json": "76fc5e1922acab82aa9e6ee1eb0f74e51f142dae77a6c37565c53ebb85582663",
+        "profiles.json": "decb22f176d60994312961b60ad1db7207c0aef858b20f6de0a44ffedb4f6778",
+        "preparation.json": "1a8b25b627771cbbafe7612e24981f1817234cf69ae0ada1183e958b6c7ed6d4",
+        "dialect.canonical.json": "9a22428fbf9a670a9283ee3a5fb9232c1023f60a77a009e674a917d5f974eb97"
+      },
+      "dialectDigest": "sha256:9a22428fbf9a670a9283ee3a5fb9232c1023f60a77a009e674a917d5f974eb97",
+      "preparationDigest": "sha256:1a8b25b627771cbbafe7612e24981f1817234cf69ae0ada1183e958b6c7ed6d4"
+    },
+    {
+      "name": "named-unbound-bound-at-import",
+      "files": {
+        "dialect.json": "6f2e55351da8982efae6e68ed470087d3ee9e5f19f2b70bdd36c62c478936bc8",
+        "case.json": "780718de39758469b8395dbaca2db1f75eea1e6af644fe4f54b507aef331572f",
+        "sources.json": "455a29ae1c72b6654d3ef918edc0e6d9065afc1b2a8ba600f082a51e99b9527d",
+        "profiles.json": "d8c1936b0821dfa586380a641ddf9485f00b36e5ccf81cc1d0a858d9a5ea9bf8",
+        "preparation.json": "39f05409ff5a64600fcf669a57fe2724dadc0ae40cfac1162a4d0c62b1e62df0",
+        "binding.json": "a6a4e90f57a4f9701d23d558e6d53778f64ce534d5cac2fbb9b782dd608333df",
+        "dialect.canonical.json": "655f0696d50ff58e10d3c3084a6579689da415aced7db491aefc7ed313442b70"
+      },
+      "dialectDigest": "sha256:655f0696d50ff58e10d3c3084a6579689da415aced7db491aefc7ed313442b70",
+      "preparationDigest": "sha256:39f05409ff5a64600fcf669a57fe2724dadc0ae40cfac1162a4d0c62b1e62df0"
+    }
+  ]
+}

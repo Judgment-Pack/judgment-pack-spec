@@ -96,7 +96,8 @@ class SecondDialectReaderTest(unittest.TestCase):
         node = self.node()
         first = first_reader_tests()
         batch, names = [], []
-        for name, expected, build in first.research_cases() + first.receipt_cases():
+        from test_dialect_artifact import artifact_cases
+        for name, expected, build in first.research_cases() + first.receipt_cases() + list(artifact_cases()):
             inputs = build()
             report = first.READER.preparation_bytes(first.READER.report(inputs.verify().answer)).decode("utf-8")
             encoded = {

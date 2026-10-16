@@ -737,6 +737,63 @@ kinds of §4.3, `query`, `body` and `headers` among them. (No vector decides eit
 Version 1 is no dialect: the Runner's version-1 file mapping has no preparation. The numbering is
 the Runner's, kept so that every mapping v2 document is a version-2 dialect document byte for byte.
 
+### 2.1. Named artifact formats
+
+The amendment recorded in RFC 0021 adds two explicitly selected formats, `2.0.0` and `3.0.0`.
+Neither is an alias for an integer format. Historical documents and their digests stay unchanged.
+A document in either named format has these REQUIRED root members, instead of the integer
+`version` of §2:
+
+| Member | Form | Meaning |
+| --- | --- | --- |
+| `formatVersion` | exactly `"2.0.0"` or `"3.0.0"` | selects the translation forms of integer version 2 or 3 respectively, with the identity and encoding rules here |
+| `id` | a non-empty string of at most 1024 UTF-8 bytes, with no ASCII control character, space or DEL | stable, opaque artifact-series identifier; compared as written, without URI, Unicode or case normalization |
+| `version` | a string matching `(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)` in its entirety | independent artifact version, using Core's three-component grammar |
+
+A URN is RECOMMENDED for globally published ids, for example
+`urn:judgmentpack:dialect:company-qualification`. The id is not resolved or fetched. The format
+selector and artifact version are independent: `formatVersion: "3.0.0"` with `version: "0.1.0"`
+is valid. Decimal components are compared by their mathematical integer values, without rounding.
+No prerelease/build suffix, leading zero, number/string coercion or assumed major-version
+compatibility is allowed. An unknown selector is refused; a reader MUST NOT guess a legacy format.
+An integer-format document MUST NOT carry `formatVersion` or `id`.
+
+The remaining members have the forms of the selected family. In **both** named formats, the
+version-3 encoding rule in §2 applies: no root `provider`, `facts` or `evidence`, and none of the
+optional empty arrays/objects listed there. The family-2 source restrictions remain in force in
+`2.0.0`; it does not gain unbound or research sources. Identity does not make an unsupported source
+executable. No output-side document or pack-free preset is admitted by these input-side formats;
+those artifacts need their own format contract and cannot silently share this identity.
+
+The canonical document includes all three identity members. Its digest is over those exact
+canonical bytes, never a projection into a legacy format. Changing id, artifact version, format,
+source binding or translation content changes that digest. A preparation's integer `version`
+remains **2 or 3**, selected by the translation family; it identifies the preparation format,
+not the artifact version. Its `mappingDigest` commits the complete named document. Historical
+preparation bytes and vectors are not rewritten.
+
+Binding (§4.4) keeps the identity members and transforms only the permitted source assignments.
+The published document, binding document and derived bound document have separate digests. A
+bound derivative is an installation product, not a replacement publication under the same
+`(id, version)`. A portable reference to a published artifact carries its `id`, `version` and
+published document `digest`; a consumer MUST check all three against the supplied document.
+An installation additionally retains the binding and bound-document digest. It MUST NOT resolve
+an unpinned latest version or substitute the bound digest for the published digest.
+
+A publication authority MUST keep `(id, version)` immutable within its catalog: different canonical
+content under an existing pair is refused. Identical canonical content under the same pair may
+return the completed receipt. These requirements govern publication, not document-only validation
+or installation binding. An authoring tool MUST NOT claim that document validity proves a fresh
+version, publication permission, binding readiness or truth of source data.
+
+Version arithmetic is shared tooling; compatibility classification is an author/reviewer decision.
+A compatible correction suggests patch, a compatible addition minor, and a breaking declared
+contract major. Passing tests alone do not establish compatibility. No-op saves, draft autosaves,
+research, import of records and execution do not create an artifact release. Jobs pin an exact
+reviewed release; upgrades are separate operations. Promotion of a pre-1.0 artifact at first job use
+is a product publication policy, not a preparation-verifier rule. A product using that policy MUST
+publish and pin the promoted content before the job starts, rather than relabeling an existing job.
+
 ### 3. The case and parameters
 
 `case` is an object of exactly `parameters`, an object, optional, absent being the empty object;
@@ -1517,7 +1574,7 @@ A preparation is a JSON object of exactly:
 
 | Member | Form | Meaning |
 | --- | --- | --- |
-| `version` | the integer `2`, or `3` | the preparation's version, its dialect's `version` |
+| `version` | the integer `2`, or `3` | the preparation format: the legacy dialect's integer `version`, or the family selected by a named dialect's `formatVersion` (§2.1); never its artifact `version` |
 | `verifiedAt` | a timestamp | the instant: the one every freshness check is held to, and the value of `runAt` |
 | `mappingDigest` | a digest | the dialect digest (§2) |
 | `verification` | the string `verified acquisitions; session sealing and input truth are not established` | the preparer's account of its checks, the same in every preparation of this version |

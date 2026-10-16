@@ -1016,18 +1016,27 @@ def check_parameter_name(name: Any, what: str) -> None:
 
 
 def parse_dialect(document: Any) -> Dialect:
-    top = closed(
-        document,
-        {"version", "case"},
-        {"sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"},
-        "the dialect",
-    )
-    if not (isinstance(top["version"], Num) and top["version"].is_integer()):
-        raise malformed("the dialect's version is not an integer")
-    version = integer_of(top["version"])
-    if version not in DEFINED_VERSIONS:
-        raise malformed("a dialect version this document does not define")
-    if version == 3:
+    named = isinstance(document, dict) and "formatVersion" in document
+    required = {"formatVersion", "id", "version", "case"} if named else {"version", "case"}
+    top = closed(document, required,
+                 {"sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"},
+                 "the dialect")
+    if named:
+        if top["formatVersion"] not in ("2.0.0", "3.0.0"):
+            raise malformed("an unknown dialect formatVersion")
+        identity = top["id"]
+        if not isinstance(identity, str) or not identity or len(identity.encode("utf-8")) > 1024 or any(ord(c) <= 32 or ord(c) == 127 for c in identity):
+            raise malformed("the dialect id is not a bounded opaque identifier")
+        if not isinstance(top["version"], str) or re.fullmatch(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", top["version"]) is None:
+            raise malformed("the dialect artifact version is not a three-component version")
+        version = 2 if top["formatVersion"] == "2.0.0" else 3
+    else:
+        if not (isinstance(top["version"], Num) and top["version"].is_integer()):
+            raise malformed("the dialect's version is not an integer")
+        version = integer_of(top["version"])
+        if version not in DEFINED_VERSIONS:
+            raise malformed("a dialect version this document does not define")
+    if version == 3 or named:
         # §2: version 3 is written one way.
         for name in VERSION_2_MEMBERS:
             if name in top:
@@ -1159,7 +1168,7 @@ def parse_dialect(document: Any) -> Dialect:
         declared = raw.get("parameters", {})
         if not isinstance(declared, dict):
             raise malformed(f"{what}: parameters are not an object")
-        if version == 3:
+        if version == 3 or named:
             not_written_empty(raw, ("parameters",), what)
         for pname, declaration in declared.items():
             check_parameter_name(pname, what)
@@ -1247,7 +1256,7 @@ def parse_dialect(document: Any) -> Dialect:
     admits: dict[tuple[str, str], list[str]] = {}
     if "admits" in top:
         raw_admits = closed(top["admits"], set(), {"facts", "evidence"}, "admits")
-        if version == 3:
+        if version == 3 or named:
             not_written_empty(raw_admits, ("facts", "evidence"), "admits")
         written_facts = {t for r in [case_read] + [s.read for s in sources] for t in r.fact_targets}
         for member, kind, written in (("facts", "fact", written_facts), ("evidence", "evidence", set(evidence_sources))):

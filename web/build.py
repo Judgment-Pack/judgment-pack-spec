@@ -667,6 +667,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0021-dialect-artifact-identity.md",
+        PurePosixPath("rfcs/0021-dialect-artifact-identity/index.html"),
+        "RFC 0021: Named Dialect artifacts",
+        "Draft-maturity Dialect artifact identities, exact format dispatch and immutable publication references.",
+        "proposals",
+        "Accepted standards-track RFC",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/0020-workflow.md",
         PurePosixPath("rfcs/0020-workflow/index.html"),
         "RFC 0020: The workflow",

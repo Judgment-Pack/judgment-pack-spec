@@ -11,7 +11,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { scanBytes } from "../src/bounds.ts";
 import { add, decodePoint, encodePoint, keyAcceptable, smallOrder, verify as edVerify } from "../src/ed25519.ts";
-import { bindDialect, readBinding } from "../src/forms.ts";
+import { bindDialect, readBinding, readDialect } from "../src/forms.ts";
 import { NotRead, arr, canon, isIntegerLiteral, member, num, obj, parse, preparationForm, read, resolve, str, utf8 } from "../src/json.ts";
 import type { JObj, JVal } from "../src/json.ts";
 import { instant } from "../src/time.ts";
@@ -1790,4 +1790,16 @@ test("§§4.3, 5.2, 11: a research acquisition has the form of its kind", () => 
   response.m.delete("receipt");
   response.m.delete("salts");
   assert.equal(verdict({ ...v3bound, acquisitions: canon(acquisitions) }), "refusal:input-malformed");
+});
+
+// RFC 0021: a named artifact changes canonical identity, not preparation format.
+test("named Dialects retain format and independent artifact versions", () => {
+  for (const family of [2, 3]) {
+    const document = { formatVersion: `${family}.0.0`, id: "urn:judgmentpack:dialect:example", version: "0.1.0", case: { facts: [], evidence: [] } };
+    const parsed = readDialect(parse(JSON.stringify(document)));
+    assert.equal(parsed.version, family);
+    assert.equal(text(canon(parsed.raw)), `{"case":{"evidence":[],"facts":[]},"formatVersion":"${family}.0.0","id":"urn:judgmentpack:dialect:example","version":"0.1.0"}`);
+    for (const version of [2, "2", "01.0.0", "1.0.0-a", "1.0.0+build", "1.0.0\n", "1.0.0\r", "1.0.0\u2028"]) assert.throws(() => readDialect(parse(JSON.stringify({ ...document, version }))));
+    for (const change of [{ formatVersion: 2 }, { formatVersion: "2.1.0" }, { id: "" }, { id: "has space" }, { id: "x".repeat(1025) }, { provider: "" }, { facts: null }, { sources: [] }, { admits: { facts: {} } }]) assert.throws(() => readDialect(parse(JSON.stringify({ ...document, ...change }))));
+  }
 });
