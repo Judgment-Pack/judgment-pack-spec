@@ -231,6 +231,12 @@ here.
 
 ### Changed
 
+- RFC 0018 and its companion record issue #197, option A (2026-10-16, round 14): a `selected-file`
+  of provider `google-drive` requires a `drive` input profile of class `record`, and its binding
+  is `record`; a profile of class `generated` bound to it is `profile-mismatch` (§§4, 4.2 and 5.1).
+  The reference Runner already enforces this rule. Neither repository reader reads the kind,
+  and no vector holds it; §5.1 marks the rule as a position no vector decides. No reader changes,
+  and no vector is changed or claimed.
 - RFC 0018 and its companion record issue #195 (2026-10-16, round 13): §5.1 states which class
   a binding takes, by kind, with references from §§4, 4.4 and 8.2. An `operation` of any admitted
   shape takes its profile's class; research capability bindings take `generated`, and `web`

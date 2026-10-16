@@ -331,7 +331,7 @@ The kinds (the class a binding takes follows §5.1):
 | Kind | Version | Class | What is declared | Vectors |
 | --- | --- | --- | --- | --- |
 | `operation` | 2 | the profile's | a read of a gateway source of shape `airbyte`, `mcp` or `http` that an input profile pins, and a template of its request (§4.1); in version 3, also unbound (§4.4) | of shapes `mcp` and `http`; in version 3, of shape `mcp` bound and of shape `http` unbound |
-| `selected-file` | 2 | `asserted` for `local-file`, the profile's for `google-drive` | a document the operator selected (§4.2) | none |
+| `selected-file` | 2 | `asserted` for `local-file`, `record` for `google-drive` (§5.1) | a document the operator selected (§4.2) | none |
 | `http` | 3, proposed | the profile's | a request to a gateway HTTP source: method, path, query and body templates, header names (§4.3) | none |
 | `sql` | 3, proposed | the profile's | a statement on a connection, with its bound parameters (§4.3) | none |
 | `web` | 3, proposed | `record` (§5.1) | a public page by URL through the gateway (§4.3) | none |
@@ -414,11 +414,11 @@ it renders `12` and `3`.
 A `selected-file` source names a document the operator selected, by its member `provider`:
 `local-file`, a file on the operator's machine, of class `asserted`, with no profile, no `maxAge` and
 no request; or `google-drive`, a Drive file read through a gateway source a `drive` input profile
-pins, with `profile`, `profileDigest`, `maxAge` and `arguments` as in §4.1, its `fileId` and the
-consumed selection `grant` resolved from typed case parameters. Its acquisition is the Runner's
-selected snapshot (Runner, "Supported input and trust configuration"), whose form this document
-does not restate. The kind is defined, and not claimable: no vector holds one, and a version that
-admits it to a claim states the snapshot's form first.
+of class `record` (§5.1) pins, with `profile`, `profileDigest`, `maxAge` and `arguments` as in §4.1,
+its `fileId` and the consumed selection `grant` resolved from typed case parameters. Its
+acquisition is the Runner's selected snapshot (Runner, "Supported input and trust configuration"),
+whose form this document does not restate. The kind is defined, and not claimable: no vector holds
+one, and a version that admits it to a claim states the snapshot's form first.
 
 ### 4.3 Kinds proposed for version 3
 
@@ -714,8 +714,10 @@ changes no operation binding check and makes no claim about model weights or exe
 A profile's `class` is the profile's own; a binding takes it only where the source's kind admits
 that class. An `operation`, of any shape §4.1 admits, takes its profile's class, `record` or
 `generated`, as do the `http` and `sql` kinds (§4). `local-file` is `asserted` and has no profile
-(§4.2). For the file kinds, see §4's table and §4.2. The Vectors column of §4's table says which
-bindings the staged vectors hold.
+(§4.2). A `selected-file` of provider `google-drive` requires a `drive` input profile of class
+`record`; the binding is `record`, and a profile of class `generated` bound to it is
+`profile-mismatch`. (No vector decides this.) For the file kinds, see §4's table and §4.2. The
+Vectors column of §4's table says which bindings the staged vectors hold.
 
 For a `research` source, the profile assigned to `answer` serves the model's answer; a profile
 assigned to `search` or `page` serves the web reads retained with the answer — the links found,

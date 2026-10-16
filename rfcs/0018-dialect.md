@@ -11,7 +11,8 @@
   research-stage admission and reader rules, issues #179 and #182), 2026-10-16 (the name an
   unbound operation's record carries; the research vectors staged, issue #190;
   the skipped source's form, issue #189, option A; the class a binding takes, by kind,
-  and what each research profile serves, issue #195)
+  and what each research profile serves, issue #195; the class a Drive selected-file takes,
+  issue #197, option A)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -564,6 +565,22 @@ No vector is changed or claimed. Rounds 6–12's replay, binding and preparation
 the preparation commits the bound dialect alone, and verification establishes no answer's truth
 (§13). RFCs 0020 and 0021 are unchanged.
 
+## Amendment of 2026-10-16: the class a Drive selected-file takes
+
+This amendment records the maintainer's decision on
+[issue #197](https://github.com/Judgment-Pack/judgment-pack-spec/issues/197), option A, on
+[pull request NNN](https://github.com/Judgment-Pack/judgment-pack-spec/pull/NNN).
+Its review is round 14 of this RFC; the cross-vendor review follows, run by the coordinator.
+The status stays Accepted. The Specification and companion are amended equally.
+
+**The decision.** A `selected-file` of provider `google-drive` requires a `drive` input profile
+of class `record`, and its binding is `record` (§§4, 4.2 and 5.1).
+A profile of class `generated` bound to it is `profile-mismatch` (§5.1).
+
+The reference Runner already enforces this rule. Neither repository reader reads this kind,
+and no vector holds it; §5.1 marks the rule as a position no vector decides, and Unresolved
+question 1 lists it. No reader changes, and no vector is changed or claimed.
+
 ## Summary
 
 A **dialect** is a pack's terms spoken in a system's: the declared, reusable translation between a
@@ -985,7 +1002,7 @@ The kinds (the class a binding takes follows §5.1):
 | Kind | Version | Class | What is declared | Vectors |
 | --- | --- | --- | --- | --- |
 | `operation` | 2 | the profile's | a read of a gateway source of shape `airbyte`, `mcp` or `http` that an input profile pins, and a template of its request (§4.1); in version 3, also unbound (§4.4) | of shapes `mcp` and `http`; in version 3, of shape `mcp` bound and of shape `http` unbound |
-| `selected-file` | 2 | `asserted` for `local-file`, the profile's for `google-drive` | a document the operator selected (§4.2) | none |
+| `selected-file` | 2 | `asserted` for `local-file`, `record` for `google-drive` (§5.1) | a document the operator selected (§4.2) | none |
 | `http` | 3, proposed | the profile's | a request to a gateway HTTP source: method, path, query and body templates, header names (§4.3) | none |
 | `sql` | 3, proposed | the profile's | a statement on a connection, with its bound parameters (§4.3) | none |
 | `web` | 3, proposed | `record` (§5.1) | a public page by URL through the gateway (§4.3) | none |
@@ -1068,11 +1085,11 @@ it renders `12` and `3`.
 A `selected-file` source names a document the operator selected, by its member `provider`:
 `local-file`, a file on the operator's machine, of class `asserted`, with no profile, no `maxAge` and
 no request; or `google-drive`, a Drive file read through a gateway source a `drive` input profile
-pins, with `profile`, `profileDigest`, `maxAge` and `arguments` as in §4.1, its `fileId` and the
-consumed selection `grant` resolved from typed case parameters. Its acquisition is the Runner's
-selected snapshot (Runner, "Supported input and trust configuration"), whose form this document
-does not restate. The kind is defined, and not claimable: no vector holds one, and a version that
-admits it to a claim states the snapshot's form first.
+of class `record` (§5.1) pins, with `profile`, `profileDigest`, `maxAge` and `arguments` as in §4.1,
+its `fileId` and the consumed selection `grant` resolved from typed case parameters. Its
+acquisition is the Runner's selected snapshot (Runner, "Supported input and trust configuration"),
+whose form this document does not restate. The kind is defined, and not claimable: no vector holds
+one, and a version that admits it to a claim states the snapshot's form first.
 
 #### 4.3 Kinds proposed for version 3
 
@@ -1368,8 +1385,10 @@ changes no operation binding check and makes no claim about model weights or exe
 A profile's `class` is the profile's own; a binding takes it only where the source's kind admits
 that class. An `operation`, of any shape §4.1 admits, takes its profile's class, `record` or
 `generated`, as do the `http` and `sql` kinds (§4). `local-file` is `asserted` and has no profile
-(§4.2). For the file kinds, see §4's table and §4.2. The Vectors column of §4's table says which
-bindings the staged vectors hold.
+(§4.2). A `selected-file` of provider `google-drive` requires a `drive` input profile of class
+`record`; the binding is `record`, and a profile of class `generated` bound to it is
+`profile-mismatch`. (No vector decides this.) For the file kinds, see §4's table and §4.2. The
+Vectors column of §4's table says which bindings the staged vectors hold.
 
 For a `research` source, the profile assigned to `answer` serves the model's answer; a profile
 assigned to `search` or `page` serves the web reads retained with the answer — the links found,
@@ -2574,6 +2593,9 @@ this text and the vectors — would strengthen that evidence, and none exists.
    Round 9 settles the closed condition list and receipt findings of issue #182, and removes
    the impossible unnamed-response case; no vector decides those rules either.
    Round 13 adds the `web` refusal of a `generated` profile (§5.1), which no vector decides.
+   Round 14 adds the `record` class required of a `google-drive` selected-file's `drive` profile
+   and binding, and the refusal of a `generated` profile (§5.1; issue #197, option A), which no
+   vector decides.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
    version-3 kinds are proposed, `research` alone with a preparer. When a kind gets a preparer and
    vectors, and whether its request forms here survive the first implementation, is open. So for
