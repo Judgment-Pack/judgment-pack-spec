@@ -10,7 +10,8 @@
   the research result contract, binding, reconciliation and fixture lists, issue #171;
   research-stage admission and reader rules, issues #179 and #182), 2026-10-16 (the name an
   unbound operation's record carries; the research vectors staged, issue #190;
-  the skipped source's form, issue #189, option A)
+  the skipped source's form, issue #189, option A), 2026-10-17 (the class a binding takes, by kind,
+  and what each research profile serves, issue #195)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -528,6 +529,34 @@ Its review is round 12 of this RFC, recorded under
 `0018-round-12.md` with the maintainer's disposition of each finding (one HIGH, one MEDIUM, four
 LOW, all applied).
 
+## Amendment of 2026-10-17: the class a binding takes, by kind
+
+This amendment records the maintainer's two decisions on
+[issue #195](https://github.com/Judgment-Pack/judgment-pack-spec/issues/195), on pull request #NNN.
+Its review is round 13 of this RFC; the cross-vendor review follows, run by the coordinator.
+The status stays Accepted. The Specification and companion are amended equally.
+
+**The first decision.** Section 5.1 states which class a binding takes, by kind, with references
+from §§4, 4.4 and 8.2: an `operation`, of any shape §4.1 admits, takes its profile's class,
+`record` or `generated`; every research capability binding takes `generated`; a `web`-kind binding
+is `record`. A profile of the other class on a research or `web` binding is `profile-mismatch`.
+The research refusal is already §4.4's; the `web` refusal is named here for the first time.
+The file kinds keep §§4.1–4.2's classes. The profile's class remains the installation's
+classification of its channel, and a binding takes it only where its kind admits it.
+
+**The second decision.** The profile assigned to `answer` serves the model's answer; a profile
+assigned to `search` or `page` serves the responses the answer draws on — the links found, the page
+read — retained in the research record (§§4.3, 5.2), all `generated` for that binding.
+This corrects what each profile serves and adds no research rule.
+
+**What changes for a reader.** The readers are unchanged: both already refuse a `record` profile
+on a research capability binding as `profile-mismatch`. No reader reads the `web` kind and no
+Runner prepares it; §5.1 marks its refusal as a position no vector decides, and §4.3 and
+Unresolved question 2 ask its first reader and a future Runner vector to hold that check.
+No vector is changed or claimed. Rounds 6–12's replay, binding and preparation rules remain;
+the preparation commits the bound dialect alone, and verification establishes no answer's truth
+(§13). RFCs 0020 and 0021 are unchanged.
+
 ## Summary
 
 A **dialect** is a pack's terms spoken in a system's: the declared, reusable translation between a
@@ -944,7 +973,7 @@ A source is an object with these members, and those its kind adds:
 | `parameters` | an object of source parameters (§3), optional | |
 | `read` | a read (§6), REQUIRED | how the value acquired becomes a claim |
 
-The kinds:
+The kinds (the class a binding takes follows §5.1):
 
 | Kind | Version | Class | What is declared | Vectors |
 | --- | --- | --- | --- | --- |
@@ -1077,6 +1106,8 @@ their own profiles pin, as below. The value acquired is read as every value is (
 - **`web`**, one public page by URL through the gateway's web source (`adapter-web`, shape
   `http`): `url`, a string, or a `$param` form naming a `string` parameter. The request is
   `{"url": url}`, and the value acquired is the attachment record the web source returns.
+  Its first reader must hold §5.1's class check, including its refusal; a vector of that refusal
+  waits for a Runner that prepares this kind. (No vector decides this.)
 - **`research`**, an AI-assisted research recipe, of class `generated`. Besides §4's members,
   `maxAge` and its profile assignments (§4.4), it has exactly `question`, a string template;
   `constraints`, an object in the `canon` domain; `model`, a non-empty string of at most 256 UTF-8
@@ -1112,8 +1143,8 @@ their own profiles pin, as below. The value acquired is read as every value is (
   present beside `result` in that `response` when `R` came back through a gateway source, and
   absent otherwise. Membership and order in `responses` are the caller's assertion: verification
   uses `R`'s order and does not establish that assertion (§13). A page cited by URL alone is no
-  retained response; the claim it supports is the answer's say. A profile of another class is
-  `profile-mismatch` (§5.1). The kind is defined, and not claimable: its vectors are staged (§11,
+  retained response; the claim it supports is the answer's say. Section 5.1 gives the class check
+  and its finding. The kind is defined, and not claimable: its vectors are staged (§11,
   §14).
   (No vector decides this.)
 
@@ -1225,7 +1256,7 @@ Its bound form adds all three members. `profile` and `profileDigest`, as in §4.
 profile for `answer`. `webProfiles` is a closed object with exactly the `search` and `page`
 capabilities the source requests as keys; each value is exactly `{"profile", "profileDigest"}`,
 of those same forms. It has zero to two members and is REQUIRED even when empty. One profile may
-serve more than one capability; every assigned profile is of class `generated`. A source with
+serve more than one capability, subject to §5.1's class rule. A source with
 only some of the three binding members, or any operation catalog member, is `input-malformed`.
 The new required members stay written when empty; §2's one-spelling rule is unchanged.
 
@@ -1269,9 +1300,9 @@ bound dialect.
 
 The binding checks of §5.1 hold research too, including a bound dialect given directly. Its AI
 profile MUST declare the exact `model` and capability `answer`; each assigned web profile MUST
-declare the capability it serves. Every assigned profile MUST be `generated`; a profile that
-declares a model MUST name the source's model. A missing profile, digest mismatch, missing
-research declaration, wrong model, missing capability or wrong class is `profile-mismatch`.
+declare the capability it serves. A profile that declares a model MUST name the source's model.
+A missing profile, digest mismatch, missing research declaration, wrong model or missing capability
+is `profile-mismatch`; §5.1 gives the class check and its finding.
 Extra or missing assignment members, a capability assigned twice, or an assignment for an
 unrequested capability is `input-malformed`. No substitution of another model is implicit.
 
@@ -1325,12 +1356,23 @@ when they include `answer`, `model`. `capabilities` is a non-empty array of dist
 `answer`, `search`, `page`, in that order, at most three; `model` has §4.3's form. Web-only
 profiles name no model. This whole declaration enters the profile digest. Malformed members
 are `input-malformed`; a well-formed profile without the declaration or with unsuitable
-capabilities, model or class is `profile-mismatch` when bound to research (§4.4). This extension
+capabilities or model is `profile-mismatch` when bound to research (§4.4). This extension
 changes no operation binding check and makes no claim about model weights or execution.
 
-A profile bound to a research source's capability serves the model's answer and is classed
-`generated` for that binding. The same gateway web source bound to a `web` source is `record`;
-its profile for that binding carries that class.
+A profile's `class` is the profile's own; a binding takes it only where the source's kind admits
+that class. An `operation`, of any shape §4.1 admits, takes its profile's class, `record` or
+`generated`, as do the `http` and `sql` kinds (§4). A `selected-file` of provider `google-drive`
+takes its profile's class (§§4.1–4.2); `local-file` is `asserted` and has no profile (§4.2).
+
+For a `research` source, the profile assigned to `answer` serves the model's answer; a profile
+assigned to `search` or `page` serves the responses the answer draws on — the links found, the page
+read — which the record retains as its retained responses (§§4.3, 5.2). Every capability binding
+takes `generated`; assigning a profile of class `record` to `answer`, `search` or `page` is
+`profile-mismatch`.
+
+The same gateway web source bound to a `web`-kind source requires a profile of class `record`; the
+binding is `record`, and a profile of class `generated` bound to it is `profile-mismatch`.
+(No vector decides this.)
 
 A profile is the installation's, never the dialect's: a dialect names a profile by its `id` and its
 digest, and only an installation supplies one. A verifier is given the profiles it trusts, out of
@@ -1344,8 +1386,8 @@ whose request does not fit its profile's shape and adapter (§4.1), under a prof
 
 Each retained response of a `research` source names its own trusted profile by `profile.id` and
 `profile.digest` (§4.3). That id MUST be among the profiles given out of band, and its digest MUST
-match. The pair MUST be the source's AI assignment or one of its web assignments, each of class
-`generated`; otherwise `profile-mismatch`. The reference in the response supplies neither a
+match. The pair MUST be the source's AI assignment or one of its web assignments, with the class
+required above; otherwise `profile-mismatch`. The reference in the response supplies neither a
 profile nor a key. The source's profile does not substitute for a retained response's profile.
 
 What a profile pins — the gateway's key, source, authority, adapter, shape, endpoint, class, tools
@@ -1670,9 +1712,10 @@ an evaluation takes (Core §8.2), and those its record carries (§11).
 
 #### 8.2 Classes and admission
 
-A target's **class** is its source's: `asserted` for the case and a local file, the profile's for
-every other source. `record` names the acquisition channel, a signed read of a system, and not the
-authorship or truth of every byte the system holds; `generated` names a model's answer.
+A target's **class** is its source's: `asserted` for the case and a local file; for every other
+source, the binding's class under §5.1's rule for its kind. `record` names the acquisition channel,
+a signed read of a system, and not the authorship or truth of every byte the system holds;
+`generated` names a model's answer.
 
 A source's **generated influence** is true when its class is `generated`, or when a source parameter
 it declares comes from a source whose generated influence is true; each of its targets carries it.
@@ -2528,7 +2571,9 @@ this text and the vectors — would strengthen that evidence, and none exists.
    vectors, and whether its request forms here survive the first implementation, is open. So for
    `operation` of shape `airbyte` (question 10); the unbound form has both (question 11). The
    research replay rule and fixture layout are fixed, and `research` has both since the amendment
-   of 2026-10-16 (question 14); `http`, `sql` and `web` have neither.
+   of 2026-10-16 (question 14); `http`, `sql` and `web` have neither. A `web` reader must hold
+   §5.1's class check, including its refusal, with a vector once a Runner prepares the kind
+   (§4.3; issue #195, round 13).
 3. **Whether `research` belongs in the first version that adds kinds.** It establishes the least, its
    record's form and fixture layout are fixed here (§4.3, §5.2, §11), and the reference Runner's
    first twenty-six fixtures of it are staged (the amendment of 2026-10-16). Its result and
