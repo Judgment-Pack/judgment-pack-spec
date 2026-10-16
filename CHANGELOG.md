@@ -231,14 +231,15 @@ here.
 
 ### Changed
 
-- RFC 0018 and its companion record issue #195 (2026-10-17, round 13): §5.1 states which class
+- RFC 0018 and its companion record issue #195 (2026-10-16, round 13): §5.1 states which class
   a binding takes, by kind, with references from §§4, 4.4 and 8.2. An `operation` of any admitted
   shape takes its profile's class; research capability bindings take `generated`, and `web`
   bindings take `record`. A profile of the other class on a research or `web` binding is
   `profile-mismatch`; the `web` refusal is named for the first time, with no vector deciding it.
   The research `answer` profile serves the model's answer; `search` and `page` profiles serve
-  the responses it draws on, retained in the research record. The readers are unchanged, and
-  no vector is changed or claimed; the `web` refusal's vector waits for a Runner of that kind.
+  the web reads retained with the answer — the links found, the pages read — in the research
+  record. The readers are unchanged, and no vector is changed or claimed; the `web` refusal's
+  vector waits for a Runner of that kind.
 - RFC 0018 and its companion record issue #189, option A (2026-10-16, round 12): a skipped
   source's outcome keeps its five-member claim and status `unknown`; each of its lineage entries
   has status `unknown`. Every source that declares a source parameter, acquired or skipped,

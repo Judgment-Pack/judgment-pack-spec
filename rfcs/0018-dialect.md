@@ -10,7 +10,7 @@
   the research result contract, binding, reconciliation and fixture lists, issue #171;
   research-stage admission and reader rules, issues #179 and #182), 2026-10-16 (the name an
   unbound operation's record carries; the research vectors staged, issue #190;
-  the skipped source's form, issue #189, option A), 2026-10-17 (the class a binding takes, by kind,
+  the skipped source's form, issue #189, option A; the class a binding takes, by kind,
   and what each research profile serves, issue #195)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
@@ -529,24 +529,31 @@ Its review is round 12 of this RFC, recorded under
 `0018-round-12.md` with the maintainer's disposition of each finding (one HIGH, one MEDIUM, four
 LOW, all applied).
 
-## Amendment of 2026-10-17: the class a binding takes, by kind
+## Amendment of 2026-10-16: the class a binding takes, by kind
 
 This amendment records the maintainer's two decisions on
-[issue #195](https://github.com/Judgment-Pack/judgment-pack-spec/issues/195), on pull request #196.
-Its review is round 13 of this RFC; the cross-vendor review follows, run by the coordinator.
+[issue #195](https://github.com/Judgment-Pack/judgment-pack-spec/issues/195), on
+[pull request 196](https://github.com/Judgment-Pack/judgment-pack-spec/pull/196).
+Its review is round 13 of this RFC, recorded under
+[`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
+`0018-round-13.md` with the maintainer's disposition of each finding (one HIGH, one MEDIUM and
+nine LOW, all applied).
 The status stays Accepted. The Specification and companion are amended equally.
 
 **The first decision.** Section 5.1 states which class a binding takes, by kind, with references
 from §§4, 4.4 and 8.2: an `operation`, of any shape §4.1 admits, takes its profile's class,
 `record` or `generated`; every research capability binding takes `generated`; a `web`-kind binding
 is `record`. A profile of the other class on a research or `web` binding is `profile-mismatch`.
-The research refusal is already §4.4's; the `web` refusal is named here for the first time.
-The file kinds keep §§4.1–4.2's classes. The profile's class remains the installation's
-classification of its channel, and a binding takes it only where its kind admits it.
+The research refusal was §4.4's and is now stated once in §5.1; the `web` refusal is named here
+for the first time. This round does not decide the file kinds' classes (§4's table and §4.2).
+The divergence between §4's table and the Runner's `record`-only admission for Drive is filed as
+[issue #197](https://github.com/Judgment-Pack/judgment-pack-spec/issues/197). The profile's class
+remains the installation's classification of its channel, and a binding takes it only where
+its kind admits it.
 
 **The second decision.** The profile assigned to `answer` serves the model's answer; a profile
-assigned to `search` or `page` serves the responses the answer draws on — the links found, the page
-read — retained in the research record (§§4.3, 5.2), all `generated` for that binding.
+assigned to `search` or `page` serves the web reads retained with the answer — the links found,
+the pages read — retained in the research record (§§4.3, 5.2), all `generated` for that binding.
 This corrects what each profile serves and adds no research rule.
 
 **What changes for a reader.** The readers are unchanged: both already refuse a `record` profile
@@ -981,7 +988,7 @@ The kinds (the class a binding takes follows §5.1):
 | `selected-file` | 2 | `asserted` for `local-file`, the profile's for `google-drive` | a document the operator selected (§4.2) | none |
 | `http` | 3, proposed | the profile's | a request to a gateway HTTP source: method, path, query and body templates, header names (§4.3) | none |
 | `sql` | 3, proposed | the profile's | a statement on a connection, with its bound parameters (§4.3) | none |
-| `web` | 3, proposed | the profile's | a public page by URL, through the gateway's web source (§4.3) | none |
+| `web` | 3, proposed | `record` (§5.1) | a public page by URL through the gateway (§4.3) | none |
 | `research` | 3, proposed | `generated` | a recipe (§4.3), also unbound (§4.4) | none |
 
 A version-2 document that names a kind of version 3, or has an unbound source (§4.4), is refused.
@@ -1146,7 +1153,6 @@ their own profiles pin, as below. The value acquired is read as every value is (
   retained response; the claim it supports is the answer's say. Section 5.1 gives the class check
   and its finding. The kind is defined, and not claimable: its vectors are staged (§11,
   §14).
-  (No vector decides this.)
 
 **Requested fields.** A research source's `fields` is an ordered array of 1 to 64 closed objects,
 each exactly `{"name", "type", "required", "description"}`. `name` has §4's source-name form: a
@@ -1325,8 +1331,8 @@ digest, including all AI and web profile ids and digests, the model, capabilitie
 read. Neither the published digest nor the binding-document digest is added to §9.1. Rebinding
 one assignment changes the bound digest. Replay uses the profiles then bound and the retained
 bytes, never a live connection or a new model answer; it establishes no answer's correctness
-(§13). The reference Runner still refuses `research` by name. No research binding or result
-vector is recorded. (No vector decides this.)
+(§13). The reference Runner prepares `research` since its pull request 97; twenty-six research
+vectors are staged.
 
 ### 5. Input profiles and acquisitions
 
@@ -1361,18 +1367,19 @@ changes no operation binding check and makes no claim about model weights or exe
 
 A profile's `class` is the profile's own; a binding takes it only where the source's kind admits
 that class. An `operation`, of any shape §4.1 admits, takes its profile's class, `record` or
-`generated`, as do the `http` and `sql` kinds (§4). A `selected-file` of provider `google-drive`
-takes its profile's class (§§4.1–4.2); `local-file` is `asserted` and has no profile (§4.2).
+`generated`, as do the `http` and `sql` kinds (§4). `local-file` is `asserted` and has no profile
+(§4.2). For the file kinds, see §4's table and §4.2. The Vectors column of §4's table says which
+bindings the staged vectors hold.
 
 For a `research` source, the profile assigned to `answer` serves the model's answer; a profile
-assigned to `search` or `page` serves the responses the answer draws on — the links found, the page
-read — which the record retains as its retained responses (§§4.3, 5.2). Every capability binding
-takes `generated`; assigning a profile of class `record` to `answer`, `search` or `page` is
-`profile-mismatch`.
+assigned to `search` or `page` serves the web reads retained with the answer — the links found,
+the pages read — which the record retains as its retained responses (§§4.3, 5.2). Every capability
+binding takes `generated`; assigning a profile of class `record` to `answer`, `search` or `page`
+is `profile-mismatch`. (No vector decides the refusal: the research vectors bind only
+`generated` profiles.)
 
-The same gateway web source bound to a `web`-kind source requires a profile of class `record`; the
-binding is `record`, and a profile of class `generated` bound to it is `profile-mismatch`.
-(No vector decides this.)
+A `web`-kind source (§4.3) requires a profile of class `record`; the binding is `record`, and a
+profile of class `generated` bound to it is `profile-mismatch`. (No vector decides this.)
 
 A profile is the installation's, never the dialect's: a dialect names a profile by its `id` and its
 digest, and only an installation supplies one. A verifier is given the profiles it trusts, out of
@@ -2566,6 +2573,7 @@ this text and the vectors — would strengthen that evidence, and none exists.
    `skipped-source-dependency-unavailable` (§§9.2–9.3).
    Round 9 settles the closed condition list and receipt findings of issue #182, and removes
    the impossible unnamed-response case; no vector decides those rules either.
+   Round 13 adds the `web` refusal of a `generated` profile (§5.1), which no vector decides.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
    version-3 kinds are proposed, `research` alone with a preparer. When a kind gets a preparer and
    vectors, and whether its request forms here survive the first implementation, is open. So for
