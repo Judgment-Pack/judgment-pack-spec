@@ -207,6 +207,11 @@ here.
 
 ### Changed
 
+- [RFC 0018](rfcs/0018-dialect.md), round 10 (issue #184): the `record` of an unbound `operation`
+  source names the program, as a profile's `adapter.name` and the gateway's receipt carry it, and
+  never a catalog's result-contract name. [`spec/dialect.md`](spec/dialect.md) §4.4 gains the
+  paragraph, equal to the RFC's; the gateway's catalog version 4 carries the program under
+  `adapter`. No vector changes.
 - Both readers, `tools/dialect_verify.py` and `tools/dialect-verify-ts/`, now give RFC 0018's
   round-9 receipt answers (issue #185, and with it issue #182): a receipt's `servedAt` or
   `acquisition.observedAt` that is not a string with an instant, a `callIndex` that is not an

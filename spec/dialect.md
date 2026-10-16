@@ -600,6 +600,14 @@ a digest: an input profile of the installation's gateway, by its `id` and its di
 exactly the requested web capabilities. Its digest is the digest of all its `canon` bytes.
 It is neither the record's `binding` (§9.5) nor a binding of the gateway's catalog.
 
+**The name `record` carries.** `record` names the program, as a profile's `adapter.name` names it
+(§5.1) and as the receipt the gateway writes carries it, and never the name of a result contract in
+a gateway's catalog, such as `web-search-v1`. A gateway's catalog that names the program of each
+source contract does so beside the contract, under a member of its own, `adapter` (from the
+gateway's catalog version 4), for every source of a shape this section admits. An authoring tool
+copies that `adapter` into the unbound source's `record`, and never the contract's own `record`. A
+source of shape `command` names no program this way and serves no operation (§4.1).
+
 **The bound dialect** is the unbound dialect with the binding applied. For each unbound
 `operation`, `platform`, `operation`, `shape` and `record` are removed, and the binding document's
 `profile` and `profileDigest` are added; every other member is kept as written. For

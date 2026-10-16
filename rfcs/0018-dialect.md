@@ -8,7 +8,8 @@
 - Amended: 2026-10-15 (every gateway source shape, in version 2; the unbound source form, in
   version 3; research replay; version 3 as the reference Runner reads it, its two vectors staged;
   the research result contract, binding, reconciliation and fixture lists, issue #171;
-  research-stage admission and reader rules, issues #179 and #182)
+  research-stage admission and reader rules, issues #179 and #182), 2026-10-16 (the name an
+  unbound operation's record carries)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -424,6 +425,23 @@ answer changes. The Evidence records the reader corrections that follow separate
 is changed here, no fixture is recorded, and no vector or conformance claim is added. Rounds 6–8's
 replay, binding and preparation forms remain: verification calls neither a model nor the web,
 and a preparation commits the bound dialect alone (§4.4, §13).
+
+## Amendment of 2026-10-16: the name an unbound operation's record carries
+
+This amendment records the maintainer's decision of 2026-10-16 on
+[issue #184](https://github.com/Judgment-Pack/judgment-pack-spec/issues/184), on
+[pull request NNN](https://github.com/Judgment-Pack/judgment-pack-spec/pull/NNN). Its review is
+round 10 of this RFC; the cross-vendor review follows, run by the coordinator. The status stays
+Accepted. The Specification and companion are amended equally, in §4.4, and nothing else changes.
+
+**The decision.** Option A: the `record` of an unbound `operation` source is the program's name, as
+an installation's profile names it in `adapter.name` and as the receipt the gateway writes carries
+it, and never the name of a catalog's result contract. The gateway's catalog version 4
+([judgment-pack-gateway#280](https://github.com/Judgment-Pack/judgment-pack-gateway/issues/280))
+carries that program beside each source contract, under the member `adapter`, for the sources of
+shape `airbyte`, `mcp` and `http`, and omits it for its two `command`-shaped sources; an authoring
+tool copies the `adapter`, never the contract's `record`. No vector changes: the staged vector
+`unbound-bound-at-import` already carries `record: "adapter-http"`.
 
 ## Summary
 
@@ -1125,6 +1143,14 @@ a digest: an input profile of the installation's gateway, by its `id` and its di
 `research` it is exactly `profile`, `profileDigest` and `webProfiles`, of the forms above, with
 exactly the requested web capabilities. Its digest is the digest of all its `canon` bytes.
 It is neither the record's `binding` (§9.5) nor a binding of the gateway's catalog.
+
+**The name `record` carries.** `record` names the program, as a profile's `adapter.name` names it
+(§5.1) and as the receipt the gateway writes carries it, and never the name of a result contract in
+a gateway's catalog, such as `web-search-v1`. A gateway's catalog that names the program of each
+source contract does so beside the contract, under a member of its own, `adapter` (from the
+gateway's catalog version 4), for every source of a shape this section admits. An authoring tool
+copies that `adapter` into the unbound source's `record`, and never the contract's own `record`. A
+source of shape `command` names no program this way and serves no operation (§4.1).
 
 **The bound dialect** is the unbound dialect with the binding applied. For each unbound
 `operation`, `platform`, `operation`, `shape` and `record` are removed, and the binding document's
