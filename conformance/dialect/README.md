@@ -51,8 +51,9 @@ expectation, the `verifyRun.report` of `disposition-differs-from-audit`, which n
 preparation's checked report beside the finding, and adds no vector. The forty-second to
 forty-seventh, the six `endpoint-scope-` vectors, and the Runner's README and manifest as they now
 are, were copied from the Runner's `main` at commit `10c073c83ce898ec1a284203b9fd76b269722326`,
-Runner pull request 142 squash-merged, which holds the forty-one unchanged. This repository's manifest
-records each extension, in order, in `source.extendedBy`; that of pull request 137 lists no vector.
+Runner pull request 142 squash-merged, which holds the forty-one unchanged. This repository's
+manifest records each extension, in order, in `source.extendedBy`; that of pull request 137
+lists no vector.
 The Runner's README says
 what each file holds and how the vectors were generated, and its manifest gives every file's
 SHA-256, the binding the Runner passes for each preparation, the record's binding as recorded, and
@@ -91,10 +92,11 @@ in each vector's `preparation.retained`:
 - `recorded`: the vector's inputs were changed after the run, so that no preparation can be
   computed from them. `preparation.json` is then the preparation the run recorded, held fixed, which
   the export retains, and `preparation.sha256` its digest: nothing is recomputed, and the verifier's
-  answer is the finding this repository's manifest gives, `acquisition-invalid` in five of them, the
-  code the Runner's `verify-run` names in its refusal. The value is the Runner's (its README, "What a vector
-  holds"), and six vectors carry it: the two `changed-response` vectors and four `endpoint-scope-`
-vectors. In `endpoint-scope-changed-constraint` the answer is `profile-mismatch`.
+  answer is the finding this repository's manifest gives, the code the Runner's `verify-run` names
+  in its refusal. The value is the Runner's (its README, "What a vector holds"), and six vectors
+  carry it: the two `changed-response` vectors and four `endpoint-scope-` vectors. The answer is
+  `acquisition-invalid` in five of them and `profile-mismatch` in
+  `endpoint-scope-changed-constraint`.
 
 The other files — `release-digest.txt`, `public-key.txt`, `checkpoints.jsonl` — are for
 `verify-run`'s checks of an export, which are not this class's.

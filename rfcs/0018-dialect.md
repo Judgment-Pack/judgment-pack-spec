@@ -644,10 +644,12 @@ When round 15 was written no vector decided the new rule; the six staged since d
 the marked positions name. Both repository readers implement it, with tests made
 from altered copies of a staged research vector. Those tests are reader controls, not vectors
 or independent implementation evidence. The reference Runner's preparation and offline replay
-were follow-ups, with the issue's required evidence recorded as vectors: two different public
-page URLs acquired during one research source; replay on a second installation without network;
-refusal of an out-of-scope endpoint, a changed profile constraint, a mismatched redirect target
-and an altered request; existing exact-endpoint profiles and historical receipts unchanged.
+were follow-ups, with the issue's required evidence to be recorded as vectors: two different
+public page URLs acquired during one research source; replay on a second installation without
+network; refusal of an out-of-scope endpoint, a changed profile constraint, a mismatched redirect
+target and an altered request; existing exact-endpoint profiles and historical receipts unchanged.
+The six staged vectors record that evidence over synthetic pages that a stand-in served inside the
+test; no other page was read.
 The Gateway keeps exact final endpoints and its connection policy; no normal-form change is
 required. The Desk's review and registration of a constrained profile remain
 [desk #423](https://github.com/Judgment-Pack/judgment-pack-desk/issues/423).
@@ -1488,7 +1490,9 @@ carrying the member outside these conditions, with a non-null `endpoint`, or wit
 scope is `input-malformed`. The member is admitted on a `research` source's `page` assignment
 and on a `web`-kind source, subject to the class rules below. Binding such a profile to any
 other kind or capability is `profile-mismatch`. `search` and `answer` retain exact provider
-endpoints. The same checks hold a retained response's assigned profile. (No vector decides this.)
+endpoints. The same checks hold a retained response's assigned profile. (The vectors
+`endpoint-scope-two-paths-one-origin` and `endpoint-scope-wildcard-two-origins` decide that a
+`research` source's `page` assignment admits the member; no vector decides the other rules here.)
 
 **The endpoint form for a constrained page.** This restricts the Gateway's remote-server URL
 form (`SPEC.md` §1.2a at `v0.17.0`) to HTTPS names, admitting the empty port as below. It is a
@@ -1518,7 +1522,7 @@ can narrow the scope per case in this round; `constraints` adds no endpoint rule
 recipe cannot require reads to stay on a case's company origin under a wider installation
 profile. Such narrowing needs a later contract. (The vector
 `endpoint-scope-wildcard-two-origins` decides the wildcard's admission of two origins; no vector
-decides the class rule or the absence of narrowing.)
+decides the other rules here.)
 
 **Matching.** Validate the endpoint's form first. An endpoint matches the scope when at least
 one entry admits it. For a prefix entry, the hosts are equal, ASCII `A` to `Z` compared as `a`
@@ -1532,9 +1536,9 @@ already ends in `/`, starting with that prefix suffices. Thus `/docs` admits `/d
 match is implied. These comparisons rewrite neither the profile nor the receipt, and require
 no URL library. They admit host case and all three spellings of port 443 as the Gateway writes
 them today; no new Gateway normal form is required. (The vectors
-`endpoint-scope-two-paths-one-origin`, `endpoint-scope-endpoint-outside` and
-`endpoint-scope-wildcard-two-origins` decide the prefix at a segment boundary and the wildcard; no
-vector decides the host's case or the spellings of port 443.)
+`endpoint-scope-two-paths-one-origin` and `endpoint-scope-endpoint-outside` decide a path prefix at
+a segment boundary, and `endpoint-scope-wildcard-two-origins` decides the wildcard; no vector
+decides the other rules here.)
 
 **Admission before acquisition.** A preparer MUST check every requested page URL against the
 assigned scope before sending that request. For this check, the URL is of the endpoint form
@@ -1554,7 +1558,9 @@ At binding, a `web` source's literal `url` that cannot meet that request check i
 is read during profile matching. Research declares no fixed page URL, so a discovered URL
 outside the scope is an acquisition failure, not `profile-mismatch`. No model is run to predict
 which URLs a recipe could request. These duties add no support for an unread kind: §11 still
-refuses it before findings. (No vector decides this.)
+refuses it before findings. (The vector `endpoint-scope-endpoint-outside` decides that a discovered
+URL outside the scope is an acquisition failure, `acquisition-invalid`, not `profile-mismatch`; no
+vector decides the other rules here.)
 
 A profile's `class` is the profile's own; a binding takes it only where the source's kind admits
 that class. An `operation`, of any shape §4.1 admits, takes its profile's class, `record` or
@@ -1641,8 +1647,9 @@ An acquisition is held to its source and its profile, and any of these checks th
    With `endpointScope` only the endpoint comparison changes: `E.acquisition.endpoint` MUST
    have §5.1's constrained page form and match the scope. The adapter and shape comparisons
    stay exact. Failure, including an endpoint outside that form, is `acquisition-invalid`.
-   (The vectors `endpoint-scope-endpoint-outside` and `endpoint-scope-redirect-outside` decide
-   this.)
+   (The vectors `endpoint-scope-endpoint-outside` and `endpoint-scope-redirect-outside` decide an
+   endpoint of that form that the scope does not admit; no vector decides an endpoint outside that
+   form or the adapter and shape comparisons.)
 4. `E.argumentsCommitment` is `sha256:` followed by the hexadecimal SHA-256 of the 32 bytes `S.args`
    encodes, then the ASCII bytes `args:`, then the `canon` bytes of the source's request (§4.1).
 5. `E.resultDigest` is the digest of `R`'s `canon` bytes; an `R` outside the `canon` domain fails.
@@ -1663,7 +1670,9 @@ retained provenance carries both URLs, but this document does not interpret that
 `statement` is a commitment, not a clear URL. Check 4 still commits the full retained `request`,
 so changing it without a matching receipt fails. It does not prove the preparer made §5.1's
 admission check. No receipt, request, result or salt is relabelled or rewritten for a scope.
-(No vector decides this.)
+(The vector `endpoint-scope-redirect-outside` decides that check 3 holds the final endpoint, and
+`endpoint-scope-changed-request` that check 4 commits the retained request; no vector decides the
+other rules here.)
 
 Then its times, against the preparation's instant, `verifiedAt`: the instants of
 `E.acquisition.observedAt` and `E.servedAt` MUST each be no more than the source's `maxAge`
@@ -2289,7 +2298,9 @@ shape; an unknown or misplaced `endpointScope`, a malformed entry, or the wildca
 The scope's binding restrictions, including an impossible literal `web` URL, are finding 1.
 A receipt's scope match is check 3 within finding 3, in retained-response order. A preparer's
 request admission runs after parameters resolve and before that request is sent; it does not
-add an offline check of the requested URL. (No vector decides this.)
+add an offline check of the requested URL. (The vectors `endpoint-scope-endpoint-outside` and
+`endpoint-scope-redirect-outside` decide a receipt's scope match as check 3; no vector decides the
+other rules here.)
 
 Some bounds are measured later, because they cannot be measured sooner: an unwrapped string's
 bytes, and the nesting and number literals of the value it holds, are measured when it is
@@ -2498,7 +2509,10 @@ cited by URL alone is no retained response; the claim it supports is the answer'
 
 - **An acquisition under a constrained page profile.** Establishes: that each receipt's final
   endpoint lay in the installation's reviewed scope, as the Gateway's adapter testified under
-  its signature. The profile digest holds the whole scope. (No vector decides this.)
+  its signature. The profile digest holds the whole scope. (The vector
+  `endpoint-scope-changed-constraint` decides that the digest holds the scope, and the vectors
+  `endpoint-scope-endpoint-outside` and `endpoint-scope-redirect-outside` that the final endpoint
+  lies in it; no vector decides the other rules here.)
 
   Does not establish: the page's content or relevance; that the host is public; anything about
   the requested URL's scope or intermediate redirects; that the preparer checked admission.
@@ -2750,15 +2764,19 @@ none. No specification version publishes any of the vectors, so none is
 claimable.
 
 **What no vector holds.** `unwrap`; a calculator that did not compute; timestamp parameters;
-a receipt that fails, but over a result changed after the run (the two `changed-response` vectors);
+a receipt that fails, but over a result changed after the run (the two `changed-response`
+vectors), a receipt that fails check 3 (`endpoint-scope-endpoint-outside` and
+`endpoint-scope-redirect-outside`) or check 4 (`endpoint-scope-changed-request`);
 a stale acquisition or table; a broken session form; a refusal at
 a bound; a paged acquisition; a request of shape `http` other than the tenth vector's — by `POST`,
 with a `body`, with no `query`, or a connection's; a kind of version 3 other than `operation` and
 `research`, and a
-binding document or a profile bound that is refused; and the positions of Unresolved question 1,
+binding document or a profile bound that is refused, beyond the one
+`endpoint-scope-changed-constraint` holds; and the positions of Unresolved question 1,
 the six choices among them. The repository's tests hold the two readers to some of these
 with altered copies of a vector — a result changed by a byte, an instant past `maxAge`, a profile's
-digest, a reader that writes `-0` as `0` or `&` as it is — but those are this repository's checks of
+digest, beyond the one `endpoint-scope-changed-constraint` holds, a reader
+that writes `-0` as `0` or `&` as it is — but those are this repository's checks of
 its readers, not vectors: they are not the Runner's bytes, and no claim could cite them.
 
 **What this repository checks.** Every vector file to the SHA-256 the Runner's manifest gives it, and
@@ -2842,11 +2860,12 @@ this text and the vectors — would strengthen that evidence, and none exists.
    URL identity, wildcard reach and deferred per-case narrowing; final-endpoint replay and
    request admission; the form, binding and acquisition findings and their order; the bounds;
    and what a constrained profile establishes (§§5.1, 5.2, 11–13; issue #199, direction A).
-   Each is marked. Six Runner vectors (Runner pull request 142) now decide three parts: the
-   prefix at a segment boundary and the wildcard's admission of two origins (§5.1), that a
-   changed scope fails the binding's digest, `profile-mismatch` (§5.1), and that a final or
-   redirect endpoint outside the scope is `acquisition-invalid` (§5.2, check 3). Reader controls
-   hold the rest; no Runner vector decides it.
+   Each is marked. Six Runner vectors (Runner pull request 142) now decide four parts: the scope
+   match and the final endpoint held, an endpoint of the constrained form outside the scope being
+   `acquisition-invalid` (§§5.1, 5.2 check 3, 13); a path prefix at a segment boundary and the
+   wildcard's admission of two origins (§5.1); the digest holding the scope, a changed scope
+   being `profile-mismatch` (§§5.1, 13); and check 4 over the retained request (§5.1). Reader
+   controls alone hold the rest; no Runner vector decides it.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
    version-3 kinds are proposed, `research` alone with a preparer. When a kind gets a preparer and
    vectors, and whether its request forms here survive the first implementation, is open. So for

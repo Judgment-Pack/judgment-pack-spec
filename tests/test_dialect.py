@@ -525,8 +525,8 @@ class DialectVectorTests(unittest.TestCase):
 
     def test_the_companion_counts_the_vectors_of_the_commits_it_names(self) -> None:
         # The companion's Status names the Runner commits its vectors were copied from, and counts
-        # the vectors of the commits it names: forty-seven, from seven commits, since the staging of the
-        # Runner's pull request 142.
+        # the vectors of the commits it names: forty-seven, from seven commits, since the staging
+        # of the Runner's pull request 142.
         text = " ".join((ROOT / COMPANION).read_text(encoding="utf-8").split())
         source = self.manifest["source"]
         self.assertIn(source["commit"], text)
