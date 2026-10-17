@@ -18,7 +18,7 @@ the companion document [`spec/checkpoint-witness.md`](../spec/checkpoint-witness
 directory. Its vectors are staged, as RFC 0013's rows are, until a later `specVersion` opens.
 [RFC 0018](0018-dialect.md) is accepted in the same form: the normative statement of the dialect and
 its preparation verifier is the companion document [`spec/dialect.md`](../spec/dialect.md), not this
-directory, and its thirty-nine vectors are staged until a later `specVersion` opens; it was amended
+directory, and its forty-one vectors are staged until a later `specVersion` opens; it was amended
 in place on 2026-10-15 and 2026-10-16, its status unchanged.
 [RFC 0014](0014-lineage-record-and-action-binding.md) is the first accepted cross-project record,
 and a retrospective one: the gateway's `SPEC.md` and the runtime's decision records govern what it
@@ -76,7 +76,7 @@ stable feature requires two independent implementations and conformance cases.
 
 RFC 0018 states how a pack's facts and evidence are obtained and derived, and what a preparation
 establishes per part. Its companion, [`spec/dialect.md`](../spec/dialect.md), defines the
-preparation-verifier class; the reference Runner's 39 preparation vectors are staged for the next
+preparation-verifier class; the reference Runner's 41 preparation vectors are staged for the next
 `specVersion`, in no corpus. It was amended on 2026-10-15 for every gateway source shape in version
 2, the unbound source form in version 3 and version 3 as the reference Runner reads it; on
 2026-10-16 for the name an unbound operation's record carries, the research vectors staged and the

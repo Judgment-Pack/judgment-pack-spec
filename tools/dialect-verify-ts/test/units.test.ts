@@ -122,6 +122,44 @@ test("§9.3: an acquired source keeps every declared dependency", () => {
   }
 });
 
+test("§9.3: the Runner's acquired dependent sources keep every declared dependency", () => {
+  const dependencies = [
+    { parameter: "approver", source: "sponsor", pointer: "/sponsor/id" },
+    { parameter: "requestType", source: "intake", pointer: "/intake/type" },
+  ];
+  for (const [name, status, present] of [
+    ["acquired-dependent-source", "resolved", [true, true]],
+    ["acquired-dependent-source-unknown", "unknown", [false, true]],
+  ] as const) {
+    const dir = join(VECTORS, name);
+    const result = verify(loadVector(dir, true));
+    assert.deepEqual(Buffer.from(result.recomputed!), readFileSync(join(dir, "preparation.json")), name);
+    assert.equal(result.kind, "reading", name);
+    assert.equal((member(result.report, "binding") as { v: string }).v, "matches", name);
+    const preparation = JSON.parse(text(result.recomputed!));
+    const outcome = preparation.outcomes.at(-1);
+    assert.deepEqual([outcome.name, outcome.status], ["endorsement", status], name);
+    assert.deepEqual(outcome.parameters, { approver: "S-1", requestId: "REQ-7",
+      requestType: "data-access", runAt: preparation.verifiedAt }, name);
+    assert.deepEqual(outcome.arguments, { tool: "lookup", arguments: {
+      table: "endorsements", approver: "S-1", requestType: "data-access",
+    } }, name);
+    const acquired: [string, boolean][] = [];
+    for (const entry of preparation.lineage) {
+      if (entry.source !== "endorsement") {
+        assert.ok(!("dependencies" in entry), name);
+        continue;
+      }
+      acquired.push([entry.target, entry.present]);
+      assert.deepEqual(entry.dependencies, dependencies, name);
+      assert.deepEqual([entry.status, entry.reason], [outcome.status, outcome.reason], name);
+      assert.ok("receipt" in entry, name);
+    }
+    assert.deepEqual(acquired, [["/endorsement", present[0]], ["sponsor-endorsement", present[1]]], name);
+    assert.equal(preparation.cites.length, 3, name);
+  }
+});
+
 test("§9.5 writes &, <, >, U+2028 and U+2029 escaped and keeps -0; canon writes them as they are and -0 as 0", () => {
   const v = obj([["s", str("A&B <x> café ☃  /\u007f\u001f\n")], ["z", num("-0")], ["big", num("-9007199254740991")]]);
   assert.equal(text(preparationForm(v)), '{"big":-9007199254740991,"s":"A\\u0026B \\u003cx\\u003e café ☃\\u2028\\u2029/\u007f\\u001f\\n","z":-0}');

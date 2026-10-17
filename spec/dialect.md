@@ -12,7 +12,7 @@ Its design record is [RFC 0018](../rfcs/0018-dialect.md), accepted on 2026-10-15
 which is informative; its Specification section, §§1–14 below, is that text. The comment period
 RFC 0000 names was waived by the maintainer, as the RFC's adoption record says.
 
-Its thirty-nine vectors, under
+Its forty-one vectors, under
 [`conformance/dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect),
 are the reference Runner's `vectors/preparation/`, byte for byte: nine at commit
 `05636eda96a9588279d61a6272625be859a28117` (Runner pull request 77), which reached the Runner's
@@ -26,7 +26,10 @@ kind `research`, the runs of §11's two examples, at the Runner's `main` commit
 `4352763e22489ca80ffbf5df338b7e7cb61319e2` (Runner pull request 97, not yet released), which holds
 the twelve unchanged; and the thirty-ninth, `skipped-source-dependency-unavailable`, at the Runner's
 `main` commit `ed1bc2a7a02b7475e96178915c36df412e536314` (Runner pull request 105), which holds
-the thirty-eight unchanged.
+the thirty-eight unchanged; and the fortieth and forty-first, `acquired-dependent-source` and
+`acquired-dependent-source-unknown`, at the Runner's `main` commit
+`694fe691fd8d325cad92ef56e215ee9a3cdaafaf` (Runner pull request 109), which holds the thirty-nine
+unchanged.
 They are **staged** until the next `specVersion` opens: they are in no corpus, no claim may cite
 them, the site does not serve them,
 and no release bundle carries them. When that version opens they move into a corpus, normative for
@@ -38,9 +41,9 @@ It specifies version 2 of the dialect document and of the preparation, which are
 mapping v2 and its preparation, restated. Since the amendment of 2026-10-15 (RFC 0018, its
 Amendment), version 2's `operation` reads a gateway source of shape `airbyte`, `mcp` or `http`, as
 the Runner's mapping v2 does since its pull request 80: the vectors of version 2 hold `mcp`, in
-nine and the thirty-ninth, and `http`, in the tenth; `airbyte` is defined and not claimable (§4.1).
-That amendment is a compatible extension of the record kind to every adapter shape, and one
-restriction: a receipt that
+nine and the thirty-ninth to forty-first, and `http`, in the tenth; `airbyte` is defined and not
+claimable (§4.1). That amendment is a compatible extension of the record kind to every adapter
+shape, and one restriction: a receipt that
 attests a page (`pageItems`) is refused, whatever the shape (§5.2). The restriction changes one
 answer the accepted text gave: a signed acquisition of shape `mcp` whose receipt carried
 `pageItems` was read, and is `acquisition-invalid` now. The Runner has never prepared a paged

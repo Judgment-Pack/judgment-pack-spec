@@ -1954,6 +1954,98 @@
         "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:b5b743717bf2d6bb10f4e265be163e7863b23658d36721d25f18a0665dbe6690\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:b2e603b88496e07837fb8f336cfac5ab49e1b6d7f21c5b689c08eb9e738f5713\",\"sequence\":1,\"trail\":\"29e3c598b5b5f0a5f2dce4faf5315616\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":6,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T15:56:12Z\",\"sources\":[{\"source\":\"intake\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"sponsor\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
         "error": null
       }
+    },
+    {
+      "name": "acquired-dependent-source",
+      "note": "A run of three operations of one profile, as Runner exported it (version 5), signed, witnessed and bound; its three records were signed by the test under a key made for the run, standing in for a gateway, and no live service was asked. Its mapping is skipped-source-dependency-unavailable's but for each source's profileDigest, the digest of the profile whose key was made for this run. intake reads the case's request and its type, and resolves them. sponsor reads the request's sponsor, and its record names one, S-1: its claim is resolved, sponsor-on-record. endorsement declares two source parameters, each a fact target of an earlier source: approver, sponsor's /sponsor/id, and requestType, intake's /intake/type. Both have a value, so endorsement is acquired: its record names the endorsement, and its claim is resolved, endorsed. A reader concludes that each of its lineage entries, the fact /endorsement and the evidence sponsor-endorsement, carries dependencies, as a skipped source's entries do: every source parameter it declares, each valued, as objects {parameter, source, pointer} in the order of the parameters' names, approver from sponsor before requestType from intake, though intake comes first among the sources. The parameters' values are carried into its request: the outcome's parameters are approver S-1 and requestType data-access with requestId and runAt, and its arguments are the request they were written into, {tool: lookup, arguments: {table: endorsements, approver: S-1, requestType: data-access}}. Each of its entries carries endorsement's receipt and the outcome's status and reason, resolved and endorsed; no other source's entry carries dependencies. A reader recomputing the preparation concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/mapping-v2-acquired-dependent",
+      "altered": null,
+      "verifiedAt": "2026-10-16T17:19:54Z",
+      "files": {
+        "case.json": "sha256:780718de39758469b8395dbaca2db1f75eea1e6af644fe4f54b507aef331572f",
+        "checkpoints.jsonl": "sha256:5884dff3f832f1ce91b6e838f589a6646b41fe9f7636125696dbce2653f9b827",
+        "mapping.json": "sha256:9f09568c3d6912c40857a07784f25bab88472e80e55bea88683ac326392e07b6",
+        "preparation.json": "sha256:bbcdab0a1692d6b3b33605668285f3cda5cb54db4c7731f29d4fc3bab9e5eeec",
+        "preparation.sha256": "sha256:cc7ac6f9c54f7cabd0844128b6b2bf29e80ac20a4868473de620d91916e4f82e",
+        "profiles.json": "sha256:5a339faf9668e00204c7088d6a502644f9126a5f3bf16fcad3a233d9f60f10a6",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:0667d0b58c3cce2a26f1dd6e6be0f2b4c3827859896a6361adf347247a15aec5",
+        "run.json": "sha256:d00a4dbee7935fe0d77646cf6ee0e83ae07212699b2a1915b67ca4d0ce32334d",
+        "sources.json": "sha256:396e72fb1ea8a6be5c9e9b7fe29d5a69ac518140a1712ed3db64565cf28eac17"
+      },
+      "preparation": {
+        "sha256": "sha256:bbcdab0a1692d6b3b33605668285f3cda5cb54db4c7731f29d4fc3bab9e5eeec",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:bbcdab0a1692d6b3b33605668285f3cda5cb54db4c7731f29d4fc3bab9e5eeec\"}",
+        "retained": "equal"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:bbcdab0a1692d6b3b33605668285f3cda5cb54db4c7731f29d4fc3bab9e5eeec\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:705a9864f6141fb18e28b23b80e7afa709991e2473448896299b5d116311b57d",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:171d1d30681b924e661893630b6fb2c665153d078b1d1fc9036f120d23e74e7d\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:7aee705caaebba29d9addb6a2cf3ee022710e7b79bf000ef445acd1972492dea\",\"sequence\":1,\"trail\":\"b204e061aae450a869bed5bd5ffe7323\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":6,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T17:19:54Z\",\"sources\":[{\"source\":\"intake\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"sponsor\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"endorsement\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "acquired-dependent-source-unknown",
+      "note": "A run of three operations of one profile, as Runner exported it (version 5), signed, witnessed and bound, as acquired-dependent-source's but that endorsement's record names no endorsement; its three records were signed by the test under a key made for the run, standing in for a gateway, and no live service was asked. sponsor's record names the sponsor S-1, and its claim is resolved, so endorsement is acquired with both its source parameters valued, approver from sponsor's /sponsor/id and requestType from intake's /intake/type; its claim is unknown, not-endorsed. A reader concludes that an acquired source whose claim is unknown carries dependencies too: each of its lineage entries, the fact /endorsement, not present, and the evidence sponsor-endorsement, present with the availability unknown, carries every source parameter it declares as objects {parameter, source, pointer} in the order of the parameters' names, approver from sponsor before requestType from intake, though intake comes first among the sources. The parameters' values are carried into its request: the outcome's parameters are approver S-1 and requestType data-access with requestId and runAt, and its arguments are the request they were written into, {tool: lookup, arguments: {table: endorsements, approver: S-1, requestType: data-access}}. Each of its entries carries endorsement's receipt and the outcome's status and reason, unknown and not-endorsed; no other source's entry carries dependencies. A reader recomputing the preparation concludes verified-inputs, the record's binding matching the preparation.",
+      "from": "internal/runner/testdata/mapping-v2-acquired-dependent-unknown",
+      "altered": null,
+      "verifiedAt": "2026-10-16T17:19:55Z",
+      "files": {
+        "case.json": "sha256:780718de39758469b8395dbaca2db1f75eea1e6af644fe4f54b507aef331572f",
+        "checkpoints.jsonl": "sha256:db376a134f1d0747c87d9939af3bda50797a412a2725f995a6a328bb91a72708",
+        "mapping.json": "sha256:86fef74c360e57d40173a50d7b796a1246387c2dcba9b6da633e766eb3c8b0a5",
+        "preparation.json": "sha256:553702fafc6ddf848af6e163c146c578c622911e897f0c92df57aec3c0ccc1cc",
+        "preparation.sha256": "sha256:3f595ba0681342fc4df361831648e08578592126dfab8c75887b883cf8632724",
+        "profiles.json": "sha256:c1bec1645c926797a40d56066eb51984ed2f39fdb78414cefaabfdac3fc9a4de",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:c82afbdfe03ff4d074f46b1b6b41a0392ce88fd28ba4f2ef402a993a61cfb337",
+        "run.json": "sha256:1edb49bce9f6e2a1d4963300bd1f712ed5c1b14ecfe634b49bcbebf2689be45e",
+        "sources.json": "sha256:051ef4291acf5ca937039755b431ca0a50140ef0c7ae18872d62979fef3a0a5d"
+      },
+      "preparation": {
+        "sha256": "sha256:553702fafc6ddf848af6e163c146c578c622911e897f0c92df57aec3c0ccc1cc",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:553702fafc6ddf848af6e163c146c578c622911e897f0c92df57aec3c0ccc1cc\"}",
+        "retained": "equal"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:553702fafc6ddf848af6e163c146c578c622911e897f0c92df57aec3c0ccc1cc\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:9e3ba2356c197e3f6f980983408409d9e620754e973e929b535b12e8aa4dce7b",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:1bef69a654338c83144652331bcbf38f1a60f49e9c550499c0f33bb8849c8794\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:6faba1efaa09012ab4972140f30180e2b29cbb9df747778f428689e778e60b48\",\"sequence\":1,\"trail\":\"68a6e0c71a53930bfd06aa2ba9916c07\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":6,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T17:19:55Z\",\"sources\":[{\"source\":\"intake\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"sponsor\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"endorsement\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
+        "error": null
+      }
     }
   ]
 }

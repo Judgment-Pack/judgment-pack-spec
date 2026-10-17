@@ -61,12 +61,20 @@
         "vectors": [
           "skipped-source-dependency-unavailable"
         ]
+      },
+      {
+        "pullRequest": 109,
+        "commit": "694fe691fd8d325cad92ef56e215ee9a3cdaafaf",
+        "vectors": [
+          "acquired-dependent-source",
+          "acquired-dependent-source-unknown"
+        ]
       }
     ]
   },
   "runnerFiles": {
-    "vectors/README.md": "af0f6c7cc0a0350be67bca74609d5b7e23562ea547a162d48727cf534a8a45af",
-    "vectors/manifest.json": "6649057d739e78047b618c3d2e61ab1fa33a3b27ac16eae06dc49548893c8b64"
+    "vectors/README.md": "f474d07fad8e2fcba7336f4e16a2917a28a9a653c04aebeaa4bba67dac60c65b",
+    "vectors/manifest.json": "8ccf8be284025a02830f402e726fbea3c6a2ef5a0c4388c0a2eefb1a72cfaeb9"
   },
   "cases": [
     {
@@ -338,6 +346,20 @@
     {
       "id": "skipped-source-dependency-unavailable",
       "path": "vectors/skipped-source-dependency-unavailable",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "acquired-dependent-source",
+      "path": "vectors/acquired-dependent-source",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "acquired-dependent-source-unknown",
+      "path": "vectors/acquired-dependent-source-unknown",
       "requiresBinding": true,
       "expectedResult": "reading",
       "expectedBinding": "matches"

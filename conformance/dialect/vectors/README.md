@@ -25,7 +25,10 @@ byte for byte. So were the eleventh and twelfth, `version-3-bound` and
 again byte for byte. So were the research vectors, the twenty-six after them, the first
 of the kind `research`: the run wrote the first twelve again byte for byte. So was the
 thirty-ninth, `skipped-source-dependency-unavailable`, the first to hold a skipped
-source: the run wrote the first thirty-eight again byte for byte. Changing a
+source: the run wrote the first thirty-eight again byte for byte. So were the fortieth
+and forty-first, `acquired-dependent-source` and `acquired-dependent-source-unknown`,
+the first to hold an acquired source that declares source parameters: the run wrote
+the first thirty-nine again byte for byte. Changing a
 vector is a change of the contract a second reader is held to, and needs the same
 justification as changing
 [`docs/MAPPING-V2.md`](../../docs/MAPPING-V2.md#the-canonical-form-of-a-preparation).
@@ -144,6 +147,8 @@ The record a binding is read from is in `run.json`: the record's exact bytes,
 | `work-item-triage-changed-binding-old-preparation` | `research/work-item-triage-changed-binding-second-installation` | the export retains valid-types' preparation, recorded under the first installation's binding | refused: `retained lineage does not match recomputation` |
 | `work-item-triage-changed-response-record-fields` | `research/work-item-triage-valid-types-all-six` | the follow-up record's answer for points changed under the record's own receipt; the receipt and the recorded preparation as they were | refused: `Source follow-up: the record's own receipt, through the profile assistant: result digest failed (acquisition-invalid). …` |
 | `skipped-source-dependency-unavailable` | `mapping-v2-skipped-source` | nothing: three operations, the third skipped because a source it waits on is not `resolved` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `acquired-dependent-source` | `mapping-v2-acquired-dependent` | nothing: three operations, the third acquired with both its source parameters valued, its claim `resolved` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `acquired-dependent-source-unknown` | `mapping-v2-acquired-dependent-unknown` | nothing: as `acquired-dependent-source`, the third's claim `unknown` | `verified-inputs`, binding `matches`, signed and witnessed |
 
 The valid case is also the calculated-values case: its one source is a calculator
 that computed. Its preparation's digest is the digest its record binds, so a reader
@@ -204,25 +209,53 @@ each a fact target of an earlier source, `approver`, `sponsor`'s `/sponsor/id`, 
 `requestType`, `intake`'s `/intake/type`, and is skipped, since `sponsor`'s claim is not
 `resolved`. A skipped source is not acquired: `sources.json` holds no record of it,
 `cites` no citation, and its read does not apply.
-Runner writes four members of a skipped source, of every kind, otherwise than the
-specification's §9.2 and §9.3 state them, until its amendment for
-judgment-pack-spec#189 takes Runner's form:
+Runner writes the skipped-source form the specification's §§9.2–9.3 state since
+judgment-pack-spec#194 (`c51c81d`):
 
 - the outcome's `claim`, present: `{"acquisitionStatus": "unknown", "basis": [],
-  "evidenceAvailability": {}, "facts": {}, "reason": "dependency-unavailable"}` (the
-  text: absent);
-- the outcome's `status`, `unknown` (the text: `dependency-unavailable`);
-- each lineage entry's `status`, `unknown` (the text: the outcome's,
-  `dependency-unavailable`);
+  "evidenceAvailability": {}, "facts": {}, "reason": "dependency-unavailable"}`;
+- the outcome's `status`, `unknown`;
+- each lineage entry's `status`, `unknown`;
 - each lineage entry's `dependencies`, the source parameters it waited on, as objects
   `{"parameter", "source", "pointer"}` in the order of the parameters' names,
   `approver` before `requestType`, though `intake` comes before `sponsor` among the
-  sources (the text: no such member).
+  sources.
 
 Its other members are as the text states them: the outcome's `reason`
 `dependency-unavailable`, no `arguments`, and as `parameters` those that have a value
 (`runAt`, `requestId`, `requestType`, and not `approver`); each lineage entry's
 `reason` `dependency-unavailable`, `present` false, `basis` `[]` and no `receipt`.
+
+`acquired-dependent-source` and `acquired-dependent-source-unknown` are there for an
+acquired source that declares source parameters, the other side of Runner's rule for
+`dependencies`: a lineage entry carries them for every source that declares one,
+acquired or skipped (the specification's §9.3 states it so since
+judgment-pack-spec#194, the amendment for judgment-pack-spec#189). Their mapping is
+`skipped-source-dependency-unavailable`'s but for each source's `profileDigest`, the
+digest of the profile whose key was made for the run. `sponsor`'s record names a
+sponsor, `S-1`, so its claim is `resolved`, and `endorsement` is acquired with both its
+source parameters valued: `approver` `S-1` and `requestType` `data-access`. Its
+record names the endorsement in `acquired-dependent-source`, and its claim is
+`resolved` (`endorsed`); it names none in `acquired-dependent-source-unknown`, and its
+claim is `unknown` (`not-endorsed`). A reader concludes, of each:
+
+- each of `endorsement`'s lineage entries, the fact `/endorsement` and the evidence
+  `sponsor-endorsement`, carries `dependencies`, every source parameter it declares,
+  each valued, as objects `{"parameter", "source", "pointer"}` in the order of the
+  parameters' names, `approver` from `sponsor` before `requestType` from `intake`,
+  though `intake` comes first among the sources: the same array as the skipped
+  source's;
+- the parameters' values are carried into its request: the outcome's `parameters` are
+  `approver`, `requestId`, `requestType` and `runAt`, and its `arguments` are
+  `{"tool": "lookup", "arguments": {"table": "endorsements", "approver": "S-1",
+  "requestType": "data-access"}}`;
+- each of its entries carries its `receipt`, `endorsement`'s citation, and the
+  outcome's `status` and `reason`; no other source's entry carries `dependencies`.
+
+`acquired-dependent-source-unknown` holds that a claim of `unknown` does not drop
+them: its `/endorsement` entry is not `present`, its `sponsor-endorsement` entry is
+`present` with the availability `unknown`, and both carry `dependencies` as
+`acquired-dependent-source`'s do.
 
 The last two of the first twelve are dialect version 3 (`docs/MAPPING-V2.md`, "Dialect version 3").
 `version-3-bound` is there for the version: its mapping is written as a version-3
@@ -297,6 +330,17 @@ in them are those of the run that wrote them, and are data now.
   for the run, standing in for a gateway: the public key is in `profiles.json`, and the
   private key was not kept. The profile names the adapter `adapter-mcp`, version
   `stand-in`; no live service was asked, and every identifier is synthetic.
+- `mapping-v2-acquired-dependent` and `mapping-v2-acquired-dependent-unknown` were
+  written as `mapping-v2-skipped-source` was, by
+  `TestAnAcquiredDependentSourceRunIsSignedWitnessedAndBound` with
+  `JPACK_V2_ACQUIRED_EXPORT_DIR` set to the directory that holds them, under the
+  Runtime CI pins (commit `09206e74`), which takes a binding. Each record is signed
+  under the seed of RFC 8032's first test vector, whose public key is
+  `public-key.txt`. Each run's three acquisition receipts were signed by the test with
+  a key made for the run, standing in for a gateway: the public key is in
+  `profiles.json`, and the private key was not kept. The profile names the adapter
+  `adapter-mcp`, version `stand-in`; no live service was asked, and every identifier
+  is synthetic.
 
 - Each run under `research/` was written as `mapping-v2-calculated-bound` was, by
   `TestResearchRunsAreSignedWitnessedAndBound` with `JPACK_RESEARCH_EXPORT_DIR` set,

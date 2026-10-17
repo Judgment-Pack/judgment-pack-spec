@@ -7,6 +7,14 @@ here.
 
 ### Added
 
+- The fortieth and forty-first dialect vectors, `acquired-dependent-source` and
+  `acquired-dependent-source-unknown`, staged byte for byte from Runner commit `694fe69`, pull
+  request 109 (issue #203), beside the thirty-nine unchanged vectors: an acquired source that
+  declares source parameters, its claim `resolved` or `unknown`, whose lineage entries name every
+  declared parameter in `dependencies` (§9.3). Both readers, unchanged, recompute each preparation
+  byte for byte and give a reading whose binding `matches`, and the cross-reader test holds their
+  reports equal on all forty-one. The vectors remain staged until the next `specVersion` opens, in
+  no corpus.
 - The thirty-ninth dialect vector, `skipped-source-dependency-unavailable`, from Runner commit
   `ed1bc2a`, pull request 105, staged byte for byte beside the thirty-eight unchanged vectors.
   The vectors remain staged until the next `specVersion` opens, in no corpus.

@@ -1,6 +1,6 @@
 # Dialect vectors (staged)
 
-This directory holds 39 vectors for the dialect, written for the preparation-verifier class that
+This directory holds 41 vectors for the dialect, written for the preparation-verifier class that
 the companion document [`spec/dialect.md`](../../spec/dialect.md) defines. Its design record,
 [RFC 0018](../../rfcs/0018-dialect.md), was accepted on 2026-10-15, and the vectors are **staged**
 until the next `specVersion` opens. They are in no corpus.
@@ -39,9 +39,12 @@ generator wrote the first ten again byte for byte. The twenty-six after them, th
 the first of the kind `research`, were copied
 from the Runner's `main` at commit `4352763e22489ca80ffbf5df338b7e7cb61319e2`, Runner pull request
 97 squash-merged, whose generator wrote the first twelve again byte for byte. The thirty-ninth,
-`skipped-source-dependency-unavailable`, and the Runner's README and manifest as they now are,
-were copied from the Runner's `main` at commit `ed1bc2a7a02b7475e96178915c36df412e536314`, Runner
-pull request 105, whose generator wrote the first thirty-eight again byte for byte. This
+`skipped-source-dependency-unavailable`, was copied from the Runner's `main` at commit
+`ed1bc2a7a02b7475e96178915c36df412e536314`, Runner pull request 105, whose generator wrote the
+first thirty-eight again byte for byte. The fortieth and forty-first, `acquired-dependent-source`
+and `acquired-dependent-source-unknown`, and the Runner's README and manifest as they now are, were
+copied from the Runner's `main` at commit `694fe691fd8d325cad92ef56e215ee9a3cdaafaf`, Runner pull
+request 109 squash-merged, whose generator wrote the first thirty-nine again byte for byte. This
 repository's manifest records each extension, in order, in `source.extendedBy`.
 The Runner's README says
 what each file holds and how the vectors were generated, and its manifest gives every file's
@@ -172,6 +175,19 @@ has exactly `parameter`, `source` and `pointer`: `approver`, `sponsor`, `/sponso
 `requestType`, `intake`, `/intake/type`. The acquired sources' entries have no `dependencies`.
 The skipped source has no acquisition or citation. Both readers recompute `preparation.json`
 byte for byte and give a reading, binding `matches`, as `verify-run` reports `verified-inputs`.
+
+The fortieth and forty-first, `acquired-dependent-source` and `acquired-dependent-source-unknown`,
+hold the other side of §9.3's rule: an acquired source that declares source parameters carries
+`dependencies` too. Their dialect is the thirty-ninth's but for each source's `profileDigest`.
+`sponsor`'s record names the sponsor `S-1`, so its claim is `resolved`, and `endorsement` is
+acquired with both parameters valued, `approver` `S-1` and `requestType` `data-access`, carried
+into its request: its outcome's `arguments` are the tool `lookup` with `table` `endorsements` and
+those two values. Its claim is `resolved` in the fortieth and `unknown` in the forty-first, whose
+`/endorsement` entry is not `present`. Both of `endorsement`'s target entries carry its receipt,
+the outcome's status and reason, and `dependencies` as the thirty-ninth's: `approver`, `sponsor`,
+`/sponsor/id`, then `requestType`, `intake`, `/intake/type`. No other source's entry carries
+`dependencies`. Both readers recompute `preparation.json` byte for byte and give a reading,
+binding `matches`, as `verify-run` reports `verified-inputs`.
 
 One vector is answered otherwise than `verify-run` answers it. `disposition-differs-from-audit`
 alters the run's retained result, which is the Runner's export and no part of a preparation or a

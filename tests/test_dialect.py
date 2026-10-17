@@ -37,7 +37,8 @@ SOURCE = {
     # The tenth vector, from the Runner's main after its pull request 80 (the amendment of
     # 2026-10-15); the eleventh and twelfth, of dialect version 3, from its main after its pull
     # request 83; and the twenty-six research vectors, of the two examples of §11's fixture plan,
-    # from its main after its pull request 97; the skipped-source vector from pull request 105.
+    # from its main after its pull request 97; the skipped-source vector from pull request 105;
+    # and the two acquired dependent-source vectors from pull request 109.
     "extendedBy": [
         {
             "pullRequest": 80,
@@ -86,11 +87,16 @@ SOURCE = {
             "commit": "ed1bc2a7a02b7475e96178915c36df412e536314",
             "vectors": ["skipped-source-dependency-unavailable"],
         },
+        {
+            "pullRequest": 109,
+            "commit": "694fe691fd8d325cad92ef56e215ee9a3cdaafaf",
+            "vectors": ["acquired-dependent-source", "acquired-dependent-source-unknown"],
+        },
     ],
 }
 # The count as the RFC and the companion spell it.
 WORDS = {9: "nine", 10: "ten", 11: "eleven", 12: "twelve",
-         38: "thirty-eight", 39: "thirty-nine"}
+         38: "thirty-eight", 39: "thirty-nine", 41: "forty-one"}
 # The Runner's manifest says what each vector's export retains (its README, "What a vector holds"):
 # `equal`, the preparation the Runner computes from the vector's inputs, which is preparation.json;
 # `altered`, another, while preparation.json is still that computation; and `recorded`, the
@@ -499,7 +505,8 @@ class DialectVectorTests(unittest.TestCase):
 
     def test_the_companion_counts_the_vectors_of_the_commits_it_names(self) -> None:
         # The companion's Status names the Runner commits its vectors were copied from, and counts
-        # the vectors of the commits it names: thirty-nine, from five commits, since round 12.
+        # the vectors of the commits it names: forty-one, from six commits, since the staging of the
+        # Runner's pull request 109.
         text = " ".join((ROOT / COMPANION).read_text(encoding="utf-8").split())
         source = self.manifest["source"]
         self.assertIn(source["commit"], text)
@@ -644,6 +651,46 @@ class DialectVectorTests(unittest.TestCase):
             self.assertNotIn("calculation", entry)
         self.assertEqual(["/endorsement", "sponsor-endorsement"], skipped)
         self.assertEqual(2, len(preparation["cites"]))
+
+    def test_the_acquired_dependent_vectors_keep_every_declared_dependency(self) -> None:
+        # The Runner's pull request 109: the thirty-ninth's dialect, its sponsor named, so that
+        # endorsement is acquired with both source parameters valued (§9.3). Each is recomputed
+        # byte for byte, and each of endorsement's entries names both, in parameter-name order.
+        dependencies = [
+            {"parameter": "approver", "source": "sponsor", "pointer": "/sponsor/id"},
+            {"parameter": "requestType", "source": "intake", "pointer": "/intake/type"},
+        ]
+        for name, status, present in (
+            ("acquired-dependent-source", "resolved", [True, True]),
+            ("acquired-dependent-source-unknown", "unknown", [False, True]),
+        ):
+            with self.subTest(vector=name):
+                result = self.inputs(name).verify()
+                expected = (VECTORS / name / "preparation.json").read_bytes()
+                self.assertEqual(expected, result.preparation)
+                self.assertEqual("matches", result.answer["reading"]["binding"])
+                preparation = json.loads(result.preparation)
+                outcome = preparation["outcomes"][-1]
+                self.assertEqual(("endorsement", status), (outcome["name"], outcome["status"]))
+                self.assertEqual({"approver": "S-1", "requestId": "REQ-7",
+                                  "requestType": "data-access", "runAt": preparation["verifiedAt"]},
+                                 outcome["parameters"])
+                self.assertEqual({"tool": "lookup", "arguments": {
+                    "table": "endorsements", "approver": "S-1", "requestType": "data-access",
+                }}, outcome["arguments"])
+                acquired = []
+                for entry in preparation["lineage"]:
+                    if entry["source"] != "endorsement":
+                        self.assertNotIn("dependencies", entry)
+                        continue
+                    acquired.append((entry["target"], entry["present"]))
+                    self.assertEqual(dependencies, entry["dependencies"])
+                    self.assertEqual((outcome["status"], outcome["reason"]),
+                                     (entry["status"], entry["reason"]))
+                    self.assertIn("receipt", entry)
+                self.assertEqual(list(zip(["/endorsement", "sponsor-endorsement"], present)),
+                                 acquired)
+                self.assertEqual(3, len(preparation["cites"]))
 
     def test_skipped_source_forms_have_the_answers_the_text_gives(self) -> None:
         for name, expected, build in skipped_source_cases():
