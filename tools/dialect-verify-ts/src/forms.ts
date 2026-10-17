@@ -2,6 +2,7 @@
 import { createHash } from "node:crypto";
 import { BOUNDS } from "./bounds.ts";
 import { keyAcceptable } from "./ed25519.ts";
+import { pageEndpoint } from "./endpoint.ts";
 import { arr, canon, depth, inCanonDomain, isInteger, isPointer, intValue, jsonEqual, member, obj, tokens, utf8 } from "./json.ts";
 import type { JNum, JObj, JStr, JVal } from "./json.ts";
 import { instant } from "./time.ts";
@@ -118,6 +119,7 @@ export type Profile = {
   shape: string;
   adapter: JVal;
   endpoint: JVal;
+  endpointScope?: string[];
   tools?: string[];
   calculator?: JVal;
   research?: { capabilities: string[]; model?: string }; // §5.1
@@ -290,6 +292,11 @@ function researchWithin(dialect: JVal, acquisitions: JVal, profiles: JVal | unde
 /** The counts of §12 taken on the documents read, wherever the count can be taken (§11, phase 3). */
 export function countsWithin(dialect: JVal, acquisitions: JVal, profiles?: JVal, binding?: JVal): boolean {
   if (!researchWithin(dialect, acquisitions, profiles, binding)) return false;
+  for (const p of profiles?.t === "arr" ? profiles.a : []) {
+    const scope = member(p, "endpointScope");
+    if (scope?.t === "arr" && (scope.a.length > 32
+        || scope.a.some((e) => e.t === "str" && utf8(e.v).length > 2048))) return false;
+  }
   const caseObj = member(dialect, "case");
   const caseParams = member(caseObj, "parameters");
   const nCase = caseParams?.t === "obj" ? caseParams.m.size : 0;
@@ -1104,7 +1111,7 @@ export function readProfiles(v: JVal): Profile[] {
   const out: Profile[] = [];
   array(v, "the profiles").forEach((raw, k) => {
     const what = `profiles[${k}]`;
-    const o = exact(raw, what, ["id", "publicKey", "class", "source", "authority", "shape", "adapter", "endpoint"], ["tools", "calculator", "research"]);
+    const o = exact(raw, what, ["id", "publicKey", "class", "source", "authority", "shape", "adapter", "endpoint"], ["tools", "calculator", "research", "endpointScope"]);
     const id = nonEmpty(o.m.get("id"), `${what}.id`);
     if (out.some((p) => p.id === id)) malformed(`${what}.id is not distinct`);
     const publicKey = string(o.m.get("publicKey"), `${what}.publicKey`);
@@ -1145,7 +1152,31 @@ export function readProfiles(v: JVal): Profile[] {
       if (capabilities.includes("answer") !== ro.m.has("model")) malformed(`${what}.research names a model exactly when it serves answer`);
       research = { capabilities, model: ro.m.has("model") ? nonEmpty(ro.m.get("model"), `${what}.research.model`) : undefined };
     }
-    out.push({ id, raw, key, publicKey, class: cls, source, authority, shape, adapter, endpoint, tools, calculator, research });
+    let endpointScope: string[] | undefined;
+    if (o.m.has("endpointScope")) {
+      if (endpoint.t !== "null" || shape !== "http"
+          || (adapter.m.get("name") as JStr).v !== "adapter-web"
+          || (research !== undefined
+              && (research.capabilities.length !== 1 || research.capabilities[0] !== "page"))
+          || (cls === "generated" && research === undefined)) {
+        malformed(`${what}: endpointScope is admitted only on page profiles`);
+      }
+      endpointScope = array(o.m.get("endpointScope"), `${what}.endpointScope`).map((v) => {
+        const entry = string(v, `${what}.endpointScope entry`);
+        if (entry !== "https://*" && pageEndpoint(entry) === undefined) {
+          malformed(`${what}: endpointScope entry is not an endpoint prefix`);
+        }
+        if (cls === "record" && entry === "https://*") {
+          malformed(`${what}: a record profile cannot carry the endpoint wildcard`);
+        }
+        return entry;
+      });
+      if (endpointScope.length === 0 || new Set(endpointScope).size !== endpointScope.length) {
+        malformed(`${what}: endpointScope must have distinct entries and not be empty`);
+      }
+    }
+    out.push({ id, raw, key, publicKey, class: cls, source, authority, shape, adapter, endpoint,
+      endpointScope, tools, calculator, research });
   });
   return out;
 }

@@ -1,6 +1,7 @@
 // Recomputing a preparation (§11, "Findings" 1–4) by §§3–9, at the given preparation's verifiedAt.
 import { BOUNDS, scanBytes } from "./bounds.ts";
 import { verify as edVerify } from "./ed25519.ts";
+import { endpointInScope } from "./endpoint.ts";
 import { DIGEST, Refusal, placeholders, profileDigestOf, sha256hex, stringTemplate } from "./forms.ts";
 import type { Acquisition, ClaimForm, CopyRead, Dialect, ParamType, Profile, Rule, Source } from "./forms.ts";
 import {
@@ -287,7 +288,11 @@ function checkReceipt(acq: Acquisition, profile: Profile, request: JObj, who: st
   if (s("source") !== profile.source || s("authority") !== profile.authority) invalid("source or authority is not the profile's");
   const field = (k: string) => member(acquisition, k);
   const same = (a: JVal | undefined, b: JVal) => a !== undefined && jsonEqual(a, b);
-  if (!same(field("adapter"), profile.adapter) || !same(field("shape"), str(profile.shape)) || !same(field("endpoint"), profile.endpoint)) {
+  const endpoint = field("endpoint");
+  const endpointMatches = profile.endpointScope === undefined
+    ? same(endpoint, profile.endpoint)
+    : endpoint?.t === "str" && endpointInScope(endpoint.v, profile.endpointScope);
+  if (!same(field("adapter"), profile.adapter) || !same(field("shape"), str(profile.shape)) || !endpointMatches) {
     invalid("the adapter, shape or endpoint is not the profile's");
   }
   // 4. the commitment to the request
@@ -486,6 +491,8 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     if (s.profile === undefined) continue;
     const p = profiles.find((x) => x.id === s.profile);
     if (p === undefined || profileDigestOf(p) !== s.profileDigest) finding("profile-mismatch", `${s.name}: no trusted profile of that id and digest`);
+    // Web is refused in the kind phase; other non-research bindings cannot use a scope.
+    if (p!.endpointScope !== undefined) finding("profile-mismatch", `${s.name}: endpointScope needs a page binding`);
     // §4.4: a profile the binding document names serves the unbound source's shape and record
     const catalog = d.boundFrom.get(s.name);
     if (catalog !== undefined && (p!.shape !== catalog.shape || (member(p!.adapter, "name") as JStr).v !== catalog.record)) {

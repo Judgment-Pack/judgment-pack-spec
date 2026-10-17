@@ -1904,6 +1904,11 @@ def count_bounds(dialect: Any, acquisitions: Any, profiles: Any = None, binding:
         return Refused("input-over-bound", detail)
 
     research_bounds(dialect, acquisitions, profiles, binding)
+    for profile in profiles if isinstance(profiles, list) else []:
+        scope = profile.get("endpointScope") if isinstance(profile, dict) else None
+        if isinstance(scope, list):
+            if len(scope) > 32 or any(isinstance(e, str) and utf8_length(e) > 2048 for e in scope):
+                raise over("an endpoint scope exceeds 32 entries or 2048 bytes per entry")
     if isinstance(acquisitions, dict):
         research = research_sources(dialect)
         for name, member in acquisitions.items():
@@ -1991,6 +1996,46 @@ def count_bounds(dialect: Any, acquisitions: Any, profiles: Any = None, binding:
 # Input profiles (§5.1)
 
 
+def page_endpoint(value: Any) -> tuple[str, str] | None:
+    """The constrained page form, parsed as text; no URL parser or path decoding (§5.1)."""
+    if not isinstance(value, str) or len(value) > 2048 or not re.fullmatch(r"[\x21-\x7e]+", value):
+        return None
+    match = re.fullmatch(r"https://([A-Za-z0-9.-]+)(?::(?:443)?)?(/[^?#\\]*)?", value)
+    if match is None:
+        return None
+    host, path = match[1], match[2] or ""
+    labels = host.split(".")
+    if len(labels) < 2 or not re.match(r"[A-Za-z]", labels[-1]):
+        return None
+    if any(not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", label)
+           for label in labels):
+        return None
+    if re.search(r"%(?![0-9A-Fa-f]{2})", path):
+        return None
+    if any(re.fullmatch(r"(?:\.|%2[eE]){1,2}", segment) for segment in path.split("/")):
+        return None
+    return host.lower(), path  # ASCII host comparison only; signed bytes are never rewritten.
+
+
+def endpoint_in_scope(endpoint: Any, scope: list[str]) -> bool:
+    parsed = page_endpoint(endpoint)
+    if parsed is None:
+        return False
+    host, path = parsed
+    for entry in scope:
+        if entry == "https://*":
+            return True
+        prefix = page_endpoint(entry)
+        assert prefix is not None  # The profile's form was checked before any finding.
+        other_host, prefix_path = prefix
+        if host == other_host and (
+            prefix_path in ("", "/") or path == prefix_path
+            or path.startswith(prefix_path if prefix_path.endswith("/") else prefix_path + "/")
+        ):
+            return True
+    return False
+
+
 def parse_profiles(document: Any) -> dict[str, dict[str, Any]]:
     if not isinstance(document, list):
         raise malformed("the profiles are not an array")
@@ -2000,7 +2045,7 @@ def parse_profiles(document: Any) -> dict[str, dict[str, Any]]:
         closed(
             profile,
             {"id", "publicKey", "class", "source", "authority", "shape", "adapter", "endpoint"},
-            {"tools", "calculator", "research"},
+            {"tools", "calculator", "research", "endpointScope"},
             what,
         )
         if not isinstance(profile["id"], str) or not profile["id"] or profile["id"] in profiles:
@@ -2044,6 +2089,21 @@ def parse_profiles(document: Any) -> dict[str, dict[str, Any]]:
                 raise malformed(f"{what}: a research declaration names a model exactly when it serves answer")
             if "model" in declaration:
                 check_model(declaration["model"], what + " research")
+        if "endpointScope" in profile:
+            scope = profile["endpointScope"]
+            if (profile["endpoint"] is not None or profile["shape"] != "http"
+                    or adapter["name"] != "adapter-web"
+                    or ("research" in profile
+                        and profile["research"]["capabilities"] != ["page"])
+                    or (profile["class"] == "generated" and "research" not in profile)):
+                raise malformed(f"{what}: endpointScope is admitted only on page profiles")
+            if (not isinstance(scope, list) or not scope
+                    or not all(isinstance(e, str) and (e == "https://*" or page_endpoint(e))
+                               for e in scope)
+                    or len(set(scope)) != len(scope)):
+                raise malformed(f"{what}: endpointScope is not distinct endpoint prefixes")
+            if profile["class"] == "record" and "https://*" in scope:
+                raise malformed(f"{what}: a record profile cannot carry the endpoint wildcard")
         if not in_canon_domain(profile):
             raise malformed(f"{what}: outside the canon domain")
         profiles[profile["id"]] = profile
@@ -2283,6 +2343,10 @@ def check_acquisition(
     if receipt["source"] != profile["source"] or receipt["authority"] != profile["authority"]:
         raise invalid("source or authority is not the profile's")
     for name in ("adapter", "shape", "endpoint"):
+        if name == "endpoint" and "endpointScope" in profile:
+            if not endpoint_in_scope(acquisition.get(name), profile["endpointScope"]):
+                raise invalid("acquisition.endpoint is outside the profile's scope")
+            continue
         if not json_equal(acquisition.get(name), profile[name]):
             raise invalid(f"acquisition.{name} is not the profile's")
     commitment = hashlib.sha256(bytes.fromhex(salts["args"]) + b"args:" + canon(request)).hexdigest()
@@ -2405,6 +2469,9 @@ def recompute(
         profile = profiles.get(source.profile_id)
         if profile is None or digest_of(canon(profile)) != source.profile_digest:
             raise Finding("profile-mismatch", f"{source.name}: no trusted profile of that id and digest")
+        # This reader refuses web in §11's kind phase; every other non-research kind is ineligible.
+        if "endpointScope" in profile:
+            raise Finding("profile-mismatch", f"{source.name}: endpointScope needs a page binding")
         # §4.4: a profile the binding document names serves the unbound source's shape and record.
         catalog = dialect.bound_from.get(source.name)
         if catalog is not None and (profile["shape"], profile["adapter"]["name"]) != catalog:

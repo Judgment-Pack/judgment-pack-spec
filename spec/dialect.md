@@ -699,6 +699,7 @@ exactly
 | `shape` | `airbyte`, `mcp`, `http` or `command` |
 | `adapter` | an object of exactly `name` and `version`, strings, and `digest`, a digest |
 | `endpoint` | a string, or `null` |
+| `endpointScope` | an optional array of endpoint prefixes (§5.1 below) |
 | `tools` | an array of distinct non-empty strings, optional, which a profile of shape `mcp` MUST give and MUST NOT give empty |
 | `calculator` | an object of exactly `name` and `version`, strings, optional: the profile is a calculator's (§7) |
 | `research` | an optional closed object of `capabilities` and conditional `model`, as below |
@@ -713,6 +714,85 @@ profiles name no model. This whole declaration enters the profile digest. Malfor
 are `input-malformed`; a well-formed profile without the declaration or with unsuitable
 capabilities or model is `profile-mismatch` when bound to research (§4.4). This extension
 changes no operation binding check and makes no claim about model weights or execution.
+
+**An endpoint constraint.** `endpointScope` is an array of 1 to 32 distinct strings, each at
+most 2048 UTF-8 bytes, in the forms below. Distinct means unequal as JSON strings. Order is kept;
+no entry is added, removed or rewritten. Its whole value enters the profile digest, so a change
+changes every binding that pins that digest. `endpoint` remains REQUIRED and MUST be `null`
+when `endpointScope` is present: exactly one endpoint rule applies. Without `endpointScope`, the
+profile's form, digest and exact endpoint check are unchanged. A reader written before this
+amendment refuses the unknown member as `input-malformed` under the closed profile form. No
+profile version member or dialect format selector is added. (No vector decides this.)
+
+The member is admitted only on shape `http` with `adapter.name` exactly `adapter-web`. If
+`research` is present, its `capabilities` MUST be exactly `["page"]`; a `generated` profile
+carrying the constraint MUST have that declaration. A `record` profile may omit it. A profile
+carrying the member outside these conditions, with a non-null `endpoint`, or with a malformed
+scope is `input-malformed`. The member is admitted on a `research` source's `page` assignment
+and on a `web`-kind source, subject to the class rules below. Binding such a profile to any
+other kind or capability is `profile-mismatch`. `search` and `answer` retain exact provider
+endpoints. The same checks hold a retained response's assigned profile. (No vector decides this.)
+
+**The endpoint form for a constrained page.** This restricts the Gateway's remote-server URL
+form (`SPEC.md` §1.2a at `v0.17.0`) to HTTPS names, admitting the empty port as below. It is a
+string of at most 2048 ASCII characters, each from U+0021 to U+007E: exactly `https://`, then a
+host, then either nothing, `:443`, or `:` followed by nothing, then either nothing or a path,
+which begins with `/`. There is no user, query or fragment. The host consists of two or more
+dot-separated labels, each of 1 to 63 characters. Each label starts and ends
+with an ASCII letter or digit; its other characters are ASCII letters, digits or `-`. The last
+label starts with an ASCII letter. There is no trailing dot, underscore, IPv4 or IPv6
+literal, wildcard or other port. The path has no `?`, `#` or backslash. Each `%` is followed by
+two hexadecimal digits, of either case. Split the path at each literal `/`: no segment is one
+or two tokens each of which is `.`, `%2e` or `%2E`. Thus literal and percent-spelled dot segments
+are refused, without decoding any path. Other escapes, including an escaped slash, remain
+literal bytes and never supply a segment boundary. This form holds the receipt's endpoint only
+when its profile carries `endpointScope`; it changes no historical receipt rule.
+(No vector decides this.)
+
+Each scope entry is either a prefix in that endpoint form, or exactly `https://*`. The wildcard
+is admitted only on a profile of class `generated`, which only a research `page` assignment
+takes. A `record` profile's scope holds prefix entries only; a `record` profile carrying the
+wildcard is `input-malformed`. The wildcard admits every endpoint in that form, including an
+origin discovered during a case. It admits neither another scheme nor another port, nor an IP
+literal. It asserts no public reachability:
+a verifier does not resolve names, check addresses or establish that a host is public. The
+Gateway's connection and redirect policy still applies. Neither a source nor a binding document
+can narrow the scope per case in this round; `constraints` adds no endpoint rule. A portable
+recipe cannot require reads to stay on a case's company origin under a wider installation
+profile. Such narrowing needs a later contract. (No vector decides this.)
+
+**Matching.** Validate the endpoint's form first. An endpoint matches the scope when at least
+one entry admits it. For a prefix entry, the hosts are equal, ASCII `A` to `Z` compared as `a`
+to `z`; an absent port, `:443` and `:` followed by nothing denote port 443. Compare paths byte
+for byte, case and percent spelling included, with no decoding, slash collapse or other
+normalization. An absent
+prefix path or `/` admits every path, the absent endpoint path included. Otherwise the endpoint
+path must equal the prefix path, or start with that path followed by `/`; when the prefix
+already ends in `/`, starting with that prefix suffices. Thus `/docs` admits `/docs` and
+`/docs/x`, never `/docsx`; `/docs/` admits `/docs/` and `/docs/x`, never `/docs`. No subdomain
+match is implied. These comparisons rewrite neither the profile nor the receipt, and require
+no URL library. They admit host case and all three spellings of port 443 as the Gateway writes
+them today; no new Gateway normal form is required. (No vector decides this.)
+
+**Admission before acquisition.** A preparer MUST check every requested page URL against the
+assigned scope before sending that request. For this check, the URL is of the endpoint form
+above, optionally followed by `?` and a query of zero or more U+0021 to U+007E characters other
+than `#`, each `%` followed by two hexadecimal digits. The whole URL is at most 2048 bytes.
+Remove only the first `?` and everything after it for matching; keep the full request unchanged
+for its commitment. An invalid or out-of-scope request fails as `acquisition-invalid`, before
+any acquisition for that request. This applies to every discovered URL, not just the first.
+Admission holds the requested URL, so a read reached through the Gateway's grounding redirect
+(`https://vertexaisearch.cloud.google.com/grounding-api-redirect/…`) needs that endpoint in the
+scope, or the wildcard. It is an admission duty, not an offline verifier's reconstruction of
+the request URL.
+(No vector decides this.)
+
+At binding, a `web` source's literal `url` that cannot meet that request check is
+`profile-mismatch`. A `$param` URL is checked when resolved, before acquisition; no case value
+is read during profile matching. Research declares no fixed page URL, so a discovered URL
+outside the scope is an acquisition failure, not `profile-mismatch`. No model is run to predict
+which URLs a recipe could request. These duties add no support for an unread kind: §11 still
+refuses it before findings. (No vector decides this.)
 
 A profile's `class` is the profile's own; a binding takes it only where the source's kind admits
 that class. An `operation`, of any shape §4.1 admits, takes its profile's class, `record` or
@@ -749,10 +829,11 @@ match. The pair MUST be the source's AI assignment or one of its web assignments
 required above; otherwise `profile-mismatch`. The reference in the response supplies neither a
 profile nor a key. The source's profile does not substitute for a retained response's profile.
 
-What a profile pins — the gateway's key, source, authority, adapter, shape, endpoint, class, tools
-and any research declaration — is the installation's classification of a channel. It does not pin
-a credential, a tenant's configuration or a model's weights, and an installation replaces a
-profile when a change of those makes its classification wrong (Runner, "Decisions and ownership").
+A profile is the installation's classification of a channel. It pins the gateway's key, source,
+authority, adapter, shape, endpoint or endpoint scope, class, tools and any research declaration;
+it does not pin a credential, a tenant's configuration or a model's weights, and an installation
+replaces a profile when a change of those makes its classification wrong (Runner, "Decisions and
+ownership").
 
 ### 5.2 Acquisitions
 
@@ -795,6 +876,10 @@ An acquisition is held to its source and its profile, and any of these checks th
 3. `E.source` and `E.authority` are the profile's `source` and `authority`; and
    `E.acquisition.adapter`, `E.acquisition.shape` and `E.acquisition.endpoint` are, as JSON values,
    the profile's `adapter`, `shape` and `endpoint`.
+   With `endpointScope` only the endpoint comparison changes: `E.acquisition.endpoint` MUST
+   have §5.1's constrained page form and match the scope. The adapter and shape comparisons
+   stay exact. Failure, including an endpoint outside that form, is `acquisition-invalid`.
+   (No vector decides this.)
 4. `E.argumentsCommitment` is `sha256:` followed by the hexadecimal SHA-256 of the 32 bytes `S.args`
    encodes, then the ASCII bytes `args:`, then the `canon` bytes of the source's request (§4.1).
 5. `E.resultDigest` is the digest of `R`'s `canon` bytes; an `R` outside the `canon` domain fails.
@@ -806,6 +891,16 @@ over that response's own `request`, not the research source's recipe. A failed c
 under the research source's profile and over the source's request and the whole research record.
 After the retained responses' checks and before the source's read, the whole record MUST be in
 the `canon` domain even when it has no receipt of its own; otherwise `acquisition-invalid`.
+
+**Which URL is held.** For a constrained page, check 3 holds the final URL after followed
+redirects, with its query removed, which the Gateway's web adapter writes as
+`acquisition.endpoint`. A final redirect target outside the scope fails that check. This does
+not check intermediate hops or the requested URL against the scope during replay. The adapter's
+retained provenance carries both URLs, but this document does not interpret that result form;
+`statement` is a commitment, not a clear URL. Check 4 still commits the full retained `request`,
+so changing it without a matching receipt fails. It does not prove the preparer made §5.1's
+admission check. No receipt, request, result or salt is relabelled or rewritten for a scope.
+(No vector decides this.)
 
 Then its times, against the preparation's instant, `verifiedAt`: the instants of
 `E.acquisition.observedAt` and `E.servedAt` MUST each be no more than the source's `maxAge`
@@ -1409,8 +1504,9 @@ the refusal, at the first of these phases that fails, in this order:
 3. the bounds of §12 that are counts — the sources, the parameters in a scope, the clauses of a
    rule, the conditions one `all` or `any` lists, the `unwrap` pointers, the fact and evidence
    targets, the retained responses per `research` source (at most 64), and every research field,
-   text, list, observation, citation, capability and read-source maximum in §12 — and the nesting
-   of each acquisition's result, taken wherever measurable before any form: `input-over-bound`.
+   text, list, observation, citation, capability and read-source maximum in §12; also the
+   endpoint-scope entry count and bytes per entry (§5.1); and the nesting of each acquisition's
+   result, taken wherever measurable before any form: `input-over-bound`.
    Type-dependent maxima measure each value by its field's declared `type` when that `type`
    is one of §4.3's six types, and not otherwise;
 4. a dialect document that is an object whose `version` is an integer of a version this document
@@ -1423,6 +1519,14 @@ the refusal, at the first of these phases that fails, in this order:
    against the timestamp form with an instant; the record against its reading below:
    `input-malformed`;
 6. a dialect that names a kind the verifier does not read: `kind-unread`.
+
+The scope maxima are measured in phase 3 wherever measurable, even on a profile of the wrong
+shape; an unknown or misplaced `endpointScope`, a malformed entry, or the wildcard on a
+`record` profile is `input-malformed` in phase 5, where a profile's form is checked.
+The scope's binding restrictions, including an impossible literal `web` URL, are finding 1.
+A receipt's scope match is check 3 within finding 3, in retained-response order. A preparer's
+request admission runs after parameters resolve and before that request is sent; it does not
+add an offline check of the requested URL. (No vector decides this.)
 
 Some bounds are measured later, because they cannot be measured sooner: an unwrapped string's
 bytes, and the nesting and number literals of the value it holds, are measured when it is
@@ -1562,6 +1666,10 @@ after JSON decoding. Wrong forms and unmet minima are `input-malformed`; exceedi
 is `input-over-bound`. The document-size and nesting bounds still hold arbitrary retained
 results, requests, constraints and the combined value of §6.4. Nothing is truncated to fit.
 
+For endpoint scopes, at most 32 entries per profile and 2048 UTF-8 bytes per entry, counted
+after JSON decoding (§5.1). Exceeding either maximum is `input-over-bound` before forms;
+wrong forms, duplicate entries and an empty array are `input-malformed`. (No vector decides this.)
+
 Nesting is counted from the document's root at zero, and every object and every array is one level
 of it: `{}` is at one level, `{"a": []}` at two, and a document that is a string, a number, `true`,
 `false` or `null` at none. On the bytes, a **number literal** is a maximal run, outside strings, of
@@ -1624,6 +1732,14 @@ cited by URL alone is no retained response; the claim it supports is the answer'
   caller's asserted membership and order describe the run; that a field's status, value or
   citation indices are the model's rather than the caller's say; that a cited response supports
   the value it is cited for; that a `stale` or `not-found` status is right; which model answered.
+
+- **An acquisition under a constrained page profile.** Establishes: that each receipt's final
+  endpoint lay in the installation's reviewed scope, as the Gateway's adapter testified under
+  its signature. The profile digest holds the whole scope. (No vector decides this.)
+
+  Does not establish: the page's content or relevance; that the host is public; anything about
+  the requested URL's scope or intermediate redirects; that the preparer checked admission.
+  Request commitments and result digests still hold their bytes as above.
 
 - **An asserted input: the case, a local file, a parameter no receipt commits.** Establishes: that
   the preparation carried what the operator supplied, faithfully.

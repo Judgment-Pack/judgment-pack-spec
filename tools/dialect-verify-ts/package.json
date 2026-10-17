@@ -8,6 +8,6 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "test": "node --test test/vectors.test.ts test/units.test.ts"
+    "test": "node --test test/vectors.test.ts test/units.test.ts test/endpoint.test.ts"
   }
 }

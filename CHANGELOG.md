@@ -245,6 +245,14 @@ here.
 
 ### Changed
 
+- RFC 0018 and its companion record issue #199, direction A (2026-10-17, round 15): an optional
+  `endpointScope` for page profiles, checked against each signed final endpoint. The form admits
+  all three spellings of port 443; only generated research page profiles admit the wildcard,
+  while record profiles hold prefix entries only. Both readers implement the rule with controls
+  on altered copies of a staged vector. Exact profiles and historical receipts stay unchanged;
+  no vector changes. Runner support and evidence as vectors, and the Desk's profile review,
+  remain follow-ups. The review and the maintainer's disposition are recorded in
+  `rfcs/reviews/0018-round-15.md` (one HIGH, two MEDIUM and four LOW, all applied).
 - RFC 0018 and its companion, issue #200: the `dependencies` row of §9.3's lineage table no longer
   says the member is absent for a local file. It reads "absent for the case and a source that
   declares none", as round 12's rule in the same section already gives it to every source that

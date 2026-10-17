@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # (tools/dialect-verify-ts/README.md). Node runs it directly, stripping the types; nothing is installed.
 READER = ROOT / "tools" / "dialect-verify-ts"
 MINIMUM = (22, 18)
-TESTS = ("test/vectors.test.ts", "test/units.test.ts")
+TESTS = ("test/vectors.test.ts", "test/units.test.ts", "test/endpoint.test.ts")
 
 
 # Reads a JSON array of cases on standard input, each document in base64, and writes the second reader's report for
@@ -105,6 +105,8 @@ class SecondDialectReaderTest(unittest.TestCase):
         cases = first.research_cases() + first.receipt_cases() + list(artifact_cases())
         cases += first.skipped_source_cases()
         cases += first.acquired_source_cases()
+        from test_dialect_scope import endpoint_scope_cases
+        cases += endpoint_scope_cases()
         cases += first.vector_cases()
         staged = [name for name, _, _ in cases if name.startswith("vector ")]
         rows = json.loads((first.DIALECT / "manifest.json").read_text(encoding="utf-8"))["cases"]
