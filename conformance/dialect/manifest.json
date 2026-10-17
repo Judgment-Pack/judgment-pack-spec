@@ -69,12 +69,17 @@
           "acquired-dependent-source",
           "acquired-dependent-source-unknown"
         ]
+      },
+      {
+        "pullRequest": 137,
+        "commit": "a4fa24525e6b5e13e64dcb242393aec3c30d264c",
+        "vectors": []
       }
     ]
   },
   "runnerFiles": {
     "vectors/README.md": "f474d07fad8e2fcba7336f4e16a2917a28a9a653c04aebeaa4bba67dac60c65b",
-    "vectors/manifest.json": "8ccf8be284025a02830f402e726fbea3c6a2ef5a0c4388c0a2eefb1a72cfaeb9"
+    "vectors/manifest.json": "30482dfdec4fa3960824fbb686229686c40005427c422092c210a204cf0be09e"
   },
   "cases": [
     {

@@ -38,7 +38,8 @@ SOURCE = {
     # 2026-10-15); the eleventh and twelfth, of dialect version 3, from its main after its pull
     # request 83; and the twenty-six research vectors, of the two examples of §11's fixture plan,
     # from its main after its pull request 97; the skipped-source vector from pull request 105;
-    # and the two acquired dependent-source vectors from pull request 109.
+    # the two acquired dependent-source vectors from pull request 109; and, from pull request 137,
+    # no vector but a changed expectation (the report of `disposition-differs-from-audit`).
     "extendedBy": [
         {
             "pullRequest": 80,
@@ -91,6 +92,11 @@ SOURCE = {
             "pullRequest": 109,
             "commit": "694fe691fd8d325cad92ef56e215ee9a3cdaafaf",
             "vectors": ["acquired-dependent-source", "acquired-dependent-source-unknown"],
+        },
+        {
+            "pullRequest": 137,
+            "commit": "a4fa24525e6b5e13e64dcb242393aec3c30d264c",
+            "vectors": [],
         },
     ],
 }

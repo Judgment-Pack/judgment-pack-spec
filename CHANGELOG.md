@@ -7,6 +7,12 @@ here.
 
 ### Added
 
+- The staged Runner manifest of the dialect vectors brought to Runner commit `a4fa245`, pull
+  request 137 (issue #205): the one expectation it changes, the `verifyRun.report` of
+  `disposition-differs-from-audit`, now carries the preparation's checked report beside the
+  finding. No vector file, count or status changes, and the cross-reader test's comparison of a
+  reading with the report now covers that vector. `source.extendedBy` records the commit with no
+  vectors.
 - The fortieth and forty-first dialect vectors, `acquired-dependent-source` and
   `acquired-dependent-source-unknown`, staged byte for byte from Runner commit `694fe69`, pull
   request 109 (issue #203), beside the thirty-nine unchanged vectors: an acquired source that

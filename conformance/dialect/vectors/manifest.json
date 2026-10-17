@@ -263,7 +263,7 @@
         ],
         "exit": 1,
         "status": "audit-disposition-mismatch",
-        "report": "{\"retainedDisposition\":\"differs-from-audit\",\"status\":\"audit-disposition-mismatch\"}",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:0c1921ad274f151b1d4115720a6c7660bea491a91263fe45932ae1275e167679\",\"retainedDisposition\":\"differs-from-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:ae3a1b35215f61316e8b6343cb51c2b12f1e6bfbf63eab414ca3394750565dd1\",\"sequence\":1,\"trail\":\"d9b38434067bc8b363875e2a4a437d1d\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"audit-disposition-mismatch\",\"targetsByClass\":{\"asserted\":0,\"record\":3,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-14T14:58:26Z\",\"sources\":[{\"source\":\"fx\",\"checks\":[\"acquisition\",\"calculation\"],\"targets\":3}]}}",
         "error": "audit-disposition-mismatch: the retained result disposition differs from the audit record"
       }
     },

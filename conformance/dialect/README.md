@@ -42,10 +42,14 @@ from the Runner's `main` at commit `4352763e22489ca80ffbf5df338b7e7cb61319e2`, R
 `skipped-source-dependency-unavailable`, was copied from the Runner's `main` at commit
 `ed1bc2a7a02b7475e96178915c36df412e536314`, Runner pull request 105, whose generator wrote the
 first thirty-eight again byte for byte. The fortieth and forty-first, `acquired-dependent-source`
-and `acquired-dependent-source-unknown`, and the Runner's README and manifest as they now are, were
-copied from the Runner's `main` at commit `694fe691fd8d325cad92ef56e215ee9a3cdaafaf`, Runner pull
-request 109 squash-merged, whose generator wrote the first thirty-nine again byte for byte. This
-repository's manifest records each extension, in order, in `source.extendedBy`.
+and `acquired-dependent-source-unknown`, and the Runner's README and manifest as they then were,
+were copied from the Runner's `main` at commit `694fe691fd8d325cad92ef56e215ee9a3cdaafaf`, Runner
+pull request 109 squash-merged, whose generator wrote the first thirty-nine again byte for byte. The
+Runner's manifest alone was copied again from its `main` at commit
+`a4fa24525e6b5e13e64dcb242393aec3c30d264c`, Runner pull request 137 squash-merged: it changes one
+expectation, the `verifyRun.report` of `disposition-differs-from-audit`, which now carries the
+preparation's checked report beside the finding, and adds no vector. This repository's manifest
+records each extension, in order, in `source.extendedBy`; that of pull request 137 lists no vector.
 The Runner's README says
 what each file holds and how the vectors were generated, and its manifest gives every file's
 SHA-256, the binding the Runner passes for each preparation, the record's binding as recorded, and
