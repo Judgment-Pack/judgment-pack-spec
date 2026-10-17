@@ -2526,7 +2526,8 @@ claimable.
 a receipt that fails, but over a result changed after the run (the two `changed-response` vectors);
 a stale acquisition or table; a broken session form; a refusal at
 a bound; a paged acquisition; a request of shape `http` other than the tenth vector's — by `POST`,
-with a `body`, with no `query`, or a connection's; a kind of version 3 other than `research`, and a
+with a `body`, with no `query`, or a connection's; a kind of version 3 other than `operation` and
+`research`, and a
 binding document or a profile bound that is refused; and the positions of Unresolved question 1,
 the six choices among them. The repository's tests hold the two readers to some of these
 with altered copies of a vector — a result changed by a byte, an instant past `maxAge`, a profile's
