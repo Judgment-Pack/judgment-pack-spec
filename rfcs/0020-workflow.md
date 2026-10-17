@@ -39,6 +39,19 @@ recording is additional, beside that demonstration.
 [dialect-amendment]: https://github.com/Judgment-Pack/judgment-pack-spec/issues/179
 [round-2]: https://github.com/Judgment-Pack/judgment-pack-spec/pull/177
 
+## Amendment proposal: current artifact encodings and failed attempts
+
+This proposal keeps RFC 0020 Draft. It pins Runner `66e264e` and Runtime `785ea589`, explicitly
+selects legacy or named Dialect formats, and gives failed Core evaluations a separately pinned
+error envelope. It does not claim an executor, fixture or conformance. Runner #130 implements
+private document/projection/selection primitives; full execution remains Runner #121.
+
+Named `2.0.0` and `3.0.0` keep their existing dialect family meanings. The proposed attempt
+member `evaluationErrorDigest` changes this still-Draft closed form; there are no published
+workflow instances to migrate. Existing preparations and run exports are unchanged.
+Two independent readers must agree on integer/named variants and on missing, malformed,
+changed and misassociated error-envelope variants before any conformance claim.
+
 ## Summary
 
 A **workflow** declares how one dialect runs for each record selected from another stage's
@@ -104,17 +117,19 @@ components, not workflow verification already implemented.
 **The prerequisite's standing.** The maintainer's decision records version-3 import/binding as
 delivered by judgment-pack-runner #83, merged as `89cf441` and released as the Runner's
 `v0.12.0`: the reference Runner reads a version-3 document and binds an unbound source at import
-through a binding document. This Draft does not claim to have run that implementation. The first
-recording must use that version-3 binder.
+through a binding document. This Draft does not claim to have run that implementation. The first recording must use the version-3 binding semantics;
+this amendment pins the current implementation of those semantics in §1.
 
-The Runner's `docs/MAPPING-V2.md` at `89cf441`, "Dialect version 3" and "Release checks, runtime
-and offline verification", documents the binder and run-export form used in §§1 and 7.
+**Historical reference evidence.** The Runner's `docs/MAPPING-V2.md` at `89cf441`,
+"Dialect version 3" and "Release checks, runtime and offline verification", documented the
+binder and run-export form used by the earlier draft.
 Judgment-pack-runtime `v0.32.0` at `80a8176`, `README.md`, "Experimental evaluation behavior",
 names the Core §8.4 error-envelope member `evaluationError.class`; its
 `docs/building-with-packs.md`, "Keeping a record of what you decided", says refusals write no
 audit record. The Runner's `internal/runner/mapping_v2_export.go` at `89cf441` reads the audit's
-`disposition` member. Section 7 distinguishes that source evidence from the runtime documents
-and records the reference Runner's failure-envelope retention limit; question 8 retains the gap.
+`disposition` member. The current amendment replaces these reference pins in §1 and defines
+the separate error-envelope artifact in §7; question 8 now retains the implementation and
+recorded-agreement requirement rather than the earlier undefined retention contract.
 
 **Condition 2's path.** This Draft chooses to demonstrate the chain through `operation` sources.
 Specification §11 gives the concrete two-stage construction, including the generated profiles,
@@ -180,24 +195,28 @@ acquired responses and audit records retain their original bytes. These forms ar
 Pack digests name exact retained bytes, explicitly adopting
 [RFC 0001](../rfcs/0001-pack-manifest.md)'s still-Draft choice, with no normalization.
 Published and bound dialects and binding documents use the dialect's canonical digests.
-The required reference Runner is judgment-pack-runner at `89cf441`, the version-3 binder shipped
-in `v0.12.0`. Its release digest is SHA-256 of `canonical(encode(r))`, where `r` is the decoded
+The required reference Runner encoding is judgment-pack-runner at
+`66e264e1e44f665e52b056be1b70864a27927338`, including its research preparer and named Dialect
+reader. This source pin does not assert that a workflow executor is shipped. Its release digest
+is SHA-256 of `canonical(encode(r))`, where `r` is the decoded
 `Release`, not the whole retained JSON object: the typed encoding can omit members. The required
 encoding references at that pin are `internal/runner/model.go` (`Release`),
 `internal/runner/source_inputs.go` (`InputMapping`), `internal/runner/dialect_v3.go`
-(`InputMapping.MarshalJSON`) and `internal/runner/mapping_v2_export.go` (`releaseDigest`).
+(`InputMapping.MarshalJSON`), `internal/runner/dialect_artifact.go` (`marshalArtifact`) and
+`internal/runner/mapping_v2_export.go` (`releaseDigest`).
 It is not a file-byte digest.
-The Runner's `docs/MAPPING-V2.md` at `89cf441`, "Dialect version 3", documents the version-3
+The Runner's `docs/MAPPING-V2.md` at `66e264e`, "Dialect version 3", documents the version-3
 encoding; "Release checks, runtime and offline verification" documents the run export (§7).
 
-The runtime reference is judgment-pack-runtime `v0.32.0` at `80a8176`. Its `README.md`,
+The runtime reference is judgment-pack-runtime `v0.34.0` at
+`785ea58927255b775a774e29952c560591429cd3`. Its `README.md`,
 "Experimental evaluation behavior", names `disposition` in the Core §8.3 result payload and
 `evaluationError.class` in a Core §8.4 error envelope. Its `docs/building-with-packs.md`,
 "Keeping a record of what you decided", and `docs/architecture.md`, "Packages", describe an
 audit retaining the canonical disposition and no record for a refused evaluation. The Runner's
-`internal/runner/mapping_v2_export.go` at `89cf441` reads the audit member `disposition`, hence
+`internal/runner/mapping_v2_export.go` at `66e264e` reads the audit member `disposition`, hence
 `run.audit.disposition`; this member name is established by that source. Runtime
-`docs/adr/0027-pin-the-evaluation-trace-contract.md` at `80a8176` keeps trace outside the
+`docs/adr/0027-pin-the-evaluation-trace-contract.md` at `785ea589` keeps trace outside the
 disposition and discards it on evaluation error. Section 7 applies these distinct forms.
 
 ### 2. The workflow document and bounds
@@ -240,12 +259,25 @@ set with those failures explicit. Nothing is truncated to fit.
 ### 3. Stages and projected cases
 
 A stage is exactly `{id, dialect, pack, input, execution, caseBindings, outputs, relation}` and
-the conditional `selection` below. `dialect` is `{version, digest}`: integer version `2` or `3`
-and the published canonical digest. An unknown stage `dialect.version` is `version-unread`, before
-closed-form checking, as is a defined version the reader does not read. `pack` is `{id, digest}`:
+the conditional `selection` below. `dialect` selects exactly one of two closed forms:
+
+- `{version, digest}` for an integer-format dialect, where `version` is integer `2` or `3`;
+- `{formatVersion, id, version, digest}` for a named dialect, where `formatVersion` is exactly
+  `"2.0.0"` or `"3.0.0"`, and `id` and string artifact `version` have dialect §2.1's forms.
+
+For a named reference, the consumer MUST check the supplied published document's `formatVersion`,
+`id`, artifact `version` and canonical `digest`, all exactly. The format selector is not an
+artifact version or a version range. A `formatVersion` member selects the named form; without
+it, integer `version` selects the legacy form. An unknown or unread selector value is
+`version-unread` before closed-form checking. A named reference with a non-string or invalid
+artifact version is `input-malformed`, never a legacy fallback. Missing selectors are
+`input-malformed`. Never infer a named format from an integer family or an artifact name.
+The digest names the whole published document in its selected format, including named identity.
+
+`pack` is `{id, digest}`:
 its Core absolute-URI id, at most 2048 UTF-8 bytes, and exact-byte digest. Loaded identities MUST
-match both pins. A mutable version, job id or
-catalog name cannot substitute for them. Each stage has its own pins, even when stages share bytes.
+match every declared pin. A version label alone, job id or catalog name cannot substitute for
+the independently supplied digest. Each stage has its own pins, even when stages share bytes.
 
 The root's `input` is exactly `{root: true}`, `execution` is `once`, and `caseBindings` is `[]`.
 It receives the supplied root case once. A dependent stage's `input` is exactly
@@ -309,10 +341,12 @@ incompatible research profiles, so no instance is admitted.
 A dialect with no unbound source has a null binding-document digest and an unchanged bound
 digest; a superfluous binding document is refused as in the dialect §4.4.
 
-Research-stage admission is conditional: its release form and encoding are pinned when a
-Runner prepares the kind ([judgment-pack-runner#88][research-preparer]). Until then no research
-stage can be frozen or verified under §§1 and 7; the release encoding at `89cf441` cannot retain
-the research contract's members.
+The reference encoding in §1 retains research sources and their bound AI and web profiles.
+A research stage may be frozen only when the installation reads that complete source contract
+and its selected dialect format; named `2.0.0` remains family 2 and cannot carry research.
+Named `3.0.0` retains its published identity during binding under dialect §2.1. No fallback to
+an integer-format reserialization is permitted. This removes the earlier release-encoding
+prerequisite, not the requirement to implement and record the workflow.
 
 The two-stage operation construction in §11 remains the acceptance demonstration of issue #160's
 condition 2; the research recording is additional, beside it.
@@ -422,11 +456,12 @@ release pins the same pack, bound dialect and runtime executable as these entrie
 names exact executable bytes. No profile, binding, release or runtime substitution is allowed.
 Read the release's `packDigest` and `runtimeDigest`, and its embedded `inputMapping`, not a mapping
 digest member. Compute `boundDialectDigest` from that mapping's dialect `canon` bytes under its
-version's encoding: version 2 writes `provider`, `facts` and `evidence`; version 3 omits those
-legacy members. The release form and encoding are pinned by §1; do not normalize the two alike.
-A research stage's release form and encoding are pinned when a Runner prepares the kind
-([judgment-pack-runner#88][research-preparer]); until then no research stage can be frozen or
-verified under §§1 and 7, as §4 requires.
+selected format's encoding: integer version 2 writes `provider`, `facts` and `evidence`;
+integer version 3 omits those legacy members. Named formats use dialect §2.1's closed
+identity-bearing form; do not insert legacy members, remove identity, or substitute the integer
+family before digesting. The release form and encoding are pinned by §1, including its named
+`dialect` identity when present and research source members. Decode and encode using that exact
+reference; do not normalize the forms alike or silently use a newer installed writer.
 
 `instances` holds 1 to `limits.maxInstances` entries, ordered by stage, then selected parent
 order. Each is exactly `{id, stage, parentRecord, selectionDigest, inputDigest, caseDigest,
@@ -446,7 +481,7 @@ None of these three states emits outputs. Failed projection has state `failed` a
 `failure` is null except for `failed`, when it is `projection-invalid`, `admission-refused`,
 `acquisition-failed`, `preparation-failed`, `evaluation-error`, `output-invalid` or
 `limit-exceeded`. Recompute projection, admission, output and bound failures; compare evaluation
-errors to the runtime error envelope's `evaluationError.class`, subject to the retention gap below.
+errors to the retained runtime error envelope under the rule below.
 Acquisition availability and stopping are installation
 assertions, not independently verified events. A successful evaluation with valid in-bound
 outputs cannot be recorded as failed without another retained failure of these kinds. A dialect
@@ -454,7 +489,7 @@ admission refusal after acquisition is recorded `admission-refused`, the dialect
 not `preparation-failed`.
 
 `attempts` has 0 to `limits.maxAttempts` entries in attempt order. Each is exactly
-`{number, state, failure, preparationDigest, auditDigest, runDigest, retry}`. `number` starts at 1
+`{number, state, failure, preparationDigest, auditDigest, runDigest, evaluationErrorDigest, retry}`. `number` starts at 1
 and increments by one. `state` has the instance state's five values. `runDigest` names exact bytes
 of a retained run export, including a failure export when no evaluation happened; it is null
 exactly when the attempt has no run export. Preparation and audit digests are null exactly when
@@ -470,18 +505,32 @@ For a run export, read `run.input.preparation` and `run.audit` as dialect §11 s
 the original audit bytes in standard-base64 `run.auditBytes` when present. In export version 2,
 take the value bytes of `run.audit` exactly as written, with no re-encoding. Compare the separately
 retained preparation and audit with these values; use the preparation's own `verifiedAt`.
-The Runner's `docs/MAPPING-V2.md` at `89cf441`, "Release checks, runtime and offline verification",
+The Runner's `docs/MAPPING-V2.md` at `66e264e`, "Release checks, runtime and offline verification",
 names the export `{version, releaseDigest, release, run}` and exports a mapped run without audit
 bytes, including a failed run, as version 2. "Exact bytes of the audit record" documents
 `run.audit` and `run.auditBytes`; `internal/runner/model.go` at that pin names
 `run.input.preparation`. Read the Core §8.3 disposition from `run.audit.disposition`, the exact
 member read by `internal/runner/mapping_v2_export.go` at the same pin. The runtime's `README.md`,
-"Experimental evaluation behavior", at `80a8176` (`v0.32.0`) names the error envelope's
+"Experimental evaluation behavior", at `785ea589` (`v0.34.0`) names the error envelope's
 `evaluationError.class` for Core §8.4. Refusals write no audit record under its
 `docs/building-with-packs.md`, "Keeping a record of what you decided"; the error class is read
-from the error envelope. The reference Runner's `internal/runner/runtime.go` at `89cf441` retains
-that envelope in attempt diagnostics but returns no `run.result` on evaluation failure, so its
-failure export does not carry that class. The workflow's retention of that envelope remains open.
+from the error envelope. The reference Runner's `internal/runner/runtime.go` at `66e264e` retains
+that envelope in attempt diagnostics but returns no `run.result` on evaluation failure.
+The workflow writer MUST retain that exact complete stdout separately as `evaluation-error.json`;
+`evaluationErrorDigest` is its exact-byte digest, including any final newline. It is non-null
+exactly for a failed attempt whose `failure` is `evaluation-error`, and null otherwise. A missing
+non-null error artifact is an inventory refusal. The bounded envelope MUST be one strict JSON
+object in Runtime output version `"2"`, with `command: "experimental evaluate"`, `status: "error"` or `"unsupported"` as the pinned
+Runtime envelope form permits,
+no disposition, and an `evaluationError` with the Core §8.4 class, matching phase and
+`evaluatorSpecVersion: "0.2.0-draft"`. Read it under the Runtime envelope form at the §1 pin;
+its diagnostics and tool version do not change the class. Its bytes are at most 8 MiB and count
+towards the branch aggregate. No audit is retained for that attempt. A reader checks the
+recorded envelope and its pin, not that the Runtime truly emitted it or would repeat it.
+An ordinary invocation failure without such a complete Core error cannot be called
+`evaluation-error` or a zero-output success; retain the attempt as interrupted when no
+completed evaluation can be established. An explicit cancellation remains cancelled.
+Existing run exports and their result members are unchanged by this workflow side artifact.
 
 `outputSets` has one entry per stage in stage order, exactly `{stage, status, records}`. `status`
 is `closed` or `blocked`; `records` is the digest array of §5. Its closed-set digest is derived
@@ -529,7 +578,7 @@ this version. Existing audit signatures cover their own audit bytes and preparat
 not these new envelopes or which published dialect and binding produced the preparation. An
 independently held execution digest can expose subsequent replacement, but this version
 specifies no authenticated execution commitment. The Runner's journal is unsigned and unchained
-(judgment-pack-runner at `89cf441`, `internal/runner/events.go`); its actor verifies no person.
+(judgment-pack-runner at `66e264e`, `internal/runner/events.go`); its actor verifies no person.
 
 ### 9. The workflow verifier
 
@@ -550,9 +599,14 @@ ordering (`input-malformed`); absent artifacts with non-null pins (`inventory-mi
 refusal); and dialect kinds it cannot read (`kind-unread`). A binding document whose `dialect`
 is not the published digest is `input-malformed` in the form phase, as dialect §4.4 requires.
 Within a phase, use workflow order, instance order, attempt order and member code-point order.
-Unknown versions, including a stage's `dialect.version`, are `version-unread`, never guessed forms.
+Unknown format selectors are `version-unread`, never guessed forms. For a stage dialect,
+scan `formatVersion` when present, otherwise the legacy integer `version`. A named artifact's
+string `version` is identity checked in the form phase, not a format discriminator; a mistyped
+or malformed named artifact version is `input-malformed`.
 Core disposition well-formedness is part of the form phase for a completed evaluation; invalidity
-is `input-malformed`. An evaluation error has no disposition.
+is `input-malformed`. An evaluation error has no disposition. A retained evaluation-error
+envelope that does not have §7's form is `input-malformed`; a valid envelope whose pin or
+attempt association disagrees is checked in semantic phase 1 or 4 respectively.
 
 Next run the dialect's **preparation-verifier** for every referenced preparation, in instance
 and attempt order, at its own saved `verifiedAt`, with its acquisitions, trusted profiles and
@@ -632,10 +686,10 @@ the acceptance construction for issue #160's condition 2. An additional research
 follows fixture 8's `selected-parent-child` plan in
 [RFC 0018 §11](../rfcs/0018-dialect.md#11-verifying-a-preparation) beside that demonstration.
 Its layout is the workflow bundle below, with fixture 8's `gtm-company-person` and
-`work-item-triage` examples as its dialects. It waits until a Runner prepares the kind
-([judgment-pack-runner#88][research-preparer]), with its release form and encoding pinned under
-§§4 and 7, and the dialect's readers read the contract
-([judgment-pack-spec#176][research-readers]). The concrete operation construction to demonstrate is:
+`work-item-triage` examples as its dialects. The research preparer and readers are available
+([judgment-pack-runner#88][research-preparer], [judgment-pack-spec#176][research-readers]);
+§§1, 4 and 7 now pin their reference encoding. This additional recording still requires
+a workflow executor and verifier; those are not established by single-stage preparation. The concrete operation construction to demonstrate is:
 
 [research-preparer]: https://github.com/Judgment-Pack/judgment-pack-runner/issues/88
 [research-readers]: https://github.com/Judgment-Pack/judgment-pack-spec/issues/176
@@ -668,7 +722,8 @@ bounds above, not literal path characters:
 - `stages/<stage>/pack.json`, `dialect.json`, `binding.json`, `bound-dialect.json`, `profiles.json`
   and `release.json`; the binding file is present exactly when §4 requires it;
 - `instances/<instance>/case.json`, and `attempts/<number>/sources.json`, `preparation.json`,
-  `preparation.sha256`, `verified-at.txt`, `audit.json`, `audit-signatures.json`, `run.json` under
+  `preparation.sha256`, `verified-at.txt`, `audit.json`, `audit-signatures.json`, `run.json` and
+  `evaluation-error.json` under
   that instance; artifacts, including the case, are absent exactly when their pins are null;
 - `outputs/<stage>/<instance>/<index>/payload.json` and `record.json`;
 - `selections/<stage>/<revision>.json`, `sets/<stage>.json`, `expected-report.json`, `trust.json`
@@ -681,7 +736,9 @@ selection files, set files and output `record.json` hold their `canon` bytes, wi
 so do `dialect.json`, `binding.json`, `bound-dialect.json` and `profiles.json` in their own forms.
 `root-case.json`, `case.json`, `payload.json` and `preparation.json` hold the dialect §9.5 bytes,
 with no newline. `pack.json`, `sources.json`, `release.json`, `run.json`, `audit.json` and
-`audit-signatures.json` and `trust.json` retain original bytes, the audit line without its newline.
+`audit-signatures.json`, `evaluation-error.json` and `trust.json` retain original bytes, the audit
+line without its newline. Evaluation-error stdout retains any final newline and is never
+reconstructed from diagnostic text or an omitted run result.
 `expected-report.json` holds §9's report in §9.5 serialization followed by one newline.
 
 Retain exact requests, answers, salts, receipts and supporting page responses in `sources.json`,
@@ -703,6 +760,9 @@ case parameter its request never names. Include two siblings of six outputs when
 remain, completed in both orders: the second and every later sibling record `limit-exceeded`.
 Include interruption after atomic admission, uncertain acquisition, a recorded selection bound
 refusal, and retries before and after consumption. Freeze expected reports with the recordings.
+Add integer and named family-3 variants with matching published identities, and refuse changed
+selectors, identity-stripped bound documents, missing/tampered error envelopes, error envelopes
+attached to successful attempts and ordinary invocation errors mislabeled as Core errors.
 This layout supplies no evidence of those runs today.
 
 ## Alternatives
@@ -722,12 +782,12 @@ This layout supplies no evidence of those runs today.
 
 ## Compatibility
 
-This amendment leaves workflow version 1's document form unchanged and adds no member. A
-research stage uses the existing workflow stage and record forms, with the dialect §4.4's
-research binding contract; its outputs still come from prepared facts under §3. Its admission
-is conditional: the release form and encoding are pinned when a Runner prepares the kind
-([judgment-pack-runner#88][research-preparer]). Until then no research stage can be frozen or
-verified under §§1 and 7; the existing release encoding at `89cf441` cannot retain that contract.
+The earlier research amendment left the document form unchanged. This proposed amendment adds
+an explicit named-Dialect selector and the required nullable `evaluationErrorDigest` attempt
+member to workflow version 1's still-Draft forms. There are no published workflow instances or
+conforming readers to migrate. Readers of the earlier draft must refuse these additions rather
+than silently dropping them. Research release encoding is now pinned in §1; its additional
+acceptance recording remains due beside the operation demonstration.
 
 Core, the dialect, the graph and the Runner's existing API are unchanged. A standalone pack or
 dialect keeps its existing meaning. This RFC defines documents and records, not new endpoints,
@@ -820,7 +880,7 @@ They are not workflow conformance tests. The round-1 cross-vendor review and the
 dispositions are recorded on pull request 168; round 2's review and dispositions are the first
 and second comments on [pull request 177][round-2].
 This text applies both rounds' dispositions and the maintainer's producing-stage selection
-rule, with the runtime-form question retained. Acceptance is not claimed.
+rule, with the runtime-form question addressed by this proposed amendment. Acceptance is not claimed.
 
 ## Unresolved questions
 
@@ -857,8 +917,7 @@ rule, with the runtime-form question retained. Acceptance is not claimed.
    inferred entity deduplication, and carries a container's influence into each copied field.
    Whether narrower field lineage is needed should be decided from recorded cases without
    weakening generated admission or assigning unproved identities.
-8. **Pinned runtime forms.** No supplied runtime document at `80a8176` names the audit record's
-   disposition member, so its documentary confirmation remains unresolved despite the Runner's
-   source reading `disposition` at `89cf441` (§§1 and 7).
-   How will a workflow retain the documented `evaluationError.class` error envelope when the
-   reference Runner's failure export carries no such envelope (§7)?
+8. **Pinned runtime forms.** The proposed amendment names current Runner and Runtime encodings
+   in §1, and §7 defines a separately pinned, exact-byte evaluation-error artifact without
+   changing run exports. Implementation and two-reader agreement on the failure variants remain
+   due; the contract text alone does not close the demonstration requirement.
