@@ -589,7 +589,7 @@ question 1 lists it. No reader changes, and no vector is changed or claimed.
 
 This amendment records the maintainer's decision on
 [issue #199](https://github.com/Judgment-Pack/judgment-pack-spec/issues/199), direction A, on
-[pull request NNN](https://github.com/Judgment-Pack/judgment-pack-spec/pull/NNN): an input
+[pull request 207](https://github.com/Judgment-Pack/judgment-pack-spec/pull/207): an input
 profile may constrain each receipt's endpoint instead of pinning one exact endpoint. It is
 round 15. The status stays Accepted. The Specification and companion are amended equally.
 Receipts stay exact. Profiles without the new member keep their form, digest and meaning, and
