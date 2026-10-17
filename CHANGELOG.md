@@ -7,6 +7,12 @@ here.
 
 ### Added
 
+- RFC 0018 round 15 records issue #199, direction A: an optional `endpointScope` for page
+  profiles, checked against each signed final endpoint. The companion and RFC define its
+  grammar, admission, bounds and limits; both readers implement it with altered-vector controls.
+  Exact profiles, historical receipts and every staged vector stay unchanged. Runner support
+  and evidence as vectors, and the Desk's profile review, remain follow-ups.
+
 - The staged Runner manifest of the dialect vectors brought to Runner commit `a4fa245`, pull
   request 137 (issue #205): the one expectation it changes, the `verifyRun.report` of
   `disposition-differs-from-audit`, now carries the preparation's checked report beside the
