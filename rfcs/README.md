@@ -69,10 +69,12 @@ stable feature requires two independent implementations and conformance cases.
 | [0018] | The dialect | Accepted | Specification (a companion document; see below) |
 | [0019] | The Judgment Exchange — a shared place for dialects | Draft | Research line (see below) |
 | [0020] | The workflow | Draft | Specification (a proposed companion document; see below) |
+| [0022] | Reusable subgraphs contract — explicit encapsulation and reference binding | Draft | Research line (see below) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
 [0020]: 0020-workflow.md
+[0022]: 0022-reusable-subgraphs.md
 
 RFC 0018 states how a pack's facts and evidence are obtained and derived, and what a preparation
 establishes per part. Its companion, [`spec/dialect.md`](../spec/dialect.md), defines the
