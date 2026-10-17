@@ -7,6 +7,17 @@ here.
 
 ### Added
 
+- The forty-second to forty-seventh dialect vectors, the six `endpoint-scope-` vectors
+  (`endpoint-scope-two-paths-one-origin`, `endpoint-scope-wildcard-two-origins`,
+  `endpoint-scope-endpoint-outside`, `endpoint-scope-redirect-outside`,
+  `endpoint-scope-changed-constraint`, `endpoint-scope-changed-request`), staged byte for byte from
+  Runner commit `10c073c`, pull request 142 (issue #199), beside the forty-one unchanged vectors.
+  Both readers, unchanged, give each the manifest's answer: a reading whose binding `matches` for
+  the first two, `acquisition-invalid` for the endpoint outside, the redirect outside and the
+  changed request, `profile-mismatch` for the changed constraint. The markers round 15 placed in
+  `spec/dialect.md` §§5.1 and 5.2 (and the RFC's Specification, equally) follow the staged vectors
+  for the rules they decide; this is no rule change. The vectors remain staged until the next
+  `specVersion` opens, in no corpus.
 - The staged Runner manifest of the dialect vectors brought to Runner commit `a4fa245`, pull
   request 137 (issue #205): the one expectation it changes, the `verifyRun.report` of
   `disposition-differs-from-audit`, now carries the preparation's checked report beside the

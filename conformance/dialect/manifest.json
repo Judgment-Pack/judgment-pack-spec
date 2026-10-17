@@ -74,12 +74,24 @@
         "pullRequest": 137,
         "commit": "a4fa24525e6b5e13e64dcb242393aec3c30d264c",
         "vectors": []
+      },
+      {
+        "pullRequest": 142,
+        "commit": "10c073c83ce898ec1a284203b9fd76b269722326",
+        "vectors": [
+          "endpoint-scope-two-paths-one-origin",
+          "endpoint-scope-wildcard-two-origins",
+          "endpoint-scope-endpoint-outside",
+          "endpoint-scope-redirect-outside",
+          "endpoint-scope-changed-constraint",
+          "endpoint-scope-changed-request"
+        ]
       }
     ]
   },
   "runnerFiles": {
-    "vectors/README.md": "f474d07fad8e2fcba7336f4e16a2917a28a9a653c04aebeaa4bba67dac60c65b",
-    "vectors/manifest.json": "30482dfdec4fa3960824fbb686229686c40005427c422092c210a204cf0be09e"
+    "vectors/README.md": "58fea34cf5a411bbd74fce124c2ad54877a49695ed40cda20ecf8b405b8fef9e",
+    "vectors/manifest.json": "b93af57a8165888dd43081a67a5aa7ea43cf3b49076af3c734479afbec589129"
   },
   "cases": [
     {
@@ -368,6 +380,48 @@
       "requiresBinding": true,
       "expectedResult": "reading",
       "expectedBinding": "matches"
+    },
+    {
+      "id": "endpoint-scope-two-paths-one-origin",
+      "path": "vectors/endpoint-scope-two-paths-one-origin",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "endpoint-scope-wildcard-two-origins",
+      "path": "vectors/endpoint-scope-wildcard-two-origins",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "endpoint-scope-endpoint-outside",
+      "path": "vectors/endpoint-scope-endpoint-outside",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "acquisition-invalid"
+    },
+    {
+      "id": "endpoint-scope-redirect-outside",
+      "path": "vectors/endpoint-scope-redirect-outside",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "acquisition-invalid"
+    },
+    {
+      "id": "endpoint-scope-changed-constraint",
+      "path": "vectors/endpoint-scope-changed-constraint",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "profile-mismatch"
+    },
+    {
+      "id": "endpoint-scope-changed-request",
+      "path": "vectors/endpoint-scope-changed-request",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "acquisition-invalid"
     }
   ]
 }

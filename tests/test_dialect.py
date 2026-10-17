@@ -39,7 +39,8 @@ SOURCE = {
     # request 83; and the twenty-six research vectors, of the two examples of §11's fixture plan,
     # from its main after its pull request 97; the skipped-source vector from pull request 105;
     # the two acquired dependent-source vectors from pull request 109; and, from pull request 137,
-    # no vector but a changed expectation (the report of `disposition-differs-from-audit`).
+    # no vector but a changed expectation (the report of `disposition-differs-from-audit`); and the
+    # six endpoint-scope vectors from pull request 142.
     "extendedBy": [
         {
             "pullRequest": 80,
@@ -98,11 +99,24 @@ SOURCE = {
             "commit": "a4fa24525e6b5e13e64dcb242393aec3c30d264c",
             "vectors": [],
         },
+        {
+            "pullRequest": 142,
+            "commit": "10c073c83ce898ec1a284203b9fd76b269722326",
+            "vectors": [
+                "endpoint-scope-two-paths-one-origin",
+                "endpoint-scope-wildcard-two-origins",
+                "endpoint-scope-endpoint-outside",
+                "endpoint-scope-redirect-outside",
+                "endpoint-scope-changed-constraint",
+                "endpoint-scope-changed-request",
+            ],
+        },
     ],
 }
 # The count as the RFC and the companion spell it.
 WORDS = {9: "nine", 10: "ten", 11: "eleven", 12: "twelve",
-         38: "thirty-eight", 39: "thirty-nine", 41: "forty-one"}
+         38: "thirty-eight", 39: "thirty-nine", 41: "forty-one",
+         47: "forty-seven"}
 # The Runner's manifest says what each vector's export retains (its README, "What a vector holds"):
 # `equal`, the preparation the Runner computes from the vector's inputs, which is preparation.json;
 # `altered`, another, while preparation.json is still that computation; and `recorded`, the
@@ -511,8 +525,8 @@ class DialectVectorTests(unittest.TestCase):
 
     def test_the_companion_counts_the_vectors_of_the_commits_it_names(self) -> None:
         # The companion's Status names the Runner commits its vectors were copied from, and counts
-        # the vectors of the commits it names: forty-one, from six commits, since the staging of the
-        # Runner's pull request 109.
+        # the vectors of the commits it names: forty-seven, from seven commits, since the staging of the
+        # Runner's pull request 142.
         text = " ".join((ROOT / COMPANION).read_text(encoding="utf-8").split())
         source = self.manifest["source"]
         self.assertIn(source["commit"], text)
@@ -581,6 +595,10 @@ class DialectVectorTests(unittest.TestCase):
             [
                 "gtm-company-person-changed-response-retained-result",
                 "work-item-triage-changed-response-record-fields",
+                "endpoint-scope-endpoint-outside",
+                "endpoint-scope-redirect-outside",
+                "endpoint-scope-changed-constraint",
+                "endpoint-scope-changed-request",
             ],
             recorded,
         )

@@ -28,7 +28,10 @@ thirty-ninth, `skipped-source-dependency-unavailable`, the first to hold a skipp
 source: the run wrote the first thirty-eight again byte for byte. So were the fortieth
 and forty-first, `acquired-dependent-source` and `acquired-dependent-source-unknown`,
 the first to hold an acquired source that declares source parameters: the run wrote
-the first thirty-nine again byte for byte. Changing a
+the first thirty-nine again byte for byte. So were the six after them, the
+endpoint-scope vectors, the first whose page profile carries an endpoint scope
+(RFC 0018 round 15, runner #141): the run wrote the first forty-one again byte for
+byte. Changing a
 vector is a change of the contract a second reader is held to, and needs the same
 justification as changing
 [`docs/MAPPING-V2.md`](../../docs/MAPPING-V2.md#the-canonical-form-of-a-preparation).
@@ -149,6 +152,12 @@ The record a binding is read from is in `run.json`: the record's exact bytes,
 | `skipped-source-dependency-unavailable` | `mapping-v2-skipped-source` | nothing: three operations, the third skipped because a source it waits on is not `resolved` | `verified-inputs`, binding `matches`, signed and witnessed |
 | `acquired-dependent-source` | `mapping-v2-acquired-dependent` | nothing: three operations, the third acquired with both its source parameters valued, its claim `resolved` | `verified-inputs`, binding `matches`, signed and witnessed |
 | `acquired-dependent-source-unknown` | `mapping-v2-acquired-dependent-unknown` | nothing: as `acquired-dependent-source`, the third's claim `unknown` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `endpoint-scope-two-paths-one-origin` | `research/endpoint-scope-two-paths-one-origin` | nothing: one research source reads two pages, two paths of one origin, under one page profile scoped to the prefix `https://docs.example.com/guides` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `endpoint-scope-wildcard-two-origins` | `research/endpoint-scope-wildcard-two-origins` | nothing: the same source reads two pages of two origins under one page profile scoped to the wildcard `https://*` | `verified-inputs`, binding `matches`, signed and witnessed |
+| `endpoint-scope-endpoint-outside` | `research/endpoint-scope-two-paths-one-origin` | the second page replaced by one the stand-in served next in the session, whose signed receipt names `https://docs.example.com/guides-archive/beta`, outside the prefix | refused: `Source company-pages: retained response 2, through the profile pages: the endpoint is outside the trusted profile's endpoint scope (acquisition-invalid). …` |
+| `endpoint-scope-redirect-outside` | `research/endpoint-scope-two-paths-one-origin` | the second page replaced by one requested inside the scope whose redirect ended at `https://elsewhere.example.com/landing`, the endpoint its signed receipt names | refused: as `endpoint-scope-endpoint-outside` |
+| `endpoint-scope-changed-constraint` | `research/endpoint-scope-two-paths-one-origin` | the page profile's scope widened by one entry in `profiles.json`; the binding pins the digest it had | refused: `release profile is not independently trusted (profile-mismatch). No decision was requested.` |
+| `endpoint-scope-changed-request` | `research/endpoint-scope-two-paths-one-origin` | the second page's retained request names another URL inside the scope; its receipt as it was | refused: `Source company-pages: retained response 2, through the profile pages: response does not match the frozen request and this case's parameters (acquisition-invalid). …` |
 
 The valid case is also the calculated-values case: its one source is a calculator
 that computed. Its preparation's digest is the digest its record binds, so a reader
@@ -257,6 +266,60 @@ them: its `/endorsement` entry is not `present`, its `sponsor-endorsement` entry
 `present` with the availability `unknown`, and both carry `dependencies` as
 `acquired-dependent-source`'s do.
 
+The endpoint-scope vectors are there for an input profile that carries
+`endpointScope` in place of one `endpoint` (`docs/MAPPING-V2.md`, "Research
+sources", "An endpoint scope"; spec/dialect.md §5.1 and §5.2 check 3, RFC 0018
+round 15, judgment-pack-spec#207). Each is a run of one research source,
+`company-pages`, asking for `answer` and `page`, published unbound and bound at
+import, as the research vectors are. Its page profile, `pages`, of class
+`generated`, declares the capability `page` alone, its shape `http`, its adapter
+`adapter-web`, its `endpoint` `null` and its scope in `endpointScope`, whose whole
+value its digest holds; its AI profile, `assistant`, pins one endpoint. The
+record retains the answer and two pages read through `pages`, and each page's
+receipt names as `acquisition.endpoint` the page's final URL, its query removed,
+as the gateway's web adapter writes it. A reader concludes, of each:
+
+- `endpoint-scope-two-paths-one-origin`: under the prefix
+  `https://docs.example.com/guides`, the endpoints
+  `https://docs.example.com/guides/alpha` and `https://docs.example.com/guides/beta`
+  are admitted, the host equal and each path the prefix's followed by a literal
+  slash: `verified-inputs`, one reviewed profile verifying the reads of two URLs.
+- `endpoint-scope-wildcard-two-origins`: under `https://*`, the endpoints
+  `https://alpha.example.com/notes/one` and `https://beta.example.com/notes/two`,
+  two origins, are admitted, each in the constrained page form:
+  `verified-inputs`.
+- `endpoint-scope-endpoint-outside`: the second page's receipt, signed, names
+  `https://docs.example.com/guides-archive/beta`, whose path begins with
+  `/guides` but not at a literal slash, so the prefix does not admit it, where a
+  comparison of strings by prefix alone would: `acquisition-invalid`, check 3.
+- `endpoint-scope-redirect-outside`: the second page was requested at
+  `https://docs.example.com/guides/moved?item=company-0007-b`, inside the scope,
+  and its receipt, signed, names the URL its redirect ended at,
+  `https://elsewhere.example.com/landing`: `acquisition-invalid`, check 3 holding
+  the final URL and not the requested one.
+- `endpoint-scope-changed-constraint`: the profile given widens the scope the
+  binding reviewed, so its digest is not the one the binding names:
+  `profile-mismatch`, before any response is replayed. `verify-run`, which holds
+  the release's frozen profiles to the profiles it is given before it replays
+  anything, refuses the export there first, with the same code: `release profile
+  is not independently trusted (profile-mismatch)`; a preparation verifier, given
+  no release, names `profile-mismatch` for the binding.
+- `endpoint-scope-changed-request`: the second page's request names another URL
+  inside the scope, and its receipt's commitment is not of it:
+  `acquisition-invalid`, check 4. Replay holds no requested URL to the scope.
+
+The four refusals are made from the first run, their inputs changed after it and
+the preparation the run recorded held fixed (`retained`: `recorded`). The two
+pages the first two of them swap in were served by the stand-in next in the run's
+session, through the same profile under its key, at call indexes 3 and 4, and the
+run did not retain them: the fixture keeps them beside its export,
+`testdata/research/endpoint-scope-two-paths-one-origin/unretained.json`, each as
+the research record would retain it, and the generator puts one in place of the
+second page. Each receipt is as the stand-in signed it, so the endpoint is the
+only check that fails. No vector holds the admission a caller makes of a
+requested URL before it sends a request (spec/dialect.md §5.1): that is the
+caller's, and no offline reader reconstructs it.
+
 The last two of the first twelve are dialect version 3 (`docs/MAPPING-V2.md`, "Dialect version 3").
 `version-3-bound` is there for the version: its mapping is written as a version-3
 document, with no `provider`, `facts` or `evidence`, which Runner writes empty in a
@@ -342,6 +405,20 @@ in them are those of the run that wrote them, and are data now.
   `adapter-mcp`, version `stand-in`; no live service was asked, and every identifier
   is synthetic.
 
+- The two runs `research/endpoint-scope-two-paths-one-origin` and
+  `research/endpoint-scope-wildcard-two-origins` were written as the research runs
+  were, by `TestScopedPageRunsAreSignedWitnessedAndBound` with
+  `JPACK_SCOPE_EXPORT_DIR` set, under the Runtime CI pins (commit `09206e74`),
+  which takes a binding. Their records were recorded from the research runs'
+  stand-in, in the test's process, over TLS on the loopback address, at hosts of
+  `example.com` that the test's client reaches at the stand-in and that the test
+  certificate names; the stand-in serves the redirect and the test's client follows
+  it, as the gateway's web adapter does, and the stand-in names the final URL, its
+  query removed. Each receipt was signed under
+  a key made for the run. The profiles name the adapters `adapter-sources` and
+  `adapter-web`, version `stand-in`, and the model `synthetic-research-model-1`. No
+  model was asked and no page outside the test's process was read; every
+  identifier, URL and observation is synthetic.
 - Each run under `research/` was written as `mapping-v2-calculated-bound` was, by
   `TestResearchRunsAreSignedWitnessedAndBound` with `JPACK_RESEARCH_EXPORT_DIR` set,
   under the Runtime CI pins (commit `4ea33155`), which takes a binding. Its research

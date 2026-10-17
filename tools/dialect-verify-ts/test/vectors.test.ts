@@ -47,7 +47,7 @@ test("the manifest names every vector directory, and nothing else", () => {
     .filter((d) => statSync(join(ROOT, "vectors", d)).isDirectory())
     .sort();
   assert.deepEqual(manifest.cases.map((c) => c.path.replace(/^vectors\//, "")).sort(), dirs);
-  assert.equal(manifest.cases.length, 41);
+  assert.equal(manifest.cases.length, 47);
   assert.deepEqual([...runner.keys()], manifest.cases.map((c) => c.id));
 });
 

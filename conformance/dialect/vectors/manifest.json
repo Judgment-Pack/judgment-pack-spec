@@ -2046,6 +2046,324 @@
         "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:1bef69a654338c83144652331bcbf38f1a60f49e9c550499c0f33bb8849c8794\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:6faba1efaa09012ab4972140f30180e2b29cbb9df747778f428689e778e60b48\",\"sequence\":1,\"trail\":\"68a6e0c71a53930bfd06aa2ba9916c07\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":0,\"record\":6,\"generated\":0},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-16T17:19:55Z\",\"sources\":[{\"source\":\"intake\",\"checks\":[\"acquisition\"],\"targets\":3},{\"source\":\"sponsor\",\"checks\":[\"acquisition\"],\"targets\":1},{\"source\":\"endorsement\",\"checks\":[\"acquisition\"],\"targets\":2}]}}",
         "error": null
       }
+    },
+    {
+      "name": "endpoint-scope-two-paths-one-origin",
+      "note": "A run of one research source, company-pages, as Runner exported it (version 5), signed, witnessed and bound, under an installation whose page profile, pages, carries an endpoint scope in place of one endpoint (spec/dialect.md, section 5.1, RFC 0018 round 15): its endpoint null and its endpointScope [\"https://docs.example.com/guides\"]; its class generated, its research declaration the capability page alone, its shape http and its adapter adapter-web. The scope's whole value is in the profile's digest, which binding.json pins. The dialect, of version 3, was published with the source unbound (unbound.json) and bound at import by binding.json to the AI profile assistant, which pins one endpoint, and to pages for page; mapping.json is the bound dialect. The source asks for answer and page. Its research record (sources.json) retains the answer and two pages read through pages, each with its request, its result, the receipt a gateway signed and the salts, and its answers cite them: the company's id the answer and the first page, its headcount the first page, whether it is active the second; its read copies the answers to /company. The responses were served, in the test's process, by a stand-in of a gateway over TLS on the loopback address, at hosts of example.com that the test's client reaches at it, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session; a page's receipt names as acquisition.endpoint the page's final URL, its query removed, as the gateway's web adapter writes it. No model was asked, no page outside the test's process was read, and every identifier, URL and observation is synthetic. The scope is one prefix, https://docs.example.com/guides. The two pages were requested at https://docs.example.com/guides/alpha?item=company-0007-a and https://docs.example.com/guides/beta?item=company-0007-b, two paths of one origin, and their receipts name the endpoints https://docs.example.com/guides/alpha and https://docs.example.com/guides/beta, each of which the prefix admits: the host equal, and the path the prefix's followed by a literal slash. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, over its own request, holding each page receipt's endpoint to the profile's scope in place of one endpoint (section 5.2, check 3) and every other member of check 3 exactly, recomputes the preparation from the record, and concludes verified-inputs, the record's binding matching the preparation: one reviewed page profile verified the reads of two URLs. Replay asks nothing, so a second installation given these files verifies them without a network.",
+      "from": "internal/runner/testdata/research/endpoint-scope-two-paths-one-origin",
+      "altered": null,
+      "verifiedAt": "2026-10-17T14:51:54Z",
+      "files": {
+        "binding.json": "sha256:d3c27f77c2db01c503ac88d3d2559e892e710a881a6273c2cd11ca2514d08279",
+        "case.json": "sha256:2f9db886cd9afb64ecae1fe941c205c98aba75898097ebd14274c6a908325655",
+        "checkpoints.jsonl": "sha256:a280ed65b9ef0500748fe2767a7d1faea4c97d1655e061ed78a7d75cb5757b89",
+        "mapping.json": "sha256:9553da23ee241b29bc2edc88ae0405340b2351c85cde75b62d744ee68af609c9",
+        "preparation.json": "sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3",
+        "preparation.sha256": "sha256:c54c9c6e4fda94bf41de0242fa926873446185401ed242a44988b1df50a6e84e",
+        "profiles.json": "sha256:b1cc246fa0f4fbcb8c4dd1bac387637047ed580301a2b8ea2fea71bd00e14b3a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:5c00acd51247ab2c48e7bd291214c1f4d58f0370e8b8feb1946f41710a32e684",
+        "run.json": "sha256:f59d56e5d5bbd41a4e3f055ca0e1f5f41e093f229f6f56f35140a891634130ab",
+        "sources.json": "sha256:65263a1b384a11b38aa70967df916d45a6b6ab5494d70479d320c6301e89b3bc",
+        "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
+      },
+      "preparation": {
+        "sha256": "sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:43a762a517fc39c0481246a06ca2573958f26f28d22327ffa578986e28a20256",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:66791927869890801e67e87b4c312c9f10a7e38204aea84a9e07da20652872e6\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:99977b09258faca2aaf9a42a1781a742b1f4712e32a30caeff4c1b8982813914\",\"sequence\":1,\"trail\":\"f6ede1c3108f6692b2d33299e6415576\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":1},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-17T14:51:54Z\",\"sources\":[{\"source\":\"company-pages\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "endpoint-scope-wildcard-two-origins",
+      "note": "A run of one research source, company-pages, as Runner exported it (version 5), signed, witnessed and bound, under an installation whose page profile, pages, carries an endpoint scope in place of one endpoint (spec/dialect.md, section 5.1, RFC 0018 round 15): its endpoint null and its endpointScope [\"https://*\"]; its class generated, its research declaration the capability page alone, its shape http and its adapter adapter-web. The scope's whole value is in the profile's digest, which binding.json pins. The dialect, of version 3, was published with the source unbound (unbound.json) and bound at import by binding.json to the AI profile assistant, which pins one endpoint, and to pages for page; mapping.json is the bound dialect. The source asks for answer and page. Its research record (sources.json) retains the answer and two pages read through pages, each with its request, its result, the receipt a gateway signed and the salts, and its answers cite them: the company's id the answer and the first page, its headcount the first page, whether it is active the second; its read copies the answers to /company. The responses were served, in the test's process, by a stand-in of a gateway over TLS on the loopback address, at hosts of example.com that the test's client reaches at it, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session; a page's receipt names as acquisition.endpoint the page's final URL, its query removed, as the gateway's web adapter writes it. No model was asked, no page outside the test's process was read, and every identifier, URL and observation is synthetic. The scope is the wildcard, https://*, which only a profile of class generated may carry. The two pages were requested at https://alpha.example.com/notes/one?item=company-0007-a and https://beta.example.com/notes/two?item=company-0007-b, two origins, and their receipts name the endpoints https://alpha.example.com/notes/one and https://beta.example.com/notes/two. The wildcard admits every endpoint in the constrained page form, and each is in it: https, a DNS name of two or more labels, no port but 443, and no user, query, fragment, IP literal or dot segment. It asserts no public reachability: no name is resolved. A reader binds unbound.json with binding.json under profiles.json and holds the result to mapping.json, replays each retained response under the profile it names, over its own request, holding each page receipt's endpoint to the profile's scope in place of one endpoint (section 5.2, check 3) and every other member of check 3 exactly, recomputes the preparation from the record, and concludes verified-inputs, the record's binding matching the preparation: one reviewed page profile verified the reads of two URLs. Replay asks nothing, so a second installation given these files verifies them without a network.",
+      "from": "internal/runner/testdata/research/endpoint-scope-wildcard-two-origins",
+      "altered": null,
+      "verifiedAt": "2026-10-17T14:51:54Z",
+      "files": {
+        "binding.json": "sha256:1b567c9e574b2a98c5efd71d03bff8b632b087622f0a616de63dfaa2c8b0a34b",
+        "case.json": "sha256:2f9db886cd9afb64ecae1fe941c205c98aba75898097ebd14274c6a908325655",
+        "checkpoints.jsonl": "sha256:8131d68810d169eb6c2999d792c71791cf659e16020ec3986a6e35c939905035",
+        "mapping.json": "sha256:4d519f804e78a1086d07a9e7eb0485c331db4b063c0b490f820a962ed7e54a63",
+        "preparation.json": "sha256:f22fc647ca08ceb3e2bd9cf41903e8c29b7b696e72342055d81d6430c7318461",
+        "preparation.sha256": "sha256:831225e081ac97b22fbc39435d6bf17f39af61fd06ec1c914291ca690152da02",
+        "profiles.json": "sha256:cbc952cbb5aa78de9ce000d4466595945a3de7743c4f0a7ca906439b4266e7d2",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:f0834bd4593b8220ff6568f691d1c39a561a1f1385986af1d7af867aee6cb254",
+        "run.json": "sha256:8698a9261796d673e69992275f76c3da1adab81816e36ab26b83808c3e657f24",
+        "sources.json": "sha256:fa9fc8557f41e9d5477dd5a33fe952b117e9f335a0392d973a2df35fd18f0fae",
+        "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
+      },
+      "preparation": {
+        "sha256": "sha256:f22fc647ca08ceb3e2bd9cf41903e8c29b7b696e72342055d81d6430c7318461",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:f22fc647ca08ceb3e2bd9cf41903e8c29b7b696e72342055d81d6430c7318461\"}",
+        "retained": "equal"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:f22fc647ca08ceb3e2bd9cf41903e8c29b7b696e72342055d81d6430c7318461\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:59f05a17f6beb52249f101cf67f3320648d8bcea61968c7c6d38ba7a37eab332",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 0,
+        "status": "verified-inputs",
+        "report": "{\"binding\":{\"status\":\"matches\"},\"exactBytes\":\"matches-record\",\"exportVersion\":5,\"recordDigest\":\"sha256:b1b9c646dd7ed48246090dcf713bc167cd6b2f94bc7a576e5a8df6d165ffa40f\",\"retainedDisposition\":\"matches-audit\",\"runChain\":{\"checkpoint\":{\"checkpointVersion\":\"1\",\"recordDigest\":\"sha256:8bb78da9e020c6fffa4a0c975bd8c56ecad4f1db29bfa0586390e2788296dc18\",\"sequence\":1,\"trail\":\"06f419e3b8c0a42e1a1a29cdf6600fb7\"},\"findings\":[],\"findingsTotal\":0,\"held\":{\"matched\":1,\"supplied\":1,\"through\":1},\"scope\":\"checkpoint\",\"status\":\"valid\",\"witnessed\":true},\"scope\":\"retained input derivation and audit binding; not sealed-session completeness or policy truth\",\"signature\":{\"findings\":[],\"findingsTotal\":0,\"keyId\":\"21fe31dfa154a261626bf854046fd227\",\"publicKey\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\",\"readableLines\":1,\"status\":\"signed\",\"unreadableLines\":0},\"status\":\"verified-inputs\",\"targetsByClass\":{\"asserted\":3,\"record\":0,\"generated\":1},\"unsignedFreshness\":{\"against\":\"preparation.verifiedAt\",\"verifiedAt\":\"2026-10-17T14:51:54Z\",\"sources\":[{\"source\":\"company-pages\",\"checks\":[\"acquisition\"],\"targets\":1}]}}",
+        "error": null
+      }
+    },
+    {
+      "name": "endpoint-scope-endpoint-outside",
+      "note": "A run of one research source, company-pages, as Runner exported it (version 5), signed, witnessed and bound, under an installation whose page profile, pages, carries an endpoint scope in place of one endpoint (spec/dialect.md, section 5.1, RFC 0018 round 15): its endpoint null and its endpointScope [\"https://docs.example.com/guides\"]; its class generated, its research declaration the capability page alone, its shape http and its adapter adapter-web. The scope's whole value is in the profile's digest, which binding.json pins. The dialect, of version 3, was published with the source unbound (unbound.json) and bound at import by binding.json to the AI profile assistant, which pins one endpoint, and to pages for page; mapping.json is the bound dialect. The source asks for answer and page. Its research record (sources.json) retains the answer and two pages read through pages, each with its request, its result, the receipt a gateway signed and the salts, and its answers cite them: the company's id the answer and the first page, its headcount the first page, whether it is active the second; its read copies the answers to /company. The responses were served, in the test's process, by a stand-in of a gateway over TLS on the loopback address, at hosts of example.com that the test's client reaches at it, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session; a page's receipt names as acquisition.endpoint the page's final URL, its query removed, as the gateway's web adapter writes it. No model was asked, no page outside the test's process was read, and every identifier, URL and observation is synthetic. The two-paths run with its second page replaced by a page whose receipt, signed under the profile's key, names an endpoint outside the scope: /guides-archive/beta begins with the prefix's path, /guides, but not at a literal slash, so the prefix does not admit it, where a comparison of strings by prefix alone would. preparation.json is the preparation the run recorded, which the export retains, and the Runner computes none from the changed inputs. A reader replays the third response under its profile and concludes acquisition-invalid: its endpoint is outside the profile's scope (section 5.2, check 3), though its signature, its commitment to its request and its result digest hold. verify-run refuses it with no report.",
+      "from": "internal/runner/testdata/research/endpoint-scope-two-paths-one-origin",
+      "altered": "In the export's research record of the source company-pages, the third retained response, the second page, is replaced by a response the stand-in served next in the run's session, through the same profile, at call index 3, which the run did not retain (the fixture's unretained.json, outside): requested at https://docs.example.com/guides-archive/beta?item=company-0007-b, its receipt naming the endpoint https://docs.example.com/guides-archive/beta, signed under the profile's key. The answers, every receipt and the recorded preparation are as they were.",
+      "verifiedAt": "2026-10-17T14:51:54Z",
+      "files": {
+        "binding.json": "sha256:d3c27f77c2db01c503ac88d3d2559e892e710a881a6273c2cd11ca2514d08279",
+        "case.json": "sha256:2f9db886cd9afb64ecae1fe941c205c98aba75898097ebd14274c6a908325655",
+        "checkpoints.jsonl": "sha256:a280ed65b9ef0500748fe2767a7d1faea4c97d1655e061ed78a7d75cb5757b89",
+        "mapping.json": "sha256:9553da23ee241b29bc2edc88ae0405340b2351c85cde75b62d744ee68af609c9",
+        "preparation.json": "sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3",
+        "preparation.sha256": "sha256:c54c9c6e4fda94bf41de0242fa926873446185401ed242a44988b1df50a6e84e",
+        "profiles.json": "sha256:b1cc246fa0f4fbcb8c4dd1bac387637047ed580301a2b8ea2fea71bd00e14b3a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:5c00acd51247ab2c48e7bd291214c1f4d58f0370e8b8feb1946f41710a32e684",
+        "run.json": "sha256:f26d253ff2ebb1c0846146397c2c44c91ffc0d38132d8ac0bf48b89f2084bf50",
+        "sources.json": "sha256:7ea6cfd03e5ef63ea20a9efc9fa2e45e54759ca32fd4f92aa569765105da92af",
+        "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
+      },
+      "preparation": {
+        "sha256": "sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3\"}",
+        "retained": "recorded"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:43a762a517fc39c0481246a06ca2573958f26f28d22327ffa578986e28a20256",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": null,
+        "report": null,
+        "error": "Source company-pages: retained response 2, through the profile pages: the endpoint is outside the trusted profile's endpoint scope (acquisition-invalid). No decision was requested."
+      }
+    },
+    {
+      "name": "endpoint-scope-redirect-outside",
+      "note": "A run of one research source, company-pages, as Runner exported it (version 5), signed, witnessed and bound, under an installation whose page profile, pages, carries an endpoint scope in place of one endpoint (spec/dialect.md, section 5.1, RFC 0018 round 15): its endpoint null and its endpointScope [\"https://docs.example.com/guides\"]; its class generated, its research declaration the capability page alone, its shape http and its adapter adapter-web. The scope's whole value is in the profile's digest, which binding.json pins. The dialect, of version 3, was published with the source unbound (unbound.json) and bound at import by binding.json to the AI profile assistant, which pins one endpoint, and to pages for page; mapping.json is the bound dialect. The source asks for answer and page. Its research record (sources.json) retains the answer and two pages read through pages, each with its request, its result, the receipt a gateway signed and the salts, and its answers cite them: the company's id the answer and the first page, its headcount the first page, whether it is active the second; its read copies the answers to /company. The responses were served, in the test's process, by a stand-in of a gateway over TLS on the loopback address, at hosts of example.com that the test's client reaches at it, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session; a page's receipt names as acquisition.endpoint the page's final URL, its query removed, as the gateway's web adapter writes it. No model was asked, no page outside the test's process was read, and every identifier, URL and observation is synthetic. The two-paths run with its second page replaced by a page requested inside the scope whose redirect ended outside it, on another host. preparation.json is the preparation the run recorded, which the export retains, and the Runner computes none from the changed inputs. A reader holds the endpoint the receipt names, the final URL, to the scope, and concludes acquisition-invalid (section 5.2, check 3, and \"Which URL is held\"), though the signature, the commitment to the request and the result digest hold; the requested URL, which the receipt commits, is not itself held to the scope in replay. verify-run refuses it with no report.",
+      "from": "internal/runner/testdata/research/endpoint-scope-two-paths-one-origin",
+      "altered": "In the export's research record of the source company-pages, the third retained response, the second page, is replaced by a response the stand-in served next in the run's session, through the same profile, at call index 4, which the run did not retain (the fixture's unretained.json, redirected): requested at https://docs.example.com/guides/moved?item=company-0007-b, inside the scope, and redirected by the stand-in to https://elsewhere.example.com/landing?item=company-0007-b, its receipt naming that final URL with its query removed, https://elsewhere.example.com/landing, as the gateway's web adapter names the URL a followed redirect ends at; signed under the profile's key. The answers, every receipt and the recorded preparation are as they were.",
+      "verifiedAt": "2026-10-17T14:51:54Z",
+      "files": {
+        "binding.json": "sha256:d3c27f77c2db01c503ac88d3d2559e892e710a881a6273c2cd11ca2514d08279",
+        "case.json": "sha256:2f9db886cd9afb64ecae1fe941c205c98aba75898097ebd14274c6a908325655",
+        "checkpoints.jsonl": "sha256:a280ed65b9ef0500748fe2767a7d1faea4c97d1655e061ed78a7d75cb5757b89",
+        "mapping.json": "sha256:9553da23ee241b29bc2edc88ae0405340b2351c85cde75b62d744ee68af609c9",
+        "preparation.json": "sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3",
+        "preparation.sha256": "sha256:c54c9c6e4fda94bf41de0242fa926873446185401ed242a44988b1df50a6e84e",
+        "profiles.json": "sha256:b1cc246fa0f4fbcb8c4dd1bac387637047ed580301a2b8ea2fea71bd00e14b3a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:5c00acd51247ab2c48e7bd291214c1f4d58f0370e8b8feb1946f41710a32e684",
+        "run.json": "sha256:037fe99c3b3a3c0c7fb7f58b85b7030124c12d9320617fb66a1d087a373d9191",
+        "sources.json": "sha256:2f211bd0c46b022052ad1513faec5ebf870161902d0038e7f7942f15d5298b42",
+        "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
+      },
+      "preparation": {
+        "sha256": "sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3\"}",
+        "retained": "recorded"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:43a762a517fc39c0481246a06ca2573958f26f28d22327ffa578986e28a20256",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": null,
+        "report": null,
+        "error": "Source company-pages: retained response 2, through the profile pages: the endpoint is outside the trusted profile's endpoint scope (acquisition-invalid). No decision was requested."
+      }
+    },
+    {
+      "name": "endpoint-scope-changed-constraint",
+      "note": "A run of one research source, company-pages, as Runner exported it (version 5), signed, witnessed and bound, under an installation whose page profile, pages, carries an endpoint scope in place of one endpoint (spec/dialect.md, section 5.1, RFC 0018 round 15): its endpoint null and its endpointScope [\"https://docs.example.com/guides\"]; its class generated, its research declaration the capability page alone, its shape http and its adapter adapter-web. The scope's whole value is in the profile's digest, which binding.json pins. The dialect, of version 3, was published with the source unbound (unbound.json) and bound at import by binding.json to the AI profile assistant, which pins one endpoint, and to pages for page; mapping.json is the bound dialect. The source asks for answer and page. Its research record (sources.json) retains the answer and two pages read through pages, each with its request, its result, the receipt a gateway signed and the salts, and its answers cite them: the company's id the answer and the first page, its headcount the first page, whether it is active the second; its read copies the answers to /company. The responses were served, in the test's process, by a stand-in of a gateway over TLS on the loopback address, at hosts of example.com that the test's client reaches at it, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session; a page's receipt names as acquisition.endpoint the page's final URL, its query removed, as the gateway's web adapter writes it. No model was asked, no page outside the test's process was read, and every identifier, URL and observation is synthetic. The installation's page profile changed after the run: its scope, which its digest holds whole, admits more than the scope the binding reviewed. preparation.json is the preparation the run recorded, which the export retains, and the Runner computes none from the changed inputs. A reader binding unbound.json with binding.json under profiles.json finds the binding naming pages by a digest that is not the given profile's, and concludes profile-mismatch before any response is replayed: a changed scope is another profile, which a binding must name anew. verify-run refuses it with no report.",
+      "from": "internal/runner/testdata/research/endpoint-scope-two-paths-one-origin",
+      "altered": "profiles.json's page profile, pages, carries its scope widened by one entry, [\"https://docs.example.com/guides\",\"https://elsewhere.example.com\"] where it was [\"https://docs.example.com/guides\"]; every other file is as the run wrote it, binding.json and mapping.json naming the profile by the digest it had.",
+      "verifiedAt": "2026-10-17T14:51:54Z",
+      "files": {
+        "binding.json": "sha256:d3c27f77c2db01c503ac88d3d2559e892e710a881a6273c2cd11ca2514d08279",
+        "case.json": "sha256:2f9db886cd9afb64ecae1fe941c205c98aba75898097ebd14274c6a908325655",
+        "checkpoints.jsonl": "sha256:a280ed65b9ef0500748fe2767a7d1faea4c97d1655e061ed78a7d75cb5757b89",
+        "mapping.json": "sha256:9553da23ee241b29bc2edc88ae0405340b2351c85cde75b62d744ee68af609c9",
+        "preparation.json": "sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3",
+        "preparation.sha256": "sha256:c54c9c6e4fda94bf41de0242fa926873446185401ed242a44988b1df50a6e84e",
+        "profiles.json": "sha256:96e726ab0d64ec9b42bd482c0db9ea8b8590b99511c05340a2a6444c564d8b38",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:5c00acd51247ab2c48e7bd291214c1f4d58f0370e8b8feb1946f41710a32e684",
+        "run.json": "sha256:f59d56e5d5bbd41a4e3f055ca0e1f5f41e093f229f6f56f35140a891634130ab",
+        "sources.json": "sha256:65263a1b384a11b38aa70967df916d45a6b6ab5494d70479d320c6301e89b3bc",
+        "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
+      },
+      "preparation": {
+        "sha256": "sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3\"}",
+        "retained": "recorded"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:43a762a517fc39c0481246a06ca2573958f26f28d22327ffa578986e28a20256",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": null,
+        "report": null,
+        "error": "release profile is not independently trusted (profile-mismatch). No decision was requested."
+      }
+    },
+    {
+      "name": "endpoint-scope-changed-request",
+      "note": "A run of one research source, company-pages, as Runner exported it (version 5), signed, witnessed and bound, under an installation whose page profile, pages, carries an endpoint scope in place of one endpoint (spec/dialect.md, section 5.1, RFC 0018 round 15): its endpoint null and its endpointScope [\"https://docs.example.com/guides\"]; its class generated, its research declaration the capability page alone, its shape http and its adapter adapter-web. The scope's whole value is in the profile's digest, which binding.json pins. The dialect, of version 3, was published with the source unbound (unbound.json) and bound at import by binding.json to the AI profile assistant, which pins one endpoint, and to pages for page; mapping.json is the bound dialect. The source asks for answer and page. Its research record (sources.json) retains the answer and two pages read through pages, each with its request, its result, the receipt a gateway signed and the salts, and its answers cite them: the company's id the answer and the first page, its headcount the first page, whether it is active the second; its read copies the answers to /company. The responses were served, in the test's process, by a stand-in of a gateway over TLS on the loopback address, at hosts of example.com that the test's client reaches at it, each receipt minted as a gateway mints one, under the stand-in's key, at call indexes of one session; a page's receipt names as acquisition.endpoint the page's final URL, its query removed, as the gateway's web adapter writes it. No model was asked, no page outside the test's process was read, and every identifier, URL and observation is synthetic. The two-paths run with the second page's request changed under its receipt. The changed URL is inside the scope, and replay holds no requested URL to the scope; the receipt's commitment holds the request's bytes. preparation.json is the preparation the run recorded, which the export retains, and the Runner computes none from the changed inputs. A reader replays the third response over its own request, finds that the receipt's arguments commitment is not of it, and concludes acquisition-invalid (section 5.2, check 4). verify-run refuses it with no report.",
+      "from": "internal/runner/testdata/research/endpoint-scope-two-paths-one-origin",
+      "altered": "In the export's research record of the source company-pages, the request of the third retained response, the second page, names https://docs.example.com/guides/gamma?item=company-0007-b where it named https://docs.example.com/guides/beta?item=company-0007-b; its receipt, which commits the request as it was, and the recorded preparation are as they were.",
+      "verifiedAt": "2026-10-17T14:51:54Z",
+      "files": {
+        "binding.json": "sha256:d3c27f77c2db01c503ac88d3d2559e892e710a881a6273c2cd11ca2514d08279",
+        "case.json": "sha256:2f9db886cd9afb64ecae1fe941c205c98aba75898097ebd14274c6a908325655",
+        "checkpoints.jsonl": "sha256:a280ed65b9ef0500748fe2767a7d1faea4c97d1655e061ed78a7d75cb5757b89",
+        "mapping.json": "sha256:9553da23ee241b29bc2edc88ae0405340b2351c85cde75b62d744ee68af609c9",
+        "preparation.json": "sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3",
+        "preparation.sha256": "sha256:c54c9c6e4fda94bf41de0242fa926873446185401ed242a44988b1df50a6e84e",
+        "profiles.json": "sha256:b1cc246fa0f4fbcb8c4dd1bac387637047ed580301a2b8ea2fea71bd00e14b3a",
+        "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
+        "release-digest.txt": "sha256:5c00acd51247ab2c48e7bd291214c1f4d58f0370e8b8feb1946f41710a32e684",
+        "run.json": "sha256:591ce43b762f2b91315161cd2b5ec35019b6ad92721bcda84c3f63b880012503",
+        "sources.json": "sha256:12c7c7a2564d149e9ebfec9f6acc89f7d0a824240c6e7dcc89198baa52bdb04e",
+        "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
+      },
+      "preparation": {
+        "sha256": "sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3",
+        "binding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3\"}",
+        "retained": "recorded"
+      },
+      "import": {
+        "published": "unbound.json",
+        "binding": "binding.json",
+        "bound": "mapping.json"
+      },
+      "recordBinding": "{\"kind\":\"judgment-pack-runner/preparation/1\",\"digest\":\"sha256:a54a2f96fd859f876bce4ff93f25fee05da31beccf56e73b277ae5d209793ca3\"}",
+      "verifyRun": {
+        "arguments": [
+          "--file",
+          "run.json",
+          "--profiles",
+          "profiles.json",
+          "--release-digest",
+          "sha256:43a762a517fc39c0481246a06ca2573958f26f28d22327ffa578986e28a20256",
+          "--public-key",
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "--require-signed",
+          "--expect",
+          "checkpoints.jsonl",
+          "--require-witnessed",
+          "--require-bound"
+        ],
+        "exit": 1,
+        "status": null,
+        "report": null,
+        "error": "Source company-pages: retained response 2, through the profile pages: response does not match the frozen request and this case's parameters (acquisition-invalid). No decision was requested."
+      }
     }
   ]
 }
