@@ -688,6 +688,16 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0022-workflow-admission-proof.md",
+        PurePosixPath("rfcs/0022-workflow-admission-proof/index.html"),
+        "RFC 0022: Retained workflow admission proofs",
+        "Draft proposal for public accounting epochs and independently checkable workflow byte refusals. "
+        "Proof bytes count toward actual bundle limits; portable encoding and transitions remain unresolved.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
