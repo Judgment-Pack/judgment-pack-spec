@@ -96,6 +96,15 @@ def endpoint_scope_cases() -> list[tuple[str, str, Any]]:
     add("equal path", endpoints=(PREFIX,))
     add("host case and default port", endpoints=("https://A.EXAMPLE:443/docs/one",))
     add("written default port in scope", scope=["https://A.EXAMPLE:443/docs"])
+    add("empty endpoint port", endpoints=("https://a.example:/docs/x",))
+    add("empty endpoint port with written scope port", scope=["https://a.example:443/docs"],
+        endpoints=("https://a.example:/docs/x",))
+    add("empty scope port", scope=["https://a.example:/docs"],
+        endpoints=("https://a.example/docs/x",))
+    add("record wildcard", malformed, scope=["https://*"],
+        profile_edit=lambda p: p.__setitem__("class", "record"))
+    add("record wildcard without research", malformed, scope=[PREFIX, "https://*"],
+        profile_edit=lambda p: (p.__setitem__("class", "record"), p.pop("research")))
     add("trailing prefix slash", scope=[PREFIX + "/"])
     add("trailing prefix excludes parent", invalid, scope=[PREFIX + "/"], endpoints=(PREFIX,))
     add("root admits absent path", scope=["https://a.example/"], endpoints=("https://a.example",))
@@ -112,7 +121,8 @@ def endpoint_scope_cases() -> list[tuple[str, str, Any]]:
     add("path at sign is not user", endpoints=(PREFIX + "/@name",))
     for endpoint in [
         None, "http://a.example/docs", "https://a.example:444/docs", "https://a.example:0443/docs",
-        "https://a.example:/docs", "https://user@a.example/docs", PREFIX + "?x", PREFIX + "#x",
+        "https://a.example:0/docs", "https://a.example:80/docs", "https://a.example:4430/docs",
+        "https://user@a.example/docs", PREFIX + "?x", PREFIX + "#x",
         "https://127.0.0.1/docs", "https://[::1]/docs", "https://127.1/docs",
         "https://localhost/docs", "https://a.example./docs", "https://a_b.example/docs",
         "https://-a.example/docs", "https://a-.example/docs", "https://a..example/docs",

@@ -48,7 +48,11 @@ It prints one line of JSON, members ordered by code point and every number its l
 
 ## Tests
 
-`npm test`, or `node --test test/vectors.test.ts test/units.test.ts`:
+`npm test`, or:
+
+```sh
+node --test test/vectors.test.ts test/units.test.ts test/endpoint.test.ts
+```
 
 - [`test/vectors.test.ts`](test/vectors.test.ts) reads every staged vector and holds the answer to the
   manifest's row (`expectedResult`, and `expectedBinding` or `expectedFinding`); the recomputed
@@ -70,6 +74,9 @@ It prints one line of JSON, members ordered by code point and every number its l
   this reader's readings of the text, not the vectors'. Under "the research contract", it builds
   hand-written research documents of every new form and refusal, signed under a key generated in the
   test, each with the answer the text gives.
+- [`test/endpoint.test.ts`](test/endpoint.test.ts) holds the endpoint scope form and matching
+  rules on altered copies of a staged research vector, including the three spellings of port
+  443 and the wildcard's restriction to generated page profiles. These are reader controls.
 
 The repository's Python suite runs both through `tests/test_dialect_ts.py`, and gives this reader
 the first reader's hand-written research documents (`tests/test_dialect.py`), holding the two
@@ -156,6 +163,12 @@ is otherwise any string. This reader had given `acquisition-stale` for such a ti
 for a string with no instant. The tests in [`test/units.test.ts`](test/units.test.ts) marked
 "round 9" hold each, and the first reader's tests give both readers the same cases. That
 correction is no part of this reader's independence.
+
+**Round 15.** RFC 0018's round 15 (issue #199, direction A) adds the endpoint scope form and
+matching rule. The extension was written by one author who read both readers, and so is no part
+of this reader's independence, as the RFC says. The controls in
+[`test/endpoint.test.ts`](test/endpoint.test.ts) use altered copies of a staged research vector;
+no vector is added or changed.
 
 ## Where the text was not enough
 

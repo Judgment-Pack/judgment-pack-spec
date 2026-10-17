@@ -97,6 +97,14 @@ const controls: [string, string, Parameters<typeof scopedInputs>[0]][] = [
   ["equal path", "reading", { endpoints: [prefix] }],
   ["host case and default port", "reading", { endpoints: ["https://A.EXAMPLE:443/docs/x"] }],
   ["written default port in prefix", "reading", { scope: ["https://A.EXAMPLE:443/docs"] }],
+  ["empty endpoint port", "reading", { endpoints: ["https://a.example:/docs/x"] }],
+  ["empty endpoint port with written scope port", "reading", {
+    scope: ["https://a.example:443/docs"], endpoints: ["https://a.example:/docs/x"] }],
+  ["empty scope port", "reading", {
+    scope: ["https://a.example:/docs"], endpoints: ["https://a.example/docs/x"] }],
+  ["record wildcard", malformed, { scope: ["https://*"], profile: (p) => p.class = "record" }],
+  ["record wildcard without research", malformed, { scope: [prefix, "https://*"],
+    profile: (p) => { p.class = "record"; delete p.research; } }],
   ["trailing slash", "reading", { scope: [prefix + "/"] }],
   ["trailing slash excludes parent", invalid, { scope: [prefix + "/"], endpoints: [prefix] }],
   ["absent root", "reading", { scope: ["https://a.example/"], endpoints: ["https://a.example"] }],
@@ -139,7 +147,8 @@ const controls: [string, string, Parameters<typeof scopedInputs>[0]][] = [
     d.acquisitions.person.response.result.responses.at(-1).receipt.acquisition.shape = "mcp" }],
 ];
 for (const endpoint of [null, "http://a.example/docs", "https://a.example:444/docs",
-  "https://a.example:0443/docs", "https://a.example:/docs", "https://user@a.example/docs",
+  "https://a.example:0443/docs", "https://a.example:0/docs", "https://a.example:80/docs",
+  "https://a.example:4430/docs", "https://user@a.example/docs",
   prefix + "?x", prefix + "#x", "https://127.0.0.1/docs", "https://[::1]/docs",
   "https://127.1/docs", "https://localhost/docs", "https://a.example./docs",
   "https://a_b.example/docs", "https://-a.example/docs", "https://a-.example/docs",

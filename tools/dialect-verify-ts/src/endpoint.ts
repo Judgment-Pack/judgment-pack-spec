@@ -1,7 +1,7 @@
 // §5.1: the constrained page form and prefix comparison. No URL parser or path decoding.
 export function pageEndpoint(value: string): [string, string] | undefined {
   if (value.length > 2048 || /[^\x21-\x7e]/.test(value)) return undefined;
-  const match = /^https:\/\/([A-Za-z0-9.-]+)(?::443)?(\/[^?#\\]*)?$/.exec(value);
+  const match = /^https:\/\/([A-Za-z0-9.-]+)(?::(?:443)?)?(\/[^?#\\]*)?$/.exec(value);
   if (match === null) return undefined;
   const host = match[1];
   const path = match[2] ?? "";

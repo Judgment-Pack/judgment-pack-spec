@@ -1166,6 +1166,9 @@ export function readProfiles(v: JVal): Profile[] {
         if (entry !== "https://*" && pageEndpoint(entry) === undefined) {
           malformed(`${what}: endpointScope entry is not an endpoint prefix`);
         }
+        if (cls === "record" && entry === "https://*") {
+          malformed(`${what}: a record profile cannot carry the endpoint wildcard`);
+        }
         return entry;
       });
       if (endpointScope.length === 0 || new Set(endpointScope).size !== endpointScope.length) {

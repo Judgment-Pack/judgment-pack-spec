@@ -2000,7 +2000,7 @@ def page_endpoint(value: Any) -> tuple[str, str] | None:
     """The constrained page form, parsed as text; no URL parser or path decoding (§5.1)."""
     if not isinstance(value, str) or len(value) > 2048 or not re.fullmatch(r"[\x21-\x7e]+", value):
         return None
-    match = re.fullmatch(r"https://([A-Za-z0-9.-]+)(?::443)?(/[^?#\\]*)?", value)
+    match = re.fullmatch(r"https://([A-Za-z0-9.-]+)(?::(?:443)?)?(/[^?#\\]*)?", value)
     if match is None:
         return None
     host, path = match[1], match[2] or ""
@@ -2102,6 +2102,8 @@ def parse_profiles(document: Any) -> dict[str, dict[str, Any]]:
                                for e in scope)
                     or len(set(scope)) != len(scope)):
                 raise malformed(f"{what}: endpointScope is not distinct endpoint prefixes")
+            if profile["class"] == "record" and "https://*" in scope:
+                raise malformed(f"{what}: a record profile cannot carry the endpoint wildcard")
         if not in_canon_domain(profile):
             raise malformed(f"{what}: outside the canon domain")
         profiles[profile["id"]] = profile

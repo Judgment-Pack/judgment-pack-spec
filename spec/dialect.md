@@ -733,11 +733,12 @@ and on a `web`-kind source, subject to the class rules below. Binding such a pro
 other kind or capability is `profile-mismatch`. `search` and `answer` retain exact provider
 endpoints. The same checks hold a retained response's assigned profile. (No vector decides this.)
 
-**The endpoint form for a constrained page.** This is a restriction of the Gateway's one
-endpoint form (`SPEC.md` §1.2a at `v0.17.0`). It is a string of at most 2048 ASCII characters,
-each from U+0021 to U+007E: exactly `https://`, then a host, then either nothing or `:443`,
-then either nothing or `/` and a path. There is no user, query or fragment. The host consists
-of two or more dot-separated labels, each of 1 to 63 characters. Each label starts and ends
+**The endpoint form for a constrained page.** This restricts the Gateway's remote-server URL
+form (`SPEC.md` §1.2a at `v0.17.0`) to HTTPS names, admitting the empty port as below. It is a
+string of at most 2048 ASCII characters, each from U+0021 to U+007E: exactly `https://`, then a
+host, then either nothing, `:443`, or `:` followed by nothing, then either nothing or a path,
+which begins with `/`. There is no user, query or fragment. The host consists of two or more
+dot-separated labels, each of 1 to 63 characters. Each label starts and ends
 with an ASCII letter or digit; its other characters are ASCII letters, digits or `-`. The last
 label starts with an ASCII letter. There is no trailing dot, underscore, IPv4 or IPv6
 literal, wildcard or other port. The path has no `?`, `#` or backslash. Each `%` is followed by
@@ -748,9 +749,12 @@ literal bytes and never supply a segment boundary. This form holds the receipt's
 when its profile carries `endpointScope`; it changes no historical receipt rule.
 (No vector decides this.)
 
-Each scope entry is either a prefix in that endpoint form, or exactly `https://*`. The latter
-admits every endpoint in that form, including an origin discovered during a case. It admits
-neither another scheme nor another port, nor an IP literal. It asserts no public reachability:
+Each scope entry is either a prefix in that endpoint form, or exactly `https://*`. The wildcard
+is admitted only on a profile of class `generated`, which only a research `page` assignment
+takes. A `record` profile's scope holds prefix entries only; a `record` profile carrying the
+wildcard is `input-malformed`. The wildcard admits every endpoint in that form, including an
+origin discovered during a case. It admits neither another scheme nor another port, nor an IP
+literal. It asserts no public reachability:
 a verifier does not resolve names, check addresses or establish that a host is public. The
 Gateway's connection and redirect policy still applies. Neither a source nor a binding document
 can narrow the scope per case in this round; `constraints` adds no endpoint rule. A portable
@@ -758,15 +762,16 @@ recipe cannot require reads to stay on a case's company origin under a wider ins
 profile. Such narrowing needs a later contract. (No vector decides this.)
 
 **Matching.** Validate the endpoint's form first. An endpoint matches the scope when at least
-one entry admits it. For a prefix entry, compare hosts with ASCII `A` to `Z` treated as `a` to
-`z`; an absent port and `:443` denote the same port. Compare paths byte for byte, case and
-percent spelling included, with no decoding, slash collapse or other normalization. An absent
+one entry admits it. For a prefix entry, the hosts are equal, ASCII `A` to `Z` compared as `a`
+to `z`; an absent port, `:443` and `:` followed by nothing denote port 443. Compare paths byte
+for byte, case and percent spelling included, with no decoding, slash collapse or other
+normalization. An absent
 prefix path or `/` admits every path, the absent endpoint path included. Otherwise the endpoint
 path must equal the prefix path, or start with that path followed by `/`; when the prefix
 already ends in `/`, starting with that prefix suffices. Thus `/docs` admits `/docs` and
 `/docs/x`, never `/docsx`; `/docs/` admits `/docs/` and `/docs/x`, never `/docs`. No subdomain
 match is implied. These comparisons rewrite neither the profile nor the receipt, and require
-no URL library. They admit host case and either spelling of port 443 as the Gateway writes
+no URL library. They admit host case and all three spellings of port 443 as the Gateway writes
 them today; no new Gateway normal form is required. (No vector decides this.)
 
 **Admission before acquisition.** A preparer MUST check every requested page URL against the
@@ -776,7 +781,10 @@ than `#`, each `%` followed by two hexadecimal digits. The whole URL is at most 
 Remove only the first `?` and everything after it for matching; keep the full request unchanged
 for its commitment. An invalid or out-of-scope request fails as `acquisition-invalid`, before
 any acquisition for that request. This applies to every discovered URL, not just the first.
-It is an admission duty, not an offline verifier's reconstruction of the request URL.
+Admission holds the requested URL, so a read reached through the Gateway's grounding redirect
+(`https://vertexaisearch.cloud.google.com/grounding-api-redirect/…`) needs that endpoint in the
+scope, or the wildcard. It is an admission duty, not an offline verifier's reconstruction of
+the request URL.
 (No vector decides this.)
 
 At binding, a `web` source's literal `url` that cannot meet that request check is
@@ -821,11 +829,11 @@ match. The pair MUST be the source's AI assignment or one of its web assignments
 required above; otherwise `profile-mismatch`. The reference in the response supplies neither a
 profile nor a key. The source's profile does not substitute for a retained response's profile.
 
-A profile pins the gateway's key, source, authority, adapter, shape, endpoint or endpoint scope,
-class, tools and any research declaration. These are the installation's classification of a
-channel. It does not pin a credential, a tenant's configuration or a model's weights, and an
-installation replaces a profile when a change of those makes its classification wrong (Runner,
-"Decisions and ownership").
+A profile is the installation's classification of a channel. It pins the gateway's key, source,
+authority, adapter, shape, endpoint or endpoint scope, class, tools and any research declaration;
+it does not pin a credential, a tenant's configuration or a model's weights, and an installation
+replaces a profile when a change of those makes its classification wrong (Runner, "Decisions and
+ownership").
 
 ### 5.2 Acquisitions
 
@@ -1513,7 +1521,8 @@ the refusal, at the first of these phases that fails, in this order:
 6. a dialect that names a kind the verifier does not read: `kind-unread`.
 
 The scope maxima are measured in phase 3 wherever measurable, even on a profile of the wrong
-shape; an unknown or misplaced `endpointScope` or a malformed entry is refused in phase 5.
+shape; an unknown or misplaced `endpointScope`, a malformed entry, or the wildcard on a
+`record` profile is `input-malformed` in phase 5, where a profile's form is checked.
 The scope's binding restrictions, including an impossible literal `web` URL, are finding 1.
 A receipt's scope match is check 3 within finding 3, in retained-response order. A preparer's
 request admission runs after parameters resolve and before that request is sent; it does not
