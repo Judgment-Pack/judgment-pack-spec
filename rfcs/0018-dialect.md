@@ -1818,7 +1818,7 @@ ordered by code point. (No vector decides facts before evidence.) An entry is an
 | `present` | `true` when the claim gives the target a value — a value at the pointer, or any availability for the requirement — and `false` otherwise |
 | `status`, `reason` | the outcome's |
 | `basis` | the claim's `basis`, or `[]` for a skipped source |
-| `dependencies` | the source's declared source parameters, as below, for every source that declares one, acquired or skipped; absent for the case, a local file and a source that declares none |
+| `dependencies` | the source's declared source parameters, as below, for every source that declares one, acquired or skipped; absent for the case and a source that declares none |
 | `candidateFrom` | the pointers of the value read that the dialect could copy to the target, distinct, ordered by code point: a copy entry's `source`, or each `from` of a claim form that writes the target; absent when there is none, as for a rule's evidence target |
 | `readDigest` | the read digest (§6) |
 | `receipt` | the acquisition's citation; for `research`, the record's own citation when it has one; absent for the case, a local file, a skipped source and a research record with no receipt of its own |

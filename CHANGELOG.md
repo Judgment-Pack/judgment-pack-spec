@@ -231,6 +231,12 @@ here.
 
 ### Changed
 
+- RFC 0018 and its companion, issue #200: the `dependencies` row of §9.3's lineage table no longer
+  says the member is absent for a local file. It reads "absent for the case and a source that
+  declares none", as round 12's rule in the same section already gives it to every source that
+  declares a source parameter, acquired or skipped; the reference Runner writes it for a local
+  file with parameters. A correction of a contradiction inside round 12's own text, not a new
+  rule. Both readers already follow the general rule; no reader changes, no vector is changed.
 - RFC 0018 and its companion record issue #197, option A (2026-10-16, round 14): a `selected-file`
   of provider `google-drive` requires a `drive` input profile of class `record`, and its binding
   is `record`; a profile of class `generated` bound to it is `profile-mismatch` (§§4, 4.2 and 5.1).
