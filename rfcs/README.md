@@ -69,12 +69,12 @@ stable feature requires two independent implementations and conformance cases.
 | [0018] | The dialect | Accepted | Specification (a companion document; see below) |
 | [0019] | The Judgment Exchange — a shared place for dialects | Draft | Research line (see below) |
 | [0020] | The workflow | Draft | Specification (a proposed companion document; see below) |
-| [0022] | Retained workflow admission proofs | Draft | Specification (a proposed amendment to the Draft workflow; unresolved portable encoding) |
+| [0024] | Retained workflow admission proofs | Draft | Specification (a proposed amendment to the Draft workflow; unresolved portable encoding) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
 [0020]: 0020-workflow.md
-[0022]: 0022-workflow-admission-proof.md
+[0024]: 0024-workflow-admission-proof.md
 
 RFC 0018 states how a pack's facts and evidence are obtained and derived, and what a preparation
 establishes per part. Its companion, [`spec/dialect.md`](../spec/dialect.md), defines the
@@ -103,7 +103,7 @@ RFC 0019 stays a Draft; a hosted registry remains out of scope (Unresolved quest
 RFC 0020 proposes `spec/workflow.md` beside Core, with a reader class and fixtures from a
 two-stage run, none recorded yet.
 
-RFC 0022 proposes public accounting epochs for independently checkable workflow byte refusals,
+RFC 0024 proposes public accounting epochs for independently checkable workflow byte refusals,
 with proof bytes included in actual bundle bounds. Its encoding and transitions have explicit
 acceptance blockers; it changes neither RFC 0020 nor its companion and creates no conformance claim.
 

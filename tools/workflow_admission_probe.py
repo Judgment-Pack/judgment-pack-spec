@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Synthetic byte-accounting experiment for the RFC 0022 drafting discussion.
+"""Synthetic byte-accounting experiment for the RFC 0024 drafting discussion.
 
 This is NOT a workflow verifier, production writer, conformance corpus, or operation recording.
 It constructs workflow-shaped controls and explicitly synthetic, prevalidated artifact roles.

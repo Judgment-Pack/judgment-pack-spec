@@ -1,7 +1,8 @@
 # Experimental offline workflow reader
 
-This is a separately authored experiment against proposed RFC 0022 at Spec
-`88794f7ac09fc46d8af89605f1defbd7a7db14d9`. The initial algorithm was frozen at
+This is a separately authored experiment against proposed RFC 0024 (numbered
+RFC 0022 at Spec
+`88794f7ac09fc46d8af89605f1defbd7a7db14d9`). The initial algorithm was frozen at
 `e3fde6153f992a42997b43459e5eb87b6ad5dcab`; that byte-identical checkpoint is
 archived at `/tmp/jps-portable-delivery/workflow-reader-freeze-initial`. This is
 not an adopted interface or a
@@ -9,6 +10,10 @@ complete workflow conformance claim. The initial algorithm was written before
 receiving actual workflow recordings or comparison results from the Go writer.
 The unit examples are manually constructed contract examples, not evidence that
 an operation or research journey actually ran.
+
+The historical review and input records below retain RFC 0022, the number used
+at their pinned commits. Those references describe this admission-proof proposal,
+now RFC 0024, rather than the separate contributor proposal assigned RFC 0022.
 
 ## API
 

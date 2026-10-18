@@ -1,4 +1,4 @@
-# RFC 0022: Retained workflow admission proofs
+# RFC 0024: Retained workflow admission proofs
 
 - Status: Draft
 - Type: Standards track, a proposed amendment to the Draft workflow contract

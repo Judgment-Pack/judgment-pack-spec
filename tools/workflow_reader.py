@@ -1,4 +1,4 @@
-"""Separately authored, offline RFC 0022 workflow reader experiment.
+"""Separately authored, offline RFC 0024 workflow reader experiment.
 
 Contract pin: 88794f7ac09fc46d8af89605f1defbd7a7db14d9. Not a conformance claim.
 Input authority is explicit in Expectations; files never confer trust on themselves.
@@ -1051,7 +1051,7 @@ class Reader:
         return result
 
     def failed_preparation(self,stage,retained,instance,failure):
-        at=retained.run['finishedAt']  # Exact terminal-check instant under RFC 0022's added writer constraint.
+        at=retained.run['finishedAt']  # Exact terminal-check instant under RFC 0024's added writer constraint.
         prefix=f"instances/{instance['id']}/attempts/{integer(retained.observation['number'])}/"
         acquisitions=d.read_document(retained.files[prefix+'sources.json'],'failed preparation acquisitions')
         try:
