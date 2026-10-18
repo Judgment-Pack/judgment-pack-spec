@@ -6,7 +6,7 @@
 - Issue: [#211](https://github.com/Judgment-Pack/judgment-pack-spec/issues/211)
 
 This is an open proposal, not part of JPS. It adds no released schema, conformance
-class or execution authority. The prototype under `rfcs/policy-companion-prototype/`
+class or execution authority. The [prototype](policy-companion-prototype/README.md)
 is explicitly non-normative. Host integration guidance below names separate
 product responsibilities; acceptance of this RFC would not adopt those products'
 protocols on their behalf.

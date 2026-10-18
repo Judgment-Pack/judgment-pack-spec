@@ -688,6 +688,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0023-policy-companion.md",
+        PurePosixPath("rfcs/0023-policy-companion/index.html"),
+        "RFC 0023: Policy content and governing adoption",
+        "Draft proposal for immutable policy content and exact governing adoption, with an exploratory non-normative prototype and unresolved trust and live governance contracts.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
@@ -1598,6 +1607,10 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
                 "artifacts/conformance/evaluation/manifest.schema.json"
             ),
             ".vscode/tasks.json": GITHUB_ROOT + ".vscode/tasks.json",
+            # Exploratory prototype files remain source review material, not site artifacts.
+            "rfcs/policy-companion-prototype/README.md": (
+                GITHUB_BLOB_ROOT + "main/rfcs/policy-companion-prototype/README.md"
+            ),
         }
     )
     for path in sorted((ROOT / "conformance" / "evaluation" / "packs").glob("*.json")):
