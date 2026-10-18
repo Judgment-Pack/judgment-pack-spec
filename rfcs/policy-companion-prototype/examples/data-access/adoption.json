@@ -1,0 +1,76 @@
+{
+  "prototype": {
+    "profile": "jps-policy-companion-prototype",
+    "proposalVersion": "0.0.1",
+    "status": "non-normative"
+  },
+  "kind": "governing-adoption",
+  "id": "https://example.invalid/policy-companion-prototype/data-access/adoption",
+  "version": "1.0.0",
+  "consumer": {
+    "kind": "pack",
+    "id": "https://example.invalid/policy-companion-prototype/data-access/pack",
+    "version": "1.0.0",
+    "content": {
+      "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
+      "byteLength": 1558,
+      "mediaType": "application/json"
+    },
+    "canonicalIdentity": {
+      "profile": "jps-canon",
+      "canonicalDigest": "sha256:d20e694ca1f99d0b3c8e239fdec3e5d1122dc875986ef5ed3651a52b3fba2473"
+    }
+  },
+  "governingPolicies": [
+    {
+      "policy": {
+        "kind": "policy",
+        "id": "https://example.invalid/policy-companion-prototype/data-access/policy",
+        "version": "1.0.0",
+        "content": {
+          "bytesDigest": "sha256:b6b76777db72be932d05bd422345440fac303df43d461e472df99f4bb5d19f5b",
+          "byteLength": 2120,
+          "mediaType": "application/json"
+        },
+        "canonicalIdentity": {
+          "profile": "jps-canon",
+          "canonicalDigest": "sha256:9dfa3658de5938458b330326b3bb64482a274d721059d689920394b2ab9200b1"
+        }
+      },
+      "scope": {
+        "kind": "whole-policy"
+      },
+      "coverage": [
+        {
+          "sectionId": "eligibility",
+          "status": "implemented",
+          "consumerElements": [
+            {
+              "kind": "rule",
+              "id": "eligible"
+            },
+            {
+              "kind": "rule",
+              "id": "ineligible"
+            }
+          ],
+          "reviewBasis": {
+            "bytesDigest": "sha256:731b587b5759a27cd6e4ebf55b030f0a4cea72cfb6922344b9ed62ea15078d9c",
+            "byteLength": 204,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "sectionId": "exception-review",
+          "status": "manual",
+          "handoff": "Fictional specialist uses the documented manual review queue; this statement grants no role or access."
+        },
+        {
+          "sectionId": "audit-review",
+          "status": "awaiting-implementation",
+          "explanation": "Synthetic open work item: develop and review a separate implementation."
+        }
+      ]
+    }
+  ]
+}

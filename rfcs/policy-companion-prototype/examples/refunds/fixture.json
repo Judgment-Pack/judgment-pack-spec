@@ -1,0 +1,62 @@
+{
+  "prototype": {
+    "profile": "jps-policy-companion-prototype",
+    "proposalVersion": "0.0.1",
+    "status": "non-normative"
+  },
+  "synthetic": true,
+  "scenario": "refunds",
+  "materials": [
+    {
+      "path": "narrative.txt",
+      "content": {
+        "bytesDigest": "sha256:7b8efe1cfe9ccd5a3c148bdac3208656db483daddebeac1817252a2b2c5993c4",
+        "byteLength": 366,
+        "mediaType": "text/plain"
+      }
+    },
+    {
+      "path": "source.txt",
+      "content": {
+        "bytesDigest": "sha256:ffc4b97cf6de99368078cd10cd63ce1633b4f93d2baf6121b791c79eaf3d0dad",
+        "byteLength": 367,
+        "mediaType": "text/plain"
+      }
+    },
+    {
+      "path": "interpretation.txt",
+      "content": {
+        "bytesDigest": "sha256:731b587b5759a27cd6e4ebf55b030f0a4cea72cfb6922344b9ed62ea15078d9c",
+        "byteLength": 204,
+        "mediaType": "text/plain"
+      }
+    },
+    {
+      "path": "consumer-pack.json",
+      "content": {
+        "bytesDigest": "sha256:fe900ff1e1217ac5d421043229b02f774c8198fbf12956e2910d96bb711b7c47",
+        "byteLength": 1564,
+        "mediaType": "application/json"
+      }
+    },
+    {
+      "path": "policy.json",
+      "content": {
+        "bytesDigest": "sha256:18cee00796eff2818edca1cfbdc7148f3009eca4a838942c9e4693727a40a366",
+        "byteLength": 2092,
+        "mediaType": "application/json"
+      }
+    },
+    {
+      "path": "adoption.json",
+      "content": {
+        "bytesDigest": "sha256:b78daaa2f10b353ed2a1c56fb493903919fc4db67adebe8fe408f13c8de3caa8",
+        "byteLength": 2382,
+        "mediaType": "application/json"
+      }
+    }
+  ],
+  "policy": "policy.json",
+  "consumer": "consumer-pack.json",
+  "adoption": "adoption.json"
+}

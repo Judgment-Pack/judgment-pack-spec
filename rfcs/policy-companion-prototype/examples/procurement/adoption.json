@@ -1,0 +1,86 @@
+{
+  "prototype": {
+    "profile": "jps-policy-companion-prototype",
+    "proposalVersion": "0.0.1",
+    "status": "non-normative"
+  },
+  "kind": "governing-adoption",
+  "id": "https://example.invalid/policy-companion-prototype/procurement/adoption",
+  "version": "1.0.0",
+  "consumer": {
+    "kind": "pack",
+    "id": "https://example.invalid/policy-companion-prototype/procurement/pack",
+    "version": "1.0.0",
+    "content": {
+      "bytesDigest": "sha256:1eaa2d06269354c5c0b243b568ca841459c2143d104d85d203ff581d11dd2d5d",
+      "byteLength": 1602,
+      "mediaType": "application/json"
+    },
+    "canonicalIdentity": {
+      "profile": "jps-canon",
+      "canonicalDigest": "sha256:71aefcfefe0800eb0bece09becd57c688435e8463382cf1052f97b9e368a939f"
+    }
+  },
+  "governingPolicies": [
+    {
+      "policy": {
+        "kind": "policy",
+        "id": "https://example.invalid/policy-companion-prototype/procurement/policy",
+        "version": "1.0.0",
+        "content": {
+          "bytesDigest": "sha256:c81414240febd9a9a4e69b74d041511dfcc05a4bb8bb851715723d2659532ce8",
+          "byteLength": 2523,
+          "mediaType": "application/json"
+        },
+        "canonicalIdentity": {
+          "profile": "jps-canon",
+          "canonicalDigest": "sha256:3658688c92691ccc8e59ce77e2fdc306ee080fa751245745918759e0b76cfb4b"
+        }
+      },
+      "scope": {
+        "kind": "sections",
+        "sectionIds": [
+          "eligibility",
+          "conflict-review",
+          "invoice-payment"
+        ],
+        "reviewBasis": {
+          "bytesDigest": "sha256:77a305e99589ddc5849edb124792312ba2f4c58a8946cf48efa50708bde35472",
+          "byteLength": 334,
+          "mediaType": "text/plain"
+        }
+      },
+      "coverage": [
+        {
+          "sectionId": "eligibility",
+          "status": "implemented",
+          "consumerElements": [
+            {
+              "kind": "rule",
+              "id": "eligible"
+            },
+            {
+              "kind": "rule",
+              "id": "ineligible"
+            }
+          ],
+          "reviewBasis": {
+            "bytesDigest": "sha256:77a305e99589ddc5849edb124792312ba2f4c58a8946cf48efa50708bde35472",
+            "byteLength": 334,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "sectionId": "conflict-review",
+          "status": "awaiting-interpretation",
+          "explanation": "Synthetic open work item: agree the conflict threshold before implementation."
+        },
+        {
+          "sectionId": "invoice-payment",
+          "status": "out-of-scope",
+          "rationale": "This pack assesses eligibility only; treasury payment reconciliation is a separate process."
+        }
+      ]
+    }
+  ]
+}
