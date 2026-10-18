@@ -1,4 +1,4 @@
-"""Round 15 reader controls, altered copies of a staged research vector, never vectors."""
+"""Rounds 15 and 16 reader controls, altered copies of a staged research vector, never vectors."""
 from __future__ import annotations
 
 import copy
@@ -11,6 +11,13 @@ from test_dialect import Inputs, READER, signer
 
 VECTOR = "gtm-company-person-valid-types-all-six"
 PREFIX = "https://a.example/docs"
+# Round 16 (issue #214, option C): each path below lies under PREFIX and round 15's form admitted
+# it. An escaped slash or backslash anywhere in the path, or a dot segment before a segment's
+# first `;`, is now outside the form.
+ROUND_16_REFUSED = (
+    "/a%2fb", "/a%2Fb", "/a%5cb", "/a%5Cb", "/%2e%2e%2fadmin", "/..;x", "/..;/admin",
+    "/%2e%2e;x", "/%2E%2e;/admin", "/.;", "/.;/admin", "/.%2e;y=1", "/x/..;",
+)
 
 
 def encoded(value: Any) -> bytes:
@@ -119,6 +126,15 @@ def endpoint_scope_cases() -> list[tuple[str, str, Any]]:
     add("no escape decoding", invalid, scope=[PREFIX + "/%7e"], endpoints=(PREFIX + "/~",))
     add("repeated slash preserved", invalid, scope=[PREFIX + "//x"], endpoints=(PREFIX + "/x",))
     add("path at sign is not user", endpoints=(PREFIX + "/@name",))
+    for path in ROUND_16_REFUSED:
+        add("round 16 endpoint " + repr(path), invalid, endpoints=(PREFIX + path,))
+        add("round 16 scope entry " + repr(path), malformed, scope=[PREFIX + path])
+    add("round 16 parameter on an ordinary segment", endpoints=(PREFIX + "/page;v=1",))
+    add("round 16 parameter in a scope entry", scope=[PREFIX + "/a;b"],
+        endpoints=(PREFIX + "/a;b/x",))
+    add("round 16 dots after the first parameter", endpoints=(PREFIX + "/x;../y",))
+    add("round 16 three dots with a parameter", endpoints=(PREFIX + "/...;x",))
+    add("round 16 escaped dot inside a segment", endpoints=(PREFIX + "/a%2eb",))
     for endpoint in [
         None, "http://a.example/docs", "https://a.example:444/docs", "https://a.example:0443/docs",
         "https://a.example:0/docs", "https://a.example:80/docs", "https://a.example:4430/docs",

@@ -256,6 +256,15 @@ here.
 
 ### Changed
 
+- RFC 0018 and its companion record issue #214, option C (2026-10-18, round 16): the constrained
+  page form refuses an escaped slash or backslash (`%2f`, `%2F`, `%5c`, `%5C`) anywhere in the
+  path, and a segment whose part before its first `;` is a dot segment (`..;x`, `.;`,
+  `%2e%2e;`). The refusals hold wherever round 15's form does: every scope entry and endpoint, at
+  admission and at check 3. Section 13 says the scope holds the URL as written, not what a server
+  serves for it; double encoding, case folding and a server's own rewriting stay the operator's.
+  Both readers implement the refusals with controls on altered copies of a staged vector; no
+  vector changes. The Runner's matcher and the Desk's admission check remain follow-ups. The
+  clean-room review follows, run by the coordinator.
 - RFC 0018 and its companion record issue #199, direction A (2026-10-17, round 15): an optional
   `endpointScope` for page profiles, checked against each signed final endpoint. The form admits
   all three spellings of port 443; only generated research page profiles admit the wildcard,

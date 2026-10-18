@@ -2012,7 +2012,11 @@ def page_endpoint(value: Any) -> tuple[str, str] | None:
         return None
     if re.search(r"%(?![0-9A-Fa-f]{2})", path):
         return None
-    if any(re.fullmatch(r"(?:\.|%2[eE]){1,2}", segment) for segment in path.split("/")):
+    if re.search(r"%(?:2[fF]|5[cC])", path):  # Round 16: an escaped slash or backslash.
+        return None
+    # A dot segment, alone or before a segment's first `;` (round 16).
+    if any(re.fullmatch(r"(?:\.|%2[eE]){1,2}", segment.split(";", 1)[0])
+           for segment in path.split("/")):
         return None
     return host.lower(), path  # ASCII host comparison only; signed bytes are never rewritten.
 

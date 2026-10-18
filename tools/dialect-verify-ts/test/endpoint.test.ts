@@ -1,4 +1,4 @@
-// Round 15 reader controls: altered copies of a staged research vector, never new vectors.
+// Rounds 15 and 16 reader controls: altered copies of a staged research vector, never new vectors.
 import assert from "node:assert/strict";
 import { createHash, createPrivateKey, createPublicKey, sign } from "node:crypto";
 import { dirname, join } from "node:path";
@@ -166,6 +166,24 @@ for (const scope of [null, [], {}, "https://*", [null], [prefix, prefix], ["http
   ["https://a.example:444"], ["https://a.example./"], ["https://A.EXAMPLE/%2E/"]]) {
   controls.push(["bad scope " + JSON.stringify(scope), malformed, { scope }]);
 }
+// Round 16 (issue #214, option C): each path lies under the prefix and round 15's form admitted
+// it. An escaped slash or backslash anywhere in the path, or a dot segment before a segment's
+// first `;`, is now outside the form.
+for (const path of ["/a%2fb", "/a%2Fb", "/a%5cb", "/a%5Cb", "/%2e%2e%2fadmin", "/..;x",
+  "/..;/admin", "/%2e%2e;x", "/%2E%2e;/admin", "/.;", "/.;/admin", "/.%2e;y=1", "/x/..;"]) {
+  controls.push(["round 16 endpoint " + path, invalid, { endpoints: [prefix + path] }]);
+  controls.push(["round 16 scope entry " + path, malformed, { scope: [prefix + path] }]);
+}
+controls.push(["round 16 parameter on an ordinary segment", "reading",
+  { endpoints: [prefix + "/page;v=1"] }]);
+controls.push(["round 16 parameter in a scope entry", "reading",
+  { scope: [prefix + "/a;b"], endpoints: [prefix + "/a;b/x"] }]);
+controls.push(["round 16 dots after the first parameter", "reading",
+  { endpoints: [prefix + "/x;../y"] }]);
+controls.push(["round 16 three dots with a parameter", "reading",
+  { endpoints: [prefix + "/...;x"] }]);
+controls.push(["round 16 escaped dot inside a segment", "reading",
+  { endpoints: [prefix + "/a%2eb"] }]);
 const longest = "https://a.example/" + "x".repeat(2048 - "https://a.example/".length);
 controls.push(["2048 byte entry", "reading", { scope: [longest], endpoints: [longest] }]);
 controls.push(["2049 bytes before forms", over,

@@ -11,7 +11,11 @@ export function pageEndpoint(value: string): [string, string] | undefined {
     return undefined;
   }
   if (/%(?![0-9A-Fa-f]{2})/.test(path)) return undefined;
-  if (path.split("/").some((s) => /^(?:\.|%2[eE]){1,2}$/.test(s))) return undefined;
+  if (/%(?:2[fF]|5[cC])/.test(path)) return undefined; // Round 16: an escaped slash or backslash.
+  // A dot segment, alone or before a segment's first `;` (round 16).
+  if (path.split("/").some((s) => /^(?:\.|%2[eE]){1,2}$/.test(s.split(";", 1)[0]))) {
+    return undefined;
+  }
   return [host.toLowerCase(), path]; // ASCII host comparison; signed bytes stay as written.
 }
 
