@@ -135,10 +135,24 @@ def unique_by_id(items, what):
     return result
 
 
+def register_material(reference, raw, material):
+    """Register a typed reference; a shared byte digest need not have one media type."""
+    check_schema("common", reference)
+    key = reference["bytesDigest"]
+    entry = material.get(key)
+    require(entry is None or entry[0] == raw, "conflicting retained material bytes")
+    require(identity(raw, reference["mediaType"]) == reference, "retained byte identity/media type mismatch")
+    media_types = {reference["mediaType"]}
+    if entry is not None:
+        media_types.update(entry[1])
+    material[key] = (raw, media_types)
+
+
 def resolve(reference, material):
     entry = material.get(reference["bytesDigest"])
     require(entry is not None, "missing retained material")
-    require(identity(entry[0], entry[1]) == reference, "retained byte identity/media type mismatch")
+    require(reference["mediaType"] in entry[1], "unregistered retained material media type")
+    require(identity(entry[0], reference["mediaType"]) == reference, "retained byte identity/media type mismatch")
     return entry[0]
 
 
@@ -232,12 +246,7 @@ def load_bundle(directory):
         require(path.parent == directory and not Path(name).is_absolute(), "material must be a local fixture file")
         require(name not in by_path, "duplicate material path")
         raw = read_local(path, MAX_MATERIAL_BYTES)
-        check_schema("common", entry["content"])
-        require(identity(raw, entry["content"]["mediaType"]) == entry["content"], "fixture material identity mismatch")
-        key = entry["content"]["bytesDigest"]
-        retained = (raw, entry["content"]["mediaType"])
-        require(key not in material or material[key] == retained, "conflicting retained material media type")
-        material[key] = retained
+        register_material(entry["content"], raw, material)
         by_path[name] = raw
     for name in ("policy", "consumer", "adoption"):
         require(isinstance(manifest[name], str) and manifest[name] in by_path, "missing fixture document")

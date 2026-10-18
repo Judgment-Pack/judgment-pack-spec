@@ -4,6 +4,8 @@ import copy
 import json
 import unittest
 from decimal import Decimal
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import verify as v
 
@@ -21,7 +23,7 @@ class PrototypeTests(unittest.TestCase):
     def retain(self, document):
         raw = (json.dumps(document, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
         content = v.identity(raw, "application/json")
-        self.material[content["bytesDigest"]] = (raw, "application/json")
+        v.register_material(content, raw, self.material)
         return content
 
     def test_three_synthetic_domains_and_all_coverage_states(self):
@@ -82,15 +84,70 @@ class PrototypeTests(unittest.TestCase):
     def test_original_bytes_are_separate_from_narrative_offsets(self):
         original = b"%PDF-synthetic-original-\xff"
         content = v.identity(original, "application/pdf")
-        self.material[content["bytesDigest"]] = (original, "application/pdf")
+        v.register_material(content, original, self.material)
         self.policy["sourceProvenance"][0]["content"] = content
         v.check_policy(self.policy, self.material)
         self.assertNotEqual(content, self.policy["content"])
 
+    def test_identical_markdown_original_and_plain_narrative_bundle(self):
+        manifest = copy.deepcopy(self.manifest)
+        payloads = {entry["path"]: v.resolve(entry["content"], self.material) for entry in manifest["materials"]}
+        narrative = v.resolve(self.policy["content"], self.material)
+        original = self.policy["sourceProvenance"][0]["content"]
+        source_entry = next(entry for entry in manifest["materials"] if entry["content"] == original)
+        source_entry["path"] = "original.md"
+        source_entry["content"] = v.identity(narrative, "text/markdown")
+        payloads["original.md"] = narrative
+        policy = copy.deepcopy(self.policy)
+        policy["sourceProvenance"][0]["content"] = source_entry["content"]
+        policy_raw = (json.dumps(policy, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+        payloads[manifest["policy"]] = policy_raw
+        adoption = copy.deepcopy(self.adoption)
+        reference = adoption["governingPolicies"][0]["policy"]
+        reference["content"] = v.identity(policy_raw, "application/json")
+        reference["canonicalIdentity"] = v.canonical_identity(policy_raw)
+        payloads[manifest["adoption"]] = (json.dumps(adoption, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+        with TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            for entry in manifest["materials"]:
+                raw = payloads[entry["path"]]
+                entry["content"] = v.identity(raw, entry["content"]["mediaType"])
+                (directory / entry["path"]).write_bytes(raw)
+            (directory / "fixture.json").write_text(json.dumps(manifest), encoding="utf-8")
+            self.assertEqual(v.verify_bundle(directory), "data-access")
+            _, material, loaded, _ = v.load_bundle(directory)
+            self.assertEqual(v.resolve(loaded["content"], material), narrative)
+            self.assertEqual(v.resolve(loaded["sourceProvenance"][0]["content"], material), narrative)
+
+    def test_material_requires_registered_media_type_and_exact_length(self):
+        content = self.policy["content"]
+        raw = v.resolve(content, self.material)
+        markdown = v.identity(raw, "text/markdown")
+        self.reject(lambda: v.resolve(markdown, self.material), "unregistered retained material media type")
+        v.register_material(markdown, raw, self.material)
+        self.assertEqual(v.resolve(markdown, self.material), raw)
+        self.assertEqual(v.resolve(content, self.material), raw)
+        html = v.identity(raw, "text/html")
+        self.reject(lambda: v.resolve(html, self.material), "unregistered retained material media type")
+        wrong_length = {**markdown, "byteLength": len(raw) + 1}
+        self.reject(lambda: v.resolve(wrong_length, self.material), "byte identity")
+        self.reject(lambda: v.register_material(wrong_length, raw, self.material), "byte identity")
+
+    def test_material_registration_rejects_conflicting_bytes_and_wrong_digest(self):
+        content = self.policy["content"]
+        raw = v.resolve(content, self.material)
+        markdown = v.identity(raw, "text/markdown")
+        self.reject(lambda: v.register_material(markdown, raw + b"changed", self.material), "conflicting retained material bytes")
+        self.reject(lambda: v.resolve(markdown, self.material), "unregistered retained material media type")
+        self.assertEqual(v.resolve(content, self.material), raw)
+        wrong_digest = {**markdown, "bytesDigest": "sha256:" + "0" * 64}
+        self.reject(lambda: v.register_material(wrong_digest, raw, self.material), "byte identity")
+        self.reject(lambda: v.resolve(wrong_digest, self.material), "missing retained material")
+
     def test_non_utf8_policy_narrative_is_refused(self):
         raw = b"\xff"
         content = v.identity(raw, "text/plain")
-        self.material[content["bytesDigest"]] = (raw, "text/plain")
+        v.register_material(content, raw, self.material)
         self.policy["content"] = content
         self.reject(lambda: v.check_policy(self.policy, self.material), "narrative is not UTF-8")
 
@@ -99,7 +156,7 @@ class PrototypeTests(unittest.TestCase):
         self.reject(lambda: v.check_policy(self.policy, self.material), "missing retained material")
         _, material, policy, _ = v.load_bundle(v.HERE / "examples" / "data-access")
         key = policy["content"]["bytesDigest"]
-        material[key] = (material[key][0] + b"changed", "text/plain")
+        material[key] = (material[key][0] + b"changed", {"text/plain"})
         self.reject(lambda: v.check_policy(policy, material), "byte identity")
 
     def test_anchor_range_digest_and_utf8_boundaries(self):
@@ -137,7 +194,8 @@ class PrototypeTests(unittest.TestCase):
         self.assertNotEqual(v.spec_canon.digest_of(raw), v.spec_canon.digest_of(compact))
         self.assertEqual(reference["canonicalIdentity"]["canonicalDigest"], v.spec_canon.digest_of(compact))
         content = v.identity(compact, "application/json")
-        material = {content["bytesDigest"]: (compact, "application/json")}
+        material = {}
+        v.register_material(content, compact, material)
         self.reject(lambda: v.check_artifact(reference, "pack", material), "missing retained material")
         reference["content"] = content
         v.check_artifact(reference, "pack", material)
@@ -168,7 +226,7 @@ class PrototypeTests(unittest.TestCase):
         view = v.core_schema_view(parsed)["extensions"]["com.example.numeric-notes"]
         self.assertEqual(view, {"fraction": Decimal("1.234567890123456789"), "exponent": 100, "large": 9007199254740992})
         reference["content"] = v.identity(raw, "application/json")
-        self.material[reference["content"]["bytesDigest"]] = (raw, "application/json")
+        v.register_material(reference["content"], raw, self.material)
         del reference["canonicalIdentity"]
         v.check_adoption(self.adoption, self.material)
         self.assertEqual(v.resolve(reference["content"], self.material), raw)

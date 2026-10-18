@@ -120,6 +120,15 @@ and interpretation are not inferred from structurally valid coverage.
 `sha256:` plus 64 hexadecimal digits over **exact retained bytes**, including
 whitespace and final newlines. It never hashes a URL or filename.
 
+Media type belongs to the declared content reference, not uniquely to its byte
+digest. An unchanged Markdown original and its plain-text narrative can share
+exact bytes while registering `text/markdown` and `text/plain` references. The
+fixture carrier stores one byte blob per digest with its explicitly registered
+media types. Reusing that digest requires identical bytes; each resolution still
+checks the registered media type, exact digest and byte length. A different media
+type is never accepted merely because the bytes are present. These declarations
+do not authenticate a source or prove its format.
+
 An artifact reference may additionally carry
 `canonicalIdentity: {profile: "jps-canon", canonicalDigest}`. Here `jps-canon` is a
 prototype selector referring directly to the existing Spec
