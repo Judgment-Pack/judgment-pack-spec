@@ -13,7 +13,8 @@
   the skipped source's form, issue #189, option A; the class a binding takes, by kind,
   and what each research profile serves, issue #195; the class a Drive selected-file takes,
   issue #197, option A), 2026-10-17 (a page endpoint constraint, issue #199, direction A,
-  round 15)
+  round 15), 2026-10-18 (traversal spellings in a constrained page path, issue #214,
+  option C, round 16)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -658,6 +659,72 @@ Its review is round 15 of this RFC, recorded under
 `0018-round-15.md` with the maintainer's disposition of each finding (one HIGH, two MEDIUM and
 four LOW, all applied).
 
+## Amendment of 2026-10-18: traversal spellings in a constrained page path
+
+This amendment records the maintainer's decision on
+[issue #214](https://github.com/Judgment-Pack/judgment-pack-spec/issues/214), option C, on
+[pull request 215](https://github.com/Judgment-Pack/judgment-pack-spec/pull/215). It is
+round 16. The status stays Accepted. The Specification and companion are amended equally.
+
+**The decision.** Round 15's constrained page form (§5.1) refuses two more spellings, and §13
+says what a scope still cannot hold. A path with an escaped slash or backslash anywhere in it,
+`%2f`, `%2F`, `%5c` or `%5C`, is outside the form. So is a path with a segment whose part
+before its first `;`, `%3b`, `%3B`, `%3f`, `%3F`, `%23` or `%00`, whichever comes first, is a
+dot segment, one or two tokens each `.`, `%2e` or `%2E`: `..;x`, `.;`, `%2e%2e;`, `..%3bx` and
+`.%00` are refused. The rule is stated as round 15's is, on the path as written, without
+decoding it. Every other escape stays literal bytes and supplies no segment boundary.
+(No vector decides this.)
+
+**Why.** Round 15 split a path at literal `/` only and kept every other escape as literal
+bytes. Its readers agree on every answer, but a URL as written can differ from what a server
+serves for it. A server that decodes `%2f` reads `/guides/%2e%2e%2fadmin` as `/guides/../admin`.
+A server that drops `;` parameters reads `/guides/..;/admin` the same way. Round 15 admitted
+both under the prefix `/guides`, so a server could serve a page from outside the prefix while
+the receipt showed the URL inside it. A cross-vendor clean-room audit of the Desk's admission
+check, which follows the text, found it. Each escaped delimiter is refused after a dot segment
+for the same reason as a literal `;`: a server that decodes it reads a parameter or the end of
+the path. A decoded `%3b` or `%3B` begins a parameter, which a server may then drop. A decoded
+`%3f` or `%3F` begins a query, and a decoded `%23` a fragment, so the path ends there. A
+decoded `%00` ends the path for a server that reads it as a string's end. In each case the
+dot segment before it is what the server serves. The refusal fails closed. A page whose path
+carries an escaped slash or backslash cannot be read under any scope, the wildcard included; a
+research run that discovers one fails at admission. Only an exact-endpoint profile naming that
+URL reads it.
+
+**Where it applies.** The form is round 15's, so the refusals hold wherever that form does: for
+every scope entry and every endpoint, at admission before acquisition and at check 3 (§§5.1,
+5.2). A profile whose scope entry carries a refused spelling is `input-malformed`, as any
+malformed entry is. A requested URL whose path carries one fails admission as
+`acquisition-invalid` before acquisition. A `web` source's literal `url` carrying one is
+`profile-mismatch` at binding. A receipt whose final endpoint carries one fails check 3 as
+`acquisition-invalid`. A `;` or an escaped delimiter on any other segment stays admitted, and
+so does a dot segment after a segment's first delimiter. (No vector decides this.)
+
+**What remains.** Section 13's entry for an acquisition under a constrained page profile now says
+that the scope holds the URL as written, not what a server serves for it. No finite list of
+spellings covers every server's normalization. Double encoding such as `%252e`, an overlong
+UTF-8 dot such as `%c0%ae`, a full-width dot or solidus (`%ef%bc%8e`, `%ef%bc%8f`) and a
+server's own rewriting remain. That residual stays the operator's, as the Gateway's redirect
+policy already is. A server that folds path case causes a false refusal, not an escape.
+
+**What changes for a reader.** Both repository readers implement the two refusals, splitting
+a segment at the first of its delimiters. Reader controls on altered copies of a staged research
+vector hold each refused spelling as a scope entry (`input-malformed`) and as a receipt's
+endpoint (`acquisition-invalid`), every escaped delimiter among them, and a `;` on an ordinary
+segment still admitted; segments with two delimiters hold the first one. The cross-reader test
+compares their reports. No staged vector changes. None of the six endpoint-scope vectors
+carries an escaped slash, backslash or delimiter, or a `;`, in any URL, and every vector's
+answer stays the same. The reference Runner's matcher
+and the Desk's admission check
+([desk pull request 445](https://github.com/Judgment-Pack/judgment-pack-desk/pull/445),
+[desk issue 456](https://github.com/Judgment-Pack/judgment-pack-desk/issues/456)) follow as
+their own pull requests.
+Its review is round 16 of this RFC, recorded under
+[`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
+`0018-round-16.md` with the maintainer's disposition of each finding (two MEDIUM and five LOW,
+all applied). The review was same-vendor, at the maintainer's direction while the OpenAI
+reviewer was unavailable.
+
 ## Summary
 
 A **dialect** is a pack's terms spoken in a system's: the declared, reusable translation between a
@@ -859,6 +926,14 @@ the cross-reader test compares their reports. These are repository reader contro
 Runner vectors, and add no independent implementation evidence. The Runner's acquisition and
 replay evidence required by issue #199 was a follow-up; its six vectors are staged since
 (Conformance).
+
+Round 16 adds to both readers the refusal of an escaped slash or backslash, and of a dot segment
+before a segment's first `;` or escaped delimiter, in the constrained page form, by one author
+who read both. Altered
+copies of the same staged research vector hold each refused spelling as a scope entry and as a
+receipt's endpoint; the cross-reader test compares their reports. These are reader controls,
+not Runner vectors, and add no independent implementation evidence. No staged vector carries
+these spellings, and no vector's answer changes.
 
 One vector is answered otherwise than `verify-run` answers it, by design:
 `disposition-differs-from-audit` alters the Runner's export, not the preparation or the record
@@ -1503,11 +1578,16 @@ dot-separated labels, each of 1 to 63 characters. Each label starts and ends
 with an ASCII letter or digit; its other characters are ASCII letters, digits or `-`. The last
 label starts with an ASCII letter. There is no trailing dot, underscore, IPv4 or IPv6
 literal, wildcard or other port. The path has no `?`, `#` or backslash. Each `%` is followed by
-two hexadecimal digits, of either case. Split the path at each literal `/`: no segment is one
-or two tokens each of which is `.`, `%2e` or `%2E`. Thus literal and percent-spelled dot segments
-are refused, without decoding any path. Other escapes, including an escaped slash, remain
-literal bytes and never supply a segment boundary. This form holds the receipt's endpoint only
-when its profile carries `endpointScope`; it changes no historical receipt rule.
+two hexadecimal digits, of either case. The path has no escaped slash or backslash: no `%2f`,
+`%2F`, `%5c` or `%5C` anywhere in it. Split the path at each literal `/`. A dot segment is one or
+two tokens each of which is `.`, `%2e` or `%2E`. No segment is a dot segment, and no segment's
+part before its first `;`, `%3b`, `%3B`, `%3f`, `%3F`, `%23` or `%00`, whichever comes first, is
+a dot segment. Thus literal and percent-spelled dot segments are refused, alone or before a path
+parameter or an escaped delimiter (`..;x`, `.;`, `%2e%2e;`, `..%3bx` and `.%00` among them),
+without decoding any path. Every escape but the four refused above, `%2e` and `%2E` outside a
+dot segment included, remains literal bytes and never supplies a segment boundary. This form
+holds the receipt's endpoint only when its profile carries `endpointScope`; it changes no
+historical receipt rule.
 (No vector decides this.)
 
 Each scope entry is either a prefix in that endpoint form, or exactly `https://*`. The wildcard
@@ -2515,8 +2595,15 @@ cited by URL alone is no retained response; the claim it supports is the answer'
   lies in it; no vector decides the other rules here.)
 
   Does not establish: the page's content or relevance; that the host is public; anything about
-  the requested URL's scope or intermediate redirects; that the preparer checked admission.
-  Request commitments and result digests still hold their bytes as above.
+  the requested URL's scope or intermediate redirects; that the preparer checked admission. The
+  scope holds the URL as written, not what a server serves for it. §5.1's form refuses an
+  escaped slash or backslash and a dot segment before a path parameter or an escaped delimiter,
+  but no finite list of spellings covers every server's normalization. Spellings that escape
+  remain: double encoding such as `%252e`, an overlong UTF-8 dot such as `%c0%ae`, a full-width
+  dot or solidus (`%ef%bc%8e`, `%ef%bc%8f`), and a server's own rewriting. That residual stays
+  the operator's, as the Gateway's redirect policy already is. A server that folds path case
+  causes a false refusal, not an escape: it serves an in-scope page under a spelling the byte
+  comparison refuses. Request commitments and result digests still hold their bytes as above.
 
 - **An asserted input: the case, a local file, a parameter no receipt commits.** Establishes: that
   the preparation carried what the operator supplied, faithfully.
@@ -2866,6 +2953,9 @@ this text and the vectors — would strengthen that evidence, and none exists.
    wildcard's admission of two origins (§5.1); the digest holding the scope, a changed scope
    being `profile-mismatch` (§§5.1, 13); and check 4 over the retained request (§5.1). Reader
    controls alone hold the rest; no Runner vector decides it.
+   Round 16 adds the refusal, in the constrained page form, of an escaped slash or backslash and
+   of a dot segment before a segment's first `;` or escaped delimiter, and what a scope cannot
+   hold (§§5.1, 13; issue #214, option C). Each refusal is marked; no vector decides it.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
    version-3 kinds are proposed, `research` alone with a preparer. When a kind gets a preparer and
    vectors, and whether its request forms here survive the first implementation, is open. So for

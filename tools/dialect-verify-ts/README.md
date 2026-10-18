@@ -170,6 +170,13 @@ of this reader's independence, as the RFC says. The controls in
 [`test/endpoint.test.ts`](test/endpoint.test.ts) use altered copies of a staged research vector;
 no vector is added or changed.
 
+**Round 16.** RFC 0018's round 16 (issue #214, option C) refuses, in that form, an escaped slash
+or backslash anywhere in the path and a dot segment before a segment's first `;`, `%3b`, `%3B`,
+`%3f`, `%3F`, `%23` or `%00`. The same
+author wrote it in both readers, so it is no part of this reader's independence either. The
+controls marked "round 16" in [`test/endpoint.test.ts`](test/endpoint.test.ts) hold each refused
+spelling as a scope entry and as a receipt's endpoint; no vector is added or changed.
+
 ## Where the text was not enough
 
 No vector depends on any point below: every vector gets the same answer under either reading of each.

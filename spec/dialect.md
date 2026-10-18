@@ -748,11 +748,16 @@ dot-separated labels, each of 1 to 63 characters. Each label starts and ends
 with an ASCII letter or digit; its other characters are ASCII letters, digits or `-`. The last
 label starts with an ASCII letter. There is no trailing dot, underscore, IPv4 or IPv6
 literal, wildcard or other port. The path has no `?`, `#` or backslash. Each `%` is followed by
-two hexadecimal digits, of either case. Split the path at each literal `/`: no segment is one
-or two tokens each of which is `.`, `%2e` or `%2E`. Thus literal and percent-spelled dot segments
-are refused, without decoding any path. Other escapes, including an escaped slash, remain
-literal bytes and never supply a segment boundary. This form holds the receipt's endpoint only
-when its profile carries `endpointScope`; it changes no historical receipt rule.
+two hexadecimal digits, of either case. The path has no escaped slash or backslash: no `%2f`,
+`%2F`, `%5c` or `%5C` anywhere in it. Split the path at each literal `/`. A dot segment is one or
+two tokens each of which is `.`, `%2e` or `%2E`. No segment is a dot segment, and no segment's
+part before its first `;`, `%3b`, `%3B`, `%3f`, `%3F`, `%23` or `%00`, whichever comes first, is
+a dot segment. Thus literal and percent-spelled dot segments are refused, alone or before a path
+parameter or an escaped delimiter (`..;x`, `.;`, `%2e%2e;`, `..%3bx` and `.%00` among them),
+without decoding any path. Every escape but the four refused above, `%2e` and `%2E` outside a
+dot segment included, remains literal bytes and never supplies a segment boundary. This form
+holds the receipt's endpoint only when its profile carries `endpointScope`; it changes no
+historical receipt rule.
 (No vector decides this.)
 
 Each scope entry is either a prefix in that endpoint form, or exactly `https://*`. The wildcard
@@ -1760,8 +1765,15 @@ cited by URL alone is no retained response; the claim it supports is the answer'
   lies in it; no vector decides the other rules here.)
 
   Does not establish: the page's content or relevance; that the host is public; anything about
-  the requested URL's scope or intermediate redirects; that the preparer checked admission.
-  Request commitments and result digests still hold their bytes as above.
+  the requested URL's scope or intermediate redirects; that the preparer checked admission. The
+  scope holds the URL as written, not what a server serves for it. §5.1's form refuses an
+  escaped slash or backslash and a dot segment before a path parameter or an escaped delimiter,
+  but no finite list of spellings covers every server's normalization. Spellings that escape
+  remain: double encoding such as `%252e`, an overlong UTF-8 dot such as `%c0%ae`, a full-width
+  dot or solidus (`%ef%bc%8e`, `%ef%bc%8f`), and a server's own rewriting. That residual stays
+  the operator's, as the Gateway's redirect policy already is. A server that folds path case
+  causes a false refusal, not an escape: it serves an in-scope page under a spelling the byte
+  comparison refuses. Request commitments and result digests still hold their bytes as above.
 
 - **An asserted input: the case, a local file, a parameter no receipt commits.** Establishes: that
   the preparation carried what the operator supplied, faithfully.
