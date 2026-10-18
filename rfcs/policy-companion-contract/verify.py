@@ -143,7 +143,7 @@ def candidate_uri(value):
     """RFC 3986 URI production; repair three pinned-validator defects locally."""
     if not isinstance(value, str):
         return True  # JSON Schema's type keyword handles non-string values.
-    if len(value) > 2048 or any(not 0x21 <= ord(char) <= 0x7E for char in value):
+    if any(not 0x21 <= ord(char) <= 0x7E for char in value):
         return False
     scheme = re.match(r"[A-Za-z][A-Za-z0-9+.-]*:", value)
     if scheme is None:
@@ -178,16 +178,16 @@ def validators():
                for name in ("common", "policy", "governing-adoption", "fixture", "vectors")}
     registry = Registry().with_resources((schema["$id"], Resource.from_contents(schema)) for schema in schemas.values())
     schemas["core"] = read_json((ROOT / "schema/judgment-pack-core.schema.json").read_bytes())
-    core_checker = FormatChecker()
-    if "uri" not in core_checker.checkers or core_checker.conforms("not a URI", "uri"):
-        raise RuntimeError("Install pinned requirements-dev.txt URI dependencies")
     candidate_checker = FormatChecker()
+    if "uri" not in candidate_checker.checkers or candidate_checker.conforms("not a URI", "uri"):
+        raise RuntimeError("Install pinned requirements-dev.txt URI dependencies")
+    # The consuming Pack is checked within this candidate reader too. Override
+    # this instance only; shared Core/prototype validators keep their own checker.
     candidate_checker.checks("uri")(candidate_uri)
     result = {}
     for name, schema in schemas.items():
         Draft202012Validator.check_schema(schema)
-        checker = core_checker if name == "core" else candidate_checker
-        result[name] = Draft202012Validator(schema, registry=registry, format_checker=checker)
+        result[name] = Draft202012Validator(schema, registry=registry, format_checker=candidate_checker)
     return result
 
 

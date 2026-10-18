@@ -6231,11 +6231,11 @@
         },
         {
           "source": {
-            "path": "examples/data-access/consumer-pack.json"
+            "path": "vectors/documents/uri-final-lf-pack.json"
           },
           "content": {
-            "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
-            "byteLength": 1558,
+            "bytesDigest": "sha256:c418f413e2b19f32dcc2f46664717ff2eb81e940fca57315275d39e63037f495",
+            "byteLength": 1503,
             "mediaType": "application/json"
           }
         },
@@ -6293,11 +6293,11 @@
         },
         {
           "source": {
-            "path": "examples/data-access/consumer-pack.json"
+            "path": "vectors/documents/uri-ipv6-leading-zero-ipv4-tail-pack.json"
           },
           "content": {
-            "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
-            "byteLength": 1558,
+            "bytesDigest": "sha256:0ea4f86f542fcfe5a183050daac17f5d43796995965096773ba7481c5ad93e4e",
+            "byteLength": 1523,
             "mediaType": "application/json"
           }
         },
@@ -6792,11 +6792,11 @@
         },
         {
           "source": {
-            "path": "examples/data-access/consumer-pack.json"
+            "path": "vectors/documents/uri-ipvfuture-lowercase-pack.json"
           },
           "content": {
-            "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
-            "byteLength": 1558,
+            "bytesDigest": "sha256:ebd7ca932ab1557442af46b391d5e1b980c9398a7213d4682a3308732be4cf5a",
+            "byteLength": 1504,
             "mediaType": "application/json"
           }
         },
@@ -6855,11 +6855,11 @@
         },
         {
           "source": {
-            "path": "examples/data-access/consumer-pack.json"
+            "path": "vectors/documents/uri-ipvfuture-uppercase-pack.json"
           },
           "content": {
-            "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
-            "byteLength": 1558,
+            "bytesDigest": "sha256:6992d4add7edc8a3dec0679b28dd58a4838d2cf5f218b4f702081583e9cb8c6b",
+            "byteLength": 1504,
             "mediaType": "application/json"
           }
         },
@@ -6980,11 +6980,11 @@
         },
         {
           "source": {
-            "path": "examples/data-access/consumer-pack.json"
+            "path": "vectors/documents/uri-percent-regname-pack.json"
           },
           "content": {
-            "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
-            "byteLength": 1558,
+            "bytesDigest": "sha256:50e9179933d3bab136e4872f25874e556cc9b1508410dd945ad564a2a3e90daa",
+            "byteLength": 1518,
             "mediaType": "application/json"
           }
         },
@@ -7169,11 +7169,11 @@
         },
         {
           "source": {
-            "path": "examples/data-access/consumer-pack.json"
+            "path": "vectors/documents/uri-rootless-raw-brackets-pack.json"
           },
           "content": {
-            "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
-            "byteLength": 1558,
+            "bytesDigest": "sha256:a2b8f1d350ac991ebfd9f94ce6e53e40d19485e1f8ec7baaeb91f2ba279418ca",
+            "byteLength": 1503,
             "mediaType": "application/json"
           }
         },
@@ -7231,11 +7231,11 @@
         },
         {
           "source": {
-            "path": "examples/data-access/consumer-pack.json"
+            "path": "vectors/documents/uri-path-raw-brackets-pack.json"
           },
           "content": {
-            "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
-            "byteLength": 1558,
+            "bytesDigest": "sha256:c0e3ef08c4644024d87d26ed4d77a5c14b1b7f46c8ca0a4b0ce7d8157ade7208",
+            "byteLength": 1518,
             "mediaType": "application/json"
           }
         },

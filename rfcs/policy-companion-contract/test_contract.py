@@ -8,6 +8,8 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from jsonschema import FormatChecker
+
 import check_vectors
 import verify as v
 
@@ -151,6 +153,50 @@ class ContractTests(unittest.TestCase):
         for version in ("1x0x0", "1.0.0\n", "01.0.0", "1.0.0+build"):
             document["version"] = version
             self.assertEqual(v.result(lambda: v.check_schema("policy", document)), {"status": "refused", "code": "invalid-document"})
+
+    def test_uri_matrix_covers_policy_and_consuming_core_without_global_override(self):
+        manifest, material, by_path = v.load_bundle(v.HERE / "examples/data-access")
+        base = v.read_companion(by_path[manifest["policy"]])
+        cases = json.loads((v.HERE / "vectors/manifest.json").read_bytes())["cases"]
+        count = 0
+        for case in cases:
+            if not case["id"].startswith("uri-"):
+                continue
+            count += 1
+            document = v.read_companion(check_vectors.source_bytes(case["document"], v.HERE))
+            policy = copy.deepcopy(base)
+            policy["id"] = document["consumer"]["id"] if document["kind"] == "governing-adoption" else document["id"]
+            with self.subTest(vector=case["id"], root="policy"):
+                self.assertEqual(v.result(lambda: v.check_policy(policy, material)), case["expected"])
+            if document["kind"] == "governing-adoption":
+                reference = document["consumer"]["content"]
+                entry = next(item for item in case["materials"] if item["content"] == reference)
+                pack = v.strict_json(check_vectors.source_bytes(entry["source"], v.HERE))
+                expected = v.VALID if case["expected"]["status"] == "valid" else {"status": "refused", "code": "invalid-consumer"}
+                with self.subTest(vector=case["id"], root="consuming-pack"):
+                    self.assertEqual(v.result(lambda: v.check_schema("core", pack)), expected)
+        self.assertEqual(count, 21)  # Twenty added cases plus the original relative-ID refusal.
+        self.assertIsNot(FormatChecker().checkers["uri"][0], v.candidate_uri)
+
+    def test_uri_adoption_vectors_preserve_every_pack_byte_except_id_token(self):
+        original = (v.HERE / "examples/data-access/consumer-pack.json").read_bytes()
+        original_id = json.dumps(json.loads(original)["id"]).encode()
+        cases = json.loads((v.HERE / "vectors/manifest.json").read_bytes())["cases"]
+        count = 0
+        for case in cases:
+            if not case["id"].startswith("uri-"):
+                continue
+            document = v.read_companion(check_vectors.source_bytes(case["document"], v.HERE))
+            if document["kind"] != "governing-adoption":
+                continue
+            count += 1
+            entry = next(item for item in case["materials"] if item["content"] == document["consumer"]["content"])
+            retained = check_vectors.source_bytes(entry["source"], v.HERE)
+            new_id = json.dumps(document["consumer"]["id"]).encode()
+            with self.subTest(vector=case["id"]):
+                self.assertEqual(retained.count(new_id), 1)
+                self.assertEqual(retained.replace(new_id, original_id, 1), original)
+        self.assertEqual(count, 7)
 
 
 if __name__ == "__main__":

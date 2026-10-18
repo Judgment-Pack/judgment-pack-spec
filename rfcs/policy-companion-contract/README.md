@@ -62,7 +62,10 @@ The unreleased candidate URI correction after commit
 `30b0b30a1b0c851c41bdb271d6ef9534c91bcdec` changes three dependency-derived answers:
 final-LF identifiers and IPv6 literals with leading-zero IPv4 tails now refuse;
 uppercase-`V` IPvFuture identifiers now validate. The checker applies a local
-candidate format override, leaving the Core checker and frozen prototype alone.
+candidate format override, including its consuming-Pack structural checks. Shared
+Core validators elsewhere and the frozen prototype are unchanged. The candidate's
+2,048-character ID bound belongs to its schemas; other Core URI fields retain
+their existing schema bounds.
 The 20 URI vectors also distinguish generic URI grammar from URL-parser behavior.
 Format `1.0.0` remains proposed and unreleased; this correction confers no adoption.
 

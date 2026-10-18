@@ -117,7 +117,10 @@ optional fragments, not the narrower `absolute-URI` production. Final LF and
 leading-zero IPv4 tails in IPv6 literals now refuse; uppercase `V` in IPvFuture
 now validates under [RFC 5234 §2.3](https://www.rfc-editor.org/rfc/rfc5234#section-2.3).
 Twenty portable URI vectors also cover percent encodings, Unicode and brackets by
-component. This repairs candidate-only validation rather than adopting dependency
+component, including seven full adoptions with exact consuming-Pack IDs/references.
+The candidate's consuming-Pack structural checks assert the same corrected URI
+grammar; shared Core validators and the prototype remain unchanged.
+This repairs candidate-only validation rather than adopting dependency
 or URL-parser quirks. Core/prototype checks and exact retained-byte semantics remain
 unchanged; proposed format `1.0.0` is still unreleased and not adopted.
 
