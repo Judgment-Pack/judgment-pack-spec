@@ -663,7 +663,7 @@ four LOW, all applied).
 
 This amendment records the maintainer's decision on
 [issue #214](https://github.com/Judgment-Pack/judgment-pack-spec/issues/214), option C, on
-[pull request NNN](https://github.com/Judgment-Pack/judgment-pack-spec/pull/NNN). It is
+[pull request 215](https://github.com/Judgment-Pack/judgment-pack-spec/pull/215). It is
 round 16. The status stays Accepted. The Specification and companion are amended equally.
 
 **The decision.** Round 15's constrained page form (§5.1) refuses two more spellings, and §13
