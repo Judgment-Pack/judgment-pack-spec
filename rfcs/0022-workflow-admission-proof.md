@@ -109,6 +109,13 @@ and output-record versions remain 1. The proof's `admissionProofVersion` is inte
 that does not implement these selectors returns `version-unread`; it never invents a proof for
 a version-1 execution. Version-1 and version-2 records cannot share a workflow digest.
 
+This proposed profile intentionally narrows the retained run export forms to versions 2 and 3.
+The Runner export document incorporated by RFC 0020 describes versions 2 through 5; that does
+not make all four forms readable by this profile. A run export with version 4 or 5 gives
+`version-unread` before applying the supported closed forms. Never strip members, relabel the
+version or rewrite retained bytes to make it readable. Chain/checkpoint material may be retained
+under `aux/`, but a pinned attempt's signature sidecar remains required attempt material below.
+
 The proof belongs to one execution and its retained branch history. Its root is exactly:
 
 ```text
@@ -324,10 +331,38 @@ The pin/phase relationships are explicit:
 | `suppressed` | All artifact pins null; the stage's earlier cutoff in this epoch is independently established |
 
 A preparation, audit or Core-error pin requires a run pin. Signature bytes require the audit
-pin and retain their existing sidecar form/bounds. If a run embeds a signature sidecar, its exact
-value bytes must agree with the separately retained sidecar and its observation pin. Without a
+pin and retain their existing sidecar form/bounds. Supported run exports do not embed signature
+sidecars; retain the original sidecar separately under its observation pin. It counts at that
+attempt's admission prefix, never only as a finalization auxiliary. Without a
 run, interrupted/cancelled observations have no other artifact pins. An ordinary invocation
 failure without a complete Core error stays interrupted, as RFC 0020 §7 requires.
+
+For `failed` / `preparation-failed` or `admission-refused` without a valid preparation, the
+retained run's `finishedAt` must be the exact UTC-second instant supplied to the terminal failing
+preparation/planning check. This is an additional constraint on writers of this proposed workflow
+profile, not an established meaning of every ordinary Runner export. The writer must retain the
+failure at that same instant; it must not substitute a later completion time or rewrite an old
+export to manufacture this guarantee. A missing, null, fractional, offset-form or invalid
+`finishedAt` is `input-malformed` in the form phase. A reader never substitutes today's clock,
+`startedAt` or a receipt timestamp. No preparation or `verified-at.txt` is fabricated for it.
+
+In phase 4, derive the terminal failure from the retained inputs and independent historical
+profiles at this instant, using the dialect's preparation rules and their ordering. A derived
+`admission-refused` establishes only the matching failure. The other terminal derivation findings
+are `profile-mismatch`, `parameter-invalid`, `read-failed`, `acquisition-unexpected`,
+`acquisition-invalid`, `acquisition-stale`, `acquisition-sessions` and `calculation-invalid`;
+these establish `preparation-failed`. `acquisition-missing` does so only when it concerns a
+required response inside an already retained source acquisition. A source acquisition still
+needed by planning is pending work, not a terminal preparation failure. Successful preparation,
+pending acquisition or a different derived failure gives `inventory-mismatch`. Existing outer
+form/bounds and unsupported-version/kind refusals retain their precedence. Reader inability,
+I/O errors, timeouts, unsupported capability and unrecognized failures must not become
+`preparation-failed` through a catch-all classifier; operational inability yields no portable
+report. No comparison to a fabricated expected preparation is needed to establish a failure.
+
+This establishes consistency at the retained instant, not that the check occurred then. Digests
+commit the timestamp without authenticating chronology. Valid preparations continue to use their
+own `verifiedAt` and existing phase-3 verification unchanged.
 
 For `evaluated`, derive the declared output pointer and cardinality. Bad output shape gives
 `failed`/`output-invalid`, retaining the attempt material and emitting no output. A valid shape
