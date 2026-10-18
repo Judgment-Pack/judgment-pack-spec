@@ -110,6 +110,17 @@ A Policy contains:
 - retained original source references with provider/account/resource identity,
   nullable opaque source revision and original content identity.
 
+The unreleased candidate's URI assertion is corrected after commit
+`30b0b30a1b0c851c41bdb271d6ef9534c91bcdec` to the complete scheme-bearing `URI`
+production of [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986#appendix-A), with
+optional fragments, not the narrower `absolute-URI` production. Final LF and
+leading-zero IPv4 tails in IPv6 literals now refuse; uppercase `V` in IPvFuture
+now validates under [RFC 5234 §2.3](https://www.rfc-editor.org/rfc/rfc5234#section-2.3).
+Twenty portable URI vectors also cover percent encodings, Unicode and brackets by
+component. This repairs candidate-only validation rather than adopting dependency
+or URL-parser quirks. Core/prototype checks and exact retained-byte semantics remain
+unchanged; proposed format `1.0.0` is still unreleased and not adopted.
+
 The narrative can be authored directly or derived from original documents.
 Original PDF/page/file bytes remain separate. An anchor in the narrative is not
 an original-source offset, and a new extraction does not silently rewrite either.

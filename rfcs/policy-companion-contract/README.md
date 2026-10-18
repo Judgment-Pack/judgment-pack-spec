@@ -42,10 +42,29 @@ or historical uniqueness is inferred. In particular, artifact `7.3.42` still use
 format `1.0.0`. Pack artifact references follow the same bounded version grammar;
 the retained Pack keeps its own Core `specVersion` unchanged.
 
-An `id` is an opaque absolute URI, at most 2,048 Unicode characters. Identity is
-not permission to fetch it. Local IDs match `[a-z][a-z0-9]*(?:-[a-z0-9]+)*`, at most
+An `id` is an opaque, scheme-bearing identifier matching the complete `URI`
+production of [RFC 3986, Appendix A](https://www.rfc-editor.org/rfc/rfc3986#appendix-A),
+at most 2,048 characters. Optional query and fragment are allowed; a relative
+reference is refused. This means `URI`, not the narrower `absolute-URI` production
+that excludes fragments. Raw Unicode, controls, whitespace (including a final LF)
+and malformed percent triplets refuse. Percent-encoded Unicode and registered
+names remain valid; percent decoding, trimming and identity normalization never
+occur. Raw brackets belong only around an authority's IP literal, so brackets in
+path, query, fragment or rootless content must be percent-encoded. IPv6 dotted
+tails must satisfy the IPv4 decimal-octet grammar without leading zeros. IPvFuture
+accepts both `v` and `V`, under [RFC 5234 §2.3](https://www.rfc-editor.org/rfc/rfc5234#section-2.3).
+An unbracketed numeric host that fails IPv4 can still be a valid registered name.
+Identity is not permission to fetch it. Local IDs match `[a-z][a-z0-9]*(?:-[a-z0-9]+)*`, at most
 128 characters. Required readable text is nonempty and at most 4,096 characters.
 Every defined object is closed: unknown members at any level are refused.
+
+The unreleased candidate URI correction after commit
+`30b0b30a1b0c851c41bdb271d6ef9534c91bcdec` changes three dependency-derived answers:
+final-LF identifiers and IPv6 literals with leading-zero IPv4 tails now refuse;
+uppercase-`V` IPvFuture identifiers now validate. The checker applies a local
+candidate format override, leaving the Core checker and frozen prototype alone.
+The 20 URI vectors also distinguish generic URI grammar from URL-parser behavior.
+Format `1.0.0` remains proposed and unreleased; this correction confers no adoption.
 
 ## 2. Exact retained content and optional canonical identity
 

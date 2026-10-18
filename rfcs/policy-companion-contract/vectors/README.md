@@ -73,6 +73,13 @@ spend the aggregate budget only once. Every role independently applies its size
 limit. Raw Core numeric extensions include fractional, exponent and unsafe integer
 literals; expected results distinguish optional canonical identity from raw pins.
 
+The 20 `uri-*` vectors assert the candidate's scheme-bearing RFC 3986 `URI`
+grammar in a Policy ID. They cover complete-string assertion, percent-encoding,
+IPv6/IPvFuture, registered names, Unicode and component-specific brackets. Their
+expected results describe URI syntax, not URL fetching or a dependency's quirks;
+valid query/fragment content remains supported. Original retained materials are
+unchanged. The earlier 104 vectors retain their exact inputs and expectations.
+
 Run the reference harness with the repository's pinned dependencies:
 
 ```sh
@@ -80,7 +87,7 @@ python rfcs/policy-companion-contract/check_vectors.py
 ```
 
 Successful harness output is exactly
-`{"status":"matched","cases":104,"maturity":"proposed-draft"}`; this is harness
+`{"status":"matched","cases":124,"maturity":"proposed-draft"}`; this is harness
 agreement, not the result for an individual document or a conformance claim. Each
 refusal vector's exact output is retained in the manifest. The harness and schema
 are optional conveniences: another language can read these same bytes and the

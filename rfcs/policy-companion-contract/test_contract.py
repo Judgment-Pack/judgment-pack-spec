@@ -15,7 +15,7 @@ import verify as v
 class ContractTests(unittest.TestCase):
     def test_static_manifest_exact_results(self):
         answers = check_vectors.run_vectors()
-        self.assertEqual(len(answers), 104)
+        self.assertEqual(len(answers), 124)
         for name, actual, expected in answers:
             with self.subTest(vector=name):
                 self.assertEqual(actual, expected)

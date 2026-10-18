@@ -25,7 +25,8 @@
       "type": "string",
       "format": "uri",
       "minLength": 1,
-      "maxLength": 2048
+      "maxLength": 2048,
+      "description": "Scheme-bearing RFC 3986 URI production, including optional fragment. Assert the entire ASCII string; no trimming, Unicode/percent decoding, or identity normalization. See candidate prose for IPv6 and case-insensitive IPvFuture checks."
     },
     "content": {
       "type": "object",
