@@ -751,11 +751,13 @@ literal, wildcard or other port. The path has no `?`, `#` or backslash. Each `%`
 two hexadecimal digits, of either case. The path has no escaped slash or backslash: no `%2f`,
 `%2F`, `%5c` or `%5C` anywhere in it. Split the path at each literal `/`. A dot segment is one or
 two tokens each of which is `.`, `%2e` or `%2E`. No segment is a dot segment, and no segment's
-part before its first `;` is one. Thus literal and percent-spelled dot segments are refused,
-with or without path parameters (`..;x`, `.;` and `%2e%2e;` among them), without decoding any
-path. Every escape but the four refused above, `%2e` and `%2E` outside a dot segment included,
-remains literal bytes and never supplies a segment boundary. This form holds the receipt's
-endpoint only when its profile carries `endpointScope`; it changes no historical receipt rule.
+part before its first `;`, `%3b`, `%3B`, `%3f`, `%3F`, `%23` or `%00`, whichever comes first, is
+a dot segment. Thus literal and percent-spelled dot segments are refused, alone or before a path
+parameter or an escaped delimiter (`..;x`, `.;`, `%2e%2e;`, `..%3bx` and `.%00` among them),
+without decoding any path. Every escape but the four refused above, `%2e` and `%2E` outside a
+dot segment included, remains literal bytes and never supplies a segment boundary. This form
+holds the receipt's endpoint only when its profile carries `endpointScope`; it changes no
+historical receipt rule.
 (No vector decides this.)
 
 Each scope entry is either a prefix in that endpoint form, or exactly `https://*`. The wildcard
@@ -1765,11 +1767,13 @@ cited by URL alone is no retained response; the claim it supports is the answer'
   Does not establish: the page's content or relevance; that the host is public; anything about
   the requested URL's scope or intermediate redirects; that the preparer checked admission. The
   scope holds the URL as written, not what a server serves for it. §5.1's form refuses an
-  escaped slash or backslash and a dot segment carrying path parameters, but no finite list of
-  spellings covers every server's normalization: double encoding such as `%252e`, case folding
-  of paths, or a server's own rewriting. That residual stays the operator's, as the Gateway's
-  redirect policy already is. Request commitments and result digests still hold their bytes as
-  above.
+  escaped slash or backslash and a dot segment before a path parameter or an escaped delimiter,
+  but no finite list of spellings covers every server's normalization. Spellings that escape
+  remain: double encoding such as `%252e`, an overlong UTF-8 dot such as `%c0%ae`, a full-width
+  dot or solidus (`%ef%bc%8e`, `%ef%bc%8f`), and a server's own rewriting. That residual stays
+  the operator's, as the Gateway's redirect policy already is. A server that folds path case
+  causes a false refusal, not an escape: it serves an in-scope page under a spelling the byte
+  comparison refuses. Request commitments and result digests still hold their bytes as above.
 
 - **An asserted input: the case, a local file, a parameter no receipt commits.** Establishes: that
   the preparation carried what the operator supplied, faithfully.
