@@ -1,0 +1,4 @@
+SYNTHETIC REVIEW BASIS; no person approved this fixture.
+The eligible and ineligible rules interpret the automated eligibility clause.
+The fallbackOutcome routes an unmatched classification to review; unknown facts escalate.
+Other coverage is stated explicitly.

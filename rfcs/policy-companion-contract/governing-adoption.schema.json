@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jps:proposal:policy-companion:1.0.0:governing-adoption",
+  "title": "PROPOSED DRAFT Policy companion 1.0.0: governing-adoption",
+  "description": "Immutable interpretation/coverage proposal for one exact pack. No authorization, registration, release envelope, graph support or live eligibility.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "kind",
+    "id",
+    "version",
+    "consumer",
+    "governingPolicies"
+  ],
+  "properties": {
+    "formatVersion": {
+      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/formatVersion"
+    },
+    "kind": {
+      "const": "governing-adoption"
+    },
+    "id": {
+      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/uri"
+    },
+    "version": {
+      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/version"
+    },
+    "consumer": {
+      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/packReference"
+    },
+    "governingPolicies": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "policy",
+          "scope",
+          "coverage"
+        ],
+        "properties": {
+          "policy": {
+            "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/policyReference"
+          },
+          "scope": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "whole-policy"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "sectionIds",
+                  "reviewBasis"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "sections"
+                  },
+                  "sectionIds": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 64,
+                    "uniqueItems": true,
+                    "items": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/localId"
+                    }
+                  },
+                  "reviewBasis": {
+                    "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/content"
+                  }
+                }
+              }
+            ]
+          },
+          "coverage": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "uniqueItems": true,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sectionId",
+                    "status",
+                    "consumerElements",
+                    "reviewBasis"
+                  ],
+                  "properties": {
+                    "sectionId": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/localId"
+                    },
+                    "status": {
+                      "const": "implemented"
+                    },
+                    "consumerElements": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 64,
+                      "uniqueItems": true,
+                      "items": {
+                        "$ref": "#/$defs/consumerElement"
+                      }
+                    },
+                    "reviewBasis": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/content"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sectionId",
+                    "status",
+                    "handoff"
+                  ],
+                  "properties": {
+                    "sectionId": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/localId"
+                    },
+                    "status": {
+                      "const": "manual"
+                    },
+                    "handoff": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sectionId",
+                    "status",
+                    "explanation"
+                  ],
+                  "properties": {
+                    "sectionId": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/localId"
+                    },
+                    "status": {
+                      "const": "awaiting-interpretation"
+                    },
+                    "explanation": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sectionId",
+                    "status",
+                    "explanation"
+                  ],
+                  "properties": {
+                    "sectionId": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/localId"
+                    },
+                    "status": {
+                      "const": "awaiting-implementation"
+                    },
+                    "explanation": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sectionId",
+                    "status",
+                    "rationale"
+                  ],
+                  "properties": {
+                    "sectionId": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/localId"
+                    },
+                    "status": {
+                      "const": "out-of-scope"
+                    },
+                    "rationale": {
+                      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "informationalSources": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/content"
+      }
+    }
+  },
+  "$defs": {
+    "consumerElement": {
+      "description": "Exact declared Core rule/exception by ID, or the present applicability/fallbackOutcome singleton without a fabricated ID. Other element kinds are unsupported.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "id"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "rule",
+                "exception"
+              ]
+            },
+            "id": {
+              "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/localId"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "applicability",
+                "fallback"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

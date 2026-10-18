@@ -1,0 +1,74 @@
+{
+  "capability": "jps-policy-companion-offline",
+  "maturity": "proposed-draft",
+  "formatVersions": [
+    "1.0.0"
+  ],
+  "consumerSpecVersions": [
+    "0.2.0-draft"
+  ],
+  "kinds": [
+    "policy",
+    "governing-adoption"
+  ],
+  "features": [
+    "exact-byte-sha256",
+    "utf8-section-anchors",
+    "scoped-total-coverage",
+    "typed-core-pack-references",
+    "optional-jps-canon-identity",
+    "multiple-media-types"
+  ],
+  "limits": {
+    "documentBytes": 262144,
+    "documentDepth": 32,
+    "numberLiteralCharacters": 128,
+    "exponentMagnitude": 308,
+    "materialBytes": 1048576,
+    "originalBytes": 4194304,
+    "distinctRetainedBytes": 16777216,
+    "materialRegistrations": 16,
+    "versionCharacters": 256,
+    "sections": 64,
+    "sources": 16,
+    "governingPolicies": 16,
+    "consumerElementsPerSection": 64,
+    "textCharacters": 4096,
+    "uriCharacters": 2048,
+    "localIdCharacters": 128,
+    "mediaTypeCharacters": 128,
+    "sourceRefsPerSection": 16,
+    "scopeSectionIds": 64,
+    "coverageRecordsPerPolicy": 64,
+    "informationalSources": 16,
+    "canonicalIntegerMagnitude": 9007199254740991
+  },
+  "excludes": [
+    "adopted-or-stable-format",
+    "graph-consumers",
+    "evaluation",
+    "full-core-semantics",
+    "signatures",
+    "review-assertion-trust",
+    "live-authority",
+    "permissions",
+    "currency",
+    "source-fetch",
+    "automatic-migration",
+    "independent-interoperability-evidence"
+  ],
+  "refusalCodes": [
+    "input-over-bound",
+    "invalid-json",
+    "invalid-selector",
+    "unsupported-format",
+    "invalid-document",
+    "missing-material",
+    "reference-mismatch",
+    "invalid-anchor",
+    "invalid-coverage",
+    "invalid-consumer",
+    "unsupported-canonical-identity",
+    "invalid-carrier"
+  ]
+}

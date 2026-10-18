@@ -1,0 +1,25 @@
+{
+  "formatVersion": "1.0.0",
+  "kind": "policy",
+  "id": "https://example.invalid/policy-companion-contract/data-access/policy",
+  "version": "1.0.0",
+  "title": "Data access — synthetic policy content",
+  "managementMode": "workspace-managed",
+  "content": {
+    "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+    "byteLength": 1,
+    "mediaType": "text/plain"
+  },
+  "sections": [
+    {
+      "id": "all",
+      "title": "All",
+      "anchor": {
+        "startByte": 0,
+        "endByte": 1,
+        "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881"
+      }
+    }
+  ],
+  "sourceProvenance": []
+}

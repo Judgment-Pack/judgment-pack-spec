@@ -1,13 +1,16 @@
 # RFC 0023: Policy content and governing adoption
 
-- Status: Draft
+- Status: Review
 - Type: Standards track, proposed companion at draft maturity
 - Created: 2026-10-17
 - Issue: [#211](https://github.com/Judgment-Pack/judgment-pack-spec/issues/211)
 
 This is an open proposal, not part of JPS. It adds no released schema, conformance
-class or execution authority. The [prototype](policy-companion-prototype/README.md)
-is explicitly non-normative. Host integration guidance below names separate
+class or execution authority. The [candidate contract](policy-companion-contract/README.md)
+proposes exact format `1.0.0` at draft maturity; it is not adopted by being written.
+The historical [prototype](policy-companion-prototype/README.md) remains explicitly
+non-normative and byte-for-byte frozen at proposal `0.0.2`, baseline commit
+`8a56a95d555c17640d2db4984363b779536b3c2a`. Host integration guidance below names separate
 product responsibilities; acceptance of this RFC would not adopt those products'
 protocols on their behalf.
 
@@ -18,9 +21,9 @@ governing relationship to a consuming pack. Preserve the pack/graph as executabl
 authority. Policy text, review assertions and adoption describe intent, provenance
 and governance; they introduce no condition language and do not change evaluator
 precedence. Optional readable structured requirements are deferred from the first
-prototype, whose closed grammar refuses a `requirements` member.
+candidate, whose closed grammar refuses a `requirements` member.
 
-The first prototype supports pack consumers only. Composition with graphs needs
+The proposed candidate supports pack consumers only. Composition with graphs needs
 the relevant adopted graph contract and supporting hosts; this RFC does not
 advertise standard Runner graph-job support. A Framework artifact is not required.
 Collections can organize policies without implying dependency or priority.
@@ -77,19 +80,29 @@ history comparisons, not policy approval or a current permission to execute.
 
 ### Proposed portable surface
 
-The initial surface consists of **Policy content** and **Governing adoption**.
-The prototype marks each document with a closed `prototype` object naming profile
-`jps-policy-companion-prototype`, proposal revision `0.0.2` and status
-`non-normative`. This is not an adopted `formatVersion` or a substitute for Core's
-`specVersion`. A future accepted companion needs an exact supported format
-selector separate from the artifact's `x.y.z` version. Revision `0.0.2` changes the
-closed coverage grammar and original-source bound; `0.0.1` is refused rather than
-silently interpreted using the new grammar.
+The surface consists of **Policy content** and **Governing adoption**. The
+[review candidate](policy-companion-contract/README.md) supplies self-contained
+proposed prose, closed schemas, a bounded offline checker/capability record,
+three retained-byte domain examples and reusable static positive/refusal vectors.
+Both documents require exact `formatVersion: "1.0.0"`, with `kind: "policy"` or
+`kind: "governing-adoption"`. The separate strict `x.y.z` artifact `version` does
+not select grammar. No shared-major inference or integer/legacy alias is allowed.
+This selector is proposed, not adopted, released or stable.
+
+The frozen historical prototype uses its closed `prototype` wrapper with profile
+`jps-policy-companion-prototype`, proposal `0.0.2` and status `non-normative`.
+The candidate refuses that wrapper; no parser migration occurs. The
+[explicit migration guide](policy-companion-contract/MIGRATION.md) preserves
+source, narrative, interpretation and consumer bytes, requires new immutable
+Policy/adoption identities and exact dependent references, retains originals and
+requires dependent snapshot re-review. No approval or permission migrates.
+The candidate's [prototype pin](policy-companion-contract/prototype-0.0.2-pin.json)
+records the unchanged historical bytes.
 
 A Policy contains:
 
 - a stable absolute-URI identity, immutable artifact version and title;
-- declared publication-management intent (`desk-managed` or `externally-managed`),
+- declared publication-management intent (`workspace-managed` or `externally-managed`),
   which does not authenticate a publisher or import its authority;
 - a reference to exact retained UTF-8 narrative bytes;
 - stable section identities anchored by half-open UTF-8 byte ranges in that exact
@@ -103,7 +116,7 @@ an original-source offset, and a new extraction does not silently rewrite either
 No runtime conditions, live ACLs, publication states or approval booleans belong in
 the immutable content. Optional readable structured requirements, including any
 section-reference grammar, are deferred pending a concrete authoring/interchange
-need and reference-check vectors. They are unsupported in this prototype. Any
+need and reference-check vectors. They are unsupported in the candidate. Any
 future form must remain non-executable and requires an explicit selector change;
 it must not introduce a second decision language.
 
@@ -119,7 +132,7 @@ declares whole-policy or explicit section scope, and per-section coverage:
 | `awaiting-implementation` | Meaning agreed but automation not supplied, with explanation |
 | `out-of-scope` | Explicit rationale; never silent omission |
 
-The first prototype resolves `{kind: "rule", id}` to Core `rules[]` and
+The candidate resolves `{kind: "rule", id}` to Core `rules[]` and
 `{kind: "exception", id}` to Core `exceptions[]`. The singleton references
 `{kind: "applicability"}` and `{kind: "fallback"}` identify the actual Core
 `applicability` and `fallbackOutcome` members; they have no fabricated ID. Absent
@@ -147,7 +160,7 @@ bytes are retained unchanged; no reserialization changes a pack's execution pin.
 Artifact versions use the same lexical discipline as
 [RFC 0021](0021-dialect-artifact-identity.md): exactly three unsigned decimal
 components, no leading zeros except `0`, no suffixes or coercion, and the existing
-256-ASCII-character bound. The prototype adds no bump arithmetic, compatibility
+256-ASCII-character bound. The candidate adds no bump arithmetic, compatibility
 inference or version-reservation service. Draft CAS revisions, source revisions,
 artifact versions and lifecycle revisions are separate values.
 
@@ -157,14 +170,22 @@ references within their declared scope. They refuse incomplete material rather
 than silently treating it as approved. Identities are opaque references, not URLs
 to fetch. Access and network acquisition require separate authority.
 
-Prototype bounds are role-specific: parsed JSON is at most 262,144 bytes, retained
-narrative/review/informational material at most 1,048,576 bytes each, and retained
+Candidate bounds retain the prototype's role-specific limits: parsed JSON is at
+most 262,144 bytes, retained narrative/review/informational material at most
+1,048,576 bytes each, and retained
 original source material at most 4,194,304 bytes each. The fixture carrier loads at
 most 16,777,216 distinct retained bytes in total; multiple registered media types
 for identical bytes count once. An unsupported original size refuses the complete
 bundle. Truncation, extraction substitution and silently dropping the original do
-not produce a complete bundle. These review limits are not adopted Core limits or
-a final portable content-size contract.
+not produce a complete bundle. The parsed-document depth limit is 32; number
+literals are at most 128 characters
+with exponent magnitude at most 308. The candidate declares these limits explicitly;
+they are not adopted Core limits or a stable content-size promise. Its refusal
+objects use fixed bounded codes, never raw content. A malformed/missing selector
+is `invalid-selector`; a well-formed unsupported selector is `unsupported-format`.
+Physical/schema resource maxima report `input-over-bound`, separately from
+reference, anchor, coverage and other semantic failures. Capability discovery lists
+exact candidate format, proposed-draft maturity, features, limits and exclusions.
 
 Consumer bytes are identified before adoption. A release can then bind the
 consumer, adoption and supported dependency closure without circular hashes.
@@ -180,7 +201,7 @@ Historical assertions cannot transfer silently to changed candidates. A section
 approval does not replace an accountable whole-policy approval. Whether the same
 local admin may author and approve is a workflow rule, not a universal spec ban.
 
-The authentication/signature/export trust profile is unresolved. The prototype
+The authentication/signature/export trust profile is unresolved. The candidate
 therefore carries an exact interpretation basis, **not** portable proof of an
 authorized sign-off. A hash, imported document, test report or model statement
 must not be interpreted as that proof. No review-assertion conformance class is
@@ -236,7 +257,7 @@ admission decisions at its action boundary and does not become policy authority.
   adapters, but requiring one narrows a domain-neutral product and introduces
   unnecessary control semantics. No normative mappings are proposed here.
 - **Make readable requirements authoritative:** creates competing execution
-  semantics. Defer optional readable requirements from this prototype; any later
+  semantics. Defer optional readable requirements from this candidate; any later
   form must keep the pack/graph authoritative.
 - **Use only pack-version currency:** RFC 0011's offline membership question is
   useful but different from policy content, adoption scope and current permissions.
@@ -245,9 +266,10 @@ admission decisions at its action boundary and does not become policy authority.
 
 ## Compatibility
 
-No Core, Dialect, preparation, graph or released conformance bytes change. Prototype
-documents remain opt-in and unsupported readers refuse them. A future selector
-cannot be inferred from semver arithmetic. Migrating a citation to a governing
+No Core, Dialect, preparation, graph or released conformance bytes change. The
+0.0.2 prototype remains unchanged. Candidate documents are opt-in; unsupported
+readers refuse them, and format compatibility cannot be inferred from artifact
+version arithmetic. Migrating a citation to a governing
 dependency is a reviewed new adoption, never automatic import behavior.
 
 Published policy content and consuming releases remain immutable. Renaming a
@@ -273,13 +295,17 @@ questions merely by verifying mathematically.
 
 ## Conformance
 
-The proposed reader claim is limited to supplied-document validity and reference
-agreement under a named profile. Before adoption, specify positive, negative,
-boundary and adversarial vectors, including malformed/unsupported selectors,
-versions, missing bytes, byte substitution, section anchors, UTF-8 boundaries,
-scope/coverage mismatches and governing-versus-informational references.
+The candidate reader result is limited to supplied-document validity and reference
+agreement under exact proposed format `1.0.0`. Its reusable manifest supplies
+positive, refusal, boundary and adversarial vectors with exact expected objects,
+including malformed/unsupported selectors, independent artifact versions, aliases,
+missing or stale byte references, optional canonical identities, section anchors,
+UTF-8 boundaries, scope/coverage mismatches and governing-versus-informational
+references. Runtime or other ports can execute retained static bytes directly; the
+only generation grammar repeats one declared byte for a declared length.
 
-The prototype checks are experimental agreement aids, not released corpus entries.
+The candidate and frozen prototype checks are experimental agreement aids, not
+released corpus entries.
 They must not be scored as proofs of authorization, complete policy coverage,
 live admission or independent interoperability.
 
@@ -316,8 +342,9 @@ is required by this RFC.
 
 ## Unresolved questions
 
-1. Exact accepted format selectors, bounded content limits and final reference/
-   coverage grammar after prototype review; no released schema is assigned here.
+1. Adoption/disposition of the exact proposed `1.0.0` selector, declared bounds and
+   closed reference/coverage grammar after public review; no released schema or
+   conformance class is assigned here.
 2. Trust/signature/export profile for review assertions and cross-workspace adoption.
 3. Reconciliation with RFC 0011's proposed pack currency registry without silently
    adopting it or treating offline membership as live authorization.
@@ -328,5 +355,8 @@ is required by this RFC.
 6. Supported graph/composition closure and its owning execution contract.
 7. Independent implementation evidence and any domain-format adapter demand.
 
-The required cross-vendor review and public disposition have not occurred. This
-draft must not be described as adopted or implementation-complete on that basis.
+Moving this RFC to `Review` requests public comment; it does not mark it
+`Accepted` or waive the public-comment process. The candidate supplies no
+cross-vendor adversarial-review record or independent implementation evidence.
+Review-assertion trust, Graph support and adoption remain unresolved. This proposal
+must not be described as adopted, stable or implementation-complete on that basis.

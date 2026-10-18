@@ -249,10 +249,10 @@ class StaticSiteTests(unittest.TestCase):
         index = (self.output / "rfcs" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="0018-dialect/"', index)
 
-    def test_policy_companion_is_a_draft_with_source_only_prototype(self) -> None:
+    def test_policy_companion_is_in_review_with_source_only_candidates(self) -> None:
         page = self.output / "rfcs" / "0023-policy-companion" / "index.html"
         document = page.read_text(encoding="utf-8")
-        self.assertIn('<span class="artifact-label">Draft proposal</span>', document)
+        self.assertIn('<span class="artifact-label">Review proposal</span>', document)
         self.assertIn("This is an open proposal, not part of JPS.", document)
         self.assertIn("blob/main/rfcs/0023-policy-companion.md", document)
         self.assertIn("View current source", document)
@@ -261,9 +261,16 @@ class StaticSiteTests(unittest.TestCase):
             "rfcs/policy-companion-prototype/README.md",
             inspect(page).links,
         )
+        for name in ("README.md", "MIGRATION.md", "prototype-0.0.2-pin.json"):
+            self.assertIn(
+                "https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/"
+                "rfcs/policy-companion-contract/" + name,
+                inspect(page).links,
+            )
         index = inspect(self.output / "rfcs" / "index.html")
         self.assertIn("0023-policy-companion/", index.links)
         self._assert_nothing_published_under("rfcs/policy-companion-prototype")
+        self._assert_nothing_published_under("rfcs/policy-companion-contract")
 
     def _assert_nothing_published_under(self, directory: str) -> None:
         staged = sorted((ROOT / directory).rglob("*"))

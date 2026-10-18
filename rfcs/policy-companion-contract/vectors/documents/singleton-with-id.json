@@ -1,0 +1,68 @@
+{
+  "formatVersion": "1.0.0",
+  "kind": "governing-adoption",
+  "id": "https://example.invalid/policy-companion-contract/data-access/adoption",
+  "version": "1.0.0",
+  "consumer": {
+    "kind": "pack",
+    "id": "https://example.invalid/policy-companion-prototype/data-access/pack",
+    "version": "1.0.0",
+    "content": {
+      "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
+      "byteLength": 1558,
+      "mediaType": "application/json"
+    },
+    "canonicalIdentity": {
+      "profile": "jps-canon",
+      "canonicalDigest": "sha256:d20e694ca1f99d0b3c8e239fdec3e5d1122dc875986ef5ed3651a52b3fba2473"
+    }
+  },
+  "governingPolicies": [
+    {
+      "policy": {
+        "kind": "policy",
+        "id": "https://example.invalid/policy-companion-contract/data-access/policy",
+        "version": "1.0.0",
+        "content": {
+          "bytesDigest": "sha256:6abbd1b965ff006e210b8a98c4a8db6eb0bb795c1f8a995d3be343aa1a984f51",
+          "byteLength": 2019,
+          "mediaType": "application/json"
+        },
+        "canonicalIdentity": {
+          "profile": "jps-canon",
+          "canonicalDigest": "sha256:8e9de4d2824a3186354e4ab410f4b0c744afa452796ce089bc0461adee63bce5"
+        }
+      },
+      "scope": {
+        "kind": "whole-policy"
+      },
+      "coverage": [
+        {
+          "sectionId": "eligibility",
+          "status": "implemented",
+          "consumerElements": [
+            {
+              "kind": "fallback",
+              "id": "fabricated"
+            }
+          ],
+          "reviewBasis": {
+            "bytesDigest": "sha256:7c649cafae58eb11498332c03a107be64fb7d72fcbedebe2c5da32aa801d55f8",
+            "byteLength": 262,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "sectionId": "exception-review",
+          "status": "manual",
+          "handoff": "Fictional specialist uses the documented manual review queue; this statement grants no role or access."
+        },
+        {
+          "sectionId": "audit-review",
+          "status": "awaiting-implementation",
+          "explanation": "Synthetic open work item: develop and review a separate implementation."
+        }
+      ]
+    }
+  ]
+}

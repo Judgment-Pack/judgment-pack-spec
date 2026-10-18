@@ -1,0 +1,106 @@
+{
+  "formatVersion": "1.0.0",
+  "kind": "policy",
+  "id": "https://example.invalid/policy-companion-contract/procurement/policy",
+  "version": "1.0.0",
+  "title": "Procurement — synthetic policy content",
+  "managementMode": "externally-managed",
+  "content": {
+    "bytesDigest": "sha256:993a73c70afdc16c94368982d1e951c85c90838d1f750a7001c2942dc9834b94",
+    "byteLength": 621,
+    "mediaType": "text/plain"
+  },
+  "sections": [
+    {
+      "id": "eligibility",
+      "title": "Competitive procedure",
+      "anchor": {
+        "startByte": 41,
+        "endByte": 181,
+        "bytesDigest": "sha256:a8d58fa560d792bbc0848b517b47a04d01fa928a4315de4be423d9756745714f"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 1"
+        }
+      ]
+    },
+    {
+      "id": "conflict-review",
+      "title": "Supplier conflicts",
+      "anchor": {
+        "startByte": 181,
+        "endByte": 314,
+        "bytesDigest": "sha256:ed53cc9edccb33c00c4692bcc84593e249117f9dbc4045d57e5e8f85458c7c94"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 2"
+        }
+      ]
+    },
+    {
+      "id": "invoice-payment",
+      "title": "Invoice payment",
+      "anchor": {
+        "startByte": 314,
+        "endByte": 413,
+        "bytesDigest": "sha256:f6803f2ffa7356a3aad889d20987a00614d8145193c521107845092745db9d1d"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 3"
+        }
+      ]
+    },
+    {
+      "id": "public-notice",
+      "title": "Public notice",
+      "anchor": {
+        "startByte": 413,
+        "endByte": 497,
+        "bytesDigest": "sha256:b6d68243578efb748244d55bcfe5f7bb730faa1c939c6a910f4e6e26b79b34f9"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 4"
+        }
+      ]
+    },
+    {
+      "id": "purchase-scope",
+      "title": "Purchase scope",
+      "anchor": {
+        "startByte": 498,
+        "endByte": 621,
+        "bytesDigest": "sha256:13498f448247cfd988d4d59046ae766abb0559cf902093cdf8f650543f37ed26"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 5"
+        }
+      ]
+    }
+  ],
+  "sourceProvenance": [
+    {
+      "id": "retained-original",
+      "source": {
+        "provider": "synthetic-fixture",
+        "accountId": "fictional-organization",
+        "resourceId": "procurement-original"
+      },
+      "sourceRevision": "fictional-revision-a",
+      "content": {
+        "bytesDigest": "sha256:4681b36d52396d3faef09e4a7c551d829920362beb47a1bfb32c2d6c4d82763b",
+        "byteLength": 591,
+        "mediaType": "text/plain"
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "formatVersion": "1.0.0",
+  "kind": "policy",
+  "id": "https://example.invalid/policy-companion-contract/data-access/policy",
+  "version": "1.0.0",
+  "title": "Data access — synthetic policy content",
+  "managementMode": "workspace-managed",
+  "content": {
+    "bytesDigest": "sha256:154b8ed3c2383ce429058768595935faf7851b5c38db2b1732594be1d88bc05a",
+    "byteLength": 1048577,
+    "mediaType": "text/plain"
+  },
+  "sections": [
+    {
+      "id": "all",
+      "title": "All bytes",
+      "anchor": {
+        "startByte": 0,
+        "endByte": 1,
+        "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881"
+      }
+    }
+  ],
+  "sourceProvenance": [
+    {
+      "id": "retained-original",
+      "source": {
+        "provider": "synthetic-fixture",
+        "accountId": "fictional-organization",
+        "resourceId": "data-access-original"
+      },
+      "sourceRevision": null,
+      "content": {
+        "bytesDigest": "sha256:9a4f335306e2a8e4fbcf73f5a5bad14f45369fa22985756181eeb8ea1ee217dd",
+        "byteLength": 433,
+        "mediaType": "text/plain"
+      }
+    }
+  ]
+}

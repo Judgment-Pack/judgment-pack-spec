@@ -691,9 +691,9 @@ PAGES = (
         "rfcs/0023-policy-companion.md",
         PurePosixPath("rfcs/0023-policy-companion/index.html"),
         "RFC 0023: Policy content and governing adoption",
-        "Draft proposal for immutable policy content and exact governing adoption, with an exploratory non-normative prototype and unresolved trust and live governance contracts.",
+        "Review proposal for immutable policy content and exact governing adoption, with a proposed draft 1.0.0 contract, a frozen non-normative prototype and unresolved trust and live governance contracts.",
         "proposals",
-        "Draft proposal",
+        "Review proposal",
         source_ref="main",
     ),
     Page(
@@ -1610,6 +1610,15 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
             # Exploratory prototype files remain source review material, not site artifacts.
             "rfcs/policy-companion-prototype/README.md": (
                 GITHUB_BLOB_ROOT + "main/rfcs/policy-companion-prototype/README.md"
+            ),
+            "rfcs/policy-companion-contract/README.md": (
+                GITHUB_BLOB_ROOT + "main/rfcs/policy-companion-contract/README.md"
+            ),
+            "rfcs/policy-companion-contract/MIGRATION.md": (
+                GITHUB_BLOB_ROOT + "main/rfcs/policy-companion-contract/MIGRATION.md"
+            ),
+            "rfcs/policy-companion-contract/prototype-0.0.2-pin.json": (
+                GITHUB_BLOB_ROOT + "main/rfcs/policy-companion-contract/prototype-0.0.2-pin.json"
             ),
         }
     )
