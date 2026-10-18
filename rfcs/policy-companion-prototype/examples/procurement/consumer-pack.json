@@ -58,5 +58,11 @@
       "kind": "human-role",
       "name": "Synthetic reviewer"
     }
+  },
+  "applicability": {
+    "op": "fact",
+    "path": "/request/kind",
+    "operator": "equals",
+    "value": "purchase"
   }
 }

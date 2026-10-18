@@ -20,7 +20,7 @@ Both proposed documents carry this required wrapper:
 ```json
 "prototype": {
   "profile": "jps-policy-companion-prototype",
-  "proposalVersion": "0.0.1",
+  "proposalVersion": "0.0.2",
   "status": "non-normative"
 }
 ```
@@ -30,6 +30,8 @@ documents have no `formatVersion` or `specVersion`; unknown selectors and member
 are rejected. Their independent `version` identifies immutable artifact content.
 An adopted selector, migration and capability discovery need a later decision.
 The existing consuming pack keeps its own Core `specVersion` unchanged.
+Revision `0.0.2` changes the closed element-reference grammar and original-source
+bound. The checker refuses `0.0.1`; it does not guess or upgrade an old selector.
 
 | File | Proposed content |
 | --- | --- |
@@ -67,6 +69,10 @@ section identity across revisions and the fidelity of source-to-narrative
 interpretation still require review; this checker only checks supplied material.
 Anchors need not partition every narrative byte, and may overlap. Checking that
 all meaningful policy clauses are represented is outside these offline checks.
+Optional readable structured requirements and their section references are
+explicitly deferred. A `requirements` member is refused even when presented as
+non-executable text; a later form needs a concrete interchange need, reference
+checks and an explicit selector revision, without a second decision language.
 
 `managementMode` is `desk-managed` or `externally-managed`. It declares intended
 publication ownership and proves no publication, authority or external approval.
@@ -80,7 +86,7 @@ kind in this slice is only `pack`; graph composition, transitive dependencies,
 release envelopes, job registration and cycle handling need separate contracts.
 The checker reads the supplied consumer using the existing Core schema, verifies
 its ID/version and exact retained bytes, and resolves implemented coverage to
-pack rule IDs. This is neither evaluation nor full Core semantic conformance.
+declared pack elements. This is neither evaluation nor full Core semantic conformance.
 Core allows arbitrary JSON numbers in optional extensions (§§2.1 and 9), so pack
 reading preserves number literals without imposing the Policy `canon` domain.
 Schema checks use exact decimal/integer values, without binary-float rounding.
@@ -95,11 +101,31 @@ for every selected section, with no undeclared or out-of-scope section records:
 
 | Coverage status | Required additional content |
 | --- | --- |
-| `implemented` | Nonempty pack `consumerElements` of kind `rule`, and retained `reviewBasis` |
+| `implemented` | Nonempty typed pack `consumerElements`, and retained `reviewBasis` |
 | `manual` | Defined `handoff` to a responsible process |
 | `awaiting-interpretation` | `explanation` of unresolved meaning |
 | `awaiting-implementation` | `explanation` of missing implementation |
 | `out-of-scope` | Explicit `rationale` |
+
+`consumerElements` uses this closed discriminated grammar:
+
+| Reference | Exact Core target |
+| --- | --- |
+| `{"kind": "rule", "id": "…"}` | A declared `rules[]` entry with that ID |
+| `{"kind": "exception", "id": "…"}` | A declared `exceptions[]` entry with that ID |
+| `{"kind": "applicability"}` | The present `applicability` condition |
+| `{"kind": "fallback"}` | The present `fallbackOutcome` member, resolving to a declared outcome |
+
+Singleton references have no ID. The checker refuses absent targets, kind/ID
+confusion, unknown IDs and repeated references within a coverage record. Rules
+and exceptions have separate ID namespaces; the same spelling does not select the
+other kind. It checks unique rule/exception/outcome IDs, fallback outcome resolution
+and exception target-rule/outcome references. It does not perform all Core semantic
+checks, evaluate conditions or infer applicability. Evidence requirements, outcomes,
+condition subelements and escalation are unsupported coverage kinds; graphs remain
+unsupported consumers. A clause implemented solely through an exception,
+applicability or fallback can name its actual element without adding dummy rules.
+Core itself still requires a nonempty `rules` array for the consumer's other behavior.
 
 The two uses of `reviewBasis` are retained explanatory bytes, not attestations or
 proof of review. An `out-of-scope` record explains a selected clause's exclusion
@@ -161,8 +187,19 @@ compatibility rule, publication rule or version bump algorithm. The parser's
 integer tuple is only a parsing aid.
 
 For bounded review fixtures, the helper permits at most 262,144 bytes per parsed
-JSON document, nesting depth 32, and 1,048,576 bytes per retained material.
-Schemas bound source lists to 16, sections/coverage/scope/rule references to 64,
+JSON document and nesting depth 32. Narrative, review-basis, artifact-reference and
+informational material remain bounded at 1,048,576 bytes each; parsed artifacts
+also obey the smaller document limit. Retained original source bytes alone may
+reach 4,194,304 bytes. Generic carrier registration permits that original bound;
+each consuming role is separately validated, including direct checker calls.
+An original above the bound refuses the bundle; the checker never truncates it,
+substitutes extraction or drops it while reporting completeness.
+
+The fixture carrier allows at most 16 local material entries and 16,777,216
+distinct retained bytes in total, checked incrementally during loading. Identical
+bytes registered under multiple media types count once; each role still applies
+its own bound. Schemas bound source lists to 16, sections/coverage/scope/element
+references to 64,
 governing policies to 16, local IDs to 128 characters, URIs to 2,048 characters
 and descriptive strings to 4,096 characters. These are **proposed prototype
 bounds**, not new bounds on Core or other adopted companions. Carrier bytes,
@@ -178,7 +215,7 @@ Core's numeric domain. Their reader reuses the existing strict reader's limits:
 those limits reports an unsupported prototype input bound, not invalid Core.
 JSON Schema Draft 2020-12 plus URI format assertion handles
 shape; the helper separately checks exact references, IDs, source/section
-uniqueness, ranges/UTF-8 boundaries, rule references and exact scope coverage.
+uniqueness, ranges/UTF-8 boundaries, typed element references and exact scope coverage.
 Schema acceptance alone does not establish those reference checks.
 The checker does not reserve an artifact version or detect historical reuse of
 the same ID/version with different content; immutable publication storage is a
@@ -186,9 +223,9 @@ separate contract.
 
 | Synthetic example | Coverage exercised |
 | --- | --- |
-| [Data access](examples/data-access/fixture.json) | Whole policy; eligibility rules, manual restricted requests, pending audit implementation |
-| [Procurement](examples/procurement/fixture.json) | Declared external ownership; limited section scope, unresolved conflict meaning, payment exclusion, public notice outside the selected scope |
-| [Refunds](examples/refunds/fixture.json) | Whole policy; eligibility rules, manual damaged-goods review, pending abuse review implementation |
+| [Data access](examples/data-access/fixture.json) | Whole policy; eligibility rules and fallback, manual restricted requests, pending audit implementation |
+| [Procurement](examples/procurement/fixture.json) | Declared external ownership; applicability-only purchase scope, limited section scope, unresolved conflict meaning, payment exclusion, public notice outside the selected scope |
+| [Refunds](examples/refunds/fixture.json) | Whole policy; eligibility rules, exception-only damaged-goods routing, manual inspection, pending abuse review implementation |
 
 Each directory contains readable proposed Policy/adoption/pack documents,
 separate narrative/original/review-basis bytes and a `fixture.json` containing
@@ -211,8 +248,12 @@ Passing that step creates no normative corpus or conformance claim. The focused
 tests exercise all three domains,
 multiple policies, exact byte versus canonical identities, unsupported profiles,
 malformed/oversized JSON and versions, unknown/live-authority fields, altered or
-missing material, invalid anchors, source/rule references and incomplete/conflicting
+missing material, invalid anchors, source/typed element references and incomplete/conflicting
 coverage, plus Core-valid numeric extensions outside the Policy canonical domain.
-They do not establish independent implementation agreement, actual
+These fixtures reuse this repository's strict reader/canonicalizer. Separate raw
+and canonical vectors, including non-ASCII ordering/escaping, test internal
+agreement only. A second language port by the same author or another Codex review
+does not supply independent evidence. They do not establish independent
+implementation agreement, actual
 approvals, withdrawal ordering, recovery safety or production fitness. Required
 full-repository checks remain the repository CI's responsibility.

@@ -58,5 +58,19 @@
       "kind": "human-role",
       "name": "Synthetic reviewer"
     }
-  }
+  },
+  "exceptions": [
+    {
+      "id": "damaged-routing",
+      "description": "Route damaged goods to review; this does not perform the manual inspection.",
+      "when": {
+        "op": "fact",
+        "path": "/purchase/damaged",
+        "operator": "equals",
+        "value": true
+      },
+      "effect": "escalate",
+      "onUnknown": "escalate"
+    }
+  ]
 }

@@ -1,7 +1,7 @@
 {
   "prototype": {
     "profile": "jps-policy-companion-prototype",
-    "proposalVersion": "0.0.1",
+    "proposalVersion": "0.0.2",
     "status": "non-normative"
   },
   "synthetic": true,
@@ -26,8 +26,8 @@
     {
       "path": "interpretation.txt",
       "content": {
-        "bytesDigest": "sha256:731b587b5759a27cd6e4ebf55b030f0a4cea72cfb6922344b9ed62ea15078d9c",
-        "byteLength": 204,
+        "bytesDigest": "sha256:7c649cafae58eb11498332c03a107be64fb7d72fcbedebe2c5da32aa801d55f8",
+        "byteLength": 262,
         "mediaType": "text/plain"
       }
     },
@@ -42,7 +42,7 @@
     {
       "path": "policy.json",
       "content": {
-        "bytesDigest": "sha256:b6b76777db72be932d05bd422345440fac303df43d461e472df99f4bb5d19f5b",
+        "bytesDigest": "sha256:75a7659ed5086c7728af95db0b56b15fdc914a51982b16627fc884cfc9dca50d",
         "byteLength": 2120,
         "mediaType": "application/json"
       }
@@ -50,8 +50,8 @@
     {
       "path": "adoption.json",
       "content": {
-        "bytesDigest": "sha256:1250db8dba08d4b4db12ecc22e8305148411b0a7f54124ead771bf5b7659150f",
-        "byteLength": 2397,
+        "bytesDigest": "sha256:f6cf887488c12b0ba5331a048f5a9661a557021f5abfc5662a95524915ec1529",
+        "byteLength": 2459,
         "mediaType": "application/json"
       }
     }

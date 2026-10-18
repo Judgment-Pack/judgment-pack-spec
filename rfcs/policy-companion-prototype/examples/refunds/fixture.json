@@ -1,7 +1,7 @@
 {
   "prototype": {
     "profile": "jps-policy-companion-prototype",
-    "proposalVersion": "0.0.1",
+    "proposalVersion": "0.0.2",
     "status": "non-normative"
   },
   "synthetic": true,
@@ -10,48 +10,48 @@
     {
       "path": "narrative.txt",
       "content": {
-        "bytesDigest": "sha256:7b8efe1cfe9ccd5a3c148bdac3208656db483daddebeac1817252a2b2c5993c4",
-        "byteLength": 366,
+        "bytesDigest": "sha256:909d57f27b7359c777dfb2ea07d859408a13504bf8dded27807889f7cde52969",
+        "byteLength": 486,
         "mediaType": "text/plain"
       }
     },
     {
       "path": "source.txt",
       "content": {
-        "bytesDigest": "sha256:ffc4b97cf6de99368078cd10cd63ce1633b4f93d2baf6121b791c79eaf3d0dad",
-        "byteLength": 367,
+        "bytesDigest": "sha256:ae72534013fc75083b184765e7a558b71b5e4674720aa56e8960844fd712c6c0",
+        "byteLength": 474,
         "mediaType": "text/plain"
       }
     },
     {
       "path": "interpretation.txt",
       "content": {
-        "bytesDigest": "sha256:731b587b5759a27cd6e4ebf55b030f0a4cea72cfb6922344b9ed62ea15078d9c",
-        "byteLength": 204,
+        "bytesDigest": "sha256:63f58f37957f808e98c67db11ac9d835286733336e47ae24f28b974d431b9862",
+        "byteLength": 301,
         "mediaType": "text/plain"
       }
     },
     {
       "path": "consumer-pack.json",
       "content": {
-        "bytesDigest": "sha256:fe900ff1e1217ac5d421043229b02f774c8198fbf12956e2910d96bb711b7c47",
-        "byteLength": 1564,
+        "bytesDigest": "sha256:2a049f10cd8c5d4fc81200976507a8563d0bc1fca19fa9691fc1601507512e38",
+        "byteLength": 1924,
         "mediaType": "application/json"
       }
     },
     {
       "path": "policy.json",
       "content": {
-        "bytesDigest": "sha256:18cee00796eff2818edca1cfbdc7148f3009eca4a838942c9e4693727a40a366",
-        "byteLength": 2092,
+        "bytesDigest": "sha256:5391763b2d9a72533e7566cce910a43cb5ab740dd0587d7383f3adf153ba9970",
+        "byteLength": 2476,
         "mediaType": "application/json"
       }
     },
     {
       "path": "adoption.json",
       "content": {
-        "bytesDigest": "sha256:b78daaa2f10b353ed2a1c56fb493903919fc4db67adebe8fe408f13c8de3caa8",
-        "byteLength": 2382,
+        "bytesDigest": "sha256:fd474eed584ae6305ea535bf1d044734f8d754fcc907b0d28b65a318b5ea4b5d",
+        "byteLength": 2836,
         "mediaType": "application/json"
       }
     }

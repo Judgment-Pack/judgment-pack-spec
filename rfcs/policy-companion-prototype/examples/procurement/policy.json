@@ -1,7 +1,7 @@
 {
   "prototype": {
     "profile": "jps-policy-companion-prototype",
-    "proposalVersion": "0.0.1",
+    "proposalVersion": "0.0.2",
     "status": "non-normative"
   },
   "kind": "policy",
@@ -10,8 +10,8 @@
   "title": "Procurement — synthetic policy content",
   "managementMode": "externally-managed",
   "content": {
-    "bytesDigest": "sha256:f83cb1203a0c7f3c3aec92d7205231a1d3838ac428ee7dd8aadd95bf003bd624",
-    "byteLength": 497,
+    "bytesDigest": "sha256:993a73c70afdc16c94368982d1e951c85c90838d1f750a7001c2942dc9834b94",
+    "byteLength": 621,
     "mediaType": "text/plain"
   },
   "sections": [
@@ -74,6 +74,21 @@
           "location": "Clause 4"
         }
       ]
+    },
+    {
+      "id": "purchase-scope",
+      "title": "Purchase scope",
+      "anchor": {
+        "startByte": 498,
+        "endByte": 621,
+        "bytesDigest": "sha256:13498f448247cfd988d4d59046ae766abb0559cf902093cdf8f650543f37ed26"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 5"
+        }
+      ]
     }
   ],
   "sourceProvenance": [
@@ -86,8 +101,8 @@
       },
       "sourceRevision": "fictional-revision-a",
       "content": {
-        "bytesDigest": "sha256:158160ccf99e8323e83a6b5ba6b923026f3c3a03aef00445996b12f0537add59",
-        "byteLength": 473,
+        "bytesDigest": "sha256:4681b36d52396d3faef09e4a7c551d829920362beb47a1bfb32c2d6c4d82763b",
+        "byteLength": 591,
         "mediaType": "text/plain"
       }
     }

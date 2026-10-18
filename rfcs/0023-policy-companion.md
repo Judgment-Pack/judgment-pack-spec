@@ -15,9 +15,10 @@ protocols on their behalf.
 
 Propose a small domain-neutral companion for retained policy content and its exact
 governing relationship to a consuming pack. Preserve the pack/graph as executable
-authority. Policy text, optional readable requirements, review assertions and
-adoption describe intent, provenance and governance; they introduce no condition
-language and do not change evaluator precedence.
+authority. Policy text, review assertions and adoption describe intent, provenance
+and governance; they introduce no condition language and do not change evaluator
+precedence. Optional readable structured requirements are deferred from the first
+prototype, whose closed grammar refuses a `requirements` member.
 
 The first prototype supports pack consumers only. Composition with graphs needs
 the relevant adopted graph contract and supporting hosts; this RFC does not
@@ -78,10 +79,12 @@ history comparisons, not policy approval or a current permission to execute.
 
 The initial surface consists of **Policy content** and **Governing adoption**.
 The prototype marks each document with a closed `prototype` object naming profile
-`jps-policy-companion-prototype`, proposal revision `0.0.1` and status
+`jps-policy-companion-prototype`, proposal revision `0.0.2` and status
 `non-normative`. This is not an adopted `formatVersion` or a substitute for Core's
 `specVersion`. A future accepted companion needs an exact supported format
-selector separate from the artifact's `x.y.z` version.
+selector separate from the artifact's `x.y.z` version. Revision `0.0.2` changes the
+closed coverage grammar and original-source bound; `0.0.1` is refused rather than
+silently interpreted using the new grammar.
 
 A Policy contains:
 
@@ -98,8 +101,11 @@ The narrative can be authored directly or derived from original documents.
 Original PDF/page/file bytes remain separate. An anchor in the narrative is not
 an original-source offset, and a new extraction does not silently rewrite either.
 No runtime conditions, live ACLs, publication states or approval booleans belong in
-the immutable content. Optional structured requirements may refer to sections;
-their execution semantics remain outside this companion.
+the immutable content. Optional readable structured requirements, including any
+section-reference grammar, are deferred pending a concrete authoring/interchange
+need and reference-check vectors. They are unsupported in this prototype. Any
+future form must remain non-executable and requires an explicit selector change;
+it must not introduce a second decision language.
 
 A Governing adoption contains its own identity/version, the exact consuming pack
 reference and one or more exact policy references. Every governing reference
@@ -107,11 +113,23 @@ declares whole-policy or explicit section scope, and per-section coverage:
 
 | Coverage | Required interpretation |
 | --- | --- |
-| `implemented` | Exact consumer rule references and retained interpretation/review basis |
+| `implemented` | Exact typed consumer element references and retained interpretation/review basis |
 | `manual` | Explicit responsible handoff/process |
 | `awaiting-interpretation` | Unresolved meaning, with explanation |
 | `awaiting-implementation` | Meaning agreed but automation not supplied, with explanation |
 | `out-of-scope` | Explicit rationale; never silent omission |
+
+The first prototype resolves `{kind: "rule", id}` to Core `rules[]` and
+`{kind: "exception", id}` to Core `exceptions[]`. The singleton references
+`{kind: "applicability"}` and `{kind: "fallback"}` identify the actual Core
+`applicability` and `fallbackOutcome` members; they have no fabricated ID. Absent
+members, unknown IDs, duplicate references within one coverage record and
+kind/ID confusion refuse. Fallback must name a declared, uniquely identified
+outcome. These references identify supplied elements; they do not prove correct
+interpretation or full Core semantic conformance. Evidence requirements, outcomes,
+condition subelements and escalation are unsupported coverage kinds, as are graph
+consumers. A clause implemented through scope, exception or fallback can reference
+that actual element without inventing a dummy rule or a manual process.
 
 Informational sources are separate and do not create governing dependencies.
 Scope and coverage are declarations to be reviewed, not a language for conditional
@@ -138,6 +156,15 @@ references, unique section identities, anchored UTF-8 boundaries and adoption
 references within their declared scope. They refuse incomplete material rather
 than silently treating it as approved. Identities are opaque references, not URLs
 to fetch. Access and network acquisition require separate authority.
+
+Prototype bounds are role-specific: parsed JSON is at most 262,144 bytes, retained
+narrative/review/informational material at most 1,048,576 bytes each, and retained
+original source material at most 4,194,304 bytes each. The fixture carrier loads at
+most 16,777,216 distinct retained bytes in total; multiple registered media types
+for identical bytes count once. An unsupported original size refuses the complete
+bundle. Truncation, extraction substitution and silently dropping the original do
+not produce a complete bundle. These review limits are not adopted Core limits or
+a final portable content-size contract.
 
 Consumer bytes are identified before adoption. A release can then bind the
 consumer, adoption and supported dependency closure without circular hashes.
@@ -209,7 +236,8 @@ admission decisions at its action boundary and does not become policy authority.
   adapters, but requiring one narrows a domain-neutral product and introduces
   unnecessary control semantics. No normative mappings are proposed here.
 - **Make readable requirements authoritative:** creates competing execution
-  semantics. Keep requirements optional and pack/graph rules authoritative.
+  semantics. Defer optional readable requirements from this prototype; any later
+  form must keep the pack/graph authoritative.
 - **Use only pack-version currency:** RFC 0011's offline membership question is
   useful but different from policy content, adoption scope and current permissions.
 - **Mandate frameworks:** organizing collections do not need another release type

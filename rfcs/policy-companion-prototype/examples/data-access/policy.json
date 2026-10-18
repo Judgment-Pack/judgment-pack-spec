@@ -1,7 +1,7 @@
 {
   "prototype": {
     "profile": "jps-policy-companion-prototype",
-    "proposalVersion": "0.0.1",
+    "proposalVersion": "0.0.2",
     "status": "non-normative"
   },
   "kind": "policy",

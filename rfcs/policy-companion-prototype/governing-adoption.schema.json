@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:jps:prototype:policy-companion:0.0.1:governing-adoption",
+  "$id": "urn:jps:prototype:policy-companion:0.0.2:governing-adoption",
   "title": "NON-NORMATIVE governing-adoption prototype",
   "description": "Immutable interpretation/coverage proposal for one exact pack. No authorization, registration, release envelope, graph support or live eligibility.",
   "type": "object",
@@ -15,19 +15,19 @@
   ],
   "properties": {
     "prototype": {
-      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/prototype"
+      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/prototype"
     },
     "kind": {
       "const": "governing-adoption"
     },
     "id": {
-      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/uri"
+      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/uri"
     },
     "version": {
-      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/version"
+      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/version"
     },
     "consumer": {
-      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/packReference"
+      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/packReference"
     },
     "governingPolicies": {
       "type": "array",
@@ -44,7 +44,7 @@
         ],
         "properties": {
           "policy": {
-            "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/policyReference"
+            "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/policyReference"
           },
           "scope": {
             "oneOf": [
@@ -78,11 +78,11 @@
                     "maxItems": 64,
                     "uniqueItems": true,
                     "items": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/localId"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/localId"
                     }
                   },
                   "reviewBasis": {
-                    "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/content"
+                    "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/content"
                   }
                 }
               }
@@ -106,7 +106,7 @@
                   ],
                   "properties": {
                     "sectionId": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/localId"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/localId"
                     },
                     "status": {
                       "const": "implemented"
@@ -117,24 +117,11 @@
                       "maxItems": 64,
                       "uniqueItems": true,
                       "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                          "kind",
-                          "id"
-                        ],
-                        "properties": {
-                          "kind": {
-                            "const": "rule"
-                          },
-                          "id": {
-                            "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/localId"
-                          }
-                        }
+                        "$ref": "#/$defs/consumerElement"
                       }
                     },
                     "reviewBasis": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/content"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/content"
                     }
                   }
                 },
@@ -148,13 +135,13 @@
                   ],
                   "properties": {
                     "sectionId": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/localId"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/localId"
                     },
                     "status": {
                       "const": "manual"
                     },
                     "handoff": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
                     }
                   }
                 },
@@ -168,13 +155,13 @@
                   ],
                   "properties": {
                     "sectionId": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/localId"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/localId"
                     },
                     "status": {
                       "const": "awaiting-interpretation"
                     },
                     "explanation": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
                     }
                   }
                 },
@@ -188,13 +175,13 @@
                   ],
                   "properties": {
                     "sectionId": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/localId"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/localId"
                     },
                     "status": {
                       "const": "awaiting-implementation"
                     },
                     "explanation": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
                     }
                   }
                 },
@@ -208,13 +195,13 @@
                   ],
                   "properties": {
                     "sectionId": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/localId"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/localId"
                     },
                     "status": {
                       "const": "out-of-scope"
                     },
                     "rationale": {
-                      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+                      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
                     }
                   }
                 }
@@ -230,8 +217,49 @@
       "maxItems": 16,
       "uniqueItems": true,
       "items": {
-        "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/content"
+        "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/content"
       }
+    }
+  },
+  "$defs": {
+    "consumerElement": {
+      "description": "Exact declared Core rule/exception by ID, or the present applicability/fallbackOutcome singleton without a fabricated ID. Other element kinds are unsupported.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "id"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "rule",
+                "exception"
+              ]
+            },
+            "id": {
+              "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/localId"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "applicability",
+                "fallback"
+              ]
+            }
+          }
+        }
+      ]
     }
   }
 }

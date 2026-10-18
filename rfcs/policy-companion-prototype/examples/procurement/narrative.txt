@@ -11,3 +11,6 @@ Treasury performs payment reconciliation outside this eligibility interpretation
 
 Public notice
 Publish the award notice through the separate communications process.
+
+Purchase scope
+This eligibility pack applies only to purchase requests; other requests remain outside this automated path.

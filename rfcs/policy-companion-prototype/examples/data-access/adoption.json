@@ -1,7 +1,7 @@
 {
   "prototype": {
     "profile": "jps-policy-companion-prototype",
-    "proposalVersion": "0.0.1",
+    "proposalVersion": "0.0.2",
     "status": "non-normative"
   },
   "kind": "governing-adoption",
@@ -28,13 +28,13 @@
         "id": "https://example.invalid/policy-companion-prototype/data-access/policy",
         "version": "1.0.0",
         "content": {
-          "bytesDigest": "sha256:b6b76777db72be932d05bd422345440fac303df43d461e472df99f4bb5d19f5b",
+          "bytesDigest": "sha256:75a7659ed5086c7728af95db0b56b15fdc914a51982b16627fc884cfc9dca50d",
           "byteLength": 2120,
           "mediaType": "application/json"
         },
         "canonicalIdentity": {
           "profile": "jps-canon",
-          "canonicalDigest": "sha256:9dfa3658de5938458b330326b3bb64482a274d721059d689920394b2ab9200b1"
+          "canonicalDigest": "sha256:c5dd5b9c7455a0404853d9fae748da6ff8d4162d3909f164aebaace78a1c9036"
         }
       },
       "scope": {
@@ -52,11 +52,14 @@
             {
               "kind": "rule",
               "id": "ineligible"
+            },
+            {
+              "kind": "fallback"
             }
           ],
           "reviewBasis": {
-            "bytesDigest": "sha256:731b587b5759a27cd6e4ebf55b030f0a4cea72cfb6922344b9ed62ea15078d9c",
-            "byteLength": 204,
+            "bytesDigest": "sha256:7c649cafae58eb11498332c03a107be64fb7d72fcbedebe2c5da32aa801d55f8",
+            "byteLength": 262,
             "mediaType": "text/plain"
           }
         },

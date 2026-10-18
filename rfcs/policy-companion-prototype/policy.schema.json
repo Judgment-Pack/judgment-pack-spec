@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:jps:prototype:policy-companion:0.0.1:policy",
+  "$id": "urn:jps:prototype:policy-companion:0.0.2:policy",
   "title": "NON-NORMATIVE policy prototype",
-  "description": "Immutable content/provenance proposal only. managementMode declares intended publication ownership; no imported approval, lifecycle, ACL or rule semantics.",
+  "description": "Immutable content/provenance proposal only. managementMode declares intended publication ownership; no imported approval, lifecycle, ACL or rule semantics. Optional readable structured requirements are deferred; a requirements member is unsupported.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -18,19 +18,19 @@
   ],
   "properties": {
     "prototype": {
-      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/prototype"
+      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/prototype"
     },
     "kind": {
       "const": "policy"
     },
     "id": {
-      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/uri"
+      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/uri"
     },
     "version": {
-      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/version"
+      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/version"
     },
     "title": {
-      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
     },
     "managementMode": {
       "enum": [
@@ -39,7 +39,7 @@
       ]
     },
     "content": {
-      "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/content"
+      "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/content"
     },
     "sections": {
       "type": "array",
@@ -56,13 +56,13 @@
         ],
         "properties": {
           "id": {
-            "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/localId"
+            "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/localId"
           },
           "title": {
-            "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+            "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
           },
           "anchor": {
-            "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/anchor"
+            "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/anchor"
           },
           "sourceRefs": {
             "type": "array",
@@ -78,10 +78,10 @@
               ],
               "properties": {
                 "sourceId": {
-                  "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/localId"
+                  "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/localId"
                 },
                 "location": {
-                  "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+                  "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
                 }
               }
             }
@@ -105,7 +105,7 @@
         ],
         "properties": {
           "id": {
-            "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/localId"
+            "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/localId"
           },
           "source": {
             "type": "object",
@@ -117,13 +117,13 @@
             ],
             "properties": {
               "provider": {
-                "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+                "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
               },
               "accountId": {
-                "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+                "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
               },
               "resourceId": {
-                "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+                "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
               }
             }
           },
@@ -133,12 +133,12 @@
                 "type": "null"
               },
               {
-                "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/text"
+                "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/text"
               }
             ]
           },
           "content": {
-            "$ref": "urn:jps:prototype:policy-companion:0.0.1:common#/$defs/content"
+            "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/originalContent"
           }
         }
       }

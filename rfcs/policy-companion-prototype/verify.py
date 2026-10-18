@@ -18,9 +18,11 @@ import dialect_verify as spec_canon  # Existing Spec strict reader and canon, no
 
 MAX_DOCUMENT_BYTES = 262144
 MAX_MATERIAL_BYTES = 1048576
+MAX_ORIGINAL_BYTES = 4194304
+MAX_TOTAL_MATERIAL_BYTES = 16777216
 MAX_DEPTH = 32
 VERSION = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", re.ASCII)
-PROFILE = {"profile": "jps-policy-companion-prototype", "proposalVersion": "0.0.1", "status": "non-normative"}
+PROFILE = {"profile": "jps-policy-companion-prototype", "proposalVersion": "0.0.2", "status": "non-normative"}
 
 
 class PrototypeError(ValueError):
@@ -32,10 +34,10 @@ def require(condition, message):
         raise PrototypeError(message)
 
 
-def read_local(path, limit):
+def read_local(path, limit, message="local file byte bound exceeded"):
     with path.open("rb") as stream:
         data = stream.read(limit + 1)
-    require(len(data) <= limit, "local file byte bound exceeded")
+    require(len(data) <= limit, message)
     return data
 
 
@@ -142,13 +144,19 @@ def register_material(reference, raw, material):
     entry = material.get(key)
     require(entry is None or entry[0] == raw, "conflicting retained material bytes")
     require(identity(raw, reference["mediaType"]) == reference, "retained byte identity/media type mismatch")
+    total = sum(len(value[0]) for value in material.values())
+    require(total + (len(raw) if entry is None else 0) <= MAX_TOTAL_MATERIAL_BYTES,
+            "aggregate retained byte bound exceeded")
     media_types = {reference["mediaType"]}
     if entry is not None:
         media_types.update(entry[1])
-    material[key] = (raw, media_types)
+    material[key] = (entry[0] if entry is not None else raw, media_types)
 
 
-def resolve(reference, material):
+def resolve(reference, material, limit=MAX_MATERIAL_BYTES):
+    # Carrier registration does not grant permission to exceed a consuming role's bound.
+    check_schema("common", reference)
+    require(reference["byteLength"] <= limit, "retained material role byte bound exceeded")
     entry = material.get(reference["bytesDigest"])
     require(entry is not None, "missing retained material")
     require(reference["mediaType"] in entry[1], "unregistered retained material media type")
@@ -180,7 +188,7 @@ def check_policy(document, material):
         raise PrototypeError("narrative is not UTF-8") from error
     sources = unique_by_id(document["sourceProvenance"], "source")
     for source in sources.values():
-        resolve(source["content"], material)  # Original retained bytes; never used as narrative offsets.
+        resolve(source["content"], material, MAX_ORIGINAL_BYTES)  # Never narrative offsets.
     sections = unique_by_id(document["sections"], "section")
     for section in sections.values():
         anchor = section["anchor"]
@@ -203,6 +211,15 @@ def check_adoption(document, material):
     consumer = check_artifact(document["consumer"], "pack", material)
     check_schema("core", consumer)  # Existing Core schema unchanged; no evaluator claim.
     rules = unique_by_id(consumer["rules"], "consumer rule")
+    exceptions = unique_by_id(consumer.get("exceptions", []), "consumer exception")
+    outcomes = unique_by_id(consumer["outcomes"], "consumer outcome")
+    if "fallbackOutcome" in consumer:
+        require(consumer["fallbackOutcome"] in outcomes, "unknown consumer fallback outcome")
+    for exception in exceptions.values():
+        if "targetRule" in exception:
+            require(exception["targetRule"] in rules, "unknown consumer exception target rule")
+        if "outcome" in exception:
+            require(exception["outcome"] in outcomes, "unknown consumer exception outcome")
     policies = set()
     for governing in document["governingPolicies"]:
         reference = governing["policy"]
@@ -222,8 +239,18 @@ def check_adoption(document, material):
             require(section_id not in seen, "duplicate section coverage")
             seen.add(section_id)
             if coverage["status"] == "implemented":
+                elements_seen = set()
                 for element in coverage["consumerElements"]:
-                    require(element["id"] in rules, "unknown consumer rule")
+                    kind = element["kind"]
+                    key = (kind, element.get("id"))
+                    require(key not in elements_seen, "duplicate consumer element reference")
+                    elements_seen.add(key)
+                    if kind in ("rule", "exception"):
+                        collection = rules if kind == "rule" else exceptions
+                        require(element["id"] in collection, "unknown consumer " + kind)
+                    else:
+                        member = "applicability" if kind == "applicability" else "fallbackOutcome"
+                        require(member in consumer, "missing consumer " + kind)
                 resolve(coverage["reviewBasis"], material)
         require(seen == selected, "coverage omits an in-scope section")
     for source in document.get("informationalSources", []):
@@ -245,9 +272,14 @@ def load_bundle(directory):
         path = (directory / name).resolve()
         require(path.parent == directory and not Path(name).is_absolute(), "material must be a local fixture file")
         require(name not in by_path, "duplicate material path")
-        raw = read_local(path, MAX_MATERIAL_BYTES)
+        check_schema("common", entry["content"])
+        existing = entry["content"]["bytesDigest"] in material
+        remaining = MAX_TOTAL_MATERIAL_BYTES - sum(len(value[0]) for value in material.values())
+        limit = MAX_ORIGINAL_BYTES if existing else min(MAX_ORIGINAL_BYTES, remaining)
+        message = "aggregate retained byte bound exceeded" if limit < MAX_ORIGINAL_BYTES else "local file byte bound exceeded"
+        raw = read_local(path, limit, message)
         register_material(entry["content"], raw, material)
-        by_path[name] = raw
+        by_path[name] = material[entry["content"]["bytesDigest"]][0]
     for name in ("policy", "consumer", "adoption"):
         require(isinstance(manifest[name], str) and manifest[name] in by_path, "missing fixture document")
     return manifest, material, read_json(by_path[manifest["policy"]]), read_json(by_path[manifest["adoption"]])

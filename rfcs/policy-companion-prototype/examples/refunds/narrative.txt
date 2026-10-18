@@ -8,3 +8,6 @@ A returns specialist handles damaged goods through the manual inspection process
 
 Fraud review
 Potential repeated-claim abuse needs a separate reviewed implementation.
+
+Damaged goods routing
+Damaged goods bypass automated eligibility and go to a returns specialist for manual inspection.
