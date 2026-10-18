@@ -394,7 +394,12 @@ class Probe:
 
     def finish_group(self, results: Iterable[Result], *,
                      claims: tuple[tuple[str, str], ...] = ()) -> tuple[Decision, ...]:
-        """Physical arrival order is ignored. This method performs no acquisition."""
+        """Commit canonical result prefixes without acquisition.
+
+        A later error retains every earlier committed result. Resume this synthetic operation
+        with only the remaining members in ``group``; already committed members are rejected.
+        An unavailable recording leaves its interrupted stub unresolved, not a valid refusal.
+        """
         received = list(results)
         by_id = {result.instance: result for result in received}
         if self.group is None or len(by_id) != len(received) or set(by_id) != set(self.group):
@@ -409,6 +414,7 @@ class Probe:
         for id in list(self.group):
             result = by_id[id]
             common = copy.deepcopy(self)
+            common.group = common.group[1:] or None
             instance = common.all_instances[id]
             attempt = instance["attempts"][-1]
             material = result.material()
@@ -484,7 +490,14 @@ class Probe:
             self.outputs[pin] = (record, payload)
             base = f"outputs/{instance['stage']}/{id}/{index}/"
             self.artifacts.update({base + "record.json": raw, base + "payload.json": payload})
-            self.sets[instance["stage"]].append(pin)
+        # Admission history stays immutable; the current offered set follows active instance order.
+        instance_rank = {member: rank for rank, member in enumerate(self._ordered(
+            member for member in self.active if self.all_instances[member]["stage"] == instance["stage"]))}
+        active_records = [pin for pin, (record, _) in self.outputs.items()
+                          if record["lineage"]["instance"] in instance_rank]
+        self.sets[instance["stage"]] = sorted(active_records, key=lambda pin: (
+            instance_rank[self.outputs[pin][0]["lineage"]["instance"]],
+            self.outputs[pin][0]["lineage"]["index"]))
 
     def select(self, upstream: str, selected: tuple[str, ...], child_ids: tuple[str, ...], *,
                fork: bool = False) -> Decision:

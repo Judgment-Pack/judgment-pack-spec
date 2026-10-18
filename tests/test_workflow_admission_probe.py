@@ -175,6 +175,147 @@ class WorkflowAdmissionProbeTests(unittest.TestCase):
         # Rejected at the first canonical candidate; later material never becomes its baseline.
         self.assertEqual(before, probe.snapshot())
 
+    def test_later_malformed_result_resumes_only_remaining_members_after_each_result_state(self) -> None:
+        for state in ("completed", "interrupted", "cancelled"):
+            with self.subTest(first_state=state):
+                probe = children()
+                first = study.Result("child-0", (b'{"person":"a"}',) if state == "completed" else (),
+                                     state=state)
+                with self.assertRaisesRegex(study.ProbeError, "must be objects"):
+                    probe.finish_group([first, study.Result("child-1", (b'[]',))])
+                prefix = probe.snapshot()
+                self.assertEqual(["child-1"], probe.group)
+                self.assertEqual(["child-0"], [r["instance"] for r in
+                                 probe.proof["epochBlocks"][-1][-1]["results"]])
+                self.assertEqual(3 if state == "completed" else 2, prefix.records)
+                with self.assertRaisesRegex(study.ProbeError, "exactly once"):
+                    probe.finish_group([first, study.Result("child-1")])
+                self.assertEqual(prefix, probe.snapshot())
+                probe.finish_group([study.Result("child-1", (b'{"person":"b"}',))])
+                after = probe.snapshot()
+                self.assertIsNone(probe.group)
+                self.assertEqual(["child-0", "child-1"], [r["instance"] for r in
+                                 probe.proof["epochBlocks"][-1][-1]["results"]])
+                self.assertEqual(prefix.records + 1, after.records)
+                self.assertEqual(len(probe.sets["people"]), len(set(probe.sets["people"])))
+                for path, raw in prefix.files:
+                    if path.startswith(("instances/child-0/", "outputs/people/child-0/")):
+                        self.assertEqual(raw, after.as_files()[path])
+
+    def test_later_false_claim_keeps_the_first_fitting_prefix_without_duplicate_observations(self) -> None:
+        probe = children()
+        results = [study.Result("child-0", (b'{"person":"a"}',)),
+                   study.Result("child-1", (b'{"person":"b"}',))]
+        with self.assertRaisesRegex(study.ProbeError, "original candidate"):
+            probe.finish_group(results, claims=(("child-1", "refused"),))
+        prefix = probe.snapshot()
+        frozen = copy.deepcopy(probe.decisions[-1])
+        self.assertEqual("accepted", frozen.outcome)
+        self.assertEqual(prefix, frozen.accepted)
+        self.assertEqual(["child-1"], probe.group)
+        probe.finish_group(results[1:])
+        self.assertEqual(frozen, probe.decisions[-2])
+        self.assertEqual(["child-0", "child-1"], [r["instance"] for r in
+                         probe.proof["epochBlocks"][-1][-1]["results"]])
+        self.assertEqual(4, probe.snapshot().records)
+        self.assertEqual(2, len(set(probe.sets["people"])))
+        for path, raw in prefix.files:
+            if path.startswith(("instances/child-0/", "outputs/people/child-0/")):
+                self.assertEqual(raw, probe.snapshot().as_files()[path])
+
+    def test_later_recording_unavailable_retains_only_the_committed_prefix(self) -> None:
+        probe = children(100_000)
+        first = study.Result("child-0", (b'{"person":"a"}',))
+        unrecordable = study.Result("child-1", response="x" * 200_000)
+        with self.assertRaises(study.RecordingUnavailable):
+            probe.finish_group([first, unrecordable])
+        prefix = probe.snapshot()
+        self.assertEqual(["child-1"], probe.group)
+        self.assertLessEqual(prefix.total_bytes, probe.limits.max_bytes)
+        self.assertEqual(3, prefix.records)
+        self.assertEqual(["child-0"], [r["instance"] for r in
+                         probe.proof["epochBlocks"][-1][-1]["results"]])
+        self.assertEqual("interrupted", probe.all_instances["child-1"]["attempts"][0]["state"])
+        self.assertNotIn("instances/child-1/attempts/1/run.json", prefix.as_files())
+        with self.assertRaises(study.RecordingUnavailable):
+            probe.finish_group([unrecordable])
+        self.assertEqual(prefix, probe.snapshot())
+        with self.assertRaisesRegex(study.ProbeError, "close"):
+            probe.begin_group(retry="child-1")
+        self.assertEqual(prefix, probe.snapshot())
+
+    def test_committed_refusal_and_suppression_are_not_reprocessed_after_later_error(self) -> None:
+        probe = children(count=3, max_records=4)
+        with self.assertRaisesRegex(study.ProbeError, "must be objects"):
+            probe.finish_group([
+                study.Result("child-0", (b'{"person":"a"}', b'{"person":"b"}')),
+                study.Result("child-1", state="not-acquired"),
+                study.Result("child-2", (b'[]',)),
+            ])
+        prefix = probe.snapshot()
+        self.assertEqual(["child-2"], probe.group)
+        self.assertEqual("failed", probe.all_instances["child-0"]["state"])
+        self.assertEqual("limit-exceeded", probe.all_instances["child-1"]["failure"])
+        self.assertEqual(3, prefix.records)
+        probe.finish_group([study.Result("child-2", state="interrupted")])
+        self.assertEqual(["child-0", "child-1", "child-2"], [r["instance"] for r in
+                         probe.proof["epochBlocks"][-1][-1]["results"]])
+        self.assertEqual(3, probe.snapshot().records)
+        self.assertEqual([], probe.sets["people"])
+        for path, raw in prefix.files:
+            if path.startswith(("instances/child-0/", "instances/child-1/")):
+                self.assertEqual(raw, probe.snapshot().as_files()[path])
+
+    def test_earlier_deferred_start_or_retry_reorders_active_set_without_reordering_history(self) -> None:
+        for deferred in (True, False):
+            with self.subTest(deferred=deferred):
+                probe = study.Probe((study.Stage("root"), study.Stage("people", "root"),
+                                     study.Stage("followup", "people")))
+                probe.begin_group()
+                probe.finish_group([study.Result("root-instance", (b'{"org":"a"}', b'{"org":"b"}'))])
+                probe.select("root", tuple(probe.sets["root"]), ("person-a", "person-b"))
+                probe.begin_group(stops=(("person-a", "interrupted"),) if deferred else ())
+                later = study.Result("person-b", (b'{"person":"b0"}', b'{"person":"b1"}'))
+                probe.finish_group([later] if deferred else
+                                   [study.Result("person-a", state="interrupted"), later])
+                before = probe.snapshot()
+                old_proof = before.as_files()["admission-proof.json"]
+                probe.begin_group(retry="person-a")
+                probe.finish_group([study.Result("person-a", (b'{"person":"a0"}', b'{"person":"a1"}'))])
+                after = probe.snapshot()
+                records = probe.sets["people"]
+                self.assertEqual([("person-a", 0), ("person-a", 1), ("person-b", 0), ("person-b", 1)],
+                                 [(probe.outputs[pin][0]["lineage"]["instance"],
+                                   probe.outputs[pin][0]["lineage"]["index"]) for pin in records])
+                expected_set = study.canon({"workflowDigest": probe.workflow_digest,
+                                            "execution": "synthetic-execution", "stage": "people",
+                                            "records": records})
+                self.assertEqual(expected_set, after.as_files()["sets/people.json"])
+                execution = json.loads(after.as_files()["execution.json"])
+                self.assertEqual(records, execution["outputSets"][1]["records"])
+                self.assertEqual(3, after.instances)
+                self.assertEqual(6, after.records)
+                epoch = probe.proof["epochBlocks"][-1][-1]
+                self.assertEqual(study.sha(old_proof), epoch["previousProofDigest"])
+                self.assertEqual(["person-a"], [r["instance"] for r in epoch["results"]])
+                for path, raw in before.files:
+                    if path.startswith(("instances/person-b/", "outputs/people/person-b/")):
+                        self.assertEqual(raw, after.as_files()[path])
+                wrong = tuple(records[2:] + records[:2])
+                with self.assertRaisesRegex(study.ProbeError, "offered order"):
+                    probe.select("people", wrong, ("next-b0", "next-b1", "next-a0", "next-a1"))
+                self.assertEqual(after, probe.snapshot())
+                decision = probe.select("people", tuple(records),
+                                        ("next-a0", "next-a1", "next-b0", "next-b1"))
+                self.assertEqual("accepted", decision.outcome)
+                selection = probe.selections["people"]
+                self.assertEqual(study.sha(expected_set), selection["outputSetDigest"])
+                self.assertEqual(records, selection["selected"])
+                self.assertEqual(records, [probe.all_instances[id]["parentRecord"] for id in
+                                 ("next-a0", "next-a1", "next-b0", "next-b1")])
+                self.assertEqual(7, probe.snapshot().instances)
+                self.assertEqual(6, probe.snapshot().records)
+
     def test_retry_appends_history_without_remeasuring_old_refusal(self) -> None:
         _, measured = retry_example(1_000_000_000)
         limit = measured.accepted.total_bytes - 1
