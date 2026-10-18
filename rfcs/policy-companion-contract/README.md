@@ -251,6 +251,9 @@ not cause reinterpretation under an unknown format.
 
 For the portable vector input, parse, select and canonical-domain-check the root
 before checking the registration count and registering material in listed order.
+Local carrier sources are acquired only after root dispatch and the count check,
+one source immediately before its registration. An earlier refusal prevents later
+source acquisition. NUL paths and path-normalization failures are `invalid-carrier`.
 Then check the root's schema and semantics as implemented in `verify.py`:
 Policy narrative, sources, sections in declaration order; adoption consumer then
 Policies in declaration order, each reference before its Policy/coverage, then

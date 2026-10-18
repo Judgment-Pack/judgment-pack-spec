@@ -11,11 +11,18 @@ import verify as v
 def source_bytes(source, root):
     if "repeatByte" in source:
         return bytes([source["repeatByte"]]) * source["byteLength"]
-    name = source["path"]
-    path = (root / name).resolve()
-    v.require(not Path(name).is_absolute() and path.is_relative_to(root), "invalid-carrier")
+    path = v.local_path(root, source["path"], allow_nested=True)
     # Vectors deliberately include one byte over the registration bound.
     return v.read_local(path, v.MAX_ORIGINAL_BYTES + 1)
+
+
+def case_result(case):
+    try:
+        raw = source_bytes(case["document"], v.HERE)
+    except v.ContractError as error:
+        return {"status": "refused", "code": error.code}
+    registrations = [(item["content"], item["source"]) for item in case["materials"]]
+    return v.verify_input(raw, registrations, load_material=lambda source: source_bytes(source, v.HERE))
 
 
 def run_vectors(manifest_path=None):
@@ -26,9 +33,7 @@ def run_vectors(manifest_path=None):
     for case in manifest["cases"]:
         v.require(case["id"] not in ids, "invalid-carrier")
         ids.add(case["id"])
-        raw = source_bytes(case["document"], v.HERE)
-        registrations = [(item["content"], source_bytes(item["source"], v.HERE)) for item in case["materials"]]
-        actual = v.verify_input(raw, registrations)
+        actual = case_result(case)
         answers.append((case["id"], actual, case["expected"]))
     return answers
 

@@ -296,16 +296,17 @@ def check_document(raw, material):
     (check_policy if kind == "policy" else check_adoption)(document, material)
 
 
-def verify_input(raw, registrations):
-    """Portable vector entry: document bytes and ordered (content reference, bytes) pairs."""
+def verify_input(raw, registrations, load_material=None):
+    """Check bytes pairs, or acquire each carrier source lazily through a supplied loader."""
     def check():
         document = read_companion(raw)
-        kind = document.get("kind")
-        require(kind in ("policy", "governing-adoption"), "invalid-document")
         require(len(registrations) <= MAX_MATERIALS, "input-over-bound")
         material = {}
         for reference, retained in registrations:
-            register_material(reference, retained, material)
+            raw_material = retained if load_material is None else load_material(retained)
+            register_material(reference, raw_material, material)
+        kind = document.get("kind")
+        require(kind in ("policy", "governing-adoption"), "invalid-document")
         (check_policy if kind == "policy" else check_adoption)(document, material)
     return result(check)
 
@@ -328,10 +329,14 @@ def read_local(path, limit):
     return raw
 
 
-def local_path(directory, name):
-    require(isinstance(name, str) and not Path(name).is_absolute(), "invalid-carrier")
-    path = (directory / name).resolve()
-    require(path.parent == directory, "invalid-carrier")
+def local_path(directory, name, allow_nested=False):
+    require(isinstance(name, str) and "\x00" not in name, "invalid-carrier")
+    try:
+        require(not Path(name).is_absolute(), "invalid-carrier")
+        path = (directory / name).resolve()
+    except (ValueError, OSError, RuntimeError) as error:
+        raise ContractError("invalid-carrier") from error
+    require(path.is_relative_to(directory) if allow_nested else path.parent == directory, "invalid-carrier")
     return path
 
 

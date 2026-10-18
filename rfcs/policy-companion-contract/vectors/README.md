@@ -12,6 +12,7 @@ companion `formatVersion` and artifact `version`; it is not a release envelope.
 All paths are relative to **rfcs/policy-companion-contract/**, the candidate root,
 regardless of the manifest's location. A path must resolve inside that root,
 including after resolving symlinks; absolute paths and escaping paths refuse.
+NUL-containing paths and path-normalization failures are `invalid-carrier`.
 Do not fetch any URI in a document or reference.
 
 Each case is exactly `{id, document, materials, expected}`:
@@ -45,7 +46,8 @@ reference; readers do not need the Python scripts used during authoring.
 To run a case, first measure/parse/select/canonical-domain-check its root bytes as
 [contract §5](../README.md#5-resource-limits-and-refusal-classifications) specifies.
 Then check the input's registration count (maximum 16), register materials in list
-order (checking declarations and distinct-byte budget), and validate the root
+order (acquiring one source immediately before its registration and checking
+declarations and distinct-byte budget), and validate the root
 schema and its semantic references. Root bytes themselves are subject to the
 262,144-byte limit and count toward the distinct-material budget only when
 explicitly registered. A referenced Policy or Pack must be retained in materials;
@@ -53,6 +55,15 @@ the carrier does not implicitly register the root or fetch a missing digest.
 Return the **first** failing phase's bounded result. Carrier preparation errors
 such as an invalid path are `invalid-carrier`; an unavailable file is
 `missing-material`. These are never successful document readings.
+
+The compound transport/ordering vectors intentionally name a missing file
+(`vectors/intentionally-missing-transport.bin`) or a NUL-containing path. These
+are test harness transport inputs, not absent files that a port should create,
+repair or fetch. Some earlier root/registration refusals must prevent acquisition
+of those later sources. The `vector-carrier-nul-path` case actually reaches its
+malformed path and returns `invalid-carrier`. The result for each case includes
+these transport refusals; the harness compares them with `expected` and continues
+to the next case. Carrier-manifest schema/setup failures remain harness failures.
 
 The manifest includes one over-bound registration count and one over-bound
 original reference; its own carrier schema permits those counterexamples. No
@@ -69,7 +80,7 @@ python rfcs/policy-companion-contract/check_vectors.py
 ```
 
 Successful harness output is exactly
-`{"status":"matched","cases":99,"maturity":"proposed-draft"}`; this is harness
+`{"status":"matched","cases":104,"maturity":"proposed-draft"}`; this is harness
 agreement, not the result for an individual document or a conformance claim. Each
 refusal vector's exact output is retained in the manifest. The harness and schema
 are optional conveniences: another language can read these same bytes and the

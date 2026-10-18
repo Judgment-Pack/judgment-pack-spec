@@ -5893,6 +5893,305 @@
         "status": "refused",
         "code": "input-over-bound"
       }
+    },
+    {
+      "id": "unknown-kind-registration-over",
+      "document": {
+        "path": "vectors/documents/unknown-kind-registration-over.json"
+      },
+      "materials": [
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        }
+      ],
+      "expected": {
+        "status": "refused",
+        "code": "input-over-bound"
+      }
+    },
+    {
+      "id": "unknown-kind-stale-length",
+      "document": {
+        "path": "vectors/documents/unknown-kind-registration-over.json"
+      },
+      "materials": [
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 2,
+            "mediaType": "text/plain"
+          }
+        }
+      ],
+      "expected": {
+        "status": "refused",
+        "code": "reference-mismatch"
+      }
+    },
+    {
+      "id": "unsupported-format-missing-source",
+      "document": {
+        "path": "vectors/documents/format-2.json"
+      },
+      "materials": [
+        {
+          "source": {
+            "path": "vectors/intentionally-missing-transport.bin"
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        }
+      ],
+      "expected": {
+        "status": "refused",
+        "code": "unsupported-format"
+      }
+    },
+    {
+      "id": "early-hash-failure-later-missing-source",
+      "document": {
+        "path": "examples/data-access/policy.json"
+      },
+      "materials": [
+        {
+          "source": {
+            "repeatByte": 120,
+            "byteLength": 1
+          },
+          "content": {
+            "bytesDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "source": {
+            "path": "vectors/intentionally-missing-transport.bin"
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        }
+      ],
+      "expected": {
+        "status": "refused",
+        "code": "reference-mismatch"
+      }
+    },
+    {
+      "id": "vector-carrier-nul-path",
+      "document": {
+        "path": "examples/data-access/policy.json"
+      },
+      "materials": [
+        {
+          "source": {
+            "path": "vectors/private\u0000transport.bin"
+          },
+          "content": {
+            "bytesDigest": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+            "byteLength": 1,
+            "mediaType": "text/plain"
+          }
+        }
+      ],
+      "expected": {
+        "status": "refused",
+        "code": "invalid-carrier"
+      }
     }
   ]
 }

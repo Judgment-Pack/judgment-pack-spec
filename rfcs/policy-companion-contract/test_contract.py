@@ -15,13 +15,13 @@ import verify as v
 class ContractTests(unittest.TestCase):
     def test_static_manifest_exact_results(self):
         answers = check_vectors.run_vectors()
-        self.assertEqual(len(answers), 99)
+        self.assertEqual(len(answers), 104)
         for name, actual, expected in answers:
             with self.subTest(vector=name):
                 self.assertEqual(actual, expected)
                 self.assertLess(len(json.dumps(actual)), 128)
         codes = {actual.get("code") for _, actual, _ in answers}
-        self.assertTrue(set(v.CODES) - {"invalid-carrier"} <= codes)
+        self.assertTrue(set(v.CODES) <= codes)
 
     def test_three_domain_bundles_and_declared_coverage(self):
         states, kinds = set(), set()
@@ -100,6 +100,34 @@ class ContractTests(unittest.TestCase):
             symlink.symlink_to(v.HERE / "examples/data-access/narrative.txt")
             (directory / "fixture.json").write_text(json.dumps(original))
             self.assertEqual(v.verify_bundle(directory), {"status": "refused", "code": "invalid-carrier"})
+
+    def test_cli_refuses_nul_material_path_with_bounded_json(self):
+        manifest = json.loads((v.HERE / "examples/data-access/fixture.json").read_bytes())
+        manifest["materials"][0]["path"] = "fictional-private\x00path.txt"
+        with TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            (directory / "fixture.json").write_text(json.dumps(manifest))
+            completed = subprocess.run([sys.executable, str(v.HERE / "verify.py"), str(directory)], capture_output=True, check=False)
+        self.assertEqual(completed.returncode, 1)
+        self.assertEqual(completed.stdout, b'{"status":"refused","code":"invalid-carrier"}\n')
+        self.assertEqual(completed.stderr, b"")
+
+    def test_vector_carrier_nul_paths_have_safe_results_and_no_cli_traceback(self):
+        expected = {"status": "refused", "code": "invalid-carrier"}
+        source = {"path": "vectors/private\x00transport.bin"}
+        case = {"id": "nul-transport", "document": {"path": "examples/data-access/policy.json"},
+                "materials": [{"source": source, "content": v.identity(b"x", "text/plain")}], "expected": expected}
+        self.assertEqual(check_vectors.case_result(case), expected)
+        root_nul = {**case, "document": source, "materials": []}
+        self.assertEqual(check_vectors.case_result(root_nul), expected)
+        manifest = {"vectorSuiteVersion": "1", "maturity": "proposed-draft", "synthetic": True, "cases": [case]}
+        with TemporaryDirectory() as temporary:
+            path = Path(temporary) / "manifest.json"
+            path.write_text(json.dumps(manifest))
+            completed = subprocess.run([sys.executable, str(v.HERE / "check_vectors.py"), str(path)], capture_output=True, check=False)
+        self.assertEqual(completed.returncode, 0)
+        self.assertEqual(completed.stdout, b'{"status":"matched","cases":1,"maturity":"proposed-draft"}\n')
+        self.assertEqual(completed.stderr, b"")
 
     def test_failed_registration_is_atomic(self):
         material = {}
