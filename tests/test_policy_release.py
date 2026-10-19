@@ -86,6 +86,21 @@ class PolicyReleaseTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "earlier release record"):
                 BUILDER.validate_policy_artifacts(VERSION, TAG, root)
 
+    def test_policy_corpus_inventory_refuses_unlisted_owned_files(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.accepted_tree(temporary)
+            BUILDER.validate_policy_artifacts(VERSION, TAG, root)
+            orphan = root / BUILDER.POLICY_ROOT / "vectors/documents/unlisted.json"
+            orphan.write_text("{}")
+            with self.assertRaisesRegex(ValueError, "corpus identity"):
+                BUILDER.validate_policy_artifacts(VERSION, TAG, root)
+            orphan.unlink()
+            BUILDER.validate_policy_artifacts(VERSION, TAG, root)
+
+    def test_proposed_draft_acceptance_matches_the_release_gate(self):
+        self.assertIn("- Status: Accepted\n", (ROOT / "rfcs/0023-policy-companion.md").read_text())
+        BUILDER.validate_policy_artifacts(VERSION, TAG)
+
     def test_tagged_history_cannot_be_rewritten_through_worktree_records(self):
         current = json.loads((ROOT / "releases" / f"{TAG}.json").read_text())
         old = copy.deepcopy(current)

@@ -1,15 +1,18 @@
-# Policy offline reader — staged draft format 1.0.0
+# Policy offline reader — draft format 1.0.0
 
-This is the supporting material for the [official-draft promotion candidate](../../../spec/policy.md)
-and [RFC 0023](../../../rfcs/0023-policy-companion.md). RFC disposition and release
-publication remain pending. The 124 vectors are in no released corpus; passing
-them creates no conformance, approval or authority claim.
+This is the supporting material for the [Policy draft companion](../../../spec/policy.md)
+and [RFC 0023](../../../rfcs/0023-policy-companion.md). The maintainer approved the
+bounded draft conditional on required green CI and PR 218 merge; until then the
+default-branch RFC remains Review. Immutable release publication remains separate.
+The 124 vectors become a released corpus only when their exact Policy tag and a
+maintainer-published GitHub release both exist. Passing them alone creates no
+conformance, approval or authority claim.
 
 - [Draft contract](../../../spec/policy.md), [versioned closed schemas](../../../schema/policy/1.0.0/).
 - [Portable vector input grammar](vectors/README.md), [exact manifest](vectors/manifest.json).
 - [Capability record](capabilities.json), [promotion and identity map](PROMOTION.md).
 - [Explicit prototype migration](MIGRATION.md), [publication plan](PUBLICATION.md).
-- [Public-process assessment and proposed disposition](ADOPTION.md).
+- [Public-process record and conditional draft disposition](ADOPTION.md).
 
 The examples retain the proposed candidate's exact Policy, adoption, Pack, source,
 narrative and interpretation bytes. The checker continues to use the repository's
@@ -26,5 +29,6 @@ python -m unittest discover -s conformance/policy/1.0.0 -p 'test_*.py' -v
 
 The independent Policy draft bundle selects these artifacts; Core bundles exclude
 the independently versioned schema/corpus directories. The site exposes versioned
-schema resources and promotion prose as unreleased review material, while its raw
-artifact directory withholds this corpus until publication. No Core corpus changes.
+schema resources and conditionally approved draft prose. Its raw artifact
+directory is separate from the independent release bundle; obtain released
+corpus bytes from the exact immutable Policy release. No Core corpus changes.

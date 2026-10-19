@@ -2,18 +2,21 @@
 
 ## Status and artifact scope
 
-This is the **official-draft promotion candidate** for [RFC 0023](../rfcs/0023-policy-companion.md),
-prepared for maintainer disposition. The RFC remains in Review. This working text
-is not yet adopted or released; merging review material or publishing software
-that reads it does not adopt this companion.
+This is the Policy companion text proposed for acceptance at **draft maturity**
+under [RFC 0023](../rfcs/0023-policy-companion.md). The maintainer authorized that
+acceptance conditional on required CI passing and
+[PR 218](https://github.com/Judgment-Pack/judgment-pack-spec/pull/218) merging.
+Until merge the default-branch RFC remains Review; this branch's acceptance
+wording describes the approved draft that takes effect upon that merge. It does
+not claim a completed merge, immutable publication, stable maturity or consumer
+adoption.
 
-On acceptance at **draft maturity**, §§1–8 define the *Policy offline reader*
-companion class. They do not change Core `0.2.0-draft`, its schema, evaluator
+Upon that merge, §§1–8 define the *Policy offline reader* companion class. They do not change Core `0.2.0-draft`, its schema, evaluator
 semantics, document corpus or evaluation corpus. The exact document selector is
 `formatVersion: "1.0.0"`; that identifies grammar, not stable maturity or a Spec
 release. Unsupported readers refuse it without legacy aliases.
 
-The proposed normative artifacts are this prose and the closed versioned
+The draft normative artifacts are this prose and the closed versioned
 [Policy](../schema/policy/1.0.0/policy.schema.json),
 [Governing adoption](../schema/policy/1.0.0/governing-adoption.schema.json) and
 [shared](../schema/policy/1.0.0/common.schema.json) schemas. Schema acceptance alone
@@ -24,10 +27,12 @@ are staged in no released corpus until an exact independent Policy draft release
 No Policy offline-reader conformance claim is available before that release.
 
 The [publication plan](../conformance/policy/1.0.0/PUBLICATION.md) follows the
-selected independent companion release route and records its pending acceptance
-and publication gates.
-The prepared first independent tag is `policy-v1.0.0-draft.1`; it has not been
-created or published. Core `specVersion` remains unchanged.
+selected independent companion release route and records its conditional-merge
+and separate publication gates.
+The first independent release identifier is `policy-v1.0.0-draft.1`. Its
+presence in a source branch does not establish publication: the exact tag and
+a maintainer-published GitHub release must both exist. Core `specVersion`
+remains unchanged.
 The historical [prototype 0.0.2](../rfcs/policy-companion-prototype/README.md) and
 [proposed 1.0.0 candidate](../rfcs/policy-companion-contract/README.md) remain
 byte-for-byte unchanged. Their pins, the [promotion map](../conformance/policy/1.0.0/PROMOTION.md),

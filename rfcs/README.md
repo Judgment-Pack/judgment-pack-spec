@@ -69,7 +69,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0018] | The dialect | Accepted | Specification (a companion document; see below) |
 | [0019] | The Judgment Exchange — a shared place for dialects | Draft | Research line (see below) |
 | [0020] | The workflow | Draft | Specification (a proposed companion document; see below) |
-| [0023](0023-policy-companion.md) | Policy content and governing adoption | Review | Specification (proposed companion); live governance remains host-owned |
+| [0023](0023-policy-companion.md) | Policy content and governing adoption | Accepted (upon green CI and PR 218 merge) | Specification (draft Policy offline-reader companion); live governance remains host-owned |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -113,5 +113,6 @@ repository.
 RFC 0021 adds [named Dialect artifact identities](0021-dialect-artifact-identity.md) through
 exact `formatVersion` selectors, with unchanged historical formats and separate binding digests.
 
-RFC 0023 has an [official-draft promotion candidate](../spec/policy.md) prepared
-for disposition; it remains in Review and is not yet adopted or released.
+RFC 0023 has conditional maintainer approval for [the bounded Policy draft](../spec/policy.md),
+effective upon required green CI and PR 218 merge. The default branch remains
+Review until then; no immutable Policy release or consumer adoption is claimed.

@@ -10,8 +10,11 @@ here.
 - Official-draft Policy promotion preparation: versioned closed format `1.0.0`
   schemas, retained-byte examples and 124 staged agreement vectors, explicit
   migration/provenance and a scoped independent draft release route through the
-  shared builder/workflow. Prepared tag `policy-v1.0.0-draft.1` is not created or
-  published; RFC 0023 remains in Review. Core versions and evaluation are unchanged.
+  shared builder/workflow. First release identifier `policy-v1.0.0-draft.1`
+  requires its exact tag and a maintainer-published GitHub release to establish
+  immutable publication. The maintainer approved the bounded draft after CI, effective upon
+  PR 218 merge, recording the limited public review and standing temporary different-vendor-review
+  exception. Core versions and evaluation are unchanged.
 
 - The forty-second to forty-seventh dialect vectors, the six `endpoint-scope-` vectors
   (`endpoint-scope-two-paths-one-origin`, `endpoint-scope-wildcard-two-origins`,

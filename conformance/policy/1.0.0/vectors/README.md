@@ -1,8 +1,10 @@
-# Staged Policy offline-reader agreement vectors
+# Policy offline-reader agreement vectors
 
 [manifest.json](manifest.json) supplies exact draft inputs and exact expected
-results for independent readers to execute. This is synthetic review material,
-not an adopted JPS corpus or independent implementation evidence. No case asserts
+results for independent readers to execute. These synthetic fixtures alone do
+not establish a released JPS corpus. Publication requires the exact
+`policy-v1.0.0-draft.1` tag and a maintainer-published GitHub release. The fixtures
+supply no independently authored implementation evidence. No case asserts
 approval, live authority, complete organizational coverage or permission.
 
 The manifest is closed under [vectors.schema.json](../vectors.schema.json). It has

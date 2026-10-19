@@ -252,9 +252,9 @@ class StaticSiteTests(unittest.TestCase):
     def test_policy_promotion_prose_is_discoverable_and_raw_artifacts_stay_staged(self) -> None:
         page = self.output / "spec/policy/index.html"
         document = page.read_text(encoding="utf-8")
-        self.assertIn("Draft promotion candidate — not yet adopted or released", document)
+        self.assertIn("Draft companion — conditional acceptance", document)
         self.assertIn("Policy offline-reader class", document)
-        self.assertIn("RFC remains in Review", document)
+        self.assertIn("default-branch RFC remains Review", document)
         self._assert_nothing_published_under("conformance/policy")
         self.assertFalse((self.output / "artifacts/schema/policy").exists())
         for name in ("common", "policy", "governing-adoption", "fixture", "vectors"):
@@ -263,11 +263,13 @@ class StaticSiteTests(unittest.TestCase):
             published = self.output / "schema/policy/1.0.0" / f"{name}.schema.json"
             self.assertEqual(published.read_bytes(), source.read_bytes())
 
-    def test_policy_companion_is_in_review_with_source_only_candidates(self) -> None:
+    def test_policy_draft_acceptance_is_conditional_with_source_only_archives(self) -> None:
         page = self.output / "rfcs" / "0023-policy-companion" / "index.html"
         document = page.read_text(encoding="utf-8")
-        self.assertIn('<span class="artifact-label">Review proposal</span>', document)
-        self.assertIn("This is an open proposal, not part of JPS.", document)
+        self.assertIn('<span class="artifact-label">Draft companion — conditional acceptance</span>', document)
+        self.assertIn("This PR proposes acceptance", document)
+        self.assertIn("required CI passes", document)
+        self.assertIn("Until then the default-branch RFC remains Review", document)
         self.assertIn("blob/main/rfcs/0023-policy-companion.md", document)
         self.assertIn("View current source", document)
         self.assertIn(

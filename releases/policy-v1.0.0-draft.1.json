@@ -40,7 +40,7 @@
       "conformance/policy/1.0.0/examples/refunds/narrative.txt": "sha256:909d57f27b7359c777dfb2ea07d859408a13504bf8dded27807889f7cde52969",
       "conformance/policy/1.0.0/examples/refunds/policy.json": "sha256:8e3a487de4b15a1bc6c824e6dedd2e1b4fe16f4b3c4430a76b46e943ef2565ff",
       "conformance/policy/1.0.0/examples/refunds/source.txt": "sha256:ae72534013fc75083b184765e7a558b71b5e4674720aa56e8960844fd712c6c0",
-      "conformance/policy/1.0.0/vectors/README.md": "sha256:b205675b06180625e47e320b7b7069a951047432b589e78b87090cbf9041830b",
+      "conformance/policy/1.0.0/vectors/README.md": "sha256:eab4e90c6e946b60842ff65f5ed7b769c6059fc03f77fb9351a203eddcadbaa9",
       "conformance/policy/1.0.0/vectors/documents/aggregate-max.json": "sha256:356820def6f85b5a73a1b3520dac185ca3413a17a7d1f269009b3109f789be09",
       "conformance/policy/1.0.0/vectors/documents/aggregate-over.json": "sha256:356820def6f85b5a73a1b3520dac185ca3413a17a7d1f269009b3109f789be09",
       "conformance/policy/1.0.0/vectors/documents/aggregate-shared-media-counted-once.json": "sha256:356820def6f85b5a73a1b3520dac185ca3413a17a7d1f269009b3109f789be09",
@@ -180,13 +180,13 @@
     }
   },
   "formatDigests": {
-    "spec/policy.md": "sha256:80e223cb7ce30295573a0b65de66b53e8cfdf15b88dddfb9149afebdf8200aa5",
+    "spec/policy.md": "sha256:c558d265e5c6aa43046fe40047a041202148d71713e576915d34d906dd65c5fe",
     "schema/policy/1.0.0/common.schema.json": "sha256:71d4427dc535a924233c9d0ef4dd222c762da7bb1de9b54436e1d4ee53602a28",
     "schema/policy/1.0.0/policy.schema.json": "sha256:ebc4e425a3dc2bac39da13fc0672d523c7f450e1df8e4df1c393b157e6698e32",
     "schema/policy/1.0.0/governing-adoption.schema.json": "sha256:c37488754b53c2a2a1bbb0a8eafab05b91ef88198160c5074aa01f921b0df84f",
     "schema/policy/1.0.0/consumer-core-0.2.0-draft.schema.json": "sha256:847910902fa202d9fb3a97062071b532f11649031c9dad32490bf191dca5b3b5",
     "conformance/policy/1.0.0/fixture.schema.json": "sha256:2525f2dc9277ab9321fe66bf8968bbcd421986bb216a8eaa1bb0efdac65f79fc",
     "conformance/policy/1.0.0/vectors.schema.json": "sha256:d622622af5abd47b270e5cc970c76870af283ff50299fbfe1d724a3e74a10376",
-    "conformance/policy/1.0.0/vectors/README.md": "sha256:b205675b06180625e47e320b7b7069a951047432b589e78b87090cbf9041830b"
+    "conformance/policy/1.0.0/vectors/README.md": "sha256:eab4e90c6e946b60842ff65f5ed7b769c6059fc03f77fb9351a203eddcadbaa9"
   }
 }

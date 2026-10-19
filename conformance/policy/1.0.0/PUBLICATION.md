@@ -1,9 +1,12 @@
 # Independent Policy draft publication
 
 The maintainer selected independent companion draft releases with Core unchanged.
-The prepared first release is **`policy-v1.0.0-draft.1`**: first draft publication
-of exact document grammar `formatVersion: "1.0.0"`. It is not a created tag,
-release, adoption decision or stable claim. RFC 0023 is still in Review.
+The first release identifier is **`policy-v1.0.0-draft.1`**: first draft
+publication of exact document grammar `formatVersion: "1.0.0"`. Naming it in a
+source branch establishes neither publication nor stable maturity; publication
+requires the exact tag and a maintainer-published GitHub release. The maintainer approved the bounded draft conditional
+on required green CI and PR 218 merge; the default-branch RFC remains Review
+until that merge. The acceptance decision is limited to draft maturity.
 
 ## Exact identities and existing release machinery
 
@@ -61,15 +64,19 @@ an experimental software release and two same-author ports do not establish it.
 
 ## Gates before any publication
 
-A bounded independent review of the exact promotion, maintainer disposition of
-findings and public-period adequacy, and explicit draft-only RFC acceptance remain
-required. Record the standing temporary different-vendor-review waiver honestly;
-it changes no general governance rule and supplies no independent authorship.
-After disposition, update the RFC status and pending wording, regenerate the
-prepared release's exact format/corpus pins, run required repository CI, then
-create a reviewed tag and let the shared workflow prepare the draft prerelease.
-Publishing that release is a separate maintainer action. No tags are created by
-this preparation, and the builder deliberately refuses the current Review state.
+The maintainer authorized bounded draft acceptance after CI and recorded the
+limited public review in [ADOPTION.md](ADOPTION.md). It takes effect only upon
+PR 218 merge after required green CI and the final bounded review/disposition.
+The earlier separate same-vendor review and standing temporary different-vendor
+waiver are identified there; neither supplies outside stakeholder review or
+independent implementation evidence, and the general governance rule is unchanged.
+
+The PR carries the proposed Accepted status and refreshed exact pins; the default
+branch remains Review until merge. A later production tag must point to the
+accepted merged source and pass the shared builder's exact manifest/tag/commit/
+HEAD/clean-tree gates. The builder still refuses a source whose RFC status is
+Review. Tag creation, the workflow's draft prerelease and maintainer publication
+are separate actions; this source document does not establish their occurrence.
 
 The [prepared release notes](../../../releases/policy-v1.0.0-draft.1.md) identify
 reader, writer, semantic and migration effects. Stable maturity remains blocked

@@ -1,13 +1,21 @@
 # RFC 0023: Policy content and governing adoption
 
-- Status: Review
-- Type: Standards track, proposed companion at draft maturity
+- Status: Accepted
+- Type: Standards track, companion at draft maturity
 - Created: 2026-10-17
 - Issue: [#211](https://github.com/Judgment-Pack/judgment-pack-spec/issues/211)
 
-This is an open proposal, not part of JPS. It adds no released schema, conformance
-class or execution authority. The [candidate contract](policy-companion-contract/README.md)
-proposes exact format `1.0.0` at draft maturity; it is not adopted by being written.
+This PR proposes acceptance at **draft maturity**, effective only when
+[PR 218](https://github.com/Judgment-Pack/judgment-pack-spec/pull/218) merges after
+required CI passes. Until then the default-branch RFC remains Review; this branch
+records the status proposed for merge, not a completed adoption or publication.
+On merge, [spec/policy.md](../spec/policy.md) defines the bounded Policy offline-reader
+companion and the selected independent draft release route. The original proposal
+and unresolved questions below remain informative design history; their current
+draft dispositions are in [ADOPTION.md](../conformance/policy/1.0.0/ADOPTION.md).
+No stable maturity, immutable release, consumer adoption or execution authority
+follows from draft acceptance. The [candidate contract](policy-companion-contract/README.md)
+remains archived proposed material with its original status and bytes.
 The historical [prototype](policy-companion-prototype/README.md) remains explicitly
 non-normative and byte-for-byte frozen at proposal `0.0.2`, baseline commit
 `8a56a95d555c17640d2db4984363b779536b3c2a`. Host integration guidance below names separate
@@ -369,19 +377,30 @@ is required by this RFC.
 6. Supported graph/composition closure and its owning execution contract.
 7. Independent implementation evidence and any domain-format adapter demand.
 
-Moving this RFC to `Review` requests public comment; it does not mark it
-`Accepted` or waive the public-comment process. The candidate supplies no
-cross-vendor adversarial-review record or independent implementation evidence.
-Review-assertion trust, Graph support and adoption remain unresolved. This proposal
-must not be described as adopted, stable or implementation-complete on that basis.
+## Conditional draft disposition
 
-## Official-draft promotion preparation
+On 2026-10-19 the maintainer directed: “Accept the bounded draft after CI; record
+the limited public review”. The decision accepts the exact corrected `1.0.0`
+content/reference/anchor/coverage grammar and bounds, Policy offline-reader scope
+and independent draft release route **upon PR 218 merge after required CI**.
+It explicitly accepts the limited public period for this bounded draft, without
+claiming outside review or independently authored interoperability evidence.
+The standing temporary different-vendor-review exception applies; the general
+governance rule is unchanged.
 
-The [promotion candidate](../spec/policy.md) stages the exact corrected grammar
-for maintainer disposition at draft maturity, with versioned schemas and the
-Policy offline-reader class. The [proposed disposition](../conformance/policy/1.0.0/ADOPTION.md)
-resolves the bounded content surface and names every deferred question. The
-[publication plan](../conformance/policy/1.0.0/PUBLICATION.md) defines the selected independent
-Policy draft release route, with no tag or release yet created. These files do not mark this RFC Accepted or publish
-a corpus. The existing candidate/prototype and historical review records retain
-their original status and bytes.
+The separate same-vendor review inspected tree
+`60b04d452efa49032a0cc7d3ac1e55a3900410a8`, committed unchanged as
+`7f118278e480d88e53e6a6be2fe084610a2bebf9`, and reported no material findings in
+[the complete PR record](https://github.com/Judgment-Pack/judgment-pack-spec/pull/218#issuecomment-6273316525).
+The final CI-fix/acceptance delta remains subject to the PR's bounded review and
+required CI gates; that earlier report is not a review of an unidentified later
+commit. [ADOPTION.md](../conformance/policy/1.0.0/ADOPTION.md) records the actual
+public history, exception, scope and deferred questions with reopening conditions.
+
+Draft acceptance adopts only [the companion](../spec/policy.md) and the narrow
+[publication route](../conformance/policy/1.0.0/PUBLICATION.md). The first independent
+release identifier is `policy-v1.0.0-draft.1`; naming it in this source branch
+does not establish publication. Only the exact tag and a maintainer-published
+GitHub release together do. No Policy conformance claim is available before
+immutable companion publication. The
+historical prototype/candidate and their review records remain unchanged.

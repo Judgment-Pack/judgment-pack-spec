@@ -358,9 +358,9 @@ PAGES = (
         "spec/policy.md",
         PurePosixPath("spec/policy/index.html"),
         "Policy content and governing adoption",
-        "Official-draft promotion candidate: immutable Policy content and exact governing adoption. RFC 0023 remains in Review; no released conformance claim.",
+        "Policy draft approved conditional on required green CI and PR 218 merge; immutable content and exact governing adoption, with no published conformance claim.",
         "spec",
-        "Draft promotion candidate — not yet adopted or released",
+        "Draft companion — conditional acceptance",
         source_ref="main",
     ),
     Page(
@@ -702,7 +702,7 @@ PAGES = (
         "RFC 0023: Policy content and governing adoption",
         "Review proposal for immutable policy content and exact governing adoption, with a proposed draft 1.0.0 contract, a frozen non-normative prototype and unresolved trust and live governance contracts.",
         "proposals",
-        "Review proposal",
+        "Draft companion — conditional acceptance",
         source_ref="main",
     ),
     Page(

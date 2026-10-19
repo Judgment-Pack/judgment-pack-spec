@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from json.decoder import WHITESPACE, WHITESPACE_STR, JSONDecodeError, scanstring
 from pathlib import Path
 from typing import Any, Iterable
+from unittest.mock import patch
 
 from jsonschema import Draft202012Validator, FormatChecker
 
@@ -905,7 +906,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             path.relative_to(CONFORMANCE).as_posix()
             for path in CONFORMANCE.rglob("*.json")
             if not (path.name.endswith(".schema.json") or path.name in ("manifest.json", "cases.json"))
-            and path.relative_to(CONFORMANCE).parts[0] not in ("evaluation", "witness", "dialect")
+            and path.relative_to(CONFORMANCE).parts[0] not in ("evaluation", "witness", "dialect", "policy")
         }
 
         for path in sorted(listed - on_disk):
@@ -915,6 +916,42 @@ class RepositoryConformanceTests(unittest.TestCase):
         for path in sorted(on_disk - listed):
             with self.subTest(orphan=path):
                 self.fail(f"fixture {path!r} is named by no case")
+
+    def test_core_fixture_audit_keeps_orphans_and_unknown_namespaces_strict(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            named = root / "valid/named.json"
+            named.parent.mkdir()
+            named.write_text("{}")
+            for namespace in ("evaluation", "witness", "dialect", "policy"):
+                owned = root / namespace / "owned.json"
+                owned.parent.mkdir()
+                owned.write_text("{}")
+
+            def audit():
+                case = RepositoryConformanceTests("test_manifest_covers_every_fixture_once")
+                case.manifest = {"cases": [{"id": "named", "path": "valid/named.json",
+                                            "layer": "semantic", "expectedResult": "valid"}]}
+                result = unittest.TestResult()
+                with patch.dict(globals(), {"CONFORMANCE": root}):
+                    case.run(result)
+                self.assertEqual([], result.errors)
+                return result
+
+            self.assertTrue(audit().wasSuccessful())
+            for relative in ("valid/orphan.json", "unknown-companion/orphan.json",
+                             "policy-other/orphan.json"):
+                orphan = root / relative
+                orphan.parent.mkdir(exist_ok=True)
+                orphan.write_text("{}")
+                result = audit()
+                self.assertEqual(1, len(result.failures))
+                self.assertIn(f"fixture '{relative}' is named by no case", result.failures[0][1])
+                orphan.unlink()
+            named.unlink()
+            result = audit()
+            self.assertEqual(1, len(result.failures))
+            self.assertIn("case path 'valid/named.json' names no file", result.failures[0][1])
 
     def test_conformance_cases_cite_existing_spec_sections(self) -> None:
         """Every document-conformance case's specSection resolves to a heading.

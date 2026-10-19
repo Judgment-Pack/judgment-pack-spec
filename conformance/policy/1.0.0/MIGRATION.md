@@ -1,8 +1,9 @@
 # Explicit migration from prototype 0.0.2
 
-This is a proposed, breaking migration to the **draft promotion candidate**
-`formatVersion: "1.0.0"`. Neither semver arithmetic nor opening a document consents
-to migration. The candidate reader refuses prototype documents; it never upgrades
+This is the breaking migration to the **Policy draft** `formatVersion: "1.0.0"`,
+whose acceptance takes effect only upon required green CI and PR 218 merge.
+The default-branch RFC remains Review until then; publication is a separate step. Neither semver arithmetic nor opening a document consents
+to migration. The draft reader refuses prototype documents; it never upgrades
 or reinterprets them. Prototype 0.0.1 needs its own explicit path to 0.0.2 and is
 not silently accepted by this guide.
 
@@ -50,7 +51,7 @@ byte and clause ID is unchanged, a host must obtain fresh applicable authorizati
 for its new candidate and workflow, under its own contract. Informational sources
 stay informational; making one governing requires a reviewed new adoption.
 
-The three candidate examples intentionally use new Policy/adoption IDs and retain
+The three retained examples intentionally use new Policy/adoption IDs and retain
 the old consumer/source/narrative/interpretation files unchanged. Their new hashes
 are reproducible examples, not migrated organizational approvals. There is no
 migration helper or implicit parser fallback in this slice.

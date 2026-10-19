@@ -1,10 +1,14 @@
-# Policy companion 1.0.0-draft.1 — prepared, not published
+# Policy companion 1.0.0-draft.1
 
-This prepares the first independently versioned Policy release at **draft
+This describes the first independently versioned Policy release at **draft
 maturity**, using exact document format `1.0.0`, Core consumers `0.2.0-draft`,
 versioned closed schemas and the complete 124-row Policy offline-reader corpus.
-RFC 0023 remains in Review pending bounded review and maintainer disposition;
-no tag, immutable release or conformance claim exists yet.
+The maintainer approved the bounded draft after CI, effective only upon required
+green CI and PR 218 merge. The default-branch RFC remains Review until that merge;
+this source document alone establishes no immutable publication or conformance
+claim. Publication requires the exact `policy-v1.0.0-draft.1` tag and a
+maintainer-published GitHub release. Maturity remains draft; a conformance claim
+also requires the complete published corpus and the companion class requirements.
 
 The format retains exact content/narrative/source/interpretation/consumer bytes,
 UTF-8 section anchors, optional existing `jps-canon` identity, independent strict
@@ -38,7 +42,15 @@ software pinned to older Spec bytes retains its exact old capability/meaning;
 this publication does not upgrade its pin or adopt it on its behalf.
 
 The reference Python reader and Runtime port are Codex-assisted work by this
-project, not genuinely independently authored implementations. Same-vendor review
-under the maintainer's temporary exception is not cross-vendor review. Exact
-reviewed commit, findings/dispositions, public-period decision and acceptance must
-be recorded on the promotion PR before merge; no such record is fabricated here.
+project, not genuinely independently authored implementations. The maintainer
+accepted the limited public review period for this bounded draft and applied the
+standing temporary different-vendor-review exception without changing the general
+governance rule. The separate OpenAI `gpt-6.1-sol`/`xhigh` review reported no
+material findings on tree `60b04d452efa49032a0cc7d3ac1e55a3900410a8`, committed
+unchanged as `7f118278e480d88e53e6a6be2fe084610a2bebf9`; its complete record is on
+[PR 218](https://github.com/Judgment-Pack/judgment-pack-spec/pull/218#issuecomment-6273316525).
+The final CI-fix/acceptance delta requires its own bounded review and required
+CI before merge. The [conditional disposition](../conformance/policy/1.0.0/ADOPTION.md)
+records scope, public-process limits, deferred questions and reopening conditions.
+No outside stakeholder review, independent interoperability or publication is
+inferred from these records.

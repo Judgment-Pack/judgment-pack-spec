@@ -1,7 +1,9 @@
 # Promotion and identity map
 
-This is a proposed promotion of the exact corrected candidate at Spec commit
-`a74a440cfc31d0e135cdc8035f3474b17f27f320`, not an assertion of adoption.
+This promotes the exact corrected candidate at Spec commit
+`a74a440cfc31d0e135cdc8035f3474b17f27f320` into the bounded draft approved by the
+maintainer conditional on required green CI and PR 218 merge. The default branch
+remains Review until merge; no completed adoption or publication is asserted here.
 The [candidate pin](candidate-1.0.0-pin.json) records every historical candidate
 file; [prototype-0.0.2-pin.json](prototype-0.0.2-pin.json) retains the original
 prototype baseline `8a56a95d555c17640d2db4984363b779536b3c2a`. Neither old tree is
