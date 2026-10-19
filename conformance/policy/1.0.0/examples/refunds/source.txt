@@ -1,0 +1,6 @@
+SYNTHETIC ORIGINAL SOURCE; NOT AN APPROVED POLICY
+
+Clause 1: The automated path accepts only purchases within the published return window. Missing purchase dates require a returns specialist.
+Clause 2: A returns specialist handles damaged goods through the manual inspection process.
+Clause 3: Potential repeated-claim abuse needs a separate reviewed implementation.
+Clause 4: Damaged goods bypass automated eligibility and go to a returns specialist for manual inspection.

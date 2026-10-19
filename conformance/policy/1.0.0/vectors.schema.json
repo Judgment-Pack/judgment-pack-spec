@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/policy/1.0.0/vectors.schema.json",
+  "title": "Draft agreement-vector carrier; not a release envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "vectorSuiteVersion",
+    "maturity",
+    "synthetic",
+    "cases"
+  ],
+  "properties": {
+    "vectorSuiteVersion": {
+      "const": "1"
+    },
+    "maturity": {
+      "const": "draft"
+    },
+    "synthetic": {
+      "const": true
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "document",
+          "materials",
+          "expected"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "document": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "path"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "repeatByte",
+                  "byteLength"
+                ],
+                "properties": {
+                  "repeatByte": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  },
+                  "byteLength": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194305
+                  }
+                }
+              }
+            ]
+          },
+          "materials": {
+            "type": "array",
+            "maxItems": 17,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "content"
+              ],
+              "properties": {
+                "source": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "path"
+                      ],
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "repeatByte",
+                        "byteLength"
+                      ],
+                      "properties": {
+                        "repeatByte": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 255
+                        },
+                        "byteLength": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 4194305
+                        }
+                      }
+                    }
+                  ]
+                },
+                "content": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "bytesDigest",
+                    "byteLength",
+                    "mediaType"
+                  ],
+                  "properties": {
+                    "bytesDigest": {
+                      "type": "string",
+                      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+                    },
+                    "byteLength": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4194305
+                    },
+                    "mediaType": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "pattern": "^[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+(?![\\s\\S])"
+                    }
+                  },
+                  "description": "Generic fixture-carrier reference; consuming roles impose their own bounds."
+                }
+              }
+            }
+          },
+          "expected": {
+            "oneOf": [
+              {
+                "const": {
+                  "status": "valid",
+                  "formatVersion": "1.0.0",
+                  "maturity": "draft"
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "status",
+                  "code"
+                ],
+                "properties": {
+                  "status": {
+                    "const": "refused"
+                  },
+                  "code": {
+                    "enum": [
+                      "input-over-bound",
+                      "invalid-json",
+                      "invalid-selector",
+                      "unsupported-format",
+                      "invalid-document",
+                      "missing-material",
+                      "reference-mismatch",
+                      "invalid-anchor",
+                      "invalid-coverage",
+                      "invalid-consumer",
+                      "unsupported-canonical-identity",
+                      "invalid-carrier"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

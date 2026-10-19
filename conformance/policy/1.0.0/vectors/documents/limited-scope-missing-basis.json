@@ -1,0 +1,92 @@
+{
+  "formatVersion": "1.0.0",
+  "kind": "governing-adoption",
+  "id": "https://example.invalid/policy-companion-contract/procurement/adoption",
+  "version": "1.0.0",
+  "consumer": {
+    "kind": "pack",
+    "id": "https://example.invalid/policy-companion-prototype/procurement/pack",
+    "version": "1.0.0",
+    "content": {
+      "bytesDigest": "sha256:d810d8b3972a4bbc31cd3deb7ada4de965f1ad59bf753cec6748f943213cbcee",
+      "byteLength": 1725,
+      "mediaType": "application/json"
+    },
+    "canonicalIdentity": {
+      "profile": "jps-canon",
+      "canonicalDigest": "sha256:205a2afdc68ebd46d5b022256fadec6bd071bc8e34faff481f288c20df008f60"
+    }
+  },
+  "governingPolicies": [
+    {
+      "policy": {
+        "kind": "policy",
+        "id": "https://example.invalid/policy-companion-contract/procurement/policy",
+        "version": "1.0.0",
+        "content": {
+          "bytesDigest": "sha256:539587356d8c0942f6e2c98ec09311e9c55fc4efcc6b9f8845e58db817a8dc58",
+          "byteLength": 2793,
+          "mediaType": "application/json"
+        },
+        "canonicalIdentity": {
+          "profile": "jps-canon",
+          "canonicalDigest": "sha256:f0ef6fe0bb4703eaf6b2c1edf2f12712dffc139e887317c46fc82d83dba71275"
+        }
+      },
+      "scope": {
+        "kind": "sections",
+        "sectionIds": [
+          "eligibility",
+          "conflict-review",
+          "invoice-payment",
+          "purchase-scope"
+        ]
+      },
+      "coverage": [
+        {
+          "sectionId": "eligibility",
+          "status": "implemented",
+          "consumerElements": [
+            {
+              "kind": "rule",
+              "id": "eligible"
+            },
+            {
+              "kind": "rule",
+              "id": "ineligible"
+            }
+          ],
+          "reviewBasis": {
+            "bytesDigest": "sha256:14e401b11a917a3275bc18c2d85f547bfd71cf34a706e160ec54621603b36de2",
+            "byteLength": 402,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "sectionId": "conflict-review",
+          "status": "awaiting-interpretation",
+          "explanation": "Synthetic open work item: agree the conflict threshold before implementation."
+        },
+        {
+          "sectionId": "invoice-payment",
+          "status": "out-of-scope",
+          "rationale": "This pack assesses eligibility only; treasury payment reconciliation is a separate process."
+        },
+        {
+          "sectionId": "purchase-scope",
+          "status": "implemented",
+          "consumerElements": [
+            {
+              "kind": "applicability"
+            }
+          ],
+          "reviewBasis": {
+            "bytesDigest": "sha256:14e401b11a917a3275bc18c2d85f547bfd71cf34a706e160ec54621603b36de2",
+            "byteLength": 402,
+            "mediaType": "text/plain"
+          }
+        }
+      ]
+    }
+  ]
+}

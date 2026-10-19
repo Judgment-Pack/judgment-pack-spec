@@ -39,3 +39,6 @@ jobs:
 
       - name: Check proposed draft Policy companion contract (not adopted)
         run: python -m unittest discover -s rfcs/policy-companion-contract -p 'test_*.py' -v
+
+      - name: Check staged Policy official-draft promotion (unreleased)
+        run: python -m unittest discover -s conformance/policy/1.0.0 -p 'test_*.py' -v

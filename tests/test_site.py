@@ -23,7 +23,7 @@ WITNESS_VECTORS = "conformance/witness"
 # directory either (conformance/dialect/README.md). The companion document they belong to is
 # published.
 DIALECT_VECTORS = "conformance/dialect"
-UNPUBLISHED_DIRECTORIES = (STAGED_EVALUATION_ROWS, WITNESS_VECTORS, DIALECT_VECTORS)
+UNPUBLISHED_DIRECTORIES = (STAGED_EVALUATION_ROWS, WITNESS_VECTORS, DIALECT_VECTORS, "conformance/policy", "schema/policy")
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
 # anywhere the site publishes. The tokens are assembled from fragments deliberately: the repository
@@ -248,6 +248,20 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("Accepted standards-track RFC", page)
         index = (self.output / "rfcs" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="0018-dialect/"', index)
+
+    def test_policy_promotion_prose_is_discoverable_and_raw_artifacts_stay_staged(self) -> None:
+        page = self.output / "spec/policy/index.html"
+        document = page.read_text(encoding="utf-8")
+        self.assertIn("Draft promotion candidate — not yet adopted or released", document)
+        self.assertIn("Policy offline-reader class", document)
+        self.assertIn("RFC remains in Review", document)
+        self._assert_nothing_published_under("conformance/policy")
+        self.assertFalse((self.output / "artifacts/schema/policy").exists())
+        for name in ("common", "policy", "governing-adoption", "fixture", "vectors"):
+            directory = "schema/policy/1.0.0" if name in ("common", "policy", "governing-adoption") else "conformance/policy/1.0.0"
+            source = ROOT / directory / f"{name}.schema.json"
+            published = self.output / "schema/policy/1.0.0" / f"{name}.schema.json"
+            self.assertEqual(published.read_bytes(), source.read_bytes())
 
     def test_policy_companion_is_in_review_with_source_only_candidates(self) -> None:
         page = self.output / "rfcs" / "0023-policy-companion" / "index.html"

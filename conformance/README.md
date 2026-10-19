@@ -12,7 +12,10 @@ holds the 54 vectors of its companion document,
 [`dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)
 holds the reference Runner's 47 preparation vectors for its companion document,
 [`spec/dialect.md`](../spec/dialect.md), staged until the next `specVersion` opens: in no corpus,
-and not served by the site.
+and not served by the site. The [Policy offline-reader promotion](policy/1.0.0/README.md)
+holds 124 staged agreement vectors for [its proposed companion class](../spec/policy.md).
+RFC 0023 remains in Review; those vectors are in no released corpus and imply no
+Core or Policy conformance claim.
 
 [`manifest.json`](manifest.json) is the machine-readable case index. Its shape is defined by
 [`manifest.schema.json`](manifest.schema.json).

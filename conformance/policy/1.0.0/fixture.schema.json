@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/policy/1.0.0/fixture.schema.json",
+  "title": "Local synthetic draft fixture carrier; not a release envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fixtureVersion",
+    "synthetic",
+    "scenario",
+    "materials",
+    "policy",
+    "consumer",
+    "adoption"
+  ],
+  "properties": {
+    "fixtureVersion": {
+      "const": "1"
+    },
+    "synthetic": {
+      "const": true
+    },
+    "scenario": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "materials": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "content"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "content": {
+            "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/retainedContent"
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "consumer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "adoption": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  }
+}

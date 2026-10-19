@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/policy/1.0.0/policy.schema.json",
+  "title": "DRAFT Policy companion 1.0.0: policy",
+  "description": "Immutable content/provenance proposal only. managementMode declares intended publication ownership; no imported approval, lifecycle, ACL or rule semantics. Optional readable structured requirements are deferred; a requirements member is unsupported.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "kind",
+    "id",
+    "version",
+    "title",
+    "managementMode",
+    "content",
+    "sections",
+    "sourceProvenance"
+  ],
+  "properties": {
+    "formatVersion": {
+      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/formatVersion"
+    },
+    "kind": {
+      "const": "policy"
+    },
+    "id": {
+      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/uri"
+    },
+    "version": {
+      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/version"
+    },
+    "title": {
+      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+    },
+    "managementMode": {
+      "enum": [
+        "workspace-managed",
+        "externally-managed"
+      ]
+    },
+    "content": {
+      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/content"
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "anchor"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/localId"
+          },
+          "title": {
+            "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+          },
+          "anchor": {
+            "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/anchor"
+          },
+          "sourceRefs": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 16,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "sourceId",
+                "location"
+              ],
+              "properties": {
+                "sourceId": {
+                  "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/localId"
+                },
+                "location": {
+                  "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sourceProvenance": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "sourceRevision",
+          "content"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/localId"
+          },
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "provider",
+              "accountId",
+              "resourceId"
+            ],
+            "properties": {
+              "provider": {
+                "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+              },
+              "accountId": {
+                "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+              },
+              "resourceId": {
+                "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+              }
+            }
+          },
+          "sourceRevision": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+              }
+            ]
+          },
+          "content": {
+            "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/originalContent"
+          }
+        }
+      }
+    }
+  }
+}

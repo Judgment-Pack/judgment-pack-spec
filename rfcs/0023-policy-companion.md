@@ -374,3 +374,14 @@ Moving this RFC to `Review` requests public comment; it does not mark it
 cross-vendor adversarial-review record or independent implementation evidence.
 Review-assertion trust, Graph support and adoption remain unresolved. This proposal
 must not be described as adopted, stable or implementation-complete on that basis.
+
+## Official-draft promotion preparation
+
+The [promotion candidate](../spec/policy.md) stages the exact corrected grammar
+for maintainer disposition at draft maturity, with versioned schemas and the
+Policy offline-reader class. The [proposed disposition](../conformance/policy/1.0.0/ADOPTION.md)
+resolves the bounded content surface and names every deferred question. The
+[publication plan](../conformance/policy/1.0.0/PUBLICATION.md) defines the selected independent
+Policy draft release route, with no tag or release yet created. These files do not mark this RFC Accepted or publish
+a corpus. The existing candidate/prototype and historical review records retain
+their original status and bytes.

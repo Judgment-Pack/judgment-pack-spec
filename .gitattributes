@@ -21,3 +21,7 @@ conformance/dialect/** export-ignore -text
 # The companion document RFC 0020 proposes is normative for nothing while the RFC is a draft,
 # so no bundle carries it; acceptance removes this line, as for RFC 0018's Draft.
 spec/workflow.md export-ignore
+
+# Independently packaged Policy fixture/schema bytes must never undergo text conversion.
+schema/policy/** -text
+conformance/policy/** -text

@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+      - "policy-v*"
 
 permissions: {}
 
@@ -40,6 +41,10 @@ jobs:
 
       - name: Check repository artifacts and static site
         run: python -m unittest discover -s tests -v
+
+      - name: Check exact Policy format and agreement corpus
+        if: startsWith(github.ref_name, 'policy-v')
+        run: python -m unittest discover -s conformance/policy/1.0.0 -p 'test_*.py' -v
 
       - name: Build immutable release bundles
         run: >-

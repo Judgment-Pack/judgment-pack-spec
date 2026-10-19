@@ -1,0 +1,33 @@
+{
+  "commit": "8a56a95d555c17640d2db4984363b779536b3c2a",
+  "proposalVersion": "0.0.2",
+  "files": {
+    "README.md": "sha256:031cc9fa743c7d3af5cc482a514cfba106d510e16364febe0e58ce8bf9830e16",
+    "common.schema.json": "sha256:97d25d9c7778c68bdd94506227a0061923a5ef5fc9bc5f0a101f1ac2449d0d33",
+    "examples/data-access/adoption.json": "sha256:f6cf887488c12b0ba5331a048f5a9661a557021f5abfc5662a95524915ec1529",
+    "examples/data-access/consumer-pack.json": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
+    "examples/data-access/fixture.json": "sha256:575edeed43ceb0b72a3a204caacbc51ba10e52075b7cbeea134b02876e550ec8",
+    "examples/data-access/interpretation.txt": "sha256:7c649cafae58eb11498332c03a107be64fb7d72fcbedebe2c5da32aa801d55f8",
+    "examples/data-access/narrative.txt": "sha256:801a0d0969c0ffe5b95d12bbdc593c823a995ea28ccdb894b0beb7de370ba172",
+    "examples/data-access/policy.json": "sha256:75a7659ed5086c7728af95db0b56b15fdc914a51982b16627fc884cfc9dca50d",
+    "examples/data-access/source.txt": "sha256:9a4f335306e2a8e4fbcf73f5a5bad14f45369fa22985756181eeb8ea1ee217dd",
+    "examples/procurement/adoption.json": "sha256:b5b94a06dba7d12748fe3f854bdb5e5da9c14736aeff8d7416e94946891fd063",
+    "examples/procurement/consumer-pack.json": "sha256:d810d8b3972a4bbc31cd3deb7ada4de965f1ad59bf753cec6748f943213cbcee",
+    "examples/procurement/fixture.json": "sha256:241d3fd3f06c0cc0572d5237bcbbae9c88bd688fdfe7b41809bd90497ebfbf4b",
+    "examples/procurement/interpretation.txt": "sha256:14e401b11a917a3275bc18c2d85f547bfd71cf34a706e160ec54621603b36de2",
+    "examples/procurement/narrative.txt": "sha256:993a73c70afdc16c94368982d1e951c85c90838d1f750a7001c2942dc9834b94",
+    "examples/procurement/policy.json": "sha256:e9bbe247d5aa7537aef08c951b88c0881e381046e357abaa05ea255e208ee852",
+    "examples/procurement/source.txt": "sha256:4681b36d52396d3faef09e4a7c551d829920362beb47a1bfb32c2d6c4d82763b",
+    "examples/refunds/adoption.json": "sha256:fd474eed584ae6305ea535bf1d044734f8d754fcc907b0d28b65a318b5ea4b5d",
+    "examples/refunds/consumer-pack.json": "sha256:2a049f10cd8c5d4fc81200976507a8563d0bc1fca19fa9691fc1601507512e38",
+    "examples/refunds/fixture.json": "sha256:2029192a538db356e9beb137e35377d00db61dda52cb7ba622d3d5e4343b6f22",
+    "examples/refunds/interpretation.txt": "sha256:63f58f37957f808e98c67db11ac9d835286733336e47ae24f28b974d431b9862",
+    "examples/refunds/narrative.txt": "sha256:909d57f27b7359c777dfb2ea07d859408a13504bf8dded27807889f7cde52969",
+    "examples/refunds/policy.json": "sha256:5391763b2d9a72533e7566cce910a43cb5ab740dd0587d7383f3adf153ba9970",
+    "examples/refunds/source.txt": "sha256:ae72534013fc75083b184765e7a558b71b5e4674720aa56e8960844fd712c6c0",
+    "governing-adoption.schema.json": "sha256:4108f3ac476b989483affbf0ddfa2e933f7be5c579c472f7b7b3aa976299f779",
+    "policy.schema.json": "sha256:d653ce7e855dce678aeadebac18de2afbc5bdcb23412fcf52f3d30b5be3d4dbd",
+    "test_prototype.py": "sha256:bdb05fe954cb75ddc859e58e81ed29c22e7181fb224068dcc55dfb59106858ef",
+    "verify.py": "sha256:ad6774c7eed831e1a586b9a313c33cb35b471db5cb41ee2212f1643135e27ea0"
+  }
+}
