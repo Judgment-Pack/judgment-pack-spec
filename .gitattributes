@@ -25,3 +25,8 @@ spec/workflow.md export-ignore
 # Independently packaged Policy fixture/schema bytes must never undergo text conversion.
 schema/policy/** -text
 conformance/policy/** -text
+
+# Whitespace is the content of these files: a test case about trailing whitespace, and review records
+# that quote lines as they were written. git diff --check (dev.json) skips them.
+conformance/carrier/trailing-whitespace.json -whitespace
+rfcs/reviews/*.md -whitespace

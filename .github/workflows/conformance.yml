@@ -1,5 +1,9 @@
 name: Repository conformance
 
+# The check list is dev.json, run by scripts/dev/check.sh (the development kit's vendored runner).
+# One job, `repository-conformance`, which branch protection requires by name: it sets the toolchains
+# up from the manifest and runs every step.
+
 on:
   push:
   pull_request:
@@ -16,29 +20,41 @@ jobs:
         with:
           persist-credentials: false
 
+      # First, so that a manifest that does not parse fails before the long steps start.
+      - name: The manifest parses and its first step runs
+        run: scripts/dev/check.sh --manifest dev.json --only local-paths
+
+      - name: Read the toolchains from dev.json
+        id: dev
+        run: |
+          set -eu
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          m = json.load(open("dev.json", encoding="utf-8"))
+          tc = m.get("toolchains", {})
+          print("node=" + tc.get("node", {}).get("version", ""))
+          print("python=" + tc.get("python", {}).get("version", "3.12"))
+          PY
+
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: "3.12"
+          python-version: ${{ steps.dev.outputs.python }}
           cache: pip
           cache-dependency-path: requirements-dev.txt
-
-      - name: Install test dependencies
-        run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
 
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "22"
+          node-version: ${{ steps.dev.outputs.node }}
 
-      - name: Check repository artifacts and static site
-        run: python -m unittest discover -s tests -v
+      # Installs requirements-dev.txt. The pinned `jsonschema[format-nongpl]` matters: without its
+      # extras the `format` keyword is silently ignored (CONTRIBUTING.md, "Local checks").
+      - name: Setup steps
+        run: scripts/dev/check.sh --setup
 
-      - name: Check exploratory Policy companion prototype (non-normative)
-        run: python -m unittest discover -s rfcs/policy-companion-prototype -p 'test_*.py' -v
-
-      - name: Check proposed draft Policy companion contract (not adopted)
-        run: python -m unittest discover -s rfcs/policy-companion-contract -p 'test_*.py' -v
-
-      - name: Check staged Policy official-draft promotion (unreleased)
-        run: python -m unittest discover -s conformance/policy/1.0.0 -p 'test_*.py' -v
+      # Repository artifacts and the static site (tests/); the exploratory Policy companion
+      # prototype (non-normative); the proposed draft Policy companion contract (not adopted); the
+      # staged Policy official-draft promotion (unreleased).
+      - name: Checks
+        run: scripts/dev/check.sh --all

@@ -267,6 +267,14 @@ press `Ctrl+C` there to stop the server.
 Use **Terminal → Run Build Task** or `Ctrl+Shift+B` to install dependencies and rebuild the site
 without starting the server. The task definitions are in [`.vscode/tasks.json`](.vscode/tasks.json).
 
+`scripts/dev/check.sh` runs every check CI runs, in order, and prints one summary block of passes,
+failures and skips; `--setup` installs the test dependencies first and `--only NAME` re-runs one
+check. The checks are listed in `dev.json`, the manifest of the Judgment Pack
+development kit (v0.1.0), whose runner is vendored here unchanged. `AGENTS.md` and `CLAUDE.md` carry
+the same instructions for agent sessions, shared rules first and this repository's own after them;
+CI checks that the two are identical (`scripts/sync-agent-docs.sh` writes `CLAUDE.md` from
+`AGENTS.md`).
+
 These exercises test documents, not decisions. Do not infer or automate a real outcome from a pack,
 and do not present agreement between evaluators as JPS conformance: an evaluator-conformance claim is
 made against the evaluation corpus for one exact `specVersion`, on the terms in §3.4.1, and nothing

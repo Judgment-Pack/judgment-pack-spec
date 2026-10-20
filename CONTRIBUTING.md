@@ -65,11 +65,15 @@ Install the test dependencies:
 python -m pip install -r requirements-dev.txt
 ```
 
-Run the same checks CI runs:
+Run the same checks CI runs, once, and paste the summary block in the pull request body:
 
 ```bash
-python -m unittest discover -s tests -v
+scripts/dev/check.sh --setup   # installs requirements-dev.txt
+scripts/dev/check.sh
 ```
+
+The list is `dev.json`; its repository-tests step is
+`python -m unittest discover -s tests -v`.
 
 **Install the dependencies even if the suite appears to run without them.** `requirements-dev.txt`
 pins `jsonschema[format-nongpl]`, and the `format` keyword is only checked when those extras are
