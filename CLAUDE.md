@@ -11,6 +11,36 @@ Edit `AGENTS.md` and run `scripts/sync-agent-docs.sh` to regenerate `CLAUDE.md`.
 - If a check fails: read its first lines in the block, fix the cause, re-run that one check with
   `--only NAME`, then run the whole list once more. Do not loop on the whole list.
 - Start no CI watch. Push, report once, and stop; CI owns everything deterministic.
+- Push with `jpdev push [BRANCH]`, or where the kit is not installed with
+  `git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push -u origin BRANCH`.
+  The machine's stored git credential can be another account's, and a plain `git push` is then
+  refused; the helper form uses the `gh` login. Never store a credential, never change global git
+  configuration, never push with force (`jpdev push` refuses `--force` and `-f`).
+
+## Before you hand over
+
+Run these self-checks on the builder's own head before writing the commit message:
+
+- (a) The boundary paths in `dev.json` (`handover.boundary_paths`) show no admission or verdict
+  change unless the issue names one: `git diff origin/main...HEAD -- <paths>` contains additions to
+  offer tables or new paths only.
+- (b) Every schema member and enum value the change adds is carried by at least one vector: remove
+  it from a scratch copy of the schema and a vector fails.
+- (c) Where two languages read the same vectors, both readers pass over everything added.
+- (d) Every mutation row added is caught, and its twin in the other language is caught by hand.
+- (e) Every refusal path added emits an event that validates with a malformed input: empty,
+  missing or oversized.
+- (f) An interrupted and resumed run carries every new checkpoint member.
+- (g) The design's words and the code agree sentence by sentence.
+
+Run the check list with `--only <touched steps>` while iterating and whole exactly once at the end.
+Change the paths in `dev.json` `handover.shared_paths` by appending only, never by reordering or
+rewriting, because a sibling build may be open. Never fetch, rebase or merge; the coordinator
+carries `main` into the branch after the push.
+
+A HIGH (a path that executes twice, runs without approval, or crosses a boundary the issue did not
+open) is fixed in the pull request before review. MEDIUMs named by the review of record are fixed in
+the same fix round; a MEDIUM found only on a re-read goes to the pre-release batch. LOW rides.
 
 ## Rules
 

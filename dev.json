@@ -15,5 +15,9 @@
     {"name": "policy-prototype", "run": "python3 -m unittest discover -s rfcs/policy-companion-prototype -p 'test_*.py' -v", "toolchain": "python", "summary": "^(Ran |OK|FAILED)", "timeout": 600},
     {"name": "policy-contract", "run": "python3 -m unittest discover -s rfcs/policy-companion-contract -p 'test_*.py' -v", "toolchain": "python", "summary": "^(Ran |OK|FAILED)", "timeout": 600},
     {"name": "policy-official-draft", "run": "python3 -m unittest discover -s conformance/policy/1.0.0 -p 'test_*.py' -v", "toolchain": "python", "summary": "^(Ran |OK|FAILED)", "timeout": 600}
-  ]
+  ],
+  "handover": {
+    "boundary_paths": ["schema", "spec"],
+    "shared_paths": ["conformance", "rfcs", "examples"]
+  }
 }
