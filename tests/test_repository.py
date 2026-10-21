@@ -329,7 +329,7 @@ def schema_diagnostic(error: Any) -> Diagnostic:
             code = "JPS-STRUCTURE-DECIMAL-OPERAND"
         elif "org\\.judgmentpack" in pattern:
             code = "JPS-STRUCTURE-EXTENSION-NAME"
-            if isinstance(error.instance, str):
+            if "propertyNames" in schema_path and isinstance(error.instance, str):
                 instance_path.append(error.instance)
         else:
             code = "JPS-STRUCTURE-PATTERN"

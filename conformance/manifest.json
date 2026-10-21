@@ -580,6 +580,30 @@
       "specSection": "§9"
     },
     {
+      "id": "structural-unqualified-required-extension",
+      "path": "structural/unqualified-required-extension.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "required extension names use a reverse-domain namespace",
+      "specSection": "§9"
+    },
+    {
+      "id": "structural-reserved-required-extension-name",
+      "path": "structural/reserved-required-extension-name.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "required extension names cannot use the specification-reserved namespace",
+      "specSection": "§9"
+    },
+    {
       "id": "structural-unknown-decision-member",
       "path": "structural/unknown-decision-member.json",
       "layer": "structural",
