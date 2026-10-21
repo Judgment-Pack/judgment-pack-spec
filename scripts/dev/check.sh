@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# from judgment-pack-devkit v0.4.0 (templates/check.sh)
+# from judgment-pack-devkit v0.5.0 (templates/check.sh)
 # scripts/dev/check.sh [--setup] [--only a,b] [--skip a,b] [--all] [--manifest FILE]
 # Runs the checks of dev.json in order and prints one summary block; exit status = failures.
 # Stops at the first failure unless --all. --setup runs the manifest's setup steps instead.
