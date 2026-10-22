@@ -366,6 +366,21 @@ from:
 - `conflict`; and
 - `no-match`.
 
+An escalation MUST declare exactly one of `target` and `routes`; declaring both is not
+conformant. `target` retains its existing `{kind, name}` shape, with `kind` one of `human-role`,
+`queue`, or `system`, and `name` a non-empty display name. `routes` is an ordered array of 1 to 8
+entries, each a closed object containing `target` and optionally `triggers`. Each route target
+has that same shape. If present, route `triggers` MUST be a non-empty, duplicate-free subset of
+this escalation's `triggers`. An omitted route trigger list means unconditional selection once
+a handoff is requested, not a request by itself. Duplicate targets remain distinct routes.
+The maximum of 8 is this specification's schema bound, not an installation setting. Profile
+negotiation and larger bounds from #232 are outside this change.
+
+For example, `"routes": [{"target": {"kind": "queue", "name": "Review"},
+"triggers": ["unknown"]}, {"target": {"kind": "human-role", "name": "Oversight"}}]`
+selects Review only for a retained `unknown` reason and Oversight for every requested handoff,
+provided `unknown` is declared among the escalation's triggers.
+
 The target identifies a human role, queue, or external system by a display name. The object
 configures handoff intent; it does not itself make a pack applicable, turn a condition into an
 outcome, or prove that a handoff occurred. When the object is omitted, Core supplies no default
@@ -558,13 +573,23 @@ priority MUST NOT select among rule outcomes, and a conflict MUST NOT be tie-bro
 Evaluation state and handoff configuration are distinct. An unresolved or not-applicable result
 exists independently of the optional `escalation` object; `escalation` is not itself an outcome.
 
-For a generated reason, the configured target is requested when `escalation` is present and at
-least one retained reason appears in `escalation.triggers`. When several reasons match, resolution
+For an escalation declaring `target`, the configured target is requested when at least one retained
+reason appears in `escalation.triggers`. When several reasons match, resolution
 creates exactly one handoff request to the configured target and includes the complete retained
 reason set. That complete set is carried in the disposition's `reasons`; `handoff.triggeredBy` names
 the subset of it that triggered the request, which is smaller whenever `escalation.triggers` does not
 name every retained reason (§8.3). A true exception with effect `escalate` is a direct request and
 uses the configured target regardless of the trigger list.
+
+For an escalation declaring `routes`, first determine whether a request is made by at least one
+retained reason in `escalation.triggers` or by a direct exception escalation. Only when a request
+is made, select every route whose `triggers` intersects the complete disposition `reasons`, and
+every route that omits `triggers`. Make exactly one request per selected route, in declaration
+order. This is fan-out, not alternatives or fallback; identical target objects are not deduplicated.
+A direct exception bypasses the escalation trigger gate, but does not bypass route filters.
+If no route is selected, `handoff.state` is `none`, `handoff.routes` is empty, and `triggeredBy`
+is absent. Routing never changes `kind`, `outcomeId`, or the complete retained `reasons`.
+A review-named outcome alone requests nothing, including from unconditional routes.
 
 When `escalation` is omitted, there are no default triggers and no default target. When it is
 present but no generated reason matches its triggers, there is likewise no configured handoff for
@@ -653,12 +678,17 @@ When `kind` is `not-applicable` its one member is `not-applicable`. Two disposit
 - `triggeredBy` — present if and only if `state` is `requested`. A non-empty **set** of reason
   identifiers: every retained reason that appears in `escalation.triggers`, plus
   `exception-escalation` when a true exception with effect `escalate` made a direct request (§8.1).
-  It is always a subset of `reasons`.
+  It is always a subset of `reasons`; route filtering does not narrow it.
+- `routes` — present if and only if the pack declares `escalation.routes`. An ordered array of
+  the selected routes' `target` objects, one per selected route in declaration order, including
+  duplicate targets. It is empty when no request is made or no route is selected. A non-empty
+  array accompanies `state: "requested"`; an empty array accompanies `state: "none"`.
 
-The disposition does not echo the configured escalation target. A consumer that needs the target
-reads it from the pack; carrying a copy here would let a disposition disagree with the pack it came
-from, and the target is a display name, not an address (§6.7). A requested handoff is a request, not
-evidence that a handoff occurred.
+For a pack declaring `target` alone, the disposition does not echo the configured target and its
+canonical bytes remain unchanged from `0.2.0-draft`. A consumer reads that target from the pack.
+For a pack declaring `routes`, `handoff.routes` carries exactly the targets selected from the pack.
+Targets are display names, not addresses (§6.7). A requested handoff is a request, not evidence
+that a handoff occurred.
 
 Nothing else belongs in the disposition object. An implementation MAY report a trace, contributing
 rule, exception, or evidence-requirement ids, timings, or any other diagnostic **outside** the
