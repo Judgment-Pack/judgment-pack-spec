@@ -8,6 +8,11 @@
     "formatAssertionRequired": true,
     "rejectDuplicateObjectMembers": true
   },
+  "diagnosticVocabulary": {
+    "advisory": [
+      "JPS-RULES-OVERLAP"
+    ]
+  },
   "cases": [
     {
       "id": "carrier-invalid-json",
@@ -1485,6 +1490,137 @@
       "expectedDiagnostic": null,
       "focus": "escalation routes eight",
       "specSection": "\u00a76.7"
+    },
+    {
+      "id": "advisory-rules-overlap-exact",
+      "path": "advisory/rules-overlap-exact.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [
+        {
+          "code": "JPS-RULES-OVERLAP",
+          "certainty": "exact",
+          "severity": {
+            "validate": "warning",
+            "strict": "error",
+            "publish": "block"
+          },
+          "path": "/rules/0",
+          "rules": [
+            { "id": "r-medium", "outcome": "medium" },
+            { "id": "r-high", "outcome": "high" }
+          ],
+          "overlap": {
+            "path": "/score",
+            "from": "70",
+            "fromInclusive": true
+          },
+          "witnessFacts": { "score": "70" },
+          "effect": "Core §8 records conflict; the disposition is unresolved.",
+          "suggestedRewrite": {
+            "ruleId": "r-medium",
+            "when": {
+              "op": "all",
+              "conditions": [
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "greater-than-or-equal",
+                  "value": "40"
+                },
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "less-than",
+                  "value": "70"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "focus": "different outcomes with an exact non-empty numeric overlap",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-touching",
+      "path": "advisory/rules-touching.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [],
+      "focus": "adjacent numeric ranges touch at an exclusive boundary without overlapping",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-overlap-same-outcome",
+      "path": "advisory/rules-overlap-same-outcome.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [],
+      "focus": "overlapping rules that name the same outcome are compatible",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-exclusive-rewrite",
+      "path": "advisory/rules-exclusive-rewrite.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [],
+      "focus": "the suggested two-comparison rewrite makes the numeric bands exclusive",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-overlap-not-excluded",
+      "path": "advisory/rules-overlap-not-excluded.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [
+        {
+          "code": "JPS-RULES-OVERLAP",
+          "certainty": "not-excluded",
+          "severity": {
+            "validate": "warning",
+            "strict": "warning",
+            "publish": "warning"
+          },
+          "path": "/rules/0",
+          "rules": [
+            { "id": "r-medium", "outcome": "medium" },
+            { "id": "r-high", "outcome": "high" }
+          ],
+          "effect": "Core §8 records conflict; the disposition is unresolved.",
+          "suggestedRewrite": {
+            "ruleId": "r-medium",
+            "when": {
+              "op": "all",
+              "conditions": [
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "greater-than-or-equal",
+                  "value": "40"
+                },
+                {
+                  "op": "not",
+                  "condition": {
+                    "op": "fact",
+                    "path": "/priority",
+                    "operator": "greater-than-or-equal",
+                    "value": "70"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "focus": "conditions on independent fact paths do not exclude overlap",
+      "specSection": "§3.3.1"
     }
   ]
 }

@@ -1,0 +1,40 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.com/judgment-packs/rules-overlap-not-excluded",
+  "version": "0.1.0",
+  "title": "Cross-path rule overlap",
+  "decision": {
+    "intent": "Assign a score band.",
+    "question": "Which score band applies?"
+  },
+  "outcomes": [
+    { "id": "medium", "label": "Medium" },
+    { "id": "high", "label": "High" }
+  ],
+  "rules": [
+    {
+      "id": "r-medium",
+      "description": "Scores of at least 40 are medium.",
+      "when": {
+        "op": "fact",
+        "path": "/score",
+        "operator": "greater-than-or-equal",
+        "value": "40"
+      },
+      "outcome": "medium",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "r-high",
+      "description": "Priorities of at least 70 are high.",
+      "when": {
+        "op": "fact",
+        "path": "/priority",
+        "operator": "greater-than-or-equal",
+        "value": "70"
+      },
+      "outcome": "high",
+      "onUnknown": "escalate"
+    }
+  ]
+}
