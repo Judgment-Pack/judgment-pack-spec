@@ -770,7 +770,39 @@ the absent side null.
 The drift result is exactly `{result: "drift", workflowDigest, leftExecutionDigest,
 rightExecutionDigest, stages, records}`. `stages` is in workflow order and carries those counter
 deltas; `records` is in stage order, then payload-digest and occurrence order, and carries only
-changed, added or removed keys. Empty differences are explicit empty arrays. The result is a
+changed, added or removed keys. Empty differences are explicit empty arrays.
+
+A stage-delta row is exactly `{stage, records, byKind, byOutcome, byReason, byRule}`. It occurs
+once for every workflow stage, including a stage with only zero deltas. Its members are closed:
+
+| Member | Type and bound |
+| --- | --- |
+| `stage` | that stage's id |
+| `records` | right summary `records` minus left, an integer from -4096 through 4096 |
+| `byKind` | exactly `{outcome, not-applicable, unresolved}`, each the corresponding signed delta in that range |
+| `byOutcome` | outcome-id members whose values are nonzero signed deltas in that range; absent on both sides is zero |
+| `byReason` | Core-reason members whose values are nonzero signed deltas in that range; absent on both sides is zero |
+| `byRule` | outcome-id members whose values are exactly `{contributors, fallback}` |
+
+Each `byRule` `contributors` object has contributing-rule-id members whose values are nonzero
+signed deltas from -4096 through 4096; absent contributors are zero. `fallback` is the signed
+fallback delta in that range and is present even when zero. An outcome row is present exactly
+when at least one contributor or fallback delta is nonzero. Thus no zero dynamic member or open
+row can give an alternative representation of the same stage delta. The stage array has 1 to 32
+rows; each dynamic object has at most 4096 members, subject to §2's smaller execution bounds.
+
+A record-delta row is exactly one of the following closed forms; `stage` is an id,
+`payloadDigest` a digest and `occurrence` an integer from 1 through 4096:
+
+| Change | Exact row | Meaning |
+| --- | --- | --- |
+| changed | `{change: "changed", stage, payloadDigest, occurrence, left, right}` | `left` and `right` are the unequal Core §8.3 dispositions |
+| added | `{change: "added", stage, payloadDigest, occurrence, left: null, right}` | no left output has that matching key; `right` is the added disposition |
+| removed | `{change: "removed", stage, payloadDigest, occurrence, left, right: null}` | `left` is the removed disposition; no right output has that matching key |
+
+Null means only that the named side has no output at the matching key; it is never an unknown or
+missing disposition. A non-null side is one complete, closed Core disposition. The records array
+has 0 to 4096 rows. The result is a
 comparison of two separately verified bundles: it makes no judgment, verdict or authorization,
 does not replay either disposition, and is not a workflow reading or finding.
 
@@ -778,8 +810,8 @@ A conforming reader gives these answers for every admitted input and all fixture
 with the specification version its claim names. Its claim names `workflow-verifier`, workflow
 version 1, that `specVersion`, and the dialect versions, kinds and shapes the published fixtures
 exercise. This is a reader class, not an executor, preparation writer or Core conformance class;
-none implies another. No claim is available while this text is Draft or until such fixtures are
-published. No fixtures or vectors have been recorded for it.
+none implies another. No claim is available while this text is Draft. The §11 contract fixture
+tests these closed forms but is not an implementation recording or a conformance corpus.
 
 ### 10. What a workflow establishes
 
@@ -797,9 +829,16 @@ and dispositions. Because this reader does not replay dispositions, it does not 
 establish that a recorded `contributingRule` condition was true; that remains part of the retained
 evaluation evidence and any separate Runtime replay.
 
-### 11. The two-stage fixture to record
+### 11. The two-stage fixture
 
-Nothing in this section is recorded yet. The first fixture is a run from the Desk's research
+The hand-written contract fixture at `conformance/workflow/` records `workflow.json`, both
+verified-bundle projections, every stage's output envelopes, dispositions and summaries, one
+seeded sample, and the expected drift result. Its manifest also names the oversized-size,
+malformed-seed and unequal-summary refusal vectors. The workflow schema at
+`schema/workflow-1.schema.json` closes every form. These records test bytes and structure; they
+are not captured executor output and establish no reader claim.
+
+The first full run fixture is from the Desk's research
 line using two version-3 unbound `operation` dialects, bound by the Runner at import. This remains
 the acceptance construction for issue #160's condition 2. An additional research-stage recording
 follows fixture 8's `selected-parent-child` plan in
@@ -834,9 +873,10 @@ a workflow executor and verifier; those are not established by single-stage prep
   non-outcome cases omitting it. The relation says which organisation was researched, not that
   employment is true.
 
-The recording carries one summary and one seeded sample for each stage. The sample configurations
-use the same `maxSize`, while the two sample records use a fixed hand-written seed and size and
-name `sha256-rank-v1`; their selected arrays are computed independently from the recorded inputs.
+The recording carries one summary for each stage and one seeded sample for `organisations`. Both
+stage sample configurations use the same `maxSize`; the sample record uses a fixed hand-written
+seed and size and names `sha256-rank-v1`, and its selected array is computed independently from
+the recorded inputs.
 The primary summaries carry the closed member forms, contributor and fallback counts, and
 independently fixed `recordsDigest` values over the ordered dispositions. The fixture variants
 collectively carry every kind, outcome, unresolved reason and contributing-rule form. A second
@@ -907,7 +947,7 @@ other reader. Include absent artifacts, empty objects or arrays, missing require
 object, array or string one above its applicable bound; the reference-phase refusal wins whenever
 that malformed form precedes the semantic mutation. Compare the drift pair with a bundle of a
 different workflow for `drift-workflow-mismatch` as well as with its matching workflow.
-This layout supplies no evidence of those runs today.
+The hand-written contract fixture supplies no evidence of those full runs today.
 
 ## Alternatives
 

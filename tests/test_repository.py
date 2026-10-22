@@ -906,7 +906,8 @@ class RepositoryConformanceTests(unittest.TestCase):
             path.relative_to(CONFORMANCE).as_posix()
             for path in CONFORMANCE.rglob("*.json")
             if not (path.name.endswith(".schema.json") or path.name in ("manifest.json", "cases.json"))
-            and path.relative_to(CONFORMANCE).parts[0] not in ("evaluation", "witness", "dialect", "policy")
+            and path.relative_to(CONFORMANCE).parts[0]
+            not in ("evaluation", "witness", "dialect", "policy", "workflow")
         }
 
         for path in sorted(listed - on_disk):
@@ -923,7 +924,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             named = root / "valid/named.json"
             named.parent.mkdir()
             named.write_text("{}")
-            for namespace in ("evaluation", "witness", "dialect", "policy"):
+            for namespace in ("evaluation", "witness", "dialect", "policy", "workflow"):
                 owned = root / namespace / "owned.json"
                 owned.parent.mkdir()
                 owned.write_text("{}")
