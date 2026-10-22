@@ -7,6 +7,10 @@ here.
 
 ### Added
 
+- A non-normative rule-overlap check (#227) with the closed `JPS-RULES-OVERLAP` diagnostic,
+  exact and not-excluded findings, warning/strict/publish severity levels, exclusive rewrite
+  guidance, and advisory vectors. Core §8 conflict resolution is unchanged.
+
 - Core escalation routes (#219): exclusive single target or up to eight conditional routes,
   ordered fan-out in `handoff.routes`, complete retained reasons, and unchanged single-target
   disposition bytes. Structural fixtures and staged evaluation vectors cover selection, bounds,

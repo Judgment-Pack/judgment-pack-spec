@@ -148,6 +148,59 @@ A structurally conforming document is semantically conforming when:
 
 Condition or resolution results are not part of semantic document conformance.
 
+#### 3.3.1 Recommended rule-overlap check
+
+This subsection is non-normative. A validator is recommended to compare every pair of rules that
+name different outcomes and report `JPS-RULES-OVERLAP` when their conditions can both be `true` for
+one facts document. This check is not a conformance requirement: a pack with an overlap remains
+conforming, and evaluation in the overlap continues unchanged. Core §8 step 8 records `conflict`,
+and the disposition is `unresolved`.
+
+For conditions composed of `fact` nodes on one path and `literal`, `all`, `any`, and `not`, the
+check is exact. Track the sets of values for which each condition is `true` and `false`; values in
+neither set produce `unknown`. For `equals`, the true set is the singleton containing its operand;
+for `in`, it is the set of its operands; and `not-equals` swaps the equality true and false sets,
+all under the type-preserving equality of §7.4. Each ordered comparison's true and false sets are
+intervals of decimal-string values under §7.4's mathematical ordering, with an open or closed
+endpoint according to the operator; other values remain `unknown`. `all` intersects true sets and
+unites false sets, `any` unites true sets and intersects false sets, and `not` swaps the two sets. A
+`literal` supplies the corresponding full and empty sets. Two rules overlap exactly when the
+intersection of their true sets is non-empty. Thus ranges that meet only at an endpoint excluded by
+either range do not overlap. Equality and membership retain JSON type and spelling, including
+§7.4's distinction between decimal ordering and string equality.
+
+When the two conditions use different fact paths and neither condition excludes the other, the
+result is **overlap not excluded**, rather than an exact overlap. Core conditions do not relate the
+values at two paths, so a validator must not invent such a relationship. An implementation may use
+Core's collection and nesting bounds to keep this pairwise analysis bounded.
+
+The diagnostic has these members:
+
+- code `JPS-RULES-OVERLAP`;
+- certainty `exact` or `not-excluded`;
+- severity;
+- a JSON Pointer to the first rule in the reported pair;
+- the ids and outcomes of both rules;
+- for an exact result, either a witness facts input or the overlapping region: its fact `path` and
+  `from` and/or `to` endpoints with inclusivity, or its shared values;
+- the effect sentence: "Core §8 records `conflict`; the disposition is `unresolved`."; and
+- a suggested exclusive rewrite, identifying the rule to rewrite and giving its replacement
+  `when` condition.
+
+For the common ascending numeric bands, the suggestion bounds the lower rule using Core's existing
+two-comparison form. For example, replace `score >= 40` with an `all` of
+`greater-than-or-equal 40` and `less-than 70` when the higher rule is `score >= 70`. No new operator
+is needed. For a cross-path pair, the suggestion may instead conjoin the lower rule with `not` of
+the higher rule's condition. Because `not` preserves `unknown` (§7.3), a missing higher-rule fact
+makes that lower rule `unknown` too; with `onUnknown: escalate`, the record is not silently banded
+lower than its known facts justify.
+
+Plain validation reports every instance as a warning. Strict mode, including
+`test-conformance --strict`, reports an exact, non-empty overlap as an error, and a review interface
+blocks publication for that exact case. `not-excluded` remains a warning in every mode and does not
+block publication. After the project can count published packs that trigger the exact case, a Core
+minor may promote it to §3.3 semantic conformance; it is not promoted in this draft.
+
 ### 3.4 Evaluator conformance
 
 An implementation is *evaluator conforming* when, given
@@ -875,6 +928,10 @@ evaluation profile can build on rather than restate. Before a candidate stable c
 still resolve:
 
 - exact unit, date/time, and normalization semantics beyond the decimal-string ordering of §7.4;
+- a `between` fact operator with an inclusive lower bound and exclusive upper bound; it could make
+  the two-comparison band of §3.3.1 one line and exact by construction, but adding an `op` is a
+  schema change that older evaluators would refuse, so evidence should first count use of the
+  two-comparison rewrite;
 - whether equality between syntactically valid but arithmetically unrepresentable JSON numbers is
   `unknown`, as §7.4's incomparable-value rule implies, or an explicit input error. This is the single
   seam §8.3 excludes from its byte-agreement requirement, and the evaluation corpus carries no row for

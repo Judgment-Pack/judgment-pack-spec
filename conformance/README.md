@@ -1,6 +1,6 @@
 # Conformance corpus
 
-This directory contains 127 focused conformance cases for testing the carrier, structural, and
+This directory contains 132 focused conformance cases for testing the carrier, structural, and
 semantic requirements of Judgment Pack Core `0.2.0-draft`. It is versioned with the draft but is not
 yet a complete or normative conformance suite. Evaluator behavior is out of scope *here*: it has its
 own corpus, in [`evaluation/`](evaluation/README.md), which is normative for the evaluator conformance
@@ -36,6 +36,9 @@ release. Passing fixtures alone establishes no Core or Policy conformance claim.
 - `valid/` contains documents expected to pass carrier, structural, and semantic checks. A valid
   result does not claim factual truth, authority, operational fitness, or anything about an
   evaluator: evaluator conformance is claimed against `evaluation/`, never against this layer.
+- `advisory/` contains semantically conforming documents for recommended checks that do not affect
+  conformance. Their `expectedAdvisories` entries use the manifest's closed advisory diagnostic
+  vocabulary and record mode-specific severity; an empty array expects a clean advisory result.
 
 Validation proceeds in layer order. A runner should stop a case at its target layer rather than
 reporting downstream diagnostics for content that failed an earlier layer.
@@ -51,6 +54,10 @@ Each case records:
 - `specSection` — the draft section that motivates the expectation; and
 - optional `supportedExtensions` — the required-extension capabilities available to the consumer
   for that case. When omitted, the capability set is empty.
+
+Advisory cases additionally record `expectedAdvisories`. `diagnosticVocabulary.advisory` closes the
+names those entries may use; advisory findings do not change `expectedResult` or
+`expectedDiagnostic`.
 
 `unsupported` is distinct from `invalid`: the document is structurally readable and semantically
 well-formed, but the consumer lacks a capability named by `metadata.requiredExtensions`.

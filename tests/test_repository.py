@@ -881,6 +881,136 @@ class RepositoryConformanceTests(unittest.TestCase):
         self.assertTrue(self.manifest["validationProfile"]["formatAssertionRequired"])
         self.assertTrue(self.manifest["validationProfile"]["rejectDuplicateObjectMembers"])
 
+    def test_rule_overlap_advisory_vectors_cover_the_recommendation(self) -> None:
+        self.assertEqual(["JPS-RULES-OVERLAP"], self.manifest["diagnosticVocabulary"]["advisory"])
+
+        cases = {
+            case["id"]: case
+            for case in self.manifest["cases"]
+            if case["path"].startswith("advisory/")
+        }
+        self.assertEqual(
+            {
+                "advisory-rules-overlap-exact",
+                "advisory-rules-touching",
+                "advisory-rules-overlap-same-outcome",
+                "advisory-rules-exclusive-rewrite",
+                "advisory-rules-overlap-not-excluded",
+            },
+            set(cases),
+        )
+
+        exact = cases["advisory-rules-overlap-exact"]["expectedAdvisories"]
+        self.assertEqual(1, len(exact))
+        diagnostic = exact[0]
+        self.assertEqual("JPS-RULES-OVERLAP", diagnostic["code"])
+        self.assertEqual("exact", diagnostic["certainty"])
+        self.assertEqual(
+            {"validate": "warning", "strict": "error", "publish": "block"},
+            diagnostic["severity"],
+        )
+        self.assertEqual("/rules/0", diagnostic["path"])
+        self.assertEqual(
+            {"path": "/score", "from": "70", "fromInclusive": True},
+            diagnostic["overlap"],
+        )
+        self.assertEqual({"score": "70"}, diagnostic["witnessFacts"])
+        self.assertEqual(
+            [
+                {"id": "r-medium", "outcome": "medium"},
+                {"id": "r-high", "outcome": "high"},
+            ],
+            diagnostic["rules"],
+        )
+        self.assertEqual("r-medium", diagnostic["suggestedRewrite"]["ruleId"])
+        self.assertEqual("all", diagnostic["suggestedRewrite"]["when"]["op"])
+
+        for case_id in (
+            "advisory-rules-touching",
+            "advisory-rules-overlap-same-outcome",
+            "advisory-rules-exclusive-rewrite",
+        ):
+            self.assertEqual([], cases[case_id]["expectedAdvisories"])
+
+        not_excluded = cases["advisory-rules-overlap-not-excluded"]["expectedAdvisories"]
+        self.assertEqual(1, len(not_excluded))
+        self.assertEqual("not-excluded", not_excluded[0]["certainty"])
+        self.assertEqual(
+            {"validate": "warning", "strict": "warning", "publish": "warning"},
+            not_excluded[0]["severity"],
+        )
+        self.assertNotIn("overlap", not_excluded[0])
+        self.assertNotIn("witnessFacts", not_excluded[0])
+
+    def test_rule_overlap_manifest_members_and_values_are_exercised(self) -> None:
+        import copy
+
+        property_paths = (
+            ("properties", "diagnosticVocabulary"),
+            ("properties", "diagnosticVocabulary", "properties", "advisory"),
+            ("$defs", "case", "properties", "expectedAdvisories"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "code"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "certainty"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "severity"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "path"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "rules"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "overlap"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "witnessFacts"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "effect"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "suggestedRewrite"),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "severity",
+                "properties", "validate",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "severity",
+                "properties", "strict",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "severity",
+                "properties", "publish",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "rules", "items",
+                "properties", "id",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "rules", "items",
+                "properties", "outcome",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "suggestedRewrite",
+                "properties", "ruleId",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "suggestedRewrite",
+                "properties", "when",
+            ),
+        )
+        for property_path in property_paths:
+            schema = copy.deepcopy(self.manifest_schema)
+            parent = schema
+            for part in property_path[:-1]:
+                parent = parent[part]
+            del parent[property_path[-1]]
+            with self.subTest(member="/".join(property_path)):
+                self.assertFalse(Draft202012Validator(schema).is_valid(self.manifest))
+
+        advisories = [
+            advisory
+            for case in self.manifest["cases"]
+            for advisory in case.get("expectedAdvisories", [])
+        ]
+        self.assertEqual({"exact", "not-excluded"}, {item["certainty"] for item in advisories})
+        self.assertEqual(
+            {"warning", "error"},
+            {item["severity"]["strict"] for item in advisories},
+        )
+        self.assertEqual(
+            {"warning", "block"},
+            {item["severity"]["publish"] for item in advisories},
+        )
+
     def test_manifest_covers_every_fixture_once(self) -> None:
         case_ids = collections.Counter(case["id"] for case in self.manifest["cases"])
         for case_id, count in sorted(case_ids.items()):
@@ -895,7 +1025,7 @@ class RepositoryConformanceTests(unittest.TestCase):
         for case in self.manifest["cases"]:
             with self.subTest(case_id=case["id"]):
                 directory = Path(case["path"]).parts[0]
-                if directory == "valid":
+                if directory in ("advisory", "valid"):
                     self.assertEqual("semantic", case["layer"])
                     self.assertEqual("valid", case["expectedResult"])
                 else:
