@@ -85,8 +85,12 @@ function decimalNumber(literal: string): string {
   const m = /^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(literal)!;
   const digits = m[2] + (m[3] ?? "");
   const point = m[2].length + Number(m[4] ?? "0");
-  const magnitude = point <= 0 ? `0.${"0".repeat(-point)}${digits}` : point >= digits.length ? digits + "0".repeat(point - digits.length) : `${digits.slice(0, point)}.${digits.slice(point)}`;
-  return m[1] + magnitude;
+  let whole = point <= 0 ? "0" : point >= digits.length ? digits + "0".repeat(point - digits.length) : digits.slice(0, point);
+  let fraction = point <= 0 ? "0".repeat(-point) + digits : point >= digits.length ? "" : digits.slice(point);
+  whole = whole.replace(/^0+(?=\d)/, "");
+  fraction = fraction.replace(/0+$/, "");
+  const magnitude = whole + (fraction ? `.${fraction}` : "");
+  return magnitude === "0" ? "0" : m[1] + magnitude;
 }
 
 function converted(v: JVal, rule: JObj): { value?: JVal; failure?: string } {
@@ -111,9 +115,18 @@ function converted(v: JVal, rule: JObj): { value?: JVal; failure?: string } {
     const signs = (rule.m.get("sign") as JStr).v;
     if ((sign === "+" && signs !== "plus-minus") || (sign === "-" && signs === "none")) return { failure: "invalid-encoding" };
     const thousands = (rule.m.get("thousandsSeparator") as JStr).v;
-    if (thousands) text = text.split(thousands).join("");
-    text = text.split((rule.m.get("decimalSeparator") as JStr).v).join(".");
-    const result = (sign === "-" ? "-" : "") + text;
+    const decimalParts = text.split((rule.m.get("decimalSeparator") as JStr).v);
+    if (decimalParts.length > 2) return { failure: "not-a-number" };
+    const [integer, fraction] = decimalParts;
+    const digits = (part: string) => /^[0-9]+$/.test(part);
+    if (fraction !== undefined && !digits(fraction)) return { failure: "not-a-number" };
+    const groups = thousands ? integer.split(thousands) : [integer];
+    if (groups.length === 1) {
+      if (!digits(integer) || (integer.length > 1 && integer.startsWith("0"))) return { failure: "not-a-number" };
+    } else if (groups[0].length < 1 || groups[0].length > 3 || !digits(groups[0]) || groups[0].startsWith("0")
+        || groups.slice(1).some((group) => group.length !== 3 || !digits(group))) return { failure: "not-a-number" };
+    let result = (sign === "-" ? "-" : "") + groups.join("");
+    if (fraction !== undefined) result += `.${fraction}`;
     return QUALITY_DECIMAL.test(result) ? { value: str(result) } : { failure: "not-a-number" };
   }
   const format = (rule.m.get("format") as JStr).v;
@@ -133,7 +146,7 @@ function validDate(year: number, month: number, day: number): boolean {
 }
 
 function qualityType(v: JVal, type: QualityFact["qualityType"]): boolean {
-  if (v.t === "null") return true;
+  if (v.t === "null") return false;
   if (type === "string") return v.t === "str";
   if (type === "decimal") return v.t === "str" && QUALITY_DECIMAL.test(v.v);
   if (type === "boolean") return v.t === "bool";
@@ -531,6 +544,22 @@ function researchClaim(s: Source, outcome: Outcome, outcomes: Outcome[]): Claim 
   return s.read.copy ? applyCopy(s.read.copy, value, s.name, outcome.transformations) : applyRule(s.read.rule!, value, outcome.scope, s.name);
 }
 
+function researchExecutionLineage(record: JVal): JObj {
+  const execution = member(record, "execution") as JObj;
+  const retained = member(execution, "retainedBytes") as JArr;
+  return obj([
+    ["resolvedSettings", member(execution, "resolvedSettings")!],
+    ["retainedBytes", arr(retained.a.map((value) => {
+      const item = value as JObj;
+      const decoded = Uint8Array.from(Buffer.from((member(item, "base64") as JStr).v, "base64"));
+      return obj([
+        ["mediaType", member(item, "mediaType")!],
+        ["digest", str(`sha256:${sha256hex(decoded)}`)],
+      ]);
+    }))],
+  ]);
+}
+
 /** §5.2, the times: the instants check 1 found present (`checkReceipt`), so `acquisition-stale` names only one
  * outside the window. */
 function checkTimes(times: Times, maxAge: number, at: number, who: string): void {
@@ -792,6 +821,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       // §9.3, version 3: an acquired research source's citations, in the order `cites` has them
       if (o.citations !== undefined) e.push(["receipts", arr(o.citations)]);
       if (o.calculation !== undefined) e.push(["calculation", o.calculation]);
+      if (o.source?.research?.resultMember === "results" && o.record !== undefined) e.push(["researchExecution", researchExecutionLineage(o.record)]);
       if (kind === "fact" && o.transformations.has(target)) e.push(["transformation", o.transformations.get(target)!]);
       if (o.source !== undefined && o.source.parameters.length > 0) {
         const parameters = [...o.source.parameters].sort((a, b) =>

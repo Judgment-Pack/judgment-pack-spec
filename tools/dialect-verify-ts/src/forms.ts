@@ -488,7 +488,7 @@ function readConversion(v: JVal | undefined, what: string): JObj {
     exact(o, what, ["kind", "decimalSeparator", "thousandsSeparator", "sign", "whitespace"]);
     const decimal = string(o.m.get("decimalSeparator"), `${what}.decimalSeparator`);
     const thousands = string(o.m.get("thousandsSeparator"), `${what}.thousandsSeparator`);
-    if (!['.', ','].includes(decimal) || thousands === decimal) malformed(`${what} has invalid separators`);
+    if (!['.', ','].includes(decimal) || !['', '.', ','].includes(thousands) || thousands === decimal) malformed(`${what} has invalid separators`);
     if (!["none", "minus", "plus-minus"].includes(string(o.m.get("sign"), `${what}.sign`))) malformed(`${what}.sign is unknown`);
     if (!["reject", "trim"].includes(string(o.m.get("whitespace"), `${what}.whitespace`))) malformed(`${what}.whitespace is unknown`);
   } else if (kind === "boolean-from-text") {
@@ -1412,7 +1412,7 @@ function readAnswers(v: JVal | undefined, research: Research, responses: number,
     const type = research.types.get(name)!;
     const status = member(entry, "status");
     const s = status?.t === "str" ? status.v : undefined;
-    if (s === "found" || s === "present") {
+    if (s === (research.resultMember === "results" ? "present" : "found")) {
       const e = exact(entry, w, ["status", "cites", "value"]);
       cites(e.m.get("cites"), responses, 1, `${w}.cites`);
       typed(e.m.get("value"), type, `${w}.value`);
@@ -1429,8 +1429,9 @@ function readAnswers(v: JVal | undefined, research: Research, responses: number,
       });
       const first = member(values[0], "value")!;
       if (values.every((x) => jsonEqual(first, member(x, "value")!))) malformed(`${w}.values has no two that differ`);
-    } else if (s === "not-found" || s === "missing" || s === "inaccessible" || s === "stale") {
-      const needsReason = research.resultMember === "results" && s !== "not-found";
+    } else if ((research.resultMember === "results" && (s === "missing" || s === "inaccessible" || s === "stale"))
+        || (research.resultMember === "fields" && (s === "not-found" || s === "stale"))) {
+      const needsReason = research.resultMember === "results";
       const e = exact(entry, w, needsReason ? ["status", "cites", "reason"] : ["status", "cites"]);
       cites(e.m.get("cites"), responses, 0, `${w}.cites`);
       if (needsReason) nonEmpty(e.m.get("reason"), `${w}.reason`);

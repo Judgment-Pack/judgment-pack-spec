@@ -2737,6 +2737,16 @@ class DataQualityVectorTests(unittest.TestCase):
                     claim = READER.copy_claim(dialect.sources[0].read.copy, row["record"], transformations)
                     self.assertEqual("missing", READER.resolve(claim["facts"], "/research/state"))
                     self.assertEqual({"kind": "trim"}, transformations["/research/state"]["applications"][0]["rule"])
+        for mutation in document["mutations"]:
+            with self.subTest(vector=mutation["id"]):
+                record = copy.deepcopy(document["cases"][0]["record"])
+                field = mutation["field"]
+                entry = {"status": mutation["status"], "cites": mutation.get("cites", [])}
+                if "value" in mutation:
+                    entry["value"] = mutation["value"]
+                record["results"][field] = entry
+                with self.assertRaisesRegex(READER.Refused, mutation["expected"]):
+                    READER.check_acquisition_form("research", {"response": {"result": record}}, research)
 
     def test_research_result_refusal_mutations(self) -> None:
         document = READER.read_document((DIALECT / "research-result-vectors.json").read_bytes(), "research vectors")
@@ -2805,6 +2815,24 @@ class DataQualityVectorTests(unittest.TestCase):
         for changed in variants:
             self.assertNotEqual(digest(base), digest(changed))
         self.assertNotEqual(digest(conversion), digest(changed_conversion))
+
+    def test_public_verifier_replays_retained_research_bytes(self) -> None:
+        document = READER.read_document((DIALECT / "research-replay-vector.json").read_bytes(), "replay vector")
+        encoded = lambda name: READER.preparation_bytes(document[name])
+        result = READER.verify(
+            encoded("dialect"), encoded("case"), encoded("acquisitions"), encoded("profiles"),
+            encoded("preparation"), None, False, None,
+        )
+        self.assertIn("reading", result.answer)
+        self.assertEqual(encoded("preparation"), result.preparation)
+
+        changed = copy.deepcopy(document["acquisitions"])
+        changed["research"]["response"]["result"]["execution"]["retainedBytes"][0]["base64"] = document["tamperedBase64"]
+        result = READER.verify(
+            encoded("dialect"), encoded("case"), READER.preparation_bytes(changed), encoded("profiles"),
+            encoded("preparation"), None, False, None,
+        )
+        self.assertEqual(document["expectedTampered"], result.answer["finding"])
 
 
 class DialectTextTests(unittest.TestCase):

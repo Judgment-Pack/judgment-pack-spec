@@ -930,7 +930,7 @@ def check_conversion(value: Any, what: str) -> dict[str, Any]:
         closed(value, {"kind", "decimalSeparator", "thousandsSeparator", "sign", "whitespace"}, set(), what)
         if value["decimalSeparator"] not in (".", ","):
             raise malformed(f"{what}: decimalSeparator")
-        if not isinstance(value["thousandsSeparator"], str) or value["thousandsSeparator"] == value["decimalSeparator"]:
+        if value["thousandsSeparator"] not in ("", ".", ",") or value["thousandsSeparator"] == value["decimalSeparator"]:
             raise malformed(f"{what}: thousandsSeparator")
         if value["sign"] not in ("none", "minus", "plus-minus") or value["whitespace"] not in ("reject", "trim"):
             raise malformed(f"{what}: sign or whitespace")
@@ -1911,7 +1911,7 @@ def check_answers(answers: Any, research: Research, responses: int, what: str) -
         where = f"{what} field {name}"
         kind = research.types[name]
         status = entry.get("status") if isinstance(entry, dict) else None
-        if status in ("found", "present"):
+        if status == ("present" if research.result_member == "results" else "found"):
             closed(entry, {"status", "cites", "value"}, set(), where)
             check_cites(entry["cites"], responses, 1, where)
             check_typed(entry["value"], kind, where)
@@ -1929,8 +1929,10 @@ def check_answers(answers: Any, research: Research, responses: int, what: str) -
             first = observations[0]["value"]
             if all(json_equal(first, observation["value"]) for observation in observations):
                 raise malformed(f"{where}: no two conflicting values differ")
-        elif isinstance(status, str) and status in ("not-found", "missing", "inaccessible", "stale"):
-            needs_reason = research.result_member == "results" and status in ("missing", "inaccessible", "stale")
+        elif isinstance(status, str) and status in (
+            ("missing", "inaccessible", "stale") if research.result_member == "results" else ("not-found", "stale")
+        ):
+            needs_reason = research.result_member == "results"
             required = {"status", "cites", "reason"} if needs_reason else {"status", "cites"}
             closed(entry, required, set(), where)
             check_cites(entry["cites"], responses, 0, where)
@@ -2443,7 +2445,23 @@ def _convert(value: Any, rule: dict[str, Any]) -> tuple[Any, str | None]:
     if kind == "decimal-from-number":
         if not isinstance(value, Num):
             return ABSENT, "not-a-number"
-        return format(value.value, "f"), None
+        match = re.fullmatch(r"(-?)([0-9]+)(?:\.([0-9]+))?(?:[eE]([+-]?[0-9]+))?", value.literal)
+        assert match is not None
+        sign, whole, fraction, exponent = match.groups()
+        digits = whole + (fraction or "")
+        point = len(whole) + int(exponent or "0")
+        if point <= 0:
+            expanded_whole, expanded_fraction = "0", "0" * -point + digits
+        elif point >= len(digits):
+            expanded_whole, expanded_fraction = digits + "0" * (point - len(digits)), ""
+        else:
+            expanded_whole, expanded_fraction = digits[:point], digits[point:]
+        expanded_whole = expanded_whole.lstrip("0") or "0"
+        expanded_fraction = expanded_fraction.rstrip("0")
+        rendered = expanded_whole + ("." + expanded_fraction if expanded_fraction else "")
+        if rendered == "0":
+            return "0", None
+        return ("-" if sign else "") + rendered, None
     if not isinstance(value, str):
         return ABSENT, "invalid-encoding"
     if kind == "trim":
@@ -2466,17 +2484,41 @@ def _convert(value: Any, rule: dict[str, Any]) -> tuple[Any, str | None]:
         if (sign == "+" and rule["sign"] != "plus-minus") or (sign == "-" and rule["sign"] == "none"):
             return ABSENT, "invalid-encoding"
         thousands = rule["thousandsSeparator"]
-        if thousands:
-            text = text.replace(thousands, "")
-        text = text.replace(rule["decimalSeparator"], ".")
-        rendered = ("-" if sign == "-" else "") + text
+        decimal_parts = text.split(rule["decimalSeparator"])
+        if len(decimal_parts) > 2:
+            return ABSENT, "not-a-number"
+        integer, fraction = decimal_parts[0], decimal_parts[1] if len(decimal_parts) == 2 else None
+        ascii_digits = lambda part: bool(part) and part.isascii() and part.isdigit()
+        if fraction is not None and not ascii_digits(fraction):
+            return ABSENT, "not-a-number"
+        groups = integer.split(thousands) if thousands else [integer]
+        if len(groups) == 1:
+            if not ascii_digits(integer) or (len(integer) > 1 and integer[0] == "0"):
+                return ABSENT, "not-a-number"
+        elif (not 1 <= len(groups[0]) <= 3 or not ascii_digits(groups[0]) or groups[0][0] == "0"
+              or any(len(group) != 3 or not ascii_digits(group) for group in groups[1:])):
+            return ABSENT, "not-a-number"
+        rendered = ("-" if sign == "-" else "") + "".join(groups)
+        if fraction is not None:
+            rendered += "." + fraction
         if DECIMAL_TEXT.fullmatch(rendered) is None:
             return ABSENT, "not-a-number"
         return rendered, None
     if kind == "date-from-text":
-        forms = {"YYYY-MM-DD": "%Y-%m-%d", "MM/DD/YYYY": "%m/%d/%Y", "DD/MM/YYYY": "%d/%m/%Y"}
+        patterns = {
+            "YYYY-MM-DD": r"([0-9]{4})-([0-9]{2})-([0-9]{2})",
+            "MM/DD/YYYY": r"([0-9]{2})/([0-9]{2})/([0-9]{4})",
+            "DD/MM/YYYY": r"([0-9]{2})/([0-9]{2})/([0-9]{4})",
+        }
+        match = re.fullmatch(patterns[rule["format"]], value)
+        if match is None:
+            return ABSENT, "invalid-encoding"
+        a, b, c = (int(part) for part in match.groups())
+        year, month, day = (a, b, c) if rule["format"] == "YYYY-MM-DD" else (
+            (c, a, b) if rule["format"] == "MM/DD/YYYY" else (c, b, a)
+        )
         try:
-            parsed = datetime.datetime.strptime(value, forms[rule["format"]]).date()
+            parsed = datetime.date(year, month, day)
         except ValueError:
             return ABSENT, "invalid-encoding"
         return parsed.isoformat(), None
@@ -2485,7 +2527,7 @@ def _convert(value: Any, rule: dict[str, Any]) -> tuple[Any, str | None]:
 
 def _quality_type(value: Any, kind: str) -> bool:
     if value is None:
-        return True
+        return False
     if kind == "string":
         return isinstance(value, str)
     if kind == "decimal":
@@ -3060,6 +3102,21 @@ def citation(receipt: dict[str, Any]) -> dict[str, Any]:
     return {name: receipt[name] for name in ("callIndex", "sessionId", "signature")}
 
 
+def research_execution_lineage(record: dict[str, Any]) -> dict[str, Any]:
+    """Commit the resolved settings and decoded retained response bytes without repeating the bytes."""
+    execution = record["execution"]
+    return {
+        "resolvedSettings": execution["resolvedSettings"],
+        "retainedBytes": [
+            {
+                "mediaType": item["mediaType"],
+                "digest": digest_of(base64.b64decode(item["base64"], validate=True)),
+            }
+            for item in execution["retainedBytes"]
+        ],
+    }
+
+
 def read_digest(read: Read) -> str:
     return digest_of(canon(read.as_written))
 
@@ -3162,6 +3219,9 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
                     entry["receipts"] = list(outcome.citations)
                 if outcome.answer is not None:
                     entry["calculation"] = calculation_lineage(dialect, outcome)
+                if (outcome.source is not None and outcome.source.research is not None
+                        and outcome.source.research.result_member == "results" and outcome.record is not None):
+                    entry["researchExecution"] = research_execution_lineage(outcome.record)
                 if kind == "fact" and target in outcome.transformations:
                     entry["transformation"] = outcome.transformations[target]
                 lineage.append(entry)

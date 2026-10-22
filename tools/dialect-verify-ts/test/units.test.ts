@@ -14,7 +14,7 @@ import { add, decodePoint, encodePoint, keyAcceptable, smallOrder, verify as edV
 import { Refusal, bindDialect, countsWithin, readAcquisitions, readBinding, readDialect, readQualityFact } from "../src/forms.ts";
 import { NotRead, arr, canon, isIntegerLiteral, jsonEqual, member, num, obj, parse, preparationForm, read, resolve, str, utf8 } from "../src/json.ts";
 import { applyQualityFact } from "../src/prepare.ts";
-import type { JObj, JVal } from "../src/json.ts";
+import type { JArr, JObj, JStr, JVal } from "../src/json.ts";
 import { instant } from "../src/time.ts";
 import { loadVector } from "../src/vector.ts";
 import { verify } from "../src/verify.ts";
@@ -84,6 +84,20 @@ test("§4.3: both readers check the typed result and retained replay vectors", (
       assert.equal((member(row, "expected") as { v: string }).v, error.code, id);
     }
   }
+  const accepted = member(((member(root, "cases") as { a: JObj[] }).a[0]), "record") as JObj;
+  for (const mutationValue of (member(root, "mutations") as { a: JVal[] }).a) {
+    const mutation = mutationValue as JObj;
+    const id = (member(mutation, "id") as JStr).v;
+    const record = parse(text(preparationForm(accepted))) as JObj;
+    const results = member(record, "results") as JObj;
+    const field = (member(mutation, "field") as JStr).v;
+    const fields: [string, JVal][] = [["status", member(mutation, "status")!], ["cites", member(mutation, "cites") ?? arr([])]];
+    if (member(mutation, "value") !== undefined) fields.push(["value", member(mutation, "value")!]);
+    results.m.set(field, obj(fields));
+    const acquisition = obj([["research", obj([["response", obj([["result", record]])]])]]);
+    assert.throws(() => readAcquisitions(acquisition, new Map([["research", recipe]])),
+      (error: unknown) => error instanceof Refusal && error.code === (member(mutation, "expected") as JStr).v, id);
+  }
 });
 
 test("§4.3: typed result refusal mutations are caught", () => {
@@ -149,6 +163,30 @@ test("§2: semantic declarations change the dialect digest", () => {
   readDialect(parse(JSON.stringify(conversion)));
   readDialect(parse(JSON.stringify(changed)));
   assert.notEqual(digest(conversion), digest(changed));
+});
+
+test("§4.3 and §11: public verifier replays retained research bytes", () => {
+  const path = join(VECTORS, "..", "research-replay-vector.json");
+  const root = parse(readFileSync(path, "utf8")) as JObj;
+  const bytes = (name: string) => preparationForm(member(root, name)!);
+  const inputs: Inputs = {
+    dialect: bytes("dialect"), case: bytes("case"), acquisitions: bytes("acquisitions"),
+    profiles: bytes("profiles"), preparation: bytes("preparation"), requireBinding: false,
+  };
+  const result = verify(inputs);
+  assert.equal(result.kind, "reading");
+  assert.deepEqual(Buffer.from(result.recomputed!), Buffer.from(inputs.preparation));
+
+  const changed = parse(text(inputs.acquisitions)) as JObj;
+  const research = member(changed, "research") as JObj;
+  const response = member(research, "response") as JObj;
+  const record = member(response, "result") as JObj;
+  const execution = member(record, "execution") as JObj;
+  const retained = member(execution, "retainedBytes") as JArr;
+  (retained.a[0] as JObj).m.set("base64", member(root, "tamperedBase64")!);
+  const tampered = verify({ ...inputs, acquisitions: preparationForm(changed) });
+  assert.equal(tampered.kind, "finding");
+  assert.equal((member(tampered.report, "finding") as JStr).v, (member(root, "expectedTampered") as JStr).v);
 });
 
 test("§9.2 and §9.3: a skipped source keeps its claim and every declared dependency", () => {

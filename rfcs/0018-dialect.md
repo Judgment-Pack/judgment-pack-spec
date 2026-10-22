@@ -950,7 +950,7 @@ coerced fact. `precedence`, `agree` and `first-present` are the only reconciliat
 last-writer-wins remains forbidden by the target-ownership rule.
 
 The amendment also gives `research` the `results` typed-contract spelling and explicit observation
-states, portable versioned acquisition-source profiles, and optional execution evidence containing
+states, portable versioned acquisition-source profiles, and required execution evidence containing
 the resolved model/profile/settings and retained response bytes. Installation bindings continue to
 own credentials, local connection ids, retries, concurrency, allowances and approvals. Replay
 validates the retained bytes and applies the ordinary reads and targets without calling a model or
@@ -1428,6 +1428,8 @@ description form; and `cardinality` is `one` or `many`. The research record then
 instead of `fields`, with the same ids and the explicit states `present`, `missing`, `conflicting`,
 `inaccessible` and `stale`. `present` carries `value` and citations; `conflicting` carries the typed
 `values` with their citations; every other state carries a non-empty `reason` and no value. The
+legacy states `found` and `not-found` are `input-malformed` in `results`; conversely, `fields`
+continues to admit its legacy states and does not admit `present`, `missing` or `inaccessible`. The
 legacy `fields` spelling above remains readable in version 3 for the staged Runner vectors. Either
 spelling is the research kind's typed result contract: identifier, description, exact type and
 encoding, required presence and cardinality are declared before execution. A value or list outside
@@ -1477,6 +1479,13 @@ retained bytes and the result contract, then applies the ordinary read and targe
 §6.2a conversion, reconciliation and quality — without calling a model or the web. A requested
 observation becomes a consumed fact only when the research read names its `/results/<id>` state or
 value and writes a target; a declaration alone writes no fact.
+
+Each lineage entry for an acquired `results` research source has `researchExecution`, exactly
+`resolvedSettings` and `retainedBytes`. The former repeats the execution record's closed resolved
+settings. The latter preserves array order and maps every retained byte entry to exactly
+`{"mediaType": M, "digest": H}`, where `H` is the SHA-256 digest of the decoded base64 bytes.
+Thus different retained bytes change the recomputed preparation even when the typed result is
+unchanged; replay with the earlier preparation gives `preparation-differs` and performs no call.
 
 `R.fields` or `R.results`, every status, value, observation and citation index, and `R.responses`
 in its order are all in `R`'s `canon` bytes. The record's receipt commits all of them when present; without
@@ -1909,7 +1918,7 @@ observation before reconciliation:
 
 | Kind | Other rule members | Result |
 | --- | --- | --- |
-| `decimal-from-text` | `decimalSeparator`, `.` or `,`; `thousandsSeparator`, a different string; `sign`, `none`, `minus` or `plus-minus`; `whitespace`, `reject` or `trim` | a Core §2.2 decimal string |
+| `decimal-from-text` | `decimalSeparator`, `.` or `,`; `thousandsSeparator`, empty or the other one of `.` and `,`; `sign`, `none`, `minus` or `plus-minus`; `whitespace`, `reject` or `trim` | a Core §2.2 decimal string |
 | `decimal-from-number` | none | the JSON number literal rendered without an exponent as the mathematically equal Core §2.2 decimal string |
 | `boolean-from-text` | non-empty, disjoint `true` and `false` spelling arrays, each of at most 16 distinct strings | the corresponding JSON boolean |
 | `trim` | none | the string without leading or trailing Unicode whitespace |
@@ -1920,10 +1929,29 @@ Here whitespace is exactly U+0009–U+000D, U+0020, U+0085, U+00A0, U+1680,
 U+2000–U+200A, U+2028, U+2029, U+202F, U+205F and U+3000; no host-language
 whitespace class extends that set.
 
+For `decimal-from-number`, split the JSON literal into sign, integer digits, fraction digits and
+base-ten exponent. Concatenate the integer and fraction digits, move the decimal point from after
+the original integer digits by the signed exponent, inserting zeroes on the side crossed. Strip
+leading zeroes from the resulting integer part, retaining one, and trailing zeroes from the
+fraction; omit an empty fraction. A zero result is exactly `0`, including for every negative-zero
+literal. No binary floating-point operation participates.
+
+For `decimal-from-text`, after the declared whitespace and sign rules, the integer part is either
+ungrouped `0` or `[1-9][0-9]*`, or `[1-9][0-9]{0,2}` followed by one or more groups each exactly
+the non-empty `thousandsSeparator` and three ASCII digits. The optional decimal part is exactly
+`decimalSeparator` followed by one or more ASCII digits. The separator occurs nowhere else;
+therefore `1,,2`, misplaced groups and separators in the fraction are `not-a-number`.
+`date-from-text` checks the declared lexical form before the calendar date: four, two and two
+ASCII digits in the positions of `YYYY-MM-DD`, and exactly two, two and four in those of
+`MM/DD/YYYY` or `DD/MM/YYYY`. A width mismatch is `invalid-encoding` even when a host parser would
+accept it.
+
 No other kind is admitted; an operation outside this table is upstream preparation, not a dialect
-conversion. Missing stays missing and `null` stays `null`. A rule applied to another JSON type or
-an invalid date has failure `invalid-encoding`; a decimal input that does not name a number has
-`not-a-number`; a boolean spelling outside both lists has `out-of-domain`. A failed conversion
+conversion. Missing stays missing. A conversion carries `null` unchanged to the type check; since
+`null` is outside every quality `type`, it records `wrong-type` and yields no fact. A rule applied
+to another JSON type or an invalid date has failure `invalid-encoding`; a decimal input that does
+not name a number has `not-a-number`; a boolean spelling outside both lists has `out-of-domain`.
+A failed conversion
 produces no candidate and never a coerced value.
 
 `reconcile` is exactly `{"mode": M}` for `agree` and `first-present`, or
@@ -1942,7 +1970,8 @@ value records `missing-required`; a value not of `type` records `wrong-type`; a 
 `domain` records `out-of-domain`. These are closed quality findings, as is `conflict`. Their target
 is omitted from the facts document: to the pack it is an unknown fact, and the pack's `onUnknown`,
 not the dialect, decides the consequence. Zero, `false` and the empty string are present. A `null`
-candidate remains `null` and is neither silently repaired nor treated as missing.
+candidate is present input but outside all four declared types: it records `wrong-type`, is omitted
+from the facts document and is never silently repaired.
 
 For every quality target, its lineage entry has `transformation`, exactly `applications` and
 `findings`, and `reconciliation` when declared. Each application records its observation `id`,

@@ -72,8 +72,11 @@ cases for the 2026-10-22 amendment, not Runner recordings and not entries in the
 manifest. The first covers every conversion kind, conversion failure, reconciliation mode and
 quality finding, including go-to-market and work-item examples. The second covers the typed result
 contract, every observation state, versioned acquisition-source declarations, resolved execution
-settings and retained bytes. Both readers consume these same files; paired reader tests add the
-empty, missing and one-over-bound mutations. No model or web request was made to write either file.
+settings and retained bytes. [`research-replay-vector.json`](research-replay-vector.json) is the
+complete public-verifier case: its hand-written expected preparation commits the execution settings
+and decoded retained bytes in lineage, and its changed-bytes twin gives `preparation-differs`.
+Both readers consume these same files; paired reader tests add the empty, missing and one-over-bound
+mutations. No model or web request was made to write any of them.
 
 ## What a vector holds, and the answer a verifier gives
 

@@ -55,5 +55,9 @@
       },
       "expected": "input-malformed"
     }
+  ],
+  "mutations": [
+    {"id":"typed-result-refuses-found","field":"score","status":"found","cites":[0],"value":"1.00","expected":"input-malformed"},
+    {"id":"typed-result-refuses-not-found","field":"score","status":"not-found","expected":"input-malformed"}
   ]
 }
