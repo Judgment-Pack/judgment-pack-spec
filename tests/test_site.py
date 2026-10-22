@@ -260,9 +260,9 @@ class StaticSiteTests(unittest.TestCase):
     def test_policy_promotion_prose_is_discoverable_and_raw_artifacts_stay_staged(self) -> None:
         page = self.output / "spec/policy/index.html"
         document = page.read_text(encoding="utf-8")
-        self.assertIn("Draft companion — conditional acceptance", document)
+        self.assertIn("Accepted at draft maturity", document)
         self.assertIn("Policy offline-reader class", document)
-        self.assertIn("default-branch RFC remains Review", document)
+        self.assertIn("No Policy offline-reader conformance claim is available before that release", document)
         self._assert_nothing_published_under("conformance/policy")
         self.assertFalse((self.output / "artifacts/schema/policy").exists())
         for name in ("common", "policy", "governing-adoption", "fixture", "vectors"):
@@ -271,13 +271,12 @@ class StaticSiteTests(unittest.TestCase):
             published = self.output / "schema/policy/1.0.0" / f"{name}.schema.json"
             self.assertEqual(published.read_bytes(), source.read_bytes())
 
-    def test_policy_draft_acceptance_is_conditional_with_source_only_archives(self) -> None:
+    def test_policy_is_accepted_at_draft_maturity_with_source_only_archives(self) -> None:
         page = self.output / "rfcs" / "0023-policy-companion" / "index.html"
         document = page.read_text(encoding="utf-8")
-        self.assertIn('<span class="artifact-label">Draft companion — conditional acceptance</span>', document)
-        self.assertIn("This PR proposes acceptance", document)
-        self.assertIn("required CI passes", document)
-        self.assertIn("Until then the default-branch RFC remains Review", document)
+        self.assertIn('<span class="artifact-label">Accepted at draft maturity</span>', document)
+        self.assertIn("completing that process disposition", document)
+        self.assertIn("No Policy conformance claim is available before", document)
         self.assertIn("blob/main/rfcs/0023-policy-companion.md", document)
         self.assertIn("View current source", document)
         self.assertIn(
@@ -643,9 +642,9 @@ class StaticSiteTests(unittest.TestCase):
 
         faq = (self.output / "faq" / "index.html").read_text(encoding="utf-8")
         self.assertIn('itemtype="https://schema.org/FAQPage"', faq)
-        self.assertEqual(faq.count('itemtype="https://schema.org/Question"'), 47)
-        self.assertEqual(faq.count('itemtype="https://schema.org/Answer"'), 47)
-        self.assertEqual(faq.count('itemprop="acceptedAnswer"'), 47)
+        self.assertEqual(faq.count('itemtype="https://schema.org/Question"'), 48)
+        self.assertEqual(faq.count('itemtype="https://schema.org/Answer"'), 48)
+        self.assertEqual(faq.count('itemprop="acceptedAnswer"'), 48)
         self.assertIn(
             '<h3 itemprop="name" id="q1-what-is-a-judgment-pack-in-one-sentence">', faq
         )

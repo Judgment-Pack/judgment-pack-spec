@@ -1,0 +1,22 @@
+[
+  {
+    "status": "draft",
+    "valid": true
+  },
+  {
+    "status": "candidate",
+    "valid": true
+  },
+  {
+    "status": "release",
+    "valid": true
+  },
+  {
+    "status": "research-preview",
+    "valid": false
+  },
+  {
+    "status": "",
+    "valid": false
+  }
+]

@@ -25,7 +25,7 @@ including the two invariants JSON Schema cannot express — and stop there.
 | -------------- | ---------------------------------------------------------------------------------------------- |
 | `suiteVersion` | The corpus version an evaluator-conformance claim must name (Core §3.4.1).                       |
 | `specVersion`  | The exact Core version these expectations are computed under.                                    |
-| `status`       | `research-preview`, matching the maturity of the specification itself.                           |
+| `status`       | `draft`, the corpus maturity level; `candidate` and `release` are later ladder steps.             |
 | `label`        | `seed` — this corpus is not exhaustive and does not aim to be.                                    |
 
 `suiteVersion` equals the `specVersion` the corpus was published for, and the corpus is frozen when
