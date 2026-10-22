@@ -2,12 +2,16 @@
 
 ## Status and artifact scope
 
-This Policy companion ships in v0.3.0 at **draft maturity**.
-[RFC 0023](../rfcs/0023-policy-companion.md) remains Draft until its acceptance
-criteria are met. This status does not claim stable maturity, immutable companion
-publication or consumer adoption.
+This is the Policy companion text proposed for acceptance at **draft maturity**
+under [RFC 0023](../rfcs/0023-policy-companion.md). The maintainer authorized that
+acceptance conditional on required CI passing and
+[PR 218](https://github.com/Judgment-Pack/judgment-pack-spec/pull/218) merging.
+Until merge the default-branch RFC remains Review; this branch's acceptance
+wording describes the approved draft that takes effect upon that merge. It does
+not claim a completed merge, immutable publication, stable maturity or consumer
+adoption.
 
-§§1–8 define the *Policy offline reader* companion class. They do not change Core `0.2.0-draft`, its schema, evaluator
+Upon that merge, §§1–8 define the *Policy offline reader* companion class. They do not change Core `0.2.0-draft`, its schema, evaluator
 semantics, document corpus or evaluation corpus. The exact document selector is
 `formatVersion: "1.0.0"`; that identifies grammar, not stable maturity or a Spec
 release. Unsupported readers refuse it without legacy aliases.
@@ -23,22 +27,12 @@ are staged in no released corpus until an exact independent Policy draft release
 No Policy offline-reader conformance claim is available before that release.
 
 The [publication plan](../conformance/policy/1.0.0/PUBLICATION.md) follows the
-selected independent companion release route and its separate publication gates.
+selected independent companion release route and records its conditional-merge
+and separate publication gates.
 The first independent release identifier is `policy-v1.0.0-draft.1`. Its
 presence in a source branch does not establish publication: the exact tag and
 a maintainer-published GitHub release must both exist. Core `specVersion`
 remains unchanged.
-
-The 16-source maximum per Policy and the 16-`sourceRefs` maximum per section are
-schema maxima and the `base` profile's values under
-[RFC 0026](../rfcs/0026-document-ceiling-profiles.md). Format `1.0.0` does not
-carry a `profile` member; the companion adopts that member only in its next
-format version. The Runtime's reader is the only reader currently counted toward
-RFC 0023's implementation criterion. It and the repository reader were both
-Codex-assisted, so the second independently authored reader remains open. A Desk
-import path or an Exchange reader counts if authored separately; a same-team port
-does not.
-
 The historical [prototype 0.0.2](../rfcs/policy-companion-prototype/README.md) and
 [proposed 1.0.0 candidate](../rfcs/policy-companion-contract/README.md) remain
 byte-for-byte unchanged. Their pins, the [promotion map](../conformance/policy/1.0.0/PROMOTION.md),
@@ -182,10 +176,6 @@ One stable Policy identity can occur only once; two versions of the same identit
 in one adoption refuse rather than imply precedence. List order never establishes
 policy priority. Each Policy reference resolves its exact bytes, ID/version,
 optional canonical identity, selector, closed grammar, sources and sections.
-
-Several governing policies may govern one Pack. Their list order never establishes
-precedence. If coverage records under two governing policies disagree, the reader
-refuses the adoption as `invalid-coverage`; it never ranks the policies.
 
 Scope is either `{kind: "whole-policy"}` or
 `{kind: "sections", sectionIds, reviewBasis}`. A section list is nonempty, unique,

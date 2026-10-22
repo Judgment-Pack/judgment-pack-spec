@@ -387,8 +387,9 @@ compatibility between drafts is not guaranteed and there is no certification pro
 decides; what acts on its disposition stays the adopter's own system.
 
 **Q47. Can several policies govern one pack, and which one wins?** Several governing policies are
-allowed. Their list order never makes one policy outrank another. If two coverage records disagree,
-the Policy reader refuses the adoption as `invalid-coverage`; it never ranks them.
+allowed, and their list order never makes one policy outrank another. Repeating the same policy
+identity refuses. This draft does not define whether disagreeing coverage records refuse; that rule
+is planned for the companion's next format version in issue #244.
 
 **Q48. How would an enterprise adopt it safely?** Treat conformance as document hygiene, not a
 decision warrant; keep a human accountable for every consequential outcome; pin immutable

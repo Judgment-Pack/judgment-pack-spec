@@ -7,7 +7,7 @@ here.
 
 ### Added
 
-- Policy companion release decision (#211): ship it in v0.3.0 at draft maturity with RFC 0023 still Draft, refuse disagreements between governing-policy coverage records as `invalid-coverage` rather than rank policies, and leave the second independently authored reader open.
+- Policy companion decision (#211): keep RFC 0023 Accepted at draft maturity and Policy 1.0.0 pinned, record its duplicate-identity and no-list-priority rules, and leave disagreement refusal and the second independently authored reader open.
 - RFC 0022 aligns reusable-subgraph bounds, routed handoff provenance, dialect-owned remapping and
   cross-installation packaging with the decisions on #129, #219, #232 and #170 (#233).
 - Dialect-owned data quality and typed research results (#170, #169): six closed deterministic

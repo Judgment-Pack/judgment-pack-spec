@@ -643,9 +643,9 @@ class StaticSiteTests(unittest.TestCase):
 
         faq = (self.output / "faq" / "index.html").read_text(encoding="utf-8")
         self.assertIn('itemtype="https://schema.org/FAQPage"', faq)
-        self.assertEqual(faq.count('itemtype="https://schema.org/Question"'), 47)
-        self.assertEqual(faq.count('itemtype="https://schema.org/Answer"'), 47)
-        self.assertEqual(faq.count('itemprop="acceptedAnswer"'), 47)
+        self.assertEqual(faq.count('itemtype="https://schema.org/Question"'), 48)
+        self.assertEqual(faq.count('itemtype="https://schema.org/Answer"'), 48)
+        self.assertEqual(faq.count('itemprop="acceptedAnswer"'), 48)
         self.assertIn(
             '<h3 itemprop="name" id="q1-what-is-a-judgment-pack-in-one-sentence">', faq
         )
