@@ -1,0 +1,44 @@
+{
+  "vectorVersion": 1,
+  "kind": "later-sibling-admission",
+  "stage": "people",
+  "maxRecords": 2,
+  "instances": [
+    {
+      "id": "admitted-first",
+      "admission": "admitted",
+      "requestedOutputs": 1,
+      "record": {
+        "caseDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "state": "completed", "failure": null, "attempts": 1
+      }
+    },
+    {
+      "id": "bound-trigger",
+      "admission": "admitted",
+      "requestedOutputs": 2,
+      "record": {
+        "caseDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "state": "failed", "failure": "limit-exceeded", "attempts": 1
+      }
+    },
+    {
+      "id": "projection-failed",
+      "admission": "projection-invalid",
+      "requestedOutputs": 0,
+      "record": {
+        "caseDigest": null, "state": "failed", "failure": "limit-exceeded", "attempts": 0
+      }
+    },
+    {
+      "id": "admitted-later",
+      "admission": "admitted",
+      "requestedOutputs": 0,
+      "record": {
+        "caseDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "state": "failed", "failure": "limit-exceeded", "attempts": 0
+      }
+    }
+  ],
+  "expectedFinding": "inventory-mismatch"
+}
