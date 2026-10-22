@@ -1,6 +1,6 @@
 # Non-goals
 
-The core research preview does not standardize:
+The Core draft does not standardize:
 
 - factual truth or source reputation;
 - organizational approval, access control, or legal authorization;

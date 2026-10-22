@@ -1,0 +1,91 @@
+{
+  "prototype": {
+    "profile": "jps-policy-companion-prototype",
+    "proposalVersion": "0.0.2",
+    "status": "non-normative"
+  },
+  "kind": "governing-adoption",
+  "id": "https://example.invalid/policy-companion-prototype/refunds/adoption",
+  "version": "1.0.0",
+  "consumer": {
+    "kind": "pack",
+    "id": "https://example.invalid/policy-companion-prototype/refunds/pack",
+    "version": "1.0.0",
+    "content": {
+      "bytesDigest": "sha256:2a049f10cd8c5d4fc81200976507a8563d0bc1fca19fa9691fc1601507512e38",
+      "byteLength": 1924,
+      "mediaType": "application/json"
+    },
+    "canonicalIdentity": {
+      "profile": "jps-canon",
+      "canonicalDigest": "sha256:d20723faedbed6ee066dd3330e4b72848702e92dfbeb68b757f6ed0a95e4a2c5"
+    }
+  },
+  "governingPolicies": [
+    {
+      "policy": {
+        "kind": "policy",
+        "id": "https://example.invalid/policy-companion-prototype/refunds/policy",
+        "version": "1.0.0",
+        "content": {
+          "bytesDigest": "sha256:5391763b2d9a72533e7566cce910a43cb5ab740dd0587d7383f3adf153ba9970",
+          "byteLength": 2476,
+          "mediaType": "application/json"
+        },
+        "canonicalIdentity": {
+          "profile": "jps-canon",
+          "canonicalDigest": "sha256:7ec48ee560d0b8ff893b04b597076d8db1fe5c5e4874b9bec683d59232d3c005"
+        }
+      },
+      "scope": {
+        "kind": "whole-policy"
+      },
+      "coverage": [
+        {
+          "sectionId": "eligibility",
+          "status": "implemented",
+          "consumerElements": [
+            {
+              "kind": "rule",
+              "id": "eligible"
+            },
+            {
+              "kind": "rule",
+              "id": "ineligible"
+            }
+          ],
+          "reviewBasis": {
+            "bytesDigest": "sha256:63f58f37957f808e98c67db11ac9d835286733336e47ae24f28b974d431b9862",
+            "byteLength": 301,
+            "mediaType": "text/plain"
+          }
+        },
+        {
+          "sectionId": "damaged-goods",
+          "status": "manual",
+          "handoff": "Fictional specialist uses the documented manual review queue; this statement grants no role or access."
+        },
+        {
+          "sectionId": "fraud-review",
+          "status": "awaiting-implementation",
+          "explanation": "Synthetic open work item: develop and review a separate implementation."
+        },
+        {
+          "sectionId": "damaged-routing",
+          "status": "implemented",
+          "consumerElements": [
+            {
+              "kind": "exception",
+              "id": "damaged-routing"
+            }
+          ],
+          "reviewBasis": {
+            "bytesDigest": "sha256:63f58f37957f808e98c67db11ac9d835286733336e47ae24f28b974d431b9862",
+            "byteLength": 301,
+            "mediaType": "text/plain"
+          }
+        }
+      ]
+    }
+  ]
+}

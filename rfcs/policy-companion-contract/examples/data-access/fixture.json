@@ -1,0 +1,58 @@
+{
+  "fixtureVersion": "1",
+  "synthetic": true,
+  "scenario": "data-access",
+  "materials": [
+    {
+      "path": "narrative.txt",
+      "content": {
+        "bytesDigest": "sha256:801a0d0969c0ffe5b95d12bbdc593c823a995ea28ccdb894b0beb7de370ba172",
+        "byteLength": 449,
+        "mediaType": "text/plain"
+      }
+    },
+    {
+      "path": "source.txt",
+      "content": {
+        "bytesDigest": "sha256:9a4f335306e2a8e4fbcf73f5a5bad14f45369fa22985756181eeb8ea1ee217dd",
+        "byteLength": 433,
+        "mediaType": "text/plain"
+      }
+    },
+    {
+      "path": "interpretation.txt",
+      "content": {
+        "bytesDigest": "sha256:7c649cafae58eb11498332c03a107be64fb7d72fcbedebe2c5da32aa801d55f8",
+        "byteLength": 262,
+        "mediaType": "text/plain"
+      }
+    },
+    {
+      "path": "consumer-pack.json",
+      "content": {
+        "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
+        "byteLength": 1558,
+        "mediaType": "application/json"
+      }
+    },
+    {
+      "path": "policy.json",
+      "content": {
+        "bytesDigest": "sha256:6abbd1b965ff006e210b8a98c4a8db6eb0bb795c1f8a995d3be343aa1a984f51",
+        "byteLength": 2019,
+        "mediaType": "application/json"
+      }
+    },
+    {
+      "path": "adoption.json",
+      "content": {
+        "bytesDigest": "sha256:98294b5df0876cc793f236fa5184380aa37f2e459e1f630a5e613237404c2ec0",
+        "byteLength": 2352,
+        "mediaType": "application/json"
+      }
+    }
+  ],
+  "policy": "policy.json",
+  "consumer": "consumer-pack.json",
+  "adoption": "adoption.json"
+}

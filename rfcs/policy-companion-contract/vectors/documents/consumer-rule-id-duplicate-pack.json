@@ -1,0 +1,74 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.invalid/policy-companion-prototype/data-access/pack",
+  "version": "1.0.0",
+  "title": "Data access — synthetic interpretation",
+  "description": "Synthetic RFC material only. No operational authorization or external action.",
+  "decision": {
+    "intent": "Apply the retained automated eligibility clause.",
+    "question": "Is this request eligible for the automated path?"
+  },
+  "outcomes": [
+    {
+      "id": "eligible",
+      "label": "Eligible for review"
+    },
+    {
+      "id": "ineligible",
+      "label": "Ineligible"
+    },
+    {
+      "id": "review",
+      "label": "Human review needed"
+    }
+  ],
+  "rules": [
+    {
+      "id": "eligible",
+      "when": {
+        "op": "fact",
+        "path": "/dataset/deidentified",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "eligible",
+      "onUnknown": "escalate",
+      "description": "Synthetic interpretation of the retained automated eligibility clause."
+    },
+    {
+      "id": "ineligible",
+      "when": {
+        "op": "fact",
+        "path": "/dataset/deidentified",
+        "operator": "equals",
+        "value": false
+      },
+      "outcome": "ineligible",
+      "onUnknown": "escalate",
+      "description": "Synthetic interpretation of the retained automated eligibility clause."
+    },
+    {
+      "id": "eligible",
+      "when": {
+        "op": "fact",
+        "path": "/dataset/deidentified",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "eligible",
+      "onUnknown": "escalate",
+      "description": "different"
+    }
+  ],
+  "fallbackOutcome": "review",
+  "escalation": {
+    "triggers": [
+      "unknown",
+      "no-match"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Synthetic reviewer"
+    }
+  }
+}

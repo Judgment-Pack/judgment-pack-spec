@@ -1,0 +1,62 @@
+{
+  "prototype": {
+    "profile": "jps-policy-companion-prototype",
+    "proposalVersion": "0.0.2",
+    "status": "non-normative"
+  },
+  "synthetic": true,
+  "scenario": "procurement",
+  "materials": [
+    {
+      "path": "narrative.txt",
+      "content": {
+        "bytesDigest": "sha256:993a73c70afdc16c94368982d1e951c85c90838d1f750a7001c2942dc9834b94",
+        "byteLength": 621,
+        "mediaType": "text/plain"
+      }
+    },
+    {
+      "path": "source.txt",
+      "content": {
+        "bytesDigest": "sha256:4681b36d52396d3faef09e4a7c551d829920362beb47a1bfb32c2d6c4d82763b",
+        "byteLength": 591,
+        "mediaType": "text/plain"
+      }
+    },
+    {
+      "path": "interpretation.txt",
+      "content": {
+        "bytesDigest": "sha256:14e401b11a917a3275bc18c2d85f547bfd71cf34a706e160ec54621603b36de2",
+        "byteLength": 402,
+        "mediaType": "text/plain"
+      }
+    },
+    {
+      "path": "consumer-pack.json",
+      "content": {
+        "bytesDigest": "sha256:d810d8b3972a4bbc31cd3deb7ada4de965f1ad59bf753cec6748f943213cbcee",
+        "byteLength": 1725,
+        "mediaType": "application/json"
+      }
+    },
+    {
+      "path": "policy.json",
+      "content": {
+        "bytesDigest": "sha256:e9bbe247d5aa7537aef08c951b88c0881e381046e357abaa05ea255e208ee852",
+        "byteLength": 2899,
+        "mediaType": "application/json"
+      }
+    },
+    {
+      "path": "adoption.json",
+      "content": {
+        "bytesDigest": "sha256:b5b94a06dba7d12748fe3f854bdb5e5da9c14736aeff8d7416e94946891fd063",
+        "byteLength": 3162,
+        "mediaType": "application/json"
+      }
+    }
+  ],
+  "policy": "policy.json",
+  "consumer": "consumer-pack.json",
+  "adoption": "adoption.json"
+}

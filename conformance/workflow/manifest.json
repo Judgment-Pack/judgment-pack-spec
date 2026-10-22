@@ -1,0 +1,25 @@
+{
+  "manifestVersion": 1,
+  "schema": "../../schema/workflow-1.schema.json",
+  "files": [
+    { "path": "workflow.json", "schemaValid": true },
+    { "path": "left-bundle.json", "schemaValid": true },
+    { "path": "right-bundle.json", "schemaValid": true },
+    { "path": "sample.json", "schemaValid": true },
+    { "path": "drift.json", "schemaValid": true },
+    { "path": "reading.json", "schemaValid": true },
+    { "path": "finding.json", "schemaValid": true },
+    { "path": "reports/sample-size-over-bound.json", "schemaValid": true },
+    { "path": "reports/sample-seed-invalid.json", "schemaValid": true },
+    { "path": "reports/summary-mismatch.json", "schemaValid": true },
+    { "path": "reports/later-sibling-admission-wrong-failure.json", "schemaValid": true },
+    { "path": "vectors/sample-size-over-bound.json", "schemaValid": true },
+    { "path": "vectors/later-sibling-admission.json", "schemaValid": true },
+    { "path": "vectors/later-sibling-admission-wrong-failure.json", "schemaValid": true },
+    { "path": "vectors/sample-seed-invalid.json", "schemaValid": false },
+    { "path": "vectors/sample-seed-empty.json", "schemaValid": false },
+    { "path": "vectors/sample-seed-missing.json", "schemaValid": false },
+    { "path": "vectors/sample-seed-oversized.json", "schemaValid": false },
+    { "path": "vectors/summary-mismatch.json", "schemaValid": true }
+  ]
+}

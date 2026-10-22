@@ -1,0 +1,16 @@
+SYNTHETIC RFC PROTOTYPE — Procurement
+
+Competitive procedure
+Automated eligibility requires a documented competitive procedure. A missing record requires a procurement reviewer.
+
+Supplier conflicts
+Supplier relationships require a conflict review. The threshold for a material relationship needs clarification.
+
+Invoice payment
+Treasury performs payment reconciliation outside this eligibility interpretation.
+
+Public notice
+Publish the award notice through the separate communications process.
+
+Purchase scope
+This eligibility pack applies only to purchase requests; other requests remain outside this automated path.

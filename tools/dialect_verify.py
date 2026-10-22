@@ -43,6 +43,9 @@ import hashlib
 import json
 import re
 import sys
+import datetime
+import base64
+import binascii
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -273,7 +276,8 @@ VERSION_3_KINDS = {
     "web": ({"url"}, set()),
 }
 # §4.3: a `research` source's members beside §4's, and its binding members (§4.4), all three or none.
-RESEARCH_MEMBERS = {"maxAge", "question", "constraints", "model", "evidence", "fields", "capabilities"}
+RESEARCH_MEMBERS = {"maxAge", "question", "constraints", "model", "evidence", "capabilities"}
+RESEARCH_OPTIONAL = {"fields", "results", "acquisitionSources"}
 RESEARCH_BINDING = ("profile", "profileDigest", "webProfiles")
 RESEARCH_TYPES = ("integer", "decimal", "boolean", "text", "text-list", "range")
 CAPABILITIES = ("answer", "search", "page")
@@ -714,6 +718,8 @@ class Read:
     candidates: dict[tuple[str, str], list[str]] = field(default_factory=dict)
     # a reconciliation read's earlier research sources, in their order (§6.4); None for any other read
     sources: list[str] | None = None
+    # fact target -> its conversion, reconciliation and quality declaration (§6.2a)
+    quality: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 @dataclass
@@ -727,6 +733,7 @@ class Research:
     model: str
     request: dict[str, Any]  # the source's request but its `question`, which is instantiated
     web: dict[str, tuple[str, str]] = field(default_factory=dict)  # capability -> (profile, digest)
+    result_member: str = "fields"
 
 
 @dataclass
@@ -902,6 +909,109 @@ def fact_target(pointer: Any, what: str) -> str:
     return pointer
 
 
+QUALITY_TYPES = {"string", "decimal", "boolean", "date"}
+CONVERSION_KINDS = {
+    "decimal-from-text", "decimal-from-number", "boolean-from-text", "trim",
+    "collapse-whitespace", "date-from-text",
+}
+DECIMAL_TEXT = re.compile(r"-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?")
+QUALITY_WHITESPACE = "\u0009\u000a\u000b\u000c\u000d\u0020\u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"
+QUALITY_WHITESPACE_RUN = re.compile(f"[{QUALITY_WHITESPACE}]+")
+
+
+def check_conversion(value: Any, what: str) -> dict[str, Any]:
+    """§6.2a: the six closed deterministic conversion declarations."""
+    if not isinstance(value, dict):
+        raise malformed(f"{what}: convert is not an object")
+    kind = value.get("kind")
+    if kind not in CONVERSION_KINDS:
+        raise malformed(f"{what}: unknown conversion kind")
+    if kind == "decimal-from-text":
+        closed(value, {"kind", "decimalSeparator", "thousandsSeparator", "sign", "whitespace"}, set(), what)
+        if value["decimalSeparator"] not in (".", ","):
+            raise malformed(f"{what}: decimalSeparator")
+        if value["thousandsSeparator"] not in ("", ".", ",") or value["thousandsSeparator"] == value["decimalSeparator"]:
+            raise malformed(f"{what}: thousandsSeparator")
+        if value["sign"] not in ("none", "minus", "plus-minus") or value["whitespace"] not in ("reject", "trim"):
+            raise malformed(f"{what}: sign or whitespace")
+    elif kind == "boolean-from-text":
+        closed(value, {"kind", "true", "false"}, set(), what)
+        for member in ("true", "false"):
+            spellings = value[member]
+            if not isinstance(spellings, list) or not spellings or len(spellings) > 16 or not all(isinstance(x, str) for x in spellings):
+                raise malformed(f"{what}: {member} spellings")
+            if len(set(spellings)) != len(spellings):
+                raise malformed(f"{what}: repeated {member} spelling")
+        if set(value["true"]) & set(value["false"]):
+            raise malformed(f"{what}: a spelling is both true and false")
+    elif kind == "date-from-text":
+        closed(value, {"kind", "format"}, set(), what)
+        if value["format"] not in ("YYYY-MM-DD", "MM/DD/YYYY", "DD/MM/YYYY"):
+            raise malformed(f"{what}: unknown date format")
+    else:
+        closed(value, {"kind"}, set(), what)
+    return value
+
+
+def check_quality_fact(entry: dict[str, Any], what: str) -> dict[str, Any] | None:
+    """Read and close the optional per-target conversion/reconciliation/quality contract."""
+    new = set(entry) - {"target", "source"}
+    if not new:
+        return None
+    allowed = {"target", "source", "observations", "reconcile", "convert", "type", "required", "domain"}
+    if set(entry) - allowed:
+        raise malformed(f"{what}: unknown quality member")
+    if ("source" in entry) == ("observations" in entry):
+        raise malformed(f"{what}: exactly one of source and observations is required")
+    if "source" in entry and not is_pointer(entry["source"]):
+        raise malformed(f"{what}: source is not a pointer")
+    observations = entry.get("observations")
+    if observations is not None:
+        if not isinstance(observations, list) or len(observations) < 2:
+            raise malformed(f"{what}: observations are not a list of two to 16")
+        ids: list[str] = []
+        for index, observation in enumerate(observations):
+            closed(observation, {"id", "source"}, set(), f"{what} observation {index}")
+            if not isinstance(observation["id"], str) or not observation["id"] or not is_pointer(observation["source"]):
+                raise malformed(f"{what}: observation id or source")
+            ids.append(observation["id"])
+        if len(set(ids)) != len(ids):
+            raise malformed(f"{what}: repeated observation id")
+        reconcile = closed(entry.get("reconcile"), {"mode"}, {"precedence"}, f"{what} reconcile")
+        if reconcile["mode"] not in ("precedence", "agree", "first-present"):
+            raise malformed(f"{what}: reconciliation mode")
+        if reconcile["mode"] == "precedence":
+            precedence = reconcile.get("precedence")
+            if (not isinstance(precedence, list) or len(precedence) != len(ids)
+                    or not all(isinstance(item, str) for item in precedence)
+                    or set(precedence) != set(ids)):
+                raise malformed(f"{what}: precedence is not exactly the observation ids")
+        elif "precedence" in reconcile:
+            raise malformed(f"{what}: precedence is present for another mode")
+    elif "reconcile" in entry:
+        raise malformed(f"{what}: reconcile without observations")
+    if "convert" in entry:
+        check_conversion(entry["convert"], f"{what} convert")
+    if entry.get("type") not in QUALITY_TYPES:
+        raise malformed(f"{what}: quality type")
+    if not isinstance(entry.get("required"), bool):
+        raise malformed(f"{what}: required is not boolean")
+    if "domain" in entry:
+        domain = entry["domain"]
+        if not isinstance(domain, dict) or (set(domain) != {"in"} and set(domain) != {"decimalRange"}):
+            raise malformed(f"{what}: domain form")
+        if "in" in domain:
+            if not isinstance(domain["in"], list) or not domain["in"] or len(domain["in"]) > 64 or not all(in_canon_domain(x) for x in domain["in"]):
+                raise malformed(f"{what}: domain in list")
+        else:
+            bounds = closed(domain["decimalRange"], {"min", "max"}, set(), f"{what} decimal range")
+            if not all(isinstance(bounds[k], str) and DECIMAL_TEXT.fullmatch(bounds[k]) for k in ("min", "max")):
+                raise malformed(f"{what}: decimal range endpoint")
+            if Decimal(bounds["min"]) > Decimal(bounds["max"]):
+                raise malformed(f"{what}: reversed decimal range")
+    return entry
+
+
 def check_read(value: Any, scope: dict[str, str], what: str) -> Read:
     read = closed(value, set(), {"unwrap", "copy", "rule"}, what)
     if ("copy" in read) == ("rule" in read):
@@ -923,12 +1033,17 @@ def check_read(value: Any, scope: dict[str, str], what: str) -> Read:
         if not isinstance(facts, list) or not isinstance(evidence, list):
             raise malformed(f"{what}: copy facts and evidence are arrays")
         for entry in facts:
-            closed(entry, {"target", "source"}, set(), what + " copy fact")
+            if not isinstance(entry, dict):
+                raise malformed(f"{what}: copy fact is not an object")
+            quality = check_quality_fact(entry, what + " copy fact")
+            if quality is None:
+                closed(entry, {"target", "source"}, set(), what + " copy fact")
             target = fact_target(entry["target"], what)
-            if not is_pointer(entry["source"]):
-                raise malformed(f"{what}: a copy source that is not a pointer")
+            sources = [entry["source"]] if "source" in entry else [x["source"] for x in entry["observations"]]
             result.fact_targets.append(target)
-            result.candidates.setdefault(("fact", target), []).append(entry["source"])
+            result.candidates.setdefault(("fact", target), []).extend(sources)
+            if quality is not None:
+                result.quality[target] = quality
         seen_requirements: set[str] = set()
         for entry in evidence:
             closed(entry, {"requirement", "source"}, set(), what + " copy evidence")
@@ -1016,11 +1131,46 @@ def check_parameter_name(name: Any, what: str) -> None:
         raise malformed(f"{what}: a parameter name that is empty or runAt")
 
 
+def document_profile(document: Any, supported: tuple[str, ...] = ("base",)) -> str:
+    """Ceiling profile admission, before any other document interpretation."""
+    profile = document.get("profile", "base") if isinstance(document, dict) else "base"
+    if profile not in ("base", "extended"):
+        raise malformed("unknown document ceiling profile")
+    if profile not in supported:
+        raise Refused("profile-unsupported", profile)
+    return profile
+
+
+def admit_envelope(dialect: bytes, case: bytes, acquisitions: bytes,
+                   supported: tuple[str, ...] = ("base",)) -> str:
+    """Negotiate, then admit envelope byte sizes only; not full Dialect validation.
+
+    This admission phase can select either ceiling. The complete verifier still
+    advertises base only, since its later phases implement only base bounds.
+    """
+    profile = "base"
+    # Only the bounded declaration scan precedes negotiation. If it cannot identify
+    # a declaration, retain the existing byte/syntax refusal order below.
+    if len(dialect) <= DIALECT_BYTES * 2:
+        try:
+            declaration = read_document(dialect, "the dialect")
+        except Refused:
+            declaration = None
+        if declaration is not None:
+            profile = document_profile(declaration, supported)
+    multiplier = 2 if profile == "extended" else 1
+    if (len(dialect) > DIALECT_BYTES * multiplier
+            or len(dialect) + len(case) + len(acquisitions) > ENVELOPE_BYTES * multiplier):
+        raise Refused("input-over-bound", "the dialect, case and acquisitions")
+    return profile
+
+
 def parse_dialect(document: Any) -> Dialect:
+    document_profile(document)
     named = isinstance(document, dict) and "formatVersion" in document
     required = {"formatVersion", "id", "version", "case"} if named else {"version", "case"}
     top = closed(document, required,
-                 {"sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"},
+                 {"profile", "sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"},
                  "the dialect")
     if named:
         if top["formatVersion"] not in ("2.0.0", "3.0.0"):
@@ -1158,7 +1308,9 @@ def parse_dialect(document: Any) -> Dialect:
         elif kind == "research":
             # §4.3, §4.4: published unbound, with none of the three binding members, or bound, with all
             # three; a source with only some of them, or an operation's catalog member, is malformed.
-            closed(raw, {"name", "kind", "read"} | RESEARCH_MEMBERS, {"parameters", *RESEARCH_BINDING}, what)
+            closed(raw, {"name", "kind", "read"} | RESEARCH_MEMBERS, {"parameters", *RESEARCH_BINDING, *RESEARCH_OPTIONAL}, what)
+            if ("fields" in raw) == ("results" in raw):
+                raise malformed(f"{what}: exactly one of fields and results is required")
             given = [member for member in RESEARCH_BINDING if member in raw]
             if given and len(given) != len(RESEARCH_BINDING):
                 raise malformed(f"{what}: some but not all of profile, profileDigest and webProfiles")
@@ -1393,30 +1545,58 @@ def check_research(raw: dict[str, Any], scope: dict[str, str], what: str) -> Res
     evidence = raw["evidence"]
     if not isinstance(evidence, list) or not all(isinstance(item, str) and item for item in evidence):
         raise malformed(f"{what}: evidence is not an array of non-empty strings")
-    fields = raw["fields"]
+    result_member = "results" if "results" in raw else "fields"
+    fields = raw[result_member]
     if not isinstance(fields, list) or not fields:
         raise malformed(f"{what}: fields is not an array of one declaration at least")
     types: dict[str, str] = {}
     for index, declaration in enumerate(fields):
         where = f"{what} field {index}"
-        closed(declaration, {"name", "type", "required", "description"}, set(), where)
-        name = declaration["name"]
+        if result_member == "results":
+            closed(declaration, {"id", "type", "required", "description", "cardinality"}, set(), where)
+            name = declaration["id"]
+            if declaration["type"] not in ("string", "decimal", "boolean", "string-list"):
+                raise malformed(f"{where}: a result type outside the closed set")
+        else:
+            closed(declaration, {"name", "type", "required", "description"}, {"cardinality"}, where)
+            name = declaration["name"]
         if not isinstance(name, str) or not name or name == "case":
             raise malformed(f"{where}: a name that is not a non-empty string other than case")
         if name in types:
             raise malformed(f"{where}: a field name given twice")
-        if not isinstance(declaration["type"], str) or declaration["type"] not in RESEARCH_TYPES:
+        mapped_type = {"string": "text", "string-list": "text-list"}.get(declaration["type"], declaration["type"])
+        if result_member == "results" and declaration["cardinality"] == "many":
+            mapped_type += "[]"
+        if not isinstance(mapped_type, str) or (mapped_type not in RESEARCH_TYPES and not (mapped_type.endswith("[]") and mapped_type[:-2] in RESEARCH_TYPES)):
             raise malformed(f"{where}: a type other than the six")
         if not isinstance(declaration["required"], bool):
             raise malformed(f"{where}: required is not a boolean")
         if not isinstance(declaration["description"], str) or not declaration["description"]:
             raise malformed(f"{where}: description is not a non-empty string")
-        types[name] = declaration["type"]
+        if declaration.get("cardinality", "many" if declaration["type"] == "text-list" else "one") not in ("one", "many"):
+            raise malformed(f"{where}: cardinality is not one or many")
+        types[name] = mapped_type
     capabilities = check_capabilities(raw["capabilities"], what)
     if capabilities[0] != "answer":
         raise malformed(f"{what}: capabilities without answer, which is required")
-    request = {name: raw[name] for name in ("constraints", "model", "evidence", "fields", "capabilities")}
-    research = Research(question, fields, types, capabilities, model, request)
+    if "acquisitionSources" in raw:
+        declared_sources = raw["acquisitionSources"]
+        if not isinstance(declared_sources, list) or not declared_sources or len(declared_sources) > MAX_SOURCES:
+            raise malformed(f"{what}: acquisitionSources is not one to 16 entries")
+        for index, declared_source in enumerate(declared_sources):
+            closed(declared_source, {"profile", "version", "purpose", "scope", "freshness"}, set(), f"{what} acquisition source {index}")
+            if not all(isinstance(declared_source[k], str) and declared_source[k] for k in ("profile", "version", "purpose")):
+                raise malformed(f"{what}: acquisition source names")
+            if not isinstance(declared_source["scope"], dict) or not in_canon_domain(declared_source["scope"]):
+                raise malformed(f"{what}: acquisition source scope")
+            if not is_integer(declared_source["freshness"]) or not 0 <= integer_of(declared_source["freshness"]) <= 31536000:
+                raise malformed(f"{what}: acquisition source freshness")
+    request_names = ["constraints", "model", "evidence", result_member, "capabilities"]
+    if "acquisitionSources" in raw:
+        request_names.append("acquisitionSources")
+    request = {name: raw[name] for name in request_names}
+    normalized_fields = [({**declaration, "name": declaration["id"]} if result_member == "results" else declaration) for declaration in fields]
+    research = Research(question, normalized_fields, types, capabilities, model, request, result_member=result_member)
     if "webProfiles" in raw:
         research.web = check_web_profiles(raw["webProfiles"], capabilities, what)
     return research
@@ -1452,13 +1632,14 @@ def check_research_read(
         return check_reconciliation(value, scope, what, source, earlier)
     read = check_read(value, scope, what)
     declared = source.research.types
+    result_member = source.research.result_member
 
     def readable(pointer: str, taken: bool) -> None:
         tokens = pointer_tokens(pointer)
         assert tokens is not None
-        if tokens == ["fields"]:
+        if tokens == [result_member]:
             return
-        if len(tokens) >= 2 and tokens[0] == "fields" and tokens[1] in declared:
+        if len(tokens) >= 2 and tokens[0] == result_member and tokens[1] in declared:
             rest = tokens[2:]
             if not rest or rest[0] == "value" or rest in (["status"], ["cites"]):
                 return
@@ -1472,7 +1653,10 @@ def check_research_read(
     for pointer in read.unwrap:
         readable(pointer, True)
     if read.copy is not None:
-        for entry in read.copy["facts"] + read.copy["evidence"]:
+        for entry in read.copy["facts"]:
+            for pointer in ([entry["source"]] if "source" in entry else [item["source"] for item in entry["observations"]]):
+                readable(pointer, True)
+        for entry in read.copy["evidence"]:
             readable(entry["source"], True)
     else:
         assert read.rule is not None
@@ -1667,6 +1851,12 @@ def check_salts(value: Any, what: str) -> None:
 def check_typed(value: Any, kind: str, what: str) -> None:
     """§4.3: a value of a field's declared type, in its exact encoding; `null` is never one. The maxima of
     §12 are counted before any form (`count_bounds`)."""
+    if kind.endswith("[]"):
+        if not isinstance(value, list) or len(value) > MAX_LIST_ITEMS:
+            raise malformed(f"{what}: a value that is not of the declared type {kind}")
+        for index, item in enumerate(value):
+            check_typed(item, kind[:-2], f"{what} item {index}")
+        return
     if kind == "integer":
         ok = is_integer(value)
     elif kind == "decimal":
@@ -1721,7 +1911,7 @@ def check_answers(answers: Any, research: Research, responses: int, what: str) -
         where = f"{what} field {name}"
         kind = research.types[name]
         status = entry.get("status") if isinstance(entry, dict) else None
-        if status == "found":
+        if status == ("present" if research.result_member == "results" else "found"):
             closed(entry, {"status", "cites", "value"}, set(), where)
             check_cites(entry["cites"], responses, 1, where)
             check_typed(entry["value"], kind, where)
@@ -1739,9 +1929,15 @@ def check_answers(answers: Any, research: Research, responses: int, what: str) -
             first = observations[0]["value"]
             if all(json_equal(first, observation["value"]) for observation in observations):
                 raise malformed(f"{where}: no two conflicting values differ")
-        elif isinstance(status, str) and status in ("not-found", "stale"):
-            closed(entry, {"status", "cites"}, set(), where)
+        elif isinstance(status, str) and status in (
+            ("missing", "inaccessible", "stale") if research.result_member == "results" else ("not-found", "stale")
+        ):
+            needs_reason = research.result_member == "results"
+            required = {"status", "cites", "reason"} if needs_reason else {"status", "cites"}
+            closed(entry, required, set(), where)
             check_cites(entry["cites"], responses, 0, where)
+            if "reason" in entry and (not isinstance(entry["reason"], str) or not entry["reason"]):
+                raise malformed(f"{where}: reason is not a non-empty string")
         else:
             raise malformed(f"{where}: an entry that is not an object of a known status")
 
@@ -1759,7 +1955,10 @@ def check_acquisition_form(name: str, member: Any, research: Research | None) ->
         response = closed(member["response"], {"result"}, {"receipt", "salts"}, what)
         if ("receipt" in response) != ("salts" in response):
             raise malformed(f"{what}: a research record's receipt and salts are both present or both absent")
-        record = closed(response["result"], {"fields", "responses"}, set(), f"{what}: the research record")
+        result_member = research.result_member
+        required_record = {result_member, "responses", "execution"} if result_member == "results" else {result_member, "responses"}
+        optional_record = set() if result_member == "results" else {"execution"}
+        record = closed(response["result"], required_record, optional_record, f"{what}: the research record")
         if not isinstance(record["responses"], list):
             raise malformed(f"{what}: the research record's responses are not an array")
         for index, entry in enumerate(record["responses"]):
@@ -1773,7 +1972,24 @@ def check_acquisition_form(name: str, member: Any, research: Research | None) ->
             if not isinstance(retained["receipt"], dict):
                 raise malformed(f"{where}: the receipt is not an object")
             check_salts(retained["salts"], where)
-        check_answers(record["fields"], research, len(record["responses"]), f"{what}: the research record")
+        if "execution" in record:
+            execution = closed(record["execution"], {"resolvedSettings", "retainedBytes"}, set(), f"{what}: execution")
+            settings = closed(execution["resolvedSettings"], {"model", "profile", "version", "settings"}, set(), f"{what}: resolved settings")
+            if (not all(isinstance(settings[k], str) and settings[k] for k in ("model", "profile", "version"))
+                    or not isinstance(settings["settings"], dict) or not in_canon_domain(settings["settings"])):
+                raise malformed(f"{what}: resolved settings")
+            retained_bytes = execution["retainedBytes"]
+            if not isinstance(retained_bytes, list) or len(retained_bytes) > MAX_RETAINED_RESPONSES:
+                raise malformed(f"{what}: retainedBytes")
+            for index, item in enumerate(retained_bytes):
+                closed(item, {"mediaType", "base64"}, set(), f"{what}: retained bytes {index}")
+                if not isinstance(item["mediaType"], str) or not item["mediaType"] or not isinstance(item["base64"], str):
+                    raise malformed(f"{what}: retained bytes {index}")
+                try:
+                    base64.b64decode(item["base64"], validate=True)
+                except (ValueError, binascii.Error):
+                    raise malformed(f"{what}: retained bytes {index} is not base64")
+        check_answers(record[result_member], research, len(record["responses"]), f"{what}: the research record")
     if "receipt" in response:
         if not isinstance(response["receipt"], dict):
             raise malformed(f"{what}: the receipt is not an object")
@@ -1783,6 +1999,10 @@ def check_acquisition_form(name: str, member: Any, research: Research | None) ->
 def over_by_type(value: Any, kind: Any) -> bool:
     """§11's third phase: a value measured by its field's declared type, when that type is one of §4.3's
     six, against the maxima of §12; a value of another form is measured by nothing here."""
+    if isinstance(kind, str) and kind.endswith("[]"):
+        return isinstance(value, list) and (
+            len(value) > MAX_LIST_ITEMS or any(over_by_type(item, kind[:-2]) for item in value)
+        )
     if kind == "text":
         return isinstance(value, str) and utf8_length(value) > MAX_TEXT_BYTES
     if kind == "text-list":
@@ -1824,20 +2044,30 @@ def research_bounds(dialect: Any, acquisitions: Any, profiles: Any, binding: Any
         if not isinstance(source, dict) or source.get("kind") != "research":
             continue
         types: dict[str, Any] = {}
-        fields = source.get("fields")
+        fields = source.get("results", source.get("fields"))
         if isinstance(fields, list):
             if len(fields) > MAX_FIELDS:
                 raise over("more than 64 fields declared")
             for declaration in fields:
                 if not isinstance(declaration, dict):
                     continue
-                name = declaration.get("name")
+                name = declaration.get("id", declaration.get("name"))
                 if too_long(name, MAX_FIELD_NAME_BYTES):
                     raise over("a field name of more than 64 bytes")
                 if too_long(declaration.get("description"), MAX_DESCRIPTION_BYTES):
                     raise over("a field description of more than 2048 bytes")
-                if isinstance(name, str) and name not in types and declaration.get("type") in RESEARCH_TYPES:
-                    types[name] = declaration["type"]
+                declared_type = declaration.get("type")
+                if "results" in source:
+                    declared_type = {"string": "text", "string-list": "text-list"}.get(declared_type, declared_type)
+                    if declaration.get("cardinality") == "many" and isinstance(declared_type, str):
+                        declared_type += "[]"
+                if (isinstance(name, str) and name not in types and isinstance(declared_type, str)
+                        and (declared_type in RESEARCH_TYPES
+                             or declared_type.endswith("[]") and declared_type[:-2] in RESEARCH_TYPES)):
+                    types[name] = declared_type
+        acquisition_sources = source.get("acquisitionSources")
+        if isinstance(acquisition_sources, list) and len(acquisition_sources) > MAX_SOURCES:
+            raise over("more than 16 acquisition sources")
         if too_long(source.get("model"), MAX_MODEL_BYTES):
             raise over("a model name of more than 256 bytes")
         evidence = source.get("evidence")
@@ -1870,7 +2100,11 @@ def research_bounds(dialect: Any, acquisitions: Any, profiles: Any, binding: Any
     for name, member in acquisitions.items() if isinstance(acquisitions, dict) else []:
         response = member.get("response") if isinstance(member, dict) and name in declared else None
         record = response.get("result") if isinstance(response, dict) else None
-        answers = record.get("fields") if isinstance(record, dict) else None
+        answers = record.get("results", record.get("fields")) if isinstance(record, dict) else None
+        execution = record.get("execution") if isinstance(record, dict) else None
+        retained_bytes = execution.get("retainedBytes") if isinstance(execution, dict) else None
+        if isinstance(retained_bytes, list) and len(retained_bytes) > MAX_RETAINED_RESPONSES:
+            raise over("more than 64 retained byte entries")
         if not isinstance(answers, dict):
             continue
         if len(answers) > MAX_FIELDS:
@@ -1934,6 +2168,9 @@ def count_bounds(dialect: Any, acquisitions: Any, profiles: Any = None, binding:
             for entry in entries(copy.get("facts")):
                 if isinstance(entry, dict) and isinstance(entry.get("target"), str):
                     facts.add(entry["target"])
+                observations = entry.get("observations") if isinstance(entry, dict) else None
+                if isinstance(observations, list) and len(observations) > MAX_SOURCES:
+                    raise over("more than 16 observations for one target")
             for entry in entries(copy.get("evidence")):
                 if isinstance(entry, dict) and isinstance(entry.get("requirement"), str):
                     evidence.add(entry["requirement"])
@@ -2012,7 +2249,12 @@ def page_endpoint(value: Any) -> tuple[str, str] | None:
         return None
     if re.search(r"%(?![0-9A-Fa-f]{2})", path):
         return None
-    if any(re.fullmatch(r"(?:\.|%2[eE]){1,2}", segment) for segment in path.split("/")):
+    if re.search(r"%(?:2[fF]|5[cC])", path):  # Round 16: an escaped slash or backslash.
+        return None
+    # A dot segment, alone or before the first `;` or escaped delimiter of its segment (round 16).
+    heads = (re.split(r";|%3[bBfF]|%23|%00", segment, maxsplit=1)[0]
+             for segment in path.split("/"))
+    if any(re.fullmatch(r"(?:\.|%2[eE]){1,2}", head) for head in heads):
         return None
     return host.lower(), path  # ASCII host comparison only; signed bytes are never rewritten.
 
@@ -2189,13 +2431,192 @@ def apply_unwrap(value: Any, unwrap: list[str]) -> Any:
     return value
 
 
-def copy_claim(copy: dict[str, Any], value: Any) -> dict[str, Any]:
+def _source_text(value: Any) -> str:
+    if isinstance(value, Num):
+        return value.literal
+    return preparation_bytes(value).decode("utf-8")
+
+
+def _convert(value: Any, rule: dict[str, Any]) -> tuple[Any, str | None]:
+    """Apply one §6.2a conversion; return (ABSENT, code) on a recorded failure."""
+    if value is None:
+        return None, None
+    kind = rule["kind"]
+    if kind == "decimal-from-number":
+        if not isinstance(value, Num):
+            return ABSENT, "not-a-number"
+        match = re.fullmatch(r"(-?)([0-9]+)(?:\.([0-9]+))?(?:[eE]([+-]?[0-9]+))?", value.literal)
+        assert match is not None
+        sign, whole, fraction, exponent = match.groups()
+        digits = whole + (fraction or "")
+        point = len(whole) + int(exponent or "0")
+        if point <= 0:
+            expanded_whole, expanded_fraction = "0", "0" * -point + digits
+        elif point >= len(digits):
+            expanded_whole, expanded_fraction = digits + "0" * (point - len(digits)), ""
+        else:
+            expanded_whole, expanded_fraction = digits[:point], digits[point:]
+        expanded_whole = expanded_whole.lstrip("0") or "0"
+        expanded_fraction = expanded_fraction.rstrip("0")
+        rendered = expanded_whole + ("." + expanded_fraction if expanded_fraction else "")
+        if rendered == "0":
+            return "0", None
+        return ("-" if sign else "") + rendered, None
+    if not isinstance(value, str):
+        return ABSENT, "invalid-encoding"
+    if kind == "trim":
+        return value.strip(QUALITY_WHITESPACE), None
+    if kind == "collapse-whitespace":
+        return QUALITY_WHITESPACE_RUN.sub(" ", value.strip(QUALITY_WHITESPACE)), None
+    if kind == "boolean-from-text":
+        if value in rule["true"]:
+            return True, None
+        if value in rule["false"]:
+            return False, None
+        return ABSENT, "out-of-domain"
+    if kind == "decimal-from-text":
+        text = value.strip(QUALITY_WHITESPACE) if rule["whitespace"] == "trim" else value
+        if rule["whitespace"] == "reject" and text != text.strip(QUALITY_WHITESPACE):
+            return ABSENT, "invalid-encoding"
+        sign = ""
+        if text[:1] in ("+", "-"):
+            sign, text = text[0], text[1:]
+        if (sign == "+" and rule["sign"] != "plus-minus") or (sign == "-" and rule["sign"] == "none"):
+            return ABSENT, "invalid-encoding"
+        thousands = rule["thousandsSeparator"]
+        decimal_parts = text.split(rule["decimalSeparator"])
+        if len(decimal_parts) > 2:
+            return ABSENT, "not-a-number"
+        integer, fraction = decimal_parts[0], decimal_parts[1] if len(decimal_parts) == 2 else None
+        ascii_digits = lambda part: bool(part) and part.isascii() and part.isdigit()
+        if fraction is not None and not ascii_digits(fraction):
+            return ABSENT, "not-a-number"
+        groups = integer.split(thousands) if thousands else [integer]
+        if len(groups) == 1:
+            if not ascii_digits(integer) or (len(integer) > 1 and integer[0] == "0"):
+                return ABSENT, "not-a-number"
+        elif (not 1 <= len(groups[0]) <= 3 or not ascii_digits(groups[0]) or groups[0][0] == "0"
+              or any(len(group) != 3 or not ascii_digits(group) for group in groups[1:])):
+            return ABSENT, "not-a-number"
+        rendered = ("-" if sign == "-" else "") + "".join(groups)
+        if fraction is not None:
+            rendered += "." + fraction
+        if DECIMAL_TEXT.fullmatch(rendered) is None:
+            return ABSENT, "not-a-number"
+        return rendered, None
+    if kind == "date-from-text":
+        patterns = {
+            "YYYY-MM-DD": r"([0-9]{4})-([0-9]{2})-([0-9]{2})",
+            "MM/DD/YYYY": r"([0-9]{2})/([0-9]{2})/([0-9]{4})",
+            "DD/MM/YYYY": r"([0-9]{2})/([0-9]{2})/([0-9]{4})",
+        }
+        match = re.fullmatch(patterns[rule["format"]], value)
+        if match is None:
+            return ABSENT, "invalid-encoding"
+        a, b, c = (int(part) for part in match.groups())
+        year, month, day = (a, b, c) if rule["format"] == "YYYY-MM-DD" else (
+            (c, a, b) if rule["format"] == "MM/DD/YYYY" else (c, b, a)
+        )
+        try:
+            parsed = datetime.date(year, month, day)
+        except ValueError:
+            return ABSENT, "invalid-encoding"
+        return parsed.isoformat(), None
+    raise AssertionError(kind)
+
+
+def _quality_type(value: Any, kind: str) -> bool:
+    if value is None:
+        return False
+    if kind == "string":
+        return isinstance(value, str)
+    if kind == "decimal":
+        return isinstance(value, str) and DECIMAL_TEXT.fullmatch(value) is not None
+    if kind == "boolean":
+        return isinstance(value, bool)
+    if kind == "date":
+        try:
+            return isinstance(value, str) and datetime.date.fromisoformat(value).isoformat() == value
+        except ValueError:
+            return False
+    return False
+
+
+def copy_claim(copy: dict[str, Any], value: Any, transformations: dict[str, Any] | None = None) -> dict[str, Any]:
     facts: dict[str, Any] = {}
     availability: dict[str, Any] = {}
     basis: set[str] = set()
     for entry in copy["facts"]:
-        basis.add(entry["source"])
-        found = resolve(value, entry["source"])
+        if set(entry) == {"target", "source"}:
+            basis.add(entry["source"])
+            found = resolve(value, entry["source"])
+            if found is ABSENT:
+                continue
+            if not in_canon_domain(found):
+                raise Finding("read-failed", "a copied value outside the canon domain")
+            write_at(facts, entry["target"], found)
+            continue
+        observations = entry["observations"] if "observations" in entry else [{"id": "source", "source": entry["source"]}]
+        basis.update(o["source"] for o in observations)
+        applications = []
+        present: list[tuple[str, Any]] = []
+        for observation in observations:
+            raw = resolve(value, observation["source"])
+            application: dict[str, Any] = {"id": observation["id"], "source": observation["source"], "state": "missing"}
+            if raw is not ABSENT:
+                converted, failure = _convert(raw, entry["convert"]) if "convert" in entry else (raw, None)
+                application.update({"state": "failed" if failure else "present", "sourceText": _source_text(raw)})
+                if "convert" in entry:
+                    application["rule"] = entry["convert"]
+                if failure:
+                    application["failure"] = {"code": failure}
+                else:
+                    application["result"] = converted
+                    present.append((observation["id"], converted))
+            applications.append(application)
+        findings: list[dict[str, str]] = []
+        chosen: str | None = None
+        found: Any = ABSENT
+        reconciliation: dict[str, Any] | None = None
+        if "reconcile" in entry:
+            mode = entry["reconcile"]["mode"]
+            order = entry["reconcile"].get("precedence", [o["id"] for o in observations])
+            reconciliation = {"mode": mode, "observed": [x[0] for x in present]}
+            if mode == "agree" and present:
+                found = present[0][1]
+                if any(not json_equal(found, x[1]) for x in present[1:]):
+                    found = ABSENT
+                    reconciliation["conflict"] = True
+                    findings.append({"code": "conflict"})
+                else:
+                    reconciliation["agreed"] = True
+            else:
+                by_id = dict(present)
+                chosen = next((name for name in order if name in by_id), None)
+                if chosen is not None:
+                    found = by_id[chosen]
+                    reconciliation["chosen"] = chosen
+        elif present:
+            chosen, found = present[0]
+        if found is ABSENT and entry.get("required") and not findings:
+            findings.append({"code": "missing-required"})
+        if found is not ABSENT and not _quality_type(found, entry.get("type", "string")):
+            findings.append({"code": "wrong-type"})
+            found = ABSENT
+        domain = entry.get("domain")
+        if found is not ABSENT and found is not None and domain is not None:
+            inside = any(json_equal(found, x) for x in domain["in"]) if "in" in domain else (
+                isinstance(found, str) and DECIMAL_TEXT.fullmatch(found) is not None
+                and Decimal(domain["decimalRange"]["min"]) <= Decimal(found) <= Decimal(domain["decimalRange"]["max"])
+            )
+            if not inside:
+                findings.append({"code": "out-of-domain"})
+                found = ABSENT
+        if transformations is not None and (set(entry) - {"target", "source"}):
+            record: dict[str, Any] = {"applications": applications, "findings": findings}
+            if reconciliation is not None:
+                record["reconciliation"] = reconciliation
+            transformations[entry["target"]] = record
         if found is ABSENT:
             continue
         if not in_canon_domain(found):
@@ -2442,6 +2863,7 @@ class Outcome:
     # reconciliation (§6.4)
     citations: list[dict[str, Any]] | None = None
     record: Any = None
+    transformations: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -2493,7 +2915,7 @@ def recompute(
     case_scope = dict(case_values)
     case_scope["runAt"] = verified_at
     case_outcome = Outcome("case", None, dialect.case_read, "asserted", False, case_scope)
-    case_outcome.claim = copy_claim(dialect.case_read.copy or {}, case)
+    case_outcome.claim = copy_claim(dialect.case_read.copy or {}, case, case_outcome.transformations)
     outcomes.append(case_outcome)
 
     receipts: list[dict[str, Any]] = []
@@ -2556,7 +2978,7 @@ def recompute(
                 }
                 continue
         if source.read.copy is not None:
-            outcome.claim = copy_claim(source.read.copy, value)
+            outcome.claim = copy_claim(source.read.copy, value, outcome.transformations)
         else:
             assert source.read.rule is not None
             outcome.claim = rule_claim(source.read.rule, value, values)
@@ -2671,13 +3093,28 @@ def research_claim(source: Source, outcome: Outcome, outcomes: list[Outcome]) ->
         if value_depth(value) > MAX_VALUE_DEPTH:
             raise Refused("input-over-bound", f"{source.name}: the combined value nests more than 32 levels")
     if read.copy is not None:
-        return copy_claim(read.copy, value)
+        return copy_claim(read.copy, value, outcome.transformations)
     assert read.rule is not None
     return rule_claim(read.rule, value, outcome.parameters)
 
 
 def citation(receipt: dict[str, Any]) -> dict[str, Any]:
     return {name: receipt[name] for name in ("callIndex", "sessionId", "signature")}
+
+
+def research_execution_lineage(record: dict[str, Any]) -> dict[str, Any]:
+    """Commit the resolved settings and decoded retained response bytes without repeating the bytes."""
+    execution = record["execution"]
+    return {
+        "resolvedSettings": execution["resolvedSettings"],
+        "retainedBytes": [
+            {
+                "mediaType": item["mediaType"],
+                "digest": digest_of(base64.b64decode(item["base64"], validate=True)),
+            }
+            for item in execution["retainedBytes"]
+        ],
+    }
 
 
 def read_digest(read: Read) -> str:
@@ -2782,6 +3219,11 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
                     entry["receipts"] = list(outcome.citations)
                 if outcome.answer is not None:
                     entry["calculation"] = calculation_lineage(dialect, outcome)
+                if (outcome.source is not None and outcome.source.research is not None
+                        and outcome.source.research.result_member == "results" and outcome.record is not None):
+                    entry["researchExecution"] = research_execution_lineage(outcome.record)
+                if kind == "fact" and target in outcome.transformations:
+                    entry["transformation"] = outcome.transformations[target]
                 lineage.append(entry)
                 if kind == "fact" and present:
                     write_at(facts_document, target, resolve(claim["facts"], target))
@@ -3034,16 +3476,15 @@ def verify(
     unbound source (§4.4), and None when none is given."""
     result = Verification(answer={})
     try:
-        if len(dialect) > DIALECT_BYTES or len(dialect) + len(case) + len(acquisitions) > ENVELOPE_BYTES:
-            raise Refused("input-over-bound", "the dialect, case and acquisitions")
+        admit_envelope(dialect, case, acquisitions)
         if len(profiles) > PROFILES_BYTES:
             raise Refused("input-over-bound", "the profiles")
         if binding is not None and len(binding) > BINDING_BYTES:
             raise Refused("input-over-bound", "the binding document")
         if len(preparation) > PREPARATION_BYTES or (record is not None and len(record) > RECORD_BYTES):
             raise Refused("input-over-bound", "the preparation or the record")
-        # §11's phases, in order: the bounds measured on bytes, on every document before any is
-        # read; every document read; the counted bounds; every form; the kinds; and only then the
+        # After §11 phase 0 negotiates the profile, measure every document's byte bounds
+        # before full document reading; then every document read; the counted bounds; every form; the kinds; and only then the
         # recomputation.
         documents = [
             (dialect, "the dialect", MAX_DOCUMENT_DEPTH),
@@ -3160,6 +3601,8 @@ def report(answer: dict[str, Any]) -> dict[str, Any]:
         return {"result": "reading", **answer["reading"]}
     if "finding" in answer:
         return {"result": "finding", "finding": answer["finding"]}
+    if answer["refused"] == "profile-unsupported":
+        return {"result": "refusal", "refusal": "profile-unsupported", "profile": "extended"}
     return {"result": "refusal", "refusal": answer["refused"]}
 
 

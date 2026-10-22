@@ -1,4 +1,4 @@
-// Round 15 reader controls: altered copies of a staged research vector, never new vectors.
+// Rounds 15 and 16 reader controls: altered copies of a staged research vector, never new vectors.
 import assert from "node:assert/strict";
 import { createHash, createPrivateKey, createPublicKey, sign } from "node:crypto";
 import { dirname, join } from "node:path";
@@ -113,7 +113,8 @@ const controls: [string, string, Parameters<typeof scopedInputs>[0]][] = [
   ["union", "reading", { scope: ["https://other.example", prefix] }],
   ["path case", invalid, { endpoints: ["https://a.example/Docs/x"] }],
   ["subdomain", invalid, { endpoints: ["https://sub.a.example/docs"] }],
-  ["escaped slash is no boundary", invalid, { endpoints: [prefix + "%2Fx"] }],
+  ["escaped slash at the prefix boundary is outside the form", invalid,
+    { endpoints: [prefix + "%2Fx"] }],
   ["escape spelling", "reading", { scope: [prefix + "/%7e"], endpoints: [prefix + "/%7e/x"] }],
   ["escape case", invalid, { scope: [prefix + "/%7e"], endpoints: [prefix + "/%7E"] }],
   ["no decoding", invalid, { scope: [prefix + "/%7e"], endpoints: [prefix + "/~"] }],
@@ -166,6 +167,28 @@ for (const scope of [null, [], {}, "https://*", [null], [prefix, prefix], ["http
   ["https://a.example:444"], ["https://a.example./"], ["https://A.EXAMPLE/%2E/"]]) {
   controls.push(["bad scope " + JSON.stringify(scope), malformed, { scope }]);
 }
+// Round 16 (issue #214, option C): each path lies under the prefix and round 15's form admitted
+// it. An escaped slash or backslash anywhere in the path, or a dot segment before the first `;`,
+// `%3b`, `%3B`, `%3f`, `%3F`, `%23` or `%00` of its segment, is now outside the form.
+for (const path of ["/a%2fb", "/a%2Fb", "/a%5cb", "/a%5Cb", "/%2e%2e%2fadmin", "/..;x",
+  "/..;/admin", "/%2e%2e;x", "/%2E%2e;/admin", "/.;", "/.;/admin", "/.%2e;y=1", "/x/..;",
+  "/..%3b/admin", "/%2e%2e%3B/admin", "/.%3fx", "/..%3F", "/..%23x", "/.%00/x",
+  "/..;;x", "/..;a=b;c/admin", "/..;x%3by", "/..%23x;y"]) {
+  controls.push(["round 16 endpoint " + path, invalid, { endpoints: [prefix + path] }]);
+  controls.push(["round 16 scope entry " + path, malformed, { scope: [prefix + path] }]);
+}
+controls.push(["round 16 parameter on an ordinary segment", "reading",
+  { endpoints: [prefix + "/page;v=1"] }]);
+controls.push(["round 16 parameter in a scope entry", "reading",
+  { scope: [prefix + "/a;b"], endpoints: [prefix + "/a;b/x"] }]);
+controls.push(["round 16 dots after the first parameter", "reading",
+  { endpoints: [prefix + "/x;../y"] }]);
+controls.push(["round 16 three dots with a parameter", "reading",
+  { endpoints: [prefix + "/...;x"] }]);
+controls.push(["round 16 escaped dot inside a segment", "reading",
+  { endpoints: [prefix + "/a%2eb"] }]);
+controls.push(["round 16 dots after an escaped delimiter", "reading",
+  { endpoints: [prefix + "/x%3b../y"] }]);
 const longest = "https://a.example/" + "x".repeat(2048 - "https://a.example/".length);
 controls.push(["2048 byte entry", "reading", { scope: [longest], endpoints: [longest] }]);
 controls.push(["2049 bytes before forms", over,

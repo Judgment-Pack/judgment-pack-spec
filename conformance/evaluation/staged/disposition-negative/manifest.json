@@ -1,0 +1,26 @@
+{
+  "status": "staged",
+  "specSection": "§8.3",
+  "cases": [
+    {
+      "id": "requested-empty-unresolved", "expectedKeyword": "minItems",
+      "disposition": {"kind": "unresolved", "reasons": ["unknown"], "handoff": {"state": "requested", "triggeredBy": ["unknown"], "routes": []}},
+      "correctedRoutes": [{"kind": "queue", "name": "Review"}]
+    },
+    {
+      "id": "requested-empty-not-applicable", "expectedKeyword": "minItems",
+      "disposition": {"kind": "not-applicable", "reasons": ["not-applicable"], "handoff": {"state": "requested", "triggeredBy": ["not-applicable"], "routes": []}},
+      "correctedRoutes": [{"kind": "human-role", "name": "Review"}]
+    },
+    {
+      "id": "none-nonempty-unresolved", "expectedKeyword": "maxItems",
+      "disposition": {"kind": "unresolved", "reasons": ["unknown"], "handoff": {"state": "none", "routes": [{"kind": "queue", "name": "Review"}]}},
+      "correctedRoutes": []
+    },
+    {
+      "id": "none-nonempty-outcome", "expectedKeyword": "maxItems",
+      "disposition": {"kind": "outcome", "outcomeId": "accept", "reasons": [], "handoff": {"state": "none", "routes": [{"kind": "system", "name": "Review"}]}},
+      "correctedRoutes": []
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 ## Status
 
-This document is a research preview. It may change incompatibly and MUST NOT be represented as an
+This document is a draft. It may change incompatibly and MUST NOT be represented as an
 industry standard or as suitable, by conformance alone, for consequential decisions.
 
 `0.2.0-draft` defines four conformance classes: carrier, structural, and semantic document
@@ -148,6 +148,63 @@ A structurally conforming document is semantically conforming when:
 
 Condition or resolution results are not part of semantic document conformance.
 
+#### 3.3.1 Recommended rule-overlap check
+
+This subsection is non-normative. A validator is recommended to compare every pair of rules that
+name different outcomes and report `JPS-RULES-OVERLAP` when their conditions can both be `true` for
+one facts document. This check is not a conformance requirement: a pack with an overlap remains
+conforming, and evaluation in the overlap continues unchanged. Core §8 step 8 records `conflict`,
+and the disposition is `unresolved`.
+
+For conditions composed of `fact` nodes on one path and `literal`, `all`, `any`, and `not`, the
+check is exact. Track the sets of values for which each condition is `true` and `false`; values in
+neither set produce `unknown`. For `equals`, the true set is the singleton containing its operand;
+for `in`, it is the set of its operands; and `not-equals` swaps the equality true and false sets,
+all under the type-preserving equality of §7.4. Each ordered comparison's true and false sets are
+intervals of decimal-string values under §7.4's mathematical ordering, with an open or closed
+endpoint according to the operator; other values remain `unknown`. `all` intersects true sets and
+unites false sets, `any` unites true sets and intersects false sets, and `not` swaps the two sets. A
+`literal` supplies the corresponding full and empty sets. Two rules overlap exactly when the
+intersection of their true sets is non-empty. Thus ranges that meet only at an endpoint excluded by
+either range do not overlap. Equality and membership retain JSON type and spelling, including
+§7.4's distinction between decimal ordering and string equality.
+
+When the two conditions use different fact paths and neither condition excludes the other, the
+result is **overlap not excluded**, rather than an exact overlap. Core conditions do not relate the
+values at two paths, so a validator must not invent such a relationship. An implementation may use
+Core's collection and nesting bounds to keep this pairwise analysis bounded.
+
+The diagnostic has these members:
+
+- code `JPS-RULES-OVERLAP`;
+- certainty `exact` or `not-excluded`;
+- severity;
+- a JSON Pointer to the first rule in the reported pair;
+- the ids and outcomes of both rules;
+- for an exact result, either a witness facts input or the overlapping region: its fact `path` and
+  `from` and/or `to` endpoints with inclusivity, or its shared values;
+- the effect sentence: "Core §8 records `conflict`; the disposition is `unresolved`."; and
+- a suggested exclusive rewrite, identifying the rule to rewrite and giving its replacement
+  `when` condition.
+
+The two rule ids in one diagnostic must differ. The manifest schema requires two unique rule
+identity objects, but Draft 2020-12 cannot compare only their `id` member across array items, so a
+manifest reader also enforces this id-level invariant.
+
+For the common ascending numeric bands, the suggestion bounds the lower rule using Core's existing
+two-comparison form. For example, replace `score >= 40` with an `all` of
+`greater-than-or-equal 40` and `less-than 70` when the higher rule is `score >= 70`. No new operator
+is needed. For a cross-path pair, the suggestion may instead conjoin the lower rule with `not` of
+the higher rule's condition. Because `not` preserves `unknown` (§7.3), a missing higher-rule fact
+makes that lower rule `unknown` too; with `onUnknown: escalate`, the record is not silently banded
+lower than its known facts justify.
+
+Plain validation reports every instance as a warning. Strict mode, including
+`test-conformance --strict`, reports an exact, non-empty overlap as an error, and a review interface
+blocks publication for that exact case. `not-excluded` remains a warning in every mode and does not
+block publication. After the project can count published packs that trigger the exact case, a Core
+minor may promote it to §3.3 semantic conformance; it is not promoted in this draft.
+
 ### 3.4 Evaluator conformance
 
 An implementation is *evaluator conforming* when, given
@@ -250,6 +307,7 @@ disposition. Every other bullet above applies to the evaluator class unchanged.
 
 | Member                 | Required | Meaning                                                 |
 | ---------------------- | -------: | ------------------------------------------------------- |
+| `profile`             |       no | Ceiling profile: `base` (default) or `extended` (§4.1) |
 | `specVersion`          |      yes | Exact value `0.2.0-draft`                               |
 | `id`                   |      yes | Stable absolute URI identifying the pack series         |
 | `version`              |      yes | Three-component `MAJOR.MINOR.PATCH` revision string     |
@@ -272,6 +330,103 @@ Collection order is preserved for authoring and display but MUST NOT determine r
 The root MUST be an object. The schema defines the recognized members of each Core object; a member
 not defined for that Core object MUST NOT appear. The names and arbitrary JSON values inside an
 `extensions` object are governed separately by §9.
+
+### 4.1 Document ceiling profiles
+
+A document may declare `profile`, exactly `base` or `extended`; absence means `base`.
+A profile is a named set of ceilings, versioned with this specification. It changes no
+members, minima, grammar, numeric domain, uniqueness requirement or evaluation semantics.
+It never lowers a ceiling below `base`. An installation setting MUST NOT raise a ceiling
+that the document does not declare. Core packs, Workflow documents and Dialect documents carry this member at their root.
+Policy and governing-adoption documents adopt it from the next companion version;
+the released 1.0.0 draft does not carry `profile`. Dialect source
+and connection profiles are separate objects, not this ceiling declaration.
+
+A reader MUST admit a document only under a profile it supports. Profile negotiation is
+the first admission step: after the bounded root scan needed to identify the declaration,
+and before other documents' byte-bound checks, schema interpretation, reference loading,
+acquisition or evaluation, it checks that declaration. A supporting reader then applies
+the selected profile's ceilings. An unknown name, non-string, empty
+string or null is a structural refusal using the format's existing structural diagnostic.
+For input declaring a known but unsupported profile, it returns exactly one diagnostic
+`profile-unsupported`, naming that profile: `{"code":"profile-unsupported","profile":"extended"}`
+for an unsupported `extended` declaration. A format's refusal envelope may wrap these two
+members (Dialect uses `refusal` for the code); it MUST NOT append another diagnostic or
+input-derived message. The same rule applies to implicit `base`. Only the parsing needed to identify the declaration precedes
+this check; malformed JSON retains its syntax refusal. Resource-safe parsing may reject
+unreadable input, but MUST NOT silently process a prefix or fall back to `base`.
+
+`profile` is part of the document's bytes, so it is part of its digest and every exact-identity
+rule. Readers MUST NOT insert the default or remove an explicit declaration before hashing.
+An `extended` document has the same identity everywhere, including at readers refusing it.
+
+The following is the ceiling table for these formats. Numbers elsewhere in the companions
+state `base`; their corresponding `extended` ceilings are exclusively those below. Units
+and counting conventions remain those of the owning companion. No Core outcome, rule or
+reference maximum is defined, so none is introduced here. Fixed semantic cardinalities
+(such as exactly one coverage record per selected section), numeric domains and index ranges
+are not resource ceilings and do not change.
+
+| Format and resource | `base` | `extended` |
+| --- | ---: | ---: |
+| Core escalation routes (and their resulting handoff routes) | 8 | 16 |
+| Policy (from the next companion version): informationalSources, sourceProvenance, sourceRefs per section, governingPolicies | 16 | 32 |
+| Policy (from the next companion version): sections, scope sectionIds, coverage records per policy, consumerElements per section | 64 | 128 |
+| Policy (from the next companion version): artifact version characters | 256 | 512 |
+| Policy (from the next companion version): URI characters | 2048 | 4096 |
+| Policy (from the next companion version): local ID and media type characters | 128 | 256 |
+| Policy (from the next companion version): readable text characters | 4096 | 8192 |
+| Policy (from the next companion version): parsed document bytes | 262144 | 524288 |
+| Policy (from the next companion version): document nesting | 32 | 64 |
+| Policy (from the next companion version): number literal characters | 128 | 256 |
+| Policy (from the next companion version): exponent magnitude | 308 | 616 |
+| Policy (from the next companion version): narrative, review basis and informational material bytes | 1048576 | 2097152 |
+| Policy (from the next companion version): original material / registration bytes | 4194304 | 8388608 |
+| Policy (from the next companion version): distinct retained bytes | 16777216 | 33554432 |
+| Policy (from the next companion version): material registrations | 16 | 32 |
+| Workflow limits.maxStages | 32 | 64 |
+| Workflow limits.maxRecords, limits.maxInstances | 4096 | 8192 |
+| Workflow limits.maxAttempts | 16 | 32 |
+| Workflow limits.maxBytes | 1073741824 | 2147483648 |
+| Dialect document bytes | 131072 | 262144 |
+| Dialect combined dialect, case and acquisitions bytes | 2097152 | 4194304 |
+| Dialect profiles / binding document bytes | 65536 | 131072 |
+| Dialect preparation / record bytes | 8388608 | 16777216 |
+| Dialect sources | 16 | 32 |
+| Dialect retained responses, parameters per scope, clauses per rule, conditions per all/any | 64 | 128 |
+| Dialect unwrap pointers | 4 | 8 |
+| Dialect unwrapped string bytes | 200000 | 400000 |
+| Dialect fact targets | 256 | 512 |
+| Dialect evidence targets | 128 | 256 |
+| Dialect value nesting / document nesting | 32 / 64 | 64 / 128 |
+| Dialect number literal characters / exponent magnitude | 128 / 308 | 256 / 616 |
+| Dialect declared fields, answer entries, text-list items, observations, citation indices | 64 | 128 |
+| Dialect field name bytes | 64 | 128 |
+| Dialect description bytes | 2048 | 4096 |
+| Dialect model name bytes | 256 | 512 |
+| Dialect evidence instruction bytes | 4096 | 8192 |
+| Dialect text value bytes | 8192 | 16384 |
+| Dialect text-list item bytes | 1024 | 2048 |
+| Dialect decimal string characters | 128 | 256 |
+| Dialect capabilities per source or connection profile | 3 | 6 |
+| Dialect web assignments per source | 2 | 4 |
+| Dialect earlier reconciliation sources | 15 | 30 |
+| Dialect endpoint scope entries | 32 | 64 |
+| Dialect endpoint scope entry / endpoint URL bytes | 2048 | 4096 |
+| Dialect artifact ID bytes | 1024 | 2048 |
+
+Workflow's document-declared `limits` remains required; only its ceilings above change.
+Other Workflow carrier bounds remain unchanged. Raising a Dialect list ceiling does not
+invent capability names or waive distinctness; a closed vocabulary can still constrain it.
+Policy's canonical integer magnitude stays 9007199254740991: it is a numeric domain, not
+a resource ceiling. Core implementation-defined limits (§10) are not rows of this table.
+
+The published structural schemas retain `base` maxima and declare the profile enum with
+`base` as an annotation default. A reader supporting `extended` MUST validate with the
+corresponding ceilings above, preserving every other schema constraint; applying an unchanged
+base schema alone does not validate an extended document. Schema validation alone does not
+negotiate capabilities. Reader capability records list `profiles`, the supported names;
+listing `extended` commits the reader to every extended ceiling of its format.
 
 ## 5. Identity and references
 
@@ -365,6 +520,21 @@ from:
 - `unknown`;
 - `conflict`; and
 - `no-match`.
+
+An escalation MUST declare exactly one of `target` and `routes`; declaring both is not
+conformant. `target` retains its existing `{kind, name}` shape, with `kind` one of `human-role`,
+`queue`, or `system`, and `name` a non-empty display name. `routes` is an ordered array of 1 to 8
+entries, each a closed object containing `target` and optionally `triggers`. Each route target
+has that same shape. If present, route `triggers` MUST be a non-empty, duplicate-free subset of
+this escalation's `triggers`. An omitted route trigger list means unconditional selection once
+a handoff is requested, not a request by itself. Duplicate targets remain distinct routes.
+The maximum of 8 is the `base` schema bound; §4.1 raises it to 16 under `extended`.
+It is not an installation setting.
+
+For example, `"routes": [{"target": {"kind": "queue", "name": "Review"},
+"triggers": ["unknown"]}, {"target": {"kind": "human-role", "name": "Oversight"}}]`
+selects Review only for a retained `unknown` reason and Oversight for every requested handoff,
+provided `unknown` is declared among the escalation's triggers.
 
 The target identifies a human role, queue, or external system by a display name. The object
 configures handoff intent; it does not itself make a pack applicable, turn a condition into an
@@ -558,13 +728,23 @@ priority MUST NOT select among rule outcomes, and a conflict MUST NOT be tie-bro
 Evaluation state and handoff configuration are distinct. An unresolved or not-applicable result
 exists independently of the optional `escalation` object; `escalation` is not itself an outcome.
 
-For a generated reason, the configured target is requested when `escalation` is present and at
-least one retained reason appears in `escalation.triggers`. When several reasons match, resolution
+For an escalation declaring `target`, the configured target is requested when at least one retained
+reason appears in `escalation.triggers`. When several reasons match, resolution
 creates exactly one handoff request to the configured target and includes the complete retained
 reason set. That complete set is carried in the disposition's `reasons`; `handoff.triggeredBy` names
 the subset of it that triggered the request, which is smaller whenever `escalation.triggers` does not
 name every retained reason (§8.3). A true exception with effect `escalate` is a direct request and
 uses the configured target regardless of the trigger list.
+
+For an escalation declaring `routes`, first determine whether a request is made by at least one
+retained reason in `escalation.triggers` or by a direct exception escalation. Only when a request
+is made, select every route whose `triggers` intersects the complete disposition `reasons`, and
+every route that omits `triggers`. Make exactly one request per selected route, in declaration
+order. This is fan-out, not alternatives or fallback; identical target objects are not deduplicated.
+A direct exception bypasses the escalation trigger gate, but does not bypass route filters.
+If no route is selected, `handoff.state` is `none`, `handoff.routes` is empty, and `triggeredBy`
+is absent. Routing never changes `kind`, `outcomeId`, or the complete retained `reasons`.
+A review-named outcome alone requests nothing, including from unconditional routes.
 
 When `escalation` is omitted, there are no default triggers and no default target. When it is
 present but no generated reason matches its triggers, there is likewise no configured handoff for
@@ -653,12 +833,17 @@ When `kind` is `not-applicable` its one member is `not-applicable`. Two disposit
 - `triggeredBy` — present if and only if `state` is `requested`. A non-empty **set** of reason
   identifiers: every retained reason that appears in `escalation.triggers`, plus
   `exception-escalation` when a true exception with effect `escalate` made a direct request (§8.1).
-  It is always a subset of `reasons`.
+  It is always a subset of `reasons`; route filtering does not narrow it.
+- `routes` — present if and only if the pack declares `escalation.routes`. An ordered array of
+  the selected routes' `target` objects, one per selected route in declaration order, including
+  duplicate targets. It is empty when no request is made or no route is selected. A non-empty
+  array accompanies `state: "requested"`; an empty array accompanies `state: "none"`.
 
-The disposition does not echo the configured escalation target. A consumer that needs the target
-reads it from the pack; carrying a copy here would let a disposition disagree with the pack it came
-from, and the target is a display name, not an address (§6.7). A requested handoff is a request, not
-evidence that a handoff occurred.
+For a pack declaring `target` alone, the disposition does not echo the configured target and its
+canonical bytes remain unchanged from `0.2.0-draft`. A consumer reads that target from the pack.
+For a pack declaring `routes`, `handoff.routes` carries exactly the targets selected from the pack.
+Targets are display names, not addresses (§6.7). A requested handoff is a request, not evidence
+that a handoff occurred.
 
 Nothing else belongs in the disposition object. An implementation MAY report a trace, contributing
 rule, exception, or evidence-requirement ids, timings, or any other diagnostic **outside** the
@@ -845,6 +1030,10 @@ evaluation profile can build on rather than restate. Before a candidate stable c
 still resolve:
 
 - exact unit, date/time, and normalization semantics beyond the decimal-string ordering of §7.4;
+- a `between` fact operator with an inclusive lower bound and exclusive upper bound; it could make
+  the two-comparison band of §3.3.1 one line and exact by construction, but adding an `op` is a
+  schema change that older evaluators would refuse, so evidence should first count use of the
+  two-comparison rewrite;
 - whether equality between syntactically valid but arithmetically unrepresentable JSON numbers is
   `unknown`, as §7.4's incomparable-value rule implies, or an explicit input error. This is the single
   seam §8.3 excludes from its byte-agreement requirement, and the evaluation corpus carries no row for
@@ -857,4 +1046,4 @@ still resolve:
 - whether authority bindings belong in optional profiles;
 - content identity, canonicalization, and signatures;
 - imports and content-addressed dependencies; and
-- profile and capability negotiation.
+- negotiation beyond the document ceiling profiles in §4.1.

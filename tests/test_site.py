@@ -23,7 +23,15 @@ WITNESS_VECTORS = "conformance/witness"
 # directory either (conformance/dialect/README.md). The companion document they belong to is
 # published.
 DIALECT_VECTORS = "conformance/dialect"
-UNPUBLISHED_DIRECTORIES = (STAGED_EVALUATION_ROWS, WITNESS_VECTORS, DIALECT_VECTORS)
+WORKFLOW_VECTORS = "conformance/workflow"
+UNPUBLISHED_DIRECTORIES = (
+    STAGED_EVALUATION_ROWS,
+    WITNESS_VECTORS,
+    DIALECT_VECTORS,
+    WORKFLOW_VECTORS,
+    "conformance/policy",
+    "schema/policy",
+)
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
 # anywhere the site publishes. The tokens are assembled from fragments deliberately: the repository
@@ -248,6 +256,45 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("Accepted standards-track RFC", page)
         index = (self.output / "rfcs" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="0018-dialect/"', index)
+
+    def test_policy_promotion_prose_is_discoverable_and_raw_artifacts_stay_staged(self) -> None:
+        page = self.output / "spec/policy/index.html"
+        document = page.read_text(encoding="utf-8")
+        self.assertIn("Draft companion — conditional acceptance", document)
+        self.assertIn("Policy offline-reader class", document)
+        self.assertIn("default-branch RFC remains Review", document)
+        self._assert_nothing_published_under("conformance/policy")
+        self.assertFalse((self.output / "artifacts/schema/policy").exists())
+        for name in ("common", "policy", "governing-adoption", "fixture", "vectors"):
+            directory = "schema/policy/1.0.0" if name in ("common", "policy", "governing-adoption") else "conformance/policy/1.0.0"
+            source = ROOT / directory / f"{name}.schema.json"
+            published = self.output / "schema/policy/1.0.0" / f"{name}.schema.json"
+            self.assertEqual(published.read_bytes(), source.read_bytes())
+
+    def test_policy_draft_acceptance_is_conditional_with_source_only_archives(self) -> None:
+        page = self.output / "rfcs" / "0023-policy-companion" / "index.html"
+        document = page.read_text(encoding="utf-8")
+        self.assertIn('<span class="artifact-label">Draft companion — conditional acceptance</span>', document)
+        self.assertIn("This PR proposes acceptance", document)
+        self.assertIn("required CI passes", document)
+        self.assertIn("Until then the default-branch RFC remains Review", document)
+        self.assertIn("blob/main/rfcs/0023-policy-companion.md", document)
+        self.assertIn("View current source", document)
+        self.assertIn(
+            "https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/"
+            "rfcs/policy-companion-prototype/README.md",
+            inspect(page).links,
+        )
+        for name in ("README.md", "MIGRATION.md", "prototype-0.0.2-pin.json"):
+            self.assertIn(
+                "https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/"
+                "rfcs/policy-companion-contract/" + name,
+                inspect(page).links,
+            )
+        index = inspect(self.output / "rfcs" / "index.html")
+        self.assertIn("0023-policy-companion/", index.links)
+        self._assert_nothing_published_under("rfcs/policy-companion-prototype")
+        self._assert_nothing_published_under("rfcs/policy-companion-contract")
 
     def _assert_nothing_published_under(self, directory: str) -> None:
         staged = sorted((ROOT / directory).rglob("*"))
@@ -644,6 +691,9 @@ class StaticSiteTests(unittest.TestCase):
             "schema/0.2.0-draft/judgment-pack-core.schema.json": ROOT
             / "schema"
             / "judgment-pack-core.schema.json",
+            "schema/0.2.0-draft/workflow-1.schema.json": ROOT
+            / "schema"
+            / "workflow-1.schema.json",
             # The superseded schemas keep the $id path each was published under, so an older pack stays
             # checkable and a previously published identifier does not 404.
             "schema/0.1.0-draft/judgment-pack-core.schema.json": ROOT
@@ -783,9 +833,9 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn('<details class="preview-banner">', page)
         self.assertNotIn('<details class="preview-banner" open>', page)
         self.assertIn('<summary class="preview-banner-summary">', page)
-        self.assertIn("Research preview", page)
+        self.assertIn("Draft \u00b7", page)
         self.assertIn(
-            "No compatibility guarantee. Not for consequential production decisions.",
+            "A `0.x` draft in production use by adopters: pin the exact draft and runtime release; no compatibility guarantee between drafts.",
             page,
         )
 

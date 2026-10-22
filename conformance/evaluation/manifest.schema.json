@@ -87,6 +87,30 @@
             "state": {
               "enum": ["none", "requested"]
             },
+            "routes": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "name"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "human-role",
+                      "queue",
+                      "system"
+                    ]
+                  },
+                  "name": {
+                    "type": "string", "minLength": 1
+                  }
+                }
+              }
+            },
             "triggeredBy": {
               "allOf": [
                 { "$ref": "#/$defs/reasonSet" },
@@ -100,8 +124,14 @@
                 "properties": { "state": { "const": "requested" } },
                 "required": ["state"]
               },
-              "then": { "required": ["triggeredBy"] },
-              "else": { "not": { "required": ["triggeredBy"] } }
+              "then": {
+                "required": ["triggeredBy"],
+                "properties": { "routes": { "minItems": 1 } }
+              },
+              "else": {
+                "not": { "required": ["triggeredBy"] },
+                "properties": { "routes": { "maxItems": 0 } }
+              }
             }
           ]
         }

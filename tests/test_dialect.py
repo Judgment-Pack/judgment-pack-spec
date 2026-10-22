@@ -2686,6 +2686,155 @@ class ResearchContractTests(unittest.TestCase):
         self.assertEqual("refusal:input-malformed", answer(lambda r: r.pop("salts"), own=True))
 
 
+class DataQualityVectorTests(unittest.TestCase):
+    def test_the_hand_written_quality_vectors(self) -> None:
+        document = READER.read_document((DIALECT / "quality-vectors.json").read_bytes(), "quality vectors")
+        for row in document["cases"]:
+            with self.subTest(vector=row["id"]):
+                try:
+                    READER.count_bounds(
+                        {"case": {}, "sources": [{"read": {"copy": {"facts": [row["entry"]]}}}]},
+                        {},
+                    )
+                    read = READER.check_read(
+                        {"copy": {"facts": [row["entry"]], "evidence": []}}, {}, row["id"]
+                    )
+                    transformations: dict[str, Any] = {}
+                    claim = READER.copy_claim(read.copy, row["input"], transformations)
+                except READER.Refused as refusal:
+                    self.assertEqual(row.get("expectedRefusal"), refusal.name)
+                    continue
+                self.assertNotIn("expectedRefusal", row)
+                value = READER.resolve(claim["facts"], "/value")
+                if "expected" in row:
+                    self.assertTrue(READER.json_equal(row["expected"], value))
+                else:
+                    self.assertIs(READER.ABSENT, value)
+                transformation = transformations["/value"]
+                if "expectedFinding" in row:
+                    self.assertIn({"code": row["expectedFinding"]}, transformation["findings"])
+                if "expectedFailure" in row:
+                    self.assertEqual(row["expectedFailure"], transformation["applications"][0]["failure"]["code"])
+                if "expectedChosen" in row:
+                    self.assertEqual(row["expectedChosen"], transformation["reconciliation"]["chosen"])
+
+    def test_the_hand_written_research_result_vectors(self) -> None:
+        document = READER.read_document((DIALECT / "research-result-vectors.json").read_bytes(), "research vectors")
+        dialect = READER.parse_dialect(document["dialect"])
+        research = dialect.sources[0].research
+        self.assertIsNotNone(research)
+        self.assertEqual("results", research.result_member)
+        self.assertEqual(["/results/summary/status"], dialect.sources[0].read.candidates[("fact", "/research/state")])
+        for row in document["cases"]:
+            with self.subTest(vector=row["id"]):
+                try:
+                    READER.check_acquisition_form("research", {"response": {"result": row["record"]}}, research)
+                except READER.Refused as refusal:
+                    self.assertEqual(row["expected"], refusal.name)
+                else:
+                    self.assertEqual("accepted", row["expected"])
+                    transformations: dict[str, Any] = {}
+                    claim = READER.copy_claim(dialect.sources[0].read.copy, row["record"], transformations)
+                    self.assertEqual("missing", READER.resolve(claim["facts"], "/research/state"))
+                    self.assertEqual({"kind": "trim"}, transformations["/research/state"]["applications"][0]["rule"])
+        for mutation in document["mutations"]:
+            with self.subTest(vector=mutation["id"]):
+                record = copy.deepcopy(document["cases"][0]["record"])
+                field = mutation["field"]
+                entry = {"status": mutation["status"], "cites": mutation.get("cites", [])}
+                if "value" in mutation:
+                    entry["value"] = mutation["value"]
+                record["results"][field] = entry
+                with self.assertRaisesRegex(READER.Refused, mutation["expected"]):
+                    READER.check_acquisition_form("research", {"response": {"result": record}}, research)
+
+    def test_research_result_refusal_mutations(self) -> None:
+        document = READER.read_document((DIALECT / "research-result-vectors.json").read_bytes(), "research vectors")
+        for name, change in {
+            "empty contract": lambda d: d["sources"][0].__setitem__("results", []),
+            "missing cardinality": lambda d: d["sources"][0]["results"][0].pop("cardinality"),
+        }.items():
+            dialect = copy.deepcopy(document["dialect"])
+            change(dialect)
+            with self.subTest(mutation=name), self.assertRaisesRegex(READER.Refused, "input-malformed"):
+                READER.parse_dialect(dialect)
+
+        dialect = copy.deepcopy(document["dialect"])
+        seed = dialect["sources"][0]["results"][0]
+        dialect["sources"][0]["results"] = [{**seed, "id": f"field-{n}"} for n in range(65)]
+        with self.assertRaisesRegex(READER.Refused, "input-over-bound"):
+            READER.count_bounds(dialect, {})
+
+        dialect = READER.parse_dialect(document["dialect"])
+        research = dialect.sources[0].research
+        record = copy.deepcopy(document["cases"][0]["record"])
+        record["execution"].pop("retainedBytes")
+        with self.assertRaisesRegex(READER.Refused, "input-malformed"):
+            READER.check_acquisition_form("research", {"response": {"result": record}}, research)
+
+        for name, change in {
+            "missing execution": lambda r: r.pop("execution"),
+            "invalid retained bytes": lambda r: r["execution"]["retainedBytes"][0].__setitem__("base64", "!"),
+        }.items():
+            record = copy.deepcopy(document["cases"][0]["record"])
+            change(record)
+            with self.subTest(mutation=name), self.assertRaisesRegex(READER.Refused, "input-malformed"):
+                READER.check_acquisition_form("research", {"response": {"result": record}}, research)
+
+        record = copy.deepcopy(document["cases"][0]["record"])
+        record["execution"]["retainedBytes"] = [{"mediaType": "application/json", "base64": "e30="}] * 65
+        acquisitions = {"research": {"response": {"result": record}}}
+        with self.assertRaisesRegex(READER.Refused, "input-over-bound"):
+            READER.count_bounds(document["dialect"], acquisitions)
+
+    def test_semantic_declarations_change_the_dialect_digest(self) -> None:
+        document = READER.read_document((DIALECT / "research-result-vectors.json").read_bytes(), "research vectors")
+        base = document["dialect"]
+        variants = []
+        for change in (
+            lambda d: d["sources"][0]["results"][0].__setitem__("description", "A different contract."),
+            lambda d: d["sources"][0].__setitem__("question", "Use a different request."),
+            lambda d: d["sources"][0]["acquisitionSources"][0].__setitem__("version", "2"),
+        ):
+            changed = copy.deepcopy(base)
+            change(changed)
+            READER.parse_dialect(changed)
+            variants.append(changed)
+
+        conversion = copy.deepcopy(base)
+        conversion["sources"][0]["read"]["copy"]["facts"][0] = {
+            "target": "/research/state", "source": "/results/summary/status",
+            "type": "string", "required": True, "convert": {"kind": "trim"},
+        }
+        READER.parse_dialect(conversion)
+        changed_conversion = copy.deepcopy(conversion)
+        changed_conversion["sources"][0]["read"]["copy"]["facts"][0]["convert"] = {"kind": "collapse-whitespace"}
+        READER.parse_dialect(changed_conversion)
+
+        digest = lambda d: READER.digest_of(READER.canon(d))
+        for changed in variants:
+            self.assertNotEqual(digest(base), digest(changed))
+        self.assertNotEqual(digest(conversion), digest(changed_conversion))
+
+    def test_public_verifier_replays_retained_research_bytes(self) -> None:
+        document = READER.read_document((DIALECT / "research-replay-vector.json").read_bytes(), "replay vector")
+        encoded = lambda name: READER.preparation_bytes(document[name])
+        result = READER.verify(
+            encoded("dialect"), encoded("case"), encoded("acquisitions"), encoded("profiles"),
+            encoded("preparation"), None, False, None,
+        )
+        self.assertIn("reading", result.answer)
+        self.assertEqual(encoded("preparation"), result.preparation)
+
+        changed = copy.deepcopy(document["acquisitions"])
+        changed["research"]["response"]["result"]["execution"]["retainedBytes"][0]["base64"] = document["tamperedBase64"]
+        result = READER.verify(
+            encoded("dialect"), encoded("case"), READER.preparation_bytes(changed), encoded("profiles"),
+            encoded("preparation"), None, False, None,
+        )
+        self.assertEqual(document["expectedTampered"], result.answer["finding"])
+
+
 class DialectTextTests(unittest.TestCase):
     def test_the_rfcs_specification_is_the_companion_text(self) -> None:
         # RFC 0017's choice: the Specification section is the text proposed to land. Here the text

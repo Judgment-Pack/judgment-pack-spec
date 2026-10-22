@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/policy/1.0.0/governing-adoption.schema.json",
+  "title": "DRAFT Policy companion 1.0.0: governing-adoption",
+  "description": "Immutable interpretation/coverage proposal for one exact pack. No authorization, registration, release envelope, graph support or live eligibility.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "kind",
+    "id",
+    "version",
+    "consumer",
+    "governingPolicies"
+  ],
+  "properties": {
+    "formatVersion": {
+      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/formatVersion"
+    },
+    "kind": {
+      "const": "governing-adoption"
+    },
+    "id": {
+      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/uri"
+    },
+    "version": {
+      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/version"
+    },
+    "consumer": {
+      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/packReference"
+    },
+    "governingPolicies": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "policy",
+          "scope",
+          "coverage"
+        ],
+        "properties": {
+          "policy": {
+            "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/policyReference"
+          },
+          "scope": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "whole-policy"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "sectionIds",
+                  "reviewBasis"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "sections"
+                  },
+                  "sectionIds": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 64,
+                    "uniqueItems": true,
+                    "items": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/localId"
+                    }
+                  },
+                  "reviewBasis": {
+                    "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/content"
+                  }
+                }
+              }
+            ]
+          },
+          "coverage": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "uniqueItems": true,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sectionId",
+                    "status",
+                    "consumerElements",
+                    "reviewBasis"
+                  ],
+                  "properties": {
+                    "sectionId": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/localId"
+                    },
+                    "status": {
+                      "const": "implemented"
+                    },
+                    "consumerElements": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 64,
+                      "uniqueItems": true,
+                      "items": {
+                        "$ref": "#/$defs/consumerElement"
+                      }
+                    },
+                    "reviewBasis": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/content"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sectionId",
+                    "status",
+                    "handoff"
+                  ],
+                  "properties": {
+                    "sectionId": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/localId"
+                    },
+                    "status": {
+                      "const": "manual"
+                    },
+                    "handoff": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sectionId",
+                    "status",
+                    "explanation"
+                  ],
+                  "properties": {
+                    "sectionId": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/localId"
+                    },
+                    "status": {
+                      "const": "awaiting-interpretation"
+                    },
+                    "explanation": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sectionId",
+                    "status",
+                    "explanation"
+                  ],
+                  "properties": {
+                    "sectionId": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/localId"
+                    },
+                    "status": {
+                      "const": "awaiting-implementation"
+                    },
+                    "explanation": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sectionId",
+                    "status",
+                    "rationale"
+                  ],
+                  "properties": {
+                    "sectionId": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/localId"
+                    },
+                    "status": {
+                      "const": "out-of-scope"
+                    },
+                    "rationale": {
+                      "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/text"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "informationalSources": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/content"
+      }
+    }
+  },
+  "$defs": {
+    "consumerElement": {
+      "description": "Exact declared Core rule/exception by ID, or the present applicability/fallbackOutcome singleton without a fabricated ID. Other element kinds are unsupported.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "id"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "rule",
+                "exception"
+              ]
+            },
+            "id": {
+              "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/localId"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "applicability",
+                "fallback"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

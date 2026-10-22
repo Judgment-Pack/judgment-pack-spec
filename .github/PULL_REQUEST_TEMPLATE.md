@@ -10,7 +10,7 @@ Explain why this belongs in the shared specification rather than an extension, p
 
 - [ ] No normative effect
 - [ ] Backward compatible
-- [ ] Breaking research-preview change
+- [ ] Breaking change in a `0.x` draft
 
 Describe reader, writer, semantic, and migration impact.
 

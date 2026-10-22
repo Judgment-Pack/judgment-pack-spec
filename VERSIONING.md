@@ -1,6 +1,6 @@
 # Versioning and release policy
 
-Judgment Pack Specification releases use Semantic Versioning identifiers with a leading `v` on
+Core Judgment Pack Specification releases use Semantic Versioning identifiers with a leading `v` on
 Git tags. Specification `0.2.0-draft` is identified by the exact tag `v0.2.0-draft`, and `0.1.0-draft`
 by `v0.1.0-draft`. Only a tag and GitHub release published by the maintainers establish an immutable
 release; similarly named files on the mutable `main` branch do not.
@@ -52,7 +52,7 @@ No compatibility dimension is implied merely because two releases share a versio
 
 ## Release artifacts
 
-An immutable preview release contains, at minimum:
+An immutable Core preview release contains, at minimum:
 
 - the tagged Core prose specification;
 - the tagged JSON Schema with a versioned `$id`, plus any superseded schema still published;
@@ -67,6 +67,39 @@ each artifact is permitted to make.
 
 ## Deprecation and support
 
-Research-preview releases have no compatibility or security service-level guarantee. Maintainers
+`0.x` draft releases have no compatibility or security service-level guarantee. Maintainers
 may deprecate or remove behavior in a later `0.x` release, but must record the change in release
 notes. A stable release will require a separate support and deprecation policy before publication.
+
+## Independently versioned Policy draft companion
+
+Policy uses the scoped tag `policy-v<releaseVersion>`, where `releaseVersion` is
+strict three-component SemVer followed by `-draft.N` (unsigned ASCII decimal N,
+no leading zero except `0`). This route is draft-only; it creates no stable
+maturity or support guarantee. Only the tag and maintainer-published GitHub
+release together establish an immutable Policy release. The prepared first
+identifier is `policy-v1.0.0-draft.1`; preparation does not publish it.
+
+A Policy release names the exact document `formatVersion`, supported Core consumer
+`specVersion`, closed schema identities and complete corpus/digest in its own
+versioned JSON release manifest beside the release notes. Those values and an
+artifact's x.y.z `version` are independent of the companion release identifier.
+The existing builder/workflow shares archive, checksums and build provenance with
+Core, but validates a Policy tag against its own manifest and explicit draft RFC
+acceptance. Core tags still require exact Core schema/document/evaluation pins;
+Core bundles exclude independently versioned Policy schema/corpus directories.
+
+First publication freezes the normative meaning, schema resource bytes/URLs and
+complete corpus inputs/results for an exact Policy format. A later draft release
+for that same format retains those pins and can change packaging or non-normative
+explanation only. Changed acceptance, interpretation, bounds, refusal semantics
+or grammar requires a new exact format selector, new versioned schema resources
+and reviewed compatibility/migration guidance. Published resource URLs, release
+manifests and tagged artifacts are preserved; they are never repointed.
+
+A Policy offline-reader conformance claim names the exact independent Policy
+release, format, supported Core consumer version and complete published corpus
+manifest/digest; every row must pass. No claim is available before publication.
+It establishes supplied-document agreement only, with the scope/exclusions of
+[the companion](spec/policy.md). Stable maturity still requires the independent
+implementation evidence in the existing governance and RFC process.

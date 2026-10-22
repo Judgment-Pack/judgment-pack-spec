@@ -22,6 +22,7 @@ from markdown.extensions import Extension
 from markdown.inlinepatterns import SimpleTagInlineProcessor
 from markdown.treeprocessors import Treeprocessor
 from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -355,6 +356,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "spec/policy.md",
+        PurePosixPath("spec/policy/index.html"),
+        "Policy content and governing adoption",
+        "Policy draft approved conditional on required green CI and PR 218 merge; immutable content and exact governing adoption, with no published conformance claim.",
+        "spec",
+        "Draft companion — conditional acceptance",
+        source_ref="main",
+    ),
+    Page(
         "docs/field-guide.md",
         PurePosixPath("field-guide/index.html"),
         "Field guide",
@@ -366,7 +376,7 @@ PAGES = (
     Page(
         "TESTING.md",
         PurePosixPath("testing/index.html"),
-        "Test the research preview",
+        "Test the draft",
         "A short, synthetic exercise for testing JPS documents and reporting reproducible feedback.",
         "testing",
         source_ref="main",
@@ -383,7 +393,7 @@ PAGES = (
         "ROADMAP.md",
         PurePosixPath("project/roadmap/index.html"),
         "Evidence-gated roadmap",
-        "The evidence required before JPS can advance beyond a research preview.",
+        "The evidence required before JPS can advance beyond a draft.",
         "project",
         source_ref="main",
     ),
@@ -398,7 +408,7 @@ PAGES = (
         "CHANGELOG.md",
         PurePosixPath("project/changelog/index.html"),
         "Changelog",
-        "The draft and published history of the JPS research preview.",
+        "The draft and published history of JPS.",
         "project",
         source_ref="main",
     ),
@@ -413,7 +423,7 @@ PAGES = (
         "SECURITY.md",
         PurePosixPath("project/security/index.html"),
         "Security policy",
-        "The research-preview security boundary and vulnerability reporting process.",
+        "The security boundary and vulnerability reporting process.",
         "project",
     ),
     Page(
@@ -676,6 +686,17 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0022-reusable-subgraphs.md",
+        PurePosixPath("rfcs/0022-reusable-subgraphs/index.html"),
+        "RFC 0022: Reusable subgraphs contract",
+        "Draft cross-project exploratory record: reusable subgraphs contract outside the specification, "
+        "explicit encapsulation, project reference resolution, identity and version binding, "
+        "expanded node namespaces, and deterministic execution boundaries.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/0020-workflow.md",
         PurePosixPath("rfcs/0020-workflow/index.html"),
         "RFC 0020: The workflow",
@@ -688,6 +709,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0023-policy-companion.md",
+        PurePosixPath("rfcs/0023-policy-companion/index.html"),
+        "RFC 0023: Policy content and governing adoption",
+        "Review proposal for immutable policy content and exact governing adoption, with a proposed draft 1.0.0 contract, a frozen non-normative prototype and unresolved trust and live governance contracts.",
+        "proposals",
+        "Draft companion — conditional acceptance",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/0024-workflow-admission-proof.md",
         PurePosixPath("rfcs/0024-workflow-admission-proof/index.html"),
         "RFC 0024: Retained workflow admission proofs",
@@ -695,6 +725,24 @@ PAGES = (
         "Proof bytes count toward actual bundle limits; portable encoding and transitions remain unresolved.",
         "proposals",
         "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0025-core-escalation-routes.md",
+        PurePosixPath("rfcs/0025-core-escalation-routes/index.html"),
+        "RFC 0025: Core escalation routes",
+        "Accepted Core routing design: ordered conditional handoff routes, with delivery kept separate.",
+        "proposals",
+        "Accepted design — review pending",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0026-document-ceiling-profiles.md",
+        PurePosixPath("rfcs/0026-document-ceiling-profiles/index.html"),
+        "RFC 0026: Document ceiling profiles",
+        "Accepted document ceiling profiles: declared base or extended bounds and explicit reader support. Policy adoption starts with its next companion version.",
+        "proposals",
+        "Accepted design — review pending",
         source_ref="main",
     ),
     Page(
@@ -1317,7 +1365,7 @@ def page_html(
         if schema_type == "TechArticle":
             schema_meta += (
                 f'<meta itemprop="version" content="{SITE_VERSION}">'
-                '<meta itemprop="creativeWorkStatus" content="Research preview">'
+                '<meta itemprop="creativeWorkStatus" content="Draft">'
             )
     generator_meta = f'<meta name="generator" content="{GENERATOR_ID} {html.escape(SITE_VERSION)}">'
 
@@ -1389,6 +1437,7 @@ def raw_block(text: str, language: str = "json") -> str:
 # One human-readable definition per JSON key, derived from the normative schema. Each entry is
 # (summary, allowed-values-or-None). Powers the clickable-key cards and the schema field reference.
 KEY_REFERENCE: dict[str, tuple[str, tuple[str, ...] | None]] = {
+    "profile": ("The document ceiling profile. Absent means base; extended requires explicit reader support and retains its declaration in the document identity.", ("base", "extended")),
     "specVersion": ("The JPS specification version this document targets.", ("0.2.0-draft",)),
     "id": ("A stable identifier. At the top level it is the pack's globally unique URI; inside outcomes, rules, evidence requirements, sources, and exceptions it is a pack-local id (lowercase, hyphenated).", None),
     "version": ("The pack's own semantic version (MAJOR.MINOR.PATCH), separate from specVersion.", None),
@@ -1400,7 +1449,7 @@ KEY_REFERENCE: dict[str, tuple[str, tuple[str, ...] | None]] = {
     "applicability": ("An optional condition that delimits when the whole pack applies; if it does not hold, the pack is not applicable.", None),
     "evidenceRequirements": ("The evidence a decision may draw on. Each item is declared once and referenced by id.", None),
     "required": ("Whether an evidence requirement must be present.", ("true", "false")),
-    "kind": ("A category. Evidence: document/fact/measurement/attestation. Source locator: uri/repository/path/other. Escalation target: human-role/queue/system.", ("document", "fact", "measurement", "attestation", "uri", "repository", "path", "other", "human-role", "queue", "system")),
+    "kind": ("A category. Evidence: document/fact/measurement/attestation. Source locator: uri/repository/path/other. Escalation target: human-role/queue/system. Disposition: outcome/not-applicable/unresolved.", ("document", "fact", "measurement", "attestation", "uri", "repository", "path", "other", "human-role", "queue", "system", "outcome", "not-applicable", "unresolved")),
     "sources": ("Provenance: the cited references the pack relies on.", None),
     "publisher": ("Who published a source.", None),
     "publishedAt": ("A source's publication date (YYYY-MM-DD).", None),
@@ -1424,8 +1473,14 @@ KEY_REFERENCE: dict[str, tuple[str, tuple[str, ...] | None]] = {
     "targetRule": ("The rule id a suppress-rule exception disables.", None),
     "fallbackOutcome": ("The outcome id used when no rule matches (§8).", None),
     "escalation": ("Handoff configuration: when and to whom the decision is escalated. Not itself an outcome.", None),
-    "triggers": ("The situations that cause escalation.", ("not-applicable", "missing-required-evidence", "unknown", "conflict", "no-match")),
+    "triggers": ("The situations that cause escalation; a route filter is a non-empty subset of the escalation triggers.", ("not-applicable", "missing-required-evidence", "unknown", "conflict", "no-match")),
     "target": ("The escalation destination: a kind and a name.", None),
+    "routes": ("Escalation: an ordered list of 1–8 target objects with optional reason filters, exclusive with target. Handoff: the selected targets in declaration order; empty when no request is selected.", None),
+    "handoff": ("The disposition's handoff intent, not evidence of delivery.", None),
+    "state": ("Whether the disposition requests a handoff.", ("none", "requested")),
+    "triggeredBy": ("The retained reasons that requested escalation; present only for a requested handoff.", None),
+    "reasons": ("The complete, sorted, duplicate-free set of disposition reasons; routing never narrows it.", None),
+    "outcomeId": ("The selected outcome's id, present only for an outcome disposition.", None),
     "name": ("The name of an escalation target, such as a role or a queue.", None),
     "message": ("Guidance shown when escalating.", None),
     "metadata": ("Non-normative bookkeeping: authors, timestamps, license, reviews, required extensions.", None),
@@ -1608,8 +1663,34 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
                 "artifacts/conformance/evaluation/manifest.schema.json"
             ),
             ".vscode/tasks.json": GITHUB_ROOT + ".vscode/tasks.json",
+            # Exploratory prototype files remain source review material, not site artifacts.
+            "rfcs/policy-companion-prototype/README.md": (
+                GITHUB_BLOB_ROOT + "main/rfcs/policy-companion-prototype/README.md"
+            ),
+            "rfcs/policy-companion-contract/README.md": (
+                GITHUB_BLOB_ROOT + "main/rfcs/policy-companion-contract/README.md"
+            ),
+            "rfcs/policy-companion-contract/MIGRATION.md": (
+                GITHUB_BLOB_ROOT + "main/rfcs/policy-companion-contract/MIGRATION.md"
+            ),
+            "rfcs/policy-companion-contract/prototype-0.0.2-pin.json": (
+                GITHUB_BLOB_ROOT + "main/rfcs/policy-companion-contract/prototype-0.0.2-pin.json"
+            ),
         }
     )
+    # Review corpus files are source-only until their independent release. Schema
+    # resources also resolve directly at their exact, format-versioned $id URLs.
+    for directory in ("conformance/policy", "schema/policy"):
+        for path in (ROOT / directory).rglob("*"):
+            source = path.relative_to(ROOT).as_posix()
+            if path.is_file():
+                routes[source] = GITHUB_BLOB_ROOT + "main/" + source
+            elif path.is_dir():
+                routes[source] = "https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/" + source
+    for source in CANONICAL_SCHEMA_SOURCES:
+        if "/policy/" in source:
+            schema_id = json.loads((ROOT / source).read_text("utf-8"))["$id"]
+            routes[source] = PurePosixPath(urlsplit(schema_id).path.lstrip("/"))
     for path in sorted((ROOT / "conformance" / "evaluation" / "packs").glob("*.json")):
         source = path.relative_to(ROOT).as_posix()
         routes[source] = PurePosixPath("artifacts") / PurePosixPath(source)
@@ -1677,7 +1758,7 @@ def home_ecosystem_html(current: PurePosixPath) -> str:
       </div>
     </article>
     <article class="ecosystem-card">
-      <p class="card-kicker">Input lineage · Research gateway</p>
+      <p class="card-kicker">Input lineage · Gateway</p>
       <h3>Trace a judgment to the bytes it used.</h3>
       <p>The open reference gateway signs acquired results and seals sessions. A verifier with a
       separately pinned public key can check the store against the registry obtained from the key
@@ -2262,6 +2343,9 @@ UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/evaluation/staged"),
     PurePosixPath("conformance/witness"),
     PurePosixPath("conformance/dialect"),
+    PurePosixPath("conformance/workflow"),
+    PurePosixPath("conformance/policy"),
+    PurePosixPath("schema/policy"),
 )
 
 
@@ -2379,7 +2463,7 @@ def build_llms_txt(output_root: Path, config: BuildConfig) -> None:
 > {SITE_DESCRIPTION}
 
 - Current draft: `{SITE_VERSION}`
-- Status: research preview; no compatibility, production-readiness, certification, truth, safety, or authorization claim
+- Status: draft, in production use by adopters; no compatibility, certification, truth, safety, or authorization claim
 - License: Apache-2.0
 - Canonical site: {guide_url(PurePosixPath("index.html"))}
 
@@ -2472,12 +2556,18 @@ def build_not_found(output_root: Path) -> None:
 
 CANONICAL_SCHEMA_SOURCES = (
     "schema/judgment-pack-core.schema.json",
+    "schema/workflow-1.schema.json",
     # The superseded schemas stay served at the $id each was published under, so a pack or manifest that
     # still declares the older exact specVersion remains checkable and a cited identifier keeps resolving.
     "schema/judgment-pack-core-0.1.0-draft.schema.json",
     "schema/conformance-manifest-0.1.0-draft.schema.json",
     "conformance/manifest.schema.json",
     "conformance/evaluation/manifest.schema.json",
+    "schema/policy/1.0.0/common.schema.json",
+    "schema/policy/1.0.0/policy.schema.json",
+    "schema/policy/1.0.0/governing-adoption.schema.json",
+    "conformance/policy/1.0.0/fixture.schema.json",
+    "conformance/policy/1.0.0/vectors.schema.json",
 )
 
 
@@ -2584,7 +2674,7 @@ being listed here.</p>
     <p class="card-meta">Demo material · never authorization or production guidance</p>
   </article>
   <article class="card">
-    <p class="card-kicker">Open source · research preview · runs its sources and receipts them apart
+    <p class="card-kicker">Open source · runs its sources and receipts them apart
     from the runtime; since v0.9.0 a decision policy can hold a write to a record signed by a
     runtime key it trusts (ADR-0012)</p>
     <h2><a href="{html.escape(GATEWAY_URL)}" target="_blank" rel="noopener noreferrer">open reference gateway</a></h2>
@@ -2602,7 +2692,7 @@ being listed here.</p>
     <p class="card-meta"><a href="{html.escape(gateway_spec_url)}" target="_blank" rel="noopener noreferrer">Receipt and seal specification</a> · <a href="{html.escape(gateway_corpus_url)}" target="_blank" rel="noopener noreferrer">frozen corpus</a></p>
   </article>
   <article class="card">
-    <p class="card-kicker">Open source · Apache-2.0 · research preview</p>
+    <p class="card-kicker">Open source · Apache-2.0</p>
     <h2><a href="{html.escape(DESK_URL)}" target="_blank" rel="noopener noreferrer">judgment-pack desk</a></h2>
     <p>A local web desk for a Judgment Pack project: one Go binary that serves a browser application
     and relays MCP messages between the page and a <code>jpack mcp</code> subprocess in the project
@@ -2612,7 +2702,7 @@ being listed here.</p>
     <p class="card-meta">Local desk · separately governed · non-normative</p>
   </article>
   <article class="card">
-    <p class="card-kicker">Open source · Apache-2.0 · research preview, single-owner local pilot</p>
+    <p class="card-kicker">Open source · Apache-2.0 · single-owner local Jobs runner</p>
     <h2><a href="{html.escape(RUNNER_URL)}" target="_blank" rel="noopener noreferrer">judgment-pack runner</a></h2>
     <p>A local jobs runner. It turns a pack snapshot into a durable job: it checks a release, takes
     facts and evidence availability, runs the pinned runtime through its public CLI, and keeps the
@@ -2891,7 +2981,8 @@ SLIDES: tuple[Slide, ...] = (
             "the specification got fixed.",
         ),
         note=(
-            "Measured across 116 tests on the file format, plus 20 decision scenarios replayed through "
+            "Measured across 127 tests on the file format and 5 advisory vectors, plus 20 decision "
+            "scenarios replayed through "
             "both engines. One limit, stated plainly: both implementations trace to the same "
             "maintainer, and the second was written from reference texts that already carried the "
             "first's implementation notes — so the agreement <em>corroborates</em> that the "
@@ -3027,7 +3118,7 @@ SLIDES: tuple[Slide, ...] = (
             "and data, in the "
             '<a href="https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments" '
             'target="_blank" rel="noopener noreferrer">public research repository</a>. It is also why '
-            "this is published as a research preview: to invite independent review and testing before "
+            "this is published as a draft: to invite independent review and testing before "
             "a 1.0, rather than after it."
         ),
     ),
@@ -3042,8 +3133,8 @@ SLIDES: tuple[Slide, ...] = (
         ),
         points=(
             "<strong>Ready today:</strong> the file specification, the checks that a file is sound, "
-            "and an agreed way to turn one into an answer — held in place by 116 tests on the format "
-            "and 20 on the answers.",
+            "and an agreed way to turn one into an answer — held in place by 127 tests on the format, "
+            "5 advisory vectors, and 20 tests on the answers.",
             "<strong>Tooling:</strong> the open-source reference runtime serves the same core through "
             "a CLI and stdio MCP, walks project-owned pack matrices, and reports informative coverage. "
             "Projects can opt into JSONL evaluation records and a reviewed-set lock that makes drift "
@@ -3292,8 +3383,14 @@ def build(output: Path, config: BuildConfig) -> None:
     manifest_schema = json.loads(
         repository_file("conformance/manifest.schema.json").read_text(encoding="utf-8")
     )
+    core_schema = json.loads(
+        repository_file("schema/judgment-pack-core.schema.json").read_text(encoding="utf-8")
+    )
+    schema_registry = Registry().with_resource(
+        core_schema["$id"], Resource.from_contents(core_schema)
+    )
     Draft202012Validator.check_schema(manifest_schema)
-    Draft202012Validator(manifest_schema).validate(manifest)
+    Draft202012Validator(manifest_schema, registry=schema_registry).validate(manifest)
     routes = build_routes(manifest)
     prepare_output(output)
     copy_static(output)

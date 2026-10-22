@@ -69,11 +69,16 @@ stable feature requires two independent implementations and conformance cases.
 | [0018] | The dialect | Accepted | Specification (a companion document; see below) |
 | [0019] | The Judgment Exchange — a shared place for dialects | Draft | Research line (see below) |
 | [0020] | The workflow | Draft | Specification (a proposed companion document; see below) |
+| [0022] | Reusable subgraphs contract — explicit encapsulation and reference binding | Draft | Research line (see below) |
+| [0023](0023-policy-companion.md) | Policy content and governing adoption | Accepted (upon green CI and PR 218 merge) | Specification (draft Policy offline-reader companion); live governance remains host-owned |
 | [0024] | Retained workflow admission proofs | Draft | Specification (a proposed amendment to the Draft workflow; unresolved portable encoding) |
+| [0025](0025-core-escalation-routes.md) | Core escalation routes | Accepted design (#219); review pending | Specification (Core) |
+| [0026](0026-document-ceiling-profiles.md) | Document ceiling profiles | Accepted design (#232); review pending | Specification and companions |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
 [0020]: 0020-workflow.md
+[0022]: 0022-reusable-subgraphs.md
 [0024]: 0024-workflow-admission-proof.md
 
 RFC 0018 states how a pack's facts and evidence are obtained and derived, and what a preparation
@@ -117,3 +122,10 @@ repository.
 
 RFC 0021 adds [named Dialect artifact identities](0021-dialect-artifact-identity.md) through
 exact `formatVersion` selectors, with unchanged historical formats and separate binding digests.
+
+RFC 0023 has conditional maintainer approval for [the bounded Policy draft](../spec/policy.md),
+effective upon required green CI and PR 218 merge. The default branch remains
+Review until then; no immutable Policy release or consumer adoption is claimed.
+
+[RFC 0026](0026-document-ceiling-profiles.md) records the accepted document ceiling profiles
+of issue #232. Core §4.1 owns the ceilings; extended companion readers remain future work.

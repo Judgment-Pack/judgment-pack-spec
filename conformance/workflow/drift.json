@@ -1,0 +1,53 @@
+{
+  "result": "drift",
+  "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "leftExecutionDigest": "sha256:2121212121212121212121212121212121212121212121212121212121212121",
+  "rightExecutionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "stages": [
+    {
+      "stage": "organisations",
+      "records": 0,
+      "byKind": { "outcome": 0, "not-applicable": 0, "unresolved": 0 },
+      "byOutcome": { "low": 1, "review": -1 },
+      "byReason": {},
+      "byRule": {
+        "low": { "contributors": {}, "fallback": 1 },
+        "review": { "contributors": { "r-review": -1 }, "fallback": 0 }
+      }
+    },
+    {
+      "stage": "people",
+      "records": 0,
+      "byKind": { "outcome": 0, "not-applicable": 1, "unresolved": -1 },
+      "byOutcome": {},
+      "byReason": { "unknown": -1 },
+      "byRule": {}
+    }
+  ],
+  "records": [
+    {
+      "change": "changed",
+      "stage": "organisations",
+      "payloadDigest": "sha256:1010101010101010101010101010101010101010101010101010101010101010",
+      "occurrence": 1,
+      "left": { "kind": "outcome", "outcomeId": "review", "reasons": [], "handoff": { "state": "none" } },
+      "right": { "kind": "outcome", "outcomeId": "low", "reasons": [], "handoff": { "state": "none" } }
+    },
+    {
+      "change": "removed",
+      "stage": "people",
+      "payloadDigest": "sha256:5050505050505050505050505050505050505050505050505050505050505050",
+      "occurrence": 1,
+      "left": { "kind": "unresolved", "reasons": ["unknown"], "handoff": { "state": "requested", "triggeredBy": ["unknown"] } },
+      "right": null
+    },
+    {
+      "change": "added",
+      "stage": "people",
+      "payloadDigest": "sha256:6060606060606060606060606060606060606060606060606060606060606060",
+      "occurrence": 1,
+      "left": null,
+      "right": { "kind": "not-applicable", "reasons": ["not-applicable"], "handoff": { "state": "none" } }
+    }
+  ]
+}

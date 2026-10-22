@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jps:prototype:policy-companion:0.0.2:common",
+  "title": "NON-NORMATIVE common prototype",
+  "description": "Local prototype shared definitions. jps-canon means the existing Spec dialect \u00a71 / checkpoint-witness \u00a71 form, not JCS or preparation canonicalization.",
+  "$ref": "#/$defs/retainedContent",
+  "$defs": {
+    "prototype": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "proposalVersion",
+        "status"
+      ],
+      "properties": {
+        "profile": {
+          "const": "jps-policy-companion-prototype"
+        },
+        "proposalVersion": {
+          "const": "0.0.2"
+        },
+        "status": {
+          "const": "non-normative"
+        }
+      }
+    },
+    "version": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 256,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?![\\s\\S])"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "localId": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?![\\s\\S])"
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bytesDigest",
+        "byteLength",
+        "mediaType"
+      ],
+      "properties": {
+        "bytesDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1048576
+        },
+        "mediaType": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+(?![\\s\\S])"
+        }
+      },
+      "description": "Narrative, review basis, artifact and informational material: at most 1 MiB."
+    },
+    "canonicalIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "canonicalDigest"
+      ],
+      "properties": {
+        "profile": {
+          "const": "jps-canon"
+        },
+        "canonicalDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startByte",
+        "endByte",
+        "bytesDigest"
+      ],
+      "properties": {
+        "startByte": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1048576
+        },
+        "endByte": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "bytesDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "policyReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id",
+        "version",
+        "content"
+      ],
+      "properties": {
+        "kind": {
+          "const": "policy"
+        },
+        "id": {
+          "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/uri"
+        },
+        "version": {
+          "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/version"
+        },
+        "content": {
+          "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/content"
+        },
+        "canonicalIdentity": {
+          "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/canonicalIdentity"
+        }
+      }
+    },
+    "packReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id",
+        "version",
+        "content"
+      ],
+      "properties": {
+        "kind": {
+          "const": "pack"
+        },
+        "id": {
+          "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/uri"
+        },
+        "version": {
+          "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/version"
+        },
+        "content": {
+          "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/content"
+        },
+        "canonicalIdentity": {
+          "$ref": "urn:jps:prototype:policy-companion:0.0.2:common#/$defs/canonicalIdentity"
+        }
+      }
+    },
+    "retainedContent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bytesDigest",
+        "byteLength",
+        "mediaType"
+      ],
+      "properties": {
+        "bytesDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4194304
+        },
+        "mediaType": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+(?![\\s\\S])"
+        }
+      },
+      "description": "Generic fixture-carrier reference; consuming roles impose their own bounds."
+    },
+    "originalContent": {
+      "description": "Exact retained original source bytes: at most 4 MiB; never a replacement for narrative.",
+      "$ref": "#/$defs/retainedContent"
+    }
+  }
+}

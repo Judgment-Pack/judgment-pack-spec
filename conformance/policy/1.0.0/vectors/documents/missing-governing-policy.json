@@ -1,0 +1,21 @@
+{
+  "formatVersion": "1.0.0",
+  "kind": "governing-adoption",
+  "id": "https://example.invalid/policy-companion-contract/data-access/adoption",
+  "version": "1.0.0",
+  "consumer": {
+    "kind": "pack",
+    "id": "https://example.invalid/policy-companion-prototype/data-access/pack",
+    "version": "1.0.0",
+    "content": {
+      "bytesDigest": "sha256:c4912216ef58c754473bdda95be7322126ab2970bd75bea9306f342927d974e4",
+      "byteLength": 1558,
+      "mediaType": "application/json"
+    },
+    "canonicalIdentity": {
+      "profile": "jps-canon",
+      "canonicalDigest": "sha256:d20e694ca1f99d0b3c8e239fdec3e5d1122dc875986ef5ed3651a52b3fba2473"
+    }
+  },
+  "governingPolicies": []
+}

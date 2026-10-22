@@ -1,0 +1,95 @@
+{
+  "prototype": {
+    "profile": "jps-policy-companion-prototype",
+    "proposalVersion": "0.0.2",
+    "status": "non-normative"
+  },
+  "kind": "policy",
+  "id": "https://example.invalid/policy-companion-prototype/refunds/policy",
+  "version": "1.0.0",
+  "title": "Refunds — synthetic policy content",
+  "managementMode": "desk-managed",
+  "content": {
+    "bytesDigest": "sha256:909d57f27b7359c777dfb2ea07d859408a13504bf8dded27807889f7cde52969",
+    "byteLength": 486,
+    "mediaType": "text/plain"
+  },
+  "sections": [
+    {
+      "id": "eligibility",
+      "title": "Return window",
+      "anchor": {
+        "startByte": 37,
+        "endByte": 183,
+        "bytesDigest": "sha256:838ea4e242523a398e18a4006aa1488cc2032eb23f503f2c2dc2539339cc757a"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 1"
+        }
+      ]
+    },
+    {
+      "id": "damaged-goods",
+      "title": "Damaged goods",
+      "anchor": {
+        "startByte": 183,
+        "endByte": 280,
+        "bytesDigest": "sha256:ac0263d8b10debc2e8fb9090bb1b55c80a5766a4d192f23f0f640062ba5c82d4"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 2"
+        }
+      ]
+    },
+    {
+      "id": "fraud-review",
+      "title": "Fraud review",
+      "anchor": {
+        "startByte": 280,
+        "endByte": 366,
+        "bytesDigest": "sha256:9117339f1340e981a232894965d79f3f2a9f8116ffc347142c7dc7d9bc2631c3"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 3"
+        }
+      ]
+    },
+    {
+      "id": "damaged-routing",
+      "title": "Damaged goods routing",
+      "anchor": {
+        "startByte": 367,
+        "endByte": 486,
+        "bytesDigest": "sha256:a47d45dfa15bb16514328ff9e1de346be10d045a194597e6c44e1f598ab17ab1"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 4"
+        }
+      ]
+    }
+  ],
+  "sourceProvenance": [
+    {
+      "id": "retained-original",
+      "source": {
+        "provider": "synthetic-fixture",
+        "accountId": "fictional-organization",
+        "resourceId": "refunds-original"
+      },
+      "sourceRevision": null,
+      "content": {
+        "bytesDigest": "sha256:ae72534013fc75083b184765e7a558b71b5e4674720aa56e8960844fd712c6c0",
+        "byteLength": 474,
+        "mediaType": "text/plain"
+      }
+    }
+  ]
+}

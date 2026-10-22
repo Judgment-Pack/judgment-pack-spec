@@ -1,0 +1,103 @@
+{
+  "status": "staged",
+  "dialect": {
+    "version": 3,
+    "case": {"facts": [], "evidence": []},
+    "sources": [{
+      "name": "research",
+      "kind": "research",
+      "profile": "assistant",
+      "profileDigest": "sha256:4212594e06b8c421c1a8de92ac5a1260b1d0e05cdca027bd65216c20be8b4540",
+      "webProfiles": {},
+      "maxAge": 300,
+      "question": "Summarize the retained response.",
+      "constraints": {"synthetic": true},
+      "model": "synthetic-research-model-1",
+      "evidence": ["Use only the retained response."],
+      "results": [{"id":"summary","type":"string","required":true,"description":"The retained summary.","cardinality":"one"}],
+      "acquisitionSources": [{"profile":"public-pages","version":"1","purpose":"discovery","scope":{"origins":["https://example.invalid"]},"freshness":86400}],
+      "capabilities": ["answer"],
+      "read": {"copy":{"facts":[{"target":"/research/state","source":"/results/summary/status","type":"string","required":true,"convert":{"kind":"trim"}}],"evidence":[]}}
+    }],
+    "admits":{"facts":{"/research/state":["generated"]}}
+  },
+  "case": {},
+  "acquisitions": {
+    "research": {"response":{"result":{
+      "results":{"summary":{"status":"missing","cites":[],"reason":"The retained response contains no summary."}},
+      "responses":[],
+      "execution":{
+        "resolvedSettings":{"model":"synthetic-research-model-1","profile":"assistant","version":"1","settings":{"temperature":"0"}},
+        "retainedBytes":[{"mediaType":"application/json","base64":"eyJzdGF0dXMiOiJtaXNzaW5nIn0="}]
+      }
+    }}}
+  },
+  "profiles": [{
+    "id":"assistant",
+    "publicKey":"c41a130f46f6427931f1fe90bf0702de9980108fcef8f845722ddab4afda3511",
+    "class":"generated",
+    "source":"web-search",
+    "authority":"stand-in",
+    "shape":"http",
+    "adapter":{"name":"adapter-sources","version":"stand-in","digest":"sha256:e05658804f621bd96ba149df689a8410a625573ff9bc1cf2376732e67d3dc061"},
+    "endpoint":"https://127.0.0.1:37399/answers",
+    "research":{"capabilities":["answer","search"],"model":"synthetic-research-model-1"}
+  }],
+  "verifiedAt": "2026-10-22T12:00:00Z",
+  "tamperedBase64": "eyJzdGF0dXMiOiJwcmVzZW50In0=",
+  "expectedTampered": "preparation-differs",
+  "preparation": {
+    "version": 3,
+    "verifiedAt": "2026-10-22T12:00:00Z",
+    "mappingDigest": "sha256:def3cc8511ce213d094ce04a4edd0961f0a2f2ed8731f97bc9139b2cefbb4250",
+    "verification": "verified acquisitions; session sealing and input truth are not established",
+    "cites": [],
+    "lineage": [{
+      "source": "research",
+      "kind": "fact",
+      "target": "/research/state",
+      "class": "generated",
+      "generatedInfluence": true,
+      "present": true,
+      "status": "resolved",
+      "reason": "copied",
+      "basis": ["/results/summary/status"],
+      "readDigest": "sha256:0e7ce757bc774f0f3bd37c54c82dd5bd2b84e2572bc128e9134f29362a499898",
+      "candidateFrom": ["/results/summary/status"],
+      "receipts": [],
+      "researchExecution": {
+        "resolvedSettings":{"model":"synthetic-research-model-1","profile":"assistant","version":"1","settings":{"temperature":"0"}},
+        "retainedBytes":[{"mediaType":"application/json","digest":"sha256:e0d52d700598d4fcbac5ac5350694f541f89510c7ca61774cad9c1742f031fa5"}]
+      },
+      "transformation": {
+        "applications":[{"id":"source","source":"/results/summary/status","state":"present","sourceText":"\"missing\"","rule":{"kind":"trim"},"result":"missing"}],
+        "findings":[]
+      }
+    }],
+    "outcomes": [
+      {
+        "name":"case",
+        "parameters":{"runAt":"2026-10-22T12:00:00Z"},
+        "claim":{"facts":{},"evidenceAvailability":{},"acquisitionStatus":"resolved","reason":"copied","basis":[]},
+        "status":"resolved",
+        "reason":"copied"
+      },
+      {
+        "name":"research",
+        "parameters":{"runAt":"2026-10-22T12:00:00Z"},
+        "claim":{"facts":{"research":{"state":"missing"}},"evidenceAvailability":{},"acquisitionStatus":"resolved","reason":"copied","basis":["/results/summary/status"]},
+        "status":"resolved",
+        "reason":"copied",
+        "arguments":{
+          "question":"Summarize the retained response.",
+          "constraints":{"synthetic":true},
+          "model":"synthetic-research-model-1",
+          "evidence":["Use only the retained response."],
+          "results":[{"id":"summary","type":"string","required":true,"description":"The retained summary.","cardinality":"one"}],
+          "capabilities":["answer"],
+          "acquisitionSources":[{"profile":"public-pages","version":"1","purpose":"discovery","scope":{"origins":["https://example.invalid"]},"freshness":86400}]
+        }
+      }
+    ]
+  }
+}

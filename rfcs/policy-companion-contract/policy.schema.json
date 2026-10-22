@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jps:proposal:policy-companion:1.0.0:policy",
+  "title": "PROPOSED DRAFT Policy companion 1.0.0: policy",
+  "description": "Immutable content/provenance proposal only. managementMode declares intended publication ownership; no imported approval, lifecycle, ACL or rule semantics. Optional readable structured requirements are deferred; a requirements member is unsupported.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "kind",
+    "id",
+    "version",
+    "title",
+    "managementMode",
+    "content",
+    "sections",
+    "sourceProvenance"
+  ],
+  "properties": {
+    "formatVersion": {
+      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/formatVersion"
+    },
+    "kind": {
+      "const": "policy"
+    },
+    "id": {
+      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/uri"
+    },
+    "version": {
+      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/version"
+    },
+    "title": {
+      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+    },
+    "managementMode": {
+      "enum": [
+        "workspace-managed",
+        "externally-managed"
+      ]
+    },
+    "content": {
+      "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/content"
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "anchor"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/localId"
+          },
+          "title": {
+            "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+          },
+          "anchor": {
+            "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/anchor"
+          },
+          "sourceRefs": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 16,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "sourceId",
+                "location"
+              ],
+              "properties": {
+                "sourceId": {
+                  "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/localId"
+                },
+                "location": {
+                  "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sourceProvenance": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "sourceRevision",
+          "content"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/localId"
+          },
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "provider",
+              "accountId",
+              "resourceId"
+            ],
+            "properties": {
+              "provider": {
+                "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+              },
+              "accountId": {
+                "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+              },
+              "resourceId": {
+                "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+              }
+            }
+          },
+          "sourceRevision": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/text"
+              }
+            ]
+          },
+          "content": {
+            "$ref": "urn:jps:proposal:policy-companion:1.0.0:common#/$defs/originalContent"
+          }
+        }
+      }
+    }
+  }
+}

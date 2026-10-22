@@ -1,0 +1,5 @@
+SYNTHETIC ORIGINAL SOURCE; NOT AN APPROVED POLICY
+
+Clause 1: Only de-identified datasets may be released through this automated path. Identifiable datasets are refused; missing classification goes to a data steward.
+Clause 2: A data steward reviews restricted requests through the manual access process. This pack cannot grant an exception.
+Clause 3: Review the access log quarterly. A separate audit implementation is still needed.

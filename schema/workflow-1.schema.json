@@ -1,0 +1,886 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/0.2.0-draft/workflow-1.schema.json",
+  "title": "Judgment Pack workflow companion records, version 1",
+  "oneOf": [
+    { "$ref": "#/$defs/workflow" },
+    { "$ref": "#/$defs/outputRecord" },
+    { "$ref": "#/$defs/stageSummary" },
+    { "$ref": "#/$defs/selection" },
+    { "$ref": "#/$defs/verifierReport" },
+    { "$ref": "#/$defs/drift" },
+    { "$ref": "#/$defs/bundleFixture" },
+    { "$ref": "#/$defs/fixtureManifest" },
+    { "$ref": "#/$defs/refusalVector" },
+    { "$ref": "#/$defs/instanceStateVector" }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "longId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "seed": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4096
+    },
+    "positiveCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4096
+    },
+    "delta": {
+      "type": "integer",
+      "minimum": -4096,
+      "maximum": 4096
+    },
+    "nonzeroDelta": {
+      "type": "integer",
+      "minimum": -4096,
+      "maximum": 4096,
+      "not": { "const": 0 }
+    },
+    "reason": {
+      "enum": [
+        "not-applicable",
+        "missing-required-evidence",
+        "unknown",
+        "conflict",
+        "no-match",
+        "exception-escalation"
+      ]
+    },
+    "handoff": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["state"],
+          "properties": { "state": { "const": "none" } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["state", "triggeredBy"],
+          "properties": {
+            "state": { "const": "requested" },
+            "triggeredBy": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 6,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/reason" }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "disposition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "outcomeId", "reasons", "handoff"],
+          "properties": {
+            "kind": { "const": "outcome" },
+            "outcomeId": { "$ref": "#/$defs/longId" },
+            "reasons": { "type": "array", "maxItems": 0 },
+            "handoff": { "$ref": "#/$defs/handoff" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "reasons", "handoff"],
+          "properties": {
+            "kind": { "const": "not-applicable" },
+            "reasons": {
+              "type": "array",
+              "prefixItems": [{ "const": "not-applicable" }],
+              "items": false,
+              "minItems": 1,
+              "maxItems": 1
+            },
+            "handoff": { "$ref": "#/$defs/handoff" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "reasons", "handoff"],
+          "properties": {
+            "kind": { "const": "unresolved" },
+            "reasons": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 5,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "missing-required-evidence",
+                  "unknown",
+                  "conflict",
+                  "no-match",
+                  "exception-escalation"
+                ]
+              }
+            },
+            "handoff": { "$ref": "#/$defs/handoff" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "relation": {
+      "type": "object",
+      "required": ["label", "direction"],
+      "properties": {
+        "label": { "$ref": "#/$defs/id" },
+        "direction": { "enum": ["output-to-parent", "parent-to-output"] }
+      },
+      "additionalProperties": false
+    },
+    "dialectReference": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["version", "digest"],
+          "properties": {
+            "version": { "enum": [2, 3] },
+            "digest": { "$ref": "#/$defs/digest" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["formatVersion", "id", "version", "digest"],
+          "properties": {
+            "formatVersion": { "enum": ["2.0.0", "3.0.0"] },
+            "id": { "type": "string", "format": "uri", "maxLength": 2048 },
+            "version": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "digest": { "$ref": "#/$defs/digest" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "selectionRule": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "outcomeId"],
+          "properties": {
+            "kind": { "const": "outcome" },
+            "outcomeId": { "$ref": "#/$defs/longId" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind"],
+          "properties": { "kind": { "enum": ["unresolved", "not-applicable"] } },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "caseBinding": {
+      "type": "object",
+      "required": ["from", "to", "type", "required"],
+      "properties": {
+        "from": { "type": "string", "maxLength": 1024 },
+        "to": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "type": {
+          "enum": ["string", "integer", "timestamp", "boolean", "object", "array", "null"]
+        },
+        "required": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "stage": {
+      "type": "object",
+      "required": [
+        "id", "dialect", "pack", "input", "execution", "caseBindings", "outputs", "relation"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "dialect": { "$ref": "#/$defs/dialectReference" },
+        "pack": {
+          "type": "object",
+          "required": ["id", "digest"],
+          "properties": {
+            "id": { "type": "string", "format": "uri", "maxLength": 2048 },
+            "digest": { "$ref": "#/$defs/digest" }
+          },
+          "additionalProperties": false
+        },
+        "input": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["root"],
+              "properties": { "root": { "const": true } },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["fromStage", "selected"],
+              "properties": {
+                "fromStage": { "$ref": "#/$defs/id" },
+                "selected": { "const": true }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "execution": { "enum": ["once", "each-selected-record"] },
+        "caseBindings": {
+          "type": "array",
+          "maxItems": 64,
+          "items": { "$ref": "#/$defs/caseBinding" }
+        },
+        "outputs": {
+          "type": "object",
+          "required": ["pointer", "cardinality"],
+          "properties": {
+            "pointer": { "type": "string", "minLength": 1, "maxLength": 1024 },
+            "cardinality": { "enum": ["one", "many"] }
+          },
+          "additionalProperties": false
+        },
+        "relation": { "$ref": "#/$defs/relation" },
+        "selection": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["mode"],
+              "properties": { "mode": { "const": "reviewer" } },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["mode", "rule"],
+              "properties": {
+                "mode": { "const": "disposition" },
+                "rule": { "$ref": "#/$defs/selectionRule" }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "sample": {
+          "type": "object",
+          "required": ["mode", "maxSize"],
+          "properties": {
+            "mode": { "const": "sample" },
+            "maxSize": { "type": "integer", "minimum": 1, "maximum": 4096 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "workflow": {
+      "type": "object",
+      "required": ["workflowVersion", "stages", "result", "limits"],
+      "properties": {
+        "workflowVersion": { "const": 1 },
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/stage" }
+        },
+        "result": { "$ref": "#/$defs/id" },
+        "limits": {
+          "type": "object",
+          "required": ["maxStages", "maxRecords", "maxInstances", "maxAttempts", "maxBytes"],
+          "properties": {
+            "maxStages": { "type": "integer", "minimum": 1, "maximum": 32 },
+            "maxRecords": { "type": "integer", "minimum": 1, "maximum": 4096 },
+            "maxInstances": { "type": "integer", "minimum": 1, "maximum": 4096 },
+            "maxAttempts": { "type": "integer", "minimum": 1, "maximum": 16 },
+            "maxBytes": { "type": "integer", "minimum": 1, "maximum": 1073741824 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "workflowDigest", "execution", "stage", "instance", "publishedDialectDigest",
+        "bindingDocumentDigest", "boundDialectDigest", "packDigest", "releaseDigest",
+        "preparationDigest", "auditDigest", "outputPointer", "index", "rootCaseDigest",
+        "caseDigest", "parentRecord", "selectionDigest", "relation", "influence"
+      ],
+      "properties": {
+        "workflowDigest": { "$ref": "#/$defs/digest" },
+        "execution": { "$ref": "#/$defs/id" },
+        "stage": { "$ref": "#/$defs/id" },
+        "instance": { "$ref": "#/$defs/id" },
+        "publishedDialectDigest": { "$ref": "#/$defs/digest" },
+        "bindingDocumentDigest": { "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+        "boundDialectDigest": { "$ref": "#/$defs/digest" },
+        "packDigest": { "$ref": "#/$defs/digest" },
+        "releaseDigest": { "$ref": "#/$defs/digest" },
+        "preparationDigest": { "$ref": "#/$defs/digest" },
+        "auditDigest": { "$ref": "#/$defs/digest" },
+        "outputPointer": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "index": { "type": "integer", "minimum": 0, "maximum": 4095 },
+        "rootCaseDigest": { "$ref": "#/$defs/digest" },
+        "caseDigest": { "$ref": "#/$defs/digest" },
+        "parentRecord": { "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+        "selectionDigest": { "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+        "relation": { "$ref": "#/$defs/relation" },
+        "influence": {
+          "type": "object",
+          "required": ["classes", "generatedInfluence"],
+          "properties": {
+            "classes": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": { "enum": ["asserted", "generated", "record"] }
+            },
+            "generatedInfluence": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "outputRecord": {
+      "type": "object",
+      "required": ["outputRecordVersion", "payloadDigest", "lineage"],
+      "properties": {
+        "outputRecordVersion": { "const": 1 },
+        "payloadDigest": { "$ref": "#/$defs/digest" },
+        "contributingRule": { "$ref": "#/$defs/id" },
+        "lineage": { "$ref": "#/$defs/lineage" }
+      },
+      "additionalProperties": false
+    },
+    "byKind": {
+      "type": "object",
+      "required": ["outcome", "not-applicable", "unresolved"],
+      "properties": {
+        "outcome": { "$ref": "#/$defs/count" },
+        "not-applicable": { "$ref": "#/$defs/count" },
+        "unresolved": { "$ref": "#/$defs/count" }
+      },
+      "additionalProperties": false
+    },
+    "positiveCountMap": {
+      "type": "object",
+      "maxProperties": 4096,
+      "patternProperties": { "^.{1,256}$": { "$ref": "#/$defs/positiveCount" } },
+      "additionalProperties": false
+    },
+    "positiveReasonCountMap": {
+      "type": "object",
+      "maxProperties": 6,
+      "patternProperties": {
+        "^(not-applicable|missing-required-evidence|unknown|conflict|no-match|exception-escalation)$": {
+          "$ref": "#/$defs/positiveCount"
+        }
+      },
+      "additionalProperties": false
+    },
+    "positiveContributorCountMap": {
+      "type": "object",
+      "maxProperties": 4096,
+      "patternProperties": {
+        "^[a-z][a-z0-9-]{0,63}$": { "$ref": "#/$defs/positiveCount" }
+      },
+      "additionalProperties": false
+    },
+    "ruleCount": {
+      "type": "object",
+      "required": ["contributors", "fallback"],
+      "properties": {
+        "contributors": { "$ref": "#/$defs/positiveContributorCountMap" },
+        "fallback": { "$ref": "#/$defs/count" }
+      },
+      "additionalProperties": false
+    },
+    "byRule": {
+      "type": "object",
+      "maxProperties": 4096,
+      "patternProperties": { "^.{1,256}$": { "$ref": "#/$defs/ruleCount" } },
+      "additionalProperties": false
+    },
+    "stageSummary": {
+      "type": "object",
+      "required": [
+        "summaryVersion", "workflowDigest", "execution", "stage", "records", "recordsDigest",
+        "byKind", "byOutcome", "byReason", "byRule"
+      ],
+      "properties": {
+        "summaryVersion": { "const": 1 },
+        "workflowDigest": { "$ref": "#/$defs/digest" },
+        "execution": { "$ref": "#/$defs/id" },
+        "stage": { "$ref": "#/$defs/id" },
+        "records": { "$ref": "#/$defs/count" },
+        "recordsDigest": { "$ref": "#/$defs/digest" },
+        "byKind": { "$ref": "#/$defs/byKind" },
+        "byOutcome": { "$ref": "#/$defs/positiveCountMap" },
+        "byReason": { "$ref": "#/$defs/positiveReasonCountMap" },
+        "byRule": { "$ref": "#/$defs/byRule" }
+      },
+      "additionalProperties": false
+    },
+    "selectionBase": {
+      "type": "object",
+      "required": [
+        "selectionVersion", "workflowDigest", "execution", "upstreamStage", "outputSetDigest",
+        "selected", "mode", "revision"
+      ],
+      "properties": {
+        "selectionVersion": { "const": 1 },
+        "workflowDigest": { "$ref": "#/$defs/digest" },
+        "execution": { "$ref": "#/$defs/id" },
+        "upstreamStage": { "$ref": "#/$defs/id" },
+        "outputSetDigest": { "$ref": "#/$defs/digest" },
+        "selected": {
+          "type": "array",
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/digest" }
+        },
+        "mode": { "enum": ["reviewer", "disposition", "sample"] },
+        "revision": { "type": "integer", "minimum": 1, "maximum": 16 }
+      },
+      "additionalProperties": false
+    },
+    "selection": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "selectionVersion", "workflowDigest", "execution", "upstreamStage",
+            "outputSetDigest", "selected", "mode", "revision", "seed", "size", "algorithm"
+          ],
+          "properties": {
+            "selectionVersion": { "const": 1 },
+            "workflowDigest": { "$ref": "#/$defs/digest" },
+            "execution": { "$ref": "#/$defs/id" },
+            "upstreamStage": { "$ref": "#/$defs/id" },
+            "outputSetDigest": { "$ref": "#/$defs/digest" },
+            "selected": {
+              "type": "array", "maxItems": 4096, "uniqueItems": true,
+              "items": { "$ref": "#/$defs/digest" }
+            },
+            "mode": { "const": "sample" },
+            "revision": { "type": "integer", "minimum": 1, "maximum": 16 },
+            "seed": { "$ref": "#/$defs/seed" },
+            "size": { "type": "integer", "minimum": 1, "maximum": 4096 },
+            "algorithm": { "const": "sha256-rank-v1" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "selectionVersion", "workflowDigest", "execution", "upstreamStage",
+            "outputSetDigest", "selected", "mode", "revision", "rule"
+          ],
+          "properties": {
+            "selectionVersion": { "const": 1 },
+            "workflowDigest": { "$ref": "#/$defs/digest" },
+            "execution": { "$ref": "#/$defs/id" },
+            "upstreamStage": { "$ref": "#/$defs/id" },
+            "outputSetDigest": { "$ref": "#/$defs/digest" },
+            "selected": {
+              "type": "array", "maxItems": 4096, "uniqueItems": true,
+              "items": { "$ref": "#/$defs/digest" }
+            },
+            "mode": { "const": "disposition" },
+            "revision": { "type": "integer", "minimum": 1, "maximum": 16 },
+            "rule": { "$ref": "#/$defs/selectionRule" },
+            "refusal": { "const": "limit-exceeded" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "selectionVersion", "workflowDigest", "execution", "upstreamStage",
+            "outputSetDigest", "selected", "mode", "revision", "review"
+          ],
+          "properties": {
+            "selectionVersion": { "const": 1 },
+            "workflowDigest": { "$ref": "#/$defs/digest" },
+            "execution": { "$ref": "#/$defs/id" },
+            "upstreamStage": { "$ref": "#/$defs/id" },
+            "outputSetDigest": { "$ref": "#/$defs/digest" },
+            "selected": {
+              "type": "array", "maxItems": 4096, "uniqueItems": true,
+              "items": { "$ref": "#/$defs/digest" }
+            },
+            "mode": { "const": "reviewer" },
+            "revision": { "type": "integer", "minimum": 1, "maximum": 16 },
+            "review": {
+              "type": "object",
+              "required": ["actor", "assertion", "at"],
+              "properties": {
+                "actor": { "type": "string", "minLength": 1, "maxLength": 256 },
+                "assertion": { "type": "string", "minLength": 1, "maxLength": 1024 },
+                "at": { "type": "string", "format": "date-time" }
+              },
+              "additionalProperties": false
+            },
+            "refusal": { "const": "limit-exceeded" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "verifierReport": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["result", "refusal"],
+          "properties": {
+            "result": { "const": "refusal" },
+            "refusal": {
+              "enum": [
+                "input-malformed", "input-over-bound", "reference-mismatch",
+                "stage-binding-mismatch", "selection-mismatch", "sample-mismatch",
+                "case-mismatch", "influence-mismatch", "inventory-mismatch",
+                "output-mismatch", "summary-mismatch", "drift-workflow-mismatch"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["result", "finding"],
+          "properties": {
+            "result": { "const": "finding" },
+            "finding": { "type": "string", "minLength": 1, "maxLength": 256 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "result", "workflowDigest", "executionDigest", "consistency", "completion",
+            "preparations", "authentication", "dispositions", "counts"
+          ],
+          "properties": {
+            "result": { "const": "reading" },
+            "workflowDigest": { "$ref": "#/$defs/digest" },
+            "executionDigest": { "$ref": "#/$defs/digest" },
+            "consistency": { "const": "agrees" },
+            "completion": { "enum": ["complete", "partial"] },
+            "preparations": { "const": "agree" },
+            "authentication": { "const": "not-established" },
+            "dispositions": { "const": "not-replayed" },
+            "counts": {
+              "type": "object",
+              "required": ["stages", "instances", "outputs", "selections", "summaries", "samples"],
+              "properties": {
+                "stages": { "$ref": "#/$defs/count" },
+                "instances": { "$ref": "#/$defs/count" },
+                "outputs": { "$ref": "#/$defs/count" },
+                "selections": { "$ref": "#/$defs/count" },
+                "summaries": { "$ref": "#/$defs/count" },
+                "samples": { "$ref": "#/$defs/count" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "deltaByKind": {
+      "type": "object",
+      "required": ["outcome", "not-applicable", "unresolved"],
+      "properties": {
+        "outcome": { "$ref": "#/$defs/delta" },
+        "not-applicable": { "$ref": "#/$defs/delta" },
+        "unresolved": { "$ref": "#/$defs/delta" }
+      },
+      "additionalProperties": false
+    },
+    "deltaMap": {
+      "type": "object",
+      "maxProperties": 4096,
+      "patternProperties": { "^.{1,256}$": { "$ref": "#/$defs/nonzeroDelta" } },
+      "additionalProperties": false
+    },
+    "deltaReasonMap": {
+      "type": "object",
+      "maxProperties": 6,
+      "patternProperties": {
+        "^(not-applicable|missing-required-evidence|unknown|conflict|no-match|exception-escalation)$": {
+          "$ref": "#/$defs/nonzeroDelta"
+        }
+      },
+      "additionalProperties": false
+    },
+    "deltaContributorMap": {
+      "type": "object",
+      "maxProperties": 4096,
+      "patternProperties": {
+        "^[a-z][a-z0-9-]{0,63}$": { "$ref": "#/$defs/nonzeroDelta" }
+      },
+      "additionalProperties": false
+    },
+    "ruleDelta": {
+      "type": "object",
+      "required": ["contributors", "fallback"],
+      "properties": {
+        "contributors": { "$ref": "#/$defs/deltaContributorMap" },
+        "fallback": { "$ref": "#/$defs/delta" }
+      },
+      "additionalProperties": false
+    },
+    "stageDelta": {
+      "type": "object",
+      "required": ["stage", "records", "byKind", "byOutcome", "byReason", "byRule"],
+      "properties": {
+        "stage": { "$ref": "#/$defs/id" },
+        "records": { "$ref": "#/$defs/delta" },
+        "byKind": { "$ref": "#/$defs/deltaByKind" },
+        "byOutcome": { "$ref": "#/$defs/deltaMap" },
+        "byReason": { "$ref": "#/$defs/deltaReasonMap" },
+        "byRule": {
+          "type": "object",
+          "maxProperties": 4096,
+          "patternProperties": { "^.{1,256}$": { "$ref": "#/$defs/ruleDelta" } },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "recordDeltaBaseProperties": {
+      "type": "object",
+      "properties": {
+        "change": { "enum": ["changed", "added", "removed"] },
+        "stage": { "$ref": "#/$defs/id" },
+        "payloadDigest": { "$ref": "#/$defs/digest" },
+        "occurrence": { "type": "integer", "minimum": 1, "maximum": 4096 },
+        "left": { "oneOf": [{ "$ref": "#/$defs/disposition" }, { "type": "null" }] },
+        "right": { "oneOf": [{ "$ref": "#/$defs/disposition" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "recordDelta": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["change", "stage", "payloadDigest", "occurrence", "left", "right"],
+          "properties": {
+            "change": { "const": "changed" },
+            "stage": { "$ref": "#/$defs/id" },
+            "payloadDigest": { "$ref": "#/$defs/digest" },
+            "occurrence": { "type": "integer", "minimum": 1, "maximum": 4096 },
+            "left": { "$ref": "#/$defs/disposition" },
+            "right": { "$ref": "#/$defs/disposition" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["change", "stage", "payloadDigest", "occurrence", "left", "right"],
+          "properties": {
+            "change": { "const": "added" },
+            "stage": { "$ref": "#/$defs/id" },
+            "payloadDigest": { "$ref": "#/$defs/digest" },
+            "occurrence": { "type": "integer", "minimum": 1, "maximum": 4096 },
+            "left": { "type": "null" },
+            "right": { "$ref": "#/$defs/disposition" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["change", "stage", "payloadDigest", "occurrence", "left", "right"],
+          "properties": {
+            "change": { "const": "removed" },
+            "stage": { "$ref": "#/$defs/id" },
+            "payloadDigest": { "$ref": "#/$defs/digest" },
+            "occurrence": { "type": "integer", "minimum": 1, "maximum": 4096 },
+            "left": { "$ref": "#/$defs/disposition" },
+            "right": { "type": "null" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "drift": {
+      "type": "object",
+      "required": [
+        "result", "workflowDigest", "leftExecutionDigest", "rightExecutionDigest", "stages", "records"
+      ],
+      "properties": {
+        "result": { "const": "drift" },
+        "workflowDigest": { "$ref": "#/$defs/digest" },
+        "leftExecutionDigest": { "$ref": "#/$defs/digest" },
+        "rightExecutionDigest": { "$ref": "#/$defs/digest" },
+        "stages": {
+          "type": "array", "minItems": 1, "maxItems": 32,
+          "items": { "$ref": "#/$defs/stageDelta" }
+        },
+        "records": {
+          "type": "array", "maxItems": 4096,
+          "items": { "$ref": "#/$defs/recordDelta" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "fixtureRecord": {
+      "type": "object",
+      "required": ["recordDigest", "output", "disposition"],
+      "properties": {
+        "recordDigest": { "$ref": "#/$defs/digest" },
+        "output": { "$ref": "#/$defs/outputRecord" },
+        "disposition": { "$ref": "#/$defs/disposition" }
+      },
+      "additionalProperties": false
+    },
+    "fixtureStage": {
+      "type": "object",
+      "required": ["stage", "records", "summary"],
+      "properties": {
+        "stage": { "$ref": "#/$defs/id" },
+        "records": {
+          "type": "array", "maxItems": 4096,
+          "items": { "$ref": "#/$defs/fixtureRecord" }
+        },
+        "summary": { "$ref": "#/$defs/stageSummary" }
+      },
+      "additionalProperties": false
+    },
+    "bundleFixture": {
+      "type": "object",
+      "required": ["fixtureVersion", "workflowDigest", "executionDigest", "execution", "stages"],
+      "properties": {
+        "fixtureVersion": { "const": 1 },
+        "workflowDigest": { "$ref": "#/$defs/digest" },
+        "executionDigest": { "$ref": "#/$defs/digest" },
+        "execution": { "$ref": "#/$defs/id" },
+        "stages": {
+          "type": "array", "minItems": 1, "maxItems": 32,
+          "items": { "$ref": "#/$defs/fixtureStage" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "fixtureManifest": {
+      "type": "object",
+      "required": ["manifestVersion", "schema", "files"],
+      "properties": {
+        "manifestVersion": { "const": 1 },
+        "schema": { "const": "../../schema/workflow-1.schema.json" },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "required": ["path", "schemaValid"],
+            "properties": {
+              "path": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "schemaValid": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "instanceStateVector": {
+      "type": "object",
+      "required": ["vectorVersion", "kind", "stage", "maxRecords", "instances"],
+      "properties": {
+        "vectorVersion": { "const": 1 },
+        "kind": { "const": "later-sibling-admission" },
+        "stage": { "$ref": "#/$defs/id" },
+        "maxRecords": { "$ref": "#/$defs/positiveCount" },
+        "instances": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": ["id", "admission", "requestedOutputs", "record"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "admission": { "enum": ["admitted", "projection-invalid"] },
+              "requestedOutputs": { "$ref": "#/$defs/count" },
+              "record": {
+                "type": "object",
+                "required": ["caseDigest", "state", "failure", "attempts"],
+                "properties": {
+                  "caseDigest": {
+                    "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+                  },
+                  "state": { "enum": ["completed", "failed"] },
+                  "failure": {
+                    "oneOf": [
+                      { "type": "null" },
+                      { "enum": ["projection-invalid", "limit-exceeded"] }
+                    ]
+                  },
+                  "attempts": { "$ref": "#/$defs/count" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "expectedFinding": { "const": "inventory-mismatch" }
+      },
+      "additionalProperties": false
+    },
+    "refusalVector": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["vectorVersion", "kind", "expectedRefusal", "stageMaxSize", "selection"],
+          "properties": {
+            "vectorVersion": { "const": 1 },
+            "kind": { "const": "sample" },
+            "expectedRefusal": { "enum": ["input-over-bound", "input-malformed"] },
+            "stageMaxSize": { "type": "integer", "minimum": 1, "maximum": 4096 },
+            "selection": { "$ref": "#/$defs/selection" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["vectorVersion", "kind", "expectedRefusal", "dispositions", "summary"],
+          "properties": {
+            "vectorVersion": { "const": 1 },
+            "kind": { "const": "summary" },
+            "expectedRefusal": { "const": "summary-mismatch" },
+            "dispositions": {
+              "type": "array", "maxItems": 4096,
+              "items": { "$ref": "#/$defs/disposition" }
+            },
+            "summary": { "$ref": "#/$defs/stageSummary" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

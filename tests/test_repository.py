@@ -11,8 +11,10 @@ from dataclasses import dataclass
 from json.decoder import WHITESPACE, WHITESPACE_STR, JSONDecodeError, scanstring
 from pathlib import Path
 from typing import Any, Iterable
+from unittest.mock import patch
 
 from jsonschema import Draft202012Validator, FormatChecker
+from referencing import Registry, Resource
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -83,6 +85,24 @@ class Diagnostic:
 def pointer(parts: Iterable[Any]) -> str:
     encoded = [str(part).replace("~", "~0").replace("/", "~1") for part in parts]
     return "" if not encoded else "/" + "/".join(encoded)
+
+
+def rule_overlap_diagnostic_keywords(
+    validator: Draft202012Validator, diagnostic: dict[str, Any]
+) -> set[str]:
+    """Return schema keywords plus Core §3.3.1's cross-item id invariant."""
+    pending = list(validator.iter_errors(diagnostic))
+    keywords = set()
+    while pending:
+        error = pending.pop()
+        keywords.add(error.validator)
+        pending.extend(error.context)
+    rules = diagnostic.get("rules")
+    if isinstance(rules, list):
+        ids = [rule.get("id") for rule in rules if isinstance(rule, dict)]
+        if len(ids) == len(rules) and len(ids) != len(set(ids)):
+            keywords.add("distinct-rule-ids")
+    return keywords
 
 
 def assert_no_unpaired_surrogates(text: str) -> None:
@@ -328,7 +348,7 @@ def schema_diagnostic(error: Any) -> Diagnostic:
             code = "JPS-STRUCTURE-DECIMAL-OPERAND"
         elif "org\\.judgmentpack" in pattern:
             code = "JPS-STRUCTURE-EXTENSION-NAME"
-            if isinstance(error.instance, str):
+            if "propertyNames" in schema_path and isinstance(error.instance, str):
                 instance_path.append(error.instance)
         else:
             code = "JPS-STRUCTURE-PATTERN"
@@ -678,9 +698,12 @@ class RepositoryConformanceTests(unittest.TestCase):
         )
         cls.manifest = strict_json_loads(MANIFEST_PATH.read_text(encoding="utf-8"))
         cls.validator = Draft202012Validator(cls.schema, format_checker=FormatChecker())
+        cls.manifest_registry = Registry().with_resource(
+            SCHEMA_ID, Resource.from_contents(cls.schema)
+        )
 
-    def test_document_corpus_counts_match_the_manifest(self) -> None:
-        """Every CURRENT statement of the document-corpus size is the manifest's.
+    def test_document_and_advisory_counts_match_the_manifest(self) -> None:
+        """Every CURRENT statement separates conformance cases from advisories.
 
         The manifest is the authoritative index and these statements repeat its
         count by hand, so a corpus addition that misses one leaves a public
@@ -695,27 +718,43 @@ class RepositoryConformanceTests(unittest.TestCase):
         what was true when published, and rewriting them would be falsifying a
         record rather than fixing a stale one.
         """
-        count = len(self.manifest["cases"])
+        advisory_count = sum(
+            case["path"].startswith("advisory/") for case in self.manifest["cases"]
+        )
+        conformance_count = len(self.manifest["cases"]) - advisory_count
+        self.assertEqual((127, 5), (conformance_count, advisory_count))
         statements = (
             (
                 "README.md",
                 "the repository contents table",
-                f"| {count} non-normative document-conformance test cases",
+                f"| {conformance_count} document-conformance cases and "
+                f"{advisory_count} advisory vectors",
             ),
             (
                 "conformance/README.md",
                 "the opening description",
-                f"This directory contains {count} focused research-preview cases",
+                f"This directory contains {conformance_count} focused conformance cases",
+            ),
+            (
+                "conformance/README.md",
+                "the opening advisory count",
+                "plus five advisory vectors",
             ),
             (
                 "web/build.py",
                 "the research-presentation note",
-                f"Measured across {count} tests on the file format",
+                f"Measured across {conformance_count} tests on the file format and "
+                f"{advisory_count} advisory vectors",
             ),
             (
                 "web/build.py",
                 "the research-presentation summary",
-                f"held in place by {count} tests on the format",
+                f"held in place by {conformance_count} tests on the format",
+            ),
+            (
+                "web/build.py",
+                "the research-presentation summary advisory count",
+                f"{advisory_count} advisory vectors, and 20 tests on the answers",
             ),
         )
         for relative, where, expected in statements:
@@ -725,7 +764,8 @@ class RepositoryConformanceTests(unittest.TestCase):
                     expected,
                     text,
                     f"{relative}: {where} no longer states the manifest's "
-                    f"{count} document-conformance cases. Update that statement "
+                    f"{conformance_count} document-conformance cases and "
+                    f"{advisory_count} advisory vectors. Update that statement "
                     f"to match conformance/manifest.json, which is authoritative; "
                     f"do not change CHANGELOG.md, releases/, or the FAQ question "
                     f"count, which are out of scope.",
@@ -871,7 +911,9 @@ class RepositoryConformanceTests(unittest.TestCase):
 
     def test_manifest_matches_its_schema(self) -> None:
         validator = Draft202012Validator(
-            self.manifest_schema, format_checker=FormatChecker()
+            self.manifest_schema,
+            format_checker=FormatChecker(),
+            registry=self.manifest_registry,
         )
         errors = sorted(validator.iter_errors(self.manifest), key=lambda item: list(item.path))
         self.assertEqual([], [error.message for error in errors])
@@ -879,6 +921,207 @@ class RepositoryConformanceTests(unittest.TestCase):
         self.assertEqual(self.manifest["specVersion"], SPEC_VERSION)
         self.assertTrue(self.manifest["validationProfile"]["formatAssertionRequired"])
         self.assertTrue(self.manifest["validationProfile"]["rejectDuplicateObjectMembers"])
+        diagnostic_validator = validator.evolve(
+            schema={"$ref": "#/$defs/ruleOverlapDiagnostic"}
+        )
+        for case in self.manifest["cases"]:
+            for diagnostic in case.get("expectedAdvisories", []):
+                self.assertEqual(
+                    set(), rule_overlap_diagnostic_keywords(diagnostic_validator, diagnostic)
+                )
+
+    def test_rule_overlap_advisory_vectors_cover_the_recommendation(self) -> None:
+        self.assertEqual(["JPS-RULES-OVERLAP"], self.manifest["diagnosticVocabulary"]["advisory"])
+
+        cases = {
+            case["id"]: case
+            for case in self.manifest["cases"]
+            if case["path"].startswith("advisory/")
+        }
+        self.assertEqual(
+            {
+                "advisory-rules-overlap-exact",
+                "advisory-rules-touching",
+                "advisory-rules-overlap-same-outcome",
+                "advisory-rules-exclusive-rewrite",
+                "advisory-rules-overlap-not-excluded",
+            },
+            set(cases),
+        )
+
+        exact = cases["advisory-rules-overlap-exact"]["expectedAdvisories"]
+        self.assertEqual(1, len(exact))
+        diagnostic = exact[0]
+        self.assertEqual("JPS-RULES-OVERLAP", diagnostic["code"])
+        self.assertEqual("exact", diagnostic["certainty"])
+        self.assertEqual(
+            {"validate": "warning", "strict": "error", "publish": "block"},
+            diagnostic["severity"],
+        )
+        self.assertEqual("/rules/0", diagnostic["path"])
+        self.assertEqual(
+            {"path": "/score", "from": "70", "fromInclusive": True},
+            diagnostic["overlap"],
+        )
+        self.assertEqual({"score": "70"}, diagnostic["witnessFacts"])
+        self.assertEqual(
+            [
+                {"id": "r-medium", "outcome": "medium"},
+                {"id": "r-high", "outcome": "high"},
+            ],
+            diagnostic["rules"],
+        )
+        self.assertEqual("r-medium", diagnostic["suggestedRewrite"]["ruleId"])
+        self.assertEqual("all", diagnostic["suggestedRewrite"]["when"]["op"])
+
+        for case_id in (
+            "advisory-rules-touching",
+            "advisory-rules-overlap-same-outcome",
+            "advisory-rules-exclusive-rewrite",
+        ):
+            self.assertEqual([], cases[case_id]["expectedAdvisories"])
+
+        not_excluded = cases["advisory-rules-overlap-not-excluded"]["expectedAdvisories"]
+        self.assertEqual(1, len(not_excluded))
+        self.assertEqual("not-excluded", not_excluded[0]["certainty"])
+        self.assertEqual(
+            {"validate": "warning", "strict": "warning", "publish": "warning"},
+            not_excluded[0]["severity"],
+        )
+        self.assertNotIn("overlap", not_excluded[0])
+        self.assertNotIn("witnessFacts", not_excluded[0])
+
+    def test_rule_overlap_manifest_members_and_values_are_exercised(self) -> None:
+        import copy
+
+        property_paths = (
+            ("properties", "diagnosticVocabulary"),
+            ("properties", "diagnosticVocabulary", "properties", "advisory"),
+            ("$defs", "case", "properties", "expectedAdvisories"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "code"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "certainty"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "severity"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "path"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "rules"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "overlap"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "witnessFacts"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "effect"),
+            ("$defs", "ruleOverlapDiagnostic", "properties", "suggestedRewrite"),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "severity",
+                "properties", "validate",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "severity",
+                "properties", "strict",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "severity",
+                "properties", "publish",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "rules", "items",
+                "properties", "id",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "rules", "items",
+                "properties", "outcome",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "suggestedRewrite",
+                "properties", "ruleId",
+            ),
+            (
+                "$defs", "ruleOverlapDiagnostic", "properties", "suggestedRewrite",
+                "properties", "when",
+            ),
+        )
+        for property_path in property_paths:
+            schema = copy.deepcopy(self.manifest_schema)
+            parent = schema
+            for part in property_path[:-1]:
+                parent = parent[part]
+            del parent[property_path[-1]]
+            with self.subTest(member="/".join(property_path)):
+                self.assertFalse(
+                    Draft202012Validator(
+                        schema, registry=self.manifest_registry
+                    ).is_valid(self.manifest)
+                )
+
+        advisories = [
+            advisory
+            for case in self.manifest["cases"]
+            for advisory in case.get("expectedAdvisories", [])
+        ]
+        self.assertEqual({"exact", "not-excluded"}, {item["certainty"] for item in advisories})
+        self.assertEqual(
+            {"warning", "error"},
+            {item["severity"]["strict"] for item in advisories},
+        )
+        self.assertEqual(
+            {"warning", "block"},
+            {item["severity"]["publish"] for item in advisories},
+        )
+
+    def test_rule_overlap_diagnostic_negative_vectors(self) -> None:
+        manifest = strict_json_loads(
+            (CONFORMANCE / "advisory/diagnostic-negative/manifest.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual("review", manifest["status"])
+        self.assertEqual("§3.3.1", manifest["specSection"])
+        self.assertEqual(2, len({case["id"] for case in manifest["controls"]}))
+        self.assertEqual(3, len({case["id"] for case in manifest["cases"]}))
+
+        validator = Draft202012Validator(
+            self.manifest_schema, registry=self.manifest_registry
+        ).evolve(
+            schema={"$ref": "#/$defs/ruleOverlapDiagnostic"}
+        )
+        for control in manifest["controls"]:
+            with self.subTest(control=control["id"]):
+                self.assertEqual(
+                    set(), rule_overlap_diagnostic_keywords(validator, control["diagnostic"])
+                )
+
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                diagnostic = case["diagnostic"]
+                self.assertIn(
+                    case["expectedKeyword"],
+                    rule_overlap_diagnostic_keywords(validator, diagnostic),
+                )
+
+    def test_rule_overlap_region_members_are_exercised(self) -> None:
+        import copy
+
+        manifest = strict_json_loads(
+            (CONFORMANCE / "advisory/diagnostic-negative/manifest.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        controls = {case["id"]: case["diagnostic"] for case in manifest["controls"]}
+        members = (
+            (0, "path", "shared-values"),
+            (0, "sharedValues", "shared-values"),
+            (1, "path", "bounded-range"),
+            (1, "from", "bounded-range"),
+            (1, "fromInclusive", "bounded-range"),
+            (1, "to", "bounded-range"),
+            (1, "toInclusive", "bounded-range"),
+        )
+        for branch, member, control in members:
+            schema = copy.deepcopy(self.manifest_schema)
+            del schema["$defs"]["ruleOverlapDiagnostic"]["properties"]["overlap"][
+                "oneOf"
+            ][branch]["properties"][member]
+            validator = Draft202012Validator(
+                schema, registry=self.manifest_registry
+            ).evolve(schema={"$ref": "#/$defs/ruleOverlapDiagnostic"})
+            with self.subTest(branch=branch, member=member):
+                self.assertFalse(validator.is_valid(controls[control]))
 
     def test_manifest_covers_every_fixture_once(self) -> None:
         case_ids = collections.Counter(case["id"] for case in self.manifest["cases"])
@@ -894,7 +1137,7 @@ class RepositoryConformanceTests(unittest.TestCase):
         for case in self.manifest["cases"]:
             with self.subTest(case_id=case["id"]):
                 directory = Path(case["path"]).parts[0]
-                if directory == "valid":
+                if directory in ("advisory", "valid"):
                     self.assertEqual("semantic", case["layer"])
                     self.assertEqual("valid", case["expectedResult"])
                 else:
@@ -905,7 +1148,8 @@ class RepositoryConformanceTests(unittest.TestCase):
             path.relative_to(CONFORMANCE).as_posix()
             for path in CONFORMANCE.rglob("*.json")
             if not (path.name.endswith(".schema.json") or path.name in ("manifest.json", "cases.json"))
-            and path.relative_to(CONFORMANCE).parts[0] not in ("evaluation", "witness", "dialect")
+            and path.relative_to(CONFORMANCE).parts[0]
+            not in ("evaluation", "witness", "dialect", "policy", "workflow")
         }
 
         for path in sorted(listed - on_disk):
@@ -915,6 +1159,42 @@ class RepositoryConformanceTests(unittest.TestCase):
         for path in sorted(on_disk - listed):
             with self.subTest(orphan=path):
                 self.fail(f"fixture {path!r} is named by no case")
+
+    def test_core_fixture_audit_keeps_orphans_and_unknown_namespaces_strict(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            named = root / "valid/named.json"
+            named.parent.mkdir()
+            named.write_text("{}")
+            for namespace in ("evaluation", "witness", "dialect", "policy", "workflow"):
+                owned = root / namespace / "owned.json"
+                owned.parent.mkdir()
+                owned.write_text("{}")
+
+            def audit():
+                case = RepositoryConformanceTests("test_manifest_covers_every_fixture_once")
+                case.manifest = {"cases": [{"id": "named", "path": "valid/named.json",
+                                            "layer": "semantic", "expectedResult": "valid"}]}
+                result = unittest.TestResult()
+                with patch.dict(globals(), {"CONFORMANCE": root}):
+                    case.run(result)
+                self.assertEqual([], result.errors)
+                return result
+
+            self.assertTrue(audit().wasSuccessful())
+            for relative in ("valid/orphan.json", "unknown-companion/orphan.json",
+                             "policy-other/orphan.json"):
+                orphan = root / relative
+                orphan.parent.mkdir(exist_ok=True)
+                orphan.write_text("{}")
+                result = audit()
+                self.assertEqual(1, len(result.failures))
+                self.assertIn(f"fixture '{relative}' is named by no case", result.failures[0][1])
+                orphan.unlink()
+            named.unlink()
+            result = audit()
+            self.assertEqual(1, len(result.failures))
+            self.assertIn("case path 'valid/named.json' names no file", result.failures[0][1])
 
     def test_conformance_cases_cite_existing_spec_sections(self) -> None:
         """Every document-conformance case's specSection resolves to a heading.
@@ -1167,6 +1447,8 @@ class RepositoryConformanceTests(unittest.TestCase):
                 if disposition is None:
                     continue
 
+                disposition_validator = self.validator.evolve(schema={"$ref": "#/$defs/disposition"})
+                self.assertEqual([], list(disposition_validator.iter_errors(disposition)))
                 reasons = disposition["reasons"]
                 self.assertEqual(reasons, sorted(set(reasons)), "reasons are a sorted set")
                 self.assertTrue(set(reasons) <= REASONS, f"unknown reason in {reasons}")
@@ -1182,7 +1464,22 @@ class RepositoryConformanceTests(unittest.TestCase):
                     self.assertEqual(["not-applicable"], reasons)
 
                 handoff = disposition["handoff"]
-                triggers = set(pack.get("escalation", {}).get("triggers", []))
+                escalation = pack.get("escalation", {})
+                triggers = set(escalation.get("triggers", []))
+                requested_by = sorted(set(reasons) & (triggers | {"exception-escalation"}))
+                if "routes" in escalation:
+                    selected = [
+                        route["target"] for route in escalation["routes"]
+                        if requested_by and (
+                            "triggers" not in route or set(route["triggers"]) & set(reasons)
+                        )
+                    ]
+                    self.assertEqual(selected, handoff.get("routes"))
+                    self.assertEqual("requested" if selected else "none", handoff["state"])
+                    if selected:
+                        self.assertEqual(requested_by, handoff.get("triggeredBy"))
+                else:
+                    self.assertNotIn("routes", handoff)
                 if handoff["state"] == "requested":
                     triggered = handoff["triggeredBy"]
                     self.assertEqual(triggered, sorted(set(triggered)))
@@ -1199,6 +1496,101 @@ class RepositoryConformanceTests(unittest.TestCase):
                 else:
                     self.assertEqual("none", handoff["state"])
                     self.assertNotIn("triggeredBy", handoff)
+
+    def test_routes_schema_members_are_exercised(self) -> None:
+        import copy
+        pack = strict_json_loads((CONFORMANCE / "valid/escalation-routes.json").read_text())
+        for member in ("routes", "target", "triggers"):
+            schema = copy.deepcopy(self.schema)
+            escalation = schema["$defs"]["escalation"]["properties"]
+            if member == "routes":
+                del escalation["routes"]
+            else:
+                del escalation["routes"]["items"]["properties"][member]
+            with self.subTest(member=member):
+                self.assertFalse(Draft202012Validator(schema).is_valid(pack))
+        schema = copy.deepcopy(self.schema)
+        del schema["$defs"]["disposition"]["properties"]["handoff"]["properties"]["routes"]
+        case = next(c for c in self._staged_cases() if c["id"] == "routes-one")
+        validator = Draft202012Validator(schema).evolve(schema={"$ref": "#/$defs/disposition"})
+        self.assertFalse(validator.is_valid(case["expectedDisposition"]))
+
+    def test_routes_schema_constraints_are_exercised(self) -> None:
+        import copy
+        mutations = [
+            ("both", lambda e: e.pop("oneOf")),
+            ("nine", lambda e: e["properties"]["routes"].pop("maxItems")),
+            ("empty", lambda e: e["properties"]["routes"].pop("minItems")),
+            ("outside-trigger", lambda e: e.pop("allOf")),
+            ("empty-triggers", lambda e: e["properties"]["routes"]["items"]["properties"]["triggers"].pop("minItems")),
+            ("missing-target", lambda e: e["properties"]["routes"]["items"].pop("required")),
+            ("unknown-member", lambda e: e["properties"]["routes"]["items"].pop("additionalProperties")),
+        ]
+        for name, mutate in mutations:
+            schema = copy.deepcopy(self.schema)
+            fixture = strict_json_loads((CONFORMANCE / ("structural/escalation-routes-" + name + ".json")).read_text())
+            with self.subTest(constraint=name):
+                self.assertFalse(self.validator.is_valid(fixture))
+                mutate(schema["$defs"]["escalation"])
+                self.assertTrue(Draft202012Validator(schema).is_valid(fixture))
+
+    def test_routes_expectation_mutations_are_caught(self) -> None:
+        import copy
+        cases = {c["id"]: c for c in self._staged_cases()}
+        mutations = [
+            ("routes-one", lambda h: h.update(routes=[])),
+            ("routes-fan-out", lambda h: h["routes"].reverse()),
+            ("routes-unconditional", lambda h: h.update(routes=[])),
+            ("routes-no-selection", lambda h: h.update(state="requested", triggeredBy=["unknown"])),
+            ("routes-duplicate-target", lambda h: h["routes"].pop()),
+            ("routes-outcome-no-request", lambda h: h.update(routes=[{"kind": "queue", "name": "Conflict"}])),
+        ]
+        # subTest normally collects failures instead of raising: use a fresh case whose
+        # outcome is unset, so assertRaises observes the deliberate invalid expectation.
+        for name, mutate in mutations:
+            case = copy.deepcopy(cases[name])
+            mutate(case["expectedDisposition"]["handoff"])
+            checker = RepositoryConformanceTests()
+            checker.validator = self.validator
+            with self.subTest(mutation=name), self.assertRaises(AssertionError):
+                checker._check_evaluation_cases([case], EVALUATION_STAGED)
+
+    def test_disposition_routes_state_negative_vectors(self) -> None:
+        import copy
+        manifest = strict_json_loads(
+            (EVALUATION_STAGED / "disposition-negative/manifest.json").read_text()
+        )
+        self.assertEqual("staged", manifest["status"])
+        self.assertEqual("§8.3", manifest["specSection"])
+        self.assertEqual(4, len({case["id"] for case in manifest["cases"]}))
+        for path in (SCHEMA_PATH, EVALUATION_MANIFEST_SCHEMA_PATH):
+            schema = strict_json_loads(path.read_text())
+            validator = Draft202012Validator(schema).evolve(schema={"$ref": "#/$defs/disposition"})
+            for case in manifest["cases"]:
+                with self.subTest(schema=path.name, case=case["id"]):
+                    errors = list(validator.iter_errors(case["disposition"]))
+                    self.assertEqual(
+                        [(case["expectedKeyword"], ["handoff", "routes"])],
+                        [(error.validator, list(error.path)) for error in errors],
+                    )
+                    corrected = copy.deepcopy(case["disposition"])
+                    corrected["handoff"]["routes"] = case["correctedRoutes"]
+                    self.assertEqual([], list(validator.iter_errors(corrected)))
+                    del corrected["handoff"]["routes"]
+                    self.assertEqual([], list(validator.iter_errors(corrected)))
+                    weakened = copy.deepcopy(schema)
+                    branch = "then" if case["expectedKeyword"] == "minItems" else "else"
+                    del weakened["$defs"]["disposition"]["properties"]["handoff"]["allOf"][0][branch]["properties"]
+                    permissive = Draft202012Validator(weakened).evolve(schema={"$ref": "#/$defs/disposition"})
+                    self.assertTrue(permissive.is_valid(case["disposition"]))
+
+    def test_routes_legacy_canonical_bytes(self) -> None:
+        legacy = next(c for c in self._staged_cases() if c["id"] == "routes-legacy-target-bytes")
+        released = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text())["cases"]
+        original = next(c for c in released if c["pack"] == legacy["pack"])
+        # These dispositions contain only ASCII strings and no numbers, so this is JCS.
+        canonical = lambda d: json.dumps(d, sort_keys=True, separators=(",", ":")).encode()
+        self.assertEqual(canonical(original["expectedDisposition"]), canonical(legacy["expectedDisposition"]))
 
     def test_evaluation_manifest_covers_every_pack_fixture_once(self) -> None:
         # Mirrors test_manifest_covers_every_fixture_once: a pack committed under packs/ and

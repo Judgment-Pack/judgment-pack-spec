@@ -2,7 +2,7 @@
 
 Dates are intentionally absent. Progress depends on evidence, not calendar commitments.
 
-## Stage 1 — Research preview
+## Stage 1 — Draft
 
 Current stage.
 

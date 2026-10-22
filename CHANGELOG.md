@@ -7,6 +7,43 @@ here.
 
 ### Added
 
+- Dialect-owned data quality and typed research results (#170, #169): six closed deterministic
+  conversions with recorded failures, three explicit reconciliation modes, presence/type/domain
+  findings surfaced as unknown facts, transformation lineage, typed research result states,
+  versioned acquisition-source profiles, resolved execution settings and retained response bytes.
+  Replay uses retained bytes without calling a model or the web.
+- RFC 0020 limits the later-sibling `limit-exceeded` rule to instances admitted for acquisition;
+  admission failures keep their own codes, with a recorded positive vector and negative twin (#213).
+- Document ceiling profiles (#232): default `base` and declared `extended`, a shared
+  ceiling table, explicit unsupported-profile refusal, capability discovery and
+  byte identity. Schemas retain base bounds; profile conformance covers negotiation.
+- A non-normative rule-overlap check (#227) with the closed `JPS-RULES-OVERLAP` diagnostic,
+  exact and not-excluded findings, warning/strict/publish severity levels, exclusive rewrite
+  guidance, and advisory vectors. Core §8 conflict resolution is unchanged.
+
+- Core escalation routes (#219): exclusive single target or up to eight conditional routes,
+  ordered fan-out in `handoff.routes`, complete retained reasons, and unchanged single-target
+  disposition bytes. Structural fixtures and staged evaluation vectors cover selection, bounds,
+  duplicate targets and no selection; profile negotiation, Dialect outputs and delivery receipts
+  remain separate work.
+
+- RFC 0020's accepted issue #228 amendment: workflow output envelopes name their contributing
+  rule outside Core's unchanged disposition; every stage records a closed disposition summary
+  and a reproducible seeded sample; the workflow verifier recomputes both and refuses disagreement;
+  and drift is a comparison over two verified bundles of the same workflow, without a verdict.
+  The closed workflow schema and hand-written two-stage contract fixture carry the new records,
+  digest recomputation, drift rows and refusal vectors. No workflow implementation, recorded
+  executor run or conformance claim is added.
+
+- Official-draft Policy promotion preparation: versioned closed format `1.0.0`
+  schemas, retained-byte examples and 124 staged agreement vectors, explicit
+  migration/provenance and a scoped independent draft release route through the
+  shared builder/workflow. First release identifier `policy-v1.0.0-draft.1`
+  requires its exact tag and a maintainer-published GitHub release to establish
+  immutable publication. The maintainer approved the bounded draft after CI, effective upon
+  PR 218 merge, recording the limited public review and standing temporary different-vendor-review
+  exception. Core versions and evaluation are unchanged.
+
 - The forty-second to forty-seventh dialect vectors, the six `endpoint-scope-` vectors
   (`endpoint-scope-two-paths-one-origin`, `endpoint-scope-wildcard-two-origins`,
   `endpoint-scope-endpoint-outside`, `endpoint-scope-redirect-outside`,
@@ -256,6 +293,18 @@ here.
 
 ### Changed
 
+- RFC 0018 and its companion record issue #214, option C (2026-10-18, round 16): the constrained
+  page form refuses an escaped slash or backslash (`%2f`, `%2F`, `%5c`, `%5C`) anywhere in the
+  path, and a segment whose part before its first `;`, `%3b`, `%3B`, `%3f`, `%3F`, `%23` or
+  `%00` is a dot segment (`..;x`, `.;`, `%2e%2e;`, `..%3bx`, `.%00`). The refusals hold wherever
+  round 15's form does: every scope entry and endpoint, at admission and at check 3, and at
+  binding for a `web` source's literal `url`. Section 13 says the scope holds the URL as written,
+  not what a server serves for it; double encoding, an overlong UTF-8 dot, a full-width dot or
+  solidus and a server's own rewriting stay the operator's. Both readers implement the refusals
+  with controls on altered copies of a staged vector; no vector changes. The Runner's matcher
+  and the Desk's admission check remain follow-ups. The review, same-vendor at the maintainer's
+  direction while the OpenAI reviewer was unavailable, and the maintainer's disposition are
+  recorded in `rfcs/reviews/0018-round-16.md` (two MEDIUM and five LOW, all applied).
 - RFC 0018 and its companion record issue #199, direction A (2026-10-17, round 15): an optional
   `endpointScope` for page profiles, checked against each signed final endpoint. The form admits
   all three spellings of port 443; only generated research page profiles admit the wildcard,

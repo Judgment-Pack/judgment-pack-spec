@@ -1,6 +1,6 @@
 # Governance
 
-## Status: early research preview
+## Status: draft specification
 
 Judgment Pack is an open, vendor-neutral specification developed in public. Today it has a single
 maintainer and no independent contributors (see [Interim review regime](#interim-review-regime)).
@@ -9,7 +9,7 @@ the same maintainer and is not independent evidence of interoperability. Conform
 implementations may be open-source or proprietary; conformance is defined by the specification and
 its conformance cases, not by any single vendor's product.
 
-The current status is an early research preview (`0.2.0-draft`). There is no compatibility guarantee
+The current status is a draft specification (`0.2.0-draft`). There is no compatibility guarantee
 for `0.x` drafts. Concepts may be revised or removed as the specification is exercised against real
 implementations.
 
@@ -41,7 +41,7 @@ The convenience of any single implementation is not sufficient reason to add a C
 - Maintainers publish the disposition and rationale for an RFC.
 - Material objections and minority positions should be recorded rather than silently discarded.
 
-During the research preview, maintainers may reject or remove concepts aggressively. There is no
+While the specification is a draft, maintainers may reject or remove concepts aggressively. There is no
 compatibility promise for `0.x` drafts.
 
 ## Interim review regime

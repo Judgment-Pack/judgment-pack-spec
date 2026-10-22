@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json",
+  "title": "DRAFT Policy companion 1.0.0: common",
+  "description": "Draft shared definitions. jps-canon refers to the existing spec/dialect.md canonical profile; this companion does not change it.",
+  "$ref": "#/$defs/retainedContent",
+  "$defs": {
+    "version": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 256,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?![\\s\\S])"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "localId": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?![\\s\\S])"
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "minLength": 1,
+      "maxLength": 2048,
+      "description": "Scheme-bearing RFC 3986 URI production, including optional fragment. Assert the entire ASCII string; no trimming, Unicode/percent decoding, or identity normalization. See Policy companion prose for IPv6 and case-insensitive IPvFuture checks."
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bytesDigest",
+        "byteLength",
+        "mediaType"
+      ],
+      "properties": {
+        "bytesDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1048576
+        },
+        "mediaType": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+(?![\\s\\S])"
+        }
+      },
+      "description": "Narrative, review basis, artifact and informational material: at most 1 MiB."
+    },
+    "canonicalIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "canonicalDigest"
+      ],
+      "properties": {
+        "profile": {
+          "const": "jps-canon"
+        },
+        "canonicalDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startByte",
+        "endByte",
+        "bytesDigest"
+      ],
+      "properties": {
+        "startByte": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1048576
+        },
+        "endByte": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "bytesDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "policyReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id",
+        "version",
+        "content"
+      ],
+      "properties": {
+        "kind": {
+          "const": "policy"
+        },
+        "id": {
+          "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/uri"
+        },
+        "version": {
+          "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/version"
+        },
+        "content": {
+          "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/content"
+        },
+        "canonicalIdentity": {
+          "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/canonicalIdentity"
+        }
+      }
+    },
+    "packReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id",
+        "version",
+        "content"
+      ],
+      "properties": {
+        "kind": {
+          "const": "pack"
+        },
+        "id": {
+          "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/uri"
+        },
+        "version": {
+          "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/version"
+        },
+        "content": {
+          "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/content"
+        },
+        "canonicalIdentity": {
+          "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/canonicalIdentity"
+        }
+      }
+    },
+    "retainedContent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bytesDigest",
+        "byteLength",
+        "mediaType"
+      ],
+      "properties": {
+        "bytesDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4194304
+        },
+        "mediaType": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+(?![\\s\\S])"
+        }
+      },
+      "description": "Generic fixture-carrier reference; consuming roles impose their own bounds."
+    },
+    "originalContent": {
+      "description": "Exact retained original source bytes: at most 4 MiB; never a replacement for narrative.",
+      "$ref": "#/$defs/retainedContent"
+    },
+    "formatVersion": {
+      "const": "1.0.0"
+    }
+  }
+}

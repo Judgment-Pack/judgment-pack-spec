@@ -1,9 +1,9 @@
 # Security policy
 
-## Research-preview support
+## Support
 
-`0.x` drafts are not supported for consequential production use. The project does not currently
-provide security or compatibility service-level guarantees.
+`0.x` drafts are in production use by adopters under a pinned draft and runtime release. The project
+does not currently provide security or compatibility service-level guarantees.
 
 ## Reporting a vulnerability
 

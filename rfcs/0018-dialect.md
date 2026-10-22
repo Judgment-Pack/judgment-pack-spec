@@ -13,7 +13,9 @@
   the skipped source's form, issue #189, option A; the class a binding takes, by kind,
   and what each research profile serves, issue #195; the class a Drive selected-file takes,
   issue #197, option A), 2026-10-17 (a page endpoint constraint, issue #199, direction A,
-  round 15)
+  round 15), 2026-10-18 (traversal spellings in a constrained page path, issue #214,
+  option C, round 16), 2026-10-22 (dialect-owned conversions, reconciliation and quality findings,
+  issue #170; typed research results, source profiles and retained execution evidence, issue #169)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -658,6 +660,72 @@ Its review is round 15 of this RFC, recorded under
 `0018-round-15.md` with the maintainer's disposition of each finding (one HIGH, two MEDIUM and
 four LOW, all applied).
 
+## Amendment of 2026-10-18: traversal spellings in a constrained page path
+
+This amendment records the maintainer's decision on
+[issue #214](https://github.com/Judgment-Pack/judgment-pack-spec/issues/214), option C, on
+[pull request 215](https://github.com/Judgment-Pack/judgment-pack-spec/pull/215). It is
+round 16. The status stays Accepted. The Specification and companion are amended equally.
+
+**The decision.** Round 15's constrained page form (§5.1) refuses two more spellings, and §13
+says what a scope still cannot hold. A path with an escaped slash or backslash anywhere in it,
+`%2f`, `%2F`, `%5c` or `%5C`, is outside the form. So is a path with a segment whose part
+before its first `;`, `%3b`, `%3B`, `%3f`, `%3F`, `%23` or `%00`, whichever comes first, is a
+dot segment, one or two tokens each `.`, `%2e` or `%2E`: `..;x`, `.;`, `%2e%2e;`, `..%3bx` and
+`.%00` are refused. The rule is stated as round 15's is, on the path as written, without
+decoding it. Every other escape stays literal bytes and supplies no segment boundary.
+(No vector decides this.)
+
+**Why.** Round 15 split a path at literal `/` only and kept every other escape as literal
+bytes. Its readers agree on every answer, but a URL as written can differ from what a server
+serves for it. A server that decodes `%2f` reads `/guides/%2e%2e%2fadmin` as `/guides/../admin`.
+A server that drops `;` parameters reads `/guides/..;/admin` the same way. Round 15 admitted
+both under the prefix `/guides`, so a server could serve a page from outside the prefix while
+the receipt showed the URL inside it. A cross-vendor clean-room audit of the Desk's admission
+check, which follows the text, found it. Each escaped delimiter is refused after a dot segment
+for the same reason as a literal `;`: a server that decodes it reads a parameter or the end of
+the path. A decoded `%3b` or `%3B` begins a parameter, which a server may then drop. A decoded
+`%3f` or `%3F` begins a query, and a decoded `%23` a fragment, so the path ends there. A
+decoded `%00` ends the path for a server that reads it as a string's end. In each case the
+dot segment before it is what the server serves. The refusal fails closed. A page whose path
+carries an escaped slash or backslash cannot be read under any scope, the wildcard included; a
+research run that discovers one fails at admission. Only an exact-endpoint profile naming that
+URL reads it.
+
+**Where it applies.** The form is round 15's, so the refusals hold wherever that form does: for
+every scope entry and every endpoint, at admission before acquisition and at check 3 (§§5.1,
+5.2). A profile whose scope entry carries a refused spelling is `input-malformed`, as any
+malformed entry is. A requested URL whose path carries one fails admission as
+`acquisition-invalid` before acquisition. A `web` source's literal `url` carrying one is
+`profile-mismatch` at binding. A receipt whose final endpoint carries one fails check 3 as
+`acquisition-invalid`. A `;` or an escaped delimiter on any other segment stays admitted, and
+so does a dot segment after a segment's first delimiter. (No vector decides this.)
+
+**What remains.** Section 13's entry for an acquisition under a constrained page profile now says
+that the scope holds the URL as written, not what a server serves for it. No finite list of
+spellings covers every server's normalization. Double encoding such as `%252e`, an overlong
+UTF-8 dot such as `%c0%ae`, a full-width dot or solidus (`%ef%bc%8e`, `%ef%bc%8f`) and a
+server's own rewriting remain. That residual stays the operator's, as the Gateway's redirect
+policy already is. A server that folds path case causes a false refusal, not an escape.
+
+**What changes for a reader.** Both repository readers implement the two refusals, splitting
+a segment at the first of its delimiters. Reader controls on altered copies of a staged research
+vector hold each refused spelling as a scope entry (`input-malformed`) and as a receipt's
+endpoint (`acquisition-invalid`), every escaped delimiter among them, and a `;` on an ordinary
+segment still admitted; segments with two delimiters hold the first one. The cross-reader test
+compares their reports. No staged vector changes. None of the six endpoint-scope vectors
+carries an escaped slash, backslash or delimiter, or a `;`, in any URL, and every vector's
+answer stays the same. The reference Runner's matcher
+and the Desk's admission check
+([desk pull request 445](https://github.com/Judgment-Pack/judgment-pack-desk/pull/445),
+[desk issue 456](https://github.com/Judgment-Pack/judgment-pack-desk/issues/456)) follow as
+their own pull requests.
+Its review is round 16 of this RFC, recorded under
+[`rfcs/reviews/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/rfcs/reviews) as
+`0018-round-16.md` with the maintainer's disposition of each finding (two MEDIUM and five LOW,
+all applied). The review was same-vendor, at the maintainer's direction while the OpenAI
+reviewer was unavailable.
+
 ## Summary
 
 A **dialect** is a pack's terms spoken in a system's: the declared, reusable translation between a
@@ -860,9 +928,38 @@ Runner vectors, and add no independent implementation evidence. The Runner's acq
 replay evidence required by issue #199 was a follow-up; its six vectors are staged since
 (Conformance).
 
+Round 16 adds to both readers the refusal of an escaped slash or backslash, and of a dot segment
+before a segment's first `;` or escaped delimiter, in the constrained page form, by one author
+who read both. Altered
+copies of the same staged research vector hold each refused spelling as a scope entry and as a
+receipt's endpoint; the cross-reader test compares their reports. These are reader controls,
+not Runner vectors, and add no independent implementation evidence. No staged vector carries
+these spellings, and no vector's answer changes.
+
 One vector is answered otherwise than `verify-run` answers it, by design:
 `disposition-differs-from-audit` alters the Runner's export, not the preparation or the record
 (Conformance).
+
+## Amendment of 2026-10-22: data quality and typed research results
+
+The maintainer accepted issues #170 and #169 as proposed. This amendment makes deterministic
+conversion, multi-observation reconciliation and presence/type/domain quality findings part of a
+target's declared read, with every rule in the dialect digest and every application in preparation
+lineage. The closed conversion set is intentionally not a scripting surface; failures yield no
+coerced fact. `precedence`, `agree` and `first-present` are the only reconciliation modes, and
+last-writer-wins remains forbidden by the target-ownership rule.
+
+The amendment also gives `research` the `results` typed-contract spelling and explicit observation
+states, portable versioned acquisition-source profiles, and required execution evidence containing
+the resolved model/profile/settings and retained response bytes. Installation bindings continue to
+own credentials, local connection ids, retries, concurrency, allowances and approvals. Replay
+validates the retained bytes and applies the ordinary reads and targets without calling a model or
+the web. These declarations affect the dialect digest; installation binding does not.
+
+The two repository readers and the hand-written staged quality vectors implement these forms. This
+does not implement the Runner work tracked by Runner #86, nor the gateway acquisition capabilities
+tracked by Gateway #275. It changes no Core qualification policy: an omitted quality target reaches
+the pack as unknown and the pack's `onUnknown` decides the consequence.
 
 ## Specification
 
@@ -947,6 +1044,13 @@ never interchanged.
 
 ### 2. The dialect document
 
+The root MAY carry `profile`, `base` by default or `extended`, independently of source
+connection profiles. [Core §4.1](../spec/judgment-pack-core.md#41-document-ceiling-profiles)
+defines its ceiling table, admission, `profile-unsupported` refusal and byte-identity rules.
+The numeric resource bounds here state base values; extended uses that table. An unknown
+profile is `input-malformed`. The bundled verifiers support only base.
+
+
 The dialect document is one JSON object. Its version 2 is the Runner's mapping v2 document: a
 mapping v2 document the Runner accepts is a version-2 dialect document, with the same bytes and the
 same digest. The one exception is a request's `query` under a profile whose adapter is the gateway's
@@ -957,6 +1061,7 @@ and a `selected-file`, and refuses each of the other four kinds by name.
 
 | Member | Form | Meaning |
 | --- | --- | --- |
+| `profile` | `base` or `extended`, optional | document ceiling profile, default `base` |
 | `version` | the integer `2`, or `3` (§4.3, §4.4) | the dialect version, per which the source kinds (§4) and every form of this document are closed |
 | `case` | an object (§3), REQUIRED | the case's parameters, and the facts and evidence copied from the case |
 | `sources` | an array of at most 16 sources (§4), optional | absent is the empty array |
@@ -1309,6 +1414,29 @@ status is the caller's assertion. In particular, `stale` describes an observatio
 not an exception to receipt freshness: an expired retained
 receipt still fails as `acquisition-stale` (§5.2).
 
+The observation vocabulary also admits the contract spellings `present`, `missing` and
+`inaccessible`. `present` has the form and meaning of `found`. `missing`, `inaccessible` and
+`stale` have exactly `status`, `cites` and a non-empty `reason`, and no `value` or `values`;
+`missing` has the meaning of `not-found` with the source's reason made explicit. `conflicting`
+keeps the typed `values` and their per-value citations above. A field declaration may add
+`cardinality`, `one` or `many`; when absent it is `many` for `text-list` and `one` otherwise.
+For the accepted typed-result spelling, the source writes `results` instead of `fields`, never
+both. `results` is an ordered array of one to 64 closed objects of exactly `id`, `type`, `required`,
+`description` and `cardinality`; `id` has the bounds and uniqueness of a field name; `type` is
+`string`, `decimal`, `boolean` or `string-list`; `required` is boolean; `description` has the field
+description form; and `cardinality` is `one` or `many`. The research record then carries `results`
+instead of `fields`, with the same ids and the explicit states `present`, `missing`, `conflicting`,
+`inaccessible` and `stale`. `present` carries `value` and citations; `conflicting` carries the typed
+`values` with their citations; every other state carries a non-empty `reason` and no value. The
+legacy states `found` and `not-found` are `input-malformed` in `results`; conversely, `fields`
+continues to admit its legacy states and does not admit `present`, `missing` or `inaccessible`. The
+legacy `fields` spelling above remains readable in version 3 for the staged Runner vectors. Either
+spelling is the research kind's typed result contract: identifier, description, exact type and
+encoding, required presence and cardinality are declared before execution. A value or list outside
+that declaration is `input-malformed`, never coerced. `one` carries one value of `type`; `many`
+carries an array of zero to 64 values of `type`, including an array of string arrays for
+`string-list` with `many`.
+
 Absence is permitted only for an optional entry and for the conditional members just stated.
 `null` is never an entry or a value, including a conflicting value, list item or range endpoint.
 It may occur in a retained response's arbitrary result, where it remains evidence, not a typed
@@ -1331,9 +1459,37 @@ take a `from` under `values`; that `from` is `input-malformed`, as in §6.4. Tha
 reconciliation's combined value and pointers.
 Deterministic sources keep their target declarations and gain no `fields` member.
 
-`R.fields`, every status, value, observation and citation index, and `R.responses` in its order
-are all in `R`'s `canon` bytes. The record's receipt commits all of them when present; without
-one, fields as well as response membership and order are the caller's assertion. The preparation
+**Acquisition sources and execution evidence.** A research source may declare
+`acquisitionSources`, one to 16 closed objects of exactly `profile`, `version`, `purpose`, `scope`
+and `freshness`. The first three are non-empty strings, `scope` is an object in the `canon` domain,
+and `freshness` is an integer from zero to 31,536,000 seconds. These are portable, versioned
+source-profile identities and request constraints, not vendor configuration. They enter the
+research request and dialect digest. The installation binding supplies credentials, connection
+ids, provider-specific settings, retries, concurrency, execution allowances and approvals; none
+enters the published artifact or its digest.
+
+A research record using `results` has `execution`, a closed object of `resolvedSettings` and
+`retainedBytes`; a legacy `fields` record may add the same object.
+`resolvedSettings` is exactly non-empty `model`, `profile` and `version` strings and `settings`, an
+object in the `canon` domain, recording what the installation actually resolved. `retainedBytes`
+is an array of at most 64 closed `{"mediaType", "base64"}` objects and holds the response bytes
+used to assemble the typed observations. The bytes, resolved settings, results, observation states
+and responses are part of `R` and therefore of its receipt when it has one. Replay validates these
+retained bytes and the result contract, then applies the ordinary read and target rules — including
+§6.2a conversion, reconciliation and quality — without calling a model or the web. A requested
+observation becomes a consumed fact only when the research read names its `/results/<id>` state or
+value and writes a target; a declaration alone writes no fact.
+
+Each lineage entry for an acquired `results` research source has `researchExecution`, exactly
+`resolvedSettings` and `retainedBytes`. The former repeats the execution record's closed resolved
+settings. The latter preserves array order and maps every retained byte entry to exactly
+`{"mediaType": M, "digest": H}`, where `H` is the SHA-256 digest of the decoded base64 bytes.
+Thus different retained bytes change the recomputed preparation even when the typed result is
+unchanged; replay with the earlier preparation gives `preparation-differs` and performs no call.
+
+`R.fields` or `R.results`, every status, value, observation and citation index, and `R.responses`
+in its order are all in `R`'s `canon` bytes. The record's receipt commits all of them when present; without
+one, results as well as response membership and order are the caller's assertion. The preparation
 commits the bound dialect, derived claims and receipt citations in §9's existing form; it gains
 no whole-record digest. A change to an unread, unreceipted field need not change that preparation.
 
@@ -1503,11 +1659,16 @@ dot-separated labels, each of 1 to 63 characters. Each label starts and ends
 with an ASCII letter or digit; its other characters are ASCII letters, digits or `-`. The last
 label starts with an ASCII letter. There is no trailing dot, underscore, IPv4 or IPv6
 literal, wildcard or other port. The path has no `?`, `#` or backslash. Each `%` is followed by
-two hexadecimal digits, of either case. Split the path at each literal `/`: no segment is one
-or two tokens each of which is `.`, `%2e` or `%2E`. Thus literal and percent-spelled dot segments
-are refused, without decoding any path. Other escapes, including an escaped slash, remain
-literal bytes and never supply a segment boundary. This form holds the receipt's endpoint only
-when its profile carries `endpointScope`; it changes no historical receipt rule.
+two hexadecimal digits, of either case. The path has no escaped slash or backslash: no `%2f`,
+`%2F`, `%5c` or `%5C` anywhere in it. Split the path at each literal `/`. A dot segment is one or
+two tokens each of which is `.`, `%2e` or `%2E`. No segment is a dot segment, and no segment's
+part before its first `;`, `%3b`, `%3B`, `%3f`, `%3F`, `%23` or `%00`, whichever comes first, is
+a dot segment. Thus literal and percent-spelled dot segments are refused, alone or before a path
+parameter or an escaped delimiter (`..;x`, `.;`, `%2e%2e;`, `..%3bx` and `.%00` among them),
+without decoding any path. Every escape but the four refused above, `%2e` and `%2E` outside a
+dot segment included, remains literal bytes and never supplies a segment boundary. This form
+holds the receipt's endpoint only when its profile carries `endpointScope`; it changes no
+historical receipt rule.
 (No vector decides this.)
 
 Each scope entry is either a prefix in that endpoint form, or exactly `https://*`. The wildcard
@@ -1741,6 +1902,85 @@ requirement twice is refused with the dialect. (No vector decides this.) The cla
 - `basis` is every entry's `Q`, of `facts` and of `evidence`, distinct, ordered by code point.
 
 A value a copy writes MUST be in the `canon` domain, its numbers integers; otherwise `read-failed`.
+
+#### 6.2a Target conversion, reconciliation and quality
+
+The dialect owns data quality. A fact entry in a copy may keep §6.2's exact two-member form, or it
+is a closed **quality target** with `target`, `type`, `required`, and exactly one of `source` or
+`observations`; it may also have `convert` and `domain`. `type` is `string`, `decimal`, `boolean`
+or `date`. `required` is a boolean. A quality target with `source` names one pointer. With
+`observations`, it names two to 16 closed `{"id", "source"}` objects, their non-empty ids distinct,
+and has `reconcile`. This remains one target owned by one read: §8.1's target-overlap rule is
+unchanged.
+
+`convert` is one of these closed deterministic rules, applied independently to every present
+observation before reconciliation:
+
+| Kind | Other rule members | Result |
+| --- | --- | --- |
+| `decimal-from-text` | `decimalSeparator`, `.` or `,`; `thousandsSeparator`, empty or the other one of `.` and `,`; `sign`, `none`, `minus` or `plus-minus`; `whitespace`, `reject` or `trim` | a Core §2.2 decimal string |
+| `decimal-from-number` | none | the JSON number literal rendered without an exponent as the mathematically equal Core §2.2 decimal string |
+| `boolean-from-text` | non-empty, disjoint `true` and `false` spelling arrays, each of at most 16 distinct strings | the corresponding JSON boolean |
+| `trim` | none | the string without leading or trailing Unicode whitespace |
+| `collapse-whitespace` | none | the trimmed string with each non-empty run of Unicode whitespace replaced by U+0020 |
+| `date-from-text` | `format`, one of `YYYY-MM-DD`, `MM/DD/YYYY`, `DD/MM/YYYY` | the existing calendar date as `YYYY-MM-DD` |
+
+Here whitespace is exactly U+0009–U+000D, U+0020, U+0085, U+00A0, U+1680,
+U+2000–U+200A, U+2028, U+2029, U+202F, U+205F and U+3000; no host-language
+whitespace class extends that set.
+
+For `decimal-from-number`, split the JSON literal into sign, integer digits, fraction digits and
+base-ten exponent. Concatenate the integer and fraction digits, move the decimal point from after
+the original integer digits by the signed exponent, inserting zeroes on the side crossed. Strip
+leading zeroes from the resulting integer part, retaining one, and trailing zeroes from the
+fraction; omit an empty fraction. A zero result is exactly `0`, including for every negative-zero
+literal. No binary floating-point operation participates.
+
+For `decimal-from-text`, after the declared whitespace and sign rules, the integer part is either
+ungrouped `0` or `[1-9][0-9]*`, or `[1-9][0-9]{0,2}` followed by one or more groups each exactly
+the non-empty `thousandsSeparator` and three ASCII digits. The optional decimal part is exactly
+`decimalSeparator` followed by one or more ASCII digits. The separator occurs nowhere else;
+therefore `1,,2`, misplaced groups and separators in the fraction are `not-a-number`.
+`date-from-text` checks the declared lexical form before the calendar date: four, two and two
+ASCII digits in the positions of `YYYY-MM-DD`, and exactly two, two and four in those of
+`MM/DD/YYYY` or `DD/MM/YYYY`. A width mismatch is `invalid-encoding` even when a host parser would
+accept it.
+
+No other kind is admitted; an operation outside this table is upstream preparation, not a dialect
+conversion. Missing stays missing. A conversion carries `null` unchanged to the type check; since
+`null` is outside every quality `type`, it records `wrong-type` and yields no fact. A rule applied
+to another JSON type or an invalid date has failure `invalid-encoding`; a decimal input that does
+not name a number has `not-a-number`; a boolean spelling outside both lists has `out-of-domain`.
+A failed conversion
+produces no candidate and never a coerced value.
+
+`reconcile` is exactly `{"mode": M}` for `agree` and `first-present`, or
+`{"mode":"precedence","precedence":[I,...]}`. `precedence` lists every observation id exactly
+once in its chosen order; the first present converted candidate in that list wins.
+`first-present` uses observation declaration order. `agree` yields the common JSON-equal value when
+all present candidates agree and otherwise records `conflict` and yields no value. An absent
+candidate is not a conflicting value. `last-writer-wins` is not a mode and is `input-malformed`.
+The reconciliation lineage records the mode, every present observation id, and the chosen id,
+agreement or conflict as applicable.
+
+`domain` is exactly `{"in":[V,...]}`, one to 64 values in the `canon` domain, or
+`{"decimalRange":{"min":D,"max":D}}`, inclusive, both endpoints Core §2.2 decimal strings and
+the minimum no greater than the maximum. After conversion and reconciliation, a missing required
+value records `missing-required`; a value not of `type` records `wrong-type`; a value outside
+`domain` records `out-of-domain`. These are closed quality findings, as is `conflict`. Their target
+is omitted from the facts document: to the pack it is an unknown fact, and the pack's `onUnknown`,
+not the dialect, decides the consequence. Zero, `false` and the empty string are present. A `null`
+candidate is present input but outside all four declared types: it records `wrong-type`, is omitted
+from the facts document and is never silently repaired.
+
+For every quality target, its lineage entry has `transformation`, exactly `applications` and
+`findings`, and `reconciliation` when declared. Each application records its observation `id`,
+pointer `source`, state `missing`, `present` or `failed`, the literal-preserving preparation-form
+JSON text of the source value when present (with the acquisition retaining its source bytes),
+the conversion `rule` when one applies, and exactly the `result` or closed `failure` code. Thus the
+preparation records every application, successful or failed. The declaration, including every
+rule, observation order, domain and reconciliation choice, is already in the read digest and the
+dialect digest. No product may convert a value on the way to a pack outside this declared read.
 
 #### 6.3 Rule
 
@@ -2269,9 +2509,19 @@ No manifest or file under `conformance/` is added by this plan. (No vector decid
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
 the refusal, at the first of these phases that fails, in this order:
 
+0. **profile negotiation**, before the byte-bound checks below and before reading any
+   supplied document for interpretation. Only a resource-bounded scan of the dialect root
+   sufficient to identify its `profile` declaration precedes negotiation; it performs no
+   case, acquisition, preparation or record reading. A recognized profile the reader does
+   not support gives exactly `profile-unsupported`, naming that profile, even when another
+   document exceeds a base bound. Unknown or malformed declarations give `input-malformed`.
+   If the bounded scan cannot identify a declaration (including malformed dialect bytes),
+   the existing byte/syntax refusal order below applies. Otherwise a supporting reader
+   selects that profile's ceilings from Core §4.1 before continuing. This scan is the sole
+   exception to the rule that byte bounds precede document reading;
 1. the bounds of §12 that are measured on bytes — a document's size, its nesting (the case
-   document's at 32 levels), and each number literal's characters and exponent — taken on every
-   document before any is read: `input-over-bound`;
+   document's at 32 levels under base), and each number literal's characters and exponent —
+   using the negotiated profile's ceilings, taken on every document before full document reading: `input-over-bound`;
 2. every document read as §1 reads one, and the record as one line: `input-malformed`;
 3. the bounds of §12 that are counts — the sources, the parameters in a scope, the clauses of a
    rule, the conditions one `all` or `any` lists, the `unwrap` pointers, the fact and evidence
@@ -2405,7 +2655,8 @@ matching binding in a record whose signature verifies is what commits it (§13).
 
 **The report.** A verifier reports a reading, a refusal or a finding as one JSON object, written in
 the preparation's canonical form (§9.5), whose member `result` is `reading`, `refusal` or `finding`.
-A refusal is exactly `{"result": "refusal", "refusal": C}` and a finding exactly
+A refusal is exactly `{"result": "refusal", "refusal": C}`, except `profile-unsupported`
+also requires `profile`, the known unsupported name. A finding is exactly
 `{"result": "finding", "finding": C}`, `C` its code. A reading is `result` and the members listed
 above, exactly: `digest`; `binding`; `facts`, the facts document; `evidence`, the
 evidence-availability document; `targetsByClass`; and `unsignedParameters` and `unsignedFreshness`
@@ -2452,9 +2703,11 @@ first `e` or `E`: the run of digits that follows it, or that follows the `+` or 
 literal with no such run has no exponent. An unwrapped string's bound is counted on the UTF-8 bytes
 of its decoded value.
 
-Over any bound it refuses the reading, `input-over-bound`, and MUST NOT read part of it. The bytes are
-bounded first, by the documents' sizes, before any is read; §11 gives the order of the rest. A
-preparer refuses the same inputs before it writes a preparation.
+After profile negotiation (§11 phase 0), exceeding a bound of the selected profile refuses
+with `input-over-bound`; a reader MUST NOT process a prefix to fit. The declaration scan is
+first; then the selected byte bounds precede full document reading. A reader that lacks the
+profile refuses `profile-unsupported` before checking other documents' sizes. A preparer
+uses the same order before it writes a preparation.
 
 ### 13. What a preparation establishes, and what it does not
 
@@ -2515,8 +2768,15 @@ cited by URL alone is no retained response; the claim it supports is the answer'
   lies in it; no vector decides the other rules here.)
 
   Does not establish: the page's content or relevance; that the host is public; anything about
-  the requested URL's scope or intermediate redirects; that the preparer checked admission.
-  Request commitments and result digests still hold their bytes as above.
+  the requested URL's scope or intermediate redirects; that the preparer checked admission. The
+  scope holds the URL as written, not what a server serves for it. §5.1's form refuses an
+  escaped slash or backslash and a dot segment before a path parameter or an escaped delimiter,
+  but no finite list of spellings covers every server's normalization. Spellings that escape
+  remain: double encoding such as `%252e`, an overlong UTF-8 dot such as `%c0%ae`, a full-width
+  dot or solidus (`%ef%bc%8e`, `%ef%bc%8f`), and a server's own rewriting. That residual stays
+  the operator's, as the Gateway's redirect policy already is. A server that folds path case
+  causes a false refusal, not an escape: it serves an in-scope page under a spelling the byte
+  comparison refuses. Request commitments and result digests still hold their bytes as above.
 
 - **An asserted input: the case, a local file, a parameter no receipt commits.** Establishes: that
   the preparation carried what the operator supplied, faithfully.
@@ -2866,6 +3126,9 @@ this text and the vectors — would strengthen that evidence, and none exists.
    wildcard's admission of two origins (§5.1); the digest holding the scope, a changed scope
    being `profile-mismatch` (§§5.1, 13); and check 4 over the retained request (§5.1). Reader
    controls alone hold the rest; no Runner vector decides it.
+   Round 16 adds the refusal, in the constrained page form, of an escaped slash or backslash and
+   of a dot segment before a segment's first `;` or escaped delimiter, and what a scope cannot
+   hold (§§5.1, 13; issue #214, option C). Each refusal is marked; no vector decides it.
 2. **The kinds without vectors.** `selected-file`'s snapshot form is not stated here, and the four
    version-3 kinds are proposed, `research` alone with a preparer. When a kind gets a preparer and
    vectors, and whether its request forms here survive the first implementation, is open. So for

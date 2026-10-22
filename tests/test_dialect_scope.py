@@ -1,4 +1,4 @@
-"""Round 15 reader controls, altered copies of a staged research vector, never vectors."""
+"""Rounds 15 and 16 reader controls, altered copies of a staged research vector, never vectors."""
 from __future__ import annotations
 
 import copy
@@ -11,6 +11,15 @@ from test_dialect import Inputs, READER, signer
 
 VECTOR = "gtm-company-person-valid-types-all-six"
 PREFIX = "https://a.example/docs"
+# Round 16 (issue #214, option C): each path below lies under PREFIX and round 15's form admitted
+# it. An escaped slash or backslash anywhere in the path, or a dot segment before the first `;`,
+# `%3b`, `%3B`, `%3f`, `%3F`, `%23` or `%00` of its segment, is now outside the form.
+ROUND_16_REFUSED = (
+    "/a%2fb", "/a%2Fb", "/a%5cb", "/a%5Cb", "/%2e%2e%2fadmin", "/..;x", "/..;/admin",
+    "/%2e%2e;x", "/%2E%2e;/admin", "/.;", "/.;/admin", "/.%2e;y=1", "/x/..;",
+    "/..%3b/admin", "/%2e%2e%3B/admin", "/.%3fx", "/..%3F", "/..%23x", "/.%00/x",
+    "/..;;x", "/..;a=b;c/admin", "/..;x%3by", "/..%23x;y",
+)
 
 
 def encoded(value: Any) -> bytes:
@@ -113,12 +122,23 @@ def endpoint_scope_cases() -> list[tuple[str, str, Any]]:
     add("wildcard", scope=["https://*"], endpoints=("https://new.example/a", "https://next.example/b"))
     add("path case", invalid, endpoints=("https://a.example/Docs/one",))
     add("host suffix", invalid, endpoints=("https://sub.a.example/docs",))
-    add("encoded slash is no boundary", invalid, endpoints=(PREFIX + "%2Fx",))
+    add("escaped slash at the prefix boundary is outside the form", invalid,
+        endpoints=(PREFIX + "%2Fx",))
     add("encoded spelling", scope=[PREFIX + "/%7e"], endpoints=(PREFIX + "/%7e/x",))
     add("escape case differs", invalid, scope=[PREFIX + "/%7e"], endpoints=(PREFIX + "/%7E",))
     add("no escape decoding", invalid, scope=[PREFIX + "/%7e"], endpoints=(PREFIX + "/~",))
     add("repeated slash preserved", invalid, scope=[PREFIX + "//x"], endpoints=(PREFIX + "/x",))
     add("path at sign is not user", endpoints=(PREFIX + "/@name",))
+    for path in ROUND_16_REFUSED:
+        add("round 16 endpoint " + repr(path), invalid, endpoints=(PREFIX + path,))
+        add("round 16 scope entry " + repr(path), malformed, scope=[PREFIX + path])
+    add("round 16 parameter on an ordinary segment", endpoints=(PREFIX + "/page;v=1",))
+    add("round 16 parameter in a scope entry", scope=[PREFIX + "/a;b"],
+        endpoints=(PREFIX + "/a;b/x",))
+    add("round 16 dots after the first parameter", endpoints=(PREFIX + "/x;../y",))
+    add("round 16 three dots with a parameter", endpoints=(PREFIX + "/...;x",))
+    add("round 16 escaped dot inside a segment", endpoints=(PREFIX + "/a%2eb",))
+    add("round 16 dots after an escaped delimiter", endpoints=(PREFIX + "/x%3b../y",))
     for endpoint in [
         None, "http://a.example/docs", "https://a.example:444/docs", "https://a.example:0443/docs",
         "https://a.example:0/docs", "https://a.example:80/docs", "https://a.example:4430/docs",

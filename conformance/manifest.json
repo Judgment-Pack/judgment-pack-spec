@@ -8,6 +8,11 @@
     "formatAssertionRequired": true,
     "rejectDuplicateObjectMembers": true
   },
+  "diagnosticVocabulary": {
+    "advisory": [
+      "JPS-RULES-OVERLAP"
+    ]
+  },
   "cases": [
     {
       "id": "carrier-invalid-json",
@@ -577,6 +582,30 @@
         "path": "/extensions/org.judgmentpack.future"
       },
       "focus": "specification-reserved extension namespace",
+      "specSection": "§9"
+    },
+    {
+      "id": "structural-unqualified-required-extension",
+      "path": "structural/unqualified-required-extension.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "required extension names use a reverse-domain namespace",
+      "specSection": "§9"
+    },
+    {
+      "id": "structural-reserved-required-extension-name",
+      "path": "structural/reserved-required-extension-name.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "required extension names cannot use the specification-reserved namespace",
       "specSection": "§9"
     },
     {
@@ -1359,6 +1388,239 @@
       "expectedDiagnostic": null,
       "focus": "membership comparison accepts a one-item array operand",
       "specSection": "§7.4"
+    },
+    {
+      "id": "escalation-routes",
+      "path": "valid/escalation-routes.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "escalation routes",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-both",
+      "path": "structural/escalation-routes-both.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ONEOF",
+        "path": "/escalation"
+      },
+      "focus": "escalation routes both",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-nine",
+      "path": "structural/escalation-routes-nine.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MAXITEMS",
+        "path": "/escalation/routes"
+      },
+      "focus": "escalation routes nine",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-outside-trigger",
+      "path": "structural/escalation-routes-outside-trigger.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/escalation/routes/0/triggers"
+      },
+      "focus": "escalation routes outside trigger",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-empty-triggers",
+      "path": "structural/escalation-routes-empty-triggers.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ESCALATION-TRIGGERS",
+        "path": "/escalation/routes/0/triggers"
+      },
+      "focus": "escalation routes empty triggers",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-empty",
+      "path": "structural/escalation-routes-empty.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-COLLECTION-ARITY",
+        "path": "/escalation/routes"
+      },
+      "focus": "escalation routes empty",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-unknown-member",
+      "path": "structural/escalation-routes-unknown-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/escalation/routes/0/extra"
+      },
+      "focus": "escalation routes unknown member",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-missing-target",
+      "path": "structural/escalation-routes-missing-target.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/escalation/routes/0/target"
+      },
+      "focus": "escalation routes missing target",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-eight",
+      "path": "valid/escalation-routes-eight.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "escalation routes eight",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "advisory-rules-overlap-exact",
+      "path": "advisory/rules-overlap-exact.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [
+        {
+          "code": "JPS-RULES-OVERLAP",
+          "certainty": "exact",
+          "severity": {
+            "validate": "warning",
+            "strict": "error",
+            "publish": "block"
+          },
+          "path": "/rules/0",
+          "rules": [
+            { "id": "r-medium", "outcome": "medium" },
+            { "id": "r-high", "outcome": "high" }
+          ],
+          "overlap": {
+            "path": "/score",
+            "from": "70",
+            "fromInclusive": true
+          },
+          "witnessFacts": { "score": "70" },
+          "effect": "Core §8 records conflict; the disposition is unresolved.",
+          "suggestedRewrite": {
+            "ruleId": "r-medium",
+            "when": {
+              "op": "all",
+              "conditions": [
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "greater-than-or-equal",
+                  "value": "40"
+                },
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "less-than",
+                  "value": "70"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "focus": "different outcomes with an exact non-empty numeric overlap",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-touching",
+      "path": "advisory/rules-touching.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [],
+      "focus": "adjacent numeric ranges touch at an exclusive boundary without overlapping",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-overlap-same-outcome",
+      "path": "advisory/rules-overlap-same-outcome.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [],
+      "focus": "overlapping rules that name the same outcome are compatible",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-exclusive-rewrite",
+      "path": "advisory/rules-exclusive-rewrite.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [],
+      "focus": "the suggested two-comparison rewrite makes the numeric bands exclusive",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-overlap-not-excluded",
+      "path": "advisory/rules-overlap-not-excluded.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [
+        {
+          "code": "JPS-RULES-OVERLAP",
+          "certainty": "not-excluded",
+          "severity": {
+            "validate": "warning",
+            "strict": "warning",
+            "publish": "warning"
+          },
+          "path": "/rules/0",
+          "rules": [
+            { "id": "r-medium", "outcome": "medium" },
+            { "id": "r-high", "outcome": "high" }
+          ],
+          "effect": "Core §8 records conflict; the disposition is unresolved.",
+          "suggestedRewrite": {
+            "ruleId": "r-medium",
+            "when": {
+              "op": "all",
+              "conditions": [
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "greater-than-or-equal",
+                  "value": "40"
+                },
+                {
+                  "op": "not",
+                  "condition": {
+                    "op": "fact",
+                    "path": "/priority",
+                    "operator": "greater-than-or-equal",
+                    "value": "70"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "focus": "conditions on independent fact paths do not exclude overlap",
+      "specSection": "§3.3.1"
     }
   ]
 }

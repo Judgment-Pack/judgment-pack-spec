@@ -1,0 +1,76 @@
+{
+  "formatVersion": "1.0.0",
+  "kind": "policy",
+  "id": "https://example.invalid/policy-companion-contract/data-access/policy",
+  "version": "1.0.0",
+  "title": "Data access — synthetic policy content",
+  "managementMode": "workspace-managed",
+  "content": {
+    "bytesDigest": "sha256:801a0d0969c0ffe5b95d12bbdc593c823a995ea28ccdb894b0beb7de370ba172",
+    "byteLength": 449,
+    "mediaType": "text/plain"
+  },
+  "sections": [
+    {
+      "id": "eligibility",
+      "title": "Automated release",
+      "anchor": {
+        "startByte": 41,
+        "endByte": 999999,
+        "bytesDigest": "sha256:95eac1de35b93fdd947821f9336f8441a4ae4ffd69473e4ee332951b150c3896"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 1"
+        }
+      ]
+    },
+    {
+      "id": "exception-review",
+      "title": "Restricted requests",
+      "anchor": {
+        "startByte": 215,
+        "endByte": 351,
+        "bytesDigest": "sha256:d2f664a5c4e515f11a5e05c0a2be36d4de7600b0b2d4f33f81dfafed55b441e8"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 2"
+        }
+      ]
+    },
+    {
+      "id": "audit-review",
+      "title": "Quarterly audit",
+      "anchor": {
+        "startByte": 351,
+        "endByte": 449,
+        "bytesDigest": "sha256:7f4e8c2f9f2a9ad8f3276c6610f9e9a140833edfd9b46dbf825a1638ab8b6a6e"
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "retained-original",
+          "location": "Clause 3"
+        }
+      ]
+    }
+  ],
+  "sourceProvenance": [
+    {
+      "id": "retained-original",
+      "source": {
+        "provider": "synthetic-fixture",
+        "accountId": "fictional-organization",
+        "resourceId": "data-access-original"
+      },
+      "sourceRevision": null,
+      "content": {
+        "bytesDigest": "sha256:9a4f335306e2a8e4fbcf73f5a5bad14f45369fa22985756181eeb8ea1ee217dd",
+        "byteLength": 433,
+        "mediaType": "text/plain"
+      }
+    }
+  ]
+}

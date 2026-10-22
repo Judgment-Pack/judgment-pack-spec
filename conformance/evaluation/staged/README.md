@@ -84,3 +84,11 @@ fixture must fail for exactly one reason, as RFC 0013 requires of it.
 The specification repository owns no evaluator, so nothing here runs a case. To run one, give an
 evaluator the case's `pack`, its `facts`, its `evidenceAvailability` and its `supportedExtensions`,
 and compare the class it reports.
+
+## Core routes (#219)
+
+The `routes-` rows are hand-written expectations for the accepted routing change, staged after
+`0.2.0-draft`; the released manifest is unchanged. The case carrier now admits `handoff.routes`
+for these rows. They exercise conditional selection, ordered fan-out, unconditional routes,
+no selected route, duplicate targets, and legacy target-only bytes. Repository checks verify
+selection against each expected reason set; they are not execution of a Core evaluator.

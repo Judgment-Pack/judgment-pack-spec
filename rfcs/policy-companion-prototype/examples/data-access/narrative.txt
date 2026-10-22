@@ -1,0 +1,10 @@
+SYNTHETIC RFC PROTOTYPE — Data access
+
+Automated release
+Only de-identified datasets may be released through this automated path. Identifiable datasets are refused; missing classification goes to a data steward.
+
+Restricted requests
+A data steward reviews restricted requests through the manual access process. This pack cannot grant an exception.
+
+Quarterly audit
+Review the access log quarterly. A separate audit implementation is still needed.
