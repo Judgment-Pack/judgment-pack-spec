@@ -99,9 +99,11 @@ containers and unsuccessful work; nothing is truncated to fit. The same bounds h
 bytes and input bytes. A workflow runner refuses admission before acquisition when a known bound
 fails. Account for results in instance order: stage order, then selected parent-record order,
 then output index, regardless of acquisition or completion order. The first instance whose
-outputs would exceed a branch bound and every later instance of that stage record
-`limit-exceeded`, emitting no outputs. Earlier completed siblings' outputs remain in the closed
-set with those failures explicit. Nothing is truncated to fit.
+outputs would exceed a branch bound and every later instance of that stage admitted for acquisition
+record `limit-exceeded`, emitting no outputs. Under §§3 and 7, an instance that fails projection or
+influence admission is not admitted for acquisition and keeps its own failure code regardless of
+its position in the stage. Earlier completed siblings' outputs remain in the closed set with those
+failures explicit. Nothing is truncated to fit.
 
 ## 3. Stages and projected cases
 
@@ -561,7 +563,9 @@ check 3, an earlier instance's `influence-mismatch` precedes a later one's `case
    (`case-mismatch`), then inherited classes, influence and explicit admission
    (`influence-mismatch`).
 4. The expected instance inventory, admission keys, attempts, terminal states, selection refusals,
-   deterministic bound accounting and stage closure (`inventory-mismatch`); then re-extract all
+   deterministic bound accounting and stage closure (`inventory-mismatch`), applying §2's
+   later-sibling rule only after each instance's admission status is established and only to
+   admitted instances, so an instance refused at admission keeps its own code; then re-extract all
    outputs, compare payload bytes, order, complete sets, parent/selection references, relation and
    lineage pins (`output-mismatch`). Neither failure nor missing data becomes `[]`.
 5. From those checked output records and their retained dispositions, recompute every stage
@@ -759,7 +763,11 @@ revisions or relations, adding an unselected child, omitting or repeating a sele
 laundering generated influence. Include a record-class downstream operation parameterised from a
 generated payload without generated admission, refused before acquisition, including an affected
 case parameter its request never names. Include two siblings of six outputs when ten records
-remain, completed in both orders: the second and every later sibling record `limit-exceeded`.
+remain, completed in both orders: the second and every later admitted sibling record
+`limit-exceeded`. In one stage record, in order, an admitted completed instance, an admitted
+`limit-exceeded` instance, a `projection-invalid` instance and an admitted later sibling that
+records `limit-exceeded`; mutate the projection failure to `limit-exceeded` for an
+`inventory-mismatch` twin.
 Include interruption after atomic admission, uncertain acquisition, a recorded selection bound
 refusal, and retries before and after consumption. Freeze expected reports with the recordings.
 Add integer and named family-3 variants with matching published identities, and refuse changed
