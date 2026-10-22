@@ -7,6 +7,8 @@ here.
 
 ### Added
 
+- RFC 0022 aligns reusable-subgraph bounds, routed handoff provenance, dialect-owned remapping and
+  cross-installation packaging with the decisions on #129, #219, #232 and #170 (#233).
 - Dialect-owned data quality and typed research results (#170, #169): six closed deterministic
   conversions with recorded failures, three explicit reconciliation modes, presence/type/domain
   findings surfaced as unknown facts, transformation lineage, typed research result states,
