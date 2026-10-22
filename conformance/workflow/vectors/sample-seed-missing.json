@@ -1,0 +1,18 @@
+{
+  "vectorVersion": 1,
+  "kind": "sample",
+  "expectedRefusal": "input-malformed",
+  "stageMaxSize": 1,
+  "selection": {
+    "selectionVersion": 1,
+    "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "execution": "left-run",
+    "upstreamStage": "organisations",
+    "outputSetDigest": "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+    "selected": [],
+    "mode": "sample",
+    "revision": 1,
+    "size": 1,
+    "algorithm": "sha256-rank-v1"
+  }
+}

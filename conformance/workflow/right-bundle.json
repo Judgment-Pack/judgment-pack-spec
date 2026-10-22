@@ -1,0 +1,86 @@
+{
+  "fixtureVersion": 1,
+  "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "executionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "execution": "right-run",
+  "stages": [
+    {
+      "stage": "organisations",
+      "records": [
+        {
+          "recordDigest": "sha256:8181818181818181818181818181818181818181818181818181818181818181",
+          "output": {
+            "outputRecordVersion": 1,
+            "payloadDigest": "sha256:1010101010101010101010101010101010101010101010101010101010101010",
+            "lineage": {
+              "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "execution": "right-run", "stage": "organisations", "instance": "org-instance",
+              "publishedDialectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bindingDocumentDigest": null,
+              "boundDialectDigest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "packDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "releaseDigest": "sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+              "preparationDigest": "sha256:b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4",
+              "auditDigest": "sha256:b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5",
+              "outputPointer": "/organisations", "index": 0,
+              "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+              "caseDigest": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+              "parentRecord": null, "selectionDigest": null,
+              "relation": { "label": "discovered-for", "direction": "output-to-parent" },
+              "influence": { "classes": ["generated"], "generatedInfluence": true }
+            }
+          },
+          "disposition": { "kind": "outcome", "outcomeId": "low", "reasons": [], "handoff": { "state": "none" } }
+        }
+      ],
+      "summary": {
+        "summaryVersion": 1,
+        "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "execution": "right-run", "stage": "organisations", "records": 1,
+        "recordsDigest": "sha256:d917664b0b7081729703649c7a9d96b2cf3e220371d577b1b6ce604d2900b9d9",
+        "byKind": { "outcome": 1, "not-applicable": 0, "unresolved": 0 },
+        "byOutcome": { "low": 1 }, "byReason": {},
+        "byRule": { "low": { "contributors": {}, "fallback": 1 } }
+      }
+    },
+    {
+      "stage": "people",
+      "records": [
+        {
+          "recordDigest": "sha256:8484848484848484848484848484848484848484848484848484848484848484",
+          "output": {
+            "outputRecordVersion": 1,
+            "payloadDigest": "sha256:6060606060606060606060606060606060606060606060606060606060606060",
+            "lineage": {
+              "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "execution": "right-run", "stage": "people", "instance": "people-three",
+              "publishedDialectDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "bindingDocumentDigest": null,
+              "boundDialectDigest": "sha256:c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1",
+              "packDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+              "releaseDigest": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+              "preparationDigest": "sha256:d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8",
+              "auditDigest": "sha256:d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9",
+              "outputPointer": "/people", "index": 0,
+              "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+              "caseDigest": "sha256:0606060606060606060606060606060606060606060606060606060606060606",
+              "parentRecord": "sha256:8181818181818181818181818181818181818181818181818181818181818181",
+              "selectionDigest": "sha256:1414141414141414141414141414141414141414141414141414141414141414",
+              "relation": { "label": "person-at-organisation", "direction": "output-to-parent" },
+              "influence": { "classes": ["generated"], "generatedInfluence": true }
+            }
+          },
+          "disposition": { "kind": "not-applicable", "reasons": ["not-applicable"], "handoff": { "state": "none" } }
+        }
+      ],
+      "summary": {
+        "summaryVersion": 1,
+        "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "execution": "right-run", "stage": "people", "records": 1,
+        "recordsDigest": "sha256:f0bd46c6e2634becb94e5fc6f1707a04eaf3d970e65552adf1e9801932aae105",
+        "byKind": { "outcome": 0, "not-applicable": 1, "unresolved": 0 },
+        "byOutcome": {}, "byReason": {}, "byRule": {}
+      }
+    }
+  ]
+}

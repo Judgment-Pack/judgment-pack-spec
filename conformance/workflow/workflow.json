@@ -1,0 +1,38 @@
+{
+  "workflowVersion": 1,
+  "stages": [
+    {
+      "id": "organisations",
+      "dialect": { "version": 3, "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+      "pack": { "id": "https://example.invalid/packs/organisations", "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+      "input": { "root": true },
+      "execution": "once",
+      "caseBindings": [],
+      "outputs": { "pointer": "/organisations", "cardinality": "many" },
+      "relation": { "label": "discovered-for", "direction": "output-to-parent" },
+      "selection": { "mode": "reviewer" },
+      "sample": { "mode": "sample", "maxSize": 1 }
+    },
+    {
+      "id": "people",
+      "dialect": { "version": 3, "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" },
+      "pack": { "id": "https://example.invalid/packs/people", "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd" },
+      "input": { "fromStage": "organisations", "selected": true },
+      "execution": "each-selected-record",
+      "caseBindings": [
+        { "from": "/id", "to": "/organisationId", "type": "string", "required": true }
+      ],
+      "outputs": { "pointer": "/people", "cardinality": "many" },
+      "relation": { "label": "person-at-organisation", "direction": "output-to-parent" },
+      "sample": { "mode": "sample", "maxSize": 1 }
+    }
+  ],
+  "result": "people",
+  "limits": {
+    "maxStages": 2,
+    "maxRecords": 16,
+    "maxInstances": 8,
+    "maxAttempts": 2,
+    "maxBytes": 1048576
+  }
+}
