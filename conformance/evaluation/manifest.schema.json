@@ -124,8 +124,14 @@
                 "properties": { "state": { "const": "requested" } },
                 "required": ["state"]
               },
-              "then": { "required": ["triggeredBy"] },
-              "else": { "not": { "required": ["triggeredBy"] } }
+              "then": {
+                "required": ["triggeredBy"],
+                "properties": { "routes": { "minItems": 1 } }
+              },
+              "else": {
+                "not": { "required": ["triggeredBy"] },
+                "properties": { "routes": { "maxItems": 0 } }
+              }
             }
           ]
         }

@@ -896,11 +896,13 @@
                 ]
               },
               "then": {
+                "properties": { "routes": { "minItems": 1 } },
                 "required": [
                   "triggeredBy"
                 ]
               },
               "else": {
+                "properties": { "routes": { "maxItems": 0 } },
                 "not": {
                   "required": [
                     "triggeredBy"
