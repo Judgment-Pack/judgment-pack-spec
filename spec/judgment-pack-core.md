@@ -187,6 +187,10 @@ The diagnostic has these members:
 - a suggested exclusive rewrite, identifying the rule to rewrite and giving its replacement
   `when` condition.
 
+The two rule ids in one diagnostic must differ. The manifest schema requires two unique rule
+identity objects, but Draft 2020-12 cannot compare only their `id` member across array items, so a
+manifest reader also enforces this id-level invariant.
+
 For the common ascending numeric bands, the suggestion bounds the lower rule using Core's existing
 two-comparison form. For example, replace `score >= 40` with an `all` of
 `greater-than-or-equal 40` and `less-than 70` when the higher rule is `score >= 70`. No new operator

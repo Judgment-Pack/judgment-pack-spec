@@ -1,8 +1,9 @@
 # Conformance corpus
 
-This directory contains 132 focused conformance cases for testing the carrier, structural, and
-semantic requirements of Judgment Pack Core `0.2.0-draft`. It is versioned with the draft but is not
-yet a complete or normative conformance suite. Evaluator behavior is out of scope *here*: it has its
+This directory contains 127 focused conformance cases for testing the carrier, structural, and
+semantic requirements of Judgment Pack Core `0.2.0-draft`, plus five advisory vectors. It is
+versioned with the draft but is not yet a complete or normative conformance suite. Evaluator
+behavior is out of scope *here*: it has its
 own corpus, in [`evaluation/`](evaluation/README.md), which is normative for the evaluator conformance
 class of §3.4. A document-conformance result never depends on it. Nor is the checkpoint witness
 statement in scope here: [`witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness)
@@ -39,6 +40,9 @@ release. Passing fixtures alone establishes no Core or Policy conformance claim.
 - `advisory/` contains semantically conforming documents for recommended checks that do not affect
   conformance. Their `expectedAdvisories` entries use the manifest's closed advisory diagnostic
   vocabulary and record mode-specific severity; an empty array expects a clean advisory result.
+  Its `diagnostic-negative/manifest.json` separately carries three malformed diagnostic rows and
+  two positive controls; those contract checks are not pack vectors and are not part of either
+  headline count.
 
 Validation proceeds in layer order. A runner should stop a case at its target layer rather than
 reporting downstream diagnostics for content that failed an earlier layer.

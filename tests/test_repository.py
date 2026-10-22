@@ -14,6 +14,7 @@ from typing import Any, Iterable
 from unittest.mock import patch
 
 from jsonschema import Draft202012Validator, FormatChecker
+from referencing import Registry, Resource
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -84,6 +85,24 @@ class Diagnostic:
 def pointer(parts: Iterable[Any]) -> str:
     encoded = [str(part).replace("~", "~0").replace("/", "~1") for part in parts]
     return "" if not encoded else "/" + "/".join(encoded)
+
+
+def rule_overlap_diagnostic_keywords(
+    validator: Draft202012Validator, diagnostic: dict[str, Any]
+) -> set[str]:
+    """Return schema keywords plus Core §3.3.1's cross-item id invariant."""
+    pending = list(validator.iter_errors(diagnostic))
+    keywords = set()
+    while pending:
+        error = pending.pop()
+        keywords.add(error.validator)
+        pending.extend(error.context)
+    rules = diagnostic.get("rules")
+    if isinstance(rules, list):
+        ids = [rule.get("id") for rule in rules if isinstance(rule, dict)]
+        if len(ids) == len(rules) and len(ids) != len(set(ids)):
+            keywords.add("distinct-rule-ids")
+    return keywords
 
 
 def assert_no_unpaired_surrogates(text: str) -> None:
@@ -679,9 +698,12 @@ class RepositoryConformanceTests(unittest.TestCase):
         )
         cls.manifest = strict_json_loads(MANIFEST_PATH.read_text(encoding="utf-8"))
         cls.validator = Draft202012Validator(cls.schema, format_checker=FormatChecker())
+        cls.manifest_registry = Registry().with_resource(
+            SCHEMA_ID, Resource.from_contents(cls.schema)
+        )
 
-    def test_document_corpus_counts_match_the_manifest(self) -> None:
-        """Every CURRENT statement of the document-corpus size is the manifest's.
+    def test_document_and_advisory_counts_match_the_manifest(self) -> None:
+        """Every CURRENT statement separates conformance cases from advisories.
 
         The manifest is the authoritative index and these statements repeat its
         count by hand, so a corpus addition that misses one leaves a public
@@ -696,27 +718,43 @@ class RepositoryConformanceTests(unittest.TestCase):
         what was true when published, and rewriting them would be falsifying a
         record rather than fixing a stale one.
         """
-        count = len(self.manifest["cases"])
+        advisory_count = sum(
+            case["path"].startswith("advisory/") for case in self.manifest["cases"]
+        )
+        conformance_count = len(self.manifest["cases"]) - advisory_count
+        self.assertEqual((127, 5), (conformance_count, advisory_count))
         statements = (
             (
                 "README.md",
                 "the repository contents table",
-                f"| {count} non-normative document-conformance test cases",
+                f"| {conformance_count} document-conformance cases and "
+                f"{advisory_count} advisory vectors",
             ),
             (
                 "conformance/README.md",
                 "the opening description",
-                f"This directory contains {count} focused conformance cases",
+                f"This directory contains {conformance_count} focused conformance cases",
+            ),
+            (
+                "conformance/README.md",
+                "the opening advisory count",
+                "plus five advisory vectors",
             ),
             (
                 "web/build.py",
                 "the research-presentation note",
-                f"Measured across {count} tests on the file format",
+                f"Measured across {conformance_count} tests on the file format and "
+                f"{advisory_count} advisory vectors",
             ),
             (
                 "web/build.py",
                 "the research-presentation summary",
-                f"held in place by {count} tests on the format",
+                f"held in place by {conformance_count} tests on the format",
+            ),
+            (
+                "web/build.py",
+                "the research-presentation summary advisory count",
+                f"{advisory_count} advisory vectors, and 20 tests on the answers",
             ),
         )
         for relative, where, expected in statements:
@@ -726,7 +764,8 @@ class RepositoryConformanceTests(unittest.TestCase):
                     expected,
                     text,
                     f"{relative}: {where} no longer states the manifest's "
-                    f"{count} document-conformance cases. Update that statement "
+                    f"{conformance_count} document-conformance cases and "
+                    f"{advisory_count} advisory vectors. Update that statement "
                     f"to match conformance/manifest.json, which is authoritative; "
                     f"do not change CHANGELOG.md, releases/, or the FAQ question "
                     f"count, which are out of scope.",
@@ -872,7 +911,9 @@ class RepositoryConformanceTests(unittest.TestCase):
 
     def test_manifest_matches_its_schema(self) -> None:
         validator = Draft202012Validator(
-            self.manifest_schema, format_checker=FormatChecker()
+            self.manifest_schema,
+            format_checker=FormatChecker(),
+            registry=self.manifest_registry,
         )
         errors = sorted(validator.iter_errors(self.manifest), key=lambda item: list(item.path))
         self.assertEqual([], [error.message for error in errors])
@@ -880,6 +921,14 @@ class RepositoryConformanceTests(unittest.TestCase):
         self.assertEqual(self.manifest["specVersion"], SPEC_VERSION)
         self.assertTrue(self.manifest["validationProfile"]["formatAssertionRequired"])
         self.assertTrue(self.manifest["validationProfile"]["rejectDuplicateObjectMembers"])
+        diagnostic_validator = validator.evolve(
+            schema={"$ref": "#/$defs/ruleOverlapDiagnostic"}
+        )
+        for case in self.manifest["cases"]:
+            for diagnostic in case.get("expectedAdvisories", []):
+                self.assertEqual(
+                    set(), rule_overlap_diagnostic_keywords(diagnostic_validator, diagnostic)
+                )
 
     def test_rule_overlap_advisory_vectors_cover_the_recommendation(self) -> None:
         self.assertEqual(["JPS-RULES-OVERLAP"], self.manifest["diagnosticVocabulary"]["advisory"])
@@ -994,7 +1043,11 @@ class RepositoryConformanceTests(unittest.TestCase):
                 parent = parent[part]
             del parent[property_path[-1]]
             with self.subTest(member="/".join(property_path)):
-                self.assertFalse(Draft202012Validator(schema).is_valid(self.manifest))
+                self.assertFalse(
+                    Draft202012Validator(
+                        schema, registry=self.manifest_registry
+                    ).is_valid(self.manifest)
+                )
 
         advisories = [
             advisory
@@ -1010,6 +1063,65 @@ class RepositoryConformanceTests(unittest.TestCase):
             {"warning", "block"},
             {item["severity"]["publish"] for item in advisories},
         )
+
+    def test_rule_overlap_diagnostic_negative_vectors(self) -> None:
+        manifest = strict_json_loads(
+            (CONFORMANCE / "advisory/diagnostic-negative/manifest.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual("review", manifest["status"])
+        self.assertEqual("§3.3.1", manifest["specSection"])
+        self.assertEqual(2, len({case["id"] for case in manifest["controls"]}))
+        self.assertEqual(3, len({case["id"] for case in manifest["cases"]}))
+
+        validator = Draft202012Validator(
+            self.manifest_schema, registry=self.manifest_registry
+        ).evolve(
+            schema={"$ref": "#/$defs/ruleOverlapDiagnostic"}
+        )
+        for control in manifest["controls"]:
+            with self.subTest(control=control["id"]):
+                self.assertEqual(
+                    set(), rule_overlap_diagnostic_keywords(validator, control["diagnostic"])
+                )
+
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                diagnostic = case["diagnostic"]
+                self.assertIn(
+                    case["expectedKeyword"],
+                    rule_overlap_diagnostic_keywords(validator, diagnostic),
+                )
+
+    def test_rule_overlap_region_members_are_exercised(self) -> None:
+        import copy
+
+        manifest = strict_json_loads(
+            (CONFORMANCE / "advisory/diagnostic-negative/manifest.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        controls = {case["id"]: case["diagnostic"] for case in manifest["controls"]}
+        members = (
+            (0, "path", "shared-values"),
+            (0, "sharedValues", "shared-values"),
+            (1, "path", "bounded-range"),
+            (1, "from", "bounded-range"),
+            (1, "fromInclusive", "bounded-range"),
+            (1, "to", "bounded-range"),
+            (1, "toInclusive", "bounded-range"),
+        )
+        for branch, member, control in members:
+            schema = copy.deepcopy(self.manifest_schema)
+            del schema["$defs"]["ruleOverlapDiagnostic"]["properties"]["overlap"][
+                "oneOf"
+            ][branch]["properties"][member]
+            validator = Draft202012Validator(
+                schema, registry=self.manifest_registry
+            ).evolve(schema={"$ref": "#/$defs/ruleOverlapDiagnostic"})
+            with self.subTest(branch=branch, member=member):
+                self.assertFalse(validator.is_valid(controls[control]))
 
     def test_manifest_covers_every_fixture_once(self) -> None:
         case_ids = collections.Counter(case["id"] for case in self.manifest["cases"])

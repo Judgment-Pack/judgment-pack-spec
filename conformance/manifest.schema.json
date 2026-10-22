@@ -122,6 +122,7 @@
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
+          "uniqueItems": true,
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -133,8 +134,53 @@
           }
         },
         "overlap": {
-          "type": "object",
-          "minProperties": 1
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["path", "sharedValues"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$"
+                },
+                "sharedValues": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["path"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$"
+                },
+                "from": {
+                  "$ref": "../judgment-pack-core.schema.json#/$defs/decimalString"
+                },
+                "fromInclusive": { "type": "boolean" },
+                "to": {
+                  "$ref": "../judgment-pack-core.schema.json#/$defs/decimalString"
+                },
+                "toInclusive": { "type": "boolean" }
+              },
+              "dependentRequired": {
+                "from": ["fromInclusive"],
+                "fromInclusive": ["from"],
+                "to": ["toInclusive"],
+                "toInclusive": ["to"]
+              },
+              "anyOf": [
+                { "required": ["from"] },
+                { "required": ["to"] }
+              ]
+            }
+          ]
         },
         "witnessFacts": {
           "type": "object"
@@ -148,7 +194,9 @@
           "required": ["ruleId", "when"],
           "properties": {
             "ruleId": { "type": "string", "minLength": 1 },
-            "when": { "type": "object" }
+            "when": {
+              "$ref": "../judgment-pack-core.schema.json#/$defs/condition"
+            }
           }
         }
       },
