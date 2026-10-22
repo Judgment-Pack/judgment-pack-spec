@@ -71,6 +71,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0020] | The workflow | Draft | Specification (a proposed companion document; see below) |
 | [0022] | Reusable subgraphs contract — explicit encapsulation and reference binding | Draft | Research line (see below) |
 | [0023](0023-policy-companion.md) | Policy content and governing adoption | Accepted | Specification (companion at draft maturity; second independently authored reader criterion open); live governance remains host-owned |
+| [0024] | Retained workflow admission proofs | Draft | Specification (a proposed amendment to the Draft workflow; unresolved portable encoding) |
 | [0025](0025-core-escalation-routes.md) | Core escalation routes | Accepted design (#219); review pending | Specification (Core) |
 | [0026](0026-document-ceiling-profiles.md) | Document ceiling profiles | Accepted design (#232); review pending | Specification and companions |
 
@@ -78,6 +79,7 @@ stable feature requires two independent implementations and conformance cases.
 [0019]: 0019-exchange.md
 [0020]: 0020-workflow.md
 [0022]: 0022-reusable-subgraphs.md
+[0024]: 0024-workflow-admission-proof.md
 
 RFC 0018 states how a pack's facts and evidence are obtained and derived, and what a preparation
 establishes per part. Its companion, [`spec/dialect.md`](../spec/dialect.md), defines the
@@ -105,6 +107,10 @@ RFC 0019 stays a Draft; a hosted registry remains out of scope (Unresolved quest
 
 RFC 0020 proposes `spec/workflow.md` beside Core, with a reader class and fixtures from a
 two-stage run, none recorded yet.
+
+RFC 0024 proposes public accounting epochs for independently checkable workflow byte refusals,
+with proof bytes included in actual bundle bounds. Its encoding and transitions have explicit
+acceptance blockers; it changes neither RFC 0020 nor its companion and creates no conformance claim.
 
 The "Belongs to" column records where each proposal would land if accepted. A format that
 independent tools must agree on is a candidate for the specification. An algorithm or engine belongs
