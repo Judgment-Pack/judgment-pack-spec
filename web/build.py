@@ -2333,6 +2333,7 @@ UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/evaluation/staged"),
     PurePosixPath("conformance/witness"),
     PurePosixPath("conformance/dialect"),
+    PurePosixPath("conformance/workflow"),
     PurePosixPath("conformance/policy"),
     PurePosixPath("schema/policy"),
 )
@@ -2545,6 +2546,7 @@ def build_not_found(output_root: Path) -> None:
 
 CANONICAL_SCHEMA_SOURCES = (
     "schema/judgment-pack-core.schema.json",
+    "schema/workflow-1.schema.json",
     # The superseded schemas stay served at the $id each was published under, so a pack or manifest that
     # still declares the older exact specVersion remains checkable and a cited identifier keeps resolving.
     "schema/judgment-pack-core-0.1.0-draft.schema.json",

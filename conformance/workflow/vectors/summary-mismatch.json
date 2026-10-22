@@ -1,0 +1,20 @@
+{
+  "vectorVersion": 1,
+  "kind": "summary",
+  "expectedRefusal": "summary-mismatch",
+  "dispositions": [
+    { "kind": "outcome", "outcomeId": "review", "reasons": [], "handoff": { "state": "none" } }
+  ],
+  "summary": {
+    "summaryVersion": 1,
+    "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "execution": "left-run",
+    "stage": "organisations",
+    "records": 1,
+    "recordsDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "byKind": { "outcome": 1, "not-applicable": 0, "unresolved": 0 },
+    "byOutcome": { "review": 1 },
+    "byReason": {},
+    "byRule": { "review": { "contributors": { "r-review": 1 }, "fallback": 0 } }
+  }
+}

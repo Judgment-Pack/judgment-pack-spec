@@ -20,6 +20,14 @@ here.
   duplicate targets and no selection; profile negotiation, Dialect outputs and delivery receipts
   remain separate work.
 
+- RFC 0020's accepted issue #228 amendment: workflow output envelopes name their contributing
+  rule outside Core's unchanged disposition; every stage records a closed disposition summary
+  and a reproducible seeded sample; the workflow verifier recomputes both and refuses disagreement;
+  and drift is a comparison over two verified bundles of the same workflow, without a verdict.
+  The closed workflow schema and hand-written two-stage contract fixture carry the new records,
+  digest recomputation, drift rows and refusal vectors. No workflow implementation, recorded
+  executor run or conformance claim is added.
+
 - Official-draft Policy promotion preparation: versioned closed format `1.0.0`
   schemas, retained-byte examples and 124 staged agreement vectors, explicit
   migration/provenance and a scoped independent draft release route through the
