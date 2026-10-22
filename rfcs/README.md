@@ -71,6 +71,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0020] | The workflow | Draft | Specification (a proposed companion document; see below) |
 | [0022] | Reusable subgraphs contract — explicit encapsulation and reference binding | Draft | Research line (see below) |
 | [0023](0023-policy-companion.md) | Policy content and governing adoption | Accepted (upon green CI and PR 218 merge) | Specification (draft Policy offline-reader companion); live governance remains host-owned |
+| [0025](0025-core-escalation-routes.md) | Core escalation routes | Accepted design (#219); review pending | Specification (Core) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md

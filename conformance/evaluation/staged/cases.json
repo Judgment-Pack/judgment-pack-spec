@@ -88,6 +88,299 @@
       "expectedErrorClass": "malformed-input",
       "focus": "both malformed-input and unsupported-required-extension apply, and the fixed order reports malformed-input; an implementation that checks extension support while reading the pack, before it looks at the evidence document, reports the wrong class here",
       "specSection": "§8.4"
+    },
+    {
+      "id": "routes-one",
+      "origin": "issue-219-hand-written",
+      "pack": "packs/routes.json",
+      "facts": {
+        "flags": {
+          "trackA": true,
+          "trackB": true,
+          "reviewDecided": false
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict"
+        ],
+        "handoff": {
+          "state": "requested",
+          "routes": [
+            {
+              "kind": "queue",
+              "name": "Conflict"
+            }
+          ],
+          "triggeredBy": [
+            "conflict"
+          ]
+        }
+      },
+      "focus": "routes one",
+      "specSection": "\u00a78.1"
+    },
+    {
+      "id": "routes-fan-out",
+      "origin": "issue-219-hand-written",
+      "pack": "packs/routes.json",
+      "facts": {
+        "flags": {
+          "trackA": true,
+          "trackB": true
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict",
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "routes": [
+            {
+              "kind": "queue",
+              "name": "Conflict"
+            },
+            {
+              "kind": "human-role",
+              "name": "Unknown"
+            }
+          ],
+          "triggeredBy": [
+            "conflict",
+            "unknown"
+          ]
+        }
+      },
+      "focus": "routes fan out",
+      "specSection": "\u00a78.1"
+    },
+    {
+      "id": "routes-outcome-no-request",
+      "origin": "issue-219-hand-written",
+      "pack": "packs/routes.json",
+      "facts": {
+        "flags": {
+          "trackA": true,
+          "trackB": false,
+          "reviewDecided": false
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "reasons": [],
+        "handoff": {
+          "state": "none",
+          "routes": []
+        },
+        "outcomeId": "track-a"
+      },
+      "focus": "routes outcome no request",
+      "specSection": "\u00a78.1"
+    },
+    {
+      "id": "routes-no-selection",
+      "origin": "issue-219-hand-written",
+      "pack": "packs/routes-filtered.json",
+      "facts": {
+        "flags": {
+          "trackA": false,
+          "trackB": false
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "none",
+          "routes": []
+        }
+      },
+      "focus": "routes no selection",
+      "specSection": "\u00a78.1"
+    },
+    {
+      "id": "routes-unconditional",
+      "origin": "issue-219-hand-written",
+      "pack": "packs/routes-unconditional.json",
+      "facts": {
+        "flags": {
+          "trackA": false,
+          "trackB": false
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "routes": [
+            {
+              "kind": "human-role",
+              "name": "Unknown"
+            }
+          ],
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "routes unconditional",
+      "specSection": "\u00a78.1"
+    },
+    {
+      "id": "routes-duplicate-target",
+      "origin": "issue-219-hand-written",
+      "pack": "packs/routes-duplicate.json",
+      "facts": {
+        "flags": {
+          "trackA": false,
+          "trackB": false
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "routes": [
+            {
+              "kind": "queue",
+              "name": "Conflict"
+            },
+            {
+              "kind": "queue",
+              "name": "Conflict"
+            }
+          ],
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "routes duplicate target",
+      "specSection": "\u00a78.1"
+    },
+    {
+      "id": "routes-legacy-target-bytes",
+      "origin": "issue-219-legacy-0.2.0-draft",
+      "pack": "packs/partial-trigger-conflict.json",
+      "facts": {
+        "flags": {
+          "trackA": true,
+          "trackB": true
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict",
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "conflict"
+          ]
+        }
+      },
+      "focus": "Single target retains the exact canonical disposition bytes of 0.2.0-draft",
+      "specSection": "\u00a7\u00a78.1, 8.3"
+    },
+    {
+      "id": "routes-direct-filtered",
+      "origin": "issue-219-hand-written",
+      "pack": "packs/routes-filtered.json",
+      "facts": {
+        "flags": {
+          "direct": true
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "none",
+          "routes": []
+        }
+      },
+      "focus": "routes direct filtered",
+      "specSection": "\u00a78.1"
+    },
+    {
+      "id": "routes-direct-unconditional",
+      "origin": "issue-219-hand-written",
+      "pack": "packs/routes-unconditional.json",
+      "facts": {
+        "flags": {
+          "direct": true
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "requested",
+          "routes": [
+            {
+              "kind": "human-role",
+              "name": "Unknown"
+            }
+          ],
+          "triggeredBy": [
+            "exception-escalation"
+          ]
+        }
+      },
+      "focus": "routes direct unconditional",
+      "specSection": "\u00a78.1"
+    },
+    {
+      "id": "routes-unconditional-no-trigger",
+      "origin": "issue-219-hand-written",
+      "pack": "packs/routes-unconditional.json",
+      "facts": {
+        "flags": {
+          "trackA": false,
+          "trackB": false,
+          "reviewDecided": false
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "none",
+          "routes": []
+        }
+      },
+      "focus": "routes unconditional no trigger",
+      "specSection": "\u00a78.1"
     }
   ]
 }

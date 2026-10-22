@@ -7,6 +7,12 @@ here.
 
 ### Added
 
+- Core escalation routes (#219): exclusive single target or up to eight conditional routes,
+  ordered fan-out in `handoff.routes`, complete retained reasons, and unchanged single-target
+  disposition bytes. Structural fixtures and staged evaluation vectors cover selection, bounds,
+  duplicate targets and no selection; profile negotiation, Dialect outputs and delivery receipts
+  remain separate work.
+
 - RFC 0020's accepted issue #228 amendment: workflow output envelopes name their contributing
   rule outside Core's unchanged disposition; every stage records a closed disposition summary
   and a reproducible seeded sample; the workflow verifier recomputes both and refuses disagreement;

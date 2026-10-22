@@ -1383,6 +1383,108 @@
       "expectedDiagnostic": null,
       "focus": "membership comparison accepts a one-item array operand",
       "specSection": "§7.4"
+    },
+    {
+      "id": "escalation-routes",
+      "path": "valid/escalation-routes.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "escalation routes",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-both",
+      "path": "structural/escalation-routes-both.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ONEOF",
+        "path": "/escalation"
+      },
+      "focus": "escalation routes both",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-nine",
+      "path": "structural/escalation-routes-nine.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MAXITEMS",
+        "path": "/escalation/routes"
+      },
+      "focus": "escalation routes nine",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-outside-trigger",
+      "path": "structural/escalation-routes-outside-trigger.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/escalation/routes/0/triggers"
+      },
+      "focus": "escalation routes outside trigger",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-empty-triggers",
+      "path": "structural/escalation-routes-empty-triggers.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ESCALATION-TRIGGERS",
+        "path": "/escalation/routes/0/triggers"
+      },
+      "focus": "escalation routes empty triggers",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-empty",
+      "path": "structural/escalation-routes-empty.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-COLLECTION-ARITY",
+        "path": "/escalation/routes"
+      },
+      "focus": "escalation routes empty",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-unknown-member",
+      "path": "structural/escalation-routes-unknown-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/escalation/routes/0/extra"
+      },
+      "focus": "escalation routes unknown member",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-missing-target",
+      "path": "structural/escalation-routes-missing-target.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/escalation/routes/0/target"
+      },
+      "focus": "escalation routes missing target",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-eight",
+      "path": "valid/escalation-routes-eight.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "escalation routes eight",
+      "specSection": "\u00a76.7"
     }
   ]
 }
