@@ -1,0 +1,18 @@
+{
+  "result": "reading",
+  "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "executionDigest": "sha256:2121212121212121212121212121212121212121212121212121212121212121",
+  "consistency": "agrees",
+  "completion": "complete",
+  "preparations": "agree",
+  "authentication": "not-established",
+  "dispositions": "not-replayed",
+  "counts": {
+    "stages": 2,
+    "instances": 2,
+    "outputs": 2,
+    "selections": 1,
+    "summaries": 2,
+    "samples": 1
+  }
+}

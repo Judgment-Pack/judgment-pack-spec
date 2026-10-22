@@ -4,8 +4,9 @@
 
 This is the proposed companion text of [RFC 0020](../rfcs/0020-workflow.md), a Draft. It is
 normative for nothing. Acceptance would place it beside Core, with the `workflow-verifier`
-reader class defined below. No workflow implementation, recorded fixture or conformance claim
-exists. The two-stage run in §11 is a recording requirement, not evidence already obtained.
+reader class defined below. No workflow implementation or conformance claim exists. Section 11's
+hand-written contract fixture records the bulk forms; the full two-stage run
+remains a recording requirement, not execution evidence already obtained.
 
 ## 1. Terms and canonical forms
 
@@ -22,8 +23,9 @@ are refused. An id is `[a-z][a-z0-9-]{0,63}`. A digest is `sha256:` and 64 lower
 characters, compared exactly. A timestamp has the form and valid instant of the dialect §1.
 
 JSON is strict as in [the dialect](../spec/dialect.md), §1: one value, well-formed Unicode and
-number literals retained. The workflow, selection, output, set and execution objects use its `canon`
-form: object members ordered by code point, arrays preserved, no whitespace or inserted defaults,
+number literals retained. The workflow, selection, output, set, summary and execution objects use
+its `canon` form: object members ordered by code point, arrays preserved, no whitespace or
+inserted defaults,
 all supplied members included, integers from −(2⁵³−1) to 2⁵³−1, and `-0` written `0`.
 Non-integer number literals have no form here. Their digests are SHA-256 of those canonical bytes.
 A digest member lives outside the object it names; an object never contains its own digest.
@@ -82,29 +84,31 @@ It names that stage's ordered outputs, without aggregating dispositions or disca
 | `maxAttempts` | 16 | attempts per instance |
 | `maxBytes` | 1073741824 | supplied bundle bytes, each file counted once |
 
-The bounds below and §1's integer domain apply to workflow, selection, output, set and execution
-objects and to cases and payloads; packs, acquisitions, preparations, audits and run exports keep
+The bounds below and §1's integer domain apply to workflow, selection, output, set, summary and
+execution objects and to cases and payloads; packs, acquisitions, preparations, audits and run exports keep
 their own formats' bounds and number domains, within the branch's aggregate byte and file limits.
 Those workflow objects have at most 64 container levels; cases and payloads have at most 32.
 The dialect §12 counting convention applies. Every object has at most 4096 members, every array
 at most 4096 elements, every decoded string and member name at most 65536 UTF-8 bytes, and every
 number literal at most 128 characters. Smaller bounds stated here or by a referenced format win.
 The bundle has at most 65536 files. The workflow is at most 262144 bytes; each selection and
-output envelope at most 65536; each case and payload at most 1048576; each set and the execution
-record at most 8388608. Dialect §12's smaller artifact and combined-input bounds
+output envelope at most 65536; each case and payload at most 1048576; each set, summary and the
+execution record at most 8388608. Dialect §12's smaller artifact and combined-input bounds
 also apply separately to every preparation, including retained attempts. Counts include empty
 containers and unsuccessful work; nothing is truncated to fit. The same bounds hold canonical
 bytes and input bytes. A workflow runner refuses admission before acquisition when a known bound
 fails. Account for results in instance order: stage order, then selected parent-record order,
 then output index, regardless of acquisition or completion order. The first instance whose
-outputs would exceed a branch bound and every later instance of that stage record
-`limit-exceeded`, emitting no outputs. Earlier completed siblings' outputs remain in the closed
-set with those failures explicit. Nothing is truncated to fit.
+outputs would exceed a branch bound and every later instance of that stage admitted for acquisition
+record `limit-exceeded`, emitting no outputs. Under §§3 and 7, an instance that fails projection or
+influence admission is not admitted for acquisition and keeps its own failure code regardless of
+its position in the stage. Earlier completed siblings' outputs remain in the closed set with those
+failures explicit. Nothing is truncated to fit.
 
 ## 3. Stages and projected cases
 
 A stage is exactly `{id, dialect, pack, input, execution, caseBindings, outputs, relation}` and
-the conditional `selection` below. `dialect` selects exactly one of two closed forms:
+the conditional `selection` and `sample` below. `dialect` selects exactly one of two closed forms:
 
 - `{version, digest}` for an integer-format dialect, where `version` is integer `2` or `3`;
 - `{formatVersion, id, version, digest}` for a named dialect, where `formatVersion` is exactly
@@ -166,6 +170,12 @@ O is a declared pack outcome id, 1 to 256 UTF-8 bytes. This is equality on the r
 §8.3 disposition's kind and, for `outcome`, its outcome id; reasons and handoff remain unchanged.
 Disposition mode requires `outputs.cardinality: "one"`. Evaluation errors have no disposition
 and no outputs. Rules do not select a batch's members by the batch's disposition.
+
+The independent conditional `sample` is exactly `{mode: "sample", maxSize: N}`, where `N` is an
+integer from 1 through `limits.maxRecords`. It requests §6's reproducible human-review sample and
+does not select inputs for a consumer. It may therefore be present on a terminal stage and may
+coexist with `selection`. `maxSize` is the stage's bound on the requested records per outcome;
+it does not raise any §2 bound.
 
 `relation` is `{label, direction}`: label is an id, and direction is `output-to-parent` or
 `parent-to-output`. A root's parent is the root case; a dependent output's parent is its selected
@@ -231,9 +241,16 @@ binds only that bound dialect; its binding is unchanged. Re-expansion checks con
 
 ## 5. Output records and closed sets
 
-An output record is `{outputRecordVersion: 1, payloadDigest, lineage}`; the payload is a separate
-object in §1's literal-preserving bytes. Its identity is the envelope's canonical digest, not
-the payload digest: duplicate payloads can be distinct records. `lineage` is exactly:
+An output record is `{outputRecordVersion: 1, payloadDigest, contributingRule, lineage}`, with
+the conditional `contributingRule` omitted as specified below; the payload is a separate object
+in §1's literal-preserving bytes. Its identity is the envelope's canonical digest, not the
+payload digest: duplicate payloads can be distinct records. `contributingRule` is outside the
+Core §8.3 disposition and never changes that closed form. For an outcome forced by one or more
+true exceptions it is the least forcing exception id by code point. Otherwise, for an `outcome`
+produced by one or more true rules it is the contributing rule id, choosing the least id by code
+point when several true rules produce that same outcome. It is absent for a fallback outcome,
+`not-applicable` and `unresolved`. This accounting choice gives no Core rule or exception
+priority. `lineage` is exactly:
 
 - `workflowDigest`, `execution`, `stage`, `instance`: the workflow digest and three ids;
 - `publishedDialectDigest`, `bindingDocumentDigest`, `boundDialectDigest`: digests, with only
@@ -262,18 +279,48 @@ digest binds the whole offered set, selected or not. Failed instances contribute
 but remain in the inventory. The set is closed only after every expected instance is terminal;
 it is never presented as complete discovery. Every stage, even one with no instances, has a set.
 
+A **stage summary** is one closed record per stage and execution, exactly
+`{summaryVersion: 1, workflowDigest, execution, stage, records, recordsDigest, byKind, byOutcome,
+byReason, byRule}`. The first member is the integer `1`; the next three identify the workflow,
+execution and stage; and `records` is the number of output records in that stage's recorded set,
+including zero for a blocked stage.
+The remaining members are:
+
+- `recordsDigest`: SHA-256 of the exact bytes `canon([D1, D2, …, Dn])`, prefixed `sha256:`, where
+  each `Di` is the decoded Core §8.3 disposition from the successful attempt for the corresponding
+  output in closed-set order. Repeated dispositions are repeated. The covered bytes are exactly
+  the opening bracket, every disposition in `canon` form separated by commas, and the closing
+  bracket, with no whitespace or final newline; for no records they are exactly `[]`.
+- `byKind`: exactly `{outcome, not-applicable, unresolved}`, with a nonnegative count for each.
+- `byOutcome`: an object whose members are exactly the outcome ids observed on `outcome` records
+  and whose positive integer values count them; it is `{}` when none were observed.
+- `byReason`: an object whose members are exactly the distinct Core reason values on `unresolved`
+  records and whose positive integer values count records carrying each reason. One record can
+  increment several reasons; it is `{}` when no unresolved reason was observed.
+- `byRule`: an object with exactly one member for each member of `byOutcome`. Its value is exactly
+  `{contributors, fallback}`: `contributors` maps each observed `contributingRule` id for that
+  outcome to its positive count, and `fallback` is the nonnegative count of records for which the
+  conditional member is absent. A forcing exception id is counted as the contributing id recorded
+  by the envelope. Contributor members with zero counts are omitted.
+
+All counters use §1's integer domain. `records`, the three `byKind` counts and the sum of
+`byOutcome` are equal. For each outcome, its contributor counts plus `fallback` equal its
+`byOutcome` count. Object member order in retained bytes follows `canon`; no display order or
+implementation map order is significant.
+
 ## 6. Selection records
 
 A selection is exactly `{selectionVersion: 1, workflowDigest, execution, upstreamStage,
 outputSetDigest, selected, mode, revision}` and the conditional members below. `execution` and
 `upstreamStage` are ids; both digest members are digests. `selected` contains 0 to
 `limits.maxRecords` distinct output-envelope digests, all in that closed set, in upstream order.
-`revision` is an integer from 1 to 16. Revisions increase by one for each replacement selection
-of the same execution and upstream stage; the first is 1. The bytes of each revision are retained.
+`revision` is an integer from 1 to 16. Revisions increase by one for each replacement of the same
+execution, upstream stage and role, where sample and consuming selections are separate roles; the
+first of each role is 1. The bytes of each revision are retained.
 
-`upstreamStage` names the producing stage whose outputs are offered. `mode` equals that stage's
-`selection.mode`. In disposition mode the additional member `rule` equals that stage's
-`selection.rule`, and `selected` is exactly every output whose evaluated case's recorded
+`upstreamStage` names the producing stage whose outputs are offered. `mode` is `sample`, or it
+equals that stage's `selection.mode`. In disposition mode the additional member `rule` equals that
+stage's `selection.rule`, and `selected` is exactly every output whose evaluated case's recorded
 disposition satisfies it. A dependent stage consumes this selection through `input.fromStage`
 and `input.selected` (§3).
 In reviewer mode the additional member `review` is exactly `{actor, assertion, at}`: an
@@ -283,17 +330,38 @@ real person's identity or intent. An empty selection is explicit, never inferred
 The conditional member `refusal`, when present, is exactly `"limit-exceeded"`: the selection was
 refused at admission (§8), remains unconsumed, and blocks its consumers for that recorded reason.
 
+In sample mode the additional members are `seed`, `size` and `algorithm`; `review`, `rule` and
+`refusal` are absent. The stage MUST carry §3's `sample`. `seed` is exactly 64 lowercase
+hexadecimal characters. `size` is an integer from 1 through that stage's `sample.maxSize`, and
+`algorithm` is exactly `"sha256-rank-v1"`. Partition the offered output records by the outcome id
+in their Core disposition, excluding `not-applicable` and `unresolved`. Within each partition,
+rank a record by the unsigned 32-byte SHA-256 value of
+`UTF8(seed) || 0x00 || UTF8(recordDigest)`, least first, breaking an otherwise equal rank by the
+record digest's code-point order. Take the first `min(size, partition length)` records from every
+partition, then write `selected` in their original upstream order. Thus the seed, size, offered
+set and recorded dispositions determine the sample without an implementation random-number
+generator.
+
+A writer refuses a sample request whose size exceeds the stage's `maxSize` as `input-over-bound`
+before writing a selection, and refuses a seed of any other form as `input-malformed`. A verifier
+gives the same refusals for a supplied sample record, including an empty, missing or oversized
+seed. These are report refusals, not `refusal` members on an otherwise valid sample record.
+
 Once consumed by a downstream admission, a selection is immutable. A change writes a new
 revision, with a new digest, and a new branch. All consumers within a branch use the same selection
 of an upstream stage. Existing children remain attached to their original selection. Branches
 share an execution id and unchanged ancestor instances; an execution record closes exactly one
 branch, identified by its ordered selection digests, without overwriting earlier branch records.
 Changed downstream output sets require new selections before any further children are admitted.
+A sample is never consumed and does not open a workflow branch. Replacing one writes a new sample
+revision and an execution record naming that digest; earlier sample bytes and execution records
+remain unchanged.
 
 ## 7. Execution records, instances and attempts
 
 An execution record is exactly `{executionVersion: 1, workflowDigest, execution, rootCaseDigest,
-frozen, instances, outputSets, selections}`. The digest members are digests and `execution` an id.
+frozen, instances, outputSets, summaries, selections, samples}`. The digest members are digests
+and `execution` an id.
 `frozen` has one entry per stage in document order, exactly `{stage, publishedDialectDigest,
 bindingDocumentDigest, boundDialectDigest, packDigest, releaseDigest, runtimeDigest}`. These are
 an id and digests, with only the binding nullable under §4. Retain the named documents. The
@@ -379,13 +447,16 @@ Existing run exports and their result members are unchanged by this workflow sid
 
 `outputSets` has one entry per stage in stage order, exactly `{stage, status, records}`. `status`
 is `closed` or `blocked`; `records` is the digest array of §5. Its closed-set digest is derived
-using the execution's workflow digest and id. `selections` has one entry per stage in that same
-order: a selection digest, or null. A stage with consumers may lack a selection only when the
+using the execution's workflow digest and id. `summaries` has one stage-summary digest per stage
+in stage order, including the empty summary for a blocked stage. `selections` has one entry per
+stage in that same order: a consuming selection digest, or null. `samples` likewise has one entry
+per stage: its sample-selection digest exactly when the stage declares `sample`, otherwise null.
+A stage with consumers may lack a consuming selection only when the
 branch ends before review or selection completes. Its consumers are `blocked`, with no instances,
 outputs or selection, transitively; a selection carrying `refusal` blocks them in the same way,
 with its digest retained in `selections`. A stage with a consumed upstream selection is `closed`,
 including an empty selection yielding zero instances. Root is closed. Terminal stages have null
-selections.
+consuming selections. Sample selections never affect closure, admission or completion.
 
 For each non-blocked dependent stage, reconstruct one expected instance for every selected
 parent. Missing, extra, repeated or foreign-parent instances are findings. A consumed selection
@@ -405,7 +476,9 @@ bound without partial admission. A successful selection enters the execution's `
 atomically with reservation of all its direct consumers' children. A bound refusal instead
 writes a selection record carrying `refusal: "limit-exceeded"` and retains its digest there,
 without reserving children. It is unconsumed and its consumers are blocked. The inventory
-survives interruption or cancellation.
+survives interruption or cancellation. Every persisted or resumed execution carries the complete
+`summaries` and `samples` arrays and every digest already assigned to them; recovery does not
+reconstruct a different seed, sample or summary from mutable state.
 
 A retried acquisition is a new recorded attempt under the same instance, with new retained
 responses and receipts, never an offline replay. Uncertain acquisitions are not retried
@@ -418,8 +491,8 @@ recomputes derivations over retained answers and never calls a model or a source
 admission is a writer rule; an offline reader checks the resulting inventory, not the history of
 every side effect. There is no end-to-end exactly-once claim.
 
-The execution record commits outputs and selections without a digest cycle. It is unsigned in
-this version. Existing audit signatures cover their own audit bytes and preparation bindings,
+The execution record commits outputs, summaries and selections without a digest cycle. It is
+unsigned in this version. Existing audit signatures cover their own audit bytes and preparation bindings,
 not these new envelopes or which published dialect and binding produced the preparation. An
 independently held execution digest can expose subsequent replacement, but this version
 specifies no authenticated execution commitment. The Runner's journal is unsigned and unchained
@@ -428,7 +501,8 @@ specifies no authenticated execution commitment. The Runner's journal is unsigne
 ## 9. The workflow verifier
 
 The `workflow-verifier` reads the workflow, its expected digest, one execution record and its
-expected digest, and all referenced current-branch artifacts. Other branches and earlier selection
+expected digest, and all referenced current-branch artifacts, including summaries and samples.
+Other branches and earlier selection
 revisions are retained by the writer but not traversed. The reader checks the chosen revision's
 form; it cannot establish an unprovided revision history or enforce transactional immutability.
 The runtime executable is supplied separately only for optional replay; this reader compares the
@@ -466,8 +540,8 @@ is none, the first preparation finding maps to `preparation-mismatch`, including
 preparation passes do the checks below run. Influence uses the recomputed lineage, never the
 unchecked retained lineage. No freshness check substitutes today's clock.
 
-Then perform checks 1 to 4 in order, stopping at the first finding. Within each check use stage
-order, then instance and attempt order; finish one instance's listed clauses before the next.
+Then perform checks 1 to 5 in order, stopping at the first finding or refusal. Within each check
+use stage order, then instance and attempt order; finish one instance's listed clauses before the next.
 Within check 1, workflow and execution pins come first, then frozen stage pins, then instance
 artifacts; within an instance, `digest-mismatch` precedes `stage-binding-mismatch`. Within
 check 3, an earlier instance's `influence-mismatch` precedes a later one's `case-mismatch`.
@@ -482,14 +556,23 @@ check 3, an earlier instance's `influence-mismatch` precedes a later one's `case
    give `stage-binding-mismatch`. A workflow runner refuses to freeze a stage with incompatible
    research profiles, so no instance is admitted (§4).
 2. Each selection's full offered set, revision and exact ordered membership; recompute the closed
-   disposition predicate against the retained Core disposition (`selection-mismatch`).
+   disposition predicate against the retained Core disposition (`selection-mismatch`). Redraw each
+   sample from its seed, size and offered set. A different ordered membership is a
+   `sample-mismatch` refusal, not a plausible alternative sample.
 3. Every projected case against its parent and bindings, including expected projection failures
    (`case-mismatch`), then inherited classes, influence and explicit admission
    (`influence-mismatch`).
 4. The expected instance inventory, admission keys, attempts, terminal states, selection refusals,
-   deterministic bound accounting and stage closure (`inventory-mismatch`); then re-extract all
+   deterministic bound accounting and stage closure (`inventory-mismatch`), applying §2's
+   later-sibling rule only after each instance's admission status is established and only to
+   admitted instances, so an instance refused at admission keeps its own code; then re-extract all
    outputs, compare payload bytes, order, complete sets, parent/selection references, relation and
    lineage pins (`output-mismatch`). Neither failure nor missing data becomes `[]`.
+5. From those checked output records and their retained dispositions, recompute every stage
+   summary, including all counters and the exact `recordsDigest` bytes of §5. A well-formed but
+   unequal recorded summary is a `summary-mismatch` refusal. Missing, extra and malformed summary
+   references have the earlier reference-phase answer. The supplied summary is never trusted as
+   the source for this computation.
 
 Predicate checking establishes agreement with the recorded disposition, not its recomputation.
 Runtime replay and verification of signatures or checkpoints are separate checks; this class
@@ -500,19 +583,69 @@ A refusal is `{result: "refusal", refusal: C}` and a finding is `{result: "findi
 C one code above. A reading is exactly `{result: "reading", workflowDigest, executionDigest,
 consistency: "agrees", completion, preparations: "agree", authentication: "not-established",
 dispositions: "not-replayed", counts}`. `completion` is `complete` or `partial` by §7; `counts`
-is `{stages, instances, outputs, selections}`, nonnegative integers within §2's bounds (selections
-at most stages). A partial reading is consistency of an explicitly incomplete execution, not
+is `{stages, instances, outputs, selections, summaries, samples}`, nonnegative integers within
+§2's bounds (selections, summaries and samples at most stages). A partial reading is consistency
+of an explicitly incomplete execution, not
 successful completion. Reports are at most 4096 bytes. A program exits 0 for a reading, 1 for a
 refusal, 2 for a finding, and 3 with no report when it could not run, including an existing file
 that cannot be read or an invalid command argument. A missing pinned artifact is instead the
 `inventory-mismatch` refusal above. A library exposes the same outcomes in its own idiom.
 
+The verifier also exposes a **drift computation** over two bundles only after each bundle has its
+own reading. Their `workflowDigest` values MUST be equal; otherwise it gives
+`{result: "refusal", refusal: "drift-workflow-mismatch"}`. For each stage it subtracts the left
+summary's `byKind`, `byOutcome`, `byReason` and `byRule` counters from the right summary's counters,
+treating an absent map member as zero, and reports the signed deltas. It then matches output
+records by `(stage, payloadDigest, occurrence)`, where `occurrence` starts at 1 among equal payload
+digests in each stage's closed-set order. For each matched key whose canonical disposition differs
+it reports the left and right dispositions; an unmatched key is reported as added or removed with
+the absent side null.
+
+The drift result is exactly `{result: "drift", workflowDigest, leftExecutionDigest,
+rightExecutionDigest, stages, records}`. `stages` is in workflow order and carries those counter
+deltas; `records` is in stage order, then payload-digest and occurrence order, and carries only
+changed, added or removed keys. Empty differences are explicit empty arrays.
+
+A stage-delta row is exactly `{stage, records, byKind, byOutcome, byReason, byRule}`. It occurs
+once for every workflow stage, including a stage with only zero deltas. Its members are closed:
+
+| Member | Type and bound |
+| --- | --- |
+| `stage` | that stage's id |
+| `records` | right summary `records` minus left, an integer from -4096 through 4096 |
+| `byKind` | exactly `{outcome, not-applicable, unresolved}`, each the corresponding signed delta in that range |
+| `byOutcome` | outcome-id members whose values are nonzero signed deltas in that range; absent on both sides is zero |
+| `byReason` | Core-reason members whose values are nonzero signed deltas in that range; absent on both sides is zero |
+| `byRule` | outcome-id members whose values are exactly `{contributors, fallback}` |
+
+Each `byRule` `contributors` object has contributing-rule-id members whose values are nonzero
+signed deltas from -4096 through 4096; absent contributors are zero. `fallback` is the signed
+fallback delta in that range and is present even when zero. An outcome row is present exactly
+when at least one contributor or fallback delta is nonzero. Thus no zero dynamic member or open
+row can give an alternative representation of the same stage delta. The stage array has 1 to 32
+rows; each dynamic object has at most 4096 members, subject to §2's smaller execution bounds.
+
+A record-delta row is exactly one of the following closed forms; `stage` is an id,
+`payloadDigest` a digest and `occurrence` an integer from 1 through 4096:
+
+| Change | Exact row | Meaning |
+| --- | --- | --- |
+| changed | `{change: "changed", stage, payloadDigest, occurrence, left, right}` | `left` and `right` are the unequal Core §8.3 dispositions |
+| added | `{change: "added", stage, payloadDigest, occurrence, left: null, right}` | no left output has that matching key; `right` is the added disposition |
+| removed | `{change: "removed", stage, payloadDigest, occurrence, left, right: null}` | `left` is the removed disposition; no right output has that matching key |
+
+Null means only that the named side has no output at the matching key; it is never an unknown or
+missing disposition. A non-null side is one complete, closed Core disposition. The records array
+has 0 to 4096 rows. The result is a
+comparison of two separately verified bundles: it makes no judgment, verdict or authorization,
+does not replay either disposition, and is not a workflow reading or finding.
+
 A conforming reader gives these answers for every admitted input and all fixtures published
 with the specification version its claim names. Its claim names `workflow-verifier`, workflow
 version 1, that `specVersion`, and the dialect versions, kinds and shapes the published fixtures
 exercise. This is a reader class, not an executor, preparation writer or Core conformance class;
-none implies another. No claim is available while this text is Draft or until such fixtures are
-published. No fixtures or vectors have been recorded for it.
+none implies another. No claim is available while this text is Draft. The §11 contract fixture
+tests these closed forms but is not an implementation recording or a conformance corpus.
 
 ## 10. What a workflow establishes
 
@@ -525,10 +658,21 @@ model answers, which model answered, or exactly-once execution. Digest pins esta
 identity, not currency. Generated-only admission checks a profile's declared class. The
 installation's classification of what its channel actually serves remains a trust assumption; a
 reading cannot detect an undeclared model behind a record-class channel (§4; dialect §5.1).
+Summary recomputation establishes that the bulk counts agree with the retained output envelopes
+and dispositions. Because this reader does not replay dispositions, it does not independently
+establish that a recorded `contributingRule` condition was true; that remains part of the retained
+evaluation evidence and any separate Runtime replay.
 
-## 11. The two-stage fixture to record
+## 11. The two-stage fixture
 
-Nothing in this section is recorded yet. The first fixture is a run from the Desk's research
+The hand-written contract fixture at `conformance/workflow/` records `workflow.json`, both
+verified-bundle projections, every stage's output envelopes, dispositions and summaries, one
+seeded sample, and the expected drift result. Its manifest also names the oversized-size,
+malformed-seed and unequal-summary refusal vectors. The workflow schema at
+`schema/workflow-1.schema.json` closes every form. These records test bytes and structure; they
+are not captured executor output and establish no reader claim.
+
+The first full run fixture is from the Desk's research
 line using two version-3 unbound `operation` dialects, bound by the Runner at import. This remains
 the acceptance construction for issue #160's condition 2. An additional research-stage recording
 follows fixture 8's `selected-parent-child` plan in
@@ -559,7 +703,19 @@ a workflow executor and verifier; those are not established by single-stage prep
 - `result` is `people`. A reviewer selects the first and third organisation in upstream order;
   one child returns two synthetic people objects, the other an empty array. The inventory holds
   three instances, one `completed-zero`, five output records and the complete three-record
-  offered set. The relation says which organisation was researched, not that employment is true.
+  offered set. Every output carries its rule or forced-exception contributor, with fallback and
+  non-outcome cases omitting it. The relation says which organisation was researched, not that
+  employment is true.
+
+The recording carries one summary for each stage and one seeded sample for `organisations`. Both
+stage sample configurations use the same `maxSize`; the sample record uses a fixed hand-written
+seed and size and names `sha256-rank-v1`, and its selected array is computed independently from
+the recorded inputs.
+The primary summaries carry the closed member forms, contributor and fallback counts, and
+independently fixed `recordsDigest` values over the ordered dispositions. The fixture variants
+collectively carry every kind, outcome, unresolved reason and contributing-rule form. A second
+bundle of the same workflow and its independently fixed expected drift result exercise summary
+deltas and changed, added and removed per-record rows without assigning a verdict.
 
 A recording carries exactly one branch: one set per stage and only the selection revision that
 branch names. Other revisions and branches are retained separately. Its directory contains the
@@ -574,13 +730,15 @@ bounds above, not literal path characters:
   `evaluation-error.json` under
   that instance; artifacts, including the case, are absent exactly when their pins are null;
 - `outputs/<stage>/<instance>/<index>/payload.json` and `record.json`;
-- `selections/<stage>/<revision>.json`, `sets/<stage>.json`, `expected-report.json`, `trust.json`
+- `selections/<stage>/<revision>.json`, `samples/<stage>/<revision>.json`,
+  `sets/<stage>.json`, `summaries/<stage>.json`, `expected-report.json`, `trust.json`
   (declared public test trust material) and `README.md` (recording commands and independent pins).
 
 Each `.sha256` file holds one digest and a newline; `verified-at.txt` holds the preparation's
 timestamp and a newline. The preparation's own `verifiedAt` and digest computed from its bytes
 govern; these side files must agree and never override them. `workflow.json`, `execution.json`,
-selection files, set files and output `record.json` hold their `canon` bytes, with no newline;
+selection, sample, set and summary files and output `record.json` hold their `canon` bytes, with
+no newline;
 so do `dialect.json`, `binding.json`, `bound-dialect.json` and `profiles.json` in their own forms.
 `root-case.json`, `case.json`, `payload.json` and `preparation.json` hold the dialect §9.5 bytes,
 with no newline. `pack.json`, `sources.json`, `release.json`, `run.json`, `audit.json` and
@@ -605,10 +763,26 @@ revisions or relations, adding an unselected child, omitting or repeating a sele
 laundering generated influence. Include a record-class downstream operation parameterised from a
 generated payload without generated admission, refused before acquisition, including an affected
 case parameter its request never names. Include two siblings of six outputs when ten records
-remain, completed in both orders: the second and every later sibling record `limit-exceeded`.
+remain, completed in both orders: the second and every later admitted sibling record
+`limit-exceeded`. In one stage record, in order, an admitted completed instance, an admitted
+`limit-exceeded` instance, a `projection-invalid` instance and an admitted later sibling that
+records `limit-exceeded`; mutate the projection failure to `limit-exceeded` for an
+`inventory-mismatch` twin.
 Include interruption after atomic admission, uncertain acquisition, a recorded selection bound
 refusal, and retries before and after consumption. Freeze expected reports with the recordings.
 Add integer and named family-3 variants with matching published identities, and refuse changed
 selectors, identity-stripped bound documents, missing/tampered error envelopes, error envelopes
 attached to successful attempts and ordinary invocation errors mislabeled as Core errors.
-This layout supplies no evidence of those runs today.
+Add hand-written summary mutations for every counter, contributor, fallback and digest member,
+and a hand-written twin mutation in the other reader's cases; each must give `summary-mismatch`.
+Add sample mutations for the seed, size, algorithm and selected order; include empty, missing,
+malformed and oversized seeds, a sample size one above the stage's `maxSize`, and a redrawn member
+that differs by one record. The form cases give `input-malformed` or `input-over-bound` as §6
+requires, and the well-formed redraw mutation gives `sample-mismatch`. Interrupted and resumed
+variants retain all summary and sample checkpoint members byte for byte.
+For every new refusal code, retain a valid expected-report event and hand-write its twin for the
+other reader. Include absent artifacts, empty objects or arrays, missing required members and an
+object, array or string one above its applicable bound; the reference-phase refusal wins whenever
+that malformed form precedes the semantic mutation. Compare the drift pair with a bundle of a
+different workflow for `drift-workflow-mismatch` as well as with its matching workflow.
+The hand-written contract fixture supplies no evidence of those full runs today.

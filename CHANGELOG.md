@@ -12,6 +12,8 @@ here.
   findings surfaced as unknown facts, transformation lineage, typed research result states,
   versioned acquisition-source profiles, resolved execution settings and retained response bytes.
   Replay uses retained bytes without calling a model or the web.
+- RFC 0020 limits the later-sibling `limit-exceeded` rule to instances admitted for acquisition;
+  admission failures keep their own codes, with a recorded positive vector and negative twin (#213).
 - Document ceiling profiles (#232): default `base` and declared `extended`, a shared
   ceiling table, explicit unsupported-profile refusal, capability discovery and
   byte identity. Schemas retain base bounds; profile conformance covers negotiation.
@@ -24,6 +26,14 @@ here.
   disposition bytes. Structural fixtures and staged evaluation vectors cover selection, bounds,
   duplicate targets and no selection; profile negotiation, Dialect outputs and delivery receipts
   remain separate work.
+
+- RFC 0020's accepted issue #228 amendment: workflow output envelopes name their contributing
+  rule outside Core's unchanged disposition; every stage records a closed disposition summary
+  and a reproducible seeded sample; the workflow verifier recomputes both and refuses disagreement;
+  and drift is a comparison over two verified bundles of the same workflow, without a verdict.
+  The closed workflow schema and hand-written two-stage contract fixture carry the new records,
+  digest recomputation, drift rows and refusal vectors. No workflow implementation, recorded
+  executor run or conformance claim is added.
 
 - Official-draft Policy promotion preparation: versioned closed format `1.0.0`
   schemas, retained-byte examples and 124 staged agreement vectors, explicit

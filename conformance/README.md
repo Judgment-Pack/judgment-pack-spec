@@ -20,6 +20,12 @@ the default branch remains Review until then. These vectors become a released
 corpus only under their exact Policy tag and a maintainer-published GitHub
 release. Passing fixtures alone establishes no Core or Policy conformance claim.
 
+The hand-written
+[`conformance/workflow`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/workflow)
+contract fixture exercises RFC 0020's workflow document, output, summary, sample,
+verifier-refusal and drift forms. It is schema and byte-rule test data, not a recorded executor
+run or a workflow conformance corpus.
+
 [`manifest.json`](manifest.json) is the machine-readable case index. Its shape is defined by
 [`manifest.schema.json`](manifest.schema.json).
 

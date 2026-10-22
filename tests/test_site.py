@@ -23,7 +23,15 @@ WITNESS_VECTORS = "conformance/witness"
 # directory either (conformance/dialect/README.md). The companion document they belong to is
 # published.
 DIALECT_VECTORS = "conformance/dialect"
-UNPUBLISHED_DIRECTORIES = (STAGED_EVALUATION_ROWS, WITNESS_VECTORS, DIALECT_VECTORS, "conformance/policy", "schema/policy")
+WORKFLOW_VECTORS = "conformance/workflow"
+UNPUBLISHED_DIRECTORIES = (
+    STAGED_EVALUATION_ROWS,
+    WITNESS_VECTORS,
+    DIALECT_VECTORS,
+    WORKFLOW_VECTORS,
+    "conformance/policy",
+    "schema/policy",
+)
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
 # anywhere the site publishes. The tokens are assembled from fragments deliberately: the repository
@@ -683,6 +691,9 @@ class StaticSiteTests(unittest.TestCase):
             "schema/0.2.0-draft/judgment-pack-core.schema.json": ROOT
             / "schema"
             / "judgment-pack-core.schema.json",
+            "schema/0.2.0-draft/workflow-1.schema.json": ROOT
+            / "schema"
+            / "workflow-1.schema.json",
             # The superseded schemas keep the $id path each was published under, so an older pack stays
             # checkable and a previously published identifier does not 404.
             "schema/0.1.0-draft/judgment-pack-core.schema.json": ROOT
