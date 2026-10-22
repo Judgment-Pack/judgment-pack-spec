@@ -7,6 +7,8 @@ here.
 
 ### Added
 
+- RFC 0020 limits the later-sibling `limit-exceeded` rule to instances admitted for acquisition;
+  admission failures keep their own codes, with a recorded positive vector and negative twin (#213).
 - Document ceiling profiles (#232): default `base` and declared `extended`, a shared
   ceiling table, explicit unsupported-profile refusal, capability discovery and
   byte identity. Schemas retain base bounds; profile conformance covers negotiation.

@@ -148,6 +148,14 @@ class WorkflowTextTests(unittest.TestCase):
         self.assertIn("For every new refusal code, retain a valid expected-report", unwrapped)
         self.assertIn("Interrupted and resumed variants retain", unwrapped)
 
+    def test_later_sibling_rule_is_limited_to_admitted_instances(self) -> None:
+        companion = (ROOT / "spec" / "workflow.md").read_text(encoding="utf-8")
+        section = companion.split("\n## 2. ", 1)[1].split("\n## 3. ", 1)[0]
+        unwrapped = section.replace("\n", " ")
+        self.assertIn("every later instance of that stage admitted for acquisition", unwrapped)
+        self.assertIn("Under §§3 and 7", unwrapped)
+        self.assertIn("keeps its own failure code", unwrapped)
+
 
 class WorkflowFixtureTests(unittest.TestCase):
     @classmethod
@@ -274,6 +282,75 @@ class WorkflowFixtureTests(unittest.TestCase):
     def test_recorded_sample_is_redrawn_from_seed(self) -> None:
         sample = json.loads((FIXTURE / "sample.json").read_text(encoding="utf-8"))
         self.assertEqual(sample["selected"], redraw_sample(sample))
+
+    def test_later_sibling_vector_preserves_admission_failures(self) -> None:
+        def verify(vector: dict[str, object]) -> dict[str, str]:
+            remaining = vector["maxRecords"]
+            assert isinstance(remaining, int)
+            later_sibling_rule = False
+            for instance in vector["instances"]:
+                admission = instance["admission"]
+                requested = instance["requestedOutputs"]
+                if admission == "projection-invalid":
+                    expected = {"state": "failed", "failure": "projection-invalid"}
+                elif later_sibling_rule or requested > remaining:
+                    expected = {"state": "failed", "failure": "limit-exceeded"}
+                    later_sibling_rule = True
+                else:
+                    expected = {"state": "completed", "failure": None}
+                    remaining -= requested
+                actual = {
+                    "state": instance["record"]["state"],
+                    "failure": instance["record"]["failure"],
+                }
+                if actual != expected:
+                    return {"result": "finding", "finding": "inventory-mismatch"}
+            return {"result": "reading", "consistency": "agrees"}
+
+        accepted = json.loads(
+            (FIXTURE / "vectors" / "later-sibling-admission.json").read_text(encoding="utf-8")
+        )
+        wrong = json.loads(
+            (FIXTURE / "vectors" / "later-sibling-admission-wrong-failure.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(
+            [
+                ("admitted", "completed", None),
+                ("admitted", "failed", "limit-exceeded"),
+                ("projection-invalid", "failed", "projection-invalid"),
+                ("admitted", "failed", "limit-exceeded"),
+            ],
+            [
+                (row["admission"], row["record"]["state"], row["record"]["failure"])
+                for row in accepted["instances"]
+            ],
+        )
+        self.assertEqual(verify(accepted), {"result": "reading", "consistency": "agrees"})
+        report = json.loads(
+            (FIXTURE / "reports" / "later-sibling-admission-wrong-failure.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(wrong["expectedFinding"], "inventory-mismatch")
+        self.assertEqual(verify(wrong), report)
+        self.validator.validate(report)
+        self.assertEqual(
+            {"caseDigest": None, "attempts": 0},
+            {
+                member: accepted["instances"][2]["record"][member]
+                for member in ("caseDigest", "attempts")
+            },
+        )
+        self.assertEqual(
+            wrong["instances"][2]["record"]["failure"],
+            "limit-exceeded",
+        )
+        repaired_twin = json.loads(json.dumps(wrong))
+        repaired_twin.pop("expectedFinding")
+        repaired_twin["instances"][2]["record"]["failure"] = "projection-invalid"
+        self.assertEqual(repaired_twin, accepted)
 
     def test_drift_is_recomputed_from_the_two_recorded_bundles(self) -> None:
         left = json.loads((FIXTURE / "left-bundle.json").read_text(encoding="utf-8"))

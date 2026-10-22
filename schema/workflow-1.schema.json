@@ -11,7 +11,8 @@
     { "$ref": "#/$defs/drift" },
     { "$ref": "#/$defs/bundleFixture" },
     { "$ref": "#/$defs/fixtureManifest" },
-    { "$ref": "#/$defs/refusalVector" }
+    { "$ref": "#/$defs/refusalVector" },
+    { "$ref": "#/$defs/instanceStateVector" }
   ],
   "$defs": {
     "id": {
@@ -802,6 +803,51 @@
             "additionalProperties": false
           }
         }
+      },
+      "additionalProperties": false
+    },
+    "instanceStateVector": {
+      "type": "object",
+      "required": ["vectorVersion", "kind", "stage", "maxRecords", "instances"],
+      "properties": {
+        "vectorVersion": { "const": 1 },
+        "kind": { "const": "later-sibling-admission" },
+        "stage": { "$ref": "#/$defs/id" },
+        "maxRecords": { "$ref": "#/$defs/positiveCount" },
+        "instances": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": ["id", "admission", "requestedOutputs", "record"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "admission": { "enum": ["admitted", "projection-invalid"] },
+              "requestedOutputs": { "$ref": "#/$defs/count" },
+              "record": {
+                "type": "object",
+                "required": ["caseDigest", "state", "failure", "attempts"],
+                "properties": {
+                  "caseDigest": {
+                    "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+                  },
+                  "state": { "enum": ["completed", "failed"] },
+                  "failure": {
+                    "oneOf": [
+                      { "type": "null" },
+                      { "enum": ["projection-invalid", "limit-exceeded"] }
+                    ]
+                  },
+                  "attempts": { "$ref": "#/$defs/count" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "expectedFinding": { "const": "inventory-mismatch" }
       },
       "additionalProperties": false
     },

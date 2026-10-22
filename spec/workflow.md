@@ -99,9 +99,11 @@ containers and unsuccessful work; nothing is truncated to fit. The same bounds h
 bytes and input bytes. A workflow runner refuses admission before acquisition when a known bound
 fails. Account for results in instance order: stage order, then selected parent-record order,
 then output index, regardless of acquisition or completion order. The first instance whose
-outputs would exceed a branch bound and every later instance of that stage record
-`limit-exceeded`, emitting no outputs. Earlier completed siblings' outputs remain in the closed
-set with those failures explicit. Nothing is truncated to fit.
+outputs would exceed a branch bound and every later instance of that stage admitted for acquisition
+record `limit-exceeded`, emitting no outputs. Under §§3 and 7, an instance that fails projection or
+influence admission is not admitted for acquisition and keeps its own failure code regardless of
+its position in the stage. Earlier completed siblings' outputs remain in the closed set with those
+failures explicit. Nothing is truncated to fit.
 
 ## 3. Stages and projected cases
 
@@ -759,7 +761,11 @@ revisions or relations, adding an unselected child, omitting or repeating a sele
 laundering generated influence. Include a record-class downstream operation parameterised from a
 generated payload without generated admission, refused before acquisition, including an affected
 case parameter its request never names. Include two siblings of six outputs when ten records
-remain, completed in both orders: the second and every later sibling record `limit-exceeded`.
+remain, completed in both orders: the second and every later admitted sibling record
+`limit-exceeded`. In one stage record, in order, an admitted completed instance, an admitted
+`limit-exceeded` instance, a `projection-invalid` instance and an admitted later sibling that
+records `limit-exceeded`; mutate the projection failure to `limit-exceeded` for an
+`inventory-mismatch` twin.
 Include interruption after atomic admission, uncertain acquisition, a recorded selection bound
 refusal, and retries before and after consumption. Freeze expected reports with the recordings.
 Add integer and named family-3 variants with matching published identities, and refuse changed
