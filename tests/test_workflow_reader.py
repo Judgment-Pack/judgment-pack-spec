@@ -573,9 +573,21 @@ class ReaderTests(unittest.TestCase):
             e=Example(); del e.files[path]
             with self.subTest(path=path): self.assertEqual(self.read(e,1).report['refusal'],'inventory-mismatch')
 
-    def test_existing_dialect_release_dependency(self):
-        raw=(ROOT/'conformance/dialect/vectors/valid/run.json').read_bytes(); value=d.read_document(raw,'existing dialect run')
-        self.assertEqual(d.digest_of(encoding.release_bytes(value['release'])),value['releaseDigest'])
+    def test_existing_dialect_release_dependencies(self):
+        root=ROOT/'conformance/dialect/vectors'
+        manifest=d.read_document((root/'manifest.json').read_bytes(),'dialect vector manifest')
+        rows={row['name']:row for row in manifest['vectors']}
+        runs=sorted(root.glob('*/run.json'))
+        self.assertEqual(len(runs),47)
+        self.assertEqual({path.parent.name for path in runs},set(rows))
+        for path in runs:
+            with self.subTest(vector=path.parent.name):
+                value=d.read_document(path.read_bytes(),'existing dialect run')
+                digest=d.digest_of(encoding.release_bytes(value['release']))
+                self.assertEqual(value['releaseDigest'],digest)
+                self.assertEqual((path.parent/'release-digest.txt').read_text(),digest)
+                arguments=rows[path.parent.name]['verifyRun']['arguments']
+                self.assertEqual(arguments[arguments.index('--release-digest')+1],digest)
 
     def test_reader_phases_do_not_hide_programming_errors(self):
         e=Example(True).group().selection()
