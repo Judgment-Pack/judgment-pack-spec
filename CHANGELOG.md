@@ -7,6 +7,11 @@ here.
 
 ### Added
 
+- Dialect-owned data quality and typed research results (#170, #169): six closed deterministic
+  conversions with recorded failures, three explicit reconciliation modes, presence/type/domain
+  findings surfaced as unknown facts, transformation lineage, typed research result states,
+  versioned acquisition-source profiles, resolved execution settings and retained response bytes.
+  Replay uses retained bytes without calling a model or the web.
 - Document ceiling profiles (#232): default `base` and declared `extended`, a shared
   ceiling table, explicit unsupported-profile refusal, capability discovery and
   byte identity. Schemas retain base bounds; profile conformance covers negotiation.

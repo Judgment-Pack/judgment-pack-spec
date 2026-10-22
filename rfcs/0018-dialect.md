@@ -14,7 +14,8 @@
   and what each research profile serves, issue #195; the class a Drive selected-file takes,
   issue #197, option A), 2026-10-17 (a page endpoint constraint, issue #199, direction A,
   round 15), 2026-10-18 (traversal spellings in a constrained page path, issue #214,
-  option C, round 16)
+  option C, round 16), 2026-10-22 (dialect-owned conversions, reconciliation and quality findings,
+  issue #170; typed research results, source profiles and retained execution evidence, issue #169)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -939,6 +940,27 @@ One vector is answered otherwise than `verify-run` answers it, by design:
 `disposition-differs-from-audit` alters the Runner's export, not the preparation or the record
 (Conformance).
 
+## Amendment of 2026-10-22: data quality and typed research results
+
+The maintainer accepted issues #170 and #169 as proposed. This amendment makes deterministic
+conversion, multi-observation reconciliation and presence/type/domain quality findings part of a
+target's declared read, with every rule in the dialect digest and every application in preparation
+lineage. The closed conversion set is intentionally not a scripting surface; failures yield no
+coerced fact. `precedence`, `agree` and `first-present` are the only reconciliation modes, and
+last-writer-wins remains forbidden by the target-ownership rule.
+
+The amendment also gives `research` the `results` typed-contract spelling and explicit observation
+states, portable versioned acquisition-source profiles, and optional execution evidence containing
+the resolved model/profile/settings and retained response bytes. Installation bindings continue to
+own credentials, local connection ids, retries, concurrency, allowances and approvals. Replay
+validates the retained bytes and applies the ordinary reads and targets without calling a model or
+the web. These declarations affect the dialect digest; installation binding does not.
+
+The two repository readers and the hand-written staged quality vectors implement these forms. This
+does not implement the Runner work tracked by Runner #86, nor the gateway acquisition capabilities
+tracked by Gateway #275. It changes no Core qualification policy: an omitted quality target reaches
+the pack as unknown and the pack's `onUnknown` decides the consequence.
+
 ## Specification
 
 This section is the text proposed to land: the proposed companion document `spec/dialect.md`, its
@@ -1392,6 +1414,27 @@ status is the caller's assertion. In particular, `stale` describes an observatio
 not an exception to receipt freshness: an expired retained
 receipt still fails as `acquisition-stale` (§5.2).
 
+The observation vocabulary also admits the contract spellings `present`, `missing` and
+`inaccessible`. `present` has the form and meaning of `found`. `missing`, `inaccessible` and
+`stale` have exactly `status`, `cites` and a non-empty `reason`, and no `value` or `values`;
+`missing` has the meaning of `not-found` with the source's reason made explicit. `conflicting`
+keeps the typed `values` and their per-value citations above. A field declaration may add
+`cardinality`, `one` or `many`; when absent it is `many` for `text-list` and `one` otherwise.
+For the accepted typed-result spelling, the source writes `results` instead of `fields`, never
+both. `results` is an ordered array of one to 64 closed objects of exactly `id`, `type`, `required`,
+`description` and `cardinality`; `id` has the bounds and uniqueness of a field name; `type` is
+`string`, `decimal`, `boolean` or `string-list`; `required` is boolean; `description` has the field
+description form; and `cardinality` is `one` or `many`. The research record then carries `results`
+instead of `fields`, with the same ids and the explicit states `present`, `missing`, `conflicting`,
+`inaccessible` and `stale`. `present` carries `value` and citations; `conflicting` carries the typed
+`values` with their citations; every other state carries a non-empty `reason` and no value. The
+legacy `fields` spelling above remains readable in version 3 for the staged Runner vectors. Either
+spelling is the research kind's typed result contract: identifier, description, exact type and
+encoding, required presence and cardinality are declared before execution. A value or list outside
+that declaration is `input-malformed`, never coerced. `one` carries one value of `type`; `many`
+carries an array of zero to 64 values of `type`, including an array of string arrays for
+`string-list` with `many`.
+
 Absence is permitted only for an optional entry and for the conditional members just stated.
 `null` is never an entry or a value, including a conflicting value, list item or range endpoint.
 It may occur in a retained response's arbitrary result, where it remains evidence, not a typed
@@ -1414,9 +1457,30 @@ take a `from` under `values`; that `from` is `input-malformed`, as in §6.4. Tha
 reconciliation's combined value and pointers.
 Deterministic sources keep their target declarations and gain no `fields` member.
 
-`R.fields`, every status, value, observation and citation index, and `R.responses` in its order
-are all in `R`'s `canon` bytes. The record's receipt commits all of them when present; without
-one, fields as well as response membership and order are the caller's assertion. The preparation
+**Acquisition sources and execution evidence.** A research source may declare
+`acquisitionSources`, one to 16 closed objects of exactly `profile`, `version`, `purpose`, `scope`
+and `freshness`. The first three are non-empty strings, `scope` is an object in the `canon` domain,
+and `freshness` is an integer from zero to 31,536,000 seconds. These are portable, versioned
+source-profile identities and request constraints, not vendor configuration. They enter the
+research request and dialect digest. The installation binding supplies credentials, connection
+ids, provider-specific settings, retries, concurrency, execution allowances and approvals; none
+enters the published artifact or its digest.
+
+A research record using `results` has `execution`, a closed object of `resolvedSettings` and
+`retainedBytes`; a legacy `fields` record may add the same object.
+`resolvedSettings` is exactly non-empty `model`, `profile` and `version` strings and `settings`, an
+object in the `canon` domain, recording what the installation actually resolved. `retainedBytes`
+is an array of at most 64 closed `{"mediaType", "base64"}` objects and holds the response bytes
+used to assemble the typed observations. The bytes, resolved settings, results, observation states
+and responses are part of `R` and therefore of its receipt when it has one. Replay validates these
+retained bytes and the result contract, then applies the ordinary read and target rules — including
+§6.2a conversion, reconciliation and quality — without calling a model or the web. A requested
+observation becomes a consumed fact only when the research read names its `/results/<id>` state or
+value and writes a target; a declaration alone writes no fact.
+
+`R.fields` or `R.results`, every status, value, observation and citation index, and `R.responses`
+in its order are all in `R`'s `canon` bytes. The record's receipt commits all of them when present; without
+one, results as well as response membership and order are the caller's assertion. The preparation
 commits the bound dialect, derived claims and receipt citations in §9's existing form; it gains
 no whole-record digest. A change to an unread, unreceipted field need not change that preparation.
 
@@ -1829,6 +1893,65 @@ requirement twice is refused with the dialect. (No vector decides this.) The cla
 - `basis` is every entry's `Q`, of `facts` and of `evidence`, distinct, ordered by code point.
 
 A value a copy writes MUST be in the `canon` domain, its numbers integers; otherwise `read-failed`.
+
+#### 6.2a Target conversion, reconciliation and quality
+
+The dialect owns data quality. A fact entry in a copy may keep §6.2's exact two-member form, or it
+is a closed **quality target** with `target`, `type`, `required`, and exactly one of `source` or
+`observations`; it may also have `convert` and `domain`. `type` is `string`, `decimal`, `boolean`
+or `date`. `required` is a boolean. A quality target with `source` names one pointer. With
+`observations`, it names two to 16 closed `{"id", "source"}` objects, their non-empty ids distinct,
+and has `reconcile`. This remains one target owned by one read: §8.1's target-overlap rule is
+unchanged.
+
+`convert` is one of these closed deterministic rules, applied independently to every present
+observation before reconciliation:
+
+| Kind | Other rule members | Result |
+| --- | --- | --- |
+| `decimal-from-text` | `decimalSeparator`, `.` or `,`; `thousandsSeparator`, a different string; `sign`, `none`, `minus` or `plus-minus`; `whitespace`, `reject` or `trim` | a Core §2.2 decimal string |
+| `decimal-from-number` | none | the JSON number literal rendered without an exponent as the mathematically equal Core §2.2 decimal string |
+| `boolean-from-text` | non-empty, disjoint `true` and `false` spelling arrays, each of at most 16 distinct strings | the corresponding JSON boolean |
+| `trim` | none | the string without leading or trailing Unicode whitespace |
+| `collapse-whitespace` | none | the trimmed string with each non-empty run of Unicode whitespace replaced by U+0020 |
+| `date-from-text` | `format`, one of `YYYY-MM-DD`, `MM/DD/YYYY`, `DD/MM/YYYY` | the existing calendar date as `YYYY-MM-DD` |
+
+Here whitespace is exactly U+0009–U+000D, U+0020, U+0085, U+00A0, U+1680,
+U+2000–U+200A, U+2028, U+2029, U+202F, U+205F and U+3000; no host-language
+whitespace class extends that set.
+
+No other kind is admitted; an operation outside this table is upstream preparation, not a dialect
+conversion. Missing stays missing and `null` stays `null`. A rule applied to another JSON type or
+an invalid date has failure `invalid-encoding`; a decimal input that does not name a number has
+`not-a-number`; a boolean spelling outside both lists has `out-of-domain`. A failed conversion
+produces no candidate and never a coerced value.
+
+`reconcile` is exactly `{"mode": M}` for `agree` and `first-present`, or
+`{"mode":"precedence","precedence":[I,...]}`. `precedence` lists every observation id exactly
+once in its chosen order; the first present converted candidate in that list wins.
+`first-present` uses observation declaration order. `agree` yields the common JSON-equal value when
+all present candidates agree and otherwise records `conflict` and yields no value. An absent
+candidate is not a conflicting value. `last-writer-wins` is not a mode and is `input-malformed`.
+The reconciliation lineage records the mode, every present observation id, and the chosen id,
+agreement or conflict as applicable.
+
+`domain` is exactly `{"in":[V,...]}`, one to 64 values in the `canon` domain, or
+`{"decimalRange":{"min":D,"max":D}}`, inclusive, both endpoints Core §2.2 decimal strings and
+the minimum no greater than the maximum. After conversion and reconciliation, a missing required
+value records `missing-required`; a value not of `type` records `wrong-type`; a value outside
+`domain` records `out-of-domain`. These are closed quality findings, as is `conflict`. Their target
+is omitted from the facts document: to the pack it is an unknown fact, and the pack's `onUnknown`,
+not the dialect, decides the consequence. Zero, `false` and the empty string are present. A `null`
+candidate remains `null` and is neither silently repaired nor treated as missing.
+
+For every quality target, its lineage entry has `transformation`, exactly `applications` and
+`findings`, and `reconciliation` when declared. Each application records its observation `id`,
+pointer `source`, state `missing`, `present` or `failed`, the literal-preserving preparation-form
+JSON text of the source value when present (with the acquisition retaining its source bytes),
+the conversion `rule` when one applies, and exactly the `result` or closed `failure` code. Thus the
+preparation records every application, successful or failed. The declaration, including every
+rule, observation order, domain and reconciliation choice, is already in the read digest and the
+dialect digest. No product may convert a value on the way to a pack outside this declared read.
 
 #### 6.3 Rule
 

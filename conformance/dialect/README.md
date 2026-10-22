@@ -64,6 +64,17 @@ Runner's first: the Runner calls them "hand-maintained normative data", and says
 The links in the Runner's README are relative to the Runner's repository, and do not resolve here;
 the repository's link check passes over `vectors/` for that reason.
 
+## Companion hand-written cases
+
+[`quality-vectors.json`](quality-vectors.json) and
+[`research-result-vectors.json`](research-result-vectors.json) are specification-authored staged
+cases for the 2026-10-22 amendment, not Runner recordings and not entries in the Runner-derived
+manifest. The first covers every conversion kind, conversion failure, reconciliation mode and
+quality finding, including go-to-market and work-item examples. The second covers the typed result
+contract, every observation state, versioned acquisition-source declarations, resolved execution
+settings and retained bytes. Both readers consume these same files; paired reader tests add the
+empty, missing and one-over-bound mutations. No model or web request was made to write either file.
+
 ## What a vector holds, and the answer a verifier gives
 
 Each vector is a directory. Of its files, a preparation verifier reads:
