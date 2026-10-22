@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 import profile_validation as profiles
 
-VECTORS = json.loads((ROOT / 'conformance/profiles.json').read_text())
+VECTORS = json.loads((ROOT / 'conformance/evaluation/staged/profiles.json').read_text())
 
 
 class ProfileTests(unittest.TestCase):
@@ -41,7 +41,7 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual(profiles.validate_core(document, ['extended'])['code'], 'malformed-input')
 
     def test_schema_member_and_enum_mutations(self):
-        for name in ['schema/judgment-pack-core.schema.json', 'schema/policy/1.0.0/policy.schema.json', 'schema/policy/1.0.0/governing-adoption.schema.json']:
+        for name in ['schema/judgment-pack-core.schema.json']:
             schema = json.loads((ROOT / name).read_text())
             declaration = schema['properties']['profile']
             self.assertEqual(declaration['default'], 'base')
@@ -65,20 +65,6 @@ class ProfileTests(unittest.TestCase):
             hashes.append(hashlib.sha256(json.dumps(document).encode()).hexdigest())
         self.assertEqual(len(set(hashes)), 3)
 
-    def test_policy_refuses_before_material_loading(self):
-        spec = importlib.util.spec_from_file_location('policy_profiles', ROOT / 'conformance/policy/1.0.0/verify.py')
-        policy = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(policy)
-        self.assertEqual(policy.CAPABILITY['profiles'], ['base'])
-        def unexpected(_):
-            self.fail('material loaded before profile refusal')
-        for extra in [{}, {'content': ''}, {'content': 'x' * 8193}]:
-            raw = json.dumps({'profile': 'extended', **extra}).encode()
-            self.assertEqual(policy.verify_input(raw, [(None, None)], unexpected),
-                             {'status': 'refused', 'code': 'profile-unsupported', 'profile': 'extended'})
-        for declaration in ['', None, 'future', [], {}]:
-            self.assertEqual(policy.verify_input(json.dumps({'profile': declaration}).encode(), [])['code'], 'invalid-document')
-
     def test_both_dialect_readers_check_shared_declarations(self):
         import dialect_verify as dialect
         for row in VECTORS['dialectDeclarations']:
@@ -91,7 +77,7 @@ class ProfileTests(unittest.TestCase):
         script = '''import { documentProfile } from './tools/dialect-verify-ts/src/forms.ts';
 import { read, utf8 } from './tools/dialect-verify-ts/src/json.ts';
 import fs from 'node:fs';
-const rows = JSON.parse(fs.readFileSync('conformance/profiles.json')).dialectDeclarations;
+const rows = JSON.parse(fs.readFileSync('conformance/evaluation/staged/profiles.json')).dialectDeclarations;
 console.log(JSON.stringify(rows.map(r => { try { return documentProfile(read(utf8(JSON.stringify({profile:r.profile}))).value); } catch(e) { return e.code; } })));
 '''
         completed = subprocess.run(['node', '--experimental-strip-types', '--input-type=module', '-e', script], cwd=ROOT, capture_output=True, text=True)
@@ -111,12 +97,6 @@ console.log(JSON.stringify(reports));'''
         result = subprocess.run(['node', '--experimental-strip-types', '--input-type=module', '-e', script], cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(json.loads(result.stdout), [expected] * 3)
-        schema = json.loads((ROOT / 'conformance/policy/1.0.0/vectors.schema.json').read_text())
-        envelope = schema['properties']['cases']['items']['properties']['expected']
-        validator = Draft202012Validator(envelope)
-        self.assertTrue(validator.is_valid({'status': 'refused', 'code': 'profile-unsupported', 'profile': 'extended'}))
-        for invalid in [{}, {'status': 'refused', 'code': 'profile-unsupported'}, {'status': 'refused', 'code': 'profile-unsupported', 'profile': 'x' * 8193}]:
-            self.assertFalse(validator.is_valid(invalid))
 
     def test_boundary_vectors_kill_ceiling_and_negotiation_mutants(self):
         # Deliberately break the implementation in memory and run the actual vector test.
@@ -136,20 +116,17 @@ console.log(JSON.stringify(reports));'''
                 self.assertFalse(result.wasSuccessful(), target + ' mutation escaped')
                 self.assertTrue(result.failures, target + ' must fail an assertion')
 
-    def test_policy_document_schema_member_mutations(self):
+    def test_released_policy_schemas_do_not_adopt_profiles(self):
         spec = importlib.util.spec_from_file_location('policy_profile_schema', ROOT / 'conformance/policy/1.0.0/verify.py')
         policy = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(policy)
         validators = policy.validators()
+        self.assertNotIn('profiles', policy.CAPABILITY)
         for kind, filename in [('policy', 'policy.json'), ('governing-adoption', 'adoption.json')]:
             document = json.loads((ROOT / 'conformance/policy/1.0.0/examples/data-access' / filename).read_text())
+            validator = validators[kind]
+            self.assertTrue(validator.is_valid(document))
+            self.assertNotIn('profile', validator.schema['properties'])
             for declaration in ['base', 'extended']:
                 document['profile'] = declaration
-                validator = validators[kind]
-                self.assertTrue(validator.is_valid(document))
-                schema = copy.deepcopy(validator.schema)
-                del schema['properties']['profile']
-                self.assertFalse(validator.evolve(schema=schema).is_valid(document))
-                schema = copy.deepcopy(validator.schema)
-                schema['properties']['profile']['enum'].remove(declaration)
-                self.assertFalse(validator.evolve(schema=schema).is_valid(document))
+                self.assertFalse(validator.is_valid(document))

@@ -17,10 +17,6 @@
     "sourceProvenance"
   ],
   "properties": {
-    "profile": {
-      "enum": ["base", "extended"],
-      "default": "base"
-    },
     "formatVersion": {
       "$ref": "https://judgmentpack.org/schema/policy/1.0.0/common.schema.json#/$defs/formatVersion"
     },

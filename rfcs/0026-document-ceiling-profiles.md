@@ -42,7 +42,9 @@ Old schemas may reject the new member. Published schemas retain base maxima; pro
 apply the enumerated extended maxima without relaxing other constraints. No frozen Core consumer
 schema, release pin, specification version or released evaluation corpus is rewritten. The Policy
 reader retains its pinned Core consumer contract. Workflow remains a proposed companion without
-an implementation. The existing Policy and Dialect readers advertise/support only base; the Core
+an implementation. The released Policy 1.0.0 draft does not carry `profile`; its table ceilings apply
+from the next companion version, which adopts the member. The Dialect readers support
+only base; the Core
 structural profile reference admits both. No claim of extended companion implementation is made.
 
 ## Security and privacy
@@ -53,10 +55,10 @@ messages echo only known profile names. All examples are synthetic; ceilings gra
 
 ## Conformance
 
-`conformance/profiles.json` supplies hand-written boundary and capability vectors. Tests cover
+`conformance/evaluation/staged/profiles.json` supplies hand-written boundary and capability vectors. Tests cover
 implicit and explicit base, one-over-base refusal, extended admission and its own ceiling,
 unsupported and unknown names, unchanged identity bytes, schema mutation sensitivity, and both
-Dialect language readers' declaration checks. Policy vectors cover refusal before loading material.
+Dialect language readers' declaration checks. The frozen Policy schemas continue to reject the new member.
 
 ## Implementation
 

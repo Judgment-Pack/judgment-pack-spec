@@ -280,8 +280,9 @@ A document may declare `profile`, exactly `base` or `extended`; absence means `b
 A profile is a named set of ceilings, versioned with this specification. It changes no
 members, minima, grammar, numeric domain, uniqueness requirement or evaluation semantics.
 It never lowers a ceiling below `base`. An installation setting MUST NOT raise a ceiling
-that the document does not declare. Core packs, Policy and governing-adoption documents,
-Workflow documents and Dialect documents carry this member at their root. Dialect source
+that the document does not declare. Core packs, Workflow documents and Dialect documents carry this member at their root.
+Policy and governing-adoption documents adopt it from the next companion version;
+the released 1.0.0 draft does not carry `profile`. Dialect source
 and connection profiles are separate objects, not this ceiling declaration.
 
 A reader MUST admit a document only under a profile it supports. After parsing enough of
@@ -310,20 +311,20 @@ are not resource ceilings and do not change.
 | Format and resource | `base` | `extended` |
 | --- | ---: | ---: |
 | Core escalation routes (and their resulting handoff routes) | 8 | 16 |
-| Policy informationalSources, sourceProvenance, sourceRefs per section, governingPolicies | 16 | 32 |
-| Policy sections, scope sectionIds, coverage records per policy, consumerElements per section | 64 | 128 |
-| Policy artifact version characters | 256 | 512 |
-| Policy URI characters | 2048 | 4096 |
-| Policy local ID and media type characters | 128 | 256 |
-| Policy readable text characters | 4096 | 8192 |
-| Policy parsed document bytes | 262144 | 524288 |
-| Policy document nesting | 32 | 64 |
-| Policy number literal characters | 128 | 256 |
-| Policy exponent magnitude | 308 | 616 |
-| Policy narrative, review basis and informational material bytes | 1048576 | 2097152 |
-| Policy original material / registration bytes | 4194304 | 8388608 |
-| Policy distinct retained bytes | 16777216 | 33554432 |
-| Policy material registrations | 16 | 32 |
+| Policy (from the next companion version): informationalSources, sourceProvenance, sourceRefs per section, governingPolicies | 16 | 32 |
+| Policy (from the next companion version): sections, scope sectionIds, coverage records per policy, consumerElements per section | 64 | 128 |
+| Policy (from the next companion version): artifact version characters | 256 | 512 |
+| Policy (from the next companion version): URI characters | 2048 | 4096 |
+| Policy (from the next companion version): local ID and media type characters | 128 | 256 |
+| Policy (from the next companion version): readable text characters | 4096 | 8192 |
+| Policy (from the next companion version): parsed document bytes | 262144 | 524288 |
+| Policy (from the next companion version): document nesting | 32 | 64 |
+| Policy (from the next companion version): number literal characters | 128 | 256 |
+| Policy (from the next companion version): exponent magnitude | 308 | 616 |
+| Policy (from the next companion version): narrative, review basis and informational material bytes | 1048576 | 2097152 |
+| Policy (from the next companion version): original material / registration bytes | 4194304 | 8388608 |
+| Policy (from the next companion version): distinct retained bytes | 16777216 | 33554432 |
+| Policy (from the next companion version): material registrations | 16 | 32 |
 | Workflow limits.maxStages | 32 | 64 |
 | Workflow limits.maxRecords, limits.maxInstances | 4096 | 8192 |
 | Workflow limits.maxAttempts | 16 | 32 |

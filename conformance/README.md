@@ -88,7 +88,7 @@ conformance on any implementation (§11).
 
 ## Document ceiling profiles
 
-[profiles.json](profiles.json) is a hand-written structural admission suite for Core §4.1.
+`conformance/evaluation/staged/profiles.json` is a hand-written structural admission suite for Core §4.1.
 Its shared pack has eight routes; each case explicitly supplies the declaration (or omits it),
 reader `profiles`, routes to append, and expected result. The same nine-route pack is refused
 under base and admitted under extended. These are admission vectors, not an evaluation claim.

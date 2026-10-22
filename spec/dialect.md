@@ -193,7 +193,7 @@ never interchanged.
 ## 2. The dialect document
 
 The root MAY carry `profile`, `base` by default or `extended`, independently of source
-connection profiles. [Core §4.1](judgment-pack-core.md#41-document-ceiling-profiles)
+connection profiles. [Core §4.1](../spec/judgment-pack-core.md#41-document-ceiling-profiles)
 defines its ceiling table, admission, `profile-unsupported` refusal and byte-identity rules.
 The numeric resource bounds here state base values; extended uses that table. An unknown
 profile is `input-malformed`. The bundled verifiers support only base.

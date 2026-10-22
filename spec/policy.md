@@ -226,17 +226,6 @@ adoption, infer natural-language consistency or decide applicability.
 
 ## 5. Resource limits and refusal classifications
 
-Policy and governing-adoption documents MAY carry root `profile`: `base` by default or
-`extended`. [Core §4.1](judgment-pack-core.md#41-document-ceiling-profiles) defines the
-ceiling table, admission, identity and refusal rules. The numbers below and in §§2–4
-are base values. A reader supporting extended checks that table’s extended values.
-The capability record MUST list `profiles`, the names supported for these documents.
-The bundled offline reader supports `["base"]`; extended input is refused before
-material registration, with `{"status":"refused","code":"profile-unsupported","profile":"extended"}`.
-Unknown or malformed profile declarations are `invalid-document`. This profile check
-precedes other field and format checks once the root has been parsed.
-
-
 These are Policy offline-reader bounds, not changes to Core limits.
 All maxima are inclusive. Strings are counted after decoding in Unicode
 characters unless the table specifies bytes. The closed schemas state all field
@@ -260,8 +249,7 @@ truncating it, silently dropping it, or substituting narrative extraction is not
 a complete input. Registration exceeding a bound changes no material state.
 
 The reader returns exactly one of these bounded JSON objects (object member order
-is irrelevant; no optional messages, paths, content, titles or provider identifiers;
-`profile-unsupported` additionally carries the known profile as specified above):
+is irrelevant; no optional messages, paths, content, titles or provider identifiers):
 
 ```json
 {"status":"valid","formatVersion":"1.0.0","maturity":"draft"}
@@ -274,7 +262,6 @@ operators must not treat an inability to run as success.
 
 | Code | Meaning |
 | --- | --- |
-| `profile-unsupported` | Known document profile absent from the reader’s `profiles` |
 | `input-over-bound` | Physical bytes/nesting/number limits, schema maxima, role sizes, registration count or aggregate bytes exceeded |
 | `invalid-json` | Strict UTF-8 JSON failed: duplicate keys, BOM, nonfinite numbers, unpaired surrogates, multiple values, malformed syntax |
 | `invalid-selector` | Root is not an object; selector missing, wrong type, not strict ASCII `x.y.z`, or over 256 characters |

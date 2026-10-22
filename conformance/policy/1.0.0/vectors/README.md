@@ -96,7 +96,7 @@ python conformance/policy/1.0.0/check_vectors.py
 ```
 
 Successful harness output is exactly
-`{"status":"matched","cases":125,"maturity":"draft"}`; this is harness
+`{"status":"matched","cases":124,"maturity":"draft"}`; this is harness
 agreement, not the result for an individual document or a conformance claim. Each
 refusal vector's exact output is retained in the manifest. The harness and schema
 are optional conveniences: another language can read these same bytes and the

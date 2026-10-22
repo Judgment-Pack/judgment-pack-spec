@@ -193,29 +193,6 @@
                     ]
                   }
                 }
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                  "status",
-                  "code",
-                  "profile"
-                ],
-                "properties": {
-                  "status": {
-                    "const": "refused"
-                  },
-                  "code": {
-                    "const": "profile-unsupported"
-                  },
-                  "profile": {
-                    "enum": [
-                      "base",
-                      "extended"
-                    ]
-                  }
-                }
               }
             ]
           }

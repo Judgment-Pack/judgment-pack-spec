@@ -58,7 +58,6 @@
     "independent-interoperability-evidence"
   ],
   "refusalCodes": [
-    "profile-unsupported",
     "input-over-bound",
     "invalid-json",
     "invalid-selector",
@@ -71,8 +70,5 @@
     "invalid-consumer",
     "unsupported-canonical-identity",
     "invalid-carrier"
-  ],
-  "profiles": [
-    "base"
   ]
 }

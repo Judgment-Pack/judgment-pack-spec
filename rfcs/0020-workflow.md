@@ -223,7 +223,7 @@ disposition and discards it on evaluation error. Section 7 applies these distinc
 
 `workflow.json` requires `{workflowVersion, stages, result, limits}` and permits only
 one additional member, `profile` (`base` by default or `extended`).
-[Core §4.1](judgment-pack-core.md#41-document-ceiling-profiles) defines its ceiling table,
+[Core §4.1](../spec/judgment-pack-core.md#41-document-ceiling-profiles) defines its ceiling table,
 admission, `profile-unsupported` refusal and byte-identity rules. Unknown profiles are
 `input-malformed`. The table below states base ceilings; extended doubles each ceiling
 over `limits`, which remains required. `workflowVersion` is the

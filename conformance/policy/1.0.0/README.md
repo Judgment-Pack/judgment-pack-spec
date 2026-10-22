@@ -4,7 +4,7 @@ This is the supporting material for the [Policy draft companion](../../../spec/p
 and [RFC 0023](../../../rfcs/0023-policy-companion.md). The maintainer approved the
 bounded draft conditional on required green CI and PR 218 merge; until then the
 default-branch RFC remains Review. Immutable release publication remains separate.
-The 125 vectors become a released corpus only when their exact Policy tag and a
+The 124 vectors become a released corpus only when their exact Policy tag and a
 maintainer-published GitHub release both exist. Passing them alone creates no
 conformance, approval or authority claim.
 
