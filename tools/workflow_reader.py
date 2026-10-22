@@ -549,7 +549,7 @@ class Reader:
         closed(value['tool'],{'name','version'}); require(value['tool']['name']=='jpack','Runtime tool identity'); text(value['tool']['version'])
         error=closed(value['evaluationError'],{'class','phase','evaluatorSpecVersion'})
         require(error['class'] in ('pack-not-conformant','malformed-input','unsupported-required-extension','resource-exhaustion'),'Core error class')
-        require(error['evaluatorSpecVersion']=='0.2.0-draft' and error['phase']==('evaluation' if error['class']=='resource-exhaustion' else 'preflight'),'Core error phase')
+        require(error['evaluatorSpecVersion']=='0.3.0' and error['phase']==('evaluation' if error['class']=='resource-exhaustion' else 'preflight'),'Core error phase')
         require(isinstance(value['diagnostics'],list),'error diagnostics')
         for diagnostic in value['diagnostics']:
             closed(diagnostic,{'code','codeStability','layer','severity','instancePath','message'})
