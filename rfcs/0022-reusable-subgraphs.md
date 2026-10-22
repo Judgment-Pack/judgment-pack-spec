@@ -53,10 +53,10 @@ treating detached copies as live references:
    member; originating instance paths travel beside the disposition as provenance. Complete Core §8.3
    disposition objects are preserved at all leaf nodes and exported boundaries, with `state` strictly
    `"requested"` or `"none"`, never flattening kinds into outcome IDs.
-5. **Clear Algorithm Boundaries**: Acyclicity requirements remain declarative per RFC 0002's
+5. **Clear Algorithms and Bounds**: Acyclicity requirements remain declarative per RFC 0002's
    format-only determination; candidate algorithms (such as Tarjan's SCC and topological sorting)
-   and numerical limits (depth 8, node budget 256) are characterized as provisional runtime
-   implementation choices with unambiguous accounting rules.
+   remain runtime choices. Portable `base` bounds are schema maxima: nesting depth 4 and RFC
+   0002's graph-document node limit applied to the expanded graph.
 
 ## Problem
 
@@ -336,22 +336,27 @@ To prevent resource exhaustion (graph bomb attacks or combinatorial expansion):
   - The root parent graph is at depth **0**.
   - A subgraph directly referenced by a node in the root graph evaluates at depth **1**.
   - Each nested subgraph reference edge increments the depth by 1.
-  - The provisional limit is a maximum depth of **8** (depths 0 through 8 inclusive are valid; a
-    subgraph at depth 9 is refused before evaluation).
+  - The maximum depth is **4**: depths 0 through 4 are admitted, and a subgraph at depth 5 is
+    refused before evaluation.
 
-- **Node Budget Accounting**:
-  - The counted units are **evaluated leaf pack node instances**.
-  - Composite wrapper nodes (subgraph reference nodes) are structural boundaries and do NOT count
-    toward the budget.
-  - Repeated instances: If a subgraph containing `k` leaf pack nodes is instantiated `m` times, it
-    contributes `k * m` leaf pack instances toward the budget.
-  - The provisional budget is a maximum of **256** total evaluated leaf pack node instances
-    (inclusive). An expanded graph with 256 leaf pack instances is admitted; 257 is refused before
-    evaluation.
+- **Expanded-Graph Node Accounting**:
+  - Expansion replaces every subgraph reference with its referenced graph before the node maximum
+    is checked. Repeated instances therefore contribute their nodes once per expansion.
+  - The maximum is the graph-document node limit owned by [RFC 0002](0002-judgment-graph.md),
+    applied once to that expanded graph. RFC 0002 and the reference runtime currently state no
+    numeric node maximum (the runtime bounds a graph document by bytes), so this record does not
+    invent one. Adoption of this contract must first state that maximum in RFC 0002's graph schema.
+  - There is no separate leaf-instance budget and no special exclusion for composite wrapper
+    nodes. The former provisional 256-instance budget is removed.
 
-- Per Core §10, these limits are implementation-defined limits rather than immutable JPS
-  conformance requirements. Traversal bounds are enforced during static validation before pack
-  evaluation.
+These are the `base` profile's inclusive schema maxima. They are hard limits for every reader, are
+exposed with their exact values in the reader's capability record in the manner of Policy companion
+§5, and may be raised only by a specification revision supported by consumer evidence. A deployment
+setting cannot raise them. The `extended` profile of [RFC 0026](0026-document-ceiling-profiles.md)
+is the portable mechanism for a specification revision to enumerate higher maxima; until it does,
+no higher portable values exist. Readers enforce the selected profile's maxima during structural
+validation before pack evaluation. Core §10's implementation-defined-limit framing does not apply
+to these graph schema maxima.
 
 ### 6. Execution Models and the Equivalence Conjecture
 
@@ -417,22 +422,41 @@ objects:
 - Per Core §6.7 and §8.3, a pack's configured escalation target (e.g. `"Sanctions Compliance Officer"`)
   is a display name for a role or queue, not a network address. The disposition does not echo or
   rewrite the target.
-- If an internal node requests a handoff with a configured target, that target is preserved
-  unaltered in the result envelope.
+- If an internal node's pack declares a single `target`, a requested handoff keeps the existing
+  envelope shape: that target is preserved unaltered beside `originatingNode`.
+- If an internal node's pack declares `routes`, the subgraph collects one envelope entry for each
+  route selected under [RFC 0025](0025-core-escalation-routes.md), in declaration order. Each entry
+  carries the complete selected route beside the same `originatingNode`; duplicate targets remain
+  separate entries. Route selection does not rewrite the per-node disposition's complete `reasons`,
+  and `triggeredBy` retains the complete handoff trigger set rather than being narrowed to the
+  route's filter.
 - If an escalation occurs without a configured target (such as a direct exception request per Core
   §8.1), the envelope's handoff entry **omits the `target` member** (it is absent, not `null`).
 - The originating instance and node are reported **separately** beside it:
 ```json
 {
   "handoffs": [
-      {
-        "originatingNode": "/contractor-sanctions/ofac-check",
+    {
+      "originatingNode": "/contractor-sanctions/ofac-check",
+      "route": {
         "target": {
           "kind": "human-role",
           "name": "Sanctions Compliance Officer"
         },
-        "triggeredBy": ["missing-required-evidence"]
+        "triggers": ["missing-required-evidence"]
       },
+      "triggeredBy": ["missing-required-evidence"]
+    },
+    {
+      "originatingNode": "/contractor-sanctions/ofac-check",
+      "route": {
+        "target": {
+          "kind": "queue",
+          "name": "Sanctions Evidence Queue"
+        }
+      },
+      "triggeredBy": ["missing-required-evidence"]
+    },
     {
       "originatingNode": "/contractor-sanctions/pep-check",
       "triggeredBy": ["exception-escalation"]
@@ -686,11 +710,22 @@ JSON text shown above, without a trailing newline; if stored with a trailing new
     }
   ],
   "escalation": {
-    "target": {
-      "kind": "human-role",
-      "name": "Sanctions Compliance Officer"
-    },
-    "triggers": ["missing-required-evidence"]
+    "triggers": ["missing-required-evidence"],
+    "routes": [
+      {
+        "target": {
+          "kind": "human-role",
+          "name": "Sanctions Compliance Officer"
+        },
+        "triggers": ["missing-required-evidence"]
+      },
+      {
+        "target": {
+          "kind": "queue",
+          "name": "Sanctions Evidence Queue"
+        }
+      }
+    ]
   }
 }
 ```
@@ -864,9 +899,22 @@ JSON text shown above, without a trailing newline; if stored with a trailing new
   "handoffs": [
     {
       "originatingNode": "/contractor-sanctions/ofac-check",
-      "target": {
-        "kind": "human-role",
-        "name": "Sanctions Compliance Officer"
+      "route": {
+        "target": {
+          "kind": "human-role",
+          "name": "Sanctions Compliance Officer"
+        },
+        "triggers": ["missing-required-evidence"]
+      },
+      "triggeredBy": ["missing-required-evidence"]
+    },
+    {
+      "originatingNode": "/contractor-sanctions/ofac-check",
+      "route": {
+        "target": {
+          "kind": "queue",
+          "name": "Sanctions Evidence Queue"
+        }
       },
       "triggeredBy": ["missing-required-evidence"]
     },
@@ -943,7 +991,17 @@ JSON text shown above, without a trailing newline; if stored with a trailing new
             "reasons": ["missing-required-evidence"],
             "handoff": {
               "state": "requested",
-              "triggeredBy": ["missing-required-evidence"]
+              "triggeredBy": ["missing-required-evidence"],
+              "routes": [
+                {
+                  "kind": "human-role",
+                  "name": "Sanctions Compliance Officer"
+                },
+                {
+                  "kind": "queue",
+                  "name": "Sanctions Evidence Queue"
+                }
+              ]
             }
           }
         },
@@ -1041,8 +1099,9 @@ A parent graph node specifying an inconsistent version:
 
 ## Security and privacy
 
-- **Resource Limits**: Provisional limits on nesting depth (8) and node budget (256) prevent
-  recursive denial-of-service ("graph bombs").
+- **Resource Limits**: The `base` schema's depth maximum of 4 and RFC 0002's graph-document node
+  maximum over the expanded graph bound recursive denial-of-service ("graph bombs"). Every reader
+  exposes and enforces the same maxima for a selected profile; there is no installation override.
 - **Untrusted Documents**: Subgraph documents loaded from project or external paths are untrusted
   inputs subject to schema validation, carrier parsing checks, and digest verification.
 - **Integrity vs. Authority**: A valid digest match proves byte identity; it does not authorize the
@@ -1060,8 +1119,12 @@ When an experimental implementation is built, test vectors should exercise:
 - Negative: Policy version mismatch between node pin and loaded document.
 - Negative: Overlapping decoded RFC 6901 pointers feeding the same target node.
 - Negative: Colliding fact feed targeting an already-fed internal pointer.
-- Negative: Nesting depth exceeding limit (depth 9).
-- Negative: Total leaf pack node budget exceeding limit (257 nodes).
+- Positive: Nesting depth at the `base` maximum (depth 4).
+- Negative: Nesting depth one past the `base` maximum (depth 5).
+- Positive: Expanded graph at RFC 0002's graph-document node maximum, including repeated subgraphs.
+- Negative: Expanded graph one node past that maximum.
+- Positive: A routed handoff produces one envelope entry per selected route in declaration order,
+  while a single-target pack retains the existing entry shape.
 
 ## Implementation
 
@@ -1082,12 +1145,17 @@ When an experimental implementation is built, test vectors should exercise:
 
 ## Unresolved questions
 
-1. **Parameter Remapping Schema**: Should `inputs.facts` support structural transformations (e.g.,
-   re-rooting JSON objects), or should it remain strictly single-pointer mapping?
 2. **Synchronization Barriers in Flattened Execution**: What specific synchronization barrier rule
    guarantees deterministic error reporting across concurrent or out-of-order flattened schedulers?
-3. **Cross-Repository Subgraph Packaging**: How should shared subgraphs be packaged and distributed
-   without relying on project-local filesystem paths? Does this require an extension to the pack
-   manifest ([RFC 0001](0001-pack-manifest.md))?
+3. **Cross-Repository Subgraph Packaging**: Packaging is out of scope for this record. If subgraphs
+   are shared between installations, [RFC 0019](0019-exchange.md)'s Exchange is the place to define
+   them as a third entry kind beside `dialect` and `preset`; this is not an extension to the pack
+   manifest ([RFC 0001](0001-pack-manifest.md)). The entry contract, fixtures, and release checks
+   remain work for an Exchange revision.
 4. **Dynamic Output Routing**: Can a subgraph conditionally select which output node surfaces based
    on rule firings, or must the output-to-node mapping remain strictly static?
+
+Former question 1 is closed by the dialect decision in issue #170: conversion, reconciliation, and
+structural remapping belong to the dialect, which declares and records the rules and owns data
+quality. Product code does not convert a value on the way to a pack. This contract's interface
+therefore remains the pointer-to-pointer map in §2 and gains no transformation language.
