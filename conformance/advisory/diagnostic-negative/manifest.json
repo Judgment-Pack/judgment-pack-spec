@@ -1,0 +1,114 @@
+{
+  "status": "review",
+  "specSection": "§3.3.1",
+  "controls": [
+    {
+      "id": "bounded-range",
+      "diagnostic": {
+        "code": "JPS-RULES-OVERLAP",
+        "certainty": "exact",
+        "severity": { "validate": "warning", "strict": "error", "publish": "block" },
+        "path": "/rules/0",
+        "rules": [
+          { "id": "r-medium", "outcome": "medium" },
+          { "id": "r-high", "outcome": "high" }
+        ],
+        "overlap": {
+          "path": "/score",
+          "from": "70",
+          "fromInclusive": true,
+          "to": "90",
+          "toInclusive": false
+        },
+        "effect": "Core §8 records conflict; the disposition is unresolved.",
+        "suggestedRewrite": {
+          "ruleId": "r-medium",
+          "when": { "op": "literal", "value": true }
+        }
+      }
+    },
+    {
+      "id": "shared-values",
+      "diagnostic": {
+        "code": "JPS-RULES-OVERLAP",
+        "certainty": "exact",
+        "severity": { "validate": "warning", "strict": "error", "publish": "block" },
+        "path": "/rules/0",
+        "rules": [
+          { "id": "r-medium", "outcome": "medium" },
+          { "id": "r-high", "outcome": "high" }
+        ],
+        "overlap": { "path": "/band", "sharedValues": ["medium", "high"] },
+        "effect": "Core §8 records conflict; the disposition is unresolved.",
+        "suggestedRewrite": {
+          "ruleId": "r-medium",
+          "when": { "op": "literal", "value": true }
+        }
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "overlap-unknown-member",
+      "expectedKeyword": "additionalProperties",
+      "diagnostic": {
+        "code": "JPS-RULES-OVERLAP",
+        "certainty": "exact",
+        "severity": { "validate": "warning", "strict": "error", "publish": "block" },
+        "path": "/rules/0",
+        "rules": [
+          { "id": "r-medium", "outcome": "medium" },
+          { "id": "r-high", "outcome": "high" }
+        ],
+        "overlap": {
+          "path": "/score",
+          "from": "70",
+          "fromInclusive": true,
+          "unexpected": true
+        },
+        "effect": "Core §8 records conflict; the disposition is unresolved.",
+        "suggestedRewrite": {
+          "ruleId": "r-medium",
+          "when": { "op": "literal", "value": true }
+        }
+      }
+    },
+    {
+      "id": "rewrite-not-condition",
+      "expectedKeyword": "oneOf",
+      "diagnostic": {
+        "code": "JPS-RULES-OVERLAP",
+        "certainty": "exact",
+        "severity": { "validate": "warning", "strict": "error", "publish": "block" },
+        "path": "/rules/0",
+        "rules": [
+          { "id": "r-medium", "outcome": "medium" },
+          { "id": "r-high", "outcome": "high" }
+        ],
+        "overlap": { "path": "/score", "from": "70", "fromInclusive": true },
+        "effect": "Core §8 records conflict; the disposition is unresolved.",
+        "suggestedRewrite": { "ruleId": "r-medium", "when": true }
+      }
+    },
+    {
+      "id": "same-rule-id",
+      "expectedKeyword": "distinct-rule-ids",
+      "diagnostic": {
+        "code": "JPS-RULES-OVERLAP",
+        "certainty": "exact",
+        "severity": { "validate": "warning", "strict": "error", "publish": "block" },
+        "path": "/rules/0",
+        "rules": [
+          { "id": "r-band", "outcome": "medium" },
+          { "id": "r-band", "outcome": "high" }
+        ],
+        "overlap": { "path": "/score", "from": "70", "fromInclusive": true },
+        "effect": "Core §8 records conflict; the disposition is unresolved.",
+        "suggestedRewrite": {
+          "ruleId": "r-band",
+          "when": { "op": "literal", "value": true }
+        }
+      }
+    }
+  ]
+}

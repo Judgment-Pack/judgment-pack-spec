@@ -22,6 +22,7 @@ from markdown.extensions import Extension
 from markdown.inlinepatterns import SimpleTagInlineProcessor
 from markdown.treeprocessors import Treeprocessor
 from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -2958,7 +2959,8 @@ SLIDES: tuple[Slide, ...] = (
             "the specification got fixed.",
         ),
         note=(
-            "Measured across 127 tests on the file format, plus 20 decision scenarios replayed through "
+            "Measured across 127 tests on the file format and 5 advisory vectors, plus 20 decision "
+            "scenarios replayed through "
             "both engines. One limit, stated plainly: both implementations trace to the same "
             "maintainer, and the second was written from reference texts that already carried the "
             "first's implementation notes — so the agreement <em>corroborates</em> that the "
@@ -3109,8 +3111,8 @@ SLIDES: tuple[Slide, ...] = (
         ),
         points=(
             "<strong>Ready today:</strong> the file specification, the checks that a file is sound, "
-            "and an agreed way to turn one into an answer — held in place by 127 tests on the format "
-            "and 20 on the answers.",
+            "and an agreed way to turn one into an answer — held in place by 127 tests on the format, "
+            "5 advisory vectors, and 20 tests on the answers.",
             "<strong>Tooling:</strong> the open-source reference runtime serves the same core through "
             "a CLI and stdio MCP, walks project-owned pack matrices, and reports informative coverage. "
             "Projects can opt into JSONL evaluation records and a reviewed-set lock that makes drift "
@@ -3359,8 +3361,14 @@ def build(output: Path, config: BuildConfig) -> None:
     manifest_schema = json.loads(
         repository_file("conformance/manifest.schema.json").read_text(encoding="utf-8")
     )
+    core_schema = json.loads(
+        repository_file("schema/judgment-pack-core.schema.json").read_text(encoding="utf-8")
+    )
+    schema_registry = Registry().with_resource(
+        core_schema["$id"], Resource.from_contents(core_schema)
+    )
     Draft202012Validator.check_schema(manifest_schema)
-    Draft202012Validator(manifest_schema).validate(manifest)
+    Draft202012Validator(manifest_schema, registry=schema_registry).validate(manifest)
     routes = build_routes(manifest)
     prepare_output(output)
     copy_static(output)
