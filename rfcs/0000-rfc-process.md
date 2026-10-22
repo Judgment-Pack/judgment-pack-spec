@@ -63,7 +63,7 @@ the question was raised by that record and ruled on at its acceptance.
 
 ## Review
 
-Research-preview RFCs remain open for public comment for a reasonable period based on complexity.
+Draft RFCs remain open for public comment for a reasonable period based on complexity.
 Maintainers may request prototypes or conformance cases before disposition. A stable normative
 feature should not be accepted without evidence from two independent implementations.
 
