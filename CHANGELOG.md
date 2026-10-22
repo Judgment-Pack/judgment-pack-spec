@@ -7,6 +7,13 @@ here.
 
 ### Added
 
+- RFC 0020's accepted issue #228 amendment: workflow output envelopes name their contributing
+  rule outside Core's unchanged disposition; every stage records a closed disposition summary
+  and a reproducible seeded sample; the workflow verifier recomputes both and refuses disagreement;
+  and drift is a comparison over two verified bundles of the same workflow, without a verdict.
+  The Draft's two-stage fixture plan now carries the new records, mutations, refusals and resume
+  cases. No workflow implementation, recorded fixture or conformance claim is added.
+
 - Official-draft Policy promotion preparation: versioned closed format `1.0.0`
   schemas, retained-byte examples and 124 staged agreement vectors, explicit
   migration/provenance and a scoped independent draft release route through the
