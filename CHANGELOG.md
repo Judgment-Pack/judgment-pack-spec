@@ -7,6 +7,8 @@ here.
 
 ### Added
 
+- Name the next Core release `0.3.0`, define conformance maturity independently, and require `v0.3.0-rc.1` before release (#231).
+
 - RFC 0022 aligns reusable-subgraph bounds, routed handoff provenance, dialect-owned remapping and
   cross-installation packaging with the decisions on #129, #219, #232 and #170 (#233).
 - Dialect-owned data quality and typed research results (#170, #169): six closed deterministic
