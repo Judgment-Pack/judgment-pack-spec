@@ -48,9 +48,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      # Pinned: 15.34.1 (2026-10-21) checks that the Hosting API is enabled through the Service Usage API,
-      # which the deploy account is not granted; move the pin with that grant.
-      - run: npm install -g firebase-tools@15.34.0
+      # Pinned on purpose: a bump is a reviewed change, since 15.34.1 (2026-10-21) began reading the
+      # Service Usage API before deploying (the deploy account holds Service Usage Viewer for it).
+      - run: npm install -g firebase-tools@15.34.1
       - name: Deploy spec preview channel
         run: |
           firebase target:apply hosting spec "${SPEC_SITE}" --project "${GCP_PROJECT}"
@@ -95,9 +95,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      # Pinned: 15.34.1 (2026-10-21) checks that the Hosting API is enabled through the Service Usage API,
-      # which the deploy account is not granted; move the pin with that grant.
-      - run: npm install -g firebase-tools@15.34.0
+      # Pinned on purpose: a bump is a reviewed change, since 15.34.1 (2026-10-21) began reading the
+      # Service Usage API before deploying (the deploy account holds Service Usage Viewer for it).
+      - run: npm install -g firebase-tools@15.34.1
       - name: Deploy live (spec + redirect)
         run: |
           firebase target:apply hosting spec "${SPEC_SITE}" --project "${GCP_PROJECT}"
