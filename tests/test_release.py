@@ -56,7 +56,15 @@ class ReleaseBuilderTests(unittest.TestCase):
             (ROOT / "conformance" / "manifest.json").read_text(encoding="utf-8")
         )
         version = manifest["specVersion"]
+        self.assertEqual("0.3.0", version)
         BUILD_RELEASE.validate_artifacts(version, f"v{version}")
+
+    def test_core_bundle_uses_prepared_notes_and_keeps_historical_notes(self) -> None:
+        current = BUILD_RELEASE.bundle_paths("v0.3.0", "HEAD")
+        historical = BUILD_RELEASE.bundle_paths("v0.2.0-draft", "HEAD")
+        self.assertIn("docs/releases/v0.3.0.md", current)
+        self.assertNotIn("releases/v0.3.0.md", current)
+        self.assertIn("releases/v0.2.0-draft.md", historical)
 
     def test_artifact_validation_pins_the_evaluation_corpus(self) -> None:
         # An evaluator-conformance claim binds to the corpus published for the exact specVersion

@@ -1,7 +1,7 @@
 {
   "$schema": "./manifest.schema.json",
-  "suiteVersion": "0.2.0-draft",
-  "specVersion": "0.2.0-draft",
+  "suiteVersion": "0.3.0",
+  "specVersion": "0.3.0",
   "status": "draft",
   "validationProfile": {
     "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",

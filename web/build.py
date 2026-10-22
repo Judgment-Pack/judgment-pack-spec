@@ -29,8 +29,8 @@ ROOT = Path(__file__).resolve().parents[1]
 WEB_ROOT = ROOT / "web"
 DEFAULT_OUTPUT = ROOT / "public"
 TEMPLATE = Template((WEB_ROOT / "templates" / "page.html").read_text(encoding="utf-8"))
-SITE_VERSION = "0.2.0-draft"
-TAGGED_SOURCE_REF = "v0.2.0-draft"
+SITE_VERSION = "0.3.0"
+TAGGED_SOURCE_REF = "v0.3.0"
 SITE_NAME = "Judgment Pack Specification"
 SITE_SHORT_NAME = "JPS"
 SITE_DESCRIPTION = (
@@ -329,8 +329,8 @@ PAGES = (
     ),
     Page(
         "spec/judgment-pack-core.md",
-        PurePosixPath("spec/0.2.0-draft/index.html"),
-        "JPS Core 0.2.0-draft",
+        PurePosixPath("spec/0.3.0/index.html"),
+        "JPS Core 0.3.0",
         "The normative prose for JPS carrier, structural, and semantic document conformance and for the evaluator conformance class.",
         "spec",
         "Normative prose",
@@ -736,11 +736,20 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "docs/releases/v0.3.0.md",
+        PurePosixPath("project/releases/0.3.0/index.html"),
+        "0.3.0 release notes",
+        "Scope, migration, included work, and maturity of the first Core release without a -draft suffix.",
+        "project",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
-        "Scope, artifacts, the independence caveat, limitations, and testing guidance for the draft that adds the evaluator conformance class.",
+        "Scope, artifacts, the independence caveat, limitations, and testing guidance for the draft that added evaluator conformance.",
         "project",
+        source_ref="v0.2.0-draft",
     ),
     Page(
         "releases/v0.1.0-draft.md",
@@ -790,7 +799,7 @@ PAGES = (
 NAVIGATION = (
     ("overview", "Overview", PurePosixPath("index.html")),
     ("why", "Why", PurePosixPath("why/index.html")),
-    ("spec", "Spec", PurePosixPath("spec/0.2.0-draft/index.html")),
+    ("spec", "Spec", PurePosixPath("spec/0.3.0/index.html")),
     ("examples", "Examples", PurePosixPath("examples/index.html")),
     ("conformance", "Conformance", PurePosixPath("conformance/index.html")),
     ("faq", "FAQ", PurePosixPath("faq/index.html")),
@@ -1350,7 +1359,7 @@ def page_html(
         else:
             schema_meta += (
                 f'<link itemprop="isPartOf" href="{html.escape(config.base_url + "/#website", quote=True)}">'
-                f'<link itemprop="about" href="{html.escape(absolute_url(config.base_url, PurePosixPath("spec/0.2.0-draft/index.html")), quote=True)}">'
+                f'<link itemprop="about" href="{html.escape(absolute_url(config.base_url, PurePosixPath("spec/0.3.0/index.html")), quote=True)}">'
             )
         if schema_type == "TechArticle":
             schema_meta += (
@@ -1428,7 +1437,7 @@ def raw_block(text: str, language: str = "json") -> str:
 # (summary, allowed-values-or-None). Powers the clickable-key cards and the schema field reference.
 KEY_REFERENCE: dict[str, tuple[str, tuple[str, ...] | None]] = {
     "profile": ("The document ceiling profile. Absent means base; extended requires explicit reader support and retains its declaration in the document identity.", ("base", "extended")),
-    "specVersion": ("The JPS specification version this document targets.", ("0.2.0-draft",)),
+    "specVersion": ("The JPS specification version this document targets.", ("0.3.0",)),
     "id": ("A stable identifier. At the top level it is the pack's globally unique URI; inside outcomes, rules, evidence requirements, sources, and exceptions it is a pack-local id (lowercase, hyphenated).", None),
     "version": ("The pack's own semantic version (MAJOR.MINOR.PATCH), separate from specVersion.", None),
     "title": ("A short human-readable name for the pack.", None),
@@ -1823,7 +1832,7 @@ Use only a minimal synthetic reproduction, then
     the evidence, rules, exceptions, uncertainty, escalation criteria, and evaluations behind an AI
     agent's decisions.</p>
     <div class="hero-actions">
-      <a class="button button-primary" href="{html.escape(output_href(page.output, PurePosixPath('spec/0.2.0-draft/index.html')))}">Read the specification</a>
+      <a class="button button-primary" href="{html.escape(output_href(page.output, PurePosixPath('spec/0.3.0/index.html')))}">Read the specification</a>
       <a class="button button-secondary" href="{html.escape(SLACK_URL)}" target="_blank" rel="noopener noreferrer">Join Slack</a>
       <a class="button button-secondary" href="{html.escape(GITHUB_ORG_URL)}" target="_blank" rel="noopener noreferrer">Browse repositories</a>
     </div>
@@ -1966,7 +1975,7 @@ not evaluation-corpus rows and assert no evaluator-conformance result.</p>
 <div class="notice notice-info"><strong>Keep the layers separate.</strong> A malformed carrier, a
 schema-shape failure, and a dangling local reference fail at different document-conformance layers.
 Missing evidence, unknown facts, conflicts, and no-match handling belong to the resolution model of
-§§7–8, which JPS 0.2.0-draft makes normative for the evaluator conformance class only.
+§§7–8, which JPS 0.3.0 makes normative for the evaluator conformance class only.
 A document-conformance result never depends on them, and the notes on this page are not corpus rows.</div>
 <h2 id="document">Annotated document</h2>
 <p>The complete validated pack. Each highlighted key links to its definition on the right — click a
@@ -2013,7 +2022,7 @@ must not fetch their source locators unless explicitly requested.</div>
   <li>Edit only a scratch copy to create a carrier, structural, or semantic failure.</li>
   <li>Compare what you observe with <a href="{html.escape(output_href(index_output, PurePosixPath('testing/index.html')))}">Test the preview</a>.</li>
 </ol>
-<p>The document examples below are about document conformance. JPS 0.2.0-draft also defines portable evaluation
+<p>The document examples below are about document conformance. JPS 0.3.0 also defines portable evaluation
 semantics, but an evaluator-conformance claim is made against the
 <a href="{html.escape(output_href(index_output, PurePosixPath('conformance/evaluation/index.html')))}">evaluation
 corpus</a>, never against an example. The edge notes on each page explain illustrative applicability,
@@ -2211,7 +2220,9 @@ def build_project_index(output_root: Path) -> None:
         (
             "Release and direction",
             (
-                ("0.2.0-draft release", "Current draft scope, the independence caveat, and known limitations.", "project/releases/0.2.0-draft/index.html"),
+                ("0.3.0 release", "Current scope, migration guidance, included work, and maturity.", "project/releases/0.3.0/index.html"),
+                ("0.2.0-draft release", "The previous draft's scope, independence caveat, and known limitations.", "project/releases/0.2.0-draft/index.html"),
+                ("0.2.0-draft specification", "Where the previous draft's tagged prose lives.", "spec/0.2.0-draft/index.html"),
                 ("0.1.0-draft release", "The first published draft's scope and known limitations.", "project/releases/0.1.0-draft/index.html"),
                 ("0.1.0-draft specification", "Where the superseded draft's tagged prose lives.", "spec/0.1.0-draft/index.html"),
                 ("Changelog", "Draft and published preview history.", "project/changelog/index.html"),
@@ -2463,8 +2474,8 @@ conformance.
 
 ## Normative specification and artifacts
 
-- [JPS Core {SITE_VERSION}]({guide_url(PurePosixPath("spec/0.2.0-draft/index.html"))}): normative prose for the four named conformance classes
-- [Core JSON Schema]({guide_url(PurePosixPath("schema/0.2.0-draft/judgment-pack-core.schema.json"))}): normative structural schema
+- [JPS Core {SITE_VERSION}]({guide_url(PurePosixPath("spec/0.3.0/index.html"))}): normative prose for the four named conformance classes
+- [Core JSON Schema]({guide_url(PurePosixPath("schema/0.3.0/judgment-pack-core.schema.json"))}): normative structural schema
 - [Document-conformance corpus]({guide_url(PurePosixPath("conformance/index.html"))}): carrier, structural, and semantic cases
 - [Evaluation corpus]({guide_url(PurePosixPath("conformance/evaluation/index.html"))}): normative only for evaluator conformance
 - [The checkpoint witness statement]({guide_url(PurePosixPath("spec/checkpoint-witness/index.html"))}): a companion document, normative only for the witness-statement reader class; its vectors are staged until the next specVersion
@@ -2550,7 +2561,9 @@ CANONICAL_SCHEMA_SOURCES = (
     # The superseded schemas stay served at the $id each was published under, so a pack or manifest that
     # still declares the older exact specVersion remains checkable and a cited identifier keeps resolving.
     "schema/judgment-pack-core-0.1.0-draft.schema.json",
+    "schema/judgment-pack-core-0.2.0-draft.schema.json",
     "schema/conformance-manifest-0.1.0-draft.schema.json",
+    "schema/conformance-manifest-0.2.0-draft.schema.json",
     "conformance/manifest.schema.json",
     "conformance/evaluation/manifest.schema.json",
     "schema/policy/1.0.0/common.schema.json",
@@ -3117,7 +3130,7 @@ SLIDES: tuple[Slide, ...] = (
         kicker="12 — Project status",
         heading="What works today, and what comes next",
         lede=(
-            "Current release: Core 0.2.0-draft. A practical foundation for testing and evaluation — "
+            "Current release: Core 0.3.0. A practical foundation for testing and evaluation — "
             "with no stability promises yet, and not something to put in front of a consequential "
             "real decision today."
         ),
@@ -3148,7 +3161,7 @@ SLIDES: tuple[Slide, ...] = (
             "their formats and nothing in JPS defines them.",
         ),
         actions=(
-            ("Read the specification", "spec/0.2.0-draft/index.html", False),
+            ("Read the specification", "spec/0.3.0/index.html", False),
             ("See a worked example", "examples/index.html", True),
             ("Tools, demos, and source", "implementations/index.html", True),
             ("View the roadmap", "project/roadmap/index.html", True),
@@ -3182,7 +3195,7 @@ SLIDES: tuple[Slide, ...] = (
             "yet."
         ),
         actions=(
-            ("Read the specification", "spec/0.2.0-draft/index.html", False),
+            ("Read the specification", "spec/0.3.0/index.html", False),
             ("Contribute on GitHub", GITHUB_URL, True),
             ("Join the Slack community", SLACK_URL, True),
             ("How to contribute", "project/contributing/index.html", True),
@@ -3366,6 +3379,39 @@ mutable site.</div>
     write_page(output_root, page_output, rendered)
 
 
+def build_0_2_0_superseded_spec_notice(output_root: Path) -> None:
+    """Keep the 0.2.0-draft route beside the historical 0.1.0-draft route."""
+    previous_version = "0.2.0-draft"
+    page_output = PurePosixPath(f"spec/{previous_version}/index.html")
+    current = output_href(page_output, PurePosixPath(f"spec/{SITE_VERSION}/index.html"))
+    release_notes = output_href(
+        page_output, PurePosixPath(f"project/releases/{previous_version}/index.html")
+    )
+    tag_url = f"{GITHUB_URL}/tree/v{previous_version}/spec"
+    body = f"""
+<h1>JPS Core {previous_version} is superseded</h1>
+<p class="lede">The current release is <a href="{html.escape(current)}">Core
+{html.escape(SITE_VERSION)}</a>. Packs and readers use one exact <code>specVersion</code>.</p>
+<div class="notice notice-warning"><strong>Nothing here is normative.</strong> The normative text
+of this historical release is the immutable tagged source.</div>
+<ul>
+  <li><a href="{html.escape(tag_url)}" target="_blank" rel="noopener noreferrer">Tagged
+  <code>v{previous_version}</code> source</a></li>
+  <li><a href="{html.escape(release_notes)}">{previous_version} release notes</a></li>
+  <li><a href="{html.escape(current)}">Core {html.escape(SITE_VERSION)}</a></li>
+</ul>
+"""
+    rendered = page_html(
+        output=page_output,
+        title=f"JPS Core {previous_version} (superseded)",
+        description=f"JPS Core {previous_version} is superseded by {SITE_VERSION}.",
+        section="spec",
+        artifact_label="Superseded",
+        body=body,
+    )
+    write_page(output_root, page_output, rendered)
+
+
 def build(output: Path, config: BuildConfig) -> None:
     global _CONFIG
     _CONFIG = config
@@ -3389,6 +3435,7 @@ def build(output: Path, config: BuildConfig) -> None:
     build_markdown_pages(output, routes)
     build_schema_page(output, routes)
     build_superseded_spec_notice(output)
+    build_0_2_0_superseded_spec_notice(output)
     build_examples(output, routes)
     build_conformance(output, routes, manifest)
     build_implementations_index(output)

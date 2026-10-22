@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://judgmentpack.org/schema/0.2.0-draft/workflow-1.schema.json",
+  "$id": "https://judgmentpack.org/schema/0.3.0/workflow-1.schema.json",
   "title": "Judgment Pack workflow companion records, version 1",
   "oneOf": [
     { "$ref": "#/$defs/workflow" },

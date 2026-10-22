@@ -12,7 +12,7 @@ hand — as the [checkpoint witness vectors](../witness/README.md) and the
 - **Not part of any corpus.** The companion document's §14 holds a preparation verifier to the
   dialect vectors published with the specification version its claim names. No version publishes
   these, so no claim may cite them, and no conformance claim of the class is available until one
-  does. Nothing here changes Core `0.2.0-draft`, its schema, its four classes, or either of its
+  does. Nothing here changes Core `0.3.0`, its schema, its four classes, or either of its
   corpora.
 - **Not published with the specification, and in no release bundle.** The site's build skips this
   directory, as it skips the other staged directories, and a test holds that nothing under it is

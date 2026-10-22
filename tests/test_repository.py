@@ -31,22 +31,9 @@ EVALUATION_MANIFEST_SCHEMA_PATH = EVALUATION / "manifest.schema.json"
 # that moving them into the manifest edits nothing.
 EVALUATION_STAGED = EVALUATION / "staged"
 EVALUATION_STAGED_CASES_PATH = EVALUATION_STAGED / "cases.json"
-SPEC_VERSION = "0.2.0-draft"
-PREVIOUS_SPEC_VERSION = "0.1.0-draft"
+SPEC_VERSION = "0.3.0"
+PREVIOUS_SPEC_VERSIONS = ("0.1.0-draft", "0.2.0-draft")
 SCHEMA_ID = f"https://judgmentpack.org/schema/{SPEC_VERSION}/judgment-pack-core.schema.json"
-PREVIOUS_SCHEMA_PATH = (
-    ROOT / "schema" / f"judgment-pack-core-{PREVIOUS_SPEC_VERSION}.schema.json"
-)
-PREVIOUS_SCHEMA_ID = (
-    f"https://judgmentpack.org/schema/{PREVIOUS_SPEC_VERSION}/judgment-pack-core.schema.json"
-)
-PREVIOUS_MANIFEST_SCHEMA_PATH = (
-    ROOT / "schema" / f"conformance-manifest-{PREVIOUS_SPEC_VERSION}.schema.json"
-)
-PREVIOUS_MANIFEST_SCHEMA_ID = (
-    f"https://judgmentpack.org/schema/{PREVIOUS_SPEC_VERSION}"
-    "/conformance/manifest.schema.json"
-)
 STATUS_VECTORS_PATH = ROOT / "tests" / "conformance-status-vectors.json"
 # §8.3: the reason vocabulary a disposition may carry.
 REASONS = {
@@ -939,7 +926,16 @@ class RepositoryConformanceTests(unittest.TestCase):
             strict_json_loads(
                 EVALUATION_MANIFEST_SCHEMA_PATH.read_text(encoding="utf-8")
             ),
-            strict_json_loads(PREVIOUS_MANIFEST_SCHEMA_PATH.read_text(encoding="utf-8")),
+            *(
+                strict_json_loads(
+                    (
+                        ROOT
+                        / "schema"
+                        / f"conformance-manifest-{version}.schema.json"
+                    ).read_text(encoding="utf-8")
+                )
+                for version in PREVIOUS_SPEC_VERSIONS
+            ),
         )
         for schema in schemas:
             status_validator = Draft202012Validator(schema["properties"]["status"])
@@ -950,7 +946,14 @@ class RepositoryConformanceTests(unittest.TestCase):
                     )
 
     def test_core_schema_descriptions_name_their_spec_versions(self) -> None:
-        for path in (SCHEMA_PATH, PREVIOUS_SCHEMA_PATH):
+        paths = (
+            SCHEMA_PATH,
+            *(
+                ROOT / "schema" / f"judgment-pack-core-{version}.schema.json"
+                for version in PREVIOUS_SPEC_VERSIONS
+            ),
+        )
+        for path in paths:
             schema = strict_json_loads(path.read_text(encoding="utf-8"))
             version = schema["properties"]["specVersion"]["const"]
             self.assertEqual(
@@ -1341,28 +1344,38 @@ class RepositoryConformanceTests(unittest.TestCase):
         fixture = (CONFORMANCE / "valid" / "minimal-expense-approval.json").read_bytes()
         self.assertEqual(example, fixture)
 
-    def test_superseded_schema_stays_published_for_its_own_version(self) -> None:
-        # A 0.1.0-draft pack is unchanged in representation and document-conformance meaning (Core §11)
-        # but must be re-declared to pass the current schema, so the older schema stays available at its
-        # own exact version for a document that keeps the older value.
-        previous = strict_json_loads(PREVIOUS_SCHEMA_PATH.read_text(encoding="utf-8"))
-        Draft202012Validator.check_schema(previous)
-        self.assertEqual(previous["$id"], PREVIOUS_SCHEMA_ID)
-        self.assertEqual(
-            previous["properties"]["specVersion"]["const"], PREVIOUS_SPEC_VERSION
-        )
+    def test_superseded_schemas_stay_published_for_their_own_versions(self) -> None:
+        # A pack that keeps an older exact version remains checkable against that version's frozen
+        # schema, while the live schema accepts only the current exact identifier.
         self.assertEqual(self.schema["properties"]["specVersion"]["const"], SPEC_VERSION)
+        for version in PREVIOUS_SPEC_VERSIONS:
+            with self.subTest(version=version):
+                previous_path = (
+                    ROOT / "schema" / f"judgment-pack-core-{version}.schema.json"
+                )
+                previous = strict_json_loads(previous_path.read_text(encoding="utf-8"))
+                Draft202012Validator.check_schema(previous)
+                self.assertEqual(
+                    previous["$id"],
+                    f"https://judgmentpack.org/schema/{version}/judgment-pack-core.schema.json",
+                )
+                self.assertEqual(previous["properties"]["specVersion"]["const"], version)
 
-        # The document-conformance manifest schema was published at its own 0.1.0-draft identifier too,
-        # so a manifest that still cites it keeps resolving.
-        previous_manifest = strict_json_loads(
-            PREVIOUS_MANIFEST_SCHEMA_PATH.read_text(encoding="utf-8")
-        )
-        Draft202012Validator.check_schema(previous_manifest)
-        self.assertEqual(previous_manifest["$id"], PREVIOUS_MANIFEST_SCHEMA_ID)
-        self.assertEqual(
-            previous_manifest["properties"]["specVersion"]["const"], PREVIOUS_SPEC_VERSION
-        )
+                # Each published document-conformance manifest schema keeps resolving too.
+                manifest_path = (
+                    ROOT / "schema" / f"conformance-manifest-{version}.schema.json"
+                )
+                previous_manifest = strict_json_loads(
+                    manifest_path.read_text(encoding="utf-8")
+                )
+                Draft202012Validator.check_schema(previous_manifest)
+                self.assertEqual(
+                    previous_manifest["$id"],
+                    f"https://judgmentpack.org/schema/{version}/conformance/manifest.schema.json",
+                )
+                self.assertEqual(
+                    previous_manifest["properties"]["specVersion"]["const"], version
+                )
 
     def test_evaluation_manifest_matches_its_schema(self) -> None:
         schema = strict_json_loads(

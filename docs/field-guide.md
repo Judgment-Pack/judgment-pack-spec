@@ -6,7 +6,7 @@ each field means and does not mean. It is written for authors, reviewers, implem
 whether the format fits their work.
 
 <div class="notice notice-info"><strong>Informative.</strong> This guide is explanatory, not normative. The
-authority is <a href="../spec/0.2.0-draft/">the normative specification</a> and its machine-readable
+authority is <a href="../spec/0.3.0/">the normative specification</a> and its machine-readable
 schema. Where this guide and the normative prose appear to disagree, the prose wins; where the prose and the
 schema appear to disagree, the prose still wins and the mismatch is a specification defect that should be
 reported.</div>
@@ -22,7 +22,7 @@ A few terms recur throughout:
 
 - **Core** is the base representation described here. It deliberately excludes profiles and extensions that a
   later specification may layer on top.
-- **`0.2.0-draft`** is the exact draft this guide describes. It is a draft and may change in
+- **`0.3.0`** is the exact draft this guide describes. It is a draft and may change in
   incompatible ways.
 - **JPS** is shorthand for the Judgment Pack Specification, the body of normative prose and schema that defines
   the format.
@@ -117,7 +117,7 @@ The document is a single JSON object. These are its members:
 
 | Field | Required | Meaning |
 | --- | --- | --- |
-| `specVersion` | yes | Exactly the string `0.2.0-draft`. |
+| `specVersion` | yes | Exactly the string `0.3.0`. |
 | `id` | yes | A stable absolute URI identifying the pack series. |
 | `version` | yes | The revision of this pack (see below). |
 | `title` | yes | A non-empty human-readable title. |
@@ -142,7 +142,7 @@ preserved for authoring and display, but it **never** sets rule priority.
 Two version fields describe different things and move independently:
 
 - `specVersion` names **which specification** the document follows. In this draft it is always the exact string
-  `0.2.0-draft`. A pack written for `0.1.0-draft` is the same document with the same document-conformance
+  `0.3.0`. A pack written for `0.1.0-draft` is the same document with the same document-conformance
   meaning here and needs only this one value changed; because the value is exact, an unedited one is not
   structurally conforming. Changing it also opts the pack into this draft's evaluator semantics, which no
   consumer had under `0.1.0-draft`, and confers no conformance on any implementation.
@@ -440,7 +440,7 @@ The `evidenceRequirement` names a declared requirement's id.
 ## How a pack is evaluated
 
 <div class="notice notice-info"><strong>Still informative — but the specification is not.</strong> This guide
-stays explanatory. What it now summarizes is normative: JPS 0.2.0-draft makes the condition and resolution
+stays explanatory. What it now summarizes is normative: JPS 0.3.0 makes the condition and resolution
 semantics binding on an implementation that claims the evaluator conformance class (Core 3.4), and it defines
 the result that implementation must produce. A document-conformance claim is unaffected by all of it.</div>
 
@@ -717,7 +717,7 @@ Uniqueness of ids is a separate semantic requirement enforced by the prose, not 
 
 ## What the draft leaves undefined
 
-`0.2.0-draft` stops at document representation and validity, plus the meaning of one evaluation. It does not
+`0.3.0` stops at document representation and validity, plus the meaning of one evaluation. It does not
 define:
 
 - how to *perform* an evaluation — the semantics are specified, the engine is not;

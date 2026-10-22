@@ -1,5 +1,5 @@
 {
-  "specVersion": "0.2.0-draft",
+  "specVersion": "0.3.0",
   "id": "https://example.invalid/packs/sales-deal-readiness",
   "version": "0.2.0",
   "title": "Deal evidence readiness — what is blocking review?",

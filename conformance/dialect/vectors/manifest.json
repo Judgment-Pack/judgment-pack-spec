@@ -19,7 +19,7 @@
         "profiles.json": "sha256:b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:e647061201036faf3032fed33604fdad90dafef42a7b20fd69b1a83361616938",
-        "run.json": "sha256:8985e8ad2fb55a3664bce19e23f3d32d10b1301e66e5efff9591c83de2bf442b",
+        "run.json": "sha256:b364b46b4eb81ea44ae7dc242e43e0abbea1ce3c075b430fb54fac4f67fa7fc8",
         "sources.json": "sha256:d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8"
       },
       "preparation": {
@@ -65,7 +65,7 @@
         "profiles.json": "sha256:b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:e647061201036faf3032fed33604fdad90dafef42a7b20fd69b1a83361616938",
-        "run.json": "sha256:b9fc6769e7bb9a2dbead4f2754a904bd3f82057afca73275e3396335d7547d3f",
+        "run.json": "sha256:def89168c7dd6348911d91750881f2a7f4a2fb910150dc603eda86071e748667",
         "sources.json": "sha256:d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8"
       },
       "preparation": {
@@ -109,7 +109,7 @@
         "preparation.sha256": "sha256:ac47b64618ba048becbfa732260c6a81368e1adc1f9315ed2f62d9a99204b84d",
         "profiles.json": "sha256:c0129bb1d9a3042b8bdbf5dbdfadd32bfd7253c818fb29840b79c15d3072bbca",
         "release-digest.txt": "sha256:251d1a215fef9a7fd0cf7826b12eb966dcc257809d03561195b04c9955170972",
-        "run.json": "sha256:5b91b6e52da0c2f5859313628da138e02aca1be204f6d0e04ccc53e03262c4ac",
+        "run.json": "sha256:e497f86d10d54fd1db474d77c91b7d301971dcc3dd92821bbb6fbd06597a04d8",
         "sources.json": "sha256:3de14b0f664957af5a3d28e684a386e17fb91e4b1e3352d806badda6423167bb"
       },
       "preparation": {
@@ -148,7 +148,7 @@
         "profiles.json": "sha256:b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:e647061201036faf3032fed33604fdad90dafef42a7b20fd69b1a83361616938",
-        "run.json": "sha256:c3473aae7ef5de35f3c67e867c117edb6340f0434fd42c289eb25be322aee121",
+        "run.json": "sha256:482b60eedcd144caa5215993de493e507cc75efc8c739fa1b620c5c2b31328f7",
         "sources.json": "sha256:d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8"
       },
       "preparation": {
@@ -190,7 +190,7 @@
         "profiles.json": "sha256:b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:e647061201036faf3032fed33604fdad90dafef42a7b20fd69b1a83361616938",
-        "run.json": "sha256:e1df6b269d02afad4156acbb3e27826dbb9dddc23243002a19f6290946414bd8",
+        "run.json": "sha256:b6ea81eb4b3eab059d1abd7ac1cba80c336af12bc6c047557d682a6a346562b6",
         "sources.json": "sha256:d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8"
       },
       "preparation": {
@@ -236,7 +236,7 @@
         "profiles.json": "sha256:b1752a5c851a7df2ee04ebd7beb37eec232f76dda57b81905baab74042420d1a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:e647061201036faf3032fed33604fdad90dafef42a7b20fd69b1a83361616938",
-        "run.json": "sha256:9174c7080f495057a5f65f92ed7abc1399910ed954099eb7523ef01dce550b2d",
+        "run.json": "sha256:6fcc50039c0feafa5de0ac1b14b5b2052559c9ac7d5965456e45ca56d39ea905",
         "sources.json": "sha256:d87bd771d575c91f870140588464a3a42ae5c71a04c4efc46301ed446b96c4b8"
       },
       "preparation": {
@@ -280,7 +280,7 @@
         "preparation.sha256": "sha256:1132766f601aa77a93620dbc6c26184cc0bf6d6e935770f9f03374200aed8426",
         "profiles.json": "sha256:3edffe6ba7eb89d324d3a0e4f3c92ef7377c0077782f2e403a91274c1d633695",
         "release-digest.txt": "sha256:3c14db3130c1d96ef80e1736f21590d6c3711d08cb0daf9cd6811f88637e8f21",
-        "run.json": "sha256:88d40de91585e5915e20586a8e58879bb25b5dd11d290a1316b425a358c79279",
+        "run.json": "sha256:b4280630f3d03cbbc9eb2ad5fa4d7ffc91f74b021d4c01d447443770cd81b616",
         "sources.json": "sha256:435150b3ca677eeb3991fde5919838094323a04f1595eb47925b09f7dfac7a85"
       },
       "preparation": {
@@ -306,7 +306,7 @@
     },
     {
       "name": "escaped-strings",
-      "note": "A case-only run, as Runner exported it (version 2), before it passed a binding: every target is asserted, and nothing was acquired. A case value holds \u0026, \u003c, \u003e, a letter with an accent and a snowman, so preparation.json shows the canonical form's escaping: \u0026, \u003c and \u003e escaped as \\u0026, \\u003c and \\u003e, the others written as UTF-8.",
+      "note": "A case-only run, as Runner exported it (version 2), before it passed a binding: every target is asserted, and nothing was acquired. A case value holds &, <, >, a letter with an accent and a snowman, so preparation.json shows the canonical form's escaping: &, < and > escaped as \\u0026, \\u003c and \\u003e, the others written as UTF-8.",
       "from": "internal/runner/testdata/mapping-v2-before-exact-bytes",
       "altered": null,
       "verifiedAt": "2026-10-01T22:04:44Z",
@@ -317,7 +317,7 @@
         "preparation.sha256": "sha256:2de87a8f437884d9ee984421fcbd03a2c46656e8777ae7b8cf94474ebcb79173",
         "profiles.json": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
         "release-digest.txt": "sha256:0c996937b049185acbb0ebb6c9bba871bad80aff71ed813b19453c9c1b68aaa3",
-        "run.json": "sha256:e7c100f2110ab271ded6bcc2e0c7169384cc18cc8a7b5ae3b76f48684f56af1b"
+        "run.json": "sha256:f37a2a57547ff960c7ec28a9f2996a53ca0def601d4cdcca351bbc017b5cb66b"
       },
       "preparation": {
         "sha256": "sha256:75c1dfdc014770aabc28930a63e2293cca5226f98b02213c8c3c20a3a93e70ca",
@@ -355,7 +355,7 @@
         "profiles.json": "sha256:3e8368d72d781f99c15d1c0e6ba88449af8841ac0f33f41dbaf6dcd23b34ee00",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:0478dc9dd6fed42d22e1775d1a234eb2a69f874301f978fa29a23218d3e5c570",
-        "run.json": "sha256:5b1bf6b595cc43257e202ebd5ccffc583e0cc08f82b36b936ba1ffdf91e751d8",
+        "run.json": "sha256:07ce3b4ea14dd59df1879bb1845cdb439492cc8801ed9cdaf7f89682ac97dae3",
         "sources.json": "sha256:0ccb6c566a29dd12c5b76dda6cdc74523ab7a8e468c03353d46903ca308e7341"
       },
       "preparation": {
@@ -401,7 +401,7 @@
         "profiles.json": "sha256:6e1f67cabbe801093b31ae2c7ce0dad86b764f4f404b9843257bcd7eeb01bc9c",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:720b1c43a328ed71ff43b7b793ccc4a15b34292b1949125e0b651281aabb5258",
-        "run.json": "sha256:c8c12f9ab2a475bba1372b33ce1336a1ea49164b4ce58caaeb0d0029e3d451e4",
+        "run.json": "sha256:3309e9981551caaef3976be13958bf2d0f6fda1fcda766d7cfaecf908126c795",
         "sources.json": "sha256:9d64b30badbde4ef719b488f2915ecde9b00ae62393f820a45f67c292d9fc349"
       },
       "preparation": {
@@ -447,7 +447,7 @@
         "profiles.json": "sha256:decb22f176d60994312961b60ad1db7207c0aef858b20f6de0a44ffedb4f6778",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:39728d4f0e7579247aa3c1cf0519b10f16b6b585a3a240f6e6676e47b4ec2c94",
-        "run.json": "sha256:2cfbb2ba795b0f04ec5d2da156a93bbb74fbf43cf899f8b631301f7a291ffc21",
+        "run.json": "sha256:a54ad4b24296afae6ecf9e1a13feb06c7a195cc59bee3aab31daa258c3b4fb6e",
         "sources.json": "sha256:76fc5e1922acab82aa9e6ee1eb0f74e51f142dae77a6c37565c53ebb85582663"
       },
       "preparation": {
@@ -494,7 +494,7 @@
         "profiles.json": "sha256:d8c1936b0821dfa586380a641ddf9485f00b36e5ccf81cc1d0a858d9a5ea9bf8",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:7d44821a275c7602c0bfbe262357e370defdd7c4cba7b7f91a4b633c1f64314e",
-        "run.json": "sha256:d8811b721dde33c60744f0bf6d69a0973ad6afbb3839ecf4c65035d7c3b24ef4",
+        "run.json": "sha256:db00f8895381f14e99e62772f9768ed4c5de6dd65b4fd932dd9267c6003842f5",
         "sources.json": "sha256:455a29ae1c72b6654d3ef918edc0e6d9065afc1b2a8ba600f082a51e99b9527d",
         "unbound.json": "sha256:8766f0c7f02f031e5af8d362e0e96d2965cb647c23bd6bf02186595278517950"
       },
@@ -547,7 +547,7 @@
         "profiles.json": "sha256:f0af1c7745f7211ce7217f47b13ad721305816c702e7341a5a719d94c844fb8e",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:d00ba322433a9dd716705f82e285273184b8fd3bb7561f777050886fb61660c7",
-        "run.json": "sha256:c985c15048f648a68b20f7faf4c6b8ed9c08f8170a49a848468f79cf27bd6bc5",
+        "run.json": "sha256:6fe0be5922f82e8d45b4c79d0b34accb22e5d71d01ed26b8edeb4ce188d9e3a0",
         "sources.json": "sha256:2a2750146931ce718c39cca28d07fb3ac7a89c5faaebc86f6d217f940f47fa02",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -600,7 +600,7 @@
         "profiles.json": "sha256:8350e7e45f202a3a6c724f079de264ef68d4be083668801335ab7f9d45a3bbec",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:b84b0dff6fd542ff9c6cfa4cebee055f61b800b56a325511e3be91d2a214635c",
-        "run.json": "sha256:a648becf817aa2a68a6026d2ee6c07be87bb4a749b94be5fe9b7205747c51033",
+        "run.json": "sha256:4b82b506823bf140426e678bcb73dd1f47bd84fca9d8ef9eefdef7b0d7d47ec6",
         "sources.json": "sha256:9a9218ef10385aa193be15a94a136de9003f4fee51fa0e9e19c389b5ce38326c",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -653,7 +653,7 @@
         "profiles.json": "sha256:1d871a6c2a4655ba0cacdb5edd46b46bf1e0a1d2015f7873ec41d0237d5ade96",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:bd350bfeb4bc1854f59c27b50c160600ff5ecefe81682f9e3d4909d7d7d5a839",
-        "run.json": "sha256:e0efdc1433a5f77db52da93dbc081e49fc3a5adc00a48dad60f1a6a4f0dbcdeb",
+        "run.json": "sha256:fcd12362409ed3faca06017978c58757e8cbefcf148659a22fa3e48237ff44a4",
         "sources.json": "sha256:f1f3da4f45e9cd419340b648a5b68f70d61a12f8889f82e387fdd6016b79bbb1",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -706,7 +706,7 @@
         "profiles.json": "sha256:bf27543aa46c931ac057ec1a480b474e8dd6e0aef4ddda01321da556518b4eca",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:95c7879481697589824605140ab978ec1f5c27ce742411281e27e931d9ffae00",
-        "run.json": "sha256:5bf931c4f44c0da5227c9d46384940ffd245b3582125a15ef4ed85c536be4e53",
+        "run.json": "sha256:76e5393d36256548774ec2ed9e53b5956cba89a93ed5e8d8cce262d97d1fecb8",
         "sources.json": "sha256:292e099e8034ad6e7c5fee777f10dbd7b4cb2d002dd037a3ca11e536c37c7a7b",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -759,7 +759,7 @@
         "profiles.json": "sha256:b1deaf45eea706c22542c310904a4214c6ed449041fdb941e1060b265821408f",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:92365dbe952812a3c162d3202e75e8a66190f975edd3ab5816f0bbb35823f548",
-        "run.json": "sha256:8d08afbd4567ed78df77881491436d7b45ef5dfe44bfce4ade970e0df87b779e",
+        "run.json": "sha256:b894ece385e0e0e00a53619efdc7f73c4d37d078025fc86cef1e6f8196c4ef9f",
         "sources.json": "sha256:f042db20a1bbeeb5823fdfdce81e83ee70c7a51c31cd13edf52beaafeba6f65f",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -812,7 +812,7 @@
         "profiles.json": "sha256:bd02b663808b8ca7f16a67a69a3655201024622d34bb76d82fb78bd1f3933e1e",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:0602dbfdd0b3e3fc2f0c459a5b5711cc985eadff533389b6acd73f49be42d9d9",
-        "run.json": "sha256:df6b718a451b6fa1374470c2ba3ab6a5261765baff20acf19bf866f6a2c97d2b",
+        "run.json": "sha256:240f5c604cdd748501b12080b245dcf61fb47552d16e2e1193fb14d611e57a18",
         "sources.json": "sha256:7a4fadebf2cc64e2a24dd98c9bd96b5260fb356b8cc27a3ab6ae7ef51fd592e0",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -865,7 +865,7 @@
         "profiles.json": "sha256:ac461eadc7ef5d5fa2ec772569dd7c0e079b5fdddcf9294c14923e1edc966ae3",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:92bc8e3a31c4395a10400e6e5a50db64d7b42273e4ef05f9ea5f7b3dbe6cd2ca",
-        "run.json": "sha256:40baa6b07665a2f89e82bdc75ab5c36287da286dfddf067e6fba37f5f0f14be7",
+        "run.json": "sha256:7237da1fad2d81039aec8ea1fd652f485a757e3744523d5b2c65d14d15a8a29e",
         "sources.json": "sha256:8a6565909a3009da54ed9d7b34c4cda7c8745c141041bc2d9633f51f8a6ccae7",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -918,7 +918,7 @@
         "profiles.json": "sha256:196706656f373a9260bf851a9abb43690b8faa7f9aa5eb96e8f4c988fce4987f",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:9339426b787f18bb3a1522b22255504e71226469083843ce342bfbdf73c4ae12",
-        "run.json": "sha256:c8d80ce4c9ee698b59ce0ceb4da0ce71f145ebc0284c9c723c0fdfe41a04825d",
+        "run.json": "sha256:8d4ec150b99e929c8f18a884f8c8d044ef3935a34600b9d1eadcdc0ccb26b7d8",
         "sources.json": "sha256:3b4bc71c9774e9ccfa4069f763d026d92862c4f1365273be0ace2b6a1b6f1ce6",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -971,7 +971,7 @@
         "profiles.json": "sha256:e1eb23e2865f3fc868f567b1bb30c32ae22fd92e528f88def264de0fbff95274",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:28d1ff49f140ae415d74cd36d1aeadc2a04ab66f09cfeb7edcaf805bcbab11cc",
-        "run.json": "sha256:38105a3755fe7a47a1f787969b4b1c745da07266047963201f2a961ec8095bea",
+        "run.json": "sha256:4450d73f27c285af673cc449a1c043741f299554c9e9120942a936683c083c81",
         "sources.json": "sha256:877685c2686ae849e60a7dc343e2b53ac86a4ad10f1e379a7582a3578beb1d22",
         "unbound.json": "sha256:b245e20c5eb8e09161ae7fb4dbf9de1bbff53a4645c7fbbdfde4762c969129b9"
       },
@@ -1024,7 +1024,7 @@
         "profiles.json": "sha256:3bdc33562db1cd73960ff36d7790a467fdae7c57104d7654864f751b8dc9f783",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:12c51a4297324a630ceabccfeb05388ea8e7dd5620d0c8e0b68210430497ff5b",
-        "run.json": "sha256:836c1d83f6366077b80124829420e6070a109e16882a907516ec69c82b6aadfa",
+        "run.json": "sha256:0c7abd6d2d01525b310f2700321b990cc9fd15990d71e776763d3633d30878f3",
         "sources.json": "sha256:db343f2575474cbbd964ba3ff0c6db79a15180020b8fdd0d6ba436bb0f4f345b",
         "unbound.json": "sha256:b245e20c5eb8e09161ae7fb4dbf9de1bbff53a4645c7fbbdfde4762c969129b9"
       },
@@ -1077,7 +1077,7 @@
         "profiles.json": "sha256:1750d5cb829ecebfbbc7558dae4b93bd0613adc8eca5bbb4f7b895236d609b95",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:57882d697fdee27c549a3ed7e9aa1a25e2510f288c1f704fe58052d969757dad",
-        "run.json": "sha256:dcaa2e72ad57f7042e8b1be0e4d9edbd981aef09a492600a46e9cb1ca0a2625f",
+        "run.json": "sha256:fcd9b47a4a6314c9a5d1af5c4d0cc7c24e52a394445d7c5ec900632ad11158f4",
         "sources.json": "sha256:ec9ec2f89921ef72d9cda83ec4e3d53b2bc3264749fedc251f9e0bf387b884fa",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -1130,7 +1130,7 @@
         "profiles.json": "sha256:1750d5cb829ecebfbbc7558dae4b93bd0613adc8eca5bbb4f7b895236d609b95",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:57882d697fdee27c549a3ed7e9aa1a25e2510f288c1f704fe58052d969757dad",
-        "run.json": "sha256:a5d2d40e6d5d82cdcd82ef5232caa04d8fe790b9e0aa7669ced2ea910ece406f",
+        "run.json": "sha256:25523c0470f4d6949f2422f2f8767a7efee26f71e70ac2400ce3ad206e9bf59d",
         "sources.json": "sha256:ec9ec2f89921ef72d9cda83ec4e3d53b2bc3264749fedc251f9e0bf387b884fa",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -1183,7 +1183,7 @@
         "profiles.json": "sha256:f0af1c7745f7211ce7217f47b13ad721305816c702e7341a5a719d94c844fb8e",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:d00ba322433a9dd716705f82e285273184b8fd3bb7561f777050886fb61660c7",
-        "run.json": "sha256:60bd5cbe39903e77c634bec696dddeea73e0bf9ab7e44f775edcd77af0cc05e8",
+        "run.json": "sha256:c46401ffb5dac116499ec0afbd86cfdd4d490450431f9e35e6b9bc98f432ff00",
         "sources.json": "sha256:cac4074f1bd61aaa681bbdef31b8fd77f03b9ceea1fd893412fa7af80a371e59",
         "unbound.json": "sha256:0914260bdc051f84d904c69fc2537c32f6fc60b34bfc29899b5e38dce9864021"
       },
@@ -1236,7 +1236,7 @@
         "profiles.json": "sha256:afc79c90a7c133b4a97ae12421160513bc14cdbdcb1222c99c17711b36829b1a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:638a048896ed0660491183d1c130758c2e467e0bc0c0ef2af01f16f392cfac67",
-        "run.json": "sha256:ca9824478a6b37d4702a5415482708c17563f4c3c7c7f134e21cb2208612f561",
+        "run.json": "sha256:68343a88c02e941fab5908339e1647db4439a9b061c91320753d3a86fb0db0c0",
         "sources.json": "sha256:0968b79fb7f025729a8f06608c8a8e4f23b3f84bde182f559a30ef07389e813f",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1289,7 +1289,7 @@
         "profiles.json": "sha256:25b029671d7e2d11260efcb7f38773291c2293eccb6bcd913fe4391882cc1c54",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:14482ee30b21403cc8c54ea28971388de55e80bc89dc1408ef026ab563ed657a",
-        "run.json": "sha256:7870bd9a62c3fbc9dc682d0836302a7167e145ae0df2a6c4f8c775e9b4246b59",
+        "run.json": "sha256:6454884c078e7d5dffee5551050d88d8f9845782b8c7d2cad7286444dc6028e4",
         "sources.json": "sha256:919924031802e47f29429f249e2a00804f8c5395c774855923ac62cc4f2c8b2f",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1342,7 +1342,7 @@
         "profiles.json": "sha256:c4b8c669e271fa2fd1bf823d52193f340b8ee3216808b992dd75b95af809bdee",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:2adee9b8ed3618ed68b70578c60b213ebe7aad60ac1d448d3cb9804b3ee2b985",
-        "run.json": "sha256:8c09dd0e4dce243ff1d99cc20dfdf42ce2efbf23ce2b1b2b9620bfce58ec70b3",
+        "run.json": "sha256:970fa78d99a7bf8dc01bce6e45cbd84594acc0e393bcabfeab98d9291e35cde4",
         "sources.json": "sha256:af608b389ddb33751ab786b3a0cfffed649517cf5117ded51fd5afa3503a9c8c",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1395,7 +1395,7 @@
         "profiles.json": "sha256:a62b627c0ee8d8897fb778ee599471de96dddac1e774f760eca7ed7e892fa3ee",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:e244da5851f86fb153798abc5a2a04a2d009efaf87957becf1b9df6f64491d26",
-        "run.json": "sha256:c15339f630f8c9dc4167565b13adee41e4163738f6435d72040aa6b646410cdf",
+        "run.json": "sha256:b6f3dad858e0781d7e98bbfa8ff965d9bc96d9287cee36f1bf86d940aa77a05e",
         "sources.json": "sha256:a359e26481a6e069a504b9be649fc8aef5e3d5efff3f6334974f6d5033d34025",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1448,7 +1448,7 @@
         "profiles.json": "sha256:ac67bafcf6c98f9a8abe8299610d981e150803ea9e790d85b2b4624f39818d1e",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:24181c14dffb632378aa13610d5abf6729dd657928d0dcb0dc373da9248c74b2",
-        "run.json": "sha256:eff2d7b864e1d0de4ef76121993436e4ded42c536a656da10af4b985f34ccc86",
+        "run.json": "sha256:96ec734a33b917cd84b61c48bf5b8f869f72c71b7a16bca65e909cd3db5a2106",
         "sources.json": "sha256:cfa9b3ad40cd54a57df6db1e21165655416d953dbfc0729adcbca92fb308f316",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1501,7 +1501,7 @@
         "profiles.json": "sha256:93293b2cd91f35c6db25907b36be282ddf72b59e89f3ee75812aca2eff3278fc",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:10654c190e4d4da2c7c2f0e3812fcae820cd46bd894709e618464786ce116e5f",
-        "run.json": "sha256:ccfd02dbc752114c5704020e3e0ddd5b72684543dca9d3666382c60826aa14e4",
+        "run.json": "sha256:d423d481485ffb8fbc69aeec103434d466f4184366dd26da41cfe70dc7a23d46",
         "sources.json": "sha256:45e6998d42bb39f04dfa7303c467cba2a249b3ad02c35e24428e8a8a632967e1",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1554,7 +1554,7 @@
         "profiles.json": "sha256:b9b3b56b100918d15c6a6b58cac00c147746a14ac4864d997e1c945b399a0ab4",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:06b231b64afaf463c358cb2dd18aae6d85b7069266f705d8a277c6dbb813d99a",
-        "run.json": "sha256:98bb14d26a45aeccc7c93955373dd4f0cb0d2eccf3b1752dd598c033fdd6d489",
+        "run.json": "sha256:f2fd7d2782ba24859d0dab260289667c3387d01aa76546c1dc7779907b4c1789",
         "sources.json": "sha256:372d6b9c500ee9c5cd708edefb87cad1a24e9346007b5da601f6aa76d4db7082",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1607,7 +1607,7 @@
         "profiles.json": "sha256:6ae11502b22ec1671b340380d01d4b93e3b50f63d64cb5d9cc21f584fa7eca10",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:8ba10c2b0ae2ba74bcb1eef5d5efb589194fbe8338f005c48fbd827e7e134fe5",
-        "run.json": "sha256:e4de1ed93d92df3d7064508c0f56ebb44584f9a560ded517cc19569737d4bc34",
+        "run.json": "sha256:04d3fc5b7a14fe8b324fcbdcb593edda11694cd5feb55363f056f7807b374415",
         "sources.json": "sha256:13401c3e646097921fc01e6d2fbaf0232ca598098113f044d7f65563918a7289",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1660,7 +1660,7 @@
         "profiles.json": "sha256:3ded2f4e605e74b1cd54704ddf697338368e34c65bbd236d95be26c1e60ca29f",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:374d055d69c07c48104bcab75cd32f1c22b84bfa6b92ef2480be73b687aaf261",
-        "run.json": "sha256:c164ecf82f66ed58becbaef2124e8114edd7a320c6a757521ab0411bfd93c4be",
+        "run.json": "sha256:5d4879a01039ad9676234ca1ea241ffa0e37c3f43a39bf3fb7ecf9789d5770ab",
         "sources.json": "sha256:643142b5717284f636ea738cbba22088222b9fc5487841a5231f491d1bd74dfb",
         "unbound.json": "sha256:233ab6152ad8de2e3107e003b46819aff0fa9f427eb55d23c99b60730a8380de"
       },
@@ -1713,7 +1713,7 @@
         "profiles.json": "sha256:06b599bcfdad6b717cdccce56bbbd5c5a9657cf22404775fa0bc97fbe87f96c3",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:3e960fb0122a80ce63cd94aedb7a73df1da857952254bbae4ec3cf827b8a6002",
-        "run.json": "sha256:789307c62e33bfa1a6572b8b45fe38eff3c2544d2b661e3488826ae07dff6d6c",
+        "run.json": "sha256:2c0e89c730d56794d4ee79d0497fbcb1a8b3c7387d66bcfe0b24a159c92b8850",
         "sources.json": "sha256:b121038b614c9a0b2066c1c660f495358b7fa11207b1eae45f62763acd0e75d5",
         "unbound.json": "sha256:233ab6152ad8de2e3107e003b46819aff0fa9f427eb55d23c99b60730a8380de"
       },
@@ -1766,7 +1766,7 @@
         "profiles.json": "sha256:7de30db6d6aec102a226818e19be8fc4ee4afc6e420bf3033e1f89efb03d153f",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:c17afe5f60636d5fe40afc93041dc9ff914fef0a048bf011de79c3062fd3d15f",
-        "run.json": "sha256:729f42d843a322056535d586f2da8a3e9821b57f9be96ad7de80d8480acb5b2c",
+        "run.json": "sha256:ec72c6d15956011c74c541961d42302faadd349ac77314971e3c54f123dda729",
         "sources.json": "sha256:585be5bcfa506cc698536e940793416b11ba4728808025fcb03eff4a0bb44bf2",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1819,7 +1819,7 @@
         "profiles.json": "sha256:7de30db6d6aec102a226818e19be8fc4ee4afc6e420bf3033e1f89efb03d153f",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:c17afe5f60636d5fe40afc93041dc9ff914fef0a048bf011de79c3062fd3d15f",
-        "run.json": "sha256:e4a53af9f16107379f6670f4608f02b42a3c640e5c162f746642c529f93bf058",
+        "run.json": "sha256:4bf015e6d23eb9de31d125cca5d1afd1906de1b3265e1ffd69dd9ac32d0f3244",
         "sources.json": "sha256:585be5bcfa506cc698536e940793416b11ba4728808025fcb03eff4a0bb44bf2",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1872,7 +1872,7 @@
         "profiles.json": "sha256:afc79c90a7c133b4a97ae12421160513bc14cdbdcb1222c99c17711b36829b1a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:638a048896ed0660491183d1c130758c2e467e0bc0c0ef2af01f16f392cfac67",
-        "run.json": "sha256:25fbcc34c52d90b4e826f92117b73f573595457fad72b8190ef0a98ae2255ab9",
+        "run.json": "sha256:e7ea7e6789b4534bd9971abba977fed7062012e6400e07ce08d6dcd56baab840",
         "sources.json": "sha256:88d7fbaa63ae8658840ad3bdbad1ced5c07b0be56646d3d3f55c4a4ee6ef6a80",
         "unbound.json": "sha256:f29bcc60f125e12a79bd32e2ebb3f0bb680b13269ae541123c9f1be554ee5afa"
       },
@@ -1924,7 +1924,7 @@
         "profiles.json": "sha256:ec1769ea49d582c86c4e8874c75c3c9d941c533431f4315b5a06c0ba61af3f26",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:67f592f2480311d6236a39dcdc3eef3f5e52482259e1ebf2f9aaaecf2060c718",
-        "run.json": "sha256:0858f45d830538e9a01fc46fb79f3794a1835e1b906749ddf546d34d371e08a7",
+        "run.json": "sha256:eef99e97afa0856a6477f1963668ada43daa5aa18213890c25ab20fd78621dc0",
         "sources.json": "sha256:a5f72d7b9cb2c83fa0cbb8f3f5314d0a5bd0821f18327891df6b85354eaa5bc5"
       },
       "preparation": {
@@ -1970,7 +1970,7 @@
         "profiles.json": "sha256:5a339faf9668e00204c7088d6a502644f9126a5f3bf16fcad3a233d9f60f10a6",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:0667d0b58c3cce2a26f1dd6e6be0f2b4c3827859896a6361adf347247a15aec5",
-        "run.json": "sha256:d00a4dbee7935fe0d77646cf6ee0e83ae07212699b2a1915b67ca4d0ce32334d",
+        "run.json": "sha256:52d87269a3451e168a3ea39dd306506c190047716d7c0361dd43daa84bbaa99f",
         "sources.json": "sha256:396e72fb1ea8a6be5c9e9b7fe29d5a69ac518140a1712ed3db64565cf28eac17"
       },
       "preparation": {
@@ -2016,7 +2016,7 @@
         "profiles.json": "sha256:c1bec1645c926797a40d56066eb51984ed2f39fdb78414cefaabfdac3fc9a4de",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:c82afbdfe03ff4d074f46b1b6b41a0392ce88fd28ba4f2ef402a993a61cfb337",
-        "run.json": "sha256:1edb49bce9f6e2a1d4963300bd1f712ed5c1b14ecfe634b49bcbebf2689be45e",
+        "run.json": "sha256:41887c3c1b6835e77669c92edd94ef931c3c0dad299909b5c10ef531a3280a51",
         "sources.json": "sha256:051ef4291acf5ca937039755b431ca0a50140ef0c7ae18872d62979fef3a0a5d"
       },
       "preparation": {
@@ -2063,7 +2063,7 @@
         "profiles.json": "sha256:b1cc246fa0f4fbcb8c4dd1bac387637047ed580301a2b8ea2fea71bd00e14b3a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:5c00acd51247ab2c48e7bd291214c1f4d58f0370e8b8feb1946f41710a32e684",
-        "run.json": "sha256:f59d56e5d5bbd41a4e3f055ca0e1f5f41e093f229f6f56f35140a891634130ab",
+        "run.json": "sha256:1aeea9dc0abb92706525f3fa51a1d17f502f69e1122515e37de2c5bf8ab8f05f",
         "sources.json": "sha256:65263a1b384a11b38aa70967df916d45a6b6ab5494d70479d320c6301e89b3bc",
         "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
       },
@@ -2116,7 +2116,7 @@
         "profiles.json": "sha256:cbc952cbb5aa78de9ce000d4466595945a3de7743c4f0a7ca906439b4266e7d2",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:f0834bd4593b8220ff6568f691d1c39a561a1f1385986af1d7af867aee6cb254",
-        "run.json": "sha256:8698a9261796d673e69992275f76c3da1adab81816e36ab26b83808c3e657f24",
+        "run.json": "sha256:f1fde2724b090c7f4a732d9e3a97e9e15daf8cfc35e5f5e9930f42e0dfde3cf9",
         "sources.json": "sha256:fa9fc8557f41e9d5477dd5a33fe952b117e9f335a0392d973a2df35fd18f0fae",
         "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
       },
@@ -2169,7 +2169,7 @@
         "profiles.json": "sha256:b1cc246fa0f4fbcb8c4dd1bac387637047ed580301a2b8ea2fea71bd00e14b3a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:5c00acd51247ab2c48e7bd291214c1f4d58f0370e8b8feb1946f41710a32e684",
-        "run.json": "sha256:f26d253ff2ebb1c0846146397c2c44c91ffc0d38132d8ac0bf48b89f2084bf50",
+        "run.json": "sha256:78dab44d11429d5e1611970dc347d08ef3072126cdcf74c00e318741c4b9692e",
         "sources.json": "sha256:7ea6cfd03e5ef63ea20a9efc9fa2e45e54759ca32fd4f92aa569765105da92af",
         "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
       },
@@ -2222,7 +2222,7 @@
         "profiles.json": "sha256:b1cc246fa0f4fbcb8c4dd1bac387637047ed580301a2b8ea2fea71bd00e14b3a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:5c00acd51247ab2c48e7bd291214c1f4d58f0370e8b8feb1946f41710a32e684",
-        "run.json": "sha256:037fe99c3b3a3c0c7fb7f58b85b7030124c12d9320617fb66a1d087a373d9191",
+        "run.json": "sha256:5ce683bb8173358c2bb1c53351c8a547bcd0a91fe2290581b0e50dc4faebe0ff",
         "sources.json": "sha256:2f211bd0c46b022052ad1513faec5ebf870161902d0038e7f7942f15d5298b42",
         "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
       },
@@ -2275,7 +2275,7 @@
         "profiles.json": "sha256:96e726ab0d64ec9b42bd482c0db9ea8b8590b99511c05340a2a6444c564d8b38",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:5c00acd51247ab2c48e7bd291214c1f4d58f0370e8b8feb1946f41710a32e684",
-        "run.json": "sha256:f59d56e5d5bbd41a4e3f055ca0e1f5f41e093f229f6f56f35140a891634130ab",
+        "run.json": "sha256:1aeea9dc0abb92706525f3fa51a1d17f502f69e1122515e37de2c5bf8ab8f05f",
         "sources.json": "sha256:65263a1b384a11b38aa70967df916d45a6b6ab5494d70479d320c6301e89b3bc",
         "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
       },
@@ -2328,7 +2328,7 @@
         "profiles.json": "sha256:b1cc246fa0f4fbcb8c4dd1bac387637047ed580301a2b8ea2fea71bd00e14b3a",
         "public-key.txt": "sha256:40d359139cfd8af4ff3ebfbf9c8845468ca7876582189c11d3293b832f660632",
         "release-digest.txt": "sha256:5c00acd51247ab2c48e7bd291214c1f4d58f0370e8b8feb1946f41710a32e684",
-        "run.json": "sha256:591ce43b762f2b91315161cd2b5ec35019b6ad92721bcda84c3f63b880012503",
+        "run.json": "sha256:74451a89425bfa8cfded37290f649dd19216680bb91a7730ce0b078b6df507eb",
         "sources.json": "sha256:12c7c7a2564d149e9ebfec9f6acc89f7d0a824240c6e7dcc89198baa52bdb04e",
         "unbound.json": "sha256:e88b73155a8eef2935eb0a344b856f0d7dc56cff10d93dd14fd85c0d9e110f75"
       },

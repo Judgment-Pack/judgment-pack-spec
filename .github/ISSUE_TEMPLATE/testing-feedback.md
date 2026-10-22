@@ -7,13 +7,13 @@ assignees: ""
 ---
 
 <!--
-Thank you for testing JPS `0.2.0-draft`.
+Thank you for testing JPS `0.3.0`.
 
 Do not include customer, employee, personal, confidential, regulated, credential, or production
 data. Remove access tokens, internal URLs, organization names, and real policy text. Use a minimal
 synthetic reproduction. Anything submitted here may become public.
 
-This template is for structural-validation and authoring feedback. Core 0.2.0-draft does define an
+This template is for structural-validation and authoring feedback. Core 0.3.0 does define an
 evaluator conformance class (Core 3.4), but a claim against it is made only against the evaluation
 corpus, so please do not describe an inferred outcome as an evaluator-conformance result.
 -->

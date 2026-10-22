@@ -64,7 +64,7 @@ resource limits, and avoid fetching source locators. Network access or external 
 should require a separate explicit action.
 
 There should be no unqualified evaluate, decide, or execute behavior presented as JPS conformance.
-Core `0.2.0-draft` defines an evaluator conformance class, and §3.4.1 makes exactly one claim
+Core `0.3.0` defines an evaluator conformance class, and §3.4.1 makes exactly one claim
 definable: against that class and the evaluation corpus, for one exact `specVersion`, with the
 results stated. Until an implementation has run that corpus and says so, its evaluator should be
 unmistakably labeled experimental, produce no JPS evaluator-conformance claim, and remain outside the

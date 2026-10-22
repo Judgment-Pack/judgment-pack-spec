@@ -1,10 +1,11 @@
 # Staged evaluation rows
 
-Rows written for the `suiteVersion` **after** `0.2.0-draft`. They are in no corpus.
+Rows written for the `suiteVersion` **after** `0.3.0`. They are in no corpus.
 
 The [evaluation corpus](../README.md) is frozen when its `specVersion` is released: rows are added
-only on the way to a later one, never inside a released one (Core §3.4.1). `0.2.0-draft` is tagged,
-so [`manifest.json`](../manifest.json) does not change. This directory is where rows wait — designed,
+only on the way to a later one, never inside a released one (Core §3.4.1). The `0.3.0`
+[`manifest.json`](../manifest.json) remains unchanged when that version is tagged. This directory is
+where rows wait — designed,
 reviewed, held to the same checks as released rows, and runnable by hand — until a later
 `specVersion` opens and they move into the manifest.
 
@@ -88,7 +89,7 @@ and compare the class it reports.
 ## Core routes (#219)
 
 The `routes-` rows are hand-written expectations for the accepted routing change, staged after
-`0.2.0-draft`; the released manifest is unchanged. The case carrier now admits `handoff.routes`
+`0.3.0`; the released manifest is unchanged. The case carrier now admits `handoff.routes`
 for these rows. They exercise conditional selection, ordered fan-out, unconditional routes,
 no selected route, duplicate targets, and legacy target-only bytes. Repository checks verify
 selection against each expected reason set; they are not execution of a Core evaluator.

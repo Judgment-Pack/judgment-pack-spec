@@ -21,15 +21,15 @@ judge their output — compilers, tests, CI. Most business agents have no such h
 the judgment behind a business decision explicit enough to test, the way a test suite makes "correct
 code" explicit. See [Why Judgment Pack?](docs/why.md).
 
-**Q3. Is JPS a standard yet?** No. It is a draft specification at `0.2.0-draft` with no compatibility
+**Q3. Is JPS a standard yet?** No. It is a draft specification at `0.3.0` with no compatibility
 guarantee; any `0.x` release may change incompatibly.
 
 **Q4. Who is it for?** Tool and runtime implementers; standards and architecture reviewers;
 enterprise architects evaluating governable AI decisioning; AI researchers studying testable
 judgment; and domain experts who author packs.
 
-**Q5. What is the one thing to understand about scope?** It specifies a document, and — new in
-`0.2.0-draft` — what evaluating that document means, not an engine. Document conformance means a
+**Q5. What is the one thing to understand about scope?** It specifies a document and what
+evaluating that document means, not an engine. Document conformance means a
 document agrees with a contract; evaluator conformance (§3.4) means an implementation complies with the
 §§7–10 evaluation contract for every input it admits, evidenced by the corpus published for the exact
 version claimed. Neither is ever a claim that the pack is true, authorized, safe, or fit for use.
@@ -38,7 +38,7 @@ version claimed. Neither is ever a claim that the pack is true, authorized, safe
 
 **Q6. What does the specification define today?** Four conformance classes for a single decision.
 Three are about the document: carrier (valid JSON and encoding), structural (the schema), and semantic
-(local references and cross-field rules). The fourth, new in `0.2.0-draft`, is **evaluator
+(local references and cross-field rules). The fourth is **evaluator
 conformance** (§3.4): what an evaluation of a pack *means* and the one portable result it produces
 (§8.3). §§7–8 are normative for that class and informative for everyone else, and the
 [evaluation corpus](conformance/evaluation/README.md) is normative for it and for nothing else.
@@ -71,7 +71,7 @@ together. Composing small packs is valuable — but composition is its own unsol
 ([RFC 0002](rfcs/0002-judgment-graph.md)), not an argument for one big document.
 
 **Q11. Is a Judgment Pack executable?** It is declarative — a pack contains no code and Core executes
-nothing. What `0.2.0-draft` does define is what a runtime's evaluation must *mean*: §§7–8 are
+nothing. What `0.3.0` does define is what a runtime's evaluation must *mean*: §§7–8 are
 normative for the evaluator conformance class of §3.4, and §8.3 pins one portable result, the
 disposition. Applying an outcome is still outside Core, and a disposition authorizes nothing.
 
@@ -145,10 +145,10 @@ stays with the product.
 generated pack is only a candidate document. Structural conformance says it is well-formed; it says
 nothing about whether the judgment is correct or whether anyone with authority approved it.
 
-**Q25. Can an agent compose packs at runtime?** Not portably yet. Single-pack evaluation semantics are
-normative for the evaluator class as of `0.2.0-draft`, but the graph format is still a proposal, and a
-composite result has no defined shape. An implementation can compose privately; it cannot claim JPS
-conformance for the composite.
+**Q25. Can an agent compose packs at runtime?** Not portably yet. Current Core defines normative
+single-pack evaluation semantics for the evaluator class, but the graph format is still a proposal,
+and a composite result has no defined shape. An implementation can compose privately; it cannot
+claim JPS conformance for the composite.
 
 **Q26. Why not just prompt an LLM, or use MCP?** A prompt couples intent to one model and phrasing;
 it is not a structured document a second tool can validate, diff, or version. MCP is a runtime
@@ -380,7 +380,7 @@ distinction. Conformance means the document agrees with the contract. Factual gr
 organizational authorization, and operational fitness are three separate claims a validator must
 never imply.
 
-**Q46. Is JPS ready for production?** Yes. JPS at `0.2.0-draft` is in production use by adopters,
+**Q46. Is JPS ready for production?** Yes. JPS at `0.3.0` is in production use by adopters,
 through the pinned reference runtime, with a person accountable for every consequential outcome
 (Q48). It is still a draft: pin the exact draft and the runtime release you verified, since
 compatibility between drafts is not guaranteed and there is no certification programme yet. A pack

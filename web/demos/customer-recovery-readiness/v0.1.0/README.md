@@ -33,7 +33,7 @@ operational job or audit record and do not take any business action.
 
 | Files | Purpose |
 | --- | --- |
-| `packs/`, `jpack.json` | Pack and relative project configuration; JPS Core 0.2.0-draft. |
+| `packs/`, `jpack.json` | Pack and relative project configuration; JPS Core 0.3.0. |
 | `packs/customer-recovery.matrix.json` | 18 project-owned expectations, using captured source projections. |
 | `sources/policy/demo-policy.md` | The original fictional policy cited by the pack. |
 | `sources/scenarios/` | 18 folders, each with a case and four separate source artifacts. |

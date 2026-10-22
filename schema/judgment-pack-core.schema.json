@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://judgmentpack.org/schema/0.2.0-draft/judgment-pack-core.schema.json",
+  "$id": "https://judgmentpack.org/schema/0.3.0/judgment-pack-core.schema.json",
   "title": "Judgment Pack Core",
-  "description": "Structural schema for 0.2.0-draft. Conformance does not establish truth, authority, safety, or operational fitness.",
+  "description": "Structural schema for 0.3.0. Conformance does not establish truth, authority, safety, or operational fitness.",
   "$comment": "JPS structural conformance requires uri, date, and date-time format assertions even when a general-purpose validator treats format as annotation-only.",
   "type": "object",
   "additionalProperties": false,
@@ -21,7 +21,7 @@
       "default": "base"
     },
     "specVersion": {
-      "const": "0.2.0-draft"
+      "const": "0.3.0"
     },
     "id": {
       "type": "string",

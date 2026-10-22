@@ -140,7 +140,7 @@ A small excerpt of the corresponding document illustrates the shape (fields omit
 
 ```json
 {
-  "specVersion": "0.2.0-draft",
+  "specVersion": "0.3.0",
   "decision": {
     "intent": "Determine whether a supplier invoice may be approved automatically.",
     "question": "Should this supplier invoice be approved automatically?"

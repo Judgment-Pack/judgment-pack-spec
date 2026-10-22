@@ -1,7 +1,7 @@
 # Conformance corpus
 
 This directory contains 127 focused conformance cases for testing the carrier, structural, and
-semantic requirements of Judgment Pack Core `0.2.0-draft`, plus five advisory vectors. It is
+semantic requirements of Judgment Pack Core `0.3.0`, plus five advisory vectors. It is
 versioned with the draft but is not yet a complete or normative conformance suite. Evaluator
 behavior is out of scope *here*: it has its
 own corpus, in [`evaluation/`](evaluation/README.md), which is normative for the evaluator conformance
@@ -97,10 +97,10 @@ covered — as a seed corpus with stated gaps — by [`evaluation/`](evaluation/
 expansion here should remain focused: one primary expectation per negative fixture, with positive,
 boundary, and adversarial counterparts added when the corresponding semantics become normative.
 
-Every fixture declares `specVersion` `0.2.0-draft`, which is exact. `structural/invalid-spec-version.json`
-still declares `0.1.0-draft`, which is now the negative case: an unedited `0.1.0-draft` pack is unchanged
+Every fixture declares `specVersion` `0.3.0`, which is exact. `structural/invalid-spec-version.json`
+instead declares `0.2.0-draft`, which is the negative case: an unedited `0.2.0-draft` pack is unchanged
 in representation and document-conformance meaning but must be re-declared to be structurally conforming
-to this draft, and re-declaring it also opts it into this draft's evaluator semantics without conferring
+to this release, and re-declaring it also opts it into this release's evaluator semantics without conferring
 conformance on any implementation (§11).
 
 ## Document ceiling profiles

@@ -1,12 +1,12 @@
 # Evaluation corpus
 
 This directory is the evaluation corpus for Judgment Pack Core
-[`0.2.0-draft`](../../spec/judgment-pack-core.md). It is the corpus an implementation must pass before
+[`0.3.0`](../../spec/judgment-pack-core.md). It is the corpus an implementation must pass before
 it may claim evaluator conformance (§3.4), and it is normative for that class only (§1.1). It is not a
 validation corpus: the document-conformance cases stay in [`../`](../README.md), and nothing here
 changes whether a document is carrier, structurally, or semantically conforming.
 
-This is a **seed** corpus. It is version-pinned to `0.2.0-draft`, it is not exhaustive, and it grows
+This is a **seed** corpus. It is version-pinned to `0.3.0`, it is not exhaustive, and it grows
 by RFC. Passing it is necessary for an evaluator-conformance claim; it is not evidence that an
 implementation is correct on inputs the corpus does not contain.
 
