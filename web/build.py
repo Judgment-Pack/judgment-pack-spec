@@ -717,9 +717,9 @@ PAGES = (
         source_ref="main",
     ),
     Page(
-        "rfcs/0024-core-escalation-routes.md",
-        PurePosixPath("rfcs/0024-core-escalation-routes/index.html"),
-        "RFC 0024: Core escalation routes",
+        "rfcs/0025-core-escalation-routes.md",
+        PurePosixPath("rfcs/0025-core-escalation-routes/index.html"),
+        "RFC 0025: Core escalation routes",
         "Accepted Core routing design: ordered conditional handoff routes, with delivery kept separate.",
         "proposals",
         "Accepted design — review pending",
