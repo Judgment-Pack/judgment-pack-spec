@@ -1,4 +1,4 @@
-// The bounds of §12 that are measured on bytes, taken before a document is read (§11, phase 1), and
+// After profile negotiation (§11 phase 0), the §12 byte bounds precede full document reading, and
 // again on an unwrapped string's bytes when it is unwrapped (§6.1).
 
 export const BOUNDS = {

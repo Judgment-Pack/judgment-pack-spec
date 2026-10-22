@@ -307,6 +307,7 @@ disposition. Every other bullet above applies to the evaluator class unchanged.
 
 | Member                 | Required | Meaning                                                 |
 | ---------------------- | -------: | ------------------------------------------------------- |
+| `profile`             |       no | Ceiling profile: `base` (default) or `extended` (§4.1) |
 | `specVersion`          |      yes | Exact value `0.2.0-draft`                               |
 | `id`                   |      yes | Stable absolute URI identifying the pack series         |
 | `version`              |      yes | Three-component `MAJOR.MINOR.PATCH` revision string     |
@@ -329,6 +330,103 @@ Collection order is preserved for authoring and display but MUST NOT determine r
 The root MUST be an object. The schema defines the recognized members of each Core object; a member
 not defined for that Core object MUST NOT appear. The names and arbitrary JSON values inside an
 `extensions` object are governed separately by §9.
+
+### 4.1 Document ceiling profiles
+
+A document may declare `profile`, exactly `base` or `extended`; absence means `base`.
+A profile is a named set of ceilings, versioned with this specification. It changes no
+members, minima, grammar, numeric domain, uniqueness requirement or evaluation semantics.
+It never lowers a ceiling below `base`. An installation setting MUST NOT raise a ceiling
+that the document does not declare. Core packs, Workflow documents and Dialect documents carry this member at their root.
+Policy and governing-adoption documents adopt it from the next companion version;
+the released 1.0.0 draft does not carry `profile`. Dialect source
+and connection profiles are separate objects, not this ceiling declaration.
+
+A reader MUST admit a document only under a profile it supports. Profile negotiation is
+the first admission step: after the bounded root scan needed to identify the declaration,
+and before other documents' byte-bound checks, schema interpretation, reference loading,
+acquisition or evaluation, it checks that declaration. A supporting reader then applies
+the selected profile's ceilings. An unknown name, non-string, empty
+string or null is a structural refusal using the format's existing structural diagnostic.
+For input declaring a known but unsupported profile, it returns exactly one diagnostic
+`profile-unsupported`, naming that profile: `{"code":"profile-unsupported","profile":"extended"}`
+for an unsupported `extended` declaration. A format's refusal envelope may wrap these two
+members (Dialect uses `refusal` for the code); it MUST NOT append another diagnostic or
+input-derived message. The same rule applies to implicit `base`. Only the parsing needed to identify the declaration precedes
+this check; malformed JSON retains its syntax refusal. Resource-safe parsing may reject
+unreadable input, but MUST NOT silently process a prefix or fall back to `base`.
+
+`profile` is part of the document's bytes, so it is part of its digest and every exact-identity
+rule. Readers MUST NOT insert the default or remove an explicit declaration before hashing.
+An `extended` document has the same identity everywhere, including at readers refusing it.
+
+The following is the ceiling table for these formats. Numbers elsewhere in the companions
+state `base`; their corresponding `extended` ceilings are exclusively those below. Units
+and counting conventions remain those of the owning companion. No Core outcome, rule or
+reference maximum is defined, so none is introduced here. Fixed semantic cardinalities
+(such as exactly one coverage record per selected section), numeric domains and index ranges
+are not resource ceilings and do not change.
+
+| Format and resource | `base` | `extended` |
+| --- | ---: | ---: |
+| Core escalation routes (and their resulting handoff routes) | 8 | 16 |
+| Policy (from the next companion version): informationalSources, sourceProvenance, sourceRefs per section, governingPolicies | 16 | 32 |
+| Policy (from the next companion version): sections, scope sectionIds, coverage records per policy, consumerElements per section | 64 | 128 |
+| Policy (from the next companion version): artifact version characters | 256 | 512 |
+| Policy (from the next companion version): URI characters | 2048 | 4096 |
+| Policy (from the next companion version): local ID and media type characters | 128 | 256 |
+| Policy (from the next companion version): readable text characters | 4096 | 8192 |
+| Policy (from the next companion version): parsed document bytes | 262144 | 524288 |
+| Policy (from the next companion version): document nesting | 32 | 64 |
+| Policy (from the next companion version): number literal characters | 128 | 256 |
+| Policy (from the next companion version): exponent magnitude | 308 | 616 |
+| Policy (from the next companion version): narrative, review basis and informational material bytes | 1048576 | 2097152 |
+| Policy (from the next companion version): original material / registration bytes | 4194304 | 8388608 |
+| Policy (from the next companion version): distinct retained bytes | 16777216 | 33554432 |
+| Policy (from the next companion version): material registrations | 16 | 32 |
+| Workflow limits.maxStages | 32 | 64 |
+| Workflow limits.maxRecords, limits.maxInstances | 4096 | 8192 |
+| Workflow limits.maxAttempts | 16 | 32 |
+| Workflow limits.maxBytes | 1073741824 | 2147483648 |
+| Dialect document bytes | 131072 | 262144 |
+| Dialect combined dialect, case and acquisitions bytes | 2097152 | 4194304 |
+| Dialect profiles / binding document bytes | 65536 | 131072 |
+| Dialect preparation / record bytes | 8388608 | 16777216 |
+| Dialect sources | 16 | 32 |
+| Dialect retained responses, parameters per scope, clauses per rule, conditions per all/any | 64 | 128 |
+| Dialect unwrap pointers | 4 | 8 |
+| Dialect unwrapped string bytes | 200000 | 400000 |
+| Dialect fact targets | 256 | 512 |
+| Dialect evidence targets | 128 | 256 |
+| Dialect value nesting / document nesting | 32 / 64 | 64 / 128 |
+| Dialect number literal characters / exponent magnitude | 128 / 308 | 256 / 616 |
+| Dialect declared fields, answer entries, text-list items, observations, citation indices | 64 | 128 |
+| Dialect field name bytes | 64 | 128 |
+| Dialect description bytes | 2048 | 4096 |
+| Dialect model name bytes | 256 | 512 |
+| Dialect evidence instruction bytes | 4096 | 8192 |
+| Dialect text value bytes | 8192 | 16384 |
+| Dialect text-list item bytes | 1024 | 2048 |
+| Dialect decimal string characters | 128 | 256 |
+| Dialect capabilities per source or connection profile | 3 | 6 |
+| Dialect web assignments per source | 2 | 4 |
+| Dialect earlier reconciliation sources | 15 | 30 |
+| Dialect endpoint scope entries | 32 | 64 |
+| Dialect endpoint scope entry / endpoint URL bytes | 2048 | 4096 |
+| Dialect artifact ID bytes | 1024 | 2048 |
+
+Workflow's document-declared `limits` remains required; only its ceilings above change.
+Other Workflow carrier bounds remain unchanged. Raising a Dialect list ceiling does not
+invent capability names or waive distinctness; a closed vocabulary can still constrain it.
+Policy's canonical integer magnitude stays 9007199254740991: it is a numeric domain, not
+a resource ceiling. Core implementation-defined limits (§10) are not rows of this table.
+
+The published structural schemas retain `base` maxima and declare the profile enum with
+`base` as an annotation default. A reader supporting `extended` MUST validate with the
+corresponding ceilings above, preserving every other schema constraint; applying an unchanged
+base schema alone does not validate an extended document. Schema validation alone does not
+negotiate capabilities. Reader capability records list `profiles`, the supported names;
+listing `extended` commits the reader to every extended ceiling of its format.
 
 ## 5. Identity and references
 
@@ -430,8 +528,8 @@ entries, each a closed object containing `target` and optionally `triggers`. Eac
 has that same shape. If present, route `triggers` MUST be a non-empty, duplicate-free subset of
 this escalation's `triggers`. An omitted route trigger list means unconditional selection once
 a handoff is requested, not a request by itself. Duplicate targets remain distinct routes.
-The maximum of 8 is this specification's schema bound, not an installation setting. Profile
-negotiation and larger bounds from #232 are outside this change.
+The maximum of 8 is the `base` schema bound; §4.1 raises it to 16 under `extended`.
+It is not an installation setting.
 
 For example, `"routes": [{"target": {"kind": "queue", "name": "Review"},
 "triggers": ["unknown"]}, {"target": {"kind": "human-role", "name": "Oversight"}}]`
@@ -948,4 +1046,4 @@ still resolve:
 - whether authority bindings belong in optional profiles;
 - content identity, canonicalization, and signatures;
 - imports and content-addressed dependencies; and
-- profile and capability negotiation.
+- negotiation beyond the document ceiling profiles in §4.1.

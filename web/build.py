@@ -727,6 +727,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0026-document-ceiling-profiles.md",
+        PurePosixPath("rfcs/0026-document-ceiling-profiles/index.html"),
+        "RFC 0026: Document ceiling profiles",
+        "Accepted document ceiling profiles: declared base or extended bounds and explicit reader support. Policy adoption starts with its next companion version.",
+        "proposals",
+        "Accepted design — review pending",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
@@ -1418,6 +1427,7 @@ def raw_block(text: str, language: str = "json") -> str:
 # One human-readable definition per JSON key, derived from the normative schema. Each entry is
 # (summary, allowed-values-or-None). Powers the clickable-key cards and the schema field reference.
 KEY_REFERENCE: dict[str, tuple[str, tuple[str, ...] | None]] = {
+    "profile": ("The document ceiling profile. Absent means base; extended requires explicit reader support and retains its declaration in the document identity.", ("base", "extended")),
     "specVersion": ("The JPS specification version this document targets.", ("0.2.0-draft",)),
     "id": ("A stable identifier. At the top level it is the pack's globally unique URI; inside outcomes, rules, evidence requirements, sources, and exceptions it is a pack-local id (lowercase, hyphenated).", None),
     "version": ("The pack's own semantic version (MAJOR.MINOR.PATCH), separate from specVersion.", None),

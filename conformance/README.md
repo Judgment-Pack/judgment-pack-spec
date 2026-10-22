@@ -96,3 +96,11 @@ still declares `0.1.0-draft`, which is now the negative case: an unedited `0.1.0
 in representation and document-conformance meaning but must be re-declared to be structurally conforming
 to this draft, and re-declaring it also opts it into this draft's evaluator semantics without conferring
 conformance on any implementation (§11).
+
+## Document ceiling profiles
+
+`conformance/evaluation/staged/profiles.json` is a hand-written structural admission suite for Core §4.1.
+Its shared pack has eight routes; each case explicitly supplies the declaration (or omits it),
+reader `profiles`, routes to append, and expected result. The same nine-route pack is refused
+under base and admitted under extended. These are admission vectors, not an evaluation claim.
+`tests/test_profiles.py` runs them and the shared Dialect declaration cases in both languages.
