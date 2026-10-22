@@ -47,6 +47,7 @@ PREVIOUS_MANIFEST_SCHEMA_ID = (
     f"https://judgmentpack.org/schema/{PREVIOUS_SPEC_VERSION}"
     "/conformance/manifest.schema.json"
 )
+STATUS_VECTORS_PATH = ROOT / "tests" / "conformance-status-vectors.json"
 # §8.3: the reason vocabulary a disposition may carry.
 REASONS = {
     "not-applicable",
@@ -919,6 +920,7 @@ class RepositoryConformanceTests(unittest.TestCase):
         self.assertEqual([], [error.message for error in errors])
         self.assertEqual(self.manifest["suiteVersion"], SPEC_VERSION)
         self.assertEqual(self.manifest["specVersion"], SPEC_VERSION)
+        self.assertEqual("draft", self.manifest["status"])
         self.assertTrue(self.manifest["validationProfile"]["formatAssertionRequired"])
         self.assertTrue(self.manifest["validationProfile"]["rejectDuplicateObjectMembers"])
         diagnostic_validator = validator.evolve(
@@ -929,6 +931,33 @@ class RepositoryConformanceTests(unittest.TestCase):
                 self.assertEqual(
                     set(), rule_overlap_diagnostic_keywords(diagnostic_validator, diagnostic)
                 )
+
+    def test_conformance_manifest_status_ladder_vectors(self) -> None:
+        vectors = strict_json_loads(STATUS_VECTORS_PATH.read_text(encoding="utf-8"))
+        schemas = (
+            self.manifest_schema,
+            strict_json_loads(
+                EVALUATION_MANIFEST_SCHEMA_PATH.read_text(encoding="utf-8")
+            ),
+            strict_json_loads(PREVIOUS_MANIFEST_SCHEMA_PATH.read_text(encoding="utf-8")),
+        )
+        for schema in schemas:
+            status_validator = Draft202012Validator(schema["properties"]["status"])
+            for vector in vectors:
+                with self.subTest(schema=schema["$id"], status=vector["status"]):
+                    self.assertEqual(
+                        vector["valid"], status_validator.is_valid(vector["status"])
+                    )
+
+    def test_core_schema_descriptions_name_their_spec_versions(self) -> None:
+        for path in (SCHEMA_PATH, PREVIOUS_SCHEMA_PATH):
+            schema = strict_json_loads(path.read_text(encoding="utf-8"))
+            version = schema["properties"]["specVersion"]["const"]
+            self.assertEqual(
+                f"Structural schema for {version}. Conformance does not establish truth, "
+                "authority, safety, or operational fitness.",
+                schema["description"],
+            )
 
     def test_rule_overlap_advisory_vectors_cover_the_recommendation(self) -> None:
         self.assertEqual(["JPS-RULES-OVERLAP"], self.manifest["diagnosticVocabulary"]["advisory"])
@@ -1346,6 +1375,7 @@ class RepositoryConformanceTests(unittest.TestCase):
         self.assertEqual([], [error.message for error in errors])
         self.assertEqual(manifest["suiteVersion"], SPEC_VERSION)
         self.assertEqual(manifest["specVersion"], SPEC_VERSION)
+        self.assertEqual("draft", manifest["status"])
         self.assertEqual(manifest["label"], "seed")
         ids = collections.Counter(case["id"] for case in manifest["cases"])
         for case_id, count in sorted(ids.items()):

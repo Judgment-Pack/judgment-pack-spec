@@ -21,8 +21,17 @@ SPEC.loader.exec_module(BUILD_RELEASE)
 
 
 class ReleaseBuilderTests(unittest.TestCase):
+    def test_0_3_0_release_naming_is_recorded(self) -> None:
+        versioning = (ROOT / "VERSIONING.md").read_text(encoding="utf-8")
+        notes = ROOT / "docs" / "releases" / "v0.3.0.md"
+        self.assertIn("`v0.3.0-rc.1`", versioning)
+        self.assertIn("`v0.3.0`", versioning)
+        self.assertTrue(notes.is_file())
+        self.assertEqual("# v0.3.0", notes.read_text(encoding="utf-8").splitlines()[0])
+
     def test_release_version_accepts_exact_semver_tags(self) -> None:
         self.assertEqual(BUILD_RELEASE.release_version("v0.1.0-draft"), "0.1.0-draft")
+        self.assertEqual(BUILD_RELEASE.release_version("v0.3.0-rc.1"), "0.3.0-rc.1")
         self.assertEqual(BUILD_RELEASE.release_version("v1.2.3-rc.1"), "1.2.3-rc.1")
         self.assertEqual(BUILD_RELEASE.release_version("v1.2.3-0"), "1.2.3-0")
         self.assertEqual(BUILD_RELEASE.release_version("v1.2.3-alpha.1"), "1.2.3-alpha.1")
@@ -55,20 +64,20 @@ class ReleaseBuilderTests(unittest.TestCase):
         # must not build even when every document artifact is correctly re-pinned.
         for stale in ("specVersion", "suiteVersion"):
             with self.subTest(member=stale), tempfile.TemporaryDirectory() as directory:
-                root = self._release_tree(Path(directory), "0.3.0-draft")
+                root = self._release_tree(Path(directory), "0.3.0")
                 evaluation_path = root / "conformance" / "evaluation" / "manifest.json"
                 evaluation = json.loads(evaluation_path.read_text(encoding="utf-8"))
                 evaluation[stale] = "0.2.0-draft"
                 evaluation_path.write_text(json.dumps(evaluation), encoding="utf-8")
                 with self.assertRaises(ValueError) as raised:
                     BUILD_RELEASE.validate_artifacts(
-                        "0.3.0-draft", "v0.3.0-draft", root=root
+                        "0.3.0", "v0.3.0", root=root
                     )
                 self.assertIn("evaluation corpus", str(raised.exception))
                 # The same tree validates once the corpus is re-pinned.
-                evaluation[stale] = "0.3.0-draft"
+                evaluation[stale] = "0.3.0"
                 evaluation_path.write_text(json.dumps(evaluation), encoding="utf-8")
-                BUILD_RELEASE.validate_artifacts("0.3.0-draft", "v0.3.0-draft", root=root)
+                BUILD_RELEASE.validate_artifacts("0.3.0", "v0.3.0", root=root)
 
     def test_validate_requires_head_to_be_the_release_commit(self) -> None:
         # Artifacts are validated from the worktree and archived from the commit, so a release built
