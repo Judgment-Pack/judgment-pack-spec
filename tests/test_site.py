@@ -445,7 +445,7 @@ class StaticSiteTests(unittest.TestCase):
         validation = workflow.index("- name: Validate production artifact")
         authentication = workflow.index("- uses: google-github-actions/auth@v2", validation)
         self.assertLess(validation, authentication)
-        self.assertIn("python -m unittest discover -s tests -v", workflow)
+        self.assertIn("python -m unittest discover -s tests -p 'test_site.py' -v", workflow)
         self.assertIn('test "${noindex_pages[0]}" = "public/404.html"', workflow)
         self.assertIn(f"grep -R -l -F '{noindex_tag}'", workflow)
 
