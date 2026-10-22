@@ -1,0 +1,42 @@
+{
+  "description": "Hand-written profile admission cases; appendRoutes and profile override the shared pack without changing its other members.",
+  "pack": {
+    "specVersion": "0.2.0-draft",
+    "id": "https://example.com/packs/profiles",
+    "version": "1.0.0",
+    "title": "Profile boundary",
+    "decision": {"intent": "Exercise route ceilings", "question": "Review?"},
+    "outcomes": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}],
+    "rules": [{"id": "review", "description": "Review", "when": {"op": "literal", "value": true}, "outcome": "yes", "onUnknown": "ignore"}],
+    "escalation": {
+      "triggers": ["unknown"],
+      "routes": [
+        {"target": {"kind": "queue", "name": "One"}},
+        {"target": {"kind": "queue", "name": "Two"}},
+        {"target": {"kind": "queue", "name": "Three"}},
+        {"target": {"kind": "queue", "name": "Four"}},
+        {"target": {"kind": "queue", "name": "Five"}},
+        {"target": {"kind": "queue", "name": "Six"}},
+        {"target": {"kind": "queue", "name": "Seven"}},
+        {"target": {"kind": "queue", "name": "Eight"}}
+      ]
+    }
+  },
+  "cases": [
+    {"id": "implicit-base", "profiles": ["base"], "appendRoutes": [], "expected": {"status": "valid"}},
+    {"id": "base-at-ceiling", "profile": "base", "profiles": ["base"], "appendRoutes": [], "expected": {"status": "valid"}},
+    {"id": "base-one-past", "profile": "base", "profiles": ["base", "extended"], "appendRoutes": [{"target": {"kind": "queue", "name": "Nine"}}], "expected": {"status": "refused", "code": "malformed-input"}},
+    {"id": "extended-one-past-base", "profile": "extended", "profiles": ["base", "extended"], "appendRoutes": [{"target": {"kind": "queue", "name": "Nine"}}], "expected": {"status": "valid"}},
+    {"id": "extended-unsupported", "profile": "extended", "profiles": ["base"], "appendRoutes": [{"target": {"kind": "queue", "name": "Nine"}}], "expected": {"status": "refused", "code": "profile-unsupported", "profile": "extended"}},
+    {"id": "unknown-profile", "profile": "future", "profiles": ["base", "extended"], "appendRoutes": [], "expected": {"status": "refused", "code": "malformed-input"}},
+    {"id": "implicit-base-unsupported", "profiles": [], "appendRoutes": [], "expected": {"status": "refused", "code": "profile-unsupported", "profile": "base"}}
+  ],
+  "capabilities": [{"profiles": ["base"]}, {"profiles": ["base", "extended"]}],
+  "dialectDeclarations": [
+    {"profile": "base", "expected": "base"},
+    {"profile": "extended", "expected": "profile-unsupported"},
+    {"profile": "future", "expected": "input-malformed"},
+    {"profile": null, "expected": "input-malformed"},
+    {"profile": "", "expected": "input-malformed"}
+  ]
+}
