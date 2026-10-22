@@ -422,7 +422,7 @@ PAGES = (
         "SECURITY.md",
         PurePosixPath("project/security/index.html"),
         "Security policy",
-        "The research-preview security boundary and vulnerability reporting process.",
+        "The security boundary and vulnerability reporting process.",
         "project",
     ),
     Page(

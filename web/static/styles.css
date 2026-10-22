@@ -83,7 +83,7 @@ summary:focus-visible,
   border: 0;
 }
 
-/* Collapsible research-preview banner (native <details>, no JavaScript). */
+/* Collapsible status banner (native <details>, no JavaScript). */
 .preview-banner {
   color: #302313;
   background: var(--accent-soft);

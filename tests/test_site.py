@@ -824,7 +824,7 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn('<summary class="preview-banner-summary">', page)
         self.assertIn("Draft \u00b7", page)
         self.assertIn(
-            "No compatibility guarantee. Not for consequential production decisions.",
+            "A `0.x` draft in production use by adopters: pin the exact draft and runtime release; no compatibility guarantee between drafts.",
             page,
         )
 

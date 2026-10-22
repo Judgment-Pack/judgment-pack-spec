@@ -67,7 +67,7 @@ each artifact is permitted to make.
 
 ## Deprecation and support
 
-Research-preview releases have no compatibility or security service-level guarantee. Maintainers
+`0.x` draft releases have no compatibility or security service-level guarantee. Maintainers
 may deprecate or remove behavior in a later `0.x` release, but must record the change in release
 notes. A stable release will require a separate support and deprecation policy before publication.
 

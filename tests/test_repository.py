@@ -706,7 +706,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             (
                 "conformance/README.md",
                 "the opening description",
-                f"This directory contains {count} focused research-preview cases",
+                f"This directory contains {count} focused conformance cases",
             ),
             (
                 "web/build.py",
