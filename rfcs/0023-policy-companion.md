@@ -5,21 +5,20 @@
 - Created: 2026-10-17
 - Issue: [#211](https://github.com/Judgment-Pack/judgment-pack-spec/issues/211)
 
-This PR proposes acceptance at **draft maturity**, effective only when
-[PR 218](https://github.com/Judgment-Pack/judgment-pack-spec/pull/218) merges after
-required CI passes. Until then the default-branch RFC remains Review; this branch
-records the status proposed for merge, not a completed adoption or publication.
-On merge, [spec/policy.md](../spec/policy.md) defines the bounded Policy offline-reader
-companion and the selected independent draft release route. The original proposal
-and unresolved questions below remain informative design history; their current
-draft dispositions are in [ADOPTION.md](../conformance/policy/1.0.0/ADOPTION.md).
-No stable maturity, immutable release, consumer adoption or execution authority
-follows from draft acceptance. The [candidate contract](policy-companion-contract/README.md)
+RFC 0023 is Accepted at **draft maturity**. Required CI passed and
+[PR 218](https://github.com/Judgment-Pack/judgment-pack-spec/pull/218) merged,
+completing that process disposition. [spec/policy.md](../spec/policy.md) defines
+the bounded Policy offline-reader companion and the selected independent draft
+release route. The original proposal and unresolved questions below remain
+informative design history; their current draft dispositions are in
+[ADOPTION.md](../conformance/policy/1.0.0/ADOPTION.md). Acceptance at draft
+maturity establishes no stable maturity, immutable release, consumer adoption or
+execution authority. The [candidate contract](policy-companion-contract/README.md)
 remains archived proposed material with its original status and bytes.
 The historical [prototype](policy-companion-prototype/README.md) remains explicitly
 non-normative and byte-for-byte frozen at proposal `0.0.2`, baseline commit
 `8a56a95d555c17640d2db4984363b779536b3c2a`. Host integration guidance below names separate
-product responsibilities; acceptance of this RFC would not adopt those products'
+product responsibilities; acceptance of this RFC does not adopt those products'
 protocols on their behalf.
 
 ## Summary
@@ -167,7 +166,7 @@ consumers. A clause implemented through scope, exception or fallback can referen
 that actual element without inventing a dummy rule or a manual process.
 
 Informational sources are separate and do not create governing dependencies.
-Scope and coverage are declarations to be reviewed, not a language for conditional
+Scope and coverage are declarations to be reviewed, not a language for runtime
 authorization. Validation cannot prove that an organization declared every
 applicable policy or that an interpretation is correct.
 
@@ -362,27 +361,37 @@ Manual and chat actions must share the existing execution/context/approval/CAS
 boundaries. No feature-specific model loop, permission inference or retry service
 is required by this RFC.
 
+## Open criteria
+
+The Runtime reader is the only implementation reader so far. It and the repository
+reader were both Codex-assisted. The acceptance criterion asks for a second reader
+authored independently and remains **OPEN**. The Desk's import path or an Exchange
+reader counts if its authorship is separate; a same-team port does not.
+
+The 16-source maximum in Policy format `1.0.0` is a schema maximum and the `base`
+profile's value under [RFC 0026](0026-document-ceiling-profiles.md). The companion
+adopts the `profile` member only in its next format version, tracked by
+[issue #244](https://github.com/Judgment-Pack/judgment-pack-spec/issues/244).
+
 ## Unresolved questions
 
-1. Adoption/disposition of the exact proposed `1.0.0` selector, declared bounds and
-   closed reference/coverage grammar after public review; no released schema or
-   conformance class is assigned here.
-2. Trust/signature/export profile for review assertions and cross-workspace adoption.
-3. Reconciliation with RFC 0011's proposed pack currency registry without silently
+1. Trust/signature/export profile for review assertions and cross-workspace adoption.
+2. Reconciliation with RFC 0011's proposed pack currency registry without silently
    adopting it or treating offline membership as live authorization.
-4. First real sync provider and its demonstrable revision/lifecycle/freshness
+3. First real sync provider and its demonstrable revision/lifecycle/freshness
    semantics; document-read support alone is insufficient.
-5. Host defaults for self-review versus independent review, quorum changes,
+4. Host defaults for self-review versus independent review, quorum changes,
    role-revocation effects on old signatures, expiry/grace and scheduled publication.
-6. Supported graph/composition closure and its owning execution contract.
-7. Independent implementation evidence and any domain-format adapter demand.
+5. Supported graph/composition closure and its owning execution contract.
+6. Independent implementation evidence and any domain-format adapter demand.
 
-## Conditional draft disposition
+## Accepted draft disposition
 
 On 2026-10-19 the maintainer directed: “Accept the bounded draft after CI; record
-the limited public review”. The decision accepts the exact corrected `1.0.0`
+the limited public review”. Required CI passed and PR 218 merged, completing
+acceptance at draft maturity. The decision accepts the exact corrected `1.0.0`
 content/reference/anchor/coverage grammar and bounds, Policy offline-reader scope
-and independent draft release route **upon PR 218 merge after required CI**.
+and independent draft release route.
 It explicitly accepts the limited public period for this bounded draft, without
 claiming outside review or independently authored interoperability evidence.
 The standing temporary different-vendor-review exception applies; the general
@@ -392,12 +401,11 @@ The separate same-vendor review inspected tree
 `60b04d452efa49032a0cc7d3ac1e55a3900410a8`, committed unchanged as
 `7f118278e480d88e53e6a6be2fe084610a2bebf9`, and reported no material findings in
 [the complete PR record](https://github.com/Judgment-Pack/judgment-pack-spec/pull/218#issuecomment-6273316525).
-The final CI-fix/acceptance delta remains subject to the PR's bounded review and
-required CI gates; that earlier report is not a review of an unidentified later
-commit. [ADOPTION.md](../conformance/policy/1.0.0/ADOPTION.md) records the actual
+That report did not establish independently authored implementation evidence.
+[ADOPTION.md](../conformance/policy/1.0.0/ADOPTION.md) records the actual
 public history, exception, scope and deferred questions with reopening conditions.
 
-Draft acceptance adopts only [the companion](../spec/policy.md) and the narrow
+Acceptance at draft maturity adopts only [the companion](../spec/policy.md) and the narrow
 [publication route](../conformance/policy/1.0.0/PUBLICATION.md). The first independent
 release identifier is `policy-v1.0.0-draft.1`; naming it in this source branch
 does not establish publication. Only the exact tag and a maintainer-published
