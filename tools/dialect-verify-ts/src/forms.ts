@@ -593,12 +593,15 @@ function classList(v: JVal | undefined, what: string): string[] {
   });
 }
 
-export function documentProfile(d: JVal): string {
+export function documentProfile(d: JVal, supported: readonly string[] = ["base"]): string {
   const p = d.t === "obj" ? d.m.get("profile") : undefined;
-  if (p === undefined) return "base";
+  if (p === undefined) {
+    if (!supported.includes("base")) throw new Refusal("profile-unsupported", "base");
+    return "base";
+  }
   if (p.t !== "str" || (p.v !== "base" && p.v !== "extended")) malformed("unknown document ceiling profile");
-  if (p.v === "extended") throw new Refusal("profile-unsupported", "extended");
-  return "base";
+  if (!supported.includes(p.v)) throw new Refusal("profile-unsupported", p.v);
+  return p.v;
 }
 
 export function readDialect(d: JVal): Dialect {

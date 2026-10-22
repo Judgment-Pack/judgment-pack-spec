@@ -31,19 +31,33 @@ export type Result = {
 
 export const BINDING_KIND = "judgment-pack-runner/preparation/1";
 
+/** Profile negotiation and envelope byte admission only, not full Dialect validation.
+ * The complete verifier remains base-only in its subsequent phases. */
+export function admitEnvelope(dialect: Uint8Array, caseBytes: Uint8Array,
+                              acquisitions: Uint8Array, supported: readonly string[] = ["base"]): string {
+  let profile = "base";
+  if (dialect.length <= BOUNDS.dialectBytes * 2) {
+    let declaration: JVal | undefined;
+    const scan = scanBytes(dialect);
+    try {
+      if (scan.nesting <= BOUNDS.documentNesting && scan.numbersWithin) declaration = read(dialect).value;
+    } catch (e) {
+      if (!(e instanceof NotRead)) throw e;
+    }
+    if (declaration !== undefined) profile = documentProfile(declaration, supported);
+  }
+  const multiplier = profile === "extended" ? 2 : 1;
+  if (dialect.length > BOUNDS.dialectBytes * multiplier
+      || dialect.length + caseBytes.length + acquisitions.length > BOUNDS.inputBytes * multiplier) {
+    throw new Refusal("input-over-bound", "the dialect, case and acquisitions");
+  }
+  return profile;
+}
+
 export function verify(inputs: Inputs): Result {
   let recomputedBytes: Uint8Array | undefined;
   try {
-    if (inputs.dialect.length <= BOUNDS.dialectBytes * 2) {
-      let declaration: JVal | undefined;
-      const scan = scanBytes(inputs.dialect);
-      try {
-        if (scan.nesting <= BOUNDS.documentNesting && scan.numbersWithin) declaration = read(inputs.dialect).value;
-      } catch (e) {
-        if (!(e instanceof NotRead)) throw e;
-      }
-      if (declaration !== undefined) documentProfile(declaration);
-    }
+    admitEnvelope(inputs.dialect, inputs.case, inputs.acquisitions);
     return reading(inputs, (b) => (recomputedBytes = b));
   } catch (e) {
     if (e instanceof Refusal && e.code === "profile-unsupported") return { kind: "refusal", report: obj([["result", str("refusal")], ["refusal", str(e.code)], ["profile", str("extended")]]) };
@@ -69,9 +83,8 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
     ["the binding document", inputs.binding],
   ];
 
-  // phase 1: the bounds measured on bytes, on every document before any is read
-  if (inputs.dialect.length > BOUNDS.dialectBytes) over("the dialect's size");
-  if (inputs.dialect.length + inputs.case.length + inputs.acquisitions.length > BOUNDS.inputBytes) over("the inputs' size");
+  // After phase 0 negotiation and envelope admission: remaining phase 1 byte bounds,
+  // before full document reading.
   if (inputs.profiles.length > BOUNDS.profilesBytes) over("the profiles' size");
   if (inputs.preparation.length > BOUNDS.preparationBytes) over("the preparation's size");
   if (inputs.record !== undefined && inputs.record.length > BOUNDS.recordBytes) over("the record's size");

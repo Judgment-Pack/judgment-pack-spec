@@ -2357,9 +2357,19 @@ No manifest or file under `conformance/` is added by this plan. (No vector decid
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
 the refusal, at the first of these phases that fails, in this order:
 
+0. **profile negotiation**, before the byte-bound checks below and before reading any
+   supplied document for interpretation. Only a resource-bounded scan of the dialect root
+   sufficient to identify its `profile` declaration precedes negotiation; it performs no
+   case, acquisition, preparation or record reading. A recognized profile the reader does
+   not support gives exactly `profile-unsupported`, naming that profile, even when another
+   document exceeds a base bound. Unknown or malformed declarations give `input-malformed`.
+   If the bounded scan cannot identify a declaration (including malformed dialect bytes),
+   the existing byte/syntax refusal order below applies. Otherwise a supporting reader
+   selects that profile's ceilings from Core §4.1 before continuing. This scan is the sole
+   exception to the rule that byte bounds precede document reading;
 1. the bounds of §12 that are measured on bytes — a document's size, its nesting (the case
-   document's at 32 levels), and each number literal's characters and exponent — taken on every
-   document before any is read: `input-over-bound`;
+   document's at 32 levels under base), and each number literal's characters and exponent —
+   using the negotiated profile's ceilings, taken on every document before full document reading: `input-over-bound`;
 2. every document read as §1 reads one, and the record as one line: `input-malformed`;
 3. the bounds of §12 that are counts — the sources, the parameters in a scope, the clauses of a
    rule, the conditions one `all` or `any` lists, the `unwrap` pointers, the fact and evidence
@@ -2541,9 +2551,11 @@ first `e` or `E`: the run of digits that follows it, or that follows the `+` or 
 literal with no such run has no exponent. An unwrapped string's bound is counted on the UTF-8 bytes
 of its decoded value.
 
-Over any bound it refuses the reading, `input-over-bound`, and MUST NOT read part of it. The bytes are
-bounded first, by the documents' sizes, before any is read; §11 gives the order of the rest. A
-preparer refuses the same inputs before it writes a preparation.
+After profile negotiation (§11 phase 0), exceeding a bound of the selected profile refuses
+with `input-over-bound`; a reader MUST NOT process a prefix to fit. The declaration scan is
+first; then the selected byte bounds precede full document reading. A reader that lacks the
+profile refuses `profile-unsupported` before checking other documents' sizes. A preparer
+uses the same order before it writes a preparation.
 
 ### 13. What a preparation establishes, and what it does not
 

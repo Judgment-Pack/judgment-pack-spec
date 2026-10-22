@@ -437,7 +437,10 @@ It is also given independently trusted historical profiles and runtime pins, nev
 their presence in an export. Digest expectations name bytes to compare, not an authenticated
 source. The reader takes no network access or acquisition permission.
 
-The reference phase refuses, in order: byte/aggregate/nesting bounds (`input-over-bound`);
+The reference phase first negotiates the workflow's document profile under Core §4.1.
+Only its bounded declaration scan precedes negotiation; a known unsupported profile
+gives `profile-unsupported` before other documents' byte-bound checks. After negotiation,
+the reference phase refuses, in order: the selected profile's byte/aggregate/nesting bounds (`input-over-bound`);
 strict JSON and the integer domain scoped by §2 (`input-malformed`); count/string bounds
 (`input-over-bound`); versions it cannot read (`version-unread`); closed forms and reference
 ordering (`input-malformed`); absent artifacts with non-null pins (`inventory-mismatch`, a

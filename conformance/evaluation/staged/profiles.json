@@ -38,5 +38,41 @@
     {"profile": "future", "expected": "input-malformed"},
     {"profile": null, "expected": "input-malformed"},
     {"profile": "", "expected": "input-malformed"}
-  ]
+  ],
+  "handoff": {
+    "kind": "unresolved", "reasons": ["unknown"],
+    "handoff": {"state": "requested", "triggeredBy": ["unknown"], "routes": [
+      {"kind": "queue", "name": "One"}, {"kind": "queue", "name": "Two"},
+      {"kind": "queue", "name": "Three"}, {"kind": "queue", "name": "Four"},
+      {"kind": "queue", "name": "Five"}, {"kind": "queue", "name": "Six"},
+      {"kind": "queue", "name": "Seven"}, {"kind": "queue", "name": "Eight"}
+    ]}
+  },
+  "handoffCases": [
+    {"id": "base-handoff-at-ceiling", "profile": "base", "appendRoutes": [], "valid": true},
+    {"id": "base-handoff-one-past", "profile": "base", "appendRoutes": [{"kind": "queue", "name": "Nine"}], "valid": false},
+    {"id": "extended-handoff-at-ceiling", "profile": "extended", "appendRoutes": [
+      {"kind": "queue", "name": "Nine"}, {"kind": "queue", "name": "Ten"},
+      {"kind": "queue", "name": "Eleven"}, {"kind": "queue", "name": "Twelve"},
+      {"kind": "queue", "name": "Thirteen"}, {"kind": "queue", "name": "Fourteen"},
+      {"kind": "queue", "name": "Fifteen"}, {"kind": "queue", "name": "Sixteen"}
+    ], "valid": true},
+    {"id": "extended-handoff-one-past", "profile": "extended", "appendRoutes": [
+      {"kind": "queue", "name": "Nine"}, {"kind": "queue", "name": "Ten"},
+      {"kind": "queue", "name": "Eleven"}, {"kind": "queue", "name": "Twelve"},
+      {"kind": "queue", "name": "Thirteen"}, {"kind": "queue", "name": "Fourteen"},
+      {"kind": "queue", "name": "Fifteen"}, {"kind": "queue", "name": "Sixteen"},
+      {"kind": "queue", "name": "Seventeen"}
+    ], "valid": false}
+  ],
+  "admissionProbe": {
+    "description": "Envelope admission only, not a complete Dialect or verification result. The case is a JSON string whose byte length exceeds the base combined-input bound and stays below extended.",
+    "document": {"profile": "extended"},
+    "caseString": {"character": "x", "length": 2097151},
+    "acquisitions": {},
+    "readers": [
+      {"profiles": ["base"], "expected": "profile-unsupported"},
+      {"profiles": ["base", "extended"], "expected": "extended"}
+    ]
+  }
 }

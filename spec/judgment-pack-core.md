@@ -342,9 +342,11 @@ Policy and governing-adoption documents adopt it from the next companion version
 the released 1.0.0 draft does not carry `profile`. Dialect source
 and connection profiles are separate objects, not this ceiling declaration.
 
-A reader MUST admit a document only under a profile it supports. After parsing enough of
-the root to recognize its declaration, and before schema interpretation, reference loading,
-acquisition or evaluation, it checks that declaration. An unknown name, non-string, empty
+A reader MUST admit a document only under a profile it supports. Profile negotiation is
+the first admission step: after the bounded root scan needed to identify the declaration,
+and before other documents' byte-bound checks, schema interpretation, reference loading,
+acquisition or evaluation, it checks that declaration. A supporting reader then applies
+the selected profile's ceilings. An unknown name, non-string, empty
 string or null is a structural refusal using the format's existing structural diagnostic.
 For input declaring a known but unsupported profile, it returns exactly one diagnostic
 `profile-unsupported`, naming that profile: `{"code":"profile-unsupported","profile":"extended"}`

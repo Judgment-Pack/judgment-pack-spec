@@ -25,7 +25,9 @@ The synthetic vectors demonstrate structural admission, not runtime or independe
 
 Core §4.1 owns the complete ceiling table, declaration, identity and capability rules. Companions
 reference it. A known unsupported profile yields one `profile-unsupported` diagnostic naming that
-profile before reference loading, acquisition or evaluation. An unknown profile is structural.
+profile before other documents' byte-bound checks, reference loading, acquisition or
+evaluation; only the bounded declaration scan precedes negotiation. A supporting reader
+then applies the selected ceilings. An unknown profile is structural.
 The declaration is retained in bytes and digests. Profiles change ceilings only, never semantics,
 minima, closed vocabularies or canonical numeric domains. Workflow keeps its `limits` member.
 
@@ -58,7 +60,11 @@ messages echo only known profile names. All examples are synthetic; ceilings gra
 `conformance/evaluation/staged/profiles.json` supplies hand-written boundary and capability vectors. Tests cover
 implicit and explicit base, one-over-base refusal, extended admission and its own ceiling,
 unsupported and unknown names, unchanged identity bytes, schema mutation sensitivity, and both
-Dialect language readers' declaration checks. The frozen Policy schemas continue to reject the new member.
+Dialect language readers' declaration checks. The frozen Policy schemas continue to reject the new member. Handoff boundaries are
+covered at 8/9 and 16/17 routes; both effective schemas are compared with the normative
+table. Canonical digests distinguish absent, base and extended declarations. The oversized
+case probe checks envelope admission only: its minimal profile declaration is not a
+complete Dialect document, and full extended verification is not claimed.
 
 ## Implementation
 
