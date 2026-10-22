@@ -1312,6 +1312,35 @@ class RepositoryConformanceTests(unittest.TestCase):
             with self.subTest(mutation=name), self.assertRaises(AssertionError):
                 checker._check_evaluation_cases([case], EVALUATION_STAGED)
 
+    def test_disposition_routes_state_negative_vectors(self) -> None:
+        import copy
+        manifest = strict_json_loads(
+            (EVALUATION_STAGED / "disposition-negative/manifest.json").read_text()
+        )
+        self.assertEqual("staged", manifest["status"])
+        self.assertEqual("§8.3", manifest["specSection"])
+        self.assertEqual(4, len({case["id"] for case in manifest["cases"]}))
+        for path in (SCHEMA_PATH, EVALUATION_MANIFEST_SCHEMA_PATH):
+            schema = strict_json_loads(path.read_text())
+            validator = Draft202012Validator(schema).evolve(schema={"$ref": "#/$defs/disposition"})
+            for case in manifest["cases"]:
+                with self.subTest(schema=path.name, case=case["id"]):
+                    errors = list(validator.iter_errors(case["disposition"]))
+                    self.assertEqual(
+                        [(case["expectedKeyword"], ["handoff", "routes"])],
+                        [(error.validator, list(error.path)) for error in errors],
+                    )
+                    corrected = copy.deepcopy(case["disposition"])
+                    corrected["handoff"]["routes"] = case["correctedRoutes"]
+                    self.assertEqual([], list(validator.iter_errors(corrected)))
+                    del corrected["handoff"]["routes"]
+                    self.assertEqual([], list(validator.iter_errors(corrected)))
+                    weakened = copy.deepcopy(schema)
+                    branch = "then" if case["expectedKeyword"] == "minItems" else "else"
+                    del weakened["$defs"]["disposition"]["properties"]["handoff"]["allOf"][0][branch]["properties"]
+                    permissive = Draft202012Validator(weakened).evolve(schema={"$ref": "#/$defs/disposition"})
+                    self.assertTrue(permissive.is_valid(case["disposition"]))
+
     def test_routes_legacy_canonical_bytes(self) -> None:
         legacy = next(c for c in self._staged_cases() if c["id"] == "routes-legacy-target-bytes")
         released = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text())["cases"]
