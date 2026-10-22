@@ -23,6 +23,33 @@ def digest(value: object) -> str:
     return "sha256:" + hashlib.sha256(canonical(value)).hexdigest()
 
 
+def redraw_sample(selection: dict[str, object]) -> list[str]:
+    bundle = json.loads((FIXTURE / "left-bundle.json").read_text(encoding="utf-8"))
+    stage = next(
+        row for row in bundle["stages"] if row["stage"] == selection["upstreamStage"]
+    )
+    partitions: dict[str, list[tuple[bytes, str]]] = {}
+    for row in stage["records"]:
+        disposition = row["disposition"]
+        if disposition["kind"] != "outcome":
+            continue
+        record_digest = row["recordDigest"]
+        rank = hashlib.sha256(
+            selection["seed"].encode("utf-8")
+            + b"\x00"
+            + record_digest.encode("utf-8")
+        ).digest()
+        partitions.setdefault(disposition["outcomeId"], []).append((rank, record_digest))
+    chosen = {
+        record_digest
+        for rows in partitions.values()
+        for _, record_digest in sorted(rows)[: selection["size"]]
+    }
+    return [
+        row["recordDigest"] for row in stage["records"] if row["recordDigest"] in chosen
+    ]
+
+
 class WorkflowTextTests(unittest.TestCase):
     def test_the_rfcs_specification_is_the_companion_text(self) -> None:
         # As for RFC 0018: numbered companion sections, with RFC headings one level down.
@@ -210,43 +237,43 @@ class WorkflowFixtureTests(unittest.TestCase):
         self.assertNotEqual(vector["summary"]["recordsDigest"], digest(vector["dispositions"]))
 
     def test_sample_refusal_vectors_cover_bound_and_seed_form(self) -> None:
-        size = json.loads(
-            (FIXTURE / "vectors" / "sample-size-over-bound.json").read_text(encoding="utf-8")
+        vector_names = (
+            "sample-seed-empty.json",
+            "sample-seed-invalid.json",
+            "sample-seed-missing.json",
+            "sample-seed-oversized.json",
+            "sample-size-over-bound.json",
         )
-        seed = json.loads(
-            (FIXTURE / "vectors" / "sample-seed-invalid.json").read_text(encoding="utf-8")
-        )
+        vectors = {
+            name: json.loads((FIXTURE / "vectors" / name).read_text(encoding="utf-8"))
+            for name in vector_names
+        }
+        size = vectors["sample-size-over-bound.json"]
+        seed = vectors["sample-seed-invalid.json"]
         self.assertEqual(size["expectedRefusal"], "input-over-bound")
         self.assertGreater(size["selection"]["size"], size["stageMaxSize"])
         self.assertEqual(seed["expectedRefusal"], "input-malformed")
         self.assertNotRegex(seed["selection"]["seed"], r"^[0-9a-f]{64}$")
         for name in ("sample-seed-empty.json", "sample-seed-missing.json", "sample-seed-oversized.json"):
             with self.subTest(name=name):
-                vector = json.loads((FIXTURE / "vectors" / name).read_text(encoding="utf-8"))
+                vector = vectors[name]
                 self.assertEqual(vector["expectedRefusal"], "input-malformed")
                 self.assertTrue(list(self.validator.iter_errors(vector)))
 
+        for name, vector in vectors.items():
+            with self.subTest(repaired=name):
+                repaired = dict(vector["selection"])
+                if name == "sample-size-over-bound.json":
+                    repaired["size"] = vector["stageMaxSize"]
+                else:
+                    repaired["seed"] = "0" * 64
+                self.validator.validate(repaired)
+                self.assertLessEqual(repaired["size"], vector["stageMaxSize"])
+                self.assertEqual(repaired["selected"], redraw_sample(repaired))
+
     def test_recorded_sample_is_redrawn_from_seed(self) -> None:
         sample = json.loads((FIXTURE / "sample.json").read_text(encoding="utf-8"))
-        bundle = json.loads((FIXTURE / "left-bundle.json").read_text(encoding="utf-8"))
-        stage = next(row for row in bundle["stages"] if row["stage"] == sample["upstreamStage"])
-        partitions: dict[str, list[tuple[bytes, str]]] = {}
-        for row in stage["records"]:
-            disposition = row["disposition"]
-            if disposition["kind"] != "outcome":
-                continue
-            record_digest = row["recordDigest"]
-            rank = hashlib.sha256(
-                sample["seed"].encode("utf-8") + b"\x00" + record_digest.encode("utf-8")
-            ).digest()
-            partitions.setdefault(disposition["outcomeId"], []).append((rank, record_digest))
-        chosen = {
-            record_digest
-            for rows in partitions.values()
-            for _, record_digest in sorted(rows)[: sample["size"]]
-        }
-        expected = [row["recordDigest"] for row in stage["records"] if row["recordDigest"] in chosen]
-        self.assertEqual(sample["selected"], expected)
+        self.assertEqual(sample["selected"], redraw_sample(sample))
 
     def test_drift_is_recomputed_from_the_two_recorded_bundles(self) -> None:
         left = json.loads((FIXTURE / "left-bundle.json").read_text(encoding="utf-8"))
