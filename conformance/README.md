@@ -1,8 +1,9 @@
 # Conformance corpus
 
 This directory contains 127 focused conformance cases for testing the carrier, structural, and
-semantic requirements of Judgment Pack Core `0.2.0-draft`. It is versioned with the draft but is not
-yet a complete or normative conformance suite. Evaluator behavior is out of scope *here*: it has its
+semantic requirements of Judgment Pack Core `0.2.0-draft`, plus five advisory vectors. It is
+versioned with the draft but is not yet a complete or normative conformance suite. Evaluator
+behavior is out of scope *here*: it has its
 own corpus, in [`evaluation/`](evaluation/README.md), which is normative for the evaluator conformance
 class of §3.4. A document-conformance result never depends on it. Nor is the checkpoint witness
 statement in scope here: [`witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness)
@@ -42,6 +43,12 @@ run or a workflow conformance corpus.
 - `valid/` contains documents expected to pass carrier, structural, and semantic checks. A valid
   result does not claim factual truth, authority, operational fitness, or anything about an
   evaluator: evaluator conformance is claimed against `evaluation/`, never against this layer.
+- `advisory/` contains semantically conforming documents for recommended checks that do not affect
+  conformance. Their `expectedAdvisories` entries use the manifest's closed advisory diagnostic
+  vocabulary and record mode-specific severity; an empty array expects a clean advisory result.
+  Its `diagnostic-negative/manifest.json` separately carries three malformed diagnostic rows and
+  two positive controls; those contract checks are not pack vectors and are not part of either
+  headline count.
 
 Validation proceeds in layer order. A runner should stop a case at its target layer rather than
 reporting downstream diagnostics for content that failed an earlier layer.
@@ -57,6 +64,10 @@ Each case records:
 - `specSection` — the draft section that motivates the expectation; and
 - optional `supportedExtensions` — the required-extension capabilities available to the consumer
   for that case. When omitted, the capability set is empty.
+
+Advisory cases additionally record `expectedAdvisories`. `diagnosticVocabulary.advisory` closes the
+names those entries may use; advisory findings do not change `expectedResult` or
+`expectedDiagnostic`.
 
 `unsupported` is distinct from `invalid`: the document is structurally readable and semantically
 well-formed, but the consumer lacks a capability named by `metadata.requiredExtensions`.
