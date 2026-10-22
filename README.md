@@ -12,8 +12,8 @@
 
 > **Status: `0.2.0-draft`**
 >
-> This repository is an early design proposal. It is not an industry standard, is not covered by
-> compatibility guarantees, and is not ready for consequential production decisions.
+> JPS is a draft specification in production use by adopters. It is not an industry standard, and
+> `0.x` drafts carry no compatibility guarantee: pin the exact draft and runtime release you verified.
 
 ## Project ecosystem and where to contribute
 

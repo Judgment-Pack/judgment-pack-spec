@@ -380,9 +380,11 @@ distinction. Conformance means the document agrees with the contract. Factual gr
 organizational authorization, and operational fitness are three separate claims a validator must
 never imply.
 
-**Q46. Is JPS ready for production?** It makes no production-readiness claim yet: it is a draft specification at `0.2.0-draft`. Safe uses today are
-experimentation, authoring, review, and conformance testing. Do not automate a real outcome from a
-pack.
+**Q46. Is JPS ready for production?** Yes. JPS at `0.2.0-draft` is in production use by adopters,
+through the pinned reference runtime, with a person accountable for every consequential outcome
+(Q47). It is still a draft: pin the exact draft and the runtime release you verified, since
+compatibility between drafts is not guaranteed and there is no certification programme yet. A pack
+decides; what acts on its disposition stays the adopter's own system.
 
 **Q47. How would an enterprise adopt it safely?** Treat conformance as document hygiene, not a
 decision warrant; keep a human accountable for every consequential outcome; pin immutable
