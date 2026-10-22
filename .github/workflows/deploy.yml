@@ -1,22 +1,18 @@
 name: Deploy site
 
-# Keyless deploy via Workload Identity Federation (no service-account key, no secrets):
-#   - Pull requests  -> build a noindex preview and deploy it to a Firebase preview channel.
-#   - Push to main   -> build the production site and deploy both hosting targets live.
-# The `production` environment lets you require a human approval in the repo settings,
-# preserving the "promote the reviewed build" boundary for the specification site.
-
+# Publication of an explicitly planned Core or Policy release deploys its immutable tag.
+# The production environment retains the repository's human approval boundary.
 on:
-  push:
-    branches: [main]
-  pull_request:
+  release:
+    types: [published]
 
 permissions:
   contents: read
+  issues: read
   id-token: write
 
 concurrency:
-  group: deploy-${{ github.workflow }}-${{ github.ref }}
+  group: deploy-production
   cancel-in-progress: false
 
 env:
@@ -28,45 +24,22 @@ env:
   DEPLOY_SA: gh-deploy@judgmentpack-spec.iam.gserviceaccount.com
 
 jobs:
-  preview:
-    # Same-repo PRs only (fork PRs cannot mint the OIDC token).
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: python -m pip install -r requirements-dev.txt
-      - name: Build preview (noindex, no canonical)
-        run: python web/build.py --environment preview
-      - uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ env.GCP_PROJECT }}
-          workload_identity_provider: ${{ env.WIF_PROVIDER }}
-          service_account: ${{ env.DEPLOY_SA }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      # Pinned on purpose: a bump is a reviewed change, since 15.34.1 (2026-10-21) began reading the
-      # Service Usage API before deploying (the deploy account holds Service Usage Viewer for it).
-      - run: npm install -g firebase-tools@15.34.1
-      - name: Deploy spec preview channel
-        run: |
-          firebase target:apply hosting spec "${SPEC_SITE}" --project "${GCP_PROJECT}"
-          firebase hosting:channel:deploy "pr-${{ github.event.number }}" \
-            --only spec --expires 7d --project "${GCP_PROJECT}" --non-interactive | tee /tmp/fb.txt
-          {
-            echo "### Specification preview";
-            grep -Eo 'https://[a-zA-Z0-9._-]+\.web\.app[^ ]*' /tmp/fb.txt | head -1;
-          } >> "$GITHUB_STEP_SUMMARY" || true
-
   production:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: startsWith(github.event.release.tag_name, 'v') || startsWith(github.event.release.tag_name, 'policy-v')
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out published tag
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ github.event.release.tag_name }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate release milestone and tagged checkout
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: python tools/release_milestone.py --tag "$RELEASE_TAG" --commit "${GITHUB_SHA}"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -75,11 +48,11 @@ jobs:
         run: |
           python web/build.py --environment production \
             --base-url "${BASE_URL}" \
-            --commit-sha "${{ github.sha }}" \
-            --build-time "$(git show -s --format=%cI ${{ github.sha }})"
+            --commit-sha "$(git rev-parse HEAD)" \
+            --build-time "$(git show -s --format=%cI HEAD)"
       - name: Validate production artifact
         run: |
-          python -m unittest discover -s tests -v
+          python -m unittest discover -s tests -p 'test_site.py' -v
           grep -Fq '<link rel="canonical" href="https://judgmentpack.org/">' public/index.html
           grep -Fxq 'Allow: /' public/robots.txt
           grep -Fxq 'Sitemap: https://judgmentpack.org/sitemap.xml' public/robots.txt
