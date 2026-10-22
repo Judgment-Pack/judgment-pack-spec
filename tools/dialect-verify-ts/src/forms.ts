@@ -593,9 +593,21 @@ function classList(v: JVal | undefined, what: string): string[] {
   });
 }
 
+export function documentProfile(d: JVal, supported: readonly string[] = ["base"]): string {
+  const p = d.t === "obj" ? d.m.get("profile") : undefined;
+  if (p === undefined) {
+    if (!supported.includes("base")) throw new Refusal("profile-unsupported", "base");
+    return "base";
+  }
+  if (p.t !== "str" || (p.v !== "base" && p.v !== "extended")) malformed("unknown document ceiling profile");
+  if (!supported.includes(p.v)) throw new Refusal("profile-unsupported", p.v);
+  return p.v;
+}
+
 export function readDialect(d: JVal): Dialect {
+  documentProfile(d);
   const named = d.t === "obj" && d.m.has("formatVersion");
-  const o = exact(d, "the dialect", named ? ["formatVersion", "id", "version", "case"] : ["version", "case"], ["sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"]);
+  const o = exact(d, "the dialect", named ? ["formatVersion", "id", "version", "case"] : ["version", "case"], ["profile", "sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"]);
   const version = o.m.get("version")!;
   let v: number;
   if (named) {

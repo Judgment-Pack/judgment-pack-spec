@@ -1022,6 +1022,13 @@ never interchanged.
 
 ### 2. The dialect document
 
+The root MAY carry `profile`, `base` by default or `extended`, independently of source
+connection profiles. [Core §4.1](../spec/judgment-pack-core.md#41-document-ceiling-profiles)
+defines its ceiling table, admission, `profile-unsupported` refusal and byte-identity rules.
+The numeric resource bounds here state base values; extended uses that table. An unknown
+profile is `input-malformed`. The bundled verifiers support only base.
+
+
 The dialect document is one JSON object. Its version 2 is the Runner's mapping v2 document: a
 mapping v2 document the Runner accepts is a version-2 dialect document, with the same bytes and the
 same digest. The one exception is a request's `query` under a profile whose adapter is the gateway's
@@ -1032,6 +1039,7 @@ and a `selected-file`, and refuses each of the other four kinds by name.
 
 | Member | Form | Meaning |
 | --- | --- | --- |
+| `profile` | `base` or `extended`, optional | document ceiling profile, default `base` |
 | `version` | the integer `2`, or `3` (§4.3, §4.4) | the dialect version, per which the source kinds (§4) and every form of this document are closed |
 | `case` | an object (§3), REQUIRED | the case's parameters, and the facts and evidence copied from the case |
 | `sources` | an array of at most 16 sources (§4), optional | absent is the empty array |
@@ -2349,9 +2357,19 @@ No manifest or file under `conformance/` is added by this plan. (No vector decid
 **Refusals.** Before it recomputes anything, it refuses the reading, which then reports nothing but
 the refusal, at the first of these phases that fails, in this order:
 
+0. **profile negotiation**, before the byte-bound checks below and before reading any
+   supplied document for interpretation. Only a resource-bounded scan of the dialect root
+   sufficient to identify its `profile` declaration precedes negotiation; it performs no
+   case, acquisition, preparation or record reading. A recognized profile the reader does
+   not support gives exactly `profile-unsupported`, naming that profile, even when another
+   document exceeds a base bound. Unknown or malformed declarations give `input-malformed`.
+   If the bounded scan cannot identify a declaration (including malformed dialect bytes),
+   the existing byte/syntax refusal order below applies. Otherwise a supporting reader
+   selects that profile's ceilings from Core §4.1 before continuing. This scan is the sole
+   exception to the rule that byte bounds precede document reading;
 1. the bounds of §12 that are measured on bytes — a document's size, its nesting (the case
-   document's at 32 levels), and each number literal's characters and exponent — taken on every
-   document before any is read: `input-over-bound`;
+   document's at 32 levels under base), and each number literal's characters and exponent —
+   using the negotiated profile's ceilings, taken on every document before full document reading: `input-over-bound`;
 2. every document read as §1 reads one, and the record as one line: `input-malformed`;
 3. the bounds of §12 that are counts — the sources, the parameters in a scope, the clauses of a
    rule, the conditions one `all` or `any` lists, the `unwrap` pointers, the fact and evidence
@@ -2485,7 +2503,8 @@ matching binding in a record whose signature verifies is what commits it (§13).
 
 **The report.** A verifier reports a reading, a refusal or a finding as one JSON object, written in
 the preparation's canonical form (§9.5), whose member `result` is `reading`, `refusal` or `finding`.
-A refusal is exactly `{"result": "refusal", "refusal": C}` and a finding exactly
+A refusal is exactly `{"result": "refusal", "refusal": C}`, except `profile-unsupported`
+also requires `profile`, the known unsupported name. A finding is exactly
 `{"result": "finding", "finding": C}`, `C` its code. A reading is `result` and the members listed
 above, exactly: `digest`; `binding`; `facts`, the facts document; `evidence`, the
 evidence-availability document; `targetsByClass`; and `unsignedParameters` and `unsignedFreshness`
@@ -2532,9 +2551,11 @@ first `e` or `E`: the run of digits that follows it, or that follows the `+` or 
 literal with no such run has no exponent. An unwrapped string's bound is counted on the UTF-8 bytes
 of its decoded value.
 
-Over any bound it refuses the reading, `input-over-bound`, and MUST NOT read part of it. The bytes are
-bounded first, by the documents' sizes, before any is read; §11 gives the order of the rest. A
-preparer refuses the same inputs before it writes a preparation.
+After profile negotiation (§11 phase 0), exceeding a bound of the selected profile refuses
+with `input-over-bound`; a reader MUST NOT process a prefix to fit. The declaration scan is
+first; then the selected byte bounds precede full document reading. A reader that lacks the
+profile refuses `profile-unsupported` before checking other documents' sizes. A preparer
+uses the same order before it writes a preparation.
 
 ### 13. What a preparation establishes, and what it does not
 

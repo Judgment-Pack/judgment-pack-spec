@@ -7,6 +7,9 @@ here.
 
 ### Added
 
+- Document ceiling profiles (#232): default `base` and declared `extended`, a shared
+  ceiling table, explicit unsupported-profile refusal, capability discovery and
+  byte identity. Schemas retain base bounds; profile conformance covers negotiation.
 - A non-normative rule-overlap check (#227) with the closed `JPS-RULES-OVERLAP` diagnostic,
   exact and not-excluded findings, warning/strict/publish severity levels, exclusive rewrite
   guidance, and advisory vectors. Core §8 conflict resolution is unchanged.

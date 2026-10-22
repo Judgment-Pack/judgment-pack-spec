@@ -241,7 +241,12 @@ disposition and discards it on evaluation error. Section 7 applies these distinc
 
 ### 2. The workflow document and bounds
 
-`workflow.json` is exactly `{workflowVersion, stages, result, limits}`. `workflowVersion` is the
+`workflow.json` requires `{workflowVersion, stages, result, limits}` and permits only
+one additional member, `profile` (`base` by default or `extended`).
+[Core §4.1](../spec/judgment-pack-core.md#41-document-ceiling-profiles) defines its ceiling table,
+admission, `profile-unsupported` refusal and byte-identity rules. Unknown profiles are
+`input-malformed`. The table below states base ceilings; extended doubles each ceiling
+over `limits`, which remains required. `workflowVersion` is the
 integer `1`; `stages` is an ordered array of 1 to `limits.maxStages` stages (§3), with distinct
 ids. Exactly the first stage is a root. Every other stage names an earlier stage; all are thereby
 reachable from the root. `result` is a stage id naming a terminal stage, one with no consumers.
@@ -682,7 +687,10 @@ It is also given independently trusted historical profiles and runtime pins, nev
 their presence in an export. Digest expectations name bytes to compare, not an authenticated
 source. The reader takes no network access or acquisition permission.
 
-The reference phase refuses, in order: byte/aggregate/nesting bounds (`input-over-bound`);
+The reference phase first negotiates the workflow's document profile under Core §4.1.
+Only its bounded declaration scan precedes negotiation; a known unsupported profile
+gives `profile-unsupported` before other documents' byte-bound checks. After negotiation,
+the reference phase refuses, in order: the selected profile's byte/aggregate/nesting bounds (`input-over-bound`);
 strict JSON and the integer domain scoped by §2 (`input-malformed`); count/string bounds
 (`input-over-bound`); versions it cannot read (`version-unread`); closed forms and reference
 ordering (`input-malformed`); absent artifacts with non-null pins (`inventory-mismatch`, a

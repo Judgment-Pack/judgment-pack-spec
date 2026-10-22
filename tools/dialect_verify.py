@@ -1016,11 +1016,46 @@ def check_parameter_name(name: Any, what: str) -> None:
         raise malformed(f"{what}: a parameter name that is empty or runAt")
 
 
+def document_profile(document: Any, supported: tuple[str, ...] = ("base",)) -> str:
+    """Ceiling profile admission, before any other document interpretation."""
+    profile = document.get("profile", "base") if isinstance(document, dict) else "base"
+    if profile not in ("base", "extended"):
+        raise malformed("unknown document ceiling profile")
+    if profile not in supported:
+        raise Refused("profile-unsupported", profile)
+    return profile
+
+
+def admit_envelope(dialect: bytes, case: bytes, acquisitions: bytes,
+                   supported: tuple[str, ...] = ("base",)) -> str:
+    """Negotiate, then admit envelope byte sizes only; not full Dialect validation.
+
+    This admission phase can select either ceiling. The complete verifier still
+    advertises base only, since its later phases implement only base bounds.
+    """
+    profile = "base"
+    # Only the bounded declaration scan precedes negotiation. If it cannot identify
+    # a declaration, retain the existing byte/syntax refusal order below.
+    if len(dialect) <= DIALECT_BYTES * 2:
+        try:
+            declaration = read_document(dialect, "the dialect")
+        except Refused:
+            declaration = None
+        if declaration is not None:
+            profile = document_profile(declaration, supported)
+    multiplier = 2 if profile == "extended" else 1
+    if (len(dialect) > DIALECT_BYTES * multiplier
+            or len(dialect) + len(case) + len(acquisitions) > ENVELOPE_BYTES * multiplier):
+        raise Refused("input-over-bound", "the dialect, case and acquisitions")
+    return profile
+
+
 def parse_dialect(document: Any) -> Dialect:
+    document_profile(document)
     named = isinstance(document, dict) and "formatVersion" in document
     required = {"formatVersion", "id", "version", "case"} if named else {"version", "case"}
     top = closed(document, required,
-                 {"sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"},
+                 {"profile", "sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"},
                  "the dialect")
     if named:
         if top["formatVersion"] not in ("2.0.0", "3.0.0"):
@@ -3039,16 +3074,15 @@ def verify(
     unbound source (§4.4), and None when none is given."""
     result = Verification(answer={})
     try:
-        if len(dialect) > DIALECT_BYTES or len(dialect) + len(case) + len(acquisitions) > ENVELOPE_BYTES:
-            raise Refused("input-over-bound", "the dialect, case and acquisitions")
+        admit_envelope(dialect, case, acquisitions)
         if len(profiles) > PROFILES_BYTES:
             raise Refused("input-over-bound", "the profiles")
         if binding is not None and len(binding) > BINDING_BYTES:
             raise Refused("input-over-bound", "the binding document")
         if len(preparation) > PREPARATION_BYTES or (record is not None and len(record) > RECORD_BYTES):
             raise Refused("input-over-bound", "the preparation or the record")
-        # §11's phases, in order: the bounds measured on bytes, on every document before any is
-        # read; every document read; the counted bounds; every form; the kinds; and only then the
+        # After §11 phase 0 negotiates the profile, measure every document's byte bounds
+        # before full document reading; then every document read; the counted bounds; every form; the kinds; and only then the
         # recomputation.
         documents = [
             (dialect, "the dialect", MAX_DOCUMENT_DEPTH),
@@ -3165,6 +3199,8 @@ def report(answer: dict[str, Any]) -> dict[str, Any]:
         return {"result": "reading", **answer["reading"]}
     if "finding" in answer:
         return {"result": "finding", "finding": answer["finding"]}
+    if answer["refused"] == "profile-unsupported":
+        return {"result": "refusal", "refusal": "profile-unsupported", "profile": "extended"}
     return {"result": "refusal", "refusal": answer["refused"]}
 
 
