@@ -7,6 +7,10 @@ here.
 
 ### Added
 
+- Document ceiling profiles (#232): default `base` and declared `extended`, a shared
+  ceiling table, explicit unsupported-profile refusal, capability discovery and
+  byte identity. Schemas retain base bounds; profile conformance covers negotiation.
+
 - Core escalation routes (#219): exclusive single target or up to eight conditional routes,
   ordered fan-out in `handoff.routes`, complete retained reasons, and unchanged single-target
   disposition bytes. Structural fixtures and staged evaluation vectors cover selection, bounds,

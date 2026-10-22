@@ -221,7 +221,12 @@ disposition and discards it on evaluation error. Section 7 applies these distinc
 
 ### 2. The workflow document and bounds
 
-`workflow.json` is exactly `{workflowVersion, stages, result, limits}`. `workflowVersion` is the
+`workflow.json` requires `{workflowVersion, stages, result, limits}` and permits only
+one additional member, `profile` (`base` by default or `extended`).
+[Core §4.1](judgment-pack-core.md#41-document-ceiling-profiles) defines its ceiling table,
+admission, `profile-unsupported` refusal and byte-identity rules. Unknown profiles are
+`input-malformed`. The table below states base ceilings; extended doubles each ceiling
+over `limits`, which remains required. `workflowVersion` is the
 integer `1`; `stages` is an ordered array of 1 to `limits.maxStages` stages (§3), with distinct
 ids. Exactly the first stage is a root. Every other stage names an earlier stage; all are thereby
 reachable from the root. `result` is a stage id naming a terminal stage, one with no consumers.

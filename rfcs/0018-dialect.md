@@ -1022,6 +1022,13 @@ never interchanged.
 
 ### 2. The dialect document
 
+The root MAY carry `profile`, `base` by default or `extended`, independently of source
+connection profiles. [Core §4.1](judgment-pack-core.md#41-document-ceiling-profiles)
+defines its ceiling table, admission, `profile-unsupported` refusal and byte-identity rules.
+The numeric resource bounds here state base values; extended uses that table. An unknown
+profile is `input-malformed`. The bundled verifiers support only base.
+
+
 The dialect document is one JSON object. Its version 2 is the Runner's mapping v2 document: a
 mapping v2 document the Runner accepts is a version-2 dialect document, with the same bytes and the
 same digest. The one exception is a request's `query` under a profile whose adapter is the gateway's
@@ -1032,6 +1039,7 @@ and a `selected-file`, and refuses each of the other four kinds by name.
 
 | Member | Form | Meaning |
 | --- | --- | --- |
+| `profile` | `base` or `extended`, optional | document ceiling profile, default `base` |
 | `version` | the integer `2`, or `3` (§4.3, §4.4) | the dialect version, per which the source kinds (§4) and every form of this document are closed |
 | `case` | an object (§3), REQUIRED | the case's parameters, and the facts and evidence copied from the case |
 | `sources` | an array of at most 16 sources (§4), optional | absent is the empty array |
@@ -2485,7 +2493,8 @@ matching binding in a record whose signature verifies is what commits it (§13).
 
 **The report.** A verifier reports a reading, a refusal or a finding as one JSON object, written in
 the preparation's canonical form (§9.5), whose member `result` is `reading`, `refusal` or `finding`.
-A refusal is exactly `{"result": "refusal", "refusal": C}` and a finding exactly
+A refusal is exactly `{"result": "refusal", "refusal": C}`, except `profile-unsupported`
+also requires `profile`, the known unsupported name. A finding is exactly
 `{"result": "finding", "finding": C}`, `C` its code. A reading is `result` and the members listed
 above, exactly: `digest`; `binding`; `facts`, the facts document; `evidence`, the
 evidence-availability document; `targetsByClass`; and `unsignedParameters` and `unsignedFreshness`

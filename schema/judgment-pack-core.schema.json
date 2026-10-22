@@ -16,6 +16,10 @@
     "rules"
   ],
   "properties": {
+    "profile": {
+      "enum": ["base", "extended"],
+      "default": "base"
+    },
     "specVersion": {
       "const": "0.2.0-draft"
     },

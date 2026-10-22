@@ -7441,6 +7441,18 @@
         "formatVersion": "1.0.0",
         "maturity": "draft"
       }
+    },
+    {
+      "id": "profile-extended-unsupported",
+      "document": {
+        "path": "vectors/profile-extended.json"
+      },
+      "materials": [],
+      "expected": {
+        "status": "refused",
+        "code": "profile-unsupported",
+        "profile": "extended"
+      }
     }
   ]
 }

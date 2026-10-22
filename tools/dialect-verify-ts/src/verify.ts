@@ -1,7 +1,7 @@
 // A preparation verifier (spec/dialect.md §11, §14): the refusals in their phases, the findings in their
 // order, and the reading.
 import { BOUNDS, scanBytes } from "./bounds.ts";
-import { Refusal, countsWithin, readAcquisitions, readBound, readDialect, readProfiles, readRecord, readVerifiedAt, sha256hex } from "./forms.ts";
+import { documentProfile, Refusal, countsWithin, readAcquisitions, readBound, readDialect, readProfiles, readRecord, readVerifiedAt, sha256hex } from "./forms.ts";
 import { NotRead, OutsideDomain, arr, compareCodePoints, intValue, isInteger, jsonEqual, member, num, obj, preparationForm, read, str, utf8 } from "./json.ts";
 import type { JObj, JVal } from "./json.ts";
 import { Finding, conditionParameters, recompute } from "./prepare.ts";
@@ -34,8 +34,19 @@ export const BINDING_KIND = "judgment-pack-runner/preparation/1";
 export function verify(inputs: Inputs): Result {
   let recomputedBytes: Uint8Array | undefined;
   try {
+    if (inputs.dialect.length <= BOUNDS.dialectBytes * 2) {
+      let declaration: JVal | undefined;
+      const scan = scanBytes(inputs.dialect);
+      try {
+        if (scan.nesting <= BOUNDS.documentNesting && scan.numbersWithin) declaration = read(inputs.dialect).value;
+      } catch (e) {
+        if (!(e instanceof NotRead)) throw e;
+      }
+      if (declaration !== undefined) documentProfile(declaration);
+    }
     return reading(inputs, (b) => (recomputedBytes = b));
   } catch (e) {
+    if (e instanceof Refusal && e.code === "profile-unsupported") return { kind: "refusal", report: obj([["result", str("refusal")], ["refusal", str(e.code)], ["profile", str("extended")]]) };
     if (e instanceof Refusal) return { kind: "refusal", report: obj([["result", str("refusal")], ["refusal", str(e.code)]]), why: e.message };
     if (e instanceof Finding) {
       return { kind: "finding", report: obj([["result", str("finding")], ["finding", str(e.code)]]), why: e.message, recomputed: recomputedBytes };

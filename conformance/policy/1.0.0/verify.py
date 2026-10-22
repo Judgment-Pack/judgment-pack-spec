@@ -29,7 +29,7 @@ VERSION = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", re.AS
 FORMAT_VERSION = "1.0.0"
 VALID = {"status": "valid", "formatVersion": FORMAT_VERSION, "maturity": "draft"}
 CODES = (
-    "input-over-bound", "invalid-json", "invalid-selector", "unsupported-format",
+    "profile-unsupported", "input-over-bound", "invalid-json", "invalid-selector", "unsupported-format",
     "invalid-document", "missing-material", "reference-mismatch", "invalid-anchor",
     "invalid-coverage", "invalid-consumer", "unsupported-canonical-identity", "invalid-carrier",
 )
@@ -37,6 +37,7 @@ CAPABILITY = {
     "capability": "jps-policy-companion-offline",
     "maturity": "draft",
     "formatVersions": [FORMAT_VERSION],
+    "profiles": ["base"],
     "consumerSpecVersions": ["0.2.0-draft"],
     "kinds": ["policy", "governing-adoption"],
     "features": ["exact-byte-sha256", "utf8-section-anchors", "scoped-total-coverage",
@@ -59,10 +60,11 @@ CAPABILITY = {
 
 class ContractError(ValueError):
     """Finite safe code only: never include retained input in public diagnostics."""
-    def __init__(self, code):
+    def __init__(self, code, profile=None):
         assert code in CODES
         super().__init__(code)
         self.code = code
+        self.profile = profile
 
 
 def require(condition, code):
@@ -105,7 +107,17 @@ def read_json(data):
     return canon_document(strict_json(data))
 
 
+def select_profile(document):
+    if not isinstance(document, dict):
+        return  # Existing root/selector classification follows.
+    profile = document.get("profile", "base")
+    require(profile in ("base", "extended"), "invalid-document")
+    if profile not in CAPABILITY["profiles"]:
+        raise ContractError("profile-unsupported", profile)
+
+
 def select_format(document):
+    select_profile(document)
     require(isinstance(document, dict), "invalid-selector")
     selector = document.get("formatVersion")
     require(isinstance(selector, str) and len(selector) <= 256 and VERSION.fullmatch(selector), "invalid-selector")
@@ -355,7 +367,10 @@ def result(callback):
     try:
         callback()
     except ContractError as error:
-        return {"status": "refused", "code": error.code}
+        refusal = {"status": "refused", "code": error.code}
+        if error.code == "profile-unsupported":
+            refusal["profile"] = error.profile
+        return refusal
     return dict(VALID)
 
 
