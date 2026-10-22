@@ -35,7 +35,8 @@ const VERSION_3_KINDS = new Map<string, { required: string[]; optional: string[]
   ["web", { required: ["url"], optional: [] }],
 ]);
 // §4.3, §4.4: a `research` source's members beside §4's, and its three binding members, all or none.
-const RESEARCH_MEMBERS = ["maxAge", "question", "constraints", "model", "evidence", "fields", "capabilities"];
+const RESEARCH_MEMBERS = ["maxAge", "question", "constraints", "model", "evidence", "capabilities"];
+const RESEARCH_OPTIONAL = ["fields", "results", "acquisitionSources"];
 const RESEARCH_BINDING = ["profile", "profileDigest", "webProfiles"];
 const FIELD_TYPES = new Set(["integer", "decimal", "boolean", "text", "text-list", "range"]);
 const CAPABILITIES = ["answer", "search", "page"];
@@ -52,7 +53,18 @@ const HEX64 = /^[0-9a-f]{64}$/;
 
 export type CaseParam = { name: string; pointer: string; type: ParamType };
 export type SourceParam = { name: string; from: string; pointer: string; type: ParamType };
-export type CopyRead = { facts: { target: string; source: string }[]; evidence: { requirement: string; source: string }[] };
+export type Conversion = JObj;
+export type QualityFact = {
+  target: string;
+  source?: string;
+  observations?: { id: string; source: string }[];
+  reconcile?: { mode: "precedence" | "agree" | "first-present"; precedence?: string[] };
+  convert?: Conversion;
+  qualityType?: "string" | "decimal" | "boolean" | "date";
+  required?: boolean;
+  domain?: JObj;
+};
+export type CopyRead = { facts: QualityFact[]; evidence: { requirement: string; source: string }[] };
 export type ClaimForm = { facts: { pointer: string; from: string }[]; evidence: Map<string, string>; acquisitionStatus: string };
 export type Clause = { when: JObj; claim: ClaimForm; reason: string };
 export type Rule = { parameters: Map<string, ParamType>; clauses: Clause[] };
@@ -68,6 +80,7 @@ export type Research = {
   model: string;
   request: [string, JVal][];
   web: Map<string, { profile: string; profileDigest: string }>;
+  resultMember: "fields" | "results";
 };
 export type Calculation = { inputs: Map<string, string>; tables: Map<string, number> };
 
@@ -206,6 +219,7 @@ const characters = (s: string) => Array.from(s).length;
  * maxima; a value of another form is measured by nothing here. A decimal string is counted in characters. */
 function overByType(v: JVal | undefined, type: string | undefined): boolean {
   if (v === undefined) return false;
+  if (type?.endsWith("[]")) return v.t === "arr" && (v.a.length > BOUNDS.listItems || v.a.some((x) => overByType(x, type.slice(0, -2))));
   if (type === "text") return v.t === "str" && byteLength(v.v) > BOUNDS.textBytes;
   if (type === "text-list") return v.t === "arr" && (v.a.length > BOUNDS.listItems || v.a.some((x) => x.t === "str" && byteLength(x.v) > BOUNDS.itemBytes));
   if (type === "decimal") return v.t === "str" && characters(v.v) > BOUNDS.decimalCharacters;
@@ -227,17 +241,26 @@ function researchWithin(dialect: JVal, acquisitions: JVal, profiles: JVal | unde
     const kind = member(s, "kind");
     if (kind?.t !== "str" || kind.v !== "research") continue;
     const types = new Map<string, string>();
-    const fields = member(s, "fields");
+    const fields = member(s, "results") ?? member(s, "fields");
     if (fields?.t === "arr") {
       if (fields.a.length > BOUNDS.fields) return false;
       for (const d of fields.a) {
         if (d.t !== "obj") continue;
-        const name = member(d, "name");
+        const name = member(d, "id") ?? member(d, "name");
         if (longer(name, BOUNDS.fieldNameBytes) || longer(member(d, "description"), BOUNDS.descriptionBytes)) return false;
         const type = member(d, "type");
-        if (name?.t === "str" && !types.has(name.v) && type?.t === "str" && FIELD_TYPES.has(type.v)) types.set(name.v, type.v);
+        let declaredType = type?.t === "str" ? type.v : undefined;
+        if (member(s, "results") !== undefined) {
+          if (declaredType === "string") declaredType = "text";
+          if (declaredType === "string-list") declaredType = "text-list";
+          if (member(d, "cardinality")?.t === "str" && (member(d, "cardinality") as JStr).v === "many" && declaredType !== undefined) declaredType += "[]";
+        }
+        if (name?.t === "str" && !types.has(name.v) && declaredType !== undefined
+            && (FIELD_TYPES.has(declaredType) || declaredType.endsWith("[]") && FIELD_TYPES.has(declaredType.slice(0, -2)))) types.set(name.v, declaredType);
       }
     }
+    const acquisitionSources = member(s, "acquisitionSources");
+    if (acquisitionSources?.t === "arr" && acquisitionSources.a.length > BOUNDS.sources) return false;
     if (longer(member(s, "model"), BOUNDS.modelBytes)) return false;
     const evidence = member(s, "evidence");
     if (evidence?.t === "arr" && evidence.a.some((x) => longer(x, BOUNDS.evidenceBytes))) return false;
@@ -265,7 +288,10 @@ function researchWithin(dialect: JVal, acquisitions: JVal, profiles: JVal | unde
     for (const [name, a] of acquisitions.m) {
       const types = declared.get(name);
       if (types === undefined) continue;
-      const answers = member(member(member(a, "response"), "result"), "fields");
+      const record = member(member(a, "response"), "result");
+      const answers = member(record, "results") ?? member(record, "fields");
+      const retainedBytes = member(member(record, "execution"), "retainedBytes");
+      if (retainedBytes?.t === "arr" && retainedBytes.a.length > BOUNDS.retainedResponses) return false;
       if (answers?.t !== "obj") continue;
       if (answers.m.size > BOUNDS.fields) return false;
       // every answer's name, declared or not, before any entry is inspected or its declaration looked up
@@ -303,16 +329,21 @@ export function countsWithin(dialect: JVal, acquisitions: JVal, profiles?: JVal,
   if (nCase + 1 > BOUNDS.scopeParameters) return false;
   let facts = 0;
   let evidence = 0;
-  const copyTargets = (copy: JVal | undefined, f: Set<string>, e: Set<string>) => {
+  const copyTargets = (copy: JVal | undefined, f: Set<string>, e: Set<string>): boolean => {
     const cf = member(copy, "facts");
-    if (cf?.t === "arr") for (const x of cf.a) { const t = member(x, "target"); if (t?.t === "str") f.add(t.v); }
+    if (cf?.t === "arr") for (const x of cf.a) {
+      const t = member(x, "target"); if (t?.t === "str") f.add(t.v);
+      const observations = member(x, "observations");
+      if (observations?.t === "arr" && observations.a.length > BOUNDS.sources) return false;
+    }
     const ce = member(copy, "evidence");
     if (ce?.t === "arr") for (const x of ce.a) { const r = member(x, "requirement"); if (r?.t === "str") e.add(r.v); }
+    return true;
   };
   {
     const f = new Set<string>();
     const e = new Set<string>();
-    copyTargets(caseObj, f, e);
+    if (!copyTargets(caseObj, f, e)) return false;
     facts += f.size;
     evidence += e.size;
   }
@@ -338,7 +369,7 @@ export function countsWithin(dialect: JVal, acquisitions: JVal, profiles?: JVal,
       if (unwrap?.t === "arr" && unwrap.a.length > BOUNDS.unwraps) return false;
       const f = new Set<string>();
       const e = new Set<string>();
-      copyTargets(member(read, "copy"), f, e);
+      if (!copyTargets(member(read, "copy"), f, e)) return false;
       const clauses = member(member(read, "rule"), "clauses");
       if (clauses?.t === "arr") {
         if (clauses.a.length > BOUNDS.clauses) return false;
@@ -390,8 +421,48 @@ type Scope = Map<string, ParamType>;
 function readCopy(v: JVal | undefined, what: string, arraysRequired: boolean, besides: string[] = []): CopyRead {
   const o = exact(v, what, arraysRequired ? ["facts", "evidence"] : [], arraysRequired ? besides : ["facts", "evidence", ...besides]);
   const facts = (o.m.has("facts") ? array(o.m.get("facts"), `${what}.facts`) : []).map((x, k) => {
-    const e = exact(x, `${what}.facts[${k}]`, ["target", "source"]);
-    return { target: factTarget(e.m.get("target"), "a copy's target"), source: pointer(e.m.get("source"), "a copy's source") };
+    const w = `${what}.facts[${k}]`;
+    const e = object(x, w);
+    const target = factTarget(e.m.get("target"), "a copy's target");
+    const extended = Array.from(e.m.keys()).some((n) => n !== "target" && n !== "source");
+    if (!extended) {
+      exact(e, w, ["target", "source"]);
+      return { target, source: pointer(e.m.get("source"), "a copy's source") };
+    }
+    exact(e, w, ["target", "type", "required"], ["source", "observations", "reconcile", "convert", "domain"]);
+    const hasSource = e.m.has("source");
+    const hasObservations = e.m.has("observations");
+    if (hasSource === hasObservations) malformed(`${w} has not exactly one of source and observations`);
+    const source = hasSource ? pointer(e.m.get("source"), `${w}.source`) : undefined;
+    let observations: { id: string; source: string }[] | undefined;
+    let reconcile: QualityFact["reconcile"];
+    if (hasObservations) {
+      const raw = array(e.m.get("observations"), `${w}.observations`);
+      if (raw.length < 2) malformed(`${w}.observations has fewer than two entries`);
+      observations = raw.map((v, n) => {
+        const q = exact(v, `${w}.observations[${n}]`, ["id", "source"]);
+        return { id: nonEmpty(q.m.get("id"), `${w}.observations[${n}].id`), source: pointer(q.m.get("source"), `${w}.observations[${n}].source`) };
+      });
+      const ids = observations.map((q) => q.id);
+      if (new Set(ids).size !== ids.length) malformed(`${w}.observations repeats an id`);
+      const r = exact(e.m.get("reconcile"), `${w}.reconcile`, ["mode"], ["precedence"]);
+      const mode = string(r.m.get("mode"), `${w}.reconcile.mode`);
+      if (mode !== "precedence" && mode !== "agree" && mode !== "first-present") malformed(`${w}.reconcile.mode is unknown`);
+      const precedence = r.m.has("precedence") ? array(r.m.get("precedence"), `${w}.reconcile.precedence`).map((p, n) => string(p, `${w}.reconcile.precedence[${n}]`)) : undefined;
+      if (mode === "precedence" && (precedence === undefined || precedence.length !== ids.length
+          || new Set(precedence).size !== ids.length || precedence.some((id) => !ids.includes(id)))) {
+        malformed(`${w}.reconcile.precedence is not exactly the observation ids`);
+      }
+      if (mode !== "precedence" && precedence !== undefined) malformed(`${w}.reconcile has precedence for another mode`);
+      reconcile = { mode, precedence };
+    } else if (e.m.has("reconcile")) malformed(`${w} reconciles one source`);
+    const qualityType = string(e.m.get("type"), `${w}.type`);
+    if (!["string", "decimal", "boolean", "date"].includes(qualityType)) malformed(`${w}.type is unknown`);
+    const required = e.m.get("required");
+    if (required?.t !== "bool") malformed(`${w}.required is not a boolean`);
+    const convert = e.m.has("convert") ? readConversion(e.m.get("convert"), `${w}.convert`) : undefined;
+    const domain = e.m.has("domain") ? readDomain(e.m.get("domain"), `${w}.domain`) : undefined;
+    return { target, source, observations, reconcile, convert, qualityType: qualityType as QualityFact["qualityType"], required: required.v, domain };
   });
   const evidence = (o.m.has("evidence") ? array(o.m.get("evidence"), `${what}.evidence`) : []).map((x, k) => {
     const e = exact(x, `${what}.evidence[${k}]`, ["requirement", "source"]);
@@ -403,6 +474,47 @@ function readCopy(v: JVal | undefined, what: string, arraysRequired: boolean, be
     seen.add(e.requirement);
   }
   return { facts, evidence };
+}
+
+/** Shared hand-written §6.2a vector entry, through the same closed-form reader as a dialect. */
+export function readQualityFact(entry: JVal, what = "quality vector"): CopyRead {
+  return readCopy(obj([["facts", arr([entry])], ["evidence", arr([])]]), what, true);
+}
+
+function readConversion(v: JVal | undefined, what: string): JObj {
+  const o = object(v, what);
+  const kind = string(o.m.get("kind"), `${what}.kind`);
+  if (kind === "decimal-from-text") {
+    exact(o, what, ["kind", "decimalSeparator", "thousandsSeparator", "sign", "whitespace"]);
+    const decimal = string(o.m.get("decimalSeparator"), `${what}.decimalSeparator`);
+    const thousands = string(o.m.get("thousandsSeparator"), `${what}.thousandsSeparator`);
+    if (!['.', ','].includes(decimal) || !['', '.', ','].includes(thousands) || thousands === decimal) malformed(`${what} has invalid separators`);
+    if (!["none", "minus", "plus-minus"].includes(string(o.m.get("sign"), `${what}.sign`))) malformed(`${what}.sign is unknown`);
+    if (!["reject", "trim"].includes(string(o.m.get("whitespace"), `${what}.whitespace`))) malformed(`${what}.whitespace is unknown`);
+  } else if (kind === "boolean-from-text") {
+    exact(o, what, ["kind", "true", "false"]);
+    const lists = ["true", "false"].map((name) => array(o.m.get(name), `${what}.${name}`).map((x, k) => string(x, `${what}.${name}[${k}]`)));
+    if (lists.some((xs) => xs.length < 1 || xs.length > 16 || new Set(xs).size !== xs.length) || lists[0].some((x) => lists[1].includes(x))) malformed(`${what} has invalid boolean spellings`);
+  } else if (kind === "date-from-text") {
+    exact(o, what, ["kind", "format"]);
+    if (!["YYYY-MM-DD", "MM/DD/YYYY", "DD/MM/YYYY"].includes(string(o.m.get("format"), `${what}.format`))) malformed(`${what}.format is unknown`);
+  } else if (["decimal-from-number", "trim", "collapse-whitespace"].includes(kind)) exact(o, what, ["kind"]);
+  else malformed(`${what}.kind is unknown`);
+  return o;
+}
+
+function readDomain(v: JVal | undefined, what: string): JObj {
+  const o = object(v, what);
+  if (o.m.size !== 1) malformed(`${what} does not have exactly one domain form`);
+  if (o.m.has("in")) {
+    const values = array(o.m.get("in"), `${what}.in`);
+    if (values.length < 1 || values.length > 64 || values.some((x) => !inCanonDomain(x))) malformed(`${what}.in is invalid`);
+  } else if (o.m.has("decimalRange")) {
+    const r = exact(o.m.get("decimalRange"), `${what}.decimalRange`, ["min", "max"]);
+    for (const n of ["min", "max"]) if (!DECIMAL.test(string(r.m.get(n), `${what}.decimalRange.${n}`))) malformed(`${what}.decimalRange.${n} is not decimal`);
+    if (compareDecimals((r.m.get("min") as JStr).v, (r.m.get("max") as JStr).v) > 0) malformed(`${what}.decimalRange is reversed`);
+  } else malformed(`${what} has an unknown domain form`);
+  return o;
 }
 
 function readCondition(v: JVal | undefined, declared: Map<string, ParamType>, what: string): JObj {
@@ -690,7 +802,8 @@ export function readDialect(d: JVal): Dialect {
     } else if (kind === "research") {
       // §4.3, §4.4: published unbound, with none of the three binding members, or bound, with all three
       if (v === 2) malformed(`${what} names the version-3 kind ${kind} in a version-2 dialect`);
-      exact(so, what, [...base, ...RESEARCH_MEMBERS], ["parameters", ...RESEARCH_BINDING]);
+      exact(so, what, [...base, ...RESEARCH_MEMBERS], ["parameters", ...RESEARCH_BINDING, ...RESEARCH_OPTIONAL]);
+      if (so.m.has("fields") === so.m.has("results")) malformed(`${what} has not exactly one of fields and results`);
       const given = RESEARCH_BINDING.filter((k) => so.m.has(k)).length;
       if (given !== 0 && given !== RESEARCH_BINDING.length) malformed(`${what} has some but not all of profile, profileDigest and webProfiles`);
     } else {
@@ -904,28 +1017,50 @@ function readResearch(so: JObj, scope: Scope, what: string): Research {
   object(so.m.get("constraints"), `${what}.constraints`);
   const model = nonEmpty(so.m.get("model"), `${what}.model`);
   array(so.m.get("evidence"), `${what}.evidence`).forEach((x, k) => nonEmpty(x, `${what}.evidence[${k}]`));
-  const declarations = array(so.m.get("fields"), `${what}.fields`);
+  const resultMember = so.m.has("results") ? "results" : "fields";
+  const declarations = array(so.m.get(resultMember), `${what}.${resultMember}`);
   if (declarations.length === 0) malformed(`${what}.fields declares no field`);
   const types = new Map<string, string>();
   const fields = declarations.map((x, k) => {
     const w = `${what}.fields[${k}]`;
-    const d = exact(x, w, ["name", "type", "required", "description"]);
-    const name = nonEmpty(d.m.get("name"), `${w}.name`);
+    const d = resultMember === "results"
+      ? exact(x, w, ["id", "type", "required", "description", "cardinality"])
+      : exact(x, w, ["name", "type", "required", "description"], ["cardinality"]);
+    const name = nonEmpty(d.m.get(resultMember === "results" ? "id" : "name"), `${w}.${resultMember === "results" ? "id" : "name"}`);
     if (name === "case") malformed(`${w}.name is case`);
     if (types.has(name)) malformed(`${w}.name ${name} is given twice`);
-    const type = string(d.m.get("type"), `${w}.type`);
-    if (!FIELD_TYPES.has(type)) malformed(`${w}.type is not one of the six`);
+    let type = string(d.m.get("type"), `${w}.type`);
+    if (resultMember === "results") {
+      if (!["string", "decimal", "boolean", "string-list"].includes(type)) malformed(`${w}.type is outside the result contract`);
+      type = type === "string" ? "text" : type === "string-list" ? "text-list" : type;
+      if ((d.m.get("cardinality") as JStr).v === "many") type += "[]";
+    }
+    if (!FIELD_TYPES.has(type) && !(type.endsWith("[]") && FIELD_TYPES.has(type.slice(0, -2)))) malformed(`${w}.type is not one of the six`);
     const required = d.m.get("required")!;
     if (required.t !== "bool") malformed(`${w}.required is not a boolean`);
     nonEmpty(d.m.get("description"), `${w}.description`);
+    if (d.m.has("cardinality") && !["one", "many"].includes(string(d.m.get("cardinality"), `${w}.cardinality`))) malformed(`${w}.cardinality is not one or many`);
     types.set(name, type);
     return { name, type, required: (required as { v: boolean }).v };
   });
   const capabilities = readCapabilities(so.m.get("capabilities"), `${what}.capabilities`);
   if (capabilities[0] !== "answer") malformed(`${what}.capabilities lacks answer, which is required`);
-  const request: [string, JVal][] = ["constraints", "model", "evidence", "fields", "capabilities"].map((k) => [k, so.m.get(k)!]);
+  if (so.m.has("acquisitionSources")) {
+    const sources = array(so.m.get("acquisitionSources"), `${what}.acquisitionSources`);
+    if (sources.length < 1 || sources.length > BOUNDS.sources) malformed(`${what}.acquisitionSources is not one to 16 entries`);
+    sources.forEach((x, k) => {
+      const w = `${what}.acquisitionSources[${k}]`;
+      const source = exact(x, w, ["profile", "version", "purpose", "scope", "freshness"]);
+      for (const name of ["profile", "version", "purpose"]) nonEmpty(source.m.get(name), `${w}.${name}`);
+      const scope = object(source.m.get("scope"), `${w}.scope`);
+      if (!inCanonDomain(scope)) malformed(`${w}.scope is outside the canon domain`);
+      integerIn(source.m.get("freshness"), 0, 31536000, `${w}.freshness`);
+    });
+  }
+  const requestNames = ["constraints", "model", "evidence", resultMember, "capabilities", ...(so.m.has("acquisitionSources") ? ["acquisitionSources"] : [])];
+  const request: [string, JVal][] = requestNames.map((k) => [k, so.m.get(k)!]);
   const web = so.m.has("webProfiles") ? readWebProfiles(so.m.get("webProfiles"), capabilities, `${what}.webProfiles`) : new Map();
-  return { question, fields, types, capabilities, model, request, web };
+  return { question, fields, types, capabilities, model, request, web, resultMember };
 }
 
 /** A condition and every condition within it, at any depth. */
@@ -947,10 +1082,11 @@ const sameTokens = (a: string[], b: string[]) => a.length === b.length && a.ever
 function readResearchRead(v: JVal | undefined, scope: Scope, what: string, research: Research, earlier: Source[]): Read {
   if (v !== undefined && v.t === "obj" && v.m.has("sources")) return readReconciliation(v, scope, what, research, earlier);
   const read = readRead(v, scope, what);
+  const resultMember = research.resultMember;
   const readable = (p: string, taken: boolean) => {
     const t = tokens(p);
-    if (sameTokens(t, ["fields"])) return;
-    if (t.length >= 2 && t[0] === "fields" && research.types.has(t[1])) {
+    if (sameTokens(t, [resultMember])) return;
+    if (t.length >= 2 && t[0] === resultMember && research.types.has(t[1])) {
       const rest = t.slice(2);
       if (rest.length === 0 || rest[0] === "value" || sameTokens(rest, ["status"]) || sameTokens(rest, ["cites"])) return;
       if (rest.length === 3 && rest[0] === "values" && INDEX_TOKEN.test(rest[1]) && rest[2] === "value") {
@@ -963,7 +1099,7 @@ function readResearchRead(v: JVal | undefined, scope: Scope, what: string, resea
   // An unwrap pointer takes the value read from where it points: this reader holds it as a from.
   for (const p of read.unwrap) readable(p, true);
   if (read.copy) {
-    for (const f of read.copy.facts) readable(f.source, true);
+    for (const f of read.copy.facts) for (const p of f.observations?.map((o) => o.source) ?? [f.source!]) readable(p, true);
     for (const e of read.copy.evidence) readable(e.source, true);
   } else {
     for (const c of leavesOf(read.rule!)) readable((c.m.get("field") as JStr).v, false);
@@ -1233,6 +1369,11 @@ export function compareDecimals(a: string, b: string): number {
 /** §4.3: a value of a field's declared type in its exact encoding; `null` is never one. Maxima are phase 3's. */
 function typed(v: JVal | undefined, type: string, what: string): void {
   let ok: boolean;
+  if (type.endsWith("[]")) {
+    if (v === undefined || v.t !== "arr" || v.a.length > BOUNDS.listItems) malformed(`${what} is not a value of the declared type ${type}`);
+    v.a.forEach((x, k) => typed(x, type.slice(0, -2), `${what}[${k}]`));
+    return;
+  }
   if (v === undefined) ok = false;
   else if (type === "integer") ok = isInteger(v);
   else if (type === "decimal") ok = v.t === "str" && DECIMAL.test(v.v);
@@ -1271,7 +1412,7 @@ function readAnswers(v: JVal | undefined, research: Research, responses: number,
     const type = research.types.get(name)!;
     const status = member(entry, "status");
     const s = status?.t === "str" ? status.v : undefined;
-    if (s === "found") {
+    if (s === (research.resultMember === "results" ? "present" : "found")) {
       const e = exact(entry, w, ["status", "cites", "value"]);
       cites(e.m.get("cites"), responses, 1, `${w}.cites`);
       typed(e.m.get("value"), type, `${w}.value`);
@@ -1288,9 +1429,12 @@ function readAnswers(v: JVal | undefined, research: Research, responses: number,
       });
       const first = member(values[0], "value")!;
       if (values.every((x) => jsonEqual(first, member(x, "value")!))) malformed(`${w}.values has no two that differ`);
-    } else if (s === "not-found" || s === "stale") {
-      const e = exact(entry, w, ["status", "cites"]);
+    } else if ((research.resultMember === "results" && (s === "missing" || s === "inaccessible" || s === "stale"))
+        || (research.resultMember === "fields" && (s === "not-found" || s === "stale"))) {
+      const needsReason = research.resultMember === "results";
+      const e = exact(entry, w, needsReason ? ["status", "cites", "reason"] : ["status", "cites"]);
       cites(e.m.get("cites"), responses, 0, `${w}.cites`);
+      if (needsReason) nonEmpty(e.m.get("reason"), `${w}.reason`);
     } else {
       malformed(`${w} is not an entry of a known status`);
     }
@@ -1318,7 +1462,9 @@ export function readAcquisitions(v: JVal, research: Map<string, Research> = new 
     }
     const r = exact(response, `${what}.response`, ["result"], ["receipt", "salts"]);
     if (r.m.has("receipt") !== r.m.has("salts")) malformed(`${what}.response has one of receipt and salts`);
-    const record = exact(r.m.get("result"), `${what}.response.result`, ["fields", "responses"]);
+    const record = exact(r.m.get("result"), `${what}.response.result`,
+      recipe.resultMember === "results" ? [recipe.resultMember, "responses", "execution"] : [recipe.resultMember, "responses"],
+      recipe.resultMember === "results" ? [] : ["execution"]);
     const retainedResponses = array(record.m.get("responses"), `${what}.response.result.responses`);
     retainedResponses.forEach((x, k) => {
       const w = `${what}.response.result.responses[${k}]`;
@@ -1331,7 +1477,22 @@ export function readAcquisitions(v: JVal, research: Map<string, Research> = new 
       object(retained.m.get("receipt"), `${w}.receipt`);
       readSalts(retained.m.get("salts"), `${w}.salts`);
     });
-    readAnswers(record.m.get("fields"), recipe, retainedResponses.length, `${what}.response.result.fields`);
+    if (record.m.has("execution")) {
+      const execution = exact(record.m.get("execution"), `${what}.response.result.execution`, ["resolvedSettings", "retainedBytes"]);
+      const settings = exact(execution.m.get("resolvedSettings"), `${what}.resolvedSettings`, ["model", "profile", "version", "settings"]);
+      for (const name of ["model", "profile", "version"]) nonEmpty(settings.m.get(name), `${what}.resolvedSettings.${name}`);
+      const values = object(settings.m.get("settings"), `${what}.resolvedSettings.settings`);
+      if (!inCanonDomain(values)) malformed(`${what}.resolvedSettings.settings is outside the canon domain`);
+      const retained = array(execution.m.get("retainedBytes"), `${what}.retainedBytes`);
+      if (retained.length > BOUNDS.retainedResponses) malformed(`${what}.retainedBytes has more than 64 entries`);
+      retained.forEach((x, k) => {
+        const item = exact(x, `${what}.retainedBytes[${k}]`, ["mediaType", "base64"]);
+        nonEmpty(item.m.get("mediaType"), `${what}.retainedBytes[${k}].mediaType`);
+        const encoded = string(item.m.get("base64"), `${what}.retainedBytes[${k}].base64`);
+        if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encoded)) malformed(`${what}.retainedBytes[${k}].base64 is not base64`);
+      });
+    }
+    readAnswers(record.m.get(recipe.resultMember), recipe, retainedResponses.length, `${what}.response.result.${recipe.resultMember}`);
     const receipt = r.m.has("receipt") ? object(r.m.get("receipt"), `${what}.response.receipt`) : obj();
     const salts = r.m.has("salts") ? readSalts(r.m.get("salts"), `${what}.response.salts`) : obj();
     out.set(name, { result: r.m.get("result")!, receipt, salts, own: r.m.has("receipt") });

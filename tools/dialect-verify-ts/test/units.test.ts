@@ -11,9 +11,10 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { scanBytes } from "../src/bounds.ts";
 import { add, decodePoint, encodePoint, keyAcceptable, smallOrder, verify as edVerify } from "../src/ed25519.ts";
-import { bindDialect, readBinding, readDialect } from "../src/forms.ts";
-import { NotRead, arr, canon, isIntegerLiteral, member, num, obj, parse, preparationForm, read, resolve, str, utf8 } from "../src/json.ts";
-import type { JObj, JVal } from "../src/json.ts";
+import { Refusal, bindDialect, countsWithin, readAcquisitions, readBinding, readDialect, readQualityFact } from "../src/forms.ts";
+import { NotRead, arr, canon, isIntegerLiteral, jsonEqual, member, num, obj, parse, preparationForm, read, resolve, str, utf8 } from "../src/json.ts";
+import { applyQualityFact } from "../src/prepare.ts";
+import type { JArr, JObj, JStr, JVal } from "../src/json.ts";
 import { instant } from "../src/time.ts";
 import { loadVector } from "../src/vector.ts";
 import { verify } from "../src/verify.ts";
@@ -21,6 +22,172 @@ import type { Inputs } from "../src/verify.ts";
 
 const VECTORS = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "conformance", "dialect", "vectors");
 const text = (b: Uint8Array) => Buffer.from(b).toString("utf8");
+
+test("§6.2a: both readers apply every hand-written quality vector", () => {
+  const path = join(VECTORS, "..", "quality-vectors.json");
+  const root = parse(readFileSync(path, "utf8")) as JObj;
+  for (const rowValue of (member(root, "cases") as { a: JVal[] }).a) {
+    const row = rowValue as JObj;
+    const id = (member(row, "id") as { v: string }).v;
+    try {
+      const boundedCopy = obj([["facts", arr([member(row, "entry")!])]]);
+      const boundedRead = obj([["copy", boundedCopy]]);
+      const boundedSource = obj([["read", boundedRead]]);
+      const boundedDialect = obj([["case", obj()], ["sources", arr([boundedSource])]]);
+      if (!countsWithin(boundedDialect, obj())) throw new Refusal("input-over-bound", `${id} exceeds a fixed bound`);
+      const copy = readQualityFact(member(row, "entry")!, id);
+      const result = applyQualityFact(copy, member(row, "input")!);
+      assert.equal(member(row, "expectedRefusal"), undefined, id);
+      const expected = member(row, "expected");
+      const actual = resolve(result.facts, "/value");
+      if (expected !== undefined) assert.ok(actual !== undefined && jsonEqual(actual, expected), id);
+      else assert.equal(actual, undefined, id);
+      const transformation = result.transformations.get("/value")!;
+      const expectedFinding = member(row, "expectedFinding");
+      if (expectedFinding !== undefined) {
+        const findings = member(transformation, "findings") as { a: JObj[] };
+        assert.ok(findings.a.some((x) => jsonEqual(member(x, "code")!, expectedFinding)), id);
+      }
+      const expectedFailure = member(row, "expectedFailure");
+      if (expectedFailure !== undefined) {
+        const application = (member(transformation, "applications") as { a: JObj[] }).a[0];
+        assert.ok(jsonEqual(member(member(application, "failure"), "code")!, expectedFailure), id);
+      }
+      const expectedChosen = member(row, "expectedChosen");
+      if (expectedChosen !== undefined) assert.ok(jsonEqual(member(member(transformation, "reconciliation"), "chosen")!, expectedChosen), id);
+    } catch (error) {
+      if (!(error instanceof Refusal)) throw error;
+      const expected = member(row, "expectedRefusal");
+      assert.equal(expected?.t === "str" ? expected.v : undefined, error.code, id);
+    }
+  }
+});
+
+test("§4.3: both readers check the typed result and retained replay vectors", () => {
+  const path = join(VECTORS, "..", "research-result-vectors.json");
+  const root = parse(readFileSync(path, "utf8")) as JObj;
+  const dialect = readDialect(member(root, "dialect")!);
+  const recipe = dialect.sources[0].research!;
+  assert.equal(recipe.resultMember, "results");
+  for (const rowValue of (member(root, "cases") as { a: JVal[] }).a) {
+    const row = rowValue as JObj;
+    const id = (member(row, "id") as { v: string }).v;
+    const acquisition = obj([["research", obj([["response", obj([["result", member(row, "record")!]])]])]]);
+    try {
+      readAcquisitions(acquisition, new Map([["research", recipe]]));
+      assert.equal((member(row, "expected") as { v: string }).v, "accepted", id);
+      const applied = applyQualityFact(dialect.sources[0].read.copy!, member(row, "record")!);
+      assert.equal((resolve(applied.facts, "/research/state") as { v: string }).v, "missing", id);
+      assert.equal((member(member((member(applied.transformations.get("/research/state"), "applications") as { a: JObj[] }).a[0], "rule"), "kind") as { v: string }).v, "trim", id);
+    } catch (error) {
+      if (!(error instanceof Refusal)) throw error;
+      assert.equal((member(row, "expected") as { v: string }).v, error.code, id);
+    }
+  }
+  const accepted = member(((member(root, "cases") as { a: JObj[] }).a[0]), "record") as JObj;
+  for (const mutationValue of (member(root, "mutations") as { a: JVal[] }).a) {
+    const mutation = mutationValue as JObj;
+    const id = (member(mutation, "id") as JStr).v;
+    const record = parse(text(preparationForm(accepted))) as JObj;
+    const results = member(record, "results") as JObj;
+    const field = (member(mutation, "field") as JStr).v;
+    const fields: [string, JVal][] = [["status", member(mutation, "status")!], ["cites", member(mutation, "cites") ?? arr([])]];
+    if (member(mutation, "value") !== undefined) fields.push(["value", member(mutation, "value")!]);
+    results.m.set(field, obj(fields));
+    const acquisition = obj([["research", obj([["response", obj([["result", record]])]])]]);
+    assert.throws(() => readAcquisitions(acquisition, new Map([["research", recipe]])),
+      (error: unknown) => error instanceof Refusal && error.code === (member(mutation, "expected") as JStr).v, id);
+  }
+});
+
+test("§4.3: typed result refusal mutations are caught", () => {
+  const path = join(VECTORS, "..", "research-result-vectors.json");
+  const source = JSON.parse(readFileSync(path, "utf8"));
+  for (const [name, change] of [
+    ["empty contract", (d: any) => { d.dialect.sources[0].results = []; }],
+    ["missing cardinality", (d: any) => { delete d.dialect.sources[0].results[0].cardinality; }],
+  ] as const) {
+    const changed = structuredClone(source);
+    change(changed);
+    assert.throws(() => readDialect(parse(JSON.stringify(changed.dialect))), (e: unknown) => e instanceof Refusal && e.code === "input-malformed", name);
+  }
+
+  const tooMany = structuredClone(source);
+  const seed = tooMany.dialect.sources[0].results[0];
+  tooMany.dialect.sources[0].results = Array.from({ length: 65 }, (_, n) => ({ ...seed, id: `field-${n}` }));
+  assert.equal(countsWithin(parse(JSON.stringify(tooMany.dialect)), obj()), false);
+
+  const missing = structuredClone(source.cases[0].record);
+  delete missing.execution.retainedBytes;
+  const dialect = readDialect(parse(JSON.stringify(source.dialect)));
+  const acquisition = (record: unknown) => obj([["research", obj([["response", obj([["result", parse(JSON.stringify(record))]])]])]]);
+  assert.throws(() => readAcquisitions(acquisition(missing), new Map([["research", dialect.sources[0].research!]])),
+    (e: unknown) => e instanceof Refusal && e.code === "input-malformed");
+
+  for (const [name, change] of [
+    ["missing execution", (record: any) => { delete record.execution; }],
+    ["invalid retained bytes", (record: any) => { record.execution.retainedBytes[0].base64 = "!"; }],
+  ] as const) {
+    const changed = structuredClone(source.cases[0].record);
+    change(changed);
+    assert.throws(() => readAcquisitions(acquisition(changed), new Map([["research", dialect.sources[0].research!]])),
+      (e: unknown) => e instanceof Refusal && e.code === "input-malformed", name);
+  }
+
+  const retained = structuredClone(source.cases[0].record);
+  retained.execution.retainedBytes = Array.from({ length: 65 }, () => ({ mediaType: "application/json", base64: "e30=" }));
+  assert.equal(countsWithin(parse(JSON.stringify(source.dialect)), acquisition(retained)), false);
+});
+
+test("§2: semantic declarations change the dialect digest", () => {
+  const path = join(VECTORS, "..", "research-result-vectors.json");
+  const source = JSON.parse(readFileSync(path, "utf8")).dialect;
+  const digest = (document: unknown) => createHash("sha256").update(canon(parse(JSON.stringify(document)))).digest("hex");
+  for (const change of [
+    (d: any) => { d.sources[0].results[0].description = "A different contract."; },
+    (d: any) => { d.sources[0].question = "Use a different request."; },
+    (d: any) => { d.sources[0].acquisitionSources[0].version = "2"; },
+  ]) {
+    const changed = structuredClone(source);
+    change(changed);
+    readDialect(parse(JSON.stringify(changed)));
+    assert.notEqual(digest(source), digest(changed));
+  }
+  const conversion = structuredClone(source);
+  conversion.sources[0].read.copy.facts[0] = {
+    target: "/research/state", source: "/results/summary/status",
+    type: "string", required: true, convert: { kind: "trim" },
+  };
+  const changed = structuredClone(conversion);
+  changed.sources[0].read.copy.facts[0].convert = { kind: "collapse-whitespace" };
+  readDialect(parse(JSON.stringify(conversion)));
+  readDialect(parse(JSON.stringify(changed)));
+  assert.notEqual(digest(conversion), digest(changed));
+});
+
+test("§4.3 and §11: public verifier replays retained research bytes", () => {
+  const path = join(VECTORS, "..", "research-replay-vector.json");
+  const root = parse(readFileSync(path, "utf8")) as JObj;
+  const bytes = (name: string) => preparationForm(member(root, name)!);
+  const inputs: Inputs = {
+    dialect: bytes("dialect"), case: bytes("case"), acquisitions: bytes("acquisitions"),
+    profiles: bytes("profiles"), preparation: bytes("preparation"), requireBinding: false,
+  };
+  const result = verify(inputs);
+  assert.equal(result.kind, "reading");
+  assert.deepEqual(Buffer.from(result.recomputed!), Buffer.from(inputs.preparation));
+
+  const changed = parse(text(inputs.acquisitions)) as JObj;
+  const research = member(changed, "research") as JObj;
+  const response = member(research, "response") as JObj;
+  const record = member(response, "result") as JObj;
+  const execution = member(record, "execution") as JObj;
+  const retained = member(execution, "retainedBytes") as JArr;
+  (retained.a[0] as JObj).m.set("base64", member(root, "tamperedBase64")!);
+  const tampered = verify({ ...inputs, acquisitions: preparationForm(changed) });
+  assert.equal(tampered.kind, "finding");
+  assert.equal((member(tampered.report, "finding") as JStr).v, (member(root, "expectedTampered") as JStr).v);
+});
 
 test("§9.2 and §9.3: a skipped source keeps its claim and every declared dependency", () => {
   const dir = join(VECTORS, "skipped-source-dependency-unavailable");

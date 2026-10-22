@@ -2,11 +2,11 @@
 import { BOUNDS, scanBytes } from "./bounds.ts";
 import { verify as edVerify } from "./ed25519.ts";
 import { endpointInScope } from "./endpoint.ts";
-import { DIGEST, Refusal, placeholders, profileDigestOf, sha256hex, stringTemplate } from "./forms.ts";
-import type { Acquisition, ClaimForm, CopyRead, Dialect, ParamType, Profile, Rule, Source } from "./forms.ts";
+import { DIGEST, Refusal, compareDecimals, placeholders, profileDigestOf, sha256hex, stringTemplate } from "./forms.ts";
+import type { Acquisition, ClaimForm, CopyRead, Dialect, ParamType, Profile, QualityFact, Rule, Source } from "./forms.ts";
 import {
   NotRead, OutsideDomain, arr, bool, canon, compareCodePoints, decode, depth, inCanonDomain, isInteger, intValue, jsonEqual, member,
-  num, obj, parse, resolve, sortedDistinct, str, utf8, writeAt,
+  num, obj, parse, preparationForm, resolve, sortedDistinct, str, utf8, writeAt,
 } from "./json.ts";
 import type { JArr, JObj, JStr, JVal } from "./json.ts";
 import { instant } from "./time.ts";
@@ -55,6 +55,7 @@ export type Outcome = {
   // it has one (§9.1, §9.3); and the research record itself, for a later reconciliation (§6.4)
   citations?: JObj[];
   record?: JVal;
+  transformations: Map<string, JObj>;
 };
 
 export type Recomputed = {
@@ -75,13 +76,144 @@ function ofType(v: JVal, t: ParamType): boolean {
 
 // ---- reads (§6) ----
 
-function applyCopy(copy: CopyRead, value: JVal, who: string): Claim {
+const QUALITY_DECIMAL = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$/;
+const QUALITY_WHITESPACE_EDGE = /^[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+|[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+$/gu;
+const QUALITY_WHITESPACE_RUN = /[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+/gu;
+const qualityTrim = (value: string) => value.replace(QUALITY_WHITESPACE_EDGE, "");
+
+function decimalNumber(literal: string): string {
+  const m = /^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(literal)!;
+  const digits = m[2] + (m[3] ?? "");
+  const point = m[2].length + Number(m[4] ?? "0");
+  let whole = point <= 0 ? "0" : point >= digits.length ? digits + "0".repeat(point - digits.length) : digits.slice(0, point);
+  let fraction = point <= 0 ? "0".repeat(-point) + digits : point >= digits.length ? "" : digits.slice(point);
+  whole = whole.replace(/^0+(?=\d)/, "");
+  fraction = fraction.replace(/0+$/, "");
+  const magnitude = whole + (fraction ? `.${fraction}` : "");
+  return magnitude === "0" ? "0" : m[1] + magnitude;
+}
+
+function converted(v: JVal, rule: JObj): { value?: JVal; failure?: string } {
+  if (v.t === "null") return { value: v };
+  const kind = (rule.m.get("kind") as JStr).v;
+  if (kind === "decimal-from-number") return v.t === "num" ? { value: str(decimalNumber(v.lit)) } : { failure: "not-a-number" };
+  if (v.t !== "str") return { failure: "invalid-encoding" };
+  if (kind === "trim") return { value: str(qualityTrim(v.v)) };
+  if (kind === "collapse-whitespace") return { value: str(qualityTrim(v.v).replace(QUALITY_WHITESPACE_RUN, " ")) };
+  if (kind === "boolean-from-text") {
+    for (const [name, answer] of [["true", true], ["false", false]] as const) {
+      if ((rule.m.get(name) as JArr).a.some((x) => (x as JStr).v === v.v)) return { value: bool(answer) };
+    }
+    return { failure: "out-of-domain" };
+  }
+  if (kind === "decimal-from-text") {
+    const whitespace = (rule.m.get("whitespace") as JStr).v;
+    let text = whitespace === "trim" ? qualityTrim(v.v) : v.v;
+    if (whitespace === "reject" && text !== qualityTrim(text)) return { failure: "invalid-encoding" };
+    let sign = "";
+    if (/^[+-]/.test(text)) { sign = text[0]; text = text.slice(1); }
+    const signs = (rule.m.get("sign") as JStr).v;
+    if ((sign === "+" && signs !== "plus-minus") || (sign === "-" && signs === "none")) return { failure: "invalid-encoding" };
+    const thousands = (rule.m.get("thousandsSeparator") as JStr).v;
+    const decimalParts = text.split((rule.m.get("decimalSeparator") as JStr).v);
+    if (decimalParts.length > 2) return { failure: "not-a-number" };
+    const [integer, fraction] = decimalParts;
+    const digits = (part: string) => /^[0-9]+$/.test(part);
+    if (fraction !== undefined && !digits(fraction)) return { failure: "not-a-number" };
+    const groups = thousands ? integer.split(thousands) : [integer];
+    if (groups.length === 1) {
+      if (!digits(integer) || (integer.length > 1 && integer.startsWith("0"))) return { failure: "not-a-number" };
+    } else if (groups[0].length < 1 || groups[0].length > 3 || !digits(groups[0]) || groups[0].startsWith("0")
+        || groups.slice(1).some((group) => group.length !== 3 || !digits(group))) return { failure: "not-a-number" };
+    let result = (sign === "-" ? "-" : "") + groups.join("");
+    if (fraction !== undefined) result += `.${fraction}`;
+    return QUALITY_DECIMAL.test(result) ? { value: str(result) } : { failure: "not-a-number" };
+  }
+  const format = (rule.m.get("format") as JStr).v;
+  const match = (format === "YYYY-MM-DD" ? /^(\d{4})-(\d{2})-(\d{2})$/ : /^(\d{2})\/(\d{2})\/(\d{4})$/).exec(v.v);
+  if (!match) return { failure: "invalid-encoding" };
+  const parts = format === "YYYY-MM-DD" ? [match[1], match[2], match[3]] : format === "MM/DD/YYYY" ? [match[3], match[1], match[2]] : [match[3], match[2], match[1]];
+  const [year, month, day] = parts.map(Number);
+  if (!validDate(year, month, day)) return { failure: "invalid-encoding" };
+  return { value: str(`${parts[0]}-${parts[1]}-${parts[2]}`) };
+}
+
+function validDate(year: number, month: number, day: number): boolean {
+  if (year < 1 || month < 1 || month > 12 || day < 1) return false;
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day <= days[month - 1];
+}
+
+function qualityType(v: JVal, type: QualityFact["qualityType"]): boolean {
+  if (v.t === "null") return false;
+  if (type === "string") return v.t === "str";
+  if (type === "decimal") return v.t === "str" && QUALITY_DECIMAL.test(v.v);
+  if (type === "boolean") return v.t === "bool";
+  if (type === "date" && v.t === "str") {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v.v);
+    return m !== null && validDate(Number(m[1]), Number(m[2]), Number(m[3]));
+  }
+  return false;
+}
+
+function applyCopy(copy: CopyRead, value: JVal, who: string, transformations?: Map<string, JObj>): Claim {
   const facts = obj();
   for (const f of copy.facts) {
-    const v = resolve(value, f.source);
-    if (v === undefined) continue;
-    if (!inCanonDomain(v)) finding("read-failed", `${who}: the value at ${f.source} is outside the canon domain`);
-    writeAt(facts, f.target, v);
+    if (f.qualityType === undefined) {
+      const legacy = resolve(value, f.source!);
+      if (legacy === undefined) continue;
+      if (!inCanonDomain(legacy)) finding("read-failed", `${who}: the value at ${f.source} is outside the canon domain`);
+      writeAt(facts, f.target, legacy);
+      continue;
+    }
+    const observations = f.observations ?? [{ id: "source", source: f.source! }];
+    const applications: JObj[] = [], present = new Map<string, JVal>();
+    for (const observation of observations) {
+      const raw = resolve(value, observation.source);
+      const fields: [string, JVal][] = [["id", str(observation.id)], ["source", str(observation.source)], ["state", str("missing")]];
+      if (raw !== undefined) {
+        const result = f.convert ? converted(raw, f.convert) : { value: raw };
+        fields[2] = ["state", str(result.failure ? "failed" : "present")];
+        fields.push(["sourceText", str(raw.t === "num" ? raw.lit : decode(preparationForm(raw)))]);
+        if (f.convert) fields.push(["rule", f.convert]);
+        if (result.failure) fields.push(["failure", obj([["code", str(result.failure)]])]);
+        else { fields.push(["result", result.value!]); present.set(observation.id, result.value!); }
+      }
+      applications.push(obj(fields));
+    }
+    const findings: JObj[] = [];
+    let selected: JVal | undefined, reconciliation: JObj | undefined;
+    if (f.reconcile) {
+      const fields: [string, JVal][] = [["mode", str(f.reconcile.mode)], ["observed", arr(Array.from(present.keys()).map(str))]];
+      if (f.reconcile.mode === "agree" && present.size) {
+        selected = Array.from(present.values())[0];
+        if (Array.from(present.values()).slice(1).some((x) => !jsonEqual(selected!, x))) { selected = undefined; fields.push(["conflict", bool(true)]); findings.push(obj([["code", str("conflict")]])); }
+        else fields.push(["agreed", bool(true)]);
+      } else {
+        const chosen = (f.reconcile.precedence ?? observations.map((x) => x.id)).find((x) => present.has(x));
+        if (chosen !== undefined) { selected = present.get(chosen); fields.push(["chosen", str(chosen)]); }
+      }
+      reconciliation = obj(fields);
+    } else selected = present.values().next().value;
+    if (selected === undefined && f.required && !findings.length) findings.push(obj([["code", str("missing-required")]]));
+    if (selected !== undefined && !qualityType(selected, f.qualityType)) { selected = undefined; findings.push(obj([["code", str("wrong-type")]])); }
+    if (selected !== undefined && selected.t !== "null" && f.domain) {
+      let inside = f.domain.m.has("in") && (f.domain.m.get("in") as JArr).a.some((x) => jsonEqual(x, selected!));
+      if (f.domain.m.has("decimalRange") && selected.t === "str" && QUALITY_DECIMAL.test(selected.v)) {
+        const range = f.domain.m.get("decimalRange") as JObj;
+        inside = compareDecimals((range.m.get("min") as JStr).v, selected.v) <= 0 && compareDecimals(selected.v, (range.m.get("max") as JStr).v) <= 0;
+      }
+      if (!inside) { selected = undefined; findings.push(obj([["code", str("out-of-domain")]])); }
+    }
+    if (transformations && f.qualityType) {
+      const fields: [string, JVal][] = [["applications", arr(applications)], ["findings", arr(findings)]];
+      if (reconciliation) fields.push(["reconciliation", reconciliation]);
+      transformations.set(f.target, obj(fields));
+    }
+    if (selected === undefined) continue;
+    if (!inCanonDomain(selected)) finding("read-failed", `${who}: the value for ${f.target} is outside the canon domain`);
+    writeAt(facts, f.target, selected);
   }
   const evidence = new Map<string, string>();
   for (const e of copy.evidence) {
@@ -90,8 +222,15 @@ function applyCopy(copy: CopyRead, value: JVal, who: string): Claim {
     if (v.t !== "str" || !AVAILABILITY.has(v.v)) finding("read-failed", `${who}: the value at ${e.source} is not an availability`);
     evidence.set(e.requirement, (v as JStr).v);
   }
-  const basis = sortedDistinct([...copy.facts.map((f) => f.source), ...copy.evidence.map((e) => e.source)]);
+  const basis = sortedDistinct([...copy.facts.flatMap((f) => f.observations?.map((o) => o.source) ?? [f.source!]), ...copy.evidence.map((e) => e.source)]);
   return { facts, evidence, status: "resolved", reason: "copied", basis };
+}
+
+/** Apply one shared hand-written §6.2a vector through the preparation implementation. */
+export function applyQualityFact(copy: CopyRead, value: JVal): { facts: JObj; transformations: Map<string, JObj> } {
+  const transformations = new Map<string, JObj>();
+  const claim = applyCopy(copy, value, "quality vector", transformations);
+  return { facts: claim.facts, transformations };
 }
 
 function applyRule(rule: Rule, value: JVal, scope: Scope, who: string): Claim {
@@ -402,7 +541,23 @@ function researchClaim(s: Source, outcome: Outcome, outcomes: Outcome[]): Claim 
     value = obj([["current", outcome.record!], ["sources", obj(held)]]);
     if (depth(value) > BOUNDS.readNesting) throw new Refusal("input-over-bound", `${s.name}: the combined value nests too deep`);
   }
-  return s.read.copy ? applyCopy(s.read.copy, value, s.name) : applyRule(s.read.rule!, value, outcome.scope, s.name);
+  return s.read.copy ? applyCopy(s.read.copy, value, s.name, outcome.transformations) : applyRule(s.read.rule!, value, outcome.scope, s.name);
+}
+
+function researchExecutionLineage(record: JVal): JObj {
+  const execution = member(record, "execution") as JObj;
+  const retained = member(execution, "retainedBytes") as JArr;
+  return obj([
+    ["resolvedSettings", member(execution, "resolvedSettings")!],
+    ["retainedBytes", arr(retained.a.map((value) => {
+      const item = value as JObj;
+      const decoded = Uint8Array.from(Buffer.from((member(item, "base64") as JStr).v, "base64"));
+      return obj([
+        ["mediaType", member(item, "mediaType")!],
+        ["digest", str(`sha256:${sha256hex(decoded)}`)],
+      ]);
+    }))],
+  ]);
 }
 
 /** §5.2, the times: the instants check 1 found present (`checkReceipt`), so `acquisition-stale` names only one
@@ -515,11 +670,12 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
   }
   const caseRead = obj([["copy", obj([["facts", d.caseFacts], ["evidence", d.caseEvidence]])]]);
   const outcomes: Outcome[] = [];
+  const caseTransformations = new Map<string, JObj>();
   outcomes.push({
     name: "case",
     scope: new Map([...caseScope, ["runAt", runAt]]),
     skipped: false,
-    claim: applyCopy(d.caseCopy, caseDoc, "case"),
+    claim: applyCopy(d.caseCopy, caseDoc, "case", caseTransformations),
     class: "asserted",
     generatedInfluence: false,
     calculatorComputed: false,
@@ -530,6 +686,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     evidenceTargets: d.caseEvidenceTargets,
     readDigest: digestOf(caseRead),
     candidateFrom: copyCandidates(d.caseCopy),
+    transformations: caseTransformations,
   });
 
   // 3. the sources, in their order
@@ -566,6 +723,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       evidenceTargets: s.evidenceTargets,
       readDigest: digestOf(s.read.raw),
       candidateFrom: s.read.copy ? copyCandidates(s.read.copy) : ruleCandidates(s.read.rule!),
+      transformations: new Map(),
     };
     outcomes.push(outcome);
     if (skipped) {
@@ -609,7 +767,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       }
       outcome.calculatorComputed = true;
     }
-    outcome.claim = s.read.copy ? applyCopy(s.read.copy, value, s.name) : applyRule(s.read.rule!, value, scope, s.name);
+    outcome.claim = s.read.copy ? applyCopy(s.read.copy, value, s.name, outcome.transformations) : applyRule(s.read.rule!, value, scope, s.name);
   }
   for (const name of acquisitions.keys()) {
     if (!d.sources.some((s) => s.name === name)) finding("acquisition-unexpected", `the acquisition ${name} names no source`);
@@ -663,6 +821,8 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       // §9.3, version 3: an acquired research source's citations, in the order `cites` has them
       if (o.citations !== undefined) e.push(["receipts", arr(o.citations)]);
       if (o.calculation !== undefined) e.push(["calculation", o.calculation]);
+      if (o.source?.research?.resultMember === "results" && o.record !== undefined) e.push(["researchExecution", researchExecutionLineage(o.record)]);
+      if (kind === "fact" && o.transformations.has(target)) e.push(["transformation", o.transformations.get(target)!]);
       if (o.source !== undefined && o.source.parameters.length > 0) {
         const parameters = [...o.source.parameters].sort((a, b) =>
           compareCodePoints(a.name, b.name));
@@ -726,7 +886,7 @@ function claimValue(c: Claim): JObj {
 
 function copyCandidates(copy: CopyRead): Map<string, string[]> {
   const m = new Map<string, string[]>();
-  for (const f of copy.facts) m.set(`fact:${f.target}`, [f.source]);
+  for (const f of copy.facts) m.set(`fact:${f.target}`, f.observations?.map((o) => o.source) ?? [f.source!]);
   for (const e of copy.evidence) m.set(`evidence:${e.requirement}`, [e.source]);
   return m;
 }

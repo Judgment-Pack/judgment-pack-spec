@@ -1,0 +1,63 @@
+{
+  "status": "staged",
+  "dialect": {
+    "version": 3,
+    "case": {"facts": [], "evidence": []},
+    "sources": [{
+      "name": "research",
+      "kind": "research",
+      "profile": "generated",
+      "profileDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "webProfiles": {},
+      "maxAge": 300,
+      "question": "Summarize the retained material.",
+      "constraints": {},
+      "model": "portable-model",
+      "evidence": ["Retain the response bytes."],
+      "results": [
+        {"id":"summary","type":"string","required":true,"description":"A concise summary.","cardinality":"one"},
+        {"id":"score","type":"decimal","required":true,"description":"An exact score.","cardinality":"one"},
+        {"id":"flags","type":"boolean","required":true,"description":"Boolean flags.","cardinality":"many"},
+        {"id":"tags","type":"string-list","required":true,"description":"Ordered tags.","cardinality":"many"},
+        {"id":"decision","type":"boolean","required":true,"description":"Conflicting decisions.","cardinality":"one"},
+        {"id":"access","type":"string","required":true,"description":"An inaccessible observation.","cardinality":"one"},
+        {"id":"old","type":"string","required":true,"description":"A stale observation.","cardinality":"one"}
+      ],
+      "acquisitionSources": [{"profile":"public-pages","version":"1","purpose":"discovery","scope":{"origins":["https://example.invalid"]},"freshness":86400}],
+      "capabilities": ["answer"],
+      "read": {"copy":{"facts":[{"target":"/research/state","source":"/results/summary/status","type":"string","required":true,"convert":{"kind":"trim"}}],"evidence":[]}}
+    }]
+  },
+  "cases": [
+    {
+      "id": "requested-observation-and-retained-replay",
+      "record": {
+        "results":{
+          "summary":{"status":"missing","cites":[],"reason":"No retained page answered the request."},
+          "score":{"status":"present","cites":[0],"value":"1.00"},
+          "flags":{"status":"present","cites":[0],"value":[false,true]},
+          "tags":{"status":"present","cites":[0],"value":[["reviewed","portable"],["public"]]},
+          "decision":{"status":"conflicting","cites":[],"values":[{"value":false,"cites":[0]},{"value":true,"cites":[0]}]},
+          "access":{"status":"inaccessible","cites":[],"reason":"The source denied access."},
+          "old":{"status":"stale","cites":[],"reason":"The observation exceeded its freshness declaration."}
+        },
+        "responses":[{"profile":{"id":"generated","digest":"sha256:0000000000000000000000000000000000000000000000000000000000000000"},"request":{},"result":{},"receipt":{},"salts":{"args":"0000000000000000000000000000000000000000000000000000000000000000"}}],
+        "execution":{"resolvedSettings":{"model":"resolved-model-v1","profile":"generated-default","version":"1","settings":{"temperature":"0"}},"retainedBytes":[{"mediaType":"application/json","base64":"e30="}]}
+      },
+      "expected": "accepted"
+    },
+    {
+      "id": "result-outside-contract",
+      "record": {
+        "results":{"summary":{"status":"missing","cites":[],"reason":"No answer."},"undeclared":{"status":"missing","cites":[],"reason":"Not requested."}},
+        "responses":[],
+        "execution":{"resolvedSettings":{"model":"resolved-model-v1","profile":"generated-default","version":"1","settings":{}},"retainedBytes":[]}
+      },
+      "expected": "input-malformed"
+    }
+  ],
+  "mutations": [
+    {"id":"typed-result-refuses-found","field":"score","status":"found","cites":[0],"value":"1.00","expected":"input-malformed"},
+    {"id":"typed-result-refuses-not-found","field":"score","status":"not-found","expected":"input-malformed"}
+  ]
+}
