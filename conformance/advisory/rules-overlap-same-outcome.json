@@ -1,0 +1,40 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "https://example.com/judgment-packs/rules-overlap-same-outcome",
+  "version": "0.1.0",
+  "title": "Compatible overlapping rules",
+  "decision": {
+    "intent": "Assign a score band.",
+    "question": "Which score band applies?"
+  },
+  "outcomes": [
+    { "id": "medium", "label": "Medium" },
+    { "id": "high", "label": "High" }
+  ],
+  "rules": [
+    {
+      "id": "r-medium-score",
+      "description": "Scores of at least 40 are medium.",
+      "when": {
+        "op": "fact",
+        "path": "/score",
+        "operator": "greater-than-or-equal",
+        "value": "40"
+      },
+      "outcome": "medium",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "r-medium-high-score",
+      "description": "Scores of at least 70 are also medium.",
+      "when": {
+        "op": "fact",
+        "path": "/score",
+        "operator": "greater-than-or-equal",
+        "value": "70"
+      },
+      "outcome": "medium",
+      "onUnknown": "escalate"
+    }
+  ]
+}
