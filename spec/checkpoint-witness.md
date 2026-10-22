@@ -18,8 +18,8 @@ the vectors published with the version its claim names, and no version publishes
 
 It specifies version `1` of the witness statement (`witnessVersion` `"1"`, §3). It is published
 beside the released Core `0.2.0-draft` and carries no `specVersion` of its own; whether its vectors
-take a `suiteVersion` of their own is open in its design record (Unresolved 1). Like Core, it is a
-research preview, at draft maturity.
+take a `suiteVersion` of their own is open in its design record (Unresolved 1). Like Core, it is
+at draft maturity.
 
 Its design record is [RFC 0017](../rfcs/0017-checkpoint-witness-statement.md), accepted on
 2026-10-12, which is informative. Its text, §§1–11 below, is that RFC's Specification section. It

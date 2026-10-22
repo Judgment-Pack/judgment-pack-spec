@@ -375,7 +375,7 @@ PAGES = (
     Page(
         "TESTING.md",
         PurePosixPath("testing/index.html"),
-        "Test the research preview",
+        "Test the draft",
         "A short, synthetic exercise for testing JPS documents and reporting reproducible feedback.",
         "testing",
         source_ref="main",
@@ -392,7 +392,7 @@ PAGES = (
         "ROADMAP.md",
         PurePosixPath("project/roadmap/index.html"),
         "Evidence-gated roadmap",
-        "The evidence required before JPS can advance beyond a research preview.",
+        "The evidence required before JPS can advance beyond a draft.",
         "project",
         source_ref="main",
     ),
@@ -407,7 +407,7 @@ PAGES = (
         "CHANGELOG.md",
         PurePosixPath("project/changelog/index.html"),
         "Changelog",
-        "The draft and published history of the JPS research preview.",
+        "The draft and published history of JPS.",
         "project",
         source_ref="main",
     ),
@@ -1325,7 +1325,7 @@ def page_html(
         if schema_type == "TechArticle":
             schema_meta += (
                 f'<meta itemprop="version" content="{SITE_VERSION}">'
-                '<meta itemprop="creativeWorkStatus" content="Research preview">'
+                '<meta itemprop="creativeWorkStatus" content="Draft">'
             )
     generator_meta = f'<meta name="generator" content="{GENERATOR_ID} {html.escape(SITE_VERSION)}">'
 
@@ -1711,7 +1711,7 @@ def home_ecosystem_html(current: PurePosixPath) -> str:
       </div>
     </article>
     <article class="ecosystem-card">
-      <p class="card-kicker">Input lineage · Research gateway</p>
+      <p class="card-kicker">Input lineage · Gateway</p>
       <h3>Trace a judgment to the bytes it used.</h3>
       <p>The open reference gateway signs acquired results and seals sessions. A verifier with a
       separately pinned public key can check the store against the registry obtained from the key
@@ -2415,7 +2415,7 @@ def build_llms_txt(output_root: Path, config: BuildConfig) -> None:
 > {SITE_DESCRIPTION}
 
 - Current draft: `{SITE_VERSION}`
-- Status: research preview; no compatibility, production-readiness, certification, truth, safety, or authorization claim
+- Status: draft; no compatibility, production-readiness, certification, truth, safety, or authorization claim
 - License: Apache-2.0
 - Canonical site: {guide_url(PurePosixPath("index.html"))}
 
@@ -2625,7 +2625,7 @@ being listed here.</p>
     <p class="card-meta">Demo material · never authorization or production guidance</p>
   </article>
   <article class="card">
-    <p class="card-kicker">Open source · research preview · runs its sources and receipts them apart
+    <p class="card-kicker">Open source · runs its sources and receipts them apart
     from the runtime; since v0.9.0 a decision policy can hold a write to a record signed by a
     runtime key it trusts (ADR-0012)</p>
     <h2><a href="{html.escape(GATEWAY_URL)}" target="_blank" rel="noopener noreferrer">open reference gateway</a></h2>
@@ -2643,7 +2643,7 @@ being listed here.</p>
     <p class="card-meta"><a href="{html.escape(gateway_spec_url)}" target="_blank" rel="noopener noreferrer">Receipt and seal specification</a> · <a href="{html.escape(gateway_corpus_url)}" target="_blank" rel="noopener noreferrer">frozen corpus</a></p>
   </article>
   <article class="card">
-    <p class="card-kicker">Open source · Apache-2.0 · research preview</p>
+    <p class="card-kicker">Open source · Apache-2.0</p>
     <h2><a href="{html.escape(DESK_URL)}" target="_blank" rel="noopener noreferrer">judgment-pack desk</a></h2>
     <p>A local web desk for a Judgment Pack project: one Go binary that serves a browser application
     and relays MCP messages between the page and a <code>jpack mcp</code> subprocess in the project
@@ -2653,7 +2653,7 @@ being listed here.</p>
     <p class="card-meta">Local desk · separately governed · non-normative</p>
   </article>
   <article class="card">
-    <p class="card-kicker">Open source · Apache-2.0 · research preview, single-owner local pilot</p>
+    <p class="card-kicker">Open source · Apache-2.0 · single-owner local Jobs runner</p>
     <h2><a href="{html.escape(RUNNER_URL)}" target="_blank" rel="noopener noreferrer">judgment-pack runner</a></h2>
     <p>A local jobs runner. It turns a pack snapshot into a durable job: it checks a release, takes
     facts and evidence availability, runs the pinned runtime through its public CLI, and keeps the
@@ -3068,7 +3068,7 @@ SLIDES: tuple[Slide, ...] = (
             "and data, in the "
             '<a href="https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments" '
             'target="_blank" rel="noopener noreferrer">public research repository</a>. It is also why '
-            "this is published as a research preview: to invite independent review and testing before "
+            "this is published as a draft: to invite independent review and testing before "
             "a 1.0, rather than after it."
         ),
     ),

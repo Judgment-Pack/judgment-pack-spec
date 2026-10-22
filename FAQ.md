@@ -21,7 +21,7 @@ judge their output — compilers, tests, CI. Most business agents have no such h
 the judgment behind a business decision explicit enough to test, the way a test suite makes "correct
 code" explicit. See [Why Judgment Pack?](docs/why.md).
 
-**Q3. Is JPS a standard yet?** No. It is a research preview at `0.2.0-draft` with no compatibility
+**Q3. Is JPS a standard yet?** No. It is a draft specification at `0.2.0-draft` with no compatibility
 guarantee; any `0.x` release may change incompatibly.
 
 **Q4. Who is it for?** Tool and runtime implementers; standards and architecture reviewers;
@@ -380,7 +380,7 @@ distinction. Conformance means the document agrees with the contract. Factual gr
 organizational authorization, and operational fitness are three separate claims a validator must
 never imply.
 
-**Q46. Is JPS ready for production?** No. It is a research preview. Safe uses today are
+**Q46. Is JPS ready for production?** It makes no production-readiness claim yet: it is a draft specification at `0.2.0-draft`. Safe uses today are
 experimentation, authoring, review, and conformance testing. Do not automate a real outcome from a
 pack.
 

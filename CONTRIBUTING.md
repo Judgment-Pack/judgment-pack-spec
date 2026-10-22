@@ -2,7 +2,7 @@
 
 Thank you for helping test whether organizational judgment can have a useful portable format.
 
-This is a research preview. Critical feedback, counterexamples, and removal proposals are as
+This is a draft specification. Critical feedback, counterexamples, and removal proposals are as
 valuable as additive features.
 
 ## Good first contributions

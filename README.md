@@ -10,7 +10,7 @@
 [![Good first issues](https://img.shields.io/github/issues/Judgment-Pack/judgment-pack-spec/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/Judgment-Pack/judgment-pack-spec/labels/good%20first%20issue)
 [![Open Source Helpers](https://www.codetriage.com/judgment-pack/judgment-pack-spec/badges/users.svg)](https://www.codetriage.com/judgment-pack/judgment-pack-spec)
 
-> **Status: Research Preview — `0.2.0-draft`**
+> **Status: `0.2.0-draft`**
 >
 > This repository is an early design proposal. It is not an industry standard, is not covered by
 > compatibility guarantees, and is not ready for consequential production decisions.
@@ -41,7 +41,7 @@ Maintainers are available to clarify scope and review focused first contribution
 | [`judgment-pack-spec`](https://github.com/Judgment-Pack/judgment-pack-spec) (this repository) | Core prose, schemas, examples, conformance artifacts, RFCs, and governance | Domain modeling, specification writing, JSON Schema, conformance fixtures, and interoperability |
 | [`judgment-pack-runtime`](https://github.com/Judgment-Pack/judgment-pack-runtime) | Go reference runtime with the `jpack` CLI and stdio MCP surfaces for validation and evaluation | Go, CLI and MCP integration, diagnostics, and deterministic tests |
 | [`judgment-pack-demo`](https://github.com/Judgment-Pack/judgment-pack-demo) | Cloneable browser sandbox and Slack-app source with synthetic projects and the runtime connected over MCP | Docker, MCP integrations, end-to-end examples, developer experience, and tutorials |
-| [`judgment-pack-gateway`](https://github.com/Judgment-Pack/judgment-pack-gateway) | Go research gateway for acquired JSON, content-addressed signed receipts, and sealed sessions | Go, provenance tests, verification examples, and trust-boundary documentation |
+| [`judgment-pack-gateway`](https://github.com/Judgment-Pack/judgment-pack-gateway) | Go gateway for acquired JSON, content-addressed signed receipts, and sealed sessions | Go, provenance tests, verification examples, and trust-boundary documentation |
 | [`judgment-pack-desk`](https://github.com/Judgment-Pack/judgment-pack-desk) | Local web desk for a Judgment Pack project: one Go binary that serves a browser application and relays MCP between the page and a `jpack mcp` subprocess; research preview | TypeScript and React, Go, and authoring and testing workflows |
 | [`judgment-pack-runner`](https://github.com/Judgment-Pack/judgment-pack-runner) | Local jobs runner that turns a pack snapshot into a durable job, runs the pinned runtime, and retains the result and audit history; research preview, single-owner local pilot | Go, SQLite, scheduling and durable execution, and verification of retained runs |
 | [`judgment-pack-evaluator-experiments`](https://github.com/Judgment-Pack/judgment-pack-evaluator-experiments) | Python clean-room evaluators, agreement harnesses, and preregistered studies; claims no JPS conformance | Python, AI evaluation, reproducibility checks, result tooling, and adversarial fixtures |
@@ -104,7 +104,7 @@ one product, model, or workflow.
 
 ## Why this repository exists
 
-This research preview exists to test whether a small declarative core can support independent tools
+This draft exists to test whether a small declarative core can support independent tools
 and runtimes without standardizing any one product, model, or workflow.
 
 The specification is successful only if independent implementations can exchange the same pack and
@@ -228,7 +228,7 @@ These are deliberately separate claims:
 6. **Organizational authorization:** an accountable organization permits the pack's use.
 7. **Operational fitness:** a particular runtime applies it safely and effectively.
 
-This research preview specifies the first four claims. The fourth is new in `0.2.0-draft` and is
+This draft specifies the first four claims. The fourth is new in `0.2.0-draft` and is
 claimed only as §3.4.1 permits: it says that the implementation complies with the whole evaluator
 contract of §§7–10 for every input it admits, and every row of the named corpus version must have
 passed for the claim to be made at all. Corpus results are required evidence of that compliance, not

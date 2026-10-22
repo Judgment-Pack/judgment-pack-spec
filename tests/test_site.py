@@ -822,7 +822,7 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn('<details class="preview-banner">', page)
         self.assertNotIn('<details class="preview-banner" open>', page)
         self.assertIn('<summary class="preview-banner-summary">', page)
-        self.assertIn("Research preview", page)
+        self.assertIn("Draft \u00b7", page)
         self.assertIn(
             "No compatibility guarantee. Not for consequential production decisions.",
             page,

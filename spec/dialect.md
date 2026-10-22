@@ -56,7 +56,7 @@ while the four kinds are proposed: the Runner prepares `research` since its pull
 twenty-six of the vectors hold it; no preparer writes the other three, and no vector holds them
 (§4.3). It proposes
 version 1 of the output side (§10). It is published beside the released Core `0.2.0-draft` and
-carries no `specVersion` of its own. Like Core, it is a research preview, at draft maturity.
+carries no `specVersion` of its own. Like Core, it is at draft maturity.
 
 The research-contract amendment of 2026-10-15 (issue #171, RFC 0018 round 8) adds typed result
 fields, portable AI and web profile binding, explicit reconciliation and two fixture lists.

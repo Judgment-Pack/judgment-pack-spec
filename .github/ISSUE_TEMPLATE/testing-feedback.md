@@ -7,7 +7,7 @@ assignees: ""
 ---
 
 <!--
-Thank you for testing the JPS research preview.
+Thank you for testing JPS `0.2.0-draft`.
 
 Do not include customer, employee, personal, confidential, regulated, credential, or production
 data. Remove access tokens, internal URLs, organization names, and real policy text. Use a minimal

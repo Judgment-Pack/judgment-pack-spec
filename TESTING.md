@@ -1,4 +1,4 @@
-# Test the research preview
+# Test the draft
 
 This exercise takes about 10–15 minutes. It tests whether the current JSON shape is understandable
 and whether a Draft 2020-12 validator reports the expected structural results. It also invites

@@ -22,7 +22,7 @@ A few terms recur throughout:
 
 - **Core** is the base representation described here. It deliberately excludes profiles and extensions that a
   later specification may layer on top.
-- **`0.2.0-draft`** is the exact draft this guide describes. It is a research preview and may change in
+- **`0.2.0-draft`** is the exact draft this guide describes. It is a draft and may change in
   incompatible ways.
 - **JPS** is shorthand for the Judgment Pack Specification, the body of normative prose and schema that defines
   the format.

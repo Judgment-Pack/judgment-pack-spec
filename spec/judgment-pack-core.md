@@ -2,7 +2,7 @@
 
 ## Status
 
-This document is a research preview. It may change incompatibly and MUST NOT be represented as an
+This document is a draft. It may change incompatibly and MUST NOT be represented as an
 industry standard or as suitable, by conformance alone, for consequential decisions.
 
 `0.2.0-draft` defines four conformance classes: carrier, structural, and semantic document

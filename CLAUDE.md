@@ -69,7 +69,7 @@ summary block, and anything you stopped on or chose not to do.
 - Install `requirements-dev.txt` (`scripts/dev/check.sh --setup`) before the tests, even if the
   suite appears to run without it: without the `format-nongpl` extras of `jsonschema` the `format`
   keyword is silently ignored and the suite checks less than it says it does.
-- This is a specification repository and a research preview. A pull request that changes normative
+- This is a specification repository at draft maturity. A pull request that changes normative
   behavior updates prose, schema, examples and conformance cases together and includes a negative
   or adversarial case; material changes go through an RFC (`rfcs/0000-rfc-process.md`). Do not
   claim that conformance proves truth, authorization or safety.
