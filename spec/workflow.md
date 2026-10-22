@@ -563,7 +563,9 @@ check 3, an earlier instance's `influence-mismatch` precedes a later one's `case
    (`case-mismatch`), then inherited classes, influence and explicit admission
    (`influence-mismatch`).
 4. The expected instance inventory, admission keys, attempts, terminal states, selection refusals,
-   deterministic bound accounting and stage closure (`inventory-mismatch`); then re-extract all
+   deterministic bound accounting and stage closure (`inventory-mismatch`), applying §2's
+   later-sibling rule only after each instance's admission status is established and only to
+   admitted instances, so an instance refused at admission keeps its own code; then re-extract all
    outputs, compare payload bytes, order, complete sets, parent/selection references, relation and
    lineage pins (`output-mismatch`). Neither failure nor missing data becomes `[]`.
 5. From those checked output records and their retained dispositions, recompute every stage
