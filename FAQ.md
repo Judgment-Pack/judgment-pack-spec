@@ -382,11 +382,15 @@ never imply.
 
 **Q46. Is JPS ready for production?** Yes. JPS at `0.2.0-draft` is in production use by adopters,
 through the pinned reference runtime, with a person accountable for every consequential outcome
-(Q47). It is still a draft: pin the exact draft and the runtime release you verified, since
+(Q48). It is still a draft: pin the exact draft and the runtime release you verified, since
 compatibility between drafts is not guaranteed and there is no certification programme yet. A pack
 decides; what acts on its disposition stays the adopter's own system.
 
-**Q47. How would an enterprise adopt it safely?** Treat conformance as document hygiene, not a
+**Q47. Can several policies govern one pack, and which one wins?** Several governing policies are
+allowed. Their list order never makes one policy outrank another. If two coverage records disagree,
+the Policy reader refuses the adoption as `invalid-coverage`; it never ranks them.
+
+**Q48. How would an enterprise adopt it safely?** Treat conformance as document hygiene, not a
 decision warrant; keep a human accountable for every consequential outcome; pin immutable
 specification releases and recorded checksums; and keep authorization in your own systems, since the
 specification explicitly refuses to model it. The [non-goals](docs/non-goals.md) and

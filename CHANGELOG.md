@@ -7,6 +7,7 @@ here.
 
 ### Added
 
+- Policy companion release decision (#211): ship it in v0.3.0 at draft maturity with RFC 0023 still Draft, refuse disagreements between governing-policy coverage records as `invalid-coverage` rather than rank policies, and leave the second independently authored reader open.
 - Dialect-owned data quality and typed research results (#170, #169): six closed deterministic
   conversions with recorded failures, three explicit reconciliation modes, presence/type/domain
   findings surfaced as unknown facts, transformation lineage, typed research result states,
