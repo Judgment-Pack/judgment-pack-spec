@@ -717,6 +717,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0024-core-escalation-routes.md",
+        PurePosixPath("rfcs/0024-core-escalation-routes/index.html"),
+        "RFC 0024: Core escalation routes",
+        "Accepted Core routing design: ordered conditional handoff routes, with delivery kept separate.",
+        "proposals",
+        "Accepted design — review pending",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.2.0-draft.md",
         PurePosixPath("project/releases/0.2.0-draft/index.html"),
         "0.2.0-draft release notes",
@@ -1419,7 +1428,7 @@ KEY_REFERENCE: dict[str, tuple[str, tuple[str, ...] | None]] = {
     "applicability": ("An optional condition that delimits when the whole pack applies; if it does not hold, the pack is not applicable.", None),
     "evidenceRequirements": ("The evidence a decision may draw on. Each item is declared once and referenced by id.", None),
     "required": ("Whether an evidence requirement must be present.", ("true", "false")),
-    "kind": ("A category. Evidence: document/fact/measurement/attestation. Source locator: uri/repository/path/other. Escalation target: human-role/queue/system.", ("document", "fact", "measurement", "attestation", "uri", "repository", "path", "other", "human-role", "queue", "system")),
+    "kind": ("A category. Evidence: document/fact/measurement/attestation. Source locator: uri/repository/path/other. Escalation target: human-role/queue/system. Disposition: outcome/not-applicable/unresolved.", ("document", "fact", "measurement", "attestation", "uri", "repository", "path", "other", "human-role", "queue", "system", "outcome", "not-applicable", "unresolved")),
     "sources": ("Provenance: the cited references the pack relies on.", None),
     "publisher": ("Who published a source.", None),
     "publishedAt": ("A source's publication date (YYYY-MM-DD).", None),
@@ -1443,8 +1452,14 @@ KEY_REFERENCE: dict[str, tuple[str, tuple[str, ...] | None]] = {
     "targetRule": ("The rule id a suppress-rule exception disables.", None),
     "fallbackOutcome": ("The outcome id used when no rule matches (§8).", None),
     "escalation": ("Handoff configuration: when and to whom the decision is escalated. Not itself an outcome.", None),
-    "triggers": ("The situations that cause escalation.", ("not-applicable", "missing-required-evidence", "unknown", "conflict", "no-match")),
+    "triggers": ("The situations that cause escalation; a route filter is a non-empty subset of the escalation triggers.", ("not-applicable", "missing-required-evidence", "unknown", "conflict", "no-match")),
     "target": ("The escalation destination: a kind and a name.", None),
+    "routes": ("Escalation: an ordered list of 1–8 target objects with optional reason filters, exclusive with target. Handoff: the selected targets in declaration order; empty when no request is selected.", None),
+    "handoff": ("The disposition's handoff intent, not evidence of delivery.", None),
+    "state": ("Whether the disposition requests a handoff.", ("none", "requested")),
+    "triggeredBy": ("The retained reasons that requested escalation; present only for a requested handoff.", None),
+    "reasons": ("The complete, sorted, duplicate-free set of disposition reasons; routing never narrows it.", None),
+    "outcomeId": ("The selected outcome's id, present only for an outcome disposition.", None),
     "name": ("The name of an escalation target, such as a role or a queue.", None),
     "message": ("Guidance shown when escalating.", None),
     "metadata": ("Non-normative bookkeeping: authors, timestamps, license, reviews, required extensions.", None),
@@ -2943,7 +2958,7 @@ SLIDES: tuple[Slide, ...] = (
             "the specification got fixed.",
         ),
         note=(
-            "Measured across 118 tests on the file format, plus 20 decision scenarios replayed through "
+            "Measured across 127 tests on the file format, plus 20 decision scenarios replayed through "
             "both engines. One limit, stated plainly: both implementations trace to the same "
             "maintainer, and the second was written from reference texts that already carried the "
             "first's implementation notes — so the agreement <em>corroborates</em> that the "
@@ -3094,7 +3109,7 @@ SLIDES: tuple[Slide, ...] = (
         ),
         points=(
             "<strong>Ready today:</strong> the file specification, the checks that a file is sound, "
-            "and an agreed way to turn one into an answer — held in place by 118 tests on the format "
+            "and an agreed way to turn one into an answer — held in place by 127 tests on the format "
             "and 20 on the answers.",
             "<strong>Tooling:</strong> the open-source reference runtime serves the same core through "
             "a CLI and stdio MCP, walks project-owned pack matrices, and reports informative coverage. "

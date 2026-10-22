@@ -1204,6 +1204,8 @@ class RepositoryConformanceTests(unittest.TestCase):
                 if disposition is None:
                     continue
 
+                disposition_validator = self.validator.evolve(schema={"$ref": "#/$defs/disposition"})
+                self.assertEqual([], list(disposition_validator.iter_errors(disposition)))
                 reasons = disposition["reasons"]
                 self.assertEqual(reasons, sorted(set(reasons)), "reasons are a sorted set")
                 self.assertTrue(set(reasons) <= REASONS, f"unknown reason in {reasons}")
@@ -1219,7 +1221,22 @@ class RepositoryConformanceTests(unittest.TestCase):
                     self.assertEqual(["not-applicable"], reasons)
 
                 handoff = disposition["handoff"]
-                triggers = set(pack.get("escalation", {}).get("triggers", []))
+                escalation = pack.get("escalation", {})
+                triggers = set(escalation.get("triggers", []))
+                requested_by = sorted(set(reasons) & (triggers | {"exception-escalation"}))
+                if "routes" in escalation:
+                    selected = [
+                        route["target"] for route in escalation["routes"]
+                        if requested_by and (
+                            "triggers" not in route or set(route["triggers"]) & set(reasons)
+                        )
+                    ]
+                    self.assertEqual(selected, handoff.get("routes"))
+                    self.assertEqual("requested" if selected else "none", handoff["state"])
+                    if selected:
+                        self.assertEqual(requested_by, handoff.get("triggeredBy"))
+                else:
+                    self.assertNotIn("routes", handoff)
                 if handoff["state"] == "requested":
                     triggered = handoff["triggeredBy"]
                     self.assertEqual(triggered, sorted(set(triggered)))
@@ -1236,6 +1253,72 @@ class RepositoryConformanceTests(unittest.TestCase):
                 else:
                     self.assertEqual("none", handoff["state"])
                     self.assertNotIn("triggeredBy", handoff)
+
+    def test_routes_schema_members_are_exercised(self) -> None:
+        import copy
+        pack = strict_json_loads((CONFORMANCE / "valid/escalation-routes.json").read_text())
+        for member in ("routes", "target", "triggers"):
+            schema = copy.deepcopy(self.schema)
+            escalation = schema["$defs"]["escalation"]["properties"]
+            if member == "routes":
+                del escalation["routes"]
+            else:
+                del escalation["routes"]["items"]["properties"][member]
+            with self.subTest(member=member):
+                self.assertFalse(Draft202012Validator(schema).is_valid(pack))
+        schema = copy.deepcopy(self.schema)
+        del schema["$defs"]["disposition"]["properties"]["handoff"]["properties"]["routes"]
+        case = next(c for c in self._staged_cases() if c["id"] == "routes-one")
+        validator = Draft202012Validator(schema).evolve(schema={"$ref": "#/$defs/disposition"})
+        self.assertFalse(validator.is_valid(case["expectedDisposition"]))
+
+    def test_routes_schema_constraints_are_exercised(self) -> None:
+        import copy
+        mutations = [
+            ("both", lambda e: e.pop("oneOf")),
+            ("nine", lambda e: e["properties"]["routes"].pop("maxItems")),
+            ("empty", lambda e: e["properties"]["routes"].pop("minItems")),
+            ("outside-trigger", lambda e: e.pop("allOf")),
+            ("empty-triggers", lambda e: e["properties"]["routes"]["items"]["properties"]["triggers"].pop("minItems")),
+            ("missing-target", lambda e: e["properties"]["routes"]["items"].pop("required")),
+            ("unknown-member", lambda e: e["properties"]["routes"]["items"].pop("additionalProperties")),
+        ]
+        for name, mutate in mutations:
+            schema = copy.deepcopy(self.schema)
+            fixture = strict_json_loads((CONFORMANCE / ("structural/escalation-routes-" + name + ".json")).read_text())
+            with self.subTest(constraint=name):
+                self.assertFalse(self.validator.is_valid(fixture))
+                mutate(schema["$defs"]["escalation"])
+                self.assertTrue(Draft202012Validator(schema).is_valid(fixture))
+
+    def test_routes_expectation_mutations_are_caught(self) -> None:
+        import copy
+        cases = {c["id"]: c for c in self._staged_cases()}
+        mutations = [
+            ("routes-one", lambda h: h.update(routes=[])),
+            ("routes-fan-out", lambda h: h["routes"].reverse()),
+            ("routes-unconditional", lambda h: h.update(routes=[])),
+            ("routes-no-selection", lambda h: h.update(state="requested", triggeredBy=["unknown"])),
+            ("routes-duplicate-target", lambda h: h["routes"].pop()),
+            ("routes-outcome-no-request", lambda h: h.update(routes=[{"kind": "queue", "name": "Conflict"}])),
+        ]
+        # subTest normally collects failures instead of raising: use a fresh case whose
+        # outcome is unset, so assertRaises observes the deliberate invalid expectation.
+        for name, mutate in mutations:
+            case = copy.deepcopy(cases[name])
+            mutate(case["expectedDisposition"]["handoff"])
+            checker = RepositoryConformanceTests()
+            checker.validator = self.validator
+            with self.subTest(mutation=name), self.assertRaises(AssertionError):
+                checker._check_evaluation_cases([case], EVALUATION_STAGED)
+
+    def test_routes_legacy_canonical_bytes(self) -> None:
+        legacy = next(c for c in self._staged_cases() if c["id"] == "routes-legacy-target-bytes")
+        released = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text())["cases"]
+        original = next(c for c in released if c["pack"] == legacy["pack"])
+        # These dispositions contain only ASCII strings and no numbers, so this is JCS.
+        canonical = lambda d: json.dumps(d, sort_keys=True, separators=(",", ":")).encode()
+        self.assertEqual(canonical(original["expectedDisposition"]), canonical(legacy["expectedDisposition"]))
 
     def test_evaluation_manifest_covers_every_pack_fixture_once(self) -> None:
         # Mirrors test_manifest_covers_every_fixture_once: a pack committed under packs/ and

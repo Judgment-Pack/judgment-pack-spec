@@ -87,6 +87,30 @@
             "state": {
               "enum": ["none", "requested"]
             },
+            "routes": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "name"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "human-role",
+                      "queue",
+                      "system"
+                    ]
+                  },
+                  "name": {
+                    "type": "string", "minLength": 1
+                  }
+                }
+              }
+            },
             "triggeredBy": {
               "allOf": [
                 { "$ref": "#/$defs/reasonSet" },

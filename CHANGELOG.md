@@ -7,6 +7,12 @@ here.
 
 ### Added
 
+- Core escalation routes (#219): exclusive single target or up to eight conditional routes,
+  ordered fan-out in `handoff.routes`, complete retained reasons, and unchanged single-target
+  disposition bytes. Structural fixtures and staged evaluation vectors cover selection, bounds,
+  duplicate targets and no selection; profile negotiation, Dialect outputs and delivery receipts
+  remain separate work.
+
 - Official-draft Policy promotion preparation: versioned closed format `1.0.0`
   schemas, retained-byte examples and 124 staged agreement vectors, explicit
   migration/provenance and a scoped independent draft release route through the
