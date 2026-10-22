@@ -70,7 +70,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0019] | The Judgment Exchange — a shared place for dialects | Draft | Research line (see below) |
 | [0020] | The workflow | Draft | Specification (a proposed companion document; see below) |
 | [0022] | Reusable subgraphs contract — explicit encapsulation and reference binding | Draft | Research line (see below) |
-| [0023](0023-policy-companion.md) | Policy content and governing adoption | Accepted (upon green CI and PR 218 merge) | Specification (draft Policy offline-reader companion); live governance remains host-owned |
+| [0023](0023-policy-companion.md) | Policy content and governing adoption | Accepted | Specification (companion at draft maturity; second independently authored reader criterion open); live governance remains host-owned |
 | [0024] | Retained workflow admission proofs | Draft | Specification (a proposed amendment to the Draft workflow; unresolved portable encoding) |
 | [0025](0025-core-escalation-routes.md) | Core escalation routes | Accepted design (#219); review pending | Specification (Core) |
 | [0026](0026-document-ceiling-profiles.md) | Document ceiling profiles | Accepted design (#232); review pending | Specification and companions |
@@ -123,9 +123,9 @@ repository.
 RFC 0021 adds [named Dialect artifact identities](0021-dialect-artifact-identity.md) through
 exact `formatVersion` selectors, with unchanged historical formats and separate binding digests.
 
-RFC 0023 has conditional maintainer approval for [the bounded Policy draft](../spec/policy.md),
-effective upon required green CI and PR 218 merge. The default branch remains
-Review until then; no immutable Policy release or consumer adoption is claimed.
+RFC 0023 is Accepted at draft maturity for [the bounded Policy companion](../spec/policy.md).
+The Runtime reader is the only reader so far; the criterion for a second independently authored
+reader remains open. No immutable Policy release or consumer adoption is claimed.
 
 [RFC 0026](0026-document-ceiling-profiles.md) records the accepted document ceiling profiles
 of issue #232. Core §4.1 owns the ceilings; extended companion readers remain future work.

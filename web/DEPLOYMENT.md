@@ -16,6 +16,36 @@ Open `http://localhost:8000`, check the generated pages and links, and stop the 
 Ctrl+C. Re-run the build after source changes. Treat `public/` as disposable generated output; do
 not edit it in place.
 
+## Automatic publication follows a planned release
+
+Pull requests retain the required `repository-conformance` check, and pushes to `main` run it
+once. Neither event deploys a preview or the live site. Tag pushes use the release workflow to
+verify artifacts, build checksummed bundles, create a draft prerelease, and attest the bundles;
+maintainers still decide when to publish that draft.
+
+For every next Core or Policy tag, commit `releases/<tag>.milestone.json` before tagging, with
+exactly the repository milestone's positive integer number and exact title. The Core v0.3.0 link
+is `{"number": 2, "title": "v0.3.0"}`. An independently versioned companion may share that train:
+for example, a future `releases/policy-v1.0.0-draft.2.milestone.json` can contain the same link.
+This is an example, not metadata retroactively added to a released companion tag.
+
+Both release preparation and deployment query the repository milestone through GitHub and refuse
+missing, malformed or mismatched links or API failures before dependencies, builds or cloud
+authentication. An open or closed milestone is allowed: a shared train may still have other work
+open after one release publishes. Closing a milestone alone never releases or deploys anything;
+publication never closes a milestone automatically.
+
+Only a `release: published` event for an exact supported Core `v-SemVer` or Policy
+`policy-vSemVer-draft.N` tag deploys automatically, including a published prerelease. Demo releases
+are excluded. The workflow checks out the exact tag, verifies its commit and clean tracked tree,
+then builds the production artifact and runs focused site and indexing checks before cloud
+authentication. The production environment still requires its configured approval; deployments
+share one concurrency group. Firebase tooling remains pinned to `15.34.1`.
+
+These workflows become available through the normal next release that includes them. Older tags
+lack the new milestone metadata and must not be retagged or have released bytes edited to make
+them pass. There is no manual dispatch bypass or automatic release publication.
+
 ## Published URLs are kept resolvable
 
 A versioned URL that has been published may already have been cited, so the generator keeps it
@@ -117,7 +147,7 @@ limits stale preview content; Firebase permits changing or deleting the channel 
 
 Obtain explicit release approval before changing the live channel. **Do not clone the preview
 channel to live:** its artifact is intentionally `noindex` and uncanonical, and cloning preserves
-those bytes. The committed production workflow rebuilds the approved `main` revision with the live
+those bytes. The committed production workflow rebuilds the approved release tag with the live
 canonical origin. For a manual release from the exact clean, reviewed revision, use the same
 production build contract:
 
@@ -129,7 +159,7 @@ python3 web/build.py \
   --base-url https://judgmentpack.org \
   --commit-sha "$commit_sha" \
   --build-time "$build_time"
-python3 -m unittest discover -s tests
+python3 -m unittest discover -s tests -p 'test_site.py'
 mapfile -t noindex_pages < <(rg -lF '<meta name="robots" content="noindex, nofollow">' public --glob '*.html')
 test "${#noindex_pages[@]}" -eq 1
 test "${noindex_pages[0]}" = "public/404.html"

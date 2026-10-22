@@ -5,11 +5,14 @@ Git tags. Specification `0.2.0-draft` is identified by the exact tag `v0.2.0-dra
 by `v0.1.0-draft`. Only a tag and GitHub release published by the maintainers establish an immutable
 release; similarly named files on the mutable `main` branch do not.
 
+The next release is `0.3.0`, identified by `v0.3.0`. It is the first Core `specVersion` without the
+retired `-draft` suffix; the identifiers and tags of `0.1.0-draft` and `0.2.0-draft` do not change.
+
 ## Specification versions
 
 `specVersion` identifies the specification release a Judgment Pack targets. Readers MUST compare
-the complete value; they must not infer compatibility from a shared major or minor number during
-the `0.x` research period.
+the complete value; they must not infer compatibility from a shared major or minor number before
+`1.0.0`.
 
 A conformance claim is made against one exact `specVersion`. That applies to every class, and it
 binds hardest on evaluator conformance (Core §3.4): such a claim names the exact version and the
@@ -25,8 +28,31 @@ claim. A preserved schema is served at the `$id` it was published under, and whe
 re-pointed to this project's own domain it differs from the tagged artifact in that one member and nothing
 else — the release notes of the version that preserved it publish the digest of both forms.
 
-Any `0.x` release may change reader, writer, or semantic behavior incompatibly. Release notes must
-identify those effects and include migration guidance when an earlier pack can be transformed.
+Before `1.0.0`, a release may change reader, writer, or semantic behavior incompatibly. Its release
+notes must record the change and include a `specVersion` migration note, including when no automatic
+migration is available.
+
+## Maturity levels
+
+The `status` in each Core conformance manifest is a maturity level, not a version. Its closed ladder
+is:
+
+- `draft`: the document is still being exercised and the acceptance evidence is not yet complete;
+- `candidate`: independent conforming implementations, production adopters, and sustained outside
+  contribution are in and recorded for the document; and
+- `release`: the evidence has been accepted and recorded for the `1.0.0` standards claim.
+
+Movement is one step at a time. The recorded evidence above moves a document from `draft` to
+`candidate`; the maintainer's recorded `1.0.0` acceptance of that evidence moves it from `candidate`
+to `release`. Production use alone does not move a document or establish a standard.
+
+## Core pre-releases
+
+A Core release candidate uses the SemVer `-rc.N` form. The `0.3.0` release is preceded by exactly
+one candidate, tag `v0.3.0-rc.1`, published as a GitHub pre-release for about one week so adopters'
+tooling can read the renamed manifest status. The unsuffixed `v0.3.0` tag is the release. The Policy
+companion's `policy-v<releaseVersion>-draft.N` route remains independent and is not replaced by this
+Core convention.
 
 The `main` branch describes work in progress. It is not an immutable specification release and
 must not be used as a reproducibility anchor.
@@ -52,7 +78,7 @@ No compatibility dimension is implied merely because two releases share a versio
 
 ## Release artifacts
 
-An immutable Core preview release contains, at minimum:
+An immutable Core release contains, at minimum:
 
 - the tagged Core prose specification;
 - the tagged JSON Schema with a versioned `$id`, plus any superseded schema still published;
@@ -67,7 +93,7 @@ each artifact is permitted to make.
 
 ## Deprecation and support
 
-`0.x` draft releases have no compatibility or security service-level guarantee. Maintainers
+Pre-`1.0.0` releases have no compatibility or security service-level guarantee. Maintainers
 may deprecate or remove behavior in a later `0.x` release, but must record the change in release
 notes. A stable release will require a separate support and deprecation policy before publication.
 

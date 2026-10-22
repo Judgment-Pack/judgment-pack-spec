@@ -7,6 +7,11 @@ here.
 
 ### Added
 
+- Name the next Core release `0.3.0`, define conformance maturity independently, and require `v0.3.0-rc.1` before release (#231).
+
+- Policy companion decision (#211): keep RFC 0023 Accepted at draft maturity and Policy 1.0.0 pinned, record its duplicate-identity and no-list-priority rules, and leave disagreement refusal and the second independently authored reader open.
+- RFC 0022 aligns reusable-subgraph bounds, routed handoff provenance, dialect-owned remapping and
+  cross-installation packaging with the decisions on #129, #219, #232 and #170 (#233).
 - Dialect-owned data quality and typed research results (#170, #169): six closed deterministic
   conversions with recorded failures, three explicit reconciliation modes, presence/type/domain
   findings surfaced as unknown facts, transformation lineage, typed research result states,

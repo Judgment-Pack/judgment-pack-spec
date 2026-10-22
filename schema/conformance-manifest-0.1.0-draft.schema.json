@@ -23,7 +23,7 @@
       "const": "0.1.0-draft"
     },
     "status": {
-      "const": "research-preview"
+      "enum": ["draft", "candidate", "release"]
     },
     "validationProfile": {
       "type": "object",
