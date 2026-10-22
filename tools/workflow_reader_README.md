@@ -4,7 +4,7 @@ This is a separately authored experiment against proposed RFC 0024 (numbered
 RFC 0022 at Spec
 `88794f7ac09fc46d8af89605f1defbd7a7db14d9`). The initial algorithm was frozen at
 `e3fde6153f992a42997b43459e5eb87b6ad5dcab`; that byte-identical checkpoint is
-archived at `/tmp/jps-portable-delivery/workflow-reader-freeze-initial`. This is
+archived at `<scratch>/workflow-reader-freeze-initial`. This is
 not an adopted interface or a
 complete workflow conformance claim. The initial algorithm was written before
 receiving actual workflow recordings or comparison results from the Go writer.
@@ -118,14 +118,14 @@ report counts. No workflow replay or accounting helper is shared with Runner.
 Focused validation, using Python 3.12:
 
 ```sh
-/tmp/jps-portable-delivery/spec-admission-proof-venv/bin/python -m unittest tests.test_workflow_reader -v
+<scratch>/spec-admission-proof-venv/bin/python -m unittest tests.test_workflow_reader -v
 ```
 
 ## Authorship, exposure and input ledger
 
 The protocol was published before implementation at Spec issue 209 comment
 6243575419 and is retained locally as
-`/tmp/jps-portable-delivery/workflow-proof-independence-protocol.md`. Both author
+`<scratch>/workflow-proof-independence-protocol.md`. Both author
 agents are OpenAI models; separate contexts/languages do not by themselves prove
 independent authorship, and this is not cross-vendor evidence.
 
@@ -144,7 +144,7 @@ Allowed inputs actually consulted before freeze:
   implementation or actual workflow recording was read. The focused existing
   export check uses `conformance/dialect/vectors/valid/run.json`.
 - Runner snapshots under
-  `/tmp/jps-portable-delivery/workflow-reader-inputs/runner-66e264e/`, with the
+  `<scratch>/workflow-reader-inputs/runner-66e264e/`, with the
   full file hashes in `PROVENANCE.json`: `internal/runner/model.go` (Release,
   Run and referenced input declarations), `source_inputs.go` (source-input data),
   `mapping_v2_types.go` (mapping, profile and preparation data),
@@ -153,12 +153,12 @@ Allowed inputs actually consulted before freeze:
   `mapping_v2_export.go` (`VerificationBundle`/`releaseDigest`), and
   `docs/MAPPING-V2.md` (referenced retained-export contract). Only declaration
   and retained-encoding rules were used as implementation authority.
-- Runtime prose under `/tmp/jps-portable-delivery/runtime-034`, pinned
+- Runtime prose under `<scratch>/runtime-034`, pinned
   `785ea58927255b775a774e29952c560591429cd3`, including README, architecture and
   ADR 0027.
 - Additional Runtime error declaration dependency was authorized publicly before
   read at Spec issue 209 comment 6243644381. Read only
-  `/tmp/jps-portable-delivery/workflow-reader-inputs/runtime-785ea589/retained-error-declarations.txt`
+  `<scratch>/workflow-reader-inputs/runtime-785ea589/retained-error-declarations.txt`
   and its `PROVENANCE.json`. Exact source `internal/result/result.go` ranges:
   23–26, 40–43, 49–56, 659–669, 1502–1513. No constructors or evaluator code.
 
@@ -212,10 +212,10 @@ remain after this revised source freeze.
 ## First actual comparison and retained-encoding correction
 
 After the five-file revised freeze was archived, the coordinator supplied the
-actual snapshots in `/tmp/jps-portable-delivery/workflow-v2-recordings-frozen`,
+actual snapshots in `<scratch>/workflow-v2-recordings-frozen`,
 independently held pins/profiles, and the measurement-only harness
-`/tmp/jps-portable-delivery/check-workflow-recordings.py`. The author read the
-harness and the preserved `/tmp/jps-portable-delivery/workflow-first-comparison.json`.
+`<scratch>/check-workflow-recordings.py`. The author read the
+harness and the preserved `<scratch>/workflow-first-comparison.json`.
 Original snapshots, pins, both freezes and that first comparison were not changed.
 
 The first diagnosis found three separate causes:
@@ -250,7 +250,7 @@ Re-running the unchanged original snapshots after this fix gives 7 readings,
 19 `record-inputs-differ` preparation findings and 8 operation profile findings.
 All 67 retained stage Release digests agree; no Release digest mismatch remains. The newly enabled interrupted-recovery
 snapshot agrees on the measured candidate inventory. Results were written to
-`/tmp/workflow-reader-serialization-comparison.json`, preserving the first result.
+`<scratch>/workflow-reader-serialization-comparison.json`, preserving the first result.
 This is a partial comparison result, not blanket agreement or adoption evidence.
 
 Additional exposure during diagnosis: the approved Runner declaration/encoding
@@ -272,7 +272,7 @@ that exact model as unknown from this author's available context; do not infer
 ## First review corrections and additional exposure
 
 The complete unedited review is preserved at
-`/tmp/jps-portable-delivery/workflow-reader-review-round1.md`. The reviewer had
+`<scratch>/workflow-reader-review-round1.md`. The reviewer had
 previously reviewed the Go writer and Spec prose and disclosed that exposure.
 This reader author received the contract findings and diagnostic mutations, not
 the writer's implementation. Initial, revised and retained-encoding freezes and
@@ -311,7 +311,7 @@ One additional incidental exposure occurred and was reported immediately to the
 coordinator: the command
 
 ```sh
-cat /tmp/jps-portable-delivery/workflow-reader-inputs/runner-66e264e/internal/runner/source_inputs.go
+cat <scratch>/workflow-reader-inputs/runner-66e264e/internal/runner/source_inputs.go
 ```
 
 requested the entire approved snapshot file, lines 1–485, rather than only its
