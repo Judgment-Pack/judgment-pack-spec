@@ -1,0 +1,79 @@
+{
+  "executionVersion": 3,
+  "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "execution": "complete-run",
+  "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+  "frozen": [
+    {
+      "stage": "cases",
+      "publishedDialectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bindingDocumentDigest": null,
+      "boundDialectDigest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "packDigest": "sha256:39255db451d5df6f622d0bd7dc498bbe3ffcbeab4cdfad87bdc1a20cb8b338e1",
+      "releaseDigest": "sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+      "runtimeDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+    }
+  ],
+  "instances": [
+    {
+      "id": "root",
+      "stage": "cases",
+      "parentRecord": null,
+      "selectionDigest": null,
+      "inputDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+      "caseDigest": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+      "state": "completed",
+      "failure": null,
+      "attempts": [
+        {
+          "number": 1,
+          "state": "failed",
+          "failure": "evaluation-error",
+          "preparationDigest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+          "auditDigest": null,
+          "runDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+          "evaluationErrorDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+          "retry": null
+        },
+        {
+          "number": 2,
+          "state": "completed",
+          "failure": null,
+          "preparationDigest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+          "auditDigest": "sha256:b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+          "runDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+          "evaluationErrorDigest": null,
+          "retry": {
+            "actor": "fixture-reviewer",
+            "at": "2026-10-23T12:00:00Z"
+          }
+        }
+      ]
+    }
+  ],
+  "outputSets": [
+    {
+      "stage": "cases",
+      "status": "closed",
+      "records": [
+        "sha256:f55bf2a6bf3bfbcc23843c4d8793b9338e9698607569f809871c35a3bdd5d9c6",
+        "sha256:953607057521a1655eefe05e2a9a13652f3b42afca22ebbd997cdc87db8301c0",
+        "sha256:59a8946e33b68e927c18c7cfd7c46c76795f5dca383d5565d71c36b6a42dfb3a",
+        "sha256:4bac3b20941f5d8c6147c98d973a166566bc5f3c8e989978b04841e35f3415a7",
+        "sha256:91ebf149aac5c997242c14d380c8063dd584562c8a9edf66f4ddda26f17d65a0",
+        "sha256:c3bbae268f3ae3342600f013a62162ce0c978de588d7d0433d6c6d40e98b4bb9",
+        "sha256:dbe03fb6bc0d4d56a77666f13cbf9766525e8418b56ba20cc5af45f9a0af9f3c",
+        "sha256:3e84675c086aa7ade9bb94d0f69a398b97831e986e4a0442d1f7e66d05eab696"
+      ]
+    }
+  ],
+  "summaries": [
+    "sha256:9ef51f61255335204c9c16c8d2a57a56169a8077f3793261c2d07191b7da16f5"
+  ],
+  "selections": [
+    null
+  ],
+  "samples": [
+    null
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "reportCaseVersion": 1,
+  "reports": [
+    {
+      "result": "refusal",
+      "refusal": "input-malformed"
+    },
+    {
+      "result": "refusal",
+      "refusal": "input-over-bound"
+    },
+    {
+      "result": "refusal",
+      "refusal": "version-unread"
+    },
+    {
+      "result": "refusal",
+      "refusal": "profile-unsupported"
+    },
+    {
+      "result": "refusal",
+      "refusal": "kind-unread"
+    },
+    {
+      "result": "refusal",
+      "refusal": "recording-pack-invalid"
+    },
+    {
+      "result": "refusal",
+      "refusal": "recording-version-mismatch"
+    },
+    {
+      "result": "refusal",
+      "refusal": "recording-version-unsupported"
+    },
+    {
+      "result": "refusal",
+      "refusal": "reference-mismatch"
+    },
+    {
+      "result": "refusal",
+      "refusal": "stage-binding-mismatch"
+    },
+    {
+      "result": "refusal",
+      "refusal": "selection-mismatch"
+    },
+    {
+      "result": "refusal",
+      "refusal": "sample-mismatch"
+    },
+    {
+      "result": "refusal",
+      "refusal": "case-mismatch"
+    },
+    {
+      "result": "refusal",
+      "refusal": "influence-mismatch"
+    },
+    {
+      "result": "refusal",
+      "refusal": "inventory-mismatch"
+    },
+    {
+      "result": "refusal",
+      "refusal": "output-mismatch"
+    },
+    {
+      "result": "refusal",
+      "refusal": "summary-mismatch"
+    },
+    {
+      "result": "refusal",
+      "refusal": "drift-workflow-mismatch"
+    }
+  ]
+}
