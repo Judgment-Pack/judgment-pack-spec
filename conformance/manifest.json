@@ -225,6 +225,114 @@
       "specSection": "§4"
     },
     {
+      "id": "structural-missing-locator-kind",
+      "path": "structural/missing-locator-kind.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/sources/0/locator/kind"
+      },
+      "focus": "source locator requires kind",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-missing-locator-value",
+      "path": "structural/missing-locator-value.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/sources/0/locator/value"
+      },
+      "focus": "source locator requires value",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-missing-citation-location",
+      "path": "structural/missing-citation-location.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/sources/0/citation/location"
+      },
+      "focus": "source citation requires location",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-missing-citation-excerpt",
+      "path": "structural/missing-citation-excerpt.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/sources/0/citation/excerpt"
+      },
+      "focus": "source citation requires excerpt",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-missing-target-kind",
+      "path": "structural/missing-target-kind.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/escalation/target/kind"
+      },
+      "focus": "escalation target requires kind",
+      "specSection": "§6.7"
+    },
+    {
+      "id": "structural-missing-target-name",
+      "path": "structural/missing-target-name.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/escalation/target/name"
+      },
+      "focus": "escalation target requires name",
+      "specSection": "§6.7"
+    },
+    {
+      "id": "structural-missing-review-reviewer",
+      "path": "structural/missing-review-reviewer.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/metadata/reviews/0/reviewer"
+      },
+      "focus": "metadata review requires reviewer",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-missing-review-reviewed-at",
+      "path": "structural/missing-review-reviewed-at.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/metadata/reviews/0/reviewedAt"
+      },
+      "focus": "metadata review requires reviewedAt",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-missing-review-disposition",
+      "path": "structural/missing-review-disposition.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/metadata/reviews/0/disposition"
+      },
+      "focus": "metadata review requires disposition",
+      "specSection": "§6.8"
+    },
+    {
       "id": "structural-empty-title",
       "path": "structural/empty-title.json",
       "layer": "structural",
@@ -390,6 +498,135 @@
         "path": "/metadata/reviews/0/reviewedAt"
       },
       "focus": "review timestamp sent as a JSON number, which only `type` refuses",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-number-version",
+      "path": "structural/number-version.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/version"
+      },
+      "focus": "pack version must be a string",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-number-title",
+      "path": "structural/number-title.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/title"
+      },
+      "focus": "pack title must be a string",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-number-outcome-id",
+      "path": "structural/number-outcome-id.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/outcomes/0/id"
+      },
+      "focus": "local outcome identifiers must be strings",
+      "specSection": "§5"
+    },
+    {
+      "id": "structural-number-required-extension",
+      "path": "structural/number-required-extension.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "required-extension names must be strings",
+      "specSection": "§9",
+      "supportedExtensions": [
+        "com.example.review-policy"
+      ]
+    },
+    {
+      "id": "structural-empty-authors",
+      "path": "structural/empty-authors.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-COLLECTION-ARITY",
+        "path": "/metadata/authors"
+      },
+      "focus": "authors must contain at least one name",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-duplicate-authors",
+      "path": "structural/duplicate-authors.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/metadata/authors"
+      },
+      "focus": "author names must not repeat",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-non-array-authors",
+      "path": "structural/non-array-authors.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/authors"
+      },
+      "focus": "authors must be an array",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-duplicate-required-extensions",
+      "path": "structural/duplicate-required-extensions.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/metadata/requiredExtensions"
+      },
+      "focus": "required-extension names must not repeat",
+      "specSection": "§9",
+      "supportedExtensions": [
+        "com.example.review-policy"
+      ]
+    },
+    {
+      "id": "structural-non-array-required-extensions",
+      "path": "structural/non-array-required-extensions.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/requiredExtensions"
+      },
+      "focus": "requiredExtensions must be an array",
+      "specSection": "§9",
+      "supportedExtensions": [
+        "com.example.review-policy"
+      ]
+    },
+    {
+      "id": "structural-non-array-reviews",
+      "path": "structural/non-array-reviews.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/reviews"
+      },
+      "focus": "reviews must be an array even for one review",
       "specSection": "§6.8"
     },
     {
@@ -1039,6 +1276,66 @@
       },
       "focus": "repeated rule source references are rejected",
       "specSection": "§6.5"
+    },
+    {
+      "id": "structural-non-array-rule-evidence-refs",
+      "path": "structural/non-array-rule-evidence-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/rules/0/evidenceRequirementRefs"
+      },
+      "focus": "rule evidence references must be an array",
+      "specSection": "§6.5"
+    },
+    {
+      "id": "structural-non-array-rule-source-refs",
+      "path": "structural/non-array-rule-source-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/rules/0/sourceRefs"
+      },
+      "focus": "rule source references must be an array",
+      "specSection": "§6.5"
+    },
+    {
+      "id": "structural-non-array-exception-source-refs",
+      "path": "structural/non-array-exception-source-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/exceptions/0/sourceRefs"
+      },
+      "focus": "exception source references must be an array",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-duplicate-rule-evidence-refs",
+      "path": "structural/duplicate-rule-evidence-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/rules/0/evidenceRequirementRefs"
+      },
+      "focus": "rule evidence references must not repeat",
+      "specSection": "§6.5"
+    },
+    {
+      "id": "structural-duplicate-exception-source-refs",
+      "path": "structural/duplicate-exception-source-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/exceptions/0/sourceRefs"
+      },
+      "focus": "exception source references must not repeat",
+      "specSection": "§6.6"
     },
     {
       "id": "structural-duplicate-outcomes",
