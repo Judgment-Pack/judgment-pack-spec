@@ -21,7 +21,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 from unittest import mock
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -559,6 +559,27 @@ class DialectVectorTests(unittest.TestCase):
             with self.assertRaises(READER.Refused) as refused:
                 READER.recording_of_export(path.read_bytes())
             self.assertEqual("recording-version-mismatch", refused.exception.name)
+
+    def assert_invalid_embedded_pack(self, change: Callable[[dict[str, Any]], Any]) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary) / "valid"
+            shutil.copytree(VECTORS / "valid", directory)
+            path = directory / "run.json"
+            export = json.loads(path.read_text(encoding="utf-8"))
+            pack = json.loads(export["release"]["pack"])
+            change(pack)
+            export["release"]["pack"] = json.dumps(pack, separators=(",", ":"))
+            path.write_text(json.dumps(export, separators=(",", ":")), encoding="utf-8")
+
+            with self.assertRaises(READER.Refused) as refused:
+                READER.recording_of_export(path.read_bytes())
+            self.assertEqual("recording-pack-invalid", refused.exception.name)
+
+    def test_an_embedded_pack_missing_a_required_member_refuses_the_recording(self) -> None:
+        self.assert_invalid_embedded_pack(lambda pack: pack.pop("id"))
+
+    def test_an_embedded_pack_with_a_wrong_member_type_refuses_the_recording(self) -> None:
+        self.assert_invalid_embedded_pack(lambda pack: pack.__setitem__("id", []))
 
     def test_recording_evaluator_versions_are_closed(self) -> None:
         self.assertEqual(

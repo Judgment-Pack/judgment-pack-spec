@@ -23,8 +23,9 @@ given, by making the bound dialect of the two and reading that as every dialect 
 research-contract amendment (RFC 0018, round 8) it reads `research` as §§4.3, 4.4, 5.1, 5.2, 6.4, 9 and
 11 define it: the requested fields and capabilities, the research record's typed answers and their
 citations, the profiles a source is bound to, each retained response replayed under its own profile,
-and the reconciliation read; the Runner's twenty-six research vectors hold the kind. It uses the
-Python standard library alone.
+and the reconciliation read; the Runner's twenty-six research vectors hold the kind. Its
+preparation reader uses the Python standard library alone; reading a complete recording uses the
+repository's JSON Schema dependency to validate its embedded Core pack.
 
     python tools/dialect_verify.py --dialect mapping.json --case case.json \\
         --acquisitions sources.json --profiles profiles.json --preparation preparation.json \\
@@ -46,6 +47,7 @@ import sys
 import datetime
 import base64
 import binascii
+import functools
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -3337,6 +3339,27 @@ def recording_schema(version: Any) -> str:
     return RECORDING_SCHEMAS[version]
 
 
+@functools.lru_cache(maxsize=len(RECORDING_SCHEMAS))
+def _recording_validator(schema_path: str) -> Any:
+    """Load one of the closed recording schemas without adding a preparation-reader dependency."""
+    from jsonschema import Draft202012Validator, FormatChecker
+
+    path = Path(__file__).resolve().parents[1] / schema_path
+    schema = json.loads(path.read_text(encoding="utf-8"))
+    Draft202012Validator.check_schema(schema)
+    return Draft202012Validator(schema, format_checker=FormatChecker())
+
+
+def _validate_recording_pack(pack_text: str, schema_path: str) -> None:
+    """Hold the embedded pack to the schema selected by its recorded evaluator version."""
+    # read_document has already established strict JSON. Parse once more into the ordinary JSON
+    # types expected by jsonschema; the preparation reader's Num preserves literals deliberately.
+    pack = json.loads(pack_text)
+    error = next(_recording_validator(schema_path).iter_errors(pack), None)
+    if error is not None:
+        raise Refused("recording-pack-invalid", f"release.pack does not validate against {schema_path}")
+
+
 def read_record(data: bytes) -> Any:
     """The record read as one line holding one JSON value (§11, the second phase)."""
     if b"\n" in data or b"\r" in data:
@@ -3422,6 +3445,7 @@ def recording_of_export(data: bytes) -> Recording:
     disagreement = [name for name, value in copies.items() if value != version]
     if disagreement:
         raise Refused("recording-version-mismatch", ", ".join(disagreement))
+    _validate_recording_pack(pack_text, schema)
     return Recording(version, schema, pack_bytes, record)
 
 

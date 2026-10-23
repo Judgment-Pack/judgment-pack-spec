@@ -47,7 +47,8 @@ pack is validated against the frozen `judgment-pack-core-0.2.0-draft.schema.json
 embedded pack is validated against the live `judgment-pack-core.schema.json`. The declaration MUST
 equal `release.pack.specVersion`, the visible audit's evaluator and pack versions, and the same two
 members in the decoded `run.auditBytes`; another version is `recording-version-unsupported`, and a
-disagreement is `recording-version-mismatch`. Both are refusals before preparation verification.
+disagreement is `recording-version-mismatch`. An embedded pack that does not validate against the
+selected schema is `recording-pack-invalid`. All three are refusals before preparation verification.
 The forty-seven staged recordings remain the Runner's byte-exact `0.2.0-draft` exports; they are
 historical evidence, not `0.3.0` producer coverage.
 

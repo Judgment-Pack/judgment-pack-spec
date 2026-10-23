@@ -71,8 +71,9 @@ evidence, not `0.3.0` producer coverage. Their declaration is
 `run.result.evaluatorSpecVersion`. The two verifier tools accept that value only with the frozen
 `schema/judgment-pack-core-0.2.0-draft.schema.json`, or `0.3.0` only with the live Core schema, and
 require it to equal the embedded pack's version and both the visible and decoded signed audit's
-evaluator and pack versions. Any other value or any disagreement refuses the recording before its
-preparation is verified. A genuine `0.3.0` set will be recorded through the Runner and published
+evaluator and pack versions. Any other value, any disagreement, or a pack that does not validate
+against the selected schema refuses the recording before its preparation is verified. A genuine
+`0.3.0` set will be recorded through the Runner and published
 beside these exports, without rewriting or re-signing them.
 
 ## Companion hand-written cases

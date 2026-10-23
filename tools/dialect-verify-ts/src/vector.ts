@@ -4,8 +4,10 @@
 // `run.audit` as the export writes it). A vector of a dialect bound at import holds binding.json: its
 // dialect is then unbound.json, given with binding.json, and mapping.json is the bound dialect (§4.4).
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { NotRead, member, read, utf8 } from "./json.ts";
+import { validates } from "./schema.ts";
 import type { JVal } from "./json.ts";
 import type { Inputs } from "./verify.ts";
 
@@ -22,6 +24,18 @@ const RECORDING_SCHEMAS = new Map([
   ["0.2.0-draft", "schema/judgment-pack-core-0.2.0-draft.schema.json"],
   ["0.3.0", "schema/judgment-pack-core.schema.json"],
 ] as const);
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+const SCHEMAS = new Map<string, unknown>();
+
+const validateRecordingPack = (schemaPath: string, packText: string): void => {
+  let schema = SCHEMAS.get(schemaPath);
+  if (schema === undefined) {
+    schema = JSON.parse(readFileSync(join(ROOT, schemaPath), "utf8"));
+    SCHEMAS.set(schemaPath, schema);
+  }
+  if (!validates(schema, JSON.parse(packText))) throw new VectorError("recording-pack-invalid");
+};
 
 export function recordingSchema(version: string): string {
   const schema = RECORDING_SCHEMAS.get(version as "0.2.0-draft" | "0.3.0");
@@ -99,6 +113,7 @@ export function recordingOfExport(bytes: Uint8Array): Recording {
   if (versions.some((version) => version !== evaluatorSpecVersion)) {
     throw new VectorError("recording-version-mismatch");
   }
+  validateRecordingPack(schema, packText);
   return {
     evaluatorSpecVersion: evaluatorSpecVersion as "0.2.0-draft" | "0.3.0",
     schema,

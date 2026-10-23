@@ -78,6 +78,32 @@ test("an embedded-pack-only version rewrite refuses the recording", () => {
   }
 });
 
+const assertInvalidEmbeddedPack = (change: (pack: Record<string, unknown>) => void): void => {
+  const temporary = mkdtempSync(join(tmpdir(), "dialect-recording-"));
+  const dir = join(temporary, "valid");
+  try {
+    cpSync(join(ROOT, "vectors", "valid"), dir, { recursive: true });
+    const path = join(dir, "run.json");
+    const exported = JSON.parse(readFileSync(path, "utf8")) as { release: { pack: string } };
+    const pack = JSON.parse(exported.release.pack) as Record<string, unknown>;
+    change(pack);
+    exported.release.pack = JSON.stringify(pack);
+    writeFileSync(path, JSON.stringify(exported));
+    assert.throws(() => loadVector(dir, false), (error: unknown) =>
+      error instanceof VectorError && error.message === "recording-pack-invalid");
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+};
+
+test("an embedded pack missing a required member refuses the recording", () => {
+  assertInvalidEmbeddedPack((pack) => { delete pack.id; });
+});
+
+test("an embedded pack with a wrong member type refuses the recording", () => {
+  assertInvalidEmbeddedPack((pack) => { pack.id = []; });
+});
+
 for (const row of manifest.cases) {
   test(`vector ${row.id}`, (t) => {
     if (row.id in KNOWN_DISAGREEMENTS) {
