@@ -1,0 +1,725 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RFC 0027 staged optional advisory report proposal",
+  "description": "Not a published Core schema or a conformance claim.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "targetSpecVersion",
+    "packDigest",
+    "domainDigest",
+    "domain",
+    "fragment",
+    "intentionalFallback",
+    "limits",
+    "usage",
+    "complete",
+    "limitations",
+    "findings"
+  ],
+  "properties": {
+    "formatVersion": {
+      "const": 1
+    },
+    "targetSpecVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "packDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "domainDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "domain": {
+      "$ref": "#/$defs/finiteDomain"
+    },
+    "fragment": {
+      "const": "finite-enumeration"
+    },
+    "intentionalFallback": {
+      "type": "boolean"
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxWork",
+        "maxFindings"
+      ],
+      "properties": {
+        "maxWork": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "maxFindings": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256
+        }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "work",
+        "findingsTruncated"
+      ],
+      "properties": {
+        "work": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "findingsTruncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "limitations": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/limitation"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "complete": {
+            "const": false
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "limitations": {
+            "minItems": 1
+          },
+          "findings": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "JPS-ANALYSIS-INCOMPLETE"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "limitations": {
+            "maxItems": 0
+          },
+          "usage": {
+            "properties": {
+              "findingsTruncated": {
+                "const": false
+              }
+            }
+          },
+          "findings": {
+            "items": {
+              "properties": {
+                "certainty": {
+                  "const": "proved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "usage": {
+            "properties": {
+              "findingsTruncated": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "complete": {
+            "const": false
+          },
+          "limitations": {
+            "contains": {
+              "properties": {
+                "reason": {
+                  "const": "output-limit"
+                }
+              },
+              "required": [
+                "reason"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "intentionalFallback": {
+            "const": false
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "findings": {
+            "items": {
+              "if": {
+                "properties": {
+                  "effect": {
+                    "const": "fallback-reachable"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "severity": {
+                    "const": "warning"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "findings": {
+            "items": {
+              "if": {
+                "properties": {
+                  "effect": {
+                    "const": "fallback-reachable"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "severity": {
+                    "const": "info"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "pointer": {
+      "type": "string",
+      "maxLength": 2048,
+      "pattern": "^(?:/(?:[^~/]|~[01])*)*$"
+    },
+    "evidence": {
+      "type": "object",
+      "maxProperties": 256,
+      "additionalProperties": {
+        "enum": [
+          "present",
+          "absent",
+          "unknown"
+        ]
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "facts",
+        "evidence"
+      ],
+      "properties": {
+        "facts": true,
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        }
+      }
+    },
+    "finiteDomain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "inputs"
+      ],
+      "properties": {
+        "kind": {
+          "const": "finite-cases"
+        },
+        "inputs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/input"
+          }
+        }
+      }
+    },
+    "limitation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "reason"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/pointer"
+        },
+        "reason": {
+          "enum": [
+            "unsupported-condition",
+            "unsupported-extension",
+            "unsupported-domain",
+            "work-limit",
+            "output-limit",
+            "numeric-comparison-limit"
+          ]
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/pointer"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "summary"
+      ],
+      "properties": {
+        "method": {
+          "enum": [
+            "witness",
+            "exhaustive-domain"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "effect",
+        "certainty",
+        "severity",
+        "sources",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "enum": [
+            "JPS-RULES-COMPATIBLE",
+            "JPS-RULE-REDUNDANT",
+            "JPS-COVERAGE-GAP",
+            "JPS-RULE-UNREACHABLE",
+            "JPS-EXCEPTION-INTERACTION",
+            "JPS-UNKNOWN-INTERACTION",
+            "JPS-ANALYSIS-INCOMPLETE"
+          ]
+        },
+        "effect": {
+          "enum": [
+            "compatible-agreement",
+            "outcome-redundancy",
+            "fallback-reachable",
+            "no-match-reachable",
+            "condition-never-true",
+            "never-contributes",
+            "forced-conflict",
+            "force-bypasses-rules",
+            "suppression",
+            "direct-escalation",
+            "unknown-blocks-resolution",
+            "analysis-incomplete"
+          ]
+        },
+        "certainty": {
+          "enum": [
+            "proved",
+            "possible",
+            "incomplete"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning"
+          ]
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "proof": {
+          "$ref": "#/$defs/proof"
+        },
+        "witness": {
+          "$ref": "#/$defs/input"
+        },
+        "suggestedCases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/input"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "certainty": {
+                "const": "proved"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "proof"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "proof"
+                  ]
+                },
+                {
+                  "required": [
+                    "witness"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "proof": {
+                "properties": {
+                  "method": {
+                    "const": "witness"
+                  }
+                }
+              }
+            },
+            "required": [
+              "proof"
+            ]
+          },
+          "then": {
+            "required": [
+              "witness"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "enum": [
+                  "JPS-RULE-UNREACHABLE",
+                  "JPS-RULE-REDUNDANT"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "certainty": {
+                "const": "proved"
+              },
+              "proof": {
+                "properties": {
+                  "method": {
+                    "const": "exhaustive-domain"
+                  }
+                }
+              }
+            },
+            "not": {
+              "required": [
+                "witness"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "JPS-RULES-COMPATIBLE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "effect": {
+                "const": "compatible-agreement"
+              },
+              "severity": {
+                "const": "info"
+              },
+              "sources": {
+                "minItems": 2
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "JPS-RULE-REDUNDANT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "effect": {
+                "const": "outcome-redundancy"
+              },
+              "severity": {
+                "const": "info"
+              },
+              "sources": {
+                "minItems": 2
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "JPS-COVERAGE-GAP"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "effect": {
+                "enum": [
+                  "fallback-reachable",
+                  "no-match-reachable"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "JPS-RULE-UNREACHABLE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "effect": {
+                "enum": [
+                  "condition-never-true",
+                  "never-contributes"
+                ]
+              },
+              "severity": {
+                "const": "warning"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "JPS-EXCEPTION-INTERACTION"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "effect": {
+                "enum": [
+                  "forced-conflict",
+                  "force-bypasses-rules",
+                  "suppression",
+                  "direct-escalation"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "effect": {
+                "enum": [
+                  "forced-conflict",
+                  "direct-escalation",
+                  "no-match-reachable",
+                  "unknown-blocks-resolution"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "severity": {
+                "const": "warning"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "effect": {
+                "enum": [
+                  "force-bypasses-rules",
+                  "suppression"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "severity": {
+                "const": "info"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "JPS-UNKNOWN-INTERACTION"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "effect": {
+                "const": "unknown-blocks-resolution"
+              },
+              "severity": {
+                "const": "warning"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "JPS-ANALYSIS-INCOMPLETE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "effect": {
+                "const": "analysis-incomplete"
+              },
+              "certainty": {
+                "const": "incomplete"
+              },
+              "severity": {
+                "const": "info"
+              }
+            },
+            "not": {
+              "required": [
+                "suggestedCases"
+              ]
+            }
+          },
+          "else": {
+            "properties": {
+              "certainty": {
+                "enum": [
+                  "proved",
+                  "possible"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

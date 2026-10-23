@@ -1,0 +1,618 @@
+{
+  "base": {
+    "formatVersion": 1,
+    "targetSpecVersion": "0.3.0",
+    "packDigest": "sha256:f152afdef3d48b5c7c8f61f62f5f90ebe77abcf2041c1697958aac40c9800aed",
+    "domainDigest": "sha256:bc5d2c5fb9c730a8fc54c9378b87fe9ec01022412b0d05d75aa331443e01d02d",
+    "domain": {
+      "kind": "finite-cases",
+      "inputs": [
+        {
+          "facts": {
+            "score": "70",
+            "mode": "none",
+            "review": false
+          },
+          "evidence": {}
+        },
+        {
+          "facts": {
+            "score": "10",
+            "mode": "none",
+            "review": false
+          },
+          "evidence": {}
+        },
+        {
+          "facts": {
+            "score": "70",
+            "mode": "conflict",
+            "review": false
+          },
+          "evidence": {}
+        },
+        {
+          "facts": {
+            "score": "70",
+            "mode": "medium",
+            "review": false
+          },
+          "evidence": {}
+        },
+        {
+          "facts": {
+            "score": "70",
+            "mode": "none",
+            "review": true
+          },
+          "evidence": {}
+        },
+        {
+          "facts": {
+            "score": "70",
+            "mode": "none"
+          },
+          "evidence": {}
+        },
+        {
+          "facts": {
+            "score": null,
+            "mode": "none",
+            "review": false
+          },
+          "evidence": {
+            "unused-present": "present",
+            "unused-absent": "absent",
+            "unused-unknown": "unknown"
+          }
+        }
+      ]
+    },
+    "fragment": "finite-enumeration",
+    "intentionalFallback": true,
+    "limits": {
+      "maxWork": 100000,
+      "maxFindings": 256
+    },
+    "usage": {
+      "work": 400,
+      "findingsTruncated": false
+    },
+    "complete": true,
+    "limitations": [],
+    "findings": [
+      {
+        "code": "JPS-RULES-COMPATIBLE",
+        "effect": "compatible-agreement",
+        "certainty": "proved",
+        "severity": "info",
+        "sources": [
+          {
+            "path": "/rules/0",
+            "id": "r-medium"
+          },
+          {
+            "path": "/rules/1",
+            "id": "r-also-medium"
+          }
+        ],
+        "message": "Two true contributing rules agree on medium. The suggested boundary inputs are outside the declared domain.",
+        "proof": {
+          "method": "witness",
+          "summary": "With mode none and review false, both score thresholds are true and neither rule is suppressed."
+        },
+        "witness": {
+          "facts": {
+            "score": "70",
+            "mode": "none",
+            "review": false
+          },
+          "evidence": {}
+        },
+        "suggestedCases": [
+          {
+            "facts": {
+              "score": "69.99",
+              "mode": "none",
+              "review": false
+            },
+            "evidence": {}
+          },
+          {
+            "facts": {
+              "score": "70.00",
+              "mode": "none",
+              "review": false
+            },
+            "evidence": {}
+          }
+        ]
+      },
+      {
+        "code": "JPS-RULE-REDUNDANT",
+        "effect": "outcome-redundancy",
+        "certainty": "proved",
+        "severity": "info",
+        "sources": [
+          {
+            "path": "/rules/1",
+            "id": "r-also-medium"
+          },
+          {
+            "path": "/rules/0",
+            "id": "r-medium"
+          }
+        ],
+        "message": "Within these seven inputs, every contribution by r-also-medium has a medium contribution by r-medium; no deletion is recommended.",
+        "proof": {
+          "method": "exhaustive-domain",
+          "summary": "Replay every declared input through applicability, evidence and exceptions. r-also-medium contributes in input 0; r-medium contributes there too. Neither contributes at blocked/forced inputs."
+        }
+      },
+      {
+        "code": "JPS-COVERAGE-GAP",
+        "effect": "fallback-reachable",
+        "certainty": "proved",
+        "severity": "info",
+        "sources": [
+          {
+            "path": "/fallbackOutcome"
+          }
+        ],
+        "message": "The caller declares fallback intentional in this domain.",
+        "proof": {
+          "method": "witness",
+          "summary": "At score 10, normal thresholds are false and the always-true high rule is suppressed; no blocking reason or force remains."
+        },
+        "witness": {
+          "facts": {
+            "score": "10",
+            "mode": "none",
+            "review": false
+          },
+          "evidence": {}
+        }
+      },
+      {
+        "code": "JPS-RULE-UNREACHABLE",
+        "effect": "condition-never-true",
+        "certainty": "proved",
+        "severity": "warning",
+        "sources": [
+          {
+            "path": "/rules/2",
+            "id": "r-impossible"
+          }
+        ],
+        "message": "The contradictory condition has no true input in the supplied finite domain.",
+        "proof": {
+          "method": "exhaustive-domain",
+          "summary": "Check its condition against all seven inputs; true is never produced. This claim extends no further than the declared inputs."
+        }
+      },
+      {
+        "code": "JPS-RULE-UNREACHABLE",
+        "effect": "never-contributes",
+        "certainty": "proved",
+        "severity": "warning",
+        "sources": [
+          {
+            "path": "/rules/3",
+            "id": "r-suppressed"
+          },
+          {
+            "path": "/exceptions/2",
+            "id": "e-suppress"
+          }
+        ],
+        "message": "The true rule never contributes in the supplied domain because it is suppressed or earlier resolution bypasses rules.",
+        "proof": {
+          "method": "exhaustive-domain",
+          "summary": "Replay all seven inputs. e-suppress is always true; stages that reach normal rules remove r-suppressed. Other stages terminate before normal rules."
+        }
+      },
+      {
+        "code": "JPS-EXCEPTION-INTERACTION",
+        "effect": "forced-conflict",
+        "certainty": "proved",
+        "severity": "warning",
+        "sources": [
+          {
+            "path": "/exceptions/0",
+            "id": "e-medium"
+          },
+          {
+            "path": "/exceptions/1",
+            "id": "e-high"
+          }
+        ],
+        "message": "Incompatible forced outcomes yield unresolved with conflict.",
+        "proof": {
+          "method": "witness",
+          "summary": "Both force conditions are true in conflict mode; neither array order nor lexical id resolves them."
+        },
+        "witness": {
+          "facts": {
+            "score": "70",
+            "mode": "conflict",
+            "review": false
+          },
+          "evidence": {}
+        }
+      },
+      {
+        "code": "JPS-EXCEPTION-INTERACTION",
+        "effect": "force-bypasses-rules",
+        "certainty": "proved",
+        "severity": "info",
+        "sources": [
+          {
+            "path": "/exceptions/0",
+            "id": "e-medium"
+          },
+          {
+            "path": "/rules/0",
+            "id": "r-medium"
+          }
+        ],
+        "message": "The compatible force skips normal rule evaluation; no lost candidate is inferred from that skip.",
+        "proof": {
+          "method": "witness",
+          "summary": "In medium mode only e-medium forces, no blocker remains, and Core step 6 resolves before normal rules."
+        },
+        "witness": {
+          "facts": {
+            "score": "70",
+            "mode": "medium",
+            "review": false
+          },
+          "evidence": {}
+        }
+      },
+      {
+        "code": "JPS-EXCEPTION-INTERACTION",
+        "effect": "suppression",
+        "certainty": "proved",
+        "severity": "info",
+        "sources": [
+          {
+            "path": "/exceptions/2",
+            "id": "e-suppress"
+          },
+          {
+            "path": "/rules/3",
+            "id": "r-suppressed"
+          }
+        ],
+        "message": "The target is skipped due to suppression; this finding does not report a counterfactual candidate.",
+        "proof": {
+          "method": "witness",
+          "summary": "Input 0 reaches normal rules and its active suppression removes the target."
+        },
+        "witness": {
+          "facts": {
+            "score": "70",
+            "mode": "none",
+            "review": false
+          },
+          "evidence": {}
+        }
+      },
+      {
+        "code": "JPS-EXCEPTION-INTERACTION",
+        "effect": "direct-escalation",
+        "certainty": "proved",
+        "severity": "warning",
+        "sources": [
+          {
+            "path": "/exceptions/3",
+            "id": "e-review"
+          }
+        ],
+        "message": "The true escalate effect blocks an outcome and records exception-escalation.",
+        "proof": {
+          "method": "witness",
+          "summary": "Review true produces a direct escalation request before normal rules."
+        },
+        "witness": {
+          "facts": {
+            "score": "70",
+            "mode": "none",
+            "review": true
+          },
+          "evidence": {}
+        }
+      },
+      {
+        "code": "JPS-UNKNOWN-INTERACTION",
+        "effect": "unknown-blocks-resolution",
+        "certainty": "proved",
+        "severity": "warning",
+        "sources": [
+          {
+            "path": "/exceptions/3",
+            "id": "e-review"
+          }
+        ],
+        "message": "Absent review produces an unknown escalate-on-unknown exception and blocks resolution.",
+        "proof": {
+          "method": "witness",
+          "summary": "The review path is absent; e-review is unknown and its onUnknown policy blocks before rules."
+        },
+        "witness": {
+          "facts": {
+            "score": "70",
+            "mode": "none"
+          },
+          "evidence": {}
+        }
+      }
+    ]
+  },
+  "variants": [
+    {
+      "id": "unintentional-fallback",
+      "patch": {
+        "intentionalFallback": false,
+        "findings": [
+          {
+            "code": "JPS-COVERAGE-GAP",
+            "effect": "fallback-reachable",
+            "certainty": "proved",
+            "severity": "warning",
+            "sources": [
+              {
+                "path": "/fallbackOutcome"
+              }
+            ],
+            "message": "Fallback is reachable without an intentional-fallback declaration for this domain.",
+            "proof": {
+              "method": "witness",
+              "summary": "At score 10, normal thresholds are false and the always-true high rule is suppressed; no blocking reason or force remains."
+            },
+            "witness": {
+              "facts": {
+                "score": "10",
+                "mode": "none",
+                "review": false
+              },
+              "evidence": {}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "possible-unsupported-analysis",
+      "patch": {
+        "complete": false,
+        "limitations": [
+          {
+            "path": "/rules/0/when",
+            "reason": "unsupported-condition"
+          }
+        ],
+        "findings": [
+          {
+            "code": "JPS-RULES-COMPATIBLE",
+            "effect": "compatible-agreement",
+            "certainty": "possible",
+            "severity": "info",
+            "sources": [
+              {
+                "path": "/rules/0",
+                "id": "r-medium"
+              },
+              {
+                "path": "/rules/1",
+                "id": "r-also-medium"
+              }
+            ],
+            "message": "An analyzer declining the condition fragment has not excluded compatible agreement.",
+            "suggestedCases": [
+              {
+                "facts": {
+                  "score": "70",
+                  "mode": "none",
+                  "review": false
+                },
+                "evidence": {}
+              }
+            ]
+          },
+          {
+            "code": "JPS-ANALYSIS-INCOMPLETE",
+            "effect": "analysis-incomplete",
+            "certainty": "incomplete",
+            "severity": "info",
+            "sources": [
+              {
+                "path": "/rules/0/when"
+              }
+            ],
+            "message": "The analyzer does not support a required condition fragment."
+          }
+        ]
+      }
+    },
+    {
+      "id": "extension-unsupported",
+      "patch": {
+        "complete": false,
+        "limitations": [
+          {
+            "path": "",
+            "reason": "unsupported-extension"
+          }
+        ],
+        "findings": [
+          {
+            "code": "JPS-ANALYSIS-INCOMPLETE",
+            "effect": "analysis-incomplete",
+            "certainty": "incomplete",
+            "severity": "info",
+            "sources": [
+              {
+                "path": ""
+              }
+            ],
+            "message": "Execution-affecting extension support is unavailable; no exhaustive claims."
+          }
+        ]
+      }
+    },
+    {
+      "id": "domain-unsupported",
+      "patch": {
+        "complete": false,
+        "limitations": [
+          {
+            "path": "",
+            "reason": "unsupported-domain"
+          }
+        ],
+        "findings": [
+          {
+            "code": "JPS-ANALYSIS-INCOMPLETE",
+            "effect": "analysis-incomplete",
+            "certainty": "incomplete",
+            "severity": "info",
+            "sources": [
+              {
+                "path": ""
+              }
+            ],
+            "message": "The implementation cannot analyze this domain within its support."
+          }
+        ]
+      }
+    },
+    {
+      "id": "work-limit",
+      "patch": {
+        "complete": false,
+        "limits": {
+          "maxWork": 1,
+          "maxFindings": 1
+        },
+        "usage": {
+          "work": 1,
+          "findingsTruncated": false
+        },
+        "limitations": [
+          {
+            "path": "",
+            "reason": "work-limit"
+          }
+        ],
+        "findings": [
+          {
+            "code": "JPS-ANALYSIS-INCOMPLETE",
+            "effect": "analysis-incomplete",
+            "certainty": "incomplete",
+            "severity": "info",
+            "sources": [
+              {
+                "path": ""
+              }
+            ],
+            "message": "Work exhausted before every input was checked; absence is not proved."
+          }
+        ]
+      }
+    },
+    {
+      "id": "output-limit",
+      "patch": {
+        "complete": false,
+        "limits": {
+          "maxWork": 100000,
+          "maxFindings": 1
+        },
+        "usage": {
+          "work": 400,
+          "findingsTruncated": true
+        },
+        "limitations": [
+          {
+            "path": "",
+            "reason": "output-limit"
+          }
+        ],
+        "findings": [
+          {
+            "code": "JPS-ANALYSIS-INCOMPLETE",
+            "effect": "analysis-incomplete",
+            "certainty": "incomplete",
+            "severity": "info",
+            "sources": [
+              {
+                "path": ""
+              }
+            ],
+            "message": "Additional findings are omitted; the reserved slot exposes truncation."
+          }
+        ]
+      }
+    },
+    {
+      "id": "numeric-comparison-limit",
+      "patch": {
+        "complete": false,
+        "limitations": [
+          {
+            "path": "/rules/0/when",
+            "reason": "numeric-comparison-limit"
+          }
+        ],
+        "findings": [
+          {
+            "code": "JPS-ANALYSIS-INCOMPLETE",
+            "effect": "analysis-incomplete",
+            "certainty": "incomplete",
+            "severity": "info",
+            "sources": [
+              {
+                "path": "/rules/0/when"
+              }
+            ],
+            "message": "Exact comparison support is insufficient; no universal finding is established."
+          }
+        ]
+      }
+    },
+    {
+      "id": "no-match",
+      "packFile": "no-fallback-pack.json",
+      "patch": {
+        "packDigest": "sha256:e0f5d03c3d10d9fb56fc5aca0ee88e512dbeaa586087c13dc33a3a050e70ed26",
+        "findings": [
+          {
+            "code": "JPS-COVERAGE-GAP",
+            "effect": "no-match-reachable",
+            "certainty": "proved",
+            "severity": "warning",
+            "sources": [
+              {
+                "path": ""
+              }
+            ],
+            "message": "No rule contributes and this pack declares no fallback.",
+            "proof": {
+              "method": "witness",
+              "summary": "At score 10, both thresholds are false, the contradictory condition is false, and the always-true rule is suppressed; no force or blocker remains."
+            },
+            "witness": {
+              "facts": {
+                "score": "10",
+                "mode": "none",
+                "review": false
+              },
+              "evidence": {}
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

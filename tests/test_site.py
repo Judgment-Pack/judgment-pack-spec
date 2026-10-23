@@ -258,6 +258,22 @@ class StaticSiteTests(unittest.TestCase):
         index = (self.output / "rfcs" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="0018-dialect/"', index)
 
+    def test_pack_design_advisory_draft_is_browsable_with_source_only_artifacts(self) -> None:
+        page = self.output / "rfcs/0027-pack-design-advisories/index.html"
+        document = page.read_text(encoding="utf-8")
+        self.assertIn('<span class="artifact-label">Draft proposal</span>', document)
+        self.assertIn("not incorporated into Core", document)
+        self.assertIn("blob/main/rfcs/0027-pack-design-advisories.md", document)
+        index = inspect(self.output / "rfcs/index.html")
+        self.assertIn("0027-pack-design-advisories/", index.links)
+        for name in ("cases.json", "reports.json", "report.schema.json"):
+            self.assertIn(
+                "https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/"
+                "rfcs/pack-design-advisories/" + name,
+                inspect(page).links,
+            )
+        self._assert_nothing_published_under("rfcs/pack-design-advisories")
+
     def test_policy_promotion_prose_is_discoverable_and_raw_artifacts_stay_staged(self) -> None:
         page = self.output / "spec/policy/index.html"
         document = page.read_text(encoding="utf-8")
