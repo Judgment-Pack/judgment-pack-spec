@@ -1,6 +1,6 @@
 # Conformance corpus
 
-This directory contains 127 focused conformance cases for testing the carrier, structural, and
+This directory contains 151 focused conformance cases for testing the carrier, structural, and
 semantic requirements of Judgment Pack Core `0.3.0`, plus five advisory vectors. It is
 versioned with the draft but is not yet a complete or normative conformance suite. Evaluator
 behavior is out of scope *here*: it has its

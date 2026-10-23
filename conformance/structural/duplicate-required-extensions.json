@@ -1,0 +1,43 @@
+{
+  "specVersion": "0.3.0",
+  "id": "https://example.com/judgment-packs/duplicate-required-extensions",
+  "version": "0.1.0",
+  "title": "Repeated required extension name",
+  "decision": {
+    "intent": "Exercise successful required-extension capability negotiation.",
+    "question": "Can a capable consumer fully interpret the pack?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "reject",
+      "label": "Reject"
+    }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "Carries data understood by the declared consumer capability.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "com.example.review-policy": {
+          "reviewMode": "two-person"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "requiredExtensions": [
+      "com.example.review-policy",
+      "com.example.review-policy"
+    ]
+  }
+}

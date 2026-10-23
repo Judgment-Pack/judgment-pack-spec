@@ -710,7 +710,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             case["path"].startswith("advisory/") for case in self.manifest["cases"]
         )
         conformance_count = len(self.manifest["cases"]) - advisory_count
-        self.assertEqual((127, 5), (conformance_count, advisory_count))
+        self.assertEqual((151, 5), (conformance_count, advisory_count))
         statements = (
             (
                 "README.md",
