@@ -3314,6 +3314,29 @@ class Record:
     binding: bytes | None
 
 
+@dataclass(frozen=True)
+class Recording:
+    """The version-bearing parts of a Runner recording, after their versions agree."""
+
+    evaluator_spec_version: str
+    schema: str
+    pack: bytes
+    record: bytes
+
+
+RECORDING_SCHEMAS = {
+    "0.2.0-draft": "schema/judgment-pack-core-0.2.0-draft.schema.json",
+    "0.3.0": "schema/judgment-pack-core.schema.json",
+}
+
+
+def recording_schema(version: Any) -> str:
+    """The Core schema for the closed set of evaluator versions a recording may name."""
+    if version not in RECORDING_SCHEMAS:
+        raise Refused("recording-version-unsupported", "the evaluator specification version")
+    return RECORDING_SCHEMAS[version]
+
+
 def read_record(data: bytes) -> Any:
     """The record read as one line holding one JSON value (§11, the second phase)."""
     if b"\n" in data or b"\r" in data:
@@ -3339,6 +3362,69 @@ def parse_record(data: bytes, value: Any) -> Record:
     return Record(value, binding)
 
 
+def _record_bytes(held: dict[str, str]) -> bytes | None:
+    """The record bytes from an already-read export."""
+    if "auditBytes" in held:
+        try:
+            encoded = json.loads(held["auditBytes"])
+            if not isinstance(encoded, str):
+                raise malformed("run.auditBytes is not a string")
+            return base64.b64decode(encoded, validate=True)
+        except (ValueError, binascii.Error) as error:
+            raise malformed("run.auditBytes is not standard base64") from error
+    if "audit" in held:
+        return held["audit"].encode("utf-8")
+    return None
+
+
+def recording_of_export(data: bytes) -> Recording:
+    """Read a complete Runner recording and hold every copy of its Core version together."""
+    document = read_document(data, "run.json")
+    if not isinstance(document, dict):
+        raise malformed("run.json is not an object")
+    run = document.get("run")
+    release = document.get("release")
+    if not isinstance(run, dict) or not isinstance(release, dict):
+        raise malformed("run.json has no run or release object")
+    held = dict(top_level_members(dict(top_level_members(data.decode("utf-8")))["run"]))
+    record = _record_bytes(held)
+    if record is None:
+        raise malformed("run.json has no audit record")
+    decoded = read_record(record)
+    visible = run.get("audit")
+    result = run.get("result")
+    pack_text = release.get("pack")
+    if not isinstance(visible, dict) or not isinstance(decoded, dict) or not isinstance(result, dict):
+        raise malformed("run.json has no recorded result, visible audit, or decoded audit object")
+    if not isinstance(pack_text, str):
+        raise malformed("run.json release.pack is not a string")
+    pack_bytes = pack_text.encode("utf-8")
+    pack = read_document(pack_bytes, "release.pack")
+    if not isinstance(pack, dict):
+        raise malformed("release.pack is not an object")
+
+    version = result.get("evaluatorSpecVersion")
+    schema = recording_schema(version)
+
+    def audit_pack(value: dict[str, Any], what: str) -> Any:
+        member = value.get("pack")
+        if not isinstance(member, dict):
+            raise malformed(f"{what}.pack is not an object")
+        return member.get("specVersion")
+
+    copies = {
+        "release.pack.specVersion": pack.get("specVersion"),
+        "run.audit.evaluatorSpecVersion": visible.get("evaluatorSpecVersion"),
+        "run.audit.pack.specVersion": audit_pack(visible, "run.audit"),
+        "decoded audit evaluatorSpecVersion": decoded.get("evaluatorSpecVersion"),
+        "decoded audit pack.specVersion": audit_pack(decoded, "the decoded audit"),
+    }
+    disagreement = [name for name, value in copies.items() if value != version]
+    if disagreement:
+        raise Refused("recording-version-mismatch", ", ".join(disagreement))
+    return Recording(version, schema, pack_bytes, record)
+
+
 def record_of_export(run: bytes) -> bytes | None:
     """The record line a Runner export's run.json holds (conformance/dialect/README.md): the bytes
     `run.auditBytes` holds in standard base64; or, in an export of version 2, which carries no bytes,
@@ -3348,11 +3434,7 @@ def record_of_export(run: bytes) -> bytes | None:
     if not isinstance(document, dict) or not isinstance(document.get("run"), dict):
         return None
     held = dict(top_level_members(dict(top_level_members(run.decode("utf-8")))["run"]))
-    if "auditBytes" in held:
-        return base64.b64decode(json.loads(held["auditBytes"]), validate=True)
-    if "audit" in held:
-        return held["audit"].encode("utf-8")
-    return None
+    return _record_bytes(held)
 
 
 # ---------------------------------------------------------------------------------------------

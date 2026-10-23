@@ -64,6 +64,17 @@ Runner's first: the Runner calls them "hand-maintained normative data", and says
 The links in the Runner's README are relative to the Runner's repository, and do not resolve here;
 the repository's link check passes over `vectors/` for that reason.
 
+## Historical recording version
+
+All 47 recordings are byte-exact Runner exports made under Core `0.2.0-draft`; they are historical
+evidence, not `0.3.0` producer coverage. Their declaration is
+`run.result.evaluatorSpecVersion`. The two verifier tools accept that value only with the frozen
+`schema/judgment-pack-core-0.2.0-draft.schema.json`, or `0.3.0` only with the live Core schema, and
+require it to equal the embedded pack's version and both the visible and decoded signed audit's
+evaluator and pack versions. Any other value or any disagreement refuses the recording before its
+preparation is verified. A genuine `0.3.0` set will be recorded through the Runner and published
+beside these exports, without rewriting or re-signing them.
+
 ## Companion hand-written cases
 
 [`quality-vectors.json`](quality-vectors.json) and
