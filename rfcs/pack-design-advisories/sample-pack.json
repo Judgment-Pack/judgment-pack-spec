@@ -5,6 +5,11 @@
   "title": "Synthetic pack-design advisory report",
   "decision": {"intent": "Exercise finite-domain diagnostics.", "question": "Which outcome applies?"},
   "outcomes": [{"id": "medium", "label": "Medium"}, {"id": "high", "label": "High"}, {"id": "manual", "label": "Manual"}],
+  "evidenceRequirements": [
+    {"id": "unused-present", "description": "Synthetic optional evidence recorded present.", "required": false},
+    {"id": "unused-absent", "description": "Synthetic optional evidence recorded absent.", "required": false},
+    {"id": "unused-unknown", "description": "Synthetic optional evidence recorded unknown.", "required": false}
+  ],
   "rules": [
     {"id": "r-medium", "description": "At least 40.", "when": {"op": "fact", "path": "/score", "operator": "greater-than-or-equal", "value": "40"}, "outcome": "medium", "onUnknown": "ignore"},
     {"id": "r-also-medium", "description": "At least 70.", "when": {"op": "fact", "path": "/score", "operator": "greater-than-or-equal", "value": "70"}, "outcome": "medium", "onUnknown": "ignore"},

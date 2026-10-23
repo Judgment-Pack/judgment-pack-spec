@@ -136,5 +136,22 @@
       "effect": "escalate",
       "onUnknown": "escalate"
     }
+  ],
+  "evidenceRequirements": [
+    {
+      "id": "unused-present",
+      "description": "Synthetic optional evidence recorded present.",
+      "required": false
+    },
+    {
+      "id": "unused-absent",
+      "description": "Synthetic optional evidence recorded absent.",
+      "required": false
+    },
+    {
+      "id": "unused-unknown",
+      "description": "Synthetic optional evidence recorded unknown.",
+      "required": false
+    }
   ]
 }

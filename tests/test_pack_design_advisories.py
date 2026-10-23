@@ -86,8 +86,22 @@ def condition(node, supplied):
             "less-than": left < right, "less-than-or-equal": left <= right}[operator]
 
 
+def preflight_evidence(pack, supplied):
+    """Core §8.2 admits evidence before applicability or any other terminal stage."""
+    evidence = supplied["evidence"]
+    if not isinstance(evidence, dict):
+        raise ValueError("malformed-input: evidence must be an object")
+    declared = {row["id"] for row in pack.get("evidenceRequirements", [])}
+    if not set(evidence).issubset(declared):
+        raise ValueError("malformed-input: evidence contains undeclared IDs")
+    if any(not isinstance(value, str) or value not in ("present", "absent", "unknown")
+           for value in evidence.values()):
+        raise ValueError("malformed-input: invalid evidence availability")
+
+
 def resolve(pack, supplied):
     """Replay just the Core stages used by these proposal fixtures; never invent a winner."""
+    preflight_evidence(pack, supplied)
     rules = pack["rules"]
     result = {"kind": "unresolved", "outcome": None, "reasons": [],
               "candidates": [], "skipped": [], "fallback": False}
@@ -192,6 +206,29 @@ class PackDesignAdvisoryTests(unittest.TestCase):
         # Whitespace changes byte identity even when the declared domain is identical.
         self.assertNotEqual(hashlib.sha256(domain_bytes).digest(), hashlib.sha256(domain_bytes + b" ").digest())
         self.assertTrue(equal(json.loads(domain_bytes), json.loads(domain_bytes + b" ")))
+
+    def test_report_domain_witnesses_and_suggestions_pass_evidence_preflight(self):
+        for name, pack_file, report in reports():
+            pack = load(pack_file)
+            supplied_inputs = list(report["domain"]["inputs"])
+            for finding in report["findings"]:
+                if "witness" in finding:
+                    supplied_inputs.append(finding["witness"])
+                supplied_inputs.extend(finding.get("suggestedCases", []))
+            for index, supplied in enumerate(supplied_inputs):
+                with self.subTest(report=name, input=index):
+                    preflight_evidence(pack, supplied)
+
+    def test_invalid_evidence_is_refused_before_terminal_resolution(self):
+        pack = load("sample-pack.json")
+        # Even a false applicability or a compatible force cannot outrun preflight.
+        packs = [pack, dict(pack, applicability={"op": "literal", "value": False})]
+        facts = {"score": "70", "mode": "medium", "review": False}
+        for tested_pack in packs:
+            for evidence in ({"not-declared": "present"}, [], {"unused-present": "maybe"}):
+                with self.subTest(applicability=tested_pack.get("applicability"), evidence=evidence):
+                    with self.assertRaisesRegex(ValueError, "^malformed-input:"):
+                        resolve(tested_pack, {"facts": facts, "evidence": evidence})
 
     def test_examples_are_current_core_documents_without_new_members(self):
         fixtures = load("cases.json")

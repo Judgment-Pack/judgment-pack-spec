@@ -2,7 +2,7 @@
   "base": {
     "formatVersion": 1,
     "targetSpecVersion": "0.3.0",
-    "packDigest": "sha256:42f9eaab656845ac8ed14070dce65b6c5ca139fe81655ad8754b66937244fe0e",
+    "packDigest": "sha256:f152afdef3d48b5c7c8f61f62f5f90ebe77abcf2041c1697958aac40c9800aed",
     "domainDigest": "sha256:bc5d2c5fb9c730a8fc54c9378b87fe9ec01022412b0d05d75aa331443e01d02d",
     "domain": {
       "kind": "finite-cases",
@@ -365,7 +365,7 @@
                 "path": "/fallbackOutcome"
               }
             ],
-            "message": "The caller declares fallback intentional in this domain.",
+            "message": "Fallback is reachable without an intentional-fallback declaration for this domain.",
             "proof": {
               "method": "witness",
               "summary": "At score 10, normal thresholds are false and the always-true high rule is suppressed; no blocking reason or force remains."
@@ -585,7 +585,7 @@
       "id": "no-match",
       "packFile": "no-fallback-pack.json",
       "patch": {
-        "packDigest": "sha256:735f057afbf4450c5812e2af33a20e6e8f7b87a7470524f13e55a7b60fd72c94",
+        "packDigest": "sha256:e0f5d03c3d10d9fb56fc5aca0ee88e512dbeaa586087c13dc33a3a050e70ed26",
         "findings": [
           {
             "code": "JPS-COVERAGE-GAP",
