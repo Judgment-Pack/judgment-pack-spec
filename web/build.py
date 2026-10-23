@@ -746,6 +746,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0028-complete-workflow-contributors.md",
+        PurePosixPath("rfcs/0028-complete-workflow-contributors/index.html"),
+        "RFC 0028: Complete workflow contributor attribution",
+        "Draft workflow amendment preserving every contributing rule or forcing exception, with typed membership summaries and explicit attribution versions.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "docs/releases/v0.3.0.md",
         PurePosixPath("project/releases/0.3.0/index.html"),
         "0.3.0 release notes",
@@ -2568,6 +2577,7 @@ def build_not_found(output_root: Path) -> None:
 CANONICAL_SCHEMA_SOURCES = (
     "schema/judgment-pack-core.schema.json",
     "schema/workflow-1.schema.json",
+    "schema/workflow-contributors-2.schema.json",
     # The superseded schemas stay served at the $id each was published under, so a pack or manifest that
     # still declares the older exact specVersion remains checkable and a cited identifier keeps resolving.
     "schema/judgment-pack-core-0.1.0-draft.schema.json",

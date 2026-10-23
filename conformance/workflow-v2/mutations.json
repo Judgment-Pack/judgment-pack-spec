@@ -1,0 +1,317 @@
+{
+  "mutationVersion": 1,
+  "cases": [
+    {
+      "name": "duplicate",
+      "target": "output",
+      "record": 0,
+      "member": "contributors",
+      "value": [
+        {
+          "kind": "rule",
+          "id": "a-rule"
+        },
+        {
+          "kind": "rule",
+          "id": "a-rule"
+        }
+      ],
+      "repin": true,
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "empty",
+      "target": "output",
+      "record": 0,
+      "member": "contributors",
+      "value": [],
+      "repin": true,
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "null",
+      "target": "output",
+      "record": 0,
+      "member": "contributors",
+      "value": null,
+      "repin": true,
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "reverse-order",
+      "target": "output",
+      "record": 0,
+      "member": "contributors",
+      "value": [
+        {
+          "kind": "rule",
+          "id": "z-rule"
+        },
+        {
+          "kind": "rule",
+          "id": "a-rule"
+        }
+      ],
+      "repin": true,
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "mixed-kinds",
+      "target": "output",
+      "record": 0,
+      "member": "contributors",
+      "value": [
+        {
+          "kind": "forcing-exception",
+          "id": "a-rule"
+        },
+        {
+          "kind": "rule",
+          "id": "z-rule"
+        }
+      ],
+      "repin": true,
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "unknown-id",
+      "target": "output",
+      "record": 0,
+      "member": "contributors",
+      "value": [
+        {
+          "kind": "rule",
+          "id": "missing-rule"
+        }
+      ],
+      "repin": true,
+      "expected": {
+        "result": "finding",
+        "finding": "output-mismatch"
+      }
+    },
+    {
+      "name": "suppress-not-force",
+      "target": "output",
+      "record": 1,
+      "member": "contributors",
+      "value": [
+        {
+          "kind": "forcing-exception",
+          "id": "suppress-a"
+        }
+      ],
+      "repin": true,
+      "expected": {
+        "result": "finding",
+        "finding": "output-mismatch"
+      }
+    },
+    {
+      "name": "wrong-outcome",
+      "target": "output",
+      "record": 0,
+      "member": "contributors",
+      "value": [
+        {
+          "kind": "rule",
+          "id": "reject-rule"
+        }
+      ],
+      "repin": true,
+      "expected": {
+        "result": "finding",
+        "finding": "output-mismatch"
+      }
+    },
+    {
+      "name": "unresolved-credit",
+      "target": "output",
+      "record": 4,
+      "member": "contributors",
+      "value": [
+        {
+          "kind": "rule",
+          "id": "a-rule"
+        }
+      ],
+      "repin": true,
+      "expected": {
+        "result": "finding",
+        "finding": "output-mismatch"
+      }
+    },
+    {
+      "name": "omitted-fixed-summary",
+      "target": "output",
+      "record": 0,
+      "member": "contributors",
+      "value": [
+        {
+          "kind": "rule",
+          "id": "z-rule"
+        }
+      ],
+      "repin": true,
+      "expected": {
+        "result": "refusal",
+        "refusal": "summary-mismatch"
+      }
+    },
+    {
+      "name": "altered-fixed-pin",
+      "target": "output",
+      "record": 0,
+      "member": "contributors",
+      "value": [
+        {
+          "kind": "rule",
+          "id": "z-rule"
+        }
+      ],
+      "repin": false,
+      "expected": {
+        "result": "finding",
+        "finding": "digest-mismatch"
+      }
+    },
+    {
+      "name": "mixed-model",
+      "target": "output",
+      "record": 0,
+      "member": "outputRecordVersion",
+      "value": 1,
+      "repin": true,
+      "expected": {
+        "result": "refusal",
+        "refusal": "version-unread"
+      }
+    },
+    {
+      "name": "fallback-double-count",
+      "target": "summary",
+      "path": [
+        "byRule",
+        "approve",
+        "fallback"
+      ],
+      "value": 2,
+      "expected": {
+        "result": "refusal",
+        "refusal": "summary-mismatch"
+      }
+    },
+    {
+      "name": "membership-double-count",
+      "target": "summary",
+      "path": [
+        "byRule",
+        "approve",
+        "contributors",
+        "rule",
+        "a-rule"
+      ],
+      "value": 2,
+      "expected": {
+        "result": "refusal",
+        "refusal": "summary-mismatch"
+      }
+    },
+    {
+      "name": "record-double-count",
+      "target": "summary",
+      "path": [
+        "records"
+      ],
+      "value": 9,
+      "expected": {
+        "result": "refusal",
+        "refusal": "summary-mismatch"
+      }
+    },
+    {
+      "name": "outcome-double-count",
+      "target": "summary",
+      "path": [
+        "byOutcome",
+        "approve"
+      ],
+      "value": 6,
+      "expected": {
+        "result": "refusal",
+        "refusal": "summary-mismatch"
+      }
+    },
+    {
+      "name": "kind-double-count",
+      "target": "summary",
+      "path": [
+        "byKind",
+        "outcome"
+      ],
+      "value": 6,
+      "expected": {
+        "result": "refusal",
+        "refusal": "summary-mismatch"
+      }
+    },
+    {
+      "name": "reason-double-count",
+      "target": "summary",
+      "path": [
+        "byReason",
+        "unknown"
+      ],
+      "value": 2,
+      "expected": {
+        "result": "refusal",
+        "refusal": "summary-mismatch"
+      }
+    },
+    {
+      "name": "digest-changed",
+      "target": "summary",
+      "path": [
+        "recordsDigest"
+      ],
+      "value": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "expected": {
+        "result": "refusal",
+        "refusal": "summary-mismatch"
+      }
+    },
+    {
+      "name": "wrong-drift",
+      "target": "drift",
+      "path": [
+        "stages",
+        0,
+        "byRule",
+        "approve",
+        "contributors",
+        "rule",
+        "a-rule"
+      ],
+      "value": -2,
+      "expected": {
+        "result": "refusal",
+        "refusal": "drift-mismatch"
+      }
+    }
+  ]
+}

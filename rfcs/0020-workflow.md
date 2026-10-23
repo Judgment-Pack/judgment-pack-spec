@@ -4,7 +4,7 @@
 - Type: Standards track (a companion document of the specification, with a reader conformance
   class; fixtures recorded from a two-stage run)
 - Created: 2026-10-15
-- Amended: 2026-10-22 (verifiable bulk records, issue #228)
+- Amended: 2026-10-23 (complete contributor attribution, issue #251; RFC 0028)
 - Issues: [#160](https://github.com/Judgment-Pack/judgment-pack-spec/issues/160),
   [#228](https://github.com/Judgment-Pack/judgment-pack-spec/issues/228)
 
@@ -67,6 +67,15 @@ reporting summary deltas and per-record additions, removals and disposition chan
 verdict. Section 11 adds these records and their refusal and mutation cases to the fixture plan.
 The RFC remains Draft: this amendment records the contract and planned vectors, not an executor,
 recorded fixture or conformance claim.
+
+## Amendment proposal of 2026-10-23: complete contributors
+
+[Issue #251](https://github.com/Judgment-Pack/judgment-pack-spec/issues/251) supersedes the
+singular representative convention in the historical #228 amendment. [RFC 0028](0028-complete-workflow-contributors.md)
+records the compatibility decision and scope. Output version 2 preserves every actual rule or
+forcing-exception contributor outside Core; summary version 2 counts typed memberships, and
+version-2 drift subtracts those counts. Historical version-1 bytes remain representative or
+unattributed. This Draft amendment targets Spec `0.4.0` and claims no release or executor support.
 
 ## Summary
 
@@ -419,16 +428,28 @@ binds only that bound dialect; its binding is unchanged. Re-expansion checks con
 
 ### 5. Output records and closed sets
 
-An output record is `{outputRecordVersion: 1, payloadDigest, contributingRule, lineage}`, with
-the conditional `contributingRule` omitted as specified below; the payload is a separate object
+An output record is `{outputRecordVersion: 2, payloadDigest, contributors, lineage}`, with
+conditional `contributors` omitted as specified below; the payload is a separate object
 in §1's literal-preserving bytes. Its identity is the envelope's canonical digest, not the
-payload digest: duplicate payloads can be distinct records. `contributingRule` is outside the
-Core §8.3 disposition and never changes that closed form. For an outcome forced by one or more
-true exceptions it is the least forcing exception id by code point. Otherwise, for an `outcome`
-produced by one or more true rules it is the contributing rule id, choosing the least id by code
-point when several true rules produce that same outcome. It is absent for a fallback outcome,
-`not-applicable` and `unresolved`. This accounting choice gives no Core rule or exception
-priority. `lineage` is exactly:
+payload digest: duplicate payloads can be distinct records. `contributors` is outside the Core §8.3 disposition
+and never changes that closed form. When present it is an array of 1 to 4096 closed objects
+`{kind, id}`. `kind` is exactly `"rule"` or `"forcing-exception"`; `id` is the exact Core §5
+local identifier in the pinned stage pack, subject to §2's string and byte bounds. Identity is
+`(kind, id)` within that pinned pack; rule and exception namespaces are distinct. Entries MUST
+be unique and ordered by kind, then id, comparing Unicode code points. No first, last or least-id
+representative stands for the collection. An empty array or null is invalid.
+
+For an outcome forced by one or more true compatible forcing exceptions, include every such
+forcing exception, with kind `forcing-exception`. Normal rules are bypassed and MUST NOT be
+credited. Otherwise include every true, unsuppressed rule that actually contributed the resolved
+outcome, with kind `rule`. All entries in one output therefore have the same kind. Each id MUST
+name an entry of that kind whose declared outcome equals the disposition's outcome; an exception
+MUST have effect `force-outcome`. False, unknown, suppressed and skipped rules, false exceptions,
+suppression and escalation effects, and discarded candidate outcomes MUST NOT be credited.
+`contributors` is absent for a fallback outcome, `not-applicable` and `unresolved`, including
+conflicting outcomes and a failed outcome-value resolution. A failed evaluation has no output
+record and no contributor credit. There is no priority or resolution change to Core §8.
+`lineage` is exactly:
 
 - `workflowDigest`, `execution`, `stage`, `instance`: the workflow digest and three ids;
 - `publishedDialectDigest`, `bindingDocumentDigest`, `boundDialectDigest`: digests, with only
@@ -458,8 +479,8 @@ but remain in the inventory. The set is closed only after every expected instanc
 it is never presented as complete discovery. Every stage, even one with no instances, has a set.
 
 A **stage summary** is one closed record per stage and execution, exactly
-`{summaryVersion: 1, workflowDigest, execution, stage, records, recordsDigest, byKind, byOutcome,
-byReason, byRule}`. The first member is the integer `1`; the next three identify the workflow,
+`{summaryVersion: 2, workflowDigest, execution, stage, records, recordsDigest, byKind, byOutcome,
+byReason, byRule}`. The first member is the integer `2`; the next three identify the workflow,
 execution and stage; and `records` is the number of output records in that stage's recorded set,
 including zero for a blocked stage.
 The remaining members are:
@@ -476,15 +497,50 @@ The remaining members are:
   records and whose positive integer values count records carrying each reason. One record can
   increment several reasons; it is `{}` when no unresolved reason was observed.
 - `byRule`: an object with exactly one member for each member of `byOutcome`. Its value is exactly
-  `{contributors, fallback}`: `contributors` maps each observed `contributingRule` id for that
-  outcome to its positive count, and `fallback` is the nonnegative count of records for which the
-  conditional member is absent. A forcing exception id is counted as the contributing id recorded
-  by the envelope. Contributor members with zero counts are omitted.
+  `{contributors, fallback}`: `contributors` is exactly `{rule, forcing-exception}`, each mapping
+  the observed ids of that kind to positive counts of output records containing that member.
+  Each output increments each of its contributor identities once; `fallback` counts outcome
+  records with absent `contributors`. Empty kind maps and zero fallback are explicit. Zero-count
+  dynamic members are omitted. A single outcome record with two contributors increments its
+  outcome once and gives two contributor credits. The historical name `byRule` does not erase
+  the distinction between rules and forcing exceptions.
 
-All counters use §1's integer domain. `records`, the three `byKind` counts and the sum of
-`byOutcome` are equal. For each outcome, its contributor counts plus `fallback` equal its
-`byOutcome` count. Object member order in retained bytes follows `canon`; no display order or
-implementation map order is significant.
+All counters use §1's integer domain and count records, each at most 4096. `records` equals the
+sum of the three `byKind` counts; the sum of `byOutcome` equals `byKind.outcome`. For an outcome
+count N and fallback F, 0 ≤ F ≤ N. Every individual contributor count is at most N−F. The sum M
+of contributor membership counts satisfies N−F ≤ M ≤ 4096×(N−F); if N=F both kind maps are empty.
+M is a derived membership total, not a record count, and may exceed N. These necessary arithmetic
+invariants supplement exact recomputation from every output membership; they do not replace it.
+Object member order in retained bytes follows `canon`; collection order follows the rule above.
+
+#### Attribution versions and migration
+
+Output version 2, summary version 2 and `driftVersion: 2` below form the complete-attribution
+model proposed for Spec `0.4.0`; this is staging, not publication. Workflow document version 1
+and selection version 1 retain their selectors. Execution version 3 explicitly selects this
+complete-attribution model; execution version 1 retains historical semantics and version 2 is
+reserved by the separate Draft admission-proof RFC 0024, whose adoption is not implied. All
+outputs and summaries within an execution use the same attribution model, including empty
+stages; mixed models are
+`version-unread`. The schema resource is `schema/workflow-contributors-2.schema.json`, with draft `$id`
+`https://judgmentpack.org/schema/0.4.0/workflow-contributors-2.schema.json`.
+
+Historical output version 1's singular `contributingRule` and summary version 1's flat contributor
+map remain representative attribution, **incomplete**, under their original schema and pins.
+The old id alone does not even distinguish its namespace. Readers MUST NOT wrap it into a
+version-2 singleton, label it complete, infer absent identities, or mix its counters with complete
+membership counters. Earlier experimental workflow-version-2 admission-proof recordings whose
+output-version-1 envelopes have no attribution remain unattributed; that independent proposal is
+not output version 2. The historical schema and contract fixtures remain byte-identical.
+
+There is no automatic complete migration. To create version 2, retain or replay the exact pack,
+inputs and evaluation evidence sufficient to establish every actual contributor. Rebuild output
+envelopes, closed sets, selections, parent references, summaries and execution digests transitively;
+keep original historical bytes. Replay cannot reproduce missing acquisition inputs by asking a model
+again. An older reader refuses the new exact selectors. A newer reader may read a historical model
+separately with its original semantics, clearly labeling attribution representative or unavailable.
+Drift across attribution models is `version-unread`; neither a zero delta nor an invented singleton
+is a migration. Core `0.3.0` published artifacts and their evaluation corpus are unchanged.
 
 ### 6. Selection records
 
@@ -537,7 +593,7 @@ remain unchanged.
 
 ### 7. Execution records, instances and attempts
 
-An execution record is exactly `{executionVersion: 1, workflowDigest, execution, rootCaseDigest,
+An execution record is exactly `{executionVersion: 3, workflowDigest, execution, rootCaseDigest,
 frozen, instances, outputSets, summaries, selections, samples}`. The digest members are digests
 and `execution` an id.
 `frozen` has one entry per stage in document order, exactly `{stage, publishedDialectDigest,
@@ -745,7 +801,9 @@ check 3, an earlier instance's `influence-mismatch` precedes a later one's `case
    later-sibling rule only after each instance's admission status is established and only to
    admitted instances, so an instance refused at admission keeps its own code; then re-extract all
    outputs, compare payload bytes, order, complete sets, parent/selection references, relation and
-   lineage pins (`output-mismatch`). Neither failure nor missing data becomes `[]`.
+   lineage pins and contributor form, pack membership and declared outcome association
+   (`output-mismatch`). A contributor absent from the pinned pack or naming a suppression/escalation
+   exception is an output mismatch. Neither failure nor missing data becomes `[]`.
 5. From those checked output records and their retained dispositions, recompute every stage
    summary, including all counters and the exact `recordsDigest` bytes of §5. A well-formed but
    unequal recorded summary is a `summary-mismatch` refusal. Missing, extra and malformed summary
@@ -779,7 +837,7 @@ digests in each stage's closed-set order. For each matched key whose canonical d
 it reports the left and right dispositions; an unmatched key is reported as added or removed with
 the absent side null.
 
-The drift result is exactly `{result: "drift", workflowDigest, leftExecutionDigest,
+The drift result is exactly `{driftVersion: 2, result: "drift", workflowDigest, leftExecutionDigest,
 rightExecutionDigest, stages, records}`. `stages` is in workflow order and carries those counter
 deltas; `records` is in stage order, then payload-digest and occurrence order, and carries only
 changed, added or removed keys. Empty differences are explicit empty arrays.
@@ -796,10 +854,14 @@ once for every workflow stage, including a stage with only zero deltas. Its memb
 | `byReason` | Core-reason members whose values are nonzero signed deltas in that range; absent on both sides is zero |
 | `byRule` | outcome-id members whose values are exactly `{contributors, fallback}` |
 
-Each `byRule` `contributors` object has contributing-rule-id members whose values are nonzero
-signed deltas from -4096 through 4096; absent contributors are zero. `fallback` is the signed
+Each `byRule` `contributors` object is exactly `{rule, forcing-exception}`. Each kind map has
+Core local-id members whose values are nonzero signed deltas from -4096 through 4096, counting
+record memberships of that identity; absent contributors are zero. Both maps remain present
+when empty. `fallback` is the signed
 fallback delta in that range and is present even when zero. An outcome row is present exactly
-when at least one contributor or fallback delta is nonzero. Thus no zero dynamic member or open
+when at least one contributor membership or fallback delta is nonzero. Membership deltas are
+not an exclusive partition of outcome deltas; their sum may exceed the record delta. A change
+only in attribution can change stage deltas while leaving the per-disposition record array empty. Thus no zero dynamic member or open
 row can give an alternative representation of the same stage delta. The stage array has 1 to 32
 rows; each dynamic object has at most 4096 members, subject to §2's smaller execution bounds.
 
@@ -838,17 +900,34 @@ installation's classification of what its channel actually serves remains a trus
 reading cannot detect an undeclared model behind a record-class channel (§4; dialect §5.1).
 Summary recomputation establishes that the bulk counts agree with the retained output envelopes
 and dispositions. Because this reader does not replay dispositions, it does not independently
-establish that a recorded `contributingRule` condition was true; that remains part of the retained
-evaluation evidence and any separate Runtime replay.
+establish that a recorded contributor condition was true, that it was unsuppressed, or that the
+collection is causally complete. Checked pack membership and outcome association are necessary
+structural checks, not evaluation. With fixed envelope pins, an omitted or altered contributor
+changes the envelope digest; with fixed summaries it changes membership counts. A coordinated
+rewrite of the envelopes, pins and summaries can still agree. Proving actual membership and
+completeness requires sufficient retained evaluation evidence or a separate Runtime replay.
 
 ### 11. The two-stage fixture
 
-The hand-written contract fixture at `conformance/workflow/` records `workflow.json`, both
+The preserved representative-attribution contract fixture at `conformance/workflow/` records `workflow.json`, both
 verified-bundle projections, every stage's output envelopes, dispositions and summaries, one
 seeded sample, and the expected drift result. Its manifest also names the oversized-size,
 malformed-seed and unequal-summary refusal vectors. The workflow schema at
 `schema/workflow-1.schema.json` closes every form. These records test bytes and structure; they
 are not captured executor output and establish no reader claim.
+
+The complete-attribution fixtures at `conformance/workflow-v2/` and schema
+`schema/workflow-contributors-2.schema.json` add hand-authored multi-rule and multi-forcing-exception cases,
+opposite pack/id ordering, distinct namespaces, suppressed/skipped/false candidates, fallback,
+not-applicable, conflicting unresolved outcomes and failed outcome-value resolution. Each case
+records an independent expected collection; neither bounded bulk reader replays conditions.
+Python and JavaScript bulk readers recompute memberships and signed drift independently, using
+caller-supplied pinned packs. Their limited input is the contract's bundle projection, not a full
+workflow recording. Mutations cover duplicate and unknown identities, kind/outcome changes,
+non-outcome credits, omissions against fixed summaries, incorrect counters, envelope digests and
+drift. A coordinated omission with recomputed commitments demonstrates the replay limitation.
+No new full execution recording, independent organizational implementation or conformance claim
+is established by these cases.
 
 The first full run fixture is from the Desk's research
 line using two version-3 unbound `operation` dialects, bound by the Runner at import. This remains
@@ -881,8 +960,8 @@ a workflow executor and verifier; those are not established by single-stage prep
 - `result` is `people`. A reviewer selects the first and third organisation in upstream order;
   one child returns two synthetic people objects, the other an empty array. The inventory holds
   three instances, one `completed-zero`, five output records and the complete three-record
-  offered set. Every output carries its rule or forced-exception contributor, with fallback and
-  non-outcome cases omitting it. The relation says which organisation was researched, not that
+  offered set. Every output carries all its rule or forcing-exception contributors, with fallback and
+  non-outcome cases omitting the collection. The relation says which organisation was researched, not that
   employment is true.
 
 The recording carries one summary for each stage and one seeded sample for `organisations`. Both
@@ -994,6 +1073,13 @@ The 2026-10-22 amendment adds the conditional output `contributingRule`, stage `
 version 1's still-Draft forms. It also extends reading counts and adds summary/sample refusal codes
 and a drift result. There are still no published instances or conforming readers to migrate; an
 older draft reader must refuse these members rather than ignore them.
+
+The 2026-10-23 amendment explicitly supersedes that representative-attribution convention.
+Output/summary version 2, execution version 3 and drift version 2 select complete typed
+membership accounting; original schemas, fixtures and experimental admission-proof recordings
+remain unchanged. [RFC 0028](0028-complete-workflow-contributors.md) records why no complete
+migration can be inferred from the singular historical field and why execution version 2 remains
+reserved for the separate Draft RFC 0024. This targets unpublished Spec `0.4.0`.
 
 Core, the dialect, the graph and the Runner's existing API are unchanged. A standalone pack or
 dialect keeps its existing meaning. This RFC defines documents and records, not new endpoints,

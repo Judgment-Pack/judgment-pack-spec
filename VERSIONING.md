@@ -130,3 +130,21 @@ manifest/digest; every row must pass. No claim is available before publication.
 It establishes supplied-document agreement only, with the scope/exclusions of
 [the companion](spec/policy.md). Stable maturity still requires the independent
 implementation evidence in the existing governance and RFC process.
+
+## Proposed workflow attribution model for Spec 0.4.0
+
+[RFC 0028](rfcs/0028-complete-workflow-contributors.md) stages complete contributor attribution;
+no release is established by this proposal. Output record version 2 and summary version 2 use
+complete typed contributor memberships; drift version 2 compares those counts. Execution version
+3 explicitly selects that model. Execution version 1 retains its historical meaning; version 2
+is reserved by the separate Draft admission-proof RFC 0024. Workflow document version 1 and
+selection version 1 retain their forms. `workflow-contributors-2.schema.json` identifies the
+attribution model and does not adopt a workflow-version-2 protocol.
+
+Readers and writers must select these exact versions; a mixed execution or mixed-model drift
+is refused. Historical output/summary version 1 remains representative attribution, incomplete,
+or unavailable in the older experimental recordings. Wrapping its singular id into a singleton
+does not migrate it to complete evidence. Complete migration needs sufficient retained evaluation
+evidence or replay, followed by rebuilding all dependent commitments while preserving history.
+This changes attribution reading, writing and semantics; it changes no Core resolution or
+published Core `0.3.0` artifact. The new `$id` under `0.4.0` is draft staging, not publication.

@@ -81,11 +81,11 @@ class WorkflowTextTests(unittest.TestCase):
         section = companion.split("\n## 5. ", 1)[1].split("\n## 6. ", 1)[0]
         unwrapped = section.replace("\n", " ")
         self.assertIn(
-            "`{outputRecordVersion: 1, payloadDigest, contributingRule, lineage}`",
+            "`{outputRecordVersion: 2, payloadDigest, contributors, lineage}`",
             unwrapped,
         )
         self.assertIn(
-            "`{summaryVersion: 1, workflowDigest, execution, stage, records, "
+            "`{summaryVersion: 2, workflowDigest, execution, stage, records, "
             "recordsDigest, byKind, byOutcome, byReason, byRule}`",
             unwrapped,
         )
@@ -111,7 +111,7 @@ class WorkflowTextTests(unittest.TestCase):
         recovery = companion.split("\n## 8. ", 1)[1].split("\n## 9. ", 1)[0]
         unwrapped = execution.replace("\n", " ")
         self.assertIn(
-            "`{executionVersion: 1, workflowDigest, execution, rootCaseDigest, "
+            "`{executionVersion: 3, workflowDigest, execution, rootCaseDigest, "
             "frozen, instances, outputSets, summaries, selections, samples}`",
             unwrapped,
         )
@@ -128,7 +128,7 @@ class WorkflowTextTests(unittest.TestCase):
         self.assertIn("`sample-mismatch`", section)
         self.assertIn('refusal: "drift-workflow-mismatch"', section)
         self.assertIn(
-            '`{result: "drift", workflowDigest, leftExecutionDigest,', section
+            '`{driftVersion: 2, result: "drift", workflowDigest, leftExecutionDigest,', section
         )
         self.assertIn("**drift computation**", section)
         self.assertIn("A stage-delta row is exactly", section)
