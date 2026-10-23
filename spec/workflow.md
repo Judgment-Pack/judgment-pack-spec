@@ -436,7 +436,7 @@ non-null error artifact is an inventory refusal. The bounded envelope MUST be on
 object in Runtime output version `"2"`, with `command: "experimental evaluate"`, `status: "error"` or `"unsupported"` as the pinned
 Runtime envelope form permits,
 no disposition, and an `evaluationError` with the Core §8.4 class, matching phase and
-`evaluatorSpecVersion: "0.2.0-draft"`. Read it under the Runtime envelope form at the §1 pin;
+`evaluatorSpecVersion: "0.3.0"`. Read it under the Runtime envelope form at the §1 pin;
 its diagnostics and tool version do not change the class. Its bytes are at most 8 MiB and count
 towards the branch aggregate. No audit is retained for that attempt. A reader checks the
 recorded envelope and its pin, not that the Runtime truly emitted it or would repeat it.

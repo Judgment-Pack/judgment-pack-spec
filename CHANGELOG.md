@@ -8,6 +8,7 @@ here.
 ### Added
 
 - Name the next Core release `0.3.0`, define conformance maturity independently, and require `v0.3.0-rc.1` before release (#231).
+- Re-pin released Core schemas, manifests, packs, vectors, readers, and site routes to exact `specVersion` `0.3.0`, preserving `0.2.0-draft` artifacts (#231).
 
 - Policy companion decision (#211): keep RFC 0023 Accepted at draft maturity and Policy 1.0.0 pinned, record its duplicate-identity and no-list-priority rules, and leave disagreement refusal and the second independently authored reader open.
 - RFC 0022 aligns reusable-subgraph bounds, routed handoff provenance, dialect-owned remapping and

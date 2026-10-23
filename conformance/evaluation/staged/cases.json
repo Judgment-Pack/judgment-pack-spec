@@ -1,6 +1,6 @@
 {
   "status": "staged",
-  "stagedAfter": "0.2.0-draft",
+  "stagedAfter": "0.3.0",
   "caseSchema": "../manifest.schema.json#/$defs/case",
   "cases": [
     {
@@ -278,7 +278,7 @@
     },
     {
       "id": "routes-legacy-target-bytes",
-      "origin": "issue-219-legacy-0.2.0-draft",
+      "origin": "issue-219-legacy-0.3.0",
       "pack": "packs/partial-trigger-conflict.json",
       "facts": {
         "flags": {
@@ -300,7 +300,7 @@
           ]
         }
       },
-      "focus": "Single target retains the exact canonical disposition bytes of 0.2.0-draft",
+      "focus": "Single target retains the exact canonical disposition bytes of 0.3.0",
       "specSection": "\u00a7\u00a78.1, 8.3"
     },
     {

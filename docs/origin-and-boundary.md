@@ -12,7 +12,7 @@ or company.
 No required commercial runtime controls it, and no implementation is designated normative by virtue
 of its origin.
 
-JPS defines document conformance and, as of `0.2.0-draft`, what an evaluation of a pack means for an
+JPS defines document conformance and what an evaluation of a pack means for an
 implementation claiming the evaluator conformance class (Core §3.4) — never how any engine is built. It
 specifies what a conforming Judgment Pack document must contain, how such documents are validated
 against tagged prose and schemas, and which single portable result an evaluation produces. It does not

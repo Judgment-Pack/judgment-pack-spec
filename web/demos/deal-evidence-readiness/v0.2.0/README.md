@@ -49,7 +49,7 @@ operational job, external write or audit record created.
 | Path | What it contains |
 | --- | --- |
 | `jpack.json` | Runtime project configuration with relative paths. |
-| `packs/deal-readiness.pack.json` | Pack v0.2.0, declaring JPS Core 0.2.0-draft. |
+| `packs/deal-readiness.pack.json` | Pack v0.2.0, declaring JPS Core 0.3.0. |
 | `packs/deal-readiness.matrix.json` | All 40 project-owned expected results. |
 | `sources/policy/` | The synthetic policy cited by the pack. |
 | `sources/readiness/scenarios/` | Thirteen folders, each with case, CRM, quote, security and finance JSON files. |

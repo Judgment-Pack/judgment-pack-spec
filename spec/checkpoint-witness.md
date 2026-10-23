@@ -5,7 +5,7 @@
 This document is a companion document of the Judgment Pack specification. It is normative for one
 conformance class, the *witness-statement reader* (§11), and for nothing else
 ([Core §1.1](judgment-pack-core.md#11-normative-artifacts-and-precedence)). It changes nothing in
-Judgment Pack Core `0.2.0-draft`, its schema, its four conformance classes, or either of its
+Judgment Pack Core `0.3.0`, its schema, its four conformance classes, or either of its
 corpora.
 
 Its 54 vectors, under
@@ -17,7 +17,7 @@ publishes them, no witness-statement reader conformance claim is available: §11
 the vectors published with the version its claim names, and no version publishes these.
 
 It specifies version `1` of the witness statement (`witnessVersion` `"1"`, §3). It is published
-beside the released Core `0.2.0-draft` and carries no `specVersion` of its own; whether its vectors
+beside the released Core `0.3.0` and carries no `specVersion` of its own; whether its vectors
 take a `suiteVersion` of their own is open in its design record (Unresolved 1). Like Core, it is
 at draft maturity.
 

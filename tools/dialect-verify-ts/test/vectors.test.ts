@@ -7,14 +7,15 @@
 // manifest's digest.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { tmpdir } from "node:os";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { bindDialect, readBinding } from "../src/forms.ts";
 import { member, preparationForm, read } from "../src/json.ts";
 import type { JObj, JVal } from "../src/json.ts";
-import { loadVector } from "../src/vector.ts";
+import { loadVector, recordingSchema, VectorError } from "../src/vector.ts";
 import { verify } from "../src/verify.ts";
 import type { Inputs, Result } from "../src/verify.ts";
 
@@ -49,6 +50,58 @@ test("the manifest names every vector directory, and nothing else", () => {
   assert.deepEqual(manifest.cases.map((c) => c.path.replace(/^vectors\//, "")).sort(), dirs);
   assert.equal(manifest.cases.length, 47);
   assert.deepEqual([...runner.keys()], manifest.cases.map((c) => c.id));
+});
+
+test("recorded evaluator versions are a closed set", () => {
+  assert.equal(recordingSchema("0.2.0-draft"), "schema/judgment-pack-core-0.2.0-draft.schema.json");
+  assert.equal(recordingSchema("0.3.0"), "schema/judgment-pack-core.schema.json");
+  for (const version of ["", "0.1.0-draft", "0.4.0"]) {
+    assert.throws(() => recordingSchema(version), (error: unknown) =>
+      error instanceof VectorError && error.message === "recording-version-unsupported");
+  }
+});
+
+test("an embedded-pack-only version rewrite refuses the recording", () => {
+  const temporary = mkdtempSync(join(tmpdir(), "dialect-recording-"));
+  const dir = join(temporary, "valid");
+  try {
+    cpSync(join(ROOT, "vectors", "valid"), dir, { recursive: true });
+    const path = join(dir, "run.json");
+    const source = readFileSync(path, "utf8");
+    const changed = source.replace('\\"specVersion\\": \\"0.2.0-draft\\"', '\\"specVersion\\": \\"0.3.0\\"');
+    assert.notEqual(changed, source);
+    writeFileSync(path, changed);
+    assert.throws(() => loadVector(dir, false), (error: unknown) =>
+      error instanceof VectorError && error.message === "recording-version-mismatch");
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+const assertInvalidEmbeddedPack = (change: (pack: Record<string, unknown>) => void): void => {
+  const temporary = mkdtempSync(join(tmpdir(), "dialect-recording-"));
+  const dir = join(temporary, "valid");
+  try {
+    cpSync(join(ROOT, "vectors", "valid"), dir, { recursive: true });
+    const path = join(dir, "run.json");
+    const exported = JSON.parse(readFileSync(path, "utf8")) as { release: { pack: string } };
+    const pack = JSON.parse(exported.release.pack) as Record<string, unknown>;
+    change(pack);
+    exported.release.pack = JSON.stringify(pack);
+    writeFileSync(path, JSON.stringify(exported));
+    assert.throws(() => loadVector(dir, false), (error: unknown) =>
+      error instanceof VectorError && error.message === "recording-pack-invalid");
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+};
+
+test("an embedded pack missing a required member refuses the recording", () => {
+  assertInvalidEmbeddedPack((pack) => { delete pack.id; });
+});
+
+test("an embedded pack with a wrong member type refuses the recording", () => {
+  assertInvalidEmbeddedPack((pack) => { pack.id = []; });
 });
 
 for (const row of manifest.cases) {

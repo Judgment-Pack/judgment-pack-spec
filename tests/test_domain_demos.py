@@ -31,7 +31,7 @@ class DomainDemoTests(unittest.TestCase):
                     self.assertEqual(first, (root / "b" / relative).read_bytes())
                     if demo.slug == "deal-evidence-readiness":
                         self.assertEqual(hashlib.sha256(first).hexdigest(),
-                            "8616e63464d2609426586d398a995da4abde5fde6a87b4c0e997d3e66d559b80")
+                            "f88fd490e85b71522fbc64e092b7d4ce5057a9169838f0fe4e234f91545bda2b")
                     with zipfile.ZipFile(root / "a" / relative) as archive:
                         prefix = demo.archive + "/"
                         manifest = json.loads((ROOT / demo.source.parent / "manifest.json").read_text())

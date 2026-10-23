@@ -114,7 +114,7 @@ records or re-run the mapping. [The coverage review](../../web/demos/deal-eviden
 explains the remaining advisory conflict probe. These project tests are not the JPS conformance
 corpus or proof of production fitness.
 
-The pack uses **JPS Core 0.2.0-draft**. Project configuration, test matrices, source mapping,
+The pack uses **JPS Core 0.3.0**. Project configuration, test matrices, source mapping,
 scheduling and briefs are companion-tool conventions, not additions to the specification.
 The website serves static documentation and downloads; it does not run jobs.
 

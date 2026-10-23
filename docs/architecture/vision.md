@@ -23,7 +23,7 @@ declares a single decision (its evidence requirements, applicability, rules, exc
 uncertainty handling, escalation, and sources) — together with how to check that a document
 **conforms** at the carrier, structural, and semantic layers.
 
-As of `0.2.0-draft` it also defines what an *evaluation* of one pack means — the semantics an
+It also defines what an *evaluation* of one pack means — the semantics an
 implementation must follow to claim the evaluator conformance class, and the one portable result it
 produces. It still ships no evaluator, and it defines no execution, no composition, no discovery, and
 no runtime. Those exclusions are intentional; see the [non-goals](../non-goals.md).
@@ -43,7 +43,7 @@ no runtime. Those exclusions are intentional; see the [non-goals](../non-goals.m
 | Judgment Pack | A single-decision document. | **Shipped** | The specification |
 | Evidence (sources) | What a pack references; supplied by any system. | Reference **shipped**; integration out of scope | [RFC 0003](../../rfcs/0003-evidence-reference.md) |
 | Evidence acquisition | Getting the bytes, and showing they were not invented. | Out of scope; open research, no RFC proposes it | [Research](#where-those-inputs-come-from-is-a-separate-open-question) |
-| Runtime | Validates documents; may also evaluate. | Validator shipped; evaluator conformance class **shipped** in Core `0.2.0-draft` §3.4, and the reference runtime now states a claim of it in its own repository | Reference runtime, [RFC 0006](../../rfcs/0006-evaluator-conformance.md) |
+| Runtime | Validates documents; may also evaluate. | Validator shipped; evaluator conformance class **shipped** in Core `0.3.0` §3.4, and the reference runtime now states a claim of it in its own repository | Reference runtime, [RFC 0006](../../rfcs/0006-evaluator-conformance.md) |
 | Composite Judgment | The aggregated result of evaluating a graph. | Proposed | [RFC 0002](../../rfcs/0002-judgment-graph.md) |
 | Discovery / registry | Finding and selecting packs across catalogs. | Proposed (format) / product (service) | [RFC 0001](../../rfcs/0001-pack-manifest.md), [RFC 0005](../../rfcs/0005-pack-discovery.md) |
 

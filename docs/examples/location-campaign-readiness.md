@@ -79,7 +79,7 @@ jpack packs test --config jpack.json
 ```
 
 Expected: **18 passed, 0 mismatched**. The matrix evaluates captured projected inputs;
-it does not re-acquire records or re-run the mapping. The pack declares JPS Core 0.2.0-draft;
+it does not re-acquire records or re-run the mapping. The pack declares JPS Core 0.3.0;
 the project matrix and Runner mapping are companion-tool conventions. These cases are not
 the normative JPS conformance corpus.
 

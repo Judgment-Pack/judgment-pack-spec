@@ -148,7 +148,15 @@ def bundle_paths(tag: str, commit: str) -> tuple[str, ...]:
             paths.extend(f"{path}/{child}" for child in children if child != "policy")
         else:
             paths.append(path)
-    return (*paths, f"releases/{tag}.md")
+    return (*paths, core_release_notes_path(tag).relative_to(ROOT).as_posix())
+
+
+def core_release_notes_path(tag: str, root: Path = ROOT) -> Path:
+    """Return the immutable notes path, or the prepared notes before release publication."""
+    published = root / "releases" / f"{tag}.md"
+    if published.is_file():
+        return published
+    return root / "docs" / "releases" / f"{tag}.md"
 
 
 def git(*arguments: str) -> str:
@@ -198,7 +206,7 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     )
     if schema.get("$id") != expected_schema_id:
         raise ValueError("schema $id does not point at the exact release version")
-    release_notes = root / "releases" / f"{tag}.md"
+    release_notes = core_release_notes_path(tag, root)
     if not release_notes.is_file():
         raise ValueError("release notes are missing for the exact tag")
 

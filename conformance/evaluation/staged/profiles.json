@@ -1,7 +1,7 @@
 {
   "description": "Hand-written profile admission cases; appendRoutes and profile override the shared pack without changing its other members.",
   "pack": {
-    "specVersion": "0.2.0-draft",
+    "specVersion": "0.3.0",
     "id": "https://example.com/packs/profiles",
     "version": "1.0.0",
     "title": "Profile boundary",

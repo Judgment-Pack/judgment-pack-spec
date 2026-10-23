@@ -10,7 +10,7 @@
 [![Good first issues](https://img.shields.io/github/issues/Judgment-Pack/judgment-pack-spec/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/Judgment-Pack/judgment-pack-spec/labels/good%20first%20issue)
 [![Open Source Helpers](https://www.codetriage.com/judgment-pack/judgment-pack-spec/badges/users.svg)](https://www.codetriage.com/judgment-pack/judgment-pack-spec)
 
-> **Status: `0.2.0-draft`**
+> **Status: `0.3.0`**
 >
 > JPS is a draft specification in production use by adopters. It is not an industry standard, and
 > `0.x` drafts carry no compatibility guarantee: pin the exact draft and runtime release you verified.
@@ -108,10 +108,10 @@ This draft exists to test whether a small declarative core can support independe
 and runtimes without standardizing any one product, model, or workflow.
 
 The specification is successful only if independent implementations can exchange the same pack and
-agree on its document structure and declared field and reference semantics — and, for the class added
-in `0.2.0-draft`, on the result of applying it.
+agree on its document structure and declared field and reference semantics — and, for evaluator
+conformance, on the result of applying it.
 
-Core `0.2.0-draft` supports testing carrier, structural, and semantic document conformance, and
+Core `0.3.0` supports testing carrier, structural, and semantic document conformance, and
 defines a fourth class: evaluator conformance (§3.4), with normative condition and resolution
 semantics, one portable result (the §8.3 disposition), an error contract (§8.4), and a seed evaluation
 corpus. Document conformance is unchanged, and exactly one form of evaluator-conformance claim is
@@ -181,7 +181,7 @@ current landscape.
 
 ```json
 {
-  "specVersion": "0.2.0-draft",
+  "specVersion": "0.3.0",
   "id": "https://example.com/judgment-packs/expense-approval",
   "version": "0.1.0",
   "title": "Expense approval",
@@ -228,7 +228,7 @@ These are deliberately separate claims:
 6. **Organizational authorization:** an accountable organization permits the pack's use.
 7. **Operational fitness:** a particular runtime applies it safely and effectively.
 
-This draft specifies the first four claims. The fourth is new in `0.2.0-draft` and is
+This draft specifies the first four claims. The fourth is
 claimed only as §3.4.1 permits: it says that the implementation complies with the whole evaluator
 contract of §§7–10 for every input it admits, and every row of the named corpus version must have
 passed for the claim to be made at all. Corpus results are required evidence of that compliance, not

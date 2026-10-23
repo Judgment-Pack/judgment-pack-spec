@@ -15,13 +15,20 @@ import hashlib
 import importlib.util
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 from unittest import mock
+
+from jsonschema import Draft202012Validator, FormatChecker
+
+from tools import workflow_reader_encoding
+
+release_bytes = workflow_reader_encoding.retained_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
 DIALECT = ROOT / "conformance" / "dialect"
@@ -190,8 +197,9 @@ class Inputs:
         run = (directory / "run.json").read_bytes()
         self.run = READER.read_document(run, "run.json")["run"]
         self.preparation = READER.preparation_bytes(self.run["input"]["preparation"])
-        # run.auditBytes; or, in a version-2 export, run.audit exactly as run.json writes it (§11)
-        self.record = READER.record_of_export(run)
+        # The complete recording's versions agree; its record is run.auditBytes, or in a version-2
+        # export run.audit exactly as run.json writes it (§11).
+        self.record = READER.recording_of_export(run).record
         self.require_binding = require_binding
 
     def verify(self) -> Any:
@@ -496,6 +504,95 @@ class DialectVectorTests(unittest.TestCase):
         }
         self.assertEqual([], sorted(on_disk - listed), "files that the Runner's manifest names not")
         self.assertEqual([], sorted(listed - on_disk), "files that the Runner's manifest names, missing")
+
+    def test_recording_versions_and_release_bytes_are_integral(self) -> None:
+        schemas: dict[str, Draft202012Validator] = {}
+        versions = set()
+        for path in sorted(VECTORS.glob("*/run.json")):
+            with self.subTest(vector=path.parent.name):
+                raw = path.read_bytes()
+                export = json.loads(raw)
+                recording = READER.recording_of_export(raw)
+                versions.add(recording.evaluator_spec_version)
+
+                validator = schemas.get(recording.schema)
+                if validator is None:
+                    schema = json.loads((ROOT / recording.schema).read_text(encoding="utf-8"))
+                    validator = Draft202012Validator(schema, format_checker=FormatChecker())
+                    schemas[recording.schema] = validator
+                pack = json.loads(recording.pack)
+                self.assertEqual([], list(validator.iter_errors(pack)), "the selected Core schema")
+
+                pack_digest = READER.digest_of(recording.pack)
+                self.assertEqual(export["release"]["packDigest"], pack_digest)
+                lock = json.loads(export["release"]["lock"])
+                self.assertEqual(lock["packs"]["target"]["digest"], pack_digest)
+
+                decoded = json.loads(recording.record)
+                visible = export["run"]["audit"]
+                declared = export["run"]["result"]["evaluatorSpecVersion"]
+                self.assertEqual(decoded["evaluatorSpecVersion"], visible["evaluatorSpecVersion"])
+                self.assertEqual(decoded["evaluatorSpecVersion"], declared)
+
+                release_digest = READER.digest_of(
+                    release_bytes(
+                        workflow_reader_encoding.d.read_document(raw, "the recorded export")["release"]
+                    )
+                )
+                self.assertEqual(export["releaseDigest"], release_digest)
+                self.assertEqual((path.parent / "release-digest.txt").read_text(), release_digest)
+        self.assertEqual({"0.2.0-draft"}, versions, "these are historical recordings, not 0.3.0 producer coverage")
+
+    def test_a_pack_only_version_rewrite_refuses_the_recording(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary) / "valid"
+            shutil.copytree(VECTORS / "valid", directory)
+            path = directory / "run.json"
+            raw = path.read_bytes()
+            changed = raw.replace(
+                b'\\"specVersion\\": \\"0.2.0-draft\\"',
+                b'\\"specVersion\\": \\"0.3.0\\"',
+                1,
+            )
+            self.assertNotEqual(raw, changed)
+            path.write_bytes(changed)
+            with self.assertRaises(READER.Refused) as refused:
+                READER.recording_of_export(path.read_bytes())
+            self.assertEqual("recording-version-mismatch", refused.exception.name)
+
+    def assert_invalid_embedded_pack(self, change: Callable[[dict[str, Any]], Any]) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary) / "valid"
+            shutil.copytree(VECTORS / "valid", directory)
+            path = directory / "run.json"
+            export = json.loads(path.read_text(encoding="utf-8"))
+            pack = json.loads(export["release"]["pack"])
+            change(pack)
+            export["release"]["pack"] = json.dumps(pack, separators=(",", ":"))
+            path.write_text(json.dumps(export, separators=(",", ":")), encoding="utf-8")
+
+            with self.assertRaises(READER.Refused) as refused:
+                READER.recording_of_export(path.read_bytes())
+            self.assertEqual("recording-pack-invalid", refused.exception.name)
+
+    def test_an_embedded_pack_missing_a_required_member_refuses_the_recording(self) -> None:
+        self.assert_invalid_embedded_pack(lambda pack: pack.pop("id"))
+
+    def test_an_embedded_pack_with_a_wrong_member_type_refuses_the_recording(self) -> None:
+        self.assert_invalid_embedded_pack(lambda pack: pack.__setitem__("id", []))
+
+    def test_recording_evaluator_versions_are_closed(self) -> None:
+        self.assertEqual(
+            "schema/judgment-pack-core-0.2.0-draft.schema.json",
+            READER.recording_schema("0.2.0-draft"),
+        )
+        self.assertEqual(
+            "schema/judgment-pack-core.schema.json", READER.recording_schema("0.3.0")
+        )
+        for version in ("", "0.1.0-draft", "0.4.0"):
+            with self.subTest(version=version), self.assertRaises(READER.Refused) as refused:
+                READER.recording_schema(version)
+            self.assertEqual("recording-version-unsupported", refused.exception.name)
 
     def test_rows_name_the_runners_vectors_in_order(self) -> None:
         self.assertEqual(

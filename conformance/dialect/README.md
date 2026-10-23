@@ -12,7 +12,7 @@ hand — as the [checkpoint witness vectors](../witness/README.md) and the
 - **Not part of any corpus.** The companion document's §14 holds a preparation verifier to the
   dialect vectors published with the specification version its claim names. No version publishes
   these, so no claim may cite them, and no conformance claim of the class is available until one
-  does. Nothing here changes Core `0.2.0-draft`, its schema, its four classes, or either of its
+  does. Nothing here changes Core `0.3.0`, its schema, its four classes, or either of its
   corpora.
 - **Not published with the specification, and in no release bundle.** The site's build skips this
   directory, as it skips the other staged directories, and a test holds that nothing under it is
@@ -63,6 +63,18 @@ Runner's first: the Runner calls them "hand-maintained normative data", and says
 
 The links in the Runner's README are relative to the Runner's repository, and do not resolve here;
 the repository's link check passes over `vectors/` for that reason.
+
+## Historical recording version
+
+All 47 recordings are byte-exact Runner exports made under Core `0.2.0-draft`; they are historical
+evidence, not `0.3.0` producer coverage. Their declaration is
+`run.result.evaluatorSpecVersion`. The two verifier tools accept that value only with the frozen
+`schema/judgment-pack-core-0.2.0-draft.schema.json`, or `0.3.0` only with the live Core schema, and
+require it to equal the embedded pack's version and both the visible and decoded signed audit's
+evaluator and pack versions. Any other value, any disagreement, or a pack that does not validate
+against the selected schema refuses the recording before its preparation is verified. A genuine
+`0.3.0` set will be recorded through the Runner and published
+beside these exports, without rewriting or re-signing them.
 
 ## Companion hand-written cases
 

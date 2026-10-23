@@ -4,7 +4,7 @@ This exercise takes about 10–15 minutes. It tests whether the current JSON sha
 and whether a Draft 2020-12 validator reports the expected structural results. It also invites
 feedback about authoring and local references.
 
-It does **not** test evaluator conformance. Core `0.2.0-draft` does define that class (§3.4), but it
+It does **not** test evaluator conformance. Core `0.3.0` does define that class (§3.4), but it
 is claimed against the [evaluation corpus](conformance/evaluation/README.md) on the terms in §3.4.1,
 not by this exercise — and schema acceptance never shows that a pack is correct, authorized, safe,
 or operationally fit.

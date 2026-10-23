@@ -5,7 +5,7 @@
 This document is a companion document of the Judgment Pack specification. It is normative for one
 conformance class, the *preparation verifier* (§14), and for nothing else
 ([Core §1.1](judgment-pack-core.md#11-normative-artifacts-and-precedence)). It changes nothing in
-Judgment Pack Core `0.2.0-draft`, its schema, its four conformance classes, or either of its
+Judgment Pack Core `0.3.0`, its schema, its four conformance classes, or either of its
 corpora.
 
 Its design record is [RFC 0018](../rfcs/0018-dialect.md), accepted on 2026-10-15 at draft maturity,
@@ -39,6 +39,19 @@ this class and for nothing else. Until a specification version publishes them, n
 preparation-verifier conformance claim is available: §14 holds a verifier to the vectors published
 with the version its claim names, and no version publishes these.
 
+### Recorded evaluator versions
+
+A Runner recording declares the Core version under which it was evaluated in
+`run.result.evaluatorSpecVersion`. A recording reader accepts exactly `0.2.0-draft`, whose embedded
+pack is validated against the frozen `judgment-pack-core-0.2.0-draft.schema.json`, or `0.3.0`, whose
+embedded pack is validated against the live `judgment-pack-core.schema.json`. The declaration MUST
+equal `release.pack.specVersion`, the visible audit's evaluator and pack versions, and the same two
+members in the decoded `run.auditBytes`; another version is `recording-version-unsupported`, and a
+disagreement is `recording-version-mismatch`. An embedded pack that does not validate against the
+selected schema is `recording-pack-invalid`. All three are refusals before preparation verification.
+The forty-seven staged recordings remain the Runner's byte-exact `0.2.0-draft` exports; they are
+historical evidence, not `0.3.0` producer coverage.
+
 It specifies version 2 of the dialect document and of the preparation, which are the Runner's
 mapping v2 and its preparation, restated. Since the amendment of 2026-10-15 (RFC 0018, its
 Amendment), version 2's `operation` reads a gateway source of shape `airbyte`, `mcp` or `http`, as
@@ -55,7 +68,7 @@ reads version 3 since its pull request 83 (`v0.12.0`), and twenty-eight of the v
 while the four kinds are proposed: the Runner prepares `research` since its pull request 97, and
 twenty-six of the vectors hold it; no preparer writes the other three, and no vector holds them
 (§4.3). It proposes
-version 1 of the output side (§10). It is published beside the released Core `0.2.0-draft` and
+version 1 of the output side (§10). It is published beside the released Core `0.3.0` and
 carries no `specVersion` of its own. Like Core, it is at draft maturity.
 
 The research-contract amendment of 2026-10-15 (issue #171, RFC 0018 round 8) adds typed result

@@ -1,18 +1,18 @@
-# Judgment Pack Core `0.2.0-draft`
+# Judgment Pack Core `0.3.0`
 
 ## Status
 
 This document is a draft. It may change incompatibly and MUST NOT be represented as an
 industry standard or as suitable, by conformance alone, for consequential decisions.
 
-`0.2.0-draft` defines four conformance classes: carrier, structural, and semantic document
-conformance, unchanged in substance from `0.1.0-draft`, and evaluator conformance (§3.4), which is
-new. Sections 7 and 8 are normative for an implementation that claims the evaluator class and
-informative for every other consumer; a document-conformance claim does not depend on them. The
-document format is unchanged: a `0.1.0-draft` pack is unchanged in representation and in
-document-conformance meaning here and may be re-declared as `0.2.0-draft` without other edits.
-Re-declaration also opts the pack into this draft's evaluator semantics (§§7–8), which existed for no
-consumer under `0.1.0-draft`, and confers no conformance on any implementation (§11).
+`0.3.0` defines four conformance classes: carrier, structural, and semantic document
+conformance, and evaluator conformance (§3.4). Sections 7 and 8 are normative for an implementation
+that claims the evaluator class and informative for every other consumer; a document-conformance
+claim does not depend on them. The document format is unchanged from `0.2.0-draft`: a pack using
+that identifier is unchanged in representation and in document-conformance meaning here and may be
+re-declared as `0.3.0` without other edits.
+Re-declaration opts the pack into this release's exact evaluator semantics and corpus and confers no
+conformance on any implementation (§11).
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT**, and **MAY** are to be
 interpreted as described by BCP 14 when, and only when, they appear in all capitals. Normative
@@ -90,7 +90,7 @@ decimal = [ "-" ] ( "0" / non-zero-digit *DIGIT ) [ "." 1*DIGIT ]
 Exponent notation, leading plus signs, leading zeroes, `NaN`, and infinities are not admitted.
 This grammar does not classify every numeric-looking string as a decimal and does not apply to
 identifiers, versions, paths, locators, citations, equality operands, or other textual values merely
-because they contain digits. Core `0.2.0-draft` has no general decimal type marker; exact decimal
+because they contain digits. Core `0.3.0` has no general decimal type marker; exact decimal
 quantities outside ordered fact-condition operands require a future profile or declared extension.
 
 This section defines decimal lexical syntax only. It has no decimal type marker and does not define
@@ -308,7 +308,7 @@ disposition. Every other bullet above applies to the evaluator class unchanged.
 | Member                 | Required | Meaning                                                 |
 | ---------------------- | -------: | ------------------------------------------------------- |
 | `profile`             |       no | Ceiling profile: `base` (default) or `extended` (§4.1) |
-| `specVersion`          |      yes | Exact value `0.2.0-draft`                               |
+| `specVersion`          |      yes | Exact value `0.3.0`                               |
 | `id`                   |      yes | Stable absolute URI identifying the pack series         |
 | `version`              |      yes | Three-component `MAJOR.MINOR.PATCH` revision string     |
 | `title`                |      yes | Non-empty human-readable title                          |
@@ -436,7 +436,7 @@ The pack `id` MUST be an absolute URI. Local object identifiers are non-empty AS
 Local identifiers are scoped to the pack version. They MUST NOT be interpreted as globally unique.
 Meaning MUST NOT be inferred from the spelling of an identifier.
 
-Core `0.2.0-draft` has no imports or remote-reference resolution. All rule, outcome, source,
+Core `0.3.0` has no imports or remote-reference resolution. All rule, outcome, source,
 evidence-requirement, and exception references resolve within one document.
 
 ## 6. Core objects
@@ -989,18 +989,18 @@ reader, writer, and semantic compatibility separately and supply machine-readabl
 
 A published pack version SHOULD be immutable. Changed content SHOULD receive a new version.
 
-`0.2.0-draft` changes no part of the document format. A pack declaring `specVersion` `0.1.0-draft` is
-unchanged in representation and in document-conformance meaning under this draft — every member, every
-cross-field rule, and every conformance verdict of §§3.1–3.3 is the same — and may be re-declared as
-`0.2.0-draft` by editing that one value and nothing else. Re-declaration is not semantically inert: it
-opts the pack into the evaluator semantics of §§7–8, which are normative for the class defined here and
-existed for no consumer under `0.1.0-draft` (§7.5 replaces that draft's undefined appeal to a complete
-evidence manifest). What re-declaration does not do is confer conformance on anything: an
+`0.3.0` changes no part of the document format from `0.2.0-draft`. A pack declaring that earlier
+`specVersion` is unchanged in representation and in document-conformance meaning under this release —
+every member, every cross-field rule, and every conformance verdict of §§3.1–3.3 is the same — and
+may be re-declared as `0.3.0` by editing that one value and nothing else. Re-declaration is not
+semantically inert: it
+opts the pack into this release's exact evaluator semantics of §§7–8 and its evaluation corpus.
+What re-declaration does not do is confer conformance on anything: an
 evaluator-conformance claim is a claim about an implementation, made only as §3.4.1 permits, and no pack
-edit creates, transfers, or strengthens one. Because the value is exact (§4), an unedited `0.1.0-draft` pack is not
-structurally conforming to `0.2.0-draft` and must be re-declared before an implementation claiming
-this draft evaluates it; the `0.1.0-draft` schema remains published for packs that keep the older
-value.
+edit creates, transfers, or strengthens one. Because the value is exact (§4), an unedited
+`0.2.0-draft` pack is not structurally conforming to `0.3.0` and must be re-declared before an
+implementation claiming this release evaluates it; the `0.1.0-draft` and `0.2.0-draft` schemas
+remain published for packs that keep an older value.
 
 An evaluator-conformance claim (§3.4) attaches to one exact `specVersion` and to the evaluation
 corpus published with it. It is not inherited by a later or an earlier version, and re-declaring a

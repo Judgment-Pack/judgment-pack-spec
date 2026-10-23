@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://judgmentpack.org/schema/0.2.0-draft/conformance/evaluation/manifest.schema.json",
+  "$id": "https://judgmentpack.org/schema/0.3.0/conformance/evaluation/manifest.schema.json",
   "title": "Judgment Pack evaluation corpus manifest",
   "description": "The case carrier for the evaluation corpus. It describes cases; it defines no evaluator and executes nothing.",
   "type": "object",
@@ -18,10 +18,10 @@
       "const": "./manifest.schema.json"
     },
     "suiteVersion": {
-      "const": "0.2.0-draft"
+      "const": "0.3.0"
     },
     "specVersion": {
-      "const": "0.2.0-draft"
+      "const": "0.3.0"
     },
     "status": {
       "enum": ["draft", "candidate", "release"]

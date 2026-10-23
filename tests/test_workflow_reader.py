@@ -70,7 +70,7 @@ class Example:
                       'case':{'facts':[{'target':'/items','source':'/items'}],'evidence':[]}}
         if mapping is not None: self.mapping=mapping
         self.profiles=[] if profiles is None else profiles
-        self.pack={'id':'https://example.invalid/pack','version':'1.0.0','specVersion':'0.2.0-draft','outcomes':[{'id':'ok'}]}
+        self.pack={'id':'https://example.invalid/pack','version':'1.0.0','specVersion':'0.3.0','outcomes':[{'id':'ok'}]}
         self.runtime='sha256:'+'a'*64
         self.release={'schemaVersion':'1','id':'r','pack':d.canon(self.pack).decode(),'packDigest':hashvalue(self.pack),
                       'packId':self.pack['id'],'packVersion':self.pack['version'],'title':'unit','runtimeDigest':self.runtime,
@@ -396,10 +396,18 @@ class ReaderTests(unittest.TestCase):
     def test_error_envelope_closed_form(self):
         e=Example(); reader=w.Reader(e.files,e.expect)
         error=dict(outputVersion='2',tool={'name':'jpack','version':'0.34.0'},command='experimental evaluate',status='error',
-                   evaluationError={'class':'resource-exhaustion','phase':'evaluation','evaluatorSpecVersion':'0.2.0-draft'},diagnostics=[])
+                   evaluationError={'class':'resource-exhaustion','phase':'evaluation','evaluatorSpecVersion':'0.3.0'},diagnostics=[])
         reader.error_form(error)
-        for mutation in [dict(error,disposition={}),dict(error,evaluationError={'class':'resource-exhaustion','phase':'preflight','evaluatorSpecVersion':'0.2.0-draft'})]:
+        for mutation in [dict(error,disposition={}),dict(error,evaluationError={'class':'resource-exhaustion','phase':'preflight','evaluatorSpecVersion':'0.3.0'})]:
             with self.assertRaises(w.Problem): reader.error_form(mutation)
+
+    def test_error_envelope_rejects_stale_evaluator_version(self):
+        e=Example(); reader=w.Reader(e.files,e.expect)
+        error=dict(outputVersion='2',tool={'name':'jpack','version':'0.34.0'},command='experimental evaluate',status='error',
+                   evaluationError={'class':'resource-exhaustion','phase':'evaluation','evaluatorSpecVersion':'0.2.0-draft'},diagnostics=[])
+        with self.assertRaises(w.Problem) as caught: reader.error_form(error)
+        self.assertEqual((caught.exception.result,caught.exception.code,caught.exception.detail),
+                         ('refusal','input-malformed','Core error phase'))
 
     def test_empty_output_is_completed_zero(self):
         result=self.read(Example(case={'items':[]}).group())
