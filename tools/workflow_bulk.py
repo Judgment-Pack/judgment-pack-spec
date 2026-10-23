@@ -14,6 +14,7 @@ import jsonschema
 SCHEMA = json.loads((Path(__file__).resolve().parents[1] / 'schema' /
                      'workflow-contributors-2.schema.json').read_text())
 KINDS = ('rule', 'forcing-exception')
+TRANSPORT_MAX_BYTES = 33554432  # Experimental transport only; not a Core pack ceiling.
 
 
 class Problem(Exception):
@@ -35,7 +36,7 @@ def digest(value):
     return 'sha256:' + hashlib.sha256(canonical(value)).hexdigest()
 
 
-def parse(raw):
+def parse(raw, controls=True):
     def pairs(items):
         value = {}
         for key, item in items:
@@ -43,8 +44,17 @@ def parse(raw):
                 fail('input-malformed')
             value[key] = item
         return value
+    def number(token, integer):
+        if controls:
+            if len(token) > 128:
+                fail('input-over-bound')
+            if not integer:
+                fail('input-malformed')
+        return int(token) if integer else float(token)
     try:
         return json.loads(raw, object_pairs_hook=pairs,
+                          parse_int=lambda token: number(token, True),
+                          parse_float=lambda token: number(token, False),
                           parse_constant=lambda _: fail('input-malformed'))
     except (ValueError, UnicodeError, RecursionError):
         fail('input-malformed')
@@ -105,6 +115,17 @@ def summarize(bundle, stage):
     return answer
 
 
+def selector(value, member, expected):
+    if member not in value or type(value[member]) is not int:
+        fail('input-malformed')
+    if value[member] != expected:
+        fail('version-unread')
+
+
+def transport_size(bundle, pack_bytes):
+    return len(canonical(bundle)) + sum(len(raw) for raw in pack_bytes.values())
+
+
 def verify(bundle, pack_bytes):
     """Checks bulk consistency, never actual conditions or causal completeness.
 
@@ -113,23 +134,22 @@ def verify(bundle, pack_bytes):
     """
     if not isinstance(bundle, dict) or 'fixtureVersion' not in bundle:
         fail('input-malformed')
-    if bundle.get('fixtureVersion') != 2:
-        fail('version-unread')
+    selector(bundle, 'fixtureVersion', 2)
     if not isinstance(bundle.get('stages'), list):
         fail('input-malformed')
     for stage in bundle['stages']:
         if not isinstance(stage, dict) or not isinstance(stage.get('summary'), dict):
             fail('input-malformed')
-        if stage['summary'].get('summaryVersion') != 2:
-            fail('version-unread')
+        selector(stage['summary'], 'summaryVersion', 2)
         if not isinstance(stage.get('records'), list):
             fail('input-malformed')
         for row in stage['records']:
             if not isinstance(row, dict) or not isinstance(row.get('output'), dict):
                 fail('input-malformed')
-            if row['output'].get('outputRecordVersion') != 2:
-                fail('version-unread')
+            selector(row['output'], 'outputRecordVersion', 2)
     form(bundle, 'bundleFixture')
+    if transport_size(bundle, pack_bytes) > TRANSPORT_MAX_BYTES:
+        fail('input-over-bound')
     if len(canonical(bundle)) > 8388608 or sum(len(s['records']) for s in bundle['stages']) > 4096:
         fail('input-over-bound')
     stage_ids = [s['stage'] for s in bundle['stages']]
@@ -141,7 +161,7 @@ def verify(bundle, pack_bytes):
             fail('inventory-mismatch')
         raw = pack_bytes[stage['stage']]
         pack_digest = 'sha256:' + hashlib.sha256(raw).hexdigest()
-        pack = parse(raw)
+        pack = parse(raw, controls=False)
         # Caller supplies admitted Core packs. This reader is not a Core document reader.
         for row in stage['records']:
             output, disposition = row['output'], row['disposition']
@@ -176,6 +196,8 @@ def verify(bundle, pack_bytes):
 
 
 def drift(left, right, left_packs, right_packs):
+    if transport_size(left, left_packs) + transport_size(right, right_packs) > TRANSPORT_MAX_BYTES:
+        fail('input-over-bound')
     verify(left, left_packs)
     verify(right, right_packs)
     if left['workflowDigest'] != right['workflowDigest']:

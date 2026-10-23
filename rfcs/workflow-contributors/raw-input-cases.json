@@ -1,0 +1,96 @@
+{
+  "rawCaseVersion": 1,
+  "cases": [
+    {
+      "name": "fixture-decimal",
+      "needle": "\"fixtureVersion\": 2",
+      "replacement": "\"fixtureVersion\": 2.0",
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "fixture-exponent",
+      "needle": "\"fixtureVersion\": 2",
+      "replacement": "\"fixtureVersion\": 2e0",
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "output-decimal",
+      "needle": "\"outputRecordVersion\": 2",
+      "replacement": "\"outputRecordVersion\": 2.0",
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "summary-exponent",
+      "needle": "\"summaryVersion\": 2",
+      "replacement": "\"summaryVersion\": 2e0",
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "index-decimal",
+      "needle": "\"index\": 0",
+      "replacement": "\"index\": 0.0",
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "index-exponent",
+      "needle": "\"index\": 0",
+      "replacement": "\"index\": 0e0",
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "integer-128-chars-out-of-domain",
+      "needle": "\"index\": 0",
+      "replacement": "\"index\": 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "integer-129-chars-over-bound",
+      "needle": "\"index\": 0",
+      "replacement": "\"index\": 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-over-bound"
+      }
+    },
+    {
+      "name": "decimal-129-chars-over-bound",
+      "needle": "\"index\": 0",
+      "replacement": "\"index\": 0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-over-bound"
+      }
+    },
+    {
+      "name": "negative-zero",
+      "needle": "\"index\": 0",
+      "replacement": "\"index\": -0",
+      "expected": {
+        "result": "bulk-consistency",
+        "attributionVersion": 2,
+        "conditions": "not-replayed"
+      }
+    }
+  ]
+}

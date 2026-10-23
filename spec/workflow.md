@@ -335,7 +335,8 @@ complete-attribution model; execution version 1 retains historical semantics and
 reserved by the separate Draft admission-proof RFC 0024, whose adoption is not implied. All
 outputs and summaries within an execution use the same attribution model, including empty
 stages; mixed models are
-`version-unread`. The schema resource is `schema/workflow-contributors-2.schema.json`, with draft `$id`
+`version-unread`. A missing or mistyped required format selector is `input-malformed`; an
+unsupported integer selector value is `version-unread`. The schema resource is `schema/workflow-contributors-2.schema.json`, with draft `$id`
 `https://judgmentpack.org/schema/0.4.0/workflow-contributors-2.schema.json`.
 
 Historical output version 1's singular `contributingRule` and summary version 1's flat contributor
@@ -729,7 +730,7 @@ malformed-seed and unequal-summary refusal vectors. The workflow schema at
 `schema/workflow-1.schema.json` closes every form. These records test bytes and structure; they
 are not captured executor output and establish no reader claim.
 
-The complete-attribution fixtures at `conformance/workflow-v2/` and schema
+The complete-attribution fixtures at `rfcs/workflow-contributors/` and schema
 `schema/workflow-contributors-2.schema.json` add hand-authored multi-rule and multi-forcing-exception cases,
 opposite pack/id ordering, distinct namespaces, suppressed/skipped/false candidates, fallback,
 not-applicable, conflicting unresolved outcomes and failed outcome-value resolution. Each case

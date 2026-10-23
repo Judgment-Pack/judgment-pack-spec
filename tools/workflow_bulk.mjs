@@ -1,12 +1,13 @@
 /** Bounded complete-attribution accounting reader. No workflow or condition replay.
  * Independently implemented in JavaScript against the shared schema and prose.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const schema = JSON.parse(readFileSync(new URL('../schema/workflow-contributors-2.schema.json', import.meta.url)));
 const kinds = ['rule', 'forcing-exception'];
+export const TRANSPORT_MAX_BYTES = 33554432; // Local transport; never a Core pack ceiling.
 class Problem extends Error {
   constructor(code, result = 'refusal') { super(code); this.report = { result, [result]: code }; }
 }
@@ -28,12 +29,20 @@ export const digest = value => sha(canon(value));
 const equal = (a, b) => canon(a) === canon(b);
 const own = (object, key, fallback) => Object.hasOwn(object, key) ? object[key] : fallback;
 
-export function parse(raw, controls = true) {
+export function parse(raw, controls = true, checkBounds = true) {
+  const tokens = raw.match(/"(?:[^"\\]|\\.)*"|[{}\[\],:]|[^\s{}\[\],:]+/gu) ?? [];
+  // Check workflow token spellings before JSON.parse converts them to Number values.
+  if (controls) for (const token of tokens) {
+    if (/^-?[0-9]/u.test(token)) {
+      if (token.length > 128) reject('input-over-bound');
+      if (!/^-?(0|[1-9][0-9]*)$/u.test(token)) reject('input-malformed');
+    }
+  }
   let value;
   try { value = JSON.parse(raw); } catch { reject('input-malformed'); }
   // JSON.parse checks grammar. Track names at each object level before accepting its result.
   const frames = [];
-  for (const token of raw.match(/"(?:[^"\\]|\\.)*"|[{}\[\],:]|[^\s{}\[\],:]+/gu) ?? []) {
+  for (const token of tokens) {
     if (token === '{') frames.push({ object: true, key: true, seen: new Set() });
     else if (token === '[') frames.push({ object: false });
     else if (token === '}' || token === ']') frames.pop();
@@ -44,7 +53,7 @@ export function parse(raw, controls = true) {
       frame.seen.add(key); frame.key = false;
     }
   }
-  if (controls) bounds(value); return value;
+  if (controls && checkBounds) bounds(value); return value;
 }
 function bounds(value, depth = 0) {
   if (value && typeof value === 'object') {
@@ -56,6 +65,7 @@ function bounds(value, depth = 0) {
   } else if (typeof value === 'number' && !Number.isSafeInteger(value)) reject('input-malformed');
 }
 function valid(value, s) {
+  if (typeof s === 'boolean') return s;
   if (s.$ref) return valid(value, schema.$defs[s.$ref.split('/').at(-1)]);
   if (s.oneOf && s.oneOf.filter(choice => valid(value, choice)).length !== 1) return false;
   if (Object.hasOwn(s, 'const') && !equal(value, s.const)) return false;
@@ -70,7 +80,9 @@ function valid(value, s) {
   if (Array.isArray(value)) {
     if ((s.minItems !== undefined && value.length < s.minItems) || (s.maxItems !== undefined && value.length > s.maxItems)) return false;
     if (s.uniqueItems && new Set(value.map(canon)).size !== value.length) return false;
-    if (s.items && !value.every(x => valid(x, s.items))) return false;
+    const prefix = s.prefixItems ?? [];
+    if (!value.slice(0, prefix.length).every((x, i) => valid(x, prefix[i]))) return false;
+    if (s.items !== undefined && !value.slice(prefix.length).every(x => valid(x, s.items))) return false;
   }
   if (object) {
     if (s.maxProperties !== undefined && Object.keys(value).length > s.maxProperties) return false;
@@ -106,20 +118,29 @@ export function summarize(bundle, stage) {
   }
   return result;
 }
+function selector(value, member, expected) {
+  if (!Object.hasOwn(value, member) || !Number.isSafeInteger(value[member])) reject('input-malformed');
+  if (value[member] !== expected) reject('version-unread');
+}
+function transportSize(bundle, packs) {
+  return Buffer.byteLength(canon(bundle)) + Object.values(packs).reduce((n, raw) => n + Buffer.byteLength(raw), 0);
+}
+
 export function verify(bundle, packs) {
   if (!bundle || typeof bundle !== 'object' || Array.isArray(bundle) || !Object.hasOwn(bundle, 'fixtureVersion')) reject('input-malformed');
-  if (bundle.fixtureVersion !== 2) reject('version-unread');
+  selector(bundle, 'fixtureVersion', 2);
   if (!Array.isArray(bundle.stages)) reject('input-malformed');
   for (const stage of bundle.stages) {
     if (!stage || typeof stage !== 'object' || !stage.summary || typeof stage.summary !== 'object') reject('input-malformed');
-    if (stage.summary.summaryVersion !== 2) reject('version-unread');
+    selector(stage.summary, 'summaryVersion', 2);
     if (!Array.isArray(stage.records)) reject('input-malformed');
     for (const row of stage.records) {
       if (!row || typeof row !== 'object' || !row.output || typeof row.output !== 'object') reject('input-malformed');
-      if (row.output.outputRecordVersion !== 2) reject('version-unread');
+      selector(row.output, 'outputRecordVersion', 2);
     }
   }
   form(bundle, 'bundleFixture');
+  if (transportSize(bundle, packs) > TRANSPORT_MAX_BYTES) reject('input-over-bound');
   if (Buffer.byteLength(canon(bundle)) > 8388608 || bundle.stages.reduce((n, s) => n + s.records.length, 0) > 4096) reject('input-over-bound');
   if (new Set(bundle.stages.map(s => s.stage)).size !== bundle.stages.length) reject('input-malformed');
   const seen = new Set();
@@ -151,6 +172,7 @@ export function verify(bundle, packs) {
   return { result: 'bulk-consistency', attributionVersion: 2, conditions: 'not-replayed' };
 }
 export function drift(left, right, leftPacks, rightPacks) {
+  if (transportSize(left, leftPacks) + transportSize(right, rightPacks) > TRANSPORT_MAX_BYTES) reject('input-over-bound');
   verify(left, leftPacks); verify(right, rightPacks);
   if (left.workflowDigest !== right.workflowDigest) reject('drift-workflow-mismatch');
   if (!equal(left.stages.map(s => s.stage), right.stages.map(s => s.stage))) reject('inventory-mismatch');
@@ -198,7 +220,17 @@ export function drift(left, right, leftPacks, rightPacks) {
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
-    const request = parse(readFileSync(0, 'utf8'));
+    // Bound the JSON transport separately; pack strings are not workflow values.
+    const chunks = []; let total = 0;
+    for (;;) {
+      const chunk = Buffer.alloc(65536);
+      const count = readSync(0, chunk, 0, Math.min(chunk.length, TRANSPORT_MAX_BYTES + 1 - total), null);
+      if (!count) break;
+      total += count;
+      if (total > TRANSPORT_MAX_BYTES) reject('input-over-bound');
+      chunks.push(chunk.subarray(0, count));
+    }
+    const request = parse(Buffer.concat(chunks).toString('utf8'), true, false);
     const result = request.command === 'drift' ? drift(request.left, request.right, request.leftPacks, request.rightPacks) : verify(request.bundle, request.packs);
     process.stdout.write(canon(result) + '\n');
   } catch (error) {

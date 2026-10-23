@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import json
+import hashlib
 import subprocess
 import unittest
 from pathlib import Path
@@ -12,7 +13,7 @@ import jsonschema
 from tools import workflow_bulk as reader
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURE = ROOT / 'conformance/workflow-v2'
+FIXTURE = ROOT / 'rfcs/workflow-contributors'
 
 
 def load(name):
@@ -28,14 +29,28 @@ def js(request):
                              text=True, capture_output=True, check=False)
     if process.returncode not in (0, 1):
         raise AssertionError(process.stderr)
-    return json.loads(process.stdout)
+    return validate_event(json.loads(process.stdout))
+
+
+def validate_event(answer):
+    if answer.get('result') in ('refusal', 'finding'):
+        reader.form(answer, 'verifierReport')
+    return answer
+
+
+def raw_js(raw):
+    process = subprocess.run(['node', str(ROOT / 'tools/workflow_bulk.mjs')], input=raw,
+                             capture_output=True, check=False)
+    if process.returncode not in (0, 1):
+        raise AssertionError(process.stderr.decode())
+    return validate_event(json.loads(process.stdout))
 
 
 def python_verify(bundle, supplied=None):
     try:
         return reader.verify(bundle, supplied or packs())
     except reader.Problem as problem:
-        return problem.report
+        return validate_event(problem.report)
 
 
 def both(bundle, supplied=None):
@@ -94,13 +109,15 @@ class CompleteContributorTests(unittest.TestCase):
         for member in ('summaries', 'samples'):
             missing = copy.deepcopy(execution)
             del missing[member]
-            with self.assertRaises(reader.Problem):
+            with self.assertRaises(reader.Problem) as caught:
                 reader.form(missing, 'execution')
+            validate_event(caught.exception.report)
         for version in (1, 2):
             historical = copy.deepcopy(execution)
             historical['executionVersion'] = version
-            with self.assertRaises(reader.Problem):
+            with self.assertRaises(reader.Problem) as caught:
                 reader.form(historical, 'execution')
+            validate_event(caught.exception.report)
 
     def test_malformed_projection_events_are_closed_in_both_readers(self):
         examples = [[], None, {}, {'fixtureVersion': 2}, {'fixtureVersion': 2, 'stages': [None]},
@@ -109,6 +126,62 @@ class CompleteContributorTests(unittest.TestCase):
             for answer in both(example):
                 self.assertEqual(answer, {'result': 'refusal', 'refusal': 'input-malformed'})
                 reader.form(answer, 'verifierReport')
+
+    def test_required_refusal_vocabulary_has_hand_authored_schema_events(self):
+        reports = load('refusal-reports.json')['reports']
+        codes = reader.SCHEMA['$defs']['verifierReport']['oneOf'][0]['properties']['refusal']['enum']
+        self.assertEqual({r['refusal'] for r in reports}, set(codes))
+        self.assertTrue({'version-unread', 'profile-unsupported', 'kind-unread'} <= set(codes))
+        for report in reports:
+            reader.form(report, 'verifierReport')
+
+    def test_missing_or_mistyped_selectors_are_malformed_and_unknown_versions_unread(self):
+        for target in ('fixture', 'output', 'summary'):
+            for value in (None, 'missing', True, '2', 99):
+                bundle = load('bundle.json')
+                at, key = (bundle, 'fixtureVersion') if target == 'fixture' else (
+                    (bundle['stages'][0]['records'][0]['output'], 'outputRecordVersion') if target == 'output'
+                    else (bundle['stages'][0]['summary'], 'summaryVersion'))
+                if value == 'missing':
+                    del at[key]
+                else:
+                    at[key] = value
+                expected = 'version-unread' if type(value) is int else 'input-malformed'
+                for answer in both(bundle):
+                    self.assertEqual(answer, {'result': 'refusal', 'refusal': expected})
+
+    def test_raw_workflow_numeric_spellings_are_checked_in_both_readers(self):
+        bundle_raw = (FIXTURE / 'bundle.json').read_bytes()
+        for case in load('raw-input-cases.json')['cases']:
+            with self.subTest(case=case['name']):
+                self.assertIn(case['needle'].encode(), bundle_raw)
+                raw = bundle_raw.replace(case['needle'].encode(), case['replacement'].encode(), 1)
+                try:
+                    answer = reader.verify(reader.parse(raw), packs())
+                except reader.Problem as problem:
+                    answer = validate_event(problem.report)
+                request = b'{"command":"verify","bundle":' + raw + b',"packs":' + json.dumps(
+                    {'cases': packs()['cases'].decode()}).encode() + b'}'
+                self.assertEqual(answer, case['expected'])
+                self.assertEqual(raw_js(request), case['expected'])
+
+    def test_core_pack_numbers_and_transport_strings_keep_independent_scope(self):
+        for tail, spelling in ((70000, b'true'), (0, b'2.0'), (0, b'2e0')):
+            bundle = load('bundle.json')
+            raw = packs()['cases'].replace(b'"value": true', b'"value": '+spelling, 1) + b' '*tail
+            core = json.loads((ROOT / 'schema/judgment-pack-core.schema.json').read_text())
+            jsonschema.Draft202012Validator(core).validate(json.loads(raw))
+            for row in bundle['stages'][0]['records']:
+                row['output']['lineage']['packDigest'] = 'sha256:'+hashlib.sha256(raw).hexdigest()
+                row['recordDigest'] = reader.digest(row['output'])
+            for answer in both(bundle, {'cases': raw}):
+                self.assertEqual(answer['result'], 'bulk-consistency')
+            reader.parse(raw, controls=False)
+
+    def test_experimental_aggregate_transport_ceiling_is_explicit_and_paired(self):
+        raw = packs()['cases'] + b' '*reader.TRANSPORT_MAX_BYTES
+        for answer in both(load('bundle.json'), {'cases': raw}):
+            self.assertEqual(answer, {'result': 'refusal', 'refusal': 'input-over-bound'})
 
     def test_schema_is_valid_closed_and_historical_fixtures_stay_legacy(self):
         jsonschema.Draft202012Validator.check_schema(reader.SCHEMA)
@@ -187,6 +260,12 @@ class CompleteContributorTests(unittest.TestCase):
                     row['output'][mutation['member']] = mutation['value']
                     if mutation['repin']:
                         row['recordDigest'] = reader.digest(row['output'])
+                elif mutation['target'] == 'disposition':
+                    stage['records'][mutation['record']]['disposition'][mutation['member']] = mutation['value']
+                    # Independent byte commitment for the changed retained dispositions, not reader output.
+                    raw = json.dumps([r['disposition'] for r in stage['records']], sort_keys=True,
+                                     ensure_ascii=False, separators=(',', ':')).encode()
+                    stage['summary']['recordsDigest'] = 'sha256:' + hashlib.sha256(raw).hexdigest()
                 else:
                     at = stage['summary']
                     for key in mutation['path'][:-1]:
@@ -302,11 +381,12 @@ class CompleteContributorTests(unittest.TestCase):
         self.assertEqual(actual['stages'][0]['byRule']['constructor']['contributors']['rule'], {'constructor': -1})
 
     def test_duplicate_decoded_json_names_are_rejected_by_both_parsers(self):
-        with self.assertRaises(reader.Problem):
+        with self.assertRaises(reader.Problem) as caught:
             reader.parse('{"x":1,"\\u0078":2}')
+        validate_event(caught.exception.report)
         process = subprocess.run(['node', str(ROOT / 'tools/workflow_bulk.mjs')],
             input='{"x":1,"\\u0078":2}', text=True, capture_output=True)
-        self.assertEqual(json.loads(process.stdout), {'result': 'refusal', 'refusal': 'input-malformed'})
+        self.assertEqual(validate_event(json.loads(process.stdout)), {'result': 'refusal', 'refusal': 'input-malformed'})
 
 
 if __name__ == '__main__':

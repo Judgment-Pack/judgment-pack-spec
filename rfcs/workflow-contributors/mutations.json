@@ -312,6 +312,33 @@
         "result": "refusal",
         "refusal": "drift-mismatch"
       }
+    },
+    {
+      "name": "wrong-not-applicable-reason",
+      "target": "disposition",
+      "record": 5,
+      "member": "reasons",
+      "value": [
+        "unknown"
+      ],
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "name": "extra-not-applicable-reason",
+      "target": "disposition",
+      "record": 5,
+      "member": "reasons",
+      "value": [
+        "not-applicable",
+        "unknown"
+      ],
+      "expected": {
+        "result": "refusal",
+        "refusal": "input-malformed"
+      }
     }
   ]
 }

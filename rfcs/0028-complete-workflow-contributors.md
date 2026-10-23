@@ -32,7 +32,7 @@ workflow-version-2 admission-proof proposal and output-version-1 envelopes witho
 it does not implement #228's bulk fields. Its retained recordings, provenance and historical pins
 are not upgraded by this proposal. No full workflow consumer upgrade is claimed.
 
-The new `conformance/workflow-v2/` fixtures are also hand-authored. They include opposite pack
+The new [RFC-owned fixtures](workflow-contributors/README.md) are also hand-authored. They include opposite pack
 orders, two compatible rules, two compatible forcing exceptions, typed same-id namespaces,
 suppressed and false rules, bypassed normal rules, fallback and non-outcome cases. An explicitly
 hypothetical failed outcome-value resolution records no contributor credit; it is not an executed
@@ -110,6 +110,16 @@ coordinated omission with rebuilt pins and summary intentionally passes structur
 its independently authored expected membership disagrees. This makes the limit visible instead
 of claiming causal proof. Full workflow recording, both full readers and replay remain acceptance
 evidence to obtain under RFC 0020 §11.
+
+The bounded experiments check workflow integer token spelling and the 128-character token
+ceiling before conversion. Caller-admitted exact Core pack bytes retain their own number and
+size domains; neither whitespace nor the escaped pack transport string is a workflow value.
+An explicit local aggregate experiment limit is 33554432 bytes for canonical projections plus
+supplied pack bytes, across both sides of drift. The JavaScript stdin transport separately caps
+its full UTF-8 JSON wrapper at that size before decoding. These local limits do not define a Core
+pack ceiling or a full workflow conformance claim. Every emitted negative regression event is
+validated against the closed report schema. Missing required selectors are `input-malformed`;
+unsupported integer selector values are `version-unread`.
 
 ## Implementation
 

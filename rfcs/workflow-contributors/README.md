@@ -2,7 +2,7 @@
 
 These hand-authored projections exercise RFC 0028 / workflow §5 complete-attribution model 2.
 They are synthetic expected records, not output recorded from an executor. The historical
-`../workflow/` version-1 representative fixtures and experimental RFC 0024 recordings are unchanged.
+`../../conformance/workflow/` version-1 representative fixtures and experimental RFC 0024 recordings are unchanged.
 
 `bundle.json` contains two compatible rules, two compatible forcing exceptions, a suppressed rule,
 a false rule, fallback, conflict, not-applicable and a hypothetical failed outcome-value resolution.
@@ -36,3 +36,23 @@ not captured from a reader/executor run. Fixtures contain no customer or product
 summary and sample checkpoint members; it is not the executed inventory behind a bundle
 projection. `manifest.json` records schema answers, including intentionally out-of-schema
 scenario/mutation wrappers and Core packs validated under their own schema.
+
+The proposal fixtures live under `rfcs/`, outside the normative conformance corpus. The frozen
+Core manifest and its strict unknown-namespace/orphan guard are unchanged.
+
+`raw-input-cases.json` hand-writes numeric token replacements for both readers, including decimal
+and exponent spellings, the 128-character token ceiling, and accepted `-0`. Workflow controls
+require integer token spelling before numeric conversion. Exact Core pack bytes retain their own
+number and document domains: decimal/exponent pack operands and 70000 bytes of trailing JSON
+whitespace are paired positive cases. Pack transport strings are never workflow string values.
+The caller remains responsible for Core pack admission; these readers check accounting only.
+
+The experimental APIs bound the sum of canonical projection bytes plus exact supplied pack bytes
+at 33554432 bytes (32 MiB), across both sides of drift. The JavaScript stdin adapter additionally
+bounds the entire UTF-8 JSON transport at that size, including wrapper and escaped pack strings,
+before decoding it; it does not apply workflow string/container bounds to that wrapper. These are
+local experiment limits, not Core pack ceilings or new workflow conformance bounds. Limit refusal
+is `input-over-bound`. `refusal-reports.json` witnesses every public refusal code; every emitted
+negative regression result is validated against the report schema, including mixed-version events.
+Missing/mistyped required selectors give `input-malformed`; unknown integer versions give
+`version-unread`. None of these checks establish condition truth or complete causal membership.

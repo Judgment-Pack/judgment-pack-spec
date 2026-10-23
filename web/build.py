@@ -1696,9 +1696,9 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
             ),
         }
     )
-    # Review corpus files are source-only until their independent release. Schema
-    # resources also resolve directly at their exact, format-versioned $id URLs.
-    for directory in ("conformance/policy", "schema/policy"):
+    # Review and proposal files stay source-only until their own adoption or release.
+    # Schema resources also resolve directly at their exact, format-versioned $id URLs.
+    for directory in ("conformance/policy", "schema/policy", "rfcs/workflow-contributors"):
         for path in (ROOT / directory).rglob("*"):
             source = path.relative_to(ROOT).as_posix()
             if path.is_file():

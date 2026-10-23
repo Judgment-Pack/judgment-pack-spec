@@ -298,6 +298,12 @@
               "enum": [
                 "input-malformed",
                 "input-over-bound",
+                "version-unread",
+                "profile-unsupported",
+                "kind-unread",
+                "recording-pack-invalid",
+                "recording-version-mismatch",
+                "recording-version-unsupported",
                 "reference-mismatch",
                 "stage-binding-mismatch",
                 "selection-mismatch",

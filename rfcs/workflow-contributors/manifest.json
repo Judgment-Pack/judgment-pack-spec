@@ -41,6 +41,14 @@
     {
       "path": "execution-shapes.json",
       "schemaValid": false
+    },
+    {
+      "path": "raw-input-cases.json",
+      "schemaValid": false
+    },
+    {
+      "path": "refusal-reports.json",
+      "schemaValid": false
     }
   ]
 }
