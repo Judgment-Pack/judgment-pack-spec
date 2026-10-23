@@ -74,6 +74,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0024] | Retained workflow admission proofs | Draft | Specification (a proposed amendment to the Draft workflow; unresolved portable encoding) |
 | [0025](0025-core-escalation-routes.md) | Core escalation routes | Accepted design (#219); review pending | Specification (Core) |
 | [0026](0026-document-ceiling-profiles.md) | Document ceiling profiles | Accepted design (#232); review pending | Specification and companions |
+| [0027](0027-pack-design-advisories.md) | Bounded pack-design advisories | Draft | Optional tooling contract proposed for Core `0.4.0`; released conformance unchanged |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -129,3 +130,8 @@ reader remains open. No immutable Policy release or consumer adoption is claimed
 
 [RFC 0026](0026-document-ceiling-profiles.md) records the accepted document ceiling profiles
 of issue #232. Core §4.1 owns the ceilings; extended companion readers remain future work.
+
+[RFC 0027](0027-pack-design-advisories.md) proposes optional bounded pack-design advisories,
+with explicit finite domains, proof/possibility/incomplete certainty, source evidence, reproducible
+inputs and analysis limits. Its schema and hand-written examples are proposal artifacts only;
+Core §3.3.1 and every released conformance corpus remain unchanged.

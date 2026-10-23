@@ -1,0 +1,12 @@
+{
+  "kind": "finite-cases",
+  "inputs": [
+    {"facts": {"score": "70", "mode": "none", "review": false}, "evidence": {}},
+    {"facts": {"score": "10", "mode": "none", "review": false}, "evidence": {}},
+    {"facts": {"score": "70", "mode": "conflict", "review": false}, "evidence": {}},
+    {"facts": {"score": "70", "mode": "medium", "review": false}, "evidence": {}},
+    {"facts": {"score": "70", "mode": "none", "review": true}, "evidence": {}},
+    {"facts": {"score": "70", "mode": "none"}, "evidence": {}},
+    {"facts": {"score": null, "mode": "none", "review": false}, "evidence": {"unused-present": "present", "unused-absent": "absent", "unused-unknown": "unknown"}}
+  ]
+}

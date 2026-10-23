@@ -7,6 +7,12 @@ here.
 
 ### Added
 
+- RFC 0027 (#252) proposes bounded optional pack-design advisories for compatible agreement,
+  scoped coverage and reachability, exception effects and unknown blocking. A closed finite-domain
+  report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
+  analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
+  This targets specification `0.4.0`; it changes no Core resolution or released conformance claim.
+
 - Name the next Core release `0.3.0`, define conformance maturity independently, and require `v0.3.0-rc.1` before release (#231).
 - Re-pin released Core schemas, manifests, packs, vectors, readers, and site routes to exact `specVersion` `0.3.0`, preserving `0.2.0-draft` artifacts (#231).
 

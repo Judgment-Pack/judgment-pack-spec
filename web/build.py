@@ -746,6 +746,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0027-pack-design-advisories.md",
+        PurePosixPath("rfcs/0027-pack-design-advisories/index.html"),
+        "RFC 0027: Bounded pack-design advisories",
+        "Draft optional advisory contract: finite domains, explicit proof limits, compatible agreement, coverage, reachability and exception interactions.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "docs/releases/v0.3.0.md",
         PurePosixPath("project/releases/0.3.0/index.html"),
         "0.3.0 release notes",
@@ -1696,6 +1705,11 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
                 routes[source] = GITHUB_BLOB_ROOT + "main/" + source
             elif path.is_dir():
                 routes[source] = "https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/" + source
+    # RFC 0027's contract and hand-written controls are proposal source, not released artifacts.
+    for path in (ROOT / "rfcs" / "pack-design-advisories").rglob("*"):
+        if path.is_file():
+            source = path.relative_to(ROOT).as_posix()
+            routes[source] = GITHUB_BLOB_ROOT + "main/" + source
     for source in CANONICAL_SCHEMA_SOURCES:
         if "/policy/" in source:
             schema_id = json.loads((ROOT / source).read_text("utf-8"))["$id"]

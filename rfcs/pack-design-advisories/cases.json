@@ -1,0 +1,939 @@
+{
+  "status": "proposal-only",
+  "basePack": {
+    "specVersion": "0.3.0",
+    "id": "https://example.com/judgment-packs/advisory-cases",
+    "version": "0.1.0",
+    "title": "Synthetic advisory contract cases",
+    "decision": {
+      "intent": "Exercise advisory distinctions.",
+      "question": "Which outcome applies?"
+    },
+    "outcomes": [
+      {
+        "id": "medium",
+        "label": "Medium"
+      },
+      {
+        "id": "high",
+        "label": "High"
+      },
+      {
+        "id": "manual",
+        "label": "Manual"
+      }
+    ],
+    "rules": []
+  },
+  "cases": [
+    {
+      "id": "same-outcome-agreement",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-medium",
+            "description": "At least 40.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "greater-than-or-equal",
+              "value": "40"
+            },
+            "outcome": "medium",
+            "onUnknown": "escalate"
+          },
+          {
+            "id": "r-also-medium",
+            "description": "At least 70.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "greater-than-or-equal",
+              "value": "70"
+            },
+            "outcome": "medium",
+            "onUnknown": "escalate"
+          }
+        ]
+      },
+      "input": {
+        "facts": {
+          "score": "70"
+        },
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "outcome",
+        "outcome": "medium",
+        "reasons": [],
+        "candidates": [
+          "r-medium",
+          "r-also-medium"
+        ],
+        "skipped": [],
+        "fallback": false
+      }
+    },
+    {
+      "id": "different-outcome-conflict",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-medium",
+            "description": "At least 40.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "greater-than-or-equal",
+              "value": "40"
+            },
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          },
+          {
+            "id": "r-high",
+            "description": "At least 70.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "greater-than-or-equal",
+              "value": "70"
+            },
+            "outcome": "high",
+            "onUnknown": "ignore"
+          }
+        ]
+      },
+      "input": {
+        "facts": {
+          "score": "70"
+        },
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "conflict"
+        ],
+        "candidates": [
+          "r-medium",
+          "r-high"
+        ],
+        "skipped": [],
+        "fallback": false
+      }
+    },
+    {
+      "id": "adjacent-exclusive-bands",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-medium",
+            "description": "40 inclusive to 70 exclusive.",
+            "when": {
+              "op": "all",
+              "conditions": [
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "greater-than-or-equal",
+                  "value": "40"
+                },
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "less-than",
+                  "value": "70"
+                }
+              ]
+            },
+            "outcome": "medium",
+            "onUnknown": "escalate"
+          },
+          {
+            "id": "r-high",
+            "description": "At least 70.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "greater-than-or-equal",
+              "value": "70"
+            },
+            "outcome": "high",
+            "onUnknown": "escalate"
+          }
+        ]
+      },
+      "input": {
+        "facts": {
+          "score": "70.00"
+        },
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "outcome",
+        "outcome": "high",
+        "reasons": [],
+        "candidates": [
+          "r-high"
+        ],
+        "skipped": [],
+        "fallback": false
+      }
+    },
+    {
+      "id": "intentional-gap-fallback",
+      "intentionalFallback": true,
+      "patch": {
+        "rules": [
+          {
+            "id": "r-medium",
+            "description": "Below 40.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "less-than",
+              "value": "40"
+            },
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          },
+          {
+            "id": "r-high",
+            "description": "At least 70.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "greater-than-or-equal",
+              "value": "70"
+            },
+            "outcome": "high",
+            "onUnknown": "ignore"
+          }
+        ],
+        "fallbackOutcome": "manual"
+      },
+      "input": {
+        "facts": {
+          "score": "60"
+        },
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "outcome",
+        "outcome": "manual",
+        "reasons": [],
+        "candidates": [],
+        "skipped": [],
+        "fallback": true
+      }
+    },
+    {
+      "id": "gap-without-fallback",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-high",
+            "description": "At least 70.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "greater-than-or-equal",
+              "value": "70"
+            },
+            "outcome": "high",
+            "onUnknown": "ignore"
+          }
+        ]
+      },
+      "input": {
+        "facts": {
+          "score": "60"
+        },
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "no-match"
+        ],
+        "candidates": [],
+        "skipped": [],
+        "fallback": false
+      }
+    },
+    {
+      "id": "contradictory-condition",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-impossible",
+            "description": "Contradictory thresholds.",
+            "when": {
+              "op": "all",
+              "conditions": [
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "greater-than-or-equal",
+                  "value": "70"
+                },
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "less-than",
+                  "value": "40"
+                }
+              ]
+            },
+            "outcome": "high",
+            "onUnknown": "ignore"
+          }
+        ],
+        "fallbackOutcome": "manual"
+      },
+      "input": {
+        "facts": {
+          "score": "70"
+        },
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "outcome",
+        "outcome": "manual",
+        "reasons": [],
+        "candidates": [],
+        "skipped": [],
+        "fallback": true
+      }
+    },
+    {
+      "id": "incompatible-forces",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-normal",
+            "description": "Normal rule.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          }
+        ],
+        "exceptions": [
+          {
+            "id": "e-medium",
+            "description": "Force medium.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "effect": "force-outcome",
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          },
+          {
+            "id": "e-high",
+            "description": "Force high.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "effect": "force-outcome",
+            "outcome": "high",
+            "onUnknown": "ignore"
+          }
+        ]
+      },
+      "input": {
+        "facts": {},
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "conflict"
+        ],
+        "candidates": [],
+        "skipped": [
+          "r-normal"
+        ],
+        "fallback": false
+      }
+    },
+    {
+      "id": "compatible-force-bypasses-rule",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-normal",
+            "description": "Unknown if it were evaluated.",
+            "when": {
+              "op": "fact",
+              "path": "/missing",
+              "operator": "equals",
+              "value": true
+            },
+            "outcome": "high",
+            "onUnknown": "escalate"
+          }
+        ],
+        "exceptions": [
+          {
+            "id": "e-medium",
+            "description": "Force medium.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "effect": "force-outcome",
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          }
+        ]
+      },
+      "input": {
+        "facts": {},
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "outcome",
+        "outcome": "medium",
+        "reasons": [],
+        "candidates": [],
+        "skipped": [
+          "r-normal"
+        ],
+        "fallback": false
+      }
+    },
+    {
+      "id": "suppressed-unknown-rule",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-normal",
+            "description": "Unknown if evaluated.",
+            "when": {
+              "op": "fact",
+              "path": "/missing",
+              "operator": "equals",
+              "value": true
+            },
+            "outcome": "high",
+            "onUnknown": "escalate"
+          }
+        ],
+        "exceptions": [
+          {
+            "id": "e-suppress",
+            "description": "Suppress normal rule.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "effect": "suppress-rule",
+            "targetRule": "r-normal",
+            "onUnknown": "ignore"
+          }
+        ],
+        "fallbackOutcome": "manual"
+      },
+      "input": {
+        "facts": {},
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "outcome",
+        "outcome": "manual",
+        "reasons": [],
+        "candidates": [],
+        "skipped": [
+          "r-normal"
+        ],
+        "fallback": true
+      }
+    },
+    {
+      "id": "missing-rewrite-escalates",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-lower",
+            "description": "Exclude a higher condition using not.",
+            "when": {
+              "op": "all",
+              "conditions": [
+                {
+                  "op": "literal",
+                  "value": true
+                },
+                {
+                  "op": "not",
+                  "condition": {
+                    "op": "fact",
+                    "path": "/higher",
+                    "operator": "equals",
+                    "value": true
+                  }
+                }
+              ]
+            },
+            "outcome": "medium",
+            "onUnknown": "escalate"
+          }
+        ],
+        "fallbackOutcome": "manual"
+      },
+      "input": {
+        "facts": {},
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "unknown"
+        ],
+        "candidates": [],
+        "skipped": [],
+        "fallback": false
+      }
+    },
+    {
+      "id": "present-null-equality",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-null",
+            "description": "Null is present and comparable for equality.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "equals",
+              "value": null
+            },
+            "outcome": "medium",
+            "onUnknown": "escalate"
+          }
+        ]
+      },
+      "input": {
+        "facts": {
+          "score": null
+        },
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "outcome",
+        "outcome": "medium",
+        "reasons": [],
+        "candidates": [
+          "r-null"
+        ],
+        "skipped": [],
+        "fallback": false
+      }
+    },
+    {
+      "id": "null-ordered-is-unknown",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-high",
+            "description": "Ordered strings only.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "greater-than-or-equal",
+              "value": "70"
+            },
+            "outcome": "high",
+            "onUnknown": "escalate"
+          }
+        ],
+        "fallbackOutcome": "manual"
+      },
+      "input": {
+        "facts": {
+          "score": null
+        },
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "unknown"
+        ],
+        "candidates": [],
+        "skipped": [],
+        "fallback": false
+      }
+    },
+    {
+      "id": "json-number-ordered-is-unknown",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-high",
+            "description": "Ordered strings only.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "greater-than-or-equal",
+              "value": "70"
+            },
+            "outcome": "high",
+            "onUnknown": "ignore"
+          }
+        ],
+        "fallbackOutcome": "manual"
+      },
+      "input": {
+        "facts": {
+          "score": 70
+        },
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "outcome",
+        "outcome": "manual",
+        "reasons": [],
+        "candidates": [],
+        "skipped": [],
+        "fallback": true
+      }
+    },
+    {
+      "id": "malformed-decimal-is-unknown",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-high",
+            "description": "Ordered strings only.",
+            "when": {
+              "op": "fact",
+              "path": "/score",
+              "operator": "greater-than-or-equal",
+              "value": "70"
+            },
+            "outcome": "high",
+            "onUnknown": "escalate"
+          }
+        ]
+      },
+      "input": {
+        "facts": {
+          "score": "70 units"
+        },
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "unknown"
+        ],
+        "candidates": [],
+        "skipped": [],
+        "fallback": false
+      }
+    },
+    {
+      "id": "direct-escalation-and-force-conflict",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-normal",
+            "description": "Never reached.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          }
+        ],
+        "exceptions": [
+          {
+            "id": "e-review",
+            "description": "Direct escalation.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "effect": "escalate",
+            "onUnknown": "ignore"
+          },
+          {
+            "id": "e-medium",
+            "description": "Force medium.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "effect": "force-outcome",
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          },
+          {
+            "id": "e-high",
+            "description": "Force high.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "effect": "force-outcome",
+            "outcome": "high",
+            "onUnknown": "ignore"
+          }
+        ]
+      },
+      "input": {
+        "facts": {},
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "conflict",
+          "exception-escalation"
+        ],
+        "candidates": [],
+        "skipped": [
+          "r-normal"
+        ],
+        "fallback": false
+      }
+    },
+    {
+      "id": "unknown-and-rule-conflict-retained",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-medium",
+            "description": "Medium.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          },
+          {
+            "id": "r-high",
+            "description": "High.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "outcome": "high",
+            "onUnknown": "ignore"
+          },
+          {
+            "id": "r-unknown",
+            "description": "Missing fact.",
+            "when": {
+              "op": "fact",
+              "path": "/missing",
+              "operator": "equals",
+              "value": true
+            },
+            "outcome": "high",
+            "onUnknown": "escalate"
+          }
+        ]
+      },
+      "input": {
+        "facts": {},
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "conflict",
+          "unknown"
+        ],
+        "candidates": [
+          "r-medium",
+          "r-high"
+        ],
+        "skipped": [],
+        "fallback": false
+      }
+    },
+    {
+      "id": "required-evidence-blocks-force",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-normal",
+            "description": "Skipped before normal evaluation.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          }
+        ],
+        "evidenceRequirements": [
+          {
+            "id": "e-required",
+            "description": "Required evidence.",
+            "required": true
+          }
+        ],
+        "exceptions": [
+          {
+            "id": "e-medium",
+            "description": "Force medium.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "effect": "force-outcome",
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          }
+        ]
+      },
+      "input": {
+        "facts": {},
+        "evidence": {
+          "e-required": "absent"
+        }
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "candidates": [],
+        "skipped": [
+          "r-normal"
+        ],
+        "fallback": false
+      }
+    },
+    {
+      "id": "unknown-applicability-stops-before-force",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-normal",
+            "description": "Skipped before normal evaluation.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          }
+        ],
+        "applicability": {
+          "op": "fact",
+          "path": "/applicable",
+          "operator": "equals",
+          "value": true
+        },
+        "exceptions": [
+          {
+            "id": "e-medium",
+            "description": "Never evaluated.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "effect": "force-outcome",
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          }
+        ]
+      },
+      "input": {
+        "facts": {},
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "unknown"
+        ],
+        "candidates": [],
+        "skipped": [
+          "r-normal"
+        ],
+        "fallback": false
+      }
+    },
+    {
+      "id": "unknown-exception-blocks-force",
+      "patch": {
+        "rules": [
+          {
+            "id": "r-normal",
+            "description": "Skipped before normal evaluation.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          }
+        ],
+        "exceptions": [
+          {
+            "id": "e-medium",
+            "description": "Force medium.",
+            "when": {
+              "op": "literal",
+              "value": true
+            },
+            "effect": "force-outcome",
+            "outcome": "medium",
+            "onUnknown": "ignore"
+          },
+          {
+            "id": "e-unknown",
+            "description": "Unknown escalation.",
+            "when": {
+              "op": "fact",
+              "path": "/review",
+              "operator": "equals",
+              "value": true
+            },
+            "effect": "escalate",
+            "onUnknown": "escalate"
+          }
+        ]
+      },
+      "input": {
+        "facts": {},
+        "evidence": {}
+      },
+      "expected": {
+        "kind": "unresolved",
+        "outcome": null,
+        "reasons": [
+          "unknown"
+        ],
+        "candidates": [],
+        "skipped": [
+          "r-normal"
+        ],
+        "fallback": false
+      }
+    }
+  ]
+}
