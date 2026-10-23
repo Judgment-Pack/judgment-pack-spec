@@ -711,6 +711,9 @@ class StaticSiteTests(unittest.TestCase):
             "schema/0.3.0/workflow-1.schema.json": ROOT
             / "schema"
             / "workflow-1.schema.json",
+            "schema/0.4.0/workflow-contributors-2.schema.json": ROOT
+            / "schema"
+            / "workflow-contributors-2.schema.json",
             # The superseded schemas keep the $id path each was published under, so an older pack stays
             # checkable and a previously published identifier does not 404.
             "schema/0.1.0-draft/judgment-pack-core.schema.json": ROOT

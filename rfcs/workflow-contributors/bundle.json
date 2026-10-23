@@ -1,0 +1,441 @@
+{
+  "fixtureVersion": 2,
+  "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "executionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "execution": "complete-run",
+  "stages": [
+    {
+      "stage": "cases",
+      "records": [
+        {
+          "recordDigest": "sha256:f55bf2a6bf3bfbcc23843c4d8793b9338e9698607569f809871c35a3bdd5d9c6",
+          "output": {
+            "outputRecordVersion": 2,
+            "payloadDigest": "sha256:fa76e6a145e80d3ef8d955abd5a17426feba569df832d2cf6af7dbd5b86c5240",
+            "lineage": {
+              "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "execution": "complete-run",
+              "stage": "cases",
+              "instance": "case-normal",
+              "publishedDialectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bindingDocumentDigest": null,
+              "boundDialectDigest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "packDigest": "sha256:39255db451d5df6f622d0bd7dc498bbe3ffcbeab4cdfad87bdc1a20cb8b338e1",
+              "releaseDigest": "sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+              "preparationDigest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+              "auditDigest": "sha256:b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+              "outputPointer": "/items",
+              "index": 0,
+              "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+              "caseDigest": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+              "parentRecord": null,
+              "selectionDigest": null,
+              "relation": {
+                "label": "discovered-for",
+                "direction": "output-to-parent"
+              },
+              "influence": {
+                "classes": [
+                  "generated"
+                ],
+                "generatedInfluence": true
+              }
+            },
+            "contributors": [
+              {
+                "kind": "rule",
+                "id": "a-rule"
+              },
+              {
+                "kind": "rule",
+                "id": "z-rule"
+              }
+            ]
+          },
+          "disposition": {
+            "kind": "outcome",
+            "outcomeId": "approve",
+            "reasons": [],
+            "handoff": {
+              "state": "none"
+            }
+          }
+        },
+        {
+          "recordDigest": "sha256:953607057521a1655eefe05e2a9a13652f3b42afca22ebbd997cdc87db8301c0",
+          "output": {
+            "outputRecordVersion": 2,
+            "payloadDigest": "sha256:7caae56ee4a7f86a5da4f764b9c15a48132112306e42cc74d1d04dec76b8bf26",
+            "lineage": {
+              "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "execution": "complete-run",
+              "stage": "cases",
+              "instance": "case-forced",
+              "publishedDialectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bindingDocumentDigest": null,
+              "boundDialectDigest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "packDigest": "sha256:39255db451d5df6f622d0bd7dc498bbe3ffcbeab4cdfad87bdc1a20cb8b338e1",
+              "releaseDigest": "sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+              "preparationDigest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+              "auditDigest": "sha256:b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+              "outputPointer": "/items",
+              "index": 1,
+              "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+              "caseDigest": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+              "parentRecord": null,
+              "selectionDigest": null,
+              "relation": {
+                "label": "discovered-for",
+                "direction": "output-to-parent"
+              },
+              "influence": {
+                "classes": [
+                  "generated"
+                ],
+                "generatedInfluence": true
+              }
+            },
+            "contributors": [
+              {
+                "kind": "forcing-exception",
+                "id": "a-rule"
+              },
+              {
+                "kind": "forcing-exception",
+                "id": "z-force"
+              }
+            ]
+          },
+          "disposition": {
+            "kind": "outcome",
+            "outcomeId": "approve",
+            "reasons": [],
+            "handoff": {
+              "state": "none"
+            }
+          }
+        },
+        {
+          "recordDigest": "sha256:59a8946e33b68e927c18c7cfd7c46c76795f5dca383d5565d71c36b6a42dfb3a",
+          "output": {
+            "outputRecordVersion": 2,
+            "payloadDigest": "sha256:a46a10ddd5a38a69c1684210ffc8a61611764bd3a2c7cb8d5a922399da62a8dc",
+            "lineage": {
+              "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "execution": "complete-run",
+              "stage": "cases",
+              "instance": "case-suppressed",
+              "publishedDialectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bindingDocumentDigest": null,
+              "boundDialectDigest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "packDigest": "sha256:39255db451d5df6f622d0bd7dc498bbe3ffcbeab4cdfad87bdc1a20cb8b338e1",
+              "releaseDigest": "sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+              "preparationDigest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+              "auditDigest": "sha256:b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+              "outputPointer": "/items",
+              "index": 2,
+              "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+              "caseDigest": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+              "parentRecord": null,
+              "selectionDigest": null,
+              "relation": {
+                "label": "discovered-for",
+                "direction": "output-to-parent"
+              },
+              "influence": {
+                "classes": [
+                  "generated"
+                ],
+                "generatedInfluence": true
+              }
+            },
+            "contributors": [
+              {
+                "kind": "rule",
+                "id": "z-rule"
+              }
+            ]
+          },
+          "disposition": {
+            "kind": "outcome",
+            "outcomeId": "approve",
+            "reasons": [],
+            "handoff": {
+              "state": "none"
+            }
+          }
+        },
+        {
+          "recordDigest": "sha256:4bac3b20941f5d8c6147c98d973a166566bc5f3c8e989978b04841e35f3415a7",
+          "output": {
+            "outputRecordVersion": 2,
+            "payloadDigest": "sha256:e027fe123b32aec06f48165717a478d2bd23283f9d0f1998671510cad295b0fb",
+            "lineage": {
+              "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "execution": "complete-run",
+              "stage": "cases",
+              "instance": "case-fallback",
+              "publishedDialectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bindingDocumentDigest": null,
+              "boundDialectDigest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "packDigest": "sha256:39255db451d5df6f622d0bd7dc498bbe3ffcbeab4cdfad87bdc1a20cb8b338e1",
+              "releaseDigest": "sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+              "preparationDigest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+              "auditDigest": "sha256:b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+              "outputPointer": "/items",
+              "index": 3,
+              "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+              "caseDigest": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+              "parentRecord": null,
+              "selectionDigest": null,
+              "relation": {
+                "label": "discovered-for",
+                "direction": "output-to-parent"
+              },
+              "influence": {
+                "classes": [
+                  "generated"
+                ],
+                "generatedInfluence": true
+              }
+            }
+          },
+          "disposition": {
+            "kind": "outcome",
+            "outcomeId": "approve",
+            "reasons": [],
+            "handoff": {
+              "state": "none"
+            }
+          }
+        },
+        {
+          "recordDigest": "sha256:91ebf149aac5c997242c14d380c8063dd584562c8a9edf66f4ddda26f17d65a0",
+          "output": {
+            "outputRecordVersion": 2,
+            "payloadDigest": "sha256:9cc195c5c341171e5b5e971c2b9d4e46973695084e0038d22bbf63bf142e9c4f",
+            "lineage": {
+              "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "execution": "complete-run",
+              "stage": "cases",
+              "instance": "case-conflict",
+              "publishedDialectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bindingDocumentDigest": null,
+              "boundDialectDigest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "packDigest": "sha256:39255db451d5df6f622d0bd7dc498bbe3ffcbeab4cdfad87bdc1a20cb8b338e1",
+              "releaseDigest": "sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+              "preparationDigest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+              "auditDigest": "sha256:b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+              "outputPointer": "/items",
+              "index": 4,
+              "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+              "caseDigest": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+              "parentRecord": null,
+              "selectionDigest": null,
+              "relation": {
+                "label": "discovered-for",
+                "direction": "output-to-parent"
+              },
+              "influence": {
+                "classes": [
+                  "generated"
+                ],
+                "generatedInfluence": true
+              }
+            }
+          },
+          "disposition": {
+            "kind": "unresolved",
+            "reasons": [
+              "conflict"
+            ],
+            "handoff": {
+              "state": "requested",
+              "triggeredBy": [
+                "conflict"
+              ]
+            }
+          }
+        },
+        {
+          "recordDigest": "sha256:c3bbae268f3ae3342600f013a62162ce0c978de588d7d0433d6c6d40e98b4bb9",
+          "output": {
+            "outputRecordVersion": 2,
+            "payloadDigest": "sha256:3c049c9e49eb6a8871af4cead50546d259696ab2b1900ee1ed5a96f53010ba9d",
+            "lineage": {
+              "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "execution": "complete-run",
+              "stage": "cases",
+              "instance": "case-not-applicable",
+              "publishedDialectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bindingDocumentDigest": null,
+              "boundDialectDigest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "packDigest": "sha256:39255db451d5df6f622d0bd7dc498bbe3ffcbeab4cdfad87bdc1a20cb8b338e1",
+              "releaseDigest": "sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+              "preparationDigest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+              "auditDigest": "sha256:b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+              "outputPointer": "/items",
+              "index": 5,
+              "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+              "caseDigest": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+              "parentRecord": null,
+              "selectionDigest": null,
+              "relation": {
+                "label": "discovered-for",
+                "direction": "output-to-parent"
+              },
+              "influence": {
+                "classes": [
+                  "generated"
+                ],
+                "generatedInfluence": true
+              }
+            }
+          },
+          "disposition": {
+            "kind": "not-applicable",
+            "reasons": [
+              "not-applicable"
+            ],
+            "handoff": {
+              "state": "none"
+            }
+          }
+        },
+        {
+          "recordDigest": "sha256:dbe03fb6bc0d4d56a77666f13cbf9766525e8418b56ba20cc5af45f9a0af9f3c",
+          "output": {
+            "outputRecordVersion": 2,
+            "payloadDigest": "sha256:b9471d4c55fcd1a7a9e84f3399e4d3b346c2386b4db7ce54bb6433c2d997c6fb",
+            "lineage": {
+              "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "execution": "complete-run",
+              "stage": "cases",
+              "instance": "case-failed-value-resolution",
+              "publishedDialectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bindingDocumentDigest": null,
+              "boundDialectDigest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "packDigest": "sha256:39255db451d5df6f622d0bd7dc498bbe3ffcbeab4cdfad87bdc1a20cb8b338e1",
+              "releaseDigest": "sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+              "preparationDigest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+              "auditDigest": "sha256:b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+              "outputPointer": "/items",
+              "index": 6,
+              "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+              "caseDigest": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+              "parentRecord": null,
+              "selectionDigest": null,
+              "relation": {
+                "label": "discovered-for",
+                "direction": "output-to-parent"
+              },
+              "influence": {
+                "classes": [
+                  "generated"
+                ],
+                "generatedInfluence": true
+              }
+            }
+          },
+          "disposition": {
+            "kind": "unresolved",
+            "reasons": [
+              "unknown"
+            ],
+            "handoff": {
+              "state": "requested",
+              "triggeredBy": [
+                "unknown"
+              ]
+            }
+          }
+        },
+        {
+          "recordDigest": "sha256:3e84675c086aa7ade9bb94d0f69a398b97831e986e4a0442d1f7e66d05eab696",
+          "output": {
+            "outputRecordVersion": 2,
+            "payloadDigest": "sha256:9c20ad9b6cb17f05b71a01e18127f07c74387f28ff76ce0210f0aaaf0dea9e2d",
+            "lineage": {
+              "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "execution": "complete-run",
+              "stage": "cases",
+              "instance": "case-false-only",
+              "publishedDialectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bindingDocumentDigest": null,
+              "boundDialectDigest": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+              "packDigest": "sha256:39255db451d5df6f622d0bd7dc498bbe3ffcbeab4cdfad87bdc1a20cb8b338e1",
+              "releaseDigest": "sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+              "preparationDigest": "sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+              "auditDigest": "sha256:b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+              "outputPointer": "/items",
+              "index": 7,
+              "rootCaseDigest": "sha256:0101010101010101010101010101010101010101010101010101010101010101",
+              "caseDigest": "sha256:0202020202020202020202020202020202020202020202020202020202020202",
+              "parentRecord": null,
+              "selectionDigest": null,
+              "relation": {
+                "label": "discovered-for",
+                "direction": "output-to-parent"
+              },
+              "influence": {
+                "classes": [
+                  "generated"
+                ],
+                "generatedInfluence": true
+              }
+            },
+            "contributors": [
+              {
+                "kind": "rule",
+                "id": "z-rule"
+              }
+            ]
+          },
+          "disposition": {
+            "kind": "outcome",
+            "outcomeId": "approve",
+            "reasons": [],
+            "handoff": {
+              "state": "none"
+            }
+          }
+        }
+      ],
+      "summary": {
+        "summaryVersion": 2,
+        "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "execution": "complete-run",
+        "stage": "cases",
+        "records": 8,
+        "recordsDigest": "sha256:7007b02faa0cdb889e1f0dcb59c71a2de95c6465008a8743f91753b792474ba0",
+        "byKind": {
+          "outcome": 5,
+          "not-applicable": 1,
+          "unresolved": 2
+        },
+        "byOutcome": {
+          "approve": 5
+        },
+        "byReason": {
+          "conflict": 1,
+          "unknown": 1
+        },
+        "byRule": {
+          "approve": {
+            "contributors": {
+              "rule": {
+                "a-rule": 1,
+                "z-rule": 3
+              },
+              "forcing-exception": {
+                "a-rule": 1,
+                "z-force": 1
+              }
+            },
+            "fallback": 1
+          }
+        }
+      }
+    }
+  ]
+}

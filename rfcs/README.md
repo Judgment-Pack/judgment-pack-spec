@@ -75,6 +75,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0025](0025-core-escalation-routes.md) | Core escalation routes | Accepted design (#219); review pending | Specification (Core) |
 | [0026](0026-document-ceiling-profiles.md) | Document ceiling profiles | Accepted design (#232); review pending | Specification and companions |
 | [0027](0027-pack-design-advisories.md) | Bounded pack-design advisories | Draft | Optional tooling contract proposed for Core `0.4.0`; released conformance unchanged |
+| [0028](0028-complete-workflow-contributors.md) | Complete workflow contributor attribution | Draft | Specification (amendment to Draft workflow; target Spec 0.4.0, unpublished) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md

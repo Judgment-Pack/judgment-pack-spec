@@ -1,0 +1,110 @@
+{
+  "shapeVersion": 1,
+  "note": "Standalone schema vocabulary witnesses; replacements do not claim a full execution or semantic inventory.",
+  "cases": [
+    {
+      "path": [
+        "instances",
+        0,
+        "state"
+      ],
+      "value": "completed-zero"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "state"
+      ],
+      "value": "completed"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "state"
+      ],
+      "value": "failed"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "state"
+      ],
+      "value": "interrupted"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "state"
+      ],
+      "value": "cancelled"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "failure"
+      ],
+      "value": "projection-invalid"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "failure"
+      ],
+      "value": "admission-refused"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "failure"
+      ],
+      "value": "acquisition-failed"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "failure"
+      ],
+      "value": "preparation-failed"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "failure"
+      ],
+      "value": "evaluation-error"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "failure"
+      ],
+      "value": "output-invalid"
+    },
+    {
+      "path": [
+        "instances",
+        0,
+        "failure"
+      ],
+      "value": "limit-exceeded"
+    },
+    {
+      "path": [
+        "outputSets",
+        0,
+        "status"
+      ],
+      "value": "blocked"
+    }
+  ]
+}

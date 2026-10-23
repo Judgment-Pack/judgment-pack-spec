@@ -1,0 +1,32 @@
+{
+  "driftVersion": 2,
+  "result": "drift",
+  "workflowDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "leftExecutionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "rightExecutionDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "stages": [
+    {
+      "stage": "cases",
+      "records": 0,
+      "byKind": {
+        "outcome": 0,
+        "not-applicable": 0,
+        "unresolved": 0
+      },
+      "byOutcome": {},
+      "byReason": {},
+      "byRule": {
+        "approve": {
+          "contributors": {
+            "rule": {
+              "a-rule": -1
+            },
+            "forcing-exception": {}
+          },
+          "fallback": 0
+        }
+      }
+    }
+  ],
+  "records": []
+}

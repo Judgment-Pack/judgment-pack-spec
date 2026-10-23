@@ -1,0 +1,79 @@
+{
+  "caseVersion": 1,
+  "cases": [
+    {
+      "name": "normal",
+      "expectedContributors": [
+        {
+          "kind": "rule",
+          "id": "a-rule"
+        },
+        {
+          "kind": "rule",
+          "id": "z-rule"
+        }
+      ],
+      "note": "Expected evaluation membership; bulk readers do not replay conditions."
+    },
+    {
+      "name": "forced",
+      "expectedContributors": [
+        {
+          "kind": "forcing-exception",
+          "id": "a-rule"
+        },
+        {
+          "kind": "forcing-exception",
+          "id": "z-force"
+        }
+      ],
+      "note": "Expected evaluation membership; bulk readers do not replay conditions."
+    },
+    {
+      "name": "suppressed",
+      "expectedContributors": [
+        {
+          "kind": "rule",
+          "id": "z-rule"
+        }
+      ],
+      "note": "Expected evaluation membership; bulk readers do not replay conditions."
+    },
+    {
+      "name": "fallback",
+      "expectedContributors": null,
+      "note": "Expected evaluation membership; bulk readers do not replay conditions."
+    },
+    {
+      "name": "conflict",
+      "expectedContributors": null,
+      "note": "Expected evaluation membership; bulk readers do not replay conditions."
+    },
+    {
+      "name": "not-applicable",
+      "expectedContributors": null,
+      "note": "Expected evaluation membership; bulk readers do not replay conditions."
+    },
+    {
+      "name": "failed-value-resolution",
+      "expectedContributors": null,
+      "note": "Synthetic outcome-value resolution fails after candidates; no outcome credit. This is not an executed Core0.3 evaluation."
+    },
+    {
+      "name": "false-only",
+      "expectedContributors": [
+        {
+          "kind": "rule",
+          "id": "z-rule"
+        }
+      ],
+      "note": "Expected evaluation membership; bulk readers do not replay conditions."
+    }
+  ],
+  "failedEvaluation": {
+    "state": "failed",
+    "failure": "evaluation-error",
+    "outputs": [],
+    "contributors": null
+  }
+}

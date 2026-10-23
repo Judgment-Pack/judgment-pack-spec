@@ -1,0 +1,168 @@
+{
+  "specVersion": "0.3.0",
+  "id": "https://example.com/packs/contributors",
+  "version": "0.1.0",
+  "title": "Synthetic contributor cases",
+  "decision": {
+    "intent": "Exercise complete contributor accounting.",
+    "question": "Which synthetic outcome?"
+  },
+  "applicability": {
+    "op": "fact",
+    "path": "/applicable",
+    "operator": "equals",
+    "value": true
+  },
+  "evidenceRequirements": [],
+  "sources": [],
+  "outcomes": [
+    {
+      "id": "approve",
+      "label": "Approve"
+    },
+    {
+      "id": "reject",
+      "label": "Reject"
+    }
+  ],
+  "rules": [
+    {
+      "id": "z-rule",
+      "description": "Synthetic rule.",
+      "when": {
+        "op": "fact",
+        "path": "/mode",
+        "operator": "in",
+        "value": [
+          "normal",
+          "suppressed",
+          "false-only",
+          "forced"
+        ]
+      },
+      "outcome": "approve",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "a-rule",
+      "description": "Synthetic rule.",
+      "when": {
+        "op": "fact",
+        "path": "/mode",
+        "operator": "in",
+        "value": [
+          "normal",
+          "suppressed",
+          "forced"
+        ]
+      },
+      "outcome": "approve",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "reject-rule",
+      "description": "Synthetic rule.",
+      "when": {
+        "op": "fact",
+        "path": "/mode",
+        "operator": "in",
+        "value": [
+          "conflict"
+        ]
+      },
+      "outcome": "reject",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "approve-rule",
+      "description": "Synthetic rule.",
+      "when": {
+        "op": "fact",
+        "path": "/mode",
+        "operator": "in",
+        "value": [
+          "conflict"
+        ]
+      },
+      "outcome": "approve",
+      "onUnknown": "escalate"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "z-force",
+      "description": "Synthetic exception.",
+      "when": {
+        "op": "fact",
+        "path": "/mode",
+        "operator": "in",
+        "value": [
+          "forced"
+        ]
+      },
+      "effect": "force-outcome",
+      "onUnknown": "escalate",
+      "outcome": "approve"
+    },
+    {
+      "id": "a-rule",
+      "description": "Synthetic exception.",
+      "when": {
+        "op": "fact",
+        "path": "/mode",
+        "operator": "in",
+        "value": [
+          "forced"
+        ]
+      },
+      "effect": "force-outcome",
+      "onUnknown": "escalate",
+      "outcome": "approve"
+    },
+    {
+      "id": "suppress-a",
+      "description": "Synthetic exception.",
+      "when": {
+        "op": "fact",
+        "path": "/mode",
+        "operator": "in",
+        "value": [
+          "suppressed"
+        ]
+      },
+      "effect": "suppress-rule",
+      "onUnknown": "escalate",
+      "targetRule": "a-rule"
+    },
+    {
+      "id": "false-force",
+      "description": "Synthetic exception.",
+      "when": {
+        "op": "fact",
+        "path": "/mode",
+        "operator": "in",
+        "value": [
+          "never"
+        ]
+      },
+      "effect": "force-outcome",
+      "onUnknown": "escalate",
+      "outcome": "approve"
+    },
+    {
+      "id": "escalate-only",
+      "description": "Synthetic exception.",
+      "when": {
+        "op": "fact",
+        "path": "/mode",
+        "operator": "in",
+        "value": [
+          "never"
+        ]
+      },
+      "effect": "escalate",
+      "onUnknown": "escalate"
+    }
+  ],
+  "fallbackOutcome": "approve"
+}

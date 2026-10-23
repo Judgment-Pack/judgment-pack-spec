@@ -1,0 +1,54 @@
+{
+  "manifestVersion": 1,
+  "schema": "../../schema/workflow-contributors-2.schema.json",
+  "files": [
+    {
+      "path": "bundle-claimed-omission.json",
+      "schemaValid": true
+    },
+    {
+      "path": "bundle-reversed.json",
+      "schemaValid": true
+    },
+    {
+      "path": "bundle.json",
+      "schemaValid": true
+    },
+    {
+      "path": "drift.json",
+      "schemaValid": true
+    },
+    {
+      "path": "execution-shape.json",
+      "schemaValid": true
+    },
+    {
+      "path": "mutations.json",
+      "schemaValid": false
+    },
+    {
+      "path": "pack-reversed.json",
+      "schemaValid": false
+    },
+    {
+      "path": "pack.json",
+      "schemaValid": false
+    },
+    {
+      "path": "semantic-cases.json",
+      "schemaValid": false
+    },
+    {
+      "path": "execution-shapes.json",
+      "schemaValid": false
+    },
+    {
+      "path": "raw-input-cases.json",
+      "schemaValid": false
+    },
+    {
+      "path": "refusal-reports.json",
+      "schemaValid": false
+    }
+  ]
+}
