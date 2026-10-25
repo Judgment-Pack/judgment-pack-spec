@@ -180,6 +180,7 @@ def refuse_existing_release(source: Path) -> None:
     # The tag endpoint is published-only. A tag404 says nothing about a draft.
     repository_id = draft_visibility(source)
     seen_ids, seen_tags = set(), set()
+    last_boundary = None
     for page in range(1, MAX_RELEASE_PAGES + 1):
         headers, releases = release_api(source, f"repos/{REPOSITORY}/releases?per_page={RELEASE_PAGE_SIZE}&page={page}")
         if not isinstance(releases, list) or len(releases) > RELEASE_PAGE_SIZE:
@@ -196,7 +197,15 @@ def refuse_existing_release(source: Path) -> None:
             seen_tags.add(release["tag_name"])
             if release["tag_name"] == TAG:
                 raise ValueError("a release or draft already exists for the exact tag")
-        next_page, last = links.get("next"), links.get("last")
+        next_page, observed_last = links.get("next"), links.get("last")
+        if last_boundary is not None and observed_last is not None and observed_last != last_boundary:
+            raise ValueError("release pagination boundary changed during inventory")
+        if observed_last is not None:
+            last_boundary = observed_last
+        # Missing later links cannot erase an earlier advertised completion boundary.
+        last = last_boundary
+        if last is not None and page == last and page > 1 and not releases:
+            raise ValueError("advertised final release page is empty")
         if (("first" in links and links["first"] != 1)
                 or ("prev" in links and links["prev"] != page - 1)
                 or (next_page is not None and (next_page != page + 1 or len(releases) != RELEASE_PAGE_SIZE))

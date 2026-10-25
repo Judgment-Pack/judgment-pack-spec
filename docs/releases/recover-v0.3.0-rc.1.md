@@ -46,6 +46,10 @@ API that exposes drafts to push-capable callers. It rechecks visibility at compl
 insufficient permission evidence, API errors, malformed/duplicate data, inconsistent/wrong-repository
 pagination or exhausted bounds cannot establish absence. It reads at most20 pages of100 releases,
 with at most16MiB per API response; a full page without completion evidence requires another page.
+The first advertised final-page number remains binding throughout the walk: changed boundaries,
+premature completion, empty advertised final pages or next links beyond that boundary refuse.
+Omitting a later final-page link does not erase earlier evidence. Stable full or partial final
+pages can complete against that retained boundary.
 Every exact matching tag refuses, regardless of draft/public state or whether it has assets.
 See GitHub's [release-list visibility contract](https://docs.github.com/en/rest/releases/releases#list-releases),
 [repository metadata](https://docs.github.com/en/rest/repos/repos#get-a-repository) and
@@ -53,7 +57,8 @@ See GitHub's [release-list visibility contract](https://docs.github.com/en/rest/
 
 Creation remains under the normal release tag's concurrency lock and uses `gh release create`
 without replacement flags. The observations are not a transactional repository snapshot or a lock
-on outside GitHub clients: a concurrent external change after the final observation remains a race.
+on outside GitHub clients: unobservable concurrent mutations during the walk, or an external change
+after the final observation, remain races. Observed contradictions refuse without automatic retry.
 No cleanup/delete/overwrite route is provided. Any unexpected creation outcome requires investigation;
 never retry against, replace or delete the existing draft/assets. The successful recovery's existing
 assets/attestations retain workflow revision `dc8825c41b1f834fce63b798a92ef4a115d5bfb6`;

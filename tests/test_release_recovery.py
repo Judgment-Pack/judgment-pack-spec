@@ -445,6 +445,61 @@ class ReleaseAbsenceTests(unittest.TestCase):
         calls=self.exercise({1:self.response([self.release(1),self.release(2)]),2:self.response([])})
         self.assertIn(f"repos/{recovery.REPOSITORY}/releases?per_page=2&page=2",calls)
 
+    def test_stable_advertised_boundary_completes_full_and_partial_final_pages(self):
+        for final in ([self.release(3)], [self.release(3),self.release(4)]):
+            for last_link in (None,self.link(2,"last")):
+                with self.subTest(final=final,last_link=last_link):
+                    calls=self.exercise({1:self.response([self.release(1),self.release(2)],
+                                                         link=self.link(2)+", "+self.link(2,"last")),
+                                         2:self.response(final,link=last_link)})
+                    self.assertEqual(len(calls),4)
+
+    def test_continuously_existing_draft_skipped_by_observed_boundary_shrink_refuses(self):
+        # Initial inventory [A,B,TARGET,C,D]; deleting A shifts TARGET into visited page1.
+        # TARGET remains a draft throughout, but the returned rows are unique [A,B], [C,D].
+        with self.assertRaisesRegex(ValueError,"boundary changed"):
+            self.exercise({1:self.response([self.release(1),self.release(2)],
+                                          link=self.link(2)+", "+self.link(3,"last")),
+                           2:self.response([self.release(3),self.release(4)],
+                                          link=self.link(1,"first")+", "+self.link(1,"prev")+", "+self.link(2,"last"))})
+
+    def test_observed_boundary_expansion_refuses(self):
+        with self.assertRaisesRegex(ValueError,"boundary changed"):
+            self.exercise({1:self.response([self.release(1),self.release(2)],
+                                          link=self.link(2)+", "+self.link(2,"last")),
+                           2:self.response([self.release(3),self.release(4)],
+                                          link=self.link(3)+", "+self.link(3,"last")),
+                           3:self.response([self.release(5)])})
+
+    def test_omitted_last_link_cannot_hide_premature_terminal_page(self):
+        for final in ([],[self.release(3)],[self.release(3),self.release(4)]):
+            with self.subTest(final=final),self.assertRaisesRegex(ValueError,"incomplete or inconsistent"):
+                self.exercise({1:self.response([self.release(1),self.release(2)],
+                                              link=self.link(2)+", "+self.link(3,"last")),
+                               2:self.response(final),3:self.response([])})
+
+    def test_empty_advertised_final_page_refuses_with_or_without_last_link(self):
+        for last_link in (None,self.link(2,"last")):
+            with self.subTest(last_link=last_link),self.assertRaisesRegex(ValueError,"final release page is empty"):
+                self.exercise({1:self.response([self.release(1),self.release(2)],
+                                              link=self.link(2)+", "+self.link(2,"last")),
+                               2:self.response([],link=last_link)})
+
+    def test_omitted_last_link_cannot_extend_prior_boundary(self):
+        with self.assertRaisesRegex(ValueError,"incomplete or inconsistent"):
+            self.exercise({1:self.response([self.release(1),self.release(2)],
+                                          link=self.link(2)+", "+self.link(2,"last")),
+                           2:self.response([self.release(3),self.release(4)],link=self.link(3)),
+                           3:self.response([self.release(5)])})
+
+    def test_stable_three_page_boundary_with_intermediate_last_link_omitted(self):
+        calls=self.exercise({1:self.response([self.release(1),self.release(2)],
+                                            link=self.link(2)+", "+self.link(3,"last")),
+                             2:self.response([self.release(3),self.release(4)],
+                                            link=self.link(1,"first")+", "+self.link(1,"prev")+", "+self.link(3)),
+                             3:self.response([self.release(5)],link=self.link(2,"prev")+", "+self.link(3,"last"))})
+        self.assertEqual(len(calls),5)
+
     def test_insufficient_push_visibility_is_not_absence(self):
         restricted={**self.repository,"permissions":{"push":False}}
         with self.assertRaisesRegex(ValueError,"draft visibility are unproven"):
