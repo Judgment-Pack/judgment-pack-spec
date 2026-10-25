@@ -2598,6 +2598,7 @@ CANONICAL_SCHEMA_SOURCES = (
     "schema/judgment-pack-core-0.2.0-draft.schema.json",
     "schema/conformance-manifest-0.1.0-draft.schema.json",
     "schema/conformance-manifest-0.2.0-draft.schema.json",
+    "schema/conformance-evaluation-manifest-0.2.0-draft.schema.json",
     "conformance/manifest.schema.json",
     "conformance/evaluation/manifest.schema.json",
     "schema/policy/1.0.0/common.schema.json",
@@ -3385,10 +3386,10 @@ mutable site.</div>
   <li><a href="{html.escape(release_notes)}">{html.escape(PREVIOUS_SITE_VERSION)} release notes</a> —
   that draft's scope and known limitations.</li>
   <li><a href="{html.escape(current)}">Core {html.escape(SITE_VERSION)}</a> — the current draft. A
-  <code>{html.escape(PREVIOUS_SITE_VERSION)}</code> pack is unchanged in representation and in
-  document-conformance meaning there and needs only its <code>specVersion</code> re-declared;
-  re-declaring it also opts it into that draft's evaluator semantics and confers no conformance on any
-  implementation.</li>
+  pack needs an explicit migration review and revalidation against the current carrier, structural
+  and semantic requirements before its exact <code>specVersion</code> is re-declared. New profiles
+  and routed escalations require newer readers; unpaired surrogate escapes are refused.
+  Re-declaration also opts into the current evaluator semantics and confers no implementation conformance.</li>
   <li><a href="{html.escape(current_release_notes)}">{html.escape(SITE_VERSION)} release notes</a> — what
   "preserved" means for the <code>{html.escape(PREVIOUS_SITE_VERSION)}</code> schemas, which stay served at
   the <code>$id</code> each was published under. Each preserved file matches the tagged artifact in every

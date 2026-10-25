@@ -8,9 +8,10 @@ industry standard or as suitable, by conformance alone, for consequential decisi
 `0.3.0` defines four conformance classes: carrier, structural, and semantic document
 conformance, and evaluator conformance (§3.4). Sections 7 and 8 are normative for an implementation
 that claims the evaluator class and informative for every other consumer; a document-conformance
-claim does not depend on them. The document format is unchanged from `0.2.0-draft`: a pack using
-that identifier is unchanged in representation and in document-conformance meaning here and may be
-re-declared as `0.3.0` without other edits.
+claim does not depend on them. This release adds document profiles and routed escalations and
+tightens carrier admission to require pairing for Unicode escapes in the UTF-16 surrogate range.
+Migration from `0.2.0-draft` requires revalidation; changing only the version selector is sufficient
+only for documents that already meet the current carrier, structural and semantic requirements.
 Re-declaration opts the pack into this release's exact evaluator semantics and corpus and confers no
 conformance on any implementation (§11).
 
@@ -989,18 +990,31 @@ reader, writer, and semantic compatibility separately and supply machine-readabl
 
 A published pack version SHOULD be immutable. Changed content SHOULD receive a new version.
 
-`0.3.0` changes no part of the document format from `0.2.0-draft`. A pack declaring that earlier
-`specVersion` is unchanged in representation and in document-conformance meaning under this release —
-every member, every cross-field rule, and every conformance verdict of §§3.1–3.3 is the same — and
-may be re-declared as `0.3.0` by editing that one value and nothing else. Re-declaration is not
-semantically inert: it
-opts the pack into this release's exact evaluator semantics of §§7–8 and its evaluation corpus.
-What re-declaration does not do is confer conformance on anything: an
-evaluator-conformance claim is a claim about an implementation, made only as §3.4.1 permits, and no pack
-edit creates, transfers, or strengthens one. Because the value is exact (§4), an unedited
-`0.2.0-draft` pack is not structurally conforming to `0.3.0` and must be re-declared before an
-implementation claiming this release evaluates it; the `0.1.0-draft` and `0.2.0-draft` schemas
-remain published for packs that keep an older value.
+Compatibility from `0.2.0-draft` is explicit rather than inferred from a shared `0.x` prefix:
+
+- **Reader and writer:** an older reader does not acquire `0.3.0` support by ignoring or replacing
+  the exact selector. `0.3.0` adds the optional `profile` member and escalation `routes`; these
+  newer-only shapes are not accepted by the historical structural schema. Writers targeting an
+  older selector must satisfy that older version's requirements and cannot emit these members under it.
+  Readers implementing multiple versions dispatch on the complete selector and preserve the older
+  contract; supporting the current version does not reinterpret historical documents.
+- **Carrier:** §2.1 now requires Unicode escapes in the UTF-16 surrogate range to form well-formed pairs. A lone
+  `\uD800` escape in a title was accepted by the published `0.2.0-draft` carrier and structural
+  schema but is refused as malformed input here. Replacing only `specVersion` cannot repair it;
+  the author must supply an intended Unicode scalar value or a valid surrogate pair, not silently
+  substitute a replacement character.
+- **Structural and semantic migration:** revalidate the document under §§3.1–3.3, including its
+  selected document profile, supported ceilings and escalation form. Selector-only migration is
+  sufficient only when the document already satisfies those requirements. Otherwise deliberate
+  content changes and review are needed; there is no automatic transformation or unchanged-verdict
+  promise for every historical document.
+- **Evaluation:** re-declaration opts into this release's exact §§7–8 evaluator semantics and
+  evaluation corpus, including the selected escalation behavior. It is not semantically inert and
+  creates, transfers or strengthens no implementation-conformance claim.
+
+An unedited `0.2.0-draft` pack is not structurally conforming to `0.3.0` because its selector is
+exact (§4). The `0.1.0-draft` and `0.2.0-draft` schemas remain published for documents retaining
+those selectors, with historical rules and identities preserved.
 
 An evaluator-conformance claim (§3.4) attaches to one exact `specVersion` and to the evaluation
 corpus published with it. It is not inherited by a later or an earlier version, and re-declaring a

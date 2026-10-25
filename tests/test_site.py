@@ -728,6 +728,9 @@ class StaticSiteTests(unittest.TestCase):
             "schema/0.2.0-draft/conformance/manifest.schema.json": ROOT
             / "schema"
             / "conformance-manifest-0.2.0-draft.schema.json",
+            "schema/0.2.0-draft/conformance/evaluation/manifest.schema.json": ROOT
+            / "schema"
+            / "conformance-evaluation-manifest-0.2.0-draft.schema.json",
             "schema/0.3.0/conformance/manifest.schema.json": ROOT
             / "conformance"
             / "manifest.schema.json",

@@ -1,0 +1,10 @@
+{
+  "specVersion": "0.2.0-draft",
+  "id": "urn:example:selector-migration",
+  "version": "1.0.0",
+  "title": "\ud800",
+  "decision": {"intent": "Synthetic compatibility probe", "question": "Is this synthetic case allowed?"},
+  "outcomes": [{"id": "allow", "label": "Allow"}, {"id": "deny", "label": "Deny"}],
+  "rules": [{"id": "allow-case", "description": "Hand-authored compatibility case", "onUnknown": "ignore", "when": {"op": "fact", "path": "/allowed", "operator": "equals", "value": true}, "outcome": "allow"}],
+  "fallbackOutcome": "deny"
+}

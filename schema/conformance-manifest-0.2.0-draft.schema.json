@@ -10,7 +10,6 @@
     "specVersion",
     "status",
     "validationProfile",
-    "diagnosticVocabulary",
     "cases"
   ],
   "properties": {
@@ -24,7 +23,7 @@
       "const": "0.2.0-draft"
     },
     "status": {
-      "enum": ["draft", "candidate", "release"]
+      "const": "research-preview"
     },
     "validationProfile": {
       "type": "object",
@@ -43,16 +42,6 @@
         },
         "rejectDuplicateObjectMembers": {
           "const": true
-        }
-      }
-    },
-    "diagnosticVocabulary": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["advisory"],
-      "properties": {
-        "advisory": {
-          "const": ["JPS-RULES-OVERLAP"]
         }
       }
     },
@@ -85,160 +74,6 @@
         }
       }
     },
-    "ruleOverlapDiagnostic": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "code",
-        "certainty",
-        "severity",
-        "path",
-        "rules",
-        "effect",
-        "suggestedRewrite"
-      ],
-      "properties": {
-        "code": {
-          "const": "JPS-RULES-OVERLAP"
-        },
-        "certainty": {
-          "enum": ["exact", "not-excluded"]
-        },
-        "severity": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["validate", "strict", "publish"],
-          "properties": {
-            "validate": { "const": "warning" },
-            "strict": { "enum": ["warning", "error"] },
-            "publish": { "enum": ["warning", "block"] }
-          }
-        },
-        "path": {
-          "type": "string",
-          "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$"
-        },
-        "rules": {
-          "type": "array",
-          "minItems": 2,
-          "maxItems": 2,
-          "uniqueItems": true,
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["id", "outcome"],
-            "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "outcome": { "type": "string", "minLength": 1 }
-            }
-          }
-        },
-        "overlap": {
-          "oneOf": [
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["path", "sharedValues"],
-              "properties": {
-                "path": {
-                  "type": "string",
-                  "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$"
-                },
-                "sharedValues": {
-                  "type": "array",
-                  "minItems": 1,
-                  "uniqueItems": true
-                }
-              }
-            },
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["path"],
-              "properties": {
-                "path": {
-                  "type": "string",
-                  "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$"
-                },
-                "from": {
-                  "$ref": "../judgment-pack-core.schema.json#/$defs/decimalString"
-                },
-                "fromInclusive": { "type": "boolean" },
-                "to": {
-                  "$ref": "../judgment-pack-core.schema.json#/$defs/decimalString"
-                },
-                "toInclusive": { "type": "boolean" }
-              },
-              "dependentRequired": {
-                "from": ["fromInclusive"],
-                "fromInclusive": ["from"],
-                "to": ["toInclusive"],
-                "toInclusive": ["to"]
-              },
-              "anyOf": [
-                { "required": ["from"] },
-                { "required": ["to"] }
-              ]
-            }
-          ]
-        },
-        "witnessFacts": {
-          "type": "object"
-        },
-        "effect": {
-          "const": "Core §8 records conflict; the disposition is unresolved."
-        },
-        "suggestedRewrite": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["ruleId", "when"],
-          "properties": {
-            "ruleId": { "type": "string", "minLength": 1 },
-            "when": {
-              "$ref": "../judgment-pack-core.schema.json#/$defs/condition"
-            }
-          }
-        }
-      },
-      "allOf": [
-        {
-          "if": {
-            "properties": { "certainty": { "const": "exact" } },
-            "required": ["certainty"]
-          },
-          "then": {
-            "anyOf": [
-              { "required": ["overlap"] },
-              { "required": ["witnessFacts"] }
-            ],
-            "properties": {
-              "severity": {
-                "properties": {
-                  "strict": { "const": "error" },
-                  "publish": { "const": "block" }
-                }
-              }
-            }
-          },
-          "else": {
-            "not": {
-              "anyOf": [
-                { "required": ["overlap"] },
-                { "required": ["witnessFacts"] }
-              ]
-            },
-            "properties": {
-              "severity": {
-                "properties": {
-                  "strict": { "const": "warning" },
-                  "publish": { "const": "warning" }
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
     "case": {
       "type": "object",
       "additionalProperties": false,
@@ -258,7 +93,7 @@
         },
         "path": {
           "type": "string",
-          "pattern": "^(?:advisory|carrier|structural|semantic|valid)/[a-z0-9][a-z0-9-]*\\.json$"
+          "pattern": "^(?:carrier|structural|semantic|valid)/[a-z0-9][a-z0-9-]*\\.json$"
         },
         "layer": {
           "enum": ["carrier", "structural", "semantic"]
@@ -286,13 +121,6 @@
             "$ref": "#/$defs/extensionName"
           },
           "uniqueItems": true
-        },
-        "expectedAdvisories": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/ruleOverlapDiagnostic"
-          },
-          "uniqueItems": true
         }
       },
       "allOf": [
@@ -312,25 +140,6 @@
             "properties": {
               "expectedDiagnostic": { "$ref": "#/$defs/diagnostic" }
             }
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "path": { "pattern": "^advisory/" }
-            },
-            "required": ["path"]
-          },
-          "then": {
-            "required": ["expectedAdvisories"],
-            "properties": {
-              "layer": { "const": "semantic" },
-              "expectedResult": { "const": "valid" },
-              "expectedDiagnostic": { "type": "null" }
-            }
-          },
-          "else": {
-            "not": { "required": ["expectedAdvisories"] }
           }
         }
       ]

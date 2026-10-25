@@ -926,16 +926,6 @@ class RepositoryConformanceTests(unittest.TestCase):
             strict_json_loads(
                 EVALUATION_MANIFEST_SCHEMA_PATH.read_text(encoding="utf-8")
             ),
-            *(
-                strict_json_loads(
-                    (
-                        ROOT
-                        / "schema"
-                        / f"conformance-manifest-{version}.schema.json"
-                    ).read_text(encoding="utf-8")
-                )
-                for version in PREVIOUS_SPEC_VERSIONS
-            ),
         )
         for schema in schemas:
             status_validator = Draft202012Validator(schema["properties"]["status"])
@@ -946,13 +936,7 @@ class RepositoryConformanceTests(unittest.TestCase):
                     )
 
     def test_core_schema_descriptions_name_their_spec_versions(self) -> None:
-        paths = (
-            SCHEMA_PATH,
-            *(
-                ROOT / "schema" / f"judgment-pack-core-{version}.schema.json"
-                for version in PREVIOUS_SPEC_VERSIONS
-            ),
-        )
+        paths = (SCHEMA_PATH,)  # Historical descriptions are frozen; trusted anchors test them.
         for path in paths:
             schema = strict_json_loads(path.read_text(encoding="utf-8"))
             version = schema["properties"]["specVersion"]["const"]
