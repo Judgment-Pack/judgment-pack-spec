@@ -31,6 +31,16 @@ BUNDLE_PATHS = (
     "conformance",
 )
 
+# One reviewed distribution candidate; this is not a generic prerelease normalizer.
+CORE_RC_TAG = "v0.3.0-rc.1"
+CORE_RC_IDENTITY = {
+    "releaseVersion": "0.3.0-rc.1",
+    "tag": CORE_RC_TAG,
+    "specVersion": "0.3.0",
+    "maturity": "draft",
+    "distribution": "release-candidate",
+}
+
 POLICY_FORMAT = "1.0.0"
 POLICY_ROOT = "conformance/policy/1.0.0"
 POLICY_SCHEMA_ROOT = "schema/policy/1.0.0"
@@ -148,6 +158,8 @@ def bundle_paths(tag: str, commit: str) -> tuple[str, ...]:
             paths.extend(f"{path}/{child}" for child in children if child != "policy")
         else:
             paths.append(path)
+    if tag == CORE_RC_TAG:
+        paths.extend((f"releases/{tag}.json", "docs/releases/v0.3.0.md"))
     return (*paths, core_release_notes_path(tag).relative_to(ROOT).as_posix())
 
 
@@ -180,12 +192,20 @@ def release_version(tag: str) -> str:
 
 
 def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
-    """Check every version-pinned artifact against the exact release version.
+    """Check exact format pins; only the reviewed RC has a separate distribution identity.
 
-    A claim binds to one exact ``specVersion`` and, for evaluator conformance, to the evaluation
-    corpus published with it (Core §§3.4, 3.4.1), so the evaluation manifest is pinned here beside
-    the document manifest and the schema.
+    The RC distributes proposed 0.3.0 artifacts, not a released conformance corpus.
+    No arbitrary prerelease suffix may be stripped to infer a compatible specVersion.
     """
+    if version != release_version(tag):
+        raise ValueError("release version does not match the exact tag")
+    if tag == CORE_RC_TAG:
+        mapping = root / "releases" / f"{tag}.json"
+        if not mapping.is_file():
+            raise ValueError("Core RC release mapping is missing for the exact tag")
+        if json.loads(mapping.read_text("utf-8")) != CORE_RC_IDENTITY:
+            raise ValueError("Core RC release mapping does not match the reviewed identity")
+        version = CORE_RC_IDENTITY["specVersion"]
     manifest = json.loads((root / "conformance" / "manifest.json").read_text("utf-8"))
     evaluation = json.loads(
         (root / "conformance" / "evaluation" / "manifest.json").read_text("utf-8")
@@ -195,6 +215,11 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     )
     if manifest.get("specVersion") != version:
         raise ValueError("release tag does not match the conformance specVersion")
+    if tag == CORE_RC_TAG:
+        if manifest.get("suiteVersion") != version:
+            raise ValueError("Core RC does not match the document corpus suiteVersion")
+        if manifest.get("status") != "draft" or evaluation.get("status") != "draft":
+            raise ValueError("Core RC requires draft manifest maturity")
     if evaluation.get("specVersion") != version:
         raise ValueError("release tag does not match the evaluation corpus specVersion")
     if evaluation.get("suiteVersion") != version:
@@ -256,9 +281,16 @@ def build(tag: str, commit: str, output: Path) -> list[Path]:
     output.mkdir(parents=True, exist_ok=True)
     artifact = "judgment-pack-policy" if is_policy_tag(tag) else "judgment-pack-spec"
     prefix = f"{artifact}-{version}/"
+    extra = ()
+    if tag == CORE_RC_TAG:
+        # This generated member is covered by both archive checksums/attestations.
+        identity = {**CORE_RC_IDENTITY, "sourceCommit": git("rev-parse", "--verify", f"{commit}^{{commit}}")}
+        encoded = json.dumps(identity, sort_keys=True, separators=(",", ":")) + "\n"
+        extra = (f"--add-virtual-file={prefix}release-identity.json:{encoded}",)
     common = (
         "archive",
         f"--prefix={prefix}",
+        *extra,
         commit,
         *bundle_paths(tag, commit),
     )

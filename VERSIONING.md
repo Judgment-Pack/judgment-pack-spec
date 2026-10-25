@@ -55,6 +55,21 @@ tooling can read the renamed manifest status. The unsuffixed `v0.3.0` tag is the
 companion's `policy-v<releaseVersion>-draft.N` route remains independent and is not replaced by this
 Core convention.
 
+This one candidate is a distribution of the proposed exact `specVersion` `0.3.0` artifacts;
+`0.3.0-rc.1` is its distribution identity, not a pack version selector. Its closed mapping at
+`releases/v0.3.0-rc.1.json` is required by the builder. Both manifests remain maturity `draft`:
+release candidacy does not establish the independent-evidence maturity `candidate`. Each RC bundle
+records its exact distribution tag and source commit in `release-identity.json`, alongside the map
+and exact RC notes. Other Core tags still require their complete version to match the artifacts;
+no general prerelease compatibility rule is introduced.
+
+The candidate does not establish the final `0.3.0` immutable release or freeze its final corpus.
+Candidate test results identify the RC tag and commit and remain provisional; a final exact-version
+conformance claim requires the corpus published with `v0.3.0` and every applicable row passing.
+Publishing the RC starts the required adopter period; creating a draft release or preparing these
+files does not. Final publication follows about one week of public RC availability and review of
+adopter feedback, with the remaining release gates satisfied.
+
 The `main` branch describes work in progress. It is not an immutable specification release and
 must not be used as a reproducibility anchor.
 

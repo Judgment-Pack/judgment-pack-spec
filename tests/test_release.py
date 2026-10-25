@@ -3,6 +3,10 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import hashlib
+import shutil
+import sys
+import zipfile
 import subprocess
 import tarfile
 import tempfile
@@ -410,6 +414,183 @@ class ReleaseBuilderTests(unittest.TestCase):
         )
         (directory / "releases" / f"v{version}.md").write_text("notes\n", encoding="utf-8")
         return directory
+
+
+class CoreRCEntryPathTests(unittest.TestCase):
+    """Hand-authored artifact trees, real Git tags and the actual builder CLI."""
+
+    TAG = "v0.3.0-rc.1"
+    IDENTITY = {"releaseVersion": "0.3.0-rc.1", "tag": TAG, "specVersion": "0.3.0",
+                "maturity": "draft", "distribution": "release-candidate"}
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        for directory in ("tools", "schema", "conformance/evaluation", "spec",
+                          "examples", "releases", "docs/releases"):
+            (self.root / directory).mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / "tools/build_release.py", self.root / "tools/build_release.py")
+        for name in ("README.md", "LICENSE", "NOTICE", "CHANGELOG.md", "VERSIONING.md",
+                     "TESTING.md", "SECURITY.md"):
+            (self.root / name).write_text("Hand-authored release fixture.\n")
+        (self.root / "spec/core.md").write_text("Proposed Core fixture, not a specification.\n")
+        (self.root / "examples/example.json").write_text('{"specVersion":"0.3.0"}\n')
+        for path, value in (
+            ("conformance/manifest.json", {"specVersion": "0.3.0", "suiteVersion": "0.3.0", "status": "draft"}),
+            ("conformance/evaluation/manifest.json", {"specVersion": "0.3.0", "suiteVersion": "0.3.0", "status": "draft"}),
+            ("schema/judgment-pack-core.schema.json", {
+                "$id": "https://judgmentpack.org/schema/0.3.0/judgment-pack-core.schema.json",
+                "properties": {"specVersion": {"const": "0.3.0"}}}),
+            (f"releases/{self.TAG}.json", self.IDENTITY),
+        ):
+            (self.root / path).write_text(json.dumps(value) + "\n")
+        for path in (f"releases/{self.TAG}.md", "docs/releases/v0.3.0.md"):
+            (self.root / path).write_text("# Hand-authored candidate notes\n")
+        self.git("init", "--quiet")
+
+    def git(self, *args):
+        return subprocess.run(["git", *args], cwd=self.root, check=True,
+                              capture_output=True, text=True).stdout.strip()
+
+    def commit(self, tag=None):
+        self.git("add", ".")
+        self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                 "commit", "--quiet", "-s", "-m", "Hand-authored release fixture")
+        commit = self.git("rev-parse", "HEAD")
+        self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                 "tag", "-a", tag or self.TAG, "-m", "Release fixture")
+        return commit
+
+    def run_builder(self, commit, tag=None):
+        return subprocess.run([sys.executable, str(self.root / "tools/build_release.py"),
+                               "--tag", tag or self.TAG, "--commit", commit,
+                               "--output", str(self.root / "dist")], cwd=self.root,
+                              capture_output=True, text=True)
+
+    def fresh_case(self):
+        case = CoreRCEntryPathTests(methodName="runTest")
+        case.setUp()
+        self.addCleanup(case.doCleanups)
+        return case
+
+    def rewrite_json(self, path, change):
+        target = self.root / path
+        value = json.loads(target.read_text())
+        change(value)
+        target.write_text(json.dumps(value) + "\n")
+
+    def test_rc_cli_builds_both_archives_with_exact_distribution_identity(self):
+        commit = self.commit()
+        result = self.run_builder(commit)
+        self.assertEqual(0, result.returncode, result.stderr)
+        prefix = "judgment-pack-spec-0.3.0-rc.1/"
+        expected = {**self.IDENTITY, "sourceCommit": commit}
+        tar = self.root / "dist/judgment-pack-spec_0.3.0-rc.1_artifacts.tar.gz"
+        zip_path = tar.with_name("judgment-pack-spec_0.3.0-rc.1_artifacts.zip")
+        with tarfile.open(tar) as archive:
+            names = {m.name for m in archive.getmembers() if m.isfile()}
+            self.assertIn(prefix + "release-identity.json", names)
+            self.assertEqual(expected, json.load(archive.extractfile(prefix + "release-identity.json")))
+            self.assertIn(prefix + f"releases/{self.TAG}.json", names)
+            self.assertIn(prefix + f"releases/{self.TAG}.md", names)
+            self.assertIn(prefix + "docs/releases/v0.3.0.md", names)
+            self.assertEqual("0.3.0", json.load(archive.extractfile(prefix + "conformance/manifest.json"))["specVersion"])
+        with zipfile.ZipFile(zip_path) as archive:
+            self.assertEqual(names, {n for n in archive.namelist() if not n.endswith("/")})
+            self.assertEqual(expected, json.loads(archive.read(prefix + "release-identity.json")))
+        checksums = (self.root / "dist/checksums.txt").read_text().splitlines()
+        self.assertEqual([hashlib.sha256(p.read_bytes()).hexdigest() + "  " + p.name
+                          for p in (tar, zip_path)], checksums)
+
+    def test_rc_cli_refuses_missing_mapping_and_notes(self):
+        for path, message in ((f"releases/{self.TAG}.json", "mapping is missing"),
+                              (f"releases/{self.TAG}.md", "notes are missing")):
+            with self.subTest(path=path):
+                case = self.fresh_case()
+                (case.root / path).unlink()
+                result = case.run_builder(case.commit())
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn(message, result.stderr)
+
+    def test_rc_cli_refuses_changed_or_open_mapping(self):
+        for changed in ({**self.IDENTITY, "specVersion": "0.2.0-draft"},
+                        {**self.IDENTITY, "distribution": "final"},
+                        {**self.IDENTITY, "maturity": "candidate"},
+                        {**self.IDENTITY, "tag": "v0.3.0-rc.2"},
+                        {**self.IDENTITY, "releaseVersion": "0.3.0"},
+                        {**self.IDENTITY, "extra": True}, []):
+            with self.subTest(changed=changed):
+                case = self.fresh_case()
+                (case.root / f"releases/{self.TAG}.json").write_text(json.dumps(changed))
+                result = case.run_builder(case.commit())
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("mapping does not match", result.stderr)
+
+    def test_rc_cli_refuses_each_format_pin_and_maturity_mismatch(self):
+        cases = (("conformance/manifest.json", ("specVersion",), "conformance specVersion"),
+                 ("conformance/manifest.json", ("suiteVersion",), "document corpus suiteVersion"),
+                 ("conformance/evaluation/manifest.json", ("specVersion",), "evaluation corpus specVersion"),
+                 ("conformance/evaluation/manifest.json", ("suiteVersion",), "evaluation corpus suiteVersion"),
+                 ("schema/judgment-pack-core.schema.json", ("properties", "specVersion", "const"), "schema specVersion"),
+                 ("schema/judgment-pack-core.schema.json", ("$id",), "schema $id"),
+                 ("conformance/manifest.json", ("status",), "draft manifest maturity"),
+                 ("conformance/evaluation/manifest.json", ("status",), "draft manifest maturity"))
+        for path, keys, message in cases:
+            with self.subTest(path=path, keys=keys):
+                case = self.fresh_case()
+                def alter(value):
+                    for key in keys[:-1]:
+                        value = value[key]
+                    value[keys[-1]] = "wrong"
+                case.rewrite_json(path, alter)
+                result = case.run_builder(case.commit())
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn(message, result.stderr)
+
+    def test_rc_cli_does_not_strip_arbitrary_prerelease_suffixes(self):
+        for tag in ("v0.3.0-rc.2", "v0.3.0-alpha.1", "v0.3.1-rc.1"):
+            with self.subTest(tag=tag):
+                case = self.fresh_case()
+                (case.root / f"releases/{tag}.md").write_text("Wrong candidate fixture notes\n")
+                result = case.run_builder(case.commit(tag=tag), tag=tag)
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("conformance specVersion", result.stderr)
+
+    def test_artifact_api_refuses_a_version_unrelated_to_the_tag(self):
+        with self.assertRaisesRegex(ValueError, "version does not match the exact tag"):
+            BUILD_RELEASE.validate_artifacts("0.3.0", self.TAG, root=self.root)
+
+    def test_rc_cli_refuses_wrong_commit_and_mixed_checkout(self):
+        commit = self.commit()
+        (self.root / "later.txt").write_text("Different tree\n")
+        later = self.commit(tag="v0.3.1")
+        wrong = self.run_builder(later)
+        self.assertNotEqual(0, wrong.returncode)
+        self.assertIn("tag does not resolve", wrong.stderr)
+        mixed = self.run_builder(commit)
+        self.assertNotEqual(0, mixed.returncode)
+        self.assertIn("not checked out", mixed.stderr)
+
+    def test_rc_cli_refuses_dirty_tracked_dependency(self):
+        commit = self.commit()
+        # A dependency may change without changing its version selector; the clean-tree gate
+        # still prevents validating its changed bytes and shipping the tagged originals.
+        (self.root / "examples/example.json").write_text('{"specVersion":"0.3.0","tampered":true}\n')
+        result = self.run_builder(commit)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("tracked release worktree is dirty", result.stderr)
+
+    def test_prepared_rc_files_and_workflow_resolve_exact_notes(self):
+        self.assertEqual(self.IDENTITY, json.loads((ROOT / f"releases/{self.TAG}.json").read_text()))
+        self.assertEqual({"number": 2, "title": "v0.3.0"},
+                         json.loads((ROOT / f"releases/{self.TAG}.milestone.json").read_text()))
+        self.assertEqual(ROOT / f"releases/{self.TAG}.md", BUILD_RELEASE.core_release_notes_path(self.TAG))
+        workflow = (ROOT / ".github/workflows/release.yml").read_text()
+        self.assertIn('--notes-file "releases/${GITHUB_REF_NAME}.md"', workflow)
+        notes = (ROOT / f"releases/{self.TAG}.md").read_text()
+        self.assertIn("No preparation-verifier conformance claim", notes)
+        self.assertIn("about one week", notes)
 
 
 if __name__ == "__main__":
