@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import importlib.util
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -76,7 +77,10 @@ class SecondDialectReaderTest(unittest.TestCase):
         # Node strips the types with a WebAssembly module, which cannot reserve its memory under an
         # address-space limit (ulimit -v) unless the trap handler is disabled; the flag changes nothing else.
         run = subprocess.run(
-            [node, "--disable-wasm-trap-handler", "--no-warnings", "--test", *TESTS],
+            [node, "--disable-wasm-trap-handler", "--no-warnings", "--test-reporter=tap", "--test", *TESTS],
+            # Reporter options accumulate rather than override NODE_OPTIONS. Keep this parsed
+            # subprocess controlled; ambient reporters or preloads must not alter its contract.
+            env={**os.environ, "NODE_OPTIONS": ""},
             cwd=READER,
             capture_output=True,
             text=True,
