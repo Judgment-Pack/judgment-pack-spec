@@ -56,19 +56,6 @@ class RecoveryGateTests(unittest.TestCase):
         with patch.object(recovery, "output", side_effect=subprocess.CalledProcessError(1, "git")), self.assertRaises(subprocess.CalledProcessError):
             recovery.validate_remote(ROOT)
 
-    def test_absence_requires_actual_404_not_generic_api_failure_or_existing_draft(self):
-        absent = subprocess.CompletedProcess([], 1, 'HTTP/2.0 404 Not Found\r\ncontent-type: application/json\r\n\r\n{"message":"Not Found"}', "")
-        with patch.object(recovery, "run", return_value=absent):
-            recovery.refuse_existing_release(ROOT)
-        cases = [(0, 'HTTP/2.0 200 OK\n\n{"draft":true,"assets":[]}'),
-                 (0, 'HTTP/2.0 200 OK\n\n{"draft":false}'),
-                 (1, ''), (1, 'HTTP/2.0 403 Forbidden\n\n{"message":"Not Found"}'),
-                 (1, 'HTTP/2.0 404 Not Found\n\n{"message":"unknown"}'),
-                 (0, absent.stdout)]
-        for code, response in cases:
-            with self.subTest(response=response), patch.object(recovery, "run", return_value=subprocess.CompletedProcess([], code, response, "")), self.assertRaisesRegex(ValueError, "release absence"):
-                recovery.refuse_existing_release(ROOT)
-
     def test_runtime_toolchains_refuse_node_versions_that_would_skip_the_original_reader(self):
         for node in ("v22.18.0", "v22.23.1"):
             with patch.object(recovery,"output",side_effect=[node,"Python 3.12.11"]):
@@ -258,10 +245,13 @@ class RecoveryEntryTests(unittest.TestCase):
             (binary / "git").write_text("#!/usr/bin/env python3\nimport os,sys\n" +
                 "if sys.argv[1] == 'ls-remote':\n print(" + repr(f"{self.tag_object}\trefs/tags/{recovery.TAG}\n{self.commit}\trefs/tags/{recovery.TAG}^{{}}") + ")\n" +
                 "else: os.execv(" + repr(real_git) + ", [" + repr(real_git) + "] + sys.argv[1:])\n")
-            (binary / "gh").write_text("#!/usr/bin/env python3\nimport sys\nfrom pathlib import Path\n" +
+            (binary / "gh").write_text("#!/usr/bin/env python3\nimport sys,json\nfrom pathlib import Path\n" +
                 "Path(" + repr(str(self.source / "original-milestone-reached")) + ").write_text('fixture API only')\n" +
-                "if sys.argv[-1].endswith('/milestones/2'): print('{\"number\":2,\"title\":\"v0.3.0\",\"state\":\"open\"}')\n" +
-                "else:\n print('HTTP/2.0 404 Not Found\\n\\n{\"message\":\"Not Found\"}');sys.exit(1)\n")
+                "path=sys.argv[-1]\n" +
+                "if path.endswith('/milestones/2'): print('{\"number\":2,\"title\":\"v0.3.0\",\"state\":\"open\"}')\n" +
+                "elif path == 'repos/Judgment-Pack/judgment-pack-spec': print('HTTP/2.0 200 OK\\n\\n'+json.dumps({'id':71,'full_name':'Judgment-Pack/judgment-pack-spec','permissions':{'push':True}}))\n" +
+                "elif path.startswith('repos/Judgment-Pack/judgment-pack-spec/releases?'): print('HTTP/2.0 200 OK\\n\\n[]')\n" +
+                "else: raise AssertionError('unexpected fixture API route')\n")
             for path in binary.iterdir():
                 path.chmod(0o755)
             env["PATH"] = str(binary)+os.pathsep+env["PATH"]
@@ -399,3 +389,127 @@ class DialectReporterContractTests(unittest.TestCase):
         for code, summary in ((1,good.stdout),(0,"# pass 0\n# fail 0\n"),(0,"# pass 271\n# fail 1\n"),(0,"271 passed")):
             with self.subTest(code=code,summary=summary), patch.object(case,"node",return_value="fixture-node"), patch.object(dialect.subprocess,"run",return_value=subprocess.CompletedProcess([],code,summary,"")), self.assertRaises(AssertionError):
                 case.test_the_typescript_reader_answers_every_staged_vector()
+
+
+class ReleaseAbsenceTests(unittest.TestCase):
+    """Hand-authored API protocol cases; published-only tag404 never proves draft absence."""
+    repository = {"id":71,"full_name":recovery.REPOSITORY,"permissions":{"push":True}}
+
+    @staticmethod
+    def release(number, *, tag=None, draft=False):
+        return {"id":number,"tag_name":tag or f"fixture-{number}","draft":draft}
+
+    @staticmethod
+    def response(value, *, link=None, status="200 OK", code=0):
+        headers = "HTTP/2.0 "+status+"\r\nContent-Type: application/json\r\n"
+        if link is not None:
+            headers += "Link: "+link+"\r\n"
+        return subprocess.CompletedProcess([],code,headers+"\r\n"+json.dumps(value),"")
+
+    def link(self,page,relation="next",*,host="api.github.com",path=None):
+        return f'<https://{host}{path or "/repos/"+recovery.REPOSITORY+"/releases"}?per_page=2&page={page}>; rel="{relation}"'
+
+    def exercise(self,pages,*,repositories=None):
+        repos = list(repositories or [self.repository,self.repository])
+        calls=[]
+        def api(*args,**kwargs):
+            path=args[-1];calls.append(path)
+            if path=="repos/"+recovery.REPOSITORY:
+                return self.response(repos.pop(0) if len(repos)>1 else repos[0])
+            if "/releases/tags/" in path:
+                return self.response({"message":"Not Found"},status="404 Not Found",code=1)
+            prefix=f"repos/{recovery.REPOSITORY}/releases?per_page=2&page="
+            if not path.startswith(prefix):
+                raise AssertionError("unexpected fixture API request")
+            page=int(path[len(prefix):])
+            return pages.get(page,self.response({"message":"unknown fixture page"},status="500 Error",code=1))
+        with patch.object(recovery,"RELEASE_PAGE_SIZE",2),patch.object(recovery,"run",side_effect=api):
+            recovery.refuse_existing_release(ROOT)
+        return calls
+
+    def test_complete_absence_requires_draft_visibility_before_and_after_listing(self):
+        calls=self.exercise({1:self.response([self.release(1)])})
+        self.assertEqual(calls,["repos/"+recovery.REPOSITORY,f"repos/{recovery.REPOSITORY}/releases?per_page=2&page=1","repos/"+recovery.REPOSITORY])
+
+    def test_published_only_tag404_cannot_hide_existing_draft_or_published_release(self):
+        for draft in (True,False):
+            with self.subTest(draft=draft),self.assertRaisesRegex(ValueError,"release or draft already exists"):
+                self.exercise({1:self.response([self.release(423420021,tag=recovery.TAG,draft=draft)])})
+
+    def test_existing_draft_on_later_page_refuses(self):
+        with self.assertRaisesRegex(ValueError,"release or draft already exists"):
+            self.exercise({1:self.response([self.release(1),self.release(2)],link=self.link(2)+", "+self.link(2,"last")),
+                           2:self.response([self.release(423420021,tag=recovery.TAG,draft=True)])})
+
+    def test_full_page_without_link_does_not_prove_completion(self):
+        calls=self.exercise({1:self.response([self.release(1),self.release(2)]),2:self.response([])})
+        self.assertIn(f"repos/{recovery.REPOSITORY}/releases?per_page=2&page=2",calls)
+
+    def test_insufficient_push_visibility_is_not_absence(self):
+        restricted={**self.repository,"permissions":{"push":False}}
+        with self.assertRaisesRegex(ValueError,"draft visibility are unproven"):
+            self.exercise({1:self.response([])},repositories=[restricted])
+
+    def test_missing_or_malformed_visibility_is_not_absence(self):
+        for changes in ({"permissions":{}},{"permissions":{"push":1}},{"permissions":{"push":"true"}},
+                        {"id":True},{"full_name":"other/spec"},{"permissions":None}):
+            with self.subTest(changes=changes),self.assertRaisesRegex(ValueError,"draft visibility are unproven"):
+                self.exercise({1:self.response([])},repositories=[{**self.repository,**changes}])
+
+    def test_permission_loss_or_repository_change_after_listing_refuses(self):
+        for changed in ({**self.repository,"permissions":{"push":False}},{**self.repository,"id":72}):
+            with self.subTest(changed=changed),self.assertRaises(ValueError):
+                self.exercise({1:self.response([])},repositories=[self.repository,changed])
+
+    def test_duplicate_rows_across_pages_are_not_complete_evidence(self):
+        with self.assertRaisesRegex(ValueError,"duplicate or unstable"):
+            self.exercise({1:self.response([self.release(1),self.release(2)],link=self.link(2)),
+                           2:self.response([self.release(1),self.release(3)],link=self.link(2,"last"))})
+
+    def test_partial_page_with_next_link_is_not_complete_evidence(self):
+        with self.assertRaisesRegex(ValueError,"incomplete or inconsistent"):
+            self.exercise({1:self.response([self.release(1)],link=self.link(2)),2:self.response([])})
+
+    def test_malformed_or_wrong_repository_links_are_not_complete_evidence(self):
+        links=[self.link(2,host="other.example"),self.link(2,path="/repos/other/spec/releases"),
+               self.link(3),self.link(2)+", "+self.link(2),"not a link",self.link(3,"last")]
+        for link in links:
+            with self.subTest(link=link),self.assertRaises(ValueError):
+                self.exercise({1:self.response([self.release(1),self.release(2)],link=link),2:self.response([])})
+        calls=self.exercise({1:self.response([self.release(1),self.release(2)],link=self.link(2,path="/repositories/71/releases")),2:self.response([])})
+        self.assertEqual(len(calls),4)
+
+    def test_missing_draft_flag_is_not_complete_evidence(self):
+        with self.assertRaisesRegex(ValueError,"malformed release inventory member"):
+            self.exercise({1:self.response([{"id":1,"tag_name":"fixture-1"}])})
+
+    def test_nonarray_page_is_not_complete_evidence(self):
+        with self.assertRaisesRegex(ValueError,"malformed release inventory page"):
+            self.exercise({1:self.response({})})
+
+    def test_malformed_pages_rows_and_second_page_failures_refuse(self):
+        for page in ({},None,[{"id":True,"tag_name":"fixture","draft":False}],
+                     [self.release(1),self.release(2),self.release(3)]):
+            with self.subTest(page=page),self.assertRaises(ValueError):
+                self.exercise({1:self.response(page)})
+        with self.assertRaisesRegex(ValueError,"successful API evidence"):
+            self.exercise({1:self.response([self.release(1),self.release(2)],link=self.link(2))})
+
+    def test_api_failures_and_unknown_http_outcomes_cannot_prove_absence(self):
+        for response in (self.response({},status="403 Forbidden",code=1),self.response({},status="404 Not Found",code=1),
+                         self.response({},status="503 Unavailable",code=1),self.response({},code=1),
+                         subprocess.CompletedProcess([],0,"not an HTTP response","")):
+            with patch.object(recovery,"run",return_value=response),self.assertRaisesRegex(ValueError,"successful API evidence"):
+                recovery.release_api(ROOT,"repos/"+recovery.REPOSITORY)
+
+    def test_duplicate_json_members_and_link_headers_refuse(self):
+        for text in ('HTTP/2.0 200 OK\n\n{"permissions":{"push":false,"push":true}}',
+                     'HTTP/2.0 200 OK\nLink: a\nlink: b\n\n[]'):
+            with patch.object(recovery,"run",return_value=subprocess.CompletedProcess([],0,text,"")),self.assertRaises(ValueError):
+                recovery.release_api(ROOT,"repos/"+recovery.REPOSITORY)
+
+    def test_response_size_and_page_bounds_fail_closed(self):
+        with patch.object(recovery,"MAX_RELEASE_API_BYTES",0),patch.object(recovery,"run",return_value=self.response({})),self.assertRaisesRegex(ValueError,"exceeds bound"):
+            recovery.release_api(ROOT,"repos/"+recovery.REPOSITORY)
+        with patch.object(recovery,"MAX_RELEASE_PAGES",1),self.assertRaisesRegex(ValueError,"bounded complete-absence proof"):
+            self.exercise({1:self.response([self.release(1),self.release(2)],link=self.link(2))})

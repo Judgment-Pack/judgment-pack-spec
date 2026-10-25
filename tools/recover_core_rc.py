@@ -108,15 +108,107 @@ def validate_remote(source: Path) -> None:
         raise ValueError("remote annotated tag object or peeled source differs")
 
 
-def refuse_existing_release(source: Path) -> None:
-    # Only an explicit GitHub API 404 with its parsed body establishes absence.
+# This one-off recovery refuses if a complete draft-visible inventory cannot be bounded.
+RELEASE_PAGE_SIZE = 100
+MAX_RELEASE_PAGES = 20
+MAX_RELEASE_API_BYTES = 16 << 20
+
+
+def unique_json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("ambiguous duplicate release API JSON member")
+        result[key] = value
+    return result
+
+
+def release_api(source: Path, path: str) -> tuple[dict, object]:
     response = run("gh", "api", "--hostname", "github.com", "--include", "--method", "GET",
-                   f"repos/{REPOSITORY}/releases/tags/{TAG}", root=source, check=False)
-    headers, separator, body = response.stdout.replace("\r\n", "\n").partition("\n\n")
-    status = re.match(r"HTTP/\S+ (\d{3})(?:\s|$)", headers)
-    if (response.returncode != 1 or not separator or not status or status[1] != "404"
-            or json.loads(body).get("message") != "Not Found"):
-        raise ValueError("release absence is unproven, or a release/draft already exists")
+                   "-H", "Accept: application/vnd.github+json", path, root=source, check=False)
+    text = response.stdout.replace("\r\n", "\n")
+    if len(text.encode("utf-8")) > MAX_RELEASE_API_BYTES:
+        raise ValueError("release absence API response exceeds bound")
+    head, separator, body = text.partition("\n\n")
+    lines = head.splitlines()
+    if (response.returncode != 0 or not separator or not lines
+            or not re.fullmatch(r"HTTP/\S+ 200(?: .*|)", lines[0])):
+        raise ValueError("release absence requires successful API evidence")
+    headers = {}
+    for line in lines[1:]:
+        key, colon, value = line.partition(":")
+        if not colon:
+            raise ValueError("malformed release absence API headers")
+        key = key.lower()
+        if key == "link" and key in headers:
+            raise ValueError("ambiguous release pagination headers")
+        headers[key] = value.strip()
+    return headers, json.loads(body, object_pairs_hook=unique_json_object)
+
+
+def draft_visibility(source: Path) -> int:
+    _, repository = release_api(source, f"repos/{REPOSITORY}")
+    if (not isinstance(repository, dict) or repository.get("full_name") != REPOSITORY
+            or type(repository.get("id")) is not int or repository["id"] <= 0
+            or not isinstance(repository.get("permissions"), dict)
+            or repository["permissions"].get("push") is not True):
+        raise ValueError("authenticated push access and draft visibility are unproven")
+    return repository["id"]
+
+
+def release_page_links(value: str | None, repository_id: int) -> dict[str, int]:
+    if value is None:
+        return {}
+    from urllib.parse import parse_qs, urlsplit
+    links = {}
+    for part in value.split(","):
+        match = re.fullmatch(r'\s*<([^>]+)>;\s*rel="(next|prev|first|last)"\s*', part)
+        if not match or match[2] in links:
+            raise ValueError("malformed or duplicate release pagination relation")
+        url = urlsplit(match[1])
+        query = parse_qs(url.query, strict_parsing=True)
+        if (url.scheme != "https" or url.netloc != "api.github.com" or url.fragment
+                or url.path not in (f"/repos/{REPOSITORY}/releases", f"/repositories/{repository_id}/releases")
+                or set(query) != {"page", "per_page"} or query["per_page"] != [str(RELEASE_PAGE_SIZE)]
+                or len(query["page"]) != 1 or not re.fullmatch(r"[1-9][0-9]*", query["page"][0])):
+            raise ValueError("release pagination leaves the exact repository or page contract")
+        links[match[2]] = int(query["page"][0])
+    return links
+
+
+def refuse_existing_release(source: Path) -> None:
+    # The tag endpoint is published-only. A tag404 says nothing about a draft.
+    repository_id = draft_visibility(source)
+    seen_ids, seen_tags = set(), set()
+    for page in range(1, MAX_RELEASE_PAGES + 1):
+        headers, releases = release_api(source, f"repos/{REPOSITORY}/releases?per_page={RELEASE_PAGE_SIZE}&page={page}")
+        if not isinstance(releases, list) or len(releases) > RELEASE_PAGE_SIZE:
+            raise ValueError("malformed release inventory page")
+        links = release_page_links(headers.get("link"), repository_id)
+        for release in releases:
+            if (not isinstance(release, dict) or type(release.get("id")) is not int or release["id"] <= 0
+                    or not isinstance(release.get("tag_name"), str) or not release["tag_name"].strip()
+                    or type(release.get("draft")) is not bool):
+                raise ValueError("malformed release inventory member")
+            if release["id"] in seen_ids or release["tag_name"] in seen_tags:
+                raise ValueError("duplicate or unstable release inventory")
+            seen_ids.add(release["id"])
+            seen_tags.add(release["tag_name"])
+            if release["tag_name"] == TAG:
+                raise ValueError("a release or draft already exists for the exact tag")
+        next_page, last = links.get("next"), links.get("last")
+        if (("first" in links and links["first"] != 1)
+                or ("prev" in links and links["prev"] != page - 1)
+                or (next_page is not None and (next_page != page + 1 or len(releases) != RELEASE_PAGE_SIZE))
+                or (last is not None and ((last < page and releases) or (next_page and last < next_page)
+                                         or (last > page and next_page is None)))):
+            raise ValueError("incomplete or inconsistent release pagination")
+        if next_page is None and (len(releases) < RELEASE_PAGE_SIZE or last == page):
+            if draft_visibility(source) != repository_id:
+                raise ValueError("repository draft visibility changed during inventory")
+            return
+        # A full page without completion evidence requires another explicit page, never absence.
+    raise ValueError("release inventory exhausted its bounded complete-absence proof")
 
 
 def admission(source: Path, workflow: Path, event: dict, env: dict) -> tuple[dict, object]:
