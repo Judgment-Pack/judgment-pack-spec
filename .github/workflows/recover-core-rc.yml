@@ -1,0 +1,129 @@
+name: Recover the exact Core RC
+
+on:
+  workflow_dispatch:
+    inputs:
+      expectedWorkflowCommit:
+        description: Full reviewed main commit running this recovery workflow
+        required: true
+        type: string
+
+permissions: {}
+
+# Shares the ordinary tag release lock. There is no generic recovery selector.
+concurrency:
+  group: release-refs/tags/v0.3.0-rc.1
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    name: Verify unchanged RC, attest, and create draft
+    if: github.repository == 'Judgment-Pack/judgment-pack-spec' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      issues: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    env:
+      NODE_OPTIONS: --test-reporter=tap
+    steps:
+      - name: Check out reviewed recovery workflow source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          path: recovery
+          persist-credentials: false
+
+      - name: Check out original artifact source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: 495535f29a517dc6a36075b77238634011e7371e
+          path: artifact-source
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Admit only the exact reviewed dispatch and immutable RC
+        id: dev
+        run: >-
+          python3 recovery/tools/recover_core_rc.py admit
+          --source-root artifact-source --workflow-root recovery --dist dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up original declared Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ steps.dev.outputs.python }}
+          cache: pip
+          cache-dependency-path: artifact-source/requirements-dev.txt
+
+      - name: Set up original declared Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ steps.dev.outputs.node }}
+
+      - name: Require supported original runtime toolchains before any test can skip
+        run: >-
+          python recovery/tools/recover_core_rc.py toolchains
+          --source-root artifact-source --workflow-root recovery --dist dist
+
+      - name: Report both sources and actual toolchains
+        run: |
+          git -C recovery rev-parse HEAD
+          git -C artifact-source rev-parse HEAD
+          node --version
+          python --version
+          gh --version
+
+      - name: Install original declared dependencies
+        working-directory: artifact-source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir ../dist
+          scripts/dev/check.sh --setup 2>&1 | tee ../dist/setup.log
+
+      - name: Run every original required check unchanged
+        working-directory: artifact-source
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/dev/check.sh --all 2>&1 | tee ../dist/validation.log
+
+      - name: Recheck admission and build with original tagged builder
+        run: >-
+          python recovery/tools/recover_core_rc.py package
+          --source-root artifact-source --workflow-root recovery --dist dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attest unchanged release bundles
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
+        with:
+          subject-checksums: dist/checksums.txt
+
+      - name: Attest recovery identity and validation evidence separately
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
+        with:
+          subject-path: dist/recovery-evidence.json
+
+      - name: Verify actual provenance, archive bytes, and release absence
+        run: >-
+          python recovery/tools/recover_core_rc.py verify
+          --source-root artifact-source --workflow-root recovery --dist dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create draft prerelease without replacing any release or asset
+        shell: bash
+        run: |
+          gh release create v0.3.0-rc.1 dist/* \
+            --repo Judgment-Pack/judgment-pack-spec \
+            --draft --prerelease --verify-tag \
+            --title "Judgment Pack Specification v0.3.0-rc.1" \
+            --notes-file artifact-source/releases/v0.3.0-rc.1.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
