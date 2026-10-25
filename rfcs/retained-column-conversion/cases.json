@@ -1,0 +1,839 @@
+{
+  "status": "Draft handwritten expected cases; not implementation recordings",
+  "cases": [
+    {
+      "id": "text-preserve",
+      "kind": "text",
+      "inputJson": "\"  A  \"",
+      "preview": {
+        "valueJson": "\"  A  \"",
+        "issues": []
+      },
+      "preparation": "same-string"
+    },
+    {
+      "id": "text-empty",
+      "kind": "text",
+      "inputJson": "\"\"",
+      "preview": {
+        "omitted": "blank",
+        "issues": []
+      },
+      "preparation": "unknown-fact"
+    },
+    {
+      "id": "text-whitespace",
+      "kind": "text",
+      "inputJson": "\"\\u00a0\\t\"",
+      "preview": {
+        "omitted": "blank",
+        "issues": []
+      },
+      "preparation": "unknown-fact"
+    },
+    {
+      "id": "text-missing",
+      "kind": "text",
+      "inputState": "missing",
+      "preview": {
+        "omitted": "missing",
+        "issues": []
+      },
+      "preparation": "unknown-fact"
+    },
+    {
+      "id": "historical-column-null",
+      "kind": "text",
+      "inputJson": "null",
+      "preview": {
+        "omitted": "legacy-null",
+        "issues": []
+      },
+      "preparation": "unknown-fact",
+      "basis": "Desk string-map decode treats null as zero string; retained input/lineage must still distinguish null from missing"
+    },
+    {
+      "id": "decimal-spelling",
+      "kind": "decimal",
+      "inputJson": "\"1.2300\"",
+      "preview": {
+        "valueJson": "\"1.2300\"",
+        "issues": []
+      },
+      "preparation": "same-string"
+    },
+    {
+      "id": "decimal-negative-zero",
+      "kind": "decimal",
+      "inputJson": "\"-0\"",
+      "preview": {
+        "valueJson": "\"-0\"",
+        "issues": []
+      },
+      "preparation": "same-string"
+    },
+    {
+      "id": "decimal-exponent-refusal",
+      "kind": "decimal",
+      "inputJson": "\"1e2\"",
+      "preview": {
+        "issues": [
+          "decimal-encoding"
+        ]
+      },
+      "preparation": "read-failed-no-evaluation"
+    },
+    {
+      "id": "boolean-true",
+      "kind": "boolean",
+      "rule": {
+        "trueValue": "YES",
+        "falseValue": "NO"
+      },
+      "inputJson": "\"YES\"",
+      "preview": {
+        "valueJson": "true",
+        "issues": []
+      },
+      "preparation": "true"
+    },
+    {
+      "id": "boolean-false",
+      "kind": "boolean",
+      "rule": {
+        "trueValue": "YES",
+        "falseValue": "NO"
+      },
+      "inputJson": "\"NO\"",
+      "preview": {
+        "valueJson": "false",
+        "issues": []
+      },
+      "preparation": "false"
+    },
+    {
+      "id": "boolean-blank",
+      "kind": "boolean",
+      "rule": {
+        "trueValue": "YES",
+        "falseValue": "NO"
+      },
+      "inputJson": "\"\"",
+      "preview": {
+        "omitted": "blank",
+        "issues": []
+      },
+      "preparation": "unknown-fact"
+    },
+    {
+      "id": "boolean-invalid",
+      "kind": "boolean",
+      "rule": {
+        "trueValue": "YES",
+        "falseValue": "NO"
+      },
+      "inputJson": "\"yes\"",
+      "preview": {
+        "issues": [
+          "boolean-spelling"
+        ]
+      },
+      "preparation": "read-failed-no-evaluation"
+    },
+    {
+      "id": "number-integer",
+      "kind": "number",
+      "inputJson": "\"125\"",
+      "preview": {
+        "valueJson": "125",
+        "issues": []
+      },
+      "preparation": "integer-125"
+    },
+    {
+      "id": "number-negative-zero",
+      "kind": "number",
+      "inputJson": "\"-0\"",
+      "preview": {
+        "valueJson": "-0",
+        "issues": []
+      },
+      "preparation": "literal-negative-zero"
+    },
+    {
+      "id": "number-fraction-preview-only",
+      "kind": "number",
+      "inputJson": "\"1.25\"",
+      "preview": {
+        "valueJson": "1.25",
+        "issues": []
+      },
+      "preparation": "read-failed-no-evaluation",
+      "basis": "existing canon-domain refusal preserved"
+    },
+    {
+      "id": "number-exponent-preview-only",
+      "kind": "number",
+      "inputJson": "\"1e3\"",
+      "preview": {
+        "valueJson": "1e3",
+        "issues": []
+      },
+      "preparation": "read-failed-no-evaluation",
+      "basis": "original literal retained; do not normalize to 1000"
+    },
+    {
+      "id": "number-range-refusal",
+      "kind": "number",
+      "inputJson": "\"9007199254740992\"",
+      "preview": {
+        "issues": [
+          "number-range"
+        ]
+      },
+      "preparation": "read-failed-no-evaluation"
+    },
+    {
+      "id": "number-precision-refusal",
+      "kind": "number",
+      "inputJson": "\"1.0000000000000001\"",
+      "preview": {
+        "issues": [
+          "number-precision"
+        ]
+      },
+      "preparation": "read-failed-no-evaluation"
+    },
+    {
+      "id": "number-lexical-refusal",
+      "kind": "number",
+      "inputJson": "\"001\"",
+      "preview": {
+        "issues": [
+          "number-encoding"
+        ]
+      },
+      "preparation": "read-failed-no-evaluation"
+    },
+    {
+      "id": "research-false",
+      "kind": "research-value",
+      "type": "boolean",
+      "status": "supported",
+      "inputJson": "false",
+      "preview": {
+        "valueJson": "false",
+        "issues": []
+      },
+      "preparation": "false"
+    },
+    {
+      "id": "research-zero",
+      "kind": "research-value",
+      "type": "integer",
+      "status": "interpretation",
+      "inputJson": "0",
+      "preview": {
+        "valueJson": "0",
+        "issues": []
+      },
+      "preparation": "integer-zero"
+    },
+    {
+      "id": "research-empty-text",
+      "kind": "research-value",
+      "type": "text",
+      "status": "supported",
+      "inputJson": "\"\"",
+      "preview": {
+        "valueJson": "\"\"",
+        "issues": []
+      },
+      "preparation": "empty-string"
+    },
+    {
+      "id": "research-empty-list",
+      "kind": "research-value",
+      "type": "text-list",
+      "status": "supported",
+      "inputJson": "[]",
+      "preview": {
+        "valueJson": "[]",
+        "issues": []
+      },
+      "preparation": "empty-list"
+    },
+    {
+      "id": "research-range",
+      "kind": "research-value",
+      "type": "range",
+      "status": "supported",
+      "inputJson": "{\"min\":\"1.00\",\"max\":\"2.0\"}",
+      "preview": {
+        "valueJson": "{\"min\":\"1.00\",\"max\":\"2.0\"}",
+        "issues": []
+      },
+      "preparation": "same-typed-range"
+    },
+    {
+      "id": "research-supported-null",
+      "kind": "research-value",
+      "type": "boolean",
+      "status": "supported",
+      "inputJson": "null",
+      "preview": {
+        "issues": [
+          "research-type"
+        ]
+      },
+      "preparation": "read-failed-no-evaluation"
+    },
+    {
+      "id": "research-missing-null",
+      "kind": "research-value",
+      "type": "boolean",
+      "status": "missing",
+      "inputJson": "null",
+      "preview": {
+        "omitted": "unavailable",
+        "issues": []
+      },
+      "preparation": "unknown-fact"
+    },
+    {
+      "id": "research-stale",
+      "kind": "research-value",
+      "type": "text",
+      "status": "stale",
+      "inputJson": "\"old\"",
+      "preview": {
+        "omitted": "unavailable",
+        "issues": []
+      },
+      "preparation": "unknown-fact"
+    },
+    {
+      "id": "research-original-unavailable",
+      "kind": "research-value",
+      "declaration": null,
+      "preview": {
+        "issues": [
+          "research-declaration"
+        ]
+      },
+      "preparation": "read-failed-no-evaluation"
+    },
+    {
+      "id": "research-legacy-string",
+      "kind": "research-value",
+      "type": "string",
+      "status": "supported",
+      "inputJson": "\"\"",
+      "preview": {
+        "valueJson": "\"\"",
+        "issues": []
+      },
+      "preparation": "empty-string"
+    },
+    {
+      "id": "research-legacy-number",
+      "kind": "research-value",
+      "type": "number",
+      "status": "supported",
+      "inputJson": "9007199254740993",
+      "preview": {
+        "valueJson": "9007199254740993",
+        "issues": []
+      },
+      "preparation": "read-failed-no-evaluation",
+      "basis": "legacy Float64 validity is not modern safe-integer validity; original raw number never rounded"
+    },
+    {
+      "id": "research-legacy-number-fraction",
+      "kind": "research-value",
+      "type": "number",
+      "status": "supported",
+      "inputJson": "1.25",
+      "preview": {
+        "valueJson": "1.25",
+        "issues": []
+      },
+      "preparation": "read-failed-no-evaluation"
+    },
+    {
+      "id": "evidence-blank",
+      "kind": "evidence-availability",
+      "inputJson": "\" \"",
+      "preview": {
+        "omitted": "blank",
+        "issues": []
+      },
+      "preparation": "no-availability"
+    },
+    {
+      "id": "evidence-present",
+      "kind": "evidence-availability",
+      "inputJson": "\"present\"",
+      "preview": {
+        "valueJson": "\"present\"",
+        "issues": []
+      },
+      "preparation": "present"
+    },
+    {
+      "id": "evidence-invalid",
+      "kind": "evidence-availability",
+      "inputJson": "\"citation\"",
+      "preview": {
+        "issues": [
+          "evidence-availability"
+        ]
+      },
+      "preparation": "read-failed-no-evaluation"
+    },
+    {
+      "id": "planned-research-zero-records",
+      "kind": "research-value",
+      "recordCount": 0,
+      "originalDeclaration": null,
+      "expected": "retain inspectable review proposal for existing/planned column; no type/execution readiness claim",
+      "status": "comparative acceptance case, must verify pinned actual tool path"
+    },
+    {
+      "id": "imported-research-value-error",
+      "kind": "research-value",
+      "origin": "asserted",
+      "expected": "legacy research-context preview issue, no evaluation; do not substitute current requested type"
+    },
+    {
+      "id": "number-tenth",
+      "kind": "number",
+      "inputJson": "\"0.1\"",
+      "preview": {
+        "valueJson": "0.1",
+        "issues": []
+      },
+      "claimAdmissible": false
+    },
+    {
+      "id": "number-subnormal",
+      "kind": "number",
+      "inputJson": "\"5e-324\"",
+      "preview": {
+        "issues": [
+          "number-exponent"
+        ]
+      },
+      "claimAdmissible": false
+    },
+    {
+      "id": "number-zero-large-exponent",
+      "kind": "number",
+      "inputJson": "\"0e309\"",
+      "preview": {
+        "issues": [
+          "number-exponent"
+        ]
+      },
+      "claimAdmissible": false
+    },
+    {
+      "id": "number-range-before-exponent",
+      "kind": "number",
+      "inputJson": "\"1e309\"",
+      "preview": {
+        "issues": [
+          "number-range"
+        ]
+      },
+      "claimAdmissible": false
+    },
+    {
+      "id": "number-underflow-within-exponent",
+      "kind": "number",
+      "inputJson": "\"0.00000000000000001e-308\"",
+      "preview": {
+        "issues": [
+          "number-precision"
+        ]
+      },
+      "claimAdmissible": false
+    },
+    {
+      "id": "number-extra-zeros",
+      "kind": "number",
+      "inputJson": "\"1.2500\"",
+      "preview": {
+        "valueJson": "1.2500",
+        "issues": []
+      },
+      "claimAdmissible": false
+    },
+    {
+      "id": "number-max-safe",
+      "kind": "number",
+      "inputJson": "\"9007199254740991\"",
+      "preview": {
+        "valueJson": "9007199254740991",
+        "issues": []
+      },
+      "claimAdmissible": true
+    },
+    {
+      "id": "decimal-leading-zero",
+      "kind": "decimal",
+      "inputJson": "\"01\"",
+      "preview": {
+        "issues": [
+          "decimal-encoding"
+        ]
+      }
+    },
+    {
+      "id": "text-zwsp-present",
+      "kind": "text",
+      "inputJson": "\"\\u200b\"",
+      "preview": {
+        "valueJson": "\"\\u200b\"",
+        "issues": []
+      }
+    },
+    {
+      "id": "research-decimal",
+      "kind": "research-value",
+      "type": "decimal",
+      "status": "supported",
+      "inputJson": "\"1.2300\"",
+      "preview": {
+        "valueJson": "\"1.2300\"",
+        "issues": []
+      }
+    },
+    {
+      "id": "research-range-integer",
+      "kind": "research-value",
+      "type": "range",
+      "status": "supported",
+      "inputJson": "{\"min\":-0,\"max\":0}",
+      "preview": {
+        "valueJson": "{\"min\":-0,\"max\":0}",
+        "issues": []
+      }
+    },
+    {
+      "id": "research-range-reversed",
+      "kind": "research-value",
+      "type": "range",
+      "status": "supported",
+      "inputJson": "{\"min\":\"2.0\",\"max\":\"1.00\"}",
+      "preview": {
+        "issues": [
+          "research-type"
+        ]
+      }
+    },
+    {
+      "id": "research-fraction-not-integer",
+      "kind": "research-value",
+      "type": "integer",
+      "status": "supported",
+      "inputJson": "1.0",
+      "preview": {
+        "issues": [
+          "research-type"
+        ]
+      }
+    },
+    {
+      "id": "research-declaration-mismatch",
+      "kind": "research-value",
+      "type": "boolean",
+      "status": "supported",
+      "inputJson": "false",
+      "revisionMismatch": true,
+      "preview": {
+        "issues": [
+          "research-declaration"
+        ]
+      }
+    },
+    {
+      "id": "research-metadata",
+      "kind": "research-value",
+      "column": "name",
+      "type": "text",
+      "status": "supported",
+      "inputJson": "\"x\"",
+      "preview": {
+        "issues": [
+          "research-metadata"
+        ]
+      }
+    },
+    {
+      "id": "research-field-absent",
+      "kind": "research-value",
+      "undeclared": true,
+      "type": "text",
+      "status": "supported",
+      "inputJson": "\"x\"",
+      "preview": {
+        "issues": [
+          "research-field"
+        ]
+      }
+    },
+    {
+      "id": "research-value-absent",
+      "kind": "research-value",
+      "type": "text",
+      "status": "supported",
+      "inputState": "missing",
+      "preview": {
+        "issues": [
+          "research-type"
+        ]
+      }
+    },
+    {
+      "id": "generated-text-unresolved",
+      "kind": "text",
+      "origin": "generated",
+      "status": "conflicting",
+      "inputJson": "\"display\"",
+      "preview": {
+        "omitted": "unavailable",
+        "issues": []
+      }
+    },
+    {
+      "id": "evidence-absent-present",
+      "kind": "evidence-availability",
+      "inputJson": "\"absent\"",
+      "preview": {
+        "valueJson": "\"absent\"",
+        "issues": []
+      }
+    },
+    {
+      "id": "evidence-no-trim",
+      "kind": "evidence-availability",
+      "inputJson": "\" present \"",
+      "preview": {
+        "issues": [
+          "evidence-availability"
+        ]
+      }
+    },
+    {
+      "id": "research-legacy-surrogate",
+      "kind": "research-value",
+      "type": "string",
+      "status": "supported",
+      "inputJson": "\"\\ud800\"",
+      "preview": {
+        "valueJson": "\"\\ud800\"",
+        "issues": []
+      },
+      "claimAdmissible": false
+    },
+    {
+      "id": "research-modern-surrogate",
+      "kind": "research-value",
+      "type": "text",
+      "status": "supported",
+      "inputJson": "\"\\ud800\"",
+      "preview": {
+        "issues": [
+          "research-type"
+        ]
+      }
+    },
+    {
+      "id": "research-duplicate-range",
+      "kind": "research-value",
+      "type": "range",
+      "status": "supported",
+      "inputJson": "{\"min\":1,\"min\":2,\"max\":3}",
+      "preview": {
+        "issues": [
+          "research-type"
+        ]
+      }
+    },
+    {
+      "id": "research-duplicate-case-insensitive",
+      "kind": "research-value",
+      "type": "range",
+      "status": "supported",
+      "inputJson": "{\"min\":1,\"MIN\":1,\"max\":2}",
+      "preview": {
+        "issues": [
+          "research-type"
+        ]
+      }
+    },
+    {
+      "id": "research-trailing-json",
+      "kind": "research-value",
+      "type": "string",
+      "status": "supported",
+      "inputJson": "\"ok\" true",
+      "preview": {
+        "issues": [
+          "research-type"
+        ]
+      }
+    },
+    {
+      "id": "imported-metadata-context-first",
+      "kind": "research-value",
+      "column": "name",
+      "origin": "asserted",
+      "preview": {
+        "issues": [
+          "research-context"
+        ]
+      }
+    },
+    {
+      "id": "generated-text-missing-entry-kept",
+      "kind": "text",
+      "origin": "generated",
+      "fieldEntryAbsent": true,
+      "inputJson": "\"display\"",
+      "preview": {
+        "valueJson": "\"display\"",
+        "issues": []
+      }
+    },
+    {
+      "id": "research-missing-entry-omitted",
+      "kind": "research-value",
+      "fieldEntryAbsent": true,
+      "type": "text",
+      "inputJson": "\"retained\"",
+      "preview": {
+        "omitted": "unavailable",
+        "issues": []
+      }
+    },
+    {
+      "id": "decimal-final-newline",
+      "kind": "decimal",
+      "inputJson": "\"1\\n\"",
+      "preview": {
+        "issues": [
+          "decimal-encoding"
+        ]
+      }
+    },
+    {
+      "id": "number-final-newline",
+      "kind": "number",
+      "inputJson": "\"1\\n\"",
+      "preview": {
+        "issues": [
+          "number-encoding"
+        ]
+      }
+    },
+    {
+      "id": "generated-blank-unresolved",
+      "kind": "text",
+      "origin": "generated",
+      "status": "conflicting",
+      "inputJson": "\" \"",
+      "preview": {
+        "omitted": "blank",
+        "issues": []
+      }
+    }
+  ],
+  "boundaryCases": [
+    {
+      "id": "decimal-at-128",
+      "kind": "decimal",
+      "repeat": "1",
+      "count": 128,
+      "expected": "value"
+    },
+    {
+      "id": "decimal-over-128",
+      "kind": "decimal",
+      "repeat": "1",
+      "count": 129,
+      "expectedIssue": "decimal-encoding"
+    },
+    {
+      "id": "number-over-128",
+      "kind": "number",
+      "repeat": "1",
+      "count": 129,
+      "expectedIssue": "number-encoding"
+    },
+    {
+      "id": "text-at-8192",
+      "researchType": "text",
+      "repeat": "a",
+      "count": 8192,
+      "expected": "value"
+    },
+    {
+      "id": "text-over-8192",
+      "researchType": "text",
+      "repeat": "a",
+      "count": 8193,
+      "expectedIssue": "research-type"
+    },
+    {
+      "id": "list-at-64",
+      "researchType": "text-list",
+      "count": 64,
+      "expected": "value"
+    },
+    {
+      "id": "list-over-64",
+      "researchType": "text-list",
+      "count": 65,
+      "expectedIssue": "research-type"
+    }
+  ],
+  "shortestCases": [
+    {
+      "id": "shortest-zero",
+      "binary64Hex": "0000000000000000",
+      "expectedRational": "0"
+    },
+    {
+      "id": "shortest-tenth",
+      "binary64Hex": "3fb999999999999a",
+      "expectedRational": "1/10"
+    },
+    {
+      "id": "shortest-min-subnormal",
+      "binary64Hex": "0000000000000001",
+      "expectedRational": "5e-324"
+    },
+    {
+      "id": "shortest-integer-distance-tie-even",
+      "binary64Hex": "43143ff3c1cb0959",
+      "expectedRational": "1424953923781206.2"
+    },
+    {
+      "id": "shortest-one-even",
+      "binary64Hex": "3ff0000000000000",
+      "expectedRational": "1"
+    },
+    {
+      "id": "shortest-next-one-odd",
+      "binary64Hex": "3ff0000000000001",
+      "expectedRational": "1.0000000000000002"
+    },
+    {
+      "id": "shortest-next-one-even",
+      "binary64Hex": "3ff0000000000002",
+      "expectedRational": "1.0000000000000004"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "status": "Draft fragments, not accepted whole Dialect or preparation documents",
+  "documentFragment": {
+    "version": 2,
+    "provider": "",
+    "facts": null,
+    "evidence": null,
+    "case": {
+      "facts": [
+        {
+          "target": "/eligible",
+          "source": "/retained",
+          "conversion": {
+            "contractVersion": "1",
+            "column": "Eligible",
+            "kind": "boolean",
+            "trueValue": "YES",
+            "falseValue": "NO"
+          }
+        }
+      ],
+      "evidence": [
+        {
+          "requirement": "receipt",
+          "source": "/retained",
+          "availability": {
+            "contractVersion": "1",
+            "column": "Evidence"
+          }
+        }
+      ]
+    }
+  },
+  "generatedFrame": {
+    "contractVersion": "1",
+    "origin": "generated",
+    "values": {
+      "Eligible": "YES"
+    },
+    "research": {
+      "recordRecipeRevision": "recipe:1",
+      "declaration": {
+        "recipeRevision": "recipe:1",
+        "fields": [
+          {
+            "name": "Eligible",
+            "fieldJson": "{\"name\":\"Eligible\",\"type\":\"boolean\",\"description\":\"Retained original declaration.\"}"
+          }
+        ]
+      },
+      "fields": {
+        "Eligible": {
+          "status": "supported",
+          "valueJson": "false"
+        }
+      }
+    }
+  },
+  "assertedFrame": {
+    "contractVersion": "1",
+    "origin": "asserted",
+    "values": {
+      "Eligible": "NO",
+      "Evidence": "absent",
+      "Historical": null
+    },
+    "research": null
+  },
+  "lineageFragment": {
+    "contractVersion": "1",
+    "column": "Eligible",
+    "input": {
+      "state": "present",
+      "json": "\"YES\""
+    },
+    "result": {
+      "state": "value",
+      "json": "true"
+    }
+  }
+}
