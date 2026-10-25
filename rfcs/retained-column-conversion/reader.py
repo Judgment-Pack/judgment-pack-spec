@@ -187,7 +187,7 @@ def validate(rule, frame, profile, raw_frame_bytes=None):
     for key, entry in research['fields'].items():
         string(key, 160, True)
         closed(entry, ['status'], ['valueJson'])
-        if entry['status'] not in STATUSES:
+        if not isinstance(entry['status'], str) or entry['status'] not in STATUSES:
             fail()
         if 'valueJson' in entry:
             string(entry['valueJson'], 4194304)
@@ -305,7 +305,7 @@ def preview(rule, frame):
         if declaration is None or declaration['recipeRevision'] != research['recordRecipeRevision']:
             return issue('research-declaration')
         original = next((parse(e['fieldJson']) for e in declaration['fields'] if e['name'] == column), None)
-        if original is None or not original['type']:
+        if original is None:
             return issue('research-field')
         entry = research['fields'].get(column)
         if entry is None or entry['status'] not in ('supported', 'interpretation'):

@@ -216,6 +216,46 @@
       "preparation": "read-failed-no-evaluation"
     },
     {
+      "id": "research-empty-type-supported",
+      "kind": "research-value",
+      "type": "",
+      "status": "supported",
+      "inputJson": "\"x\"",
+      "preview": {"issues": ["research-type"]}
+    },
+    {
+      "id": "research-empty-type-missing",
+      "kind": "research-value",
+      "type": "",
+      "status": "missing",
+      "inputJson": "\"x\"",
+      "preview": {"omitted": "unavailable", "issues": []}
+    },
+    {
+      "id": "research-empty-type-entry-absent",
+      "kind": "research-value",
+      "type": "",
+      "fieldEntryAbsent": true,
+      "inputJson": "\"x\"",
+      "preview": {"omitted": "unavailable", "issues": []}
+    },
+    {
+      "id": "research-unknown-type-supported",
+      "kind": "research-value",
+      "type": "future",
+      "status": "supported",
+      "inputJson": "\"x\"",
+      "preview": {"issues": ["research-type"]}
+    },
+    {
+      "id": "research-unknown-type-missing",
+      "kind": "research-value",
+      "type": "future",
+      "status": "missing",
+      "inputJson": "\"x\"",
+      "preview": {"omitted": "unavailable", "issues": []}
+    },
+    {
       "id": "research-false",
       "kind": "research-value",
       "type": "boolean",

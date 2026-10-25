@@ -221,7 +221,7 @@ function preview(rule,frame) {
     const d=r.declaration;
     if (d===null || d.recipeRevision!==r.recordRecipeRevision) return issue('research-declaration');
     const item=d.fields.find(e=>e.name===column), original=item ? parse(item.fieldJson) : null;
-    if (!original || !original.type) return issue('research-field');
+    if (original===null) return issue('research-field');
     const entry=r.fields[column];
     if (!entry || !['supported','interpretation'].includes(entry.status)) return omit('unavailable');
     const raw=entry.valueJson ?? '';
@@ -250,7 +250,7 @@ function handle(r) {
     if (Math.abs(x)>Number(SAFE)) fail(); const q=shortest(x); if (x<0) q[0]=-q[0];
     return {rational:q[1]===1n ? String(q[0]) : `${q[0]}/${q[1]}`};
   }
-  closed(r,['rule','frame'],['profile']); validate(r.rule,r.frame,r.profile ?? 'base',r[FRAME_SIZE]); return preview(r.rule,r.frame);
+  closed(r,['rule','frame'],['profile']); validate(r.rule,r.frame,Object.hasOwn(r,'profile') ? r.profile : 'base',r[FRAME_SIZE]); return preview(r.rule,r.frame);
 }
 // Fatal UTF8 decoding prevents Node's replacement-character stream behavior.
 let pending=Buffer.alloc(0), discarding=false;

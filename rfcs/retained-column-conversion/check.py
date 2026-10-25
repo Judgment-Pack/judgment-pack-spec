@@ -105,6 +105,8 @@ refused('raw-column-wrong-type',lambda r:r['frame']['values'].update(Column=Fals
 refused('raw-column-over-bound',lambda r:r['frame']['values'].update(Column='x'*16001),'input-over-bound')
 refused('columns-over-bound',lambda r:r['frame'].update(values={f'c{i}':'' for i in range(1001)}),'input-over-bound')
 refused('unknown-profile',lambda r:r.update(profile='huge'))
+refused('null-profile',lambda r:r.update(profile=None))
+add('absent-profile-default',copy.deepcopy(base),{'issues':[],'valueJson':'"x"','claimAdmissible':True})
 
 research=fixture({'kind':'research-value','type':'boolean','inputJson':'false'})
 for name,mutation,code in [
@@ -115,6 +117,12 @@ for name,mutation,code in [
  ('field-json-over-bound',lambda r:r['frame']['research']['declaration']['fields'][0].update(fieldJson=' '*16385),'input-over-bound'),
 ]:
     r=copy.deepcopy(research);mutation(r);add(name,r,{'refusal':code})
+# A malformed status must refuse its line and still process the next request.
+for name,status in [('array',[]),('object',{})]:
+    r=copy.deepcopy(research)
+    r['frame']['research']['fields']['Column']['status']=status
+    add('status-'+name,r,{'refusal':'input-malformed'})
+    add('status-'+name+'-continuation',copy.deepcopy(base),{'issues':[],'valueJson':'"x"','claimAdmissible':True})
 for status in ('missing','inaccessible'):
     register_case({'id':'research-status-'+status,'kind':'research-value','type':'boolean','status':status,'inputJson':'null','preview':{'omitted':'unavailable','issues':[]}})
 # Original typed bound failures remain per-record issues within an inspectable frame.
