@@ -226,6 +226,121 @@ class RecoveryEntryTests(unittest.TestCase):
             invoke("verify")
         self.assertEqual(stopped.exception.code,1)
 
+    def run_source_cli(self, source, *, stub_api=False):
+        """Actual CLI with fixture-only identity constants and no credentials/network."""
+        import shutil
+        workflow = self.source / "workflow-cli"
+        workflow.mkdir()
+        (workflow / "README.md").write_text("Hand-authored workflow checkout fixture")
+        def git(*args):
+            return subprocess.run(["git",*args],cwd=workflow,check=True,capture_output=True,text=True).stdout.strip()
+        git("init","--quiet")
+        git("add","README.md")
+        git("-c","user.name=Fixture","-c","user.email=fixture@example.invalid","commit","--quiet","-m","Workflow fixture")
+        revision = git("rev-parse","HEAD")
+        cli = self.source / "recovery-cli.py"
+        text = (ROOT / "tools/recover_core_rc.py").read_text()
+        text = text.replace('SOURCE = "495535f29a517dc6a36075b77238634011e7371e"',f'SOURCE = "{self.commit}"')
+        text = text.replace('TAG_OBJECT = "c0ddd58e507ce42891947929acb1ad0330faa038"',f'TAG_OBJECT = "{self.tag_object}"')
+        cli.write_text(text)
+        fixture_event = event()
+        fixture_event["inputs"]["expectedWorkflowCommit"] = revision
+        event_path = self.source / "cli-event.json"
+        event_path.write_text(json.dumps(fixture_event))
+        env = {key:value for key,value in os.environ.items() if key not in ("GH_TOKEN","GITHUB_TOKEN")}
+        env.update(environment())
+        env.update({"GITHUB_SHA":revision,"GITHUB_WORKFLOW_SHA":revision,"GITHUB_EVENT_PATH":str(event_path),
+                    "GITHUB_OUTPUT":str(self.source / "cli-output"),"PYTHONDONTWRITEBYTECODE":"1"})
+        if stub_api:
+            binary = self.source / "cli-bin"
+            binary.mkdir()
+            real_git = shutil.which("git")
+            (binary / "git").write_text("#!/usr/bin/env python3\nimport os,sys\n" +
+                "if sys.argv[1] == 'ls-remote':\n print(" + repr(f"{self.tag_object}\trefs/tags/{recovery.TAG}\n{self.commit}\trefs/tags/{recovery.TAG}^{{}}") + ")\n" +
+                "else: os.execv(" + repr(real_git) + ", [" + repr(real_git) + "] + sys.argv[1:])\n")
+            (binary / "gh").write_text("#!/usr/bin/env python3\nimport sys\nfrom pathlib import Path\n" +
+                "Path(" + repr(str(self.source / "original-milestone-reached")) + ").write_text('fixture API only')\n" +
+                "if sys.argv[-1].endswith('/milestones/2'): print('{\"number\":2,\"title\":\"v0.3.0\",\"state\":\"open\"}')\n" +
+                "else:\n print('HTTP/2.0 404 Not Found\\n\\n{\"message\":\"Not Found\"}');sys.exit(1)\n")
+            for path in binary.iterdir():
+                path.chmod(0o755)
+            env["PATH"] = str(binary)+os.pathsep+env["PATH"]
+        return subprocess.run([sys.executable,str(cli),"admit","--source-root",str(source),"--workflow-root",str(workflow),"--dist",str(self.dist)],
+                              env=env,capture_output=True,text=True,timeout=30)
+
+    def marker_helper(self, directory):
+        (directory / "tools").mkdir(exist_ok=True)
+        marker = directory / "import-executed"
+        (directory / "tools/build_release.py").write_text("from pathlib import Path\nPath("+repr(str(marker))+").write_text('fixture import side effect')\nraise ValueError('fixture helper executed')\n")
+        return marker
+
+    def test_cli_nonrepository_source_refuses_without_executing_helper(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp)
+            marker = self.marker_helper(source)
+            self.assertNotEqual(subprocess.run(["git","rev-parse","HEAD"],cwd=source,capture_output=True).returncode,0)
+            result = self.run_source_cli(source)
+            self.assertFalse(marker.exists(),"rejected source helper executed before source validation")
+            self.assertEqual(result.returncode,1,result.stdout)
+            self.assertIn("exact RC recovery refused",result.stderr)
+
+    def test_cli_wrong_commit_refuses_without_executing_helper(self):
+        marker = self.marker_helper(self.source)
+        self.fixture.git("add","tools/build_release.py")
+        self.fixture.git("-c","user.name=Fixture","-c","user.email=fixture@example.invalid","commit","--quiet","-m","Wrong fixture source")
+        result = self.run_source_cli(self.source)
+        self.assertFalse(marker.exists(),"rejected source helper executed before source validation")
+        self.assertEqual(result.returncode,1,result.stdout)
+        self.assertIn("source checkout root, commit and exact annotated tag",result.stderr)
+
+    def test_cli_dirty_helper_refuses_without_executing_helper(self):
+        marker = self.marker_helper(self.source)
+        result = self.run_source_cli(self.source)
+        self.assertFalse(marker.exists(),"rejected source helper executed before source validation")
+        self.assertEqual(result.returncode,1,result.stdout)
+        self.assertIn("clean before helper execution",result.stderr)
+
+    def test_cli_hidden_modified_helper_refuses_before_import(self):
+        marker = self.marker_helper(self.source)
+        self.fixture.git("update-index","--assume-unchanged","tools/build_release.py")
+        self.assertEqual(self.fixture.git("status","--porcelain","--untracked-files=no"),"")
+        result = self.run_source_cli(self.source)
+        self.assertFalse(marker.exists(),"changed helper bytes executed before source validation")
+        self.assertEqual(result.returncode,1,result.stdout)
+        self.assertIn("helper bytes differ",result.stderr)
+
+    def test_both_helper_blobs_are_checked_before_either_module_is_created(self):
+        (self.source / "tools/release_milestone.py").write_text("raise ValueError('changed second helper')")
+        self.fixture.git("update-index","--assume-unchanged","tools/release_milestone.py")
+        with patch.object(recovery.types,"ModuleType") as create:
+            with self.assertRaisesRegex(ValueError,"helper bytes differ"):
+                recovery.tagged_helpers(self.source)
+            create.assert_not_called()
+
+    def test_verified_helper_bytes_bypass_untracked_python_cache_and_keep_original_roots(self):
+        import importlib.util
+        import py_compile
+        helper = self.source / "tools/build_release.py"
+        marker = self.source / "cache-import-executed"
+        poison = self.source / "poison.py"
+        poison.write_text(helper.read_text().replace("ROOT =", "Path("+repr(str(marker))+").write_text('fixture cache side effect')\nROOT =",1))
+        with patch.object(sys,"pycache_prefix",None):
+            cached = Path(importlib.util.cache_from_source(str(helper)))
+            cached.parent.mkdir(exist_ok=True)
+            py_compile.compile(str(poison),cfile=str(cached),doraise=True,invalidation_mode=py_compile.PycInvalidationMode.UNCHECKED_HASH)
+            builder,milestone = recovery.tagged_helpers(self.source)
+        self.assertFalse(marker.exists(),"unverified Python cache executed")
+        self.assertEqual(builder.ROOT,self.source)
+        self.assertEqual(milestone.ROOT,self.source)
+        self.assertIs(milestone.release_version,builder.release_version)
+        self.assertEqual(builder.validate(recovery.TAG,self.commit),"0.3.0-rc.1")
+
+    def test_actual_cli_valid_source_reaches_original_validators_after_preflight(self):
+        result = self.run_source_cli(self.source,stub_api=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertTrue((self.source / "original-milestone-reached").exists())
+        self.assertEqual((self.source / "cli-output").read_text(),"node=22\npython=3.12\n")
+
     def test_cli_refuses_bad_dispatch_before_importing_or_calling_any_source(self):
         with tempfile.TemporaryDirectory() as temp:
             event_path = Path(temp) / "event.json"

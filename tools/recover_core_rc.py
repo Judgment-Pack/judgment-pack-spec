@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -12,6 +11,7 @@ import re
 import subprocess
 import sys
 import tarfile
+import types
 import zipfile
 
 REPOSITORY = "Judgment-Pack/judgment-pack-spec"
@@ -57,18 +57,40 @@ def validate_dispatch(event: dict, env: dict) -> str:
     return expected
 
 
+def trusted_source_helpers(source: Path) -> dict[str, bytes]:
+    """Establish original helper identity in recovery-owned code before executing source Python."""
+    if (Path(output("git", "rev-parse", "--show-toplevel", root=source)).resolve() != source.resolve()
+            or output("git", "rev-parse", "--verify", "HEAD^{commit}", root=source) != SOURCE
+            or output("git", "rev-parse", "--verify", f"refs/tags/{TAG}", root=source) != TAG_OBJECT
+            or output("git", "rev-parse", "--verify", f"refs/tags/{TAG}^{{commit}}", root=source) != SOURCE):
+        raise ValueError("source checkout root, commit and exact annotated tag must match")
+    if output("git", "status", "--porcelain", "--untracked-files=no", root=source):
+        raise ValueError("tracked release checkout must be clean before helper execution")
+    helpers = {}
+    # Check BOTH before running either. Byte comparison also catches helpers hidden by index flags.
+    for name in ("build_release", "release_milestone"):
+        relative = f"tools/{name}.py"
+        original = subprocess.run(["git", "show", f"{SOURCE}:{relative}"], cwd=source,
+                                  check=True, capture_output=True, timeout=120).stdout
+        if (source / relative).read_bytes() != original:
+            raise ValueError("source helper bytes differ from the original tagged blob")
+        helpers[name] = original
+    return helpers
+
+
 def tagged_helpers(source: Path):
-    # Import the ORIGINAL tagged implementations, including the milestone module's own import.
-    def load(name, path):
-        spec = importlib.util.spec_from_file_location(name, path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+    helpers = trusted_source_helpers(source)
+    # Compile verified immutable bytes, not a second path read or an untracked .pyc cache.
+    def load(name, path, raw):
+        module = types.ModuleType(name)
+        module.__file__ = str(path)
+        exec(compile(raw, str(path), "exec"), module.__dict__)
         return module
-    builder = load("recovery_tagged_builder", source / "tools/build_release.py")
+    builder = load("recovery_tagged_builder", source / "tools/build_release.py", helpers["build_release"])
     previous = sys.modules.get("build_release")
     sys.modules["build_release"] = builder
     try:
-        milestone = load("recovery_tagged_milestone", source / "tools/release_milestone.py")
+        milestone = load("recovery_tagged_milestone", source / "tools/release_milestone.py", helpers["release_milestone"])
     finally:
         if previous is None:
             del sys.modules["build_release"]
