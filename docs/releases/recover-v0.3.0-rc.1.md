@@ -39,10 +39,30 @@ Only admission, packaging, provenance verification and draft creation receive th
 dependency installation, runtime version checks and tests do not receive that environment variable.
 
 Before packaging and draft creation, remote unavailability, tag drift or a release/draft causes
-refusal. Creation is under the normal release tag's concurrency lock and uses `gh release create`
-without replacement flags; an intervening release also makes creation fail. There is necessarily a
-remote-observation race, not a claim of locking all outside GitHub clients. No cleanup/delete route
-is provided. A failure after any draft has been created requires investigation, not overwriting it.
+refusal. The published-only tag lookup cannot prove draft absence: after recovery created draft
+`423420021`, that tag route still returned404. The guard now requires the exact repository/id and
+explicit authenticated `permissions.push:true` from repository metadata, then walks the release-list
+API that exposes drafts to push-capable callers. It rechecks visibility at completion. Missing or
+insufficient permission evidence, API errors, malformed/duplicate data, inconsistent/wrong-repository
+pagination or exhausted bounds cannot establish absence. It reads at most20 pages of100 releases,
+with at most16MiB per API response; a full page without completion evidence requires another page.
+The first advertised final-page number remains binding throughout the walk: changed boundaries,
+premature completion, empty advertised final pages or next links beyond that boundary refuse.
+Omitting a later final-page link does not erase earlier evidence. Stable full or partial final
+pages can complete against that retained boundary.
+Every exact matching tag refuses, regardless of draft/public state or whether it has assets.
+See GitHub's [release-list visibility contract](https://docs.github.com/en/rest/releases/releases#list-releases),
+[repository metadata](https://docs.github.com/en/rest/repos/repos#get-a-repository) and
+[pagination contract](https://docs.github.com/en/rest/using-the-rest-api/using-pagination-in-the-rest-api).
+
+Creation remains under the normal release tag's concurrency lock and uses `gh release create`
+without replacement flags. The observations are not a transactional repository snapshot or a lock
+on outside GitHub clients: unobservable concurrent mutations during the walk, or an external change
+after the final observation, remain races. Observed contradictions refuse without automatic retry.
+No cleanup/delete/overwrite route is provided. Any unexpected creation outcome requires investigation;
+never retry against, replace or delete the existing draft/assets. The successful recovery's existing
+assets/attestations retain workflow revision `dc8825c41b1f834fce63b798a92ef4a115d5bfb6`;
+this guard correction neither rebuilds them nor relabels their provenance.
 
 ## Provenance has two source identities
 
