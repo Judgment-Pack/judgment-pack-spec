@@ -1,0 +1,560 @@
+{
+  "$schema": "./manifest.schema.json",
+  "suiteVersion": "0.2.0-draft",
+  "specVersion": "0.2.0-draft",
+  "status": "research-preview",
+  "label": "seed",
+  "cases": [
+    {
+      "id": "not-applicable-request-type",
+      "origin": "rfc-0006-appendix-1",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "dataset-deletion"
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "not-applicable",
+        "reasons": [
+          "not-applicable"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "not-applicable"
+          ]
+        }
+      },
+      "focus": "an applicability condition that is false is a terminal not-applicable result, never an outcome",
+      "specSection": "§8 step 1"
+    },
+    {
+      "id": "applicability-unknown",
+      "origin": "rfc-0006-appendix-2",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "completeness": "complete",
+          "appropriateness": "pass",
+          "embargoedInformationToUnauthorizedRecipients": false
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "an unresolved applicability pointer is unknown and stops resolution before evidence and rules",
+      "specSection": "§8 step 1"
+    },
+    {
+      "id": "decline-hard-appropriateness-failure",
+      "origin": "rfc-0006-appendix-3",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "one-time-extract",
+          "completeness": "complete",
+          "appropriateness": "hard-fail",
+          "embargoedInformationToUnauthorizedRecipients": false
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "decline-redirect",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "exactly one true rule selects its outcome and requests no handoff",
+      "specSection": "§8 step 9"
+    },
+    {
+      "id": "clarify-incomplete",
+      "origin": "rfc-0006-appendix-4",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "data-access",
+          "completeness": "incomplete",
+          "appropriateness": "pass",
+          "embargoedInformationToUnauthorizedRecipients": false
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "clarify-return",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "an any-condition true on its first branch selects the clarify outcome",
+      "specSection": "§8 step 9"
+    },
+    {
+      "id": "clarify-appropriateness-pending",
+      "origin": "rfc-0006-appendix-5",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "data-access",
+          "completeness": "complete",
+          "appropriateness": "pending",
+          "embargoedInformationToUnauthorizedRecipients": false
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "clarify-return",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "an any-condition true on its second branch selects the same outcome",
+      "specSection": "§8 step 9"
+    },
+    {
+      "id": "proceed-complete-and-appropriate",
+      "origin": "rfc-0006-appendix-6",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "new-data-pipeline",
+          "completeness": "complete",
+          "appropriateness": "pass",
+          "embargoedInformationToUnauthorizedRecipients": false
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "proceed",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "an all-condition over facts and two present evidence requirements selects proceed",
+      "specSection": "§§7.5, 8 step 9"
+    },
+    {
+      "id": "required-evidence-unknown",
+      "origin": "rfc-0006-appendix-7a",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "dataset-onboarding",
+          "completeness": "complete",
+          "appropriateness": "pass",
+          "embargoedInformationToUnauthorizedRecipients": false
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "unknown"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "required evidence whose presence is unknown, with none false, records unknown — the divergence §8 step 2 resolves",
+      "specSection": "§8 step 2"
+    },
+    {
+      "id": "required-evidence-absent",
+      "origin": "rfc-0006-appendix-7b",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "dataset-onboarding",
+          "completeness": "complete",
+          "appropriateness": "pass",
+          "embargoedInformationToUnauthorizedRecipients": false
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "absent"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ]
+        }
+      },
+      "focus": "required evidence whose presence is false records missing-required-evidence",
+      "specSection": "§8 step 2"
+    },
+    {
+      "id": "forced-outcome-embargo",
+      "origin": "rfc-0006-appendix-8",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "reporting-feed",
+          "completeness": "complete",
+          "appropriateness": "pass",
+          "embargoedInformationToUnauthorizedRecipients": true
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "decline-redirect",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a true force-outcome exception produces its outcome without evaluating normal rules",
+      "specSection": "§8 steps 4, 6"
+    },
+    {
+      "id": "conflict-decline-and-clarify",
+      "origin": "rfc-0006-appendix-9",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "pipeline-change",
+          "completeness": "incomplete",
+          "appropriateness": "hard-fail",
+          "embargoedInformationToUnauthorizedRecipients": false
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "conflict"
+          ]
+        }
+      },
+      "focus": "two true rules naming different outcomes conflict and are never tie-broken",
+      "specSection": "§8 step 8"
+    },
+    {
+      "id": "omitted-evidence-document",
+      "origin": "rfc-0006-probe",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "data-access",
+          "completeness": "complete",
+          "appropriateness": "pass",
+          "embargoedInformationToUnauthorizedRecipients": false
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "an omitted evidence-availability document makes every declared requirement unknown",
+      "specSection": "§8.2"
+    },
+    {
+      "id": "inert-unreferenced-decimal-fact",
+      "origin": "rfc-0006-probe",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "data-access",
+          "completeness": "complete",
+          "appropriateness": "pass",
+          "embargoedInformationToUnauthorizedRecipients": false,
+          "amount": "150"
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "proceed",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a decimal-string fact no condition reads changes nothing; this pack declares no ordered comparison, so the row does not exercise §7.4 ordering",
+      "specSection": "§7.4"
+    },
+    {
+      "id": "exception-fact-missing",
+      "origin": "rfc-0006-probe",
+      "pack": "packs/data-request-intake-triage.json",
+      "facts": {
+        "request": {
+          "type": "data-access",
+          "completeness": "complete",
+          "appropriateness": "pass"
+        }
+      },
+      "evidenceAvailability": {
+        "intake-form": "present",
+        "sponsor-endorsement": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "an exception whose fact is missing is unknown, and onUnknown escalate blocks resolution before rules",
+      "specSection": "§8 steps 3, 5"
+    },
+    {
+      "id": "handoff-trigger-subset",
+      "origin": "constructed-handoff-semantics",
+      "pack": "packs/partial-trigger-conflict.json",
+      "facts": {
+        "flags": {
+          "trackA": true,
+          "trackB": true
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict",
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "conflict"
+          ]
+        }
+      },
+      "focus": "two retained reasons where escalation.triggers names only one: reasons carries both, triggeredBy is the strict subset that requested the handoff",
+      "specSection": "§§8.1, 8.3"
+    },
+    {
+      "id": "retained-reason-without-a-trigger",
+      "origin": "constructed-handoff-semantics",
+      "pack": "packs/partial-trigger-conflict.json",
+      "facts": {
+        "flags": {
+          "trackA": false,
+          "trackB": false
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "an unresolved result whose only reason is not a configured trigger stays unresolved with handoff state none and no triggeredBy",
+      "specSection": "§§8.1, 8.3"
+    },
+    {
+      "id": "no-match-without-a-fallback",
+      "origin": "constructed-handoff-semantics",
+      "pack": "packs/partial-trigger-conflict.json",
+      "facts": {
+        "flags": {
+          "trackA": false,
+          "trackB": false,
+          "reviewDecided": false
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "every rule false with no fallbackOutcome declared produces no-match, and no-match is not a configured trigger here",
+      "specSection": "§8 step 10"
+    },
+    {
+      "id": "direct-exception-escalation-without-configuration",
+      "origin": "constructed-handoff-semantics",
+      "pack": "packs/direct-exception-escalation.json",
+      "facts": {
+        "request": {
+          "ready": true,
+          "flagged": true
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "exception-escalation"
+          ]
+        }
+      },
+      "focus": "a true escalate exception in a pack with no escalation object is a requested handoff whose destination the pack does not supply, and it takes precedence over an otherwise true rule",
+      "specSection": "§§8.1, 8.3"
+    },
+    {
+      "id": "ordered-comparison-below-threshold",
+      "origin": "constructed-decimal-ordering",
+      "pack": "packs/decimal-threshold-fee.json",
+      "facts": {
+        "request": {
+          "amount": "999.99"
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "reduced-fee",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "ordered comparison is by mathematical value, not code point: 999.99 is below 1000 even though it sorts after it as a string",
+      "specSection": "§7.4"
+    },
+    {
+      "id": "ordered-comparison-ignores-decimal-scale",
+      "origin": "constructed-decimal-ordering",
+      "pack": "packs/decimal-threshold-fee.json",
+      "facts": {
+        "request": {
+          "amount": "1000.00"
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "standard-fee",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "1000.00 is at the threshold under ordered comparison and is not equal to the string 1000 under equals, so the exempt rule stays false and no conflict arises",
+      "specSection": "§7.4"
+    },
+    {
+      "id": "ordered-comparison-refuses-a-json-number",
+      "origin": "constructed-decimal-ordering",
+      "pack": "packs/decimal-threshold-fee.json",
+      "facts": {
+        "request": {
+          "amount": 1000
+        }
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "a JSON number is never coerced into an ordered comparison and is not equal to a decimal string, so both ordered rules are unknown and escalate",
+      "specSection": "§7.4"
+    }
+  ]
+}
