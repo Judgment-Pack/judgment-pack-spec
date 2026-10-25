@@ -265,9 +265,9 @@ the corresponding dialect prose. No excluded Runner workflow code or synthetic
 probe was opened.
 
 Model provenance: the session identifies this author as Codex based on GPT-6,
-but does not expose a reliable exact served model identifier/version. Record
-that exact model as unknown from this author's available context; do not infer
-`gpt-6.1-sol`. The same-vendor limitation remains.
+but does not expose a reliable exact served model identifier/version. The exact
+model is therefore recorded as unknown from the author's available context;
+`gpt-6.1-sol` is not inferred. The same-vendor limitation remains.
 
 ## First review corrections and additional exposure
 
