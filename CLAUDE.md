@@ -74,3 +74,12 @@ summary block, and anything you stopped on or chose not to do.
   or adversarial case; material changes go through an RFC (`rfcs/0000-rfc-process.md`). Do not
   claim that conformance proves truth, authorization or safety.
 - Do not put customer, personal, credential or production data in an example, a fixture or an issue.
+- A pull request runs `scripts/dev/check.sh --all --changed origin/<base>`: the checks the
+  `changed` rules of `jpdev.json` map its changed paths to. A push to `main` runs the whole list.
+  Run the same selection locally with `scripts/dev/check.sh --all --changed origin/main` (or
+  `jpdev check --changed`). `local-paths`, `agent-docs`, `diff-check` and `repository-tests` are in
+  every rule, because they read the whole tree: `repository-tests` checks every Markdown link
+  target and stages the working tree for the release-archive tests. So only the three Policy steps
+  are ever left out, when no path they read changed. A path that no rule matches runs the whole
+  list. So do changes to `jpdev.json`, `dev.json` and the vendored runner. When a Policy step
+  starts reading a new path, add that path to its rule.

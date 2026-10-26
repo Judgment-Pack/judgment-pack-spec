@@ -2,7 +2,10 @@ name: Repository conformance
 
 # The check list is dev.json, run by scripts/dev/check.sh (the development kit's vendored runner).
 # One job, `repository-conformance`, which branch protection requires by name: it sets the toolchains
-# up from the manifest and runs every step.
+# up from the manifest and runs the checks. A pull request runs `check.sh --changed` against its
+# base branch: the checks jpdev.json maps the changed paths to, and the whole list when a path is
+# unmapped, when the mapping, the manifest or the runner changed, or with no mapping. A push to
+# main runs the whole list.
 
 on:
   push:
@@ -16,9 +19,11 @@ jobs:
   repository-conformance:
     runs-on: ubuntu-latest
     steps:
+      # The whole history, so that --changed finds the merge base with the base branch.
       - name: Check out the repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       # First, so that a manifest that does not parse fails before the long steps start.
@@ -55,4 +60,12 @@ jobs:
       # prototype (non-normative); the proposed draft Policy companion contract (not adopted); the
       # staged Policy official-draft promotion (unreleased).
       - name: Checks
-        run: scripts/dev/check.sh --all
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$EVENT" = pull_request ]; then
+            scripts/dev/check.sh --all --changed "origin/$BASE_REF"
+          else
+            scripts/dev/check.sh --all
+          fi
