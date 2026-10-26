@@ -110,6 +110,7 @@ POLICY_BUNDLE_PATHS = (
     "requirements-dev.txt", "spec/policy.md", "spec/dialect.md",
     "spec/checkpoint-witness.md", POLICY_SCHEMA_ROOT, POLICY_ROOT,
     "schema/judgment-pack-core.schema.json", "tools/dialect_verify.py",
+    "tools/retained_column.py", "tools/_retained_column.py",
     "rfcs/0000-rfc-process.md", "rfcs/0023-policy-companion.md",
     "rfcs/policy-companion-prototype", "rfcs/policy-companion-contract",
 )

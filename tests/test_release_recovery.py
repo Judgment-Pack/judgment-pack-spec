@@ -105,7 +105,15 @@ class RecoveryEntryTests(unittest.TestCase):
         self.source = self.fixture.root
         import shutil
         shutil.copyfile(ROOT / "tools/release_milestone.py", self.source / "tools/release_milestone.py")
-        (self.source / "dev.json").write_bytes((ROOT / "dev.json").read_bytes())
+        # Genuine RC1 requirements, authored as a fixture independently of the evolving main checklist.
+        original_checks = ["local-paths", "agent-docs", "diff-check", "repository-tests",
+                           "policy-prototype", "policy-contract", "policy-official-draft"]
+        self.assertEqual(original_checks, recovery.CHECKS)
+        (self.source / "dev.json").write_text(json.dumps({
+            "version": 1,
+            "toolchains": {"node": {"version": "22"}, "python": {"version": "3.12", "venv": ".venv"}},
+            "checks": [{"name": name} for name in original_checks],
+        }))
         (self.source / f"releases/{recovery.TAG}.milestone.json").write_text('{"number":2,"title":"v0.3.0"}')
         self.commit = self.fixture.commit()
         self.tag_object = self.fixture.git("rev-parse", f"refs/tags/{recovery.TAG}")

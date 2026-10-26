@@ -26,6 +26,15 @@ PREPARATIONS = json.loads((HERE/'preparations.json').read_text())
 GLOBAL_SCHEMA_EXAMPLES.extend(json.loads(c['preparationJson']) for c in PREPARATIONS['cases'] if c['expected']=='reading')
 
 
+def executable_probe(source):
+    """Explicitly run a scratch mutation; imported engines never consume their host's stdin."""
+    guard = 'if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {'
+    if guard in source:
+        assert source.count(guard) == 1, 'fragment entrypoint mutation target'
+        return source.replace(guard, 'if (true) {')
+    return source
+
+
 def fixture(case):
     column = case.get('column', 'Column')
     kind = case['kind']
@@ -206,7 +215,7 @@ for (const line of input.trimEnd().split('\\n')) {
             before, after = (py_before, py_after) if name.endswith('.py') else (js_before, js_after)
             assert source.count(before) == 1, (name, title, 'mutation target')
             changed = source.replace(before, after)
-            invocation = [command[0], '-B', '-c', changed] if name.endswith('.py') else [command[0], '--input-type=module', '-e', changed]
+            invocation = [command[0], '-B', '-c', changed] if name.endswith('.py') else [command[0], '--input-type=module', '-e', executable_probe(changed)]
             case = by_id[label]
             result = subprocess.run(invocation, input=encode(case['request']), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5)
             assert result.returncode == 0, (name, title, 'mutation setup', result.stderr.decode()[:500])
@@ -339,7 +348,7 @@ def check_inventory():
          'if (bytes(snapshot)>524288)', 'if (false)'),
         ('raw-frame-identity', 'producer-escaped-frame-identity',
          "digest(source_member(carrier_text, 'retained'))", 'digest(carrier_canon(frame))',
-         'digest(f[RAW_TOKEN])', 'digest(carrierCanon(f))'),
+         'frameSha256:digest(f[RAW_TOKEN])', 'frameSha256:digest(carrierCanon(f))'),
         ('no-history-authority-claim', 'producer-original-type-text',
          "'history':'not-checked'", "'history':'checked'",
          "history:'not-checked'", "history:'checked'"),
@@ -360,7 +369,7 @@ def check_inventory():
             before, after = (py_before, py_after) if name.endswith('.py') else (js_before, js_after)
             assert source.count(before) == 1, (name, label, 'removal target', source.count(before))
             changed = source.replace(before, after, 1)
-            invoke = [command[0], '-B', '-c', changed] if name.endswith('.py') else [command[0], '--input-type=module', '-e', changed]
+            invoke = [command[0], '-B', '-c', changed] if name.endswith('.py') else [command[0], '--input-type=module', '-e', executable_probe(changed)]
             case = by_id[case_id]
             removed = subprocess.run(invoke, input=encode(case), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5)
             assert removed.returncode == 0, (name, label, 'invalid setup', removed.stderr.decode()[:1000])
@@ -461,7 +470,7 @@ def check_references(replay_changed_outputs=True, schema_only=False):
             before,after=(pb,pa) if name.endswith('.py') else (jb,ja)
             assert source.count(before)==1,(name,title,'mutation target')
             changed=source.replace(before,after)
-            invocation=[command[0],'-B','-c',changed] if name.endswith('.py') else [command[0],'--input-type=module','-e',changed]
+            invocation=[command[0],'-B','-c',changed] if name.endswith('.py') else [command[0],'--input-type=module','-e',executable_probe(changed)]
             result=subprocess.run(invocation,input=encode(by_id[label]),stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=5)
             assert result.returncode==0,(name,title,'setup',result.stderr.decode()[:500])
             got=json.loads(result.stdout)
@@ -587,7 +596,7 @@ for(const line of input.trimEnd().split('\\n')) {
             before,after=(py_before,py_after) if name.endswith('.py') else (js_before,js_after)
             assert source.count(before)==1,(name,label,'mutation target')
             changed=source.replace(before,after)
-            invocation=[command[0],'-B','-c',changed] if name.endswith('.py') else [command[0],'--input-type=module','-e',changed]
+            invocation=[command[0],'-B','-c',changed] if name.endswith('.py') else [command[0],'--input-type=module','-e',executable_probe(changed)]
             case=by_id[case_id]
             result=subprocess.run(invocation,input=encode(case['request']),stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=5)
             assert result.returncode==0,(name,label,'mutation setup',result.stderr.decode()[:500])
@@ -851,7 +860,7 @@ print(f'Draft schema: {len(schema_valid)} positive fragments, 4 negative probes,
 mutations=[
  ('precision','number-precision-refusal','if Q(value) != selected:','if False:','cmp(decimalRat(v),selected)===0','true'),
  ('shortest-even-tie','shortest-integer-distance-tie-even','a % 2, q','1 - a % 2, q','odd:a%2n','odd:1n-a%2n'),
- ('duplicate-members','research-duplicate-range','if name in names:','if False:','if (seen.has(name)) fail();','if (false) fail();'),
+ ('duplicate-members','research-duplicate-range','if name in names:\n                fail()','if False:\n                fail()','if (seen.has(name)) fail();','if (false) fail();'),
  ('claim-domain','number-fraction-preview-only',"'claimAdmissible': admissible(raw)","'claimAdmissible': True",'claimAdmissible:admissible(raw)','claimAdmissible:true'),
  ('generated-absence','generated-text-missing-entry-kept',"if entry is not None and entry['status'] not in", "if entry is None or entry['status'] not in", "if (entry && !['supported','interpretation'].includes(entry.status))", "if (!entry || !['supported','interpretation'].includes(entry.status))")
 ]
@@ -864,7 +873,7 @@ for command in commands:
         changed=source.replace(before,after)
         index=labels.index(label)
         probe=(json.dumps(requests[index],ensure_ascii=True,separators=(',',':'))+'\n').encode()
-        invocation=[command[0],'-B','-c',changed] if name.endswith('.py') else [command[0],'--input-type=module','-e',changed]
+        invocation=[command[0],'-B','-c',changed] if name.endswith('.py') else [command[0],'--input-type=module','-e',executable_probe(changed)]
         result=subprocess.run(invocation,input=probe,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=3,check=False)
         assert result.returncode==0,(title,'mutation setup failure',result.stderr.decode()[:500])
         altered=json.loads(result.stdout)

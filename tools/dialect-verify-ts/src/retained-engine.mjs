@@ -466,7 +466,7 @@ function handle(r) {
 export {parse, validate, lineage, generatedConsistency, producerContext, Refusal, preview, PROFILE_CAPS, ROLE_LIMITS, handle};
 
 // Fatal UTF8 decoding prevents replacement-character repair.
-if (!process.argv[1] || import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
 let pending=Buffer.alloc(0), discarding=false;
 const decoder=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true});
 function line(input) {

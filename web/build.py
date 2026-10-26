@@ -773,6 +773,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0029-retained-column-conversions.md",
+        PurePosixPath("rfcs/0029-retained-column-conversions/index.html"),
+        "RFC 0029: Retained column conversions",
+        "Review-stage adoption candidate for exact selected retained-column/1 support at draft maturity; adoption and publication gates remain pending.",
+        "proposals",
+        "Review proposal",
+        source_ref="main",
+    ),
+    Page(
         "docs/releases/v0.3.0.md",
         PurePosixPath("project/releases/0.3.0/index.html"),
         "0.3.0 release notes",
@@ -1716,7 +1725,7 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
     )
     # Review and proposal files stay source-only until their own adoption or release.
     # Schema resources also resolve directly at their exact, format-versioned $id URLs.
-    for directory in ("conformance/policy", "schema/policy", "rfcs/workflow-contributors"):
+    for directory in ("conformance/policy", "schema/policy", "rfcs/workflow-contributors", "rfcs/retained-column-conversion"):
         for path in (ROOT / directory).rglob("*"):
             source = path.relative_to(ROOT).as_posix()
             if path.is_file():

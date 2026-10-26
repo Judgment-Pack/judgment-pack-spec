@@ -62,6 +62,31 @@ class RetainedRelease(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'RFC0029 acceptance'):
                 build_release.validate_artifacts('0.3.0-rc.2','v0.3.0-rc.2')
 
+    def test_rc2_scoped_mapping_inventory_and_acceptance_gates(self):
+        # Disposable adoption fixture, not a claim that this candidate's public gates passed.
+        inventory=json.loads((ROOT/INVENTORY).read_text())
+        paths={INVENTORY,*inventory['files'],
+               'releases/v0.3.0-rc.2.json','releases/v0.3.0-rc.2.md','releases/v0.3.0-rc.2.milestone.json',
+               'rfcs/0029-retained-column-conversions.md','schema/judgment-pack-core.schema.json',
+               'conformance/manifest.json','conformance/evaluation/manifest.json'}
+        with tempfile.TemporaryDirectory(prefix='rc2-adoption-fixture-') as temporary:
+            root=Path(temporary)
+            for name in paths:
+                target=root/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,target)
+            rfc=root/'rfcs/0029-retained-column-conversions.md'
+            rfc.write_text(rfc.read_text().replace('- Status: Review','- Status: Accepted'))
+            build_release.validate_artifacts('0.3.0-rc.2','v0.3.0-rc.2',root)
+            for name,changed,message in [
+                ('releases/v0.3.0-rc.2.json',{'extra':True},'mapping does not match'),
+                ('releases/v0.3.0-rc.2.milestone.json',{'number':3,'title':'v0.3.0'},'final Core milestone')]:
+                path=root/name;original=path.read_bytes();value=json.loads(original);value.update(changed);path.write_text(json.dumps(value))
+                with self.assertRaisesRegex(ValueError,message):
+                    build_release.validate_artifacts('0.3.0-rc.2','v0.3.0-rc.2',root)
+                path.write_bytes(original)
+            rfc.write_text(rfc.read_text().replace('- Status: Accepted','- Status: Review'))
+            with self.assertRaisesRegex(ValueError,'RFC0029 acceptance'):
+                build_release.validate_artifacts('0.3.0-rc.2','v0.3.0-rc.2',root)
+
     def test_rc2_packages_reader_and_inventory_without_publishing_staged_dialect(self):
         def git(*args):
             if args[0]=='ls-tree':
