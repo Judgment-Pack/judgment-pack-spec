@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { verify, verifySourceInput, verifyExport } from "../src/verify.ts";
-import { installation, selected, CAPS } from "../src/retained.ts";
+import { installation, selected, CAPS, translateError } from "../src/retained.ts";
 import { parse, preparationForm, utf8, decode } from "../src/json.ts";
 const corpus = JSON.parse(readFileSync(new URL("../../../conformance/retained-column/1/preparations.json", import.meta.url), "utf8"));
 function inputs(row: any, selector = corpus.selector) {
@@ -69,4 +69,29 @@ test("complete selector and transformation binding",()=>{
  assert.equal(JSON.parse(decode(preparationForm(result.report))).finding,"preparation-differs");
  const prep=JSON.parse(corpus.cases[0].preparationJson);prep.conversionContract.roles.pop();row.preparationJson=JSON.stringify(prep);
  result=verify(inputs(row));assert.equal(JSON.parse(decode(preparationForm(result.report))).finding,"preparation-differs");
+});
+
+
+for(const c of corpus.readerBoundaryCases)test("review boundary "+c.id,()=>{
+ const row={...structuredClone(corpus.cases.find((r:any)=>r.id===c.baseCaseId)),...c};
+ const selector=c.selectorHex?Uint8Array.from(Buffer.from(c.selectorHex,"hex")):utf8(JSON.stringify(corpus.selector));
+ let result:ReturnType<typeof verify>;
+ assert.doesNotThrow(()=>{
+  if(c.entrypoint==="verify")result=verify({...inputs(row),conversionContract:selector});
+  else {
+   const artifact=c.artifactHex?Uint8Array.from(Buffer.from(c.artifactHex,"hex")):utf8(c.entrypoint==="source-input"?row.sourceInputJson:(row.wireJson??corpus.exports[0].wireJson));
+   result=c.entrypoint==="source-input"?verifySourceInput(artifact,utf8(row.profilesJson),utf8(row.preparationJson),selector):verifyExport(artifact,utf8(row.profilesJson),selector);
+  }
+ },c.id+" exported API must report the reading/refusal");
+ if(c.expected==="reading"){
+  assert.equal(result!.kind,"reading",result!.why);
+  assert.equal(decode(result!.recomputed!),decode(preparationForm(parse(row.preparationJson))));
+ }else {
+  const [kind,code]=c.expected.split(":");assert.equal(result!.kind,kind,c.id);
+  assert.equal(JSON.parse(decode(preparationForm(result!.report)))[kind==="refusal"?"refusal":"finding"],code,c.id);
+ }
+ assert.equal(selected(),false);
+});
+test("selected error translation preserves program faults",()=>{
+ const fault=new Error("program-fault");assert.throws(()=>translateError(fault),(error)=>error===fault);
 });

@@ -2,6 +2,11 @@
 from pathlib import Path
 import copy
 import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -16,6 +21,24 @@ def check(row, selector=None):
     with patch.object(retained_column, 'installed_spec', return_value=CORPUS['testInstallation']):
         return reader.verify(*(row[k].encode() for k in ('dialectJson','caseJson','acquisitionsJson','profilesJson','preparationJson')),
                              conversion_contract=json.dumps(selector or CORPUS['selector']).encode())
+
+
+def boundary_row(case):
+    row=copy.deepcopy(next(row for row in CORPUS['cases'] if row['id']==case['baseCaseId']))
+    row.update(case)
+    return row
+
+
+def boundary_result(case):
+    row=boundary_row(case)
+    selector=bytes.fromhex(case['selectorHex']) if 'selectorHex' in case else json.dumps(CORPUS['selector']).encode()
+    with patch.object(retained_column,'installed_spec',return_value=CORPUS['testInstallation']):
+        if case['entrypoint']=='verify':
+            return reader.verify(*(row[k].encode() for k in ('dialectJson','caseJson','acquisitionsJson','profilesJson','preparationJson')),conversion_contract=selector)
+        artifact=bytes.fromhex(case['artifactHex']) if 'artifactHex' in case else (row['sourceInputJson'] if case['entrypoint']=='source-input' else row.get('wireJson',CORPUS['exports'][0]['wireJson'])).encode()
+        if case['entrypoint']=='source-input':
+            return reader.verify_source_input(artifact,row['profilesJson'].encode(),row['preparationJson'].encode(),selector)
+        return reader.verify_export(artifact,row['profilesJson'].encode(),selector)
 
 
 class SelectedPreparations(unittest.TestCase):
@@ -93,6 +116,59 @@ class SelectedPreparations(unittest.TestCase):
                 self.assertIn('reading',check(boundary).answer)
                 boundary[field]+=' '
                 self.assertEqual('input-over-bound',check(boundary).answer.get('refused'))
+
+
+    def test_review_reader_boundaries(self):
+        for case in CORPUS['readerBoundaryCases']:
+            with self.subTest(case=case['id']):
+                result=boundary_result(case)
+                if case['expected']=='reading':
+                    self.assertIn('reading',result.answer,result.answer)
+                    self.assertEqual(reader.preparation_bytes(reader.read_document(boundary_row(case)['preparationJson'].encode(),'handwritten expectation')),result.preparation)
+                else:
+                    kind,code=case['expected'].split(':')
+                    self.assertEqual(code,result.answer.get('finding' if kind=='finding' else 'refused'),result.answer)
+
+    def test_review_cli_refusal_protocol(self):
+        node=shutil.which('node')
+        self.assertIsNotNone(node,'selected CLI certification requires Node')
+        with tempfile.TemporaryDirectory(prefix='retained-cli-review-') as temporary:
+            root=Path(temporary)
+            # Synthetic installation seam only; execute the real CLI argument/read/report paths.
+            python=root/'python-cli.py';python.write_text('import sys\nsys.path.insert(0,'+repr(str(ROOT))+')\nfrom tools import retained_column,dialect_verify\nretained_column.installed_spec=lambda:'+repr(CORPUS['testInstallation'])+'\nraise SystemExit(dialect_verify.main())\n')
+            typescript=root/'typescript-cli.mjs';typescript.write_text('import {installation} from '+json.dumps((ROOT/'tools/dialect-verify-ts/src/retained.ts').as_uri())+';installation.identity=()=>('+json.dumps(CORPUS['testInstallation'])+');await import('+json.dumps((ROOT/'tools/dialect-verify-ts/src/main.ts').as_uri())+');')
+            for case in (c for c in CORPUS['readerBoundaryCases'] if c['cli']):
+                row=boundary_row(case);files=root/case['id'];files.mkdir()
+                for key in ('dialectJson','caseJson','acquisitionsJson','profilesJson','preparationJson'):
+                    (files/key).write_text(row[key])
+                selector=bytes.fromhex(case['selectorHex']) if 'selectorHex' in case else json.dumps(CORPUS['selector']).encode()
+                (files/'selector').write_bytes(selector)
+                args=['--conversion-contract',str(files/'selector'),'--profiles',str(files/'profilesJson')]
+                if case['entrypoint']=='verify':
+                    for flag,key in [('--dialect','dialectJson'),('--case','caseJson'),('--acquisitions','acquisitionsJson'),('--preparation','preparationJson')]:args.extend([flag,str(files/key)])
+                else:
+                    value=row['sourceInputJson'] if case['entrypoint']=='source-input' else row.get('wireJson',CORPUS['exports'][0]['wireJson'])
+                    (files/'artifact').write_bytes(bytes.fromhex(case['artifactHex']) if 'artifactHex' in case else value.encode())
+                    args.extend(['--source-input' if case['entrypoint']=='source-input' else '--export',str(files/'artifact')])
+                    if case['entrypoint']=='source-input':args.extend(['--preparation',str(files/'preparationJson')])
+                for language,command in [('python',[sys.executable,'-B',str(python)]),('typescript',[node,'--disable-wasm-trap-handler','--no-warnings',str(typescript)])]:
+                    with self.subTest(case=case['id'],language=language):
+                        result=subprocess.run(command+args,capture_output=True,text=True,timeout=30,env={**os.environ,'NODE_OPTIONS':''})
+                        expected=case['expected'];self.assertEqual(0 if expected=='reading' else 1,result.returncode,result.stderr)
+                        report=json.loads(result.stdout)
+                        self.assertEqual('reading' if expected=='reading' else 'refusal',report['result'])
+                        if expected!='reading':self.assertEqual(expected.split(':')[1],report['refusal'])
+                # A real file I/O failure remains CLI exit3, not a malformed-input refusal.
+                if case['id']=='case-depth-exact-retained':
+                    args[args.index('--profiles')+1]=str(files/'missing-profiles')
+                    for command in ([sys.executable,'-B',str(python)],[node,'--disable-wasm-trap-handler','--no-warnings',str(typescript)]):
+                        result=subprocess.run(command+args,capture_output=True,text=True,timeout=30,env={**os.environ,'NODE_OPTIONS':''})
+                        self.assertEqual(3,result.returncode,result.stderr);self.assertEqual('',result.stdout)
+
+    def test_import_program_faults_are_not_refusals(self):
+        case=next(c for c in CORPUS['readerBoundaryCases'] if c['id']=='source-import-valid-unbound')
+        with patch.object(reader,'read_bound',side_effect=RuntimeError('program-fault')),self.assertRaisesRegex(RuntimeError,'program-fault'):
+            boundary_result(case)
 
 
 if __name__=='__main__':

@@ -312,11 +312,13 @@ def source_documents(host: Any, raw: bytes) -> tuple[bytes, bytes, bytes, bytes 
     if 'import' in source:
         imported = source['import']
         engine.closed(imported, ['dialect', 'binding'])
+        if not isinstance(imported['dialect'], dict) or not isinstance(imported['binding'], dict):
+            engine.fail()
         published = raw_of(imported['dialect']).encode('utf-8')
         binding = raw_of(imported['binding']).encode('utf-8')
         if len(published) > CAPS['base']['documentBytes'] or len(binding) > host.BINDING_BYTES:
             engine.fail('input-over-bound')
-        bound = host.bind(imported['dialect'], imported['binding'])
+        bound = host.read_bound(host.parse_dialect(imported['dialect']), imported['binding'], True).document
         if host.canon(bound) != host.canon(source['mapping']):
             raise host.Finding('read-failed', 'retained published and bound mappings differ')
         mapping = published

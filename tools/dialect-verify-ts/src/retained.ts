@@ -6,7 +6,8 @@ import { fileURLToPath } from "node:url";
 import { resolve as pathResolve } from "node:path";
 import { Refusal, readBound, readDialect } from "./forms.ts";
 import { Finding } from "./prepare.ts";
-import { canon, decode, parse, preparationForm, resolve, utf8 } from "./json.ts";
+import { BOUNDS, scanBytes } from "./bounds.ts";
+import { NotRead, canon, decode, parse, preparationForm, resolve, utf8 } from "./json.ts";
 import type { JObj, JVal } from "./json.ts";
 import type { Profile, Source } from "./forms.ts";
 import * as engine from "./retained-engine.mjs";
@@ -156,12 +157,17 @@ export function producer(source: Source, p: Profile, result?: JVal, receipt?: JO
   if (first.availability) request.generatedConsistency.rule.kind = "evidence-availability";
   engine.generatedConsistency(request.generatedConsistency);
 }
+function boundedText(text: string, nesting: number): JVal {
+  const scan = scanBytes(utf8(text));
+  if (scan.nesting > nesting || !scan.numbersWithin) bad("input-over-bound");
+  return parse(text);
+}
 export function restoreCase(v: JVal): JVal {
   if (v.t !== "obj" || !v.m.has("retainedCaseJson")) return v;
   if (v.m.size !== 1) bad();
   const text = v.m.get("retainedCaseJson");
   if (text?.t !== "str" || !text.v) bad();
-  const result = parse(text.v);
+  const result = boundedText(text.v, BOUNDS.readNesting);
   if (result.t !== "obj") bad();
   remember(result, text.v);
   return result;
@@ -174,7 +180,7 @@ export function restoreAcquisitions(v: JVal): void {
     const text = slot.m.get("retainedResponseJson");
     if (text?.t !== "str" || !text.v) bad();
     if (utf8(text.v).length > CAPS.responseBytes) bad("input-over-bound");
-    const response = parse(text.v);
+    const response = boundedText(text.v, BOUNDS.documentNesting);
     if (response.t !== "obj") bad();
     remember(response, text.v);
     resultEnvelopeBytes.set(response.m.get("result")!,utf8(text.v).length);
@@ -182,6 +188,7 @@ export function restoreAcquisitions(v: JVal): void {
   }
 }
 export function translateError(e: unknown): never {
+  if (e instanceof NotRead) bad("input-malformed");
   if (e instanceof engine.Refusal) {
     if (["read-failed", "profile-mismatch", "acquisition-invalid"].includes(e.message)) throw new Finding(e.message, "selected retained-column reading");
     bad(e.message);
@@ -191,7 +198,7 @@ export function translateError(e: unknown): never {
 
 export function sourceDocuments(raw: Uint8Array): { dialect: Uint8Array; case: Uint8Array; acquisitions: Uint8Array; binding?: Uint8Array } {
   if (raw.length > CAPS.combinedBytes) bad("input-over-bound");
-  const text=decode(raw), source=parse(text); remember(source,text);
+  const text=decode(raw), source=boundedText(text, BOUNDS.documentNesting); remember(source,text);
   if (source.t!=="obj") bad();
   const required=["conversionContract","mapping"], optional=["case","retainedCaseJson","sources","import","snapshot","mappingDigest"];
   if (required.some(k=>!source.m.has(k)) || [...source.m.keys()].some(k=>!required.includes(k)&&!optional.includes(k))) bad();
@@ -221,7 +228,7 @@ export function sourceDocuments(raw: Uint8Array): { dialect: Uint8Array; case: U
 }
 export function exportInputs(raw: Uint8Array): { retained: {source:Uint8Array;preparation:Uint8Array}[]; audit:Uint8Array } {
   if (raw.length>CAPS.exportWireBytes) bad("input-over-bound");
-  const text=decode(raw),doc=parse(text); remember(doc,text);
+  const text=decode(raw),doc=boundedText(text, BOUNDS.documentNesting); remember(doc,text);
   if (doc.t!=="obj" || !["version","releaseDigest","release","run"].every(k=>doc.m.has(k)) || [...doc.m.keys()].some(k=>!["version","releaseDigest","release","run","chain"].includes(k))) bad();
   const version=doc.m.get("version");
   if (version?.t!=="num" || !["2","3","4","5"].includes(version.lit)) bad();
