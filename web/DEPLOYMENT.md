@@ -21,7 +21,9 @@ not edit it in place.
 Pull requests retain the required `repository-conformance` check, and pushes to `main` run it
 once. Neither event deploys a preview or the live site. Tag pushes use the release workflow to
 verify artifacts, build checksummed bundles, create a draft prerelease, and attest the bundles;
-maintainers still decide when to publish that draft.
+maintainers still decide when to publish that draft. A `vMAJOR.MINOR.PATCH` tag takes main's
+conformance evidence at the tagged commit instead of running the repository suite again
+(Release evidence, below).
 
 For every next Core or Policy tag, commit `releases/<tag>.milestone.json` before tagging, with
 exactly the repository milestone's positive integer number and exact title. The Core v0.3.0 link
@@ -45,6 +47,58 @@ share one concurrency group. Firebase tooling remains pinned to `15.34.1`.
 These workflows become available through the normal next release that includes them. Older tags
 lack the new milestone metadata and must not be retagged or have released bytes edited to make
 them pass. There is no manual dispatch bypass or automatic release publication.
+
+## Release evidence
+
+A Core tag `vMAJOR.MINOR.PATCH`, with nothing after the patch number, does not run the repository
+suite again. The release workflow's `CI evidence at the tag` job runs
+`scripts/dev/release_evidence.py verify`, the development kit's release evidence gate vendored with
+the kit release on its line 2, configured by `.github/ci-evidence.json`. It takes the evidence of
+the `repository-conformance` job main already ran at the exact tagged commit, or refuses. Reuse
+needs all of this:
+
+- the newest `Repository conformance` run of a push to `main` at that commit, complete,
+  successful and at most 48 hours old; a newer failed, cancelled or running attempt is never
+  searched past, and pull request runs never count;
+- that job's evidence artifact, which only a push to `main` records: every `dev.json` setup step
+  and check `PASS`, the commit's input identities, and the runner image, Python, Node, git and the
+  installed requirements (`pip freeze` of the `.venv` the checks ran in) equal to what the release
+  runner resolves when it sets up the same way; the `jsonschema` format checkers are pinned, so a
+  run without the `format-nongpl` extras refuses;
+- the tag an annotated tag naming the commit, when the gate starts and when it ends.
+
+The decision record, reuse or refusal with its code, is in the job's log and is kept as the run's
+`release-evidence-<attempt>` artifact. A refusal fails the release before anything is built. It
+never becomes a pass, and nothing runs CI again on its own. The fresh route is the maintainer's
+choice: re-run all jobs of main's `Repository conformance` run at the commit, not only the failed
+ones (`gh run rerun RUN_ID --repo Judgment-Pack/judgment-pack-spec`), wait for it to finish, then
+re-run the release run's failed jobs once. If the gate refuses again, fix the cause on `main` and
+release from a new commit. The usual causes are `run-age`, `runtime-identity` (a runner image,
+toolchain or resolved dependency newer than main's run; while a hosted image is still rolling out,
+a re-run can refuse again with nothing on `main` to fix, so wait and re-run) and `run-unfinished`
+(the tag was pushed while main's run was still going: wait, then re-run the release run's failed
+jobs). Re-running only the failed jobs of a release run whose evidence job passed keeps that job's
+decision without asking the gate again. If the release job failed for another reason and main's run
+at the commit has had a newer attempt since, or the decision is nearly 48 hours old, re-run all jobs
+of the release run instead, so that the gate decides again.
+
+Any other tag, a release candidate such as `v0.3.0-rc.1` or a `policy-v` tag, reuses nothing: the
+release job runs the whole repository suite itself, as before. The kit's prerelease tag grammar
+(`"tag": {"prerelease": true}` in the configuration, from kit v0.11.0) is opt-in: until this
+repository opts in, release candidates keep the whole suite, and opting in means widening the route
+step and its test in the same change. `policy-v` tags are outside every kit grammar and always run
+the whole suite. Either way the release job keeps,
+fresh and in the same order, the milestone and tagged-checkout admission, the exact Policy format
+and agreement corpus for `policy-v` tags, the bundle build with its tag, clean-tree, artifact-pin
+and Policy tag-history checks, the release notes, the draft prerelease and the bundle attestation.
+Publication and its approval are unchanged.
+
+The suite can be reused because none of its tests reads the repository's tags, branch or
+milestone: it gives the same result for every test on a branch checkout without the release tag
+and on a detached checkout of a new annotated tag, its git reads of the checkout are of `HEAD`, its
+tree and its attributes, and its milestone, tag and remote reads go to fixture repositories and
+stand-in commands. A test that needs the tag, the milestone or the date must run in the release job
+instead.
 
 ## Published URLs are kept resolvable
 

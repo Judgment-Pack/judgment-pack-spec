@@ -5,7 +5,9 @@ name: Repository conformance
 # up from the manifest and runs the checks. A pull request runs `check.sh --changed` against its
 # base branch: the checks jpdev.json maps the changed paths to, and the whole list when a path is
 # unmapped, when the mapping, the manifest or the runner changed, or with no mapping. A push to
-# main runs the whole list.
+# main runs the whole list, and only a push to main records the evidence a release takes
+# (scripts/dev/release_evidence.py capture; .github/ci-evidence.json; web/DEPLOYMENT.md, "Release
+# evidence").
 
 on:
   push:
@@ -54,7 +56,9 @@ jobs:
       # Installs requirements-dev.txt. The pinned `jsonschema[format-nongpl]` matters: without its
       # extras the `format` keyword is silently ignored (CONTRIBUTING.md, "Local checks").
       - name: Setup steps
-        run: scripts/dev/check.sh --setup
+        run: |
+          set -o pipefail
+          scripts/dev/check.sh --setup | tee "${{ runner.temp }}/setup.log"
 
       # Repository artifacts and the static site (tests/); the exploratory Policy companion
       # prototype (non-normative); the proposed draft Policy companion contract (not adopted); the
@@ -64,8 +68,29 @@ jobs:
           EVENT: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
         run: |
+          set -o pipefail
           if [ "$EVENT" = pull_request ]; then
-            scripts/dev/check.sh --all --changed "origin/$BASE_REF"
+            scripts/dev/check.sh --all --changed "origin/$BASE_REF" | tee "${{ runner.temp }}/checks.log"
           else
-            scripts/dev/check.sh --all
+            scripts/dev/check.sh --all | tee "${{ runner.temp }}/checks.log"
           fi
+
+      # A push to main only: the commit's input identities, the runner, the tools and the installed
+      # requirements (.venv, which the checks ran in), and every setup step and check PASS.
+      - name: Record exact CI inputs and coverage
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: >-
+          python3 scripts/dev/release_evidence.py capture
+          --workflow conformance --job repository-conformance
+          --setup-log "${{ runner.temp }}/setup.log"
+          --check-log "${{ runner.temp }}/checks.log"
+          --output "${{ runner.temp }}/evidence.json"
+
+      - name: Upload immutable CI evidence
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ci-evidence-conformance-repository-conformance-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/evidence.json
+          if-no-files-found: error
+          retention-days: 7
