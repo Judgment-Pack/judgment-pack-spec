@@ -83,3 +83,8 @@ summary block, and anything you stopped on or chose not to do.
   are ever left out, when no path they read changed. A path that no rule matches runs the whole
   list. So do changes to `jpdev.json`, `dev.json` and the vendored runner. When a Policy step
   starts reading a new path, add that path to its rule.
+- A `vMAJOR.MINOR.PATCH` release reuses main's `repository-conformance` evidence at the exact
+  commit instead of running `tests/` again (`scripts/dev/release_evidence.py`, the kit's gate
+  vendored byte for byte after line 2, configured by `.github/ci-evidence.json`; web/DEPLOYMENT.md,
+  "Release evidence"), so a test must not read the repository's tags, branch, milestone or clock
+  unless the release workflow runs it fresh at the tag.
