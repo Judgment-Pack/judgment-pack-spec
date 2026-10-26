@@ -25,8 +25,8 @@ CONFIG = ROOT / ".github/ci-evidence.json"
 GATE = ROOT / "scripts/dev/release_evidence.py"
 # The kit release the gate is vendored from, and the SHA-256 of that release's
 # lib/release_evidence.py. A re-vendor changes both, and line 2 of the copy.
-KIT_RELEASE = "v0.10.0"
-KIT_LIBRARY_SHA256 = "d44af3df07f64036013ba9967a54cf799cec678068f0937395d6a2eef370e0e8"
+KIT_RELEASE = "v0.11.0"
+KIT_LIBRARY_SHA256 = "f272b7a43272bac31bb9b0c37a583d9c40d376972b04c812e576bd82c1ef18e3"
 # The release job's steps, in order. Only the repository suite depends on the evidence job.
 RELEASE_STEPS = [
     "Check out tagged source",
