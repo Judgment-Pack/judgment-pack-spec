@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# from judgment-pack-devkit v0.9.0 (lib/changed_checks.py)
+# from judgment-pack-devkit v0.10.0 (lib/changed_checks.py)
 """changed_checks.py --root ROOT --manifest MANIFEST [--base BASE] [--label TEXT]
 
 Selects the check-list steps that the changed paths of a clone can affect, for
