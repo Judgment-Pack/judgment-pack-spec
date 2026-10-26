@@ -257,13 +257,12 @@ function preview(rule,frame) {
   return cmp(decimalRat(v),selected)===0 ? result(v) : issue('number-precision');
 }
 // Draft-only interfaces. No maxima below are production defaults.
-const ROLE_LIMITS = {
-  'document-validation':['documentBytes','frameBytes'],
-  preview:['documentBytes','combinedBytes','frameBytes'],
-  preparation:['documentBytes','combinedBytes','frameBytes','preparationBytes','recordBytes'],
-  'preparation-verification':['documentBytes','combinedBytes','frameBytes','preparationBytes','recordBytes'],
-  'producer-carrier':['originalSnapshotBytes','carrierBytes','grantBytes','adapterStdoutBytes','responseBytes']
-};
+const ROLE_LIMITS = {"document-validation":["documentBytes","frameBytes"],"preview":["documentBytes","combinedBytes","frameBytes","profilesBytes","requestBodyBytes","inputReplyBytes"],"preparation":["documentBytes","combinedBytes","frameBytes","preparationBytes","recordBytes","profilesBytes","requestBodyBytes","inputReplyBytes","releaseStoredBytes","runStoredBytes","exportBaseBytes","exportWireBytes"],"preparation-verification":["documentBytes","combinedBytes","frameBytes","preparationBytes","recordBytes","profilesBytes","requestBodyBytes","inputReplyBytes","releaseStoredBytes","runStoredBytes","exportBaseBytes","exportWireBytes"],"producer-carrier":["originalSnapshotBytes","carrierBytes","grantBytes","adapterStdoutBytes","responseBytes","profilesBytes"]};
+// Synthetic trusted installation fixture, never request/report authority.
+const INSTALLED_SPEC = {"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"};
+const PROFILE_CAPS = {"base":{"documentBytes":1048576,"frameBytes":2097152,"combinedBytes":12582912,"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":5242880,"preparationBytes":16777216,"recordBytes":9437184,"profilesBytes":81920,"requestBodyBytes":16777216,"inputReplyBytes":37748736,"releaseStoredBytes":41943040,"runStoredBytes":41943040,"exportBaseBytes":75497472,"exportWireBytes":90177536},"extended":{"documentBytes":2097152,"frameBytes":4194304,"combinedBytes":25165824,"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":5242880,"preparationBytes":33554432,"recordBytes":17825792,"profilesBytes":163840,"requestBodyBytes":33554432,"inputReplyBytes":75497472,"releaseStoredBytes":83886080,"runStoredBytes":83886080,"exportBaseBytes":150994944,"exportWireBytes":176160768}};
+const installedSpec=s=>Object.keys(INSTALLED_SPEC).every(k=>s[k]===INSTALLED_SPEC[k]);
+
 function positive(v,zero=false) {
   if (!(v instanceof JsonNumber) || v.text.length>17 || !full(INT,v.text)) fail();
   const n=BigInt(v.text); if (n<(zero ? 0n : 1n) || n>SAFE) fail(); return n;
@@ -288,7 +287,7 @@ function admit(p,effect=()=>{}) {
   closed(p.capabilities,['conversionContracts']);
   const entries=p.capabilities.conversionContracts;
   if (!Array.isArray(entries) || entries.length>32) fail();
-  const r=p.required; capability(r); const identities=new Set(); let selected;
+  const r=p.required; capability(r); if (!installedSpec(r.spec)) fail('capability-unsupported'); const identities=new Set(); let selected;
   const identity=e=>JSON.stringify([e.contract,e.spec.version,e.spec.revision,e.spec.schemaSha256,e.spec.corpusSha256,e.profile,e.role,e.producerGrammar??null]);
   for (const e of entries) {
     capability(e); const id=identity(e); if (identities.has(id)) fail(); identities.add(id);
@@ -298,11 +297,24 @@ function admit(p,effect=()=>{}) {
   closed(p.sizes,ROLE_LIMITS[r.role]);
   for (const k of ROLE_LIMITS[r.role]) {
     const a=positive(p.sizes[k],true), x=positive(r.limits[k]), y=positive(selected.limits[k]);
+    if (a>BigInt(PROFILE_CAPS[r.profile][k])) fail('input-over-bound');
     if (a>(x<y ? x : y)) fail('input-over-bound');
   }
   effect(); // Every refusal must precede this caller callback.
   return {admitted:true};
 }
+function select(p,effect=()=>{}) {
+  closed(p,['selector','role']); const s=p.selector;
+  closed(s,['contract','spec','profile','roles']); closed(s.spec,['version','revision','schemaSha256','corpusSha256']);
+  if (s.contract!=='retained-column/1' || !installedSpec(s.spec) || typeof s.profile!=='string' || !Object.hasOwn(PROFILE_CAPS,s.profile)) fail('capability-unsupported');
+  const order=Object.keys(ROLE_LIMITS);
+  if (!Array.isArray(s.roles) || s.roles.length<1 || s.roles.length>order.length) fail();
+  if (s.roles.some(r=>typeof r!=='string' || !Object.hasOwn(ROLE_LIMITS,r))) fail('capability-unsupported');
+  if (new Set(s.roles).size!==s.roles.length || JSON.stringify(s.roles)!==JSON.stringify(order.filter(r=>s.roles.includes(r)))) fail();
+  if (typeof p.role!=='string' || !s.roles.includes(p.role)) fail('capability-unsupported');
+  effect(); return {selected:true};
+}
+
 function restore(r) {
   closed(r,['restore','profile','limits']); closed(r.limits,['originalSnapshotBytes','carrierBytes']);
   const maxSnapshot=positive(r.limits.originalSnapshotBytes), maxCarrier=positive(r.limits.carrierBytes), c=r.restore;
@@ -319,12 +331,13 @@ function restore(r) {
 function lineage(r,rawFrameBytes) {
   closed(r,['rule','frame'],['profile']); validate(r.rule,r.frame,Object.hasOwn(r,'profile') ? r.profile : 'base',rawFrameBytes);
   const p=preview(r.rule,r.frame); if (p.issues.length || (Object.hasOwn(p,'valueJson') && !p.claimAdmissible)) fail('read-failed');
-  const column=r.rule.column,f=r.frame; let input={state:'missing'}, researchIdentity;
+  const column=r.rule.column,f=r.frame; if (typeof f[RAW_TOKEN]!=='string') fail('read-failed');
+  const frameDigest=digest(f[RAW_TOKEN]); let input={state:'missing'}, researchIdentity;
   if (r.rule.kind==='research-value') {
-    const e=f.research.fields[column]; if (e && Object.hasOwn(e,'valueJson')) input={state:'present',json:e.valueJson};
+    const e=f.research.fields[column]; if (e && Object.hasOwn(e,'valueJson')) input={state:'present',ref:{frameSha256:frameDigest,location:'research-value'}};
     const field=f.research.declaration.fields.find(e=>e.name===column);
     researchIdentity={recipeRevision:f.research.recordRecipeRevision,fieldSha256:digest(field.fieldJson)};
-  } else if (Object.hasOwn(f.values,column)) input={state:'present',json:JSON.stringify(f.values[column])};
+  } else if (Object.hasOwn(f.values,column)) input={state:'present',ref:{frameSha256:frameDigest,location:'values'}};
   const result=Object.hasOwn(p,'valueJson') ? {state:'value',json:p.valueJson} : {state:'omitted',reason:p.omitted};
   const answer={contractVersion:'1',column,input,result}; if (researchIdentity) answer.researchIdentity=researchIdentity;
   return answer;
@@ -409,9 +422,35 @@ function generatedConsistency(p) {
     frameSha256:digest(f[RAW_TOKEN]),revisionIdentity:revision,projection:source,transformation};
 }
 
+function verifyLineage(p) {
+  closed(p,['rule','frame','transformation'],['profile']);
+  const {transformation,...request}=p, expected=lineage(request,typeof p[RAW_MEMBERS]?.frame==='string' ? bytes(p[RAW_MEMBERS].frame) : undefined);
+  const same=(a,b)=>a===b || (object(a) && object(b) && Object.keys(a).length===Object.keys(b).length && Object.keys(a).every(k=>Object.hasOwn(b,k) && same(a[k],b[k])));
+  if (!same(transformation,expected)) fail('read-failed');
+  return {consistent:true,acquisition:'not-verified'};
+}
+function retainCase(p) {
+  closed(p,['source']); const s=p.source; let text;
+  if (object(s) && Object.keys(s).length===1 && Object.hasOwn(s,'case')) text=s[RAW_MEMBERS].case;
+  else {closed(s,['retainedCaseJson']); text=s.retainedCaseJson; if (typeof text!=='string' || !text) fail();}
+  if (!object(parse(text,{strict:false}))) fail();
+  return {retainedCaseJson:text};
+}
+function retainSource(p) {
+  closed(p,['source']); const s=p.source; let envelope;
+  if (object(s) && Object.keys(s).length===1 && Object.hasOwn(s,'response')) envelope=s[RAW_MEMBERS].response;
+  else {closed(s,['retainedResponseJson']); envelope=s.retainedResponseJson; if (typeof envelope!=='string' || !envelope) fail();}
+  const parsed=parse(envelope,{strict:false}); closed(parsed,['result','receipt','salts']);
+  if (!['result','receipt','salts'].every(k=>object(parsed[k]))) fail();
+  return {retainedResponseJson:envelope};
+}
 function handle(r) {
+  if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'verifyLineage')) return verifyLineage(r.verifyLineage);
+  if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'retainCase')) return retainCase(r.retainCase);
+  if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'retainSource')) return retainSource(r.retainSource);
   if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'generatedConsistency')) return generatedConsistency(r.generatedConsistency);
   if (object(r) && Object.hasOwn(r,'restore')) return restore(r);
+  if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'selection')) return select(r.selection);
   if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'admission')) return admit(r.admission);
   if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'lineage')) return lineage(r.lineage,r[FRAME_SIZE]);
   if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'binary64Hex')) {
