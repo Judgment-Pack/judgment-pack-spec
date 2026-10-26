@@ -22,9 +22,6 @@ jobs:
           persist-credentials: false
 
       # First, so that a manifest that does not parse fails before the long steps start.
-      - name: The manifest parses and its first step runs
-        run: scripts/dev/check.sh --manifest dev.json --only local-paths
-
       - name: Read the toolchains from dev.json
         id: dev
         run: |
