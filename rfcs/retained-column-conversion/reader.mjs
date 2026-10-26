@@ -306,7 +306,7 @@ function admit(p,effect=()=>{}) {
 function select(p,effect=()=>{}) {
   closed(p,['selector','role']); const s=p.selector;
   closed(s,['contract','spec','profile','roles']); closed(s.spec,['version','revision','schemaSha256','corpusSha256']);
-  if (s.contract!=='retained-column/1' || !installedSpec(s.spec) || !Object.hasOwn(PROFILE_CAPS,s.profile)) fail('capability-unsupported');
+  if (s.contract!=='retained-column/1' || !installedSpec(s.spec) || typeof s.profile!=='string' || !Object.hasOwn(PROFILE_CAPS,s.profile)) fail('capability-unsupported');
   const order=Object.keys(ROLE_LIMITS);
   if (!Array.isArray(s.roles) || s.roles.length<1 || s.roles.length>order.length) fail();
   if (s.roles.some(r=>typeof r!=='string' || !Object.hasOwn(ROLE_LIMITS,r))) fail('capability-unsupported');

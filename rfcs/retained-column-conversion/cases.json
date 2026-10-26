@@ -17910,6 +17910,206 @@
       "expected": {
         "selected": true
       }
+    },
+    {
+      "id": "selection-profile-type-array-base",
+      "request": {
+        "selection": {
+          "selector": {
+            "contract": "retained-column/1",
+            "spec": {
+              "version": "draft-rfc0029",
+              "revision": "0000000000000000000000000000000000000000",
+              "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+            },
+            "profile": [
+              "base"
+            ],
+            "roles": [
+              "document-validation",
+              "preview",
+              "preparation",
+              "preparation-verification",
+              "producer-carrier"
+            ]
+          },
+          "role": "preview"
+        }
+      },
+      "expected": {
+        "refusal": "capability-unsupported"
+      }
+    },
+    {
+      "id": "selection-profile-type-array-extended",
+      "request": {
+        "selection": {
+          "selector": {
+            "contract": "retained-column/1",
+            "spec": {
+              "version": "draft-rfc0029",
+              "revision": "0000000000000000000000000000000000000000",
+              "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+            },
+            "profile": [
+              "extended"
+            ],
+            "roles": [
+              "document-validation",
+              "preview",
+              "preparation",
+              "preparation-verification",
+              "producer-carrier"
+            ]
+          },
+          "role": "preview"
+        }
+      },
+      "expected": {
+        "refusal": "capability-unsupported"
+      }
+    },
+    {
+      "id": "selection-profile-type-empty-array",
+      "request": {
+        "selection": {
+          "selector": {
+            "contract": "retained-column/1",
+            "spec": {
+              "version": "draft-rfc0029",
+              "revision": "0000000000000000000000000000000000000000",
+              "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+            },
+            "profile": [],
+            "roles": [
+              "document-validation",
+              "preview",
+              "preparation",
+              "preparation-verification",
+              "producer-carrier"
+            ]
+          },
+          "role": "preview"
+        }
+      },
+      "expected": {
+        "refusal": "capability-unsupported"
+      }
+    },
+    {
+      "id": "selection-profile-type-object",
+      "request": {
+        "selection": {
+          "selector": {
+            "contract": "retained-column/1",
+            "spec": {
+              "version": "draft-rfc0029",
+              "revision": "0000000000000000000000000000000000000000",
+              "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+            },
+            "profile": {},
+            "roles": [
+              "document-validation",
+              "preview",
+              "preparation",
+              "preparation-verification",
+              "producer-carrier"
+            ]
+          },
+          "role": "preview"
+        }
+      },
+      "expected": {
+        "refusal": "capability-unsupported"
+      }
+    },
+    {
+      "id": "selection-profile-type-null",
+      "request": {
+        "selection": {
+          "selector": {
+            "contract": "retained-column/1",
+            "spec": {
+              "version": "draft-rfc0029",
+              "revision": "0000000000000000000000000000000000000000",
+              "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+            },
+            "profile": null,
+            "roles": [
+              "document-validation",
+              "preview",
+              "preparation",
+              "preparation-verification",
+              "producer-carrier"
+            ]
+          },
+          "role": "preview"
+        }
+      },
+      "expected": {
+        "refusal": "capability-unsupported"
+      }
+    },
+    {
+      "id": "selection-profile-type-number",
+      "request": {
+        "selection": {
+          "selector": {
+            "contract": "retained-column/1",
+            "spec": {
+              "version": "draft-rfc0029",
+              "revision": "0000000000000000000000000000000000000000",
+              "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+            },
+            "profile": 0,
+            "roles": [
+              "document-validation",
+              "preview",
+              "preparation",
+              "preparation-verification",
+              "producer-carrier"
+            ]
+          },
+          "role": "preview"
+        }
+      },
+      "expected": {
+        "refusal": "capability-unsupported"
+      }
+    },
+    {
+      "id": "selection-profile-type-boolean",
+      "request": {
+        "selection": {
+          "selector": {
+            "contract": "retained-column/1",
+            "spec": {
+              "version": "draft-rfc0029",
+              "revision": "0000000000000000000000000000000000000000",
+              "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+            },
+            "profile": true,
+            "roles": [
+              "document-validation",
+              "preview",
+              "preparation",
+              "preparation-verification",
+              "producer-carrier"
+            ]
+          },
+          "role": "preview"
+        }
+      },
+      "expected": {
+        "refusal": "capability-unsupported"
+      }
     }
   ]
 }

@@ -16,6 +16,12 @@ SCHEMA = json.loads((HERE/'contract.schema.json').read_text())
 jsonschema.Draft202012Validator.check_schema(SCHEMA)
 VALIDATOR = jsonschema.Draft202012Validator(SCHEMA)
 
+# The default all-definition coverage loop must carry the closed custody/selection alternatives.
+GLOBAL_SCHEMA_EXAMPLES = [EXAMPLES[k] for k in (
+    'generatedFrame', 'assertedFrame', 'lineageFragment', 'generatedCarrier', 'capabilitiesFragment',
+    'preparationSourceFragment', 'retainedSourceFragment', 'assertedCaseCustodyFragment', 'selectionFragment')]
+GLOBAL_SCHEMA_EXAMPLES.append({'case': {'retained': EXAMPLES['assertedFrame']}})
+
 
 def fixture(case):
     column = case.get('column', 'Column')
@@ -362,7 +368,7 @@ def check_inventory():
     print(f'Draft producer projection schema: {controls} member/alternative-removal controls PASS')
     print('Scope: snapshot/frame consistency and portable identities only; acquisition:not-verified, history:not-checked; no producer, preparation or adoption evidence.')
 
-def check_references(replay_changed_outputs=True):
+def check_references(replay_changed_outputs=True, schema_only=False):
     """Only changed reference/custody behavior; reuse unchanged guard evidence."""
     cases = list(DATA['referenceCases'])
     if replay_changed_outputs:
@@ -373,6 +379,8 @@ def check_references(replay_changed_outputs=True):
         cases += [expand_producer_case(c) for c in DATA['producerCases']]
     encode = lambda c: ((c.get('wireJson') or json.dumps(c['request'], ensure_ascii=True, separators=(',', ':'))) + '\n').encode()
     fragments = [EXAMPLES[k] for k in ('lineageFragment', 'preparationSourceFragment', 'retainedSourceFragment', 'assertedCaseCustodyFragment')]
+    # Schema coverage must not depend on replaying producer-reader outputs.
+    fragments.append(EXAMPLES['producerConsistency']['expected']['transformation'])
     fragments += [c['expected'] for c in cases if 'input' in c['expected']]
     fragments.append({'case':{'retained':EXAMPLES['assertedFrame']}})
     for c in DATA['referenceCases']:
@@ -411,6 +419,9 @@ def check_references(replay_changed_outputs=True):
             elif isinstance(value,list):
                 for index,child in enumerate(value):visit(child,path+[index])
         visit(SCHEMA['$defs'][definition], [])
+    if schema_only:
+        print(f'Draft reference/source schema: {controls} existing member/alternative controls PASS')
+        return
     by_id={c['id']:c for c in cases}
     # Changed safeguards only: exact raw digest, full fragment verification,
     # sole response/case source, exact-text return. Both readers must miss the
@@ -471,9 +482,16 @@ def check_references(replay_changed_outputs=True):
     print('Scope: Draft fragments, raw custody, source union and local reference consistency; no source authentication, complete preparation maxima, production support or adoption claim.')
 
 
-def check_limits():
+def check_limits(selector_types_only=False):
     """Selected Draft caps/selector only; no repeated conversion or producer checks."""
     cases = DATA['capCases'] + [c for c in DATA['interfaceCases'] if 'admission' in c['request']]
+    type_cases = [c for c in DATA['capCases'] if c['id'].startswith('selection-profile-type-')]
+    for case in type_cases:
+        assert not VALIDATOR.is_valid(case['request']['selection']['selector']), ('selector-profile-schema', case['id'])
+    if selector_types_only:
+        following = next(c for c in DATA['capCases'] if c['id'] == 'selection-preparation-only')
+        # Each malformed request is followed by a known valid request in the same process.
+        cases = [entry for case in type_cases for entry in (case, following)]
     by_id = {c['id']: c for c in cases}
     encode = lambda v: (json.dumps(v, ensure_ascii=True, separators=(',', ':'))+'\n').encode()
     commands = [[sys.executable, '-B', str(HERE/'reader.py')],
@@ -498,7 +516,8 @@ def check_limits():
             for key, child in node.items(): remove_controls(definition, child, path+(key,))
         elif isinstance(node, list):
             for i, child in enumerate(node): remove_controls(definition, child, path+(i,))
-    for definition in ('selection', 'conversionCapability'): remove_controls(definition, SCHEMA['$defs'][definition])
+    if not selector_types_only:
+        for definition in ('selection', 'conversionCapability'): remove_controls(definition, SCHEMA['$defs'][definition])
     mutations = [
         ('installed-identity', 'caps-untrusted-agreement-revision',
          "if required['spec'] != INSTALLED_SPEC:", 'if False:',
@@ -557,7 +576,11 @@ for(const line of input.trimEnd().split('\\n')) {
         for case,got in zip(cases,rows):
             expected=case['expected']; effects=int(expected.get('admitted',False) or expected.get('selected',False))
             assert got=={'answer':expected,'effects':effects},(name,case['id'],'effect order',got)
-        for label, case_id, py_before, py_after, js_before, js_after in mutations:
+        active_mutations = [] if selector_types_only else list(mutations)
+        if name.endswith('.mjs'):
+            active_mutations.append(('selector-profile-string-guard', 'selection-profile-type-array-base',
+                                     '', '', "typeof s.profile!=='string' || ", ''))
+        for label, case_id, py_before, py_after, js_before, js_after in active_mutations:
             before,after=(py_before,py_after) if name.endswith('.py') else (js_before,js_after)
             assert source.count(before)==1,(name,label,'mutation target')
             changed=source.replace(before,after)
@@ -568,9 +591,16 @@ for(const line of input.trimEnd().split('\\n')) {
             got=json.loads(result.stdout)
             assert got!=case['expected'],(name,label,'intended assertion did not fail')
             print(f'{name}: removed {label} at {case_id} expected={case["expected"]} removedGot={got}')
-        print(f'{name}: {len(cases)} changed cap/selector/role fixtures and callback probes; {len(mutations)} intended safeguard removals PASS')
-    print(f'Draft cap/selector schema: {controls} member/enum removal controls PASS')
+        print(f'{name}: {len(cases)} changed cap/selector/role fixtures and callback probes; {len(active_mutations)} intended safeguard removals PASS')
+    print(f'Draft selector wrong-type profiles: {len(type_cases)} schema refusals PASS')
+    if not selector_types_only:
+        print(f'Draft cap/selector schema: {controls} member/enum removal controls PASS')
     print('Scope: synthetic installed identity and reported-size admission only; no actual artifact boundary, supported product role, Extended support or normative adoption claim.')
+
+
+if '--selector-types-only' in sys.argv:
+    check_limits(selector_types_only=True)
+    sys.exit(0)
 
 
 if '--limits-only' in sys.argv:
@@ -579,7 +609,8 @@ if '--limits-only' in sys.argv:
 
 
 if '--references-only' in sys.argv:
-    check_references()
+    schema_only = '--schema-only' in sys.argv
+    check_references(replay_changed_outputs=not schema_only, schema_only=schema_only)
     sys.exit(0)
 
 
@@ -593,7 +624,8 @@ if '--carrier-only' in sys.argv:
     sys.exit(0)
 
 
-check_limits()
+if '--global-schema-only' not in sys.argv:
+    check_limits()
 
 requests, expected, labels, schema_valid = [], [], [], []
 
@@ -709,7 +741,7 @@ for c in map(expand_producer_case, DATA['producerCases']):
         schema_valid.extend([c['request'], c['expected']])
 schema_valid.append(EXAMPLES['producerGrammarBinding'])
 
-for value in [EXAMPLES['generatedFrame'],EXAMPLES['assertedFrame'],EXAMPLES['lineageFragment'],EXAMPLES['generatedCarrier'],EXAMPLES['capabilitiesFragment']]:
+for value in GLOBAL_SCHEMA_EXAMPLES:
     schema_valid.append(value)
 for fragment in schema_valid:
     VALIDATOR.validate(fragment)
@@ -759,6 +791,12 @@ for definition in SCHEMA['$defs']:
         elif isinstance(value,list):
             for i,child in enumerate(value):visit_members(child,path+[i])
     visit_members(SCHEMA['$defs'][definition],[])
+
+if '--global-schema-only' in sys.argv:
+    print(f'Default global schema coverage: {enum_mutations} enum and {member_mutations} member-removal controls PASS, including signedResponseFragment.result')
+    check_references(replay_changed_outputs=False, schema_only=True)
+    sys.exit(0)
+
 
 # Only transport-byte admission is probed here, not a complete old/new envelope comparison.
 raw_at=copy.deepcopy(base)
