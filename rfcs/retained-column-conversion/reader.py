@@ -353,13 +353,82 @@ def preview(rule, frame):
 
 
 # Draft-only interfaces. Reported maxima are negotiated input, not adopted ceilings.
-ROLE_LIMITS = {
-    'document-validation': ('documentBytes', 'frameBytes'),
-    'preview': ('documentBytes', 'combinedBytes', 'frameBytes'),
-    'preparation': ('documentBytes', 'combinedBytes', 'frameBytes', 'preparationBytes', 'recordBytes'),
-    'preparation-verification': ('documentBytes', 'combinedBytes', 'frameBytes', 'preparationBytes', 'recordBytes'),
-    'producer-carrier': ('originalSnapshotBytes', 'carrierBytes', 'grantBytes', 'adapterStdoutBytes', 'responseBytes'),
-}
+ROLE_LIMITS = {'document-validation': ('documentBytes', 'frameBytes'),
+ 'preview': ('documentBytes',
+             'combinedBytes',
+             'frameBytes',
+             'profilesBytes',
+             'requestBodyBytes',
+             'inputReplyBytes'),
+ 'preparation': ('documentBytes',
+                 'combinedBytes',
+                 'frameBytes',
+                 'preparationBytes',
+                 'recordBytes',
+                 'profilesBytes',
+                 'requestBodyBytes',
+                 'inputReplyBytes',
+                 'releaseStoredBytes',
+                 'runStoredBytes',
+                 'exportBaseBytes',
+                 'exportWireBytes'),
+ 'preparation-verification': ('documentBytes',
+                              'combinedBytes',
+                              'frameBytes',
+                              'preparationBytes',
+                              'recordBytes',
+                              'profilesBytes',
+                              'requestBodyBytes',
+                              'inputReplyBytes',
+                              'releaseStoredBytes',
+                              'runStoredBytes',
+                              'exportBaseBytes',
+                              'exportWireBytes'),
+ 'producer-carrier': ('originalSnapshotBytes',
+                      'carrierBytes',
+                      'grantBytes',
+                      'adapterStdoutBytes',
+                      'responseBytes',
+                      'profilesBytes')}
+# Synthetic trusted installation fixture; never supplied by a request/report.
+INSTALLED_SPEC = {'version': 'draft-rfc0029',
+ 'revision': '0000000000000000000000000000000000000000',
+ 'schemaSha256': 'sha256:1111111111111111111111111111111111111111111111111111111111111111',
+ 'corpusSha256': 'sha256:2222222222222222222222222222222222222222222222222222222222222222'}
+PROFILE_CAPS = {'base': {'documentBytes': 1048576,
+          'frameBytes': 2097152,
+          'combinedBytes': 12582912,
+          'originalSnapshotBytes': 524288,
+          'carrierBytes': 3145728,
+          'grantBytes': 3145728,
+          'adapterStdoutBytes': 3145728,
+          'responseBytes': 5242880,
+          'preparationBytes': 16777216,
+          'recordBytes': 9437184,
+          'profilesBytes': 81920,
+          'requestBodyBytes': 16777216,
+          'inputReplyBytes': 37748736,
+          'releaseStoredBytes': 41943040,
+          'runStoredBytes': 41943040,
+          'exportBaseBytes': 75497472,
+          'exportWireBytes': 90177536},
+ 'extended': {'documentBytes': 2097152,
+              'frameBytes': 4194304,
+              'combinedBytes': 25165824,
+              'originalSnapshotBytes': 524288,
+              'carrierBytes': 3145728,
+              'grantBytes': 3145728,
+              'adapterStdoutBytes': 3145728,
+              'responseBytes': 5242880,
+              'preparationBytes': 33554432,
+              'recordBytes': 17825792,
+              'profilesBytes': 163840,
+              'requestBodyBytes': 33554432,
+              'inputReplyBytes': 75497472,
+              'releaseStoredBytes': 83886080,
+              'runStoredBytes': 83886080,
+              'exportBaseBytes': 150994944,
+              'exportWireBytes': 176160768}}
 
 
 def positive(value, zero=False):
@@ -409,6 +478,8 @@ def admit(probe, effect=lambda: None):
         fail()
     required = probe['required']
     capability(required)
+    if required['spec'] != INSTALLED_SPEC:
+        fail('capability-unsupported')
     identities = set()
     selected = None
     for entry in entries:
@@ -425,10 +496,32 @@ def admit(probe, effect=lambda: None):
     closed(probe['sizes'], ROLE_LIMITS[required['role']])
     for key in ROLE_LIMITS[required['role']]:
         actual = positive(probe['sizes'][key], zero=True)
+        if actual > PROFILE_CAPS[required['profile']][key]:
+            fail('input-over-bound')
         if actual > min(positive(required['limits'][key]), positive(selected['limits'][key])):
             fail('input-over-bound')
     effect()  # The only effect seam: every refusal above precedes the caller callback.
     return {'admitted': True}
+
+
+def select(probe, effect=lambda: None):
+    closed(probe, ['selector', 'role'])
+    s = probe['selector']
+    closed(s, ['contract', 'spec', 'profile', 'roles'])
+    closed(s['spec'], ['version', 'revision', 'schemaSha256', 'corpusSha256'])
+    if s['contract'] != 'retained-column/1' or s['spec'] != INSTALLED_SPEC or not isinstance(s['profile'], str) or s['profile'] not in PROFILE_CAPS:
+        fail('capability-unsupported')
+    order = list(ROLE_LIMITS)
+    if not isinstance(s['roles'], list) or not 1 <= len(s['roles']) <= len(order):
+        fail()
+    if any(not isinstance(r, str) or r not in ROLE_LIMITS for r in s['roles']):
+        fail('capability-unsupported')
+    if len(set(s['roles'])) != len(s['roles']) or s['roles'] != [r for r in order if r in s['roles']]:
+        fail()
+    if not isinstance(probe['role'], str) or probe['role'] not in s['roles']:
+        fail('capability-unsupported')
+    effect()
+    return {'selected': True}
 
 
 def restore(request, raw_carrier_text):
@@ -457,10 +550,13 @@ def restore(request, raw_carrier_text):
             'originalSnapshotBytes': length(snapshot)}
 
 
-def lineage(request, raw_frame_bytes=None):
+def lineage(request, raw_frame_text=None):
     closed(request, ['rule', 'frame'], ['profile'])
     rule, frame = request['rule'], request['frame']
-    validate(rule, frame, request.get('profile', 'base'), raw_frame_bytes)
+    if raw_frame_text is None:
+        fail('read-failed')
+    validate(rule, frame, request.get('profile', 'base'), length(raw_frame_text))
+    frame_digest = digest(raw_frame_text)
     output = preview(rule, frame)
     if output['issues'] or ('valueJson' in output and not output['claimAdmissible']):
         fail('read-failed')
@@ -471,11 +567,11 @@ def lineage(request, raw_frame_bytes=None):
         research = frame['research']
         entry = research['fields'].get(column)
         if entry is not None and 'valueJson' in entry:
-            original = {'state':'present', 'json':entry['valueJson']}
+            original = {'state':'present', 'ref':{'frameSha256':frame_digest, 'location':'research-value'}}
         field = next(e for e in research['declaration']['fields'] if e['name'] == column)
         identity = {'recipeRevision':research['recordRecipeRevision'], 'fieldSha256':digest(field['fieldJson'])}
     elif column in frame['values']:
-        original = {'state':'present', 'json':json.dumps(frame['values'][column], ensure_ascii=False, separators=(',', ':'))}
+        original = {'state':'present', 'ref':{'frameSha256':frame_digest, 'location':'values'}}
     result = {'state':'value', 'json':output['valueJson']} if 'valueJson' in output else {'state':'omitted', 'reason':output['omitted']}
     answer = {'contractVersion':'1', 'column':column, 'input':original, 'result':result}
     if identity is not None:
@@ -690,22 +786,74 @@ def generated_consistency(probe, carrier_text):
         fail('read-failed')
     if frame['values'] != source['values'] or research['fields'] != source['fields']:
         fail('read-failed')
-    transformation = lineage({'rule':probe['rule'], 'frame':frame, 'profile':probe['profile']}, raw_frame_size(carrier_text, 'retained'))
+    transformation = lineage({'rule':probe['rule'], 'frame':frame, 'profile':probe['profile']}, source_member(carrier_text, 'retained'))
     return {'consistent':True, 'acquisition':'not-verified', 'history':'not-checked',
             'originalSnapshotSha256':probe['carrier']['originalSnapshotSha256'],
             'frameSha256':digest(source_member(carrier_text, 'retained')),
             'revisionIdentity':revision, 'projection':source, 'transformation':transformation}
 
 
+def verify_lineage(probe, raw_probe_text):
+    closed(probe, ['rule', 'frame', 'transformation'], ['profile'])
+    expected = lineage({k:v for k,v in probe.items() if k != 'transformation'}, source_member(raw_probe_text, 'frame'))
+    # Equality is over the complete closed fragment, including target column,
+    # reference location/custody digest, result and conditional original identity.
+    if probe['transformation'] != expected:
+        fail('read-failed')
+    return {'consistent':True, 'acquisition':'not-verified'}
+
+
+def retain_case(probe, raw_probe_text):
+    closed(probe, ['source'])
+    source = probe['source']
+    if isinstance(source, dict) and set(source) == {'case'}:
+        text = source_member(source_member(raw_probe_text, 'source'), 'case')
+    else:
+        closed(source, ['retainedCaseJson'])
+        text = source['retainedCaseJson']
+        if not isinstance(text, str) or not text:
+            fail()
+    if not isinstance(parse(text, strict=False), dict):
+        fail()
+    return {'retainedCaseJson':text}
+
+
+def retain_source(probe, raw_probe_text):
+    closed(probe, ['source'])
+    source = probe['source']
+    if isinstance(source, dict) and set(source) == {'response'}:
+        envelope = source_member(source_member(raw_probe_text, 'source'), 'response')
+    else:
+        closed(source, ['retainedResponseJson'])
+        envelope = source['retainedResponseJson']
+        if not isinstance(envelope, str) or not envelope:
+            fail()
+    # Structure only: the ordinary acquisition reader still verifies the full
+    # receipt/salts grammar, signature, frozen request, profile and freshness.
+    parsed = parse(envelope, strict=False)
+    closed(parsed, ['result', 'receipt', 'salts'])
+    if not all(isinstance(parsed[k], dict) for k in ('result', 'receipt', 'salts')):
+        fail()
+    return {'retainedResponseJson':envelope}
+
+
 def handle(request, raw_frame_bytes=None, raw_carrier_text=None, raw_lineage_text=None):
+    if isinstance(request, dict) and set(request) == {'verifyLineage'}:
+        return verify_lineage(request['verifyLineage'], source_member(raw_lineage_text, 'verifyLineage'))
+    if isinstance(request, dict) and set(request) == {'retainCase'}:
+        return retain_case(request['retainCase'], source_member(raw_lineage_text, 'retainCase'))
+    if isinstance(request, dict) and set(request) == {'retainSource'}:
+        return retain_source(request['retainSource'], source_member(raw_lineage_text, 'retainSource'))
     if isinstance(request, dict) and set(request) == {'generatedConsistency'}:
         return generated_consistency(request['generatedConsistency'], raw_carrier_text)
     if isinstance(request, dict) and 'restore' in request:
         return restore(request, raw_carrier_text)
+    if isinstance(request, dict) and set(request) == {'selection'}:
+        return select(request['selection'])
     if isinstance(request, dict) and set(request) == {'admission'}:
         return admit(request['admission'])
     if isinstance(request, dict) and set(request) == {'lineage'}:
-        return lineage(request['lineage'], raw_frame_size(raw_lineage_text) if raw_lineage_text is not None else None)
+        return lineage(request['lineage'], source_member(raw_lineage_text, 'frame') if raw_lineage_text is not None else None)
     if isinstance(request, dict) and set(request) == {'binary64Hex'}:
         text = request['binary64Hex']
         if not isinstance(text, str) or not re.fullmatch('[0-9a-f]{16}', text):
@@ -743,7 +891,7 @@ if __name__ == '__main__':
                 raw_carrier = source_member(source_member(text, 'generatedConsistency'), 'carrier')
             else:
                 raw_carrier = raw_frame_size(text, 'restore', as_text=True) if isinstance(request, dict) and 'restore' in request else None
-            output = handle(request, raw_frame_size(text) if isinstance(request, dict) and 'frame' in request else None, raw_carrier, raw_frame_size(text, 'lineage', as_text=True) if isinstance(request, dict) and 'lineage' in request else None)
+            output = handle(request, raw_frame_size(text) if isinstance(request, dict) and 'frame' in request else None, raw_carrier, raw_frame_size(text, 'lineage', as_text=True) if isinstance(request, dict) and 'lineage' in request else text)
         except (Refusal, UnicodeError) as exc:
             output = {'refusal': str(exc) if isinstance(exc, Refusal) else 'input-malformed'}
         print(json.dumps(output, ensure_ascii=True, separators=(',', ':')))

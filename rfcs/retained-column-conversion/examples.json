@@ -71,7 +71,10 @@
     "column": "Eligible",
     "input": {
       "state": "present",
-      "json": "\"YES\""
+      "ref": {
+        "frameSha256": "sha256:5e15070ee22fcb46096f162d845f4604a16523515a61fe089211339ec08529bf",
+        "location": "values"
+      }
     },
     "result": {
       "state": "value",
@@ -162,8 +165,11 @@
         "role": "preview",
         "limits": {
           "documentBytes": 1048576,
-          "combinedBytes": 6291456,
-          "frameBytes": 2097152
+          "combinedBytes": 12582912,
+          "frameBytes": 2097152,
+          "profilesBytes": 81920,
+          "requestBodyBytes": 16777216,
+          "inputReplyBytes": 37748736
         }
       },
       {
@@ -178,8 +184,11 @@
         "role": "preview",
         "limits": {
           "documentBytes": 2097152,
-          "combinedBytes": 12582912,
-          "frameBytes": 4194304
+          "combinedBytes": 25165824,
+          "frameBytes": 4194304,
+          "profilesBytes": 163840,
+          "requestBodyBytes": 33554432,
+          "inputReplyBytes": 75497472
         }
       },
       {
@@ -194,10 +203,17 @@
         "role": "preparation",
         "limits": {
           "documentBytes": 1048576,
-          "combinedBytes": 6291456,
+          "combinedBytes": 12582912,
           "frameBytes": 2097152,
-          "preparationBytes": 8388608,
-          "recordBytes": 8388608
+          "preparationBytes": 16777216,
+          "recordBytes": 9437184,
+          "profilesBytes": 81920,
+          "requestBodyBytes": 16777216,
+          "inputReplyBytes": 37748736,
+          "releaseStoredBytes": 41943040,
+          "runStoredBytes": 41943040,
+          "exportBaseBytes": 75497472,
+          "exportWireBytes": 90177536
         }
       },
       {
@@ -212,10 +228,17 @@
         "role": "preparation",
         "limits": {
           "documentBytes": 2097152,
-          "combinedBytes": 12582912,
+          "combinedBytes": 25165824,
           "frameBytes": 4194304,
-          "preparationBytes": 16777216,
-          "recordBytes": 16777216
+          "preparationBytes": 33554432,
+          "recordBytes": 17825792,
+          "profilesBytes": 163840,
+          "requestBodyBytes": 33554432,
+          "inputReplyBytes": 75497472,
+          "releaseStoredBytes": 83886080,
+          "runStoredBytes": 83886080,
+          "exportBaseBytes": 150994944,
+          "exportWireBytes": 176160768
         }
       },
       {
@@ -230,10 +253,17 @@
         "role": "preparation-verification",
         "limits": {
           "documentBytes": 1048576,
-          "combinedBytes": 6291456,
+          "combinedBytes": 12582912,
           "frameBytes": 2097152,
-          "preparationBytes": 8388608,
-          "recordBytes": 8388608
+          "preparationBytes": 16777216,
+          "recordBytes": 9437184,
+          "profilesBytes": 81920,
+          "requestBodyBytes": 16777216,
+          "inputReplyBytes": 37748736,
+          "releaseStoredBytes": 41943040,
+          "runStoredBytes": 41943040,
+          "exportBaseBytes": 75497472,
+          "exportWireBytes": 90177536
         }
       },
       {
@@ -248,10 +278,17 @@
         "role": "preparation-verification",
         "limits": {
           "documentBytes": 2097152,
-          "combinedBytes": 12582912,
+          "combinedBytes": 25165824,
           "frameBytes": 4194304,
-          "preparationBytes": 16777216,
-          "recordBytes": 16777216
+          "preparationBytes": 33554432,
+          "recordBytes": 17825792,
+          "profilesBytes": 163840,
+          "requestBodyBytes": 33554432,
+          "inputReplyBytes": 75497472,
+          "releaseStoredBytes": 83886080,
+          "runStoredBytes": 83886080,
+          "exportBaseBytes": 150994944,
+          "exportWireBytes": 176160768
         }
       },
       {
@@ -269,7 +306,8 @@
           "carrierBytes": 3145728,
           "grantBytes": 3145728,
           "adapterStdoutBytes": 3145728,
-          "responseBytes": 3145728
+          "responseBytes": 5242880,
+          "profilesBytes": 81920
         }
       },
       {
@@ -287,7 +325,8 @@
           "carrierBytes": 3145728,
           "grantBytes": 3145728,
           "adapterStdoutBytes": 3145728,
-          "responseBytes": 3145728
+          "responseBytes": 5242880,
+          "profilesBytes": 163840
         }
       },
       {
@@ -302,10 +341,17 @@
         "role": "preparation",
         "limits": {
           "documentBytes": 1048576,
-          "combinedBytes": 6291456,
+          "combinedBytes": 12582912,
           "frameBytes": 2097152,
-          "preparationBytes": 8388608,
-          "recordBytes": 8388608
+          "preparationBytes": 16777216,
+          "recordBytes": 9437184,
+          "profilesBytes": 81920,
+          "requestBodyBytes": 16777216,
+          "inputReplyBytes": 37748736,
+          "releaseStoredBytes": 41943040,
+          "runStoredBytes": 41943040,
+          "exportBaseBytes": 75497472,
+          "exportWireBytes": 90177536
         },
         "producerGrammar": "desk-reviewed-input/1"
       },
@@ -321,10 +367,17 @@
         "role": "preparation",
         "limits": {
           "documentBytes": 2097152,
-          "combinedBytes": 12582912,
+          "combinedBytes": 25165824,
           "frameBytes": 4194304,
-          "preparationBytes": 16777216,
-          "recordBytes": 16777216
+          "preparationBytes": 33554432,
+          "recordBytes": 17825792,
+          "profilesBytes": 163840,
+          "requestBodyBytes": 33554432,
+          "inputReplyBytes": 75497472,
+          "releaseStoredBytes": 83886080,
+          "runStoredBytes": 83886080,
+          "exportBaseBytes": 150994944,
+          "exportWireBytes": 176160768
         },
         "producerGrammar": "desk-reviewed-input/1"
       },
@@ -340,10 +393,17 @@
         "role": "preparation-verification",
         "limits": {
           "documentBytes": 1048576,
-          "combinedBytes": 6291456,
+          "combinedBytes": 12582912,
           "frameBytes": 2097152,
-          "preparationBytes": 8388608,
-          "recordBytes": 8388608
+          "preparationBytes": 16777216,
+          "recordBytes": 9437184,
+          "profilesBytes": 81920,
+          "requestBodyBytes": 16777216,
+          "inputReplyBytes": 37748736,
+          "releaseStoredBytes": 41943040,
+          "runStoredBytes": 41943040,
+          "exportBaseBytes": 75497472,
+          "exportWireBytes": 90177536
         },
         "producerGrammar": "desk-reviewed-input/1"
       },
@@ -359,10 +419,17 @@
         "role": "preparation-verification",
         "limits": {
           "documentBytes": 2097152,
-          "combinedBytes": 12582912,
+          "combinedBytes": 25165824,
           "frameBytes": 4194304,
-          "preparationBytes": 16777216,
-          "recordBytes": 16777216
+          "preparationBytes": 33554432,
+          "recordBytes": 17825792,
+          "profilesBytes": 163840,
+          "requestBodyBytes": 33554432,
+          "inputReplyBytes": 75497472,
+          "releaseStoredBytes": 83886080,
+          "runStoredBytes": 83886080,
+          "exportBaseBytes": 150994944,
+          "exportWireBytes": 176160768
         },
         "producerGrammar": "desk-reviewed-input/1"
       },
@@ -381,7 +448,8 @@
           "carrierBytes": 3145728,
           "grantBytes": 3145728,
           "adapterStdoutBytes": 3145728,
-          "responseBytes": 3145728
+          "responseBytes": 5242880,
+          "profilesBytes": 81920
         },
         "producerGrammar": "desk-reviewed-input/1"
       },
@@ -400,7 +468,8 @@
           "carrierBytes": 3145728,
           "grantBytes": 3145728,
           "adapterStdoutBytes": 3145728,
-          "responseBytes": 3145728
+          "responseBytes": 5242880,
+          "profilesBytes": 163840
         },
         "producerGrammar": "desk-reviewed-input/1"
       }
@@ -750,7 +819,10 @@
         "column": "Text",
         "input": {
           "state": "present",
-          "json": "\"  A  \""
+          "ref": {
+            "frameSha256": "sha256:228ee51e667ef31afbbba90d7a4e7025250cc20b1c7f2fbb0a414f1e00a5392c",
+            "location": "research-value"
+          }
         },
         "result": {
           "state": "value",
@@ -784,5 +856,74 @@
       "grammar": "desk-reviewed-input/1"
     }
   },
-  "producerContextNote": "Synthetic independently supplied trust/digest inputs demonstrate consistency only; acquisition and original history are not verified by the prototype."
+  "producerContextNote": "Synthetic independently supplied trust/digest inputs demonstrate consistency only; acquisition and original history are not verified by the prototype.",
+  "preparationSourceFragment": {
+    "response": {
+      "result": {
+        "contractVersion": "1",
+        "originalSnapshotJson": "{ \"value\":1e3,\"label\":\"\\u00e9\" }\n",
+        "originalSnapshotSha256": "sha256:2bcde75a108ddd8533fbd9736b09bf9117f5393612073bab4b022a04eb3ffd87",
+        "retained": {
+          "contractVersion": "1",
+          "origin": "generated",
+          "values": {
+            "A": "-0",
+            "B": "legacy"
+          },
+          "research": {
+            "recordRecipeRevision": "recipe:7",
+            "declaration": {
+              "recipeRevision": "recipe:7",
+              "fields": [
+                {
+                  "name": "A",
+                  "fieldJson": "{\"name\":\"A\",\"type\":\"number\",\"description\":\"Original declaration.\"}"
+                },
+                {
+                  "name": "B",
+                  "fieldJson": "{\"name\":\"B\",\"type\":\"string\"}"
+                }
+              ]
+            },
+            "fields": {
+              "A": {
+                "status": "supported",
+                "valueJson": "-0"
+              },
+              "B": {
+                "status": "interpretation",
+                "valueJson": "\"\\ud800\""
+              }
+            }
+          }
+        }
+      },
+      "receipt": {},
+      "salts": {}
+    }
+  },
+  "retainedSourceFragment": {
+    "retainedResponseJson": "{\"result\":{\"contractVersion\":\"1\",\"originalSnapshotJson\":\"{ \\\"value\\\":1e3,\\\"label\\\":\\\"\\\\u00e9\\\" }\\n\",\"originalSnapshotSha256\":\"sha256:2bcde75a108ddd8533fbd9736b09bf9117f5393612073bab4b022a04eb3ffd87\",\"retained\":{\"contractVersion\":\"1\",\"origin\":\"generated\",\"values\":{\"A\":\"-0\",\"B\":\"legacy\"},\"research\":{\"recordRecipeRevision\":\"recipe:7\",\"declaration\":{\"recipeRevision\":\"recipe:7\",\"fields\":[{\"name\":\"A\",\"fieldJson\":\"{\\\"name\\\":\\\"A\\\",\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"Original declaration.\\\"}\"},{\"name\":\"B\",\"fieldJson\":\"{\\\"name\\\":\\\"B\\\",\\\"type\\\":\\\"string\\\"}\"}]},\"fields\":{\"A\":{\"status\":\"supported\",\"valueJson\":\"-0\"},\"B\":{\"status\":\"interpretation\",\"valueJson\":\"\\\"\\\\ud800\\\"\"}}}}},\"receipt\":{},\"salts\":{}}"
+  },
+  "sourceRetentionNote": "Structure fragments only. Empty receipt/salts do not authenticate an acquisition. Existing signature/profile/request/freshness checks remain required.",
+  "assertedCaseCustodyFragment": {
+    "retainedCaseJson": "{ \"origin\":{\"originalValues\":{\"A\":\"\\t\"},\"n\":1e3}, \"retained\":{ \"contractVersion\":\"1\", \"origin\":\"asserted\", \"values\":{\"A\":\"\\u00e9\\n\"}, \"research\":null } }"
+  },
+  "selectionFragment": {
+    "contract": "retained-column/1",
+    "spec": {
+      "version": "draft-rfc0029",
+      "revision": "0000000000000000000000000000000000000000",
+      "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "profile": "base",
+    "roles": [
+      "document-validation",
+      "preview",
+      "preparation",
+      "preparation-verification",
+      "producer-carrier"
+    ]
+  }
 }

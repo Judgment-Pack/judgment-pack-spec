@@ -216,24 +216,51 @@ preparation is emitted. Preview and claim-admissibility prototypes are not prepa
 New successful/omitted applications add closed `columnTransformation` lineage with exactly
 `contractVersion:"1"`, `column`, `input`, `result`, and conditional `researchIdentity` for
 selected original research declarations. Input is exactly `{state:"missing"}` or
-`{state:"present",json:<selected JSON text>}`. For ordinary columns `json` is the compact
-JSON encoding of the retained structured string
-or null in `frame.values`: UTF-8 non-ASCII remains literal, C0 controls, quote and backslash
-are JSON-escaped, and no optional whitespace or solidus escaping is added. This is not a
-claim to recover request spelling that the legacy host discarded. Research uses the exact
-retained `valueJson`, including its whitespace and numeric spelling. Missing raw `valueJson`
-is missing input; explicit `"null"` and empty `""` raw text are present inputs with different
-bytes, even when their selected original type subsequently gives the same issue. Result
-is exactly `{state:"value",json:<exact candidate JSON>}` or
-`{state:"omitted",reason:"missing"|"blank"|"legacy-null"|"unavailable"}`.
-Research identity is exactly `{recipeRevision,fieldSha256}`; hash is `sha256:` plus lower-case
-SHA-256 over the exact UTF-8 fieldJson. The representation is inline: every input/result copy
-counts at its serialized location; no
-pooling, digest substitution or implied reference resolution is selected. Offline recomputation
-derives all members from the supplied frame, never trusting retained result members. The Draft
-readers expose this recomputation for successful/omitted canon-admissible previews only, not
-a whole preparation verifier. Complete preparation/signature accounting and integration into
-the existing preparation schema remain prerequisites. No failed execution gains success lineage.
+`{state:"present",ref:{frameSha256:<digest>,location:"values"|"research-value"}}`.
+The reference is closed: no inline `json`, URI, extra column, fallback or other member.
+`frameSha256` is `sha256:` plus lower-case SHA-256 of the exact retained frame UTF-8
+object token, including internal whitespace, escapes and number spelling. It is not a
+hash of a decoded or canonicalized frame. `columnTransformation.column` selects the exact
+case-sensitive column; the checked rule, existing target source/read identity and source
+pointer bind the frame occurrence. Generated occurrences additionally retain their existing
+source/profile/request/receipt binding. Equal frame hashes never authorize interchanging
+occurrences, sources, profiles or receipts. Hashes convey custody identity, not authority.
+
+For `location:"values"`, resolve the selected structured string or null in that occurrence's
+`frame.values` to compact JSON: UTF-8 non-ASCII stays literal, C0 controls, quote and backslash
+are escaped, and no optional whitespace or solidus escaping is added. This does not recover
+request spelling discarded by a legacy host. For `location:"research-value"`, resolve the
+selected field's exact retained `valueJson` string contents, including whitespace and numeric
+spelling. The location must agree with the checked rule's kind. An absent column or absent
+raw `valueJson` is missing input; a present reference to it refuses. Explicit `"null"` and
+empty raw text are present and distinct even when conversion later refuses or omits them.
+Missing input must have exactly `{state:"missing"}`; it cannot stand in for a present value.
+
+The retained acquisition or case is the only resolution source. Do not search by digest,
+fetch a URI, use a network or external digest store, substitute unsigned data or fall back
+to current declarations/values. Unresolved, substituted, wrong-location, wrong-column and
+wrong-source references refuse with `read-failed` after existing source admission checks.
+Malformed outer shapes retain their ordinary refusal. A verification/export bundle must
+include the exact retained occurrence under its existing custody and authority contract;
+a standalone fragment is unverifiable. Transient decoding must never replace retained bytes.
+Preview may separately expose selected input JSON for inspection; that diagnostic is not
+the preparation wire format or an execution authorization.
+
+Every target retains result exactly `{state:"value",json:<exact candidate JSON>}` or
+`{state:"omitted",reason:"missing"|"blank"|"legacy-null"|"unavailable"}`, plus all its
+existing target metadata and conditional research identity. Research identity remains
+exactly `{recipeRevision,fieldSha256}`, hashing the exact UTF-8 `fieldJson`. Result JSON
+remains inline and its aggregate serialized bytes still count. Offline recomputation
+resolves the bound occurrence, reruns the checked conversion and compares the complete
+fragment; neither a reference nor retained result is accepted as truth. The `lineage` and
+`verifyLineage` probes derive/compare these fragments from their actual raw frame tokens.
+They explicitly do not authenticate source context or verify a whole preparation. Existing
+source/read/profile/receipt checks remain required, including when two frames hash equally.
+No failed execution gains success lineage. Integration with the production preparation
+schema, independent verification and complete preparation/signature accounting remains required.
+
+This amends an unadopted Draft proposal, not a released `retained-column/1` contract. New
+exact schema/corpus pins are required; old closed readers gain no implicit support.
 Existing envelope versions and historical optional-member absence stay unchanged; old closed
 readers refuse unsupported lineage. Rules enter read/dialect identity. Frame identity and complete
 original declaration inventory commitments bind the checked projection; source/recipe identities
@@ -261,10 +288,10 @@ permit zero. The structural schema cannot inspect numeric spelling; the readers 
 | Role | Exactly required limit members | Owner and meaning |
 | --- | --- | --- |
 | document-validation | documentBytes, frameBytes | Runtime checks document/target coverage and retained frame only. |
-| preview | documentBytes, combinedBytes, frameBytes | Runner conversion preview; not preparation support. |
-| preparation | documentBytes, combinedBytes, frameBytes, preparationBytes, recordBytes | Runner complete preparation and signed record accounting. |
-| preparation-verification | documentBytes, combinedBytes, frameBytes, preparationBytes, recordBytes | Offline verifier's independently supported complete input/preparation/record bounds. |
-| producer-carrier | originalSnapshotBytes, carrierBytes, grantBytes, adapterStdoutBytes, responseBytes | Producer's exact acquired snapshot and complete wrapper/grant/adapter stdout/signed response transport. |
+| preview | documentBytes, combinedBytes, frameBytes, profilesBytes, requestBodyBytes, inputReplyBytes | Runner complete preview request/reply and trusted profiles, not preparation support. |
+| preparation | documentBytes, combinedBytes, frameBytes, preparationBytes, recordBytes, profilesBytes, requestBodyBytes, inputReplyBytes, releaseStoredBytes, runStoredBytes, exportBaseBytes, exportWireBytes | Runner complete preparation, record, storage and export boundaries. |
+| preparation-verification | documentBytes, combinedBytes, frameBytes, preparationBytes, recordBytes, profilesBytes, requestBodyBytes, inputReplyBytes, releaseStoredBytes, runStoredBytes, exportBaseBytes, exportWireBytes | Offline verifier independently supports the complete retained bundle, replay and export bounds. |
+| producer-carrier | originalSnapshotBytes, carrierBytes, grantBytes, adapterStdoutBytes, responseBytes, profilesBytes | Producer's exact snapshot, complete wrapper/grant/stdout/signed response and trusted profiles. |
 
 These limits count each complete serialized artifact, including punctuation, escaping, provenance
 and signatures, rather than selected payload members. A document limit applies separately to
@@ -281,8 +308,11 @@ an empty array grants nothing. Every declared entry must have the required role 
 no unknown members. An absent capability or unmatched exact identity is `capability-unsupported`;
 an unknown contract, role or profile also fails with `capability-unsupported`. Malformed shapes,
 missing limits and duplicate identities give `input-malformed`. The selected role's artifact
-sizes must all be present as nonnegative safe integers; each must fit the lower of caller-required
-and reported limits, otherwise `input-over-bound`. Known unsupported support is refused before
+sizes must all be present as nonnegative safe integers; each must fit the minimum of the selected
+profile cap, caller-required maximum and reported maximum, otherwise `input-over-bound`. A larger
+report or caller maximum cannot enlarge the selected profile. Separate published and bound documents
+are each tested against documentBytes; the probe sizes report the largest one, while combinedBytes
+counts both actual occurrences. Production readers measure each occurrence themselves. Known unsupported support is refused before
 artifact admission, grant creation, dispatch or evaluation; it cannot pass because a payload is
 tiny. For a supported identity, malformed declarations and over-bound inputs keep the existing
 validation/diagnostic order. The executable `admission` probe checks this declaration and size
@@ -294,15 +324,75 @@ Runtime 0.39.0-alpha.1 has no such support. No capability is inferred from carri
 approval, phase, acquisition, mixed-origin, cancellation, unknown-ack/no-retry and CAS guards
 remain with their present owners.
 
+### Closed selection before larger reads
+
+The optional selected-profile envelope is exactly
+`{contract:"retained-column/1",spec:{version,revision,schemaSha256,corpusSha256},profile,roles}`.
+It is a separate selector, not a capability entry: it contains no caller maxima, route names,
+producer registration or host-version override. `roles` is nonempty, duplicate-free and follows
+this fixed order: `document-validation`, `preview`, `preparation`, `preparation-verification`,
+`producer-carrier`, omitting unused roles. Unknown identity/profile/role refuses as
+`capability-unsupported`; an extra member, repeated role or noncanonical order is `input-malformed`.
+Every operation independently requires its complete role set from trusted local operation metadata.
+A selector omitting any of those roles refuses even when every reported payload size is tiny.
+Producer grammar support remains an exact additional capability check; selecting a role does not
+register a profile, verify a receipt or authenticate a producer.
+
+The consumer compares the complete tuple to an immutable expected manifest installed with its
+trusted package. Agreement between an untrusted caller and capability report cannot install a
+revision. The schema/corpus digests live in that external manifest; the schema does not contain
+its own digest, and the corpus does not hash itself. Draft prototype constants are visibly
+synthetic test installation pins, granting no product support. The final actual revision and
+schema/corpus bytes must be selected only after the artifact set is frozen and reviewed.
+
+A transport conveys and validates this bounded selector before reading a body beyond ordinary
+limits. Header/route encoding is an adapter detail; this RFC specifies no Runner route name.
+Validate exact installed identity, required roles and supported profile before the larger read,
+then apply lower caller/reporter limits and every artifact guard before acquisition, grants,
+dispatch or evaluation. Persist the exact selector as optional `conversionContract` on the
+enclosing source input and preparation, and retain it through release/run and checkpoint/source-operation
+custody. It is outside the closed inner case/response custody slot. Existing complete-object
+signing/binding includes it. Offline verification,
+replay, storage and export revalidate it against their trusted installed manifest. They cannot
+infer selection from body contents, carrier numbers, frame hashes or an installed binary version.
+An absent selector keeps ordinary legacy behavior and bytes; it never opts an old artifact into
+new limits. No new signing domain or authority follows from the selector.
+
 ### Proposed complete carrier amendment (pending adoption)
 
-The candidate byte table is document 1048576/2097152 and combined
-6291456/12582912 for base/extended respectively. It is a conservative proposal for
-the complete carrier layout below, not an implemented or adopted limit. The earlier
-4194304/8388608 and 5242880/8388608 combined candidates do not establish full parity.
-Other Core rows, including target counts, parser node/string work budgets, nesting and
-preparation/record 8388608/16777216, do not change by implication. Preparation/record
-accounting remains an adoption prerequisite; document byte expansion alone does not prove it.
+The selected Draft proposal below supersedes the earlier 6/12 MiB combined, 3 MiB
+signed-response and 8/16 MiB preparation targets. It is a scoped proposed contract for the
+pinned asserted CSV/URL and reviewed generated-record projection, not implemented product
+support or normative adoption. Extended remains conditional on all existing Extended requirements;
+prototype examples and doubled arithmetic do not establish end-to-end Extended preparation.
+Document-validation support is a separate role: this amendment does not remove an existing
+Runtime document-only Extended implementation or infer Runner support from it.
+Ordinary/legacy limits remain unchanged. All entries are complete UTF-8 byte counts.
+
+| Limit member / counted artifact | Base | Extended, conditional |
+| --- | ---: | ---: |
+| documentBytes, each published/bound document | 1048576 | 2097152 |
+| frameBytes, additionally within combined | 2097152 | 4194304 |
+| combinedBytes, complete counted documents/bindings/case/acquisitions | 12582912 | 25165824 |
+| originalSnapshotBytes, exact original producer snapshot | 524288 | 524288 |
+| carrierBytes, complete four-member generated carrier | 3145728 | 3145728 |
+| grantBytes, complete separately selected new-channel grant | 3145728 | 3145728 |
+| adapterStdoutBytes, complete new-channel stdout | 3145728 | 3145728 |
+| responseBytes, complete signed response before retention | 5242880 | 5242880 |
+| preparationBytes, complete preparation | 16777216 | 33554432 |
+| recordBytes, complete audit record line, signature sidecar separately bounded | 9437184 | 17825792 |
+| profilesBytes, complete trusted profiles document | 81920 | 163840 |
+| requestBodyBytes, complete incoming preview/prepare/run body | 16777216 | 33554432 |
+| inputReplyBytes, complete preparation/inputs-next reply | 37748736 | 75497472 |
+| releaseStoredBytes, complete retained release | 41943040 | 83886080 |
+| runStoredBytes, complete stored run | 41943040 | 83886080 |
+| exportBaseBytes, complete version-2-shaped base including parsed audit | 75497472 | 150994944 |
+| exportWireBytes, complete version 3/4/5 wire including sidecars | 90177536 | 176160768 |
+
+This does not replace a global MaxBody, canonical parser bound or legacy producer channel.
+Existing counts, nesting, node/string work, target coverage, claim admissibility and signature
+rules remain independently required. A consumer must implement every applicable boundary before
+advertising the corresponding role; a frame, preview or transport probe cannot establish it.
 
 An asserted projection appends the retained frame and keeps the complete original
 `origin.originalValues`, its other provenance, prepared values and sibling acquisitions.
@@ -336,6 +426,45 @@ that production integration is a prerequisite. A changed wrapper needs a new rec
 source/recipe artifacts, reviews, original receipts and publication
 identities remain available under their actual retention contracts. A new signed wrapper
 binds the new projection; it does not retroactively authenticate an old snapshot digest.
+
+### Sole exact-text preparation sources
+
+On the new generated producer path, a source value is exactly one of
+`{response:<complete existing signed envelope>}` and
+`{retainedResponseJson:<nonempty exact envelope UTF-8 text>}`. The signed envelope retains
+its existing closed `{result,receipt,salts}` grammar and all receipt/salts validation.
+No snapshot sibling, second response form, null/empty text, case variant or extra member
+is permitted. The text must parse as that duplicate-free envelope, never a surrogate
+object containing a partial result. Initial object input is admitted through the ordinary
+source checks; successful Draft preparation retains only the exact received envelope text.
+Previously retained exact text is checked by the same acquisition reader. Parsing may be
+transient, but serializing both representations or replacing text by a canonical re-encoding
+is forbidden. Canonical result signatures authenticate content; they do not authenticate
+outer whitespace or the raw frame token. Raw envelope/frame hashes remain separate custody
+identities. `originalSnapshotJson` remains authenticated as string content of the canonical
+result. The existing producer-v2 grammar and full original-inventory preconditions below
+remain necessary before successful generated lineage.
+
+Asserted input has the corresponding **case custody slot**: existing `case:<object>` or
+`retainedCaseJson:<nonempty exact case UTF-8 object text>`, exclusively. The enclosing input's
+existing mapping, sources, import, binding and other permitted siblings keep their ordinary
+grammar; this alternative does not create an arbitrary extra-member allowance. It preserves
+the complete case once, including original values, provenance and the appended frame.
+Initial case object admission remains available; successful Draft preparation with retained
+case conversions changes that slot to exact text. Consumers transiently materialize it at
+the existing case-reading boundary; exports and stored records keep the sole text. Duplicate
+names, nonobjects, dual representations, null/empty/wrong-case members and unsupported use
+refuse. Ordinary historical inputs and absent optional members keep their existing behavior.
+No universal JSON marshaler change, canonical raw-frame rehash or provenance deletion is
+permitted to conceal compaction. Preserve the actual selected frame token through HTTP,
+preparation retention, storage, offline verification and export.
+
+The companion `preparationSource` and `assertedCaseCustody` schemas are fragment schemas;
+receipt/salts internals and enclosing ordinary input members remain their existing contracts.
+`retainSource:{source}` and `retainCase:{source}` probes demonstrate only closed custody slots
+and exact text restoration. Empty receipt/salts in a labelled example establish no signature,
+profile, producer, freshness or acquisition validity. The probes do not prepare or execute.
+Their line bound is an experimental harness bound, not a negotiated production byte limit.
 
 ### Proposed producer grammar and complete original inventory
 
@@ -480,43 +609,128 @@ fix the retained paths and run-id grammar; and
 resolves the original declaration revision. None of these current paths implements the new full
 history/inventory comparison or the proposed adapter version `2`. Those remain real producer work.
 
-For the pinned supported Desk producer the original snapshot is at most 524288 bytes.
-Its compact Go representation has no literal C0 controls or unescaped `<`, `>` or `&`,
-and its UTF-8 non-ASCII is retained by the actual downstream canonical encoder. Hence a
-quoted exact snapshot of S bytes takes at most 2*S+2 bytes in these encoders. This is not
-a bound for arbitrary JSON string encoders: escaping every non-ASCII character can exceed
-2*S+2. The producer must fix and test its encoding rather than infer this bound from JSON.
-A conservative frame proof charges at most three times disjoint retained component bytes,
-plus a 65536-byte structure/provenance reserve. The tighter two-times charge applies only
-when the pinned 30-field, ASCII-name producer constraints are separately verified.
+### Complete serialization-layer accounting (proof still required)
 
-Let C be the former complete combined bound (2097152/4194304), and G the conservative
-document growth (895104/1790080). One changed counted dialect gives an asserted bound
-2*C+G+65536 = 5154944/10244224. With a retained generated snapshot S<=524288 and the
-conservative frame charge, its bound is C+G+4*S+65536 = 5154944/8147072.
-Pinned Desk's asserted 2097152-byte producer cap gives 5154944/8147072, but cannot justify
-the generic extended asserted case. A Core-sized extended asserted source-shaped witness
-is 4194304 bytes before projection and 8871801 after appending the frame, above 8388608.
-This is a counterexample to that proposed ceiling, not a real Desk/Runner admission run.
+Count the bytes of each **actual complete serialized artifact** with its selected encoder.
+Let `Q_E(t)` be the UTF-8 byte length of JSON string encoding exact text `t` using encoder E,
+including its surrounding quotes. Each nested serialization applies its own Q; a decoded
+byte length is never a substitute. For a serializer that leaves scalar non-ASCII literal,
+uses short escapes where available and no optional escapes, Q equals raw UTF-8 length plus
+2, plus 1 for each quote/backslash/short-escaped control, plus 5 for every other C0 control.
+An encoder using HTML, Unicode or solidus escapes needs its actual additional charge.
+Encoder behavior must be pinned and tested at every transition, including outer stores.
 
-Published execution can count a published dialect in `source.import` beside its bound
-`source.mapping`. Budget both changed copies: adding a further G gives conservative
-complete-carrier maxima 6050048/12034304, below 6291456/12582912. Original immutable
-publications are not rewritten; the proposed derivative needs a fresh identity and explicit
-publication/binding workflow. All other original acquisitions, arguments, salts, receipts,
-signatures, provenance and binding copies remain counted. Unchanged fixed-length digests
-and signatures do not grow merely because their contents change. Additional changed
-document copies or independently growing receipt/binding metadata need explicit accounting;
-these formulas are not permission to omit them or to make unsupported-input claims.
+The pinned original snapshot bound remains 524288 bytes. The pinned compact Go snapshot
+has no literal C0 controls or unescaped `<`, `>` or `&`; its downstream canonical encoder
+keeps UTF-8 non-ASCII literal. Thus its first string encoding obeys `Q_E(S)<=2*|S|+2`
+for those encoders. This bound does not cover arbitrary encoders or a second quoting layer.
+A prior projection estimate charged up to three times disjoint retained components plus
+65536 structure bytes (two times only under separately verified 30-field ASCII-name
+constraints). That estimate is not a proof for complete signed-response text or case text.
 
-The generated channel also needs its own transport contract. Keep the old 524288-byte
-snapshot and 1048576-byte grant boundaries for the legacy channel. For the new pinned closed
-profile, a 3145728-byte bound for each complete grant, adapter stdout and signed response
-is a candidate: the conservative wrapper is at most 2687104 bytes and an additional
-65536-byte receipt reserve gives 2752640. This is separate from the combined bound.
-The currently pinned 1048576-byte Gateway default stdout and 2097152-byte Desk response
-limits cannot be assumed to admit it. Generic profiles with larger receipts or original
-snapshots have not been proved by this calculation and must not be silently narrowed.
+The accounting ledger must follow all these layers without dropping a copy:
+
+| Artifact | Bytes that must actually be charged |
+| --- | --- |
+| Published and bound documents | Each complete changed document, including rule spelling/escaping; count both `source.import` publication and bound `source.mapping` when present, and every binding document/copy. Immutable original publications keep their identities. |
+| Asserted case | Complete original case/provenance/prepared values plus appended frame; after retention charge `Q_E(exactCaseText)` and the `retainedCaseJson` member/container, once at each real embedding. |
+| Generated carrier | All four wrapper members, including `Q_E(originalSnapshotJson)`, exact frame and full inventory. Carrier/frame limits remain additional constraints within the combined bound. |
+| Grant and adapter stdout | Their complete wire forms, including any wrapper/string escaping, metadata, arguments, salts, receipts and protocol delimiters that their transport counts. Measure each separately. |
+| Signed response | Complete envelope `result`, `receipt`, `salts`, signature and all ordinary metadata; check its raw transport bytes before decoding. |
+| Retained source | `Q_E(exactSignedEnvelopeText)` plus the `retainedResponseJson` member/container. Do not add an object copy or charge only the decoded envelope. |
+| Complete combined input | Actual retained source/case custody slot, both documents and bindings, all sibling acquisitions, arguments, salts, receipts, signatures and provenance at their serialized locations. No extra allocation outside this bound. |
+| Preparation | Complete actual preparation, target/source/read metadata, all per-target reference fragments, inline applied results or omission reasons, conditional identities, basis arrays and signatures/commitments. Count repeated output values and metadata even when input refs share a frame. |
+| Verification/export and signed record | Each complete actual enclosing artifact, including every source/input/preparation/record copy and every further escaped text layer it really stores. A preparation-sized fragment is not proof for its export or record. |
+
+For a given unchanged input, compute growth by replacing each old serialized custody slot
+with its actual new serialized slot and adding growth of **both** documents and any new
+metadata; preserve every unaffected sibling. For complete preparation/export/record, measure
+their actual separately emitted bytes rather than deriving a maximum from the combined bound.
+Fixed-length hashes/signatures do not grow merely when content changes, but their containers,
+independently growing inventories, basis arrays, result JSON and further embedded copies do.
+All role limits apply together; fitting one 3 MiB transport does not prove complete combined,
+preparation, record, storage or export support. Never enlarge global request, parser or canonical bounds
+by implication, clip inputs, omit provenance or narrow previously usable spelling/type scope.
+
+The previous `6050048/12034304` combined estimates counted two changed document copies but
+omitted the complete signed-envelope/case string retention layer. They are superseded as
+complete-envelope evidence. The complete-artifact proposal above replaces those targets;
+it has conditional accounting evidence, not actual product-boundary proof. The old 524288
+snapshot, 1048576 grant and ordinary channel limits remain unchanged; a new producer channel
+requires its own reviewed selection. Generic larger profiles/receipts are not inferred.
+
+The accounting domain is the existing pinned Desk projection, preserving all five conversions,
+eight original field types, original unfiltered values/declarations, opaque provenance, omission
+and availability distinctions and every old sibling. This is an analysis of that compatibility
+domain, not a restriction of generic retained-column syntax or permission to discard data.
+The actual old complete input jointly bounds variable components at C=2097152/4194304, with
+F=256/512 fact targets, E=128/256 evidence targets and L=F+E. The existing producer's 524288-byte
+snapshot, 100 columns, 160-byte column names, 16000-byte cells and complete old response bound
+are used together. The new producer must load and compare the complete original history inventory.
+A successful extraction cannot prove that this history was loaded.
+
+For the fixed compact Go / literal-UTF8 JavaScript producer families, Q is the actual downstream
+Go JSON string encoding, including quotes. The old compact Go text has Q(t)<=2|t|+2. Literal
+JavaScript HTML is charged by its Go-equivalent component size for this inequality only; raw
+custody bytes are never rewritten. Every further text embedding applies Q again. Arbitrary
+pretty printers or ASCII-inflating encoders need separate accounting; consumers still measure
+their actual bytes. A generic 64 KiB receipt allowance is not assumed. Old metadata stays inside
+C; only bounded new tuple spelling/profile bookkeeping is charged separately.
+
+A conservative per-document growth G=F*2977+E*1011+4096 gives G=895616/1787136.
+Two changed published/bound documents each add G. The asserted complete combined bound is
+4*C+2*G+65536 = 10245376/20417024. With S=524288, generated carrier
+W<=5*S+65536+256=2687232, generated frame<=3*S+65536=1638400, and complete response
+R<=min(C,2097152)+W+4096=4788480. The old gateway may normalize escapes; subtracting the
+raw snapshot length from the old response would be invalid. Retaining the sole exact response
+string gives combined<=C+min(C,2097152)+2*W+8192+2*G+65536 = 11433728/15313920.
+These inequalities charge the second string layer explicitly. They fit the proposed 12/24 MiB
+combined caps; raw response fits 5 MiB, while carrier/grant/stdout fit their separate 3 MiB caps.
+
+Preparation must also count basis repeated L+1 times, inline results and every target's
+metadata. Under the unchanged old aggregate prepared-value budget U<=C, the conservative bound is
+65536+10240*L+(L+1)*(12*L+1)+3*C+8*F*1024+1549*E+2*F
+= 14359553/32192513, below 16/32 MiB. The old normalizer could emit preparations that its
+offline verifier refused, so old offline acceptance is not assumed as a preparation bound.
+The record proposal charges old record bytes plus 2*F+65536, giving 8454656/16843776 below
+9/17 MiB. This provisional record lemma depends on actual Runtime preserving its existing trace
+shape; restored negative-zero endpoints can add bytes. It does not assert record byte/hash identity
+or waive the answer-change review gate. Actual Runtime boundary evidence remains required.
+
+A verification bundle retains independent release.sample and run.input plus release.inputMapping.
+Count both complete new input/preparation copies and the third mapping. With old export base
+V0=8/16 MiB and selected A=12/24 MiB, T=16/32 MiB, M=1/2 MiB:
+release<=V0+A+T+M+65536=38862848/77660160;
+stored run<=V0+A+T+4*F+65536=37815296/75565056;
+export base<=V0+2*(A+T)+M+6*F+131072=68290048/136449024.
+For versions 3/4/5, raw audit bytes are additionally base64 alongside parsed audit. Complete
+wire<=selected exportBaseBytes+4*ceil(selected recordBytes/3)+65536
+=88145920/174828204, fitting 86/168 MiB. Existing bounded signature sidecar, chain and checkpoint
+remain separately checked, with version-aware base exclusions. An adapter that embeds the whole
+export as JSON text must apply Q again; these wire caps do not authorize that different transport.
+
+These are conservative analytic bounds and actual encoder checks on structural fragments.
+They are not authenticated product admissions, maximum end-to-end runs or adoption evidence.
+Every source assumption, whole-artifact boundary, lower caller limit and one-over refusal must
+be confirmed by the actual selected producer, Runtime and Runner before declaring support.
+
+A focused Runner witness now exercises the unchanged ordinary authenticated input entry
+with one 16000-TAB asserted column reused by 256 distinct text targets. The pinned Desk pure
+normalizer/qualification/preparation bodies retain the column and omit all blank prepared
+values; the ordinary Runner entry accepts its 50844-byte request and emits a 1322969-byte
+preparation that passes offline preparation checking, plus a 1406838-byte checked export.
+This is the actual ordinary path in the candidate Runner, not a historical binary or full
+Desk server/browser/persistence run. The corresponding projected request is 97559 bytes and
+refuses at the unchanged 8388608-byte preparation limit. Its compact selected input JSON has
+32002 bytes; each nested inline JSON string is `3*16000+6=48006` bytes, so input copies alone
+charge `256*48006=12289536` bytes. The 13186521-byte diagnostic preparation and 13331607-byte
+diagnostic export are assembled refused artifacts, not accepted/emitted candidate outputs.
+Replacing only input states by the closed references measures 924633 diagnostic preparation
+bytes; every target result, metadata and basis remains counted. This refutes inline-input
+sufficiency for that admitted ordinary case, but proves neither reference-path admission nor
+Base/Extended maxima. The real reference path, complete original-snapshot escaping families,
+maximum siblings/bindings/results and boundary/one-over artifacts remain production gates.
+The adjacent tiny serializer fixtures establish exact counts only for those encoders/inputs.
 
 Before acquisition, grant creation or evaluation, consumers require the exact adopted Spec
 identity, `retained-column/1`, the selected profile and every role-specific reported limit:
@@ -537,10 +751,11 @@ production gates. No normative adoption or support claim follows from this amend
 
 Negotiate the companion profile before byte-bound processing or any acquisition/evaluation.
 Known unsupported profiles give `profile-unsupported`; unknown profiles are malformed. Apply
-Core §4.1's combined dialect/case/acquisition ceiling (2097152 base, 4194304 extended bytes),
-dialect ceiling (131072/262144), target counts (256/512 facts, 128/256 evidence), document
-nesting (64/128) and preparation ceiling (8388608/16777216). A frame is additionally bounded
-by the selected combined ceiling; it does not get an extra allocation outside it. Fixed new
+Core §4.1's ordinary combined dialect/case/acquisition ceiling (2097152 base, 4194304 extended
+bytes), dialect ceiling (131072/262144) and preparation ceiling (8388608/16777216) unless an
+exactly selected implemented retained-column role applies the scoped table above. Target counts
+(256/512 facts, 128/256 evidence), document nesting (64/128) and independent work budgets remain.
+A frame is additionally bounded by the selected frame and combined ceilings; it does not get an extra allocation outside it. Fixed new
 frame limits are 1000 values, 1000 declaration entries, 1000 field entries, 16000 bytes per raw
 column string, 16384 per fieldJson, nesting 32 inside fieldJson and nesting 64 inside retained raw values
 (the existing research duplicate reader limit).
@@ -587,7 +802,7 @@ conditional document/combined proposal above is the Draft candidate, with no
 adopted production ceiling selected; no installed ceiling is silently waived.
 
 The prototypes check exact snapshot restoration, explicit Draft capability declarations, frame
-parsing, embedded raw parsing, conversions and inline lineage fragments only. They do not claim
+parsing, embedded raw parsing, conversions and reference lineage fragments and sole-text custody slots only. They do not claim
 actual transport admission, whole acquisition/preparation accounting or production negotiation.
 
 ## Alternatives
@@ -628,7 +843,10 @@ an implementation makes a broader availability claim.
 ## Conformance
 
 The adjacent cases cover each kind, eight original declarations, absence/null/blank/status,
-original precision/negative zero, invalid forms and current claim refusal. Additional structural,
+original precision/negative zero, invalid forms and current claim refusal. Closed input
+references, exact response/case text custody and wrong digest/location/column/unresolved
+references have paired handwritten cases. Equal-frame wrong-source refusal requires the
+production source-binding reader; these local probes authenticate no source. Additional structural,
 duplicate/scalar, version, tie, exponent/range ordering and byte-bound probes are handwritten.
 The check harness runs both readers on identical requests and asserts expected outputs; expected
 results are never generated from a reader. Structural schema probes are separate from semantic
@@ -658,8 +876,10 @@ this draft does not record them as completed or silently modify GOVERNANCE.md.
 - Keep the compatibility claim tied to the pinned supported ingress/storage boundary. If a
   broader arbitrary-host raw-byte importer is intended, review an explicit byte-preserving
   representation; do not infer that new surface from the isolated legacy validation helper.
-- Ratify the leaf union, number tie algorithm/legacy issue mapping, historical-null rule and
-  conditional lineage before adopting any normative files.
+- Ratify the leaf union, number tie algorithm/legacy issue mapping, historical-null rule,
+  closed input references, sole exact response/case custody and conditional lineage before
+  adopting any normative files. Pin new exact schema/corpus identities; no released contract
+  is reinterpreted by this Draft amendment.
 - The bounded number/helper comparison now passes, including underflow, decimal ties and
   range/exponent diagnostic precedence. Actual Desk tool-path comparison remains separate;
   extracted helpers and same-author readers establish no independent whole-application evidence.
@@ -667,7 +887,8 @@ this draft does not record them as completed or silently modify GOVERNANCE.md.
   reviewed ceiling amendment, or a revised closed compact encoding (for example shared rule
   declarations where applicable). Deduplication must also cover distinct-rule worst cases;
   no clipping or narrowed spellings is acceptable. Complete the maximum previously usable
-  combined-envelope proof for the selected option. Existing extended ceilings alone do not fit
+  combined-envelope, preparation and signed-record proof for the selected option, including
+  nested response/case text escaping and repeated inline results/metadata. Existing extended ceilings alone do not fit
   the witness, and current production readers' extended support is not implied.
 - Implement and independently verify the proposed production original-inventory precondition and
   complete signed snapshot/frame relation, then integrate conditional lineage with the existing
