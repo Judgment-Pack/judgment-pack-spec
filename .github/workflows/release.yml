@@ -27,8 +27,10 @@ jobs:
       contents: read
       # Reading this repository's workflow runs, jobs and artifacts.
       actions: read
+    # true only when the gate exited 0 and its decision record says reuse; anything else, an empty
+    # value included, makes the release job run the whole suite.
     outputs:
-      route: ${{ steps.route.outputs.route }}
+      reuse: ${{ steps.reused.outputs.reuse }}
     steps:
       # The gate's tag grammar: vMAJOR.MINOR.PATCH in ASCII digits, no leading zeroes, nothing after.
       - name: Choose reuse or the whole suite at the tag
@@ -95,7 +97,20 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: python3 scripts/dev/release_evidence.py verify --output "${{ runner.temp }}/release-evidence.json"
 
-      # The decision record, reuse or refusal, is also in the log of the step above.
+      # Reached only after the gate step succeeded, and refuses unless the record it wrote is a reuse.
+      - name: Hand the reuse to the release job
+        id: reused
+        if: steps.route.outputs.route == 'evidence'
+        run: |
+          python3 - "${{ runner.temp }}/release-evidence.json" >> "$GITHUB_OUTPUT" <<'PY'
+          import json, sys
+          record = json.load(open(sys.argv[1], encoding="utf-8"))
+          if record.get("decision") != "reuse" or record.get("refusal") is not None:
+              sys.exit("the decision record is not a reuse")
+          print("reuse=true")
+          PY
+
+      # The decision record, reuse or refusal, is also in the log of the gate step.
       - name: Keep the decision record
         if: ${{ !cancelled() && steps.route.outputs.route == 'evidence' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -162,7 +177,7 @@ jobs:
       # Skipped only when the evidence job reused main's evidence at this commit, which covers this
       # suite; web/DEPLOYMENT.md ("Release evidence") says why no test here depends on the tag.
       - name: Check repository artifacts and static site
-        if: needs.evidence.outputs.route != 'evidence'
+        if: needs.evidence.outputs.reuse != 'true'
         run: python -m unittest discover -s tests -v
 
       - name: Check exact Policy format and agreement corpus

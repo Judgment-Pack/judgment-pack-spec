@@ -74,11 +74,20 @@ choice: re-run all jobs of main's `Repository conformance` run at the commit, no
 ones (`gh run rerun RUN_ID --repo Judgment-Pack/judgment-pack-spec`), wait for it to finish, then
 re-run the release run's failed jobs once. If the gate refuses again, fix the cause on `main` and
 release from a new commit. The usual causes are `run-age`, `runtime-identity` (a runner image,
-toolchain or resolved dependency newer than main's run) and `run-unfinished` (the tag was pushed
-while main's run was still going: wait, then re-run the release run's failed jobs).
+toolchain or resolved dependency newer than main's run; while a hosted image is still rolling out,
+a re-run can refuse again with nothing on `main` to fix, so wait and re-run) and `run-unfinished`
+(the tag was pushed while main's run was still going: wait, then re-run the release run's failed
+jobs). Re-running only the failed jobs of a release run whose evidence job passed keeps that job's
+decision without asking the gate again. If the release job failed for another reason and main's run
+at the commit has had a newer attempt since, or the decision is nearly 48 hours old, re-run all jobs
+of the release run instead, so that the gate decides again.
 
 Any other tag, a release candidate such as `v0.3.0-rc.1` or a `policy-v` tag, reuses nothing: the
-release job runs the whole repository suite itself, as before. Either way the release job keeps,
+release job runs the whole repository suite itself, as before. The kit's prerelease tag grammar
+(`"tag": {"prerelease": true}` in the configuration, from kit v0.11.0) is opt-in: until this
+repository opts in, release candidates keep the whole suite, and opting in means widening the route
+step and its test in the same change. `policy-v` tags are outside every kit grammar and always run
+the whole suite. Either way the release job keeps,
 fresh and in the same order, the milestone and tagged-checkout admission, the exact Policy format
 and agreement corpus for `policy-v` tags, the bundle build with its tag, clean-tree, artifact-pin
 and Policy tag-history checks, the release notes, the draft prerelease and the bundle attestation.

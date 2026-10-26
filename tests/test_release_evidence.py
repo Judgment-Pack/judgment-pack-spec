@@ -12,8 +12,12 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import os
 import re
+import shlex
 import subprocess
+import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,6 +43,18 @@ RELEASE_STEPS = [
     "Attest release bundles",
 ]
 SUITE_STEP = "Check repository artifacts and static site"
+EVIDENCE_STEPS = [
+    "Choose reuse or the whole suite at the tag",
+    "Check out the release commit",
+    "Read the toolchains from dev.json",
+    "Set up Python",
+    "Set up Node",
+    "Set up the test environment as main CI does",
+    "Reuse exact-commit main CI evidence, or refuse",
+    "Hand the reuse to the release job",
+    "Keep the decision record",
+]
+VERIFY = 'python3 scripts/dev/release_evidence.py verify --output "${{ runner.temp }}/release-evidence.json"'
 
 
 def load_gate():
@@ -76,6 +92,29 @@ def step_named(job: str, name: str) -> str:
 
 def steps_running(job: str, text: str) -> list[str]:
     return [step for step in steps_of(job) if text in step]
+
+
+def script_of(step: str) -> str:
+    """The text of a step's `run: |` block, dedented."""
+    lines = step.split("\n        run: |\n", 1)[1].splitlines()
+    block = []
+    for line in lines:
+        if not line.startswith(" " * 10):
+            break
+        block.append(line[10:])
+    return "\n".join(block) + "\n"
+
+
+def run_step(script: str, env: dict[str, str], directory: str) -> dict[str, str]:
+    """Run a step's script as a `shell: bash` step runs it; return what it wrote to GITHUB_OUTPUT."""
+    output = Path(directory) / "github-output"
+    output.write_text("")
+    path = Path(directory) / "step.sh"
+    path.write_text(script)
+    subprocess.run(["bash", "--noprofile", "--norc", "-eo", "pipefail", str(path)], cwd=directory,
+                   env={"PATH": os.environ.get("PATH", ""), "GITHUB_OUTPUT": str(output), **env},
+                   stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60)
+    return dict(line.split("=", 1) for line in output.read_text().splitlines() if "=" in line)
 
 
 class VendoredGateTests(unittest.TestCase):
@@ -205,26 +244,71 @@ class ReleaseWorkflowTests(unittest.TestCase):
                 self.assertEqual(re.search(expanded, tag) is not None,
                                  self.gate.TAG.fullmatch(tag) is not None)
 
+    def test_the_route_step_sends_exactly_the_gates_tags_to_the_gate(self):
+        route = step_named(self.jobs["evidence"], "Choose reuse or the whole suite at the tag")
+        self.assertEqual(field(route, "shell", 8), "bash")
+        self.assertEqual(field(route, "LC_ALL", 10), "C")
+        self.assertEqual(field(route, "RELEASE_TAG", 10), "${{ github.ref_name }}")
+        script = script_of(route)
+        expected = {"v0.3.0": "evidence", "v1.10.0": "evidence", "v10.0.0": "evidence",
+                    "v0.3.0-rc.1": "fresh", "v0.3.0-rc.10": "fresh", "v0.2.0-draft": "fresh",
+                    "v1.0.0-0": "fresh", "v1.0.0+build": "fresh", "policy-v1.0.0": "fresh",
+                    "policy-v1.0.0-draft.1": "fresh", "v1.2": "fresh", "v01.0.0": "fresh",
+                    "v0.3.0.1": "fresh", "v0.3.0 ": "fresh", "v\u0660.\u0663.\u0660": "fresh",
+                    "demo/deal-evidence-readiness/v0.2.0": "fresh"}
+        with tempfile.TemporaryDirectory() as directory:
+            for tag, route_value in expected.items():
+                with self.subTest(tag=tag):
+                    written = run_step(script, {"LC_ALL": "C", "RELEASE_TAG": tag, "GITHUB_SHA": "a" * 40},
+                                       directory)
+                    self.assertEqual(written, {"route": route_value})
+                    self.assertEqual(route_value == "evidence", self.gate.TAG.fullmatch(tag) is not None)
+
+    def test_only_a_record_that_says_reuse_is_handed_to_the_release_job(self):
+        handover = step_named(self.jobs["evidence"], "Hand the reuse to the release job")
+        self.assertEqual(field(handover, "if", 8), "steps.route.outputs.route == 'evidence'")
+        script = script_of(handover).replace("python3 -", shlex.quote(sys.executable) + " -")
+        reuse = {"decision": "reuse", "refusal": None}
+        records = {"reuse": (reuse, {"reuse": "true"}),
+                   "refuse": ({"decision": "refuse", "refusal": {"code": "run-missing", "detail": ""}}, {}),
+                   "reuse with a refusal": ({"decision": "reuse", "refusal": {"code": "run-age"}}, {}),
+                   "no decision": ({}, {}), "not an object": ([], {}), "missing": (None, {})}
+        for name, (record, output) in records.items():
+            with self.subTest(record=name), tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "release-evidence.json"
+                if record is not None:
+                    path.write_text(json.dumps(record))
+                written = run_step(script.replace("${{ runner.temp }}", directory), {}, directory)
+                self.assertEqual(written, output)
+
     def test_reuse_skips_only_the_repository_suite_and_a_refusal_stops_the_release(self):
         evidence, release = self.jobs["evidence"], self.jobs["release"]
+        self.assertEqual(list(self.jobs), ["evidence", "release"])
         self.assertEqual(field(release, "needs", 4), "evidence")
-        self.assertEqual(field(evidence, "route", 6), "${{ steps.route.outputs.route }}")
+        # A refused gate fails the evidence job, and the release job then does not run: no job may
+        # run regardless of its needs, and nothing may turn a failed step into a passed one.
+        for name, job in self.jobs.items():
+            with self.subTest(job=name):
+                self.assertIsNone(field(job, "if", 4))
+        self.assertNotIn("continue-on-error", self.release)
+        self.assertEqual(field(evidence, "reuse", 6), "${{ steps.reused.outputs.reuse }}")
+        self.assertEqual([field(step, "- name", 0) for step in steps_of(evidence)], EVIDENCE_STEPS)
         permissions = evidence.split("    permissions:\n", 1)[1].split("    outputs:\n", 1)[0]
         self.assertEqual(re.findall(r"^      ([a-z-]+): (\w+)$", permissions, re.MULTILINE),
                          [("contents", "read"), ("actions", "read")])
-        # The suite runs unless the route is exactly the evidence route, which the job reaches only
-        # when the gate exited 0: a missing or other route value runs it.
+        # The suite runs unless the evidence job handed over exactly `true`, which it does only after
+        # the gate step succeeded and its record says reuse: a missing or other value runs it.
         self.assertEqual(field(step_named(release, SUITE_STEP), "if", 8),
-                         "needs.evidence.outputs.route != 'evidence'")
+                         "needs.evidence.outputs.reuse != 'true'")
         self.assertEqual([name for name in RELEASE_STEPS if "needs.evidence" in step_named(release, name)],
                          [SUITE_STEP])
         self.assertIn("python -m unittest discover -s tests -v", step_named(release, SUITE_STEP))
         verify = step_named(evidence, "Reuse exact-commit main CI evidence, or refuse")
         self.assertEqual(field(verify, "if", 8), "steps.route.outputs.route == 'evidence'")
         self.assertEqual(field(verify, "RELEASE_TAG", 10), "${{ github.ref_name }}")
-        self.assertIn('python3 scripts/dev/release_evidence.py verify --output "${{ runner.temp }}/release-evidence.json"',
-                      verify)
-        self.assertNotIn("continue-on-error", self.release)
+        # The command alone: its exit status is the step's (no `|| true`, `set +e` or other wrapper).
+        self.assertEqual(field(verify, "run", 8), VERIFY)
+        self.assertEqual(self.release.count("release_evidence.py verify"), 1)
         record = step_named(evidence, "Keep the decision record")
         self.assertEqual(field(record, "if", 8),
                          "${{ !cancelled() && steps.route.outputs.route == 'evidence' }}")
@@ -254,7 +338,7 @@ class ReleaseWorkflowTests(unittest.TestCase):
             self.assertEqual(uses(evidence, action), uses(ci, action))
 
         def toolchains(job):
-            [step] = steps_running(job, "<<'P")
+            step = step_named(job, "Read the toolchains from dev.json")
             return re.findall(r"^          (?:import|m =|tc =|print).*$", step, re.MULTILINE)
 
         self.assertEqual(len(toolchains(ci)), 5)
