@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Draft RFC0029 preview only; no acquisition, preparation or adoption claim."""
 import json
+import hashlib
 import math
 import re
 import struct
@@ -351,8 +352,133 @@ def preview(rule, frame):
     return result(value)
 
 
-def raw_frame_size(text):
+# Draft-only interfaces. Reported maxima are negotiated input, not adopted ceilings.
+ROLE_LIMITS = {
+    'document-validation': ('documentBytes', 'frameBytes'),
+    'preview': ('documentBytes', 'combinedBytes', 'frameBytes'),
+    'preparation': ('documentBytes', 'combinedBytes', 'frameBytes', 'preparationBytes', 'recordBytes'),
+    'preparation-verification': ('documentBytes', 'combinedBytes', 'frameBytes', 'preparationBytes', 'recordBytes'),
+    'producer-carrier': ('originalSnapshotBytes', 'carrierBytes', 'grantBytes', 'adapterStdoutBytes', 'responseBytes'),
+}
+
+
+def positive(value, zero=False):
+    if not isinstance(value, Number) or len(value.text) > 17 or not INT.fullmatch(value.text):
+        fail()
+    number = int(value.text)
+    if number < (0 if zero else 1) or number > SAFE:
+        fail()
+    return number
+
+
+def digest(text):
+    return 'sha256:' + hashlib.sha256(text.encode('utf-8')).hexdigest()
+
+
+def capability(entry):
+    closed(entry, ['contract', 'spec', 'profile', 'role', 'limits'])
+    if entry['contract'] != 'retained-column/1':
+        fail('capability-unsupported')
+    spec = entry['spec']
+    closed(spec, ['version', 'revision', 'schemaSha256', 'corpusSha256'])
+    string(spec['version'], 160, True)
+    if not isinstance(spec['revision'], str) or not re.fullmatch('[0-9a-f]{40}', spec['revision']):
+        fail()
+    for key in ('schemaSha256', 'corpusSha256'):
+        if not isinstance(spec[key], str) or not re.fullmatch('sha256:[0-9a-f]{64}', spec[key]):
+            fail()
+    if entry['profile'] not in ('base', 'extended') or not isinstance(entry['role'], str) or entry['role'] not in ROLE_LIMITS:
+        fail('capability-unsupported')
+    closed(entry['limits'], ROLE_LIMITS[entry['role']])
+    for value in entry['limits'].values():
+        positive(value)
+
+
+def admit(probe, effect=lambda: None):
+    closed(probe, ['capabilities', 'required', 'sizes'])
+    closed(probe['capabilities'], ['conversionContracts'])
+    entries = probe['capabilities']['conversionContracts']
+    if not isinstance(entries, list) or len(entries) > 32:
+        fail()
+    required = probe['required']
+    capability(required)
+    identities = set()
+    selected = None
+    for entry in entries:
+        capability(entry)
+        identity = json.dumps({k: entry[k] for k in ('contract', 'spec', 'profile', 'role')}, sort_keys=True)
+        if identity in identities:
+            fail()
+        identities.add(identity)
+        if all(entry[k] == required[k] for k in ('contract', 'spec', 'profile', 'role')):
+            selected = entry
+    if selected is None:
+        fail('capability-unsupported')
+    closed(probe['sizes'], ROLE_LIMITS[required['role']])
+    for key in ROLE_LIMITS[required['role']]:
+        actual = positive(probe['sizes'][key], zero=True)
+        if actual > min(positive(required['limits'][key]), positive(selected['limits'][key])):
+            fail('input-over-bound')
+    effect()  # The only effect seam: every refusal above precedes the caller callback.
+    return {'admitted': True}
+
+
+def restore(request, raw_carrier_text):
+    closed(request, ['restore', 'profile', 'limits'])
+    closed(request['limits'], ['originalSnapshotBytes', 'carrierBytes'])
+    snapshot_max = positive(request['limits']['originalSnapshotBytes'])
+    carrier_max = positive(request['limits']['carrierBytes'])
+    carrier = request['restore']
+    closed(carrier, ['contractVersion', 'originalSnapshotJson', 'originalSnapshotSha256', 'retained'])
+    if carrier['contractVersion'] != '1':
+        fail()
+    snapshot = carrier['originalSnapshotJson']
+    string(snapshot, snapshot_max)
+    if raw_carrier_text is None or length(raw_carrier_text) > carrier_max:
+        fail('input-over-bound')
+    if carrier['originalSnapshotSha256'] != digest(snapshot):
+        fail('snapshot-digest')
+    # Decode only to check JSON structure. Never derive original identity from this object.
+    if not isinstance(parse(snapshot, strict=False), dict):
+        fail()
+    frame = carrier['retained']
+    validate({'contractVersion':'1', 'column':'_carrier', 'kind':'text'}, frame, request['profile'], raw_frame_size(raw_carrier_text, 'retained'))
+    if frame['origin'] != 'generated':
+        fail()
+    return {'originalSnapshotJson': snapshot, 'originalSnapshotSha256': digest(snapshot),
+            'originalSnapshotBytes': length(snapshot)}
+
+
+def lineage(request, raw_frame_bytes=None):
+    closed(request, ['rule', 'frame'], ['profile'])
+    rule, frame = request['rule'], request['frame']
+    validate(rule, frame, request.get('profile', 'base'), raw_frame_bytes)
+    output = preview(rule, frame)
+    if output['issues'] or ('valueJson' in output and not output['claimAdmissible']):
+        fail('read-failed')
+    column = rule['column']
+    original = {'state':'missing'}
+    identity = None
+    if rule['kind'] == 'research-value':
+        research = frame['research']
+        entry = research['fields'].get(column)
+        if entry is not None and 'valueJson' in entry:
+            original = {'state':'present', 'json':entry['valueJson']}
+        field = next(e for e in research['declaration']['fields'] if e['name'] == column)
+        identity = {'recipeRevision':research['recordRecipeRevision'], 'fieldSha256':digest(field['fieldJson'])}
+    elif column in frame['values']:
+        original = {'state':'present', 'json':json.dumps(frame['values'][column], ensure_ascii=False, separators=(',', ':'))}
+    result = {'state':'value', 'json':output['valueJson']} if 'valueJson' in output else {'state':'omitted', 'reason':output['omitted']}
+    answer = {'contractVersion':'1', 'column':column, 'input':original, 'result':result}
+    if identity is not None:
+        answer['researchIdentity'] = identity
+    return answer
+
+
+def raw_frame_size(text, member='frame', as_text=False):
     # Input was already validated. Measure the actual serialized frame, including escapes.
+    if not text.lstrip(' \t\r\n').startswith('{'):
+        return None
     decoder = json.JSONDecoder(parse_int=Number, parse_float=Number)
     index = text.index('{') + 1
     while True:
@@ -368,8 +494,8 @@ def raw_frame_size(text):
             index += 1
         start = index
         _, index = decoder.raw_decode(text, index)
-        if key == 'frame':
-            return length(text[start:index])
+        if key == member:
+            return text[start:index] if as_text else length(text[start:index])
         while text[index] in ' \t\r\n':
             index += 1
         if text[index] == '}':
@@ -377,7 +503,13 @@ def raw_frame_size(text):
         index += 1
 
 
-def handle(request, raw_frame_bytes=None):
+def handle(request, raw_frame_bytes=None, raw_carrier_text=None, raw_lineage_text=None):
+    if isinstance(request, dict) and 'restore' in request:
+        return restore(request, raw_carrier_text)
+    if isinstance(request, dict) and set(request) == {'admission'}:
+        return admit(request['admission'])
+    if isinstance(request, dict) and set(request) == {'lineage'}:
+        return lineage(request['lineage'], raw_frame_size(raw_lineage_text) if raw_lineage_text is not None else None)
     if isinstance(request, dict) and set(request) == {'binary64Hex'}:
         text = request['binary64Hex']
         if not isinstance(text, str) or not re.fullmatch('[0-9a-f]{16}', text):
@@ -411,7 +543,7 @@ if __name__ == '__main__':
                 fail('input-over-bound')
             text = line.decode('utf-8')
             request = parse(text, depth=64)
-            output = handle(request, raw_frame_size(text) if isinstance(request, dict) and 'frame' in request else None)
+            output = handle(request, raw_frame_size(text) if isinstance(request, dict) and 'frame' in request else None, raw_frame_size(text, 'restore', as_text=True) if isinstance(request, dict) and 'restore' in request else None, raw_frame_size(text, 'lineage', as_text=True) if isinstance(request, dict) and 'lineage' in request else None)
         except (Refusal, UnicodeError) as exc:
             output = {'refusal': str(exc) if isinstance(exc, Refusal) else 'input-malformed'}
         print(json.dumps(output, ensure_ascii=True, separators=(',', ':')))
