@@ -77,5 +77,310 @@
       "state": "value",
       "json": "true"
     }
+  },
+  "currentRecipeRevision": "recipe:8",
+  "generatedCarrier": {
+    "contractVersion": "1",
+    "originalSnapshotJson": "{ \"value\":1e3,\"label\":\"\\u00e9\" }\n",
+    "originalSnapshotSha256": "sha256:2bcde75a108ddd8533fbd9736b09bf9117f5393612073bab4b022a04eb3ffd87",
+    "retained": {
+      "contractVersion": "1",
+      "origin": "generated",
+      "values": {
+        "A": "-0",
+        "B": "legacy"
+      },
+      "research": {
+        "recordRecipeRevision": "recipe:7",
+        "declaration": {
+          "recipeRevision": "recipe:7",
+          "fields": [
+            {
+              "name": "A",
+              "fieldJson": "{\"name\":\"A\",\"type\":\"number\",\"description\":\"Original declaration.\"}"
+            },
+            {
+              "name": "B",
+              "fieldJson": "{\"name\":\"B\",\"type\":\"string\"}"
+            }
+          ]
+        },
+        "fields": {
+          "A": {
+            "status": "supported",
+            "valueJson": "-0"
+          },
+          "B": {
+            "status": "interpretation",
+            "valueJson": "\"\\ud800\""
+          }
+        }
+      }
+    }
+  },
+  "capabilitiesFragment": {
+    "conversionContracts": [
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "document-validation",
+        "limits": {
+          "documentBytes": 1048576,
+          "frameBytes": 2097152
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "document-validation",
+        "limits": {
+          "documentBytes": 2097152,
+          "frameBytes": 4194304
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "preview",
+        "limits": {
+          "documentBytes": 1048576,
+          "combinedBytes": 6291456,
+          "frameBytes": 2097152
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "preview",
+        "limits": {
+          "documentBytes": 2097152,
+          "combinedBytes": 12582912,
+          "frameBytes": 4194304
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "preparation",
+        "limits": {
+          "documentBytes": 1048576,
+          "combinedBytes": 6291456,
+          "frameBytes": 2097152,
+          "preparationBytes": 8388608,
+          "recordBytes": 8388608
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "preparation",
+        "limits": {
+          "documentBytes": 2097152,
+          "combinedBytes": 12582912,
+          "frameBytes": 4194304,
+          "preparationBytes": 16777216,
+          "recordBytes": 16777216
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "preparation-verification",
+        "limits": {
+          "documentBytes": 1048576,
+          "combinedBytes": 6291456,
+          "frameBytes": 2097152,
+          "preparationBytes": 8388608,
+          "recordBytes": 8388608
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "preparation-verification",
+        "limits": {
+          "documentBytes": 2097152,
+          "combinedBytes": 12582912,
+          "frameBytes": 4194304,
+          "preparationBytes": 16777216,
+          "recordBytes": 16777216
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "producer-carrier",
+        "limits": {
+          "originalSnapshotBytes": 524288,
+          "carrierBytes": 3145728,
+          "grantBytes": 3145728,
+          "adapterStdoutBytes": 3145728,
+          "responseBytes": 3145728
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "producer-carrier",
+        "limits": {
+          "originalSnapshotBytes": 524288,
+          "carrierBytes": 3145728,
+          "grantBytes": 3145728,
+          "adapterStdoutBytes": 3145728,
+          "responseBytes": 3145728
+        }
+      }
+    ]
+  },
+  "capabilityIdentityNote": "Synthetic test pins only; no implementation advertises these capabilities. Preparation/record maxima and producer transport require real accounting before advertisement.",
+  "assertedAppendBefore": {
+    "origin": {
+      "originalValues": {
+        "Eligible": "NO",
+        "Evidence": "absent",
+        "Historical": null
+      },
+      "source": "source:original",
+      "recipeRevision": "recipe:7",
+      "receipt": "receipt:original"
+    },
+    "prepared": {
+      "Eligible": "NO",
+      "Evidence": "absent"
+    },
+    "acquisitions": [
+      {
+        "source": "sibling:1",
+        "receipt": "receipt:sibling"
+      }
+    ]
+  },
+  "assertedAppendAfter": {
+    "origin": {
+      "originalValues": {
+        "Eligible": "NO",
+        "Evidence": "absent",
+        "Historical": null
+      },
+      "source": "source:original",
+      "recipeRevision": "recipe:7",
+      "receipt": "receipt:original"
+    },
+    "prepared": {
+      "Eligible": "NO",
+      "Evidence": "absent"
+    },
+    "acquisitions": [
+      {
+        "source": "sibling:1",
+        "receipt": "receipt:sibling"
+      }
+    ],
+    "retained": {
+      "contractVersion": "1",
+      "origin": "asserted",
+      "values": {
+        "Eligible": "NO",
+        "Evidence": "absent",
+        "Historical": null
+      },
+      "research": null
+    }
+  },
+  "publicationBindingExample": {
+    "publishedDocumentJson": "{\"version\":2,\"provider\":\"published\"}",
+    "boundDocumentJson": "{\"version\":2,\"provider\":\"bound\"}",
+    "publishedDocumentSha256": "sha256:747a7afb3de48dd7dea36b8c3dc8ce12acb58730736c07b5a7f23a417ecaa53f",
+    "boundDocumentSha256": "sha256:c3bbbe4c46c347372161ffc863175754f3be6b893f3c650a9949274c246e62e1"
+  },
+  "identityDomains": {
+    "originalSnapshot": "SHA-256 of originalSnapshotJson UTF-8 bytes",
+    "rawCarrier": "SHA-256 of complete received carrier bytes, including spelling and whitespace",
+    "frame": "separate exact received retained frame byte commitment",
+    "canonicalResult": "existing canonical result digest over the new wrapper; never original snapshot identity",
+    "sourceRecipe": "original source and recipe commitments remain separate",
+    "publishedBound": "published and bound document identities remain distinct; count both retained copies"
+  },
+  "generatedReplaceBefore": {
+    "resultJson": "{\"origin\":{\"source\":\"source:original\",\"recipeRevision\":\"recipe:7\",\"receipt\":\"receipt:original\"},\"values\":{\"A\":\"-0\",\"B\":\"legacy\"},\"acquisitions\":[{\"source\":\"sibling:1\",\"receipt\":\"receipt:sibling\"}],\"fields\":{\"A\":{\"status\":\"supported\",\"valueJson\":\"-0\"},\"B\":{\"status\":\"interpretation\",\"valueJson\":\"\\\"\\\\ud800\\\"\"}}}",
+    "source": "source:original",
+    "recipeRevision": "recipe:7",
+    "acquisitions": [
+      {
+        "source": "sibling:1",
+        "receipt": "receipt:sibling"
+      }
+    ]
+  },
+  "generatedReplaceAfter": {
+    "resultJson": "{\"contractVersion\":\"1\",\"originalSnapshotJson\":\"{\\\"origin\\\":{\\\"source\\\":\\\"source:original\\\",\\\"recipeRevision\\\":\\\"recipe:7\\\",\\\"receipt\\\":\\\"receipt:original\\\"},\\\"values\\\":{\\\"A\\\":\\\"-0\\\",\\\"B\\\":\\\"legacy\\\"},\\\"acquisitions\\\":[{\\\"source\\\":\\\"sibling:1\\\",\\\"receipt\\\":\\\"receipt:sibling\\\"}],\\\"fields\\\":{\\\"A\\\":{\\\"status\\\":\\\"supported\\\",\\\"valueJson\\\":\\\"-0\\\"},\\\"B\\\":{\\\"status\\\":\\\"interpretation\\\",\\\"valueJson\\\":\\\"\\\\\\\"\\\\\\\\ud800\\\\\\\"\\\"}}}\",\"originalSnapshotSha256\":\"sha256:db9ac0beecaec9714510fc3fa66677564b6dcf1c6fee754d43d343a07ff24f9b\",\"retained\":{\"contractVersion\":\"1\",\"origin\":\"generated\",\"values\":{\"A\":\"-0\",\"B\":\"legacy\"},\"research\":{\"recordRecipeRevision\":\"recipe:7\",\"declaration\":{\"recipeRevision\":\"recipe:7\",\"fields\":[{\"name\":\"A\",\"fieldJson\":\"{\\\"name\\\":\\\"A\\\",\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"Original declaration.\\\"}\"},{\"name\":\"B\",\"fieldJson\":\"{\\\"name\\\":\\\"B\\\",\\\"type\\\":\\\"string\\\"}\"}]},\"fields\":{\"A\":{\"status\":\"supported\",\"valueJson\":\"-0\"},\"B\":{\"status\":\"interpretation\",\"valueJson\":\"\\\"\\\\ud800\\\"\"}}}}}",
+    "source": "source:original",
+    "recipeRevision": "recipe:7",
+    "acquisitions": [
+      {
+        "source": "sibling:1",
+        "receipt": "receipt:sibling"
+      }
+    ]
   }
 }

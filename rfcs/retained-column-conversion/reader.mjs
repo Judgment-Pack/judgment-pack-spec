@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // Draft RFC0029 preview only. No acquisition, preparation or adoption claim.
+import { createHash } from 'node:crypto';
 const SAFE = 9007199254740991n;
 const DEC = /^-?(0|[1-9][0-9]*)(\.[0-9]+)?$/;
 const NUM = /^-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?$/;
@@ -39,9 +40,9 @@ function scalar(v) {
   return true;
 }
 // Separate recursive-descent parser retains numeric spelling and sees duplicate decoded keys.
-const FRAME_SIZE=Symbol('raw frame bytes');
+const FRAME_SIZE=Symbol('raw frame bytes'), CARRIER_SIZE=Symbol('raw carrier bytes'), RETAINED_SIZE=Symbol('raw retained bytes');
 function parse(text, {strict=true,folded=false,depth=64}={}) {
-  let i=0, rootFrameBytes;
+  let i=0, rootFrameBytes, rootCarrierBytes, retainedBytes;
   const ws=() => { while (i<text.length && /[\x20\x09\x0a\x0d]/.test(text[i])) i++; };
   function quoted() {
     if (text[i] !== '"') fail();
@@ -67,7 +68,9 @@ function parse(text, {strict=true,folded=false,depth=64}={}) {
         if (seen.has(name)) fail();
         seen.add(name); ws(); if (text[i++] !== ':') fail();
         ws(); const start=i; result[key]=read(level+1);
-        if (level===0 && key==='frame') rootFrameBytes=bytes(text.slice(start,i));
+        if ((level===0 || level===1) && key==='frame') rootFrameBytes=bytes(text.slice(start,i));
+        if (level===1 && key==='retained') retainedBytes=bytes(text.slice(start,i));
+        if (level===0 && key==='restore') rootCarrierBytes=bytes(text.slice(start,i));
         ws();
         const stop=text[i++]; if (stop === '}') return result;
         if (stop !== ',') fail();
@@ -91,6 +94,8 @@ function parse(text, {strict=true,folded=false,depth=64}={}) {
   }
   const result=read(0); ws(); if (i!==text.length || (strict && !scalar(result))) fail();
   if (object(result) && rootFrameBytes!==undefined) Object.defineProperty(result,FRAME_SIZE,{value:rootFrameBytes});
+  if (object(result) && rootCarrierBytes!==undefined) Object.defineProperty(result,CARRIER_SIZE,{value:rootCarrierBytes});
+  if (object(result) && retainedBytes!==undefined) Object.defineProperty(result,RETAINED_SIZE,{value:retainedBytes});
   return result;
 }
 function closed(v,required,optional=[]) {
@@ -243,7 +248,77 @@ function preview(rule,frame) {
   const selected=shortest(number); if (number<0) selected[0]=-selected[0];
   return cmp(decimalRat(v),selected)===0 ? result(v) : issue('number-precision');
 }
+// Draft-only interfaces. No maxima below are production defaults.
+const ROLE_LIMITS = {
+  'document-validation':['documentBytes','frameBytes'],
+  preview:['documentBytes','combinedBytes','frameBytes'],
+  preparation:['documentBytes','combinedBytes','frameBytes','preparationBytes','recordBytes'],
+  'preparation-verification':['documentBytes','combinedBytes','frameBytes','preparationBytes','recordBytes'],
+  'producer-carrier':['originalSnapshotBytes','carrierBytes','grantBytes','adapterStdoutBytes','responseBytes']
+};
+function positive(v,zero=false) {
+  if (!(v instanceof JsonNumber) || v.text.length>17 || !full(INT,v.text)) fail();
+  const n=BigInt(v.text); if (n<(zero ? 0n : 1n) || n>SAFE) fail(); return n;
+}
+const digest=s=>'sha256:'+createHash('sha256').update(s,'utf8').digest('hex');
+function capability(e) {
+  closed(e,['contract','spec','profile','role','limits']);
+  if (e.contract!=='retained-column/1') fail('capability-unsupported');
+  closed(e.spec,['version','revision','schemaSha256','corpusSha256']); string(e.spec.version,160,true);
+  if (typeof e.spec.revision!=='string' || !full(/^[0-9a-f]{40}$/,e.spec.revision)) fail();
+  for (const k of ['schemaSha256','corpusSha256']) if (typeof e.spec[k]!=='string' || !full(/^sha256:[0-9a-f]{64}$/,e.spec[k])) fail();
+  if (!['base','extended'].includes(e.profile) || typeof e.role!=='string' || !Object.hasOwn(ROLE_LIMITS,e.role)) fail('capability-unsupported');
+  closed(e.limits,ROLE_LIMITS[e.role]); for (const v of Object.values(e.limits)) positive(v);
+}
+function admit(p,effect=()=>{}) {
+  closed(p,['capabilities','required','sizes']); closed(p.capabilities,['conversionContracts']);
+  const entries=p.capabilities.conversionContracts;
+  if (!Array.isArray(entries) || entries.length>32) fail();
+  const r=p.required; capability(r); const identities=new Set(); let selected;
+  const identity=e=>JSON.stringify([e.contract,e.spec.version,e.spec.revision,e.spec.schemaSha256,e.spec.corpusSha256,e.profile,e.role]);
+  for (const e of entries) {
+    capability(e); const id=identity(e); if (identities.has(id)) fail(); identities.add(id);
+    if (id===identity(r)) selected=e;
+  }
+  if (!selected) fail('capability-unsupported');
+  closed(p.sizes,ROLE_LIMITS[r.role]);
+  for (const k of ROLE_LIMITS[r.role]) {
+    const a=positive(p.sizes[k],true), x=positive(r.limits[k]), y=positive(selected.limits[k]);
+    if (a>(x<y ? x : y)) fail('input-over-bound');
+  }
+  effect(); // Every refusal must precede this caller callback.
+  return {admitted:true};
+}
+function restore(r) {
+  closed(r,['restore','profile','limits']); closed(r.limits,['originalSnapshotBytes','carrierBytes']);
+  const maxSnapshot=positive(r.limits.originalSnapshotBytes), maxCarrier=positive(r.limits.carrierBytes), c=r.restore;
+  closed(c,['contractVersion','originalSnapshotJson','originalSnapshotSha256','retained']);
+  if (c.contractVersion!=='1') fail();
+  string(c.originalSnapshotJson,Number(maxSnapshot));
+  if (r[CARRIER_SIZE]===undefined || BigInt(r[CARRIER_SIZE])>maxCarrier) fail('input-over-bound');
+  if (c.originalSnapshotSha256!==digest(c.originalSnapshotJson)) fail('snapshot-digest');
+  if (!object(parse(c.originalSnapshotJson,{strict:false}))) fail();
+  validate({contractVersion:'1',column:'_carrier',kind:'text'},c.retained,r.profile,r[RETAINED_SIZE]);
+  if (c.retained.origin!=='generated') fail();
+  return {originalSnapshotJson:c.originalSnapshotJson,originalSnapshotSha256:digest(c.originalSnapshotJson),originalSnapshotBytes:bytes(c.originalSnapshotJson)};
+}
+function lineage(r,rawFrameBytes) {
+  closed(r,['rule','frame'],['profile']); validate(r.rule,r.frame,Object.hasOwn(r,'profile') ? r.profile : 'base',rawFrameBytes);
+  const p=preview(r.rule,r.frame); if (p.issues.length || (Object.hasOwn(p,'valueJson') && !p.claimAdmissible)) fail('read-failed');
+  const column=r.rule.column,f=r.frame; let input={state:'missing'}, researchIdentity;
+  if (r.rule.kind==='research-value') {
+    const e=f.research.fields[column]; if (e && Object.hasOwn(e,'valueJson')) input={state:'present',json:e.valueJson};
+    const field=f.research.declaration.fields.find(e=>e.name===column);
+    researchIdentity={recipeRevision:f.research.recordRecipeRevision,fieldSha256:digest(field.fieldJson)};
+  } else if (Object.hasOwn(f.values,column)) input={state:'present',json:JSON.stringify(f.values[column])};
+  const result=Object.hasOwn(p,'valueJson') ? {state:'value',json:p.valueJson} : {state:'omitted',reason:p.omitted};
+  const answer={contractVersion:'1',column,input,result}; if (researchIdentity) answer.researchIdentity=researchIdentity;
+  return answer;
+}
 function handle(r) {
+  if (object(r) && Object.hasOwn(r,'restore')) return restore(r);
+  if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'admission')) return admit(r.admission);
+  if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'lineage')) return lineage(r.lineage,r[FRAME_SIZE]);
   if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'binary64Hex')) {
     if (typeof r.binary64Hex!=='string' || !full(/^[0-9a-f]{16}$/,r.binary64Hex)) fail();
     const b=new DataView(new ArrayBuffer(8)); b.setBigUint64(0,BigInt('0x'+r.binary64Hex),false); const x=b.getFloat64(0,false);

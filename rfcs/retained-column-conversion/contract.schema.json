@@ -427,6 +427,391 @@
         "result"
       ],
       "additionalProperties": false
+    },
+    "generatedCarrier": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "const": "1"
+        },
+        "originalSnapshotJson": {
+          "type": "string"
+        },
+        "originalSnapshotSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "retained": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/frame"
+            },
+            {
+              "properties": {
+                "origin": {
+                  "const": "generated"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "contractVersion",
+        "originalSnapshotJson",
+        "originalSnapshotSha256",
+        "retained"
+      ],
+      "additionalProperties": false
+    },
+    "specIdentity": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "schemaSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "corpusSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "version",
+        "revision",
+        "schemaSha256",
+        "corpusSha256"
+      ],
+      "additionalProperties": false
+    },
+    "conversionCapability": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "const": "retained-column/1"
+            },
+            "spec": {
+              "$ref": "#/$defs/specIdentity"
+            },
+            "profile": {
+              "enum": [
+                "base",
+                "extended"
+              ]
+            },
+            "role": {
+              "const": "document-validation"
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "documentBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "frameBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "documentBytes",
+                "frameBytes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "contract",
+            "spec",
+            "profile",
+            "role",
+            "limits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "const": "retained-column/1"
+            },
+            "spec": {
+              "$ref": "#/$defs/specIdentity"
+            },
+            "profile": {
+              "enum": [
+                "base",
+                "extended"
+              ]
+            },
+            "role": {
+              "const": "preview"
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "documentBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "combinedBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "frameBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "documentBytes",
+                "combinedBytes",
+                "frameBytes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "contract",
+            "spec",
+            "profile",
+            "role",
+            "limits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "const": "retained-column/1"
+            },
+            "spec": {
+              "$ref": "#/$defs/specIdentity"
+            },
+            "profile": {
+              "enum": [
+                "base",
+                "extended"
+              ]
+            },
+            "role": {
+              "const": "preparation"
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "documentBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "combinedBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "frameBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "preparationBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "recordBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "documentBytes",
+                "combinedBytes",
+                "frameBytes",
+                "preparationBytes",
+                "recordBytes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "contract",
+            "spec",
+            "profile",
+            "role",
+            "limits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "const": "retained-column/1"
+            },
+            "spec": {
+              "$ref": "#/$defs/specIdentity"
+            },
+            "profile": {
+              "enum": [
+                "base",
+                "extended"
+              ]
+            },
+            "role": {
+              "const": "preparation-verification"
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "documentBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "combinedBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "frameBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "preparationBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "recordBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "documentBytes",
+                "combinedBytes",
+                "frameBytes",
+                "preparationBytes",
+                "recordBytes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "contract",
+            "spec",
+            "profile",
+            "role",
+            "limits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "const": "retained-column/1"
+            },
+            "spec": {
+              "$ref": "#/$defs/specIdentity"
+            },
+            "profile": {
+              "enum": [
+                "base",
+                "extended"
+              ]
+            },
+            "role": {
+              "const": "producer-carrier"
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "originalSnapshotBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "carrierBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "grantBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "adapterStdoutBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "responseBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "originalSnapshotBytes",
+                "carrierBytes",
+                "grantBytes",
+                "adapterStdoutBytes",
+                "responseBytes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "contract",
+            "spec",
+            "profile",
+            "role",
+            "limits"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "conversionContracts": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/conversionCapability"
+          }
+        }
+      },
+      "required": [
+        "conversionContracts"
+      ],
+      "additionalProperties": false
     }
   },
   "oneOf": [
@@ -441,6 +826,12 @@
     },
     {
       "$ref": "#/$defs/columnTransformation"
+    },
+    {
+      "$ref": "#/$defs/generatedCarrier"
+    },
+    {
+      "$ref": "#/$defs/capabilities"
     }
   ]
 }

@@ -35,6 +35,186 @@ def fixture(case):
     return {'rule':rule,'frame':frame}
 
 
+def check_interfaces():
+    """Focused changed-contract fixtures; old conversion corpus remains a separate gate."""
+    cases = DATA['interfaceCases']
+    commands = [[sys.executable, '-B', str(HERE/'reader.py')],
+                [os.environ.get('RFC0029_NODE', 'node'), str(HERE/'reader.mjs')]]
+    encode = lambda value: (json.dumps(value, ensure_ascii=True, separators=(',', ':'))+'\n').encode()
+    payload = b''.join(encode(c['request']) for c in cases)
+    # Duplicate decoded outer names are a parser check, not a JSON Schema assertion.
+    duplicate = b'{"restore":{},"restore":{},"profile":"base","limits":{}}\n'
+    numeric_base = next(c['request'] for c in cases if c['id']=='admission-preview-base')
+    numeric_wire = encode(numeric_base)
+    lexical_refusals = [
+        numeric_wire.replace(b'6291456', b'6.291456e6', 1),
+        numeric_wire.replace(b'6291456', b'6291456.0', 1),
+        numeric_wire.replace(b'6291456', b'9'*4301, 1),
+    ]
+    carrier = EXAMPLES['generatedCarrier']
+    VALIDATOR.validate(carrier)
+    VALIDATOR.validate(EXAMPLES['capabilitiesFragment'])
+    for key in ('originalSnapshotJson', 'originalSnapshotSha256', 'retained', 'contractVersion'):
+        bad = copy.deepcopy(carrier); del bad[key]
+        assert not VALIDATOR.is_valid(bad), ('carrier-required', key)
+    bad = copy.deepcopy(carrier); bad['originalSnapshotJson'] = {}
+    assert not VALIDATOR.is_valid(bad), 'carrier-object-embedding'
+    bad = copy.deepcopy(carrier); bad['extra'] = 0
+    assert not VALIDATOR.is_valid(bad), 'carrier-extra'
+    # Positive structural fixtures carry each new member, role and profile alternative.
+    fragments = [carrier, EXAMPLES['capabilitiesFragment']]
+    mutations = 0
+    for definition in ('generatedCarrier', 'specIdentity', 'conversionCapability', 'capabilities'):
+        def visit(value, path):
+            nonlocal mutations
+            if isinstance(value, dict):
+                if value.get('additionalProperties') is False:
+                    for member in value.get('properties', {}):
+                        changed = copy.deepcopy(SCHEMA); node = changed['$defs'][definition]
+                        for token in path:
+                            node = node[token]
+                        del node['properties'][member]
+                        validator = jsonschema.Draft202012Validator(changed)
+                        assert any(not validator.is_valid(f) for f in fragments), (definition, path, member)
+                        mutations += 1
+                if 'enum' in value:
+                    for option in value['enum']:
+                        changed = copy.deepcopy(SCHEMA); node = changed['$defs'][definition]
+                        for token in path:
+                            node = node[token]
+                        node['enum'] = [x for x in value['enum'] if x != option]
+                        validator = jsonschema.Draft202012Validator(changed)
+                        assert any(not validator.is_valid(f) for f in fragments), (definition, path, option)
+                        mutations += 1
+                if 'const' in value:
+                    changed = copy.deepcopy(SCHEMA); node = changed['$defs'][definition]
+                    for token in path:
+                        node = node[token]
+                    node['const'] = '__removed_draft_alternative__'
+                    validator = jsonschema.Draft202012Validator(changed)
+                    assert any(not validator.is_valid(f) for f in fragments), (definition, path, 'const')
+                    mutations += 1
+                for key, child in value.items():
+                    visit(child, path+[key])
+            elif isinstance(value, list):
+                for index, child in enumerate(value):
+                    visit(child, path+[index])
+        visit(SCHEMA['$defs'][definition], [])
+    # Asserted append keeps every original member and sibling, including originalValues.
+    appended = copy.deepcopy(EXAMPLES['assertedAppendAfter'])
+    frame = appended.pop('retained')
+    assert appended == EXAMPLES['assertedAppendBefore']
+    VALIDATOR.validate(frame)
+    generated_before = copy.deepcopy(EXAMPLES['generatedReplaceBefore'])
+    generated_after = copy.deepcopy(EXAMPLES['generatedReplaceAfter'])
+    original_result = generated_before.pop('resultJson')
+    replacement = json.loads(generated_after.pop('resultJson'))
+    assert generated_before == generated_after
+    assert replacement['originalSnapshotJson'] == original_result
+    VALIDATOR.validate(replacement)
+    pub = EXAMPLES['publicationBindingExample']
+    import hashlib
+    for kind in ('published', 'bound'):
+        raw = pub[kind+'DocumentJson'].encode()
+        assert 'sha256:'+hashlib.sha256(raw).hexdigest() == pub[kind+'DocumentSha256']
+    assert pub['publishedDocumentSha256'] != pub['boundDocumentSha256']
+    counted_document_bytes = sum(len(pub[k+'DocumentJson'].encode()) for k in ('published', 'bound'))
+    assert counted_document_bytes == 68  # Both complete retained serialized documents count.
+    # Opaque raw and decoded identity differ: these spellings can decode alike and hash differently.
+    by_id = {c['id']: c for c in cases}
+    a = by_id['carrier-exponent-escaped']['expected']
+    b = by_id['carrier-integer-unicode']['expected']
+    assert json.loads(a['originalSnapshotJson']) == json.loads(b['originalSnapshotJson'])
+    assert a['originalSnapshotSha256'] != b['originalSnapshotSha256']
+    zero = by_id['carrier-negative-zero']['expected']; positive = by_id['carrier-positive-zero']['expected']
+    assert json.loads(zero['originalSnapshotJson']) == json.loads(positive['originalSnapshotJson'])
+    assert zero['originalSnapshotSha256'] != positive['originalSnapshotSha256']
+    admission_cases = [c for c in cases if 'admission' in c['request']]
+    removal = [
+        ('raw-snapshot-identity', 'carrier-exponent-escaped',
+         "'originalSnapshotJson': snapshot, 'originalSnapshotSha256': digest(snapshot)",
+         "'originalSnapshotJson': snapshot.replace('1e3', '1000'), 'originalSnapshotSha256': digest(snapshot)",
+         'originalSnapshotJson:c.originalSnapshotJson,originalSnapshotSha256:digest(c.originalSnapshotJson)',
+         "originalSnapshotJson:c.originalSnapshotJson.replace('1e3','1000'),originalSnapshotSha256:digest(c.originalSnapshotJson)"),
+        ('snapshot-digest', 'carrier-digest',
+         "if carrier['originalSnapshotSha256'] != digest(snapshot):", 'if False:',
+         'if (c.originalSnapshotSha256!==digest(c.originalSnapshotJson))', 'if (false)'),
+        ('capability-exact-identity', 'admission-identity-revision',
+         "if all(entry[k] == required[k] for k in ('contract', 'spec', 'profile', 'role')):", 'if True:',
+         'if (id===identity(r)) selected=e;', 'if (true) selected=e;'),
+        ('lower-supported-limit', 'admission-weak-limit',
+         "min(positive(required['limits'][key]), positive(selected['limits'][key]))",
+         "max(positive(required['limits'][key]), positive(selected['limits'][key]))",
+         'a>(x<y ? x : y)', 'a>(x>y ? x : y)'),
+        ('original-declaration-revision', 'original-revision-mismatch',
+         "declaration['recipeRevision'] != research['recordRecipeRevision']", 'False',
+         'd.recipeRevision!==r.recordRecipeRevision', 'false'),
+        ('lineage-raw-number', 'lineage-original-revision7',
+         "original = {'state':'present', 'json':entry['valueJson']}",
+         "original = {'state':'present', 'json':entry['valueJson'].replace('-0', '0')}",
+         "input={state:'present',json:e.valueJson};", "input={state:'present',json:e.valueJson.replace('-0','0')};")
+    ]
+    for command in commands:
+        name = Path(command[-1]).name
+        done = subprocess.run(command, input=payload+duplicate+b''.join(lexical_refusals), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=20)
+        assert done.returncode == 0, (name, done.stderr.decode()[:1500])
+        outputs = [json.loads(line) for line in done.stdout.splitlines()]
+        assert len(outputs) == len(cases)+1+len(lexical_refusals), (name, len(outputs), len(cases)+1+len(lexical_refusals))
+        for c, got in zip(cases, outputs):
+            assert got == c['expected'], (name, c['id'], got, c['expected'])
+        for got in outputs[len(cases):]:
+            assert got == {'refusal':'input-malformed'}, (name, 'duplicate-members-or-limit-token', got)
+        source = (HERE/name).read_text()
+        # Call the actual admission helper with a counter callback, including every refusal.
+        if name.endswith('.py'):
+            instrument = source[:source.index("if __name__ == '__main__':")] + '''
+for line in sys.stdin:
+    effects = []
+    try:
+        answer = admit(parse(line)['admission'], lambda: effects.append('called'))
+    except Refusal as exc:
+        answer = {'refusal': str(exc)}
+    print(json.dumps({'answer': answer, 'effects': len(effects)}))
+'''
+            invocation = [command[0], '-B', '-c', instrument]
+        else:
+            instrument = source[:source.index('// Fatal UTF8')] + '''
+let input=''; for await (const chunk of process.stdin) input+=chunk;
+for (const line of input.trimEnd().split('\\n')) {
+  let effects=0, answer;
+  try { answer=admit(parse(line).admission,()=>effects++); }
+  catch (e) { if (!(e instanceof Refusal)) throw e; answer={refusal:e.message}; }
+  process.stdout.write(JSON.stringify({answer,effects})+'\\n');
+}
+'''
+            invocation = [command[0], '--input-type=module', '-e', instrument]
+        counted = subprocess.run(invocation, input=b''.join(encode(c['request']) for c in admission_cases), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10)
+        assert counted.returncode == 0, (name, 'callback setup', counted.stderr.decode()[:500])
+        rows = [json.loads(line) for line in counted.stdout.splitlines()]
+        assert len(rows) == len(admission_cases)
+        for case, got in zip(admission_cases, rows):
+            assert got == {'answer':case['expected'], 'effects':int(case['expected'].get('admitted', False))}, (name, case['id'], got)
+        for title, label, py_before, py_after, js_before, js_after in removal:
+            before, after = (py_before, py_after) if name.endswith('.py') else (js_before, js_after)
+            assert source.count(before) == 1, (name, title, 'mutation target')
+            changed = source.replace(before, after)
+            invocation = [command[0], '-B', '-c', changed] if name.endswith('.py') else [command[0], '--input-type=module', '-e', changed]
+            case = by_id[label]
+            result = subprocess.run(invocation, input=encode(case['request']), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5)
+            assert result.returncode == 0, (name, title, 'mutation setup', result.stderr.decode()[:500])
+            got = json.loads(result.stdout)
+            assert got != case['expected'], (name, title, 'intended contract assertion did not fail')
+            print(f'{name}: removal {title} detected at {label} expected={json.dumps(case["expected"], ensure_ascii=True, separators=(",", ":"))} got={json.dumps(got, ensure_ascii=True, separators=(",", ":"))}')
+        print(f'{name}: {len(cases)} changed-interface fixtures + duplicate-name/3 limit-token refusals + {len(admission_cases)} callback-order probes + {len(removal)} safeguard-removal probes PASS')
+    print(f'Draft carrier/capability schema: {mutations} member/alternative-removal controls PASS')
+    print('Scope: exact UTF8 restoration, original declarations, inline lineage and Draft capability admission only; no producer, preparation, independent-authorship or adopted-limit claim.')
+
+
+if '--carrier-only' in sys.argv:
+    check_interfaces()
+    sys.exit(0)
+
+
 requests, expected, labels, schema_valid = [], [], [], []
 
 def add(label,request,want):
@@ -144,7 +324,7 @@ for size in (8192,8193):
     register_case({'id':f'legacy-number-raw-{size}','kind':'research-value','type':'number','status':'supported','inputJson':raw,'preview':want})
 register_case({'id':'range-exact-order','kind':'research-value','type':'range','status':'supported','inputJson':'{"min":"0.1000000000000000001","max":"0.1"}','preview':{'issues':['research-type']}})
 
-for value in [EXAMPLES['generatedFrame'],EXAMPLES['assertedFrame'],EXAMPLES['lineageFragment']]:
+for value in [EXAMPLES['generatedFrame'],EXAMPLES['assertedFrame'],EXAMPLES['lineageFragment'],EXAMPLES['generatedCarrier'],EXAMPLES['capabilitiesFragment']]:
     schema_valid.append(value)
 for fragment in schema_valid:
     VALIDATOR.validate(fragment)
@@ -264,3 +444,5 @@ for command in commands:
         assert altered!=expected[index] and 'refusal' not in altered,(title,'intended expectation did not fail',altered)
     print(f'{name}: {len(mutations)} relevant in-memory safeguard-removal probes detected PASS')
 print('Scope: preview/claim admissibility only; no whole preparation, historical-envelope parity, live Desk or independent-authorship claim.')
+
+check_interfaces()
