@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# from judgment-pack-devkit v0.8.0 (templates/check.sh)
+# from judgment-pack-devkit v0.9.0 (templates/check.sh)
 # scripts/dev/check.sh [--setup] [--only a,b | --changed [BASE]] [--skip a,b] [--all] [--manifest FILE]
 # Runs the checks of dev.json in order and prints one summary block; exit status = failures.
 # --changed runs only the checks jpdev.json maps the paths changed since the merge base of BASE

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# from judgment-pack-devkit v0.8.0 (lib/handover_check.sh)
+# from judgment-pack-devkit v0.9.0 (lib/handover_check.sh)
 set -eu
 
 python3 - <<'PY'

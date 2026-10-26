@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# from judgment-pack-devkit v0.8.0 (lib/changed_checks.py)
+# from judgment-pack-devkit v0.9.0 (lib/changed_checks.py)
 """changed_checks.py --root ROOT --manifest MANIFEST [--base BASE] [--label TEXT]
 
 Selects the check-list steps that the changed paths of a clone can affect, for
@@ -16,7 +16,8 @@ names they select. A glob is matched against the whole repository-relative path;
 `?` stay within one path segment and a `**` segment matches any number of segments. The whole
 list runs when a changed path matches no rule, when a selection input changed (the mapping file,
 the manifest, scripts/dev/check.sh, scripts/dev/changed_checks.py), when nothing changed, or when
-there is no mapping.
+there is no mapping. An unmapped untracked path is named as such: a path a workflow creates
+inside the clone defeats the selection on every run and belongs outside the clone or in .gitignore.
 
 The first line of the output is the selection, `whole` or `only NAME,NAME`; the lines after it
 are the report the runner prints, headed and refused with --label (default `jpdev check
@@ -39,6 +40,9 @@ MEMBERS = {'version', 'generators', 'changed', 'duplication'}
 RULE_MEMBERS = {'paths', 'checks'}
 UNSUPPORTED = '\\[]{}'
 SHOWN = 20
+UNMAPPED = 'unmapped path %s: whole list'
+UNTRACKED = ('untracked path %s is not mapped; a workflow-created path belongs outside the clone or in '
+             '.gitignore: whole list')
 
 
 class Refused(Exception):
@@ -160,7 +164,8 @@ def resolve_base(root, base):
 
 
 def changed_paths(root, merge_base):
-    """The paths HEAD, the index or the working tree changed since the merge base, and untracked."""
+    """Return (the paths HEAD, the index or the working tree changed since the merge base or that are
+    untracked, sorted; the untracked ones among them)."""
     raw = set()
     for side, args in (('the working tree', (merge_base,)), ('the index', ('--cached', merge_base)),
                        ('HEAD', (merge_base, 'HEAD'))):
@@ -171,8 +176,11 @@ def changed_paths(root, merge_base):
     status, untracked = git(root, 'ls-files', '--others', '--exclude-standard', '--full-name', '-z')
     if status:
         raise Refused('git ls-files of the untracked files failed')
-    raw |= set(untracked.split(b'\0'))
-    return sorted(p.decode('utf-8', 'replace') for p in raw - {b''})
+    # Untracked: a path only ls-files --others names, not one a diff names too.
+    others = set(untracked.split(b'\0')) - raw
+    raw |= others
+    return (sorted(p.decode('utf-8', 'replace') for p in raw - {b''}),
+            {p.decode('utf-8', 'replace') for p in others - {b''}})
 
 
 def selection_inputs(root, manifest):
@@ -199,7 +207,7 @@ def select(root, manifest, base=None, runner='jpdev check --changed'):
     steps = step_names(manifest)
     rules, no_mapping = load_rules(root, steps, os.path.basename(manifest))
     base_label, merge_base = resolve_base(root, base)
-    paths = changed_paths(root, merge_base)
+    paths, untracked = changed_paths(root, merge_base)
     short = git(root, 'rev-parse', '--short', merge_base)[1].decode().strip() or merge_base[:12]
     noun = 'path' if len(paths) == 1 else 'paths'
     report = ['== %s: %d changed %s since %s (merge base %s) ==' % (runner, len(paths), noun, base_label, short)]
@@ -225,7 +233,7 @@ def select(root, manifest, base=None, runner='jpdev check --changed'):
                     reasons.setdefault(name, set()).update(matched)
             if not hit:
                 unmapped.append(path)
-        why = ['unmapped path %s: whole list' % path for path in unmapped[:SHOWN]]
+        why = [(UNTRACKED if path in untracked else UNMAPPED) % path for path in unmapped[:SHOWN]]
         if len(unmapped) > SHOWN:
             why.append('... %d more unmapped paths' % (len(unmapped) - SHOWN))
         if not why and not reasons:
