@@ -1,0 +1,70 @@
+{
+  "$comment": [
+    "The release evidence gate's configuration, read at the release commit by scripts/dev/release_evidence.py",
+    "(the development kit's lib/release_evidence.py, vendored; web/DEPLOYMENT.md, \"Release evidence\").",
+    "tests/test_release_evidence.py holds it to conformance.yml, release.yml and dev.json."
+  ],
+  "schema": 2,
+  "repository": "Judgment-Pack/judgment-pack-spec",
+  "branch": "main",
+  "max_age_hours": 48,
+  "inputs": [
+    "requirements-dev.txt",
+    "scripts/dev/check.sh"
+  ],
+  "fresh_at_release": [
+    "route: a tag outside vMAJOR.MINOR.PATCH (a release candidate, a policy-v tag) reuses nothing and runs the whole repository suite",
+    "release milestone and tagged checkout (tools/release_milestone.py)",
+    "exact Policy format and agreement corpus (policy-v tags)",
+    "release tag, commit, clean tree, artifact pins and Policy tag history (tools/build_release.py)",
+    "immutable release bundles and checksums",
+    "release notes",
+    "draft prerelease",
+    "bundle attestation"
+  ],
+  "profiles": {
+    "linux": {
+      "$comment": [
+        "The release's evidence job sets the runner up as conformance.yml does (dev.json toolchains, then",
+        "scripts/dev/check.sh --setup into .venv) and must resolve exactly this. python-packages is the",
+        "environment the checks ran in: requirements-dev.txt pins only its direct requirements, so the",
+        "resolved set is compared rather than assumed. jsonschema-formats is pinned: without the",
+        "format-nongpl extras the format keyword is not checked and the list is shorter."
+      ],
+      "platform": {
+        "RUNNER_OS": "Linux",
+        "RUNNER_ARCH": "X64"
+      },
+      "compare": "release-runner",
+      "tools": {
+        "python": ["python3", "--version"],
+        "node": ["node", "--version"],
+        "git": ["git", "--version"],
+        "python-packages": [".venv/bin/python3", "-m", "pip", "freeze", "--all"],
+        "jsonschema-formats": [".venv/bin/python3", "-c", "import importlib.metadata as m; from jsonschema import FormatChecker; print('jsonschema==' + m.version('jsonschema'), 'formats:', ' '.join(sorted(FormatChecker().checkers)))"]
+      },
+      "pins": {
+        "jsonschema-formats": "jsonschema==4.23.0 formats: color date date-time duration email hostname idn-email idn-hostname ipv4 ipv6 json-pointer regex relative-json-pointer time uri uri-reference uri-template uuid"
+      }
+    }
+  },
+  "workflows": {
+    "conformance": {
+      "$comment": "A push to main runs the whole dev.json list and records the job's evidence; pull request runs never count.",
+      "path": ".github/workflows/conformance.yml",
+      "name": "Repository conformance",
+      "events": ["push"],
+      "jobs": {
+        "repository-conformance": {
+          "name": "repository-conformance",
+          "job_id": "repository-conformance",
+          "labels": ["ubuntu-latest"],
+          "profile": "linux",
+          "checks": "all",
+          "optional_skips": [],
+          "setup": true
+        }
+      }
+    }
+  }
+}

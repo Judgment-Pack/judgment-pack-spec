@@ -7,7 +7,8 @@
         ".github/ISSUE_TEMPLATE/**", ".github/PULL_REQUEST_TEMPLATE.md",
         "conformance/**", "docs/**", "examples/**", "redirect-root/**", "releases/**", "rfcs/**",
         "schema/**", "spec/**", "tests/**", "tools/**", "web/**",
-        "scripts/local-paths.sh", "scripts/sync-agent-docs.sh", "scripts/dev/handover_check.sh"
+        "scripts/local-paths.sh", "scripts/sync-agent-docs.sh", "scripts/dev/handover_check.sh",
+        ".github/ci-evidence.json", "scripts/dev/release_evidence.py"
       ],
       "checks": ["local-paths", "agent-docs", "diff-check", "repository-tests"]
     },

@@ -13,8 +13,100 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The repository conformance evidence main already produced at this exact commit, or a refusal
+  # (web/DEPLOYMENT.md, "Release evidence"; .github/ci-evidence.json). The repository suite is not
+  # run again when the evidence is reused; a refusal fails the release, and the fresh route is the
+  # operator's choice. A tag the gate does not admit (a release candidate, a policy-v tag) reuses
+  # nothing: the release job runs the whole suite itself, as before. The tag, milestone, Policy,
+  # bundle, notes, prerelease and attestation steps of the release job stay fresh either way.
+  evidence:
+    name: CI evidence at the tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      # Reading this repository's workflow runs, jobs and artifacts.
+      actions: read
+    outputs:
+      route: ${{ steps.route.outputs.route }}
+    steps:
+      # The gate's tag grammar: vMAJOR.MINOR.PATCH in ASCII digits, no leading zeroes, nothing after.
+      - name: Choose reuse or the whole suite at the tag
+        id: route
+        shell: bash
+        env:
+          LC_ALL: C
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          number='(0|[1-9][0-9]*)'
+          grammar="^v${number}\.${number}\.${number}$"
+          if [[ "${RELEASE_TAG}" =~ ${grammar} ]]; then
+            echo "route=evidence" >> "${GITHUB_OUTPUT}"
+            echo "${RELEASE_TAG}: reuse main's repository conformance evidence at ${GITHUB_SHA}, or refuse"
+          else
+            echo "route=fresh" >> "${GITHUB_OUTPUT}"
+            echo "${RELEASE_TAG}: outside vMAJOR.MINOR.PATCH; the release job runs the whole repository suite"
+          fi
+
+      - name: Check out the release commit
+        if: steps.route.outputs.route == 'evidence'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      # The runner is set up as conformance.yml sets up the job whose evidence is read; the gate
+      # compares the image and the tools, the installed requirements among them, with that job's.
+      - name: Read the toolchains from dev.json
+        if: steps.route.outputs.route == 'evidence'
+        id: dev
+        run: |
+          set -eu
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          m = json.load(open("dev.json", encoding="utf-8"))
+          tc = m.get("toolchains", {})
+          print("node=" + tc.get("node", {}).get("version", ""))
+          print("python=" + tc.get("python", {}).get("version", "3.12"))
+          PY
+
+      - name: Set up Python
+        if: steps.route.outputs.route == 'evidence'
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ steps.dev.outputs.python }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Set up Node
+        if: steps.route.outputs.route == 'evidence'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ steps.dev.outputs.node }}
+
+      - name: Set up the test environment as main CI does
+        if: steps.route.outputs.route == 'evidence'
+        run: scripts/dev/check.sh --setup
+
+      - name: Reuse exact-commit main CI evidence, or refuse
+        if: steps.route.outputs.route == 'evidence'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python3 scripts/dev/release_evidence.py verify --output "${{ runner.temp }}/release-evidence.json"
+
+      # The decision record, reuse or refusal, is also in the log of the step above.
+      - name: Keep the decision record
+        if: ${{ !cancelled() && steps.route.outputs.route == 'evidence' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-evidence-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/release-evidence.json
+          if-no-files-found: error
+
   release:
     name: Verify, package, and draft release
+    needs: evidence
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -67,7 +159,10 @@ jobs:
       - name: Install test dependencies
         run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
 
+      # Skipped only when the evidence job reused main's evidence at this commit, which covers this
+      # suite; web/DEPLOYMENT.md ("Release evidence") says why no test here depends on the tag.
       - name: Check repository artifacts and static site
+        if: needs.evidence.outputs.route != 'evidence'
         run: python -m unittest discover -s tests -v
 
       - name: Check exact Policy format and agreement corpus
