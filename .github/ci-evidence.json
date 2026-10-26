@@ -37,11 +37,30 @@
       },
       "compare": "release-runner",
       "tools": {
-        "python": ["python3", "--version"],
-        "node": ["node", "--version"],
-        "git": ["git", "--version"],
-        "python-packages": [".venv/bin/python3", "-m", "pip", "freeze", "--all"],
-        "jsonschema-formats": [".venv/bin/python3", "-c", "import importlib.metadata as m; from jsonschema import FormatChecker; print('jsonschema==' + m.version('jsonschema'), 'formats:', ' '.join(sorted(FormatChecker().checkers)))"]
+        "python": [
+          "python3",
+          "--version"
+        ],
+        "node": [
+          "node",
+          "--version"
+        ],
+        "git": [
+          "git",
+          "--version"
+        ],
+        "python-packages": [
+          ".venv/bin/python3",
+          "-m",
+          "pip",
+          "freeze",
+          "--all"
+        ],
+        "jsonschema-formats": [
+          ".venv/bin/python3",
+          "-c",
+          "import importlib.metadata as m; from jsonschema import FormatChecker; print('jsonschema==' + m.version('jsonschema'), 'formats:', ' '.join(sorted(FormatChecker().checkers)))"
+        ]
       },
       "pins": {
         "jsonschema-formats": "jsonschema==4.23.0 formats: color date date-time duration email hostname idn-email idn-hostname ipv4 ipv6 json-pointer regex relative-json-pointer time uri uri-reference uri-template uuid"
@@ -53,12 +72,16 @@
       "$comment": "A push to main runs the whole dev.json list and records the job's evidence; pull request runs never count.",
       "path": ".github/workflows/conformance.yml",
       "name": "Repository conformance",
-      "events": ["push"],
+      "events": [
+        "push"
+      ],
       "jobs": {
         "repository-conformance": {
           "name": "repository-conformance",
           "job_id": "repository-conformance",
-          "labels": ["ubuntu-latest"],
+          "labels": [
+            "ubuntu-latest"
+          ],
           "profile": "linux",
           "checks": "all",
           "optional_skips": [],
@@ -66,5 +89,8 @@
         }
       }
     }
+  },
+  "tag": {
+    "prerelease": true
   }
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# from judgment-pack-devkit v0.10.0 (lib/release_evidence.py)
+# from judgment-pack-devkit v0.11.0 (lib/release_evidence.py)
 """release_evidence.py capture|verify: reuse the CI evidence main produced at the release commit.
 
 capture  Runs in a CI job on the trusted branch, after the job's checks. Writes evidence.json for
@@ -49,6 +49,15 @@ REPOSITORY = re.compile(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+')
 PATH = re.compile(r'[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*')
 WORKFLOW_PATH = re.compile(r'\.github/workflows/[A-Za-z0-9_.-]+\.ya?ml')
 TAG = re.compile(r'v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)')
+# The same, with an optional SemVer prerelease: "-" and dot-separated identifiers of ASCII letters,
+# digits and hyphens, none empty, a numeric one without leading zeroes. Build metadata never.
+PRERELEASE_IDENTIFIER = r'(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)'
+TAG_PRERELEASE = re.compile(TAG.pattern + r'(-%s(\.%s)*)?' % (PRERELEASE_IDENTIFIER, PRERELEASE_IDENTIFIER))
+# What a workflow_dispatch run of the release workflow validates: nothing (it does not use the
+# gate), or the trusted branch's tip, as a validation-only decision.
+DISPATCH = ('none', 'branch-tip')
+# The decision each mode reaches when every check passes: only a publication reuses.
+PASSED = {'publication': 'reuse', 'validation-only': 'validated'}
 SHA = re.compile(r'[0-9a-f]{40}')
 OBJECT_ID = re.compile(r'[0-9a-f]{40}|[0-9a-f]{64}')
 
@@ -178,7 +187,7 @@ def check_config(config):
             fail(where, 'a path without . or .. segments is required')
 
     fields(config, 'config', ['schema', 'repository', 'branch', 'max_age_hours', 'inputs',
-                              'profiles', 'workflows'], ['fresh_at_release'])
+                              'profiles', 'workflows'], ['fresh_at_release', 'tag', 'dispatch'])
     if config['schema'] != SCHEMA or type(config['schema']) is not int:
         fail('config.schema', 'must be %d' % SCHEMA)
     text(config['repository'], 'config.repository', REPOSITORY)
@@ -190,6 +199,14 @@ def check_config(config):
     for index, item in enumerate(config['inputs']):
         path(item, 'config.inputs[%d]' % index)
     texts(config.get('fresh_at_release', []), 'config.fresh_at_release')
+    tag = config.get('tag', {'prerelease': False})
+    fields(tag, 'config.tag', ['prerelease'])
+    if type(tag['prerelease']) is not bool:
+        fail('config.tag.prerelease', 'true or false is required')
+    dispatch = config.get('dispatch', {'validates': 'none'})
+    fields(dispatch, 'config.dispatch', ['validates'])
+    if dispatch['validates'] not in DISPATCH:
+        fail('config.dispatch.validates', 'one of %s is required' % (DISPATCH,))
 
     named(config['profiles'], 'config.profiles')
     for name, profile in config['profiles'].items():
@@ -244,6 +261,25 @@ def check_config(config):
             names.append(spec['name'])
         if len(names) != len(set(names)):
             fail(where, 'a job name is repeated')
+
+
+def tag_grammar(config):
+    """vMAJOR.MINOR.PATCH, and a SemVer prerelease only where the configuration allows one."""
+    return TAG_PRERELEASE if config.get('tag', {}).get('prerelease') is True else TAG
+
+
+def release_mode(config):
+    """What this run decides. A workflow_dispatch run is a validation of the trusted branch's tip,
+    never a publication, where dispatch.validates is "branch-tip", and is refused otherwise; every
+    other run is a publication, held to its tag."""
+    if os.environ.get('GITHUB_EVENT_NAME') != 'workflow_dispatch':
+        return 'publication'
+    need(config.get('dispatch', {}).get('validates') == 'branch-tip', 'dispatch-not-gated',
+         'a workflow_dispatch run does not use the gate (dispatch.validates is "none")')
+    need(os.environ.get('GITHUB_REF') == 'refs/heads/' + config['branch'], 'dispatch-ref',
+         'a validation run is dispatched on %s, not %s' % ('refs/heads/' + config['branch'],
+                                                          os.environ.get('GITHUB_REF')))
+    return 'validation-only'
 
 
 def helper_path(root):
@@ -429,9 +465,9 @@ def selection(run):
     return (run['id'], run['run_attempt'], run['status'], run['conclusion'])
 
 
-def tag_object(api, name, sha):
+def tag_object(api, name, sha, grammar=TAG):
     """The annotated tag's object id, after checking that the tag peels to the release commit."""
-    need(isinstance(name, str) and TAG.fullmatch(name), 'tag-syntax')
+    need(isinstance(name, str) and grammar.fullmatch(name), 'tag-syntax')
     ref = api.get('git/ref/tags/' + quote(name, safe=''))
     need(ref['ref'] == 'refs/tags/' + name and ref['object']['type'] == 'tag', 'tag-annotated')
     original = ref['object']['sha']
@@ -623,14 +659,18 @@ def verify_workflow(api, config, source, key, now, here, trail):
 
 
 def verify(api, config, source, release_tag, now, record):
-    branch = config['branch']
+    """A publication is held to its tag; a validation-only run reads no tag: its commit is the
+    trusted branch's tip the dispatch ran for, and its decision is never a publication's."""
+    branch, publication = config['branch'], record['mode'] == 'publication'
+    grammar = tag_grammar(config)
     repository = api.get('')
     need((repository['full_name'], repository['id']) == (source['repository'], source['repository_id']),
          'repository-identity', '%s (%s)' % (repository.get('full_name'), repository.get('id')))
     need(repository['default_branch'] == branch, 'branch-default',
          'the default branch is %s, the configuration trusts %s' % (repository['default_branch'], branch))
-    first_tag = tag_object(api, release_tag, source['source'])
-    record['tag_object'] = first_tag
+    if publication:
+        first_tag = tag_object(api, release_tag, source['source'], grammar)
+        record['tag_object'] = first_tag
     here, chosen = {}, {}
     for key in config['workflows']:
         record['workflows'][key] = {}
@@ -639,7 +679,8 @@ def verify(api, config, source, release_tag, now, record):
     for key, (workflow_id, run) in chosen.items():
         final = select(api, source, config['workflows'][key], workflow_id, branch)
         need(selection(final) == selection(run), 'final-latest-changed', key)
-    need(tag_object(api, release_tag, source['source']) == first_tag, 'tag-changed')
+    if publication:
+        need(tag_object(api, release_tag, source['source'], grammar) == first_tag, 'tag-changed')
 
 
 # Malformed or missing API data or files: a refusal like any other, never a success.
@@ -657,40 +698,67 @@ def refusal_of(error):
 
 
 def decide(api, config, source, release_tag, now, record):
-    """The decision is reuse only when every check of verify passed."""
+    """The decision is reuse only for a publication whose every check of verify passed; a
+    validation-only run that passes is validated, which no publication takes."""
     try:
+        need(record.get('mode') in PASSED, 'mode-unknown', str(record.get('mode')))
+        passed = PASSED[record['mode']]
         verify(api, config, source, release_tag, now, record)
     except (Refusal,) + MALFORMED as error:
         record['decision'], record['refusal'] = 'refuse', refusal_of(error)
     else:
-        record['decision'], record['refusal'] = 'reuse', None
+        record['decision'], record['refusal'] = passed, None
     return record
+
+
+def write_outputs(record):
+    """The decision and mode as step outputs, for the jobs after the gate: a publishing job
+    proceeds on decision "reuse" alone. Both values are from fixed sets."""
+    name = os.environ.get('GITHUB_OUTPUT')
+    if name:
+        with open(name, 'a', encoding='utf-8') as output:
+            output.write('decision=%s\nmode=%s\n' % (record['decision'], record['mode'] or ''))
 
 
 def run_verify(args):
     now = dt.datetime.now(dt.timezone.utc)
     output = Path(args.output or 'release-evidence.json')
-    record = {'schema': SCHEMA, 'decision': 'refuse', 'refusal': None,
+    record = {'schema': SCHEMA, 'decision': 'refuse', 'refusal': None, 'mode': None,
+              'event': os.environ.get('GITHUB_EVENT_NAME', ''),
               'tag': os.environ.get('RELEASE_TAG', ''), 'checked_at': now.isoformat(),
               'workflows': {}}
     try:
         config, source = source_context(args.config)
-    except (Refusal,) + MALFORMED as error:
-        record['refusal'] = refusal_of(error)
-    else:
         record.update(repository=source['repository'], repository_id=source['repository_id'],
                       source=source['source'], inputs=source['inputs'], branch=config['branch'],
                       max_age_hours=config['max_age_hours'],
-                      fresh_at_release=config.get('fresh_at_release', []))
+                      fresh_at_release=config.get('fresh_at_release', []),
+                      tag_prerelease=tag_grammar(config) is TAG_PRERELEASE,
+                      dispatch=config.get('dispatch', {}).get('validates', 'none'))
+        record['mode'] = release_mode(config)
+    except (Refusal,) + MALFORMED as error:
+        record['refusal'] = refusal_of(error)
+    else:
+        if record['mode'] != 'publication':
+            # No tag is read or stood for: the commit is the tip the dispatch ran for.
+            record['tag'] = None
         decide(API(source['repository']), config, source, record['tag'], now, record)
     text = json.dumps(record, indent=2, sort_keys=True)
     print(text)
     try:
         output.write_text(text + '\n', encoding='utf-8')
+        write_outputs(record)
     except OSError:
-        print('release-evidence: refuse: the decision record could not be written to %s' % output,
+        print('release-evidence: refuse: the decision record or the step outputs could not be written',
               file=sys.stderr)
         return 1
+    if record['decision'] == 'validated':
+        print('release-evidence: validated, validation-only and never a publication decision: %s at %s '
+              '(decision record: %s)' % (', '.join(
+                  '%s run %s attempt %s' % (key, value['run_id'], value['attempt'])
+                  for key, value in record['workflows'].items()), record['source'], output),
+              file=sys.stderr)
+        return 0
     if record['decision'] != 'reuse':
         refusal = record['refusal']
         print('release-evidence: refuse: %s%s (decision record: %s)' % (
