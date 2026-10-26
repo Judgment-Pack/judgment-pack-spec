@@ -40,6 +40,7 @@ function scalar(v) {
   return true;
 }
 // Separate recursive-descent parser retains numeric spelling and sees duplicate decoded keys.
+const RAW_MEMBERS=Symbol('raw members'), RAW_ITEMS=Symbol('raw array items'), RAW_TOKEN=Symbol('raw token');
 const FRAME_SIZE=Symbol('raw frame bytes'), CARRIER_SIZE=Symbol('raw carrier bytes'), RETAINED_SIZE=Symbol('raw retained bytes');
 function parse(text, {strict=true,folded=false,depth=64}={}) {
   let i=0, rootFrameBytes, rootCarrierBytes, retainedBytes;
@@ -57,17 +58,24 @@ function parse(text, {strict=true,folded=false,depth=64}={}) {
     fail();
   }
   function read(level) {
+    ws(); const start=i; const value=readValue(level);
+    if (object(value) || Array.isArray(value)) Object.defineProperty(value,RAW_TOKEN,{value:text.slice(start,i)});
+    return value;
+  }
+  function readValue(level) {
     if (level>depth) fail('input-over-bound');
     ws();
     if (text[i] === '"') return quoted();
     if (text[i] === '{') {
       i++; ws(); const result=Object.create(null), seen=new Set();
+      Object.defineProperty(result,RAW_MEMBERS,{value:Object.create(null)});
       if (text[i] === '}') { i++; return result; }
       while (true) {
         ws(); const key=quoted(), name=folded ? lower15(key) : key;
         if (seen.has(name)) fail();
         seen.add(name); ws(); if (text[i++] !== ':') fail();
         ws(); const start=i; result[key]=read(level+1);
+        result[RAW_MEMBERS][key]=text.slice(start,i);
         if ((level===0 || level===1) && key==='frame') rootFrameBytes=bytes(text.slice(start,i));
         if (level===1 && key==='retained') retainedBytes=bytes(text.slice(start,i));
         if (level===0 && key==='restore') rootCarrierBytes=bytes(text.slice(start,i));
@@ -77,10 +85,10 @@ function parse(text, {strict=true,folded=false,depth=64}={}) {
       }
     }
     if (text[i] === '[') {
-      i++; ws(); const result=[];
+      i++; ws(); const result=[]; Object.defineProperty(result,RAW_ITEMS,{value:[]});
       if (text[i] === ']') { i++; return result; }
       while (true) {
-        result.push(read(level+1)); ws();
+        ws(); const start=i; result.push(read(level+1)); result[RAW_ITEMS].push(text.slice(start,i)); ws();
         const stop=text[i++]; if (stop === ']') return result;
         if (stop !== ',') fail();
       }
@@ -262,20 +270,26 @@ function positive(v,zero=false) {
 }
 const digest=s=>'sha256:'+createHash('sha256').update(s,'utf8').digest('hex');
 function capability(e) {
-  closed(e,['contract','spec','profile','role','limits']);
+  closed(e,['contract','spec','profile','role','limits'],['producerGrammar']);
   if (e.contract!=='retained-column/1') fail('capability-unsupported');
   closed(e.spec,['version','revision','schemaSha256','corpusSha256']); string(e.spec.version,160,true);
   if (typeof e.spec.revision!=='string' || !full(/^[0-9a-f]{40}$/,e.spec.revision)) fail();
   for (const k of ['schemaSha256','corpusSha256']) if (typeof e.spec[k]!=='string' || !full(/^sha256:[0-9a-f]{64}$/,e.spec[k])) fail();
   if (!['base','extended'].includes(e.profile) || typeof e.role!=='string' || !Object.hasOwn(ROLE_LIMITS,e.role)) fail('capability-unsupported');
+  if (Object.hasOwn(e,'producerGrammar')) {
+    if (!['preparation','preparation-verification','producer-carrier'].includes(e.role)) fail();
+    if (e.producerGrammar!=='desk-reviewed-input/1') fail('capability-unsupported');
+  }
   closed(e.limits,ROLE_LIMITS[e.role]); for (const v of Object.values(e.limits)) positive(v);
 }
 function admit(p,effect=()=>{}) {
-  closed(p,['capabilities','required','sizes']); closed(p.capabilities,['conversionContracts']);
+  closed(p,['capabilities','required','sizes']);
+  if (object(p.capabilities) && Object.keys(p.capabilities).length===0) fail('capability-unsupported');
+  closed(p.capabilities,['conversionContracts']);
   const entries=p.capabilities.conversionContracts;
   if (!Array.isArray(entries) || entries.length>32) fail();
   const r=p.required; capability(r); const identities=new Set(); let selected;
-  const identity=e=>JSON.stringify([e.contract,e.spec.version,e.spec.revision,e.spec.schemaSha256,e.spec.corpusSha256,e.profile,e.role]);
+  const identity=e=>JSON.stringify([e.contract,e.spec.version,e.spec.revision,e.spec.schemaSha256,e.spec.corpusSha256,e.profile,e.role,e.producerGrammar??null]);
   for (const e of entries) {
     capability(e); const id=identity(e); if (identities.has(id)) fail(); identities.add(id);
     if (id===identity(r)) selected=e;
@@ -315,7 +329,88 @@ function lineage(r,rawFrameBytes) {
   const answer={contractVersion:'1',column,input,result}; if (researchIdentity) answer.researchIdentity=researchIdentity;
   return answer;
 }
+
+const PRODUCER_GRAMMAR='desk-reviewed-input/1';
+const REVISION_DOMAIN='judgment-pack/retained-column/1/desk-reviewed-input/revision\0';
+function compactToken(text) {
+  let quoted=false, escaped=false, out='';
+  for (const c of text) {
+    if (quoted) {out+=c; if (escaped) escaped=false; else if (c==='\\') escaped=true; else if (c==='"') quoted=false;}
+    else if (c==='"') {quoted=true;out+=c;}
+    else if (!' \t\r\n'.includes(c)) out+=c;
+  }
+  return out;
+}
+function revisionIdentity(id,version) {
+  if (typeof id!=='string' || !full(/^research_[a-f0-9]{32}$/,id)) fail();
+  return digest(REVISION_DOMAIN+id+'\0'+String(positive(version)));
+}
+function producerContext(t,b) {
+  closed(t,['id','profileDigest','class','source','authority','shape','endpoint','adapter','tools','retainedColumnProducer']);
+  closed(b,['kind','profile','profileDigest']);closed(t.retainedColumnProducer,['contractVersion','grammar']);closed(t.adapter,['name','version','digest']);
+  for (const pin of [t.profileDigest,t.adapter.digest]) if (typeof pin!=='string' || !full(/^sha256:[0-9a-f]{64}$/,pin)) fail();
+  string(t.id,64,true);string(t.authority,256,true);
+  if (!full(/^[A-Za-z][A-Za-z0-9_-]{0,63}$/,t.id)) fail();
+  if (t.retainedColumnProducer.contractVersion!=='1' || t.retainedColumnProducer.grammar!==PRODUCER_GRAMMAR) fail('capability-unsupported');
+  if (t.class!=='generated' || t.source!=='desk-inputs' || t.shape!=='mcp' || t.endpoint!=='desk-local:reviewed-inputs' ||
+      !Array.isArray(t.tools) || t.tools.length!==1 || t.tools[0]!=='read_reviewed_input' ||
+      t.adapter.name!=='jpack-desk/reviewed-input' || t.adapter.version!=='2' ||
+      b.kind!=='operation' || b.profile!==t.id || b.profileDigest!==t.profileDigest) fail('profile-mismatch');
+}
+function producerProjection(snapshot) {
+  if (bytes(snapshot)>524288) fail('input-over-bound');
+  const original=parse(snapshot,{strict:false});
+  if (!object(original)) fail();
+  const record=original.record,research=original.research;
+  if (!object(record)||!object(research)||!object(record.research)||!object(record.research.entity)||!object(research.recipe)) fail();
+  const retained=record.research, declared=research.recipe.fields, fields=retained.entity.fields, values=record.values;
+  if (!(original.version instanceof JsonNumber)||original.version.text!=='1'||original.class!=='generated'||record.class!=='generated') fail();
+  const revision=revisionIdentity(research.id,research.recipeVersion), other=revisionIdentity(retained.runId,retained.recipeVersion);
+  if (revision!==other) fail('read-failed');
+  if (!object(values)||!object(fields)||!Array.isArray(declared)) fail();
+  if (Math.max(Object.keys(values).length,Object.keys(fields).length,declared.length)>1000) fail('input-over-bound');
+  for (const [k,v] of Object.entries(values)) {string(k,160,true);string(v,16000);}
+  const names=new Set(), declarations=[];
+  for (let i=0;i<declared.length;i++) {
+    const f=declared[i];if (!object(f)) fail();string(f.name,160,true);if(names.has(f.name)) fail();names.add(f.name);
+    if (!['text','integer','decimal','boolean','text-list','range','string','number'].includes(f.type)) fail();
+    declarations.push({name:f.name,fieldJson:compactToken(declared[RAW_ITEMS][i])});
+  }
+  const projected=Object.create(null);
+  for (const [name,e] of Object.entries(fields)) {
+    string(name,160,true);if (!object(e)||typeof e.status!=='string'||!STATUS.includes(e.status)) fail();
+    const selected={status:e.status};if (Object.hasOwn(e,'value')) selected.valueJson=e[RAW_MEMBERS].value;
+    projected[name]=selected;
+  }
+  return [{grammar:PRODUCER_GRAMMAR,snapshotVersion:1,snapshotClass:'generated',recordClass:'generated',runId:research.id,recordRunId:retained.runId,
+    recipeVersion:Number(positive(research.recipeVersion)),recordRecipeVersion:Number(positive(retained.recipeVersion)),values,declarations,fields:projected},revision];
+}
+function carrierCanon(v) {
+  if (Array.isArray(v)) return '['+v.map(carrierCanon).join(',')+']';
+  if (object(v)) return '{'+Object.keys(v).sort((a,b)=>Buffer.compare(Buffer.from(a,'utf8'),Buffer.from(b,'utf8'))).map(k=>JSON.stringify(k)+':'+carrierCanon(v[k])).join(',')+'}';
+  if (v===null || typeof v==='string' || typeof v==='boolean') return JSON.stringify(v);
+  fail('acquisition-invalid');
+}
+function generatedConsistency(p) {
+  closed(p,['carrier','profile','limits','trustedProducer','sourceBinding','receiptResultDigest','rule']);producerContext(p.trustedProducer,p.sourceBinding);
+  if (!object(p.carrier)||!object(p.carrier.retained)) fail();
+  const r={restore:p.carrier,profile:p.profile,limits:p.limits};
+  Object.defineProperty(r,CARRIER_SIZE,{value:bytes(p.carrier[RAW_TOKEN])});
+  Object.defineProperty(r,RETAINED_SIZE,{value:bytes(p.carrier.retained[RAW_TOKEN])});restore(r);
+  if (p.receiptResultDigest!==digest(carrierCanon(p.carrier))) fail('acquisition-invalid');
+  const [source,revision]=producerProjection(p.carrier.originalSnapshotJson), f=p.carrier.retained, research=f.research;
+  const equal=(a,b)=>carrierCanon(a)===carrierCanon(b);
+  if (research.declaration===null) fail('read-failed');
+  if (!equal([research.recordRecipeRevision,research.declaration.recipeRevision],[revision,revision])) fail('read-failed');
+  if (!equal(research.declaration.fields,source.declarations)) fail('read-failed');
+  if (!equal(f.values,source.values) || !equal(research.fields,source.fields)) fail('read-failed');
+  const transformation=lineage({rule:p.rule,frame:f,profile:p.profile},bytes(f[RAW_TOKEN]));
+  return {consistent:true,acquisition:'not-verified',history:'not-checked',originalSnapshotSha256:p.carrier.originalSnapshotSha256,
+    frameSha256:digest(f[RAW_TOKEN]),revisionIdentity:revision,projection:source,transformation};
+}
+
 function handle(r) {
+  if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'generatedConsistency')) return generatedConsistency(r.generatedConsistency);
   if (object(r) && Object.hasOwn(r,'restore')) return restore(r);
   if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'admission')) return admit(r.admission);
   if (object(r) && Object.keys(r).length===1 && Object.hasOwn(r,'lineage')) return lineage(r.lineage,r[FRAME_SIZE]);

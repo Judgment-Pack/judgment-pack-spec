@@ -990,6 +990,2449 @@
     {"id":"admission-malformed-empty","request":{"admission":""},"expected":{"refusal":"input-malformed"}},
     {"id":"restore-malformed-null","request":{"restore":null,"profile":"base","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728}},"expected":{"refusal":"input-malformed"}},
     {"id":"restore-malformed-array","request":{"restore":[],"profile":"base","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728}},"expected":{"refusal":"input-malformed"}},
-    {"id":"restore-malformed-empty","request":{"restore":"","profile":"base","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728}},"expected":{"refusal":"input-malformed"}}
+    {"id":"restore-malformed-empty","request":{"restore":"","profile":"base","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728}},"expected":{"refusal":"input-malformed"}},
+    {"id":"admission-producer-grammar","request":{"admission":{"capabilities":{"conversionContracts":[{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"producer-carrier","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728},"producerGrammar":"desk-reviewed-input/1"}]},"required":{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"producer-carrier","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728},"producerGrammar":"desk-reviewed-input/1"},"sizes":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728}}},"expected":{"admitted":true}},
+    {"id":"admission-producer-missing-grammar","request":{"admission":{"capabilities":{"conversionContracts":[{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"producer-carrier","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728}}]},"required":{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"producer-carrier","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728},"producerGrammar":"desk-reviewed-input/1"},"sizes":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728}}},"expected":{"refusal":"capability-unsupported"}},
+    {"id":"admission-producer-unknown-grammar","request":{"admission":{"capabilities":{"conversionContracts":[{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"producer-carrier","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728},"producerGrammar":"other/1"}]},"required":{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"producer-carrier","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728},"producerGrammar":"desk-reviewed-input/1"},"sizes":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728}}},"expected":{"refusal":"capability-unsupported"}},
+    {"id":"admission-producer-missing-conversion-contracts","request":{"admission":{"capabilities":{},"required":{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"producer-carrier","limits":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728},"producerGrammar":"desk-reviewed-input/1"},"sizes":{"originalSnapshotBytes":524288,"carrierBytes":3145728,"grantBytes":3145728,"adapterStdoutBytes":3145728,"responseBytes":3145728}}},"expected":{"refusal":"capability-unsupported"}},
+    {"id":"admission-grammar-preparation-base","request":{"admission":{"capabilities":{"conversionContracts":[{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"preparation","limits":{"documentBytes":1048576,"combinedBytes":6291456,"frameBytes":2097152,"preparationBytes":8388608,"recordBytes":8388608},"producerGrammar":"desk-reviewed-input/1"}]},"required":{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"preparation","limits":{"documentBytes":1048576,"combinedBytes":6291456,"frameBytes":2097152,"preparationBytes":8388608,"recordBytes":8388608},"producerGrammar":"desk-reviewed-input/1"},"sizes":{"documentBytes":1048576,"combinedBytes":6291456,"frameBytes":2097152,"preparationBytes":8388608,"recordBytes":8388608}}},"expected":{"admitted":true}},
+    {"id":"admission-grammar-preparation-extended","request":{"admission":{"capabilities":{"conversionContracts":[{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"extended","role":"preparation","limits":{"documentBytes":2097152,"combinedBytes":12582912,"frameBytes":4194304,"preparationBytes":16777216,"recordBytes":16777216},"producerGrammar":"desk-reviewed-input/1"}]},"required":{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"extended","role":"preparation","limits":{"documentBytes":2097152,"combinedBytes":12582912,"frameBytes":4194304,"preparationBytes":16777216,"recordBytes":16777216},"producerGrammar":"desk-reviewed-input/1"},"sizes":{"documentBytes":2097152,"combinedBytes":12582912,"frameBytes":4194304,"preparationBytes":16777216,"recordBytes":16777216}}},"expected":{"admitted":true}},
+    {"id":"admission-grammar-preparation-verification-base","request":{"admission":{"capabilities":{"conversionContracts":[{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"preparation-verification","limits":{"documentBytes":1048576,"combinedBytes":6291456,"frameBytes":2097152,"preparationBytes":8388608,"recordBytes":8388608},"producerGrammar":"desk-reviewed-input/1"}]},"required":{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"base","role":"preparation-verification","limits":{"documentBytes":1048576,"combinedBytes":6291456,"frameBytes":2097152,"preparationBytes":8388608,"recordBytes":8388608},"producerGrammar":"desk-reviewed-input/1"},"sizes":{"documentBytes":1048576,"combinedBytes":6291456,"frameBytes":2097152,"preparationBytes":8388608,"recordBytes":8388608}}},"expected":{"admitted":true}},
+    {"id":"admission-grammar-preparation-verification-extended","request":{"admission":{"capabilities":{"conversionContracts":[{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"extended","role":"preparation-verification","limits":{"documentBytes":2097152,"combinedBytes":12582912,"frameBytes":4194304,"preparationBytes":16777216,"recordBytes":16777216},"producerGrammar":"desk-reviewed-input/1"}]},"required":{"contract":"retained-column/1","spec":{"version":"draft-rfc0029","revision":"0000000000000000000000000000000000000000","schemaSha256":"sha256:1111111111111111111111111111111111111111111111111111111111111111","corpusSha256":"sha256:2222222222222222222222222222222222222222222222222222222222222222"},"profile":"extended","role":"preparation-verification","limits":{"documentBytes":2097152,"combinedBytes":12582912,"frameBytes":4194304,"preparationBytes":16777216,"recordBytes":16777216},"producerGrammar":"desk-reviewed-input/1"},"sizes":{"documentBytes":2097152,"combinedBytes":12582912,"frameBytes":4194304,"preparationBytes":16777216,"recordBytes":16777216}}},"expected":{"admitted":true}}
+  ],
+  "producerCases": [
+    {
+      "id": "producer-original-type-text"
+    },
+    {
+      "id": "producer-original-type-integer",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Integer"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Integer"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "-0"
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "-0"
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "fieldSha256"
+          ],
+          "value": "sha256:eb500d8bd1a106b052e2963f12263e75b1cf0e4d593a7d1a6fd3651c1715db8a"
+        }
+      ]
+    },
+    {
+      "id": "producer-original-type-decimal",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Decimal"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Decimal"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "\"1.2300\""
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "\"1.2300\""
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "fieldSha256"
+          ],
+          "value": "sha256:1e96f41174e008b55a85766badc3a1b474145b5dae98709713c83285b99d898c"
+        }
+      ]
+    },
+    {
+      "id": "producer-original-type-boolean",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Boolean"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Boolean"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "false"
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "false"
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "fieldSha256"
+          ],
+          "value": "sha256:6bbd6a1d2d192a87512cb5e5477aca6a6e30f90580ff2e8022172abf26b748f7"
+        }
+      ]
+    },
+    {
+      "id": "producer-original-type-text-list",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "List"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "List"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "[]"
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "[]"
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "fieldSha256"
+          ],
+          "value": "sha256:b83dd6a3e1df1b8605aff28ae3bb6e3bbd9a5a072adf6421cb5fda9f997cc023"
+        }
+      ]
+    },
+    {
+      "id": "producer-original-type-range",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Range"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Range"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "{\"min\":\"1.00\",\"max\":\"2.0\"}"
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "{\"min\":\"1.00\",\"max\":\"2.0\"}"
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "fieldSha256"
+          ],
+          "value": "sha256:d463e0f77bf2c28fa7c6c2fcd70c2aab4ce341e99486f1a25eca6642166d0a46"
+        }
+      ]
+    },
+    {
+      "id": "producer-original-type-string",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "String"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "String"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "\"\""
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "\"\""
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "fieldSha256"
+          ],
+          "value": "sha256:60e84d0fe0de00c95ffed8b8a36d4dc798118c29efed18dac23449f47ca8be39"
+        }
+      ]
+    },
+    {
+      "id": "producer-original-type-number",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Number"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Number"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "-0"
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "-0"
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "fieldSha256"
+          ],
+          "value": "sha256:78fc205fa9a01e82bb0442bffd41f6c3e8ccd611d655d490c252f4c8c2a99898"
+        }
+      ]
+    },
+    {
+      "id": "producer-kind-text",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "kind"
+          ],
+          "value": "text"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "researchIdentity"
+          ],
+          "remove": true
+        }
+      ]
+    },
+    {
+      "id": "producer-kind-decimal",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Decimal"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "kind"
+          ],
+          "value": "decimal"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "researchIdentity"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Decimal"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "\"1.2300\""
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "\"1.2300\""
+        }
+      ]
+    },
+    {
+      "id": "producer-kind-number",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Number"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "kind"
+          ],
+          "value": "number"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "researchIdentity"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Number"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "\"-0\""
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "-0"
+        }
+      ]
+    },
+    {
+      "id": "producer-kind-boolean",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Boolean"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "kind"
+          ],
+          "value": "boolean"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "trueValue"
+          ],
+          "value": "true"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "falseValue"
+          ],
+          "value": "false"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "researchIdentity"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Boolean"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "\"false\""
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "false"
+        }
+      ]
+    },
+    {
+      "id": "producer-kind-evidence-availability",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Evidence"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "kind"
+          ],
+          "value": "evidence-availability"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "transformation",
+            "researchIdentity"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Evidence"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "\"present\""
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "\"present\""
+        }
+      ]
+    },
+    {
+      "id": "producer-omitted-unselected-declaration",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields"
+          ],
+          "value": [
+            {
+              "name": "Text",
+              "fieldJson": "{\"type\":\"text\",\"name\":\"Text\",\"description\":\"A  \\u0042 / kept\"}"
+            },
+            {
+              "name": "Integer",
+              "fieldJson": "{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"}"
+            },
+            {
+              "name": "Decimal",
+              "fieldJson": "{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"}"
+            },
+            {
+              "name": "Boolean",
+              "fieldJson": "{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"}"
+            },
+            {
+              "name": "List",
+              "fieldJson": "{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"}"
+            },
+            {
+              "name": "Range",
+              "fieldJson": "{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"}"
+            },
+            {
+              "name": "String",
+              "fieldJson": "{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"}"
+            },
+            {
+              "name": "Number",
+              "fieldJson": "{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"}"
+            }
+          ]
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:6dc48a2dc5e7c7119c4377754526a6164390c0106557b36cc59aa461aff5f4bc"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-extra-declaration",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields"
+          ],
+          "value": [
+            {
+              "name": "Text",
+              "fieldJson": "{\"type\":\"text\",\"name\":\"Text\",\"description\":\"A  \\u0042 / kept\"}"
+            },
+            {
+              "name": "Integer",
+              "fieldJson": "{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"}"
+            },
+            {
+              "name": "Decimal",
+              "fieldJson": "{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"}"
+            },
+            {
+              "name": "Boolean",
+              "fieldJson": "{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"}"
+            },
+            {
+              "name": "List",
+              "fieldJson": "{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"}"
+            },
+            {
+              "name": "Range",
+              "fieldJson": "{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"}"
+            },
+            {
+              "name": "String",
+              "fieldJson": "{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"}"
+            },
+            {
+              "name": "Number",
+              "fieldJson": "{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"}"
+            },
+            {
+              "name": "Evidence",
+              "fieldJson": "{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}"
+            },
+            {
+              "name": "Extra",
+              "fieldJson": "{\"name\":\"Extra\",\"type\":\"text\"}"
+            }
+          ]
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:680ffbb2a99ce0a0577e0faeed3c8a9b06da5ccd5c2d546469ffbb3299e209ac"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-reordered-declarations",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            0,
+            "name"
+          ],
+          "value": "Evidence"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            0,
+            "fieldJson"
+          ],
+          "value": "{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            1,
+            "name"
+          ],
+          "value": "Number"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            1,
+            "fieldJson"
+          ],
+          "value": "{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            2,
+            "name"
+          ],
+          "value": "String"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            2,
+            "fieldJson"
+          ],
+          "value": "{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            3,
+            "name"
+          ],
+          "value": "Range"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            3,
+            "fieldJson"
+          ],
+          "value": "{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            5,
+            "name"
+          ],
+          "value": "Boolean"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            5,
+            "fieldJson"
+          ],
+          "value": "{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            6,
+            "name"
+          ],
+          "value": "Decimal"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            6,
+            "fieldJson"
+          ],
+          "value": "{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            7,
+            "name"
+          ],
+          "value": "Integer"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            7,
+            "fieldJson"
+          ],
+          "value": "{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            8,
+            "name"
+          ],
+          "value": "Text"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            8,
+            "fieldJson"
+          ],
+          "value": "{\"type\":\"text\",\"name\":\"Text\",\"description\":\"A  \\u0042 / kept\"}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:c227d6757513533c9b93770f98ed22eed4bcbe63dbcb5d155d59ad9218530a79"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-unselected-description",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            7,
+            "fieldJson"
+          ],
+          "value": "{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Changed unselected\"}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:3504a7050aaa6a156a66f166dcf75d365344818cd68d0f3ea137fc55d8328692"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-semantic-equal-escape-changed",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "fields",
+            0,
+            "fieldJson"
+          ],
+          "value": "{\"type\":\"text\",\"name\":\"Text\",\"description\":\"A  B / kept\"}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:5d2be429514f3e61c69bb39001aaccaaaadbae29c939e39dd4bb135f646166e3"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-current-frame-revision",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "recordRecipeRevision"
+          ],
+          "value": "sha256:6ac1dde4e2cb90262060258a1cb1ee5ba2538f4822f427fb24110e9fbcbb69cf"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:fb457571371329a04b1fade5f1d7d7fc9061df62963bc088c1b774bcf70c9e49"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-current-declaration-revision",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "recipeRevision"
+          ],
+          "value": "sha256:6ac1dde4e2cb90262060258a1cb1ee5ba2538f4822f427fb24110e9fbcbb69cf"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:bb405f4e16e2f1540c86e2e60b40640f1cbb83adea9e9e3ed2fde0d8e43ffcf5"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-original-revision-missing",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:04042ad5b63806097cb0659c82e79e5df4d75d0afad863ff7529c1bba62ce98e"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:afe407f6b0cc167e8acece6172f8fa5bd285a2d28cc285bbc843007170dffa8e"
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-record-original-revision-mismatch",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":8,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:b04dfc4d28d5ad95484a01425164f7f7edf655e86c02d74cf8bba75381959198"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:ca450043b392071ef63ae4f97b2dbf7bcad0b504532cf1ba46bcbf5c4440e3c8"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-run-id-invalid",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_not-a-supported-id\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_not-a-supported-id\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:d5f624385882c468d63959c5dc3cf48e12fc45d8a3f1f2d4d67c517cc12851dd"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:ed94ef25281680ed9024c61fd0be27f8b229121003abffce66c29fa03cf441a6"
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-version-not-literal-integer",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7e0,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7e0,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:029d8697207f336d06f82ba36f0c2f00c2265b5b3aa0ba2de1d001313a839eea"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:fbbb8d37532788686ac488c4dcb4fcbf2b94bd134c16a7a729850d248bd7cdd6"
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-original-fields-missing",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"notFields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:4d8102da1d96389e9bd6cc17ceca5042d6ae808242044f7ad84a27f599371a74"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:d7a3a3efdcf5199177c19903120e0efd136b4ac2b3b5e5e0282f2e9edb866bae"
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-filtered-values-substitution",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "Integer"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "Decimal"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "Boolean"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "List"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "Range"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "String"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "Number"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "Evidence"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "Text"
+          ],
+          "value": "filtered visible"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:dec0c2a30ea2608c883da6897605e7af94bf2384f29905d85faf4ce4869900e7"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-zero-spelling-changed",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "fields",
+            "Integer",
+            "valueJson"
+          ],
+          "value": "0"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:a6ec27e3321e8b5e4fd15e9400cc6f778b6c7990ac8da6cb53df1d6de18b07ec"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-status-changed",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "fields",
+            "Boolean",
+            "status"
+          ],
+          "value": "missing"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:79a9715441fadd67b75df40914d14dd5da81f9da691f87a90dd0fa47f058a489"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-typed-field-omitted",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "fields",
+            "Number"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:de2e06b3d161e7f255719d26618b510ef254bd1e9b96743aaf80b5a64063a06b"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    },
+    {
+      "id": "producer-wrong-trusted-source",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "trustedProducer",
+            "source"
+          ],
+          "value": "other-source"
+        }
+      ],
+      "expected": {
+        "refusal": "profile-mismatch"
+      }
+    },
+    {
+      "id": "producer-asserted-trust",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "trustedProducer",
+            "class"
+          ],
+          "value": "asserted"
+        }
+      ],
+      "expected": {
+        "refusal": "profile-mismatch"
+      }
+    },
+    {
+      "id": "producer-record-trust",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "trustedProducer",
+            "class"
+          ],
+          "value": "record"
+        }
+      ],
+      "expected": {
+        "refusal": "profile-mismatch"
+      }
+    },
+    {
+      "id": "producer-old-adapter",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "trustedProducer",
+            "adapter",
+            "version"
+          ],
+          "value": "1"
+        }
+      ],
+      "expected": {
+        "refusal": "profile-mismatch"
+      }
+    },
+    {
+      "id": "producer-wrong-profile-digest",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "sourceBinding",
+            "profileDigest"
+          ],
+          "value": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ],
+      "expected": {
+        "refusal": "profile-mismatch"
+      }
+    },
+    {
+      "id": "producer-unknown-grammar",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "trustedProducer",
+            "retainedColumnProducer",
+            "grammar"
+          ],
+          "value": "other/1"
+        }
+      ],
+      "expected": {
+        "refusal": "capability-unsupported"
+      }
+    },
+    {
+      "id": "producer-frame-origin-forged",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "origin"
+          ],
+          "value": "asserted"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:68cd89447354e38028c2e8ff1858a3ed6933a8b3237635ca495324d7913371fd"
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-updated-frame-old-receipt",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"changed\",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"changed\",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:00dacd4cd2c331a555ff9e2be0539e3e72256fef65617a34b9446bc73a673f99"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "Text"
+          ],
+          "value": "changed"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "fields",
+            "Text",
+            "valueJson"
+          ],
+          "value": "\"changed\""
+        }
+      ],
+      "expected": {
+        "refusal": "acquisition-invalid"
+      }
+    },
+    {
+      "id": "producer-duplicate-snapshot-key",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"cl\\u0061ss\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:4e9f48488441eca4b1f2dde38b0375e0e77776250716532d1a5c75b3beafd005"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:dcbe654b3137f922cb4fe820efdcc1633e280287e21d750e3fefa313f5e5874d"
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-duplicate-nested-key",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"x\":1,\"\\u0078\":2}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:4b4cdd463cfb015c751ceec805c50405e3df6a4df6f36806084553ddb062b2bd"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:c867f92b9a9126be8e0959dbea823293b6a30030f0fe8699f34b9d0721703f75"
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-duplicate-declaration-name",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:324b0b3ab4736cba4d1cbaa3ca96e10275a67da1e5ea734725979d96bf0f5cf4"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:3ce6a241f21d0c4aead23da0cfb4b9adedfed7e3b05650c51ecf261a3cec8c4e"
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-unavailable-absent",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"missing\",\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:7a489b2c5ba033f1bd8dde3c3dfc6426c395645120a2dd6c305a7e051e3aa526"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "fields",
+            "Boolean",
+            "valueJson"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "fields",
+            "Boolean",
+            "status"
+          ],
+          "value": "missing"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:b401945245ba15164f6c5d43fd8b897325ebd85f4e282ab1e0889469a4c5445c"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Boolean"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:7a489b2c5ba033f1bd8dde3c3dfc6426c395645120a2dd6c305a7e051e3aa526"
+        },
+        {
+          "path": [
+            "frameSha256"
+          ],
+          "value": "sha256:59453fa223eddd68728a4128c690aeafdeee1bff9971e53a54fafaa77856480a"
+        },
+        {
+          "path": [
+            "projection",
+            "fields",
+            "Boolean",
+            "valueJson"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "projection",
+            "fields",
+            "Boolean",
+            "status"
+          ],
+          "value": "missing"
+        },
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Boolean"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "state"
+          ],
+          "value": "missing"
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "state"
+          ],
+          "value": "omitted"
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "reason"
+          ],
+          "value": "unavailable"
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "fieldSha256"
+          ],
+          "value": "sha256:6bbd6a1d2d192a87512cb5e5477aca6a6e30f90580ff2e8022172abf26b748f7"
+        }
+      ]
+    },
+    {
+      "id": "producer-unavailable-null",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"missing\",\"value\":null,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:1a7e66b3a08cec8bdedf1d608a33ea416500b9c4c94a17c6c3ace0f60b8e47c5"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "fields",
+            "Boolean",
+            "status"
+          ],
+          "value": "missing"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "fields",
+            "Boolean",
+            "valueJson"
+          ],
+          "value": "null"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:fb649a9d0105e67c0a8d404fc3d295e70991b6b7363dbd6fcfefd374f736ebf5"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Boolean"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:1a7e66b3a08cec8bdedf1d608a33ea416500b9c4c94a17c6c3ace0f60b8e47c5"
+        },
+        {
+          "path": [
+            "frameSha256"
+          ],
+          "value": "sha256:286b7fa4642d919bc9dc8f4683f72675975de3c0f0cfdc1b1b705a9af2b8fc74"
+        },
+        {
+          "path": [
+            "projection",
+            "fields",
+            "Boolean",
+            "status"
+          ],
+          "value": "missing"
+        },
+        {
+          "path": [
+            "projection",
+            "fields",
+            "Boolean",
+            "valueJson"
+          ],
+          "value": "null"
+        },
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Boolean"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "null"
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "state"
+          ],
+          "value": "omitted"
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "reason"
+          ],
+          "value": "unavailable"
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "fieldSha256"
+          ],
+          "value": "sha256:6bbd6a1d2d192a87512cb5e5477aca6a6e30f90580ff2e8022172abf26b748f7"
+        }
+      ]
+    },
+    {
+      "id": "producer-availability-absent",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"absent\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:516048df9328b4027408bc01a2ba64dcd0dba859b9e15f78ee26a2cac8442699"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "Evidence"
+          ],
+          "value": "absent"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:230689081da8fe78c98cd1e31bc4779e38ee64def2b6215dcc5692a050e16efb"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Evidence"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "kind"
+          ],
+          "value": "evidence-availability"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:516048df9328b4027408bc01a2ba64dcd0dba859b9e15f78ee26a2cac8442699"
+        },
+        {
+          "path": [
+            "frameSha256"
+          ],
+          "value": "sha256:e6cd75757aa8f19324b4b8cd26728bc936a091decfb1874218fed2515175e9d1"
+        },
+        {
+          "path": [
+            "projection",
+            "values",
+            "Evidence"
+          ],
+          "value": "absent"
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Evidence"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "\"absent\""
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "\"absent\""
+        }
+      ]
+    },
+    {
+      "id": "producer-availability-unknown",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"unknown\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:e4866ac57ce1aabf403a9aef302f6d53d53add86853b4274d7ceb96c6b79e741"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "values",
+            "Evidence"
+          ],
+          "value": "unknown"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:a3e6dcbf9b0826353d6aba20167e76dd93a6bb86e770e99d0c3a287a6815912c"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "column"
+          ],
+          "value": "Evidence"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "rule",
+            "kind"
+          ],
+          "value": "evidence-availability"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:e4866ac57ce1aabf403a9aef302f6d53d53add86853b4274d7ceb96c6b79e741"
+        },
+        {
+          "path": [
+            "frameSha256"
+          ],
+          "value": "sha256:775394053b4489fb881c6b1a2ba96abdc6d587f34086478769a59e143d07ae4a"
+        },
+        {
+          "path": [
+            "projection",
+            "values",
+            "Evidence"
+          ],
+          "value": "unknown"
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity"
+          ],
+          "remove": true
+        },
+        {
+          "path": [
+            "transformation",
+            "column"
+          ],
+          "value": "Evidence"
+        },
+        {
+          "path": [
+            "transformation",
+            "input",
+            "json"
+          ],
+          "value": "\"unknown\""
+        },
+        {
+          "path": [
+            "transformation",
+            "result",
+            "json"
+          ],
+          "value": "\"unknown\""
+        }
+      ]
+    },
+    {
+      "id": "producer-revision-boundary-1",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":1,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":1,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:2c0c1589d4e4d7245a483dc680570976793bd11391ed41a0d22c076897a72a00"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "recordRecipeRevision"
+          ],
+          "value": "sha256:2ad9735e6b3b81add9fa85447209c1104b85708c81a6694ea83d607e6bc15ca2"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "recipeRevision"
+          ],
+          "value": "sha256:2ad9735e6b3b81add9fa85447209c1104b85708c81a6694ea83d607e6bc15ca2"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:5a88b51911f607c70cc530c704ce668cc964180919765f6d909968c5d6f67183"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:2c0c1589d4e4d7245a483dc680570976793bd11391ed41a0d22c076897a72a00"
+        },
+        {
+          "path": [
+            "frameSha256"
+          ],
+          "value": "sha256:a1e85c3dd9f3ea55d8afba10d4568c9c5e3a69ae2ab5308d73ea6b8b7db35810"
+        },
+        {
+          "path": [
+            "revisionIdentity"
+          ],
+          "value": "sha256:2ad9735e6b3b81add9fa85447209c1104b85708c81a6694ea83d607e6bc15ca2"
+        },
+        {
+          "path": [
+            "projection",
+            "recipeVersion"
+          ],
+          "value": 1
+        },
+        {
+          "path": [
+            "projection",
+            "recordRecipeVersion"
+          ],
+          "value": 1
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "recipeRevision"
+          ],
+          "value": "sha256:2ad9735e6b3b81add9fa85447209c1104b85708c81a6694ea83d607e6bc15ca2"
+        }
+      ]
+    },
+    {
+      "id": "producer-revision-boundary-9007199254740991",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":9007199254740991,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":9007199254740991,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:846acccd4ba99ed32bfbd72c86b76ea94cf9d430e2dea4ebe8c58a7b96276418"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "recordRecipeRevision"
+          ],
+          "value": "sha256:195f78bf3c5a40044ebe16d52f934a9edb9f5665ac93c6bec7525d939adcb18e"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "recipeRevision"
+          ],
+          "value": "sha256:195f78bf3c5a40044ebe16d52f934a9edb9f5665ac93c6bec7525d939adcb18e"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:0ba64b795fb9c175b5272b6abab9cf46486eaeac62aec7b6b51186c0b4dc9ca8"
+        }
+      ],
+      "expectedPatch": [
+        {
+          "path": [
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:846acccd4ba99ed32bfbd72c86b76ea94cf9d430e2dea4ebe8c58a7b96276418"
+        },
+        {
+          "path": [
+            "frameSha256"
+          ],
+          "value": "sha256:eabb4bad72c9859b47186ff9d39ef89ba7f0f3573bdc880a390ba22ea0c8e3fc"
+        },
+        {
+          "path": [
+            "revisionIdentity"
+          ],
+          "value": "sha256:195f78bf3c5a40044ebe16d52f934a9edb9f5665ac93c6bec7525d939adcb18e"
+        },
+        {
+          "path": [
+            "projection",
+            "recipeVersion"
+          ],
+          "value": 9007199254740991
+        },
+        {
+          "path": [
+            "projection",
+            "recordRecipeVersion"
+          ],
+          "value": 9007199254740991
+        },
+        {
+          "path": [
+            "transformation",
+            "researchIdentity",
+            "recipeRevision"
+          ],
+          "value": "sha256:195f78bf3c5a40044ebe16d52f934a9edb9f5665ac93c6bec7525d939adcb18e"
+        }
+      ]
+    },
+    {
+      "id": "producer-escaped-frame-identity",
+      "expectedPatch": [
+        {
+          "path": [
+            "frameSha256"
+          ],
+          "value": "sha256:6e1ee80662772a061f8a00d1b32fef99259ce06a5973770ff3abd94836b0ca72"
+        }
+      ],
+      "wireJson": "{\"generatedConsistency\":{\"carrier\":{\"contractVersion\":\"1\",\"originalSnapshotJson\":\"{\\\"version\\\":1,\\\"class\\\":\\\"generated\\\",\\\"preparationId\\\":\\\"prep_synthetic\\\",\\\"recipeVersion\\\":8,\\\"qualification\\\":null,\\\"prepared\\\":{\\\"ignored\\\":\\\"not raw input\\\"},\\\"record\\\":{\\\"id\\\":\\\"record_synthetic\\\",\\\"name\\\":\\\"Synthetic\\\",\\\"sourceId\\\":\\\"source_synthetic\\\",\\\"row\\\":1,\\\"class\\\":\\\"generated\\\",\\\"status\\\":\\\"ready\\\",\\\"values\\\":{\\\"Text\\\":\\\"  A  \\\",\\\"Integer\\\":\\\"-0\\\",\\\"Decimal\\\":\\\"1.2300\\\",\\\"Boolean\\\":\\\"false\\\",\\\"List\\\":\\\"[]\\\",\\\"Range\\\":\\\"{\\\\\\\"min\\\\\\\":\\\\\\\"1.00\\\\\\\",\\\\\\\"max\\\\\\\":\\\\\\\"2.0\\\\\\\"}\\\",\\\"String\\\":\\\"\\\",\\\"Number\\\":\\\"-0\\\",\\\"Evidence\\\":\\\"present\\\"},\\\"research\\\":{\\\"runId\\\":\\\"research_11111111111111111111111111111111\\\",\\\"recipeVersion\\\":7,\\\"entity\\\":{\\\"id\\\":\\\"entity_synthetic\\\",\\\"kind\\\":\\\"record\\\",\\\"name\\\":\\\"Synthetic\\\",\\\"url\\\":\\\"https://example.test/\\\",\\\"fields\\\":{\\\"Text\\\":{\\\"status\\\":\\\"supported\\\",\\\"value\\\":\\\"  A  \\\",\\\"sources\\\":[],\\\"note\\\":\\\"opaque source note\\\"},\\\"Integer\\\":{\\\"status\\\":\\\"supported\\\",\\\"value\\\":-0,\\\"sources\\\":[],\\\"note\\\":\\\"opaque source note\\\"},\\\"Decimal\\\":{\\\"status\\\":\\\"supported\\\",\\\"value\\\":\\\"1.2300\\\",\\\"sources\\\":[],\\\"note\\\":\\\"opaque source note\\\"},\\\"Boolean\\\":{\\\"status\\\":\\\"supported\\\",\\\"value\\\":false,\\\"sources\\\":[],\\\"note\\\":\\\"opaque source note\\\"},\\\"List\\\":{\\\"status\\\":\\\"supported\\\",\\\"value\\\":[],\\\"sources\\\":[],\\\"note\\\":\\\"opaque source note\\\"},\\\"Range\\\":{\\\"status\\\":\\\"supported\\\",\\\"value\\\":{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"},\\\"sources\\\":[],\\\"note\\\":\\\"opaque source note\\\"},\\\"String\\\":{\\\"status\\\":\\\"supported\\\",\\\"value\\\":\\\"\\\",\\\"sources\\\":[],\\\"note\\\":\\\"opaque source note\\\"},\\\"Number\\\":{\\\"status\\\":\\\"supported\\\",\\\"value\\\":-0,\\\"sources\\\":[],\\\"note\\\":\\\"opaque source note\\\"},\\\"Evidence\\\":{\\\"status\\\":\\\"supported\\\",\\\"value\\\":\\\"present\\\",\\\"sources\\\":[],\\\"note\\\":\\\"opaque source note\\\"}}}}},\\\"values\\\":{\\\"Text\\\":\\\"filtered visible\\\"},\\\"research\\\":{\\\"id\\\":\\\"research_11111111111111111111111111111111\\\",\\\"recipeVersion\\\":7,\\\"recipe\\\":{\\\"version\\\":1,\\\"target\\\":\\\"records\\\",\\\"fields\\\":[{ \\\"type\\\" : \\\"text\\\", \\\"name\\\" : \\\"Text\\\", \\\"description\\\" : \\\"A  \\\\u0042 / kept\\\" },{\\\"name\\\":\\\"Integer\\\",\\\"type\\\":\\\"integer\\\",\\\"description\\\":\\\"Original integer\\\"},{\\\"name\\\":\\\"Decimal\\\",\\\"type\\\":\\\"decimal\\\",\\\"description\\\":\\\"Original decimal\\\"},{\\\"name\\\":\\\"Boolean\\\",\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"Original boolean\\\"},{\\\"name\\\":\\\"List\\\",\\\"type\\\":\\\"text-list\\\",\\\"description\\\":\\\"Original list\\\"},{\\\"name\\\":\\\"Range\\\",\\\"type\\\":\\\"range\\\",\\\"description\\\":\\\"Original range\\\"},{\\\"name\\\":\\\"String\\\",\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"Historical string\\\"},{\\\"name\\\":\\\"Number\\\",\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"Historical number\\\"},{\\\"name\\\":\\\"Evidence\\\",\\\"type\\\":\\\"text\\\",\\\"description\\\":\\\"Availability\\\"}],\\\"criteria\\\":[],\\\"ai\\\":{},\\\"limits\\\":{}},\\\"intent\\\":\\\"Opaque original intent\\\",\\\"createdAt\\\":\\\"2026-01-01T00:00:00Z\\\",\\\"approvedLimits\\\":{},\\\"budgetApprovals\\\":[],\\\"workflowApproval\\\":null,\\\"modelResponses\\\":[],\\\"sources\\\":[]},\\\"reviews\\\":[],\\\"legacyOpaque\\\":{\\\"escaped\\\":\\\"\\\\ud800\\\"}}\",\"originalSnapshotSha256\":\"sha256:059b04e2781eea91f1d1f529fdbd5f6da1d1e731acab7309615b99a7ec52f4ea\",\"retained\":{\"contractVersion\":\"1\",\"origin\":\"generated\",\"values\":{\"\\u0054ext\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"recordRecipeRevision\":\"sha256:2fffc39ce48e5ecf531123cbcf65ff4dac679c044a25c681ecd44bc2fb28daed\",\"declaration\":{\"recipeRevision\":\"sha256:2fffc39ce48e5ecf531123cbcf65ff4dac679c044a25c681ecd44bc2fb28daed\",\"fields\":[{\"name\":\"Text\",\"fieldJson\":\"{\\\"type\\\":\\\"text\\\",\\\"name\\\":\\\"Text\\\",\\\"description\\\":\\\"A  \\\\u0042 / kept\\\"}\"},{\"name\":\"Integer\",\"fieldJson\":\"{\\\"name\\\":\\\"Integer\\\",\\\"type\\\":\\\"integer\\\",\\\"description\\\":\\\"Original integer\\\"}\"},{\"name\":\"Decimal\",\"fieldJson\":\"{\\\"name\\\":\\\"Decimal\\\",\\\"type\\\":\\\"decimal\\\",\\\"description\\\":\\\"Original decimal\\\"}\"},{\"name\":\"Boolean\",\"fieldJson\":\"{\\\"name\\\":\\\"Boolean\\\",\\\"type\\\":\\\"boolean\\\",\\\"description\\\":\\\"Original boolean\\\"}\"},{\"name\":\"List\",\"fieldJson\":\"{\\\"name\\\":\\\"List\\\",\\\"type\\\":\\\"text-list\\\",\\\"description\\\":\\\"Original list\\\"}\"},{\"name\":\"Range\",\"fieldJson\":\"{\\\"name\\\":\\\"Range\\\",\\\"type\\\":\\\"range\\\",\\\"description\\\":\\\"Original range\\\"}\"},{\"name\":\"String\",\"fieldJson\":\"{\\\"name\\\":\\\"String\\\",\\\"type\\\":\\\"string\\\",\\\"description\\\":\\\"Historical string\\\"}\"},{\"name\":\"Number\",\"fieldJson\":\"{\\\"name\\\":\\\"Number\\\",\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"Historical number\\\"}\"},{\"name\":\"Evidence\",\"fieldJson\":\"{\\\"name\\\":\\\"Evidence\\\",\\\"type\\\":\\\"text\\\",\\\"description\\\":\\\"Availability\\\"}\"}]},\"fields\":{\"Text\":{\"status\":\"supported\",\"valueJson\":\"\\\"  A  \\\"\"},\"Integer\":{\"status\":\"supported\",\"valueJson\":\"-0\"},\"Decimal\":{\"status\":\"supported\",\"valueJson\":\"\\\"1.2300\\\"\"},\"Boolean\":{\"status\":\"supported\",\"valueJson\":\"false\"},\"List\":{\"status\":\"supported\",\"valueJson\":\"[]\"},\"Range\":{\"status\":\"supported\",\"valueJson\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\"},\"String\":{\"status\":\"supported\",\"valueJson\":\"\\\"\\\"\"},\"Number\":{\"status\":\"supported\",\"valueJson\":\"-0\"},\"Evidence\":{\"status\":\"supported\",\"valueJson\":\"\\\"present\\\"\"}}}}},\"profile\":\"base\",\"limits\":{\"originalSnapshotBytes\":524288,\"carrierBytes\":3145728},\"trustedProducer\":{\"id\":\"reviewed-columns\",\"profileDigest\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"class\":\"generated\",\"source\":\"desk-inputs\",\"authority\":\"synthetic-trusted-host\",\"shape\":\"mcp\",\"endpoint\":\"desk-local:reviewed-inputs\",\"adapter\":{\"name\":\"jpack-desk/reviewed-input\",\"version\":\"2\",\"digest\":\"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"},\"tools\":[\"read_reviewed_input\"],\"retainedColumnProducer\":{\"contractVersion\":\"1\",\"grammar\":\"desk-reviewed-input/1\"}},\"sourceBinding\":{\"kind\":\"operation\",\"profile\":\"reviewed-columns\",\"profileDigest\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"},\"receiptResultDigest\":\"sha256:4e8a6ba130e89f25231ce9b54c6062a1bf6e773762b7d41929839319d11f43c4\",\"rule\":{\"contractVersion\":\"1\",\"column\":\"Text\",\"kind\":\"research-value\"}}}"
+    },
+    {
+      "id": "producer-null-carrier",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-null-trust",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "trustedProducer"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-nonscalar-status",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotJson"
+          ],
+          "value": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":[],\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "originalSnapshotSha256"
+          ],
+          "value": "sha256:fca776bd6116127a8205e8be1bf08f873be6b942cace10426c1131eb75eb316d"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:93984f2cc75d67a2562c965876f4057a72e0c3f3452c65af8dd3ef4dd14fd9c5"
+        }
+      ],
+      "expected": {
+        "refusal": "input-malformed"
+      }
+    },
+    {
+      "id": "producer-extended-small-consistency",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "profile"
+          ],
+          "value": "extended"
+        }
+      ]
+    },
+    {
+      "id": "producer-current-both-frame-revisions",
+      "requestPatch": [
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "recordRecipeRevision"
+          ],
+          "value": "sha256:6ac1dde4e2cb90262060258a1cb1ee5ba2538f4822f427fb24110e9fbcbb69cf"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "carrier",
+            "retained",
+            "research",
+            "declaration",
+            "recipeRevision"
+          ],
+          "value": "sha256:6ac1dde4e2cb90262060258a1cb1ee5ba2538f4822f427fb24110e9fbcbb69cf"
+        },
+        {
+          "path": [
+            "generatedConsistency",
+            "receiptResultDigest"
+          ],
+          "value": "sha256:23f10df115410791decfad68a7c4ca87a88e5fab7573f98f75dae2635986ddac"
+        }
+      ],
+      "expected": {
+        "refusal": "read-failed"
+      }
+    }
   ]
 }

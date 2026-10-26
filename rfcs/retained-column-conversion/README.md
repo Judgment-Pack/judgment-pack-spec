@@ -43,3 +43,35 @@ The conditional document 1/2 MiB, combined 6/12 MiB and standalone producer tran
 figures remain proposals. Preparation/record 8/16 MiB accounting, actual producer transport,
 original inventory commitments in complete receipts, Runtime/Runner integration, independent
 production recomputation, exact-head CI/review and normative adoption remain prerequisites.
+
+
+Run `python3 -B rfcs/retained-column-conversion/check.py --inventory-only` for the
+producer-specific relation and identity fixtures. The full original snapshot remains
+byte-exact; the reader extracts a separately closed projection, compares the complete
+ordered declaration inventory, binds unfiltered `record.values` and exact typed
+status/value tokens, and derives the domain-separated 71-byte revision identity.
+The proposed `desk-reviewed-input/1` profile member and optional role capability
+binding require a new pinned adapter version 2; current version 1 is not claimed.
+
+`{generatedConsistency:{carrier,profile,limits,trustedProducer,sourceBinding,
+receiptResultDigest,rule}}` is a pure probe. Its supplied profile projection/digest
+are independent seams, not authentication performed by this protocol. Every success
+explicitly returns `acquisition:"not-verified"` and `history:"not-checked"`. Existing
+signature/request/profile verification and complete original-history lookup by the
+actual trusted producer remain required. A matching projection cannot prove that
+history was loaded or that any record is true. The schema closes the extracted
+projection, not the full legacy snapshot; opaque source members remain retained.
+
+The focused checks exercise all eight original types, all five conversion kinds,
+availability, original versus current revision, omitted/extra/reordered/unselected
+declarations, exact escapes/-0/null/absence/status, wrong trusted context, stale
+receipt digests, exact raw-frame identity and the 524288-byte original snapshot
+boundary. Both readers have the same author and remain Draft-only prototypes.
+
+Producer cases use explicit literal `requestPatch`/`expectedPatch` edits against
+`examples.json`'s labelled `producerConsistency` fixture. An explicit `expected`
+refusal replaces the positive expectation. Paths are decoded member names or array
+indexes, and edits set a literal `value` or `remove:true`; the driver never invokes
+a reader to produce an expected value. `wireJson`, where present, fixes the exact
+received serialization for raw-frame identity. This avoids duplicating the entire
+snapshot/inventory for each negative case while retaining exact expanded wire data.
