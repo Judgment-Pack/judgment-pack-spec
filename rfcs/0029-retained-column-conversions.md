@@ -242,8 +242,9 @@ invalidate their relevant commitments and require fresh checking and ordinary CA
 Editor sidecars must equal document-derived rules and confer no separate execution authority.
 
 The Draft wire shape is `capabilities.conversionContracts:[entry,...]`, not a string list
-or a boolean support flag. Each entry is a closed object with exactly `contract`, `spec`,
-`profile`, `role` and `limits`. `contract` is exactly `"retained-column/1"`; `profile` is exactly
+or a boolean support flag. Each entry is a closed object with required `contract`, `spec`,
+`profile`, `role` and `limits`, and only the optional `producerGrammar` described in the proposed
+producer section below for its three applicable roles. `contract` is exactly `"retained-column/1"`; `profile` is exactly
 `"base"` or `"extended"`. `spec` is closed with exactly `version` (nonempty version label),
 `revision` (40 lower-case hex characters identifying the exact Spec commit), `schemaSha256`
 and `corpusSha256` (each `sha256:` plus 64 lower-case hex characters). For a Draft experiment,
@@ -275,7 +276,7 @@ support the requested role independently; a Runtime entry cannot authorize Runne
 work. All existing target-count, parser node/string-work, nesting and compatibility limits
 remain applicable and do not grow when a byte maximum grows.
 
-The array has at most 32 entries and no repeated exact contract/spec/profile/role identity;
+The array has at most 32 entries and no repeated exact contract/spec/profile/role/producerGrammar identity (including absence);
 an empty array grants nothing. Every declared entry must have the required role members and
 no unknown members. An absent capability or unmatched exact identity is `capability-unsupported`;
 an unknown contract, role or profile also fails with `capability-unsupported`. Malformed shapes,
@@ -335,6 +336,149 @@ that production integration is a prerequisite. A changed wrapper needs a new rec
 source/recipe artifacts, reviews, original receipts and publication
 identities remain available under their actual retention contracts. A new signed wrapper
 binds the new projection; it does not retroactively authenticate an old snapshot digest.
+
+### Proposed producer grammar and complete original inventory
+
+The generated wrapper remains exactly the four members above. Its signature domain remains
+Gateway `canon` over the wrapper, under the existing acquisition receipt and frozen request.
+This section proposes producer grammar `desk-reviewed-input/1`; it does not adopt it or claim
+that the current producer implements it. In particular, the current Desk adapter reports
+version `1`; the grammar below requires a newly implemented and reviewed version `2`.
+
+**Trusted binding.** A proposed optional `retainedColumnProducer` member of the installation's
+trusted InputProfile is closed with exactly `contractVersion:"1"` and
+`grammar:"desk-reviewed-input/1"`. It enters the existing complete profile digest. This Draft
+changes no normative profile schema. A source using this grammar is an operation bound to
+that profile's exact id/digest. The independently trusted profile must have class `generated`,
+shape `mcp`, source `desk-inputs`, endpoint `desk-local:reviewed-inputs`, exactly the tool
+`read_reviewed_input`, and adapter name `jpack-desk/reviewed-input`, proposed version `2`, and
+an independently trusted exact adapter digest. The existing public-key, authority, request,
+receipt signature, canonical result-digest and freshness checks remain required. A caller's
+frame, capability report or context object cannot register a trusted profile, select a
+replacement key, upgrade class or establish human review.
+
+For the roles `preparation`, `preparation-verification` and `producer-carrier`, a capability
+entry may additionally carry exactly `producerGrammar:"desk-reviewed-input/1"`. It is part of
+the exact capability identity, including presence versus absence. A report without it grants
+no support for this generated grammar. The other two roles do not carry that member.
+Ordinary entries remain unchanged and can be reported beside generated entries. Negotiation
+requires the exact adopted Spec/schema/corpus pins and supported limits for each traversed
+role; a prototype probe or proposed adapter version is not a support declaration.
+
+**Producer precondition, not an offline truth claim.** Before issuing the new wrapper, the
+trusted producer must resolve the entire original declaration inventory by
+`record.Research.RecipeVersion`, using the retained `doc.Recipe` or `doc.Recipes` revision as
+`typedResearchValue` does. A current recipe is usable only when its revision equals that
+original revision. It must compare the complete ordered retained field structures, including
+all retained metadata and unselected fields, with the run's `Recipe.Fields` that the original
+snapshot records. Missing history, missing original declarations, differing fields or ambiguous
+revision resolution refuses production before evaluation. It must also retain the existing
+record/review/model/source admission checks. A new signature over a wrapper does not establish
+that an old producer loaded history, and an offline reader cannot observe whether this step
+ran. This is a required behavior of the newly pinned producer, to be demonstrated through its
+actual implementation and signed integration. It is not inferred from one selected field hash.
+
+**Closed extracted projection.** The full original snapshot has other real members, such as
+qualification, prepared values, reviews, model/source references and recipe metadata. They stay
+byte-exact in `originalSnapshotJson`, and duplicate decoded keys are refused throughout, including
+opaque siblings. They are not silently dropped and this Draft does not falsely declare the full
+snapshot closed. Instead the reader explicitly extracts the following closed projection, as
+`deskSnapshotProjection` in the adjacent experimental schema specifies. This projection is
+computed from original bytes, not accepted as a replacement snapshot or independent authority.
+
+| Projection member | Required original snapshot path or fixed value |
+| --- | --- |
+| grammar | `desk-reviewed-input/1` |
+| snapshotVersion, snapshotClass | `version` exactly integer literal `1`, `class` exactly `generated` |
+| recordClass | `record.class` exactly `generated` |
+| runId, recordRunId | `research.id`, `record.research.runId` |
+| recipeVersion, recordRecipeVersion | `research.recipeVersion`, `record.research.recipeVersion` |
+| values | complete, unfiltered `record.values` string map |
+| declarations | every raw object token in `research.recipe.fields`, in its original order |
+| fields | every `record.research.entity.fields` key, with its status and exact optional raw `value` token |
+
+Required path containers and selected members must have these forms. Unknown snapshot versions
+are malformed for this grammar; another producer grammar requires explicit support. Opaque
+siblings grant no executable policy. Selected strings must be scalar Unicode, without case,
+URI or Unicode normalization. `record.values` contains strings; it is not the top-level
+snapshot `values` map, which the legacy `availableInputValues` filters for blanks and
+unavailable statuses. Frame `values` must equal **all of `snapshot.record.values`**, preserving
+blank and unavailable display values. Availability remains a conversion decision. Prepared
+values, current requested types and the filtered map are never substitutes.
+
+The two run ids must be equal and match the existing ASCII grammar
+`research_[a-f0-9]{32}` exactly (41 bytes). Both original revision numbers must be equal positive
+safe JSON integer literals, `1` through `9007199254740991`, without exponent, fraction or leading
+zero. The upper bound is the existing signed `canon` domain, not a new precision conversion.
+Define revision identity as `sha256:` plus the lower-case SHA-256 of this byte concatenation:
+
+```
+UTF8("judgment-pack/retained-column/1/desk-reviewed-input/revision")
+0x00
+UTF8(the decoded original run id)
+0x00
+ASCII(the original positive integer in unsigned decimal)
+```
+
+This label is always 71 ASCII bytes, below the existing 160-byte revision-member ceiling for
+every supported run id and safe revision, including both endpoints. It is a new projection
+identity and grants no authority; it does not rename a source, snapshot, recipe, record or
+publication. Both frame `research.recordRecipeRevision` and
+`research.declaration.recipeRevision` must equal this identity. A current qualification revision
+elsewhere in the snapshot is ignored for this purpose.
+
+For each declaration, retain the complete original snapshot field object token and remove
+**only** JSON whitespace bytes `0x20`, `0x09`, `0x0a`, `0x0d` occurring outside strings. Preserve
+member order, all string bytes and escapes, numeric spelling, opaque field metadata and array
+order. This is token compaction, not decoding/re-encoding or a Go struct-order contract. Its
+`name` and original `type` must agree with the frame's entry and existing eight-type contract;
+decoded duplicate object names and repeated declaration names refuse. Frame declaration entries
+must equal this **entire ordered inventory** exactly, with no omission, extra entry, reordering
+or selected-field-only comparison. Existing `fieldSha256` hashes the resulting exact `fieldJson`.
+
+Each projected typed field is closed with exactly `status` and, if its original object contains
+`value`, `valueJson`. `valueJson` is that exact raw value token, including internal whitespace,
+escapes and numeric spelling; it is not compacted or serialized through binary64. Other original
+field members, such as citations and notes, remain in the original snapshot. Frame research
+fields must equal the complete projection: status, key inventory and raw-token presence/value.
+Absent differs from null, and `-0` differs from `0`. Status/type applicability and canonical-claim
+refusals then use the existing conversion interpreter; an issue never receives success lineage.
+
+The pinned original snapshot ceiling stays 524288 bytes even if a generic caller reports a larger
+maximum. Carrier, combined, profile and transport bounds remain separately negotiated; no byte
+allocation is added outside the complete carrier. The full-envelope and preparation/record
+accounting gates below remain unresolved. Opaque original JSON may retain legacy escaped lone
+surrogates, but selected field/frame strings keep their existing well-formed-string rules.
+
+**Executable consistency probe.** `{generatedConsistency:{carrier,profile,limits,trustedProducer,
+sourceBinding,receiptResultDigest,rule}}` uses the closed shapes in the experimental schema.
+`limits` is exactly `originalSnapshotBytes`/`carrierBytes`. The profile and digest inputs are
+independent integration seams; this line protocol cannot authenticate them. The probe checks the
+proposed producer tuple and source binding, exact restoration, the supplied result digest against
+existing wrapper `canon`, every original/frame relation above, and one recomputed transformation.
+It returns separate original-snapshot, received-frame and revision identities plus the closed
+projection. Every successful result explicitly says `acquisition:"not-verified"` and
+`history:"not-checked"`. It cannot mint production authority from caller-supplied context or
+claim that a receipt signature or history lookup occurred. The actual integration must run the
+existing signature/profile/request checks and the new producer precondition first.
+
+Malformed structures/duplicates use `input-malformed`; exceeded fixed or negotiated bounds use
+`input-over-bound`; unsupported grammar capabilities use `capability-unsupported`; a trusted tuple
+or source binding that does not fit uses `profile-mismatch`; a changed wrapper with the old result
+digest uses `acquisition-invalid`; well-formed inventory/revision/value inconsistencies and failed
+conversions use `read-failed`. Probe success is consistency only, not a preparation or an evaluation.
+
+Pinned source evidence is Desk commit `605630a535a25292a40926ba72e269de03b951e7`:
+[input_handoff.go](https://github.com/Judgment-Pack/judgment-pack-desk/blob/605630a535a25292a40926ba72e269de03b951e7/internal/desk/input_handoff.go#L25-L111)
+fixes the existing source/tool/endpoint/adapter tuple and current adapter version `1`;
+[its snapshot and filtered-values paths](https://github.com/Judgment-Pack/judgment-pack-desk/blob/605630a535a25292a40926ba72e269de03b951e7/internal/desk/input_handoff.go#L128-L271),
+[availableInputValues](https://github.com/Judgment-Pack/judgment-pack-desk/blob/605630a535a25292a40926ba72e269de03b951e7/internal/desk/input_handoff.go#L471-L486),
+[input_research_journal.go](https://github.com/Judgment-Pack/judgment-pack-desk/blob/605630a535a25292a40926ba72e269de03b951e7/internal/desk/input_research_journal.go#L17)
+and [openInputResearch](https://github.com/Judgment-Pack/judgment-pack-desk/blob/605630a535a25292a40926ba72e269de03b951e7/internal/desk/input_research_journal.go#L112-L119)
+fix the retained paths and run-id grammar; and
+[input_typed_research.go](https://github.com/Judgment-Pack/judgment-pack-desk/blob/605630a535a25292a40926ba72e269de03b951e7/internal/desk/input_typed_research.go#L8-L50)
+resolves the original declaration revision. None of these current paths implements the new full
+history/inventory comparison or the proposed adapter version `2`. Those remain real producer work.
 
 For the pinned supported Desk producer the original snapshot is at most 524288 bytes.
 Its compact Go representation has no literal C0 controls or unescaped `<`, `>` or `&`,
@@ -525,8 +669,10 @@ this draft does not record them as completed or silently modify GOVERNANCE.md.
   no clipping or narrowed spellings is acceptable. Complete the maximum previously usable
   combined-envelope proof for the selected option. Existing extended ceilings alone do not fit
   the witness, and current production readers' extended support is not implied.
-- Specify the production original-inventory commitment carrier and integrate conditional lineage
-  with the existing preparation schema/recomputation owner; prototype results are not that carrier.
+- Implement and independently verify the proposed production original-inventory precondition and
+  complete signed snapshot/frame relation, then integrate conditional lineage with the existing
+  preparation schema/recomputation owner. The consistency prototypes do not authenticate profiles,
+  verify receipt signatures, load original history or establish production support.
 - Obtain real independent production implementation evidence and complete review/disposition,
   feedback, exact-head CI and immutable release gates. No completion claim for Agent #171 follows
   merely from this RFC.

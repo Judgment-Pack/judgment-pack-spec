@@ -210,6 +210,164 @@ for (const line of input.trimEnd().split('\\n')) {
     print('Scope: exact UTF8 restoration, original declarations, inline lineage and Draft capability admission only; no producer, preparation, independent-authorship or adopted-limit claim.')
 
 
+
+
+def expand_producer_case(row):
+    """Apply literal fixture patches; never derive expectations with a reader."""
+    case = copy.deepcopy(EXAMPLES['producerConsistency'])
+    case['id'] = row['id']
+    for member in ('request', 'expected'):
+        if member in row:
+            case[member] = copy.deepcopy(row[member])
+        for edit in row.get(member+'Patch', []):
+            parent = case[member]
+            for token in edit['path'][:-1]:
+                parent = parent[token]
+            key = edit['path'][-1]
+            if edit.get('remove'):
+                del parent[key]
+            else:
+                parent[key] = copy.deepcopy(edit['value'])
+    if 'wireJson' in row:
+        case['wireJson'] = row['wireJson']
+    return case
+
+
+def check_inventory():
+    """Producer-specific relation only; trust/signature/history are explicit seams."""
+    cases = [expand_producer_case(c) for c in DATA['producerCases']]
+    # Handwritten fixed producer-bound recipes; generic requested limits cannot
+    # enlarge the pinned old snapshot ceiling. No reader output is recorded.
+    import hashlib
+    baseline = next(c for c in cases if c['id']=='producer-original-type-text')
+    for size in (524288, 524289):
+        c = copy.deepcopy(baseline)
+        c['id'] = 'producer-original-snapshot-bytes-'+str(size)
+        body = c['request']['generatedConsistency']
+        old = body['carrier']['originalSnapshotJson']
+        prefix = old[:-1]+',"opaquePadding":"'
+        snapshot = prefix+'x'*(size-len(prefix.encode())-2)+'"}'
+        assert len(snapshot.encode())==size
+        body['carrier']['originalSnapshotJson'] = snapshot
+        pin = 'sha256:'+hashlib.sha256(snapshot.encode()).hexdigest()
+        body['carrier']['originalSnapshotSha256'] = pin
+        body['receiptResultDigest'] = 'sha256:'+hashlib.sha256(json.dumps(body['carrier'],ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        body['limits']['originalSnapshotBytes'] = 524289
+        c['expected']['originalSnapshotSha256'] = pin
+        if size>524288:
+            c['expected'] = {'refusal':'input-over-bound'}
+        cases.append(c)
+    encode = lambda c: ((c.get('wireJson') or json.dumps(c['request'], ensure_ascii=True, separators=(',', ':'))) + '\n').encode()
+    fragments = [EXAMPLES['producerGrammarBinding'], EXAMPLES['producerGrammarBinding']['retainedColumnProducer']]
+    for case in cases:
+        if case['expected'].get('consistent'):
+            VALIDATOR.validate(case['request'])
+            VALIDATOR.validate(case['expected'])
+            fragments.extend([case['request'], case['expected']])
+    controls = 0
+    definitions = ('retainedColumnProducer', 'trustedProducerProjection', 'producerSourceBinding',
+                   'deskSnapshotProjection', 'previewAvailability', 'generatedConsistencyBody',
+                   'generatedConsistencyRequest', 'generatedConsistencyResult')
+    for definition in definitions:
+        def visit(value, path):
+            nonlocal controls
+            if isinstance(value, dict):
+                alterations = []
+                if value.get('additionalProperties') is False:
+                    alterations += [('member', key) for key in value.get('properties', {})]
+                alterations += [('enum', item) for item in value.get('enum', [])]
+                if 'const' in value:
+                    alterations.append(('const', None))
+                for kind, member in alterations:
+                    changed = copy.deepcopy(SCHEMA)
+                    node = changed['$defs'][definition]
+                    for token in path:
+                        node = node[token]
+                    if kind == 'member':
+                        del node['properties'][member]
+                    elif kind == 'enum':
+                        node['enum'] = [x for x in node['enum'] if x != member]
+                    else:
+                        node['const'] = '__removed_draft_alternative__'
+                    validator = jsonschema.Draft202012Validator(changed)
+                    assert any(not validator.is_valid(f) for f in fragments), (definition, path, kind, member)
+                    controls += 1
+                for key, child in value.items():
+                    visit(child, path+[key])
+            elif isinstance(value, list):
+                for index, child in enumerate(value):
+                    visit(child, path+[index])
+        visit(SCHEMA['$defs'][definition], [])
+    mutations = [
+        ('complete-unselected-inventory', 'producer-omitted-unselected-declaration',
+         "research['declaration']['fields'] != source['declarations']", 'False',
+         '!equal(research.declaration.fields,source.declarations)', 'false'),
+        ('raw-unfiltered-values', 'producer-filtered-values-substitution',
+         "frame['values'] != source['values']", 'False',
+         '!equal(f.values,source.values)', 'false'),
+        ('exact-typed-source', 'producer-zero-spelling-changed',
+         "research['fields'] != source['fields']", 'False',
+         '!equal(research.fields,source.fields)', 'false'),
+        ('trusted-source', 'producer-wrong-trusted-source',
+         "trust['source'] != 'desk-inputs'", 'False',
+         "t.source!=='desk-inputs'", 'false'),
+        ('new-pinned-adapter', 'producer-old-adapter',
+         "trust['adapter']['version'] != '2'", 'False',
+         "t.adapter.version!=='2'", 'false'),
+        ('existing-receipt-result-domain', 'producer-updated-frame-old-receipt',
+         "if probe['receiptResultDigest'] != digest(carrier_canon(probe['carrier'])):", 'if False:',
+         "if (p.receiptResultDigest!==digest(carrierCanon(p.carrier)))", 'if (false)'),
+        ('revision-domain', 'producer-original-type-text',
+         "REVISION_DOMAIN + run_id + '\\0' + str(version)", "run_id + '\\0' + str(version)",
+         "REVISION_DOMAIN+id+'\\0'+String(positive(version))", "id+'\\0'+String(positive(version))"),
+        ('original-record-run-revision', 'producer-record-original-revision-mismatch',
+         'if revision != other:', 'if False:',
+         'if (revision!==other)', 'if (false)'),
+        ('original-frame-revision', 'producer-current-both-frame-revisions',
+         "if (research['recordRecipeRevision'], research['declaration']['recipeRevision']) != (revision, revision):", 'if False:',
+         'if (!equal([research.recordRecipeRevision,research.declaration.recipeRevision],[revision,revision]))', 'if (false)'),
+        ('fixed-original-snapshot-bound', 'producer-original-snapshot-bytes-524289',
+         'if length(snapshot) > 524288:', 'if False:',
+         'if (bytes(snapshot)>524288)', 'if (false)'),
+        ('raw-frame-identity', 'producer-escaped-frame-identity',
+         "digest(source_member(carrier_text, 'retained'))", 'digest(carrier_canon(frame))',
+         'digest(f[RAW_TOKEN])', 'digest(carrierCanon(f))'),
+        ('no-history-authority-claim', 'producer-original-type-text',
+         "'history':'not-checked'", "'history':'checked'",
+         "history:'not-checked'", "history:'checked'"),
+    ]
+    commands = [[sys.executable, '-B', str(HERE/'reader.py')],
+                [os.environ.get('RFC0029_NODE', 'node'), str(HERE/'reader.mjs')]]
+    by_id = {c['id']:c for c in cases}
+    for command in commands:
+        name = Path(command[-1]).name
+        result = subprocess.run(command, input=b''.join(map(encode, cases)), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+        assert result.returncode == 0, (name, 'producer cases setup', result.stderr.decode()[:2000])
+        rows = [json.loads(line) for line in result.stdout.splitlines()]
+        assert len(rows) == len(cases), (name, 'producer case count', len(rows), len(cases))
+        for case, actual in zip(cases, rows):
+            assert actual == case['expected'], (name, case['id'], actual, case['expected'])
+        source = (HERE/name).read_text()
+        for label, case_id, py_before, py_after, js_before, js_after in mutations:
+            before, after = (py_before, py_after) if name.endswith('.py') else (js_before, js_after)
+            assert source.count(before) == 1, (name, label, 'removal target', source.count(before))
+            changed = source.replace(before, after, 1)
+            invoke = [command[0], '-B', '-c', changed] if name.endswith('.py') else [command[0], '--input-type=module', '-e', changed]
+            case = by_id[case_id]
+            removed = subprocess.run(invoke, input=encode(case), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5)
+            assert removed.returncode == 0, (name, label, 'invalid setup', removed.stderr.decode()[:1000])
+            actual = json.loads(removed.stdout)
+            assert actual != case['expected'], (name, label, 'intended assertion did not fail')
+            print(f'{name}: producer removal {label} detected at {case_id}')
+        print(f'{name}: {len(cases)} producer relation/identity cases + {len(mutations)} intended removals PASS')
+    print(f'Draft producer projection schema: {controls} member/alternative-removal controls PASS')
+    print('Scope: snapshot/frame consistency and portable identities only; acquisition:not-verified, history:not-checked; no producer, preparation or adoption evidence.')
+
+if '--inventory-only' in sys.argv:
+    check_inventory()
+    sys.exit(0)
+
+
 if '--carrier-only' in sys.argv:
     check_interfaces()
     sys.exit(0)
@@ -323,6 +481,11 @@ for size in (8192,8193):
     want={'issues':[],'valueJson':raw} if size==8192 else {'issues':['research-type']}
     register_case({'id':f'legacy-number-raw-{size}','kind':'research-value','type':'number','status':'supported','inputJson':raw,'preview':want})
 register_case({'id':'range-exact-order','kind':'research-value','type':'range','status':'supported','inputJson':'{"min":"0.1000000000000000001","max":"0.1"}','preview':{'issues':['research-type']}})
+
+for c in map(expand_producer_case, DATA['producerCases']):
+    if c['expected'].get('consistent'):
+        schema_valid.extend([c['request'], c['expected']])
+schema_valid.append(EXAMPLES['producerGrammarBinding'])
 
 for value in [EXAMPLES['generatedFrame'],EXAMPLES['assertedFrame'],EXAMPLES['lineageFragment'],EXAMPLES['generatedCarrier'],EXAMPLES['capabilitiesFragment']]:
     schema_valid.append(value)
@@ -446,3 +609,5 @@ for command in commands:
 print('Scope: preview/claim admissibility only; no whole preparation, historical-envelope parity, live Desk or independent-authorship claim.')
 
 check_interfaces()
+
+check_inventory()

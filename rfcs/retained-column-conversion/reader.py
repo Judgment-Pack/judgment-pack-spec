@@ -376,7 +376,7 @@ def digest(text):
 
 
 def capability(entry):
-    closed(entry, ['contract', 'spec', 'profile', 'role', 'limits'])
+    closed(entry, ['contract', 'spec', 'profile', 'role', 'limits'], ['producerGrammar'])
     if entry['contract'] != 'retained-column/1':
         fail('capability-unsupported')
     spec = entry['spec']
@@ -389,6 +389,11 @@ def capability(entry):
             fail()
     if entry['profile'] not in ('base', 'extended') or not isinstance(entry['role'], str) or entry['role'] not in ROLE_LIMITS:
         fail('capability-unsupported')
+    if 'producerGrammar' in entry:
+        if entry['role'] not in ('preparation', 'preparation-verification', 'producer-carrier'):
+            fail()
+        if entry['producerGrammar'] != 'desk-reviewed-input/1':
+            fail('capability-unsupported')
     closed(entry['limits'], ROLE_LIMITS[entry['role']])
     for value in entry['limits'].values():
         positive(value)
@@ -396,6 +401,8 @@ def capability(entry):
 
 def admit(probe, effect=lambda: None):
     closed(probe, ['capabilities', 'required', 'sizes'])
+    if probe['capabilities'] == {}:
+        fail('capability-unsupported')
     closed(probe['capabilities'], ['conversionContracts'])
     entries = probe['capabilities']['conversionContracts']
     if not isinstance(entries, list) or len(entries) > 32:
@@ -406,12 +413,13 @@ def admit(probe, effect=lambda: None):
     selected = None
     for entry in entries:
         capability(entry)
-        identity = json.dumps({k: entry[k] for k in ('contract', 'spec', 'profile', 'role')}, sort_keys=True)
+        identity = json.dumps({k: entry.get(k) for k in ('contract', 'spec', 'profile', 'role', 'producerGrammar')}, sort_keys=True)
         if identity in identities:
             fail()
         identities.add(identity)
         if all(entry[k] == required[k] for k in ('contract', 'spec', 'profile', 'role')):
-            selected = entry
+            if entry.get('producerGrammar') == required.get('producerGrammar'):
+                selected = entry
     if selected is None:
         fail('capability-unsupported')
     closed(probe['sizes'], ROLE_LIMITS[required['role']])
@@ -503,7 +511,195 @@ def raw_frame_size(text, member='frame', as_text=False):
         index += 1
 
 
+# A pure consistency experiment. The integration supplies its trusted profile
+# projection and an already verified receipt resultDigest through separate seams.
+# This line protocol cannot authenticate either seam and reports that explicitly.
+PRODUCER_GRAMMAR = 'desk-reviewed-input/1'
+REVISION_DOMAIN = 'judgment-pack/retained-column/1/desk-reviewed-input/revision\0'
+RUN_ID = re.compile(r'research_[a-f0-9]{32}\Z', re.ASCII)
+
+
+def compact_token(text):
+    quoted = escaped = False
+    out = []
+    for char in text:
+        if quoted:
+            out.append(char)
+            if escaped:
+                escaped = False
+            elif char == '\\':
+                escaped = True
+            elif char == '"':
+                quoted = False
+        elif char == '"':
+            quoted = True
+            out.append(char)
+        elif char not in ' \t\r\n':
+            out.append(char)
+    return ''.join(out)
+
+
+def raw_array(text):
+    decoder = json.JSONDecoder(parse_int=Number, parse_float=Number)
+    index = 1
+    out = []
+    while True:
+        while text[index] in ' \t\r\n':
+            index += 1
+        if text[index] == ']':
+            return out
+        start = index
+        _, index = decoder.raw_decode(text, index)
+        out.append(text[start:index])
+        while text[index] in ' \t\r\n':
+            index += 1
+        if text[index] == ']':
+            return out
+        index += 1
+
+
+def source_member(text, *path):
+    for key in path:
+        text = raw_frame_size(text, key, as_text=True)
+        if text is None:
+            fail()
+    return text
+
+
+def revision_identity(run_id, revision):
+    if not isinstance(run_id, str) or not RUN_ID.fullmatch(run_id):
+        fail()
+    version = positive(revision)
+    return digest(REVISION_DOMAIN + run_id + '\0' + str(version))
+
+
+def producer_context(trust, binding):
+    closed(trust, ['id', 'profileDigest', 'class', 'source', 'authority', 'shape',
+                   'endpoint', 'adapter', 'tools', 'retainedColumnProducer'])
+    closed(binding, ['kind', 'profile', 'profileDigest'])
+    closed(trust['retainedColumnProducer'], ['contractVersion', 'grammar'])
+    closed(trust['adapter'], ['name', 'version', 'digest'])
+    for key in ('profileDigest',):
+        if not isinstance(trust[key], str) or not re.fullmatch('sha256:[0-9a-f]{64}', trust[key]):
+            fail()
+    string(trust['id'], 64, True)
+    if not re.fullmatch('[A-Za-z][A-Za-z0-9_-]{0,63}', trust['id']):
+        fail()
+    string(trust['authority'], 256, True)
+    if trust['retainedColumnProducer'] != {'contractVersion':'1', 'grammar':PRODUCER_GRAMMAR}:
+        fail('capability-unsupported')
+    if not isinstance(trust['adapter']['digest'], str) or not re.fullmatch('sha256:[0-9a-f]{64}', trust['adapter']['digest']):
+        fail()
+    if (trust['class'] != 'generated' or trust['source'] != 'desk-inputs' or
+        trust['shape'] != 'mcp' or trust['endpoint'] != 'desk-local:reviewed-inputs' or
+        trust['tools'] != ['read_reviewed_input'] or
+        trust['adapter']['name'] != 'jpack-desk/reviewed-input' or trust['adapter']['version'] != '2' or
+        binding != {'kind':'operation', 'profile':trust['id'], 'profileDigest':trust['profileDigest']}):
+        fail('profile-mismatch')
+
+
+def producer_projection(snapshot):
+    if length(snapshot) > 524288:
+        fail('input-over-bound')
+    original = parse(snapshot, strict=False)
+    if not isinstance(original, dict):
+        fail()
+    # Select known required paths. Other real snapshot members remain opaque,
+    # duplicate-checked, and byte-exact in originalSnapshotJson.
+    try:
+        record, research = original['record'], original['research']
+        retained = record['research']
+        declared = research['recipe']['fields']
+        fields = retained['entity']['fields']
+        values = record['values']
+        versions = (research['recipeVersion'], retained['recipeVersion'])
+        run_ids = (research['id'], retained['runId'])
+        if original['version'].text != '1' or original['class'] != 'generated' or record['class'] != 'generated':
+            fail()
+    except (KeyError, TypeError, AttributeError):
+        fail()
+    revision = revision_identity(run_ids[0], versions[0])
+    other = revision_identity(run_ids[1], versions[1])
+    if revision != other:
+        fail('read-failed')
+    if not isinstance(values, dict) or not isinstance(fields, dict) or not isinstance(declared, list):
+        fail()
+    if max(len(values), len(fields), len(declared)) > 1000:
+        fail('input-over-bound')
+    for key, value in values.items():
+        string(key, 160, True)
+        string(value, 16000)
+    declarations = []
+    names = set()
+    field_tokens = raw_array(source_member(snapshot, 'research', 'recipe', 'fields'))
+    for field, raw in zip(declared, field_tokens):
+        if not isinstance(field, dict):
+            fail()
+        name = field.get('name')
+        string(name, 160, True)
+        if name in names:
+            fail()
+        names.add(name)
+        if field.get('type') not in ('text','integer','decimal','boolean','text-list','range','string','number'):
+            fail()
+        declarations.append({'name':name, 'fieldJson':compact_token(raw)})
+    projected = {}
+    raw_fields = source_member(snapshot, 'record', 'research', 'entity', 'fields')
+    for name, entry in fields.items():
+        string(name, 160, True)
+        if not isinstance(entry, dict) or not isinstance(entry.get('status'), str) or entry['status'] not in STATUSES:
+            fail()
+        selected = {'status':entry['status']}
+        if 'value' in entry:
+            selected['valueJson'] = source_member(source_member(raw_fields, name), 'value')
+        projected[name] = selected
+    # This is the closed projection, not a claim that the full snapshot is closed.
+    return {'grammar':PRODUCER_GRAMMAR, 'snapshotVersion':1, 'snapshotClass':'generated',
+            'recordClass':'generated', 'runId':run_ids[0], 'recordRunId':run_ids[1],
+            'recipeVersion':positive(versions[0]), 'recordRecipeVersion':positive(versions[1]),
+            'values':values, 'declarations':declarations, 'fields':projected}, revision
+
+
+def carrier_canon(value):
+    # The generated wrapper/frame domain consists of scalar strings/null and
+    # containers. Embedded source numbers remain opaque strings. §1 canon orders
+    # object names by code point and never HTML/Unicode-normalizes strings.
+    if isinstance(value, dict):
+        return '{' + ','.join(json.dumps(k, ensure_ascii=False) + ':' + carrier_canon(value[k]) for k in sorted(value)) + '}'
+    if isinstance(value, list):
+        return '[' + ','.join(map(carrier_canon, value)) + ']'
+    if value is None or isinstance(value, (str, bool)):
+        return json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+    fail('acquisition-invalid')
+
+
+def generated_consistency(probe, carrier_text):
+    closed(probe, ['carrier','profile','limits','trustedProducer','sourceBinding','receiptResultDigest','rule'])
+    producer_context(probe['trustedProducer'], probe['sourceBinding'])
+    restore({'restore':probe['carrier'], 'profile':probe['profile'], 'limits':probe['limits']}, carrier_text)
+    if probe['receiptResultDigest'] != digest(carrier_canon(probe['carrier'])):
+        fail('acquisition-invalid')
+    source, revision = producer_projection(probe['carrier']['originalSnapshotJson'])
+    frame = probe['carrier']['retained']
+    research = frame['research']
+    if research['declaration'] is None:
+        fail('read-failed')
+    if (research['recordRecipeRevision'], research['declaration']['recipeRevision']) != (revision, revision):
+        fail('read-failed')
+    if research['declaration']['fields'] != source['declarations']:
+        fail('read-failed')
+    if frame['values'] != source['values'] or research['fields'] != source['fields']:
+        fail('read-failed')
+    transformation = lineage({'rule':probe['rule'], 'frame':frame, 'profile':probe['profile']}, raw_frame_size(carrier_text, 'retained'))
+    return {'consistent':True, 'acquisition':'not-verified', 'history':'not-checked',
+            'originalSnapshotSha256':probe['carrier']['originalSnapshotSha256'],
+            'frameSha256':digest(source_member(carrier_text, 'retained')),
+            'revisionIdentity':revision, 'projection':source, 'transformation':transformation}
+
+
 def handle(request, raw_frame_bytes=None, raw_carrier_text=None, raw_lineage_text=None):
+    if isinstance(request, dict) and set(request) == {'generatedConsistency'}:
+        return generated_consistency(request['generatedConsistency'], raw_carrier_text)
     if isinstance(request, dict) and 'restore' in request:
         return restore(request, raw_carrier_text)
     if isinstance(request, dict) and set(request) == {'admission'}:
@@ -543,7 +739,11 @@ if __name__ == '__main__':
                 fail('input-over-bound')
             text = line.decode('utf-8')
             request = parse(text, depth=64)
-            output = handle(request, raw_frame_size(text) if isinstance(request, dict) and 'frame' in request else None, raw_frame_size(text, 'restore', as_text=True) if isinstance(request, dict) and 'restore' in request else None, raw_frame_size(text, 'lineage', as_text=True) if isinstance(request, dict) and 'lineage' in request else None)
+            if isinstance(request, dict) and set(request) == {'generatedConsistency'}:
+                raw_carrier = source_member(source_member(text, 'generatedConsistency'), 'carrier')
+            else:
+                raw_carrier = raw_frame_size(text, 'restore', as_text=True) if isinstance(request, dict) and 'restore' in request else None
+            output = handle(request, raw_frame_size(text) if isinstance(request, dict) and 'frame' in request else None, raw_carrier, raw_frame_size(text, 'lineage', as_text=True) if isinstance(request, dict) and 'lineage' in request else None)
         except (Refusal, UnicodeError) as exc:
             output = {'refusal': str(exc) if isinstance(exc, Refusal) else 'input-malformed'}
         print(json.dumps(output, ensure_ascii=True, separators=(',', ':')))

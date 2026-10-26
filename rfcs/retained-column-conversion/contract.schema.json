@@ -652,6 +652,9 @@
                 "recordBytes"
               ],
               "additionalProperties": false
+            },
+            "producerGrammar": {
+              "const": "desk-reviewed-input/1"
             }
           },
           "required": [
@@ -718,6 +721,9 @@
                 "recordBytes"
               ],
               "additionalProperties": false
+            },
+            "producerGrammar": {
+              "const": "desk-reviewed-input/1"
             }
           },
           "required": [
@@ -784,6 +790,9 @@
                 "responseBytes"
               ],
               "additionalProperties": false
+            },
+            "producerGrammar": {
+              "const": "desk-reviewed-input/1"
             }
           },
           "required": [
@@ -812,6 +821,341 @@
         "conversionContracts"
       ],
       "additionalProperties": false
+    },
+    "retainedColumnProducer": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "const": "1"
+        },
+        "grammar": {
+          "const": "desk-reviewed-input/1"
+        }
+      },
+      "required": [
+        "contractVersion",
+        "grammar"
+      ],
+      "additionalProperties": false
+    },
+    "trustedProducerProjection": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
+        "profileDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "class": {
+          "const": "generated"
+        },
+        "source": {
+          "const": "desk-inputs"
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "shape": {
+          "const": "mcp"
+        },
+        "endpoint": {
+          "const": "desk-local:reviewed-inputs"
+        },
+        "adapter": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "jpack-desk/reviewed-input"
+            },
+            "version": {
+              "const": "2"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "name",
+            "version",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "const": "read_reviewed_input"
+          },
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "retainedColumnProducer": {
+          "$ref": "#/$defs/retainedColumnProducer"
+        }
+      },
+      "required": [
+        "id",
+        "profileDigest",
+        "class",
+        "source",
+        "authority",
+        "shape",
+        "endpoint",
+        "adapter",
+        "tools",
+        "retainedColumnProducer"
+      ],
+      "additionalProperties": false
+    },
+    "producerSourceBinding": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "operation"
+        },
+        "profile": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
+        "profileDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "kind",
+        "profile",
+        "profileDigest"
+      ],
+      "additionalProperties": false
+    },
+    "deskSnapshotProjection": {
+      "type": "object",
+      "properties": {
+        "grammar": {
+          "const": "desk-reviewed-input/1"
+        },
+        "snapshotVersion": {
+          "const": 1
+        },
+        "snapshotClass": {
+          "const": "generated"
+        },
+        "recordClass": {
+          "const": "generated"
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^research_[a-f0-9]{32}$"
+        },
+        "recordRunId": {
+          "type": "string",
+          "pattern": "^research_[a-f0-9]{32}$"
+        },
+        "recipeVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "recordRecipeVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "values": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "maxProperties": 1000,
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 16000
+          }
+        },
+        "declarations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/declarationEntry"
+          },
+          "maxItems": 1000
+        },
+        "fields": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "maxProperties": 1000,
+          "additionalProperties": {
+            "$ref": "#/$defs/field"
+          }
+        }
+      },
+      "required": [
+        "grammar",
+        "snapshotVersion",
+        "snapshotClass",
+        "recordClass",
+        "runId",
+        "recordRunId",
+        "recipeVersion",
+        "recordRecipeVersion",
+        "values",
+        "declarations",
+        "fields"
+      ],
+      "additionalProperties": false
+    },
+    "previewAvailability": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "const": "1"
+        },
+        "column": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "kind": {
+          "const": "evidence-availability"
+        }
+      },
+      "required": [
+        "contractVersion",
+        "column",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "generatedConsistencyBody": {
+      "type": "object",
+      "properties": {
+        "carrier": {
+          "$ref": "#/$defs/generatedCarrier"
+        },
+        "profile": {
+          "enum": [
+            "base",
+            "extended"
+          ]
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "originalSnapshotBytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "carrierBytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "originalSnapshotBytes",
+            "carrierBytes"
+          ],
+          "additionalProperties": false
+        },
+        "trustedProducer": {
+          "$ref": "#/$defs/trustedProducerProjection"
+        },
+        "sourceBinding": {
+          "$ref": "#/$defs/producerSourceBinding"
+        },
+        "receiptResultDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "rule": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/conversion"
+            },
+            {
+              "$ref": "#/$defs/previewAvailability"
+            }
+          ]
+        }
+      },
+      "required": [
+        "carrier",
+        "profile",
+        "limits",
+        "trustedProducer",
+        "sourceBinding",
+        "receiptResultDigest",
+        "rule"
+      ],
+      "additionalProperties": false
+    },
+    "generatedConsistencyRequest": {
+      "type": "object",
+      "properties": {
+        "generatedConsistency": {
+          "$ref": "#/$defs/generatedConsistencyBody"
+        }
+      },
+      "required": [
+        "generatedConsistency"
+      ],
+      "additionalProperties": false
+    },
+    "generatedConsistencyResult": {
+      "type": "object",
+      "properties": {
+        "consistent": {
+          "const": true
+        },
+        "acquisition": {
+          "const": "not-verified"
+        },
+        "history": {
+          "const": "not-checked"
+        },
+        "originalSnapshotSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "frameSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "revisionIdentity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "projection": {
+          "$ref": "#/$defs/deskSnapshotProjection"
+        },
+        "transformation": {
+          "$ref": "#/$defs/columnTransformation"
+        }
+      },
+      "required": [
+        "consistent",
+        "acquisition",
+        "history",
+        "originalSnapshotSha256",
+        "frameSha256",
+        "revisionIdentity",
+        "projection",
+        "transformation"
+      ],
+      "additionalProperties": false
     }
   },
   "oneOf": [
@@ -832,6 +1176,24 @@
     },
     {
       "$ref": "#/$defs/capabilities"
+    },
+    {
+      "$ref": "#/$defs/retainedColumnProducer"
+    },
+    {
+      "$ref": "#/$defs/trustedProducerProjection"
+    },
+    {
+      "$ref": "#/$defs/producerSourceBinding"
+    },
+    {
+      "$ref": "#/$defs/deskSnapshotProjection"
+    },
+    {
+      "$ref": "#/$defs/generatedConsistencyRequest"
+    },
+    {
+      "$ref": "#/$defs/generatedConsistencyResult"
     }
   ]
 }
