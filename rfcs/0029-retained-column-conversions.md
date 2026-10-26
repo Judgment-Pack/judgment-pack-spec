@@ -1,10 +1,20 @@
 # RFC 0029: Retained column conversions
 
-- Status: Draft
+- Status: Review
 - Type: Standards track, draft maturity
 - Created: 2026-10-25
 - Tracking: Judgment-Pack/judgment-pack-agent#171
 - Proposed leaf contract: `retained-column/1`
+
+## Adoption candidate
+
+The maintainer approved a scoped `v0.3.0-rc.2` adoption route, preserving immutable RC1 and
+final milestone #2. This pull request proposes acceptance at draft maturity and incorporation
+into [the selected companion](../spec/retained-column.md), new versioned schema/corpus and
+both-language offline readers. Status remains Review until adoption; nothing here claims the
+required checks, review, feedback disposition, maximum proof or publication has completed.
+The authorized same-vendor exception covers this bounded normative implementation and separate
+review; it is not cross-vendor compliance or independent authorship.
 
 ## Summary
 

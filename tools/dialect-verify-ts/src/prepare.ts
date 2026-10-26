@@ -1,3 +1,4 @@
+import { selected as retainedSelected, applyColumn, selectedPreparation, producer } from "./retained.ts";
 // Recomputing a preparation (§11, "Findings" 1–4) by §§3–9, at the given preparation's verifiedAt.
 import { BOUNDS, scanBytes } from "./bounds.ts";
 import { verify as edVerify } from "./ed25519.ts";
@@ -160,6 +161,12 @@ function qualityType(v: JVal, type: QualityFact["qualityType"]): boolean {
 function applyCopy(copy: CopyRead, value: JVal, who: string, transformations?: Map<string, JObj>): Claim {
   const facts = obj();
   for (const f of copy.facts) {
+    if (retainedSelected() && f.conversion) {
+      const column = applyColumn(value, f.source!, f.conversion);
+      transformations?.set("fact:" + f.target, column.fragment);
+      if (column.value !== undefined) writeAt(facts, f.target, column.value);
+      continue;
+    }
     if (f.qualityType === undefined) {
       const legacy = resolve(value, f.source!);
       if (legacy === undefined) continue;
@@ -217,7 +224,9 @@ function applyCopy(copy: CopyRead, value: JVal, who: string, transformations?: M
   }
   const evidence = new Map<string, string>();
   for (const e of copy.evidence) {
-    const v = resolve(value, e.source);
+    const column = retainedSelected() && e.availability ? applyColumn(value, e.source, e.availability, true) : undefined;
+    if (column) transformations?.set("evidence:" + e.requirement, column.fragment);
+    const v = column ? column.value : resolve(value, e.source);
     if (v === undefined) continue;
     if (v.t !== "str" || !AVAILABILITY.has(v.v)) finding("read-failed", `${who}: the value at ${e.source} is not an availability`);
     evidence.set(e.requirement, (v as JStr).v);
@@ -658,6 +667,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       if (misfit !== null) finding("profile-mismatch", `${s.name}: ${misfit}`);
     }
     if ((p!.calculator !== undefined) !== (s.calculation !== undefined)) finding("profile-mismatch", `${s.name}: calculation and the profile's calculator`);
+    if (retainedSelected()) producer(s, p!);
     profileOf.set(s.name, p!);
   }
 
@@ -767,6 +777,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       }
       outcome.calculatorComputed = true;
     }
+    if (retainedSelected()) producer(s, profile, acq.result, acq.receipt);
     outcome.claim = s.read.copy ? applyCopy(s.read.copy, value, s.name, outcome.transformations) : applyRule(s.read.rule!, value, scope, s.name);
   }
   for (const name of acquisitions.keys()) {
@@ -823,6 +834,8 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
       if (o.calculation !== undefined) e.push(["calculation", o.calculation]);
       if (o.source?.research?.resultMember === "results" && o.record !== undefined) e.push(["researchExecution", researchExecutionLineage(o.record)]);
       if (kind === "fact" && o.transformations.has(target)) e.push(["transformation", o.transformations.get(target)!]);
+      const columnKey = `${kind}:${target}`;
+      if (retainedSelected() && o.transformations.has(columnKey)) e.push(["columnTransformation", o.transformations.get(columnKey)!]);
       if (o.source !== undefined && o.source.parameters.length > 0) {
         const parameters = [...o.source.parameters].sort((a, b) =>
           compareCodePoints(a.name, b.name));
@@ -864,6 +877,7 @@ export function recompute(d: Dialect, caseDoc: JVal, acquisitions: Map<string, A
     }
     for (const [r, a] of o.claim.evidence) evidenceDocument.m.set(r, str(a));
   }
+  selectedPreparation(preparation);
   return { preparation, outcomes, factsDocument, evidenceDocument, lineage };
 }
 

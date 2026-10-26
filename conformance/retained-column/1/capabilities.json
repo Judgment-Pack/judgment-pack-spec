@@ -1,0 +1,97 @@
+{
+  "contract": "retained-column/1",
+  "distribution": "v0.3.0-rc.2",
+  "maturity": "draft",
+  "kind": "contract-role-table",
+  "profiles": {
+    "base": {
+      "documentBytes": 1048576,
+      "frameBytes": 2097152,
+      "combinedBytes": 12582912,
+      "originalSnapshotBytes": 524288,
+      "carrierBytes": 3145728,
+      "grantBytes": 3145728,
+      "adapterStdoutBytes": 3145728,
+      "responseBytes": 5242880,
+      "preparationBytes": 16777216,
+      "recordBytes": 9437184,
+      "profilesBytes": 81920,
+      "requestBodyBytes": 16777216,
+      "inputReplyBytes": 37748736,
+      "releaseStoredBytes": 41943040,
+      "runStoredBytes": 41943040,
+      "exportBaseBytes": 75497472,
+      "exportWireBytes": 90177536
+    },
+    "extended": {
+      "documentBytes": 2097152,
+      "frameBytes": 4194304,
+      "combinedBytes": 25165824,
+      "originalSnapshotBytes": 524288,
+      "carrierBytes": 3145728,
+      "grantBytes": 3145728,
+      "adapterStdoutBytes": 3145728,
+      "responseBytes": 5242880,
+      "preparationBytes": 33554432,
+      "recordBytes": 17825792,
+      "profilesBytes": 163840,
+      "requestBodyBytes": 33554432,
+      "inputReplyBytes": 75497472,
+      "releaseStoredBytes": 83886080,
+      "runStoredBytes": 83886080,
+      "exportBaseBytes": 150994944,
+      "exportWireBytes": 176160768
+    }
+  },
+  "roles": {
+    "document-validation": [
+      "documentBytes",
+      "frameBytes"
+    ],
+    "preview": [
+      "documentBytes",
+      "combinedBytes",
+      "frameBytes",
+      "profilesBytes",
+      "requestBodyBytes",
+      "inputReplyBytes"
+    ],
+    "preparation": [
+      "documentBytes",
+      "combinedBytes",
+      "frameBytes",
+      "preparationBytes",
+      "recordBytes",
+      "profilesBytes",
+      "requestBodyBytes",
+      "inputReplyBytes",
+      "releaseStoredBytes",
+      "runStoredBytes",
+      "exportBaseBytes",
+      "exportWireBytes"
+    ],
+    "preparation-verification": [
+      "documentBytes",
+      "combinedBytes",
+      "frameBytes",
+      "preparationBytes",
+      "recordBytes",
+      "profilesBytes",
+      "requestBodyBytes",
+      "inputReplyBytes",
+      "releaseStoredBytes",
+      "runStoredBytes",
+      "exportBaseBytes",
+      "exportWireBytes"
+    ],
+    "producer-carrier": [
+      "originalSnapshotBytes",
+      "carrierBytes",
+      "grantBytes",
+      "adapterStdoutBytes",
+      "responseBytes",
+      "profilesBytes"
+    ]
+  },
+  "claim": "This table grants no product support; each installed owner independently declares exact pins/profile/role after its actual gates."
+}

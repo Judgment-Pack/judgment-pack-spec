@@ -346,6 +346,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "spec/retained-column.md",
+        PurePosixPath("spec/retained-column/index.html"),
+        "Selected retained columns",
+        "Exact selected retained-column/1 contract candidate for Core RC2, at draft maturity; no general Core conformance or authority claim.",
+        "spec",
+        "RC2 selected leaf candidate",
+        source_ref="main",
+    ),
+    Page(
         "spec/dialect.md",
         PurePosixPath("spec/dialect/index.html"),
         "The dialect",
@@ -1720,7 +1729,7 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
             source = path.relative_to(ROOT).as_posix()
             routes[source] = GITHUB_BLOB_ROOT + "main/" + source
     for source in CANONICAL_SCHEMA_SOURCES:
-        if "/policy/" in source:
+        if "/policy/" in source or "/retained-column/" in source:
             schema_id = json.loads((ROOT / source).read_text("utf-8"))["$id"]
             routes[source] = PurePosixPath(urlsplit(schema_id).path.lstrip("/"))
     for path in sorted((ROOT / "conformance" / "evaluation" / "packs").glob("*.json")):
@@ -2589,6 +2598,7 @@ def build_not_found(output_root: Path) -> None:
 
 
 CANONICAL_SCHEMA_SOURCES = (
+    "schema/retained-column/1/contract.schema.json",
     "schema/judgment-pack-core.schema.json",
     "schema/workflow-1.schema.json",
     "schema/workflow-contributors-2.schema.json",

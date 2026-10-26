@@ -30,3 +30,7 @@ conformance/policy/** -text
 # that quote lines as they were written. git diff --check (dev.json) skips them.
 conformance/carrier/trailing-whitespace.json -whitespace
 rfcs/reviews/*.md -whitespace
+
+# New selected leaf resources retain exact bytes; historical staged namespaces keep their rules.
+schema/retained-column/** -text
+conformance/retained-column/** -text

@@ -50,6 +50,9 @@ The artifacts in this repository have distinct roles:
   prose for the witness-statement reader conformance class it defines, and for nothing else;
 - [`spec/dialect.md`](dialect.md), a companion document, is the normative prose for the
   preparation-verifier reader conformance class it defines, and for nothing else;
+- [selected retained columns](retained-column.md) is the normative-text candidate for the exact
+  RC2 selected leaf support scope only; it establishes no implicit ordinary support or generic
+  preparation-verifier claim and remains subject to its adoption/publication gates;
 - the evaluation corpus — the manifest and case fixtures under
   [`conformance/evaluation/`](../conformance/evaluation/README.md), not its README — is normative for
   evaluator conformance (§3.4) and for nothing else. This is the normative status the bullet below
@@ -361,8 +364,15 @@ unreadable input, but MUST NOT silently process a prefix or fall back to `base`.
 rule. Readers MUST NOT insert the default or remove an explicit declaration before hashing.
 An `extended` document has the same identity everywhere, including at readers refusing it.
 
+For the proposed exact selected `retained-column/1` contract only,
+[the retained-column companion](retained-column.md) specifies scoped Dialect artifact ceilings
+after its own selection and independent role admission. Absence of that selection uses this
+table. It does not raise Core pack, global transport, canonical parser, target-count or independent
+work ceilings. This is an RC2 adoption candidate, not a support claim for an existing release.
+
 The following is the ceiling table for these formats. Numbers elsewhere in the companions
-state `base`; their corresponding `extended` ceilings are exclusively those below. Units
+state `base`; except for the exactly selected retained-column companion above, their
+corresponding `extended` ceilings are exclusively those below. Units
 and counting conventions remain those of the owning companion. No Core outcome, rule or
 reference maximum is defined, so none is introduced here. Fixed semantic cardinalities
 (such as exactly one coverage record per selected section), numeric domains and index ranges

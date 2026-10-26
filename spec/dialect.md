@@ -136,6 +136,13 @@ No vector decides them either, and that question names them too.
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** and **MAY** are to
 be interpreted as described by BCP 14 when, and only when, they appear in all capitals.
 
+## Selected retained-column candidate
+
+[Selected retained columns](retained-column.md) is the normative-text candidate for exact
+`retained-column/1` selection in proposed RC2. It adds no implicit support to ordinary inputs.
+Its new leaf corpus/claim does not publish the forty-seven staged recordings or establish the
+generic §14 preparation-verifier conformance claim. Adoption/publication gates remain pending.
+
 ## 1. Terms and the canonical forms
 
 A **dialect** is a pack's terms spoken in a system's: the declared, reusable translation between a

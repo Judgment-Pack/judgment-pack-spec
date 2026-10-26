@@ -1,3 +1,4 @@
+import { selected as retainedSelected, retainedRule, retainedProfile, rememberEnvelope } from "./retained.ts";
 // The forms of §§2–8, §5.1 and §5.2, held in phase 4 of §11, and the counts of §12 held in phase 3.
 import { createHash } from "node:crypto";
 import { BOUNDS } from "./bounds.ts";
@@ -60,11 +61,12 @@ export type QualityFact = {
   observations?: { id: string; source: string }[];
   reconcile?: { mode: "precedence" | "agree" | "first-present"; precedence?: string[] };
   convert?: Conversion;
+  conversion?: JObj;
   qualityType?: "string" | "decimal" | "boolean" | "date";
   required?: boolean;
   domain?: JObj;
 };
-export type CopyRead = { facts: QualityFact[]; evidence: { requirement: string; source: string }[] };
+export type CopyRead = { facts: QualityFact[]; evidence: { requirement: string; source: string; availability?: JObj }[] };
 export type ClaimForm = { facts: { pointer: string; from: string }[]; evidence: Map<string, string>; acquisitionStatus: string };
 export type Clause = { when: JObj; claim: ClaimForm; reason: string };
 export type Rule = { parameters: Map<string, ParamType>; clauses: Clause[] };
@@ -424,6 +426,11 @@ function readCopy(v: JVal | undefined, what: string, arraysRequired: boolean, be
     const w = `${what}.facts[${k}]`;
     const e = object(x, w);
     const target = factTarget(e.m.get("target"), "a copy's target");
+    if (retainedSelected() && e.m.has("conversion")) {
+      exact(e, w, ["target", "source", "conversion"]);
+      const conversion = retainedRule(e.m.get("conversion")!);
+      return { target, source: pointer(e.m.get("source"), "a retained frame source"), conversion };
+    }
     const extended = Array.from(e.m.keys()).some((n) => n !== "target" && n !== "source");
     if (!extended) {
       exact(e, w, ["target", "source"]);
@@ -465,8 +472,9 @@ function readCopy(v: JVal | undefined, what: string, arraysRequired: boolean, be
     return { target, source, observations, reconcile, convert, qualityType: qualityType as QualityFact["qualityType"], required: required.v, domain };
   });
   const evidence = (o.m.has("evidence") ? array(o.m.get("evidence"), `${what}.evidence`) : []).map((x, k) => {
-    const e = exact(x, `${what}.evidence[${k}]`, ["requirement", "source"]);
-    return { requirement: nonEmpty(e.m.get("requirement"), "a copy's requirement"), source: pointer(e.m.get("source"), "a copy's source") };
+    const e = exact(x, `${what}.evidence[${k}]`, ["requirement", "source"], retainedSelected() ? ["availability"] : []);
+    const availability = e.m.has("availability") ? retainedRule(e.m.get("availability")!, true) : undefined;
+    return { requirement: nonEmpty(e.m.get("requirement"), "a copy's requirement"), source: pointer(e.m.get("source"), "a copy's source"), availability };
   });
   const seen = new Set<string>();
   for (const e of evidence) {
@@ -1259,7 +1267,8 @@ export function readProfiles(v: JVal): Profile[] {
   const out: Profile[] = [];
   array(v, "the profiles").forEach((raw, k) => {
     const what = `profiles[${k}]`;
-    const o = exact(raw, what, ["id", "publicKey", "class", "source", "authority", "shape", "adapter", "endpoint"], ["tools", "calculator", "research", "endpointScope"]);
+    const o = exact(raw, what, ["id", "publicKey", "class", "source", "authority", "shape", "adapter", "endpoint"], ["tools", "calculator", "research", "endpointScope", ...(retainedSelected() ? ["retainedColumnProducer", "conversionContracts"] : [])]);
+    if (retainedSelected()) retainedProfile(o);
     const id = nonEmpty(o.m.get("id"), `${what}.id`);
     if (out.some((p) => p.id === id)) malformed(`${what}.id is not distinct`);
     const publicKey = string(o.m.get("publicKey"), `${what}.publicKey`);
@@ -1457,6 +1466,7 @@ export function readAcquisitions(v: JVal, research: Map<string, Research> = new 
     if (recipe === undefined) {
       const r = exact(response, `${what}.response`, ["result", "receipt", "salts"]);
       const receipt = object(r.m.get("receipt"), `${what}.response.receipt`);
+      if (retainedSelected()) rememberEnvelope(r.m.get("result")!,r);
       out.set(name, { result: r.m.get("result")!, receipt, salts: readSalts(r.m.get("salts"), `${what}.response.salts`), own: true });
       continue;
     }

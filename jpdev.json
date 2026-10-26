@@ -30,6 +30,12 @@
       "paths": ["conformance/policy/**", "schema/policy/**", "tools/*.py"],
       "checks": ["local-paths", "agent-docs", "diff-check", "repository-tests",
                  "policy-official-draft"]
+    },
+    {
+      "paths": ["schema/retained-column/**", "conformance/retained-column/**", "spec/retained-column.md",
+                "tools/_retained_column.py", "tools/retained_column.py", "tools/dialect_verify.py",
+                "tools/check_retained_column.py", "tools/dialect-verify-ts/**", "releases/v0.3.0-rc.2*"],
+      "checks": ["local-paths", "agent-docs", "diff-check", "repository-tests", "retained-column"]
     }
   ]
 }

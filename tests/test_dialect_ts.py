@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # (tools/dialect-verify-ts/README.md). Node runs it directly, stripping the types; nothing is installed.
 READER = ROOT / "tools" / "dialect-verify-ts"
 MINIMUM = (22, 18)
-TESTS = ("test/vectors.test.ts", "test/units.test.ts", "test/endpoint.test.ts")
+TESTS = ("test/vectors.test.ts", "test/units.test.ts", "test/endpoint.test.ts", "test/retained.test.ts")
 
 
 # Reads a JSON array of cases on standard input, each document in base64, and writes the second reader's report for
