@@ -51,7 +51,7 @@ It prints one line of JSON, members ordered by code point and every number its l
 `npm test`, or:
 
 ```sh
-node --test test/vectors.test.ts test/units.test.ts test/endpoint.test.ts
+node --test test/vectors.test.ts test/units.test.ts test/endpoint.test.ts test/retained.test.ts
 ```
 
 - [`test/vectors.test.ts`](test/vectors.test.ts) reads every staged vector and holds the answer to the
@@ -316,3 +316,27 @@ Two things this reader could not compare, because the protocol kept it from the 
   maintainer to compare;
 - whether a vector requires a binding, which the staging note gives as the Runner's `verifyRun.arguments`.
   This reader takes `requiresBinding` from this repository's manifest.
+
+## Explicit selected retained-column candidate
+
+The independence statements above describe the original ordinary reader. This selected
+addition uses the expressly authorized same-vendor implementation/review route and makes
+no independent-authorship or cross-vendor-compliance claim.
+
+The RC2 candidate adds `--conversion-contract F` to the existing separate-file invocation.
+The selector is checked against the immutable installed release identity/inventory before
+artifact files are read. Source checkout HEAD, a capability report and matching caller pins
+do not install support. Without `release-identity.json`, selected use is unsupported.
+
+`--source-input F --profiles F --preparation F --conversion-contract F` checks the complete
+persisted source input, including exact case/response text, both imported/bound documents and
+selector agreement. `--export F --profiles F --conversion-contract F` checks both retained
+input/preparation copies, the third release mapping, complete selected wire/store/base/record
+and sidecar bounds, then ordinary preparation/record-input binding. This is preparation
+agreement only: record signature and chain authority retain their separate consumer contracts.
+This candidate implements Base preparation verification; its support claim awaits the
+actual adoption/release gates. Runtime's Extended document role implies nothing about it. Ordinary invocation and historical optional-member absence keep their contracts.
+
+The shared handwritten selected certification file is
+`conformance/retained-column/1/preparations.json`. Synthetic test installation/signatures are
+fixtures, not Desk history lookup, product maximum proof, independent authorship or publication.

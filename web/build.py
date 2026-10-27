@@ -346,6 +346,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "spec/retained-column.md",
+        PurePosixPath("spec/retained-column/index.html"),
+        "Selected retained columns",
+        "Selected retained-column/1 contract accepted for RC2 at draft maturity; publication is separate, with no general Core conformance or authority claim.",
+        "spec",
+        "RC2 selected leaf",
+        source_ref="main",
+    ),
+    Page(
         "spec/dialect.md",
         PurePosixPath("spec/dialect/index.html"),
         "The dialect",
@@ -761,6 +770,15 @@ PAGES = (
         "Draft workflow amendment preserving every contributing rule or forcing exception, with typed membership summaries and explicit attribution versions.",
         "proposals",
         "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0029-retained-column-conversions.md",
+        PurePosixPath("rfcs/0029-retained-column-conversions/index.html"),
+        "RFC 0029: Retained column conversions",
+        "Accepted design for exact selected retained-column/1 support at draft maturity; immutable RC2 publication and production support remain separate gates.",
+        "proposals",
+        "Accepted design",
         source_ref="main",
     ),
     Page(
@@ -1707,7 +1725,7 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
     )
     # Review and proposal files stay source-only until their own adoption or release.
     # Schema resources also resolve directly at their exact, format-versioned $id URLs.
-    for directory in ("conformance/policy", "schema/policy", "rfcs/workflow-contributors"):
+    for directory in ("conformance/policy", "schema/policy", "rfcs/workflow-contributors", "rfcs/retained-column-conversion"):
         for path in (ROOT / directory).rglob("*"):
             source = path.relative_to(ROOT).as_posix()
             if path.is_file():
@@ -1720,7 +1738,7 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
             source = path.relative_to(ROOT).as_posix()
             routes[source] = GITHUB_BLOB_ROOT + "main/" + source
     for source in CANONICAL_SCHEMA_SOURCES:
-        if "/policy/" in source:
+        if "/policy/" in source or "/retained-column/" in source:
             schema_id = json.loads((ROOT / source).read_text("utf-8"))["$id"]
             routes[source] = PurePosixPath(urlsplit(schema_id).path.lstrip("/"))
     for path in sorted((ROOT / "conformance" / "evaluation" / "packs").glob("*.json")):
@@ -2589,6 +2607,7 @@ def build_not_found(output_root: Path) -> None:
 
 
 CANONICAL_SCHEMA_SOURCES = (
+    "schema/retained-column/1/contract.schema.json",
     "schema/judgment-pack-core.schema.json",
     "schema/workflow-1.schema.json",
     "schema/workflow-contributors-2.schema.json",

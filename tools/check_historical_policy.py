@@ -37,7 +37,10 @@ def main() -> int:
             HISTORICAL_SCHEMA,
             schema_directory / "judgment-pack-core.schema.json",
         )
-        shutil.copyfile(ROOT / "tools" / "dialect_verify.py", tools_directory / "dialect_verify.py")
+        # The ordinary reader imports its selected extension even when no selector is used.
+        # Stage the complete current reader dependency closure; historical RFC bytes stay frozen.
+        for name in ("dialect_verify.py", "retained_column.py", "_retained_column.py"):
+            shutil.copyfile(ROOT / "tools" / name, tools_directory / name)
         shutil.copytree(
             ROOT / "rfcs" / "policy-companion-prototype",
             rfcs_directory / "policy-companion-prototype",

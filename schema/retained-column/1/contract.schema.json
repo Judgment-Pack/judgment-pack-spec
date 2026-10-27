@@ -1,0 +1,1509 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/retained-column/1/contract.schema.json",
+  "title": "Selected retained-column/1 contract fragments",
+  "description": "Structural projection of spec/retained-column.md. Scalar, duplicate, byte, embedded JSON, signature, custody and semantic checks are separately required.",
+  "$defs": {
+    "conversion": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "contractVersion": {
+              "const": "1"
+            },
+            "column": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "kind": {
+              "enum": [
+                "text",
+                "decimal",
+                "number",
+                "research-value"
+              ]
+            }
+          },
+          "required": [
+            "contractVersion",
+            "column",
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contractVersion": {
+              "const": "1"
+            },
+            "column": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "kind": {
+              "const": "boolean"
+            },
+            "trueValue": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "falseValue": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          },
+          "required": [
+            "contractVersion",
+            "column",
+            "kind",
+            "trueValue",
+            "falseValue"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "availability": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "const": "1"
+        },
+        "column": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "contractVersion",
+        "column"
+      ],
+      "additionalProperties": false
+    },
+    "fact": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string",
+          "pattern": "^(?:/(?:[^~]|~[01])*)*$",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^(?:/(?:[^~]|~[01])*)*$"
+        },
+        "conversion": {
+          "$ref": "#/$defs/conversion"
+        }
+      },
+      "required": [
+        "target",
+        "source",
+        "conversion"
+      ],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "requirement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^(?:/(?:[^~]|~[01])*)*$"
+        },
+        "availability": {
+          "$ref": "#/$defs/availability"
+        }
+      },
+      "required": [
+        "requirement",
+        "source",
+        "availability"
+      ],
+      "additionalProperties": false
+    },
+    "declarationEntry": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "fieldJson": {
+          "type": "string",
+          "maxLength": 16384
+        }
+      },
+      "required": [
+        "name",
+        "fieldJson"
+      ],
+      "additionalProperties": false
+    },
+    "declaration": {
+      "type": "object",
+      "properties": {
+        "recipeRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "fields": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "$ref": "#/$defs/declarationEntry"
+          }
+        }
+      },
+      "required": [
+        "recipeRevision",
+        "fields"
+      ],
+      "additionalProperties": false
+    },
+    "field": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "supported",
+            "interpretation",
+            "missing",
+            "conflicting",
+            "inaccessible",
+            "stale"
+          ]
+        },
+        "valueJson": {
+          "type": "string",
+          "maxLength": 4194304
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "research": {
+      "type": "object",
+      "properties": {
+        "recordRecipeRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "declaration": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/declaration"
+            }
+          ]
+        },
+        "fields": {
+          "type": "object",
+          "maxProperties": 1000,
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/field"
+          }
+        }
+      },
+      "required": [
+        "recordRecipeRevision",
+        "declaration",
+        "fields"
+      ],
+      "additionalProperties": false
+    },
+    "frame": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "const": "1"
+        },
+        "origin": {
+          "enum": [
+            "asserted",
+            "generated"
+          ]
+        },
+        "values": {
+          "type": "object",
+          "maxProperties": 1000,
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "additionalProperties": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 524288
+          }
+        },
+        "research": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/research"
+            }
+          ]
+        }
+      },
+      "required": [
+        "contractVersion",
+        "origin",
+        "values",
+        "research"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "origin": {
+                "const": "asserted"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "research": {
+                "type": "null"
+              },
+              "values": {
+                "additionalProperties": {
+                  "maxLength": 16000
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "research": {
+                "$ref": "#/$defs/research"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "input": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "missing"
+            }
+          },
+          "required": [
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "present"
+            },
+            "ref": {
+              "$ref": "#/$defs/inputReference"
+            }
+          },
+          "required": [
+            "state",
+            "ref"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "value"
+            },
+            "json": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "state",
+            "json"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "omitted"
+            },
+            "reason": {
+              "enum": [
+                "missing",
+                "blank",
+                "legacy-null",
+                "unavailable"
+              ]
+            }
+          },
+          "required": [
+            "state",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "researchIdentity": {
+      "type": "object",
+      "properties": {
+        "recipeRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "fieldSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "recipeRevision",
+        "fieldSha256"
+      ],
+      "additionalProperties": false
+    },
+    "columnTransformation": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "const": "1"
+        },
+        "column": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "input": {
+          "$ref": "#/$defs/input"
+        },
+        "result": {
+          "$ref": "#/$defs/result"
+        },
+        "researchIdentity": {
+          "$ref": "#/$defs/researchIdentity"
+        }
+      },
+      "required": [
+        "contractVersion",
+        "column",
+        "input",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "generatedCarrier": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "const": "1"
+        },
+        "originalSnapshotJson": {
+          "type": "string"
+        },
+        "originalSnapshotSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "retained": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/frame"
+            },
+            {
+              "properties": {
+                "origin": {
+                  "const": "generated"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "contractVersion",
+        "originalSnapshotJson",
+        "originalSnapshotSha256",
+        "retained"
+      ],
+      "additionalProperties": false
+    },
+    "specIdentity": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "schemaSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "corpusSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "version",
+        "revision",
+        "schemaSha256",
+        "corpusSha256"
+      ],
+      "additionalProperties": false
+    },
+    "conversionCapability": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "const": "retained-column/1"
+            },
+            "spec": {
+              "$ref": "#/$defs/specIdentity"
+            },
+            "profile": {
+              "enum": [
+                "base",
+                "extended"
+              ]
+            },
+            "role": {
+              "const": "document-validation"
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "documentBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "frameBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "documentBytes",
+                "frameBytes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "contract",
+            "spec",
+            "profile",
+            "role",
+            "limits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "const": "retained-column/1"
+            },
+            "spec": {
+              "$ref": "#/$defs/specIdentity"
+            },
+            "profile": {
+              "enum": [
+                "base",
+                "extended"
+              ]
+            },
+            "role": {
+              "const": "preview"
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "documentBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "combinedBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "frameBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "profilesBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "requestBodyBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "inputReplyBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "documentBytes",
+                "combinedBytes",
+                "frameBytes",
+                "profilesBytes",
+                "requestBodyBytes",
+                "inputReplyBytes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "contract",
+            "spec",
+            "profile",
+            "role",
+            "limits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "const": "retained-column/1"
+            },
+            "spec": {
+              "$ref": "#/$defs/specIdentity"
+            },
+            "profile": {
+              "enum": [
+                "base",
+                "extended"
+              ]
+            },
+            "role": {
+              "const": "preparation"
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "documentBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "combinedBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "frameBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "preparationBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "recordBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "profilesBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "requestBodyBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "inputReplyBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "releaseStoredBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "runStoredBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "exportBaseBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "exportWireBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "documentBytes",
+                "combinedBytes",
+                "frameBytes",
+                "preparationBytes",
+                "recordBytes",
+                "profilesBytes",
+                "requestBodyBytes",
+                "inputReplyBytes",
+                "releaseStoredBytes",
+                "runStoredBytes",
+                "exportBaseBytes",
+                "exportWireBytes"
+              ],
+              "additionalProperties": false
+            },
+            "producerGrammar": {
+              "const": "desk-reviewed-input/1"
+            }
+          },
+          "required": [
+            "contract",
+            "spec",
+            "profile",
+            "role",
+            "limits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "const": "retained-column/1"
+            },
+            "spec": {
+              "$ref": "#/$defs/specIdentity"
+            },
+            "profile": {
+              "enum": [
+                "base",
+                "extended"
+              ]
+            },
+            "role": {
+              "const": "preparation-verification"
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "documentBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "combinedBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "frameBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "preparationBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "recordBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "profilesBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "requestBodyBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "inputReplyBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "releaseStoredBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "runStoredBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "exportBaseBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "exportWireBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "documentBytes",
+                "combinedBytes",
+                "frameBytes",
+                "preparationBytes",
+                "recordBytes",
+                "profilesBytes",
+                "requestBodyBytes",
+                "inputReplyBytes",
+                "releaseStoredBytes",
+                "runStoredBytes",
+                "exportBaseBytes",
+                "exportWireBytes"
+              ],
+              "additionalProperties": false
+            },
+            "producerGrammar": {
+              "const": "desk-reviewed-input/1"
+            }
+          },
+          "required": [
+            "contract",
+            "spec",
+            "profile",
+            "role",
+            "limits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract": {
+              "const": "retained-column/1"
+            },
+            "spec": {
+              "$ref": "#/$defs/specIdentity"
+            },
+            "profile": {
+              "enum": [
+                "base",
+                "extended"
+              ]
+            },
+            "role": {
+              "const": "producer-carrier"
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "originalSnapshotBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "carrierBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "grantBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "adapterStdoutBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "responseBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "profilesBytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "originalSnapshotBytes",
+                "carrierBytes",
+                "grantBytes",
+                "adapterStdoutBytes",
+                "responseBytes",
+                "profilesBytes"
+              ],
+              "additionalProperties": false
+            },
+            "producerGrammar": {
+              "const": "desk-reviewed-input/1"
+            }
+          },
+          "required": [
+            "contract",
+            "spec",
+            "profile",
+            "role",
+            "limits"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "conversionContracts": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/conversionCapability"
+          }
+        }
+      },
+      "required": [
+        "conversionContracts"
+      ],
+      "additionalProperties": false
+    },
+    "retainedColumnProducer": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "const": "1"
+        },
+        "grammar": {
+          "const": "desk-reviewed-input/1"
+        }
+      },
+      "required": [
+        "contractVersion",
+        "grammar"
+      ],
+      "additionalProperties": false
+    },
+    "trustedProducerProjection": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
+        "profileDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "class": {
+          "const": "generated"
+        },
+        "source": {
+          "const": "desk-inputs"
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "shape": {
+          "const": "mcp"
+        },
+        "endpoint": {
+          "const": "desk-local:reviewed-inputs"
+        },
+        "adapter": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "jpack-desk/reviewed-input"
+            },
+            "version": {
+              "const": "2"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "name",
+            "version",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "const": "read_reviewed_input"
+          },
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "retainedColumnProducer": {
+          "$ref": "#/$defs/retainedColumnProducer"
+        }
+      },
+      "required": [
+        "id",
+        "profileDigest",
+        "class",
+        "source",
+        "authority",
+        "shape",
+        "endpoint",
+        "adapter",
+        "tools",
+        "retainedColumnProducer"
+      ],
+      "additionalProperties": false
+    },
+    "producerSourceBinding": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "operation"
+        },
+        "profile": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
+        "profileDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "kind",
+        "profile",
+        "profileDigest"
+      ],
+      "additionalProperties": false
+    },
+    "deskSnapshotProjection": {
+      "type": "object",
+      "properties": {
+        "grammar": {
+          "const": "desk-reviewed-input/1"
+        },
+        "snapshotVersion": {
+          "const": 1
+        },
+        "snapshotClass": {
+          "const": "generated"
+        },
+        "recordClass": {
+          "const": "generated"
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^research_[a-f0-9]{32}$"
+        },
+        "recordRunId": {
+          "type": "string",
+          "pattern": "^research_[a-f0-9]{32}$"
+        },
+        "recipeVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "recordRecipeVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "values": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "maxProperties": 1000,
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 524288
+          }
+        },
+        "declarations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/declarationEntry"
+          },
+          "maxItems": 1000
+        },
+        "fields": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "maxProperties": 1000,
+          "additionalProperties": {
+            "$ref": "#/$defs/field"
+          }
+        }
+      },
+      "required": [
+        "grammar",
+        "snapshotVersion",
+        "snapshotClass",
+        "recordClass",
+        "runId",
+        "recordRunId",
+        "recipeVersion",
+        "recordRecipeVersion",
+        "values",
+        "declarations",
+        "fields"
+      ],
+      "additionalProperties": false
+    },
+    "previewAvailability": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "const": "1"
+        },
+        "column": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "kind": {
+          "const": "evidence-availability"
+        }
+      },
+      "required": [
+        "contractVersion",
+        "column",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "generatedConsistencyBody": {
+      "type": "object",
+      "properties": {
+        "carrier": {
+          "$ref": "#/$defs/generatedCarrier"
+        },
+        "profile": {
+          "enum": [
+            "base",
+            "extended"
+          ]
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "originalSnapshotBytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "carrierBytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "originalSnapshotBytes",
+            "carrierBytes"
+          ],
+          "additionalProperties": false
+        },
+        "trustedProducer": {
+          "$ref": "#/$defs/trustedProducerProjection"
+        },
+        "sourceBinding": {
+          "$ref": "#/$defs/producerSourceBinding"
+        },
+        "receiptResultDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "rule": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/conversion"
+            },
+            {
+              "$ref": "#/$defs/previewAvailability"
+            }
+          ]
+        }
+      },
+      "required": [
+        "carrier",
+        "profile",
+        "limits",
+        "trustedProducer",
+        "sourceBinding",
+        "receiptResultDigest",
+        "rule"
+      ],
+      "additionalProperties": false
+    },
+    "generatedConsistencyRequest": {
+      "type": "object",
+      "properties": {
+        "generatedConsistency": {
+          "$ref": "#/$defs/generatedConsistencyBody"
+        }
+      },
+      "required": [
+        "generatedConsistency"
+      ],
+      "additionalProperties": false
+    },
+    "generatedConsistencyResult": {
+      "type": "object",
+      "properties": {
+        "consistent": {
+          "const": true
+        },
+        "acquisition": {
+          "const": "not-verified"
+        },
+        "history": {
+          "const": "not-checked"
+        },
+        "originalSnapshotSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "frameSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "revisionIdentity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "projection": {
+          "$ref": "#/$defs/deskSnapshotProjection"
+        },
+        "transformation": {
+          "$ref": "#/$defs/columnTransformation"
+        }
+      },
+      "required": [
+        "consistent",
+        "acquisition",
+        "history",
+        "originalSnapshotSha256",
+        "frameSha256",
+        "revisionIdentity",
+        "projection",
+        "transformation"
+      ],
+      "additionalProperties": false
+    },
+    "inputReference": {
+      "type": "object",
+      "properties": {
+        "frameSha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "location": {
+          "enum": [
+            "values",
+            "research-value"
+          ]
+        }
+      },
+      "required": [
+        "frameSha256",
+        "location"
+      ],
+      "additionalProperties": false
+    },
+    "signedResponseFragment": {
+      "type": "object",
+      "description": "Envelope structure only; receipt/salts must separately satisfy the existing acquisition schema and verification. No signature validation is implied.",
+      "properties": {
+        "result": {
+          "$ref": "#/$defs/generatedCarrier"
+        },
+        "receipt": {
+          "type": "object"
+        },
+        "salts": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "result",
+        "receipt",
+        "salts"
+      ],
+      "additionalProperties": false
+    },
+    "preparationSource": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "response": {
+              "$ref": "#/$defs/signedResponseFragment"
+            }
+          },
+          "required": [
+            "response"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "retainedResponseJson": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "retainedResponseJson"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "assertedCaseCustody": {
+      "description": "Only the case custody slot; existing enclosing source mapping/sources/import siblings remain counted and unchanged. Embedded retainedCaseJson must parse as a duplicate-free UTF8 JSON object.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "case": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "case"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "retainedCaseJson": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "retainedCaseJson"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "selection": {
+      "description": "Exact installed-package selector, carried before a larger body read and persisted for offline custody. No caller maxima or inferred support. Roles use the fixed canonical order; readers enforce ordering and installed identity.",
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "retained-column/1"
+        },
+        "spec": {
+          "$ref": "#/$defs/specIdentity"
+        },
+        "profile": {
+          "enum": [
+            "base",
+            "extended"
+          ]
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "document-validation",
+              "preview",
+              "preparation",
+              "preparation-verification",
+              "producer-carrier"
+            ]
+          }
+        }
+      },
+      "required": [
+        "contract",
+        "spec",
+        "profile",
+        "roles"
+      ],
+      "additionalProperties": false
+    },
+    "selectedPreparation": {
+      "type": "object",
+      "required": [
+        "conversionContract",
+        "version",
+        "verifiedAt",
+        "mappingDigest",
+        "verification",
+        "cites",
+        "lineage",
+        "outcomes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "conversionContract": {
+          "$ref": "#/$defs/selection"
+        },
+        "version": {
+          "enum": [
+            2,
+            3
+          ]
+        },
+        "verifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mappingDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "verification": {
+          "type": "string"
+        },
+        "cites": {
+          "type": "array"
+        },
+        "lineage": {
+          "type": "array"
+        },
+        "outcomes": {
+          "type": "array"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/fact"
+    },
+    {
+      "$ref": "#/$defs/evidence"
+    },
+    {
+      "$ref": "#/$defs/frame"
+    },
+    {
+      "$ref": "#/$defs/columnTransformation"
+    },
+    {
+      "$ref": "#/$defs/generatedCarrier"
+    },
+    {
+      "$ref": "#/$defs/capabilities"
+    },
+    {
+      "$ref": "#/$defs/retainedColumnProducer"
+    },
+    {
+      "$ref": "#/$defs/trustedProducerProjection"
+    },
+    {
+      "$ref": "#/$defs/producerSourceBinding"
+    },
+    {
+      "$ref": "#/$defs/deskSnapshotProjection"
+    },
+    {
+      "$ref": "#/$defs/generatedConsistencyRequest"
+    },
+    {
+      "$ref": "#/$defs/generatedConsistencyResult"
+    },
+    {
+      "$ref": "#/$defs/preparationSource"
+    },
+    {
+      "$ref": "#/$defs/assertedCaseCustody"
+    },
+    {
+      "$ref": "#/$defs/selection"
+    },
+    {
+      "$ref": "#/$defs/selectedPreparation"
+    }
+  ]
+}

@@ -143,6 +143,7 @@ class PolicyReleaseTests(unittest.TestCase):
             required = ["spec/policy.md", "schema/policy/1.0.0/policy.schema.json",
                         "conformance/policy/1.0.0/vectors/manifest.json",
                         "conformance/policy/1.0.0/verify.py", "tools/dialect_verify.py",
+                        "tools/retained_column.py", "tools/_retained_column.py",
                         "rfcs/policy-companion-contract/verify.py", f"releases/{TAG}.json"]
             with tarfile.open(artifacts[0]) as archive:
                 members = set(archive.getnames())

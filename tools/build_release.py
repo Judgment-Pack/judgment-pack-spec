@@ -31,7 +31,7 @@ BUNDLE_PATHS = (
     "conformance",
 )
 
-# One reviewed distribution candidate; this is not a generic prerelease normalizer.
+# Explicit reviewed distribution identities; no generic prerelease normalization.
 CORE_RC_TAG = "v0.3.0-rc.1"
 CORE_RC_IDENTITY = {
     "releaseVersion": "0.3.0-rc.1",
@@ -40,6 +40,54 @@ CORE_RC_IDENTITY = {
     "maturity": "draft",
     "distribution": "release-candidate",
 }
+
+# Explicit planned RC2 distribution; published RC1 mapping stays exact and immutable.
+CORE_RC2_TAG = "v0.3.0-rc.2"
+CORE_RC2_IDENTITY = {"releaseVersion": "0.3.0-rc.2", "tag": CORE_RC2_TAG,
+                     "specVersion": "0.3.0", "maturity": "draft", "distribution": "release-candidate"}
+CORE_RC_IDENTITIES = {CORE_RC_TAG: CORE_RC_IDENTITY, CORE_RC2_TAG: CORE_RC2_IDENTITY}
+RETAINED_INVENTORY = "releases/v0.3.0-rc.2.retained-column.json"
+RETAINED_BUNDLE_PATHS = ("tools/dialect_verify.py", "tools/retained_column.py",
+                         "tools/_retained_column.py", "tools/check_retained_column.py",
+                         "tools/dialect-verify-ts", "requirements-dev.txt")
+
+
+def validate_retained_inventory(root: Path = ROOT) -> None:
+    release = json.loads((root / RETAINED_INVENTORY).read_text("utf-8"))
+    if set(release) != {"contract", "distribution", "maturity", "schema", "schemaSha256",
+                        "corpus", "corpusSha256", "files", "claim"}:
+        raise ValueError("retained-column inventory has an invalid closed shape")
+    if (release["contract"] != "retained-column/1" or release["distribution"] != CORE_RC2_TAG
+            or release["maturity"] != "draft" or release["claim"] != "selected-leaf-support"):
+        raise ValueError("retained-column inventory identity or scope differs")
+    schema = "schema/retained-column/1/contract.schema.json"
+    corpus = "conformance/retained-column/1/cases.json"
+    if release["schema"] != schema or release["corpus"] != corpus:
+        raise ValueError("retained-column artifact paths differ")
+    expected = {schema, "spec/retained-column.md", "spec/dialect.md", "spec/judgment-pack-core.md",
+                "tools/dialect_verify.py", "tools/retained_column.py", "tools/_retained_column.py",
+                "tools/check_retained_column.py"}
+    for directory in ("conformance/retained-column/1", "tools/dialect-verify-ts/src"):
+        expected.update(p.relative_to(root).as_posix() for p in (root / directory).rglob("*") if p.is_file())
+    if set(release["files"]) != expected:
+        raise ValueError("retained-column complete artifact inventory differs")
+    if any(value != "sha256:" + sha256(root / path) for path, value in release["files"].items()):
+        raise ValueError("retained-column immutable artifact bytes differ")
+    if (release["schemaSha256"] != release["files"][schema]
+            or release["corpusSha256"] != release["files"][corpus]):
+        raise ValueError("retained-column schema or corpus pin differs")
+    resource = json.loads((root / schema).read_text("utf-8"))
+    if resource.get("$id") != "https://judgmentpack.org/schema/retained-column/1/contract.schema.json":
+        raise ValueError("retained-column immutable schema identity differs")
+    cases = json.loads((root / corpus).read_text("utf-8"))
+    corpus_inputs = {"conformance/retained-column/1/" + name for name in
+                     ("examples.json", "preparations.json", "capabilities.json", "manifest.json")}
+    if set(cases["inputs"]) != corpus_inputs:
+        raise ValueError("retained-column complete corpus input set differs")
+    for path, value in cases["inputs"].items():
+        if path not in expected or value != release["files"][path]:
+            raise ValueError("retained-column corpus companion input differs")
+
 
 POLICY_FORMAT = "1.0.0"
 POLICY_ROOT = "conformance/policy/1.0.0"
@@ -62,6 +110,7 @@ POLICY_BUNDLE_PATHS = (
     "requirements-dev.txt", "spec/policy.md", "spec/dialect.md",
     "spec/checkpoint-witness.md", POLICY_SCHEMA_ROOT, POLICY_ROOT,
     "schema/judgment-pack-core.schema.json", "tools/dialect_verify.py",
+    "tools/retained_column.py", "tools/_retained_column.py",
     "rfcs/0000-rfc-process.md", "rfcs/0023-policy-companion.md",
     "rfcs/policy-companion-prototype", "rfcs/policy-companion-contract",
 )
@@ -158,8 +207,10 @@ def bundle_paths(tag: str, commit: str) -> tuple[str, ...]:
             paths.extend(f"{path}/{child}" for child in children if child != "policy")
         else:
             paths.append(path)
-    if tag == CORE_RC_TAG:
+    if tag in CORE_RC_IDENTITIES:
         paths.extend((f"releases/{tag}.json", "docs/releases/v0.3.0.md"))
+    if tag == CORE_RC2_TAG:
+        paths.extend((*RETAINED_BUNDLE_PATHS, RETAINED_INVENTORY, "releases/v0.3.0-rc.2.milestone.json"))
     return (*paths, core_release_notes_path(tag).relative_to(ROOT).as_posix())
 
 
@@ -199,13 +250,13 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     """
     if version != release_version(tag):
         raise ValueError("release version does not match the exact tag")
-    if tag == CORE_RC_TAG:
+    if tag in CORE_RC_IDENTITIES:
         mapping = root / "releases" / f"{tag}.json"
         if not mapping.is_file():
             raise ValueError("Core RC release mapping is missing for the exact tag")
-        if json.loads(mapping.read_text("utf-8")) != CORE_RC_IDENTITY:
+        if json.loads(mapping.read_text("utf-8")) != CORE_RC_IDENTITIES[tag]:
             raise ValueError("Core RC release mapping does not match the reviewed identity")
-        version = CORE_RC_IDENTITY["specVersion"]
+        version = CORE_RC_IDENTITIES[tag]["specVersion"]
     manifest = json.loads((root / "conformance" / "manifest.json").read_text("utf-8"))
     evaluation = json.loads(
         (root / "conformance" / "evaluation" / "manifest.json").read_text("utf-8")
@@ -215,7 +266,7 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     )
     if manifest.get("specVersion") != version:
         raise ValueError("release tag does not match the conformance specVersion")
-    if tag == CORE_RC_TAG:
+    if tag in CORE_RC_IDENTITIES:
         if manifest.get("suiteVersion") != version:
             raise ValueError("Core RC does not match the document corpus suiteVersion")
         if manifest.get("status") != "draft" or evaluation.get("status") != "draft":
@@ -231,6 +282,12 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     )
     if schema.get("$id") != expected_schema_id:
         raise ValueError("schema $id does not point at the exact release version")
+    if tag == CORE_RC2_TAG:
+        validate_retained_inventory(root)
+        if json.loads((root / "releases/v0.3.0-rc.2.milestone.json").read_text("utf-8")) != {"number": 2, "title": "v0.3.0"}:
+            raise ValueError("RC2 must preserve the final Core milestone")
+        if "- Status: Accepted" not in (root / "rfcs/0029-retained-column-conversions.md").read_text("utf-8").splitlines():
+            raise ValueError("RC2 release requires recorded RFC0029 acceptance at draft maturity")
     release_notes = core_release_notes_path(tag, root)
     if not release_notes.is_file():
         raise ValueError("release notes are missing for the exact tag")
@@ -282,9 +339,9 @@ def build(tag: str, commit: str, output: Path) -> list[Path]:
     artifact = "judgment-pack-policy" if is_policy_tag(tag) else "judgment-pack-spec"
     prefix = f"{artifact}-{version}/"
     extra = ()
-    if tag == CORE_RC_TAG:
+    if tag in CORE_RC_IDENTITIES:
         # This generated member is covered by both archive checksums/attestations.
-        identity = {**CORE_RC_IDENTITY, "sourceCommit": git("rev-parse", "--verify", f"{commit}^{{commit}}")}
+        identity = {**CORE_RC_IDENTITIES[tag], "sourceCommit": git("rev-parse", "--verify", f"{commit}^{{commit}}")}
         encoded = json.dumps(identity, sort_keys=True, separators=(",", ":")) + "\n"
         extra = (f"--add-virtual-file={prefix}release-identity.json:{encoded}",)
     common = (

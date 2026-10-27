@@ -49,13 +49,12 @@ to `release`. Production use alone does not move a document or establish a stand
 
 ## Core pre-releases
 
-A Core release candidate uses the SemVer `-rc.N` form. The `0.3.0` release is preceded by exactly
-one candidate, tag `v0.3.0-rc.1`, published as a GitHub pre-release for about one week so adopters'
+A Core release candidate uses the SemVer `-rc.N` form. The `0.3.0` release began with candidate `v0.3.0-rc.1`, published as a GitHub pre-release for about one week so adopters'
 tooling can read the renamed manifest status. The unsuffixed `v0.3.0` tag is the release. The Policy
 companion's `policy-v<releaseVersion>-draft.N` route remains independent and is not replaced by this
 Core convention.
 
-This one candidate is a distribution of the proposed exact `specVersion` `0.3.0` artifacts;
+That first candidate is a distribution of the proposed exact `specVersion` `0.3.0` artifacts;
 `0.3.0-rc.1` is its distribution identity, not a pack version selector. Its closed mapping at
 `releases/v0.3.0-rc.1.json` is required by the builder. Both manifests remain maturity `draft`:
 release candidacy does not establish the independent-evidence maturity `candidate`. Each RC bundle
@@ -72,6 +71,25 @@ adopter feedback, with the remaining release gates satisfied.
 
 The `main` branch describes work in progress. It is not an immutable specification release and
 must not be used as a reproducibility anchor.
+
+## Explicit second Core distribution candidate
+
+The expressly approved RFC0029 adoption route prepares exactly `v0.3.0-rc.2`, also mapping to proposed
+specVersion `0.3.0` and draft maturity. This expressly amends the former single-candidate plan;
+it does not replace RC1, its immutable source/tag/assets or its recorded mapping/notes. The closed
+RC2 mapping is `releases/v0.3.0-rc.2.json`; release tooling allowlists these two mappings only.
+It does not strip arbitrary prerelease suffixes to infer compatibility. Final v0.3.0 retains
+milestone #2, and its final corpus/feedback/release gates remain.
+
+RC2 adds new exact selected retained-column/1 schema resources and its own leaf corpus/inventory.
+Its support tuple names distribution `0.3.0-rc.2`, exact source commit and schema/corpus digests,
+independent of pack specVersion. First publication freezes that leaf's new resource bytes and
+corpus; no prior schema URL is repointed. A later semantic/grammar/bound/refusal change needs a
+new exact supported contract identity and versioned resources rather than reinterpreting this one.
+Both-language selected-leaf certification establishes only its named scope, never general Core,
+stable maturity, independent authorship, truth or authority. Historical staged Dialect recordings
+retain their standing. Public availability and adopter-feedback disposition remain necessary;
+this preparation does not establish that time elapsed or prescribe an invented RFC comment period.
 
 ## Pack versions
 

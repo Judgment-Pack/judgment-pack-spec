@@ -1,0 +1,929 @@
+{
+  "status": "Draft fragments, not accepted whole Dialect or preparation documents",
+  "documentFragment": {
+    "version": 2,
+    "provider": "",
+    "facts": null,
+    "evidence": null,
+    "case": {
+      "facts": [
+        {
+          "target": "/eligible",
+          "source": "/retained",
+          "conversion": {
+            "contractVersion": "1",
+            "column": "Eligible",
+            "kind": "boolean",
+            "trueValue": "YES",
+            "falseValue": "NO"
+          }
+        }
+      ],
+      "evidence": [
+        {
+          "requirement": "receipt",
+          "source": "/retained",
+          "availability": {
+            "contractVersion": "1",
+            "column": "Evidence"
+          }
+        }
+      ]
+    }
+  },
+  "generatedFrame": {
+    "contractVersion": "1",
+    "origin": "generated",
+    "values": {
+      "Eligible": "YES"
+    },
+    "research": {
+      "recordRecipeRevision": "recipe:1",
+      "declaration": {
+        "recipeRevision": "recipe:1",
+        "fields": [
+          {
+            "name": "Eligible",
+            "fieldJson": "{\"name\":\"Eligible\",\"type\":\"boolean\",\"description\":\"Retained original declaration.\"}"
+          }
+        ]
+      },
+      "fields": {
+        "Eligible": {
+          "status": "supported",
+          "valueJson": "false"
+        }
+      }
+    }
+  },
+  "assertedFrame": {
+    "contractVersion": "1",
+    "origin": "asserted",
+    "values": {
+      "Eligible": "NO",
+      "Evidence": "absent",
+      "Historical": null
+    },
+    "research": null
+  },
+  "lineageFragment": {
+    "contractVersion": "1",
+    "column": "Eligible",
+    "input": {
+      "state": "present",
+      "ref": {
+        "frameSha256": "sha256:5e15070ee22fcb46096f162d845f4604a16523515a61fe089211339ec08529bf",
+        "location": "values"
+      }
+    },
+    "result": {
+      "state": "value",
+      "json": "true"
+    }
+  },
+  "currentRecipeRevision": "recipe:8",
+  "generatedCarrier": {
+    "contractVersion": "1",
+    "originalSnapshotJson": "{ \"value\":1e3,\"label\":\"\\u00e9\" }\n",
+    "originalSnapshotSha256": "sha256:2bcde75a108ddd8533fbd9736b09bf9117f5393612073bab4b022a04eb3ffd87",
+    "retained": {
+      "contractVersion": "1",
+      "origin": "generated",
+      "values": {
+        "A": "-0",
+        "B": "legacy"
+      },
+      "research": {
+        "recordRecipeRevision": "recipe:7",
+        "declaration": {
+          "recipeRevision": "recipe:7",
+          "fields": [
+            {
+              "name": "A",
+              "fieldJson": "{\"name\":\"A\",\"type\":\"number\",\"description\":\"Original declaration.\"}"
+            },
+            {
+              "name": "B",
+              "fieldJson": "{\"name\":\"B\",\"type\":\"string\"}"
+            }
+          ]
+        },
+        "fields": {
+          "A": {
+            "status": "supported",
+            "valueJson": "-0"
+          },
+          "B": {
+            "status": "interpretation",
+            "valueJson": "\"\\ud800\""
+          }
+        }
+      }
+    }
+  },
+  "capabilitiesFragment": {
+    "conversionContracts": [
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "document-validation",
+        "limits": {
+          "documentBytes": 1048576,
+          "frameBytes": 2097152
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "document-validation",
+        "limits": {
+          "documentBytes": 2097152,
+          "frameBytes": 4194304
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "preview",
+        "limits": {
+          "documentBytes": 1048576,
+          "combinedBytes": 12582912,
+          "frameBytes": 2097152,
+          "profilesBytes": 81920,
+          "requestBodyBytes": 16777216,
+          "inputReplyBytes": 37748736
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "preview",
+        "limits": {
+          "documentBytes": 2097152,
+          "combinedBytes": 25165824,
+          "frameBytes": 4194304,
+          "profilesBytes": 163840,
+          "requestBodyBytes": 33554432,
+          "inputReplyBytes": 75497472
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "preparation",
+        "limits": {
+          "documentBytes": 1048576,
+          "combinedBytes": 12582912,
+          "frameBytes": 2097152,
+          "preparationBytes": 16777216,
+          "recordBytes": 9437184,
+          "profilesBytes": 81920,
+          "requestBodyBytes": 16777216,
+          "inputReplyBytes": 37748736,
+          "releaseStoredBytes": 41943040,
+          "runStoredBytes": 41943040,
+          "exportBaseBytes": 75497472,
+          "exportWireBytes": 90177536
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "preparation",
+        "limits": {
+          "documentBytes": 2097152,
+          "combinedBytes": 25165824,
+          "frameBytes": 4194304,
+          "preparationBytes": 33554432,
+          "recordBytes": 17825792,
+          "profilesBytes": 163840,
+          "requestBodyBytes": 33554432,
+          "inputReplyBytes": 75497472,
+          "releaseStoredBytes": 83886080,
+          "runStoredBytes": 83886080,
+          "exportBaseBytes": 150994944,
+          "exportWireBytes": 176160768
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "preparation-verification",
+        "limits": {
+          "documentBytes": 1048576,
+          "combinedBytes": 12582912,
+          "frameBytes": 2097152,
+          "preparationBytes": 16777216,
+          "recordBytes": 9437184,
+          "profilesBytes": 81920,
+          "requestBodyBytes": 16777216,
+          "inputReplyBytes": 37748736,
+          "releaseStoredBytes": 41943040,
+          "runStoredBytes": 41943040,
+          "exportBaseBytes": 75497472,
+          "exportWireBytes": 90177536
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "preparation-verification",
+        "limits": {
+          "documentBytes": 2097152,
+          "combinedBytes": 25165824,
+          "frameBytes": 4194304,
+          "preparationBytes": 33554432,
+          "recordBytes": 17825792,
+          "profilesBytes": 163840,
+          "requestBodyBytes": 33554432,
+          "inputReplyBytes": 75497472,
+          "releaseStoredBytes": 83886080,
+          "runStoredBytes": 83886080,
+          "exportBaseBytes": 150994944,
+          "exportWireBytes": 176160768
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "producer-carrier",
+        "limits": {
+          "originalSnapshotBytes": 524288,
+          "carrierBytes": 3145728,
+          "grantBytes": 3145728,
+          "adapterStdoutBytes": 3145728,
+          "responseBytes": 5242880,
+          "profilesBytes": 81920
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "producer-carrier",
+        "limits": {
+          "originalSnapshotBytes": 524288,
+          "carrierBytes": 3145728,
+          "grantBytes": 3145728,
+          "adapterStdoutBytes": 3145728,
+          "responseBytes": 5242880,
+          "profilesBytes": 163840
+        }
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "preparation",
+        "limits": {
+          "documentBytes": 1048576,
+          "combinedBytes": 12582912,
+          "frameBytes": 2097152,
+          "preparationBytes": 16777216,
+          "recordBytes": 9437184,
+          "profilesBytes": 81920,
+          "requestBodyBytes": 16777216,
+          "inputReplyBytes": 37748736,
+          "releaseStoredBytes": 41943040,
+          "runStoredBytes": 41943040,
+          "exportBaseBytes": 75497472,
+          "exportWireBytes": 90177536
+        },
+        "producerGrammar": "desk-reviewed-input/1"
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "preparation",
+        "limits": {
+          "documentBytes": 2097152,
+          "combinedBytes": 25165824,
+          "frameBytes": 4194304,
+          "preparationBytes": 33554432,
+          "recordBytes": 17825792,
+          "profilesBytes": 163840,
+          "requestBodyBytes": 33554432,
+          "inputReplyBytes": 75497472,
+          "releaseStoredBytes": 83886080,
+          "runStoredBytes": 83886080,
+          "exportBaseBytes": 150994944,
+          "exportWireBytes": 176160768
+        },
+        "producerGrammar": "desk-reviewed-input/1"
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "preparation-verification",
+        "limits": {
+          "documentBytes": 1048576,
+          "combinedBytes": 12582912,
+          "frameBytes": 2097152,
+          "preparationBytes": 16777216,
+          "recordBytes": 9437184,
+          "profilesBytes": 81920,
+          "requestBodyBytes": 16777216,
+          "inputReplyBytes": 37748736,
+          "releaseStoredBytes": 41943040,
+          "runStoredBytes": 41943040,
+          "exportBaseBytes": 75497472,
+          "exportWireBytes": 90177536
+        },
+        "producerGrammar": "desk-reviewed-input/1"
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "preparation-verification",
+        "limits": {
+          "documentBytes": 2097152,
+          "combinedBytes": 25165824,
+          "frameBytes": 4194304,
+          "preparationBytes": 33554432,
+          "recordBytes": 17825792,
+          "profilesBytes": 163840,
+          "requestBodyBytes": 33554432,
+          "inputReplyBytes": 75497472,
+          "releaseStoredBytes": 83886080,
+          "runStoredBytes": 83886080,
+          "exportBaseBytes": 150994944,
+          "exportWireBytes": 176160768
+        },
+        "producerGrammar": "desk-reviewed-input/1"
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "base",
+        "role": "producer-carrier",
+        "limits": {
+          "originalSnapshotBytes": 524288,
+          "carrierBytes": 3145728,
+          "grantBytes": 3145728,
+          "adapterStdoutBytes": 3145728,
+          "responseBytes": 5242880,
+          "profilesBytes": 81920
+        },
+        "producerGrammar": "desk-reviewed-input/1"
+      },
+      {
+        "contract": "retained-column/1",
+        "spec": {
+          "version": "draft-rfc0029",
+          "revision": "0000000000000000000000000000000000000000",
+          "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "profile": "extended",
+        "role": "producer-carrier",
+        "limits": {
+          "originalSnapshotBytes": 524288,
+          "carrierBytes": 3145728,
+          "grantBytes": 3145728,
+          "adapterStdoutBytes": 3145728,
+          "responseBytes": 5242880,
+          "profilesBytes": 163840
+        },
+        "producerGrammar": "desk-reviewed-input/1"
+      }
+    ]
+  },
+  "capabilityIdentityNote": "Synthetic test pins only; no implementation advertises these capabilities. Preparation/record maxima and producer transport require real accounting before advertisement.",
+  "assertedAppendBefore": {
+    "origin": {
+      "originalValues": {
+        "Eligible": "NO",
+        "Evidence": "absent",
+        "Historical": null
+      },
+      "source": "source:original",
+      "recipeRevision": "recipe:7",
+      "receipt": "receipt:original"
+    },
+    "prepared": {
+      "Eligible": "NO",
+      "Evidence": "absent"
+    },
+    "acquisitions": [
+      {
+        "source": "sibling:1",
+        "receipt": "receipt:sibling"
+      }
+    ]
+  },
+  "assertedAppendAfter": {
+    "origin": {
+      "originalValues": {
+        "Eligible": "NO",
+        "Evidence": "absent",
+        "Historical": null
+      },
+      "source": "source:original",
+      "recipeRevision": "recipe:7",
+      "receipt": "receipt:original"
+    },
+    "prepared": {
+      "Eligible": "NO",
+      "Evidence": "absent"
+    },
+    "acquisitions": [
+      {
+        "source": "sibling:1",
+        "receipt": "receipt:sibling"
+      }
+    ],
+    "retained": {
+      "contractVersion": "1",
+      "origin": "asserted",
+      "values": {
+        "Eligible": "NO",
+        "Evidence": "absent",
+        "Historical": null
+      },
+      "research": null
+    }
+  },
+  "publicationBindingExample": {
+    "publishedDocumentJson": "{\"version\":2,\"provider\":\"published\"}",
+    "boundDocumentJson": "{\"version\":2,\"provider\":\"bound\"}",
+    "publishedDocumentSha256": "sha256:747a7afb3de48dd7dea36b8c3dc8ce12acb58730736c07b5a7f23a417ecaa53f",
+    "boundDocumentSha256": "sha256:c3bbbe4c46c347372161ffc863175754f3be6b893f3c650a9949274c246e62e1"
+  },
+  "identityDomains": {
+    "originalSnapshot": "SHA-256 of originalSnapshotJson UTF-8 bytes",
+    "rawCarrier": "SHA-256 of complete received carrier bytes, including spelling and whitespace",
+    "frame": "separate exact received retained frame byte commitment",
+    "canonicalResult": "existing canonical result digest over the new wrapper; never original snapshot identity",
+    "sourceRecipe": "original source and recipe commitments remain separate",
+    "publishedBound": "published and bound document identities remain distinct; count both retained copies"
+  },
+  "generatedReplaceBefore": {
+    "resultJson": "{\"origin\":{\"source\":\"source:original\",\"recipeRevision\":\"recipe:7\",\"receipt\":\"receipt:original\"},\"values\":{\"A\":\"-0\",\"B\":\"legacy\"},\"acquisitions\":[{\"source\":\"sibling:1\",\"receipt\":\"receipt:sibling\"}],\"fields\":{\"A\":{\"status\":\"supported\",\"valueJson\":\"-0\"},\"B\":{\"status\":\"interpretation\",\"valueJson\":\"\\\"\\\\ud800\\\"\"}}}",
+    "source": "source:original",
+    "recipeRevision": "recipe:7",
+    "acquisitions": [
+      {
+        "source": "sibling:1",
+        "receipt": "receipt:sibling"
+      }
+    ]
+  },
+  "generatedReplaceAfter": {
+    "resultJson": "{\"contractVersion\":\"1\",\"originalSnapshotJson\":\"{\\\"origin\\\":{\\\"source\\\":\\\"source:original\\\",\\\"recipeRevision\\\":\\\"recipe:7\\\",\\\"receipt\\\":\\\"receipt:original\\\"},\\\"values\\\":{\\\"A\\\":\\\"-0\\\",\\\"B\\\":\\\"legacy\\\"},\\\"acquisitions\\\":[{\\\"source\\\":\\\"sibling:1\\\",\\\"receipt\\\":\\\"receipt:sibling\\\"}],\\\"fields\\\":{\\\"A\\\":{\\\"status\\\":\\\"supported\\\",\\\"valueJson\\\":\\\"-0\\\"},\\\"B\\\":{\\\"status\\\":\\\"interpretation\\\",\\\"valueJson\\\":\\\"\\\\\\\"\\\\\\\\ud800\\\\\\\"\\\"}}}\",\"originalSnapshotSha256\":\"sha256:db9ac0beecaec9714510fc3fa66677564b6dcf1c6fee754d43d343a07ff24f9b\",\"retained\":{\"contractVersion\":\"1\",\"origin\":\"generated\",\"values\":{\"A\":\"-0\",\"B\":\"legacy\"},\"research\":{\"recordRecipeRevision\":\"recipe:7\",\"declaration\":{\"recipeRevision\":\"recipe:7\",\"fields\":[{\"name\":\"A\",\"fieldJson\":\"{\\\"name\\\":\\\"A\\\",\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"Original declaration.\\\"}\"},{\"name\":\"B\",\"fieldJson\":\"{\\\"name\\\":\\\"B\\\",\\\"type\\\":\\\"string\\\"}\"}]},\"fields\":{\"A\":{\"status\":\"supported\",\"valueJson\":\"-0\"},\"B\":{\"status\":\"interpretation\",\"valueJson\":\"\\\"\\\\ud800\\\"\"}}}}}",
+    "source": "source:original",
+    "recipeRevision": "recipe:7",
+    "acquisitions": [
+      {
+        "source": "sibling:1",
+        "receipt": "receipt:sibling"
+      }
+    ]
+  },
+  "producerConsistency": {
+    "request": {
+      "generatedConsistency": {
+        "carrier": {
+          "contractVersion": "1",
+          "originalSnapshotJson": "{\"version\":1,\"class\":\"generated\",\"preparationId\":\"prep_synthetic\",\"recipeVersion\":8,\"qualification\":null,\"prepared\":{\"ignored\":\"not raw input\"},\"record\":{\"id\":\"record_synthetic\",\"name\":\"Synthetic\",\"sourceId\":\"source_synthetic\",\"row\":1,\"class\":\"generated\",\"status\":\"ready\",\"values\":{\"Text\":\"  A  \",\"Integer\":\"-0\",\"Decimal\":\"1.2300\",\"Boolean\":\"false\",\"List\":\"[]\",\"Range\":\"{\\\"min\\\":\\\"1.00\\\",\\\"max\\\":\\\"2.0\\\"}\",\"String\":\"\",\"Number\":\"-0\",\"Evidence\":\"present\"},\"research\":{\"runId\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"entity\":{\"id\":\"entity_synthetic\",\"kind\":\"record\",\"name\":\"Synthetic\",\"url\":\"https://example.test/\",\"fields\":{\"Text\":{\"status\":\"supported\",\"value\":\"  A  \",\"sources\":[],\"note\":\"opaque source note\"},\"Integer\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Decimal\":{\"status\":\"supported\",\"value\":\"1.2300\",\"sources\":[],\"note\":\"opaque source note\"},\"Boolean\":{\"status\":\"supported\",\"value\":false,\"sources\":[],\"note\":\"opaque source note\"},\"List\":{\"status\":\"supported\",\"value\":[],\"sources\":[],\"note\":\"opaque source note\"},\"Range\":{\"status\":\"supported\",\"value\":{\"min\":\"1.00\",\"max\":\"2.0\"},\"sources\":[],\"note\":\"opaque source note\"},\"String\":{\"status\":\"supported\",\"value\":\"\",\"sources\":[],\"note\":\"opaque source note\"},\"Number\":{\"status\":\"supported\",\"value\":-0,\"sources\":[],\"note\":\"opaque source note\"},\"Evidence\":{\"status\":\"supported\",\"value\":\"present\",\"sources\":[],\"note\":\"opaque source note\"}}}}},\"values\":{\"Text\":\"filtered visible\"},\"research\":{\"id\":\"research_11111111111111111111111111111111\",\"recipeVersion\":7,\"recipe\":{\"version\":1,\"target\":\"records\",\"fields\":[{ \"type\" : \"text\", \"name\" : \"Text\", \"description\" : \"A  \\u0042 / kept\" },{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"},{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"},{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"},{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"},{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"},{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"},{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"},{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}],\"criteria\":[],\"ai\":{},\"limits\":{}},\"intent\":\"Opaque original intent\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"approvedLimits\":{},\"budgetApprovals\":[],\"workflowApproval\":null,\"modelResponses\":[],\"sources\":[]},\"reviews\":[],\"legacyOpaque\":{\"escaped\":\"\\ud800\"}}",
+          "originalSnapshotSha256": "sha256:059b04e2781eea91f1d1f529fdbd5f6da1d1e731acab7309615b99a7ec52f4ea",
+          "retained": {
+            "contractVersion": "1",
+            "origin": "generated",
+            "values": {
+              "Text": "  A  ",
+              "Integer": "-0",
+              "Decimal": "1.2300",
+              "Boolean": "false",
+              "List": "[]",
+              "Range": "{\"min\":\"1.00\",\"max\":\"2.0\"}",
+              "String": "",
+              "Number": "-0",
+              "Evidence": "present"
+            },
+            "research": {
+              "recordRecipeRevision": "sha256:2fffc39ce48e5ecf531123cbcf65ff4dac679c044a25c681ecd44bc2fb28daed",
+              "declaration": {
+                "recipeRevision": "sha256:2fffc39ce48e5ecf531123cbcf65ff4dac679c044a25c681ecd44bc2fb28daed",
+                "fields": [
+                  {
+                    "name": "Text",
+                    "fieldJson": "{\"type\":\"text\",\"name\":\"Text\",\"description\":\"A  \\u0042 / kept\"}"
+                  },
+                  {
+                    "name": "Integer",
+                    "fieldJson": "{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"}"
+                  },
+                  {
+                    "name": "Decimal",
+                    "fieldJson": "{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"}"
+                  },
+                  {
+                    "name": "Boolean",
+                    "fieldJson": "{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"}"
+                  },
+                  {
+                    "name": "List",
+                    "fieldJson": "{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"}"
+                  },
+                  {
+                    "name": "Range",
+                    "fieldJson": "{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"}"
+                  },
+                  {
+                    "name": "String",
+                    "fieldJson": "{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"}"
+                  },
+                  {
+                    "name": "Number",
+                    "fieldJson": "{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"}"
+                  },
+                  {
+                    "name": "Evidence",
+                    "fieldJson": "{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}"
+                  }
+                ]
+              },
+              "fields": {
+                "Text": {
+                  "status": "supported",
+                  "valueJson": "\"  A  \""
+                },
+                "Integer": {
+                  "status": "supported",
+                  "valueJson": "-0"
+                },
+                "Decimal": {
+                  "status": "supported",
+                  "valueJson": "\"1.2300\""
+                },
+                "Boolean": {
+                  "status": "supported",
+                  "valueJson": "false"
+                },
+                "List": {
+                  "status": "supported",
+                  "valueJson": "[]"
+                },
+                "Range": {
+                  "status": "supported",
+                  "valueJson": "{\"min\":\"1.00\",\"max\":\"2.0\"}"
+                },
+                "String": {
+                  "status": "supported",
+                  "valueJson": "\"\""
+                },
+                "Number": {
+                  "status": "supported",
+                  "valueJson": "-0"
+                },
+                "Evidence": {
+                  "status": "supported",
+                  "valueJson": "\"present\""
+                }
+              }
+            }
+          }
+        },
+        "profile": "base",
+        "limits": {
+          "originalSnapshotBytes": 524288,
+          "carrierBytes": 3145728
+        },
+        "trustedProducer": {
+          "id": "reviewed-columns",
+          "profileDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "class": "generated",
+          "source": "desk-inputs",
+          "authority": "synthetic-trusted-host",
+          "shape": "mcp",
+          "endpoint": "desk-local:reviewed-inputs",
+          "adapter": {
+            "name": "jpack-desk/reviewed-input",
+            "version": "2",
+            "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "tools": [
+            "read_reviewed_input"
+          ],
+          "retainedColumnProducer": {
+            "contractVersion": "1",
+            "grammar": "desk-reviewed-input/1"
+          }
+        },
+        "sourceBinding": {
+          "kind": "operation",
+          "profile": "reviewed-columns",
+          "profileDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "receiptResultDigest": "sha256:4e8a6ba130e89f25231ce9b54c6062a1bf6e773762b7d41929839319d11f43c4",
+        "rule": {
+          "contractVersion": "1",
+          "column": "Text",
+          "kind": "research-value"
+        }
+      }
+    },
+    "expected": {
+      "consistent": true,
+      "acquisition": "not-verified",
+      "history": "not-checked",
+      "originalSnapshotSha256": "sha256:059b04e2781eea91f1d1f529fdbd5f6da1d1e731acab7309615b99a7ec52f4ea",
+      "frameSha256": "sha256:228ee51e667ef31afbbba90d7a4e7025250cc20b1c7f2fbb0a414f1e00a5392c",
+      "revisionIdentity": "sha256:2fffc39ce48e5ecf531123cbcf65ff4dac679c044a25c681ecd44bc2fb28daed",
+      "projection": {
+        "grammar": "desk-reviewed-input/1",
+        "snapshotVersion": 1,
+        "snapshotClass": "generated",
+        "recordClass": "generated",
+        "runId": "research_11111111111111111111111111111111",
+        "recordRunId": "research_11111111111111111111111111111111",
+        "recipeVersion": 7,
+        "recordRecipeVersion": 7,
+        "values": {
+          "Text": "  A  ",
+          "Integer": "-0",
+          "Decimal": "1.2300",
+          "Boolean": "false",
+          "List": "[]",
+          "Range": "{\"min\":\"1.00\",\"max\":\"2.0\"}",
+          "String": "",
+          "Number": "-0",
+          "Evidence": "present"
+        },
+        "declarations": [
+          {
+            "name": "Text",
+            "fieldJson": "{\"type\":\"text\",\"name\":\"Text\",\"description\":\"A  \\u0042 / kept\"}"
+          },
+          {
+            "name": "Integer",
+            "fieldJson": "{\"name\":\"Integer\",\"type\":\"integer\",\"description\":\"Original integer\"}"
+          },
+          {
+            "name": "Decimal",
+            "fieldJson": "{\"name\":\"Decimal\",\"type\":\"decimal\",\"description\":\"Original decimal\"}"
+          },
+          {
+            "name": "Boolean",
+            "fieldJson": "{\"name\":\"Boolean\",\"type\":\"boolean\",\"description\":\"Original boolean\"}"
+          },
+          {
+            "name": "List",
+            "fieldJson": "{\"name\":\"List\",\"type\":\"text-list\",\"description\":\"Original list\"}"
+          },
+          {
+            "name": "Range",
+            "fieldJson": "{\"name\":\"Range\",\"type\":\"range\",\"description\":\"Original range\"}"
+          },
+          {
+            "name": "String",
+            "fieldJson": "{\"name\":\"String\",\"type\":\"string\",\"description\":\"Historical string\"}"
+          },
+          {
+            "name": "Number",
+            "fieldJson": "{\"name\":\"Number\",\"type\":\"number\",\"description\":\"Historical number\"}"
+          },
+          {
+            "name": "Evidence",
+            "fieldJson": "{\"name\":\"Evidence\",\"type\":\"text\",\"description\":\"Availability\"}"
+          }
+        ],
+        "fields": {
+          "Text": {
+            "status": "supported",
+            "valueJson": "\"  A  \""
+          },
+          "Integer": {
+            "status": "supported",
+            "valueJson": "-0"
+          },
+          "Decimal": {
+            "status": "supported",
+            "valueJson": "\"1.2300\""
+          },
+          "Boolean": {
+            "status": "supported",
+            "valueJson": "false"
+          },
+          "List": {
+            "status": "supported",
+            "valueJson": "[]"
+          },
+          "Range": {
+            "status": "supported",
+            "valueJson": "{\"min\":\"1.00\",\"max\":\"2.0\"}"
+          },
+          "String": {
+            "status": "supported",
+            "valueJson": "\"\""
+          },
+          "Number": {
+            "status": "supported",
+            "valueJson": "-0"
+          },
+          "Evidence": {
+            "status": "supported",
+            "valueJson": "\"present\""
+          }
+        }
+      },
+      "transformation": {
+        "contractVersion": "1",
+        "column": "Text",
+        "input": {
+          "state": "present",
+          "ref": {
+            "frameSha256": "sha256:228ee51e667ef31afbbba90d7a4e7025250cc20b1c7f2fbb0a414f1e00a5392c",
+            "location": "research-value"
+          }
+        },
+        "result": {
+          "state": "value",
+          "json": "\"  A  \""
+        },
+        "researchIdentity": {
+          "recipeRevision": "sha256:2fffc39ce48e5ecf531123cbcf65ff4dac679c044a25c681ecd44bc2fb28daed",
+          "fieldSha256": "sha256:c34b7a41cb849c1f3d4155283acaf77f9906b742229a12ae0e6157487205af83"
+        }
+      }
+    }
+  },
+  "producerGrammarBinding": {
+    "id": "reviewed-columns",
+    "profileDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "class": "generated",
+    "source": "desk-inputs",
+    "authority": "synthetic-trusted-host",
+    "shape": "mcp",
+    "endpoint": "desk-local:reviewed-inputs",
+    "adapter": {
+      "name": "jpack-desk/reviewed-input",
+      "version": "2",
+      "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "tools": [
+      "read_reviewed_input"
+    ],
+    "retainedColumnProducer": {
+      "contractVersion": "1",
+      "grammar": "desk-reviewed-input/1"
+    }
+  },
+  "producerContextNote": "Synthetic independently supplied trust/digest inputs demonstrate consistency only; acquisition and original history are not verified by the prototype.",
+  "preparationSourceFragment": {
+    "response": {
+      "result": {
+        "contractVersion": "1",
+        "originalSnapshotJson": "{ \"value\":1e3,\"label\":\"\\u00e9\" }\n",
+        "originalSnapshotSha256": "sha256:2bcde75a108ddd8533fbd9736b09bf9117f5393612073bab4b022a04eb3ffd87",
+        "retained": {
+          "contractVersion": "1",
+          "origin": "generated",
+          "values": {
+            "A": "-0",
+            "B": "legacy"
+          },
+          "research": {
+            "recordRecipeRevision": "recipe:7",
+            "declaration": {
+              "recipeRevision": "recipe:7",
+              "fields": [
+                {
+                  "name": "A",
+                  "fieldJson": "{\"name\":\"A\",\"type\":\"number\",\"description\":\"Original declaration.\"}"
+                },
+                {
+                  "name": "B",
+                  "fieldJson": "{\"name\":\"B\",\"type\":\"string\"}"
+                }
+              ]
+            },
+            "fields": {
+              "A": {
+                "status": "supported",
+                "valueJson": "-0"
+              },
+              "B": {
+                "status": "interpretation",
+                "valueJson": "\"\\ud800\""
+              }
+            }
+          }
+        }
+      },
+      "receipt": {},
+      "salts": {}
+    }
+  },
+  "retainedSourceFragment": {
+    "retainedResponseJson": "{\"result\":{\"contractVersion\":\"1\",\"originalSnapshotJson\":\"{ \\\"value\\\":1e3,\\\"label\\\":\\\"\\\\u00e9\\\" }\\n\",\"originalSnapshotSha256\":\"sha256:2bcde75a108ddd8533fbd9736b09bf9117f5393612073bab4b022a04eb3ffd87\",\"retained\":{\"contractVersion\":\"1\",\"origin\":\"generated\",\"values\":{\"A\":\"-0\",\"B\":\"legacy\"},\"research\":{\"recordRecipeRevision\":\"recipe:7\",\"declaration\":{\"recipeRevision\":\"recipe:7\",\"fields\":[{\"name\":\"A\",\"fieldJson\":\"{\\\"name\\\":\\\"A\\\",\\\"type\\\":\\\"number\\\",\\\"description\\\":\\\"Original declaration.\\\"}\"},{\"name\":\"B\",\"fieldJson\":\"{\\\"name\\\":\\\"B\\\",\\\"type\\\":\\\"string\\\"}\"}]},\"fields\":{\"A\":{\"status\":\"supported\",\"valueJson\":\"-0\"},\"B\":{\"status\":\"interpretation\",\"valueJson\":\"\\\"\\\\ud800\\\"\"}}}}},\"receipt\":{},\"salts\":{}}"
+  },
+  "sourceRetentionNote": "Structure fragments only. Empty receipt/salts do not authenticate an acquisition. Existing signature/profile/request/freshness checks remain required.",
+  "assertedCaseCustodyFragment": {
+    "retainedCaseJson": "{ \"origin\":{\"originalValues\":{\"A\":\"\\t\"},\"n\":1e3}, \"retained\":{ \"contractVersion\":\"1\", \"origin\":\"asserted\", \"values\":{\"A\":\"\\u00e9\\n\"}, \"research\":null } }"
+  },
+  "selectionFragment": {
+    "contract": "retained-column/1",
+    "spec": {
+      "version": "draft-rfc0029",
+      "revision": "0000000000000000000000000000000000000000",
+      "schemaSha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "corpusSha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "profile": "base",
+    "roles": [
+      "document-validation",
+      "preview",
+      "preparation",
+      "preparation-verification",
+      "producer-carrier"
+    ]
+  }
+}

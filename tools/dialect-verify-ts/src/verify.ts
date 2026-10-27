@@ -1,3 +1,5 @@
+import { recordingOfExport, VectorError } from "./vector.ts";
+import { selected as retainedSelected, CAPS, profileBytes, admitSelection, inSelection, remember, restoreCase, restoreAcquisitions, sourceDocuments, exportInputs, translateError } from "./retained.ts";
 // A preparation verifier (spec/dialect.md §11, §14): the refusals in their phases, the findings in their
 // order, and the reading.
 import { BOUNDS, scanBytes } from "./bounds.ts";
@@ -14,6 +16,7 @@ export type Inputs = {
   profiles: Uint8Array;
   preparation: Uint8Array;
   record?: Uint8Array; // the line, without its newline
+  conversionContract?: Uint8Array;
   requireBinding: boolean;
   binding?: Uint8Array; // the binding document of a dialect with an unbound source (§4.4)
 };
@@ -55,11 +58,29 @@ export function admitEnvelope(dialect: Uint8Array, caseBytes: Uint8Array,
 }
 
 export function verify(inputs: Inputs): Result {
+  if (inputs.conversionContract !== undefined) {
+    try { return inSelection(admitSelection(inputs.conversionContract), () => verifyOrdinary(inputs)); }
+    catch (error) {
+      try { translateError(error); } catch (e) {
+        if (e instanceof Refusal) return { kind: "refusal", report: obj([["result", str("refusal")], ["refusal", str(e.code)]]) };
+        if (e instanceof Finding) return { kind: "finding", report: obj([["result", str("finding")], ["finding", str(e.code)]]) };
+        throw e;
+      }
+    }
+  }
+  return verifyOrdinary(inputs);
+}
+
+function verifyOrdinary(inputs: Inputs): Result {
   let recomputedBytes: Uint8Array | undefined;
   try {
-    admitEnvelope(inputs.dialect, inputs.case, inputs.acquisitions);
+    if (retainedSelected()) {
+      profileBytes(inputs.profiles.length);
+      if (inputs.dialect.length > CAPS.documentBytes || inputs.dialect.length + inputs.case.length + inputs.acquisitions.length + (inputs.binding?.length ?? 0) > CAPS.combinedBytes) throw new Refusal("input-over-bound", "selected complete input");
+    } else admitEnvelope(inputs.dialect, inputs.case, inputs.acquisitions);
     return reading(inputs, (b) => (recomputedBytes = b));
   } catch (e) {
+    if (!(e instanceof Refusal) && !(e instanceof Finding)) translateError(e);
     if (e instanceof Refusal && e.code === "profile-unsupported") return { kind: "refusal", report: obj([["result", str("refusal")], ["refusal", str(e.code)], ["profile", str("extended")]]) };
     if (e instanceof Refusal) return { kind: "refusal", report: obj([["result", str("refusal")], ["refusal", str(e.code)]]), why: e.message };
     if (e instanceof Finding) {
@@ -85,9 +106,9 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
 
   // After phase 0 negotiation and envelope admission: remaining phase 1 byte bounds,
   // before full document reading.
-  if (inputs.profiles.length > BOUNDS.profilesBytes) over("the profiles' size");
-  if (inputs.preparation.length > BOUNDS.preparationBytes) over("the preparation's size");
-  if (inputs.record !== undefined && inputs.record.length > BOUNDS.recordBytes) over("the record's size");
+  if (inputs.profiles.length > (retainedSelected() ? CAPS.profilesBytes : BOUNDS.profilesBytes)) over("the profiles' size");
+  if (inputs.preparation.length > (retainedSelected() ? CAPS.preparationBytes : BOUNDS.preparationBytes)) over("the preparation's size");
+  if (inputs.record !== undefined && inputs.record.length > (retainedSelected() ? CAPS.recordBytes : BOUNDS.recordBytes)) over("the record's size");
   if (inputs.binding !== undefined && inputs.binding.length > BOUNDS.bindingBytes) over("the binding document's size");
   for (const [what, bytes] of docs) {
     if (bytes === undefined) continue;
@@ -105,15 +126,18 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
   for (const [what, bytes] of docs) {
     if (bytes === undefined) continue;
     try {
-      parsed.set(what, read(bytes));
+      const document = read(bytes);
+      remember(document.value, document.text);
+      parsed.set(what, document);
     } catch (e) {
       if (e instanceof NotRead) throw new Refusal("input-malformed", `${what}: ${e.message}`);
       throw e;
     }
   }
   const dialectValue = parsed.get("the dialect")!.value;
-  const caseValue = parsed.get("the case")!.value;
+  const caseValue = retainedSelected() ? restoreCase(parsed.get("the case")!.value) : parsed.get("the case")!.value;
   const acquisitionsValue = parsed.get("the acquisitions")!.value;
+  if (retainedSelected()) restoreAcquisitions(acquisitionsValue);
   const preparationValue = parsed.get("the preparation")!.value;
   const record = parsed.get("the record");
 
@@ -147,6 +171,7 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
   // findings 1–4, by recomputation
   const r = recompute(dialect, caseValue, acquisitions, profiles, verifiedAt);
   const bytes = preparationForm(r.preparation);
+  if (retainedSelected() && bytes.length > CAPS.preparationBytes) over("complete recomputed preparation");
   keep(bytes);
 
   // 5. preparation-differs
@@ -275,4 +300,39 @@ function unsignedFreshness(r: Recomputed, verifiedAt: string): JObj | undefined 
     );
   if (sources.length === 0) return undefined;
   return obj([["against", str("preparation.verifiedAt")], ["verifiedAt", str(verifiedAt)], ["sources", arr(sources)]]);
+}
+
+/** Explicit complete persisted input adapter. Caller still selects the installed tuple first. */
+export function verifySourceInput(source: Uint8Array, profiles: Uint8Array, preparation: Uint8Array,
+                                  conversionContract: Uint8Array, record?: Uint8Array, requireBinding=false): Result {
+  try {
+    return inSelection(admitSelection(conversionContract),()=>verifyOrdinary({...sourceDocuments(source),profiles,preparation,record,requireBinding}));
+  } catch(error) { return selectedError(error); }
+}
+function selectedError(error: unknown): Result {
+  if(error instanceof VectorError) {
+    const code=["recording-version-unsupported","recording-version-mismatch","recording-pack-invalid"].includes(error.message)?error.message:"input-malformed";
+    return {kind:"refusal",report:obj([["result",str("refusal")],["refusal",str(code)]])};
+  }
+  try { translateError(error); } catch(e) {
+    if(e instanceof Refusal)return {kind:"refusal",report:obj([["result",str("refusal")],["refusal",str(e.code)]])};
+    if(e instanceof Finding)return {kind:"finding",report:obj([["result",str("finding")],["finding",str(e.code)]])};
+    throw e;
+  }
+}
+/** Preparation agreement only: existing record-signature/chain authority is separate. */
+export function verifyExport(data:Uint8Array,profiles:Uint8Array,conversionContract:Uint8Array,requireBinding=false):Result {
+  try {
+    return inSelection(admitSelection(conversionContract),()=>{
+      const bundle=exportInputs(data);
+      recordingOfExport(data);
+      let last:Result|undefined;
+      for(let i=0;i<bundle.retained.length;i++){
+        const item=bundle.retained[i];
+        last=verifySourceInput(item.source,profiles,item.preparation,conversionContract,i===1?bundle.audit:undefined,i===1&&requireBinding);
+        if(last.kind!=="reading")return last;
+      }
+      return last!;
+    });
+  }catch(error){return selectedError(error);}
 }

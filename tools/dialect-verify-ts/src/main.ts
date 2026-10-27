@@ -1,3 +1,5 @@
+import { admitSelection, translateError } from "./retained.ts";
+import { Refusal } from "./forms.ts";
 // The command line: one reading of one preparation, its report printed as one line of JSON.
 //
 //   node src/main.ts <vector directory> [--require-binding]
@@ -9,8 +11,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { preparationForm, utf8 } from "./json.ts";
 import { VectorError, loadVector } from "./vector.ts";
-import { verify } from "./verify.ts";
-import type { Inputs } from "./verify.ts";
+import { verify, verifySourceInput, verifyExport } from "./verify.ts";
+import type { Inputs, Result } from "./verify.ts";
 
 const USAGE =
   "usage: node src/main.ts <vector directory> [--require-binding] [--emit-preparation F] [--explain]\n" +
@@ -21,7 +23,7 @@ function main(argv: string[]): number {
   const flags = new Set<string>();
   const values = new Map<string, string>();
   const positional: string[] = [];
-  const valued = new Set(["--dialect", "--case", "--acquisitions", "--profiles", "--preparation", "--binding", "--record", "--emit-preparation"]);
+  const valued = new Set(["--dialect", "--case", "--acquisitions", "--profiles", "--preparation", "--binding", "--record", "--emit-preparation", "--conversion-contract", "--source-input", "--export"]);
   for (let k = 0; k < argv.length; k++) {
     const a = argv[k];
     if (valued.has(a)) {
@@ -36,13 +38,34 @@ function main(argv: string[]): number {
     }
   }
   const requireBinding = flags.has("--require-binding");
-  let inputs: Inputs;
+  let inputs!: Inputs;
+  let directResult: Result | undefined;
   try {
-    if (positional.length === 1) {
+    let conversionContract: Uint8Array | undefined;
+    if (values.has("--conversion-contract")) {
+      conversionContract = Uint8Array.from(readFileSync(values.get("--conversion-contract")!));
+      try { admitSelection(conversionContract); }
+      catch (error) {
+        try { translateError(error); } catch (e) {
+          if (!(e instanceof Refusal)) throw e;
+          process.stdout.write(JSON.stringify({result:"refusal",refusal:e.code}) + "\n");
+          return 1;
+        }
+      }
+    }
+    if (values.has("--source-input") || values.has("--export")) {
+      if (positional.length || !conversionContract || !values.has("--profiles") || values.has("--source-input") && values.has("--export") || ["--dialect","--case","--acquisitions","--binding"].some(k=>values.has(k))) return usage("select exactly one complete source-input/export adapter and an explicit conversion contract");
+      const file=(key:string)=>Uint8Array.from(readFileSync(values.get(key)!));
+      if(values.has("--export")) directResult=verifyExport(file("--export"),file("--profiles"),conversionContract,requireBinding);
+      else {
+        if(!values.has("--preparation"))return usage("--source-input requires --preparation");
+        directResult=verifySourceInput(file("--source-input"),file("--profiles"),file("--preparation"),conversionContract,values.has("--record")?file("--record"):undefined,requireBinding);
+      }
+    } else if (positional.length === 1) {
       for (const k of ["--dialect", "--case", "--acquisitions", "--profiles", "--preparation", "--binding", "--record"]) {
         if (values.has(k)) return usage(`${k} is not taken with a vector directory`);
       }
-      inputs = loadVector(positional[0], requireBinding);
+      inputs = { ...loadVector(positional[0], requireBinding), conversionContract };
     } else if (positional.length === 0) {
       for (const k of ["--dialect", "--case", "--profiles", "--preparation"]) if (!values.has(k)) return usage(`${k} is required`);
       const file = (k: string) => Uint8Array.from(readFileSync(values.get(k)!));
@@ -59,6 +82,7 @@ function main(argv: string[]): number {
         preparation: file("--preparation"),
         record,
         requireBinding,
+        conversionContract,
         binding: values.has("--binding") ? file("--binding") : undefined,
       };
     } else {
@@ -71,7 +95,7 @@ function main(argv: string[]): number {
     }
     throw e;
   }
-  const result = verify(inputs);
+  const result = directResult ?? verify(inputs);
   // The file it was asked to write comes before the report: a program that cannot write it could not run,
   // and exits 3 having written no report (§11, the report).
   if (values.has("--emit-preparation") && result.recomputed !== undefined) {

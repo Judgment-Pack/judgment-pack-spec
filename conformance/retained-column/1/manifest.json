@@ -1,0 +1,22 @@
+{
+  "contract": "retained-column/1",
+  "distribution": "v0.3.0-rc.2",
+  "maturity": "draft",
+  "publication": "release-candidate",
+  "corpus": "conformance/retained-column/1/cases.json",
+  "scope": "selected-leaf-support",
+  "groups": [
+    "cases",
+    "boundaryCases",
+    "shortestCases",
+    "interfaceCases",
+    "producerCases",
+    "referenceCases",
+    "capCases",
+    "preparations",
+    "exports",
+    "rawValueBounds"
+  ],
+  "historicalDialectRecordings": "remain-staged",
+  "fixtureInstallation": "synthetic-independent-of-final-commit"
+}

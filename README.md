@@ -153,6 +153,7 @@ reproducing its corpus version, its results, or its every-row statement.
 | [`conformance/witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness) | 54 checkpoint witness vectors, staged until the next `specVersion` (in no corpus) |
 | [`spec/dialect.md`](spec/dialect.md) | Normative prose for the preparation-verifier class, a companion document beside Core |
 | [Dialect vectors][staged-dialect] | 47 dialect vectors; staged (see below) |
+| [`spec/retained-column.md`](spec/retained-column.md) | Exact selected retained-column/1 support accepted at draft maturity for RC2; immutable publication and product support are separate gates |
 | [`spec/policy.md`](spec/policy.md) | Policy companion accepted at draft maturity; publication requires its exact Policy tag and a maintainer-published GitHub release; [124 agreement vectors](conformance/policy/1.0.0/README.md) and [versioned schemas](schema/policy/1.0.0/) |
 | [`TESTING.md`](TESTING.md)                                                       | A 10–15 minute external testing exercise            |
 | [`VERSIONING.md`](VERSIONING.md)                                                 | Release and compatibility policy                    |

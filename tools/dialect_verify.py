@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """A preparation verifier written from the words of spec/dialect.md.
 
+The historical independence account below describes the original ordinary reader.
+The selected retained-column addition is same-vendor work under the authorized bounded
+exception, with no independent-authorship or cross-vendor-compliance claim.
+
 This is the first of the two readers RFC 0018 records (its Evidence): it recomputes a preparation
 from a dialect document, a case, the acquisitions and the trusted input profiles, at the
 preparation's own instant, writes it in the preparation's canonical form, takes its digest, and
@@ -45,13 +49,17 @@ import json
 import re
 import sys
 import datetime
-import base64
 import binascii
 import functools
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, NoReturn
+
+try:
+    from tools import retained_column as retained
+except ModuleNotFoundError:
+    import retained_column as retained
 
 # ---------------------------------------------------------------------------------------------
 # Outcomes of a reading (§11)
@@ -253,6 +261,7 @@ def read_document(data: bytes, what: str, max_depth: int = MAX_DOCUMENT_DEPTH) -
     except (ValueError, RecursionError) as error:
         raise malformed(f"{what} is not one JSON value") from error
     _well_formed(value)
+    retained.remember(value, text)
     return value
 
 
@@ -1037,8 +1046,15 @@ def check_read(value: Any, scope: dict[str, str], what: str) -> Read:
         for entry in facts:
             if not isinstance(entry, dict):
                 raise malformed(f"{what}: copy fact is not an object")
-            quality = check_quality_fact(entry, what + " copy fact")
-            if quality is None:
+            if "conversion" in entry and retained.selected():
+                closed(entry, {"target", "source", "conversion"}, set(), what)
+                retained.rule(entry["conversion"])
+                if not is_pointer(entry["source"]):
+                    raise malformed("a retained frame source must be a pointer")
+                quality = None
+            else:
+                quality = check_quality_fact(entry, what + " copy fact")
+            if quality is None and not (retained.selected() and "conversion" in entry):
                 closed(entry, {"target", "source"}, set(), what + " copy fact")
             target = fact_target(entry["target"], what)
             sources = [entry["source"]] if "source" in entry else [x["source"] for x in entry["observations"]]
@@ -1048,7 +1064,9 @@ def check_read(value: Any, scope: dict[str, str], what: str) -> Read:
                 result.quality[target] = quality
         seen_requirements: set[str] = set()
         for entry in evidence:
-            closed(entry, {"requirement", "source"}, set(), what + " copy evidence")
+            closed(entry, {"requirement", "source"}, {"availability"} if retained.selected() else set(), what + " copy evidence")
+            if "availability" in entry:
+                retained.rule(entry["availability"], True)
             requirement = entry["requirement"]
             if not isinstance(requirement, str) or not requirement:
                 raise malformed(f"{what}: a requirement that is not a non-empty string")
@@ -2289,7 +2307,7 @@ def parse_profiles(document: Any) -> dict[str, dict[str, Any]]:
         closed(
             profile,
             {"id", "publicKey", "class", "source", "authority", "shape", "adapter", "endpoint"},
-            {"tools", "calculator", "research", "endpointScope"},
+            {"tools", "calculator", "research", "endpointScope"} | ({"retainedColumnProducer", "conversionContracts"} if retained.selected() else set()),
             what,
         )
         if not isinstance(profile["id"], str) or not profile["id"] or profile["id"] in profiles:
@@ -2350,6 +2368,8 @@ def parse_profiles(document: Any) -> dict[str, dict[str, Any]]:
                 raise malformed(f"{what}: a record profile cannot carry the endpoint wildcard")
         if not in_canon_domain(profile):
             raise malformed(f"{what}: outside the canon domain")
+        if retained.selected():
+            retained.profile(sys.modules[__name__], profile)
         profiles[profile["id"]] = profile
     return profiles
 
@@ -2549,6 +2569,12 @@ def copy_claim(copy: dict[str, Any], value: Any, transformations: dict[str, Any]
     availability: dict[str, Any] = {}
     basis: set[str] = set()
     for entry in copy["facts"]:
+        if retained.selected() and "conversion" in entry:
+            basis.add(entry["source"])
+            found = retained.application(sys.modules[__name__], entry, value, transformations if transformations is not None else {})
+            if found is not ABSENT:
+                write_at(facts, entry["target"], found)
+            continue
         if set(entry) == {"target", "source"}:
             basis.add(entry["source"])
             found = resolve(value, entry["source"])
@@ -2626,7 +2652,8 @@ def copy_claim(copy: dict[str, Any], value: Any, transformations: dict[str, Any]
         write_at(facts, entry["target"], found)
     for entry in copy["evidence"]:
         basis.add(entry["source"])
-        found = resolve(value, entry["source"])
+        found = (retained.application(sys.modules[__name__], entry, value, transformations if transformations is not None else {}, True)
+                 if retained.selected() and "availability" in entry else resolve(value, entry["source"]))
         if found is ABSENT:
             continue
         if found not in AVAILABILITY:
@@ -2905,6 +2932,8 @@ def recompute(
             raise Finding("profile-mismatch", f"{source.name}: {misfit}")
         if ("calculator" in profile) != (source.calculation is not None):
             raise Finding("profile-mismatch", f"{source.name}: calculation and calculator disagree")
+        if retained.selected():
+            retained.producer(sys.modules[__name__], source, profile)
     # 2. parameter-invalid, the case's first
     case_values: dict[str, Any] = {}
     for name, parameter in dialect.case_parameters.items():
@@ -2963,6 +2992,8 @@ def recompute(
             continue
         outcome.request = instantiate(source.template, values)
         check_acquisition(source, profile, response, outcome.request, at)
+        if retained.selected():
+            retained.producer(sys.modules[__name__], source, profile, response)
         outcome.receipt = response["receipt"]
         receipts.append(response["receipt"])
         if not sessions_in_a_form(receipts):
@@ -3226,6 +3257,9 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
                     entry["researchExecution"] = research_execution_lineage(outcome.record)
                 if kind == "fact" and target in outcome.transformations:
                     entry["transformation"] = outcome.transformations[target]
+                column_key = ("fact:" if kind == "fact" else "evidence:") + target
+                if retained.selected() and column_key in outcome.transformations:
+                    entry["columnTransformation"] = outcome.transformations[column_key]
                 lineage.append(entry)
                 if kind == "fact" and present:
                     write_at(facts_document, target, resolve(claim["facts"], target))
@@ -3241,6 +3275,8 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
         "lineage": lineage,
         "outcomes": out_outcomes,
     }
+    if retained.selected():
+        preparation["conversionContract"] = retained.CURRENT.get().selector
     return Computation(preparation, outcomes, facts_document, evidence_document)
 
 
@@ -3568,7 +3604,7 @@ class Verification:
     evidence: Any = None
 
 
-def verify(
+def _verify(
     dialect: bytes,
     case: bytes,
     acquisitions: bytes,
@@ -3582,12 +3618,18 @@ def verify(
     unbound source (§4.4), and None when none is given."""
     result = Verification(answer={})
     try:
-        admit_envelope(dialect, case, acquisitions)
-        if len(profiles) > PROFILES_BYTES:
+        if retained.selected():
+            retained.CURRENT.get().profiles_bytes = len(profiles)
+            caps = retained.CAPS["base"]
+            if len(dialect) > caps["documentBytes"] or len(dialect) + len(case) + len(acquisitions) + len(binding or b"") > caps["combinedBytes"]:
+                raise Refused("input-over-bound", "selected complete input")
+        else:
+            admit_envelope(dialect, case, acquisitions)
+        if len(profiles) > (retained.CAPS["base"]["profilesBytes"] if retained.selected() else PROFILES_BYTES):
             raise Refused("input-over-bound", "the profiles")
         if binding is not None and len(binding) > BINDING_BYTES:
             raise Refused("input-over-bound", "the binding document")
-        if len(preparation) > PREPARATION_BYTES or (record is not None and len(record) > RECORD_BYTES):
+        if len(preparation) > (retained.CAPS["base"]["preparationBytes"] if retained.selected() else PREPARATION_BYTES) or (record is not None and len(record) > (retained.CAPS["base"]["recordBytes"] if retained.selected() else RECORD_BYTES)):
             raise Refused("input-over-bound", "the preparation or the record")
         # After §11 phase 0 negotiates the profile, measure every document's byte bounds
         # before full document reading; then every document read; the counted bounds; every form; the kinds; and only then the
@@ -3610,6 +3652,9 @@ def verify(
         acquisitions_document = read_document(acquisitions, "the acquisitions")
         profiles_document = read_document(profiles, "the profiles")
         given = read_document(preparation, "the preparation")
+        if retained.selected():
+            case_document = retained.restore_case(sys.modules[__name__], case_document)
+            retained.restore_acquisitions(sys.modules[__name__], acquisitions_document)
         record_document = read_record(record) if record is not None else None
         binding_document = read_document(binding, "the binding document") if binding is not None else None
         count_bounds(dialect_document, acquisitions_document, profiles_document, binding_document)
@@ -3638,6 +3683,8 @@ def verify(
 
         computation = recompute(parsed_dialect, case_document, acquisitions_document, trusted, verified_at)
         result.preparation = preparation_bytes(computation.preparation)
+        if retained.selected() and len(result.preparation) > retained.CAPS["base"]["preparationBytes"]:
+            raise Refused("input-over-bound", "complete recomputed preparation")
         result.digest = digest_of(result.preparation)
         result.facts = as_plain(computation.facts)
         result.evidence = as_plain(computation.evidence)
@@ -3700,6 +3747,66 @@ def verify(
     return result
 
 
+def verify(dialect: bytes, case: bytes, acquisitions: bytes, profiles: bytes, preparation: bytes,
+           record: bytes | None = None, require_binding: bool = False, binding: bytes | None = None,
+           conversion_contract: bytes | None = None) -> Verification:
+    token = None
+    try:
+        if conversion_contract is not None:
+            token = retained.CURRENT.set(retained.begin(conversion_contract))
+        return _verify(dialect, case, acquisitions, profiles, preparation, record, require_binding, binding)
+    except (retained.engine.Refusal, UnicodeError) as error:
+        code = str(error) if isinstance(error, retained.engine.Refusal) else "input-malformed"
+        return Verification(answer={"finding" if code in ("read-failed", "profile-mismatch", "acquisition-invalid") else "refused": code})
+    finally:
+        if token is not None:
+            retained.CURRENT.reset(token)
+
+
+def verify_source_input(source_input: bytes, profiles: bytes, preparation: bytes,
+                        conversion_contract: bytes, record: bytes | None = None,
+                        require_binding: bool = False) -> Verification:
+    token = None
+    try:
+        token = retained.CURRENT.set(retained.begin(conversion_contract))
+        dialect, case, acquisitions, binding = retained.source_documents(sys.modules[__name__], source_input)
+        return _verify(dialect, case, acquisitions, profiles, preparation, record, require_binding, binding)
+    except (retained.engine.Refusal, UnicodeError, Refused, Finding) as error:
+        if isinstance(error, (Refused, Finding)):
+            return Verification(answer={"finding" if isinstance(error, Finding) else "refused": error.name})
+        code = str(error) if isinstance(error, retained.engine.Refusal) else "input-malformed"
+        return Verification(answer={"finding" if code in ("read-failed", "profile-mismatch", "acquisition-invalid") else "refused": code})
+    finally:
+        if token is not None:
+            retained.CURRENT.reset(token)
+
+
+def verify_export(data: bytes, profiles: bytes, conversion_contract: bytes,
+                  require_binding: bool = False) -> Verification:
+    token = None
+    try:
+        token = retained.CURRENT.set(retained.begin(conversion_contract))
+        inputs, record = retained.export_inputs(sys.modules[__name__], data)
+        last = None
+        for index, (source, preparation) in enumerate(inputs):
+            dialect, case, acquisitions, binding = retained.source_documents(sys.modules[__name__], source)
+            retained.CURRENT.get().origin = "asserted"
+            last = _verify(dialect, case, acquisitions, profiles, preparation,
+                           record if index == 1 else None, require_binding if index == 1 else False, binding)
+            if "reading" not in last.answer:
+                return last
+        assert last is not None
+        return last
+    except (retained.engine.Refusal, UnicodeError, Refused, Finding) as error:
+        if isinstance(error, (Refused, Finding)):
+            return Verification(answer={"finding" if isinstance(error, Finding) else "refused": error.name})
+        code = str(error) if isinstance(error, retained.engine.Refusal) else "input-malformed"
+        return Verification(answer={"finding" if code in ("read-failed", "profile-mismatch", "acquisition-invalid") else "refused": code})
+    finally:
+        if token is not None:
+            retained.CURRENT.reset(token)
+
+
 def report(answer: dict[str, Any]) -> dict[str, Any]:
     """§11, the report: one object whose `result` is `reading`, `refusal` or `finding`, with exactly
     the members that form carries."""
@@ -3727,26 +3834,50 @@ class _Arguments(argparse.ArgumentParser):
 
 def main(argv: list[str] | None = None) -> int:
     parser = _Arguments(description=__doc__.splitlines()[0])
-    parser.add_argument("--dialect", required=True, type=Path)
-    parser.add_argument("--case", required=True, type=Path)
+    parser.add_argument("--dialect", type=Path)
+    parser.add_argument("--case", type=Path)
     parser.add_argument("--acquisitions", type=Path, help="absent: no acquisitions, {}")
     parser.add_argument("--profiles", required=True, type=Path)
-    parser.add_argument("--preparation", required=True, type=Path)
+    parser.add_argument("--preparation", type=Path)
     parser.add_argument("--binding", type=Path, help="the binding document of a dialect with an unbound source")
     parser.add_argument("--record", type=Path, help="one record line, without its newline")
     parser.add_argument("--require-binding", action="store_true")
+    parser.add_argument("--conversion-contract", type=Path, help="exact selected contract, admitted against the immutable installed package before artifact reads")
+    parser.add_argument("--source-input", type=Path, help="complete persisted selected SourceInput")
+    parser.add_argument("--export", type=Path, help="complete selected verification export; preparation agreement only, no record-signature or chain-authority claim")
     arguments = parser.parse_args(argv)
+    if arguments.source_input or arguments.export:
+        if not arguments.conversion_contract or arguments.source_input and arguments.export or any((arguments.dialect, arguments.case, arguments.acquisitions, arguments.binding)):
+            parser.error("select exactly one source-input/export adapter with an explicit conversion contract")
+        if arguments.source_input and not arguments.preparation:
+            parser.error("--source-input requires --preparation")
+    elif not all((arguments.dialect, arguments.case, arguments.preparation)):
+        parser.error("--dialect, --case and --preparation are required")
     try:
-        documents = (
-            arguments.dialect.read_bytes(),
-            arguments.case.read_bytes(),
-            arguments.acquisitions.read_bytes() if arguments.acquisitions else b"{}",
-            arguments.profiles.read_bytes(),
-            arguments.preparation.read_bytes(),
-            arguments.record.read_bytes() if arguments.record else None,
-        )
-        binding = arguments.binding.read_bytes() if arguments.binding else None
-        outcome = verify(*documents, arguments.require_binding, binding)
+        selector = arguments.conversion_contract.read_bytes() if arguments.conversion_contract else None
+        if selector is not None:
+            try:
+                retained.begin(selector)
+            except (retained.engine.Refusal, UnicodeError) as error:
+                code = str(error) if isinstance(error, retained.engine.Refusal) else "input-malformed"
+                sys.stdout.buffer.write(preparation_bytes({"result": "refusal", "refusal": code}) + b"\n")
+                return 1
+        if arguments.export:
+            outcome = verify_export(arguments.export.read_bytes(), arguments.profiles.read_bytes(), selector, arguments.require_binding)
+        elif arguments.source_input:
+            outcome = verify_source_input(arguments.source_input.read_bytes(), arguments.profiles.read_bytes(), arguments.preparation.read_bytes(), selector,
+                                          arguments.record.read_bytes() if arguments.record else None, arguments.require_binding)
+        else:
+            documents = (
+                arguments.dialect.read_bytes(),
+                arguments.case.read_bytes(),
+                arguments.acquisitions.read_bytes() if arguments.acquisitions else b"{}",
+                arguments.profiles.read_bytes(),
+                arguments.preparation.read_bytes(),
+                arguments.record.read_bytes() if arguments.record else None,
+            )
+            binding = arguments.binding.read_bytes() if arguments.binding else None
+            outcome = verify(*documents, arguments.require_binding, binding, selector)
         answer = report(outcome.answer)
         line = preparation_bytes(answer) + b"\n"
     except Exception as error:  # a file it cannot open, or a fault of its own: never 1 or 2

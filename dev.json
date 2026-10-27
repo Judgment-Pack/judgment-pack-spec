@@ -14,7 +14,8 @@
     {"name": "repository-tests", "run": "python3 -m unittest discover -s tests -v", "toolchain": "node", "summary": "^(Ran |OK|FAILED)", "timeout": 1800},
     {"name": "policy-prototype", "run": "python3 tools/check_historical_policy.py prototype", "toolchain": "python", "summary": "^(Ran |OK|FAILED)", "timeout": 600},
     {"name": "policy-contract", "run": "python3 tools/check_historical_policy.py contract", "toolchain": "python", "summary": "^(Ran |OK|FAILED)", "timeout": 600},
-    {"name": "policy-official-draft", "run": "python3 -m unittest discover -s conformance/policy/1.0.0 -p 'test_*.py' -v", "toolchain": "python", "summary": "^(Ran |OK|FAILED)", "timeout": 600}
+    {"name": "policy-official-draft", "run": "python3 -m unittest discover -s conformance/policy/1.0.0 -p 'test_*.py' -v", "toolchain": "python", "summary": "^(Ran |OK|FAILED)", "timeout": 600},
+    {"name": "retained-column", "run": "python3 -B tools/check_retained_column.py", "toolchain": "node", "summary": "PASS", "timeout": 600}
   ],
   "handover": {
     "boundary_paths": ["schema", "spec"],

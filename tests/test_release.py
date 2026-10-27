@@ -549,7 +549,7 @@ class CoreRCEntryPathTests(unittest.TestCase):
                 self.assertIn(message, result.stderr)
 
     def test_rc_cli_does_not_strip_arbitrary_prerelease_suffixes(self):
-        for tag in ("v0.3.0-rc.2", "v0.3.0-alpha.1", "v0.3.1-rc.1"):
+        for tag in ("v0.3.0-rc.3", "v0.3.0-alpha.1", "v0.3.1-rc.1"):
             with self.subTest(tag=tag):
                 case = self.fresh_case()
                 (case.root / f"releases/{tag}.md").write_text("Wrong candidate fixture notes\n")
