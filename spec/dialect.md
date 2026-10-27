@@ -136,12 +136,12 @@ No vector decides them either, and that question names them too.
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** and **MAY** are to
 be interpreted as described by BCP 14 when, and only when, they appear in all capitals.
 
-## Selected retained-column candidate
+## Selected retained-column support
 
-[Selected retained columns](retained-column.md) is the normative-text candidate for exact
-`retained-column/1` selection in proposed RC2. It adds no implicit support to ordinary inputs.
+[Selected retained columns](retained-column.md) is accepted at draft maturity for exact
+`retained-column/1` selection in RC2. It adds no implicit support to ordinary inputs.
 Its new leaf corpus/claim does not publish the forty-seven staged recordings or establish the
-generic §14 preparation-verifier conformance claim. Adoption/publication gates remain pending.
+generic §14 preparation-verifier conformance claim. Immutable RC2 publication remains separate.
 
 ## 1. Terms and the canonical forms
 

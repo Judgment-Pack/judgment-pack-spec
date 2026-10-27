@@ -50,9 +50,9 @@ The artifacts in this repository have distinct roles:
   prose for the witness-statement reader conformance class it defines, and for nothing else;
 - [`spec/dialect.md`](dialect.md), a companion document, is the normative prose for the
   preparation-verifier reader conformance class it defines, and for nothing else;
-- [selected retained columns](retained-column.md) is the normative-text candidate for the exact
-  RC2 selected leaf support scope only; it establishes no implicit ordinary support or generic
-  preparation-verifier claim and remains subject to its adoption/publication gates;
+- [selected retained columns](retained-column.md) is accepted at draft maturity as normative prose
+  for the exact RC2 selected leaf support scope only; it establishes no implicit ordinary support
+  or generic preparation-verifier claim, and publication requires the immutable RC2 release;
 - the evaluation corpus — the manifest and case fixtures under
   [`conformance/evaluation/`](../conformance/evaluation/README.md), not its README — is normative for
   evaluator conformance (§3.4) and for nothing else. This is the normative status the bullet below

@@ -1,7 +1,10 @@
-# Selected retained-column/1 corpus candidate
+# Selected retained-column/1 RC2 corpus
 
-This is the new selected leaf corpus for proposed v0.3.0-rc.2 at draft maturity.
-It is not published support until adoption and immutable publication complete. Its handwritten
+This is the selected leaf corpus accepted for v0.3.0-rc.2 at draft maturity.
+It is not published support until immutable publication completes. The manifest's
+`publication: "release-candidate"` classifies the distribution; it is not a live publication
+status. Publication requires the exact tag, maintainer-published GitHub release and verified
+artifacts. Its handwritten
 case expectations preserve RFC0029's five kinds/eight original types. Full-preparation fixtures
 exercise the actual Python and TypeScript owners, including exact custody and selector binding.
 Synthetic test installation pins are independent fixtures, not product support pins.

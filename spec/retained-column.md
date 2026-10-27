@@ -2,12 +2,12 @@
 
 ## Status and exact scope
 
-This is the normative-text candidate for the RFC0029 adoption pull request and proposed
-`v0.3.0-rc.2` distribution, at **draft maturity**. It is not an adopted or published contract
-until the maintainer's adoption and immutable release gates complete. RFC0029 is its informative
-design record. A Draft RFC merge alone confers no authority.
+This companion is accepted at **draft maturity** through [RFC0029](../rfcs/0029-retained-column-conversions.md)
+for the exact `v0.3.0-rc.2` distribution. Acceptance is separate from immutable publication:
+the exact tag, maintainer-published GitHub release and verified artifacts are required before
+published support can be claimed. RFC0029 is its informative design record.
 
-On adoption, this companion governs only explicitly selected `retained-column/1` document,
+This companion governs only explicitly selected `retained-column/1` document,
 preview, preparation and offline-verification support. It supplements [the Dialect](dialect.md)
 for that exact selection. It creates no general Core conformance, stable interoperability,
 source truth, acquisition authenticity or execution-authority claim. Preparation versions remain
@@ -50,7 +50,7 @@ independently fixed test installation to avoid a self-referential corpus/prepara
 ## Contract
 
 
-The requirements below govern only exact selected retained-column/1 support after adoption. This candidate does not establish that adoption or publication has occurred.
+The requirements below govern only exact selected retained-column/1 support. Acceptance at draft maturity does not establish immutable publication or product support.
 
 ### Closed grammar and selection
 

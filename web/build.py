@@ -349,9 +349,9 @@ PAGES = (
         "spec/retained-column.md",
         PurePosixPath("spec/retained-column/index.html"),
         "Selected retained columns",
-        "Exact selected retained-column/1 contract candidate for Core RC2, at draft maturity; no general Core conformance or authority claim.",
+        "Selected retained-column/1 contract accepted for RC2 at draft maturity; publication is separate, with no general Core conformance or authority claim.",
         "spec",
-        "RC2 selected leaf candidate",
+        "RC2 selected leaf",
         source_ref="main",
     ),
     Page(
@@ -776,9 +776,9 @@ PAGES = (
         "rfcs/0029-retained-column-conversions.md",
         PurePosixPath("rfcs/0029-retained-column-conversions/index.html"),
         "RFC 0029: Retained column conversions",
-        "Review-stage adoption candidate for exact selected retained-column/1 support at draft maturity; adoption and publication gates remain pending.",
+        "Accepted design for exact selected retained-column/1 support at draft maturity; immutable RC2 publication and production support remain separate gates.",
         "proposals",
-        "Review proposal",
+        "Accepted design",
         source_ref="main",
     ),
     Page(

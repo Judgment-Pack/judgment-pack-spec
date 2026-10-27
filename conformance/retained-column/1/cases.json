@@ -18588,7 +18588,7 @@
     "conformance/retained-column/1/examples.json": "sha256:113354682037e3b576be23d812ab86d280718a50ca1bf1a631e85ba91eea5cca",
     "conformance/retained-column/1/preparations.json": "sha256:ff9450279cc65db4422f3644975b5b1128396e2e9a1f17effd4dcc732bb5317a",
     "conformance/retained-column/1/capabilities.json": "sha256:fd8b969e5372cdf630fe12ec4034a2bf929d47ea56664abb0b3f510ad761f644",
-    "conformance/retained-column/1/manifest.json": "sha256:12c3b54311d046b7a6b38dfe21c0e79d3e598a207486f3f2f460d856cb4fec7d"
+    "conformance/retained-column/1/manifest.json": "sha256:b78cdac121b4b936614c9e652af3c78bde8b84184fd0a04f84effdd2c3eaf2c8"
   },
   "rawValueBounds": [
     {

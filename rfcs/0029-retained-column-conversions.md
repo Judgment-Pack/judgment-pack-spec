@@ -1,20 +1,32 @@
 # RFC 0029: Retained column conversions
 
-- Status: Review
+- Status: Accepted
 - Type: Standards track, draft maturity
 - Created: 2026-10-25
 - Tracking: Judgment-Pack/judgment-pack-agent#171
-- Proposed leaf contract: `retained-column/1`
+- Selected leaf contract: `retained-column/1`
 
-## Adoption candidate
+## Adoption at draft maturity
 
-The maintainer approved a scoped `v0.3.0-rc.2` adoption route, preserving immutable RC1 and
-final milestone #2. This pull request proposes acceptance at draft maturity and incorporation
-into [the selected companion](../spec/retained-column.md), new versioned schema/corpus and
-both-language offline readers. Status remains Review until adoption; nothing here claims the
-required checks, review, feedback disposition, maximum proof or publication has completed.
-The authorized same-vendor exception covers this bounded normative implementation and separate
-review; it is not cross-vendor compliance or independent authorship.
+The design is accepted at draft maturity for the scoped `v0.3.0-rc.2` route recorded in
+[the adoption pull request](https://github.com/Judgment-Pack/judgment-pack-spec/pull/274).
+[The selected companion](../spec/retained-column.md), new versioned schema/corpus and
+both-language offline readers carry the exact selected contract. Published RC1 remains
+immutable and final v0.3.0 milestone #2 remains open. Acceptance permits this RC2 distribution;
+it does not establish immutable publication, stable interoperability, production Desk cutover
+or completion of Agent #171.
+
+The [adoption disposition](https://github.com/Judgment-Pack/judgment-pack-spec/pull/274#issuecomment-6431106029)
+records same-vendor OpenAI Codex review under the authorized exception and dispositions of the
+pre-adoption RFC comments at draft maturity. It judges the public review window and substantive
+review work sufficient under the maintainer's scoped RC2 authorization; it claims neither a fixed
+waiting period nor outside-adopter feedback. It does not establish cross-vendor review or
+independent authorship. RFC 0000 and GOVERNANCE are unchanged. The final Core adopter period,
+feedback disposition, final corpus and maturity gates remain required.
+
+That record independently closes C1 and the supported immediate/published/frozen reference
+correspondence. Its corrected maximum-envelope ledger supersedes the original sufficient-total
+table in the earlier public proof comment, with the stated source/history premises and limitations.
 
 ## Summary
 
@@ -22,8 +34,9 @@ Add closed converted-copy and evidence-availability variants to Dialect reads. T
 an explicitly retained raw column frame. Five conversions preserve existing Desk preview
 behavior, including historical research declarations and original JSON spelling. Conversion
 policy enters the checked document and its identity instead of remaining executable sidecar data.
-This RFC and its adjacent schema, handwritten cases and two reader prototypes are a proposal;
-they change no normative schema, published capability, preparation version or release.
+This RFC preserves the design and prototype history. Its adjacent prototype schema/cases remain
+informative; the selected companion and versioned artifacts carry the accepted RC2 contract.
+Acceptance changes no preparation version and is separate from immutable release publication.
 
 ## Problem
 
@@ -71,7 +84,9 @@ This is source-contract reachability evidence, not an HTTP, model-provider or wh
 
 ## Specification
 
-All requirements in this section describe the proposed contract, conditional on acceptance.
+This section preserves the design's proposal and amendment history. For the accepted selected
+RC2 contract, [the companion](../spec/retained-column.md) and its pinned versioned schema/corpus
+control; historical statements about pending adoption below describe the prototype stage.
 
 ### Closed grammar and selection
 
@@ -876,34 +891,31 @@ contract acceptance. Runtime owns full document validation, Runner owns acquisit
 and Agent owns checked authoring projections. Runner PR 146's shared mapping files remain in its
 existing ownership lane. These prototypes do no provider calls and invent no preparations.
 
-The maintainer authorized a same-vendor Codex exception for this bounded draft work. It is not
-cross-vendor review and supplies no independent evidence. Public comment, the review record with
-accurate exception basis, every finding's disposition and normative adoption remain required;
-this draft does not record them as completed or silently modify GOVERNANCE.md.
+The maintainer authorized a same-vendor Codex exception for this bounded draft work. The
+adoption pull request records that basis and the review dispositions. This is independent
+review by separate Codex sessions, not cross-vendor review or independent implementation
+authorship, and it does not modify GOVERNANCE.md.
 
-## Unresolved questions
+## Unresolved questions and remaining gates
 
-- Keep the compatibility claim tied to the pinned supported ingress/storage boundary. If a
-  broader arbitrary-host raw-byte importer is intended, review an explicit byte-preserving
-  representation; do not infer that new surface from the isolated legacy validation helper.
-- Ratify the leaf union, number tie algorithm/legacy issue mapping, historical-null rule,
-  closed input references, sole exact response/case custody and conditional lineage before
-  adopting any normative files. Pin new exact schema/corpus identities; no released contract
-  is reinterpreted by this Draft amendment.
-- The bounded number/helper comparison now passes, including underflow, decimal ties and
-  range/exponent diagnostic precedence. Actual Desk tool-path comparison remains separate;
-  extracted helpers and same-author readers establish no independent whole-application evidence.
-- Resolve the demonstrated document-ceiling incompatibility. Concrete options are an explicit
-  reviewed ceiling amendment, or a revised closed compact encoding (for example shared rule
-  declarations where applicable). Deduplication must also cover distinct-rule worst cases;
-  no clipping or narrowed spellings is acceptable. Complete the maximum previously usable
-  combined-envelope, preparation and signed-record proof for the selected option, including
-  nested response/case text escaping and repeated inline results/metadata. Existing extended ceilings alone do not fit
-  the witness, and current production readers' extended support is not implied.
-- Implement and independently verify the proposed production original-inventory precondition and
-  complete signed snapshot/frame relation, then integrate conditional lineage with the existing
-  preparation schema/recomputation owner. The consistency prototypes do not authenticate profiles,
-  verify receipt signatures, load original history or establish production support.
-- Obtain real independent production implementation evidence and complete review/disposition,
-  feedback, exact-head CI and immutable release gates. No completion claim for Agent #171 follows
-  merely from this RFC.
+Acceptance ratifies the selected leaf union, number algorithm/legacy issue mapping,
+historical-null rule, closed references, exact custody, conditional lineage and selected
+role ceilings through the companion. Exact schema/corpus identities are pinned for RC2;
+no released contract is reinterpreted. The following limits and gates remain explicit:
+
+- Keep compatibility tied to the pinned supported ingress/storage and original producer/history
+  premises. A broader arbitrary-host raw-byte importer needs separate review; the isolated legacy
+  helper does not establish that surface.
+- The bounded number/helper comparison includes underflow, decimal ties and range/exponent
+  diagnostic precedence. Actual Desk tool-path comparison remains separate; extracted helpers
+  and same-author readers establish no independent whole-application evidence.
+- The corrected maximum-envelope ledger is a conservative sufficient bound under its stated
+  source/semantic/history premises, not a measured global maximum or a whole Desk lifecycle
+  run. Preserve its original-inventory and target correspondence conditions; do not infer
+  arbitrary external mapping/history support or Extended preparation support.
+- Production original-inventory verification, complete signed snapshot/frame relations and
+  original-history custody remain product gates. The prototypes do not authenticate profiles,
+  verify receipt signatures or load original history. Production Desk cutover is separate.
+- Real independent production implementation evidence, applicable exact-head product checks,
+  immutable RC2 artifact verification and final Core feedback/conformance gates remain required.
+  This acceptance does not complete Agent #171, general Core conformance or final v0.3.0.

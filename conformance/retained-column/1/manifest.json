@@ -2,7 +2,7 @@
   "contract": "retained-column/1",
   "distribution": "v0.3.0-rc.2",
   "maturity": "draft",
-  "publication": "candidate-unpublished",
+  "publication": "release-candidate",
   "corpus": "conformance/retained-column/1/cases.json",
   "scope": "selected-leaf-support",
   "groups": [
