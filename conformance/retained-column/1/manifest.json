@@ -14,7 +14,8 @@
     "referenceCases",
     "capCases",
     "preparations",
-    "exports"
+    "exports",
+    "rawValueBounds"
   ],
   "historicalDialectRecordings": "remain-staged",
   "fixtureInstallation": "synthetic-independent-of-final-commit"

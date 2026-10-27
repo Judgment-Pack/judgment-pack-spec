@@ -121,6 +121,8 @@ through the existing Python and TypeScript owners. Focused development uses
 `python3 -B -m unittest discover -s tests -p 'test_retained_column.py' -v` and
 `node --test tools/dialect-verify-ts/test/retained.test.ts`; schema and role slices are
 `python3 -B tools/check_retained_column.py --global-schema-only` and `--limits-only`.
+The `--raw-values-only` slice checks origin-specific UTF-8 limits and unchanged complete
+snapshot bounds; its independent frame maxima are not claims of realizable snapshot maxima.
 These do not replace the stable integrated checklist, exact-head CI, review, maximum-envelope
 evidence, producer original-history proof, adopter feedback or immutable publication.
 No generic Core/preparation-verifier, signature/chain authority or stable interoperability

@@ -637,9 +637,11 @@ eight original field types, original unfiltered values/declarations, opaque prov
 and availability distinctions and every old sibling. This is an analysis of that compatibility
 domain, not a restriction of generic retained-column syntax or permission to discard data.
 The actual old complete input jointly bounds variable components at C=2097152/4194304, with
-F=256/512 fact targets, E=128/256 evidence targets and L=F+E. The existing producer's 524288-byte
-snapshot, 100 columns, 160-byte column names, 16000-byte cells and complete old response bound
-are used together. The new producer must load and compare the complete original history inventory.
+F=256/512 fact targets, E=128/256 evidence targets and L=F+E. The asserted ingress retains its
+100-column, 160-byte-name and 16000-byte-cell constraints. Generated reviewed input is jointly
+bounded by its complete 524288-byte original snapshot and complete old response; its unfiltered
+`record.values` strings do not inherit the CSV cell ceiling. Existing column/name/count bounds
+stay with their original owners. The new producer must load and compare the complete original history inventory.
 A successful extraction cannot prove that this history was loaded.
 
 The RFC's informative serialization analysis and historical witnesses motivate this selected
@@ -670,8 +672,15 @@ bytes), dialect ceiling (131072/262144) and preparation ceiling (8388608/1677721
 exactly selected implemented retained-column role applies the scoped table above. Target counts
 (256/512 facts, 128/256 evidence), document nesting (64/128) and independent work budgets remain.
 A frame is additionally bounded by the selected frame and combined ceilings; it does not get an extra allocation outside it. Fixed new
-frame limits are 1000 values, 1000 declaration entries, 1000 field entries, 16000 bytes per raw
-column string, 16384 per fieldJson, nesting 32 inside fieldJson and nesting 64 inside retained raw values
+frame limits are 1000 values, 1000 declaration entries and 1000 field entries. Each raw
+`values` string is at most 16000 UTF-8 bytes for asserted frames and 524288 UTF-8 bytes for
+generated frames; the generated snapshot projection applies the same 524288-byte value bound.
+This is a safe compatibility bound derived from the entire original snapshot ceiling, not a
+claim that a value of that size can coexist with the required snapshot structure. All complete
+snapshot, frame, carrier and combined limits still apply independently. These value ceilings
+are fixed in Base and Extended, with no automatic doubling. JSON Schema maxLength counts
+characters; readers independently enforce these UTF-8 byte limits. Other fixed bounds are
+16384 bytes per fieldJson, nesting 32 inside fieldJson and nesting 64 inside retained raw values
 (the existing research duplicate reader limit).
 The legacy conversion/type limits stated above are FIXED compatibility constraints, not doubled
 by extended. Frame members and embedding overhead count in the genuine carrier budget. Exceeding

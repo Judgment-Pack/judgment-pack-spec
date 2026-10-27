@@ -127,7 +127,7 @@ function validate(rule,frame,profile,rawFrameBytes) {
   closed(frame,['contractVersion','origin','values','research']);
   if (frame.contractVersion!=='1' || !['asserted','generated'].includes(frame.origin) || !object(frame.values)) fail();
   if (Object.keys(frame.values).length>1000) fail('input-over-bound');
-  for (const [key,value] of Object.entries(frame.values)) { string(key,160,true); if (value!==null) string(value,16000); }
+  for (const [key,value] of Object.entries(frame.values)) { string(key,160,true); if (value!==null) string(value,frame.origin==='asserted' ? 16000 : 524288); }
   if (frame.origin==='asserted') { if (frame.research!==null) fail(); return; }
   const r=frame.research;
   closed(r,['recordRecipeRevision','declaration','fields']); string(r.recordRecipeRevision,160,true);
@@ -383,7 +383,7 @@ function producerProjection(snapshot) {
   if (revision!==other) fail('read-failed');
   if (!object(values)||!object(fields)||!Array.isArray(declared)) fail();
   if (Math.max(Object.keys(values).length,Object.keys(fields).length,declared.length)>1000) fail('input-over-bound');
-  for (const [k,v] of Object.entries(values)) {string(k,160,true);string(v,16000);}
+  for (const [k,v] of Object.entries(values)) {string(k,160,true);string(v,524288);}
   const names=new Set(), declarations=[];
   for (let i=0;i<declared.length;i++) {
     const f=declared[i];if (!object(f)) fail();string(f.name,160,true);if(names.has(f.name)) fail();names.add(f.name);

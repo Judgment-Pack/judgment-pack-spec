@@ -165,6 +165,11 @@ class SelectedPreparations(unittest.TestCase):
                         result=subprocess.run(command+args,capture_output=True,text=True,timeout=30,env={**os.environ,'NODE_OPTIONS':''})
                         self.assertEqual(3,result.returncode,result.stderr);self.assertEqual('',result.stdout)
 
+    def test_origin_specific_raw_value_bounds(self):
+        result=subprocess.run([sys.executable,'-B',str(ROOT/'tools/check_retained_column.py'),'--raw-values-only'],cwd=ROOT,capture_output=True,text=True,timeout=60)
+        self.assertEqual(0,result.returncode,result.stdout+result.stderr)
+        self.assertIn('origin/UTF8/frame bounds + 3 complete snapshot/projection cases PASS',result.stdout)
+
     def test_import_program_faults_are_not_refusals(self):
         case=next(c for c in CORPUS['readerBoundaryCases'] if c['id']=='source-import-valid-unbound')
         with patch.object(reader,'read_bound',side_effect=RuntimeError('program-fault')),self.assertRaisesRegex(RuntimeError,'program-fault'):

@@ -53,6 +53,68 @@ def fixture(case):
     return {'rule':rule,'frame':frame}
 
 
+
+def check_raw_values():
+    """Origin-specific UTF-8 admission, independent frame maxima and joint snapshot caps."""
+    import hashlib
+    compact = lambda v: json.dumps(v, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+    digest = lambda text: 'sha256:' + hashlib.sha256(text.encode()).hexdigest()
+    requests, expected = [], []
+    for case in DATA['rawValueBounds']:
+        raw = compact(['x'*case['itemBytes']]*case['listItems']) if 'listItems' in case else case['unit']*case['repeat']+case.get('suffix','')
+        if 'expectedBytes' in case:
+            assert len(raw.encode()) == case['expectedBytes'], case['id']
+        frame = {'contractVersion':'1','origin':case['origin'],'values':{'Selected':'ok','Unselected':raw},'research':None}
+        if case['origin']=='generated':
+            frame['research']={'recordRecipeRevision':'recipe:1','declaration':None,'fields':{}}
+        requests.append({'rule':{'contractVersion':'1','column':'Selected','kind':'text'},'frame':frame,'profile':case.get('profile','base')})
+        expected.append(case['expected'])
+        # Schema bounds count characters; byte overflow with fewer Unicode characters
+        # remains a semantic reader refusal, not a false schema byte-limit claim.
+        structural = len(raw) <= (16000 if case['origin']=='asserted' else 524288)
+        assert VALIDATOR.is_valid(frame) == structural, ('raw-value-schema', case['id'])
+    projection = copy.deepcopy(EXAMPLES['producerConsistency']['expected']['projection'])
+    projection_schema = jsonschema.Draft202012Validator({'$ref':'#/$defs/deskSnapshotProjection','$defs':SCHEMA['$defs']})
+    for size in (524288,524289):
+        fragment=copy.deepcopy(projection);fragment['values']['Independent']='x'*size
+        assert projection_schema.is_valid(fragment) == (size==524288), ('independent-projection-schema',size)
+    # A handwritten legal grammar/consistency witness, not a real history claim:
+    # the long unselected display value is preserved beside all eight original types.
+    base=copy.deepcopy(EXAMPLES['producerConsistency'])
+    body=base['request']['generatedConsistency'];carrier=body['carrier']
+    display=compact(['x'*1000]*16);assert len(display.encode())==16049
+    original=carrier['originalSnapshotJson'];assert original.count('"List":"[]"')==1
+    original=original.replace('"List":"[]"','"List":'+compact(display))
+    carrier['retained']['values']['List']=display
+    want=base['expected'];want['projection']['values']['List']=display
+    frame_digest=digest(compact(carrier['retained']));want['frameSha256']=frame_digest
+    want['transformation']['input']['ref']['frameSha256']=frame_digest
+    for size in (None,524288,524289):
+        request=copy.deepcopy(base['request']);c=request['generatedConsistency']['carrier']
+        snapshot=original
+        if size is not None:
+            prefix=snapshot[:-1]+',"opaquePadding":"';snapshot=prefix+'x'*(size-len(prefix.encode())-2)+'"}'
+            assert len(snapshot.encode())==size
+        c['originalSnapshotJson']=snapshot;c['originalSnapshotSha256']=digest(snapshot)
+        request['generatedConsistency']['receiptResultDigest']=digest(compact(c))
+        answer=copy.deepcopy(want);answer['originalSnapshotSha256']=digest(snapshot)
+        if size==524289:answer={'refusal':'input-over-bound'}
+        requests.append(request);expected.append(answer)
+    payload=''.join(compact(request)+'\n' for request in requests).encode()
+    commands=[[sys.executable,'-B',str(ROOT/'tools/_retained_column.py')],
+              [os.environ.get('RFC0029_NODE','node'),str(ROOT/'tools/dialect-verify-ts/src/retained-engine.mjs')]]
+    for command in commands:
+        result=subprocess.run(command,input=payload,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=30)
+        assert result.returncode==0,(command[-1],result.stderr.decode()[-1500:])
+        outputs=[json.loads(line) for line in result.stdout.splitlines()]
+        assert len(outputs)==len(expected),(command[-1],len(outputs),len(expected))
+        for index,(actual,want) in enumerate(zip(outputs,expected)):
+            assert actual==want,(Path(command[-1]).name,'raw-value-row',index,actual if 'refusal' in actual else 'unexpected successful result',want if 'refusal' in want else 'expected handwritten positive')
+        print(f'{Path(command[-1]).name}: {len(DATA["rawValueBounds"])} origin/UTF8/frame bounds + 3 complete snapshot/projection cases PASS')
+    print('Raw-value schema: origin-specific scalar bounds and independent projection 524288/524289 PASS')
+    print('Scope: frame/projection APIs and explicit joint snapshot checks; no independently realizable maximum value inside the fixed snapshot, Extended preparation, producer/history authority or full compatibility proof claimed.')
+
+
 def check_interfaces():
     """Focused changed-contract fixtures; old conversion corpus remains a separate gate."""
     cases = DATA['interfaceCases']
@@ -610,6 +672,11 @@ for(const line of input.trimEnd().split('\\n')) {
     print('Scope: synthetic installed identity and reported-size admission only; no actual artifact boundary, supported product role, Extended support or normative adoption claim.')
 
 
+if '--raw-values-only' in sys.argv:
+    check_raw_values()
+    sys.exit(0)
+
+
 if '--selector-types-only' in sys.argv:
     check_limits(selector_types_only=True)
     sys.exit(0)
@@ -637,6 +704,7 @@ if '--carrier-only' in sys.argv:
 
 
 if '--global-schema-only' not in sys.argv:
+    check_raw_values()
     check_limits()
 
 requests, expected, labels, schema_valid = [], [], [], []

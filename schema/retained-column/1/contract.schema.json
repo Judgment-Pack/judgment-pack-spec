@@ -260,7 +260,7 @@
               "string",
               "null"
             ],
-            "maxLength": 16000
+            "maxLength": 524288
           }
         },
         "research": {
@@ -294,6 +294,11 @@
             "properties": {
               "research": {
                 "type": "null"
+              },
+              "values": {
+                "additionalProperties": {
+                  "maxLength": 16000
+                }
               }
             }
           },
@@ -1086,7 +1091,7 @@
           "maxProperties": 1000,
           "additionalProperties": {
             "type": "string",
-            "maxLength": 16000
+            "maxLength": 524288
           }
         },
         "declarations": {

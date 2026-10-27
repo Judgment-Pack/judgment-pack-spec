@@ -18588,6 +18588,127 @@
     "conformance/retained-column/1/examples.json": "sha256:113354682037e3b576be23d812ab86d280718a50ca1bf1a631e85ba91eea5cca",
     "conformance/retained-column/1/preparations.json": "sha256:ff9450279cc65db4422f3644975b5b1128396e2e9a1f17effd4dcc732bb5317a",
     "conformance/retained-column/1/capabilities.json": "sha256:fd8b969e5372cdf630fe12ec4034a2bf929d47ea56664abb0b3f510ad761f644",
-    "conformance/retained-column/1/manifest.json": "sha256:a18aa25d4504a3b91d2cda6f2f2b35384dc701c3c9567d7dbb963db4a90c4ab1"
-  }
+    "conformance/retained-column/1/manifest.json": "sha256:12c3b54311d046b7a6b38dfe21c0e79d3e598a207486f3f2f460d856cb4fec7d"
+  },
+  "rawValueBounds": [
+    {
+      "id": "asserted-raw-exact",
+      "origin": "asserted",
+      "unit": "x",
+      "repeat": 16000,
+      "expected": {
+        "issues": [],
+        "valueJson": "\"ok\"",
+        "claimAdmissible": true
+      }
+    },
+    {
+      "id": "asserted-raw-one-over",
+      "origin": "asserted",
+      "unit": "x",
+      "repeat": 16001,
+      "expected": {
+        "refusal": "input-over-bound"
+      }
+    },
+    {
+      "id": "generated-raw-list-16049",
+      "origin": "generated",
+      "listItems": 16,
+      "itemBytes": 1000,
+      "expectedBytes": 16049,
+      "expected": {
+        "issues": [],
+        "valueJson": "\"ok\"",
+        "claimAdmissible": true
+      }
+    },
+    {
+      "id": "generated-raw-independent-exact",
+      "origin": "generated",
+      "unit": "x",
+      "repeat": 524288,
+      "scope": "frame API only; not independently realizable inside the fixed snapshot",
+      "expected": {
+        "issues": [],
+        "valueJson": "\"ok\"",
+        "claimAdmissible": true
+      }
+    },
+    {
+      "id": "generated-raw-independent-one-over",
+      "origin": "generated",
+      "unit": "x",
+      "repeat": 524289,
+      "scope": "frame API only",
+      "expected": {
+        "refusal": "input-over-bound"
+      }
+    },
+    {
+      "id": "asserted-utf8-exact",
+      "origin": "asserted",
+      "unit": "\u00e9",
+      "repeat": 8000,
+      "expected": {
+        "issues": [],
+        "valueJson": "\"ok\"",
+        "claimAdmissible": true
+      }
+    },
+    {
+      "id": "asserted-utf8-one-over",
+      "origin": "asserted",
+      "unit": "\u00e9",
+      "repeat": 8000,
+      "suffix": "x",
+      "expected": {
+        "refusal": "input-over-bound"
+      }
+    },
+    {
+      "id": "generated-utf8-independent-exact",
+      "origin": "generated",
+      "unit": "\u00e9",
+      "repeat": 262144,
+      "scope": "frame API only",
+      "expected": {
+        "issues": [],
+        "valueJson": "\"ok\"",
+        "claimAdmissible": true
+      }
+    },
+    {
+      "id": "generated-utf8-independent-one-over",
+      "origin": "generated",
+      "unit": "\u00e9",
+      "repeat": 262144,
+      "suffix": "x",
+      "scope": "frame API only",
+      "expected": {
+        "refusal": "input-over-bound"
+      }
+    },
+    {
+      "id": "asserted-extended-not-doubled",
+      "origin": "asserted",
+      "unit": "x",
+      "repeat": 16001,
+      "profile": "extended",
+      "expected": {
+        "refusal": "input-over-bound"
+      }
+    },
+    {
+      "id": "generated-extended-not-doubled",
+      "origin": "generated",
+      "unit": "x",
+      "repeat": 524289,
+      "profile": "extended",
+      "scope": "frame API only; no Extended preparation claim",
+      "expected": {
+        "refusal": "input-over-bound"
+      }
+    }
+  ]
 }

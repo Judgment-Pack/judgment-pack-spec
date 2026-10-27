@@ -155,7 +155,7 @@ def validate(rule, frame, profile, raw_frame_bytes=None):
     for key, value in values.items():
         string(key, 160, True)
         if value is not None:
-            string(value, 16000)
+            string(value, 16000 if frame['origin'] == 'asserted' else 524288)
     research = frame['research']
     if frame['origin'] == 'asserted':
         if research is not None:
@@ -725,7 +725,7 @@ def producer_projection(snapshot):
         fail('input-over-bound')
     for key, value in values.items():
         string(key, 160, True)
-        string(value, 16000)
+        string(value, 524288)
     declarations = []
     names = set()
     field_tokens = raw_array(source_member(snapshot, 'research', 'recipe', 'fields'))
