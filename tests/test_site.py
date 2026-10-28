@@ -687,6 +687,8 @@ class StaticSiteTests(unittest.TestCase):
             "conformance/evaluation/index.html": "conformance/evaluation/README.md",
             "spec/checkpoint-witness/index.html": "spec/checkpoint-witness.md",
             "spec/dialect/index.html": "spec/dialect.md",
+            # Rendered from the immutable final notes; docs/releases/v0.3.0.md is only a pointer.
+            "project/releases/0.3.0/index.html": "releases/v0.3.0.md",
         }
         for output, source in cases.items():
             with self.subTest(output=output):
@@ -702,6 +704,24 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn(self.commit_sha[:12], overview)
         generator = overview.split('name="generator" content="')[1].split('"')[0]
         self._assert_no_retired_brand(generator, "generator meta")
+
+    def test_the_0_3_0_release_page_serves_the_final_notes_and_pins(self) -> None:
+        page = (self.output / "project/releases/0.3.0/index.html").read_text(encoding="utf-8")
+        inventory = json.loads(
+            (ROOT / "releases/v0.3.0.retained-column.json").read_text(encoding="utf-8")
+        )
+        for text in ("What this release pins", "Checks run for this release",
+                     "https://judgmentpack.org/schema/0.3.0/judgment-pack-core.schema.json",
+                     inventory["schemaSha256"], inventory["corpusSha256"]):
+            with self.subTest(text=text):
+                self.assertIn(text, page)
+        # The resources those pins name stay served at their exact $id paths.
+        for served, source in (
+            ("schema/0.3.0/judgment-pack-core.schema.json", "schema/judgment-pack-core.schema.json"),
+            ("schema/retained-column/1/contract.schema.json", inventory["schema"]),
+        ):
+            with self.subTest(served=served):
+                self.assertEqual((ROOT / source).read_bytes(), (self.output / served).read_bytes())
 
     def test_schemas_are_served_at_their_canonical_id_path(self) -> None:
         cases = {

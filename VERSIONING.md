@@ -54,6 +54,10 @@ tooling can read the renamed manifest status. The unsuffixed `v0.3.0` tag is the
 companion's `policy-v<releaseVersion>-draft.N` route remains independent and is not replaced by this
 Core convention.
 
+Across the project, `vX.Y.Z-rc.N` is a candidate of the complete milestone that graduates to
+`vX.Y.Z` with no code change, and `vX.Y.Z-alpha.N`, used by the implementations and never by this
+repository's Core route, is a scoped cut for a named consumer that never graduates.
+
 That first candidate is a distribution of the proposed exact `specVersion` `0.3.0` artifacts;
 `0.3.0-rc.1` is its distribution identity, not a pack version selector. Its closed mapping at
 `releases/v0.3.0-rc.1.json` is required by the builder. Both manifests remain maturity `draft`:

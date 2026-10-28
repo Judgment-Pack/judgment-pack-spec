@@ -782,7 +782,7 @@ PAGES = (
         source_ref="main",
     ),
     Page(
-        "docs/releases/v0.3.0.md",
+        "releases/v0.3.0.md",
         PurePosixPath("project/releases/0.3.0/index.html"),
         "0.3.0 release notes",
         "Scope, migration, included work, and maturity of the first Core release without a -draft suffix.",

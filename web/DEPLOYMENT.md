@@ -20,9 +20,10 @@ not edit it in place.
 
 Pull requests retain the required `repository-conformance` check, and pushes to `main` run it
 once. Neither event deploys a preview or the live site. Tag pushes use the release workflow to
-verify artifacts, build checksummed bundles, create a draft prerelease, and attest the bundles;
-maintainers still decide when to publish that draft. A `vMAJOR.MINOR.PATCH` tag takes main's
-conformance evidence at the tagged commit instead of running the repository suite again
+verify artifacts, build checksummed bundles, create a draft release, and attest the bundles;
+maintainers still decide when to publish that draft. The draft of a `vMAJOR.MINOR.PATCH` tag is a
+release; the draft of every other tag is marked pre-release. A `vMAJOR.MINOR.PATCH` tag takes
+main's conformance evidence at the tagged commit instead of running the repository suite again
 (Release evidence, below).
 
 For every next Core or Policy tag, commit `releases/<tag>.milestone.json` before tagging, with
@@ -90,7 +91,7 @@ step and its test in the same change. `policy-v` tags are outside every kit gram
 the whole suite. Either way the release job keeps,
 fresh and in the same order, the milestone and tagged-checkout admission, the exact Policy format
 and agreement corpus for `policy-v` tags, the bundle build with its tag, clean-tree, artifact-pin
-and Policy tag-history checks, the release notes, the draft prerelease and the bundle attestation.
+and Policy tag-history checks, the release notes, the draft release and the bundle attestation.
 Publication and its approval are unchanged.
 
 The suite can be reused because none of its tests reads the repository's tags, branch or

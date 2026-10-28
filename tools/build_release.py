@@ -51,13 +51,23 @@ RETAINED_BUNDLE_PATHS = ("tools/dialect_verify.py", "tools/retained_column.py",
                          "tools/_retained_column.py", "tools/check_retained_column.py",
                          "tools/dialect-verify-ts", "requirements-dev.txt")
 
+# The final carries RC2's selected leaf byte for byte under its own inventory. It has no
+# distribution mapping: VERSIONING.md allowlists the two RC mappings only.
+CORE_FINAL_TAG = "v0.3.0"
+FINAL_RETAINED_INVENTORY = "releases/v0.3.0.retained-column.json"
+RETAINED_INVENTORIES = {CORE_RC2_TAG: RETAINED_INVENTORY, CORE_FINAL_TAG: FINAL_RETAINED_INVENTORY}
+CORE_MILESTONE = {"number": 2, "title": "v0.3.0"}
 
-def validate_retained_inventory(root: Path = ROOT) -> None:
-    release = json.loads((root / RETAINED_INVENTORY).read_text("utf-8"))
+
+def validate_retained_inventory(root: Path = ROOT, tag: str = CORE_RC2_TAG) -> None:
+    inventory = root / RETAINED_INVENTORIES[tag]
+    if not inventory.is_file():
+        raise ValueError("retained-column inventory is missing for the exact tag")
+    release = json.loads(inventory.read_text("utf-8"))
     if set(release) != {"contract", "distribution", "maturity", "schema", "schemaSha256",
                         "corpus", "corpusSha256", "files", "claim"}:
         raise ValueError("retained-column inventory has an invalid closed shape")
-    if (release["contract"] != "retained-column/1" or release["distribution"] != CORE_RC2_TAG
+    if (release["contract"] != "retained-column/1" or release["distribution"] != tag
             or release["maturity"] != "draft" or release["claim"] != "selected-leaf-support"):
         raise ValueError("retained-column inventory identity or scope differs")
     schema = "schema/retained-column/1/contract.schema.json"
@@ -87,6 +97,17 @@ def validate_retained_inventory(root: Path = ROOT) -> None:
     for path, value in cases["inputs"].items():
         if path not in expected or value != release["files"][path]:
             raise ValueError("retained-column corpus companion input differs")
+
+
+def validate_final_retained_inventory(root: Path = ROOT) -> None:
+    """Hold the final's inventory to the bytes RC2 published: only its distribution differs."""
+    validate_retained_inventory(root, CORE_FINAL_TAG)
+    final = json.loads((root / FINAL_RETAINED_INVENTORY).read_text("utf-8"))
+    published = root / RETAINED_INVENTORY
+    if not published.is_file():
+        raise ValueError("the published RC2 retained-column inventory is missing")
+    if {**final, "distribution": CORE_RC2_TAG} != json.loads(published.read_text("utf-8")):
+        raise ValueError("final retained-column inventory differs from the published RC2 inventory")
 
 
 POLICY_FORMAT = "1.0.0"
@@ -209,8 +230,8 @@ def bundle_paths(tag: str, commit: str) -> tuple[str, ...]:
             paths.append(path)
     if tag in CORE_RC_IDENTITIES:
         paths.extend((f"releases/{tag}.json", "docs/releases/v0.3.0.md"))
-    if tag == CORE_RC2_TAG:
-        paths.extend((*RETAINED_BUNDLE_PATHS, RETAINED_INVENTORY, "releases/v0.3.0-rc.2.milestone.json"))
+    if tag in RETAINED_INVENTORIES:
+        paths.extend((*RETAINED_BUNDLE_PATHS, RETAINED_INVENTORIES[tag], f"releases/{tag}.milestone.json"))
     return (*paths, core_release_notes_path(tag).relative_to(ROOT).as_posix())
 
 
@@ -243,13 +264,16 @@ def release_version(tag: str) -> str:
 
 
 def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
-    """Check exact format pins; only the reviewed RC has a separate distribution identity.
+    """Check exact format pins; only the reviewed RCs have a separate distribution identity.
 
     The RC distributes proposed 0.3.0 artifacts, not a released conformance corpus.
     No arbitrary prerelease suffix may be stripped to infer a compatible specVersion.
+    The v0.3.0 final carries RC2's selected leaf under its own inventory and no mapping.
     """
     if version != release_version(tag):
         raise ValueError("release version does not match the exact tag")
+    if tag not in CORE_RC_IDENTITIES and (root / "releases" / f"{tag}.json").exists():
+        raise ValueError("only the allowlisted Core RCs have a release mapping")
     if tag in CORE_RC_IDENTITIES:
         mapping = root / "releases" / f"{tag}.json"
         if not mapping.is_file():
@@ -282,12 +306,16 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     )
     if schema.get("$id") != expected_schema_id:
         raise ValueError("schema $id does not point at the exact release version")
-    if tag == CORE_RC2_TAG:
-        validate_retained_inventory(root)
-        if json.loads((root / "releases/v0.3.0-rc.2.milestone.json").read_text("utf-8")) != {"number": 2, "title": "v0.3.0"}:
-            raise ValueError("RC2 must preserve the final Core milestone")
+    if tag in RETAINED_INVENTORIES:
+        if tag == CORE_FINAL_TAG:
+            validate_final_retained_inventory(root)
+        else:
+            validate_retained_inventory(root, tag)
+        milestone = root / "releases" / f"{tag}.milestone.json"
+        if not milestone.is_file() or json.loads(milestone.read_text("utf-8")) != CORE_MILESTONE:
+            raise ValueError(f"{tag} must preserve the final Core milestone")
         if "- Status: Accepted" not in (root / "rfcs/0029-retained-column-conversions.md").read_text("utf-8").splitlines():
-            raise ValueError("RC2 release requires recorded RFC0029 acceptance at draft maturity")
+            raise ValueError(f"{tag} requires recorded RFC0029 acceptance at draft maturity")
     release_notes = core_release_notes_path(tag, root)
     if not release_notes.is_file():
         raise ValueError("release notes are missing for the exact tag")

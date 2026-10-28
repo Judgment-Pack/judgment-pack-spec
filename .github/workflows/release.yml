@@ -18,7 +18,7 @@ jobs:
   # run again when the evidence is reused; a refusal fails the release, and the fresh route is the
   # operator's choice. A tag the gate does not admit (a release candidate, a policy-v tag) reuses
   # nothing: the release job runs the whole suite itself, as before. The tag, milestone, Policy,
-  # bundle, notes, prerelease and attestation steps of the release job stay fresh either way.
+  # bundle, notes, draft and attestation steps of the release job stay fresh either way.
   evidence:
     name: CI evidence at the tag
     runs-on: ubuntu-latest
@@ -28,9 +28,11 @@ jobs:
       # Reading this repository's workflow runs, jobs and artifacts.
       actions: read
     # true only when the gate exited 0 and its decision record says reuse; anything else, an empty
-    # value included, makes the release job run the whole suite.
+    # value included, makes the release job run the whole suite. route is the tag grammar alone
+    # (evidence for vMAJOR.MINOR.PATCH, fresh otherwise); the draft step reads it, not the evidence.
     outputs:
       reuse: ${{ steps.reused.outputs.reuse }}
+      route: ${{ steps.route.outputs.route }}
     steps:
       # The gate's tag grammar: vMAJOR.MINOR.PATCH in ASCII digits, no leading zeroes, nothing after.
       - name: Choose reuse or the whole suite at the tag
@@ -191,18 +193,26 @@ jobs:
           --commit "${GITHUB_SHA}"
           --output dist
 
-      - name: Create draft prerelease
+      # A plain vMAJOR.MINOR.PATCH tag is drafted as a release the maintainer publishes. Every other
+      # tag (a release candidate, a policy-v tag), and any route value but evidence, is drafted as a
+      # pre-release.
+      - name: Create draft release
         shell: bash
         run: |
+          prerelease=(--prerelease)
+          if [[ "${RELEASE_ROUTE}" == "evidence" ]]; then
+            prerelease=()
+          fi
           gh release create "${GITHUB_REF_NAME}" \
             dist/* \
             --draft \
-            --prerelease \
+            "${prerelease[@]}" \
             --verify-tag \
             --title "Judgment Pack Specification ${GITHUB_REF_NAME}" \
             --notes-file "releases/${GITHUB_REF_NAME}.md"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_ROUTE: ${{ needs.evidence.outputs.route }}
 
       - name: Attest release bundles
         uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0

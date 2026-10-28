@@ -19,7 +19,7 @@
     "release tag, commit, clean tree, artifact pins and Policy tag history (tools/build_release.py)",
     "immutable release bundles and checksums",
     "release notes",
-    "draft prerelease",
+    "draft release, marked pre-release for every tag outside vMAJOR.MINOR.PATCH",
     "bundle attestation"
   ],
   "profiles": {
