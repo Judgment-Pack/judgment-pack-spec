@@ -139,9 +139,9 @@ be interpreted as described by BCP 14 when, and only when, they appear in all ca
 ## Selected retained-column support
 
 [Selected retained columns](retained-column.md) is accepted at draft maturity for exact
-`retained-column/1` selection in RC2. It adds no implicit support to ordinary inputs.
+`retained-column/1` selection, adopted in `v0.3.0` (candidate distribution `v0.3.0-rc.2`). It adds no implicit support to ordinary inputs.
 Its new leaf corpus/claim does not publish the forty-seven staged recordings or establish the
-generic §14 preparation-verifier conformance claim. Immutable RC2 publication remains separate.
+generic §14 preparation-verifier conformance claim.
 
 ## 1. Terms and the canonical forms
 

@@ -226,7 +226,7 @@ class HistoricalReleaseTests(unittest.TestCase):
 
     def test_migration_guidance_records_the_demonstrated_exceptions(self):
         core = (ROOT / "spec/judgment-pack-core.md").read_text()
-        notes = (ROOT / "docs/releases/v0.3.0.md").read_text()
+        notes = (ROOT / "releases/v0.3.0.md").read_text()
         self.assertNotIn("changes no part of the document format", core)
         self.assertNotIn("every conformance verdict of §§3.1–3.3 is the same", core)
         for text in (core, notes):

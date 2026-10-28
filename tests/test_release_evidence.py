@@ -15,6 +15,7 @@ from pathlib import Path
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -27,7 +28,8 @@ GATE = ROOT / "scripts/dev/release_evidence.py"
 # lib/release_evidence.py. A re-vendor changes both, and line 2 of the copy.
 KIT_RELEASE = "v0.11.0"
 KIT_LIBRARY_SHA256 = "f272b7a43272bac31bb9b0c37a583d9c40d376972b04c812e576bd82c1ef18e3"
-# The release job's steps, in order. Only the repository suite depends on the evidence job.
+# The release job's steps, in order. Only the repository suite depends on the evidence decision;
+# the draft step reads the route, the tag grammar alone.
 RELEASE_STEPS = [
     "Check out tagged source",
     "Validate release milestone and tagged checkout",
@@ -39,10 +41,11 @@ RELEASE_STEPS = [
     "Check repository artifacts and static site",
     "Check exact Policy format and agreement corpus",
     "Build immutable release bundles",
-    "Create draft prerelease",
+    "Create draft release",
     "Attest release bundles",
 ]
 SUITE_STEP = "Check repository artifacts and static site"
+DRAFT_STEP = "Create draft release"
 EVIDENCE_STEPS = [
     "Choose reuse or the whole suite at the tag",
     "Check out the release commit",
@@ -292,6 +295,7 @@ class ReleaseWorkflowTests(unittest.TestCase):
                 self.assertIsNone(field(job, "if", 4))
         self.assertNotIn("continue-on-error", self.release)
         self.assertEqual(field(evidence, "reuse", 6), "${{ steps.reused.outputs.reuse }}")
+        self.assertEqual(field(evidence, "route", 6), "${{ steps.route.outputs.route }}")
         self.assertEqual([field(step, "- name", 0) for step in steps_of(evidence)], EVIDENCE_STEPS)
         permissions = evidence.split("    permissions:\n", 1)[1].split("    outputs:\n", 1)[0]
         self.assertEqual(re.findall(r"^      ([a-z-]+): (\w+)$", permissions, re.MULTILINE),
@@ -300,8 +304,13 @@ class ReleaseWorkflowTests(unittest.TestCase):
         # the gate step succeeded and its record says reuse: a missing or other value runs it.
         self.assertEqual(field(step_named(release, SUITE_STEP), "if", 8),
                          "needs.evidence.outputs.reuse != 'true'")
+        self.assertEqual([name for name in RELEASE_STEPS
+                          if "needs.evidence.outputs.reuse" in step_named(release, name)], [SUITE_STEP])
+        # The draft step reads only the route, which is the tag grammar and never the gate's decision.
         self.assertEqual([name for name in RELEASE_STEPS if "needs.evidence" in step_named(release, name)],
-                         [SUITE_STEP])
+                         [SUITE_STEP, DRAFT_STEP])
+        self.assertEqual(re.findall(r"needs\.evidence\.outputs\.\w+", step_named(release, DRAFT_STEP)),
+                         ["needs.evidence.outputs.route"])
         self.assertIn("python -m unittest discover -s tests -v", step_named(release, SUITE_STEP))
         verify = step_named(evidence, "Reuse exact-commit main CI evidence, or refuse")
         self.assertEqual(field(verify, "if", 8), "steps.route.outputs.route == 'evidence'")
@@ -321,10 +330,45 @@ class ReleaseWorkflowTests(unittest.TestCase):
         self.assertEqual([field(step, "- name", 0) for step in steps_of(release)], RELEASE_STEPS)
         self.assertEqual(field(step_named(release, "Check exact Policy format and agreement corpus"), "if", 8),
                          "startsWith(github.ref_name, 'policy-v')")
-        draft = step_named(release, "Create draft prerelease")
-        for flag in ("--draft", "--prerelease", "--verify-tag", '--notes-file "releases/${GITHUB_REF_NAME}.md"'):
+        draft = step_named(release, DRAFT_STEP)
+        for flag in ("--draft", "--verify-tag", '--notes-file "releases/${GITHUB_REF_NAME}.md"'):
             self.assertIn(flag, draft)
+        self.assertEqual(field(draft, "RELEASE_ROUTE", 10), "${{ needs.evidence.outputs.route }}")
         self.assertIn("subject-checksums: dist/checksums.txt", step_named(release, "Attest release bundles"))
+
+    def test_only_a_plain_release_tag_is_drafted_without_the_prerelease_flag(self):
+        # The route step's own output decides: a plain vMAJOR.MINOR.PATCH tag is drafted as a release
+        # the maintainer publishes; every other tag, and any route value but evidence, as a pre-release.
+        route = script_of(step_named(self.jobs["evidence"], "Choose reuse or the whole suite at the tag"))
+        draft = script_of(step_named(self.jobs["release"], DRAFT_STEP))
+        with tempfile.TemporaryDirectory() as directory:
+            stub = Path(directory) / "bin"
+            stub.mkdir()
+            # A stand-in for gh that records its arguments; PATH holds it and bash, nothing else.
+            (stub / "gh").write_text('#!/bin/bash\nprintf "%s\\n" "$@" > "${GH_ARGUMENTS}"\n')
+            (stub / "gh").chmod(0o755)
+            (stub / "bash").symlink_to(shutil.which("bash"))
+            arguments = Path(directory) / "arguments"
+
+            def drafted(route_value):
+                arguments.unlink(missing_ok=True)
+                run_step(draft, {"PATH": str(stub), "RELEASE_ROUTE": route_value, "GH_ARGUMENTS": str(arguments),
+                                 "GITHUB_REF_NAME": "tag-fixture"}, directory)
+                return arguments.read_text().splitlines()
+
+            tags = ("v0.3.0", "v1.10.0", "v0.3.0-rc.1", "v0.3.0-rc.2", "v1.2.3-alpha.1", "v0.2.0-draft",
+                    "policy-v1.0.0-draft.1", "v01.0.0", "v0.3.0 ")
+            for tag in tags:
+                with self.subTest(tag=tag):
+                    written = run_step(route, {"LC_ALL": "C", "RELEASE_TAG": tag, "GITHUB_SHA": "a" * 40}, directory)
+                    called = drafted(written["route"])
+                    self.assertEqual(called[:2], ["release", "create"])
+                    self.assertIn("--draft", called)
+                    self.assertIn("--verify-tag", called)
+                    self.assertEqual("--prerelease" in called, self.gate.TAG.fullmatch(tag) is None)
+            for value in ("", "fresh", "Evidence", "evidence "):
+                with self.subTest(route=value):
+                    self.assertIn("--prerelease", drafted(value))
 
     def test_the_evidence_job_sets_up_its_runner_as_main_ci_does(self):
         evidence = self.jobs["evidence"]

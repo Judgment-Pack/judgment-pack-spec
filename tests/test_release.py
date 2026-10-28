@@ -4,6 +4,7 @@ import importlib.util
 import io
 import json
 import hashlib
+import re
 import shutil
 import sys
 import zipfile
@@ -27,11 +28,59 @@ SPEC.loader.exec_module(BUILD_RELEASE)
 class ReleaseBuilderTests(unittest.TestCase):
     def test_0_3_0_release_naming_is_recorded(self) -> None:
         versioning = (ROOT / "VERSIONING.md").read_text(encoding="utf-8")
-        notes = ROOT / "docs" / "releases" / "v0.3.0.md"
+        notes = ROOT / "releases" / "v0.3.0.md"
         self.assertIn("`v0.3.0-rc.1`", versioning)
         self.assertIn("`v0.3.0`", versioning)
+        # The two prerelease forms, and which of them this repository's Core route uses.
+        self.assertIn("`vX.Y.Z-rc.N` is a candidate of the complete milestone", versioning)
+        self.assertIn("with no change to its normative artifacts", re.sub(r"\s+", " ", versioning))
+        self.assertIn("`vX.Y.Z-alpha.N`, used by the implementations and never by this", versioning)
         self.assertTrue(notes.is_file())
         self.assertEqual("# v0.3.0", notes.read_text(encoding="utf-8").splitlines()[0])
+        # The prepared notes stay as a pointer: the published RC1 notes link to them.
+        pointer = (ROOT / "docs" / "releases" / "v0.3.0.md").read_text(encoding="utf-8")
+        self.assertEqual("# v0.3.0", pointer.splitlines()[0])
+        self.assertIn("(../../releases/v0.3.0.md)", pointer)
+        self.assertIn("(../docs/releases/v0.3.0.md)",
+                      (ROOT / "releases" / "v0.3.0-rc.1.md").read_text(encoding="utf-8"))
+
+    def test_final_notes_name_both_candidates_the_leaf_and_the_pins(self) -> None:
+        notes = (ROOT / "releases" / "v0.3.0.md").read_text(encoding="utf-8")
+        inventory = json.loads(
+            (ROOT / "releases" / "v0.3.0.retained-column.json").read_text(encoding="utf-8")
+        )
+        for text in ("`v0.3.0-rc.1`", "published 2026-10-25", "`v0.3.0-rc.2`",
+                     "published 2026-10-27", "The leaf is part of this release.",
+                     "This release is the leaf's normative support distribution.",
+                     "support version `0.3.0`", "keep their `v0.3.0-rc.2` labels",
+                     "the Core and Dialect sentences on the leaf's adoption, and a dated note in RFC 0029",
+                     "RFC 0024 is not part of this release; it remains a Draft.",
+                     "## What this release pins", "## Checks run for this release",
+                     "https://judgmentpack.org/schema/0.3.0/judgment-pack-core.schema.json",
+                     inventory["schemaSha256"], inventory["corpusSha256"],
+                     "## Migration note", "## Included work", "## Versioning and maturity"):
+            with self.subTest(text=text):
+                self.assertIn(text, re.sub(r"\s+", " ", notes))
+        self.assertNotIn("if merged before the tag", notes)
+        # The checks section states the mechanism, not values to fill in at the tag: the reused run's
+        # identity lives in the decision artifact and the published release body.
+        checks = notes.split("## Checks run for this release", 1)[1]
+        for text in ("evidence for this exact commit", "release evidence gate",
+                     "`release-evidence-<attempt>` artifact", "issue #259", "issue #261",
+                     "#274", "same-vendor review under the authorized exception"):
+            with self.subTest(checks=text):
+                self.assertIn(text, re.sub(r"\s+", " ", checks))
+        # The record of the reused run is the decision artifact (web/DEPLOYMENT.md), nothing else.
+        self.assertNotIn("appended", checks)
+        candidate = re.sub(r"\s+", " ", notes.split("## Candidate period", 1)[1].split("\n## ", 1)[0])
+        for text in ("published on 2026-10-25", "on 2026-10-27", "recorded on issue #231 before the tag",
+                     "no earlier than one week after the publication of `v0.3.0-rc.2`"):
+            with self.subTest(candidate=text):
+                self.assertIn(text, candidate)
+        self.assertIn("kept as the run's\n`release-evidence-<attempt>` artifact",
+                      (ROOT / "web" / "DEPLOYMENT.md").read_text(encoding="utf-8"))
+        for placeholder in ("<conformance run id>", "<main commit>"):
+            self.assertNotIn(placeholder, notes)
 
     def test_release_version_accepts_exact_semver_tags(self) -> None:
         self.assertEqual(BUILD_RELEASE.release_version("v0.1.0-draft"), "0.1.0-draft")
@@ -63,12 +112,17 @@ class ReleaseBuilderTests(unittest.TestCase):
         self.assertEqual("0.3.0", version)
         BUILD_RELEASE.validate_artifacts(version, f"v{version}")
 
-    def test_core_bundle_uses_prepared_notes_and_keeps_historical_notes(self) -> None:
+    def test_core_bundle_uses_immutable_final_notes_and_keeps_historical_notes(self) -> None:
         current = BUILD_RELEASE.bundle_paths("v0.3.0", "HEAD")
         historical = BUILD_RELEASE.bundle_paths("v0.2.0-draft", "HEAD")
-        self.assertIn("docs/releases/v0.3.0.md", current)
-        self.assertNotIn("releases/v0.3.0.md", current)
+        self.assertEqual(ROOT / "releases" / "v0.3.0.md", BUILD_RELEASE.core_release_notes_path("v0.3.0"))
+        self.assertIn("releases/v0.3.0.md", current)
+        self.assertNotIn("docs/releases/v0.3.0.md", current)
+        # A final has no distribution mapping; only the two RC mappings are allowlisted.
+        self.assertNotIn("releases/v0.3.0.json", current)
+        self.assertFalse((ROOT / "releases" / "v0.3.0.json").exists())
         self.assertIn("releases/v0.2.0-draft.md", historical)
+        self.assertNotIn("releases/v0.3.0.retained-column.json", historical)
 
     def test_artifact_validation_pins_the_evaluation_corpus(self) -> None:
         # An evaluator-conformance claim binds to the corpus published for the exact specVersion
@@ -413,6 +467,18 @@ class ReleaseBuilderTests(unittest.TestCase):
             encoding="utf-8",
         )
         (directory / "releases" / f"v{version}.md").write_text("notes\n", encoding="utf-8")
+        if version == "0.3.0":
+            # The v0.3.0 final also carries RC2's selected leaf: its inventories, the leaf bytes they
+            # pin, the milestone link and RFC 0029's acceptance are copied, not invented.
+            inventory = json.loads(
+                (ROOT / "releases" / "v0.3.0.retained-column.json").read_text(encoding="utf-8")
+            )
+            for name in ("releases/v0.3.0.retained-column.json",
+                         "releases/v0.3.0-rc.2.retained-column.json",
+                         "releases/v0.3.0.milestone.json",
+                         "rfcs/0029-retained-column-conversions.md", *inventory["files"]):
+                (directory / name).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT / name, directory / name)
         return directory
 
 

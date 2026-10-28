@@ -51,8 +51,8 @@ The artifacts in this repository have distinct roles:
 - [`spec/dialect.md`](dialect.md), a companion document, is the normative prose for the
   preparation-verifier reader conformance class it defines, and for nothing else;
 - [selected retained columns](retained-column.md) is accepted at draft maturity as normative prose
-  for the exact RC2 selected leaf support scope only; it establishes no implicit ordinary support
-  or generic preparation-verifier claim, and publication requires the immutable RC2 release;
+  for the selected leaf support scope only, adopted in `v0.3.0` (candidate distribution `v0.3.0-rc.2`);
+  it establishes no implicit ordinary support or generic preparation-verifier claim;
 - the evaluation corpus — the manifest and case fixtures under
   [`conformance/evaluation/`](../conformance/evaluation/README.md), not its README — is normative for
   evaluator conformance (§3.4) and for nothing else. This is the normative status the bullet below
@@ -368,7 +368,7 @@ For the proposed exact selected `retained-column/1` contract only,
 [the retained-column companion](retained-column.md) specifies scoped Dialect artifact ceilings
 after its own selection and independent role admission. Absence of that selection uses this
 table. It does not raise Core pack, global transport, canonical parser, target-count or independent
-work ceilings. This is an RC2 adoption candidate, not a support claim for an existing release.
+work ceilings. It is adopted at draft maturity in `v0.3.0` (candidate distribution `v0.3.0-rc.2`), not a Core conformance claim.
 
 The following is the ceiling table for these formats. Numbers elsewhere in the companions
 state `base`; except for the exactly selected retained-column companion above, their

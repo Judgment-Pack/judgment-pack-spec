@@ -165,6 +165,42 @@ class SelectedPreparations(unittest.TestCase):
                         result=subprocess.run(command+args,capture_output=True,text=True,timeout=30,env={**os.environ,'NODE_OPTIONS':''})
                         self.assertEqual(3,result.returncode,result.stderr);self.assertEqual('',result.stdout)
 
+    def test_installed_identity_is_the_v0_3_0_distribution(self):
+        # The real installation check, on a disposable copy of a v0.3.0 installation.
+        inventory_path='releases/v0.3.0.retained-column.json'
+        inventory=json.loads((ROOT/inventory_path).read_text())
+        commit='a'*40
+        final={'releaseVersion':'0.3.0','tag':'v0.3.0','specVersion':'0.3.0','maturity':'draft','sourceCommit':commit}
+        spec={'version':'0.3.0','revision':commit,'schemaSha256':inventory['schemaSha256'],'corpusSha256':inventory['corpusSha256']}
+        def select(version='0.3.0'):
+            return retained_column.begin(json.dumps({'contract':'retained-column/1','spec':{**spec,'version':version},
+                                                     'profile':'base','roles':['preparation-verification']}).encode())
+        def unsupported(action):
+            with self.assertRaises(retained_column.engine.Refusal) as raised:
+                action()
+            self.assertEqual(('capability-unsupported',),raised.exception.args)
+        with tempfile.TemporaryDirectory(prefix='retained-installation-') as temporary:
+            root=Path(temporary)
+            for name in (inventory_path,*inventory['files']):
+                target=root/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,target)
+            identity=root/'release-identity.json'
+            with patch.object(retained_column,'ROOT',root):
+                identity.write_text(json.dumps(final))
+                self.assertEqual(spec,retained_column.installed_spec())
+                self.assertEqual('0.3.0',select().selector['spec']['version'])
+                unsupported(lambda:select('0.3.0-rc.2'))
+                for changed in ({'tag':'v0.3.0-rc.2','releaseVersion':'0.3.0-rc.2'},{'releaseVersion':'0.3.0-rc.2'},
+                                {'maturity':'candidate'},{'sourceCommit':'A'*40}):
+                    with self.subTest(changed=changed):
+                        identity.write_text(json.dumps({**final,**changed}));unsupported(retained_column.installed_spec)
+                identity.write_text(json.dumps(final))
+                listed=root/inventory_path;original=listed.read_bytes()
+                listed.write_text(json.dumps({**inventory,'distribution':'v0.3.0-rc.2'}));unsupported(retained_column.installed_spec)
+                listed.write_bytes(original)
+                pinned=root/inventory['corpus'];pinned.write_bytes(pinned.read_bytes()+b' ');unsupported(retained_column.installed_spec)
+                shutil.copyfile(ROOT/inventory['corpus'],pinned)
+                identity.unlink();unsupported(select)
+
     def test_origin_specific_raw_value_bounds(self):
         result=subprocess.run([sys.executable,'-B',str(ROOT/'tools/check_retained_column.py'),'--raw-values-only'],cwd=ROOT,capture_output=True,text=True,timeout=60)
         self.assertEqual(0,result.returncode,result.stdout+result.stderr)
