@@ -33,6 +33,7 @@ class ReleaseBuilderTests(unittest.TestCase):
         self.assertIn("`v0.3.0`", versioning)
         # The two prerelease forms, and which of them this repository's Core route uses.
         self.assertIn("`vX.Y.Z-rc.N` is a candidate of the complete milestone", versioning)
+        self.assertIn("with no change to its normative artifacts", re.sub(r"\s+", " ", versioning))
         self.assertIn("`vX.Y.Z-alpha.N`, used by the implementations and never by this", versioning)
         self.assertTrue(notes.is_file())
         self.assertEqual("# v0.3.0", notes.read_text(encoding="utf-8").splitlines()[0])
@@ -64,10 +65,19 @@ class ReleaseBuilderTests(unittest.TestCase):
         # identity lives in the decision artifact and the published release body.
         checks = notes.split("## Checks run for this release", 1)[1]
         for text in ("evidence for this exact commit", "release evidence gate",
-                     "(`release-evidence-<attempt>`)", "appended to the published release body",
+                     "`release-evidence-<attempt>` artifact", "issue #259", "issue #261",
                      "#274", "same-vendor review under the authorized exception"):
             with self.subTest(checks=text):
                 self.assertIn(text, re.sub(r"\s+", " ", checks))
+        # The record of the reused run is the decision artifact (web/DEPLOYMENT.md), nothing else.
+        self.assertNotIn("appended", checks)
+        candidate = re.sub(r"\s+", " ", notes.split("## Candidate period", 1)[1].split("\n## ", 1)[0])
+        for text in ("published on 2026-10-25", "on 2026-10-27", "recorded on issue #231 before the tag",
+                     "no earlier than one week after the publication of `v0.3.0-rc.2`"):
+            with self.subTest(candidate=text):
+                self.assertIn(text, candidate)
+        self.assertIn("kept as the run's\n`release-evidence-<attempt>` artifact",
+                      (ROOT / "web" / "DEPLOYMENT.md").read_text(encoding="utf-8"))
         for placeholder in ("<conformance run id>", "<main commit>"):
             self.assertNotIn(placeholder, notes)
 

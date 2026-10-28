@@ -44,6 +44,8 @@ class RetainedRelease(unittest.TestCase):
         # RC2's published pins still hold for every leaf byte but the final's revised support identity.
         published=json.loads((ROOT/INVENTORY).read_text())['files']
         self.assertEqual(build_release.FINAL_REVISED_LEAF_FILES,{name for name,pin in published.items() if pin!=digest(name)})
+        # The builder holds the final to RC2's inventory by its published digest; this copy is unedited.
+        self.assertEqual('sha256:'+build_release.RC2_RETAINED_INVENTORY_SHA256,digest(INVENTORY))
         source=(ROOT/'tools/build_release.py').read_text()
         self.assertIn('"sourceCommit": git(',source)
 
@@ -168,6 +170,11 @@ class RetainedRelease(unittest.TestCase):
                                  ('conformance/retained-column/1/README.md','This is','This  is')]:
                 with self.subTest(changed=name):
                     restore=rewrite(name,old,new);refuses('differs from the published RC2 inventory');restore()
+            # The same change with both inventories re-pinned: RC2's copy no longer has its published bytes.
+            restore=rewrite('tools/_retained_column.py','# Promoted','#  Promoted')
+            pin='sha256:'+hashlib.sha256((root/'tools/_retained_column.py').read_bytes()).hexdigest()
+            restore_rc2=json_change(INVENTORY,lambda value:value['files'].update({'tools/_retained_column.py':pin}))
+            refuses('differs from the bytes RC2 published');restore_rc2();restore()
             # The revised support identity may differ, re-pinned; the readers must still name the final.
             restore=rewrite('spec/retained-column.md','exactly `0.3.0`, the','exactly `0.3.0` , the')
             build_release.validate_artifacts('0.3.0','v0.3.0',root);restore()
@@ -188,7 +195,13 @@ class RetainedRelease(unittest.TestCase):
                 (FINAL_INVENTORY,lambda v:v.update(maturity='candidate'),'identity or scope differs'),
                 ('releases/v0.3.0.milestone.json',lambda v:v.update(number=3),'final Core milestone')]:
                 with self.subTest(name=name,message=message):
-                    restore=json_change(name,change);refuses(message);restore()
+                    restore=json_change(name,change)
+                    # An edited RC2 copy is refused by its published digest first; pinning the edited
+                    # bytes here exercises the comparison behind that digest.
+                    with patch.object(build_release,'RC2_RETAINED_INVENTORY_SHA256',
+                                      hashlib.sha256((root/INVENTORY).read_bytes()).hexdigest()):
+                        refuses(message)
+                    restore()
             for name,message in [(INVENTORY,'published RC2 retained-column inventory is missing'),
                                  (FINAL_INVENTORY,'inventory is missing for the exact tag'),
                                  ('releases/v0.3.0.milestone.json','final Core milestone')]:

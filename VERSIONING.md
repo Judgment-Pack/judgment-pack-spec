@@ -55,7 +55,9 @@ companion's `policy-v<releaseVersion>-draft.N` route remains independent and is 
 Core convention.
 
 Across the project, `vX.Y.Z-rc.N` is a candidate of the complete milestone that graduates to
-`vX.Y.Z` with no code change, and `vX.Y.Z-alpha.N`, used by the implementations and never by this
+`vX.Y.Z` with no change to its normative artifacts (schemas, corpus, Core and companion rules);
+text and tooling that named the candidate distribution are updated to name the release, and the
+release's notes list those changes. `vX.Y.Z-alpha.N`, used by the implementations and never by this
 repository's Core route, is a scoped cut for a named consumer that never graduates.
 
 That first candidate is a distribution of the proposed exact `specVersion` `0.3.0` artifacts;

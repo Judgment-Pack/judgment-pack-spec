@@ -65,6 +65,9 @@ FINAL_RETAINED_INVENTORY = "releases/v0.3.0.retained-column.json"
 RETAINED_INVENTORIES = {CORE_RC2_TAG: RETAINED_INVENTORY, CORE_FINAL_TAG: FINAL_RETAINED_INVENTORY}
 FINAL_REVISED_LEAF_FILES = frozenset({"spec/retained-column.md", "tools/retained_column.py",
                                       "tools/dialect-verify-ts/src/retained.ts"})
+# The SHA-256 of releases/v0.3.0-rc.2.retained-column.json as tag v0.3.0-rc.2 published it, so the
+# final is held to RC2's published inventory, not to a working copy edited after publication.
+RC2_RETAINED_INVENTORY_SHA256 = "b4d62b3259b24dee68d926750ab45247d974004eec2bd15814f7d24c89140160"
 CORE_MILESTONE = {"number": 2, "title": "v0.3.0"}
 
 
@@ -119,6 +122,8 @@ def validate_final_retained_inventory(root: Path = ROOT) -> None:
     published_path = root / RETAINED_INVENTORY
     if not published_path.is_file():
         raise ValueError("the published RC2 retained-column inventory is missing")
+    if sha256(published_path) != RC2_RETAINED_INVENTORY_SHA256:
+        raise ValueError("the RC2 retained-column inventory differs from the bytes RC2 published")
     published = json.loads(published_path.read_text("utf-8"))
     if (not isinstance(published, dict) or not isinstance(published.get("files"), dict)
             or {**final, "distribution": CORE_RC2_TAG, "files": None} != {**published, "files": None}
