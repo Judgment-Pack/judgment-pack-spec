@@ -58,9 +58,16 @@ class ReleaseBuilderTests(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertIn(text, notes)
         self.assertNotIn("if merged before the tag", notes)
-        # Only these two are completed at the tag, and completing them keeps this test passing.
-        self.assertLessEqual(set(re.findall(r"<[a-z][a-z ]+>", notes)),
-                             {"<conformance run id>", "<main commit>"})
+        # The checks section states the mechanism, not values to fill in at the tag: the reused run's
+        # identity lives in the decision artifact and the published release body.
+        checks = notes.split("## Checks run for this release", 1)[1]
+        for text in ("evidence for this exact commit", "release evidence gate",
+                     "(`release-evidence-<attempt>`)", "appended to the published release body",
+                     "#274", "same-vendor review under the authorized exception"):
+            with self.subTest(checks=text):
+                self.assertIn(text, re.sub(r"\s+", " ", checks))
+        for placeholder in ("<conformance run id>", "<main commit>"):
+            self.assertNotIn(placeholder, notes)
 
     def test_release_version_accepts_exact_semver_tags(self) -> None:
         self.assertEqual(BUILD_RELEASE.release_version("v0.1.0-draft"), "0.1.0-draft")
