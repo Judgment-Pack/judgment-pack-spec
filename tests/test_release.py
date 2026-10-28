@@ -53,6 +53,7 @@ class ReleaseBuilderTests(unittest.TestCase):
                      "published 2026-10-27", "The leaf is part of this release.",
                      "This release is the leaf's normative support distribution.",
                      "support version `0.3.0`", "keep their `v0.3.0-rc.2` labels",
+                     "the Core and Dialect sentences on the leaf's adoption, and a dated note in RFC 0029",
                      "RFC 0024 is not part of this release; it remains a Draft.",
                      "## What this release pins", "## Checks run for this release",
                      "https://judgmentpack.org/schema/0.3.0/judgment-pack-core.schema.json",

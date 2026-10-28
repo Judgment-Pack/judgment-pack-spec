@@ -132,7 +132,9 @@ class RetainedRelease(unittest.TestCase):
         build_release.validate_reader_support_identity('v0.3.0')
         final=json.loads((ROOT/FINAL_INVENTORY).read_text());candidate=json.loads((ROOT/INVENTORY).read_text())
         self.assertEqual(('v0.3.0','v0.3.0-rc.2'),(final['distribution'],candidate['distribution']))
-        revised={'spec/retained-column.md','tools/retained_column.py','tools/dialect-verify-ts/src/retained.ts'}
+        # The companion, the Core and Dialect sentences on the leaf's adoption, and the two readers.
+        revised={'spec/retained-column.md','spec/judgment-pack-core.md','spec/dialect.md',
+                 'tools/retained_column.py','tools/dialect-verify-ts/src/retained.ts'}
         self.assertEqual(revised,set(build_release.FINAL_REVISED_LEAF_FILES))
         self.assertEqual(revised,{path for path,digest in final['files'].items() if candidate['files'][path]!=digest})
         self.assertEqual({**candidate,'distribution':'v0.3.0','files':None},{**final,'files':None})
@@ -176,8 +178,11 @@ class RetainedRelease(unittest.TestCase):
             restore_rc2=json_change(INVENTORY,lambda value:value['files'].update({'tools/_retained_column.py':pin}))
             refuses('differs from the bytes RC2 published');restore_rc2();restore()
             # The revised support identity may differ, re-pinned; the readers must still name the final.
-            restore=rewrite('spec/retained-column.md','exactly `0.3.0`, the','exactly `0.3.0` , the')
-            build_release.validate_artifacts('0.3.0','v0.3.0',root);restore()
+            for name,old,new in [('spec/retained-column.md','exactly `0.3.0`, the','exactly `0.3.0` , the'),
+                                 ('spec/judgment-pack-core.md','adopted at draft maturity in `v0.3.0`','adopted at draft maturity in  `v0.3.0`'),
+                                 ('spec/dialect.md','selection, adopted in `v0.3.0`','selection, adopted in  `v0.3.0`')]:
+                with self.subTest(revised=name):
+                    restore=rewrite(name,old,new);build_release.validate_artifacts('0.3.0','v0.3.0',root);restore()
             for name,old,new in [('tools/retained_column.py','TAG = "v0.3.0"\n','TAG = "v0.3.0-rc.2"\n'),
                                  ('tools/retained_column.py','VERSION = "0.3.0"\n','VERSION = "0.3.0-rc.2"\n'),
                                  ('tools/dialect-verify-ts/src/retained.ts','INVENTORY = "releases/v0.3.0.retained-column.json"',

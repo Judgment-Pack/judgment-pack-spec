@@ -53,8 +53,9 @@ RETAINED_BUNDLE_PATHS = ("tools/dialect_verify.py", "tools/retained_column.py",
                          "tools/dialect-verify-ts", "requirements-dev.txt")
 
 # The final is the leaf's normative support distribution. It carries RC2's schema, corpus and
-# every other leaf byte unchanged under its own inventory; only the companion's support-version
-# sentences and the two readers' installation identity may differ from RC2's. It has no
+# every other leaf byte unchanged under its own inventory; only the companion page, the Core and
+# Dialect pages (their sentences on the leaf's adoption) and the two readers' installation
+# identity may differ from RC2's. It has no
 # distribution mapping (VERSIONING.md allowlists the two RC mappings only); its bundles carry a
 # generated release-identity.json, never a tracked mapping, so readers can check sourceCommit.
 CORE_FINAL_TAG = "v0.3.0"
@@ -63,7 +64,8 @@ CORE_FINAL_IDENTITY = {"releaseVersion": "0.3.0", "tag": CORE_FINAL_TAG, "specVe
 GENERATED_IDENTITIES = {**CORE_RC_IDENTITIES, CORE_FINAL_TAG: CORE_FINAL_IDENTITY}
 FINAL_RETAINED_INVENTORY = "releases/v0.3.0.retained-column.json"
 RETAINED_INVENTORIES = {CORE_RC2_TAG: RETAINED_INVENTORY, CORE_FINAL_TAG: FINAL_RETAINED_INVENTORY}
-FINAL_REVISED_LEAF_FILES = frozenset({"spec/retained-column.md", "tools/retained_column.py",
+FINAL_REVISED_LEAF_FILES = frozenset({"spec/retained-column.md", "spec/judgment-pack-core.md",
+                                      "spec/dialect.md", "tools/retained_column.py",
                                       "tools/dialect-verify-ts/src/retained.ts"})
 # The SHA-256 of releases/v0.3.0-rc.2.retained-column.json as tag v0.3.0-rc.2 published it, so the
 # final is held to RC2's published inventory, not to a working copy edited after publication.

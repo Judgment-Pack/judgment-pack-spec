@@ -16,6 +16,8 @@ immutable and final v0.3.0 milestone #2 remains open. Acceptance permits this RC
 it does not establish immutable publication, stable interoperability, production Desk cutover
 or completion of Agent #171.
 
+Note (2026-10-28): the accepted route's final distribution is `v0.3.0`; the RC2 wording above records the candidate's history.
+
 The [adoption disposition](https://github.com/Judgment-Pack/judgment-pack-spec/pull/274#issuecomment-6431106029)
 records same-vendor OpenAI Codex review under the authorized exception and dispositions of the
 pre-adoption RFC comments at draft maturity. It judges the public review window and substantive
