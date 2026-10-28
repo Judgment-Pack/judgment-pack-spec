@@ -6,6 +6,7 @@ import ast
 import copy
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -33,49 +34,52 @@ def final_fixture(root):
 
 class RetainedRelease(unittest.TestCase):
     def test_closed_inventory_and_non_circular_pins(self):
-        build_release.validate_retained_inventory()
-        manifest=json.loads((ROOT/INVENTORY).read_text())
-        self.assertNotIn(INVENTORY,manifest['files'])
-        for name in ('schema','corpus'):
-            self.assertEqual(manifest[name+'Sha256'],'sha256:'+hashlib.sha256((ROOT/manifest[name]).read_bytes()).hexdigest())
+        build_release.validate_retained_inventory(ROOT,'v0.3.0')
+        digest=lambda name:'sha256:'+hashlib.sha256((ROOT/name).read_bytes()).hexdigest()
+        for inventory in (FINAL_INVENTORY,INVENTORY):
+            manifest=json.loads((ROOT/inventory).read_text())
+            self.assertNotIn(inventory,manifest['files'])
+            for name in ('schema','corpus'):
+                self.assertEqual(manifest[name+'Sha256'],digest(manifest[name]))
+        # RC2's published pins still hold for every leaf byte but the final's revised support identity.
+        published=json.loads((ROOT/INVENTORY).read_text())['files']
+        self.assertEqual(build_release.FINAL_REVISED_LEAF_FILES,{name for name,pin in published.items() if pin!=digest(name)})
         source=(ROOT/'tools/build_release.py').read_text()
         self.assertIn('"sourceCommit": git(',source)
 
     def test_inventory_refuses_changed_and_missing_corpus_inputs(self):
-        manifest=json.loads((ROOT/INVENTORY).read_text())
+        manifest=json.loads((ROOT/FINAL_INVENTORY).read_text())
         with tempfile.TemporaryDirectory(prefix='retained-inventory-') as temporary:
             root=Path(temporary)
-            for name in [INVENTORY,*manifest['files']]:
+            for name in [FINAL_INVENTORY,*manifest['files']]:
                 destination=root/name;destination.parent.mkdir(parents=True,exist_ok=True)
                 shutil.copyfile(ROOT/name,destination)
-            build_release.validate_retained_inventory(root)
+            build_release.validate_retained_inventory(root,'v0.3.0')
             cases_path=root/manifest['corpus'];original_cases=cases_path.read_bytes();cases=json.loads(original_cases)
             del cases['inputs']['conformance/retained-column/1/preparations.json']
             cases_path.write_text(json.dumps(cases))
             changed=copy.deepcopy(manifest);changed['files'][manifest['corpus']]='sha256:'+hashlib.sha256(cases_path.read_bytes()).hexdigest();changed['corpusSha256']=changed['files'][manifest['corpus']]
-            (root/INVENTORY).write_text(json.dumps(changed))
+            (root/FINAL_INVENTORY).write_text(json.dumps(changed))
             with self.assertRaisesRegex(ValueError,'complete corpus input set'):
-                build_release.validate_retained_inventory(root)
-            cases_path.write_bytes(original_cases);(root/INVENTORY).write_text(json.dumps(manifest))
+                build_release.validate_retained_inventory(root,'v0.3.0')
+            cases_path.write_bytes(original_cases);(root/FINAL_INVENTORY).write_text(json.dumps(manifest))
             corpus=root/manifest['corpus'];corpus.write_bytes(corpus.read_bytes()+b' ')
             with self.assertRaisesRegex(ValueError,'immutable artifact bytes'):
-                build_release.validate_retained_inventory(root)
+                build_release.validate_retained_inventory(root,'v0.3.0')
             shutil.copyfile(ROOT/manifest['corpus'],corpus)
             (root/'conformance/retained-column/1/preparations.json').unlink()
             with self.assertRaisesRegex(ValueError,'complete artifact inventory'):
-                build_release.validate_retained_inventory(root)
+                build_release.validate_retained_inventory(root,'v0.3.0')
 
     def test_rc2_mapping_is_closed_and_keeps_final_milestone(self):
         self.assertEqual(build_release.CORE_RC2_IDENTITY,json.loads((ROOT/'releases/v0.3.0-rc.2.json').read_text()))
         self.assertEqual({'v0.3.0-rc.1','v0.3.0-rc.2'},set(build_release.CORE_RC_IDENTITIES))
         self.assertEqual({'number':2,'title':'v0.3.0'},json.loads((ROOT/'releases/v0.3.0-rc.2.milestone.json').read_text()))
-        # Preparation does not satisfy adoption or release publication.
-        status=(ROOT/'rfcs/0029-retained-column-conversions.md').read_text()
-        if '- Status: Accepted' in status.splitlines():
+        self.assertIn('- Status: Accepted',(ROOT/'rfcs/0029-retained-column-conversions.md').read_text().splitlines())
+        # RC2 is built only from its own tag: the final revised the leaf's support identity, so RC2's
+        # route refuses this tree instead of re-publishing RC2 with the final's readers.
+        with self.assertRaisesRegex(ValueError,'immutable artifact bytes'):
             build_release.validate_artifacts('0.3.0-rc.2','v0.3.0-rc.2')
-        else:
-            with self.assertRaisesRegex(ValueError,'RFC0029 acceptance'):
-                build_release.validate_artifacts('0.3.0-rc.2','v0.3.0-rc.2')
 
     def test_rc2_scoped_mapping_inventory_and_acceptance_gates(self):
         # Disposable adoption fixture, not a claim that this candidate's public gates passed.
@@ -88,6 +92,12 @@ class RetainedRelease(unittest.TestCase):
             root=Path(temporary)
             for name in paths:
                 target=root/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,target)
+            # The fixture stands in for RC2's tree: RC2's own bytes for the three files the final revised
+            # live only at its tag, so the fixture's copy of the inventory is re-pinned to these copies.
+            fixture=json.loads((root/INVENTORY).read_text())
+            for name in build_release.FINAL_REVISED_LEAF_FILES:
+                fixture['files'][name]='sha256:'+hashlib.sha256((root/name).read_bytes()).hexdigest()
+            (root/INVENTORY).write_text(json.dumps(fixture))
             rfc=root/'rfcs/0029-retained-column-conversions.md'
             rfc.write_text(rfc.read_text().replace('- Status: Review','- Status: Accepted'))
             build_release.validate_artifacts('0.3.0-rc.2','v0.3.0-rc.2',root)
@@ -115,11 +125,15 @@ class RetainedRelease(unittest.TestCase):
         attributes=(ROOT/'.gitattributes').read_text()
         self.assertIn('conformance/dialect/** export-ignore -text',attributes)
 
-    def test_final_inventory_is_rc2s_but_for_its_distribution(self):
+    def test_final_inventory_keeps_rc2s_leaf_bytes_but_its_support_identity(self):
         build_release.validate_final_retained_inventory()
+        build_release.validate_reader_support_identity('v0.3.0')
         final=json.loads((ROOT/FINAL_INVENTORY).read_text());candidate=json.loads((ROOT/INVENTORY).read_text())
         self.assertEqual(('v0.3.0','v0.3.0-rc.2'),(final['distribution'],candidate['distribution']))
-        self.assertEqual({**candidate,'distribution':'v0.3.0'},final)
+        revised={'spec/retained-column.md','tools/retained_column.py','tools/dialect-verify-ts/src/retained.ts'}
+        self.assertEqual(revised,set(build_release.FINAL_REVISED_LEAF_FILES))
+        self.assertEqual(revised,{path for path,digest in final['files'].items() if candidate['files'][path]!=digest})
+        self.assertEqual({**candidate,'distribution':'v0.3.0','files':None},{**final,'files':None})
         self.assertEqual({'v0.3.0-rc.2':INVENTORY,'v0.3.0':FINAL_INVENTORY},build_release.RETAINED_INVENTORIES)
         self.assertEqual({'number':2,'title':'v0.3.0'},json.loads((ROOT/'releases/v0.3.0.milestone.json').read_text()))
         self.assertNotIn('v0.3.0',build_release.CORE_RC_IDENTITIES)
@@ -136,19 +150,40 @@ class RetainedRelease(unittest.TestCase):
             def json_change(name,change):
                 path=root/name;original=path.read_bytes();value=json.loads(original);change(value);path.write_text(json.dumps(value))
                 return lambda:path.write_bytes(original)
-            # Changed leaf bytes with a final inventory regenerated to match them: not RC2's bytes.
+            def rewrite(name,old,new):
+                """Change a leaf file and re-pin it in the final inventory, so only the RC2 rule can refuse."""
+                path=root/name;original=path.read_bytes();text=original.decode()
+                self.assertEqual(1,text.count(old),(name,old));path.write_text(text.replace(old,new))
+                pin='sha256:'+hashlib.sha256(path.read_bytes()).hexdigest()
+                def repin(value):
+                    value['files'][name]=pin
+                    if name==inventory['corpus']:value['corpusSha256']=pin
+                    if name==inventory['schema']:value['schemaSha256']=pin
+                restore=json_change(FINAL_INVENTORY,repin)
+                build_release.validate_retained_inventory(root,'v0.3.0')
+                return lambda:(restore(),path.write_bytes(original))
+            # Changed RC2 bytes outside the revised support identity, re-pinned: not RC2's leaf.
+            for name,old,new in [(inventory['corpus'],'draft selected corpus candidate','draft  selected corpus candidate'),(inventory['schema'],'"$id"','"$id" '),
+                                 ('tools/_retained_column.py','# Promoted','#  Promoted'),
+                                 ('conformance/retained-column/1/README.md','This is','This  is')]:
+                with self.subTest(changed=name):
+                    restore=rewrite(name,old,new);refuses('differs from the published RC2 inventory');restore()
+            # The revised support identity may differ, re-pinned; the readers must still name the final.
+            restore=rewrite('spec/retained-column.md','exactly `0.3.0`, the','exactly `0.3.0` , the')
+            build_release.validate_artifacts('0.3.0','v0.3.0',root);restore()
+            for name,old,new in [('tools/retained_column.py','TAG = "v0.3.0"\n','TAG = "v0.3.0-rc.2"\n'),
+                                 ('tools/retained_column.py','VERSION = "0.3.0"\n','VERSION = "0.3.0-rc.2"\n'),
+                                 ('tools/dialect-verify-ts/src/retained.ts','INVENTORY = "releases/v0.3.0.retained-column.json"',
+                                  'INVENTORY = "releases/v0.3.0-rc.2.retained-column.json"'),
+                                 ('tools/dialect-verify-ts/src/retained.ts','const TAG = "v0.3.0"','const TAG = "v0.3.0-rc.2"')]:
+                with self.subTest(reader=name,changed=new):
+                    restore=rewrite(name,old,new);refuses('readers do not name the exact release distribution');restore()
             corpus=root/inventory['corpus'];original_corpus=corpus.read_bytes();corpus.write_bytes(original_corpus+b' ')
-            pin='sha256:'+hashlib.sha256(corpus.read_bytes()).hexdigest()
-            def repin(value):
-                value['files'][inventory['corpus']]=pin;value['corpusSha256']=pin
-            restore=json_change(FINAL_INVENTORY,repin)
-            build_release.validate_retained_inventory(root,'v0.3.0')
-            refuses('differs from the published RC2 inventory')
-            restore();refuses('immutable artifact bytes')
-            corpus.write_bytes(original_corpus)
+            refuses('immutable artifact bytes');corpus.write_bytes(original_corpus)
             for name,change,message in [
                 (INVENTORY,lambda v:v.update(claim='other'),'differs from the published RC2 inventory'),
                 (INVENTORY,lambda v:v.update(extra=True),'differs from the published RC2 inventory'),
+                (INVENTORY,lambda v:v['files'].update({'tools/extra.py':'sha256:'+'0'*64}),'differs from the published RC2 inventory'),
                 (FINAL_INVENTORY,lambda v:v.update(distribution='v0.3.0-rc.2'),'identity or scope differs'),
                 (FINAL_INVENTORY,lambda v:v.update(maturity='candidate'),'identity or scope differs'),
                 ('releases/v0.3.0.milestone.json',lambda v:v.update(number=3),'final Core milestone')]:
@@ -183,8 +218,11 @@ class RetainedRelease(unittest.TestCase):
                      'conformance/policy','schema/policy'):
             self.assertNotIn(path,paths)
 
-    def test_final_cli_archives_the_leaf_with_no_rc_identity(self):
-        # The actual builder CLI on a disposable fixture repository and a real annotated tag.
+    def test_final_cli_archives_the_leaf_and_its_readers_support_it(self):
+        # The actual builder CLI on a disposable fixture repository and a real annotated tag; then both
+        # readers of the extracted final bundle answer a leaf selection.
+        node=shutil.which('node')
+        self.assertIsNotNone(node,'the bundle probe runs the TypeScript reader')
         with tempfile.TemporaryDirectory(prefix='final-archive-fixture-') as temporary:
             root=Path(temporary);final_fixture(root)
             for name in ('tools/build_release.py','tools/dialect_verify.py','requirements-dev.txt','.gitattributes'):
@@ -205,14 +243,36 @@ class RetainedRelease(unittest.TestCase):
             with tarfile.open(root/'dist/judgment-pack-spec_0.3.0_artifacts.tar.gz') as archive:
                 names={m.name[len(prefix):] for m in archive.getmembers() if m.isfile()}
                 self.assertEqual((root/FINAL_INVENTORY).read_bytes(),archive.extractfile(prefix+FINAL_INVENTORY).read())
+                self.assertEqual({'releaseVersion':'0.3.0','tag':'v0.3.0','specVersion':'0.3.0','maturity':'draft',
+                                  'sourceCommit':commit},json.load(archive.extractfile(prefix+'release-identity.json')))
+                archive.extractall(root/'installed',filter='data')
             with zipfile.ZipFile(root/'dist/judgment-pack-spec_0.3.0_artifacts.zip') as archive:
                 self.assertEqual(names,{n[len(prefix):] for n in archive.namelist() if not n.endswith('/')})
             for name in (FINAL_INVENTORY,'releases/v0.3.0.milestone.json','releases/v0.3.0.md','tools/retained_column.py',
                          'tools/dialect-verify-ts/src/retained.ts','schema/retained-column/1/contract.schema.json',
-                         'conformance/retained-column/1/cases.json'):
+                         'conformance/retained-column/1/cases.json','release-identity.json'):
                 self.assertIn(name,names)
-            for name in ('release-identity.json','releases/v0.3.0.json',INVENTORY,'rfcs/0029-retained-column-conversions.md'):
+            for name in ('releases/v0.3.0.json',INVENTORY,'rfcs/0029-retained-column-conversions.md'):
                 self.assertNotIn(name,names)
+            installed=root/'installed'/prefix.rstrip('/');inventory=json.loads((installed/FINAL_INVENTORY).read_text())
+            def selector(version):
+                return json.dumps({'contract':'retained-column/1','profile':'base','roles':['preparation-verification'],
+                                   'spec':{'version':version,'revision':commit,'schemaSha256':inventory['schemaSha256'],
+                                           'corpusSha256':inventory['corpusSha256']}})
+            python=('import sys\nsys.path.insert(0,sys.argv[1])\nfrom tools import retained_column\n'
+                    'try:\n    retained_column.begin(sys.argv[2].encode());print("supported")\n'
+                    'except retained_column.engine.Refusal as refusal:print(refusal.args[0])\n')
+            typescript=('const [root,raw]=process.argv.slice(1);const m=await import(new URL("tools/dialect-verify-ts/src/retained.ts",'
+                        '"file://"+root+"/").href);try{m.admitSelection(new TextEncoder().encode(raw));console.log("supported")}'
+                        'catch(e){if(e.code===undefined)throw e;console.log(e.code)}')
+            for version,answer in (('0.3.0','supported'),('0.3.0-rc.2','capability-unsupported')):
+                for language,command in (('python',[sys.executable,'-I','-c',python]),
+                                         ('typescript',[node,'--disable-wasm-trap-handler','--no-warnings','--input-type=module','-e',typescript])):
+                    with self.subTest(version=version,language=language):
+                        probe=subprocess.run([*command,str(installed),selector(version)],cwd=temporary,capture_output=True,
+                                             text=True,timeout=60,env={**os.environ,'NODE_OPTIONS':''})
+                        self.assertEqual(0,probe.returncode,probe.stderr)
+                        self.assertEqual(answer,probe.stdout.strip())
 
     def test_schema_publisher_serves_exact_new_id_and_bytes(self):
         tree=ast.parse((ROOT/'web/build.py').read_text())

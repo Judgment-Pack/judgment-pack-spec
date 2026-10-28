@@ -25,7 +25,8 @@ The first Core release without a `-draft` suffix, at maturity `draft`, after the
   accepted at draft maturity; #274): the [selected retained columns](spec/retained-column.md)
   companion, the versioned schema `schema/retained-column/1/contract.schema.json`, the corpus
   `conformance/retained-column/1/` and the two offline readers. It was first distributed in
-  `v0.3.0-rc.2`; the final carries the same bytes under `releases/v0.3.0.retained-column.json`.
+  `v0.3.0-rc.2`. The final is its normative support distribution (support version `0.3.0`, inventory
+  `releases/v0.3.0.retained-column.json`), with the schema and corpus bytes unchanged.
 - Name the next Core release `0.3.0`, define conformance maturity independently, and require `v0.3.0-rc.1` before release (#231).
 - Re-pin released Core schemas, manifests, packs, vectors, readers, and site routes to exact `specVersion` `0.3.0`, preserving `0.2.0-draft` artifacts (#231).
 

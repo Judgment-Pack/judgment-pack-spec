@@ -20,12 +20,12 @@ below are required behavior of a selected supporting role, not optional implemen
 ## Installed identity and certification
 
 The complete trusted support tuple is contract `retained-column/1`, Spec distribution version
-`0.3.0-rc.2`, the exact immutable Spec source commit, the new schema SHA-256, complete selected
+`0.3.0`, the exact immutable Spec source commit, the new schema SHA-256, complete selected
 corpus SHA-256, profile and role (plus producerGrammar where applicable). Core packs continue
 to declare exact specVersion `0.3.0`; that does not select this leaf. RC2 evidence remains
 provisional for final Core conformance and is never described as a final Core release claim.
 
-`releases/v0.3.0-rc.2.retained-column.json` inventories the new schema and all corpus inputs.
+`releases/v0.3.0.retained-column.json` inventories the new schema and all corpus inputs.
 `corpusSha256` hashes the exact selected `conformance/retained-column/1/cases.json` bytes;
 that file names every normative case group and its external companion inputs by digest.
 The release inventory also binds the handwritten full-preparation fixtures and their driver.
@@ -263,7 +263,7 @@ or a boolean support flag. Each entry is a closed object with required `contract
 producer section below for its three applicable roles. `contract` is exactly `"retained-column/1"`; `profile` is exactly
 `"base"` or `"extended"`. `spec` is closed with exactly `version` (nonempty version label),
 `revision` (40 lower-case hex characters identifying the exact Spec commit), `schemaSha256`
-and `corpusSha256` (each `sha256:` plus 64 lower-case hex characters). The normative support version is exactly `0.3.0-rc.2`; the final immutable source revision
+and `corpusSha256` (each `sha256:` plus 64 lower-case hex characters). The normative support version is exactly `0.3.0`, the `v0.3.0` distribution; `v0.3.0-rc.2` was the candidate distribution of the same leaf bytes and remains published, and a leaf support claim is made against a `v0.3.0` installation. The final immutable source revision
 and new schema/corpus digests come from the external release inventory described above. Test example pins are synthetic
 and grant no real support. Consumers compare all identity members exactly to trusted expected
 pins, never values learned solely from the report. Member order does not affect comparison.

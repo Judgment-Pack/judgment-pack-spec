@@ -1,5 +1,8 @@
 // Both readers consume these same handwritten full-preparation expectations.
-import { readFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { verify, verifySourceInput, verifyExport } from "../src/verify.ts";
@@ -9,6 +12,50 @@ const corpus = JSON.parse(readFileSync(new URL("../../../conformance/retained-co
 function inputs(row: any, selector = corpus.selector) {
   return { dialect: utf8(row.dialectJson), case: utf8(row.caseJson), acquisitions: utf8(row.acquisitionsJson), profiles: utf8(row.profilesJson), preparation: utf8(row.preparationJson), requireBinding: false, conversionContract: utf8(JSON.stringify(selector)) };
 }
+// The real installation check, exercised on a disposable copy of a v0.3.0 installation.
+test("installed identity is the v0.3.0 distribution", async () => {
+  const repo = fileURLToPath(new URL("../../../", import.meta.url));
+  const root = mkdtempSync(join(tmpdir(), "retained-installation-"));
+  try {
+    const inventoryPath = "releases/v0.3.0.retained-column.json";
+    const inventory = JSON.parse(readFileSync(join(repo, inventoryPath), "utf8"));
+    for (const name of [inventoryPath, ...Object.keys(inventory.files)]) {
+      mkdirSync(dirname(join(root, name)), { recursive: true });
+      copyFileSync(join(repo, name), join(root, name));
+    }
+    const installed = await import(pathToFileURL(join(root, "tools/dialect-verify-ts/src/retained.ts")).href);
+    const commit = "a".repeat(40);
+    const final = { releaseVersion: "0.3.0", tag: "v0.3.0", specVersion: "0.3.0", maturity: "draft", sourceCommit: commit };
+    const write = (identity: object) => writeFileSync(join(root, "release-identity.json"), JSON.stringify(identity));
+    const spec = { version: "0.3.0", revision: commit, schemaSha256: inventory.schemaSha256, corpusSha256: inventory.corpusSha256 };
+    const select = (version: string) => installed.admitSelection(utf8(JSON.stringify({ contract: "retained-column/1",
+      spec: { ...spec, version }, profile: "base", roles: ["preparation-verification"] })));
+    const unsupported = (error: any) => error.code === "capability-unsupported";
+    write(final);
+    assert.deepEqual(installed.installation.identity(), spec);
+    assert.equal(select("0.3.0").selector.spec.version, "0.3.0");
+    assert.throws(() => select("0.3.0-rc.2"), unsupported);
+    for (const changed of [{ tag: "v0.3.0-rc.2", releaseVersion: "0.3.0-rc.2" }, { releaseVersion: "0.3.0-rc.2" },
+                           { maturity: "candidate" }, { sourceCommit: "A".repeat(40) }]) {
+      write({ ...final, ...changed });
+      assert.throws(() => installed.installation.identity(), unsupported);
+    }
+    write(final);
+    const listed = join(root, inventoryPath);
+    writeFileSync(listed, JSON.stringify({ ...inventory, distribution: "v0.3.0-rc.2" }));
+    assert.throws(() => installed.installation.identity(), unsupported);
+    copyFileSync(join(repo, inventoryPath), listed);
+    const pinned = join(root, inventory.corpus);
+    writeFileSync(pinned, readFileSync(pinned, "utf8") + " ");
+    assert.throws(() => installed.installation.identity(), unsupported);
+    copyFileSync(join(repo, inventory.corpus), pinned);
+    assert.deepEqual(installed.installation.identity(), spec);
+    rmSync(join(root, "release-identity.json"));
+    assert.throws(() => select("0.3.0"), unsupported);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 installation.identity = () => corpus.testInstallation;
 for (const row of corpus.cases) test(row.id, () => {
   const result = verify(inputs(row));

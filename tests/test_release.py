@@ -50,13 +50,15 @@ class ReleaseBuilderTests(unittest.TestCase):
         )
         for text in ("`v0.3.0-rc.1`", "published 2026-10-25", "`v0.3.0-rc.2`",
                      "published 2026-10-27", "The leaf is part of this release.",
+                     "This release is the leaf's normative support distribution.",
+                     "support version `0.3.0`", "keep their `v0.3.0-rc.2` labels",
                      "RFC 0024 is not part of this release; it remains a Draft.",
                      "## What this release pins", "## Checks run for this release",
                      "https://judgmentpack.org/schema/0.3.0/judgment-pack-core.schema.json",
                      inventory["schemaSha256"], inventory["corpusSha256"],
                      "## Migration note", "## Included work", "## Versioning and maturity"):
             with self.subTest(text=text):
-                self.assertIn(text, notes)
+                self.assertIn(text, re.sub(r"\s+", " ", notes))
         self.assertNotIn("if merged before the tag", notes)
         # The checks section states the mechanism, not values to fill in at the tag: the reused run's
         # identity lives in the decision artifact and the published release body.

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import re
@@ -51,11 +52,19 @@ RETAINED_BUNDLE_PATHS = ("tools/dialect_verify.py", "tools/retained_column.py",
                          "tools/_retained_column.py", "tools/check_retained_column.py",
                          "tools/dialect-verify-ts", "requirements-dev.txt")
 
-# The final carries RC2's selected leaf byte for byte under its own inventory. It has no
-# distribution mapping: VERSIONING.md allowlists the two RC mappings only.
+# The final is the leaf's normative support distribution. It carries RC2's schema, corpus and
+# every other leaf byte unchanged under its own inventory; only the companion's support-version
+# sentences and the two readers' installation identity may differ from RC2's. It has no
+# distribution mapping (VERSIONING.md allowlists the two RC mappings only); its bundles carry a
+# generated release-identity.json, never a tracked mapping, so readers can check sourceCommit.
 CORE_FINAL_TAG = "v0.3.0"
+CORE_FINAL_IDENTITY = {"releaseVersion": "0.3.0", "tag": CORE_FINAL_TAG, "specVersion": "0.3.0",
+                       "maturity": "draft"}
+GENERATED_IDENTITIES = {**CORE_RC_IDENTITIES, CORE_FINAL_TAG: CORE_FINAL_IDENTITY}
 FINAL_RETAINED_INVENTORY = "releases/v0.3.0.retained-column.json"
 RETAINED_INVENTORIES = {CORE_RC2_TAG: RETAINED_INVENTORY, CORE_FINAL_TAG: FINAL_RETAINED_INVENTORY}
+FINAL_REVISED_LEAF_FILES = frozenset({"spec/retained-column.md", "tools/retained_column.py",
+                                      "tools/dialect-verify-ts/src/retained.ts"})
 CORE_MILESTONE = {"number": 2, "title": "v0.3.0"}
 
 
@@ -100,14 +109,38 @@ def validate_retained_inventory(root: Path = ROOT, tag: str = CORE_RC2_TAG) -> N
 
 
 def validate_final_retained_inventory(root: Path = ROOT) -> None:
-    """Hold the final's inventory to the bytes RC2 published: only its distribution differs."""
+    """Hold the final's inventory to the bytes RC2 published.
+
+    The schema, corpus and every other pinned file keep RC2's digests; only the distribution and
+    the files that name the final's support identity may differ.
+    """
     validate_retained_inventory(root, CORE_FINAL_TAG)
     final = json.loads((root / FINAL_RETAINED_INVENTORY).read_text("utf-8"))
-    published = root / RETAINED_INVENTORY
-    if not published.is_file():
+    published_path = root / RETAINED_INVENTORY
+    if not published_path.is_file():
         raise ValueError("the published RC2 retained-column inventory is missing")
-    if {**final, "distribution": CORE_RC2_TAG} != json.loads(published.read_text("utf-8")):
+    published = json.loads(published_path.read_text("utf-8"))
+    if (not isinstance(published, dict) or not isinstance(published.get("files"), dict)
+            or {**final, "distribution": CORE_RC2_TAG, "files": None} != {**published, "files": None}
+            or set(final["files"]) != set(published["files"])
+            or any(digest != published["files"][path] for path, digest in final["files"].items()
+                   if path not in FINAL_REVISED_LEAF_FILES)):
         raise ValueError("final retained-column inventory differs from the published RC2 inventory")
+
+
+def validate_reader_support_identity(tag: str, root: Path = ROOT) -> None:
+    """Both readers must name this exact distribution, its version and its inventory."""
+    expected = (tag, release_version(tag), RETAINED_INVENTORIES[tag])
+    module = ast.parse((root / "tools/retained_column.py").read_text("utf-8"))
+    constants = {target.id: node.value.value for node in module.body if isinstance(node, ast.Assign)
+                 for target in node.targets if isinstance(target, ast.Name)
+                 and isinstance(node.value, ast.Constant)}
+    typescript = re.search(r'^const TAG = "([^"]*)", VERSION = "([^"]*)", INVENTORY = "([^"]*)";$',
+                           (root / "tools/dialect-verify-ts/src/retained.ts").read_text("utf-8"),
+                           re.MULTILINE)
+    if (tuple(constants.get(name) for name in ("TAG", "VERSION", "INVENTORY")) != expected
+            or typescript is None or typescript.groups() != expected):
+        raise ValueError("retained-column readers do not name the exact release distribution")
 
 
 POLICY_FORMAT = "1.0.0"
@@ -309,6 +342,7 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     if tag in RETAINED_INVENTORIES:
         if tag == CORE_FINAL_TAG:
             validate_final_retained_inventory(root)
+            validate_reader_support_identity(tag, root)
         else:
             validate_retained_inventory(root, tag)
         milestone = root / "releases" / f"{tag}.milestone.json"
@@ -367,9 +401,9 @@ def build(tag: str, commit: str, output: Path) -> list[Path]:
     artifact = "judgment-pack-policy" if is_policy_tag(tag) else "judgment-pack-spec"
     prefix = f"{artifact}-{version}/"
     extra = ()
-    if tag in CORE_RC_IDENTITIES:
+    if tag in GENERATED_IDENTITIES:
         # This generated member is covered by both archive checksums/attestations.
-        identity = {**CORE_RC_IDENTITIES[tag], "sourceCommit": git("rev-parse", "--verify", f"{commit}^{{commit}}")}
+        identity = {**GENERATED_IDENTITIES[tag], "sourceCommit": git("rev-parse", "--verify", f"{commit}^{{commit}}")}
         encoded = json.dumps(identity, sort_keys=True, separators=(",", ":")) + "\n"
         extra = (f"--add-virtual-file={prefix}release-identity.json:{encoded}",)
     common = (

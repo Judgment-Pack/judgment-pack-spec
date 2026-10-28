@@ -20,22 +20,25 @@ except ModuleNotFoundError:
     import _retained_column as engine
 
 ROOT = Path(__file__).resolve().parents[1]
-TAG = "v0.3.0-rc.2"
+TAG = "v0.3.0"
+VERSION = "0.3.0"
+INVENTORY = "releases/v0.3.0.retained-column.json"
 ROLES = tuple(engine.ROLE_LIMITS)
 CAPS = engine.PROFILE_CAPS
 
 
 def installed_spec() -> dict[str, str]:
     identity = json.loads((ROOT / "release-identity.json").read_text("utf-8"))
-    inventory = json.loads((ROOT / "releases/v0.3.0-rc.2.retained-column.json").read_text("utf-8"))
-    if (identity.get("tag") != TAG or identity.get("releaseVersion") != "0.3.0-rc.2"
+    inventory = json.loads((ROOT / INVENTORY).read_text("utf-8"))
+    if (identity.get("tag") != TAG or identity.get("releaseVersion") != VERSION
             or identity.get("specVersion") != "0.3.0" or identity.get("maturity") != "draft"
-            or not re.fullmatch("[0-9a-f]{40}", identity.get("sourceCommit", ""))):
+            or not re.fullmatch("[0-9a-f]{40}", identity.get("sourceCommit", ""))
+            or inventory.get("distribution") != TAG):
         engine.fail("capability-unsupported")
     for name, digest in inventory["files"].items():
         if "sha256:" + hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != digest:
             engine.fail("capability-unsupported")
-    return {"version": "0.3.0-rc.2", "revision": identity["sourceCommit"],
+    return {"version": VERSION, "revision": identity["sourceCommit"],
             "schemaSha256": inventory["schemaSha256"], "corpusSha256": inventory["corpusSha256"]}
 
 

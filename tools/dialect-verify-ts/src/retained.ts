@@ -19,16 +19,18 @@ const digest = (text: Uint8Array | string) => "sha256:" + createHash("sha256").u
 const plain = (v: JVal): any => engine.parse(decode(preparationForm(v)));
 const jval = (v: any): JVal => parse(JSON.stringify(v));
 const bad = (code = "input-malformed"): never => { throw new Refusal(code, "selected retained-column contract"); };
+const TAG = "v0.3.0", VERSION = "0.3.0", INVENTORY = "releases/v0.3.0.retained-column.json";
 export const installation = {
   identity(): Record<string, string> {
     const identity = JSON.parse(readFileSync(pathResolve(ROOT, "release-identity.json"), "utf8"));
-    const inventory = JSON.parse(readFileSync(pathResolve(ROOT, "releases/v0.3.0-rc.2.retained-column.json"), "utf8"));
-    if (identity.tag !== "v0.3.0-rc.2" || identity.releaseVersion !== "0.3.0-rc.2" || identity.specVersion !== "0.3.0"
-        || identity.maturity !== "draft" || !/^[0-9a-f]{40}$/.test(identity.sourceCommit)) bad("capability-unsupported");
+    const inventory = JSON.parse(readFileSync(pathResolve(ROOT, INVENTORY), "utf8"));
+    if (identity.tag !== TAG || identity.releaseVersion !== VERSION || identity.specVersion !== "0.3.0"
+        || identity.maturity !== "draft" || !/^[0-9a-f]{40}$/.test(identity.sourceCommit)
+        || inventory.distribution !== TAG) bad("capability-unsupported");
     for (const [name, sha] of Object.entries(inventory.files)) {
       if (digest(readFileSync(pathResolve(ROOT, name))) !== sha) bad("capability-unsupported");
     }
-    return { version: "0.3.0-rc.2", revision: identity.sourceCommit, schemaSha256: inventory.schemaSha256, corpusSha256: inventory.corpusSha256 };
+    return { version: VERSION, revision: identity.sourceCommit, schemaSha256: inventory.schemaSha256, corpusSha256: inventory.corpusSha256 };
   },
 };
 type Selection = { selector: any; raw: WeakMap<object, {text:string;start:number;end:number}>; origin: "asserted" | "generated"; profilesBytes: number };
