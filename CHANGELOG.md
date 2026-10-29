@@ -13,7 +13,7 @@ here.
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.4.0`; it changes no Core resolution or released conformance claim.
 
-## `0.3.0`
+## `0.3.0` — 2026-10-29
 
 The first Core release without a `-draft` suffix, at maturity `draft`, after the candidates
 `v0.3.0-rc.1` (2026-10-25) and `v0.3.0-rc.2` (2026-10-27); the

@@ -74,7 +74,8 @@ class ReleaseBuilderTests(unittest.TestCase):
         self.assertNotIn("appended", checks)
         candidate = re.sub(r"\s+", " ", notes.split("## Candidate period", 1)[1].split("\n## ", 1)[0])
         for text in ("published on 2026-10-25", "on 2026-10-27", "recorded on issue #231 before the tag",
-                     "no earlier than one week after the publication of `v0.3.0-rc.2`"):
+                     "No adopter feedback was received", "the maintainer shortened the candidate period",
+                     "the tag was cut on 2026-10-29"):
             with self.subTest(candidate=text):
                 self.assertIn(text, candidate)
         self.assertIn("kept as the run's\n`release-evidence-<attempt>` artifact",
