@@ -1,55 +1,69 @@
 # RFC 0030: Agent principals and delegated authority
 
 - Status: Draft
-- Type: Exploratory (a cross-project record: the agent's run admission and records, the gateway's per-delegation credentials, receipts, action keys and connection grants, and the Desk's inventories; outside JPS Core)
+- Type: Mixed. The delegation statement (its members, canonical form, signing, narrowing check and verification steps) is **standards track at draft maturity**, proposed for a companion document beside Core. Everything else — the agent's run admission and records, the gateway's credentials, receipt member, action keys and connection grants, and the Desk's inventories — is an **exploratory cross-project record** outside JPS.
 - Created: 2026-10-30
-- Target: normative text in Spec `0.5.0`; nothing in Spec `0.4.0` is normative for it
+- Target: proposed for Spec `0.5.0`. This Draft is carried in Spec `0.4.0`, is normative for nothing, and pre-commits nothing for `0.5.0`.
 - Issue: [#280](https://github.com/Judgment-Pack/judgment-pack-spec/issues/280)
 
 > This is an open proposal, not part of the specification. See
 > [RFC 0000](0000-rfc-process.md) for the process and evidence bar.
 >
-> **Scope note, load-bearing.** Nothing this Draft proposes lands in JPS Core, a profile or a
-> conformance class, and it claims none. It is recorded under RFC 0000's cross-project
-> exploratory provision, and its parts would land as follows. The delegation statement, its
-> canonical form, its narrowing check and its verification steps are a format that independent
-> parties must agree on: they are proposed for a companion document beside Core in Spec `0.5.0`.
-> The receipt member and the action-key scope land in the
-> [reference gateway's](https://github.com/Judgment-Pack/judgment-pack-gateway) `SPEC.md`
-> (§1.2a, §1.2b, §1.4), with the connection grant in its design notes and posture; the run's
-> carried principal, its admission refusals and its record members land in the
-> [agent harness's](https://github.com/Judgment-Pack/judgment-pack-agent) contract and decision
-> records; the inventories and the revoke actions land in the
-> [Desk](https://github.com/Judgment-Pack/judgment-pack-desk). Each repository decides its own
-> adoption by its own process. The implementation rows that build against this Draft are
-> agent #260, gateway #356 and #357, and desk #679. Implementations may build against it; where
-> they do, they build against a Draft, and the normative text may differ.
+> **Scope note, load-bearing.** This record has two parts, and RFC 0000 treats them differently.
+>
+> *The standards-track part* is the delegation statement of §§2–3: its members, its canonical form
+> and signing, the narrowing check and the verification steps. Independent parties must agree on
+> it byte for byte, so it is proposed for a companion document beside Core. It owes RFC 0000's
+> standards-track bar, including two independent implementations and conformance cases. Neither
+> exists yet (see Implementation), so it can reach no status beyond Draft until they do. It
+> changes nothing in Core.
+>
+> *The exploratory part* is everything else, and every piece of it lands in another repository of
+> the project, under RFC 0000's cross-project exploratory provision:
+> - the receipt member, the action-key scope and the connection grant land in the
+>   [reference gateway's](https://github.com/Judgment-Pack/judgment-pack-gateway) `SPEC.md`
+>   (§1.2a, §1.2b, §1.4), design notes and posture;
+> - the run's carried principal, its admission refusals, its record members and the lease's
+>   principal binding land in the
+>   [agent harness's](https://github.com/Judgment-Pack/judgment-pack-agent) contract and decision
+>   records;
+> - the inventories and the revoke actions land in the
+>   [Desk](https://github.com/Judgment-Pack/judgment-pack-desk).
+>
+> A disposition here confers no authority over those repositories; each decides its own adoption.
+> The implementation rows that build against this Draft are agent #260, gateway #356 and #357, and
+> desk #679. Where they build against it, they build against a Draft, and the text may change.
 
 ## Summary
 
 An agent that reaches a system with a person's own credentials is indistinguishable from that
-person. It has no identity of its own, nothing records on whose behalf it acted or within what
-limits, its access is the person's whole access, and it cannot be stopped without stopping the
+person. It has no identity of its own, and nothing records on whose behalf it acted or within what
+limits. Its access is the person's whole access, and it cannot be stopped without stopping the
 person. This record proposes the missing model in seven parts:
 
 1. an **agent principal**: a registered, non-human principal with a stable identifier, the host
    that registered it and its software identity; an unregistered agent cannot act;
 2. a **delegation**: a signed, bounded statement that a subject (a person or a service) authorizes
    an actor (an agent principal) for a scope until an expiry, with the subject and actor semantics
-   of OAuth 2.0 Token Exchange (RFC 8693);
-3. **chained delegation**, in which each link narrows scope and expiry and never widens them, by an
-   exact check, and the chain is recorded;
-4. **revocation** that stops new calls at once and leaves the subject's own access untouched, with
-   effects in flight left to the existing uncertain-action rules;
-5. the **connection grant** behind each gateway connection as a principal-held resource, with an
-   owner, least-privilege scopes, a record of granted against used scopes, an owner and idle
-   lifecycle, and publisher trust for customer MCP servers; revocation on the owner's removal is
-   normative;
-6. **recording**: receipts and run records name the actor, the subject and the delegation, while a
-   reader that predates this sees the existing caller identity unchanged, by an exact rule;
-7. its **relation to existing contracts**: the per-call identity of agent #102 becomes the subject,
-   run leases bound time while delegations bound authority, and action keys are scoped to subject
-   and actor so that a lease takeover cannot reopen them.
+   of OAuth 2.0 Token Exchange (RFC 8693), exercised only through a short-lived,
+   sender-constrained credential bound to it;
+3. **chained delegation**: each link narrows scope and expiry and never widens them, by an exact
+   check, and only the parent's actor or the subject can ask for a child; the chain is recorded;
+4. **revocation**, which stops new dispatch at once and leaves the subject's own access untouched;
+   effects already dispatched follow the existing uncertain-action rules;
+5. the **connection grant** behind each gateway connection, treated as a principal-held resource.
+   It has an owner, least-privilege scopes, a record of granted against used scopes, an owner and
+   idle lifecycle, and publisher trust for customer MCP servers. Revocation or quarantine on the
+   owner's removal is proposed as normative;
+6. **recording**: receipts and run records name the actor, the subject and the delegation. A
+   receipt reader that predates this record reads the same `caller` pair and returns the same
+   status, by an exact rule that also states what that reader is misled about;
+7. its **relation to existing contracts**:
+   - the per-call identity of agent #102 becomes the subject where it names a person, and names
+     the credential's holder otherwise;
+   - run leases bound time and delegations bound authority;
+   - action keys are scoped to the subject and the root actor, so that a lease takeover of a
+     delegated run cannot reopen them.
 
 It closes with open questions, each with a proposed default, and the conformance vectors a
 normative version would need.
@@ -71,18 +85,19 @@ The project already attributes calls, and already bounds what a run may do:
   bound what a run may do and when.
 
 None of these says **who the agent is, who delegated to it, and what it was allowed to do**.
-ADR-0019 is explicit that its identity "is reported, never a grant": it labels whose credential a
-call runs under, and grants nothing. A gateway `caller` proves who asked at the gateway's boundary,
-and when an agent presents a person's token, the caller is the person. So today:
+ADR-0019 says so itself: its identity is reported and counted, and beyond its first-service-action
+safeguard "the label grants nothing". It labels whose credential a call runs under. A gateway
+`caller` proves who asked at the gateway's boundary, and when an agent presents a person's token,
+the caller is the person. So today:
 
 - an audit cannot tell an agent's call from the person's own;
 - an agent's reach is whatever its credential reaches, not a narrowed share of it;
 - a child agent receives its parent's whole reach, and nothing records that it was a child;
 - stopping an agent means revoking the person's credential, which stops the person as well;
-- the standing grant behind a connection outlives its use and its owner, with nobody recorded as
+- the standing grant behind a connection outlives its use and its owner, and nobody is recorded as
   answerable for it.
 
-There is also a concrete defect this model must close. The gateway scopes an action key to the
+There is also a concrete defect this model bears on. The gateway scopes an action key to the
 authenticated issuer and subject (§1.2b). ADR-0025's idempotency identity carries no principal, so
 that a takeover by a new lease owner never replays an effect. When a takeover authenticates as a
 different transport subject, the gateway sees a new key scope and sends the write again
@@ -93,72 +108,93 @@ different transport subject, the gateway sees a new key scope and sends the writ
 What exists, and what it shows:
 
 1. **The per-call identity, built.** ADR-0019 (agent v0.8.0) puts `identity: {kind, label}` on the
-   source record, with `kind` one of `person`, `service` or `connection`, carries it on every
-   `tool_call` and `tool_result`, counts calls per identity, withholds a source whose identity
-   changes mid-run, and always asks the first `act` under a `service` identity. The model never
-   chooses an identity. What it does not have is a principal for the agent: the identity names the
-   credential, not the party using it.
+   source record, with `kind` one of `person`, `service` or `connection`, and `connection` the
+   default where the host declares nothing. It carries the identity on every `tool_call` and
+   `tool_result`, counts calls per identity, and withholds a source whose identity changes mid-run.
+   It always asks before the first `act` under a `service` identity, and the model never chooses
+   an identity. What it lacks is a principal for the agent: the identity names the credential, not
+   the party using it.
 2. **The caller identity, built.** Gateway receipt version 3 records `caller` as
-   `{issuer, subject, tokenDigest}` from a verified token, or `null` where no issuer is configured,
-   and an action's `requester` in the same form, never `null`. Both are signed with every other
-   member. A version 3 verifier tolerates a signed member it does not know: `witness`,
+   `{issuer, subject, tokenDigest}` from a verified token, or `null` where no issuer is configured.
+   An action records its `requester` in the same form, never `null`. Both are signed with every
+   other member. A version 3 verifier tolerates a signed member it does not know. `witness`,
    `tool.transport` and `decision.recordBytes` were each added that way, and the specification says
    of each that a verifier written before it "tolerates it, as it tolerates any signed member it
-   does not know" (§1.2a). That is the precedent the compatibility rule below follows.
+   does not know" (§1.2a). The compatibility rule below follows that precedent.
 3. **Leases and the fence, built.** ADR-0025 decision 1, as amended for agent #223, defines the
    lease (`owner`, `expiry`, `epoch`, `state`), the fence `{resource, owner, epoch}` presented at
    every commit and admission, and an idempotency identity `{run, operation, source, tool,
    requestDigest}` with no epoch. It states that "a lease grants neither tool permission nor
-   approval". Time is bounded; authority is not.
+   approval", and that the fence adds no member to any checkpoint or event format. Time is bounded;
+   authority is not, and the fence names no principal.
 4. **Action keys and uncertain delivery, specified.** Gateway §1.2b defines `action.delivery`
-   (`response` or `uncertain`), reconciliation by a declared read-back that reports `committed` or
-   `unknown`, and the rule that neither permits another dispatch of the mutation. Its action key is
-   scoped to "gateway authority, authenticated issuer and subject".
+   (`response` or `uncertain`), and reconciliation by a declared read-back that reports `committed`
+   or `unknown`. Neither outcome permits another dispatch of the mutation. The action key is scoped
+   to "gateway authority, authenticated issuer and subject".
 5. **The takeover defect, observed.** The different-vendor review of gateway #351 recorded a probe
    (P4c) in which a takeover authenticating as a different subject produced two mutations of one
-   operation. Gateway #352 asks for either a run-level owner that survives takeover, or a takeover
-   that presents the original subject's delegation. This record proposes the second, refined.
+   operation. Gateway #352 offers two options: a run-level owner that survives takeover, or a
+   takeover that presents the original subject's delegation. It is to be decided with its named
+   consumer, agent #229 (run-owned jobs). For delegated runs, this record proposes the second
+   option, refined. Undelegated takeovers still need #352's own fix.
 6. **Effect classes, built.** ADR-0027 fixes the effects `pure`, `read`, `read-external`, `propose`
-   and `act`, in that strength order, declared by a tool's owner and never by the model. A scope
-   can therefore name effect classes by a closed vocabulary that already exists.
-7. **Nothing of this model is built.** Agent #260, gateway #356 and #357, and desk #679 are filed
+   and `act`, in that strength order. A tool's owner declares them; the model never does. So a
+   scope can name effect classes by a closed vocabulary that already exists.
+7. **Signing conventions, specified.** Gateway `SPEC.md` fixes a canonical form (§1.1), a key
+   identifier (§1.2), domain-separated Ed25519 signing (§1.2, §1.2a), and an exact key rule and
+   verification equation (§8.4). The statement reuses them rather than adding a second
+   convention.
+8. **Nothing of this model is built.** Agent #260, gateway #356 and #357, and desk #679 are filed
    against this Draft and open.
 
 ## Specification (sketch)
 
-The key words below are used in their ordinary sense. This is a Draft: the text is precise so that
-an implementation can build against it, but it is normative for nothing until a later version
-lands.
+This is a Draft. The text is precise so that an implementation can build against it, but it is
+normative for nothing. Where it says "must" or "refuses", read "is proposed to".
 
 ### Common forms
 
 - **Canonical form.** Every signed or digested object in this record is serialized by `canon`, the
   canonical form of gateway `SPEC.md` §1.1: integers only, duplicate member names refused, member
   names ordered by Unicode code point, compact, raw UTF-8. It is not RFC 8785, whose name order
-  differs outside the Basic Multilingual Plane; an implementation reaching for an RFC 8785 package
-  gets that case wrong.
-- **Signature.** Ed25519 (RFC 8032), 64 bytes, written as exactly 128 lowercase hexadecimal
-  characters, over a context prefix followed by `canon` of the object with its top-level
-  `signature` member removed and every other member retained, as gateway §1.2a signs a receipt.
+  differs outside the Basic Multilingual Plane. An implementation that reaches for an RFC 8785
+  package gets that case wrong.
+- **Signature.** An Ed25519 signature (RFC 8032): 64 bytes, written as exactly 128 lowercase
+  hexadecimal characters. It is made over a context prefix followed by `canon` of the object, with
+  the object's top-level `signature` member removed and every other member retained, as gateway
+  §1.2a signs a receipt. Keys and signatures are held to gateway §8.4 by reference:
+  - a pinned key is refused when it is not canonical, of small order, or not on the curve;
+  - a signature verifies by the cofactorless equation with `S` below the group order;
+  - the cofactored check is not used.
+
+  Since a statement's digest covers its signature, two implementations that disagree on an edge
+  signature also disagree on every chain digest that includes it.
 - **Key identifier.** `keyId` is derived as gateway §1.2 derives one: the first 32 characters of the
   lowercase hexadecimal SHA-256 of the 32-byte public key.
 - **Digest.** `"sha256:"` followed by exactly 64 lowercase hexadecimal characters, as gateway §1.2a.
 - **Time.** An RFC 3339 UTC timestamp with exactly millisecond precision,
   `YYYY-MM-DDTHH:MM:SS.sssZ`, the form ADR-0025's lease amendment fixes for a lease expiry. Two
-  times of this form compare by their characters. An instant equal to an expiry is expired, as for
-  a lease.
+  times *of this form* compare by their characters. A time of another form, such as a receipt's
+  `servedAt` (§6), is never compared by characters with one of this form: both are parsed and the
+  instants compared. An instant equal to an expiry is expired, as for a lease.
 - **Identifier.** An **opaque identifier** is exactly 32 lowercase hexadecimal characters drawn from
   at least 128 random bits. A **flat token** is `[A-Za-z0-9._-]{1,128}`, never `.` or `..`, as
   gateway §3a.
 - **Principal reference.** A person or service is named by
-  `{"kind": "person" | "service", "issuer": string, "subject": string}`: the issuer and subject of
-  the identity the host verified for it, the same pair gateway §1.2a records in `caller`. It carries
-  no token, no token digest and no display label.
+  `{"kind": "person" | "service", "issuer": string, "subject": string}`. `issuer` and `subject` are
+  those of the identity the host verified for it, the same pair gateway §1.2a records in `caller`.
+  Two references are equal only when all three members are equal. A reference carries no token,
+  no token digest and no display label.
+- **Issuing host and enforcing host.** The *issuing host* registers agents, issues delegations,
+  and holds the authoritative state that admission reads (§2, *Authoritative state*). In the
+  reference stack that is the Desk. An *enforcing host* admits and dispatches a call: the gateway
+  for a gateway source, or the agent harness for a host source. An enforcing host that is also the
+  issuing host reads its own state.
 
 ### 1. The agent principal
 
-An agent principal is a principal distinct from every person and every service. A host registers
-it in its **agent inventory** before it can act. An inventory entry has these members:
+An agent principal is a principal distinct from every person and every service. The issuing host
+registers it in its **agent inventory** before it can act. An inventory entry has these members:
 
 | Member | Form | Meaning |
 | --- | --- | --- |
@@ -173,30 +209,36 @@ it in its **agent inventory** before it can act. An inventory entry has these me
 Rules:
 
 1. An agent principal has no credential of its own to any source. It acts only under a delegation
-   (§2), and only through a credential minted or derived for that delegation (gateway #356).
-2. A delegation whose actor is not an `active` entry of the issuing host's inventory admits nothing:
-   the refusal is `agent-unregistered`. A host that keeps no inventory admits no agent call.
-3. The software identity is part of the actor. A delegation binds the actor's `software` as it
-   stood at issuance (§2); a call presented by software other than the bound identity is refused as
-   `software-mismatch`. A software upgrade updates the inventory entry and requires new delegations
-   (open question 5).
-4. Revoking the entry (`state` → `revoked`) revokes every delegation whose actor it is (§4).
-5. The `label` is shown, never trusted, as ADR-0019's label is.
+   (§2), and only through a credential bound to that delegation (§2, *The credential*).
+2. A call under a chain any of whose actors is not an `active` entry of the issuing host's
+   inventory is refused as `agent-unregistered`. A host that keeps no inventory admits no agent
+   call.
+3. **The software identity is host-attested, not proved.** The issuing host starts, or admits, the
+   run, and it states the run's software when it obtains the credential. The enforcing host binds
+   that statement to the credential (§2, *The credential*). The *presenting software* in step 9
+   (verification) is that bound value, and nothing the caller asserts at call time. Because the
+   value is the host's attestation, the binding holds the host to its own record. It does not
+   prove which bytes ran (open question 5).
+4. The inventory entry's `software` is current. A link whose `act.software` differs from its
+   actor's current entry admits nothing (`software-mismatch`), so an upgrade needs new delegations.
+5. Revoking an entry (`state` → `revoked`) revokes every delegation in which it is an actor (§4).
+6. Registrations, changes to an entry and revocations are recorded, each with the principal that
+   made it and the time (open question 19).
+7. The `label` is shown, never trusted, as ADR-0019's label is.
 
 ### 2. The delegation
 
 A delegation is a signed, bounded statement: subject P authorizes actor A, for scope S, until
-expiry E. It is revocable by P, by the issuing host, and, for a link of a chain, by the actor of the
-link it was narrowed from (§3, §4). Its semantics are those of OAuth 2.0 Token Exchange (RFC 8693):
-the subject (`sub`) is the principal on whose behalf the call is made, and the actor (`act`) is the
-party making it. This is RFC 8693's *delegation* case, never its *impersonation* case: an agent's
-call is never presented to a reader of this model as the subject's alone. The statement is the
-host's record of the authorization that RFC 8693 expresses with its `may_act` claim; a credential
-the gateway mints for it may be an RFC 8693 issued token, and this record does not require one.
+expiry E. Its semantics are those of OAuth 2.0 Token Exchange (RFC 8693): the subject (`sub`) is the
+principal on whose behalf the call is made, and the actor (`act`) is the party making it. It is RFC
+8693's *delegation* case, never its *impersonation* case: an agent's call is never presented to a
+reader of this model as the subject's alone. The statement is the host's record of the
+authorization that RFC 8693 expresses with its `may_act` claim. A credential bound to it may be an
+RFC 8693 issued token, and this record does not require one.
 
-**The statement is not a credential.** Holding its bytes grants nothing. It is evidence that the
-host recorded an authorization; authority is exercised only through a credential an enforcing host
-binds to it, and is checked at every admission (verification steps 6 to 10).
+**The statement is not a credential.** Holding its bytes grants nothing. An enforcing host never
+admits a call on statement bytes a caller supplies. It resolves the chain from the credential it
+bound (step 0), and it binds a credential only at the issuing host's authenticated request.
 
 **Members** (delegation version 1). Every member is required; a nullable member is present as
 `null`, never absent.
@@ -210,140 +252,263 @@ binds to it, and is checked at every admission (verification steps 6 to 10).
 | `sub` | principal reference | the subject |
 | `act` | `{"agent": opaque identifier, "software": as in §1}` | the actor and its bound software identity |
 | `scope` | object, below | what the actor may do |
+| `mayDelegate` | `true` or `false` | whether a child link may be issued below this one (§3) |
 | `issuedAt` | time | |
 | `expiresAt` | time | strictly later than `issuedAt` |
 | `parent` | `null`, or `{"id": opaque identifier, "digest": digest}` | `null` for a root; otherwise the link this one is narrowed from |
 | `depth` | integer | `0` for a root; the parent's `depth` plus one otherwise |
 | `signature` | signature | |
 
-**Scope.** `scope` is `{"sources": [entry, ...]}`, at least one entry, ordered by `source` by code
-point with no `source` repeated. An entry is:
+**Scope.** `scope` is `{"sources": [entry, ...]}`, at least one entry. Entries are ordered by
+`audience`, then by `source`, both by code point, and no pair of `audience` and `source` repeats.
+An entry is:
 
 | Member | Form | Meaning |
 | --- | --- | --- |
-| `source` | string | a source as the enforcing host names it: the gateway's `source` (for example `<platform>/live` or `<platform>/write`), the agent's source record identifier for a host source |
+| `audience` | flat token | the enforcing host that admits calls under this entry: a gateway authority (§1.2's `authority`), or the agent host's name for its own host sources |
+| `source` | string | the source as that enforcing host names it: the gateway's `source` (for example `<platform>/live` or `<platform>/write`), or the agent's source record identifier for a host source |
 | `tools` | array of strings, at least one, ordered by code point, no repeats | the exact tool names admitted; no pattern, prefix or wildcard (open question 4) |
 | `effects` | array, at least one, of `"pure"`, `"read"`, `"read-external"`, `"propose"`, `"act"`, in that order, no repeats | the effect classes admitted, in ADR-0027's vocabulary |
 | `limits` | object of limit name to non-negative integer; may be empty | resource limits, where the source has them |
 
-A **limit name** is either `calls` — the number of calls admitted under the link for that source —
-or a name the source itself declares, `x-` followed by a flat token. A source may declare a limit
-only when it can enforce it **before dispatch** (a row bound passed to a query, a size bound passed
-to a request); a limit checked only after the result arrives is not a scope limit. An enforcing
-host that does not know a limit name in an entry refuses every call to that entry's source as
-`limit-unknown`.
+An enforcing host admits only under an entry whose `audience` is its own name. A staging gateway
+and a production gateway that serve the same `source` name are therefore distinct entries. The
+agent harness checks a gateway source against the entry for that gateway's authority and the
+gateway's `source` name. The host declares that mapping on the ADR-0006 source record. A gateway
+source record with no mapping cannot be checked, and its calls are refused (`out-of-scope`, reason
+`source`).
 
-A call is **within the scope** of a link exactly when an entry has the call's `source`, the call's
-tool is in its `tools`, the tool's declared effect — the owner's ADR-0027 declaration as admitted,
-never a model argument or a label — is in its `effects`, and every limit of the entry holds: for
-`calls`, the count after admitting the call does not exceed it; for a source-declared limit, the
-request is bounded within it, as the source declares, before dispatch. An admitted call increments
-the counters of **every** link of its chain, so a child's calls count against its ancestors' limits.
+**Limits.** Every limit is an **upper bound**: the quantity it names must not exceed it. A limit
+name is one of two kinds:
+- `calls`: the number of calls dispatched under the link for that entry;
+- a name the source itself declares: `x-` followed by a flat token.
+
+A source may declare a limit only when two things hold: the limit is an upper bound, and the source
+can enforce it **before dispatch**, such as a row bound passed to a query or a size bound passed to
+a request. A limit checked only after the result arrives is not a scope limit.
+
+**Counting `calls`.** The counter for each (link, entry) pair is held by the issuing host and is
+the only authoritative one. Admission checks it and increments it in one atomic operation (the
+*admission read*, below), so concurrent admissions cannot together exceed the limit.
+- **Who counts.** When the agent harness and a gateway both verify the same call, only the
+  enforcing host that dispatches it, the gateway, counts it. The harness checks without counting.
+  For a host source, the harness is the enforcing host and counts.
+- **What counts.** A dispatched call, including a freed attempt (gateway §1.2b), counts once per
+  dispatch. An answer from retained evidence counts nothing, and neither does a reconciliation
+  read-back.
+- **Across a chain.** A dispatched call counts against **every** link of its chain, so a child's
+  calls count against its ancestors' limits.
+- **On re-issue.** A re-issued root starts from the budget its new grant states (open question 3).
+
+**Within the scope.** A call is within the scope of a link exactly when an entry has the enforcing
+host's `audience` and the call's `source`, and four conditions hold:
+- the call's tool is in the entry's `tools`;
+- the tool's declared effect is in its `effects`. The effect is the owner's ADR-0027 declaration
+  as admitted, never a model argument or a label;
+- every limit name is known to the enforcing host;
+- every limit holds: for `calls`, the count after this dispatch does not exceed it, and for a
+  source-declared limit, the request is bounded within it before dispatch, as the source declares.
 
 **Canonical form and signing.** The statement is serialized by `canon`. Its signature is Ed25519
-under the issuing host's key over the prefix `"judgment-pack/delegation/1:"` followed by `canon` of
-the statement with the top-level `signature` removed and every other member retained. Appending a
-member anywhere invalidates it. The prefix carries the version, and domain-separates a delegation
-from a receipt, a seal, a witness statement and a continuity statement, none of whose prefixes it
-shares. The statement's **digest** is `"sha256:"` + hex of SHA-256 over `canon` of the whole
-statement, `signature` included; it is how a child, a receipt and a run record name the statement.
+under the issuing host's key. It is made over the prefix `"judgment-pack/delegation/1:"` followed by
+`canon` of the statement, with the top-level `signature` removed and every other member retained.
+- Appending a member anywhere invalidates the signature.
+- The prefix carries the version. It domain-separates a delegation from a receipt, a seal, a
+  witness statement and a continuity statement, none of whose prefixes it shares.
+- The statement's **digest** is `"sha256:"` + hex of SHA-256 over `canon` of the whole statement,
+  `signature` included. A child, a receipt and a run record name the statement by its digest.
+- The statement is at most 65536 bytes in `canon`, with at most 256 entries, at most 256 tools
+  per entry and at most 16 limits per entry (open question 21).
 
-**Issuance.** The host issues a root only on the subject's authenticated grant, and refuses one
-whose scope exceeds what the subject itself may do on that host when it is issued
-(`subject-unauthorized`). A person cannot grant an agent more than the person holds; a policy can
-grant an agent less (desk #679).
+**Issuance.** The host issues a root only on the subject's authenticated grant. It refuses one whose
+scope exceeds what the subject itself may do on that host when it is issued
+(`subject-unauthorized`). A person cannot grant an agent more than the person holds, and a policy
+can grant an agent less (desk #679). Children are issued by §3's rule.
 
-**Verification steps.** A verifier is handed the chain, root first, ending with the link the call
-claims, and the call. It takes the first failure:
+**The credential.** Authority is exercised only through a credential that an enforcing host binds
+to one leaf link.
+1. **Who obtains it.** Only the issuing host requests a credential, over a channel on which it
+   authenticates to the enforcing host as itself. Its request carries:
+   - the chain;
+   - the run's software (§1, rule 3);
+   - the public key of the run's proof-of-possession key pair: an RFC 9449 (DPoP) key, or under
+     RFC 8705 the client certificate's thumbprint.
+
+   The enforcing host verifies the chain (steps 1 to 10, with no call yet), binds the credential to the
+   leaf's `id`, the chain's digests, the software and the key, and returns it to the host. The host
+   hands it to the run it started. An agent never obtains a credential by presenting statement
+   bytes, and a request from anyone but the issuing host is refused.
+2. **Lifetime.** A credential lives at most 5 minutes, and never past the leaf's `expiresAt`. The
+   host obtains a fresh one against the current state as the run proceeds. This is independent of
+   the delegation's own expiry, which can be up to 24 hours (open question 3).
+3. **Sender constraint.** A credential is sender-constrained, under RFC 9449 or RFC 8705. A call
+   that does not prove possession of the bound key is refused at step 0. The one exception is a
+   chain whose every entry admits only `pure`, `read` or `read-external`: the operator may accept a
+   bearer credential for it, still subject to the 5-minute lifetime, and posture reports that it
+   did (open question 8).
+
+The reason for both rules: a bearer credential that lives as long as the delegation lets a thief
+perform the whole scope, mutations included, for up to a day. A short lifetime bounds that window
+but does not close it. Sender constraint closes it, because the thief does not hold the run's
+private key. Revocation (§4) does not make either rule redundant: it acts only once someone has
+noticed.
+
+**Authoritative state.** Steps 9 to 12 read state the issuing host holds:
+- the inventory;
+- revocations;
+- the subject's standing in its authorization model (desk #612, #452);
+- the `calls` counters.
+
+The enforcing host gets this state by an **admission read**: an authenticated, synchronous request
+to the issuing host. It names the chain's digests, the call's audience, source, tool and effect,
+and whether this dispatch is to be counted. The issuing host answers `admit`, or the first refusal
+of steps 9 to 12. On `admit`, it has already incremented the counters. The enforcing host does not
+admit from a copy, a cache or an earlier answer: a missing, late or unreadable answer is a refusal.
+A gateway holds no authorization model of its own, so step 12 is always the issuing host's answer
+(open question 10).
+
+**When admission happens.** Admission is the check made **immediately before physical dispatch**.
+It is made again after any approval pause, park, wake, re-authorization or freed attempt. A call
+that was checked, but had not been dispatched when a revocation landed, is refused at its
+re-check. Approval, a wait or an earlier check never carries authority past a revocation.
+
+**Verification steps.** The enforcing host resolves the chain, root first, ending with the leaf it
+bound to the credential. For one call it applies the steps below and stops at the first failure.
+Where a step concerns links, links are taken from root to leaf, and within a link the reasons are
+taken in the order the step lists them.
 
 | Step | Refusal | Condition |
 | --- | --- | --- |
-| 1 | `malformed` | any link violates a structural constraint above: a member missing, of another type or form, an array out of order or with a repeat, a value outside the `canon` domain, `parent` and `depth` inconsistent with each other |
-| 2 | `unsupported-version` | `delegationVersion` is not `"1"` |
-| 3 | `key-mismatch` | a link's `keyId` is not a key the verifier pinned for its `host` |
-| 4 | `signature-mismatch` | a link's signature does not verify over the input above |
-| 5 | `chain-broken` or `widened` | the chain does not satisfy §3's check: `chain-broken` for clauses 1 to 3, `widened` for clauses 4 to 7 |
-| 6 | `not-yet-valid` or `expired` | at the enforcing host's authoritative time t, some link has t < `issuedAt`, or t ≥ `expiresAt` |
-| 7 | `agent-unregistered` or `software-mismatch` | the leaf's `act.agent` is not `active` in the inventory of `host`, or the presenting software is not `act.software` |
-| 8 | `revoked` | some link, its actor, or its subject's standing on the host is revoked (§4) |
-| 9 | `out-of-scope` | the call is not within the scope of every link; the refusal names which of `source`, `tool`, `effect` or `limit` failed first, in that order |
-| 10 | `subject-unauthorized` | the call is outside what the subject itself may do on the host now |
+| 0 | `credential-mismatch` | the presented credential is not live at this enforcing host, is expired, does not prove possession of its bound key where one is bound, or its bound chain is not byte-identical to any chain the caller also presents |
+| 1 | `malformed` | a link is not a JSON object, has a duplicate member name, holds a value outside the `canon` domain, or lacks a string `delegationVersion` |
+| 2 | `unsupported-version` | a link's `delegationVersion` is a string other than `"1"` |
+| 3 | `malformed` | a link violates any structural constraint of version 1 above: a member missing, of another type or form, an array out of order or with a repeat, `expiresAt` not after `issuedAt`, `parent` and `depth` inconsistent, or over a size cap |
+| 4 | `key-mismatch` | a link's `keyId` is not a key the verifier pinned for its `host`, or reached by a rotation it followed (open question 1) |
+| 5 | `signature-mismatch` | a link's signature does not verify over the input above, under gateway §8.4's rules |
+| 6 | `chain-broken` | §3's clauses 0 to 3 fail |
+| 7 | `widened` | §3's clauses 4 to 8 fail |
+| 8 | `not-yet-valid`, then `expired` | at the enforcing host's authoritative time t, some link has t < `issuedAt` minus the skew allowance (open question 17), or t ≥ `expiresAt` |
+| 9 | `agent-unregistered`, then `software-mismatch` | some link's `act.agent` is not `active` in the inventory of `host`, or some link's `act.software` differs from its actor's current entry or from the software bound to the credential |
+| 10 | `revoked` | some link is revoked, some link's actor is revoked, or the subject has been removed from the host (§4) |
+| 11 | `out-of-scope` | the call is not within the scope of some link. The refusal names the first failing reason, in the order `source`, `tool`, `effect`, `limit-unknown`, `limit` |
+| 12 | `subject-mismatch`, then `subject-unauthorized` | the source's declared identity is a person other than `sub` (§7, rule 1), or the call is outside what the subject itself may do on the issuing host now, the subject's standing on a service's or a connection's credential included |
 
-Steps 1 to 5 depend only on the bytes and a pinned key: any party can repeat them later. Steps 6 to
-10 depend on the enforcing host's time, inventory, revocation state and authorization model; they
-are admission checks, made before dispatch, and an enforcing host that cannot establish the state a
-step needs refuses rather than admitting. Clock uncertainty closes admission, as ADR-0025 closes
-dispatch on unavailable ownership evidence.
+Steps 1 to 7 depend only on the bytes and a pinned key, so any party can repeat them later. Steps 0
+and 8 to 12 depend on the enforcing host's credential bindings and time, and on the issuing host's
+state. They are admission checks. An enforcing host that cannot establish the state a step needs
+refuses rather than admitting. Clock uncertainty closes admission, as ADR-0025 closes dispatch on
+unavailable ownership evidence.
+
+Some refusals are not verification steps, and they sit outside this table:
+- `principal-changed` is a fence check (§7, rule 2), made with the lease at the same admission and
+  before step 0;
+- `action-key-scope-conflict` is the gateway's key reservation (§7, rule 3), made after admission;
+- `not-parent-actor` and `delegation-not-permitted` are issuance refusals (§3).
 
 ### 3. Chained delegation
 
-An actor may ask the host to issue a child link to another actor — a child agent of the delegation
-coordinator (agent #217) or another registered agent. The host issues it under the same rules as a
-root, and the chain is recorded: each child names its parent by `id` and digest, and every record of
-a call names the whole chain (§6).
+A child link narrows a parent link `P` for another actor, or for the same actor with less: for
+example, a sub-agent (agent
+[ADR-0013](https://github.com/Judgment-Pack/judgment-pack-agent/blob/main/docs/adr/0013-sub-agents.md))
+or another registered agent. The chain is recorded: each child names its parent by `id` and
+digest, and every record of a call names the whole chain (§6).
 
-**The narrowing check.** A chain `L0, …, Ln` (root first) is valid exactly when `L0.parent` is
-`null`, `L0.depth` is `0`, and for each child `C = Lk` and its parent `P = L(k−1)`, `k ≥ 1`:
+**Who may obtain a child.** The issuing host issues a child of `P` only when two conditions hold:
+- `P.mayDelegate` is `true`;
+- the request comes either from `P`'s actor, authenticated by the live credential bound to `P` and
+  relayed by the host, or from the subject's own authenticated grant.
 
+It refuses otherwise:
+- `delegation-not-permitted` when `P.mayDelegate` is `false`;
+- `not-parent-actor` when the requester is neither of those.
+
+A child whose actor runs other software than `P`'s actor needs the subject's grant (open
+question 6). A request from a third registered agent, or from a party that holds only statement
+bytes, obtains nothing.
+
+**The narrowing check.** A chain `L0, …, Ln` (root first) is valid exactly when clause 0 holds and,
+for each child `C = Lk` and its parent `P = L(k−1)`, `k ≥ 1`, clauses 1 to 8 hold:
+
+0. `L0.parent` is `null` and `L0.depth` is `0`; a chain that starts below its root is broken;
 1. `C.parent.id` equals `P.id`, and `C.parent.digest` equals the digest of `P`;
-2. `C.depth` equals `P.depth + 1`, and `C.depth` does not exceed the maximum depth (open question 3);
+2. `C.depth` equals `P.depth + 1`, and does not exceed the maximum depth (open question 3);
 3. `C.host` equals `P.host` (open question 7);
-4. `C.sub` equals `P.sub`, member for member — the subject never changes along a chain;
+4. `C.sub` equals `P.sub` in all three members, so the subject never changes along a chain;
 5. `C.issuedAt` ≥ `P.issuedAt`, and `C.expiresAt` ≤ `P.expiresAt`;
-6. for every entry `e` of `C.scope.sources` there is an entry `p` of `P.scope.sources` with
-   `p.source` equal to `e.source`, and `e.tools` ⊆ `p.tools`, and `e.effects` ⊆ `p.effects`;
-7. for that same pair, every limit name of `p.limits` is a limit name of `e.limits` with
-   `e.limits[name]` ≤ `p.limits[name]`; `e.limits` may add names `p.limits` does not have.
+6. for every entry `e` of `C.scope.sources` there is an entry `p` of `P.scope.sources` with the
+   same `audience` and `source`, and `e.tools` ⊆ `p.tools`, and `e.effects` ⊆ `p.effects`;
+7. for that same pair, every limit name of `p.limits` is a limit name of `e.limits`, and
+   `e.limits[name]` ≤ `p.limits[name]`. `e.limits` may add names `p.limits` does not have, which
+   is sound because every limit is an upper bound;
+8. `P.mayDelegate` is `true`, and if `C.mayDelegate` is `true` then so is `P.mayDelegate`.
 
-Clauses 1 to 3 failing is `chain-broken`; clauses 4 to 7 failing is `widened`. Equality is of
+Clauses 0 to 3 failing is `chain-broken`; clauses 4 to 8 failing is `widened`. Equality is of
 `canon` bytes. The check is pairwise, and by transitivity a link is never wider than any ancestor.
-A host refuses to issue a child that would fail it, and every verifier checks it again: issuance is
-not evidence that the check was made.
+The host refuses to issue a child that would fail it, and every verifier checks it again, because
+issuance is not evidence that the check was made.
 
 ### 4. Revocation
 
-A **revocation** names a delegation `id`, or an agent principal, and is recorded by the issuing
-host with the revoking principal and its time. Who may revoke: for a delegation, its subject, the
-issuing host, and, for a child, the actor of its parent; for an agent principal, the host, and the
-principal that registered it.
+A **revocation** names a delegation `id`, an agent principal, or a removed principal. The issuing
+host records it with the revoking principal and its time (open question 20).
 
-1. **Effect on new calls.** A revocation takes effect at the instant the host records it durably.
-   From then, verification step 8 refuses every call presented under the revoked link and every link
-   below it in any chain, and under every delegation whose actor is a revoked agent principal. An
-   enforcing host consults the authoritative revocation state at each admission; it does not admit
-   from a cached "not revoked" (open question 10). A credential minted or derived for a revoked
-   delegation (gateway #356) is revoked with it. The host acknowledges a revocation to the revoker
-   only after every enforcing host it delegated enforcement to has recorded it, or has had the
-   delegation's credential revoked.
-2. **The subject's own access is untouched.** A revocation names a delegation or an agent. It never
+Who may revoke:
+- a delegation: its subject, the issuing host, and, for a child, the actor of its parent;
+- an agent principal: the host, and the principal that registered it.
+
+1. **Effect on new calls.** A revocation takes effect at the instant the issuing host records it
+   durably.
+   - From then, every admission read (§2) answers `revoked`. This covers every call under the
+     revoked link, under every link below it in any chain, and under every chain with a revoked
+     actor.
+   - No enforcing host admits without a fresh admission read, so none admits after that instant.
+   - The credentials bound to the revoked links are also revoked at the enforcing hosts that hold
+     them, as a second barrier behind the admission read.
+   - The host acknowledges the revocation to the revoker once it has recorded it durably.
+2. **The subject's own access is untouched.** A revocation of a delegation or an agent never
    revokes, rotates or invalidates a session, token, credential or connection grant of the subject,
-   and it never changes the subject's authorization. The one interaction is the reverse one:
-   removing a principal from the host revokes every delegation whose `sub` it is, and the connection
-   grants it owns follow §5.
-3. **Effects in flight.** A revocation stops admission; it cannot undo a call already admitted. An
-   effect admitted before the revocation follows the existing uncertain-action rules unchanged:
-   gateway `SPEC.md` §1.2b (an action whose delivery is `uncertain` is reconciled by its declared
-   read-back to `committed` or `unknown`, and neither permits another dispatch), and agent ADR-0025
-   decision 1 (an in-flight effect "remains unknown until reconciled by its authoritative host";
-   takeover never replays it) and decision 4 (re-authorization "is not retry permission"). A
-   revocation never turns an uncertain effect into a refused one, and never into a retry. The
-   declared read-back that reconciles an action admitted before the revocation is not a new call
-   under the delegation and is not refused by it (open question 12).
-4. **No restoration.** A revoked delegation is never un-revoked. A new grant is a new statement
+   and never changes the subject's authorization. The one interaction runs the other way. Removing a
+   principal from the host revokes every delegation whose `sub` it is, and every chain below them;
+   the connection grants it owns follow §5. This is how the removal of a person who has left
+   reaches "every delegation they authorized" (desk #679). Delegations are revoked, never
+   quarantined (open question 22).
+3. **Effects in flight.** A revocation stops dispatch; it cannot undo a call already dispatched. An
+   effect dispatched before the revocation follows the existing uncertain-action rules, unchanged:
+   - gateway `SPEC.md` §1.2b: an action whose delivery is `uncertain` is reconciled by its declared
+     read-back to `committed` or `unknown`, and neither outcome permits another dispatch;
+   - agent ADR-0025 decision 1: an in-flight effect "remains unknown until reconciled by its
+     authoritative host", and takeover "never automatically replays it";
+   - agent ADR-0025 decision 4: re-authorization "is not retry permission".
+
+   A revocation never turns an uncertain effect into a refused one, and never into a retry. A call
+   that was admitted but not dispatched is not in flight: it is refused at its re-check (§2, *When
+   admission happens*).
+4. **Reconciliation after revocation.** A gateway request whose action key names a reservation with
+   an `uncertain` outcome is resolved **by key, before step 0**. It is limited to retained evidence
+   or the declared read-back, and never reaches a freed attempt or a dispatch. After revocation the
+   bound credential is gone, so such a request is accepted from one of two parties:
+   - the issuing host, authenticated as itself and acting for the run;
+   - the subject, with its own token, whose issuer and subject match the reservation's scope.
+
+   The gateway's own operator may also run it. The read-back is not a call under the delegation
+   and counts against no limit (open question 12).
+5. **No restoration.** A revoked delegation is never un-revoked. A new grant is a new statement
    with a new `id`.
-5. **Revoking a connection grant's owner.** Removing the owner of a connection grant from the host
+6. **Removing a connection grant's owner.** Removing the owner of a connection grant from the host
    revokes or quarantines that grant (§5, rule 5). The gateway then refuses every call through the
-   grant, under whatever delegation it comes; delegations whose `sub` is the removed owner are
-   revoked by rule 2, and other delegations are unchanged, since they name sources, not grants.
+   grant, whatever delegation it comes under. Delegations whose `sub` is the removed owner are
+   revoked by rule 2. Other delegations are unchanged, since they name sources, not grants.
+7. **Compromise of the issuing host's key.** Revoking a `keyId` revokes every delegation it signed,
+   and every chain through one (open question 18).
 
 ### 5. The connection grant, a principal-held resource
 
-The standing grant behind a gateway connection — the provider authorization that lets the gateway
-reach a mail account, a file store, a source-control host, a work-tracking service, a data
-platform or a customer MCP server — is a resource held by a principal. It is distinct from a
-delegation: a delegation narrows what one actor may do on a subject's behalf; a grant is what the
-gateway holds at all.
-A per-delegation credential (gateway #356) is always narrower than the grant it is derived from.
+The standing grant behind a gateway connection is the provider authorization that lets the gateway
+reach a mail account, a file store, a source-control host, a work-tracking service, a data platform
+or a customer MCP server. It is a resource held by a principal, and it is distinct from a
+delegation: a delegation narrows what one actor may do on a subject's behalf, while a grant is what
+the gateway holds at all. A credential bound to a delegation (§2) is always narrower than the grant
+it is derived from.
 
 **The grant record** (gateway #357). It carries no credential, no token, no token digest and no
 content.
@@ -354,8 +519,8 @@ content.
 | `owner` | principal reference | the person or service that authorized the grant and answers for it |
 | `scopes.required` | array of strings, ordered, no repeats | the union of the minimum scopes the connection's sources declare per operation |
 | `scopes.granted` | array of strings, ordered, no repeats | what the provider granted, as last read |
-| `scopes.used` | array of `{"scope": string, "lastUsedAt": time}`, ordered by `scope` | each granted scope that some admitted call exercised, and when last |
-| `lastUsedAt` | time or `null` | the last admitted acquisition or action through the connection |
+| `scopes.used` | array of `{"scope": string, "lastUsedAt": time}`, ordered by `scope` | each granted scope that some dispatched call exercised, and when last |
+| `lastUsedAt` | time or `null` | the last dispatched acquisition or action through the connection |
 | `idleExpiry` | integer milliseconds, or `null` | the configured idle bound; `null` is none |
 | `state` | `"active"`, `"quarantined"` or `"revoked"` | `revoked` is terminal |
 | `publisher` | object or `null` | for a customer MCP server, below; `null` otherwise |
@@ -367,31 +532,35 @@ content.
    admitted and reports `excess-scope` with the extra scopes named.
 2. **Drift.** Where the provider reports the scopes of a grant, the gateway reads them again on use;
    a scope added since the record was made is reported as `excess-scope` and the record updated.
-3. **Granted against used.** A scope is *used* when an admitted call's operation declares it among
-   its required scopes; the record says this is derived from declarations, since few providers
+3. **Granted against used.** A scope is *used* when a dispatched call's operation declares it among
+   its required scopes. The record says this is derived from declarations, since few providers
    report which scope a call exercised. An operator query lists `granted` minus `used`, the scopes
    to trim.
-4. **Idle lifecycle.** A grant with a non-null `idleExpiry` whose `lastUsedAt` (or, never used, its
-   creation) is at least `idleExpiry` before the current time is revoked by rule 6. Equal is
-   expired.
-5. **Owner removal — normative in this model.** Removing the owner principal from the host revokes
-   **or** quarantines every grant it owns, as the operator configured (open question 13). A
-   quarantined grant admits no call, keeps its credential, and leaves quarantine only by being
-   reassigned to a new owner, by that owner's authenticated acceptance, or by being revoked. No
-   grant remains `active` with a removed owner. Pending action keys follow reconciliation (§4,
-   rule 3).
+4. **Idle lifecycle.** A grant is revoked by rule 6 when it has a non-null `idleExpiry` and its
+   `lastUsedAt` is at least `idleExpiry` before the current time. A grant never used is measured
+   from its creation. Equal is expired.
+5. **Owner removal, proposed as normative.** Removing the owner principal from the host revokes
+   **or** quarantines every grant it owns, as the operator configured (open question 13).
+   - A quarantined grant admits no call and keeps its credential.
+   - It leaves quarantine only by being revoked, or by being reassigned to a new owner. Only the
+     operator of the issuing host may reassign it, and the reassignment takes effect only on the
+     new owner's authenticated acceptance.
+   - No grant remains `active` with a removed owner.
+   - Pending action keys follow reconciliation (§4, rule 4).
 6. **What revoking a grant does.** The gateway calls the provider's revocation endpoint where it
    offers one (for an OAuth provider, RFC 7009 token revocation), deletes the credential, and sets
    `state` to `revoked`. Where the provider offers no revocation, it deletes the credential and
    reports `provider-grant-may-persist`, since the authorization may still exist at the provider.
-7. **Publisher trust for customer MCP.** At registration (gateway #348), `publisher` records
+7. **Publisher trust for customer MCP.** At registration (gateway #348), `publisher` records the
+   server's publisher and its liveness:
    `{"kind": "registry" | "repository" | "domain", "name": string, "state": "maintained" |
-   "unmaintained" | "unknown", "checkedAt": time}`: the server's publisher and its liveness — the
-   domain's registration, the repository archived or not, the package deprecated or not. It is
-   shown with the approval and checked again on recapture and on a schedule. A lapsed or archived
-   publisher reports `publisher-unmaintained`, which an operator policy may make a refusal (open
-   question 15). A registration whose display name closely matches a known integration's under a
-   different publisher is flagged `name-lookalike`.
+   "unmaintained" | "unknown", "checkedAt": time}`. Liveness covers the domain's registration,
+   whether the repository is archived and whether the package is deprecated.
+   - It is shown with the approval, and checked again on recapture and on a schedule.
+   - A lapsed or archived publisher reports `publisher-unmaintained`, which an operator policy may
+     make a refusal (open question 15).
+   - A registration whose display name closely matches a known integration's, under a different
+     publisher, is flagged `name-lookalike`.
 
 A grant's owner is the principal answerable for it, not the subject of every call through it. How
 the two meet is §7, rule 1.
@@ -412,107 +581,166 @@ top-level member, `delegation`, signed with every other member under §1.2a's ru
 **The compatibility rule, exact.** Under a delegation:
 
 1. `caller.issuer` and `caller.subject` are `delegation.subject.issuer` and
-   `delegation.subject.subject`, and on an action receipt so are `action.requester.issuer` and
-   `action.requester.subject`. `tokenDigest` remains the digest of the token presented, which is the
-   per-delegation credential. That is, the existing caller identity is the subject's, exactly the
-   pair the receipt carried when the agent called with the subject's own token.
+   `delegation.subject.subject`. On an action receipt, so are `action.requester.issuer` and
+   `action.requester.subject`. `tokenDigest` is the digest of the token presented, which is the
+   per-delegation credential. That credential may have been issued by a party other than
+   `caller.issuer`: by the gateway itself, or by the exchange that minted it.
 2. `caller` is never `null` on a receipt that carries `delegation`.
-3. No member of version 3 changes form or meaning, `receiptVersion` stays `"3"`, and the signing
-   prefix is unchanged.
-4. A call made under no delegation carries no `delegation` member (open question 2), and its
-   receipt is byte for byte the receipt it was before this record.
+3. `receiptVersion` stays `"3"`, the signing prefix is unchanged, and no member changes its form.
+   **The meaning of `caller` and `requester` does change** on a receipt that carries `delegation`.
+   - Before, the triple described one token: its issuer, its subject and its digest.
+   - Here, `issuer` and `subject` name the delegation's subject, and `tokenDigest` names a different
+     credential, which another issuer may have issued.
 
-So a verifier written before this record tolerates `delegation` as it tolerates any signed member it
-does not know, returns the status it returned before, and reads `caller` and `requester` as naming
-the subject — the identity it always read, unchanged. It does not see the actor; that is the bound
-of rule 1, and it is the same bound such a reader had when agents used the subject's credential.
-A verifier that reads the member holds it to the forms above at §1.4 order 1, and also requires,
-as order-1 conditions within the one receipt, rules 1 and 2 above, and `chain` holding at least one
-and at most the maximum depth plus one digests. Handed the statements, it may report
-`delegation-unresolved` beside `ok`, as gateway §4's steps 5 to 8 report their findings, when a
-digest of `chain` resolves to no statement, the chain's length is not the leaf's `depth` plus one,
-steps 1 to 5 of §2 fail, the leaf's `id`, `sub` or `act.agent` differ from `id`, `subject` or
-`actor`, or `servedAt` is outside the leaf's validity. Revocation at `servedAt` is not established
-offline unless a revocation record is also given; the receipt asserts only that the gateway
-admitted the call.
+   Gateway §1.2a's text for `caller` and `requester` would be amended to say exactly this.
+4. A call made under no delegation carries no `delegation` member (open question 2), and its receipt
+   is byte for byte the receipt it was before this record.
 
-**Agent records.** `tool_call`, `tool_result` and the run record carry `principal`:
-`{"actor": {"agent", "host", "software"}, "subject": principal reference, "delegation": {"id",
-"digest"}, "chain": [digest, ...]}`. The source record's ADR-0019 `identity` keeps its form and its
-meaning, the credential kind and label, beside it. These members ship under new record versions per
-[ADR-0024](https://github.com/Judgment-Pack/judgment-pack-agent/blob/main/docs/adr/0024-versioned-record-readers.md):
-a reader that predates them refuses the new version (`record version unsupported`) before reading
-the body, so it never reads an agent's call as the person's; records of the current versions are
-unchanged.
+**What a verifier written before this record sees.**
+- It tolerates `delegation` as it tolerates any signed member it does not know, and returns the
+  status it returned before.
+- It reads `caller` and `requester` as naming the subject: the same pair it read when agents used
+  the subject's own token.
+- It does not see the actor. That is the bound of rule 1, and such a reader had the same bound
+  when agents used the subject's credential.
+- It is misled on exactly one point: a reader that treats `{issuer, subject, tokenDigest}` as one
+  token's, and correlates `tokenDigest` with that issuer's token records, finds no such token.
 
-**Refusals are recorded.** A call refused at verification is recorded with its refusal name, its
-actor and subject where they parsed, and no credential.
+**What a verifier that reads the member checks.**
+- **At §1.4 order 1:** it holds the member to the forms above. Within the one receipt, it also
+  requires rules 1 and 2, and a `chain` of at least one and at most the maximum depth plus one
+  digests. Gateway §1.2a says order 1 is never a relational check. These comparisons are between
+  members of one receipt, so they are a stated exception, and the §1.2a amendment would say so.
+- **Given the statements,** it may report `delegation-unresolved` beside `ok`, as gateway §4's
+  steps 5 to 8 report their findings, when any of these holds:
+  - a digest of `chain` resolves to no statement;
+  - the chain's length is not the leaf's `depth` plus one;
+  - steps 1 to 7 of §2 fail;
+  - the leaf's `id`, `sub` or `act.agent` differ from `id`, `subject` or `actor`;
+  - the served instant falls outside the leaf's validity.
+- **The served instant.** `servedAt` is the gateway's stamp, to the second, of the form
+  `YYYY-MM-DDTHH:MM:SSZ`. It is parsed, never compared by characters. It stands for the interval
+  `[s, s + 1 s)`, and it is outside the leaf's validity exactly when `s + 1 s` ≤ `issuedAt` or
+  `s` ≥ `expiresAt`.
+- **Revocation** at the served instant is not established offline unless a revocation statement
+  (open question 20) is also given. The receipt asserts only that the gateway admitted the call.
 
-**The Desk** shows both principals on runs, receipts and history (desk #679), and records every
-delegation, revocation and connection action with who performed it.
+**Agent records.** The record kinds are those of
+[ADR-0024](https://github.com/Judgment-Pack/judgment-pack-agent/blob/main/docs/adr/0024-versioned-record-readers.md).
+- **What carries `principal`.** Run events (`tool_call` and `tool_result` among them), the
+  checkpoint, and the run report carry `principal`:
+  `{"actor": {"agent", "host", "software"}, "subject": principal reference, "delegation": {"id",
+  "digest"}, "chain": [digest, ...]}`.
+- **Versions.** It ships under the versions after those current when this was written, which are
+  run event 2, checkpoint 3 and run report 2. So the new versions are run event 3, checkpoint 4 and
+  run report 3, unless the agent repository has moved on by then.
+- **ADR-0019's identity is unchanged.** The source record's `identity` keeps its form and its
+  meaning, the credential kind and label, beside `principal`.
+- **Delegation is opt-in.** As ADR-0025's facilities are, delegation is an explicit opt-in: a run
+  with no delegation configured keeps writing the current versions, byte for byte.
+- **Older readers refuse.** A reader from agent v0.10.0 onward that predates these versions refuses
+  them (`record version unsupported`) before reading the body, so it never reads an agent's call as
+  the person's. Readers older than v0.10.0 predate ADR-0024, and this record promises nothing about
+  them.
+
+**Refusals are recorded.** A refused call is recorded with its refusal name, its actor and subject
+where they parsed, and no credential.
+
+**The Desk** shows both principals on runs, receipts and history (desk #679). It records every
+registration, entry change, delegation, revocation and connection action with who performed it.
 
 ### 7. Relation to existing contracts
 
-1. **Agent #102's identity becomes the subject.** ADR-0019's per-source identity was the only
-   principal a record named. Under this record, the principal it names is the call's subject: for
-   kind `person` or `service`, the principal it declares; for kind `connection`, the owner of the
-   connection grant (§5). That principal must equal the delegation's `sub`, or the call is refused
-   as `subject-mismatch`. The label stays a display name, and an identity change mid-run is still
-   withheld until re-approval. A source whose identity is a service the subject is not — a shared
-   connection a service owns — is used by a delegation whose `sub` is that service (open question 11).
-2. **Leases bound time; delegations bound authority.** A call needs both a current fence (ADR-0025:
-   owner, epoch, expiry, checked at admission) and a valid delegation. Neither stands in for the
-   other: renewing a lease renews no delegation, and a new delegation renews no lease. When the
-   delegation expires or is revoked while the lease is held, admission refuses, and the run parks
-   for re-authorization (ADR-0025 decision 4) naming the delegation, never retrying on its own. A
-   worker that acquires a run's lease presents the run's delegation chain; an enforcing host refuses
-   a fenced dispatch whose `sub` or root actor (the `act.agent` of `L0`) differs from those the run
-   was admitted with, as `principal-changed`. A takeover is a new epoch of the same principals, never
-   a change of principal.
-3. **Action keys are scoped to subject and actor.** Under a delegation, gateway §1.2b's key scope
-   "gateway authority, authenticated issuer and subject" becomes the gateway authority, the chain's
-   `sub` (`issuer` and `subject`) and the chain's **root actor**. It excludes the transport token,
-   the lease epoch, the worker, and the delegation `id`, so a re-issued delegation for the same run
-   keeps its keys. A takeover presents the same subject and root actor, finds the same reservation,
-   and is answered from retained evidence, a freed attempt or the declared read-back — never a new
-   mutation. This is gateway #352's second option, refined, and it composes with ADR-0025's
-   epoch-free idempotency identity, which already binds the run. A call made under no delegation
-   keeps the scope §1.2b states today. A key value already reserved under one scope and presented
-   under another is refused (open question 9).
+1. **Agent #102's identity and the subject.**
+   - Under this record, the subject of every call is the delegation's `sub`.
+   - **A `person` identity becomes the subject.** ADR-0019's per-source identity was the only
+     principal a record named. When it is kind `person`, it names the subject: that person must be
+     `sub`, or the call is refused as `subject-mismatch`.
+   - **A `service` or `connection` identity names the credential's holder,** not the subject. For
+     `service`, that is the service. For `connection`, it is the grant's owner (§5), or, for a host
+     source with no grant record, the host itself.
+   - **Using another principal's credential needs the subject's own standing.** When the
+     credential's holder is not `sub`, the call is admitted only if the issuing host's
+     authorization model gives `sub` standing to use that service's or connection's credential for
+     the call (step 12, `subject-unauthorized`). A person's agent therefore never exceeds the
+     person's authority, even through a connection a service owns (open question 11).
+   - **One chain per run is enough.** The subject is the same for every source in the run, while
+     the credential holders differ by source and are each checked for the subject's standing.
+   - **What ADR-0019 keeps.** The label stays a display name, an identity change mid-run is still
+     withheld until re-approval, and the first `act` under a `service` identity is still asked.
+2. **Leases bound time; delegations bound authority.**
+   - **A call needs both.** It needs a current fence (ADR-0025: owner, epoch, expiry, checked at
+     admission) and a valid delegation. Neither stands in for the other: renewing a lease renews no
+     delegation, and a new delegation renews no lease.
+   - **Expiry or revocation while the lease is held.** Admission refuses, and the run parks for
+     re-authorization naming the delegation. It never retries on its own.
+   - **That park extends ADR-0025 decision 4.** Decision 4 parks with "a bounded connection
+     reference and the unsent operation". Naming a delegation needs a new wait format, which
+     agent #260 carries.
+   - **The lease records its principal.** The fence today names no principal. So the lease record
+     gains the run's admitted `sub` and root actor (the `act.agent` of `L0`): a new `run-lease`
+     schema version, and a fence version that carries them.
+   - **A takeover keeps the principals.** A worker that acquires a run's lease presents the run's
+     chain. The effect host refuses a fenced dispatch whose `sub` or root actor differs from the
+     lease's, as `principal-changed`. A takeover is a new epoch of the same principals, never a
+     change of principal.
+3. **Action keys are scoped to the subject and the root actor.**
+   - **The scope.** Under a delegation, gateway §1.2b's key scope ("gateway authority,
+     authenticated issuer and subject") becomes four values: the gateway authority, the chain's
+     `sub` (`kind`, `issuer` and `subject`), and the chain's **root actor**.
+   - **Why `kind` is included.** A person and a service that happen to share an issuer and subject
+     pair then still have different scopes.
+   - **What it excludes.** The transport token, the lease epoch, the worker and the delegation `id`.
+     So a delegation re-issued for the same run keeps its keys.
+   - **A takeover.** It presents the same subject and root actor and finds the same reservation. It
+     is answered from retained evidence, a freed attempt or the declared read-back, never a new
+     mutation.
+   - **Relation to #352.** This is #352's second option, refined, for delegated runs. It composes
+     with ADR-0025's epoch-free idempotency identity, which already binds the run.
+   - **Undelegated calls.** A call made under no delegation keeps the scope §1.2b states today. So
+     an undelegated takeover that authenticates as another subject still needs #352's own fix,
+     decided with agent #229.
+   - **A key presented under another scope.** It is open question 9.
 
 ## Alternatives
 
 - **No change.** Agents keep using the person's credential. Every problem above stays, and the
   takeover defect needs a separate fix.
-- **Each agent as a service identity of its own.** It gives the agent an identity but drops the
-  subject: an audit sees a service, not on whose behalf it acted, and the service accumulates a
+- **Each agent as a service identity of its own.** This gives the agent an identity but drops the
+  subject. An audit sees a service, not on whose behalf it acted, and the service accumulates a
   standing grant wider than any one person's share. It is ADR-0019's `service` kind, which already
   exists and is not this.
 - **Impersonation** (RFC 8693's other case). The agent receives a token that presents as the
-  subject. It narrows nothing an audit can see and is exactly the indistinguishability this record
-  removes.
-- **Provider scopes alone.** OAuth scopes narrow per platform, cannot name the project's effect
-  classes or tools, cannot express a chain, and many providers cannot narrow below the grant. The
-  gateway enforcing the scope itself where the platform cannot is gateway #356's rule.
-- **An attenuable capability token** (macaroon- or biscuit-style chains). Its attenuation is the
-  narrowing check this record states. It would add a second canonical form and signing convention
-  to a project that has one. The statement here could later be carried in such a token without
-  changing the check.
-- **Put it in Core.** Core is a pack format; authorization of an agent at an enforcing host is not a
-  property of a pack. A companion beside Core is the proposed home of the shared format.
+  subject. It narrows nothing an audit can see, and it is exactly the indistinguishability this
+  record removes.
+- **Provider scopes alone.** OAuth scopes narrow per platform. They cannot name the project's effect
+  classes or tools, cannot express a chain, and many providers cannot narrow below the grant.
+  Gateway #356 covers that last case: the gateway enforces the scope itself where the platform
+  cannot.
+- **Attenuable capability tokens.** In this design, each holder of a token can append a caveat that
+  narrows it, without contacting the issuer. That attenuation is the narrowing check this record
+  states. It would add a second canonical form and signing convention to a project that has one,
+  and offline attenuation cannot consult revocation or the subject's current standing. The
+  statement here could later be carried in such a token without changing the check.
+- **Put it in Core.** Core is a pack format, and authorization of an agent at an enforcing host is
+  not a property of a pack. A companion beside Core is the proposed home of the shared statement.
 
 ## Compatibility
 
-- **Receipts.** §6's rule: the version stays `"3"`, the new member is signed and tolerated by every
-  existing verifier, `caller` and `requester` keep naming the subject, and a receipt made under no
-  delegation is unchanged in its bytes. A verifier that knows version 2 alone already refuses
-  version 3 and still does.
-- **Action keys.** Unchanged for calls made under no delegation. Under one, the scope changes from
-  the transport subject to the delegation's subject and root actor; a key reserved before a
-  gateway adopts this, under a transport subject, stays in its old scope.
-- **Agent records.** New record versions; older readers refuse them by ADR-0024 rather than
-  misreading them. ADR-0019's identity member is unchanged in form and meaning.
-- **Desk.** No record format of the Desk changes by this record; its authorization model gains a
+- **Receipts.** See §6's rule. The version stays `"3"`, and every existing verifier tolerates the
+  new signed member and returns the status it returned before. `caller` and `requester` keep naming
+  the subject's pair, but on a delegated receipt `tokenDigest` names another credential (rule 3).
+  A receipt made under no delegation is unchanged in its bytes. A verifier that knows version 2
+  alone already refuses version 3, and still does.
+- **Action keys.** Unchanged for calls made under no delegation. Under a delegation, the scope
+  changes from the transport subject to the delegation's subject and root actor. A key reserved
+  under a transport subject before a gateway adopts this stays in its old scope.
+- **Leases.** A new `run-lease` version and fence version carry the principal (§7, rule 2). Version
+  1 leases are read as before and cannot host a delegated run.
+- **Agent records.** New record versions, written only by runs with delegation configured. Readers
+  from v0.10.0 onward refuse them by ADR-0024 rather than misreading them. ADR-0019's identity member
+  is unchanged in form and meaning.
+- **Desk.** No record format of the Desk changes by this record. Its authorization model gains a
   kind of principal (desk #612, #452).
 - **Spec.** Nothing in Core `0.3.0`, its schema, corpus or released artifacts changes. Spec `0.4.0`
   carries this Draft and no normative text.
@@ -520,109 +748,231 @@ delegation, revocation and connection action with who performed it.
 ## Security and privacy
 
 - **Confused deputy.** Without a subject, an agent's reach is its credential's. The delegation and
-  step 10 hold every call to the intersection of the scope and the subject's current authority.
+  step 12 hold every call to the intersection of the scope and the subject's current authority,
+  through another principal's connection as much as through the subject's own.
+- **Statement substitution and minting.** An enforcing host resolves the chain from the credential
+  it bound (step 0). It binds credentials only at the issuing host's authenticated request, and
+  child links only at the parent actor's or the subject's (§3). Holding statement bytes, by
+  themselves, therefore admits nothing and mints nothing.
 - **Widening along a chain.** The narrowing check is pairwise and repeated by every verifier;
   issuance is not trusted as evidence of it.
-- **The statement as a bearer token.** It is not one. Stealing its bytes admits nothing; the
-  credential bound to it is the thing to protect, and its theft is bounded by the delegation's
-  expiry and revocation. Sender-constraining that credential is open question 8.
+- **Credential theft.** A stolen credential is useless without the run's proof-of-possession key,
+  and lives at most 5 minutes. A bearer credential is accepted only for read-only chains, and posture
+  reports it.
 - **The issuing host's key.** Its holder can issue any delegation within what it believes the subject
-  holds. Verification proves the host signed, not that the subject consented; the host's record of
-  the grant is the evidence of that, and it is the host's.
-- **Revocation races.** A call admitted an instant before a revocation proceeds and is reconciled,
-  never undone or retried. "At once" means at the next admission after the durable record.
-- **Clocks.** Expiry is decided by the enforcing host's authoritative time; uncertainty refuses.
-- **Disclosure.** A receipt already discloses the subject's issuer and subject in `caller`; the
-  new member adds the agent's opaque identifier and the chain's digests, and no label. A grant record
-  carries scope names and times, no credential and no content. Publisher checks query public
-  registries and domains, which can disclose to those services which servers an operator uses; the
-  schedule is the operator's.
-- **Resource exhaustion.** Depth and lifetime are bounded (open question 3); scopes are closed lists,
-  bounded by the statement's size, which a normative version must cap.
-- **Name lookalikes.** The flag is a heuristic; it reports, and refuses only by operator policy.
+  holds. Verification proves the host signed, not that the subject consented: the host's record of
+  the grant is the evidence of consent, and it is the host's. Key compromise is open question 18.
+- **The issuing host's state.** Admission trusts the issuing host's answer for inventory, revocation,
+  standing and counters. An issuing host that answers falsely admits falsely. The admission read
+  makes that host a single point of availability, and the record chooses refusal over admission
+  when it is unreachable.
+- **Revocation races.** A call dispatched an instant before a revocation proceeds and is
+  reconciled, never undone or retried. A call that was checked but not dispatched is refused at its
+  re-check. "At once" means at the next admission read after the durable record.
+- **Clocks.** Expiry is decided by the enforcing host's authoritative time, within a stated skew
+  allowance (open question 17). Uncertainty refuses.
+- **Software attestation.** The bound software identity is the host's statement (§1, rule 3), not a
+  measurement. A host that misstates it misstates it.
+- **Disclosure.**
+  - A receipt already discloses the subject's issuer and subject in `caller`. The new member adds
+    the agent's opaque identifier and the chain's digests, and no label.
+  - A grant record carries scope names and times, no credential and no content.
+  - Publisher checks query public registries and domains, which can disclose to those services
+    which servers an operator uses. The schedule is the operator's.
+- **Resource exhaustion.** Depth, lifetime and statement size are bounded (open questions 3 and 21).
+- **Name lookalikes.** The flag is a heuristic. It reports, and refuses only by operator policy.
 
 ## Conformance
 
 A Draft claims no conformance class and ships no vectors. A normative version would need at least
-these, positive and negative, as hand-written vectors read by two independently written readers:
+the vectors below, positive and negative, hand-written and read by two independently written
+readers.
 
-- **Delegation statement:** a valid root; a valid three-link chain; each structural violation of
-  step 1, one per member; an unsupported version; an unpinned key; a signature over a changed member;
-  a member appended at the top level and inside `scope`; a member name outside the Basic
-  Multilingual Plane, ordered by `canon` and not by RFC 8785.
-- **Narrowing:** one vector per clause 1 to 7 failing; a child that adds a limit its parent lacks
-  (valid); a child that drops one (widened); equal expiry (valid); later expiry (widened); a changed
-  `sub` (widened); depth one past the maximum.
-- **Admission:** equal-time expiry; not yet valid; an unregistered actor; a software mismatch; a
-  revoked leaf, a revoked ancestor, a revoked agent; each `out-of-scope` reason; a limit counted
-  across a chain; an unknown limit name; a subject that has lost the access since issuance.
-- **Receipts:** an acquisition and an action under a delegation verified by a reader that knows the
-  member and by one written before it, both returning `ok` and the same `caller`; `caller` differing
-  from `delegation.subject` (`malformed` for the new reader); a `null` caller with the member; a
-  tampered member (`signature-mismatch`); a call under no delegation, byte-identical to the receipt
-  before this record; `delegation-unresolved` for each of its causes.
-- **Action keys:** a takeover authenticating as another transport subject with the same subject and
-  root actor (one mutation, or the outcome stays `unknown`); a re-issued delegation keeping the key;
-  a key presented under another scope.
-- **Connection grants:** excess scope refused and, where the provider cannot narrow, reported; drift;
-  unused scopes listed; idle expiry at equal time; owner removal revoking and quarantining; a
-  provider without revocation reporting `provider-grant-may-persist`; a lapsed publisher; a name
-  lookalike.
-- **Agent records:** `tool_call`, `tool_result` and run record carrying `principal`; an older reader
-  refusing the new version; a child's narrowed chain recorded; a refused attempt to widen.
+- **Delegation statement:**
+  - a valid root, and a valid three-link chain;
+  - each structural violation of step 3, one per member;
+  - a non-string `delegationVersion` (`malformed`), and the string `"2"` (`unsupported-version`);
+  - an unpinned key, and each key refusal of gateway §8.4;
+  - a signature over a changed member;
+  - a signature with `S` not below the group order;
+  - a signature that verifies only under the cofactored check;
+  - a member appended at the top level and inside `scope`;
+  - a member name outside the Basic Multilingual Plane, ordered by `canon` and not by RFC 8785;
+  - a statement over each size cap.
+- **Narrowing:**
+  - one vector per failing clause, 0 to 8, with clause 0 as a truncated chain;
+  - a child that adds a limit its parent lacks (valid), and one that drops one (widened);
+  - an equal expiry (valid), and a later expiry (widened);
+  - a changed `sub`, and a changed `sub.kind`;
+  - a different `audience` with the same `source`;
+  - `mayDelegate` false with a child below it;
+  - a depth one past the maximum.
+- **Issuance:**
+  - a child requested by a third registered agent (`not-parent-actor`);
+  - a child under `mayDelegate: false`;
+  - a credential requested by a party that presents only statement bytes;
+  - a root whose scope exceeds the subject's standing.
+- **Credential:**
+  - a chain substituted beside a valid credential;
+  - a credential without its proof of possession;
+  - a bearer credential for a chain with `act`;
+  - a credential used after 5 minutes;
+  - a credential used past the leaf's `expiresAt`.
+- **Admission:**
+  - equal-time expiry, not yet valid, and each edge of the skew allowance;
+  - an unregistered actor, at the leaf and at an ancestor;
+  - a software mismatch against the entry and against the credential;
+  - a revoked leaf, a revoked ancestor, a revoked agent and a removed subject;
+  - each `out-of-scope` reason, and their order within a link and across links;
+  - two concurrent admissions at a `calls` limit of one;
+  - a limit counted across a chain, a freed attempt counted, and a read-back not counted;
+  - a subject that has lost the access since issuance;
+  - a person's agent through a service-owned connection, with and without the person's standing;
+  - an approval pause across a revocation.
+- **Receipts:**
+  - an acquisition and an action under a delegation, verified by a reader that knows the member
+    and by one written before it, both returning `ok` and the same `caller`;
+  - `caller` differing from `delegation.subject` (`malformed` for the new reader);
+  - a `null` caller with the member;
+  - a tampered member (`signature-mismatch`);
+  - a call under no delegation, byte-identical to the receipt before this record;
+  - `delegation-unresolved` for each of its causes;
+  - `servedAt` one second before `issuedAt`, equal to it, and equal to `expiresAt`.
+- **Action keys and leases:**
+  - a takeover authenticating as another transport subject, with the same subject and root actor:
+    one mutation, or the outcome stays `unknown`;
+  - a takeover with another root actor (`principal-changed`);
+  - a re-issued delegation keeping the key;
+  - a key presented under another scope with the same subject, and with another subject;
+  - reconciliation after revocation, by the host and by the subject's own token.
+- **Connection grants:**
+  - excess scope, refused and, where the provider cannot narrow, reported;
+  - drift, and unused scopes listed;
+  - idle expiry at equal time;
+  - owner removal revoking and quarantining, and reassignment with and without acceptance;
+  - a provider without revocation, reporting `provider-grant-may-persist`;
+  - a lapsed publisher, and a name lookalike.
+- **Agent records:**
+  - `principal` on each record kind;
+  - an older reader refusing the new version, and a run without delegation writing the current
+    version unchanged;
+  - a child's narrowed chain recorded;
+  - a refused attempt to widen.
 
 ## Implementation
 
-The agent harness carries the chain per run, verifies it before each dispatch, and records
-`principal` in TypeScript and Go readers sharing vectors (agent #260). The gateway verifies the chain
-at `/acquire` and `/act`, mints or derives the per-delegation credential, writes the receipt member,
-scopes action keys, and keeps grant records (gateway #356, #357, #352); its Go verifier and its
-TypeScript verifier are the two receipt readers. The Desk issues delegations, keeps the inventories
-and performs revocation (desk #679). A second implementation of the statement verifier could be
-written from §§2–3 alone, since the forms are those the gateway already specifies. All of these are
-plausible routes, by one maintainer with same-vendor assistance; none is independent organizational
-interoperability evidence, and none is built.
+- **The agent harness** carries the chain per run, checks it before each dispatch, and records
+  `principal`, in TypeScript and Go readers that share vectors (agent #260).
+- **The gateway** verifies the chain at credential binding and at `/acquire` and `/act`. It binds
+  sender-constrained credentials, writes the receipt member, scopes action keys and keeps grant
+  records (gateway #356, #357, #352). Its Go verifier and its TypeScript verifier are the two
+  receipt readers.
+- **The Desk** issues delegations, keeps the inventories, answers admission reads and performs
+  revocation (desk #679).
+- **A second statement verifier** could be written from §§2–3 alone, since the forms are those the
+  gateway already specifies.
+
+All of these are plausible routes, written by one maintainer with same-vendor assistance. None is
+independent organizational interoperability evidence, and none is built. The standards-track part
+cannot leave Draft on them alone.
 
 ## Unresolved questions
 
-Each has a proposed default, which the Spec `0.5.0` text adopts unless review says otherwise.
+Each has a proposed default. A default is a proposal for review, not a decision taken for `0.5.0`.
 
-1. **Who signs a delegation?** Default: the issuing host, with an Ed25519 key pinned by `keyId`,
-   rotated by a continuity statement of gateway §3b's form. Subject-held keys are not required.
-2. **`delegation` absent or `null` when no delegation applies?** Default: absent, so that a receipt
-   made under no delegation is unchanged in its bytes. Its absence never proves the caller was not an
+1. **Who signs a delegation, and how its key rotates.**
+   - The issuing host signs, with an Ed25519 key pinned by `keyId`. Subject-held keys are not
+     required.
+   - Rotation uses a continuity statement modelled on gateway §3b, under its own prefix,
+     `"judgment-pack/delegation-rotation/1:"`.
+   - The host publishes it in a registry file of its own, which verifiers read as §3b's reader
+     reads the gateway's registry.
+2. **`delegation` absent or `null` when no delegation applies?** Absent, so that a receipt made
+   under no delegation is unchanged in its bytes. Its absence never proves the caller was not an
    agent; it proves only that no delegation was presented.
-3. **Bounds.** Default: a link lives at most 24 hours (`expiresAt − issuedAt`), the lease amendment's
-   longest duration; a longer run is re-issued a new root with a new `id`, which keeps its action
-   keys (§7, rule 3). Maximum depth 4.
-4. **Patterns in `tools`.** Default: none; exact names only. A changed tool list already requires
+3. **Bounds and re-issue.**
+   - A link lives at most 24 hours (`expiresAt − issuedAt`), the lease amendment's longest
+     duration. Maximum depth 4.
+   - A run that outlives its root parks for re-authorization, and re-issue needs the subject's
+     fresh grant: a new root with a new `id`, keeping its action keys (§7, rule 3).
+   - The new root's limits are the budget that grant states, with no counts carried forward. The
+     subject sees the consumed counts when granting.
+4. **Patterns in `tools`.** None; exact names only. A changed tool list already requires
    re-approval (ADR-0027), and so does a changed scope.
-5. **Software identity bound into the delegation.** Default: bound; an upgrade updates the
-   inventory entry and needs new delegations.
-6. **Is a sub-agent its own principal?** Default: a child that runs the same software in the same run
-   may act under its parent's `act.agent` with a narrowed link; a child of other software is a
-   registered principal of its own.
-7. **Chains across hosts.** Default: refused; every link has one `host`.
-8. **Sender-constrained credentials** (RFC 9449 proof of possession, RFC 8705 mutual TLS). Default:
-   not required in `0.5.0`; the credential is short-lived to the delegation's expiry and revocable
-   alone, and posture states which.
-9. **A key presented under another scope.** Default: refused as `action-key-scope-conflict`. Keys
-   are digests of run-bound identities, so a collision across scopes means a changed principal, and
-   the refusal discloses only that the key exists, to a caller that already holds it.
-10. **Caching revocation state.** Default: none; each admission consults the authoritative state,
-    and an enforcing host that cannot reach it refuses.
-11. **A person's agent through a connection a service owns.** Default: the delegation's `sub` is the
-    service, issued by the host under its authorization policy, and the person who started the run
-    is recorded on the run, not in the delegation.
-12. **The read-back after revocation.** Default: permitted, as the gateway's reconciliation of an
-    action admitted before the revocation; it dispatches no mutation and admits no new call.
-13. **Revoke or quarantine on owner removal, when the operator configured neither.** Default: revoke.
-14. **Idle expiry.** Default: absent (`null`); posture reports a grant unused for 90 days as idle.
-15. **Publisher trust.** Default: report only; refusal is an operator policy.
-16. **The normative home.** Default: the statement, its narrowing check and its verification in a
-    companion document beside Core in Spec `0.5.0`, with its vectors; the receipt member and key
-    scope in the gateway's `SPEC.md`; records in the agent's contract; the grant in the gateway.
+5. **Software identity.** Bound, host-attested, and compared with the current inventory entry. An
+   upgrade needs new delegations. Measured attestation of the running bytes is out of scope for
+   `0.5.0`.
+6. **Is a sub-agent its own principal?**
+   - A child that runs the same `act.software` as its parent may act under its parent's
+     `act.agent`, with a narrowed link the parent's actor requests.
+   - A child of other software is a registered principal of its own, and needs the subject's grant.
+   - "In the same run" is not a condition, since the statement binds no run.
+7. **Chains across hosts.** Refused; every link has one `host`.
+8. **Sender-constrained credentials.**
+   - Required for every chain that admits `propose` or `act` anywhere, under RFC 9449 or RFC 8705.
+   - A bearer credential is accepted only for read-only chains, by operator choice, and posture
+     reports it.
+   - Every credential lives at most 5 minutes (§2, *The credential*), and the text there argues
+     for both rules.
+9. **A key presented under another scope.**
+   - Refused as `action-key-scope-conflict` only when the existing reservation's scope has the same
+     subject (`kind`, `issuer` and `subject`). Under another subject, the scopes are independent.
+   - Receipts publish `action.delivery.key`, and ADR-0025's keys are derived from predictable
+     inputs. A global refusal would let another principal pre-reserve a key and block a run, so it
+     is not proposed, and the gateway does not rely on how keys are derived.
+10. **Admission read and caching.**
+    - A synchronous admission read at every admission, with no cache. Unreachable means refused.
+    - A bounded cache would weaken "at once" to "within the bound", and is not proposed for `0.5.0`.
+11. **A person's agent through a connection a service owns.**
+    - `sub` stays the person. The call needs the person's own standing on that connection in the
+      issuing host's authorization model (step 12).
+    - Removing the person revokes the delegation by §4, rule 2.
+    - The receipt's `caller` names the person.
+12. **The read-back after revocation.** Permitted, resolved by key before step 0 and limited to
+    retained evidence or the declared read-back. It may be presented by the issuing host, by the
+    subject's own token, or by the gateway's operator. It dispatches no mutation and counts against
+    no limit.
+13. **Revoke or quarantine on owner removal, when the operator configured neither.** Revoke.
+14. **Idle expiry.** Absent (`null`) by default. Posture reports a grant unused for 90 days as idle.
+15. **Publisher trust.** Report only; refusal is an operator policy.
+16. **The normative home.** The statement, its narrowing check and its verification would go in a
+    companion document beside Core, with its vectors. The receipt member, key scope and grant
+    would go in the gateway's `SPEC.md`. Records and the lease version would go in the agent's
+    contract. None of this is committed for `0.5.0`.
+17. **Clock skew between the issuing host and an enforcing host.**
+    - The allowance is zero: the issuing host back-dates `issuedAt` by at most 5 seconds when it
+      issues a link, and enforcing hosts allow no further skew.
+    - Expiry gets no allowance.
+18. **Compromise of the issuing host's key.**
+    - A signed key-revocation statement names a `keyId`. It revokes every delegation that key
+      signed, and every chain through one.
+    - Enforcing hosts revoke every credential bound to those chains.
+    - Recovery is a new key, pinned out of band, and new grants. A continuity statement from a
+      compromised key is not followed.
+19. **The inventory's own integrity.** Registrations, entry changes and revocations are appended to
+    a log the issuing host keeps. Each entry names the principal and the time, and the Desk shows
+    it beside the inventory. Signing that log is not proposed for `0.5.0`.
+20. **The form of a revocation record.** A signed revocation statement under its own prefix,
+    `"judgment-pack/delegation-revocation/1:"`. Its members are:
+    - `revoked`: a delegation `id`, an agent, a principal reference, or a `keyId`;
+    - `host`, `keyId`, `revokedBy` (a principal reference), `revokedAt`, and `signature`.
 
-This Draft does not mark complete the public comment period, the interim review regime's record
-for a pull request creating an RFC ([RFC 0009](0009-interim-review-regime.md)), or the maintainer's
-dispositions; those remain merge gates as the process states them.
+    An offline reader given these statements can establish revocation at an instant.
+21. **Size caps.** At most 65536 bytes per statement in `canon`, 256 entries, 256 tools per entry,
+    and 16 limits per entry.
+22. **What a departed person's removal reaches, beside desk #679.**
+    - Desk #679 says "revoke or quarantine every connection and delegation they authorized". This
+      record revokes the person's delegations, and every chain below them. It revokes or
+      quarantines the grants the person owns.
+    - It never quarantines a delegation: a suspended authority whose subject is gone has no one to
+      answer for it.
+    - Agents the person registered stay registered, with no delegations of the person's left. The
+      operator reassigns their `registeredBy`, or revokes them.
+    - The proposal is that desk #679 adopt this reading. Until it does, the difference is recorded
+      here.
+
+**Review standing.** This Draft does not mark the public comment period complete. The maintainer
+authorized a same-vendor review exception for it: its adversarial review and re-read are by the
+same model that drafted it. That is not compliance with [RFC 0009](0009-interim-review-regime.md)'s
+cross-vendor requirement. The normative text proposed for a later version requires a cross-vendor
+review before adoption.

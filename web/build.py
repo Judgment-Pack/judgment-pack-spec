@@ -785,8 +785,9 @@ PAGES = (
         "rfcs/0030-agent-principals-and-delegated-authority.md",
         PurePosixPath("rfcs/0030-agent-principals-and-delegated-authority/index.html"),
         "RFC 0030: Agent principals and delegated authority",
-        "Draft cross-project record: agent principals, signed scoped delegations that only narrow, "
-        "revocation, connection grants with owners, and actor and subject in receipts and run records.",
+        "Draft: agent principals, signed scoped delegations that only narrow, sender-constrained "
+        "credentials, revocation, connection grants with owners, and actor and subject in receipts "
+        "and run records.",
         "proposals",
         "Draft proposal",
         source_ref="main",
