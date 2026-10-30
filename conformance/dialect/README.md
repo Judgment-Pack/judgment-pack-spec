@@ -1,7 +1,9 @@
 # Dialect vectors (staged)
 
 This directory holds 47 vectors for the dialect, written for the preparation-verifier class that
-the companion document [`spec/dialect.md`](../../spec/dialect.md) defines. Its design record,
+the companion document [`spec/dialect.md`](../../spec/dialect.md) defines, recorded under Core
+`0.2.0-draft`; and, apart from them, the [Core `0.3.0` recording set](#the-core-030-recording-set),
+which holds 46 recordings made under Core `0.3.0`. Its design record,
 [RFC 0018](../../rfcs/0018-dialect.md), was accepted on 2026-10-15, and the vectors are **staged**
 until the next `specVersion` opens. They are in no corpus.
 
@@ -72,9 +74,66 @@ evidence, not `0.3.0` producer coverage. Their declaration is
 `schema/judgment-pack-core-0.2.0-draft.schema.json`, or `0.3.0` only with the live Core schema, and
 require it to equal the embedded pack's version and both the visible and decoded signed audit's
 evaluator and pack versions. Any other value, any disagreement, or a pack that does not validate
-against the selected schema refuses the recording before its preparation is verified. A genuine
-`0.3.0` set will be recorded through the Runner and published
-beside these exports, without rewriting or re-signing them.
+against the selected schema refuses the recording before its preparation is verified. The genuine
+`0.3.0` set recorded through the Runner is published beside these exports, without rewriting or
+re-signing them: [the Core `0.3.0` recording set](#the-core-030-recording-set).
+
+## The Core 0.3.0 recording set
+
+[`vectors-0.3.0/`](vectors-0.3.0/) holds 46 recordings made under Core `0.3.0`: the scenarios of
+[`vectors/`](vectors/), recorded again by the reference Runner's producer, not edited. It was recorded
+under `0.3.0` by Runner `275b5ce0a2b3e25faf37ce5b70906fb31544e8ab` (Runner pull request 198)
+against Runtime `v0.39.0`, with the command
+
+```text
+scripts/recording-set.sh OUT
+```
+
+run in a clean checkout of that commit, and `OUT` copied here byte for byte. The script runs the
+Runner's own tests that recorded the historical fixtures, each scenario a real run through the
+pinned Runtime `v0.39.0` (commit `12793d2dd24d18549567ac422711a2b3c1489f04`) with the triage pack
+declaring Core `0.3.0` (Spec `v0.3.0`), and makes the vectors of their exports with the historical
+set's generator and alterations, running the Runner's `verify-run` on each. Every recording declares
+and names `0.3.0`: its pack, `run.result.evaluatorSpecVersion`, and the visible and decoded audit
+record's evaluator and pack versions.
+
+- **Its manifest.** [`vectors-0.3.0/manifest.json`](vectors-0.3.0/manifest.json) is the Runner's: it
+  has the historical manifest's members for each vector and, besides, `core`; `producer`, the Runner
+  commit, the Runtime's version and commit, and the Spec release; `signing`; `notFixed`;
+  `recordings`, the Runner tests that recorded the fixtures; `notRecorded`; and, for each vector,
+  `recorded`, the SHA-256 of the run's export as the Runner wrote it, before any alteration.
+  [`manifest-0.3.0.json`](manifest-0.3.0.json) is this repository's, in the form of
+  [`manifest.json`](manifest.json), with `recordedUnder` and `notRecorded`; its `source` names the
+  Runner's pull request, commit and command, and its `runnerFiles` the digest of the Runner's
+  manifest.
+- **The signing identity.** Every signed record is signed under the seed of RFC 8032's first test
+  vector (section 7.1, TEST 1), a published test key that signs nothing real, as the historical
+  set's records are; `public-key.txt` holds its public key. The stand-in gateways' receipts are
+  signed under keys made for each run, whose public keys `profiles.json` holds.
+- **What a regeneration reproduces.** The same vectors, files, alterations and `verify-run`
+  findings. Not the same bytes: each run's instants are the clock's when it was recorded, the keys
+  of each run are made for it, and identifiers, salts, the Runtime's binary digest, and every
+  digest and signature over them differ. The manifest's `notFixed` lists them.
+- **One scenario is not recorded.** `unbound-record` holds a record that carries no binding, which
+  only a Runtime before 0.31.0 makes; every Runtime that evaluates Core `0.3.0` takes the
+  preparation's binding, and the Runner gives it on every run. The historical `unbound-record`
+  remains the vector of that finding.
+- **Two answers differ from the historical rows.** `unsigned-parameters` and `escaped-strings` are
+  still version-2 exports, unsigned, but their records now bind their preparations: the class gives
+  a reading, binding `matches`, where the historical rows give `absent`. Every other row is the
+  historical row's.
+
+The checks of [How they are checked](#how-they-are-checked) run over both sets: each file to the
+digest its Runner manifest gives, that manifest to the digest this repository records, a recording
+edited by one byte caught in either, each recording's Core version and release bytes integral,
+each preparation recomputed or held fixed, each vector's answer by both readers, and the controls.
+Producer coverage at `0.3.0` is claimed from this set alone, and only for these scenarios.
+
+The companion document is not changed with this set: `spec/dialect.md` is a file of the `v0.3.0`
+retained-column distribution, held to its digest by
+[`releases/v0.3.0.retained-column.json`](../../releases/v0.3.0.retained-column.json), and its Status
+already says that the forty-seven recordings are historical evidence, not `0.3.0` producer coverage.
+Its next revision names this set.
 
 ## Companion hand-written cases
 

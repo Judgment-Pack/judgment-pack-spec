@@ -1,0 +1,341 @@
+{
+  "status": "staged",
+  "proposedBy": "rfcs/0018-dialect.md",
+  "recordedUnder": "0.3.0",
+  "source": {
+    "repository": "https://github.com/Judgment-Pack/judgment-pack-runner",
+    "pullRequest": 198,
+    "commit": "275b5ce0a2b3e25faf37ce5b70906fb31544e8ab",
+    "command": "scripts/recording-set.sh OUT"
+  },
+  "runnerFiles": {
+    "vectors-0.3.0/manifest.json": "5fe4e6a150c1de379ff0d7723838f2bc7d9ce7cc047741016fa2288c99ff04d9"
+  },
+  "notRecorded": [
+    "unbound-record"
+  ],
+  "cases": [
+    {
+      "id": "valid",
+      "path": "vectors-0.3.0/valid",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "recomputed-one-second-later",
+      "path": "vectors-0.3.0/recomputed-one-second-later",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "binding-mismatch"
+    },
+    {
+      "id": "foreign-binding-kind",
+      "path": "vectors-0.3.0/foreign-binding-kind",
+      "requiresBinding": false,
+      "expectedResult": "finding",
+      "expectedFinding": "binding-foreign-kind"
+    },
+    {
+      "id": "changed-table-lineage",
+      "path": "vectors-0.3.0/changed-table-lineage",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "preparation-differs"
+    },
+    {
+      "id": "disposition-differs-from-audit",
+      "path": "vectors-0.3.0/disposition-differs-from-audit",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "unsigned-parameters",
+      "path": "vectors-0.3.0/unsigned-parameters",
+      "requiresBinding": false,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "escaped-strings",
+      "path": "vectors-0.3.0/escaped-strings",
+      "requiresBinding": false,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "numeric-spellings",
+      "path": "vectors-0.3.0/numeric-spellings",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "http-shaped-source",
+      "path": "vectors-0.3.0/http-shaped-source",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "version-3-bound",
+      "path": "vectors-0.3.0/version-3-bound",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "unbound-bound-at-import",
+      "path": "vectors-0.3.0/unbound-bound-at-import",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-valid-types-all-six",
+      "path": "vectors-0.3.0/gtm-company-person-valid-types-all-six",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-optional-omitted",
+      "path": "vectors-0.3.0/gtm-company-person-presence-optional-omitted",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-required-not-found",
+      "path": "vectors-0.3.0/gtm-company-person-presence-required-not-found",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-integer-zero",
+      "path": "vectors-0.3.0/gtm-company-person-presence-integer-zero",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-decimal-zero",
+      "path": "vectors-0.3.0/gtm-company-person-presence-decimal-zero",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-boolean-false",
+      "path": "vectors-0.3.0/gtm-company-person-presence-boolean-false",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-presence-text-empty",
+      "path": "vectors-0.3.0/gtm-company-person-presence-text-empty",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-stale-and-conflicting-unknown",
+      "path": "vectors-0.3.0/gtm-company-person-stale-and-conflicting-unknown",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-failed-fallback-all-unavailable",
+      "path": "vectors-0.3.0/gtm-company-person-failed-fallback-all-unavailable",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-failed-fallback-secondary-found",
+      "path": "vectors-0.3.0/gtm-company-person-failed-fallback-secondary-found",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-changed-binding-second-installation",
+      "path": "vectors-0.3.0/gtm-company-person-changed-binding-second-installation",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "gtm-company-person-changed-binding-old-preparation",
+      "path": "vectors-0.3.0/gtm-company-person-changed-binding-old-preparation",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "preparation-differs"
+    },
+    {
+      "id": "gtm-company-person-changed-response-retained-result",
+      "path": "vectors-0.3.0/gtm-company-person-changed-response-retained-result",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "acquisition-invalid"
+    },
+    {
+      "id": "work-item-triage-valid-types-all-six",
+      "path": "vectors-0.3.0/work-item-triage-valid-types-all-six",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-optional-omitted",
+      "path": "vectors-0.3.0/work-item-triage-presence-optional-omitted",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-required-not-found",
+      "path": "vectors-0.3.0/work-item-triage-presence-required-not-found",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-integer-zero",
+      "path": "vectors-0.3.0/work-item-triage-presence-integer-zero",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-decimal-zero",
+      "path": "vectors-0.3.0/work-item-triage-presence-decimal-zero",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-boolean-false",
+      "path": "vectors-0.3.0/work-item-triage-presence-boolean-false",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-presence-text-empty",
+      "path": "vectors-0.3.0/work-item-triage-presence-text-empty",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-stale-and-conflicting-unknown",
+      "path": "vectors-0.3.0/work-item-triage-stale-and-conflicting-unknown",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-failed-fallback-all-unavailable",
+      "path": "vectors-0.3.0/work-item-triage-failed-fallback-all-unavailable",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-failed-fallback-secondary-found",
+      "path": "vectors-0.3.0/work-item-triage-failed-fallback-secondary-found",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-changed-binding-second-installation",
+      "path": "vectors-0.3.0/work-item-triage-changed-binding-second-installation",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "work-item-triage-changed-binding-old-preparation",
+      "path": "vectors-0.3.0/work-item-triage-changed-binding-old-preparation",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "preparation-differs"
+    },
+    {
+      "id": "work-item-triage-changed-response-record-fields",
+      "path": "vectors-0.3.0/work-item-triage-changed-response-record-fields",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "acquisition-invalid"
+    },
+    {
+      "id": "skipped-source-dependency-unavailable",
+      "path": "vectors-0.3.0/skipped-source-dependency-unavailable",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "acquired-dependent-source",
+      "path": "vectors-0.3.0/acquired-dependent-source",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "acquired-dependent-source-unknown",
+      "path": "vectors-0.3.0/acquired-dependent-source-unknown",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "endpoint-scope-two-paths-one-origin",
+      "path": "vectors-0.3.0/endpoint-scope-two-paths-one-origin",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "endpoint-scope-wildcard-two-origins",
+      "path": "vectors-0.3.0/endpoint-scope-wildcard-two-origins",
+      "requiresBinding": true,
+      "expectedResult": "reading",
+      "expectedBinding": "matches"
+    },
+    {
+      "id": "endpoint-scope-endpoint-outside",
+      "path": "vectors-0.3.0/endpoint-scope-endpoint-outside",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "acquisition-invalid"
+    },
+    {
+      "id": "endpoint-scope-redirect-outside",
+      "path": "vectors-0.3.0/endpoint-scope-redirect-outside",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "acquisition-invalid"
+    },
+    {
+      "id": "endpoint-scope-changed-constraint",
+      "path": "vectors-0.3.0/endpoint-scope-changed-constraint",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "profile-mismatch"
+    },
+    {
+      "id": "endpoint-scope-changed-request",
+      "path": "vectors-0.3.0/endpoint-scope-changed-request",
+      "requiresBinding": true,
+      "expectedResult": "finding",
+      "expectedFinding": "acquisition-invalid"
+    }
+  ]
+}

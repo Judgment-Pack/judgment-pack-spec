@@ -1,0 +1,1 @@
+[{"id":"intake","publicKey":"02ccf4588cbbeaa54b333272ed040ff47644043e3741470b00198c757788442b","class":"record","source":"intake/api","authority":"test","shape":"http","adapter":{"name":"adapter-http","version":"stand-in","digest":"sha256:ce1c5e3075386e9f8466db2074f128b68d0ad3abd9784fe78fd31ef231d82cc4"},"endpoint":"https://127.0.0.1:33087/intake/requests"}]

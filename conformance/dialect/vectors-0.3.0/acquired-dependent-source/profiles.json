@@ -1,0 +1,1 @@
+[{"id":"records","publicKey":"112fa9ee6daf3d33c687a0f338aa53a4c695a9a52fbc4b2591148be0d32c1936","class":"record","source":"intake/records","authority":"test","shape":"mcp","adapter":{"name":"adapter-mcp","version":"stand-in","digest":"sha256:925eca3eec53bdfd2629e67de46f1b63b8a90f1b7053bc39d7fc75e7af4bf6c2"},"endpoint":"stdio:intake-records","tools":["lookup"]}]
