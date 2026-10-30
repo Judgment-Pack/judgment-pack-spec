@@ -260,22 +260,32 @@ bound (step 0), and it binds a credential only at the issuing host's authenticat
 | `signature` | signature | |
 
 **Scope.** `scope` is `{"sources": [entry, ...]}`, at least one entry. Entries are ordered by
-`audience`, then by `source`, both by code point, and no pair of `audience` and `source` repeats.
-An entry is:
+`audience.kind`, then `audience.name`, then `source`, each by code point, and no pair of `audience`
+and `source` repeats. An entry is:
 
 | Member | Form | Meaning |
 | --- | --- | --- |
-| `audience` | flat token | the enforcing host that admits calls under this entry: a gateway authority (§1.2's `authority`), or the agent host's name for its own host sources |
+| `audience` | `{"kind": "gateway", "name": string}` or `{"kind": "agent-host", "name": flat token}` | the enforcing host that admits calls under this entry (below) |
 | `source` | string | the source as that enforcing host names it: the gateway's `source` (for example `<platform>/live` or `<platform>/write`), or the agent's source record identifier for a host source |
 | `tools` | array of strings, at least one, ordered by code point, no repeats | the exact tool names admitted; no pattern, prefix or wildcard (open question 4) |
 | `effects` | array, at least one, of `"pure"`, `"read"`, `"read-external"`, `"propose"`, `"act"`, in that order, no repeats | the effect classes admitted, in ADR-0027's vocabulary |
 | `limits` | object of limit name to non-negative integer; may be empty | resource limits, where the source has them |
 
-An enforcing host admits only under an entry whose `audience` is its own name. A staging gateway
-and a production gateway that serve the same `source` name are therefore distinct entries. The
-agent harness checks a gateway source against the entry for that gateway's authority and the
-gateway's `source` name. The host declares that mapping on the ADR-0006 source record. A gateway
-source record with no mapping cannot be checked, and its calls are refused (`out-of-scope`, reason
+**Audience.** An audience names one enforcing host, in one of two forms.
+- **A gateway.** `{"kind": "gateway", "name": …}`, where `name` is exactly the string that
+  gateway's receipts carry in `authority` (gateway `SPEC.md` §1.2, an operator-configured label
+  such as `gateway:acme-finance`). The form is 1 to 256 characters from U+0021 to U+007E, so a
+  label with `:` is admitted.
+- **An agent host.** `{"kind": "agent-host", "name": …}`, where `name` is a flat token. It is the
+  name the host declares in its harness configuration for the host sources it serves, and it is
+  carried on each host source's ADR-0006 source record. When the issuing host runs the harness
+  itself, the name is its own `host`.
+
+An enforcing host admits only under an entry whose `audience` is its own. A staging gateway and a
+production gateway that serve the same `source` name are therefore distinct entries. The agent
+harness checks a gateway source against the entry for that gateway's audience and the gateway's
+`source` name. The host declares that mapping on the ADR-0006 source record. A gateway source
+record with no mapping cannot be checked, and its calls are refused (`out-of-scope`, reason
 `source`).
 
 **Limits.** Every limit is an **upper bound**: the quantity it names must not exceed it. A limit
@@ -288,8 +298,17 @@ can enforce it **before dispatch**, such as a row bound passed to a query or a s
 a request. A limit checked only after the result arrives is not a scope limit.
 
 **Counting `calls`.** The counter for each (link, entry) pair is held by the issuing host and is
-the only authoritative one. Admission checks it and increments it in one atomic operation (the
-*admission read*, below), so concurrent admissions cannot together exceed the limit.
+the only authoritative one. The admission read (below) checks it and increments it in one atomic
+operation, so concurrent admissions cannot together exceed the limit.
+- **When it counts.** Counting happens at dispatch, after the action-key lookup. The gateway first
+  looks up the request's action key (§4, rule 4; §7, rule 3). A request that the lookup answers
+  from retained evidence, sends to a read-back, or refuses dispatches nothing, and makes no
+  counting admission read. Only a request that will physically dispatch — a first attempt, or a
+  freed attempt — makes an admission read with counting set. Of the admissions made for one call,
+  only the final one immediately before dispatch counts. A check before an approval pause, a park
+  or a wake is made with counting unset.
+- **A lost answer.** If the issuing host counted but its `admit` answer is lost, the budget is
+  consumed and the call is not dispatched. This fails closed.
 - **Who counts.** When the agent harness and a gateway both verify the same call, only the
   enforcing host that dispatches it, the gateway, counts it. The harness checks without counting.
   For a host source, the harness is the enforcing host and counts.
@@ -353,7 +372,7 @@ but does not close it. Sender constraint closes it, because the thief does not h
 private key. Revocation (§4) does not make either rule redundant: it acts only once someone has
 noticed.
 
-**Authoritative state.** Steps 9 to 12 read state the issuing host holds:
+**Authoritative state.** Steps 8 to 12 read state the issuing host holds:
 - the inventory;
 - revocations;
 - the subject's standing in its authorization model (desk #612, #452);
@@ -362,10 +381,18 @@ noticed.
 The enforcing host gets this state by an **admission read**: an authenticated, synchronous request
 to the issuing host. It names the chain's digests, the call's audience, source, tool and effect,
 and whether this dispatch is to be counted. The issuing host answers `admit`, or the first refusal
-of steps 9 to 12. On `admit`, it has already incremented the counters. The enforcing host does not
-admit from a copy, a cache or an earlier answer: a missing, late or unreadable answer is a refusal.
-A gateway holds no authorization model of its own, so step 12 is always the issuing host's answer
-(open question 10).
+of steps 8 to 12. On `admit` with counting set, it has already incremented the counters. Three
+checks are the issuing host's own:
+- it answers `admit` only for links it recorded issuing, so a chain signed with a stolen key alone,
+  without the host's channel credentials, is never admitted (`not-issued`, open question 18);
+- it answers only an enforcing host that authenticates as the audience named in the call's entry,
+  so one enforcing host can neither read another audience's state nor consume its counters;
+- it checks `expiresAt` against its own clock as well, so an enforcing host with a slow clock does
+  not admit past expiry.
+
+The enforcing host does not admit from a copy, a cache or an earlier answer: a missing, late or
+unreadable answer is a refusal. A gateway holds no authorization model of its own, so step 12 is
+always the issuing host's answer (open question 10).
 
 **When admission happens.** Admission is the check made **immediately before physical dispatch**.
 It is made again after any approval pause, park, wake, re-authorization or freed attempt. A call
@@ -373,13 +400,16 @@ that was checked, but had not been dispatched when a revocation landed, is refus
 re-check. Approval, a wait or an earlier check never carries authority past a revocation.
 
 **Verification steps.** The enforcing host resolves the chain, root first, ending with the leaf it
-bound to the credential. For one call it applies the steps below and stops at the first failure.
+bound to the credential. For a host source, the agent harness is the enforcing host and binds no
+credential: step 0 then requires that the chain is the one the issuing host supplied to the run
+when it started it, never one a model, a tool result or a child supplies. For one call the
+enforcing host applies the steps below and stops at the first failure.
 Where a step concerns links, links are taken from root to leaf, and within a link the reasons are
 taken in the order the step lists them.
 
 | Step | Refusal | Condition |
 | --- | --- | --- |
-| 0 | `credential-mismatch` | the presented credential is not live at this enforcing host, is expired, does not prove possession of its bound key where one is bound, or its bound chain is not byte-identical to any chain the caller also presents |
+| 0 | `credential-mismatch` | the presented credential is not live at this enforcing host, is expired, does not prove possession of its bound key where one is bound, or, if the caller also presents a chain, its bound chain is not byte-identical to the chain the caller presents |
 | 1 | `malformed` | a link is not a JSON object, has a duplicate member name, holds a value outside the `canon` domain, or lacks a string `delegationVersion` |
 | 2 | `unsupported-version` | a link's `delegationVersion` is a string other than `"1"` |
 | 3 | `malformed` | a link violates any structural constraint of version 1 above: a member missing, of another type or form, an array out of order or with a repeat, `expiresAt` not after `issuedAt`, `parent` and `depth` inconsistent, or over a size cap |
@@ -388,8 +418,8 @@ taken in the order the step lists them.
 | 6 | `chain-broken` | §3's clauses 0 to 3 fail |
 | 7 | `widened` | §3's clauses 4 to 8 fail |
 | 8 | `not-yet-valid`, then `expired` | at the enforcing host's authoritative time t, some link has t < `issuedAt` minus the skew allowance (open question 17), or t ≥ `expiresAt` |
-| 9 | `agent-unregistered`, then `software-mismatch` | some link's `act.agent` is not `active` in the inventory of `host`, or some link's `act.software` differs from its actor's current entry or from the software bound to the credential |
-| 10 | `revoked` | some link is revoked, some link's actor is revoked, or the subject has been removed from the host (§4) |
+| 9 | `agent-unregistered`, then `software-mismatch` | some link's `act.agent` is not `active` in the inventory of `host`; or some link's `act.software` differs from its own actor's current inventory entry; or the **leaf's** `act.software` differs from the software bound to the credential |
+| 10 | `not-issued`, then `revoked` | the issuing host has no record of issuing some link; or some link is revoked, some link's actor is revoked, or the subject has been removed from the host (§4) |
 | 11 | `out-of-scope` | the call is not within the scope of some link. The refusal names the first failing reason, in the order `source`, `tool`, `effect`, `limit-unknown`, `limit` |
 | 12 | `subject-mismatch`, then `subject-unauthorized` | the source's declared identity is a person other than `sub` (§7, rule 1), or the call is outside what the subject itself may do on the issuing host now, the subject's standing on a service's or a connection's credential included |
 
@@ -402,7 +432,8 @@ unavailable ownership evidence.
 Some refusals are not verification steps, and they sit outside this table:
 - `principal-changed` is a fence check (§7, rule 2), made with the lease at the same admission and
   before step 0;
-- `action-key-scope-conflict` is the gateway's key reservation (§7, rule 3), made after admission;
+- `action-key-unauthenticated` and `action-key-scope-conflict` come from the gateway's action-key
+  lookup (§4, rule 4; §7, rule 3), made before the counting admission read;
 - `not-parent-actor` and `delegation-not-permitted` are issuance refusals (§3).
 
 ### 3. Chained delegation
@@ -440,7 +471,7 @@ for each child `C = Lk` and its parent `P = L(k−1)`, `k ≥ 1`, clauses 1 to 8
 7. for that same pair, every limit name of `p.limits` is a limit name of `e.limits`, and
    `e.limits[name]` ≤ `p.limits[name]`. `e.limits` may add names `p.limits` does not have, which
    is sound because every limit is an upper bound;
-8. `P.mayDelegate` is `true`, and if `C.mayDelegate` is `true` then so is `P.mayDelegate`.
+8. `P.mayDelegate` is `true`: a child exists only below a link that permits one.
 
 Clauses 0 to 3 failing is `chain-broken`; clauses 4 to 8 failing is `widened`. Equality is of
 `canon` bytes. The check is pairwise, and by transitivity a link is never wider than any ancestor.
@@ -483,15 +514,48 @@ Who may revoke:
    A revocation never turns an uncertain effect into a refused one, and never into a retry. A call
    that was admitted but not dispatched is not in flight: it is refused at its re-check (§2, *When
    admission happens*).
-4. **Reconciliation after revocation.** A gateway request whose action key names a reservation with
-   an `uncertain` outcome is resolved **by key, before step 0**. It is limited to retained evidence
-   or the declared read-back, and never reaches a freed attempt or a dispatch. After revocation the
-   bound credential is gone, so such a request is accepted from one of two parties:
-   - the issuing host, authenticated as itself and acting for the run;
-   - the subject, with its own token, whose issuer and subject match the reservation's scope.
+4. **Requests on an action key, before and after revocation.** A gateway request whose action key
+   names an existing reservation is resolved **by key**, before the counting admission read (§2).
+   A reservation made under a delegation records its scope: the gateway authority, the chain's
+   `sub` (`kind`, `issuer` and `subject`), the chain's root actor, and the issuing host.
 
-   The gateway's own operator may also run it. The read-back is not a call under the delegation
-   and counts against no limit (open question 12).
+   **The key grants nothing on its own.** It is public in receipts (`action.delivery.key`). Before
+   any retained response or read-back, the gateway authenticates the sender against the
+   reservation's scope. Only these senders are accepted:
+
+   | Sender | Authenticated by | Before revocation | After revocation |
+   | --- | --- | --- | --- |
+   | the run's actor | a live credential bound to a chain whose `sub` and root actor equal the reservation's: step 0 and steps 1 to 7 applied, and steps 8 to 12 not, since nothing new is admitted | accepted | not possible: no live credential exists |
+   | the subject | its own token, whose verified issuer and subject equal the reservation's `sub` | accepted | accepted, unless the subject has been removed |
+   | the issuing host | authenticated as the reservation's issuing host, acting for the run | accepted | accepted |
+   | the gateway's operator | the gateway's own operator authentication | accepted | accepted |
+
+   Any other sender, a bare key, or a credential bound to another scope is refused as
+   `action-key-unauthenticated`, and the refusal discloses nothing about the reservation.
+   - **What an authenticated sender gets.** Retained evidence or the declared read-back. Only the
+     actor's live credential can reach a freed attempt, and that attempt is a dispatch: it makes
+     the counting admission read like any other. After revocation, no sender reaches a freed
+     attempt or any dispatch.
+   - **Counting.** The read-back is not a call under the delegation and counts against no limit
+     (open question 12).
+   - **Recording the read-back.** The read-back's receipt records `caller` as the reservation's
+     subject pair: the same `issuer` and `subject` that the cited action's `requester` carries.
+     `tokenDigest` is the digest of the token the sender presented. The sender is recorded in a new
+     signed top-level member, `reconciler`:
+     `{"kind": "actor" | "subject" | "host" | "operator", "issuer": string, "subject": string}`.
+     It holds the identity the sender authenticated as; for the actor, `issuer` is the issuing
+     host and `subject` the agent's identifier.
+   - **What verifiers then report.** Gateway §1.2b's check resolves the cited action "under the
+     same authority and authenticated issuer and subject". The amendment to §1.2b would say that,
+     on a read-back carrying `reconciler`, that pair is `caller`'s, which is the reservation's
+     subject and not the sender's token. A legitimate reconciliation then resolves for every
+     sender above, and a new verifier holds `reconciler` to its form.
+   - **What an older verifier reports.** It tolerates `reconciler` as an unknown signed member,
+     resolves the read-back, and reports the same `action-committed` or `action-uncertain`
+     observation it would for the subject's own read-back. It is misled on one point only: it takes
+     the read-back as made by the subject, when the issuing host or the operator may have sent it.
+   - **Undelegated reservations.** Reservations made under no delegation keep §1.2b's scope and
+     rules unchanged.
 5. **No restoration.** A revoked delegation is never un-revoked. A new grant is a new statement
    with a new `id`.
 6. **Removing a connection grant's owner.** Removing the owner of a connection grant from the host
@@ -517,6 +581,7 @@ content.
 | --- | --- | --- |
 | `connection` | flat token | the gateway's connection |
 | `owner` | principal reference | the person or service that authorized the grant and answers for it |
+| `ownerHost` | flat token | the issuing host that holds the owner's standing |
 | `scopes.required` | array of strings, ordered, no repeats | the union of the minimum scopes the connection's sources declare per operation |
 | `scopes.granted` | array of strings, ordered, no repeats | what the provider granted, as last read |
 | `scopes.used` | array of `{"scope": string, "lastUsedAt": time}`, ordered by `scope` | each granted scope that some dispatched call exercised, and when last |
@@ -545,8 +610,30 @@ content.
    - It leaves quarantine only by being revoked, or by being reassigned to a new owner. Only the
      operator of the issuing host may reassign it, and the reassignment takes effect only on the
      new owner's authenticated acceptance.
-   - No grant remains `active` with a removed owner.
+   - No grant remains usable with a removed owner.
    - Pending action keys follow reconciliation (§4, rule 4).
+
+   **How the gateway learns of the removal: a read at each use.** Before every use of a grant —
+   delegated or not — the gateway learns the owner's standing from `ownerHost`.
+   - For a delegated call, the admission read (§2) carries the grant's owner, and the issuing host
+     answers the owner's standing with the rest. Where `ownerHost` is another host, the gateway
+     makes a separate owner read to it.
+   - For an undelegated call, which makes no admission read, the gateway makes an **owner read**:
+     an authenticated, synchronous request to `ownerHost` asking whether the owner is a current
+     principal.
+   - An owner that has been removed is refused (`owner-removed`) and rule 5 is applied to the grant.
+     A missing, late or unreadable answer is refused (`owner-unknown`).
+   - A grant never used after its owner's removal is caught at its next use, at its idle expiry
+     (rule 4), or by the operator's periodic owner read.
+
+   Why a read and not a notification: a notification event that the issuing host sends on removal
+   can be late or lost. It would need a delivery guarantee the project does not offer: ADR-0025
+   puts notification delivery guarantees out of the package's scope. Until it arrived, the gateway
+   would keep admitting. A read at each use fails closed, reuses the synchronous admission read
+   that delegated calls already make, and needs no new delivery contract. Its cost is one
+   synchronous read on undelegated calls through an owned grant. A gateway may still act early on
+   a removal it is told about, but such a message never admits anything. A grant whose record has
+   no owner, as before gateway #357, is used as today.
 6. **What revoking a grant does.** The gateway calls the provider's revocation endpoint where it
    offers one (for an OAuth provider, RFC 7009 token revocation), deletes the credential, and sets
    `state` to `revoked`. Where the provider offers no revocation, it deletes the credential and
@@ -577,6 +664,7 @@ top-level member, `delegation`, signed with every other member under §1.2a's ru
 | `actor` | opaque identifier | the leaf's `act.agent` |
 | `subject` | principal reference | the chain's `sub` |
 | `chain` | array of digests, root first, ending with the leaf's | the chain the call was admitted under |
+| `admittedAt` | time (millisecond form) | the enforcing host's authoritative time at the final admission before dispatch (§2) |
 
 **The compatibility rule, exact.** Under a delegation:
 
@@ -617,11 +705,17 @@ top-level member, `delegation`, signed with every other member under §1.2a's ru
   - the chain's length is not the leaf's `depth` plus one;
   - steps 1 to 7 of §2 fail;
   - the leaf's `id`, `sub` or `act.agent` differ from `id`, `subject` or `actor`;
-  - the served instant falls outside the leaf's validity.
-- **The served instant.** `servedAt` is the gateway's stamp, to the second, of the form
-  `YYYY-MM-DDTHH:MM:SSZ`. It is parsed, never compared by characters. It stands for the interval
-  `[s, s + 1 s)`, and it is outside the leaf's validity exactly when `s + 1 s` ≤ `issuedAt` or
-  `s` ≥ `expiresAt`.
+  - `admittedAt` falls outside the validity of some link: before its `issuedAt`, or at or after
+    its `expiresAt`;
+  - the call was served before it was admitted (below).
+- **Admission and service are different instants.** Validity is judged by `admittedAt`, which
+  names the admission. `servedAt` names a later event: the gateway stamps it after the source or
+  executor has returned, and later still for an uncertain action. So a call admitted before
+  `expiresAt` may be served after it, and that is not a finding.
+- **Served no earlier than admitted.** `servedAt` is the gateway's stamp, to the second, of the
+  form `YYYY-MM-DDTHH:MM:SSZ`. It is parsed, never compared by characters. It stands for the
+  interval `[s, s + 1 s)`, and the call was served before it was admitted exactly when
+  `s + 1 s` ≤ `admittedAt`. A `servedAt` of any other form is reported `delegation-unresolved`.
 - **Revocation** at the served instant is not established offline unless a revocation statement
   (open question 20) is also given. The receipt asserts only that the gateway admitted the call.
 
@@ -731,7 +825,9 @@ registration, entry change, delegation, revocation and connection action with wh
   new signed member and returns the status it returned before. `caller` and `requester` keep naming
   the subject's pair, but on a delegated receipt `tokenDigest` names another credential (rule 3).
   A receipt made under no delegation is unchanged in its bytes. A verifier that knows version 2
-  alone already refuses version 3, and still does.
+  alone already refuses version 3, and still does. A reconciliation read-back of a delegated action
+  carries `reconciler`, which existing verifiers tolerate; they resolve it as the subject's own
+  read-back (§4, rule 4).
 - **Action keys.** Unchanged for calls made under no delegation. Under a delegation, the scope
   changes from the transport subject to the delegation's subject and root actor. A key reserved
   under a transport subject before a gateway adopts this stays in its old scope.
@@ -754,6 +850,9 @@ registration, entry change, delegation, revocation and connection action with wh
   it bound (step 0). It binds credentials only at the issuing host's authenticated request, and
   child links only at the parent actor's or the subject's (§3). Holding statement bytes, by
   themselves, therefore admits nothing and mints nothing.
+- **Public action keys.** A key is published in every action receipt. It grants nothing: every
+  request on a key authenticates its sender against the reservation's scope before any retained
+  response or read-back (§4, rule 4).
 - **Widening along a chain.** The narrowing check is pairwise and repeated by every verifier;
   issuance is not trusted as evidence of it.
 - **Credential theft.** A stolen credential is useless without the run's proof-of-possession key,
@@ -821,7 +920,11 @@ readers.
 - **Admission:**
   - equal-time expiry, not yet valid, and each edge of the skew allowance;
   - an unregistered actor, at the leaf and at an ancestor;
-  - a software mismatch against the entry and against the credential;
+  - a software mismatch against the entry and against the credential, and a valid chain whose
+    links' actors run different software;
+  - a link the issuing host never recorded (`not-issued`), and an admission read from an enforcing
+    host that is not the entry's audience;
+  - a gateway audience whose authority label contains `:`;
   - a revoked leaf, a revoked ancestor, a revoked agent and a removed subject;
   - each `out-of-scope` reason, and their order within a link and across links;
   - two concurrent admissions at a `calls` limit of one;
@@ -837,19 +940,29 @@ readers.
   - a tampered member (`signature-mismatch`);
   - a call under no delegation, byte-identical to the receipt before this record;
   - `delegation-unresolved` for each of its causes;
-  - `servedAt` one second before `issuedAt`, equal to it, and equal to `expiresAt`.
+  - `admittedAt` before `issuedAt`, equal to it, and equal to `expiresAt`;
+  - a call admitted before `expiresAt` and served after it (no finding);
+  - `servedAt` one second before `admittedAt`, in the same second, and of another form.
 - **Action keys and leases:**
   - a takeover authenticating as another transport subject, with the same subject and root actor:
     one mutation, or the outcome stays `unknown`;
   - a takeover with another root actor (`principal-changed`);
   - a re-issued delegation keeping the key;
   - a key presented under another scope with the same subject, and with another subject;
-  - reconciliation after revocation, by the host and by the subject's own token.
+  - reconciliation before and after revocation, by each sender of §4, rule 4's table, with its
+    receipt's `caller` and `reconciler`, verified by a reader that knows `reconciler` and by one
+    written before it;
+  - a key presented with no credential, and with a credential bound to another scope
+    (`action-key-unauthenticated`);
+  - a request answered from retained evidence, and one refused at the key lookup, neither counted;
+    a check before an approval pause not counted, and the dispatch after it counted once.
 - **Connection grants:**
   - excess scope, refused and, where the provider cannot narrow, reported;
   - drift, and unused scopes listed;
   - idle expiry at equal time;
   - owner removal revoking and quarantining, and reassignment with and without acceptance;
+  - an undelegated call after the owner's removal (`owner-removed`), and with the owner read
+    unanswered (`owner-unknown`);
   - a provider without revocation, reporting `provider-grant-may-persist`;
   - a lapsed publisher, and a name lookalike.
 - **Agent records:**
@@ -928,10 +1041,11 @@ Each has a proposed default. A default is a proposal for review, not a decision 
       issuing host's authorization model (step 12).
     - Removing the person revokes the delegation by §4, rule 2.
     - The receipt's `caller` names the person.
-12. **The read-back after revocation.** Permitted, resolved by key before step 0 and limited to
-    retained evidence or the declared read-back. It may be presented by the issuing host, by the
-    subject's own token, or by the gateway's operator. It dispatches no mutation and counts against
-    no limit.
+12. **Requests on an action key after revocation.** Permitted, resolved by key and limited to
+    retained evidence or the declared read-back. The sender is always authenticated against the
+    reservation's scope, by §4, rule 4's table: after revocation, the subject's own token, the
+    issuing host or the gateway's operator. The read-back's `caller` is the reservation's subject
+    pair, and `reconciler` names the sender. It dispatches no mutation and counts against no limit.
 13. **Revoke or quarantine on owner removal, when the operator configured neither.** Revoke.
 14. **Idle expiry.** Absent (`null`) by default. Posture reports a grant unused for 90 days as idle.
 15. **Publisher trust.** Report only; refusal is an operator policy.
@@ -942,7 +1056,10 @@ Each has a proposed default. A default is a proposal for review, not a decision 
 17. **Clock skew between the issuing host and an enforcing host.**
     - The allowance is zero: the issuing host back-dates `issuedAt` by at most 5 seconds when it
       issues a link, and enforcing hosts allow no further skew.
-    - Expiry gets no allowance.
+    - A child's back-dated `issuedAt` is clamped to its parent's `issuedAt`, so clause 5 holds.
+    - Expiry gets no allowance. The issuing host also checks `expiresAt` against its own clock in
+      every admission read (§2), so an enforcing host whose clock runs slow does not admit past
+      expiry.
 18. **Compromise of the issuing host's key.**
     - A signed key-revocation statement names a `keyId`. It revokes every delegation that key
       signed, and every chain through one.
@@ -954,7 +1071,10 @@ Each has a proposed default. A default is a proposal for review, not a decision 
     it beside the inventory. Signing that log is not proposed for `0.5.0`.
 20. **The form of a revocation record.** A signed revocation statement under its own prefix,
     `"judgment-pack/delegation-revocation/1:"`. Its members are:
-    - `revoked`: a delegation `id`, an agent, a principal reference, or a `keyId`;
+    - `revoked`: a tagged form, one of `{"kind": "delegation", "id": opaque identifier}`,
+      `{"kind": "agent", "agent": opaque identifier}`, `{"kind": "principal", "principal":
+      principal reference}` or `{"kind": "key", "keyId": key identifier}`. Three of the four
+      identifiers share one lexical form, so the tag, not the value, says what is revoked;
     - `host`, `keyId`, `revokedBy` (a principal reference), `revokedAt`, and `signature`.
 
     An offline reader given these statements can establish revocation at an instant.
@@ -972,7 +1092,8 @@ Each has a proposed default. A default is a proposal for review, not a decision 
       here.
 
 **Review standing.** This Draft does not mark the public comment period complete. The maintainer
-authorized a same-vendor review exception for it: its adversarial review and re-read are by the
-same model that drafted it. That is not compliance with [RFC 0009](0009-interim-review-regime.md)'s
-cross-vendor requirement. The normative text proposed for a later version requires a cross-vendor
-review before adoption.
+authorized a departure from [RFC 0009](0009-interim-review-regime.md)'s cross-vendor review
+requirement for this Draft: the adversarial review and its re-reads are by Anthropic Claude Opus
+5.5, the model that also drafted it. `GOVERNANCE.md` defines no exception mechanism; this is
+recorded as a departure and is not RFC 0009 cross-vendor compliance. The normative text proposed
+for Spec 0.5.0 requires a cross-vendor review before adoption.
