@@ -82,7 +82,7 @@ re-signing them: [the Core `0.3.0` recording set](#the-core-030-recording-set).
 
 [`vectors-0.3.0/`](vectors-0.3.0/) holds 46 recordings made under Core `0.3.0`: the scenarios of
 [`vectors/`](vectors/), recorded again by the reference Runner's producer, not edited. It was recorded
-under `0.3.0` by Runner `d87c8a9b9582bd9a839cd9b44e1cbacd57cacb75` (Runner pull request 198)
+under `0.3.0` by Runner `275b5ce0a2b3e25faf37ce5b70906fb31544e8ab` (Runner pull request 198)
 against Runtime `v0.39.0`, with the command
 
 ```text

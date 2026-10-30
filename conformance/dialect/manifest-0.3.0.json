@@ -5,11 +5,11 @@
   "source": {
     "repository": "https://github.com/Judgment-Pack/judgment-pack-runner",
     "pullRequest": 198,
-    "commit": "d87c8a9b9582bd9a839cd9b44e1cbacd57cacb75",
+    "commit": "275b5ce0a2b3e25faf37ce5b70906fb31544e8ab",
     "command": "scripts/recording-set.sh OUT"
   },
   "runnerFiles": {
-    "vectors-0.3.0/manifest.json": "a0972524976b5809873943ab941211bd38111e562f7d1e56f39123cbb87389a8"
+    "vectors-0.3.0/manifest.json": "5fe4e6a150c1de379ff0d7723838f2bc7d9ce7cc047741016fa2288c99ff04d9"
   },
   "notRecorded": [
     "unbound-record"

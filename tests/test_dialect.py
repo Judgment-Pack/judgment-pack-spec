@@ -41,7 +41,7 @@ MANIFEST_030 = DIALECT / "manifest-0.3.0.json"
 SOURCE_030 = {
     "repository": "https://github.com/Judgment-Pack/judgment-pack-runner",
     "pullRequest": 198,
-    "commit": "d87c8a9b9582bd9a839cd9b44e1cbacd57cacb75",
+    "commit": "275b5ce0a2b3e25faf37ce5b70906fb31544e8ab",
     "command": "scripts/recording-set.sh OUT",
 }
 # What recorded it, as the Runner's manifest names it: the Runner commit above, the pinned Runtime
