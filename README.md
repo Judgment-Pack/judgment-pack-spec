@@ -168,8 +168,9 @@ reproducing its corpus version, its results, or its every-row statement.
 [staged-dialect]:
   https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect
 
-The 47 dialect vectors are the reference Runner's, staged until the next `specVersion`, in no
-corpus.
+The 47 dialect vectors are the reference Runner's, recorded under Core `0.2.0-draft`, staged
+until the next `specVersion`, in no corpus. Beside them, a separate set of 46 recordings of the same
+scenarios was made by the Runner under Core `0.3.0`; it is staged the same way.
 
 The `docs/` directory records the specification's design constraints, its explicit non-goals, and
 how the spec stays independent of any implementation. The specification defines the portable

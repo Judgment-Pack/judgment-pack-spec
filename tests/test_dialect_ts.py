@@ -98,7 +98,8 @@ class SecondDialectReaderTest(unittest.TestCase):
         # vector signed again; round 12's skipped-source members, each altered alone, and an
         # acquired dependent source with a resolved or unknown claim, signed again; and every
         # staged vector, the Runner's research, skipped-source and acquired dependent-source
-        # vectors among them, as conformance/dialect/README.md gives it to a verifier. Their
+        # vectors among them, and every recording of the Core 0.3.0 set, as
+        # conformance/dialect/README.md gives it to a verifier. Their
         # reports must be equal byte for byte, and the answer the text, or the staged manifest,
         # gives. A disagreement is a finding about the readers or the text, and is reported here,
         # never papered over.
@@ -112,9 +113,14 @@ class SecondDialectReaderTest(unittest.TestCase):
         from test_dialect_scope import endpoint_scope_cases
         cases += endpoint_scope_cases()
         cases += first.vector_cases()
+        cases += first.recording_030_cases()
         staged = [name for name, _, _ in cases if name.startswith("vector ")]
         rows = json.loads((first.DIALECT / "manifest.json").read_text(encoding="utf-8"))["cases"]
         self.assertEqual([f"vector {row['id']}" for row in rows], staged)
+        # and every recording of the Core 0.3.0 set beside them (#249)
+        recorded = [name for name, _, _ in cases if name.startswith("recording 0.3.0 ")]
+        rows = json.loads(first.MANIFEST_030.read_text(encoding="utf-8"))["cases"]
+        self.assertEqual([f"recording 0.3.0 {row['id']}" for row in rows], recorded)
         self.assertIn("vector acquired-dependent-source", staged)
         self.assertIn("vector acquired-dependent-source-unknown", staged)
         for name, expected, build in cases:

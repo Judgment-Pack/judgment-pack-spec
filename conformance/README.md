@@ -12,8 +12,9 @@ holds the 54 vectors of its companion document,
 `specVersion` opens: in no corpus, and not served by the site. Nor is the dialect:
 [`dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)
 holds the reference Runner's 47 preparation vectors for its companion document,
-[`spec/dialect.md`](../spec/dialect.md), staged until the next `specVersion` opens: in no corpus,
-and not served by the site. The [Policy offline-reader promotion](policy/1.0.0/README.md)
+[`spec/dialect.md`](../spec/dialect.md), recorded under Core `0.2.0-draft`, and 46 recorded again
+under Core `0.3.0` beside them, staged until the next `specVersion` opens: in no corpus, and not
+served by the site. The [Policy offline-reader promotion](policy/1.0.0/README.md)
 holds 124 agreement vectors for [its draft companion class](../spec/policy.md).
 RFC 0023 has conditional draft approval upon required green CI and PR 218 merge;
 the default branch remains Review until then. These vectors become a released
