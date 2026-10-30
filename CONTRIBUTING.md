@@ -81,6 +81,21 @@ present. Without them, `jsonschema` silently ignores `format`, so conformance ca
 prove a malformed URI or timestamp is rejected come back **valid** and the suite passes while
 checking less than it says it does. Two current corpus cases behave exactly that way.
 
+## Changing a schema
+
+Every JSON Schema the specification defines is fingerprinted in `catalog/record-shapes.json`
+(described in `catalog/README.md`). A pull request that adds, changes or removes one regenerates the
+catalog and commits a change record that names the family, the old and new digests and the reason:
+
+```bash
+python3 tools/record_shapes.py generate
+python3 tools/record_shapes.py record --slug <slug> --reason "<why, with the issue or RFC>"
+```
+
+A pull request that prepares a release or moves a family's draft version also updates
+`catalog/format-status.json`. The `record-shapes` check fails on a schema change without a change
+record, a record that names a wrong digest, or a status record that `releases/` contradicts.
+
 ## Developer Certificate of Origin
 
 Contributions must be signed off using Git's `--signoff` option. The sign-off certifies the

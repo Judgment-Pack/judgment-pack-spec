@@ -20,6 +20,14 @@ here.
   statement is standards track at draft maturity, and the rest is a cross-project exploratory
   record. It is normative for nothing, and nothing in Core or any released conformance claim
   changes.
+- A record-shape catalog (#256): `catalog/record-shapes.json` gives every JSON Schema the
+  specification defines in a stated normalized form (RFC 8785 serialization of an integer-only JSON
+  value) with its SHA-256 digest and a family inventory derived from the tree. Change records in
+  `catalog/changes/` replay every digest, and `catalog/format-status.json` gives per family the
+  draft version, the last accepted compatibility baseline and the last release, checked against
+  `releases/`. The `record-shapes` check runs on every pull request. `catalog/README.md` describes
+  how an implementation compares its own catalog, where a mismatch is a conformance finding. No
+  schema, corpus or released artifact changes.
 
 ## `0.3.0` — 2026-10-29
 

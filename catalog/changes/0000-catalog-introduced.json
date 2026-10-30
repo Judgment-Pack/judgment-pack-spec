@@ -1,0 +1,107 @@
+{
+  "reason": "The catalog begins (#256): every record shape the specification defines on the default branch at that point, at the digest it had then. No shape changed.",
+  "changes": [
+    {
+      "path": "conformance/evaluation/manifest.schema.json",
+      "family": "conformance/evaluation/manifest",
+      "from": null,
+      "to": "sha256:e40e969aa27a98bad01c3d03d3f55cafb01aad673f2ca23d8a56d8b2cf840075"
+    },
+    {
+      "path": "conformance/manifest.schema.json",
+      "family": "conformance/manifest",
+      "from": null,
+      "to": "sha256:e0609fc9ba9d299b99f633617ff1bf715a5b3f1026f0c7323838cda69569bfd3"
+    },
+    {
+      "path": "conformance/policy/1.0.0/fixture.schema.json",
+      "family": "policy",
+      "from": null,
+      "to": "sha256:7c19fcd53fe9d1265bdb4a33aa960d1dead4ab273ddce08c4677a74fd70b04ad"
+    },
+    {
+      "path": "conformance/policy/1.0.0/vectors.schema.json",
+      "family": "policy",
+      "from": null,
+      "to": "sha256:0a0a614d945c1dd6904f5a3ae9c34db74fea80dd085afb50ba019adeccf46393"
+    },
+    {
+      "path": "schema/conformance-evaluation-manifest-0.2.0-draft.schema.json",
+      "family": "conformance/evaluation/manifest",
+      "from": null,
+      "to": "sha256:2f6e157960a7d51c15c1382aec792ce60a4e78ceb30e7549fc32747c557efe5f"
+    },
+    {
+      "path": "schema/conformance-manifest-0.1.0-draft.schema.json",
+      "family": "conformance/manifest",
+      "from": null,
+      "to": "sha256:136fd577d5b8692c64192129259390a5d18abf64e954ca4499f452c4884896a4"
+    },
+    {
+      "path": "schema/conformance-manifest-0.2.0-draft.schema.json",
+      "family": "conformance/manifest",
+      "from": null,
+      "to": "sha256:272564b17a4a8346128dbc3b050122fcf9b016074ea5ffcdc5d5b6dbb2673927"
+    },
+    {
+      "path": "schema/judgment-pack-core-0.1.0-draft.schema.json",
+      "family": "judgment-pack-core",
+      "from": null,
+      "to": "sha256:b10599b262df8f9e0184030fc0a895888dd4875b532ca2ec3ab5da659b718b07"
+    },
+    {
+      "path": "schema/judgment-pack-core-0.2.0-draft.schema.json",
+      "family": "judgment-pack-core",
+      "from": null,
+      "to": "sha256:a44598df65cbbcf2333aefd661b1380a54910004fd09539ccd42e8feabff14cb"
+    },
+    {
+      "path": "schema/judgment-pack-core.schema.json",
+      "family": "judgment-pack-core",
+      "from": null,
+      "to": "sha256:b188b95764535e675ffaf0942bdd655f48a9f7ab90fd973f9702908ed1634285"
+    },
+    {
+      "path": "schema/policy/1.0.0/common.schema.json",
+      "family": "policy",
+      "from": null,
+      "to": "sha256:6a4679e4735af8e7346fdcdf18167063f2ebc61a7d0e9c02266346b1f959df88"
+    },
+    {
+      "path": "schema/policy/1.0.0/consumer-core-0.2.0-draft.schema.json",
+      "family": "judgment-pack-core",
+      "from": null,
+      "to": "sha256:a44598df65cbbcf2333aefd661b1380a54910004fd09539ccd42e8feabff14cb"
+    },
+    {
+      "path": "schema/policy/1.0.0/governing-adoption.schema.json",
+      "family": "policy",
+      "from": null,
+      "to": "sha256:ebd940383123defdf4ff2ef38a4c0780f125e906ad1e6c83a986e1ab4ceb4a64"
+    },
+    {
+      "path": "schema/policy/1.0.0/policy.schema.json",
+      "family": "policy",
+      "from": null,
+      "to": "sha256:4d2318cd8707ec276a37cc06f8c8108522bd43c7f559d0a5c151a86778f0c54a"
+    },
+    {
+      "path": "schema/retained-column/1/contract.schema.json",
+      "family": "retained-column",
+      "from": null,
+      "to": "sha256:3a613510a936ce6c6a40591e49c26eb993d673bae7b4c78557d24057f95a7312"
+    },
+    {
+      "path": "schema/workflow-1.schema.json",
+      "family": "workflow",
+      "from": null,
+      "to": "sha256:722e56392f820c2541f91c97a37243fca532b6d1fb31a56e6c4229aa344a5042"
+    },
+    {
+      "path": "schema/workflow-contributors-2.schema.json",
+      "family": "workflow-contributors",
+      "from": null,
+      "to": "sha256:c6a130fb7285f1df30a91125077df9799d54b7ead3abfecbaa147fc9c23a20ee"
+    }
+  ]
+}

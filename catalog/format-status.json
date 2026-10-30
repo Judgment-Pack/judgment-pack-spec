@@ -1,0 +1,40 @@
+{
+  "format": "judgment-pack-format-status/1",
+  "families": {
+    "conformance/evaluation/manifest": {
+      "draftVersion": "0.3.0",
+      "baseline": "v0.3.0",
+      "lastReleased": "v0.3.0"
+    },
+    "conformance/manifest": {
+      "draftVersion": "0.3.0",
+      "baseline": "v0.3.0",
+      "lastReleased": "v0.3.0"
+    },
+    "judgment-pack-core": {
+      "draftVersion": "0.3.0",
+      "baseline": "v0.3.0",
+      "lastReleased": "v0.3.0"
+    },
+    "policy": {
+      "draftVersion": "1.0.0",
+      "baseline": "policy-v1.0.0-draft.1",
+      "lastReleased": "policy-v1.0.0-draft.1"
+    },
+    "retained-column": {
+      "draftVersion": "1",
+      "baseline": "v0.3.0",
+      "lastReleased": "v0.3.0"
+    },
+    "workflow": {
+      "draftVersion": "0.3.0",
+      "baseline": "v0.3.0",
+      "lastReleased": "v0.3.0"
+    },
+    "workflow-contributors": {
+      "draftVersion": "0.4.0",
+      "baseline": null,
+      "lastReleased": null
+    }
+  }
+}

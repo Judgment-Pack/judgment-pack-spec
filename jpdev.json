@@ -5,38 +5,38 @@
       "paths": [
         "*.md", ".firebaserc.example", "LICENSE", "NOTICE", "firebase.json", ".vscode/**",
         ".github/ISSUE_TEMPLATE/**", ".github/PULL_REQUEST_TEMPLATE.md",
-        "conformance/**", "docs/**", "examples/**", "redirect-root/**", "releases/**", "rfcs/**",
+        "catalog/**", "conformance/**", "docs/**", "examples/**", "redirect-root/**", "releases/**", "rfcs/**",
         "schema/**", "spec/**", "tests/**", "tools/**", "web/**",
         "scripts/local-paths.sh", "scripts/sync-agent-docs.sh", "scripts/dev/handover_check.sh",
         ".github/ci-evidence.json", "scripts/dev/release_evidence.py"
       ],
-      "checks": ["local-paths", "agent-docs", "diff-check", "repository-tests"]
+      "checks": ["local-paths", "agent-docs", "diff-check", "record-shapes", "repository-tests"]
     },
     {
       "paths": ["rfcs/policy-companion-prototype/**", "tools/dialect_verify.py", "requirements-dev.txt"],
-      "checks": ["local-paths", "agent-docs", "diff-check", "repository-tests",
+      "checks": ["local-paths", "agent-docs", "diff-check", "record-shapes", "repository-tests",
                  "policy-prototype", "policy-contract", "policy-official-draft"]
     },
     {
       "paths": ["schema/judgment-pack-core-0.2.0-draft.schema.json", "tools/check_historical_policy.py"],
-      "checks": ["local-paths", "agent-docs", "diff-check", "repository-tests",
+      "checks": ["local-paths", "agent-docs", "diff-check", "record-shapes", "repository-tests",
                  "policy-prototype", "policy-contract"]
     },
     {
       "paths": ["rfcs/policy-companion-contract/**"],
-      "checks": ["local-paths", "agent-docs", "diff-check", "repository-tests",
+      "checks": ["local-paths", "agent-docs", "diff-check", "record-shapes", "repository-tests",
                  "policy-contract", "policy-official-draft"]
     },
     {
       "paths": ["conformance/policy/**", "schema/policy/**", "tools/*.py"],
-      "checks": ["local-paths", "agent-docs", "diff-check", "repository-tests",
+      "checks": ["local-paths", "agent-docs", "diff-check", "record-shapes", "repository-tests",
                  "policy-official-draft"]
     },
     {
       "paths": ["schema/retained-column/**", "conformance/retained-column/**", "spec/retained-column.md",
                 "tools/_retained_column.py", "tools/retained_column.py", "tools/dialect_verify.py",
                 "tools/check_retained_column.py", "tools/dialect-verify-ts/**", "releases/v0.3.0-rc.2*"],
-      "checks": ["local-paths", "agent-docs", "diff-check", "repository-tests", "retained-column"]
+      "checks": ["local-paths", "agent-docs", "diff-check", "record-shapes", "repository-tests", "retained-column"]
     }
   ]
 }
