@@ -12,6 +12,12 @@ here.
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.4.0`; it changes no Core resolution or released conformance claim.
+- RFC 0030 (#280), a Draft cross-project record, proposes agent principals and delegated
+  authority: a registered agent principal, a signed and bounded delegation with RFC 8693 subject
+  and actor semantics, an exact narrowing check for chains, revocation, the connection grant as a
+  principal-held resource, and actor, subject and delegation in receipts and run records with an
+  exact compatibility rule for existing readers. Normative text is targeted at `0.5.0`; nothing in
+  Core or any released conformance claim changes.
 
 ## `0.3.0` — 2026-10-29
 
