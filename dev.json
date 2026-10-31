@@ -11,6 +11,7 @@
     {"name": "local-paths", "run": "scripts/local-paths.sh", "toolchain": "shell"},
     {"name": "agent-docs", "run": "scripts/sync-agent-docs.sh --check .", "toolchain": "shell", "summary": "^sync-agent-docs:"},
     {"name": "diff-check", "run": "git diff --check \"$(git hash-object -t tree /dev/null)\"", "toolchain": "shell"},
+    {"name": "record-shapes", "run": "python3 -B tools/record_shapes.py check", "toolchain": "python", "summary": "^record-shapes:"},
     {"name": "repository-tests", "run": "python3 -m unittest discover -s tests -v", "toolchain": "node", "summary": "^(Ran |OK|FAILED)", "timeout": 1800},
     {"name": "policy-prototype", "run": "python3 tools/check_historical_policy.py prototype", "toolchain": "python", "summary": "^(Ran |OK|FAILED)", "timeout": 600},
     {"name": "policy-contract", "run": "python3 tools/check_historical_policy.py contract", "toolchain": "python", "summary": "^(Ran |OK|FAILED)", "timeout": 600},
