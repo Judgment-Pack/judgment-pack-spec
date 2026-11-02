@@ -119,7 +119,7 @@ class ReleaseBuilderTests(unittest.TestCase):
         self.assertEqual(ROOT / "releases" / "v0.3.0.md", BUILD_RELEASE.core_release_notes_path("v0.3.0"))
         self.assertIn("releases/v0.3.0.md", current)
         self.assertNotIn("docs/releases/v0.3.0.md", current)
-        # A final has no distribution mapping; only the two RC mappings are allowlisted.
+        # A final has no distribution mapping; only the two RCs' and v0.4.0's are allowlisted.
         self.assertNotIn("releases/v0.3.0.json", current)
         self.assertFalse((ROOT / "releases" / "v0.3.0.json").exists())
         self.assertIn("releases/v0.2.0-draft.md", historical)
@@ -658,6 +658,217 @@ class CoreRCEntryPathTests(unittest.TestCase):
         notes = (ROOT / f"releases/{self.TAG}.md").read_text()
         self.assertIn("No preparation-verifier conformance claim", notes)
         self.assertIn("about one week", notes)
+
+
+class CoreCarriedReleaseTests(unittest.TestCase):
+    """v0.4.0 carries specVersion 0.3.0 unchanged: hand-authored trees, real tags, the builder CLI."""
+
+    TAG = "v0.4.0"
+    IDENTITY = {"releaseVersion": "0.4.0", "tag": TAG, "specVersion": "0.3.0",
+                "maturity": "draft", "distribution": "specification-unchanged"}
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        for directory in ("tools", "schema", "conformance/evaluation", "spec", "examples",
+                          "releases", "catalog"):
+            (self.root / directory).mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / "tools/build_release.py", self.root / "tools/build_release.py")
+        for name in ("README.md", "LICENSE", "NOTICE", "CHANGELOG.md", "VERSIONING.md",
+                     "TESTING.md", "SECURITY.md"):
+            (self.root / name).write_text("Hand-authored release fixture.\n")
+        (self.root / "spec/core.md").write_text("Core fixture, not a specification.\n")
+        (self.root / "examples/example.json").write_text('{"specVersion":"0.3.0"}\n')
+        (self.root / "catalog/record-shapes.json").write_text('{"format":"fixture"}\n')
+        (self.root / "releases/v0.3.0.md").write_text("# Hand-authored earlier notes\n")
+        for path, value in (
+            ("conformance/manifest.json", {"specVersion": "0.3.0", "suiteVersion": "0.3.0", "status": "draft"}),
+            ("conformance/evaluation/manifest.json", {"specVersion": "0.3.0", "suiteVersion": "0.3.0", "status": "draft"}),
+            ("schema/judgment-pack-core.schema.json", {
+                "$id": "https://judgmentpack.org/schema/0.3.0/judgment-pack-core.schema.json",
+                "properties": {"specVersion": {"const": "0.3.0"}}}),
+            (f"releases/{self.TAG}.json", self.IDENTITY),
+        ):
+            (self.root / path).write_text(json.dumps(value) + "\n")
+        (self.root / f"releases/{self.TAG}.md").write_text("# Hand-authored notes\n")
+        self.git("init", "--quiet")
+
+    def git(self, *args):
+        return subprocess.run(["git", *args], cwd=self.root, check=True,
+                              capture_output=True, text=True).stdout.strip()
+
+    def commit(self, tag=None):
+        self.git("add", "-A")
+        self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                 "commit", "--quiet", "-s", "-m", "Hand-authored release fixture")
+        commit = self.git("rev-parse", "HEAD")
+        self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                 "tag", "-a", tag or self.TAG, "-m", "Release fixture")
+        return commit
+
+    def run_builder(self, commit, tag=None):
+        return subprocess.run([sys.executable, str(self.root / "tools/build_release.py"),
+                               "--tag", tag or self.TAG, "--commit", commit,
+                               "--output", str(self.root / "dist")], cwd=self.root,
+                              capture_output=True, text=True)
+
+    def fresh_case(self):
+        case = CoreCarriedReleaseTests(methodName="runTest")
+        case.setUp()
+        self.addCleanup(case.doCleanups)
+        return case
+
+    def test_the_mapping_builds_both_archives_with_the_exact_identity(self):
+        commit = self.commit()
+        result = self.run_builder(commit)
+        self.assertEqual(0, result.returncode, result.stderr)
+        prefix = "judgment-pack-spec-0.4.0/"
+        expected = {**self.IDENTITY, "sourceCommit": commit}
+        tar = self.root / "dist/judgment-pack-spec_0.4.0_artifacts.tar.gz"
+        zip_path = tar.with_name("judgment-pack-spec_0.4.0_artifacts.zip")
+        with tarfile.open(tar) as archive:
+            names = {m.name for m in archive.getmembers() if m.isfile()}
+            self.assertEqual(expected, json.load(archive.extractfile(prefix + "release-identity.json")))
+            self.assertEqual("0.3.0", json.load(archive.extractfile(prefix + "conformance/manifest.json"))["specVersion"])
+        for member in (f"releases/{self.TAG}.json", f"releases/{self.TAG}.md", "catalog/record-shapes.json"):
+            with self.subTest(member=member):
+                self.assertIn(prefix + member, names)
+        # Exactly this tag's two release files: no earlier notes, no tools, no milestone link.
+        self.assertEqual({prefix + f"releases/{self.TAG}.json", prefix + f"releases/{self.TAG}.md"},
+                         {name for name in names if name.startswith(prefix + "releases/")})
+        self.assertEqual([], [name for name in names if name.startswith(prefix + "tools/")])
+        with zipfile.ZipFile(zip_path) as archive:
+            self.assertEqual(names, {n for n in archive.namelist() if not n.endswith("/")})
+            self.assertEqual(expected, json.loads(archive.read(prefix + "release-identity.json")))
+        self.assertEqual([hashlib.sha256(p.read_bytes()).hexdigest() + "  " + p.name
+                          for p in (tar, zip_path)],
+                         (self.root / "dist/checksums.txt").read_text().splitlines())
+
+    def test_a_missing_mapping_or_missing_notes_is_refused(self):
+        for path, message in ((f"releases/{self.TAG}.json", "mapping is missing"),
+                              (f"releases/{self.TAG}.md", "notes are missing")):
+            with self.subTest(path=path):
+                case = self.fresh_case()
+                (case.root / path).unlink()
+                result = case.run_builder(case.commit())
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn(message, result.stderr)
+
+    def test_a_tampered_mapping_is_refused(self):
+        for changed in ({**self.IDENTITY, "specVersion": "0.4.0"},
+                        {**self.IDENTITY, "specVersion": "0.2.0-draft"},
+                        {**self.IDENTITY, "distribution": "release-candidate"},
+                        {**self.IDENTITY, "maturity": "candidate"},
+                        {**self.IDENTITY, "tag": "v0.4.1"},
+                        {**self.IDENTITY, "releaseVersion": "0.3.0"},
+                        {**self.IDENTITY, "extra": True},
+                        {key: value for key, value in self.IDENTITY.items() if key != "distribution"},
+                        []):
+            with self.subTest(changed=changed):
+                case = self.fresh_case()
+                (case.root / f"releases/{self.TAG}.json").write_text(json.dumps(changed))
+                result = case.run_builder(case.commit())
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("mapping does not match", result.stderr)
+
+    def test_no_other_tag_can_use_the_mapping(self):
+        for tag in ("v0.3.1", "v0.4.1", "v0.5.0", "v1.0.0", "v0.4.0-rc.1", "v0.4.0-alpha.1"):
+            version = tag[1:]
+            for mapping, message in (
+                    # This tag's bytes copied under another tag's name; then renamed to fit it.
+                    (self.IDENTITY, "only the allowlisted Core distributions"),
+                    ({**self.IDENTITY, "releaseVersion": version, "tag": tag},
+                     "only the allowlisted Core distributions"),
+                    # And with no mapping at all, the tag's own version is held to the 0.3.0 pins.
+                    (None, "conformance specVersion")):
+                with self.subTest(tag=tag, mapping=mapping):
+                    case = self.fresh_case()
+                    (case.root / f"releases/{self.TAG}.json").unlink()
+                    (case.root / f"releases/{self.TAG}.md").unlink()
+                    (case.root / f"releases/{tag}.md").write_text("Wrong tag fixture notes\n")
+                    if mapping is not None:
+                        (case.root / f"releases/{tag}.json").write_text(json.dumps(mapping))
+                    result = case.run_builder(case.commit(tag=tag), tag=tag)
+                    self.assertNotEqual(0, result.returncode)
+                    self.assertIn(message, result.stderr)
+
+    def test_the_catalog_and_the_mapping_join_this_tags_bundle_only(self):
+        # bundle_paths reads the schema/ and conformance/ children from this repository's commit.
+        current = BUILD_RELEASE.bundle_paths(self.TAG, "HEAD")
+        self.assertIn("catalog", current)
+        self.assertIn(f"releases/{self.TAG}.json", current)
+        self.assertIn(f"releases/{self.TAG}.md", current)
+        for path in ("tools/retained_column.py", "requirements-dev.txt", "rfcs",
+                     "releases/v0.3.0.retained-column.json", "releases/v0.3.0.md"):
+            with self.subTest(absent=path):
+                self.assertNotIn(path, current)
+        for tag in ("v0.3.0", "v0.3.0-rc.1", "v0.3.0-rc.2", "v0.3.1", "v0.5.0", "v0.2.0-draft",
+                    "policy-v1.0.0-draft.1"):
+            with self.subTest(tag=tag):
+                paths = BUILD_RELEASE.bundle_paths(tag, "HEAD")
+                self.assertNotIn("catalog", paths)
+                self.assertNotIn(f"releases/{self.TAG}.json", paths)
+
+    def test_a_tree_whose_core_moved_is_refused(self):
+        # The route carries 0.3.0: a re-pinned Core under this tag is not this release.
+        for path, keys, message in (
+                ("conformance/manifest.json", ("specVersion",), "conformance specVersion"),
+                ("conformance/manifest.json", ("suiteVersion",), "document corpus suiteVersion"),
+                ("conformance/manifest.json", ("status",), "draft manifest maturity"),
+                ("conformance/evaluation/manifest.json", ("specVersion",), "evaluation corpus specVersion"),
+                ("conformance/evaluation/manifest.json", ("suiteVersion",), "evaluation corpus suiteVersion"),
+                ("conformance/evaluation/manifest.json", ("status",), "draft manifest maturity"),
+                ("schema/judgment-pack-core.schema.json", ("properties", "specVersion", "const"), "schema specVersion"),
+                ("schema/judgment-pack-core.schema.json", ("$id",), "schema $id")):
+            with self.subTest(path=path, keys=keys):
+                case = self.fresh_case()
+                value = json.loads((case.root / path).read_text())
+                target = value
+                for key in keys[:-1]:
+                    target = target[key]
+                target[keys[-1]] = "0.4.0"
+                (case.root / path).write_text(json.dumps(value))
+                result = case.run_builder(case.commit())
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn(message, result.stderr)
+
+    def test_the_prepared_files_are_the_reviewed_identity(self):
+        self.assertEqual(self.IDENTITY, BUILD_RELEASE.CORE_CARRIED_IDENTITY)
+        self.assertEqual(self.IDENTITY, json.loads((ROOT / f"releases/{self.TAG}.json").read_text()))
+        self.assertEqual({"number": 4, "title": "v0.4.0"},
+                         json.loads((ROOT / f"releases/{self.TAG}.milestone.json").read_text()))
+        BUILD_RELEASE.validate_artifacts("0.4.0", self.TAG)
+        self.assertEqual("# v0.4.0", (ROOT / f"releases/{self.TAG}.md").read_text().splitlines()[0])
+        try:
+            attributes = subprocess.run(
+                ["git", "check-attr", "export-ignore", "--", "catalog/record-shapes.json",
+                 "catalog/format-status.json", "catalog/README.md", f"releases/{self.TAG}.json"],
+                cwd=ROOT, check=True, capture_output=True, text=True).stdout.splitlines()
+        except (OSError, subprocess.CalledProcessError) as error:
+            self.skipTest(f"git cannot read attributes here: {error}")
+        for line in attributes:
+            with self.subTest(line=line):
+                self.assertTrue(line.endswith(": export-ignore: unspecified"))
+
+    def test_the_notes_state_what_a_consumer_needs(self):
+        notes = re.sub(r"\s+", " ", (ROOT / f"releases/{self.TAG}.md").read_text(encoding="utf-8"))
+        for text in ("carries `specVersion` `0.3.0` unchanged",
+                     "/blob/v0.4.0/catalog/README.md",
+                     "Packs keep declaring exact `specVersion` `0.3.0`",
+                     "The tag name is not a selector.",
+                     "Consumers pinned to `v0.3.0` need do nothing.",
+                     "Stay on the `v0.3.0` bundle for the `retained-column/1` leaf.",
+                     "## What is in the bundles", "They do not hold:",
+                     "#249", "RFC 0030", "at Draft (#280)", "#256", "stays at Draft maturity (#142)",
+                     "**Reader compatibility:**", "**Writer compatibility:**",
+                     "**Semantic compatibility:**", "**Migration compatibility:**",
+                     "## Migration note",
+                     "https://judgmentpack.org/schema/0.4.0/workflow-contributors-2.schema.json` is not "
+                     "published by this release",
+                     "same-vendor review, not a cross-vendor claim"):
+            with self.subTest(text=text):
+                self.assertIn(text, notes)
 
 
 if __name__ == "__main__":

@@ -689,6 +689,7 @@ class StaticSiteTests(unittest.TestCase):
             "spec/dialect/index.html": "spec/dialect.md",
             # Rendered from the immutable final notes; docs/releases/v0.3.0.md is only a pointer.
             "project/releases/0.3.0/index.html": "releases/v0.3.0.md",
+            "project/releases/0.4.0/index.html": "releases/v0.4.0.md",
         }
         for output, source in cases.items():
             with self.subTest(output=output):
@@ -722,6 +723,19 @@ class StaticSiteTests(unittest.TestCase):
         ):
             with self.subTest(served=served):
                 self.assertEqual((ROOT / source).read_bytes(), (self.output / served).read_bytes())
+
+    def test_the_0_4_0_release_page_says_it_carries_0_3_0_and_the_site_stays_on_0_3_0(self) -> None:
+        page = (self.output / "project/releases/0.4.0/index.html").read_text(encoding="utf-8")
+        for text in ("Consumers pinned to", "What is in the bundles", "The workflow contributor model"):
+            with self.subTest(text=text):
+                self.assertIn(text, page)
+        project = (self.output / "project/index.html").read_text(encoding="utf-8")
+        self.assertIn('href="releases/0.4.0/"', project)
+        self.assertIn("0.4.0 release", project)
+        # The release re-pins nothing, so the site's Core version and tagged source do not move.
+        overview = (self.output / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<meta name="generator" content="jps-site-build 0.3.0">', overview)
+        self.assertFalse((self.output / "spec/0.4.0").exists())
 
     def test_schemas_are_served_at_their_canonical_id_path(self) -> None:
         cases = {

@@ -4,17 +4,17 @@
     "conformance/evaluation/manifest": {
       "draftVersion": "0.3.0",
       "baseline": "v0.3.0",
-      "lastReleased": "v0.3.0"
+      "lastReleased": "v0.4.0"
     },
     "conformance/manifest": {
       "draftVersion": "0.3.0",
       "baseline": "v0.3.0",
-      "lastReleased": "v0.3.0"
+      "lastReleased": "v0.4.0"
     },
     "judgment-pack-core": {
       "draftVersion": "0.3.0",
       "baseline": "v0.3.0",
-      "lastReleased": "v0.3.0"
+      "lastReleased": "v0.4.0"
     },
     "policy": {
       "draftVersion": "1.0.0",
@@ -29,7 +29,7 @@
     "workflow": {
       "draftVersion": "0.3.0",
       "baseline": "v0.3.0",
-      "lastReleased": "v0.3.0"
+      "lastReleased": "v0.4.0"
     },
     "workflow-contributors": {
       "draftVersion": "0.4.0",

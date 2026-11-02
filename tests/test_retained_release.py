@@ -217,7 +217,7 @@ class RetainedRelease(unittest.TestCase):
             rfc.write_text(accepted)
             # A final has no separate distribution identity: no mapping is admitted beside it.
             (root/'releases/v0.3.0.json').write_text(json.dumps({**build_release.CORE_RC2_IDENTITY,'tag':'v0.3.0'}))
-            refuses('only the allowlisted Core RCs have a release mapping')
+            refuses('only the allowlisted Core distributions have a release mapping')
             (root/'releases/v0.3.0.json').unlink()
             build_release.validate_artifacts('0.3.0','v0.3.0',root)
 

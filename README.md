@@ -14,6 +14,7 @@
 >
 > JPS is a draft specification in production use by adopters. It is not an industry standard, and
 > `0.x` drafts carry no compatibility guarantee: pin the exact draft and runtime release you verified.
+> Release tag [`v0.4.0`](releases/v0.4.0.md) carries `specVersion` `0.3.0` unchanged.
 
 ## Project ecosystem and where to contribute
 

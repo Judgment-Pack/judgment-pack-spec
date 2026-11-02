@@ -329,7 +329,7 @@ Object member order in retained bytes follows `canon`; collection order follows 
 ### Attribution versions and migration
 
 Output version 2, summary version 2 and `driftVersion: 2` below form the complete-attribution
-model proposed for Spec `0.4.0`; this is staging, not publication. Workflow document version 1
+model proposed for Spec `0.5.0`; this is staging, not publication. Workflow document version 1
 and selection version 1 retain their selectors. Execution version 3 explicitly selects this
 complete-attribution model; execution version 1 retains historical semantics and version 2 is
 reserved by the separate Draft admission-proof RFC 0024, whose adoption is not implied. All

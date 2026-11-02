@@ -3,7 +3,7 @@
 - Status: Draft
 - Type: Standards track, optional tooling contract at draft maturity
 - Created: 2026-10-23
-- Target: Core `0.4.0`; not incorporated into Core
+- Target: Core `0.6.0`; not incorporated into Core
 - Issue: [#252](https://github.com/Judgment-Pack/judgment-pack-spec/issues/252)
 
 ## Summary
@@ -108,7 +108,7 @@ no-match or unknown blocking. It is analysis input, not a new member of a pack.
 
 Every report names the exact supported Core version used to validate and evaluate the pack, not
 the specification release proposing the advisory contract. Initial examples analyze Core `0.3.0`;
-this RFC targets incorporation in `0.4.0`. `targetSpecVersion` must equal the pack's complete
+this RFC targets incorporation in `0.6.0`. `targetSpecVersion` must equal the pack's complete
 `specVersion` and be supported by the analyzer. No compatibility is inferred from version prefixes.
 The format's `formatVersion: 1` identifies this advisory contract separately.
 
@@ -263,7 +263,7 @@ its stable different-outcome meaning and severity, so separate codes are propose
 Reader/writer effects are confined to consumers opting into this new report format; old report
 readers need not accept it. Pack bytes and Core §§7–8 semantics are unchanged. No migration,
 relabeling of frozen `0.3.0` vectors, new operator, implicit extension capability, or current
-conformance claim follows. The proposed specification incorporation target is `0.4.0`; adoption
+conformance claim follows. The proposed specification incorporation target is `0.6.0`; adoption
 must publish its final exact format/schema and review its release compatibility separately. RFC 0028's attribution work is a
 separate contract and this report does not alter its artifacts.
 

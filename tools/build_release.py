@@ -56,12 +56,23 @@ RETAINED_BUNDLE_PATHS = ("tools/dialect_verify.py", "tools/retained_column.py",
 # every other leaf byte unchanged under its own inventory; only the companion page, the Core and
 # Dialect pages (their sentences on the leaf's adoption) and the two readers' installation
 # identity may differ from RC2's. It has no
-# distribution mapping (VERSIONING.md allowlists the two RC mappings only); its bundles carry a
+# distribution mapping (VERSIONING.md allowlists the two RCs' and v0.4.0's only); its bundles carry a
 # generated release-identity.json, never a tracked mapping, so readers can check sourceCommit.
 CORE_FINAL_TAG = "v0.3.0"
 CORE_FINAL_IDENTITY = {"releaseVersion": "0.3.0", "tag": CORE_FINAL_TAG, "specVersion": "0.3.0",
                        "maturity": "draft"}
-GENERATED_IDENTITIES = {**CORE_RC_IDENTITIES, CORE_FINAL_TAG: CORE_FINAL_IDENTITY}
+
+# A release that carries the released specVersion 0.3.0 unchanged. Core is not re-pinned, so its tag
+# is a distribution identity and not a pack selector (VERSIONING.md). The mapping is exact and this
+# tag alone may use it; no rule lets any other tag differ from the artifacts' specVersion.
+CORE_CARRIED_TAG = "v0.4.0"
+CORE_CARRIED_IDENTITY = {"releaseVersion": "0.4.0", "tag": CORE_CARRIED_TAG, "specVersion": "0.3.0",
+                         "maturity": "draft", "distribution": "specification-unchanged"}
+CORE_MAPPED_IDENTITIES = {**CORE_RC_IDENTITIES, CORE_CARRIED_TAG: CORE_CARRIED_IDENTITY}
+# The record-shape catalog joins this tag's bundle only: earlier tags have no such directory, and
+# `git archive` refuses a path their tree lacks.
+CORE_CARRIED_BUNDLE_PATHS = ("catalog",)
+GENERATED_IDENTITIES = {**CORE_MAPPED_IDENTITIES, CORE_FINAL_TAG: CORE_FINAL_IDENTITY}
 FINAL_RETAINED_INVENTORY = "releases/v0.3.0.retained-column.json"
 RETAINED_INVENTORIES = {CORE_RC2_TAG: RETAINED_INVENTORY, CORE_FINAL_TAG: FINAL_RETAINED_INVENTORY}
 FINAL_REVISED_LEAF_FILES = frozenset({"spec/retained-column.md", "spec/judgment-pack-core.md",
@@ -270,6 +281,8 @@ def bundle_paths(tag: str, commit: str) -> tuple[str, ...]:
             paths.append(path)
     if tag in CORE_RC_IDENTITIES:
         paths.extend((f"releases/{tag}.json", "docs/releases/v0.3.0.md"))
+    if tag == CORE_CARRIED_TAG:
+        paths.extend((f"releases/{tag}.json", *CORE_CARRIED_BUNDLE_PATHS))
     if tag in RETAINED_INVENTORIES:
         paths.extend((*RETAINED_BUNDLE_PATHS, RETAINED_INVENTORIES[tag], f"releases/{tag}.milestone.json"))
     return (*paths, core_release_notes_path(tag).relative_to(ROOT).as_posix())
@@ -304,23 +317,24 @@ def release_version(tag: str) -> str:
 
 
 def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
-    """Check exact format pins; only the reviewed RCs have a separate distribution identity.
+    """Check exact format pins; only the reviewed mappings give a separate distribution identity.
 
     The RC distributes proposed 0.3.0 artifacts, not a released conformance corpus.
     No arbitrary prerelease suffix may be stripped to infer a compatible specVersion.
     The v0.3.0 final carries RC2's selected leaf under its own inventory and no mapping.
+    v0.4.0 carries the released specVersion 0.3.0 unchanged, so its pins stay at 0.3.0.
     """
     if version != release_version(tag):
         raise ValueError("release version does not match the exact tag")
-    if tag not in CORE_RC_IDENTITIES and (root / "releases" / f"{tag}.json").exists():
-        raise ValueError("only the allowlisted Core RCs have a release mapping")
-    if tag in CORE_RC_IDENTITIES:
+    if tag not in CORE_MAPPED_IDENTITIES and (root / "releases" / f"{tag}.json").exists():
+        raise ValueError("only the allowlisted Core distributions have a release mapping")
+    if tag in CORE_MAPPED_IDENTITIES:
         mapping = root / "releases" / f"{tag}.json"
         if not mapping.is_file():
-            raise ValueError("Core RC release mapping is missing for the exact tag")
-        if json.loads(mapping.read_text("utf-8")) != CORE_RC_IDENTITIES[tag]:
-            raise ValueError("Core RC release mapping does not match the reviewed identity")
-        version = CORE_RC_IDENTITIES[tag]["specVersion"]
+            raise ValueError("Core release mapping is missing for the exact tag")
+        if json.loads(mapping.read_text("utf-8")) != CORE_MAPPED_IDENTITIES[tag]:
+            raise ValueError("Core release mapping does not match the reviewed identity")
+        version = CORE_MAPPED_IDENTITIES[tag]["specVersion"]
     manifest = json.loads((root / "conformance" / "manifest.json").read_text("utf-8"))
     evaluation = json.loads(
         (root / "conformance" / "evaluation" / "manifest.json").read_text("utf-8")
@@ -330,11 +344,11 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     )
     if manifest.get("specVersion") != version:
         raise ValueError("release tag does not match the conformance specVersion")
-    if tag in CORE_RC_IDENTITIES:
+    if tag in CORE_MAPPED_IDENTITIES:
         if manifest.get("suiteVersion") != version:
-            raise ValueError("Core RC does not match the document corpus suiteVersion")
+            raise ValueError("Core distribution does not match the document corpus suiteVersion")
         if manifest.get("status") != "draft" or evaluation.get("status") != "draft":
-            raise ValueError("Core RC requires draft manifest maturity")
+            raise ValueError("Core distribution requires draft manifest maturity")
     if evaluation.get("specVersion") != version:
         raise ValueError("release tag does not match the evaluation corpus specVersion")
     if evaluation.get("suiteVersion") != version:

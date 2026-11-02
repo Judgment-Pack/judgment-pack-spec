@@ -4,7 +4,9 @@ Core Judgment Pack Specification releases use Semantic Versioning identifiers wi
 Git tags. Specification `0.3.0` is identified by the exact tag `v0.3.0`; `0.2.0-draft` and
 `0.1.0-draft` keep the tags `v0.2.0-draft` and `v0.1.0-draft`. Only a tag and GitHub release
 published by the maintainers establish an immutable release; similarly named files on the mutable
-`main` branch do not.
+`main` branch do not. Release tag `v0.4.0` identifies a distribution that carries `specVersion`
+`0.3.0` unchanged, not a specification `0.4.0`; [its section](#release-v040-carries-specversion-030-unchanged)
+states the route.
 
 `0.3.0` is the first Core `specVersion` without the
 retired `-draft` suffix; the identifiers and tags of `0.1.0-draft` and `0.2.0-draft` do not change.
@@ -65,8 +67,9 @@ That first candidate is a distribution of the proposed exact `specVersion` `0.3.
 `releases/v0.3.0-rc.1.json` is required by the builder. Both manifests remain maturity `draft`:
 release candidacy does not establish the independent-evidence maturity `candidate`. Each RC bundle
 records its exact distribution tag and source commit in `release-identity.json`, alongside the map
-and exact RC notes. Other Core tags still require their complete version to match the artifacts;
-no general prerelease compatibility rule is introduced.
+and exact RC notes. Other Core tags, apart from
+[release `v0.4.0`](#release-v040-carries-specversion-030-unchanged), still require their complete
+version to match the artifacts; no general prerelease compatibility rule is introduced.
 
 The candidate does not establish the final `0.3.0` immutable release or freeze its final corpus.
 Candidate test results identify the RC tag and commit and remain provisional; a final exact-version
@@ -83,7 +86,8 @@ must not be used as a reproducibility anchor.
 The expressly approved RFC0029 adoption route prepares exactly `v0.3.0-rc.2`, also mapping to proposed
 specVersion `0.3.0` and draft maturity. This expressly amends the former single-candidate plan;
 it does not replace RC1, its immutable source/tag/assets or its recorded mapping/notes. The closed
-RC2 mapping is `releases/v0.3.0-rc.2.json`; release tooling allowlists these two mappings only.
+RC2 mapping is `releases/v0.3.0-rc.2.json`; release tooling allowlists these two candidate mappings
+and, apart from them, only [release `v0.4.0`'s](#release-v040-carries-specversion-030-unchanged).
 It does not strip arbitrary prerelease suffixes to infer compatibility. Final v0.3.0 retains
 milestone #2, and its final corpus/feedback/release gates remain.
 
@@ -96,6 +100,22 @@ Both-language selected-leaf certification establishes only its named scope, neve
 stable maturity, independent authorship, truth or authority. Historical staged Dialect recordings
 retain their standing. Public availability and adopter-feedback disposition remain necessary;
 this preparation does not establish that time elapsed or prescribe an invented RFC comment period.
+
+## Release v0.4.0 carries specVersion 0.3.0 unchanged
+
+Release `v0.4.0` publishes work outside Core and re-pins nothing. Its closed mapping
+`releases/v0.4.0.json` names `specVersion` `0.3.0`, maturity `draft` and distribution
+`specification-unchanged`. The builder refuses any other content in that mapping, and it holds the
+Core schema and both corpus manifests to `0.3.0`, the version the mapping names.
+
+The tag name is not a pack selector. Packs keep declaring `specVersion` `0.3.0`; a pack declaring
+`0.4.0` is refused. A conformance claim still names `specVersion` `0.3.0` and its corpora, and a
+selected retained-column leaf claim is still made against a `v0.3.0` installation. In the format
+status records `v0.4.0` counts as the last release of the families it carries, but it is not their
+compatibility baseline, which stays `v0.3.0`.
+
+This mapping is that tag's alone. No other tag may use it, and it introduces no general rule that a
+tag may differ from the `specVersion` of its artifacts.
 
 ## Pack versions
 
@@ -152,7 +172,8 @@ versioned JSON release manifest beside the release notes. Those values and an
 artifact's x.y.z `version` are independent of the companion release identifier.
 The existing builder/workflow shares archive, checksums and build provenance with
 Core, but validates a Policy tag against its own manifest and explicit draft RFC
-acceptance. Core tags still require exact Core schema/document/evaluation pins;
+acceptance. Core tags still require exact Core schema/document/evaluation pins (release `v0.4.0`'s
+pins are the `0.3.0` its mapping names);
 Core bundles exclude independently versioned Policy schema/corpus directories.
 
 First publication freezes the normative meaning, schema resource bytes/URLs and
@@ -170,7 +191,7 @@ It establishes supplied-document agreement only, with the scope/exclusions of
 [the companion](spec/policy.md). Stable maturity still requires the independent
 implementation evidence in the existing governance and RFC process.
 
-## Proposed workflow attribution model for Spec 0.4.0
+## Proposed workflow attribution model for Spec 0.5.0
 
 [RFC 0028](rfcs/0028-complete-workflow-contributors.md) stages complete contributor attribution;
 no release is established by this proposal. Output record version 2 and summary version 2 use
@@ -186,4 +207,6 @@ or unavailable in the older experimental recordings. Wrapping its singular id in
 does not migrate it to complete evidence. Complete migration needs sufficient retained evaluation
 evidence or replay, followed by rebuilding all dependent commitments while preserving history.
 This changes attribution reading, writing and semantics; it changes no Core resolution or
-published Core `0.3.0` artifact. The new `$id` under `0.4.0` is draft staging, not publication.
+published Core `0.3.0` artifact. The new `$id` under `0.4.0` is draft staging, not publication, and
+release `v0.4.0` does not publish it: that path is the staged resource's identifier and does not name
+that release.
