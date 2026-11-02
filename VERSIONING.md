@@ -115,7 +115,10 @@ status records `v0.4.0` counts as the last release of the families it carries, b
 compatibility baseline, which stays `v0.3.0`.
 
 This mapping is that tag's alone. No other tag may use it, and it introduces no general rule that a
-tag may differ from the `specVersion` of its artifacts.
+tag may differ from the `specVersion` of its artifacts. `specVersion` `0.4.0` is not assigned, and no
+release carries it. Any further release whose tag differs from its artifacts' `specVersion` needs its
+own amendment of this document and its own reviewed identity in the builder; this section implies
+none.
 
 ## Pack versions
 
