@@ -144,5 +144,5 @@ from people, and signed, bounded delegations with RFC 8693 subject and actor sem
 only through short-lived, sender-constrained credentials. Chains only narrow, revocation leaves the
 subject's own access untouched, and the connection grant is a principal-held resource. Receipts and
 run records would name actor, subject and delegation. Its delegation statement is standards track at
-draft maturity; the rest is a cross-project exploratory record. It is a Draft carried in Spec
-`0.4.0`, normative for nothing; no conformance class is claimed and nothing is committed for `0.5.0`.
+draft maturity; the rest is a cross-project exploratory record. It is a Draft carried in release
+`v0.4.0`, normative for nothing; no conformance class is claimed and nothing is committed for `0.5.0`.

@@ -3,7 +3,7 @@
 - Status: Draft
 - Type: Mixed. The delegation statement (its members, canonical form, signing, narrowing check and verification steps) is **standards track at draft maturity**, proposed for a companion document beside Core. Everything else — the agent's run admission and records, the gateway's credentials, receipt member, action keys and connection grants, and the Desk's inventories — is an **exploratory cross-project record** outside JPS.
 - Created: 2026-10-30
-- Target: proposed for Spec `0.5.0`. This Draft is carried in Spec `0.4.0`, is normative for nothing, and pre-commits nothing for `0.5.0`.
+- Target: proposed for Spec `0.5.0`. This Draft is carried in release `v0.4.0`, is normative for nothing, and pre-commits nothing for `0.5.0`.
 - Issue: [#280](https://github.com/Judgment-Pack/judgment-pack-spec/issues/280)
 
 > This is an open proposal, not part of the specification. See
@@ -838,7 +838,7 @@ registration, entry change, delegation, revocation and connection action with wh
   is unchanged in form and meaning.
 - **Desk.** No record format of the Desk changes by this record. Its authorization model gains a
   kind of principal (desk #612, #452).
-- **Spec.** Nothing in Core `0.3.0`, its schema, corpus or released artifacts changes. Spec `0.4.0`
+- **Spec.** Nothing in Core `0.3.0`, its schema, corpus or released artifacts changes. Release `v0.4.0`
   carries this Draft and no normative text.
 
 ## Security and privacy
