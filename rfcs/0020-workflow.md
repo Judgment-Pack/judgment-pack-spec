@@ -75,7 +75,7 @@ singular representative convention in the historical #228 amendment. [RFC 0028](
 records the compatibility decision and scope. Output version 2 preserves every actual rule or
 forcing-exception contributor outside Core; summary version 2 counts typed memberships, and
 version-2 drift subtracts those counts. Historical version-1 bytes remain representative or
-unattributed. This Draft amendment targets Spec `0.4.0` and claims no release or executor support.
+unattributed. This Draft amendment targets Spec `0.5.0` and claims no release or executor support.
 
 ## Summary
 
@@ -516,7 +516,7 @@ Object member order in retained bytes follows `canon`; collection order follows 
 #### Attribution versions and migration
 
 Output version 2, summary version 2 and `driftVersion: 2` below form the complete-attribution
-model proposed for Spec `0.4.0`; this is staging, not publication. Workflow document version 1
+model proposed for Spec `0.5.0`; this is staging, not publication. Workflow document version 1
 and selection version 1 retain their selectors. Execution version 3 explicitly selects this
 complete-attribution model; execution version 1 retains historical semantics and version 2 is
 reserved by the separate Draft admission-proof RFC 0024, whose adoption is not implied. All
@@ -1080,7 +1080,7 @@ Output/summary version 2, execution version 3 and drift version 2 select complet
 membership accounting; original schemas, fixtures and experimental admission-proof recordings
 remain unchanged. [RFC 0028](0028-complete-workflow-contributors.md) records why no complete
 migration can be inferred from the singular historical field and why execution version 2 remains
-reserved for the separate Draft RFC 0024. This targets unpublished Spec `0.4.0`.
+reserved for the separate Draft RFC 0024. This targets unpublished Spec `0.5.0`.
 
 Core, the dialect, the graph and the Runner's existing API are unchanged. A standalone pack or
 dialect keeps its existing meaning. This RFC defines documents and records, not new endpoints,

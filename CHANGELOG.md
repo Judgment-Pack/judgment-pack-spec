@@ -11,7 +11,20 @@ here.
   scoped coverage and reachability, exception effects and unknown blocking. A closed finite-domain
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
-  This targets specification `0.4.0`; it changes no Core resolution or released conformance claim.
+  This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
+
+## `0.4.0` — 2026-11-02
+
+A release that carries `specVersion` `0.3.0` unchanged: packs keep declaring `0.3.0`, the tag name
+is not a selector, and consumers pinned to `v0.3.0` need do nothing. The
+[release notes](releases/v0.4.0.md) give its scope and what is and is not in its bundles.
+
+### Added
+
+- A Core `0.3.0` dialect recording set (#249): 46 recordings made by the reference Runner under Core
+  `0.3.0`, in `conformance/dialect/vectors-0.3.0/` with `manifest-0.3.0.json`, beside the 47
+  historical recordings, whose bytes do not change. They are staged like those: in no corpus and no
+  release bundle.
 - RFC 0030 (#280), a Draft, proposes agent principals and delegated authority: a registered agent
   principal, a signed and bounded delegation with RFC 8693 subject and actor semantics exercised
   through short-lived, sender-constrained credentials, an exact narrowing check for chains,
@@ -26,8 +39,17 @@ here.
   `catalog/changes/` replay every digest, and `catalog/format-status.json` gives per family the
   draft version, the last accepted compatibility baseline and the last release, checked against
   `releases/`. The `record-shapes` check runs on every pull request. `catalog/README.md` describes
-  how an implementation compares its own catalog, where a mismatch is a conformance finding. No
-  schema, corpus or released artifact changes.
+  how an implementation compares its own catalog, where a mismatch is a finding and no part of a
+  conformance claim. No schema, corpus or released artifact changes. The catalog is in this release's
+  bundles.
+
+### Changed
+
+- `VERSIONING.md` and the builder gain the exact mapping `releases/v0.4.0.json`. It is that tag's
+  alone and introduces no general rule that a tag may differ from its artifacts' `specVersion`.
+- RFC 0028 and the complete-attribution text now target `0.5.0`, and RFC 0027 targets `0.6.0`. The
+  staged `$id` under `0.4.0` is not edited and is not published by this release.
+- RFC 0019 is named at Draft maturity, outside the specification, as the record #142 asked for.
 
 ## `0.3.0` — 2026-10-29
 

@@ -74,8 +74,8 @@ stable feature requires two independent implementations and conformance cases.
 | [0024] | Retained workflow admission proofs | Draft | Specification (a proposed amendment to the Draft workflow; unresolved portable encoding) |
 | [0025](0025-core-escalation-routes.md) | Core escalation routes | Accepted design (#219); review pending | Specification (Core) |
 | [0026](0026-document-ceiling-profiles.md) | Document ceiling profiles | Accepted design (#232); review pending | Specification and companions |
-| [0027](0027-pack-design-advisories.md) | Bounded pack-design advisories | Draft | Optional tooling contract proposed for Core `0.4.0`; released conformance unchanged |
-| [0028](0028-complete-workflow-contributors.md) | Complete workflow contributor attribution | Draft | Specification (amendment to Draft workflow; target Spec 0.4.0, unpublished) |
+| [0027](0027-pack-design-advisories.md) | Bounded pack-design advisories | Draft | Optional tooling contract proposed for Core `0.6.0`; released conformance unchanged |
+| [0028](0028-complete-workflow-contributors.md) | Complete workflow contributor attribution | Draft | Specification (amendment to Draft workflow; target Spec 0.5.0, unpublished) |
 | [0029](0029-retained-column-conversions.md) | Exact selected retained columns, custody, producer grammar and role ceilings | Accepted | Selected Dialect companion for immutable Core RC2 at draft maturity; acceptance is separate from publication |
 | [0030](0030-agent-principals-and-delegated-authority.md) | Agent principals and delegated authority | Draft | Mixed: the delegation statement is standards track at draft maturity (a proposed companion beside Core); the rest is a cross-project exploratory record (agent, gateway, Desk) |
 
@@ -144,5 +144,5 @@ from people, and signed, bounded delegations with RFC 8693 subject and actor sem
 only through short-lived, sender-constrained credentials. Chains only narrow, revocation leaves the
 subject's own access untouched, and the connection grant is a principal-held resource. Receipts and
 run records would name actor, subject and delegation. Its delegation statement is standards track at
-draft maturity; the rest is a cross-project exploratory record. It is a Draft carried in Spec
-`0.4.0`, normative for nothing; no conformance class is claimed and nothing is committed for `0.5.0`.
+draft maturity; the rest is a cross-project exploratory record. It is a Draft carried in release
+`v0.4.0`, normative for nothing; no conformance class is claimed and nothing is committed for `0.5.0`.

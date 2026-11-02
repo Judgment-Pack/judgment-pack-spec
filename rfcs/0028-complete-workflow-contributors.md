@@ -3,7 +3,7 @@
 - Status: Draft
 - Type: Standards track (amendment to Draft RFC 0020)
 - Created: 2026-10-23
-- Target: Spec `0.4.0`, unpublished
+- Target: Spec `0.5.0`, unpublished
 - Issue: [#251](https://github.com/Judgment-Pack/judgment-pack-spec/issues/251)
 
 ## Summary
@@ -84,7 +84,7 @@ evidence or replay. Rebuild all transitive pins after replay and preserve origin
 
 Reader, writer and semantic compatibility are intentionally broken at the new attribution model.
 Core `0.3.0` schema, corpus, published artifacts and resolution remain unchanged; no release version
-is bumped by this change. The target `0.4.0` is a planning identifier and not an immutable release.
+is bumped by this change. The target `0.5.0` is a planning identifier and not an immutable release.
 
 ## Security and privacy
 

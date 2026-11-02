@@ -17,6 +17,10 @@ on every pull request and on every push to `main`.
 The catalog fingerprints shapes; it does not establish that a document is valid, that two
 implementations agree on meaning, or that any record is true or authorized.
 
+Only formats with a JSON Schema are guarded. Formats the specification defines in prose alone, such
+as the decision record and audit chain, dialect recordings and receipts, have no schema, so they are
+not catalogued and a change to them shows nothing here.
+
 ## What is catalogued
 
 The inventory is derived from the tree; no schema is listed by hand. The tool finds every file named
@@ -133,7 +137,7 @@ and no others:
 {
   "format": "judgment-pack-format-status/1",
   "families": {
-    "judgment-pack-core": { "draftVersion": "0.3.0", "baseline": "v0.3.0", "lastReleased": "v0.3.0" }
+    "judgment-pack-core": { "draftVersion": "0.3.0", "baseline": "v0.3.0", "lastReleased": "v0.4.0" }
   }
 }
 ```
@@ -157,9 +161,11 @@ release counts from that commit onward. A release includes a family when:
   family's schemas, by path in `schema` or by path or `$id` in the values of `schemas`.
 
 A candidate is a release whose version carries VERSIONING.md's `-rc.N` or `-alpha.N` distribution
-suffix, or a Core distribution whose tag is not its `specVersion`. A candidate counts for
-`lastReleased` but is never a `baseline`. A Policy companion release (`policy-v<releaseVersion>`)
-freezes its format on first publication, so it is a baseline.
+suffix. A candidate counts for `lastReleased` but is never a `baseline`. So does any other Core
+distribution whose tag is not its `specVersion`. Release `v0.4.0` is the one such distribution: it
+carries `specVersion` `0.3.0` unchanged and is not a candidate, but `v0.3.0` stays the baseline of
+what it carries. A Policy companion release (`policy-v<releaseVersion>`) freezes its format on first
+publication, so it is a baseline.
 
 When a pull request prepares a release, or moves a family's draft version, it updates this file in
 the same change. The check's failure message gives the derived record.
@@ -171,17 +177,20 @@ It builds its own catalog in the same format from the schema bytes it actually v
 using the same normalization. An implementation's own catalog needs `id`, `family`, `version` and
 `sha256` for each schema. Its `path` is the implementation's own, and `normalized` is optional.
 
-It then compares that catalog with this one at the exact release tag it claims, as follows:
+It then compares that catalog with this one, at the release tag it names, as follows. Tag `v0.3.0`
+has no catalog. An implementation of `specVersion` `0.3.0` reads the one at tag `v0.4.0`, which
+carries that version unchanged, and names `v0.4.0` as the catalog it compared with.
 
 1. For each `id` the implementation carries, find the entry with the same `id` in this catalog.
-2. A missing `id`, or the same `id` with a different `sha256`, is a **conformance finding**. The
-   implementation validates against a shape this release does not define. The finding names the
-   family, the `id`, the claimed release tag and both digests.
+2. A missing `id`, or the same `id` with a different `sha256`, is a **finding**. The implementation
+   validates against a shape this catalog does not hold. The finding names the family, the `id`, the
+   release tag and both digests.
 3. A difference in `family` or `version` for the same `id` is also a finding: the two derivations
    disagree.
-4. A family in this catalog that the implementation does not carry is not a finding by itself. A
-   conformance claim says which families it covers.
+4. A family in this catalog that the implementation does not carry is not a finding by itself.
 
 The comparison establishes byte-level agreement on shapes only. It does not establish that the
-implementation applies them correctly, and a matching digest is not a conformance claim. Each
-implementation adopts the comparison in its own repository.
+implementation applies them correctly. It is not part of a conformance claim: Core §3.4 and
+[`VERSIONING.md`](../VERSIONING.md) define a claim by its class, exact version and corpus, so a
+matching digest, a finding or a list of families neither makes nor adds to one. Each implementation
+adopts the comparison in its own repository, and adopting it is optional.

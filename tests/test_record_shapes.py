@@ -246,11 +246,14 @@ class FormatStatus(Fixture):
     def test_the_status_records_are_those_releases_give(self):
         derived = shapes.derive_status(ROOT, shapes.build_catalog(ROOT))
         self.assertEqual(derived, json.loads((ROOT / shapes.STATUS).read_text("utf-8"))["families"])
-        # Hand-checked against releases/: v0.3.0 is the last Core release, after two candidates;
-        # the Policy companion's only release is policy-v1.0.0-draft.1; the leaf shipped in rc.2 and
-        # the final; the 0.4.0 contributors shape is staged and unreleased.
-        self.assertEqual(derived["judgment-pack-core"],
-                         {"draftVersion": "0.3.0", "baseline": "v0.3.0", "lastReleased": "v0.3.0"})
+        # Hand-checked against releases/: v0.4.0 carries specVersion 0.3.0 unchanged, so it is the
+        # last release of the families under 0.3.0 and v0.3.0 stays their baseline, after two
+        # candidates; the Policy companion's only release is policy-v1.0.0-draft.1; the leaf shipped
+        # in rc.2 and the final; the contributors shape under 0.4.0 is staged and unreleased.
+        for family in ("judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest",
+                       "workflow"):
+            self.assertEqual(derived[family],
+                             {"draftVersion": "0.3.0", "baseline": "v0.3.0", "lastReleased": "v0.4.0"})
         self.assertEqual(derived["policy"], {"draftVersion": "1.0.0", "baseline": "policy-v1.0.0-draft.1",
                                              "lastReleased": "policy-v1.0.0-draft.1"})
         self.assertEqual(derived["retained-column"],
@@ -265,7 +268,7 @@ class FormatStatus(Fixture):
         faults = shapes.check(self.root)
         self.assertEqual(1, len(faults), faults)
         self.assertIn("family judgment-pack-core", faults[0])
-        self.assertIn('"lastReleased": "v0.3.0"', faults[0].split("give", 1)[1])
+        self.assertIn('"lastReleased": "v0.4.0"', faults[0].split("give", 1)[1])
 
     def test_a_candidate_is_released_but_is_not_a_baseline(self):
         (self.root / "releases" / "v0.4.0-rc.1.md").write_text("# v0.4.0-rc.1\n", "utf-8")
@@ -274,14 +277,34 @@ class FormatStatus(Fixture):
         derived = shapes.derive_status(self.root, shapes.build_catalog(self.root))
         self.assertEqual(derived["workflow-contributors"],
                          {"draftVersion": "0.4.0", "baseline": None, "lastReleased": "v0.4.0-rc.1"})
-        self.assertEqual(derived["workflow"]["lastReleased"], "v0.3.0")
+        self.assertEqual(derived["workflow"]["lastReleased"], "v0.4.0")
         faults = shapes.check(self.root)
         self.assertEqual(1, len(faults), faults)
         self.assertIn("family workflow-contributors", faults[0])
-        (self.root / "releases" / "v0.4.0.md").write_text("# v0.4.0\n", "utf-8")
+        # Without the mapping that carries specVersion 0.3.0, the tag would read as specVersion 0.4.0.
+        (self.root / "releases" / "v0.4.0.json").unlink()
         derived = shapes.derive_status(self.root, shapes.build_catalog(self.root))
         self.assertEqual(derived["workflow-contributors"],
                          {"draftVersion": "0.4.0", "baseline": "v0.4.0", "lastReleased": "v0.4.0"})
+
+    def test_the_carrying_release_is_last_released_but_publishes_and_baselines_nothing(self):
+        derived = shapes.derive_status(self.root, shapes.build_catalog(self.root))
+        self.assertEqual(derived["workflow-contributors"],
+                         {"draftVersion": "0.4.0", "baseline": None, "lastReleased": None})
+        self.assertEqual(derived["judgment-pack-core"]["baseline"], "v0.3.0")
+        self.assertEqual({family for family, record in derived.items()
+                          if record["lastReleased"] == "v0.4.0"},
+                         {"judgment-pack-core", "conformance/manifest",
+                          "conformance/evaluation/manifest", "workflow"})
+        self.assertEqual([], shapes.check(self.root))
+        # The mapping is what keeps the staged shape unpublished: losing it, or moving its
+        # specVersion, is a fault in the status records and not a new baseline accepted silently.
+        mapping = self.root / "releases" / "v0.4.0.json"
+        identity = json.loads(mapping.read_text("utf-8"))
+        write_json(mapping, {**identity, "specVersion": "0.4.0"})
+        self.assertTrue(any("family workflow-contributors" in fault for fault in shapes.check(self.root)))
+        mapping.unlink()
+        self.assertTrue(any("family workflow-contributors" in fault for fault in shapes.check(self.root)))
 
     def test_a_release_naming_a_schema_the_catalog_lacks_is_refused(self):
         write_json(self.root / "releases" / "v0.3.0.extra.json",

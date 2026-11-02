@@ -3,7 +3,7 @@
 These hand-written fixtures and the report schema exercise
 [RFC 0027](../0027-pack-design-advisories.md), a Draft. They belong to no conformance manifest,
 release corpus or currently published advisory format. The specification incorporation target is
-`0.4.0`; the example packs themselves target Core `0.3.0`.
+`0.6.0`; the example packs themselves target Core `0.3.0`.
 
 - `report.schema.json`: closed finite-domain report proposal (`formatVersion: 1`). JSON Schema
   validates shape; it does not verify a proof summary, digest, source identity or claim.

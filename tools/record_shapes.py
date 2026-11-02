@@ -466,7 +466,8 @@ def load_releases(root: Path, catalog: dict) -> dict[str, dict]:
             prefix = NAMESPACE + str(release["specVersion"]) + "/"
             release["families"].update(entry["family"] for entry in catalog["schemas"]
                                        if entry["id"].startswith(prefix))
-            # A Core distribution whose tag is not its specVersion is a candidate.
+            # A Core distribution whose tag is not its specVersion establishes no baseline: a
+            # candidate, or v0.4.0, which carries specVersion 0.3.0 unchanged and is no candidate.
             if release["specVersion"] != release["version"]:
                 release["candidate"] = True
     return releases
