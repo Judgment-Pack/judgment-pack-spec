@@ -16,6 +16,19 @@ here.
   names the judge, the signer, the witness and the reader around a decision record: what each
   produces, trusts and never does, and which parts are not shipped. It defines nothing.
 
+### Changed
+
+- [RFC 0030](rfcs/0030-agent-principals-and-delegated-authority.md) is amended for #284
+  (2026-11-09), still Draft, closing the five LOW findings of its confirmation review. On an action
+  key, the actor's credential is also held to step 11's `source` and `tool` conditions for the
+  action's write (NC1), and the subject's request makes a standing read to the issuing host,
+  failing closed as `standing-unknown` (NC5). The admission read may name the grant's owner, or
+  the gateway makes a separate owner read, and `owner-removed` and `owner-unknown` are ordered
+  after step 12 (NC2). A grant with no owner is used and reported `owner-missing` rather than
+  required at adoption (NC3). A pending action whose read-back runs through a revoked or
+  quarantined grant stays `unknown` (NC4). The needed vectors are listed. Nothing in Core or any
+  released conformance claim changes.
+
 ## `0.4.0` — 2026-11-02
 
 A release that carries `specVersion` `0.3.0` unchanged: packs keep declaring `0.3.0`, the tag name
