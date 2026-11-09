@@ -498,6 +498,14 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "docs/concepts/roles-in-a-record.md",
+        PurePosixPath("concepts/roles-in-a-record/index.html"),
+        "Roles in a record",
+        "The judge, the signer, the witness and the reader around a decision record: what each produces, what it trusts, what it never does, and what is not shipped.",
+        "concepts",
+        source_ref="main",
+    ),
+    Page(
         "rfcs/README.md",
         PurePosixPath("rfcs/index.html"),
         "Proposals (RFCs)",
@@ -2319,6 +2327,7 @@ def build_project_index(output_root: Path) -> None:
                 ("Field guide", "Plain-language walkthrough of every field.", "field-guide/index.html"),
                 ("Architecture vision", "A non-normative picture of the layered architecture.", "architecture/vision/index.html"),
                 ("Comparison", "How JPS relates to DMN, policy engines, and rule engines.", "concepts/comparison/index.html"),
+                ("Roles in a record", "Who judges, signs, witnesses and reads a decision record.", "concepts/roles-in-a-record/index.html"),
                 ("Proposals (RFCs)", "Design proposals, their disposition records, and the change process.", "rfcs/index.html"),
             ),
         ),
@@ -2364,6 +2373,7 @@ def build_concepts_index(output_root: Path) -> None:
         ("Why Judgment Pack?", "The gap between information and judgment, and why coding agents work better than most business agents.", "why/index.html"),
         ("Architecture vision", "A non-normative picture of the layered architecture — what is shipped versus what is proposed.", "architecture/vision/index.html"),
         ("How Judgment Pack compares", "How JPS relates to DMN, policy engines, rule engines, BPMN, and knowledge graphs.", "concepts/comparison/index.html"),
+        ("Roles in a record", "Who judges, signs, witnesses and reads a decision record, and what each one never does.", "concepts/roles-in-a-record/index.html"),
         ("Field guide", "A plain-language walkthrough of every part of a Judgment Pack document.", "field-guide/index.html"),
         ("FAQ", "Answers to common and hard architectural questions.", "faq/index.html"),
     )
@@ -2560,6 +2570,7 @@ conformance.
 - [Field guide]({guide_url(PurePosixPath("field-guide/index.html"))})
 - [Frequently asked questions]({guide_url(PurePosixPath("faq/index.html"))})
 - [How Judgment Pack compares]({guide_url(PurePosixPath("concepts/comparison/index.html"))})
+- [Roles in a record]({guide_url(PurePosixPath("concepts/roles-in-a-record/index.html"))})
 - [Synthetic examples]({guide_url(PurePosixPath("examples/index.html"))})
 
 ## Project boundaries and participation

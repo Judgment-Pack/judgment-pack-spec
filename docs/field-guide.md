@@ -742,3 +742,5 @@ model; it is not a policy-execution engine.
   conformance requirements.
 - Browse the [schema field reference](../schema/) for the machine-readable structural constraints.
 - Study a [worked example](../examples/supplier-invoice-approval.json) — a complete, validated document.
+- Read [Roles in a record](concepts/roles-in-a-record.md) for who judges, signs, witnesses and reads a
+  decision record, and what each one never does.

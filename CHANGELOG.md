@@ -12,6 +12,9 @@ here.
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
+- An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
+  names the judge, the signer, the witness and the reader around a decision record: what each
+  produces, trusts and never does, and which parts are not shipped. It defines nothing.
 
 ## `0.4.0` — 2026-11-02
 
