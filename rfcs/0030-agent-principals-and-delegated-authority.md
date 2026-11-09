@@ -3,6 +3,10 @@
 - Status: Draft
 - Type: Mixed. The delegation statement (its members, canonical form, signing, narrowing check and verification steps) is **standards track at draft maturity**, proposed for a companion document beside Core. Everything else — the agent's run admission and records, the gateway's credentials, receipt member, action keys and connection grants, and the Desk's inventories — is an **exploratory cross-project record** outside JPS.
 - Created: 2026-10-30
+- Amended: 2026-11-09 (the confirmation review's five LOW findings, issue
+  [#284](https://github.com/Judgment-Pack/judgment-pack-spec/issues/284): the actor row's source
+  and tool, the owner in the admission read and its refusals' order, a grant with no owner,
+  pending actions behind a removed owner, and the subject's standing read); still Draft
 - Target: proposed for Spec `0.5.0`. This Draft is carried in release `v0.4.0`, is normative for nothing, and pre-commits nothing for `0.5.0`.
 - Issue: [#280](https://github.com/Judgment-Pack/judgment-pack-spec/issues/280)
 
@@ -379,10 +383,17 @@ noticed.
 - the `calls` counters.
 
 The enforcing host gets this state by an **admission read**: an authenticated, synchronous request
-to the issuing host. It names the chain's digests, the call's audience, source, tool and effect,
-and whether this dispatch is to be counted. The issuing host answers `admit`, or the first refusal
-of steps 8 to 12. On `admit` with counting set, it has already incremented the counters. Three
-checks are the issuing host's own:
+to the issuing host. It names:
+- the chain's digests;
+- the call's audience, source, tool and effect;
+- whether this dispatch is to be counted;
+- the owner of the connection grant the call uses, where it uses one whose record names an owner
+  and whose `ownerHost` is this issuing host, unless the enforcing host reads that owner's standing
+  by §5's separate owner read instead (§5, rule 5).
+
+The issuing host answers `admit`, or the first refusal of steps 8 to 12 and then of the owner's
+standing (*Verification steps*, below). On `admit` with counting set, it has already incremented
+the counters. Three checks are the issuing host's own:
 - it answers `admit` only for links it recorded issuing, so a chain signed with a stolen key alone,
   without the host's channel credentials, is never admitted (`not-issued`, open question 18);
 - it answers only an enforcing host that authenticates as the audience named in the call's entry,
@@ -432,8 +443,16 @@ unavailable ownership evidence.
 Some refusals are not verification steps, and they sit outside this table:
 - `principal-changed` is a fence check (§7, rule 2), made with the lease at the same admission and
   before step 0;
-- `action-key-unauthenticated` and `action-key-scope-conflict` come from the gateway's action-key
-  lookup (§4, rule 4; §7, rule 3), made before the counting admission read;
+- `action-key-unauthenticated`, `action-key-scope-conflict` and `standing-unknown` come from the
+  gateway's action-key lookup (§4, rule 4; §7, rule 3), made before the counting admission read;
+- `owner-removed`, then `owner-unknown`, come from the connection grant's owner standing (§5,
+  rule 5). They are ordered **after step 12**: a call that steps 0 to 12 refuse reports that
+  refusal, and a call they admit is refused if the owner has been removed or its standing cannot
+  be read. Where the owner is named in the admission read, the issuing host answers the owner's
+  standing after steps 8 to 12, and an owner refusal is not `admit`, so it counts nothing. Where
+  the enforcing host makes §5's separate owner read instead, it makes it after the admission read
+  answers `admit`. A call it then refuses is not dispatched, and its counted budget stays
+  consumed, which fails closed, as a lost answer does;
 - `not-parent-actor` and `delegation-not-permitted` are issuance refusals (§3).
 
 ### 3. Chained delegation
@@ -525,17 +544,31 @@ Who may revoke:
 
    | Sender | Authenticated by | Before revocation | After revocation |
    | --- | --- | --- | --- |
-   | the run's actor | a live credential bound to a chain whose `sub` and root actor equal the reservation's: step 0 and steps 1 to 7 applied, and steps 8 to 12 not, since nothing new is admitted | accepted | not possible: no live credential exists |
-   | the subject | its own token, whose verified issuer and subject equal the reservation's `sub` | accepted | accepted, unless the subject has been removed |
+   | the run's actor | a live credential bound to a chain whose `sub` and root actor equal the reservation's: step 0 and steps 1 to 7 applied, and step 11's `source` and `tool` conditions applied to the action's write source and tool on every link; steps 8 to 10, 12 and step 11's effect and limit conditions not, since nothing new is admitted | accepted | not possible: no live credential exists |
+   | the subject | its own token, whose verified issuer and subject equal the reservation's `sub`, and a standing read (below) that answers the subject `current` | accepted | accepted, unless the subject has been removed |
    | the issuing host | authenticated as the reservation's issuing host, acting for the run | accepted | accepted |
    | the gateway's operator | the gateway's own operator authentication | accepted | accepted |
 
    Any other sender, a bare key, or a credential bound to another scope is refused as
    `action-key-unauthenticated`, and the refusal discloses nothing about the reservation.
+   - **The actor's source and tool.** A narrower link of the same family has the reservation's
+     `sub` and root actor, and may still exclude the action's write source or tool. Its credential
+     is refused as `action-key-unauthenticated`, so no link reaches an action's retained response,
+     or triggers its read-back, outside its own scope. The effect and the limits are not checked:
+     they bound what is dispatched, and a freed attempt is a dispatch that makes the full admission
+     read of §2.
+   - **How the gateway learns that the subject was removed.** The subject row makes no admission
+     read, so the gateway makes a **standing read**: an authenticated, synchronous request to the
+     reservation's issuing host, naming the subject and asking whether it is a current principal.
+     It is answered `current` or `removed`. `removed` is refused as `action-key-unauthenticated`,
+     and a missing, late or unreadable answer as `standing-unknown`. The read fails closed, and it
+     is made on every subject request, before and after revocation.
    - **What an authenticated sender gets.** Retained evidence or the declared read-back. Only the
      actor's live credential can reach a freed attempt, and that attempt is a dispatch: it makes
      the counting admission read like any other. After revocation, no sender reaches a freed
-     attempt or any dispatch.
+     attempt or any dispatch. A read-back through a connection grant is a use of that grant, and
+     §5's rule 5 applies to it: where the grant is revoked or quarantined, or its owner is refused,
+     no read-back runs, and the action's outcome stays `unknown`.
    - **Counting.** The read-back is not a call under the delegation and counts against no limit
      (open question 12).
    - **Recording the read-back.** The read-back's receipt records `caller` as the reservation's
@@ -560,8 +593,9 @@ Who may revoke:
    with a new `id`.
 6. **Removing a connection grant's owner.** Removing the owner of a connection grant from the host
    revokes or quarantines that grant (§5, rule 5). The gateway then refuses every call through the
-   grant, whatever delegation it comes under. Delegations whose `sub` is the removed owner are
-   revoked by rule 2. Other delegations are unchanged, since they name sources, not grants.
+   grant, a read-back included, whatever delegation it comes under. Delegations whose `sub` is the
+   removed owner are revoked by rule 2. Other delegations are unchanged, since they name sources,
+   not grants.
 7. **Compromise of the issuing host's key.** Revoking a `keyId` revokes every delegation it signed,
    and every chain through one (open question 18).
 
@@ -580,8 +614,8 @@ content.
 | Member | Form | Meaning |
 | --- | --- | --- |
 | `connection` | flat token | the gateway's connection |
-| `owner` | principal reference | the person or service that authorized the grant and answers for it |
-| `ownerHost` | flat token | the issuing host that holds the owner's standing |
+| `owner` | principal reference, or `null` where no owner is recorded (rule 5) | the person or service that authorized the grant and answers for it |
+| `ownerHost` | flat token, or `null` exactly when `owner` is | the issuing host that holds the owner's standing |
 | `scopes.required` | array of strings, ordered, no repeats | the union of the minimum scopes the connection's sources declare per operation |
 | `scopes.granted` | array of strings, ordered, no repeats | what the provider granted, as last read |
 | `scopes.used` | array of `{"scope": string, "lastUsedAt": time}`, ordered by `scope` | each granted scope that some dispatched call exercised, and when last |
@@ -611,18 +645,28 @@ content.
      operator of the issuing host may reassign it, and the reassignment takes effect only on the
      new owner's authenticated acceptance.
    - No grant remains usable with a removed owner.
-   - Pending action keys follow reconciliation (§4, rule 4).
+   - **Pending action keys stay `unknown`.** Revoking or quarantining a grant deletes no record of a
+     pending action. A quarantined grant serves no call, a declared read-back included, and a
+     revoked grant has no credential. So an action whose declared read-back runs through the grant
+     cannot be reconciled while the grant is revoked, quarantined or refused by its owner read. Its
+     outcome stays `unknown` (§4, rule 3): a verifier reports it as `action-uncertain`, and it
+     permits no other dispatch. A quarantined grant that is reassigned and accepted is in use
+     again, and a read-back through it is then a use like any other.
 
    **How the gateway learns of the removal: a read at each use.** Before every use of a grant —
-   delegated or not — the gateway learns the owner's standing from `ownerHost`.
-   - For a delegated call, the admission read (§2) carries the grant's owner, and the issuing host
-     answers the owner's standing with the rest. Where `ownerHost` is another host, the gateway
-     makes a separate owner read to it.
-   - For an undelegated call, which makes no admission read, the gateway makes an **owner read**:
-     an authenticated, synchronous request to `ownerHost` asking whether the owner is a current
-     principal.
-   - An owner that has been removed is refused (`owner-removed`) and rule 5 is applied to the grant.
-     A missing, late or unreadable answer is refused (`owner-unknown`).
+   delegated or not, a read-back included — the gateway learns the owner's standing from
+   `ownerHost`. It does so in one of two ways:
+   - **In the admission read.** For a delegated call whose grant's `ownerHost` is the issuing host,
+     the enforcing host may name the grant's owner in the admission read (§2), and the issuing host
+     answers the owner's standing with the rest.
+   - **By an owner read.** Otherwise — an undelegated call, which makes no admission read, a grant
+     whose `ownerHost` is another host, or an enforcing host that does not carry the owner in its
+     admission read — the gateway makes an **owner read**: an authenticated, synchronous request to
+     `ownerHost` asking whether the owner is a current principal.
+
+   Either way, an owner that has been removed is refused (`owner-removed`) and rule 5 is applied to
+   the grant. A missing, late or unreadable answer is refused (`owner-unknown`). For a delegated
+   call, both refusals are ordered after step 12 (§2, *Verification steps*).
    - A grant never used after its owner's removal is caught at its next use, at its idle expiry
      (rule 4), or by the operator's periodic owner read.
 
@@ -632,8 +676,20 @@ content.
    would keep admitting. A read at each use fails closed, reuses the synchronous admission read
    that delegated calls already make, and needs no new delivery contract. Its cost is one
    synchronous read on undelegated calls through an owned grant. A gateway may still act early on
-   a removal it is told about, but such a message never admits anything. A grant whose record has
-   no owner, as before gateway #357, is used as today.
+   a removal it is told about, but such a message never admits anything.
+
+   **A grant with no recorded owner.** A grant made before gateway #357, or one whose owner the
+   operator has not yet recorded, has `owner` and `ownerHost` `null`. It is used as today, and the
+   gateway's grant report names it with the finding `owner-missing` for as long as it has no owner,
+   so no such grant stays outside this rule unseen. An owner, once recorded, is changed only by
+   the reassignment above, never cleared.
+
+   *Why a report and not a requirement at adoption.* Requiring the owner fields when gateway #357
+   is adopted would either refuse every connection made before the record existed, which breaks
+   working connections at an upgrade, or have the gateway fill in an owner it does not know. A
+   guessed owner is worse than a named gap: its removal would revoke a grant it never answered
+   for, and the real owner's removal would miss it. Only the operator knows who authorized a grant
+   made before the record, so the record leaves the gap visible until the operator closes it.
 6. **What revoking a grant does.** The gateway calls the provider's revocation endpoint where it
    offers one (for an OAuth provider, RFC 7009 token revocation), deletes the credential, and sets
    `state` to `revoked`. Where the provider offers no revocation, it deletes the credential and
@@ -954,6 +1010,11 @@ readers.
     written before it;
   - a key presented with no credential, and with a credential bound to another scope
     (`action-key-unauthenticated`);
+  - a key presented with the credential of a narrower link of the same `sub` and root actor
+    whose scope excludes the action's write source, and one whose scope excludes its tool
+    (`action-key-unauthenticated`), and one whose scope excludes only its effect (accepted);
+  - the subject's request with the standing read answering `removed`
+    (`action-key-unauthenticated`), and unanswered (`standing-unknown`);
   - a request answered from retained evidence, and one refused at the key lookup, neither counted;
     a check before an approval pause not counted, and the dispatch after it counted once.
 - **Connection grants:**
@@ -963,6 +1024,12 @@ readers.
   - owner removal revoking and quarantining, and reassignment with and without acceptance;
   - an undelegated call after the owner's removal (`owner-removed`), and with the owner read
     unanswered (`owner-unknown`);
+  - a delegated call after the owner's removal, with the owner named in the admission read and
+    with a separate owner read, each `owner-removed`; and one that step 12 also refuses, reporting
+    step 12's refusal;
+  - a grant with no owner, used and reported `owner-missing`;
+  - a pending action whose read-back grant is quarantined, and one whose grant is revoked, each
+    staying `unknown` with no read-back run;
   - a provider without revocation, reporting `provider-grant-may-persist`;
   - a lapsed publisher, and a name lookalike.
 - **Agent records:**
@@ -1043,8 +1110,11 @@ Each has a proposed default. A default is a proposal for review, not a decision 
     - The receipt's `caller` names the person.
 12. **Requests on an action key after revocation.** Permitted, resolved by key and limited to
     retained evidence or the declared read-back. The sender is always authenticated against the
-    reservation's scope, by §4, rule 4's table: after revocation, the subject's own token, the
-    issuing host or the gateway's operator. The read-back's `caller` is the reservation's subject
+    reservation's scope, by §4, rule 4's table: after revocation, the subject's own token with a
+    standing read answering `current`, the issuing host or the gateway's operator. The actor's
+    credential reaches a key only when every link's scope has the action's write source and tool.
+    A read-back through a revoked or quarantined grant does not run, and the outcome stays
+    `unknown` (§5, rule 5). The read-back's `caller` is the reservation's subject
     pair, and `reconciler` names the sender. It dispatches no mutation and counts against no limit.
 13. **Revoke or quarantine on owner removal, when the operator configured neither.** Revoke.
 14. **Idle expiry.** Absent (`null`) by default. Posture reports a grant unused for 90 days as idle.
@@ -1097,3 +1167,6 @@ requirement for this Draft: the adversarial review and its re-reads are by Anthr
 5.5, the model that also drafted it. `GOVERNANCE.md` defines no exception mechanism; this is
 recorded as a departure and is not RFC 0009 cross-vendor compliance. The normative text proposed
 for Spec 0.5.0 requires a cross-vendor review before adoption.
+The amendment of 2026-11-09 (#284) closes the confirmation review's five LOW findings; its review
+is same-vendor as well, is recorded on its pull request, and is not RFC 0009 cross-vendor
+compliance either.
