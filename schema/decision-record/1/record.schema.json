@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/decision-record/1/record.schema.json",
+  "title": "A decision record, as the specification reads one",
+  "description": "Informative, at draft maturity. The runtime evaluation record of a decision trail, in the form spec/dialect.md section 11, Reading the record, reads it: one JSON object with an object inputs, whose member binding is read by that exact name, so a member named binding but for ASCII case is refused. The record's format and its chaining are the reference runtime's (runtime ADR-0047, spec/checkpoint-witness.md section 1), so the object stays open and no other member is described here; a binding of any value, null included, is carried. Core section 1.1 does not list this schema among the normative artifacts, so publishing it changes no format's normative status; where it and the prose differ, the prose controls and the difference is a specification defect. Outside it: that the record is one line with neither a line feed nor a carriage return, its bytes and the binding's bytes, its signature, its chain and its witness.",
+  "type": "object",
+  "required": [
+    "inputs"
+  ],
+  "properties": {
+    "inputs": {
+      "type": "object"
+    }
+  },
+  "propertyNames": {
+    "anyOf": [
+      {
+        "const": "binding"
+      },
+      {
+        "not": {
+          "pattern": "^[Bb][Ii][Nn][Dd][Ii][Nn][Gg](?![\\s\\S])"
+        }
+      }
+    ]
+  }
+}

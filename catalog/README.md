@@ -17,9 +17,13 @@ on every pull request and on every push to `main`.
 The catalog fingerprints shapes; it does not establish that a document is valid, that two
 implementations agree on meaning, or that any record is true or authorized.
 
-Only formats with a JSON Schema are guarded. Formats the specification defines in prose alone, such
-as the decision record and audit chain, dialect recordings and receipts, have no schema, so they are
-not catalogued and a change to them shows nothing here.
+Only formats with a JSON Schema are guarded, and only in what their schemas describe. Since #286 the
+decision record and audit chain (family `decision-record`), the dialect recordings
+(`dialect-recording`) and receipts as consumed (`receipt`) have informative schemas at draft
+maturity. Each describes the members the prose reads, and leaves open what the gateway, the runtime
+or the Runner owns. A change to a format in prose alone, or to a member a schema leaves open, shows
+nothing here. A schema does not change a format's normative status: Core §1.1 does not list these,
+and the prose controls where they differ.
 
 ## What is catalogued
 

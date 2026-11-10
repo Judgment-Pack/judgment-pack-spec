@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/dialect-recording/1/export.schema.json",
+  "title": "A dialect recording: a Runner run export, as a recording reader reads it",
+  "description": "Informative, at draft maturity. The run.json of a dialect recording, in the members spec/dialect.md reads (Status, Recorded evaluator versions; section 11, A research fixture): the preparation, run.input.preparation; the evaluation record, the bytes run.auditBytes holds in standard base64 or, in an export of version 2, which carries no audit bytes, run.audit; the declared evaluator version, run.result.evaluatorSpecVersion, exactly 0.2.0-draft or 0.3.0, which the visible audit's evaluatorSpecVersion and pack.specVersion equal; and release.pack, the embedded pack as JSON text. The export format is the Runner's, so every object stays open beyond those members. A run export with no evaluation, which spec/workflow.md also retains, is not a dialect recording. Core section 1.1 does not list this schema among the normative artifacts, so publishing it changes no format's normative status; where it and the prose differ, the prose controls and the difference is a specification defect. Format assertions are required. Outside it: the decoded run.auditBytes and release.pack, their versions and the pack's validation against the Core schema the version selects, and every byte rule of the record.",
+  "type": "object",
+  "required": [
+    "version",
+    "release",
+    "run"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer"
+    },
+    "release": {
+      "type": "object",
+      "required": [
+        "pack"
+      ],
+      "properties": {
+        "pack": {
+          "type": "string",
+          "contentMediaType": "application/json"
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "required": [
+        "input",
+        "result",
+        "audit"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "preparation"
+          ],
+          "properties": {
+            "preparation": {
+              "$ref": "https://judgmentpack.org/schema/dialect-recording/1/preparation.schema.json"
+            }
+          }
+        },
+        "result": {
+          "type": "object",
+          "required": [
+            "evaluatorSpecVersion"
+          ],
+          "properties": {
+            "evaluatorSpecVersion": {
+              "enum": [
+                "0.2.0-draft",
+                "0.3.0"
+              ]
+            }
+          }
+        },
+        "audit": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/record"
+            }
+          ],
+          "required": [
+            "evaluatorSpecVersion",
+            "pack"
+          ],
+          "properties": {
+            "pack": {
+              "type": "object",
+              "required": [
+                "specVersion"
+              ]
+            }
+          }
+        },
+        "auditBytes": {
+          "type": "string",
+          "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?(?![\\s\\S])",
+          "contentEncoding": "base64",
+          "contentMediaType": "application/json"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "description": "The declared evaluator version, and the visible audit's two copies of it, agree.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/declares-0.2.0-draft"
+        },
+        {
+          "$ref": "#/$defs/declares-0.3.0"
+        }
+      ]
+    },
+    {
+      "description": "An export of version 2 carries no audit bytes; any other carries them.",
+      "if": {
+        "properties": {
+          "version": {
+            "const": 2
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "run": {
+            "not": {
+              "required": [
+                "auditBytes"
+              ]
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "run": {
+            "required": [
+              "auditBytes"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "record": {
+      "description": "A copy of https://judgmentpack.org/schema/decision-record/1/record.schema.json, kept equal to it by the repository's tests.",
+      "type": "object",
+      "required": [
+        "inputs"
+      ],
+      "properties": {
+        "inputs": {
+          "type": "object"
+        }
+      },
+      "propertyNames": {
+        "anyOf": [
+          {
+            "const": "binding"
+          },
+          {
+            "not": {
+              "pattern": "^[Bb][Ii][Nn][Dd][Ii][Nn][Gg](?![\\s\\S])"
+            }
+          }
+        ]
+      }
+    },
+    "declares-0.2.0-draft": {
+      "properties": {
+        "run": {
+          "properties": {
+            "result": {
+              "properties": {
+                "evaluatorSpecVersion": {
+                  "const": "0.2.0-draft"
+                }
+              }
+            },
+            "audit": {
+              "properties": {
+                "evaluatorSpecVersion": {
+                  "const": "0.2.0-draft"
+                },
+                "pack": {
+                  "properties": {
+                    "specVersion": {
+                      "const": "0.2.0-draft"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "declares-0.3.0": {
+      "properties": {
+        "run": {
+          "properties": {
+            "result": {
+              "properties": {
+                "evaluatorSpecVersion": {
+                  "const": "0.3.0"
+                }
+              }
+            },
+            "audit": {
+              "properties": {
+                "evaluatorSpecVersion": {
+                  "const": "0.3.0"
+                },
+                "pack": {
+                  "properties": {
+                    "specVersion": {
+                      "const": "0.3.0"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

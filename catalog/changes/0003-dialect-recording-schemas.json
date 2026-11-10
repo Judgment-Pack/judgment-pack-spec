@@ -1,0 +1,17 @@
+{
+  "reason": "The dialect recordings get schemas (#286): a Runner run export as a recording reader reads it, and the preparation of spec/dialect.md section 9 it carries. The schemas are informative and at draft maturity; no format's normative status changes.",
+  "changes": [
+    {
+      "path": "schema/dialect-recording/1/export.schema.json",
+      "family": "dialect-recording",
+      "from": null,
+      "to": "sha256:0bfee6021025d161a830eb6b57d2eb04b79411090b1e23ba27bf95d8c78c7ee7"
+    },
+    {
+      "path": "schema/dialect-recording/1/preparation.schema.json",
+      "family": "dialect-recording",
+      "from": null,
+      "to": "sha256:4d8482ea0fa76e69006823d0acff618e78cfe0e52a1041541fd074ab515869db"
+    }
+  ]
+}

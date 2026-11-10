@@ -1,0 +1,11 @@
+{
+  "reason": "Receipts as consumed get a schema (#286): a gateway's version-3 acquisition receipt, in the form spec/dialect.md section 5.2 holds it to. The schema is informative and at draft maturity; no format's normative status changes.",
+  "changes": [
+    {
+      "path": "schema/receipt/3/acquisition.schema.json",
+      "family": "receipt",
+      "from": null,
+      "to": "sha256:b62ae15e5c5d485f689fbb42d14e38c84da1bc8f87a2d36782f9d49fe28092c4"
+    }
+  ]
+}

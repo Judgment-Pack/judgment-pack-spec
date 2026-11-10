@@ -11,6 +11,16 @@
       "baseline": "v0.3.0",
       "lastReleased": "v0.4.0"
     },
+    "decision-record": {
+      "draftVersion": "1",
+      "baseline": null,
+      "lastReleased": null
+    },
+    "dialect-recording": {
+      "draftVersion": "1",
+      "baseline": null,
+      "lastReleased": null
+    },
     "judgment-pack-core": {
       "draftVersion": "0.3.0",
       "baseline": "v0.3.0",
@@ -20,6 +30,11 @@
       "draftVersion": "1.0.0",
       "baseline": "policy-v1.0.0-draft.1",
       "lastReleased": "policy-v1.0.0-draft.1"
+    },
+    "receipt": {
+      "draftVersion": "3",
+      "baseline": null,
+      "lastReleased": null
     },
     "retained-column": {
       "draftVersion": "1",

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/decision-record/1/checkpoint.schema.json",
+  "title": "A decision trail's checkpoint",
+  "description": "Informative, at draft maturity. The checkpoint of spec/checkpoint-witness.md section 2: an object of exactly four members, the checkpoint line the reference runtime prints for one record of a trail. Core section 1.1 does not list this schema among the normative artifacts, so publishing it changes no format's normative status; where it and the prose differ, the prose controls and the difference is a specification defect. Outside it: that each member is given once, that the line is in the canonical form of section 1 and is not re-encoded, and every rule about number literals.",
+  "type": "object",
+  "required": [
+    "checkpointVersion",
+    "trail",
+    "sequence",
+    "recordDigest"
+  ],
+  "properties": {
+    "checkpointVersion": {
+      "const": "1"
+    },
+    "trail": {
+      "description": "The trail's identity.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+    },
+    "sequence": {
+      "description": "The record's line number in the trail, from 1 to 2^53-2.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740990
+    },
+    "recordDigest": {
+      "description": "The SHA-256 of the record line's exact bytes, without its newline.",
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    }
+  },
+  "additionalProperties": false
+}

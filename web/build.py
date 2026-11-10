@@ -2657,6 +2657,12 @@ CANONICAL_SCHEMA_SOURCES = (
     "schema/policy/1.0.0/governing-adoption.schema.json",
     "conformance/policy/1.0.0/fixture.schema.json",
     "conformance/policy/1.0.0/vectors.schema.json",
+    # Informative schemas of the record formats the companion documents read (#286).
+    "schema/receipt/3/acquisition.schema.json",
+    "schema/decision-record/1/record.schema.json",
+    "schema/decision-record/1/checkpoint.schema.json",
+    "schema/dialect-recording/1/export.schema.json",
+    "schema/dialect-recording/1/preparation.schema.json",
 )
 
 

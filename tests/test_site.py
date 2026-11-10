@@ -772,6 +772,17 @@ class StaticSiteTests(unittest.TestCase):
             / "conformance"
             / "evaluation"
             / "manifest.schema.json",
+            # The record formats' schemas (#286) are served at their format-versioned $id paths.
+            **{
+                path: ROOT / path
+                for path in (
+                    "schema/receipt/3/acquisition.schema.json",
+                    "schema/decision-record/1/record.schema.json",
+                    "schema/decision-record/1/checkpoint.schema.json",
+                    "schema/dialect-recording/1/export.schema.json",
+                    "schema/dialect-recording/1/preparation.schema.json",
+                )
+            },
         }
         for served, source in cases.items():
             with self.subTest(served=served):

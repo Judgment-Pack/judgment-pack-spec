@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/receipt/3/acquisition.schema.json",
+  "title": "A version-3 acquisition receipt, as a preparation verifier consumes it",
+  "description": "Informative, at draft maturity. The structural form spec/dialect.md section 5.2, check 1, holds a gateway's version-3 acquisition receipt to before it reads one: the members checks 1 to 5 and the time and session rules read, and no others. The receipt format is the gateway's (gateway SPEC.md section 1.2a), so the object stays open: caller, statement, prevSignature, witness and every other member the dialect does not read are not described here. Core section 1.1 does not list this schema among the normative artifacts, so publishing it changes no format's normative status; where it and spec/dialect.md differ, the prose controls and the difference is a specification defect. Format assertions are required. Outside it: the signature equation and key identifier match (check 2), the comparisons with a profile (check 3, including an endpoint scope), the commitments (checks 4 and 5), the time window and the session forms, and every rule about bytes or number literals.",
+  "type": "object",
+  "required": [
+    "receiptVersion",
+    "kind",
+    "callIndex",
+    "sessionId",
+    "servedAt",
+    "keyId",
+    "signature",
+    "source",
+    "authority",
+    "acquisition",
+    "argumentsCommitment",
+    "resultDigest"
+  ],
+  "properties": {
+    "receiptVersion": {
+      "const": "3"
+    },
+    "kind": {
+      "const": "acquisition"
+    },
+    "callIndex": {
+      "description": "An integer at least zero (spec/dialect.md section 1, Integers).",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sessionId": {
+      "description": "A string; the dialect does not hold it to the gateway's token form.",
+      "type": "string"
+    },
+    "servedAt": {
+      "$ref": "#/$defs/instant"
+    },
+    "keyId": {
+      "description": "A key identifier: the first 32 hexadecimal characters of the SHA-256 of the key.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{128}(?![\\s\\S])"
+    },
+    "source": {
+      "description": "Compared with the profile's source, a string (section 5.1).",
+      "type": "string"
+    },
+    "authority": {
+      "description": "Compared with the profile's authority, a string (section 5.1).",
+      "type": "string"
+    },
+    "acquisition": {
+      "type": "object",
+      "required": [
+        "adapter",
+        "shape",
+        "endpoint",
+        "observedAt"
+      ],
+      "properties": {
+        "adapter": {
+          "description": "Equal, as a JSON value, to the profile's adapter, which section 5.1 closes.",
+          "type": "object",
+          "required": [
+            "name",
+            "version",
+            "digest"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "digest": {
+              "$ref": "#/$defs/digest"
+            }
+          },
+          "additionalProperties": false
+        },
+        "shape": {
+          "description": "Equal, as a JSON value, to the profile's shape.",
+          "enum": [
+            "airbyte",
+            "mcp",
+            "http",
+            "command"
+          ]
+        },
+        "endpoint": {
+          "description": "Equal, as a JSON value, to the profile's endpoint, a string or null.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "observedAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "pageItems": {
+          "description": "A receipt that attests a page is refused, whatever its shape.",
+          "not": {}
+        }
+      }
+    },
+    "argumentsCommitment": {
+      "$ref": "#/$defs/digest"
+    },
+    "resultDigest": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "instant": {
+      "description": "A timestamp with an instant (section 1): YYYY-MM-DDThh:mm:ssZ, UTC, whole seconds, naming a date and time that exist.",
+      "type": "string",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z(?![\\s\\S])",
+      "format": "date-time"
+    }
+  }
+}
