@@ -1,0 +1,17 @@
+{
+  "reason": "The decision record and audit chain get schemas (#286): the record as spec/dialect.md section 11 reads it, and the checkpoint of spec/checkpoint-witness.md section 2. The schemas are informative and at draft maturity; no format's normative status changes.",
+  "changes": [
+    {
+      "path": "schema/decision-record/1/checkpoint.schema.json",
+      "family": "decision-record",
+      "from": null,
+      "to": "sha256:025d1531eba3e25689ac7ae3bb9d822d5f38d3f5adc7a6a8177cf1f0e0c6e931"
+    },
+    {
+      "path": "schema/decision-record/1/record.schema.json",
+      "family": "decision-record",
+      "from": null,
+      "to": "sha256:d62dc87c71dca30bc2834a51de187435680fa632bc870b212ce7c23759eeb235"
+    }
+  ]
+}

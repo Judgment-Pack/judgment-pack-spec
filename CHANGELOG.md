@@ -15,6 +15,20 @@ here.
 - An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
   names the judge, the signer, the witness and the reader around a decision record: what each
   produces, trusts and never does, and which parts are not shipped. It defines nothing.
+- JSON Schemas for three record formats that had none (#286), so the record-shape catalog
+  fingerprints them, each with a generated change record and a format-status record: receipts as
+  consumed, `schema/receipt/3/acquisition.schema.json`, the form spec/dialect.md §5.2 holds a
+  gateway's version-3 acquisition receipt to; the decision record and audit chain,
+  `schema/decision-record/1/record.schema.json`, the record as dialect §11 reads it, and
+  `schema/decision-record/1/checkpoint.schema.json`, the checkpoint of checkpoint-witness §2; and
+  the dialect recordings, `schema/dialect-recording/1/export.schema.json`, a Runner export as the
+  recording reader reads it, and `schema/dialect-recording/1/preparation.schema.json`, the
+  preparation of dialect §9. Each describes only the members the prose reads, leaves open what the
+  gateway, the runtime or the Runner owns, and says what it does not check. A test validates every
+  dialect vector of each family against its schema, with hand-written cases for each constraint.
+  The schemas are informative and at draft maturity, as the companion documents are: Core §1.1
+  does not list them, so publishing them changes no format's normative status, and the prose
+  controls where they differ. The site serves each at its `$id`.
 
 ### Changed
 

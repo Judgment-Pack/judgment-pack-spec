@@ -142,6 +142,12 @@ class ChangeRecords(Fixture):
     def record(self, name: str, changes: list[dict]) -> None:
         write_json(self.root / shapes.CHANGES / name, {"reason": "test", "changes": changes})
 
+    def next_record(self, slug: str) -> str:
+        """The name the next change record takes, after those the tree already holds."""
+        numbers = [int(shapes.RECORD_FILE.match(path.name).group(1))
+                   for path in (self.root / shapes.CHANGES).iterdir()]
+        return "%04d-%s.json" % (max(numbers) + 1, slug)
+
     def test_a_changed_schema_without_a_change_record_fails(self):
         before, after = self.change_shape()
         faults = shapes.check(self.root)
@@ -152,11 +158,23 @@ class ChangeRecords(Fixture):
 
     def test_a_changed_schema_with_its_change_record_passes(self):
         before, after = self.change_shape()
+        expected = self.next_record("retitle-workflow")
         written = shapes.write_record(self.root, "retitle-workflow", "Retitle for a test")
-        self.assertEqual(written.name, "0001-retitle-workflow.json")
+        self.assertEqual(written.name, expected)
         self.assertEqual(json.loads(written.read_text("utf-8")),
                          {"reason": "Retitle for a test", "changes": [
                              {"path": self.PATH, "family": "workflow", "from": before, "to": after}]})
+        self.assertEqual([], shapes.check(self.root))
+
+    def test_the_next_change_record_follows_the_highest_number_across_a_gap(self):
+        # Renumber the last record to 0007, so the numbers have a gap and the tree holds no 0004.
+        last = sorted((self.root / shapes.CHANGES).iterdir())[-1]
+        self.assertLess(int(shapes.RECORD_FILE.match(last.name).group(1)), 7)
+        last.rename(last.with_name("0007-x.json"))
+        self.assertEqual([], shapes.check(self.root))
+        self.change_shape()
+        written = shapes.write_record(self.root, "retitle-workflow", "Retitle for a test")
+        self.assertEqual("0008-retitle-workflow.json", written.name)
         self.assertEqual([], shapes.check(self.root))
 
     def test_a_stale_catalog_fails(self):
@@ -167,7 +185,8 @@ class ChangeRecords(Fixture):
     def test_a_change_record_naming_a_wrong_old_digest_fails(self):
         before, after = self.change_shape()
         wrong = self.entry(shapes.build_catalog(self.root), "schema/judgment-pack-core.schema.json")["sha256"]
-        self.record("0001-wrong-old.json", [{"path": self.PATH, "family": "workflow", "from": wrong, "to": after}])
+        self.record(self.next_record("wrong-old"),
+                    [{"path": self.PATH, "family": "workflow", "from": wrong, "to": after}])
         faults = shapes.check(self.root)
         self.assertTrue(any("from %s, but the earlier records end at %s" % (wrong, before) in fault
                             for fault in faults), faults)
@@ -175,14 +194,16 @@ class ChangeRecords(Fixture):
     def test_a_change_record_naming_a_wrong_new_digest_fails(self):
         before, after = self.change_shape()
         wrong = "sha256:" + "0" * 64
-        self.record("0001-wrong-new.json", [{"path": self.PATH, "family": "workflow", "from": before, "to": wrong}])
+        self.record(self.next_record("wrong-new"),
+                    [{"path": self.PATH, "family": "workflow", "from": before, "to": wrong}])
         faults = shapes.check(self.root)
         self.assertTrue(any(self.PATH in fault and "change records end at %s" % wrong in fault
                             for fault in faults), faults)
 
     def test_a_change_record_adding_a_path_already_held_fails(self):
         before, after = self.change_shape()
-        self.record("0001-added-again.json", [{"path": self.PATH, "family": "workflow", "from": None, "to": after}])
+        self.record(self.next_record("added-again"),
+                    [{"path": self.PATH, "family": "workflow", "from": None, "to": after}])
         faults = shapes.check(self.root)
         self.assertTrue(any("adds %s, which the earlier records already hold at %s" % (self.PATH, before) in fault
                             for fault in faults), faults)
@@ -199,7 +220,7 @@ class ChangeRecords(Fixture):
         with self.assertRaisesRegex(shapes.ShapeError, "share the number 0000"):
             shapes.check(self.root)
         (self.root / shapes.CHANGES / "0000-again.json").unlink()
-        write_json(self.root / shapes.CHANGES / "0001-open.json", {"reason": "x", "changes": [], "extra": 1})
+        write_json(self.root / shapes.CHANGES / self.next_record("open"), {"reason": "x", "changes": [], "extra": 1})
         with self.assertRaisesRegex(shapes.ShapeError, "exactly the members reason and changes"):
             shapes.check(self.root)
 
@@ -314,10 +335,10 @@ class FormatStatus(Fixture):
 
     def test_a_status_record_for_a_family_the_catalog_lacks_fails(self):
         status = self.status()
-        status["families"]["receipt"] = {"draftVersion": "1", "baseline": None, "lastReleased": None}
+        status["families"]["no-such-family"] = {"draftVersion": "1", "baseline": None, "lastReleased": None}
         write_json(self.root / shapes.STATUS, status)
         faults = shapes.check(self.root)
-        self.assertEqual(["%s records the family receipt, which the catalog does not have" % shapes.STATUS],
+        self.assertEqual(["%s records the family no-such-family, which the catalog does not have" % shapes.STATUS],
                          faults)
 
 
