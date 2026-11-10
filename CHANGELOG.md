@@ -28,6 +28,16 @@ here.
   required at adoption (NC3). A pending action whose read-back runs through a revoked or
   quarantined grant stays `unknown` (NC4). The needed vectors are listed. Nothing in Core or any
   released conformance claim changes.
+- [RFC 0030](rfcs/0030-agent-principals-and-delegated-authority.md) is amended again for #291
+  (2026-11-09), still Draft, closing the six LOW findings of the narrow review of #289. A request
+  on an action key that the declared read-back answers holds the actor's credential to step 11's
+  `source` and `tool` conditions for the read-back's own source and tool as well as the write's,
+  refusing `action-key-unauthenticated` otherwise. The owner read's cost is restated as one read
+  per use outside the admission read. The vectors now name the key's state where a link excludes
+  only the effect, what is counted on each owner-read path and step 12's refusal on both, that a
+  recorded owner is never cleared (NC3), and a read-back whose owner read is unanswered or whose
+  grant is revoked staying `unknown` (NC4). Nothing in Core or any released conformance claim
+  changes.
 
 ## `0.4.0` — 2026-11-02
 

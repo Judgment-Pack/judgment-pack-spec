@@ -6,7 +6,10 @@
 - Amended: 2026-11-09 (the confirmation review's five LOW findings, issue
   [#284](https://github.com/Judgment-Pack/judgment-pack-spec/issues/284): the actor row's source
   and tool, the owner in the admission read and its refusals' order, a grant with no owner,
-  pending actions behind a removed owner, and the subject's standing read); still Draft
+  pending actions behind a removed owner, and the subject's standing read; then the narrow
+  review's six LOW findings, issue
+  [#291](https://github.com/Judgment-Pack/judgment-pack-spec/issues/291): the read-back's own
+  source and tool on the actor row, the owner read's cost, and the vectors they need); still Draft
 - Target: proposed for Spec `0.5.0`. This Draft is carried in release `v0.4.0`, is normative for nothing, and pre-commits nothing for `0.5.0`.
 - Issue: [#280](https://github.com/Judgment-Pack/judgment-pack-spec/issues/280)
 
@@ -544,7 +547,7 @@ Who may revoke:
 
    | Sender | Authenticated by | Before revocation | After revocation |
    | --- | --- | --- | --- |
-   | the run's actor | a live credential bound to a chain whose `sub` and root actor equal the reservation's: step 0 and steps 1 to 7 applied, and step 11's `source` and `tool` conditions applied to the action's write source and tool on every link; steps 8 to 10, 12 and step 11's effect and limit conditions not, since nothing new is admitted | accepted | not possible: no live credential exists |
+   | the run's actor | a live credential bound to a chain whose `sub` and root actor equal the reservation's: step 0 and steps 1 to 7 applied, and step 11's `source` and `tool` conditions applied to the action's write source and tool on every link, and, for a request answered by the declared read-back, to the read-back's own source and tool on every link as well; steps 8 to 10, 12 and step 11's effect and limit conditions not, since nothing new is admitted | accepted | not possible: no live credential exists |
    | the subject | its own token, whose verified issuer and subject equal the reservation's `sub`, and a standing read (below) that answers the subject `current` | accepted | accepted, unless the subject has been removed |
    | the issuing host | authenticated as the reservation's issuing host, acting for the run | accepted | accepted |
    | the gateway's operator | the gateway's own operator authentication | accepted | accepted |
@@ -553,8 +556,17 @@ Who may revoke:
    `action-key-unauthenticated`, and the refusal discloses nothing about the reservation.
    - **The actor's source and tool.** A narrower link of the same family has the reservation's
      `sub` and root actor, and may still exclude the action's write source or tool. Its credential
-     is refused as `action-key-unauthenticated`, so no link reaches an action's retained response,
-     or triggers its read-back, outside its own scope. The effect and the limits are not checked:
+     is refused as `action-key-unauthenticated`, so no link reaches an action's retained response
+     outside its own scope.
+   - **The read-back's source and tool.** The declared read-back is another operation from the
+     write: under gateway §1.2b its source is `<platform>/live` where the write's is
+     `<platform>/write`, and it runs the declared read tool. A link may hold the write and exclude
+     the read-back's source or tool. So a request that the key lookup answers with the read-back is
+     held to step 11's `source` and `tool` conditions twice on every link: for the action's write,
+     and for the read-back's own source and tool. A link that excludes either is refused as
+     `action-key-unauthenticated` and no read-back runs, so no link triggers a read-back outside its
+     own scope. A request answered from retained evidence runs no read-back and is not held to its
+     source and tool. For neither operation are the effect and the limits checked:
      they bound what is dispatched, and a freed attempt is a dispatch that makes the full admission
      read of §2.
    - **How the gateway learns that the subject was removed.** The subject row makes no admission
@@ -674,9 +686,11 @@ content.
    can be late or lost. It would need a delivery guarantee the project does not offer: ADR-0025
    puts notification delivery guarantees out of the package's scope. Until it arrived, the gateway
    would keep admitting. A read at each use fails closed, reuses the synchronous admission read
-   that delegated calls already make, and needs no new delivery contract. Its cost is one
-   synchronous read on undelegated calls through an owned grant. A gateway may still act early on
-   a removal it is told about, but such a message never admits anything.
+   where a delegated call's owner is named in it, and needs no new delivery contract. Its cost is
+   one synchronous owner read per use of an owned grant outside the admission read: an undelegated
+   call, a delegated call whose enforcing host makes the separate owner read, and a read-back,
+   which makes no admission read. A gateway may still act early on a removal it is told about, but
+   such a message never admits anything.
 
    **A grant with no recorded owner.** A grant made before gateway #357, or one whose owner the
    operator has not yet recorded, has `owner` and `ownerHost` `null`. It is used as today, and the
@@ -1012,7 +1026,13 @@ readers.
     (`action-key-unauthenticated`);
   - a key presented with the credential of a narrower link of the same `sub` and root actor
     whose scope excludes the action's write source, and one whose scope excludes its tool
-    (`action-key-unauthenticated`), and one whose scope excludes only its effect (accepted);
+    (`action-key-unauthenticated`), and one whose scope excludes only its effect, accepted on a key
+    with retained evidence, or an uncertain key answered by read-back, and refused `out-of-scope`
+    on a key whose attempt is freed;
+  - an uncertain key presented with the credential of a link that holds the action's write source
+    and tool and excludes the read-back's source, and one that excludes its read tool
+    (`action-key-unauthenticated`, no read-back run), and the same links on a key with retained
+    evidence (accepted);
   - the subject's request with the standing read answering `removed`
     (`action-key-unauthenticated`), and unanswered (`standing-unknown`);
   - a request answered from retained evidence, and one refused at the key lookup, neither counted;
@@ -1024,12 +1044,21 @@ readers.
   - owner removal revoking and quarantining, and reassignment with and without acceptance;
   - an undelegated call after the owner's removal (`owner-removed`), and with the owner read
     unanswered (`owner-unknown`);
-  - a delegated call after the owner's removal, with the owner named in the admission read and
-    with a separate owner read, each `owner-removed`; and one that step 12 also refuses, reporting
-    step 12's refusal;
+  - a delegated call after the owner's removal, with the owner named in the admission read
+    (`owner-removed`, nothing counted) and with a separate owner read (`owner-removed`, the
+    counted budget consumed and the call not dispatched);
+  - the same call that step 12 also refuses, on each path, reporting step 12's refusal: with the
+    owner named in the admission read, and with a separate owner read, which is not made; nothing
+    counted on either path;
   - a grant with no owner, used and reported `owner-missing`;
+  - an owner recorded once, then a second recording of an owner that is not a reassignment,
+    refused, and a clearing of the owner, refused (never cleared);
   - a pending action whose read-back grant is quarantined, and one whose grant is revoked, each
     staying `unknown` with no read-back run;
+  - a read-back whose owner read goes unanswered: `owner-unknown`, no read-back run, the outcome
+    stays `unknown` and the grant stays `active`;
+  - an uncertain key whose grant was revoked, on which a freed attempt is refused and the outcome
+    stays `unknown`;
   - a provider without revocation, reporting `provider-grant-may-persist`;
   - a lapsed publisher, and a name lookalike.
 - **Agent records:**
@@ -1111,8 +1140,10 @@ Each has a proposed default. A default is a proposal for review, not a decision 
 12. **Requests on an action key after revocation.** Permitted, resolved by key and limited to
     retained evidence or the declared read-back. The sender is always authenticated against the
     reservation's scope, by §4, rule 4's table: after revocation, the subject's own token with a
-    standing read answering `current`, the issuing host or the gateway's operator. The actor's
-    credential reaches a key only when every link's scope has the action's write source and tool.
+    standing read answering `current`, the issuing host or the gateway's operator. Before
+    revocation, the actor's credential reaches a key only when every link's scope has the action's
+    write source and tool, and runs its read-back only when every link's scope also has the
+    read-back's source and tool.
     A read-back through a revoked or quarantined grant does not run, and the outcome stays
     `unknown` (§5, rule 5). The read-back's `caller` is the reservation's subject
     pair, and `reconciler` names the sender. It dispatches no mutation and counts against no limit.
