@@ -31,6 +31,9 @@
 > retention, cross-view comparison, verifier enforcement, and witness independence and
 > non-collusion." What follows are **candidate clauses** such a contract would have to address, with
 > — for the clauses where evidence exists — what one measured prototype did and did not achieve.
+>
+> **Roles.** [Roles in a record](../docs/concepts/roles-in-a-record.md) is a short informative
+> page on the judge, the signer, the witness and the reader, and on what each one never does.
 
 ## Summary
 

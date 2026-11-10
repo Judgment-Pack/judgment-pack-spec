@@ -28,6 +28,9 @@
 > history it observed so that a verifier can compare views. The thing asked for here is different
 > — one party's account of one call, signed by the engine — and this record calls it a **reported
 > receipt**, and its author a **reporter**, so that RFC 0012's word keeps one meaning.
+>
+> **Roles.** [Roles in a record](../docs/concepts/roles-in-a-record.md) is a short informative
+> page on the judge, the signer, the witness and the reader, and on what each one never does.
 
 ## Summary
 
