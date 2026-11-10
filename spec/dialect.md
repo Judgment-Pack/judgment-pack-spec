@@ -227,11 +227,13 @@ profile is `input-malformed`. The bundled verifiers support only base.
 
 The dialect document is one JSON object. Its version 2 is the Runner's mapping v2 document: a
 mapping v2 document the Runner accepts is a version-2 dialect document, with the same bytes and the
-same digest. The one exception is a request's `query` under a profile whose adapter is the gateway's
-`adapter-http`, which the Runner holds to the rules of a template alone and this document to string
-templates as well (§4.1). Version 3 (§4.3, §4.4) is read by the reference Runner since its pull
-request 83, released in `v0.12.0`: it prepares an `operation`, bound or unbound and bound at import,
-and a `selected-file`, and refuses each of the other four kinds by name.
+same digest. Before the Runner's `v0.28.0` there was one exception: a request's `query` under a
+profile whose adapter is the gateway's `adapter-http`, which the Runner then held to the rules of a
+template alone and this document to string templates as well (§4.1). Since `v0.28.0` the Runner
+holds that `query` to §4.1 and refuses any other form as `profile-mismatch`. Version 3 (§4.3,
+§4.4) is read by the reference Runner since its pull request 83, released in `v0.12.0`: it prepares
+an `operation`, bound or unbound and bound at import, and a `selected-file`, and refuses each of
+the other four kinds by name.
 
 | Member | Form | Meaning |
 | --- | --- | --- |

@@ -32,6 +32,11 @@ here.
 
 ### Changed
 
+- `spec/dialect.md` §2 restates its one exception as history (#282). Runner `v0.28.0` holds an
+  `adapter-http` request's `query` to §4.1, an object of string templates, and refuses any other
+  form as `profile-mismatch`, so a mapping v2 document that Runner accepts is a version-2 dialect
+  document with no exception. Earlier Runners held the `query` to the rules of a template alone.
+  No rule of this document, vector or verdict changes.
 - [RFC 0030](rfcs/0030-agent-principals-and-delegated-authority.md) is amended for #284
   (2026-11-09), still Draft, closing the five LOW findings of its confirmation review. On an action
   key, the actor's credential is also held to step 11's `source` and `tool` conditions for the
