@@ -543,7 +543,9 @@ Who may revoke:
 
    **The key grants nothing on its own.** It is public in receipts (`action.delivery.key`). Before
    any retained response or read-back, the gateway authenticates the sender against the
-   reservation's scope. Only these senders are accepted:
+   reservation's scope. For the actor, one part of that check, the read-back's source and tool,
+   is made only once the key lookup has found the key uncertain (below). Only these senders are
+   accepted:
 
    | Sender | Authenticated by | Before revocation | After revocation |
    | --- | --- | --- | --- |
@@ -553,7 +555,9 @@ Who may revoke:
    | the gateway's operator | the gateway's own operator authentication | accepted | accepted |
 
    Any other sender, a bare key, or a credential bound to another scope is refused as
-   `action-key-unauthenticated`, and the refusal discloses nothing about the reservation.
+   `action-key-unauthenticated`, and the refusal discloses nothing about the reservation. The one
+   exception is the read-back's source and tool check, whose refusal discloses only what
+   *The read-back's source and tool*, below, states.
    - **The actor's source and tool.** A narrower link of the same family has the reservation's
      `sub` and root actor, and may still exclude the action's write source or tool. Its credential
      is refused as `action-key-unauthenticated`, so no link reaches an action's retained response
@@ -565,8 +569,12 @@ Who may revoke:
      held to step 11's `source` and `tool` conditions twice on every link: for the action's write,
      and for the read-back's own source and tool. A link that excludes either is refused as
      `action-key-unauthenticated` and no read-back runs, so no link triggers a read-back outside its
-     own scope. A request answered from retained evidence runs no read-back and is not held to its
-     source and tool. For neither operation are the effect and the limits checked:
+     own scope. The check is made after the key lookup finds the key uncertain and before the
+     grant's state, owner read or publisher check (grant revoked or quarantined, `owner-unknown`,
+     `action-reconciliation-unavailable`); its refusal tells a link that already holds the write
+     only that the key awaits a read-back. A request answered from retained evidence runs no
+     read-back and is not held to its source and tool. For neither operation are the effect and
+     the limits checked:
      they bound what is dispatched, and a freed attempt is a dispatch that makes the full admission
      read of §2.
    - **How the gateway learns that the subject was removed.** The subject row makes no admission
@@ -1026,13 +1034,17 @@ readers.
     (`action-key-unauthenticated`);
   - a key presented with the credential of a narrower link of the same `sub` and root actor
     whose scope excludes the action's write source, and one whose scope excludes its tool
-    (`action-key-unauthenticated`), and one whose scope excludes only its effect, accepted on a key
-    with retained evidence, or an uncertain key answered by read-back, and refused `out-of-scope`
-    on a key whose attempt is freed;
+    (`action-key-unauthenticated`), and one whose scope excludes only its effect and holds the
+    read-back's source and tool, accepted on a key with retained evidence, or an uncertain key
+    answered by read-back, and refused `out-of-scope` (reason `effect`) on a key whose attempt is
+    freed;
   - an uncertain key presented with the credential of a link that holds the action's write source
     and tool and excludes the read-back's source, and one that excludes its read tool
     (`action-key-unauthenticated`, no read-back run), and the same links on a key with retained
     evidence (accepted);
+  - an uncertain key whose grant is revoked, presented with the credential of a link that
+    excludes the read-back's source (`action-key-unauthenticated`, the check made before the
+    grant's state);
   - the subject's request with the standing read answering `removed`
     (`action-key-unauthenticated`), and unanswered (`standing-unknown`);
   - a request answered from retained evidence, and one refused at the key lookup, neither counted;
@@ -1057,8 +1069,8 @@ readers.
     staying `unknown` with no read-back run;
   - a read-back whose owner read goes unanswered: `owner-unknown`, no read-back run, the outcome
     stays `unknown` and the grant stays `active`;
-  - an uncertain key whose grant was revoked, on which a freed attempt is refused and the outcome
-    stays `unknown`;
+  - a request on an uncertain key whose grant was revoked: no dispatch, no read-back, answered with
+    its uncertain record, outcome stays `unknown`;
   - a provider without revocation, reporting `provider-grant-may-persist`;
   - a lapsed publisher, and a name lookalike.
 - **Agent records:**

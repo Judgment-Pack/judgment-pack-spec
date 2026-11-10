@@ -35,8 +35,11 @@ here.
   refusing `action-key-unauthenticated` otherwise. The owner read's cost is restated as one read
   per use outside the admission read. The vectors now name the key's state where a link excludes
   only the effect, what is counted on each owner-read path and step 12's refusal on both, that a
-  recorded owner is never cleared (NC3), and a read-back whose owner read is unanswered or whose
-  grant is revoked staying `unknown` (NC4). Nothing in Core or any released conformance claim
+  recorded owner is never cleared (NC3), a read-back whose owner read is unanswered staying
+  `unknown`, and a request on an uncertain key whose grant was revoked answered with its uncertain
+  record, with no dispatch and no read-back, its outcome staying `unknown` (NC4). The read-back's
+  source and tool check is placed after the key lookup finds the key uncertain and before the
+  grant's state, owner read or publisher check. Nothing in Core or any released conformance claim
   changes.
 
 ## `0.4.0` — 2026-11-02
