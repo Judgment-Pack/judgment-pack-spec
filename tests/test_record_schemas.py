@@ -667,8 +667,14 @@ class Recordings(SchemaTestCase):
         self.accepts("export", changed(self.export, ("run", "auditBytes"), "YQ=="), "two padding characters")
         self.accepts("export", changed(self.export, ("run", "auditBytes"), "YWI="), "one padding character")
         self.accepts("export", changed(self.export, ("run", "auditBytes"), ""), "no bytes")
-        self.accepts("export", changed(self.export, ("run", "audit", "Binding\n"), 1),
+        self.accepts("export", changed(self.legacy, ("run", "audit", "Binding\n"), 1),
                      "an audit member that is not binding but for case")
+        # Outside version 2 the record is the audit bytes; of run.audit only its two version
+        # members are read (spec/dialect.md section 11).
+        self.accepts("export", changed(self.export, ("run", "audit", "inputs"), DELETE),
+                     "an export of version 5 whose audit lacks inputs")
+        self.accepts("export", changed(self.export, ("run", "audit", "Binding"), None),
+                     "an export of version 5 whose audit has a binding but for case")
 
     def test_a_recording_of_another_form_is_refused(self) -> None:
         cases = {
@@ -690,9 +696,6 @@ class Recordings(SchemaTestCase):
             "an evaluator version not read": (("run", "result", "evaluatorSpecVersion"), "0.4.0"),
             "without run.audit": (("run", "audit"), DELETE),
             "run.audit not an object": (("run", "audit"), []),
-            "run.audit without inputs": (("run", "audit", "inputs"), DELETE),
-            "run.audit's inputs an array": (("run", "audit", "inputs"), []),
-            "run.audit with a binding but for case": (("run", "audit", "Binding"), None),
             "run.audit without evaluatorSpecVersion": (("run", "audit", "evaluatorSpecVersion"), DELETE),
             "run.audit without pack": (("run", "audit", "pack"), DELETE),
             "run.audit.pack not an object": (("run", "audit", "pack"), "0.2.0-draft"),
@@ -709,6 +712,13 @@ class Recordings(SchemaTestCase):
             self.refuses("export", changed(self.export, path, new), case)
         self.refuses("export", changed(self.legacy, ("run", "auditBytes"), "e30="),
                      "an export of version 2 with audit bytes")
+        legacy_cases = {
+            "an export of version 2 whose audit lacks inputs": (("run", "audit", "inputs"), DELETE),
+            "an export of version 2 whose audit's inputs is an array": (("run", "audit", "inputs"), []),
+            "an export of version 2 whose audit has a binding but for case": (("run", "audit", "Binding"), None),
+        }
+        for case, (path, new) in legacy_cases.items():
+            self.refuses("export", changed(self.legacy, path, new), case)
         self.refuses("export", changed(self.legacy, ("version",), DELETE), "an export without audit bytes or version")
         self.refuses("export", [self.export], "not an object")
         later = vector("vectors-0.3.0", "valid", "run.json")

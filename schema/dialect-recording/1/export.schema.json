@@ -59,11 +59,7 @@
           }
         },
         "audit": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/record"
-            }
-          ],
+          "type": "object",
           "required": [
             "evaluatorSpecVersion",
             "pack"
@@ -99,7 +95,7 @@
       ]
     },
     {
-      "description": "An export of version 2 carries no audit bytes; any other carries them.",
+      "description": "An export of version 2 carries no audit bytes, and its run.audit is the record; any other carries them, and of its run.audit only the two version members are read.",
       "if": {
         "properties": {
           "version": {
@@ -114,6 +110,11 @@
               "required": [
                 "auditBytes"
               ]
+            },
+            "properties": {
+              "audit": {
+                "$ref": "#/$defs/record"
+              }
             }
           }
         }

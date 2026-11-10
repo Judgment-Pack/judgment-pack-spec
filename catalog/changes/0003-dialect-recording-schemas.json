@@ -5,7 +5,7 @@
       "path": "schema/dialect-recording/1/export.schema.json",
       "family": "dialect-recording",
       "from": null,
-      "to": "sha256:0bfee6021025d161a830eb6b57d2eb04b79411090b1e23ba27bf95d8c78c7ee7"
+      "to": "sha256:764f2a80c34ba2536e1d06333a18977179fcac6638166af179fcd3f2ad8cb020"
     },
     {
       "path": "schema/dialect-recording/1/preparation.schema.json",
