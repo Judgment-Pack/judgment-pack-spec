@@ -705,6 +705,7 @@ class StaticSiteTests(unittest.TestCase):
             # Rendered from the immutable final notes; docs/releases/v0.3.0.md is only a pointer.
             "project/releases/0.3.0/index.html": "releases/v0.3.0.md",
             "project/releases/0.4.0/index.html": "releases/v0.4.0.md",
+            "project/releases/0.5.0/index.html": "releases/v0.5.0.md",
         }
         for output, source in cases.items():
             with self.subTest(output=output):
@@ -738,6 +739,15 @@ class StaticSiteTests(unittest.TestCase):
         ):
             with self.subTest(served=served):
                 self.assertEqual((ROOT / source).read_bytes(), (self.output / served).read_bytes())
+
+    def test_the_0_5_0_release_page_says_why_it_is_not_0_4_0(self) -> None:
+        page = (self.output / "project/releases/0.5.0/index.html").read_text(encoding="utf-8")
+        for text in ("Why", "Candidate period", "Migration note", "What is in the bundles"):
+            with self.subTest(text=text):
+                self.assertIn(text, page)
+        project = (self.output / "project/index.html").read_text(encoding="utf-8")
+        self.assertIn('href="releases/0.5.0/"', project)
+        self.assertIn("0.5.0 release", project)
 
     def test_the_0_4_0_release_page_says_it_carries_0_3_0(self) -> None:
         page = (self.output / "project/releases/0.4.0/index.html").read_text(encoding="utf-8")

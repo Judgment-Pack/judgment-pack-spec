@@ -145,7 +145,7 @@ and no others:
 {
   "format": "judgment-pack-format-status/1",
   "families": {
-    "judgment-pack-core": { "draftVersion": "0.5.0", "baseline": "v0.3.0", "lastReleased": "v0.4.0" }
+    "judgment-pack-core": { "draftVersion": "0.5.0", "baseline": "v0.5.0", "lastReleased": "v0.5.0" }
   }
 }
 ```
@@ -171,7 +171,7 @@ release counts from that commit onward. A release includes a family when:
 A candidate is a release whose version carries VERSIONING.md's `-rc.N` or `-alpha.N` distribution
 suffix. A candidate counts for `lastReleased` but is never a `baseline`. So does any other Core
 distribution whose tag is not its `specVersion`. Release `v0.4.0` is the one such distribution: it
-carries `specVersion` `0.3.0` unchanged and is not a candidate, but `v0.3.0` stays the baseline of
+carries `specVersion` `0.3.0` unchanged and is not a candidate, but `v0.3.0` stayed the baseline of
 what it carries. A Policy companion release (`policy-v<releaseVersion>`) freezes its format on first
 publication, so it is a baseline.
 
@@ -187,7 +187,8 @@ using the same normalization. An implementation's own catalog needs `id`, `famil
 
 It then compares that catalog with this one, at the release tag it names, as follows. Tag `v0.3.0`
 has no catalog. An implementation of `specVersion` `0.3.0` reads the one at tag `v0.4.0`, which
-carries that version unchanged, and names `v0.4.0` as the catalog it compared with.
+carries that version unchanged, and names `v0.4.0` as the catalog it compared with. An implementation
+of `specVersion` `0.5.0` reads the one at tag `v0.5.0`; the `v0.5.0` bundles do not carry it.
 
 1. For each `id` the implementation carries, find the entry with the same `id` in this catalog.
 2. A missing `id`, or the same `id` with a different `sha256`, is a **finding**. The implementation

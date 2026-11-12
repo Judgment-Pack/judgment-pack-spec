@@ -843,6 +843,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "releases/v0.5.0.md",
+        PurePosixPath("project/releases/0.5.0/index.html"),
+        "0.5.0 release notes",
+        "Core 0.5.0, staged as 0.4.0-draft: annotations and value sets, compatibility, the migration "
+        "from 0.3.0 and what is in the bundle.",
+        "project",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.4.0.md",
         PurePosixPath("project/releases/0.4.0/index.html"),
         "0.4.0 release notes",
@@ -2353,6 +2362,7 @@ def build_project_index(output_root: Path) -> None:
         (
             "Release and direction",
             (
+                ("0.5.0 release", "Core 0.5.0: annotations and value sets, compatibility, migration from 0.3.0 and bundle contents.", "project/releases/0.5.0/index.html"),
                 ("0.4.0 release", "Carries specVersion 0.3.0 unchanged: included work, bundle contents, and what consumers do (nothing).", "project/releases/0.4.0/index.html"),
                 ("0.3.0 release", "The previous Core release's scope, migration guidance, included work, and maturity.", "project/releases/0.3.0/index.html"),
                 ("0.3.0 specification", "Where the previous release's tagged prose lives.", "spec/0.3.0/index.html"),

@@ -14,6 +14,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from test_retained_release import v0_3_0_tree
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
@@ -76,6 +78,33 @@ class ReleaseBuilderTests(unittest.TestCase):
             with self.assertRaises(ValueError) as raised:
                 BUILD_RELEASE.validate_artifacts("0.5.1", "v0.5.1", root=root)
             self.assertIn("conformance specVersion", str(raised.exception))
+
+    def test_the_0_5_0_notes_state_the_selector_and_the_waived_candidate_period(self) -> None:
+        notes = re.sub(r"\s+", " ", (ROOT / "releases" / "v0.5.0.md").read_text(encoding="utf-8"))
+        schema = ROOT / "schema" / "judgment-pack-core.schema.json"
+        for text in ("Packs declare exact `specVersion` `0.5.0`, and the tag equals the selector",
+                     "The text was staged under the working selector `0.4.0-draft`, which was never released.",
+                     "no `specVersion` `0.4.0` is assigned",
+                     "A `0.5.0` reader refuses a pack declaring `0.4.0-draft`, by the exact selector.",
+                     "## Candidate period", "The maintainer waived the candidate period",
+                     "same-vendor review, not a cross-vendor claim",
+                     "**Reader compatibility:**", "**Writer compatibility:**",
+                     "**Semantic compatibility:**", "**Migration compatibility:**", "## Migration note",
+                     "Stay on the `v0.3.0` bundle for the `retained-column/1` leaf.",
+                     "https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json",
+                     hashlib.sha256(schema.read_bytes()).hexdigest(),
+                     "366 conformance cases and 5 advisory cases", "103 rows, 29 pairs"):
+            with self.subTest(text=text[:40]):
+                self.assertIn(text, notes)
+        for name in ("schema/judgment-pack-core-0.3.0.schema.json",
+                     "schema/conformance-manifest-0.3.0.schema.json",
+                     "schema/conformance-evaluation-manifest-0.3.0.schema.json",
+                     "schema/workflow-1-0.3.0.schema.json"):
+            with self.subTest(preserved=name):
+                self.assertIn(f"`{name}`", notes)
+                self.assertIn(hashlib.sha256((ROOT / name).read_bytes()).hexdigest(), notes)
+        errata = (ROOT / "conformance" / "evaluation" / "errata.md").read_text(encoding="utf-8")
+        self.assertIn("## `0.5.0`\n\nNo errata.", errata)
 
     def test_final_notes_name_both_candidates_the_leaf_and_the_pins(self) -> None:
         notes = (ROOT / "releases" / "v0.3.0.md").read_text(encoding="utf-8")
@@ -143,8 +172,16 @@ class ReleaseBuilderTests(unittest.TestCase):
             (ROOT / "conformance" / "manifest.json").read_text(encoding="utf-8")
         )
         version = manifest["specVersion"]
-        self.assertEqual("0.3.0", version)
+        self.assertEqual("0.5.0", version)
         BUILD_RELEASE.validate_artifacts(version, f"v{version}")
+        # The ordinary path: the tag is the specVersion, so the release has no distribution mapping,
+        # no generated identity and the notes and milestone link the workflow reads.
+        self.assertNotIn("v0.5.0", BUILD_RELEASE.CORE_MAPPED_IDENTITIES)
+        self.assertNotIn("v0.5.0", BUILD_RELEASE.GENERATED_IDENTITIES)
+        self.assertFalse((ROOT / "releases" / "v0.5.0.json").exists())
+        self.assertEqual("# v0.5.0", (ROOT / "releases" / "v0.5.0.md").read_text(encoding="utf-8").splitlines()[0])
+        self.assertEqual({"number": 6, "title": "v0.5.0"},
+                         json.loads((ROOT / "releases" / "v0.5.0.milestone.json").read_text(encoding="utf-8")))
 
     def test_core_bundle_uses_immutable_final_notes_and_keeps_historical_notes(self) -> None:
         current = BUILD_RELEASE.bundle_paths("v0.3.0", "HEAD")
@@ -507,12 +544,11 @@ class ReleaseBuilderTests(unittest.TestCase):
             inventory = json.loads(
                 (ROOT / "releases" / "v0.3.0.retained-column.json").read_text(encoding="utf-8")
             )
-            for name in ("releases/v0.3.0.retained-column.json",
-                         "releases/v0.3.0-rc.2.retained-column.json",
-                         "releases/v0.3.0.milestone.json",
-                         "rfcs/0029-retained-column-conversions.md", *inventory["files"]):
-                (directory / name).parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(ROOT / name, directory / name)
+            # Core 0.5.0 changed four leaf files in place; their v0.3.0 bytes are the preserved copies.
+            v0_3_0_tree(directory, ("releases/v0.3.0.retained-column.json",
+                                    "releases/v0.3.0-rc.2.retained-column.json",
+                                    "releases/v0.3.0.milestone.json",
+                                    "rfcs/0029-retained-column-conversions.md", *inventory["files"]))
         return directory
 
 
@@ -871,7 +907,19 @@ class CoreCarriedReleaseTests(unittest.TestCase):
         self.assertEqual(self.IDENTITY, json.loads((ROOT / f"releases/{self.TAG}.json").read_text()))
         self.assertEqual({"number": 4, "title": "v0.4.0"},
                          json.loads((ROOT / f"releases/{self.TAG}.milestone.json").read_text()))
-        BUILD_RELEASE.validate_artifacts("0.4.0", self.TAG)
+        # main carries Core 0.5.0 now, so the v0.4.0 identity is checked on a tree holding that tag's
+        # pins, which are the v0.3.0 bytes the preserved copies keep, with this tag's own files.
+        with tempfile.TemporaryDirectory() as directory:
+            tree = Path(directory)
+            v0_3_0_tree(tree, ("schema/judgment-pack-core.schema.json", "conformance/manifest.json",
+                               "conformance/evaluation/manifest.json"))
+            for name in (f"releases/{self.TAG}.json", f"releases/{self.TAG}.md"):
+                (tree / name).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT / name, tree / name)
+            BUILD_RELEASE.validate_artifacts("0.4.0", self.TAG, root=tree)
+            # The live tree is no v0.4.0 tree: its pins are 0.5.0's.
+            with self.assertRaises(ValueError):
+                BUILD_RELEASE.validate_artifacts("0.4.0", self.TAG)
         self.assertEqual("# v0.4.0", (ROOT / f"releases/{self.TAG}.md").read_text().splitlines()[0])
         try:
             attributes = subprocess.run(

@@ -21,6 +21,11 @@ Every entry states:
 An erratum is issued by the maintainers through the ordinary change process; a corrected row lands in
 the next `suiteVersion` rather than in the released one.
 
+## `0.5.0`
+
+No errata. Every row of `suiteVersion` `0.5.0` stands as published, and a claim against it must
+state that every row passed.
+
 ## `0.3.0`
 
 No errata. Every row of `suiteVersion` `0.3.0` stands as published, and a claim against it must
