@@ -20,12 +20,13 @@
 >
 > **Review standing.** [RFC 0009](0009-interim-review-regime.md) requires a recorded adversarial
 > review by a model from a different vendor, with a written disposition for each finding, on the
-> pull request that creates this RFC. That review has not happened, and this record does not
-> claim it; the pull request that created this record was merged without it. A review by a model
-> from the drafting vendor, run at the maintainer's direction, is recorded with the maintainer's
-> disposition of each finding at [`rfcs/reviews/0031-round-1.md`](reviews/0031-round-1.md), and
-> this text is revised by that disposition. It does not count toward the requirement and makes no
-> cross-vendor claim. The different-vendor review, when it happens, is recorded as a later round
+> pull request that creates this RFC. That review has not happened, and this record does not claim
+> it; the pull request that created this record was merged without it. A review by a model from the
+> drafting vendor, run at the maintainer's direction, is recorded with the maintainer's disposition
+> of each finding at
+> [`rfcs/reviews/0031-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0031-round-1.md),
+> and this text is revised by that disposition. It does not count toward the requirement and makes
+> no cross-vendor claim. The different-vendor review, when it happens, is recorded as a later round
 > in `rfcs/reviews/`.
 >
 > **Terminology.** In this record an *annotation* is a key and its value inside the reserved
@@ -241,15 +242,16 @@ differ by kind:
   display makes them safe in a one-line label.
 - **Bidirectional format characters.** Each can make a label display in an order other than its
   logical one, and make two different labels look alike. Embeddings and overrides reorder the
-  characters that follow them. A mark is an invisible strong character: it sets the direction of
-  the neutral characters beside it and, as a label's first strong character, the label's base
-  direction, so the logical string `"\u200Fapprove\u200F not\u200F do"`, isolated with its
-  direction taken from its content (`dir="auto"` or `<bdi>` in HTML), displays as "do not approve". An unbalanced isolate inside a label defeats the isolation a consumer adds with isolate
-  characters, the only isolation plain text, terminals, logs and spreadsheet cells have (D1): a
-  lone U+2069 closes the consumer's isolate early, and a lone U+2066–U+2068 leaves it open to the
-  end of the line. A label in a single right-to-left script displays correctly with none of them,
-  so the class refuses them all. D1 still requires isolating a label, because a label's own strong
-  characters affect the neutral text beside it.
+  characters that follow them. A mark is an invisible strong character: it sets the direction of the
+  neutral characters beside it and, as a label's first strong character, the label's base direction,
+  so the logical string `"\u200Fapprove\u200F not\u200F do"`, isolated with its direction taken from
+  its content (`dir="auto"` or `<bdi>` in HTML), displays as "do not approve". An unbalanced isolate
+  inside a label defeats the isolation a consumer adds with isolate characters, the only isolation
+  plain text, terminals, logs and spreadsheet cells have (D1): a lone U+2069 closes the consumer's
+  isolate early, and a lone U+2066–U+2068 leaves it open to the end of the line. A label in a single
+  right-to-left script displays correctly with none of them, so the class refuses them all. D1 still
+  requires isolating a label, because a label's own strong characters affect the neutral text beside
+  it.
 - **Invisible characters.** A default-ignorable character displays as nothing in most contexts, so
   two labels that differ by one look alike: a list of distinct values shows `intake` twice when one
   of them ends in U+200B, and a view filtered by one silently omits what carries the other (D2). Tag
@@ -386,11 +388,11 @@ repository's validator); ECMA-262 in Unicode mode, with the `u` flag and with th
 22; RE2, through Go 1.26's `regexp`; Perl 5.30; Java's `java.util.regex`; and Ruby 2.7. ECMA-262
 without Unicode mode does not compile it: it reads the pattern as UTF-16 code units, and the low
 surrogate of one pair followed by the high surrogate of the next is a range out of order. The JSON
-Schema 2020-12 core specification asks that patterns be built with the `u` flag or equivalent Unicode
-support. An engine that matches UTF-16 code units and has no Unicode mode cannot hold the three
-ranges outside the Basic Multilingual Plane at all; an implementation built on one applies them as
-a check of its own, with the same code and pointer. No other engine was tested, .NET's and PCRE2
-among them. Each pattern holds a literal U+0000, which a pattern interface that takes a
+Schema 2020-12 core specification asks that patterns be built with the `u` flag or equivalent
+Unicode support. An engine that matches UTF-16 code units and has no Unicode mode cannot hold the
+three ranges outside the Basic Multilingual Plane at all; an implementation built on one applies
+them as a check of its own, with the same code and pointer. No other engine was tested, .NET's and
+PCRE2 among them. Each pattern holds a literal U+0000, which a pattern interface that takes a
 NUL-terminated string truncates; such an interface needs another spelling of the same class.
 
 In `annotationString` the `not` holds `"type": "string"` beside the pattern. A `pattern` holds for
@@ -1426,11 +1428,12 @@ This record cannot move beyond Draft until all of the following hold.
    0016.
 
 **Standing after round 1.** Item 1 is not met: the round-1 review was by a model from the drafting
-vendor ([`reviews/0031-round-1.md`](reviews/0031-round-1.md)) and does not count. Item 3 is not
-met: one implementation exists, experimentally, and a second does not (Implementation). Item 6 is
-met by the disposition of Unresolved question 1. Item 7's coordination is drafted in this record
-(Compatibility, Coordination with RFC 0016). The other items stand as the round-1 review found
-them.
+vendor
+([`rfcs/reviews/0031-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0031-round-1.md))
+and does not count. Item 3 is not met: one implementation exists, experimentally, and a second does
+not (Implementation). Item 6 is met by the disposition of Unresolved question 1. Item 7's
+coordination is drafted in this record (Compatibility, Coordination with RFC 0016). The other items
+stand as the round-1 review found them.
 
 ### Codes
 

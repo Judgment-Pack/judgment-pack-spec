@@ -43,7 +43,7 @@ manifest edits nothing in the case. Its other members:
   codes RFC 0031 proposes outside conformance and outside the draft's text, which no case states
   (below).
 
-The 139 cases are:
+The 208 cases are:
 
 - RFC 0031's staged document table;
 - 26 profile cases for its ceilings: each of the six one over under `base`, admitted under
@@ -63,9 +63,9 @@ The 139 cases are:
 | Directory | Cases | What |
 | --- | ---: | --- |
 | `carrier/` | 1 | a duplicate key inside an annotations object |
-| `structural/` | 85 | refused annotations at every annotated position, sets, entries and references, and the profile ceilings |
+| `structural/` | 151 | refused annotations at every annotated position, refused characters in annotation strings, sets, entries and references, and the profile ceilings |
 | `semantic/` | 10 | unresolved references, a duplicate set id, and a required name found only in data |
-| `valid/` | 43 | admitted shapes, every ceiling reached exactly, names inside data, the advisory cases and [the example](../../examples/staged/expense-approval-annotated.json) |
+| `valid/` | 46 | admitted shapes, the neighbours of every refused character range, every ceiling reached exactly, names inside data, the advisory cases and [the example](../../examples/staged/expense-approval-annotated.json) |
 
 Every fixture is written by hand, with no raw invisible character: each non-ASCII character is a JSON
 `\u` escape, and one outside the Basic Multilingual Plane is its surrogate pair, so every fixture is

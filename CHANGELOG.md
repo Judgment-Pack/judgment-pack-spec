@@ -15,7 +15,8 @@ here.
 - RFC 0031 (#301), a Draft, proposes annotations and annotated value sets. Short labels on the
   pack, its outcomes and rules live in the reserved extension `org.judgmentpack.annotations`: keys
   from the local-identifier grammar, each mapped to a string or a list of distinct strings, with
-  ceilings, refused empty forms and refused control characters. The extension is optional and never
+  ceilings and refused empty forms. A string refuses control, bidirectional-format, invisible and
+  default-ignorable characters, and white space at either end. The extension is optional and never
   required. A pack may declare named value sets at its root, whose entries may carry descriptions
   and annotations, and an `in` condition may name one in place of an inline list. An evaluator must
   give a conforming pack the result of its evaluation form, with annotations removed and references
@@ -26,9 +27,9 @@ here.
   which no maintainer has assigned and no release carries ([VERSIONING.md](VERSIONING.md)). The
   staged schema is the `0.3.0` schema plus exactly the record's fragments. The staged Core text
   ([`spec/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md)) is marked normative for nothing.
-  Hand-written vectors sit in no corpus: 139 document cases in
+  Hand-written vectors sit in no corpus: 208 document cases in
   [`conformance/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/staged), with five provisional conformance codes,
-  and 72 evaluation rows with their pairs in
+  and 82 evaluation rows with their pairs in
   [`conformance/evaluation/staged/annotations-value-sets/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged/annotations-value-sets),
   where one more row is held. An annotated expense example is staged too. Tests hold all of it to the
   repository's checks, including a static check of the paired rows, and check that every released
@@ -39,6 +40,14 @@ here.
   specification's schema namespace, with its shape and digest, and Core's `draftVersion` there names
   the working selector, not an assigned `specVersion`. RFC 0031 stays a Draft, and the released
   schema, Core text and corpora are unchanged.
+- RFC 0031's round-1 review, by a reviewer from the drafting model's own vendor, is recorded at
+  `rfcs/reviews/0031-round-1.md` with its disposition; it is not the different-vendor review the
+  record's Evidence bar asks for. The staged artifacts follow it:
+  the string rule above; a filtered view that states its counts and shows every character outside
+  printable ASCII unambiguously; limits on the pack as presented counted as document limits; the
+  annotations name in a supported-extension set ignored (draft §8.2); the two value-set advisories
+  kept out of the draft's Core text; and more inertness rows, over evidence, exceptions, the
+  fallback outcome and escalation routes. The draft schema's new digest has a change record.
 - An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
   names the judge, the signer, the witness and the reader around a decision record: what each
   produces, trusts and never does, and which parts are not shipped. It defines nothing.
