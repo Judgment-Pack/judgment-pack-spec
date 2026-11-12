@@ -62,7 +62,11 @@
     },
     "extensionName": {
       "type": "string",
-      "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+      "not": {
+        "type": "string",
+        "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+      }
     },
     "supportedExtensionName": {
       "description": "A name a supported-extension set may hold: an extension name, or a specification-defined name, which Core \u00a78.2 ignores when no conforming pack can require it.",

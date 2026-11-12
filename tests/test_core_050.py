@@ -934,6 +934,23 @@ class AnchoredGrammarTests(unittest.TestCase):
                 self.assertIsNotNone(re.search(pattern, value))
                 self.assertFalse(self.admits_in_python()(g, value))
 
+    def test_the_manifest_schemas_name_extensions_with_cores_pattern_pair(self) -> None:
+        # Both manifest schemas take the Core schema's extension-name pattern and its `not`, in
+        # place of the lookahead form, so a supported-extension name ending in a line terminator is
+        # refused in every engine. Under ECMA-262 the two forms admit the same names, so no manifest
+        # changes what it admits there.
+        core = core_schema()["$defs"]["extensions"]["propertyNames"]
+        self.assertEqual({"pattern": EXTENSION_NAME, "not": EXTENSION_NAME_NOT}, core)
+        for path in (CONFORMANCE / "manifest.schema.json", EVALUATION_MANIFEST_SCHEMA_PATH):
+            with self.subTest(schema=path.name):
+                schema = strict_json_loads(path.read_text(encoding="utf-8"))
+                self.assertEqual({"type": "string", **core}, schema["$defs"]["extensionName"])
+                validator = Draft202012Validator({"$defs": schema["$defs"], "$ref": "#/$defs/supportedExtensionName"})
+                for name in ("com.example.review-policy", "org.judgmentpackx.a", "org.judgmentpack.annotations"):
+                    self.assertTrue(validator.is_valid(name), name)
+                for name in ("com.example\n", "com.example\u2028", "org.judgmentpack.other", "Com.example"):
+                    self.assertFalse(validator.is_valid(name), name)
+
     def test_each_line_terminator_is_refused_once_at_every_position(self) -> None:
         validator = core_validators()["base"]
         base = strict_json_loads((CONFORMANCE / "valid" / "annotations-one-element-list.json").read_text(encoding="utf-8"))
