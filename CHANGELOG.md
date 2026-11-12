@@ -13,7 +13,7 @@ here.
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
 
-## `0.5.0`
+## `0.5.0` — 2026-11-12
 
 Core `specVersion` `0.5.0`, tagged `v0.5.0`, releases [RFC 0031](rfcs/0031-annotations-and-value-sets.md)
 (#301), annotations and annotated value sets, with issues #304 and #308
