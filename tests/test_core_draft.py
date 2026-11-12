@@ -507,8 +507,9 @@ class DraftDocumentCaseTests(unittest.TestCase):
                     assert_one_finding(self, case["id"], case["expectedDiagnostic"], diagnostics)
 
     def test_every_released_document_case_holds_under_the_draft_selector(self) -> None:
-        # The draft changes no 0.3.0 shape (RFC 0031, Compatibility): each released case, with its
-        # root selector's bytes replaced, gives its released result and diagnostic under the draft.
+        # The draft refuses one 0.3.0 shape, by its clarification of Core 0.3.0 §9 (RFC 0031,
+        # Compatibility), and no released case has it: each released case, with its root selector's
+        # bytes replaced, gives its released result and diagnostic under the draft.
         # A fixture that does not declare 0.3.0 (the 0.2.0-draft negative case, malformed carriers)
         # is run unchanged and must also keep its expectation.
         replaced = 0

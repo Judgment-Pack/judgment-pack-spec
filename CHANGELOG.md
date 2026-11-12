@@ -32,7 +32,9 @@ here.
   [`conformance/evaluation/staged/annotations-value-sets/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged/annotations-value-sets),
   where one more row is held. An annotated expense example is staged too. Tests hold all of it to the
   repository's checks, including a static check of the paired rows, and check that every released
-  case and row still holds under the draft selector. Nothing staged is published or bundled. RFC 0031
+  case and row still holds under the draft selector. The draft reads Core `0.3.0` §9's `extensions`
+  object as one the schema defines, a clarification that refuses one `0.3.0` shape the released
+  checker accepts; that checker is unchanged. Nothing staged is published or bundled. RFC 0031
   stays a Draft, and the released schema, Core text and corpora are unchanged.
 - An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
   names the judge, the signer, the witness and the reader around a decision record: what each

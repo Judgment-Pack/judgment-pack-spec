@@ -279,6 +279,11 @@ data, not an `extensions` object. So "every name in `metadata.requiredExtensions
 key in at least one `extensions` object" counts only those objects: a required name that appears only
 inside an operand or an entry value is missing (`JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION`).
 
+This clarifies Core `0.3.0` §9. The repository's released `0.3.0` checker reads that sentence more
+broadly, counting a member named `extensions` anywhere in the document, and it is not changed. So one
+`0.3.0` shape is refused under `0.4.0-draft` (§11). The clarification awaits its own review
+(RFC 0031, Unresolved question 4).
+
 This draft defines one such extension, `org.judgmentpack.annotations` (§9.2).
 [RFC 0016](../../rfcs/0016-outcome-values.md), also a Draft, would add its own name under this
 paragraph; the two records share it.
@@ -375,9 +380,11 @@ Compatibility from `0.3.0` is explicit:
   selector, and does not acquire support by ignoring or replacing it. The `0.3.0` schema also refuses
   each new shape: the reserved key, the root `valueSets` and the `valueSet` member.
 - **Semantic.** For a pack that uses neither feature, `EF(P)` is `P`, so this draft changes no
-  result for it.
-- **Migrating up.** No `0.3.0` shape is refused by these rules: changing only the selector is enough,
-  and evaluation is unchanged. Labels kept in a vendor extension MAY be moved to the reserved name by
+  result for it, apart from the one shape §9.1's clarification refuses.
+- **Migrating up.** One shape aside, no `0.3.0` shape is refused by these rules: a pack whose required
+  name appears only under a member named `extensions` inside an operand is refused, by §9.1's
+  clarification of Core `0.3.0` §9. Otherwise changing only the selector is enough, and evaluation is
+  unchanged. Labels kept in a vendor extension MAY be moved to the reserved name by
   hand once they meet §9.2; there is no automatic coercion. An inline list MAY be replaced by a
   reference. Each such edit changes the bytes, so the pack SHOULD receive a new `version`.
 - **Migrating down.** `EF(P)` with the selector changed is evaluation-equivalent within §10's limit

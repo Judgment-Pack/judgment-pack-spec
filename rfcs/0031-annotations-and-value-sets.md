@@ -825,6 +825,7 @@ every implementation. No Core conformance class tests display.
 | Core §7.4 | the `valueSet` member (§3.1) |
 | Core §8 (new paragraph) | the evaluation form and §4.2's requirement, with its limit rule |
 | Core §9 | a paragraph on specification-defined extensions (their value is governed by their definition, which qualifies "Values may be any JSON value", line 950; each definition states where the name may appear and whether it may be required); then annotations: A1–A6, D2 |
+| Core §9 (clarification) | an `extensions` object is one the schema defines as a member of a Core object; a member named `extensions` inside an operand, an entry value or an extension's value is data, so a required name found only there is missing (§4.1; Compatibility; Unresolved question 4) |
 | Core §10 | D1; which limits §4.2 applies to the pack as presented and which to the work its evaluation form requires |
 | Core §11 | compatibility from `0.3.0` (see Compatibility) |
 | Core §13 | unchanged; content identity stays open |
@@ -1092,10 +1093,16 @@ requires, compatibility is explicit:
   schema also refuses each new shape: the reserved key, the root `valueSets` and the `valueSet`
   member. A writer targeting `0.3.0` cannot emit them.
 - **Semantic.** For a pack that uses neither feature, `EF(P)` is `P`, so this record changes no
-  result for it.
-- **Migrating up from `0.3.0`.** No `0.3.0` shape is refused by these rules. As far as this record
-  goes, changing only the selector is enough, and evaluation is unchanged. The next version's other
-  changes are their own.
+  result for it, apart from the one shape the clarification below refuses.
+- **Migrating up from `0.3.0`.** One shape aside, no `0.3.0` shape is refused by these rules. The
+  exception is a clarification of Core `0.3.0` §9, by which every required name "MUST appear as a
+  key in at least one `extensions` object": an `extensions` object is one the schema defines as a
+  member, and a member named `extensions` inside data, such as an item of an `in` operand, is not
+  one (§4.1). A `0.3.0` pack whose required name appears only under such a member is therefore
+  refused under the next selector (`JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION`). The repository's
+  released `0.3.0` checker reads Core §9 more broadly, counting such a member, and this record does
+  not change it. With that exception, and as far as this record goes, changing only the selector is
+  enough, and evaluation is unchanged. The next version's other changes are their own.
   - Labels kept in a vendor extension MAY be moved to the reserved name by hand, once they meet
     §§1.3–1.5. There is no automatic coercion: a vendor value outside those rules must be edited,
     not truncated, joined or dropped by a tool.
@@ -1391,3 +1398,9 @@ The scratch check described under Evidence is not one.
    `JPS-VALUE-SET-DUPLICATE-VALUE` (§2.4) could join RFC 0027's report contract, or stay beside
    `JPS-RULES-OVERLAP` in the document corpus's advisory vocabulary. That depends on RFC 0027's
    disposition, which is open.
+4. **The reading of an `extensions` object.** §4.1 reads Core `0.3.0` §9's "at least one
+   `extensions` object" as the objects the schema defines as members, as RFC 0016 does. That
+   clarifies released text, and it refuses one shape the repository's released checker accepts
+   (Compatibility). It needs the review RFC 0009 requires, with its own disposition, before it
+   lands. The staged cases `semantic-required-extension-in-operand` and
+   `semantic-required-extension-in-entry-value` pin the reading meanwhile.

@@ -41,7 +41,8 @@ manifest edits nothing in the case. Its other members:
 
 The 127 cases are RFC 0031's staged document table, one case for its §1.7 (a number inside an
 annotation list), the 18 profile cases its ceilings call for, two cases for its reading of an
-`extensions` object, and the staged example:
+`extensions` object (a clarification of Core `0.3.0` §9, which the repository's released checker
+reads more broadly; RFC 0031, Compatibility), and the staged example:
 
 | Directory | Cases | What |
 | --- | ---: | --- |
