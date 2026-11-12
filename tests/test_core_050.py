@@ -229,6 +229,19 @@ def assert_one_finding(test: unittest.TestCase, case_id: str, expected: dict[str
     assert_findings(test, case_id, [expected], diagnostics)
 
 
+def number_word(number: int) -> str:
+    """The English word for 0 to 99, as the corpus README spells its small counts."""
+    ones = ("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen "
+            "fifteen sixteen seventeen eighteen nineteen").split()
+    tens = "twenty thirty forty fifty sixty seventy eighty ninety".split()
+    if not 0 <= number < 100:
+        raise ValueError(f"no word for {number}")
+    if number < 20:
+        return ones[number]
+    word = tens[number // 10 - 2]
+    return word if number % 10 == 0 else f"{word}-{ones[number % 10]}"
+
+
 def added(manifest_path: Path, previous_path: Path) -> list[dict[str, Any]]:
     """The cases or rows a manifest holds that the `0.3.0` one does not name, in manifest order."""
     previous = {case["id"] for case in strict_json_loads(previous_path.read_text(encoding="utf-8"))["cases"]}
@@ -597,6 +610,57 @@ class AddedEvaluationRowTests(unittest.TestCase):
             with self.subTest(row=row["id"]):
                 pack = self.pack(row["pack"])
                 self.assertEqual(row["pack"] in listed, evaluation_form(pack) == pack)
+
+    def test_the_corpus_readme_states_the_manifest_counts(self) -> None:
+        # Every count the evaluation README states is computed here from the manifest, so a row,
+        # pack or pair added or removed without the README fails this test.
+        text = (EVALUATION / "README.md").read_text(encoding="utf-8")
+        text = re.sub(r"\s+", " ", re.sub(r"\]\([^)]*\)", "]", text))
+        cases = self.document["cases"]
+        carried = [row for row in cases if row["id"] in {r["id"] for r in self.released["cases"]}]
+        packs = {row["pack"] for row in cases}
+        carried_packs = {row["pack"] for row in carried}
+        added_packs = {row["pack"] for row in self.rows}
+        errors = collections.Counter(row["expectedErrorClass"] for row in cases if "expectedErrorClass" in row)
+        dispositions = [row["expectedDisposition"] for row in cases if "expectedDisposition" in row]
+        pairs = self.document["pairs"]
+        bases = collections.Counter(pair["basis"] for pair in pairs)
+        refused = {row["pack"] for row in cases if row.get("expectedErrorClass") == "pack-not-conformant"}
+        routed = sum("routes" in disposition["handoff"] for disposition in dispositions)
+        supported = sum(bool(row["supportedExtensions"]) for row in cases)
+        own = len(self.document["ownEvaluationForm"])
+        self.assertEqual(len(carried_packs | added_packs), len(packs))
+        word = number_word
+        for statement in (
+            f"`0.5.0` holds {len(cases)} rows over {len(packs)} pack fixtures: {len(carried)} rows carried "
+            f"from Core `0.3.0` over {len(carried_packs)} packs, and {len(self.rows)} rows added with "
+            f"[RFC 0031] over {len(added_packs)} packs. {len(dispositions)} rows expect a disposition and "
+            f"{sum(errors.values())} expect an error class. {len(pairs)} pairs group "
+            f"{len({case for pair in pairs for case in pair['cases']})} of the rows, and {own} of the "
+            f"{len(packs)} packs are their own evaluation form.",
+            f"{word(len(carried)).capitalize()} rows over {word(len(carried_packs))} pack fixtures.",
+            f"{word(len(self.rows)).capitalize()} rows over {word(len(added_packs))} pack fixtures, each "
+            "with origin `rfc-0031`.",
+            f"{word(len(refused)).capitalize()} of the packs are not semantically conforming",
+            f"the {word(errors['pack-not-conformant'])} rows over them expect `pack-not-conformant`",
+            f"runs all {len(cases)} rows",
+            f"Empty on all but {word(supported)} rows.",
+            f"| `evaluation-form` | {bases['evaluation-form']} |",
+            f"| `optional-extension` | {bases['optional-extension']} |",
+            f"| `supported-extension-set` | {bases['supported-extension-set']} |",
+            f"The list names all {own} such packs",
+            f"{word(sum(errors.values())).capitalize()} rows expect an error class: "
+            f"{word(errors['pack-not-conformant'])} `pack-not-conformant`, "
+            f"{word(errors['malformed-input'])} `malformed-input`",
+            f"and {word(errors['unsupported-required-extension'])} `unsupported-required-extension`, all "
+            "added with RFC 0031",
+            f"Of the {len(dispositions)} disposition rows",
+            f"{word(routed).capitalize()} rows, over the three packs with two escalation routes",
+        ):
+            with self.subTest(statement=statement[:60]):
+                self.assertIn(statement, text)
+        self.assertEqual(set(errors), {"pack-not-conformant", "malformed-input", "unsupported-required-extension"})
+        self.assertEqual(len(self.rows), sum(row["origin"] == "rfc-0031" for row in cases))
 
     def test_every_0_3_0_row_is_carried_and_its_pack_is_its_own_evaluation_form(self) -> None:
         # Each 0.3.0 row, and each row staged after the release, keeps its expectation under 0.5.0:

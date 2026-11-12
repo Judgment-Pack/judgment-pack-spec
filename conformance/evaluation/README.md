@@ -28,6 +28,9 @@ including the two invariants JSON Schema cannot express — and stop there.
 | `status`       | `draft`, the corpus maturity level; `candidate` and `release` are later ladder steps.             |
 | `label`        | `seed` — this corpus is not exhaustive and does not aim to be.                                    |
 
+Two more, `pairs` and `ownEvaluationForm`, relate rows and packs to Core §8.5; they are described
+under "Pairs, and packs that are their own evaluation form" below.
+
 `suiteVersion` equals the `specVersion` the corpus was published for, and the corpus is frozen when
 that version is released: rows are added, changed, or corrected only on the way to a later
 `specVersion`, never inside a released one, so two identically worded claims require the same rows
@@ -47,7 +50,7 @@ Every case records:
 | `pack`                 | The pack input, as a path under `packs/`.                                                       |
 | `facts`                | The one JSON facts document of §8.2. `fact.path` is an RFC 6901 pointer into it.                 |
 | `evidenceAvailability` | The §8.2 tri-state input: declared requirement id → `present`, `absent`, or `unknown`.           |
-| `supportedExtensions`  | The capabilities the evaluator is assumed to support. Empty for every seed case.                 |
+| `supportedExtensions`  | The capabilities the evaluator is assumed to support. Empty on all but three rows.               |
 | `expectedDisposition`  | The exact §8.3 disposition, both sets already sorted — **or**                                    |
 | `expectedErrorClass`   | the §8.4 error class expected instead of a disposition. Exactly one of the two is present.       |
 | `workBudget`           | Optional. A positive integer of evaluation-work units; absent means no budget (see below).        |
@@ -78,9 +81,18 @@ claim.
 
 ## What is here now
 
-Twenty cases over four pack fixtures. Thirteen are *imported* from the cross-implementation exercise
-recorded in [RFC 0006](../../rfcs/0006-evaluator-conformance.md); seven are *constructed* here from the
-specification text. The `origin` field of each case says which.
+`0.5.0` holds 103 rows over 41 pack fixtures: 20 rows carried from Core `0.3.0` over 4 packs, and 83
+rows added with [RFC 0031](../../rfcs/0031-annotations-and-value-sets.md) over 37 packs. 93 rows
+expect a disposition and 10 expect an error class. 29 pairs group 67 of the rows, and 17 of the 41
+packs are their own evaluation form. The `origin` field of each case says where it came from.
+
+### Carried from `0.3.0`
+
+Twenty rows over four pack fixtures. Thirteen are *imported* from the cross-implementation exercise
+recorded in [RFC 0006](../../rfcs/0006-evaluator-conformance.md); seven are *constructed* from the
+specification text. Each row is unchanged; its pack differs from the `0.3.0` fixture only in its
+`specVersion` bytes, and each pack is its own evaluation form, so Core §8.5 gives each row its
+`0.3.0` result.
 
 Imported — thirteen rows, all over
 [`packs/data-request-intake-triage.json`](packs/data-request-intake-triage.json), byte-identical to
@@ -92,8 +104,8 @@ Imported — thirteen rows, all over
 - three probes: an omitted evidence-availability document, an unreferenced decimal-string fact, and a
   missing exception fact.
 
-Constructed — seven rows over three fixtures written for this corpus, each exercising a §§7.4–8.3 rule
-the imported rows leave untouched:
+Constructed — seven rows over three fixtures, each exercising a §§7.4–8.3 rule the imported rows
+leave untouched:
 
 - [`packs/partial-trigger-conflict.json`](packs/partial-trigger-conflict.json) declares
   `escalation.triggers` as a strict subset of the reasons its rules can generate. Three rows: two
@@ -111,89 +123,144 @@ the imported rows leave untouched:
   equal to a decimal string, so both ordered rules are `unknown`.
 
 The two implementations described in RFC 0006 agreed on all thirteen imported rows. That agreement is
-what motivated pinning them, and it is weaker evidence than it looks: both implementations trace to
-one maintainer's direction, so their agreement corroborates the semantics rather than independently
-confirming them. The rows are pinned because the specification now says what the result is, not
-because two programs happened to match.
+weaker evidence than it looks: both implementations trace to one maintainer's direction, so their
+agreement corroborates the semantics rather than independently confirming them. The seven
+constructed rows were read off the text by the same maintainer and first replayed through one of the
+two. Both were later run over the whole frozen `0.3.0` corpus, and all twenty rows byte-agreed, each
+disposition compared against the other's. That strengthens the evidence and changes nothing about
+its independence.
 
-**When this corpus was published, the seven constructed rows did not carry that agreement.** They
-were read off the specification text by the same maintainer, then replayed through one of those two
-implementations — the clean-room Python evaluator — and all seven reproduced. That was a
-single-implementation check on a derivation, not two implementations agreeing on pinned semantics.
+### Added with RFC 0031
 
-**They carry it now, and at the byte level.** Both implementations have since been run over this
-whole frozen corpus and **all twenty rows byte-agree**, each disposition compared against the
-other's rather than only against the manifest, so every §8.3 serialization rule that could have
-diverged is covered. That strengthens the evidence behind the constructed rows and changes nothing
-about its independence: the caveat above holds in full, because both implementations still trace to
-one maintainer's direction. A divergence found against any of these rows remains as likely to be a
-defect in the row as in an implementation (Core §3.4), and only a project-issued erratum can settle
-that (see [errata](errata.md)).
+Eighty-three rows over thirty-seven pack fixtures, each with origin `rfc-0031`. They test Core §8.5:
+for a semantically conforming pack, an evaluator produces the result §§7–8 give the pack's evaluation
+form, with annotations removed and value-set references expanded. Every expectation is written by
+hand from Core §8. Five of the packs are not semantically conforming, each for one stated reason, and
+the six rows over them expect `pack-not-conformant`.
+
+- **Inertness.** For each kind of result (an outcome, `not-applicable`, `unknown`, `conflict` and
+  no match), a pack without annotations, with annotations, and with changed annotations give one
+  disposition. So do a missing required evidence requirement, an escalate exception and a fallback
+  outcome, on a pack with two escalation routes, one filtered and one not, so the routes a
+  disposition names are compared too. A label that spells an outcome id, a reason and a route
+  target changes nothing. Two error-class pairs show that annotations change neither
+  `unsupported-required-extension` nor `malformed-input`, and a required vendor key beside
+  annotations still counts. A pack and the same pack with an optional vendor extension give one
+  result (Core §9).
+- **Malformed annotations.** Too many keys, and a tab in a string: `pack-not-conformant`. So is the
+  annotations name listed in `metadata.requiredExtensions`, never `unsupported-required-extension`.
+- **The supported-extension set.** One row lists `org.judgmentpack.annotations` in its
+  `supportedExtensions`, which Core §8.2 ignores because the name is not requirable, and gives the
+  result of the same row without it.
+- **Substitution.** A reference and its inline array give one result: on a match, on no match, on
+  an absent path, inside an exception that matches and one that does not, inside `applicability`,
+  under `not`, `all` and `any`, with repeated entries, and with entry annotations present, absent or
+  changed. An unreferenced set, and `valueSets: []`, change nothing.
+- **Equality.** A set of type-distinct values (`1`, `"true"`, `"1.00"`, a decomposed accent, an
+  object and an object that looks like a reference) compared under Core §7.4, with no coercion and
+  no normalization.
+- **Positions, not content.** An inline `in` item that holds the annotations name is compared as
+  data.
+- **Resolution.** An unresolved reference, and one naming an outcome's id, are `pack-not-conformant`,
+  which §8.4's order reports ahead of a malformed evidence document.
+
+Two implementations by the drafting model's vendor have run these rows, and neither is independent
+of the text's authors. The repository's test evaluator,
+[`tools/core_050_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tools/core_050_eval.py),
+a test tool that makes no conformance claim, runs all 103 rows. The reference runtime ran the rows
+as they were staged before the release, under the draft selector `0.4.0-draft`, and has not yet run
+them under `0.5.0` (RFC 0031, Acceptance).
+
+### Pairs, and packs that are their own evaluation form
+
+`pairs` groups rows that give one result for a stated reason, which a static check confirms without
+an evaluator. A pair is a defect in the fixtures unless its basis holds:
+
+| Basis | Pairs | Holds when |
+| --- | --- | --- |
+| `evaluation-form` | 27 | the packs differ and their evaluation forms are equal JSON values, and the rows' facts, evidence availability, supported set and expectation are equal |
+| `optional-extension` | 1 | the evaluation forms differ only in optional vendor extensions, and the rows' inputs and expectation are equal (Core §9) |
+| `supported-extension-set` | 1 | one pack, and the supported sets differ only by `org.judgmentpack.annotations` |
+
+A row belongs to one pair at most. The `evaluation-form` check compares whole evaluation forms, `id`
+and `version` included, so a pair cannot pass by differing in identity.
+
+`ownEvaluationForm` lists the pack fixtures that are their own evaluation form (Core §8.5): conforming
+packs with no `valueSets` member, no reference and no annotations. Core §8.5 changes nothing for a row
+over one of them. The list names all 17 such packs, whichever version's rows use them, and the
+repository's tests hold it to exactly those packs.
 
 ## What is missing
 
 Stated rather than implied, because a seed corpus that hides its gaps is worse than a small one:
 
-- **No error rows.** `expectedErrorClass` is part of the carrier and no case uses it yet. Each of the
-  §8.4 classes — a non-conforming pack, an unsupported required extension, a malformed facts or
-  evidence document, an undeclared evidence key, resource exhaustion — deserves a row, as does §8.4's
-  precedence order where two classes apply to the same inputs, and so does the phase split between
-  `malformed-input` and `resource-exhaustion` that `expectedErrorPhase` exists to record. This corpus
-  still has none, and being frozen it will not gain any. Five are **staged** for the next
-  `suiteVersion` in
+- **Error rows are few, and one class has none.** Ten rows expect an error class: six
+  `pack-not-conformant`, two `malformed-input` (an evidence document naming a requirement the pack
+  does not declare) and two `unsupported-required-extension`, all added with RFC 0031. One,
+  `value-set-unresolved-precedence`, is a precedence row: §8.4's order reports `pack-not-conformant`
+  ahead of a malformed evidence document. `resource-exhaustion` has no row; nor does the phase split
+  between `malformed-input` and `resource-exhaustion` that `expectedErrorPhase` exists to record, nor
+  the order of `malformed-input` ahead of `unsupported-required-extension`. Being frozen, this corpus
+  will not gain any. Five rows
+  [RFC 0013](../../rfcs/0013-evaluator-error-and-precedence-cases.md) proposed are **staged** for the
+  next `suiteVersion` in
   [`staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged)
-  — three single-class rows and the two precedence
-  rows [RFC 0013](../../rfcs/0013-evaluator-error-and-precedence-cases.md) proposed. They are in no
-  corpus, and no claim may cite them. `resource-exhaustion` and the phase split are not among them.
-- **The carrier cannot yet express some of those rows, and that is deferred.** `facts` is embedded
-  parsed JSON and `evidenceAvailability` is constrained to the tri-state by this carrier's own schema, so
-  a malformed-JSON document, a duplicate member, a non-object evidence input, and an invalid evidence
-  state have no fixture form here. A raw-document fixture form — a case that carries an input as unparsed
-  bytes — is **deferred to the next `suiteVersion`**; it is a carrier change, and this one is frozen at
-  release (Core §3.4.1). This repository's own checks used to require every evidence key a case supplies
-  to be declared by its pack, which an undeclared-key row cannot satisfy. That check is now conditional
-  on the expected error class, exactly as the pack-conformance check already was. It admits what it
-  used to refuse, a correctly labelled error row, and asks more of everything it still covers: the
-  class a case expects must be the one §8.4's fixed order reports for the case's own inputs, and a
-  case whose inputs nothing refuses may expect none of the three classes decided while admitting
-  them. For the released rows it refuses what the old check refused, and every one of them passes it
-  unchanged. The `workBudget` and `expectedErrorPhase`
-  members were added now, ahead of the rows that will use them, precisely so that those rows do not need
-  another carrier change; no row in this version uses either.
+  — three single-class rows and two precedence rows. They are in no corpus, and no claim may cite
+  them. `resource-exhaustion` and the phase split are not among them.
+- **The carrier cannot yet express some error rows, and that is deferred.** `facts` is embedded parsed
+  JSON and `evidenceAvailability` is constrained to the tri-state by this carrier's own schema, so a
+  malformed-JSON document, a duplicate member, a non-object evidence input, and an invalid evidence
+  state have no fixture form here. A raw-document fixture form — a case that carries an input as
+  unparsed bytes — is **deferred to the next `suiteVersion`**; it is a carrier change, and this one is
+  frozen at release (Core §3.4.1). The `workBudget` and `expectedErrorPhase` members were added in
+  `0.3.0`, ahead of the rows that will use them, so that those rows need no carrier change; no row in
+  this version uses either.
 - **Three mandatory operators have no row.** §7.4 requires every operator of an implementation claiming
   the class, and the fixtures exercise only `equals`, `in`, `greater-than-or-equal`, and `less-than`.
   There is no `not-equals`, `greater-than`, or `less-than-or-equal` row.
-- **No `literal` and no `not` row.** Of §7's condition forms the fixtures use `fact`, `all`, `any`, and
-  `evidence-present`. A `literal` condition and a `not` condition — including `not` over an `unknown`
-  child, which §7.3 requires to stay `unknown` — have no row.
-- **No composite-equality row.** Every `equals` operand in the fixtures is a Boolean or a string. §7.4's
-  recursive equality over arrays and objects, its member-order-insensitive object comparison, and
-  equality against `null` are all unexercised.
-- **No fallback-selection row.** Only one fixture declares a `fallbackOutcome`, and no row reaches it:
-  the two rows that produce that outcome do so through a true rule at §8 step 9, and the one row that
-  reaches step 10 has no fallback to select (`no-match-without-a-fallback`). Step 10's positive branch —
-  no true rule, a declared fallback, and false or ignored-unknown rules that must not prevent it — has no
-  row.
+- **`literal` and `not` are thin.** A `literal` condition appears only as `true`, as one rule of four
+  value-set packs, and on every row the child of each `not` is true or false. No row has a `literal`
+  `false`, and no row has `not` over an `unknown` child, which §7.3 requires to stay `unknown`.
+- **Composite equality only through `in`.** Every `equals` operand in the fixtures is a Boolean or a
+  string. §7.4's recursive equality is reached only through `in`: an object entry whose members differ
+  in order, a literal object that looks like a reference, an inline item holding the annotations name,
+  and a number equal to an entry by mathematical value. No row compares an array, and none compares
+  against `null`.
+- **One fallback shape.** Three rows reach §8 step 10's fallback, each over a pack whose only rule is
+  false. Step 10 with false or ignored-unknown rules beside the fallback, which must not prevent it,
+  has no row.
 - **No number-representability row.** RFC 0006's implementation experience asked for one, and it is
   deliberately absent: whether equality involving a JSON number an implementation cannot represent
   exactly is `unknown` or an input error is open (Core §13), and §8.3 names it as the single seam in
   the byte-agreement requirement. A row cannot state an expected result until the question closes.
-- **Thin handoff coverage, stated exactly.** Of the twenty rows, exactly one — `handoff-trigger-subset` —
-  has `triggeredBy` as a proper subset of `reasons`. Two more, `retained-reason-without-a-trigger` and
-  `no-match-without-a-fallback`, pair an `unresolved` result with `state: none`. One,
-  `direct-exception-escalation-without-configuration`, records a requested handoff in a pack that declares
-  no `escalation` object, so the request has no Core-defined destination; on that row `triggeredBy` still
-  equals `reasons`. On every other row with `state: requested` — all thirteen imported rows, whose pack
-  declares all five triggers, and the one decimal row that escalates on an unknown — `triggeredBy` equals
-  `reasons`, and `state` is `requested` exactly when `kind` is not `outcome`. So the subset rule of §8.3
-  rests on a single row, and no row combines a direct exception escalation with a trigger-selected reason
-  or exercises a pack that declares `escalation` with triggers none of its reachable reasons can match.
-- **Unexercised structure.** `suppress-rule` exceptions, an unknown exception with
-  `onUnknown: escalate` combined with a forced outcome, conditions nested more than one level, and
-  `missing-required-evidence` together with any other reason all have no row.
-- **No permutation or hostile rows.** Rule-order permutations that must not change a result, and
-  hostile optional-extension content that must stay inert during evaluation, are both called for by
-  RFC 0006 and absent here.
+- **Thin handoff coverage, stated exactly.** Of the 93 disposition rows, exactly one —
+  `handoff-trigger-subset` — has `triggeredBy` as a nonempty proper subset of `reasons`. Two more,
+  `retained-reason-without-a-trigger` and `no-match-without-a-fallback`, pair an `unresolved` result
+  with `state: none`. One, `direct-exception-escalation-without-configuration`, records a requested
+  handoff in a pack that declares no `escalation` object; on that row `triggeredBy` still equals
+  `reasons`. On every other row with `state: requested`, `triggeredBy` equals `reasons`, and apart from
+  those two rows `state` is `requested` exactly when `kind` is not `outcome`. Nine rows, over the
+  three packs with two escalation routes, name routes in their disposition. So the subset rule of §8.3
+  rests on a single row, and no row combines a direct exception escalation with a trigger-selected
+  reason.
+- **Unexercised structure.** `suppress-rule` exceptions, a pack with more than one exception (so
+  neither forced outcomes that differ nor an unknown exception with `onUnknown: escalate` beside a
+  forced outcome), conditions nested more than one level, and `missing-required-evidence` together
+  with any other reason all have no row.
+- **No permutation rows.** Rule-order permutations that must not change a result are called for by
+  RFC 0006 and absent. Optional-extension content that must stay inert has the one
+  `optional-extension` pair above.
+- **Rules a second evaluator can break without a row failing.** Issue #310 records that a test
+  evaluator written from the text, mutation-checked against the rows, can break each of these
+  without any row failing: a `suppress-rule` exception (§8 steps 4 and 6); forced outcomes that
+  differ, and the conflict that results (§8 steps 4–5); §8 step 5 stopping before the rules when
+  required evidence blocks, beside a rule that would add `unknown` or `conflict`; an omitted evidence
+  key or document for a required requirement reading as `unknown` (§8.2); `evidence-present` over
+  `absent` giving false (§7.5); an unknown rule with `onUnknown: ignore` not blocking no-match or the
+  fallback (§8 steps 7 and 10); three-valued `all`, `any` and `not` over `unknown` (§§7.1–7.3),
+  including an absent path under `not` with a value-set reference; an ordered comparison over a
+  non-decimal string such as `"1e3"` giving `unknown` (§7.4); and a reference resolving to the set it
+  names when a pack declares more than one. The issue proposes rows for each; none is in this corpus.
 
 Growth is by RFC, and a row that changes an expected disposition is a normative change to §§7–8, not
 a corpus edit.
