@@ -88,6 +88,9 @@ class ReleaseBuilderTests(unittest.TestCase):
                      "A `0.5.0` reader refuses a pack declaring `0.4.0-draft`, by the exact selector.",
                      "## Candidate period", "The maintainer waived the candidate period",
                      "same-vendor review, not a cross-vendor claim",
+                     "The #308 content and the #304 fixture corrections postdate the round-1 review "
+                     "and were covered by the review of the graduation pull request, also by the same "
+                     "vendor, whose findings added the three reserved-prefix cases.",
                      "**Reader compatibility:**", "**Writer compatibility:**",
                      "**Semantic compatibility:**", "**Migration compatibility:**", "## Migration note",
                      "Stay on the `v0.3.0` bundle for the `retained-column/1` leaf.",
