@@ -1,9 +1,9 @@
 # Staged evaluation rows
 
-Rows written for the `suiteVersion` **after** `0.3.0`. They are in no corpus.
+Rows written for the `suiteVersion` **after** `0.4.0`. They are in no corpus.
 
 The [evaluation corpus](../README.md) is frozen when its `specVersion` is released: rows are added
-only on the way to a later one, never inside a released one (Core §3.4.1). The `0.3.0`
+only on the way to a later one, never inside a released one (Core §3.4.1). The `0.4.0`
 [`manifest.json`](../manifest.json) remains unchanged when that version is tagged. This directory is
 where rows wait — designed,
 reviewed, held to the same checks as released rows, and runnable by hand — until a later
@@ -31,11 +31,8 @@ reviewed, held to the same checks as released rows, and runnable by hand — unt
   `export-ignore`, so no bundle carries a staged row whatever is staged when a release is cut. The
   directory is work in progress on `main`, reachable in the repository and nowhere else.
 
-Rows for the staged draft Core selector `0.4.0-draft`, which carries
-[RFC 0031](../../../rfcs/0031-annotations-and-value-sets.md), a Draft, are in
-[`annotations-value-sets/`](annotations-value-sets/README.md). Their packs declare that selector,
-so they wait for the version that carries RFC 0031, and its README states how they differ from
-the rows below.
+The rows of [RFC 0031](../../../rfcs/0031-annotations-and-value-sets.md), once staged here for the
+draft selector `0.4.0-draft`, are released in the `0.4.0` manifest.
 
 ## How a staged row lands
 
@@ -88,18 +85,16 @@ from the pack fixture, the evidence document and the supported extensions, witho
 A row that pinned the intuitive, wrong class for the fifth case would fail there. The nonconforming
 fixture must fail for exactly one reason, as RFC 0013 requires of it.
 
-The specification repository owns no evaluator for Core `0.3.0`, so nothing here runs a case under
-it. To run one, give an evaluator the case's `pack`, its `facts`, its `evidenceAvailability` and its
-`supportedExtensions`, and compare the class it reports. The repository's evaluator for the staged
-draft selector `0.4.0-draft` ([`tools/core_draft_eval.py`](../../../tools/core_draft_eval.py)) runs
-these rows with each pack's selector replaced, as the draft's rows carry them over
-([`annotations-value-sets/`](annotations-value-sets/README.md)); that checks them under the draft,
-not under `0.3.0`.
+The repository's second evaluator for Core `0.4.0`
+([`tools/core_040_eval.py`](../../../tools/core_040_eval.py)) runs these rows, as
+`tests/test_core_040_eval.py` does; it is a check written from the text, not a reference
+implementation. To run one elsewhere, give an evaluator the case's `pack`, its `facts`, its
+`evidenceAvailability` and its `supportedExtensions`, and compare the class it reports.
 
 ## Core routes (#219)
 
 The `routes-` rows are hand-written expectations for the accepted routing change, staged after
-`0.3.0`; the released manifest is unchanged. The case carrier now admits `handoff.routes`
+`0.4.0`; the released manifest is unchanged. The case carrier now admits `handoff.routes`
 for these rows. They exercise conditional selection, ordered fan-out, unconditional routes,
 no selected route, duplicate targets, and legacy target-only bytes. Repository checks verify
 selection against each expected reason set; they are not execution of a Core evaluator.

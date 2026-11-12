@@ -30,6 +30,21 @@ class ProfileTests(unittest.TestCase):
                 self.assertEqual(profiles.validate_core(document, case['profiles']), case['expected'])
                 self.assertEqual(json.dumps(document).encode(), before)
 
+    def test_the_tool_applies_every_core_row_of_the_ceiling_table(self):
+        # Core §4.1 has seven Core rows: the routes and the six RFC 0031 added. The tool and the
+        # corpus harness apply the same ceilings, so a reader built on either admits the same packs.
+        import test_repository as harness
+        text = (ROOT / 'spec/judgment-pack-core.md').read_text(encoding='utf-8')
+        self.assertEqual(7, len([line for line in text.splitlines() if line.startswith('| Core ')]))
+        for profile in ('base', 'extended'):
+            with self.subTest(profile=profile):
+                self.assertEqual(harness.core_schema(profile), profiles.core_schema(profile))
+        document = copy.deepcopy(VECTORS['pack'])
+        document['profile'] = 'extended'
+        document['extensions'] = {'org.judgmentpack.annotations': {f'k{i}': 'v' for i in range(32)}}
+        self.assertEqual(profiles.validate_core(document, ['extended']), {'status': 'valid'})
+        self.assertEqual(profiles.validate_core(dict(document, profile='base'), ['base'])['code'], 'malformed-input')
+
     def test_extended_ceiling_and_other_constraints(self):
         document = copy.deepcopy(VECTORS['pack'])
         document['profile'] = 'extended'

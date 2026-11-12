@@ -1,7 +1,7 @@
 # Conformance corpus
 
-This directory contains 151 focused conformance cases for testing the carrier, structural, and
-semantic requirements of Judgment Pack Core `0.3.0`, plus five advisory vectors. It is
+This directory contains 366 focused conformance cases for testing the carrier, structural, and
+semantic requirements of Judgment Pack Core `0.4.0`, plus five advisory vectors. It is
 versioned with the draft but is not yet a complete or normative conformance suite. Evaluator
 behavior is out of scope *here*: it has its
 own corpus, in [`evaluation/`](evaluation/README.md), which is normative for the evaluator conformance
@@ -14,10 +14,7 @@ holds the 54 vectors of its companion document,
 holds the reference Runner's 47 preparation vectors for its companion document,
 [`spec/dialect.md`](../spec/dialect.md), recorded under Core `0.2.0-draft`, and 46 recorded again
 under Core `0.3.0` beside them, staged until the next `specVersion` opens: in no corpus, and not
-served by the site. Nor are the document cases of the staged draft Core selector `0.4.0-draft`,
-which carries [RFC 0031](../rfcs/0031-annotations-and-value-sets.md), a Draft:
-[`staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/staged) is their staging location, outside every released corpus, and the
-site does not serve it. The [Policy offline-reader promotion](policy/1.0.0/README.md)
+served by the site. The [Policy offline-reader promotion](policy/1.0.0/README.md)
 holds 124 agreement vectors for [its draft companion class](../spec/policy.md).
 RFC 0023 has conditional draft approval upon required green CI and PR 218 merge;
 the default branch remains Review until then. These vectors become a released
@@ -67,7 +64,19 @@ Each case records:
   valid case;
 - `specSection` — the draft section that motivates the expectation; and
 - optional `supportedExtensions` — the required-extension capabilities available to the consumer
-  for that case. When omitted, the capability set is empty.
+  for that case. When omitted, the capability set is empty. A specification-defined name such as
+  `org.judgmentpack.annotations` may appear there; it is never requirable, so listing it changes
+  nothing (Core §8.2); and
+- optional `expectedDiagnostics` — every finding of a case whose one defect gives more than one,
+  with `expectedDiagnostic` as its first item. One case uses it:
+  `structural-value-set-reference-and-value-operator-equals`, whose condition carries both `value`
+  and `valueSet` with the operator `equals`, and gives `JPS-STRUCTURE-VALUE-SET-REFERENCE` at
+  `/rules/0/when` and at `/rules/0/when/operator`.
+
+The manifest's `readerProfiles` names the ceiling profiles a reader runs the cases under (Core §4.1).
+A case whose fixture declares the `extended` profile is run by a reader that supports it, under the
+extended value of every row; a reader that supports only `base` refuses that fixture with the one
+diagnostic of §4.1 and reports the case unsupported, not failed.
 
 Advisory cases additionally record `expectedAdvisories`. `diagnosticVocabulary.advisory` closes the
 names those entries may use; advisory findings do not change `expectedResult` or
@@ -80,6 +89,40 @@ Diagnostic codes in this corpus are test metadata, not yet a normative cross-imp
 diagnostic contract. The recorded diagnostic is the primary expected result; implementations may
 also report additional detail. A pointer to a missing member identifies the location the member
 would have occupied.
+
+A structural code follows one rule: Core's code for the definition, where Core has one
+(`JPS-STRUCTURE-LOCAL-ID`, `JPS-STRUCTURE-EXTENSION-NAME`, `JPS-STRUCTURE-IN-OPERAND`); otherwise the
+corpus's code for the keyword that fails, where it uses one; otherwise one new code per keyword. Two
+refusals take a code mapped from another keyword: `JPS-STRUCTURE-VALUE-SET-REFERENCE`, from `not` at
+the condition and from `const` at `…/operator`; and `JPS-STRUCTURE-LOCAL-ID`, from the `not` under an
+annotations object's `propertyNames`.
+
+A case's findings compare as a set of (code, pointer) pairs. A keyword reported twice at one pointer,
+as some validators or regular-expression engines report it, is one finding, and the order of
+findings carries no meaning. A key that the annotated `extensions` object's `propertyNames` refuses
+is one refusal, `JPS-STRUCTURE-EXTENSION-NAME` at the key, not one per branch of its `anyOf`.
+
+A pointer to a refused key names the key's member, as the pointer for an extension-name refusal
+does. A refused key and a refused value at that key therefore share one pointer, so the pair yields
+one finding per code: a 65-character key whose value has 257 characters gives one
+`JPS-STRUCTURE-MAX-LENGTH`, not two.
+
+Core `0.4.0` added five codes (RFC 0031):
+
+| Code | Layer | Where |
+| --- | --- | --- |
+| `JPS-STRUCTURE-MAX-LENGTH` | structural | an annotation key or string over its ceiling (§§4.1, 9.2) |
+| `JPS-STRUCTURE-MIN-PROPERTIES` | structural | an empty annotations object (§9.2) |
+| `JPS-STRUCTURE-MAX-PROPERTIES` | structural | an annotations object over its key ceiling (§§4.1, 9.2) |
+| `JPS-STRUCTURE-VALUE-SET-REFERENCE` | structural | `value` beside `valueSet`, or `valueSet` with an operator other than `in` (§7.4) |
+| `JPS-SEMANTIC-UNRESOLVED-VALUE-SET` | semantic | a `valueSet` naming no declared set (§3.3) |
+
+RFC 0031's two advisory codes, `JPS-VALUE-SET-DUPLICATE-VALUE` and `JPS-VALUE-SET-UNREFERENCED`, are
+outside conformance (#307) and no case states them.
+
+Every fixture and evaluation pack RFC 0031 added is ASCII bytes: a character outside ASCII is a JSON
+escape, one outside the Basic Multilingual Plane a surrogate pair, so no invisible character sits raw
+in one (tests/test_core_040.py).
 
 ## Semantic checks represented here
 
@@ -101,11 +144,10 @@ covered — as a seed corpus with stated gaps — by [`evaluation/`](evaluation/
 expansion here should remain focused: one primary expectation per negative fixture, with positive,
 boundary, and adversarial counterparts added when the corresponding semantics become normative.
 
-Every fixture declares `specVersion` `0.3.0`, which is exact. `structural/invalid-spec-version.json`
-instead declares `0.2.0-draft`, which is the negative case: an unedited `0.2.0-draft` pack is unchanged
-in representation and document-conformance meaning but must be re-declared to be structurally conforming
-to this release, and re-declaring it also opts it into this release's evaluator semantics without conferring
-conformance on any implementation (§11).
+Every fixture declares `specVersion` `0.4.0`, which is exact. `structural/invalid-spec-version.json`
+instead declares `0.2.0-draft`, which is the negative case: an unedited pack of an earlier version must be
+re-declared to be structurally conforming to this release, and re-declaring it also opts it into this
+release's evaluator semantics without conferring conformance on any implementation (§11).
 
 ## Document ceiling profiles
 

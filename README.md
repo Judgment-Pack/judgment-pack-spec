@@ -10,7 +10,7 @@
 [![Good first issues](https://img.shields.io/github/issues/Judgment-Pack/judgment-pack-spec/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/Judgment-Pack/judgment-pack-spec/labels/good%20first%20issue)
 [![Open Source Helpers](https://www.codetriage.com/judgment-pack/judgment-pack-spec/badges/users.svg)](https://www.codetriage.com/judgment-pack/judgment-pack-spec)
 
-> **Status: `0.3.0`**
+> **Status: `0.4.0`**
 >
 > JPS is a draft specification in production use by adopters. It is not an industry standard, and
 > `0.x` drafts carry no compatibility guarantee: pin the exact draft and runtime release you verified.
@@ -112,7 +112,7 @@ The specification is successful only if independent implementations can exchange
 agree on its document structure and declared field and reference semantics — and, for evaluator
 conformance, on the result of applying it.
 
-Core `0.3.0` supports testing carrier, structural, and semantic document conformance, and
+Core `0.4.0` supports testing carrier, structural, and semantic document conformance, and
 defines a fourth class: evaluator conformance (§3.4), with normative condition and resolution
 semantics, one portable result (the §8.3 disposition), an error contract (§8.4), and a seed evaluation
 corpus. Document conformance is unchanged, and exactly one form of evaluator-conformance claim is
@@ -148,14 +148,13 @@ reproducing its corpus version, its results, or its every-row statement.
 | [`spec/judgment-pack-core.md`](spec/judgment-pack-core.md)                       | Normative prose for document conformance            |
 | [`schema/judgment-pack-core.schema.json`](schema/judgment-pack-core.schema.json) | Normative Draft 2020-12 structural schema           |
 | [`examples/`](examples/)                                                         | Synthetic examples from unrelated domains           |
-| [`conformance/`](conformance/)                                                   | 151 document-conformance cases and 5 advisory vectors |
-| [`conformance/evaluation/`](conformance/evaluation/README.md)                     | 20-case seed evaluation corpus (normative for §3.4) |
+| [`conformance/`](conformance/)                                                   | 366 document-conformance cases and 5 advisory vectors |
+| [`conformance/evaluation/`](conformance/evaluation/README.md)                     | 103-case seed evaluation corpus (normative for §3.4) |
 | [`spec/checkpoint-witness.md`](spec/checkpoint-witness.md)                       | Normative prose for the witness-statement reader class, a companion document beside Core |
 | [`conformance/witness/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/witness) | 54 checkpoint witness vectors, staged until the next `specVersion` (in no corpus) |
 | [`spec/dialect.md`](spec/dialect.md) | Normative prose for the preparation-verifier class, a companion document beside Core |
 | [Dialect vectors][staged-dialect] | 47 dialect vectors; staged (see below) |
 | [`spec/retained-column.md`](spec/retained-column.md) | Exact selected retained-column/1 support accepted at draft maturity for RC2; immutable publication and product support are separate gates |
-| [`spec/staged/judgment-pack-core-0.4.0-draft.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md) | Staged draft Core text for RFC 0031, a Draft, under the working selector `0.4.0-draft` that no release carries; normative for nothing, with a staged schema, [document cases](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/staged) and evaluation rows in no corpus (not served by the site) |
 | [`spec/policy.md`](spec/policy.md) | Policy companion accepted at draft maturity; publication requires its exact Policy tag and a maintainer-published GitHub release; [124 agreement vectors](conformance/policy/1.0.0/README.md) and [versioned schemas](schema/policy/1.0.0/) |
 | [`TESTING.md`](TESTING.md)                                                       | A 10–15 minute external testing exercise            |
 | [`VERSIONING.md`](VERSIONING.md)                                                 | Release and compatibility policy                    |
@@ -185,7 +184,7 @@ current landscape.
 
 ```json
 {
-  "specVersion": "0.3.0",
+  "specVersion": "0.4.0",
   "id": "https://example.com/judgment-packs/expense-approval",
   "version": "0.1.0",
   "title": "Expense approval",

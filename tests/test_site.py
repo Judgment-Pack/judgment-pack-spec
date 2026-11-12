@@ -24,10 +24,9 @@ WITNESS_VECTORS = "conformance/witness"
 # published.
 DIALECT_VECTORS = "conformance/dialect"
 WORKFLOW_VECTORS = "conformance/workflow"
-# The staged draft Core specVersion 0.4.0-draft carries RFC 0031, a Draft, and is published nowhere:
-# the site serves neither its schema, its document cases nor its example, and its text is no page
-# (conformance/staged/README.md). Its evaluation rows are under STAGED_EVALUATION_ROWS.
-STAGED_DRAFT_DIRECTORIES = ("schema/staged", "conformance/staged", "examples/staged")
+# The staged draft Core specVersion 0.4.0-draft graduated to the released 0.4.0 in place; its staged
+# directories are retired, and nothing the site writes is named for the draft selector.
+RETIRED_DRAFT_DIRECTORIES = ("schema/staged", "conformance/staged", "examples/staged")
 UNPUBLISHED_DIRECTORIES = (
     STAGED_EVALUATION_ROWS,
     WITNESS_VECTORS,
@@ -35,7 +34,6 @@ UNPUBLISHED_DIRECTORIES = (
     WORKFLOW_VECTORS,
     "conformance/policy",
     "schema/policy",
-    *STAGED_DRAFT_DIRECTORIES,
 )
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
@@ -119,6 +117,7 @@ class StaticSiteTests(unittest.TestCase):
     def test_primary_pages_are_generated_without_client_javascript(self) -> None:
         expected = (
             "index.html",
+            "spec/0.4.0/index.html",
             "spec/0.3.0/index.html",
             "spec/0.2.0-draft/index.html",
             "schema/index.html",
@@ -227,12 +226,13 @@ class StaticSiteTests(unittest.TestCase):
         # here: nothing under the staged directory is published, as an artifact or as a page.
         self._assert_nothing_published_under(STAGED_EVALUATION_ROWS)
 
-    def test_staged_draft_is_not_published(self) -> None:
-        # Held as the staged rows' exclusion is, for each directory, and for the draft text, which is
-        # no page: nothing the site writes is named for the draft selector.
-        for directory in STAGED_DRAFT_DIRECTORIES:
+    def test_the_retired_draft_is_not_published(self) -> None:
+        # The draft graduated in place: its staged directories are gone from the source and the
+        # output, and nothing the site writes is named for the draft selector.
+        for directory in RETIRED_DRAFT_DIRECTORIES:
             with self.subTest(directory=directory):
-                self._assert_nothing_published_under(directory)
+                self.assertFalse((ROOT / directory).exists(), directory)
+                self.assertFalse((self.output / directory).exists(), directory)
         self.assertEqual([], sorted(
             path.relative_to(self.output).as_posix() for path in self.output.rglob("*0.4.0-draft*")
         ))
@@ -251,7 +251,7 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("Normative for the witness-statement reader class", document)
         for heading in ("1. Terms and the canonical form", "11. The witness-statement reader"):
             self.assertIn(heading, document)
-        core = (self.output / "spec" / "0.3.0" / "index.html").read_text(encoding="utf-8")
+        core = (self.output / "spec" / "0.4.0" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="../checkpoint-witness/"', core)
 
     def test_dialect_vectors_are_not_published(self) -> None:
@@ -266,7 +266,7 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("Normative for the preparation-verifier reader class", document)
         for heading in ("1. Terms and the canonical forms", "14. The preparation verifier"):
             self.assertIn(heading, document)
-        core = (self.output / "spec" / "0.3.0" / "index.html").read_text(encoding="utf-8")
+        core = (self.output / "spec" / "0.4.0" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="../dialect/"', core)
         page = (self.output / "rfcs" / "0018-dialect" / "index.html").read_text(encoding="utf-8")
         self.assertIn("Accepted standards-track RFC", page)
@@ -535,9 +535,9 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("embeds no evaluator of its own", companions)
         # The spec page still cites its immutable tagged source (docs use the mutable branch).
         specification = (
-            self.output / "spec" / "0.3.0" / "index.html"
+            self.output / "spec" / "0.4.0" / "index.html"
         ).read_text(encoding="utf-8")
-        self.assertIn("blob/v0.3.0/spec/judgment-pack-core.md", specification)
+        self.assertIn("blob/v0.5.0/spec/judgment-pack-core.md", specification)
         self.assertIn("View tagged source", specification)
 
     def test_published_site_is_indexable_and_nested_404_is_not(self) -> None:
@@ -575,13 +575,13 @@ class StaticSiteTests(unittest.TestCase):
         overview = (self.output / "index.html").read_text(encoding="utf-8")
         self.assertIn(f'<link rel="canonical" href="{self.base_url}/">', overview)
         spec = (
-            self.output / "spec" / "0.3.0" / "index.html"
+            self.output / "spec" / "0.4.0" / "index.html"
         ).read_text(encoding="utf-8")
         self.assertIn(
-            f'<link rel="canonical" href="{self.base_url}/spec/0.3.0/">', spec
+            f'<link rel="canonical" href="{self.base_url}/spec/0.4.0/">', spec
         )
         self.assertIn(
-            f'property="og:url" content="{self.base_url}/spec/0.3.0/"', spec
+            f'property="og:url" content="{self.base_url}/spec/0.4.0/"', spec
         )
 
     def test_absolute_urls_never_contain_double_slashes(self) -> None:
@@ -598,7 +598,7 @@ class StaticSiteTests(unittest.TestCase):
     def test_sitemap_lists_indexable_pages_and_excludes_404(self) -> None:
         sitemap = (self.output / "sitemap.xml").read_text(encoding="utf-8")
         self.assertIn(f"<loc>{self.base_url}/</loc>", sitemap)
-        self.assertIn(f"<loc>{self.base_url}/spec/0.3.0/</loc>", sitemap)
+        self.assertIn(f"<loc>{self.base_url}/spec/0.4.0/</loc>", sitemap)
         self.assertIn(f"<loc>{self.base_url}/implementations/</loc>", sitemap)
         self.assertNotIn("404", sitemap)
         # A deployment timestamp is not a page-level content modification timestamp.
@@ -659,20 +659,20 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn('itemprop="alternateName" content="JPS"', home)
 
         specification = (
-            self.output / "spec" / "0.3.0" / "index.html"
+            self.output / "spec" / "0.4.0" / "index.html"
         ).read_text(encoding="utf-8")
         self.assertIn('itemtype="https://schema.org/TechArticle"', specification)
-        self.assertIn('itemprop="version" content="0.3.0"', specification)
+        self.assertIn('itemprop="version" content="0.4.0"', specification)
         self.assertIn('itemtype="https://schema.org/BreadcrumbList"', specification)
 
-        for version in ("0.1.0-draft", "0.2.0-draft"):
+        for version in ("0.1.0-draft", "0.2.0-draft", "0.3.0"):
             with self.subTest(version=version):
                 superseded = (
                     self.output / "spec" / version / "index.html"
                 ).read_text(encoding="utf-8")
                 self.assertIn('itemtype="https://schema.org/WebPage"', superseded)
                 self.assertNotIn('itemtype="https://schema.org/TechArticle"', superseded)
-                self.assertNotIn('itemprop="version" content="0.3.0"', superseded)
+                self.assertNotIn('itemprop="version" content="0.4.0"', superseded)
 
         faq = (self.output / "faq" / "index.html").read_text(encoding="utf-8")
         self.assertIn('itemtype="https://schema.org/FAQPage"', faq)
@@ -687,9 +687,9 @@ class StaticSiteTests(unittest.TestCase):
     def test_llms_guide_is_explicitly_non_authoritative_and_resolvable(self) -> None:
         guide = (self.output / "llms.txt").read_text(encoding="utf-8")
         self.assertIn("# Judgment Pack Specification (JPS)", guide)
-        self.assertIn("Current draft: `0.3.0`", guide)
+        self.assertIn("Current draft: `0.4.0`", guide)
         self.assertIn("experimental file is a navigation aid", guide)
-        self.assertIn(f"{self.base_url}/spec/0.3.0/", guide)
+        self.assertIn(f"{self.base_url}/spec/0.4.0/", guide)
         self.assertIn(f"{self.base_url}/faq/", guide)
         self.assertIn("never establishes that evidence is true", guide)
 
@@ -714,7 +714,7 @@ class StaticSiteTests(unittest.TestCase):
     def test_pages_carry_neutral_generator_and_commit_provenance(self) -> None:
         overview = (self.output / "index.html").read_text(encoding="utf-8")
         self.assertIn(
-            '<meta name="generator" content="jps-site-build 0.3.0">', overview
+            '<meta name="generator" content="jps-site-build 0.4.0">', overview
         )
         self.assertIn("Built from", overview)
         self.assertIn(self.commit_sha[:12], overview)
@@ -733,13 +733,13 @@ class StaticSiteTests(unittest.TestCase):
                 self.assertIn(text, page)
         # The resources those pins name stay served at their exact $id paths.
         for served, source in (
-            ("schema/0.3.0/judgment-pack-core.schema.json", "schema/judgment-pack-core.schema.json"),
+            ("schema/0.3.0/judgment-pack-core.schema.json", "schema/judgment-pack-core-0.3.0.schema.json"),
             ("schema/retained-column/1/contract.schema.json", inventory["schema"]),
         ):
             with self.subTest(served=served):
                 self.assertEqual((ROOT / source).read_bytes(), (self.output / served).read_bytes())
 
-    def test_the_0_4_0_release_page_says_it_carries_0_3_0_and_the_site_stays_on_0_3_0(self) -> None:
+    def test_the_0_4_0_release_page_says_it_carries_0_3_0(self) -> None:
         page = (self.output / "project/releases/0.4.0/index.html").read_text(encoding="utf-8")
         for text in ("Consumers pinned to", "What is in the bundles", "The workflow contributor model"):
             with self.subTest(text=text):
@@ -747,17 +747,26 @@ class StaticSiteTests(unittest.TestCase):
         project = (self.output / "project/index.html").read_text(encoding="utf-8")
         self.assertIn('href="releases/0.4.0/"', project)
         self.assertIn("0.4.0 release", project)
-        # The release re-pins nothing, so the site's Core version and tagged source do not move.
+
+    def test_core_0_4_0_is_the_current_page_and_0_3_0_a_signpost(self) -> None:
+        # Core 0.4.0 replaced 0.3.0 in place (as 0.3.0 replaced 0.2.0-draft): the current page is
+        # /spec/0.4.0/, its source is the tag that carries it, and /spec/0.3.0/ still resolves.
         overview = (self.output / "index.html").read_text(encoding="utf-8")
-        self.assertIn('<meta name="generator" content="jps-site-build 0.3.0">', overview)
-        self.assertFalse((self.output / "spec/0.4.0").exists())
+        self.assertIn('<meta name="generator" content="jps-site-build 0.4.0">', overview)
+        current = (self.output / "spec/0.4.0/index.html").read_text(encoding="utf-8")
+        self.assertIn("JPS Core 0.4.0", current)
+        signpost = (self.output / "spec/0.3.0/index.html").read_text(encoding="utf-8")
+        self.assertIn("JPS Core 0.3.0 is superseded", signpost)
+        self.assertIn("/tree/v0.3.0/spec", signpost)
+        self.assertIn('href="../0.4.0/"', signpost)
+        self.assertIn('href="releases/0.3.0/"', (self.output / "project/index.html").read_text(encoding="utf-8"))
 
     def test_schemas_are_served_at_their_canonical_id_path(self) -> None:
         cases = {
-            "schema/0.3.0/judgment-pack-core.schema.json": ROOT
+            "schema/0.4.0/judgment-pack-core.schema.json": ROOT
             / "schema"
             / "judgment-pack-core.schema.json",
-            "schema/0.3.0/workflow-1.schema.json": ROOT
+            "schema/0.4.0/workflow-1.schema.json": ROOT
             / "schema"
             / "workflow-1.schema.json",
             "schema/0.4.0/workflow-contributors-2.schema.json": ROOT
@@ -780,10 +789,22 @@ class StaticSiteTests(unittest.TestCase):
             "schema/0.2.0-draft/conformance/evaluation/manifest.schema.json": ROOT
             / "schema"
             / "conformance-evaluation-manifest-0.2.0-draft.schema.json",
+            "schema/0.3.0/judgment-pack-core.schema.json": ROOT
+            / "schema"
+            / "judgment-pack-core-0.3.0.schema.json",
             "schema/0.3.0/conformance/manifest.schema.json": ROOT
+            / "schema"
+            / "conformance-manifest-0.3.0.schema.json",
+            "schema/0.3.0/workflow-1.schema.json": ROOT
+            / "schema"
+            / "workflow-1-0.3.0.schema.json",
+            "schema/0.3.0/conformance/evaluation/manifest.schema.json": ROOT
+            / "schema"
+            / "conformance-evaluation-manifest-0.3.0.schema.json",
+            "schema/0.4.0/conformance/manifest.schema.json": ROOT
             / "conformance"
             / "manifest.schema.json",
-            "schema/0.3.0/conformance/evaluation/manifest.schema.json": ROOT
+            "schema/0.4.0/conformance/evaluation/manifest.schema.json": ROOT
             / "conformance"
             / "evaluation"
             / "manifest.schema.json",
@@ -940,12 +961,15 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("nav-toggle", actions)
 
     def test_no_javascript_anywhere_in_rendered_pages(self) -> None:
-        # script-src 'none' is a hard invariant: no <script> tag or inline handler in any page.
+        # script-src 'none' is a hard invariant: no <script> tag or inline handler in any page. A
+        # handler is an on* attribute of a tag; a fixture page shows a JSON string that spells one
+        # (conformance/valid/annotations-display-hostile.json), escaped, so it is text, not a tag.
+        handler = re.compile(r"<[A-Za-z][^<>]*\son[a-z]+\s*=", re.IGNORECASE)
         for path in self.output.rglob("*.html"):
             text = path.read_text(encoding="utf-8")
             rel = path.relative_to(self.output)
             self.assertNotIn("<script", text, f"{rel} contains a <script> tag")
-            self.assertNotIn("onclick", text, f"{rel} contains an inline handler")
+            self.assertIsNone(handler.search(text), f"{rel} contains an inline handler")
             self.assertNotIn("javascript:", text, f"{rel} contains a javascript: URL")
 
     def test_why_page_explains_motivation(self) -> None:
@@ -964,7 +988,7 @@ class StaticSiteTests(unittest.TestCase):
             self.assertIn(phrase, why)
         # Links to the full example and the specification, rewritten to real site routes.
         self.assertIn('href="../examples/supplier-invoice-approval/"', why)
-        self.assertIn('href="../spec/0.3.0/"', why)
+        self.assertIn('href="../spec/0.4.0/"', why)
         self._assert_no_retired_brand(why, "why/index.html")
 
     def test_architecture_and_presentation_show_the_current_input_pipeline(self) -> None:
@@ -1101,7 +1125,7 @@ class StaticSiteTests(unittest.TestCase):
     def test_specification_page_excludes_layered_vision_terms(self) -> None:
         # The product/runtime vision must not leak into the normative specification page.
         spec = (
-            self.output / "spec" / "0.3.0" / "index.html"
+            self.output / "spec" / "0.4.0" / "index.html"
         ).read_text(encoding="utf-8")
         for term in ("Judgment Graph", "Composite Judgment", "Judgment Planner", "Evidence Layer"):
             self.assertNotIn(term, spec, f"vision term leaked into the spec page: {term}")

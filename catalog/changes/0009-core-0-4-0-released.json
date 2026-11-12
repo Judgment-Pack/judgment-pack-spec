@@ -1,0 +1,59 @@
+{
+  "reason": "Core 0.4.0 (RFC 0031, issues #304 and #308) replaces the released 0.3.0 schemas in place, as 0.3.0 replaced 0.2.0-draft (#248): the active Core, document-manifest and evaluation-manifest schemas carry 0.4.0, and the workflow-1 identifier moves to /schema/0.4.0/. Byte-identical copies of the four 0.3.0 schemas stay at schema/*-0.3.0.schema.json, served at their 0.3.0 identifiers. The staged 0.4.0-draft schema is retired.",
+  "changes": [
+    {
+      "path": "conformance/evaluation/manifest.schema.json",
+      "family": "conformance/evaluation/manifest",
+      "from": "sha256:e40e969aa27a98bad01c3d03d3f55cafb01aad673f2ca23d8a56d8b2cf840075",
+      "to": "sha256:eb4931550f11770bac3fc2e925c0229d6d9845d23b47aecead1a175469ac0a1a"
+    },
+    {
+      "path": "conformance/manifest.schema.json",
+      "family": "conformance/manifest",
+      "from": "sha256:e0609fc9ba9d299b99f633617ff1bf715a5b3f1026f0c7323838cda69569bfd3",
+      "to": "sha256:a912cd926f4bc062c5b9da329e0f165834ea83934cb2e80c50e85da83134a92d"
+    },
+    {
+      "path": "schema/conformance-evaluation-manifest-0.3.0.schema.json",
+      "family": "conformance/evaluation/manifest",
+      "from": null,
+      "to": "sha256:e40e969aa27a98bad01c3d03d3f55cafb01aad673f2ca23d8a56d8b2cf840075"
+    },
+    {
+      "path": "schema/conformance-manifest-0.3.0.schema.json",
+      "family": "conformance/manifest",
+      "from": null,
+      "to": "sha256:e0609fc9ba9d299b99f633617ff1bf715a5b3f1026f0c7323838cda69569bfd3"
+    },
+    {
+      "path": "schema/judgment-pack-core-0.3.0.schema.json",
+      "family": "judgment-pack-core",
+      "from": null,
+      "to": "sha256:b188b95764535e675ffaf0942bdd655f48a9f7ab90fd973f9702908ed1634285"
+    },
+    {
+      "path": "schema/judgment-pack-core.schema.json",
+      "family": "judgment-pack-core",
+      "from": "sha256:b188b95764535e675ffaf0942bdd655f48a9f7ab90fd973f9702908ed1634285",
+      "to": "sha256:06e0412e69fa2ae0704761be190518228af5848a6ad0031dfaec661c7a96f33c"
+    },
+    {
+      "path": "schema/staged/judgment-pack-core-0.4.0-draft.schema.json",
+      "family": "judgment-pack-core",
+      "from": "sha256:533b245a7bc9cba5b4e6ca572f2c18ffdfbde04f54ef27e7039187c274962b4a",
+      "to": null
+    },
+    {
+      "path": "schema/workflow-1-0.3.0.schema.json",
+      "family": "workflow",
+      "from": null,
+      "to": "sha256:722e56392f820c2541f91c97a37243fca532b6d1fb31a56e6c4229aa344a5042"
+    },
+    {
+      "path": "schema/workflow-1.schema.json",
+      "family": "workflow",
+      "from": "sha256:722e56392f820c2541f91c97a37243fca532b6d1fb31a56e6c4229aa344a5042",
+      "to": "sha256:385797d34d89380a302d1c5a115e6e234a15aeaca9b96cc81d8b28c252f0e4aa"
+    }
+  ]
+}

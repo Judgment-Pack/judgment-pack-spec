@@ -267,20 +267,21 @@ class ChangeRecords(Fixture):
 
 class Inventory(Fixture):
     def test_a_new_schema_file_appears_in_the_inventory_without_hand_edits(self):
+        # A version above every catalogued workflow shape, so the family's draft version moves.
         write_json(self.root / "schema" / "workflow-2.schema.json",
-                   {"$id": shapes.NAMESPACE + "0.4.0/workflow-2.schema.json", "type": "object"})
+                   {"$id": shapes.NAMESPACE + "0.5.0/workflow-2.schema.json", "type": "object"})
         write_json(self.root / "schema" / "example" / "1" / "record.schema.json",
                    {"$id": shapes.NAMESPACE + "example/1/record.schema.json", "type": "object"})
         catalog = shapes.build_catalog(self.root)
         self.assertIn("schema/workflow-2.schema.json", catalog["families"]["workflow"])
         self.assertEqual(["schema/example/1/record.schema.json"], catalog["families"]["example"])
-        self.assertEqual("0.4.0", self.entry(catalog, "schema/workflow-2.schema.json")["version"])
+        self.assertEqual("0.5.0", self.entry(catalog, "schema/workflow-2.schema.json")["version"])
         # Found is not accepted: the new shapes still need their change records and status.
         self.regenerate()
         faults = "\n".join(shapes.check(self.root))
         self.assertIn("schema/workflow-2.schema.json (family workflow) at sha256:", faults)
         self.assertIn("no record for the family example", faults)
-        self.assertIn('"draftVersion": "0.4.0"', [line for line in faults.splitlines() if "workflow is" in line][0])
+        self.assertIn('"draftVersion": "0.5.0"', [line for line in faults.splitlines() if "workflow is" in line][0])
 
     def test_a_schema_in_a_specification_directory_outside_the_namespace_is_refused(self):
         write_json(self.root / "conformance" / "new" / "thing.schema.json",
@@ -307,17 +308,15 @@ class FormatStatus(Fixture):
     def test_the_status_records_are_those_releases_give(self):
         derived = shapes.derive_status(ROOT, shapes.build_catalog(ROOT))
         self.assertEqual(derived, json.loads((ROOT / shapes.STATUS).read_text("utf-8"))["families"])
-        # Hand-checked against releases/: v0.4.0 carries specVersion 0.3.0 unchanged, so it is the
-        # last release of the families under 0.3.0 and v0.3.0 stays their baseline, after two
-        # candidates; the Policy companion's only release is policy-v1.0.0-draft.1; the leaf shipped
-        # in rc.2 and the final; the contributors shape under 0.4.0 is staged and unreleased. Core's
-        # draft version is the staged draft schema's selector, 0.4.0-draft (RFC 0031), which no
-        # release carries, so its baseline and last release are still those of 0.3.0.
-        for family in ("conformance/manifest", "conformance/evaluation/manifest", "workflow"):
+        # Hand-checked against releases/: the four families Core 0.4.0 moved in place draft 0.4.0,
+        # which no release carries yet; their 0.3.0 copies keep v0.4.0 (which carries specVersion
+        # 0.3.0 unchanged) as their last release and v0.3.0, after two candidates, as their baseline.
+        # The Policy companion's only release is policy-v1.0.0-draft.1; the leaf shipped in rc.2 and
+        # the final; the contributors shape under 0.4.0 is staged and unreleased.
+        for family in ("judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest",
+                       "workflow"):
             self.assertEqual(derived[family],
-                             {"draftVersion": "0.3.0", "baseline": "v0.3.0", "lastReleased": "v0.4.0"})
-        self.assertEqual(derived["judgment-pack-core"],
-                         {"draftVersion": "0.4.0-draft", "baseline": "v0.3.0", "lastReleased": "v0.4.0"})
+                             {"draftVersion": "0.4.0", "baseline": "v0.3.0", "lastReleased": "v0.4.0"})
         self.assertEqual(derived["policy"], {"draftVersion": "1.0.0", "baseline": "policy-v1.0.0-draft.1",
                                              "lastReleased": "policy-v1.0.0-draft.1"})
         self.assertEqual(derived["retained-column"],

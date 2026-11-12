@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "title": "The annotations name listed as required",
   "decision": {
-    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "intent": "Exercise one rule of RFC 0031.",
     "question": "Is the request accepted?"
   },
   "outcomes": [

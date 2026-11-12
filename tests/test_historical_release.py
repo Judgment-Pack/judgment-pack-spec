@@ -118,6 +118,14 @@ ANCHORS = [{'tag': 'v0.1.0-draft',
   'id': 'https://judgmentpack.org/schema/0.3.0/conformance/evaluation/manifest.schema.json'},
  {'tag': 'v0.3.0',
   'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'schema/workflow-1.schema.json',
+  'blob': 'c1c0cd03eb0fef8694f03923007b76ea9ee9ef35',
+  'sourceSha256': 'b306eb4d96b5ff4edfa87e7b7e86fbac12b9d3d347f8f513a396217464075d6f',
+  'target': 'schema/workflow-1-0.3.0.schema.json',
+  'targetSha256': 'b306eb4d96b5ff4edfa87e7b7e86fbac12b9d3d347f8f513a396217464075d6f',
+  'id': 'https://judgmentpack.org/schema/0.3.0/workflow-1.schema.json'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
   'source': 'conformance/manifest.json',
   'blob': '8e30bb2592401da4c0e2dff99f1a05c99c7d0c05',
   'target': 'tests/fixtures/historical-compatibility/0.3.0-document-manifest.json',
@@ -246,8 +254,8 @@ class HistoricalReleaseTests(unittest.TestCase):
         output = Path(tempfile.mkdtemp(prefix="historical-publisher-"))
         publisher()(output)
         # This complete inventory is the five canonical IDs published at immutable v0.2.0-draft and
-        # the three the v0.3.0 tag published, which Core 0.4.0 superseded in place.
-        self.assertEqual(8, len(SCHEMAS))
+        # the four the v0.3.0 tag published that Core 0.4.0 superseded in place (workflow-1 among them).
+        self.assertEqual(9, len(SCHEMAS))
         for row in SCHEMAS:
             path = output / urlsplit(row["id"]).path.lstrip("/")
             self.assertTrue(path.is_file(), f"old canonical URL disappeared: {row['id']}")
