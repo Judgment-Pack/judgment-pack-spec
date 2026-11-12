@@ -91,6 +91,14 @@ other outside the outermost `oneOf` that encloses it. One reading is the harness
 an implementation can match it: a key the annotated `extensions` object's `propertyNames` refuses is
 one refusal, `JPS-STRUCTURE-EXTENSION-NAME` at the key, not one per branch of its `anyOf`.
 
+Each case holds exactly the defect, or the property, it names (issue #304). The `oneOf` rule above
+admits what a validator reports inside a `oneOf` for the case's own defect, never the finding of a
+second defect. The tests hold that every refusal the validator reports at the top level of a
+structural case holds its stated finding, and that no two rules of a valid case that name
+different outcomes and read one fact path, with `literal`, `equals`, `not-equals` and `in` under
+`all`, `any` and `not`, can both be `true`: an exact overlap (Core §3.3.1), which a runner that
+reports the overlap advisory would report there.
+
 A non-string inside an annotation list needs no such reading. The refused-character `not` in
 `annotationString` holds `"type": "string"` beside its `pattern` (RFC 0031 §1.7), so a number or a
 list there fails `type` alone, and the case expects that one `JPS-STRUCTURE-TYPE`.

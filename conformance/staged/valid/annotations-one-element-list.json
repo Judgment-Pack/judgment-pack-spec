@@ -20,10 +20,12 @@
   "rules": [
     {
       "id": "accept-request",
-      "description": "Accept every request.",
+      "description": "Accept a request made online.",
       "when": {
-        "op": "literal",
-        "value": true
+        "op": "fact",
+        "path": "/request/channel",
+        "operator": "equals",
+        "value": "online"
       },
       "outcome": "accept",
       "onUnknown": "ignore",
@@ -37,10 +39,12 @@
     },
     {
       "id": "refer-request",
-      "description": "Refer every request.",
+      "description": "Refer a request made on any other channel.",
       "when": {
-        "op": "literal",
-        "value": true
+        "op": "fact",
+        "path": "/request/channel",
+        "operator": "not-equals",
+        "value": "online"
       },
       "outcome": "refer",
       "onUnknown": "ignore",

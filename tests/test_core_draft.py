@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import collections
 import copy
+import decimal
 import json
 import re
 import shutil
@@ -323,6 +324,90 @@ def evaluation_form(pack: dict[str, Any]) -> dict[str, Any]:
     return form
 
 
+def _equality_key(value: Any) -> Any:
+    """A key under Core §7.4's type-preserving equality: numbers by value, objects regardless of order."""
+    if isinstance(value, bool):
+        return ("boolean", value)
+    if value is None:
+        return ("null",)
+    if isinstance(value, (int, float, decimal.Decimal)):
+        number = decimal.Decimal(str(value))
+        return ("number", "0" if number == 0 else str(number.normalize()))
+    if isinstance(value, str):
+        return ("string", value)
+    if isinstance(value, list):
+        return ("array", tuple(_equality_key(item) for item in value))
+    return ("object", tuple(sorted((name, _equality_key(item)) for name, item in value.items())))
+
+
+# A set of values is (complemented, members): (False, S) is S, and (True, S) is every value but S.
+_ALL: tuple[bool, frozenset[Any]] = (True, frozenset())
+_NONE: tuple[bool, frozenset[Any]] = (False, frozenset())
+
+
+def _intersect(x: tuple[bool, frozenset[Any]], y: tuple[bool, frozenset[Any]]) -> tuple[bool, frozenset[Any]]:
+    if x[0] and y[0]:
+        return True, x[1] | y[1]
+    if x[0]:
+        return False, y[1] - x[1]
+    if y[0]:
+        return False, x[1] - y[1]
+    return False, x[1] & y[1]
+
+
+def _unite(x: tuple[bool, frozenset[Any]], y: tuple[bool, frozenset[Any]]) -> tuple[bool, frozenset[Any]]:
+    if x[0] and y[0]:
+        return True, x[1] & y[1]
+    if x[0]:
+        return True, x[1] - y[1]
+    if y[0]:
+        return True, y[1] - x[1]
+    return False, x[1] | y[1]
+
+
+def _true_and_false_sets(condition: Any, paths: set[str]) -> Any:
+    """Core §3.3.1's true and false sets for the equality fragment, or None outside it."""
+    op = condition.get("op") if isinstance(condition, dict) else None
+    if op == "literal":
+        return (_ALL, _NONE) if condition["value"] is True else (_NONE, _ALL)
+    if op == "fact":
+        paths.add(condition["path"])
+        operator = condition["operator"]
+        if operator in ("equals", "not-equals"):
+            members = frozenset([_equality_key(condition["value"])])
+            sets = ((False, members), (True, members))
+            return sets if operator == "equals" else sets[::-1]
+        if operator == "in":
+            members = frozenset(_equality_key(item) for item in condition["value"])
+            return (False, members), (True, members)
+        return None
+    if op in ("all", "any"):
+        children = [_true_and_false_sets(child, paths) for child in condition["conditions"]]
+        if any(child is None for child in children):
+            return None
+        true, false = (_ALL, _NONE) if op == "all" else (_NONE, _ALL)
+        for child_true, child_false in children:
+            if op == "all":
+                true, false = _intersect(true, child_true), _unite(false, child_false)
+            else:
+                true, false = _unite(true, child_true), _intersect(false, child_false)
+        return true, false
+    if op == "not":
+        child = _true_and_false_sets(condition["condition"], paths)
+        return None if child is None else (child[1], child[0])
+    return None
+
+
+def exact_overlap(first: Any, second: Any) -> bool | None:
+    """Whether two conditions can both be true (Core §3.3.1), where the equality fragment decides it."""
+    paths: set[str] = set()
+    a, b = _true_and_false_sets(first, paths), _true_and_false_sets(second, paths)
+    if a is None or b is None or len(paths) > 1:
+        return None
+    both = _intersect(a[0], b[0])
+    return both[0] or bool(both[1])
+
+
 def without_optional_extensions(pack: dict[str, Any]) -> dict[str, Any]:
     """The pack with every extension key that metadata.requiredExtensions does not list removed."""
     form = copy.deepcopy(pack)
@@ -539,6 +624,49 @@ class DraftDocumentCaseTests(unittest.TestCase):
                     self.assertEqual([], diagnostics)
                 else:
                     assert_one_finding(self, case["id"], case["expectedDiagnostic"], diagnostics)
+
+    def test_each_structural_case_holds_one_defect(self) -> None:
+        # Issue #304: a case holds exactly the defect it names. The oneOf rule above admits a
+        # finding inside the outermost oneOf whose pointer encloses the stated one, so a second,
+        # unrelated defect at an enclosing object (an escalation with neither target nor routes)
+        # would pass it. Here every refusal the validator reports at the top level must hold the
+        # stated finding, so each one comes from the case's own defect.
+        for case in self.manifest["cases"]:
+            if case["layer"] != "structural":
+                continue
+            with self.subTest(case=case["id"]):
+                value = strict_json_loads((STAGED / case["path"]).read_text(encoding="utf-8"))
+                wanted = (case["expectedDiagnostic"]["code"], case["expectedDiagnostic"]["path"])
+                top_level = list(self.validators[profile_of(value)].iter_errors(value))
+                self.assertTrue(top_level)
+                for error in top_level:
+                    pairs = {(d.code, d.path) for d in map(draft_schema_diagnostic, draft_walk(error))}
+                    self.assertIn(wanted, pairs, f"a refusal that is not the case's own: {sorted(pairs)}")
+
+    def test_no_valid_case_has_an_exact_rule_overlap(self) -> None:
+        # Issue #304: a valid case is about its own property, so it carries no exact overlap of two
+        # rules naming different outcomes, which a validator running the recommended check (Core
+        # §3.3.1) would report. The check here is exact for the fragment it reads: `literal`,
+        # `equals`, `not-equals` and `in` on one fact path, under `all`, `any` and `not`, on the
+        # evaluation form (a reference reads as its set, RFC 0031 §4.4). A pair outside that
+        # fragment is not decided here.
+        decided = 0
+        for case in self.manifest["cases"]:
+            if case["expectedResult"] != "valid":
+                continue
+            with self.subTest(case=case["id"]):
+                form = evaluation_form(strict_json_loads((STAGED / case["path"]).read_text(encoding="utf-8")))
+                rules = form.get("rules", [])
+                for first in range(len(rules)):
+                    for second in range(first + 1, len(rules)):
+                        a, b = rules[first], rules[second]
+                        if a["outcome"] == b["outcome"]:
+                            continue
+                        overlap = exact_overlap(a["when"], b["when"])
+                        if overlap is not None:
+                            decided += 1
+                            self.assertFalse(overlap, f"rules {a['id']} and {b['id']} overlap")
+        self.assertGreater(decided, 0)
 
     def test_every_released_document_case_holds_under_the_draft_selector(self) -> None:
         # The draft refuses one 0.3.0 shape, by its reading of an extensions object, a change under

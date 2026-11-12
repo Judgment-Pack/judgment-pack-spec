@@ -33,6 +33,10 @@
     "triggers": [
       "unknown"
     ],
+    "target": {
+      "kind": "human-role",
+      "name": "Intake reviewer"
+    },
     "extensions": {
       "org.judgmentpack.annotations": {
         "category": "intake"
