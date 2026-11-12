@@ -1,0 +1,11 @@
+{
+  "reason": "Issue #308 (RFC 0031, Unresolved question 5, answered): the staged draft schema's pack-version and decimal-operand patterns each gain a not that refuses U+0000-U+001F, U+007F-U+009F and U+2028-U+202E, so neither admits a trailing line terminator in any engine RFC 0031 section 1.7 lists and both admit what the 0.3.0 patterns admit under ECMA-262. Staged draft only; the released 0.3.0 schema is unchanged.",
+  "changes": [
+    {
+      "path": "schema/staged/judgment-pack-core-0.4.0-draft.schema.json",
+      "family": "judgment-pack-core",
+      "from": "sha256:f9fbe091bf9ff3f97b9823db2790c1492dd0419239f59355dafd3e4696e31691",
+      "to": "sha256:533b245a7bc9cba5b4e6ca572f2c18ffdfbde04f54ef27e7039187c274962b4a"
+    }
+  ]
+}

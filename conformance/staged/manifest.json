@@ -528,6 +528,30 @@
       "specSection": "\u00a79"
     },
     {
+      "id": "structural-pack-version-trailing-lf",
+      "path": "structural/pack-version-trailing-lf.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-PACK-VERSION",
+        "path": "/version"
+      },
+      "focus": "a pack version ending in a line feed is refused under any engine: by the pattern, or by the not beside it where an engine's $ admits the line feed",
+      "specSection": "\u00a74"
+    },
+    {
+      "id": "structural-decimal-operand-trailing-lf",
+      "path": "structural/decimal-operand-trailing-lf.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "an ordered comparison's decimal operand ending in a line feed is refused under any engine",
+      "specSection": "\u00a72.2"
+    },
+    {
       "id": "structural-annotations-key-too-long",
       "path": "structural/annotations-key-too-long.json",
       "layer": "structural",

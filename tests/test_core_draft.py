@@ -84,7 +84,16 @@ REFUSED_NOTS = ({"pattern": KEY_CLASS}, {"type": "string", "pattern": STRING_PAT
 # non-string fails `type` alone, as in annotationString.
 RELEASED_EXTENSION_NAME = "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
 EXTENSION_NAME = "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$"
-LOCAL_ID_NOT = {"type": "string", "pattern": KEY_CLASS}
+GRAMMAR_NOT = {"type": "string", "pattern": KEY_CLASS}
+# The same `not` stands beside the pack-version and decimal-operand grammars, and takes the code of
+# the grammar beside it.
+PACK_VERSION = "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+DECIMAL = "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$"
+GRAMMAR_CODES = {
+    LOCAL_ID: "JPS-STRUCTURE-LOCAL-ID",
+    PACK_VERSION: "JPS-STRUCTURE-PACK-VERSION",
+    DECIMAL: "JPS-STRUCTURE-DECIMAL-OPERAND",
+}
 EXTENSION_NAME_NOT = {"type": "string", "pattern": "^org\\.judgmentpack\\.|" + KEY_CLASS}
 # The same rule as §1.4 states it in words, written out by hand: the code points refused anywhere in
 # an annotation string, and Unicode's White_Space, refused at either end.
@@ -178,9 +187,14 @@ def draft_schema_diagnostic(error: Any) -> Diagnostic:
         if under_names:
             return code("JPS-STRUCTURE-LOCAL-ID", instance_path + key)
         return code("JPS-STRUCTURE-NOT", instance_path)
-    if validator == "not" and error.validator_value == LOCAL_ID_NOT:
-        # Issue #308: the class repeats the local-identifier grammar and takes its code.
-        return code("JPS-STRUCTURE-LOCAL-ID", instance_path)
+    if (
+        validator == "not"
+        and error.validator_value == GRAMMAR_NOT
+        and isinstance(error.schema, dict)
+        and error.schema.get("pattern") in GRAMMAR_CODES
+    ):
+        # Issue #308: the class repeats the grammar beside it, and takes that grammar's code.
+        return code(GRAMMAR_CODES[error.schema["pattern"]], instance_path)
     if (validator == "not" and error.validator_value == EXTENSION_NAME_NOT) or (
         validator == "pattern" and error.validator_value == EXTENSION_NAME
     ):
@@ -515,7 +529,9 @@ class DraftSchemaTests(unittest.TestCase):
             fact["allOf"].pop(),
         )
         # Issue #308 (RFC 0031, Unresolved question 5, answered): the identifier patterns.
-        self.assertEqual(LOCAL_ID_NOT, defs["localId"].pop("not"))
+        self.assertEqual(GRAMMAR_NOT, defs["localId"].pop("not"))
+        self.assertEqual(GRAMMAR_NOT, draft["properties"]["version"].pop("not"))
+        self.assertEqual(GRAMMAR_NOT, defs["decimalString"].pop("not"))
         self.assertEqual({"pattern": RELEASED_EXTENSION_NAME}, released["$defs"]["extensions"]["propertyNames"])
         self.assertEqual({"pattern": EXTENSION_NAME, "not": EXTENSION_NAME_NOT}, defs["extensions"]["propertyNames"])
         defs["extensions"]["propertyNames"] = {"pattern": RELEASED_EXTENSION_NAME}
@@ -736,7 +752,7 @@ class DraftDocumentCaseTests(unittest.TestCase):
                 for keyword, value in node.items():
                     if keyword in ("maxLength", "minProperties", "maxProperties"):
                         found.append(path + [keyword])
-                    if keyword == "not" and value in ({"required": ["value"]}, *REFUSED_NOTS, LOCAL_ID_NOT, EXTENSION_NAME_NOT):
+                    if keyword == "not" and value in ({"required": ["value"]}, *REFUSED_NOTS, GRAMMAR_NOT, EXTENSION_NAME_NOT):
                         found.append(path + [keyword])
                     if keyword == "pattern" and value == EXTENSION_NAME:
                         found.append(path + [keyword])
@@ -1034,27 +1050,31 @@ class DraftCharacterRuleTests(unittest.TestCase):
         self.assertEqual(self.expected(), result["v"])
 
 
-# Issue #308: the two identifier grammars, each code point before, inside and after a name, and
-# strings of more than one line, where engines' anchors differ.
-IDENTIFIER_BASES = (("na", "me"), ("com.ex", "ample"))
-IDENTIFIER_LINES = (
+# Issue #308: the four anchored grammars (a local identifier, an extension name, a pack version and a
+# decimal operand), each code point before, inside and after a value, and strings of more than one
+# line, where engines' anchors differ.
+GRAMMAR_BASES = (("na", "me"), ("com.ex", "ample"), ("1.0", ".0"), ("12", ".5"))
+GRAMMAR_LINES = (
     "name", "name\n", "name\r", "name\r\n", "name\u0085", "name\u2028", "name\u2029", "BAD\nname",
     "name\nBAD", "\nname", "com.example", "com.example\n", "com.example\r", "com.example\u2028",
     "BAD\ncom.example", "com.example\nBAD", "org.judgmentpack.annotations", "org.judgmentpack.future",
     "com.example\norg.judgmentpack.x", "org.judgmentpack.x\ncom.example", "org.judgmentpackx.y",
     "orgxjudgmentpack.y", "com.example-x", "com.example.a-b-", "com.-x", "a.b",
+    "1.0.0", "1.0.0\n", "1.0.0\r", "x\n1.0.0", "1.0.0\nx", "01.0.0", "1.5", "1.5\n", "-0.5\r\n",
+    "x\n1.5", "1.5\u2028", "-", "",
 )
-NODE_IDENTIFIER_SWEEP = r"""
+NODE_GRAMMAR_SWEEP = r"""
 const schema = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
 const [bases, lines] = JSON.parse(process.argv[2]);
-const pairs = [schema.$defs.localId, schema.$defs.extensions.propertyNames];
+const pairs = [schema.$defs.localId, schema.$defs.extensions.propertyNames, schema.properties.version,
+               schema.$defs.decimalString];
 const result = {};
 for (const flags of ["u", "v"]) {
   let res;
   try { res = pairs.map(p => [new RegExp(p.pattern, flags), new RegExp(p.not.pattern, flags)]); }
   catch (error) { result[flags] = error.name; continue; }
   const admits = (g, s) => res[g][0].test(s) && !res[g][1].test(s);
-  const found = {grammars: [], lines: lines.map(s => [admits(0, s), admits(1, s)])};
+  const found = {grammars: [], lines: lines.map(s => res.map((_, g) => admits(g, s)))};
   bases.forEach(([head, tail], g) => {
     const one = {lead: [], inner: [], trail: []};
     for (let cp = 0; cp <= 0x10ffff; cp++) {
@@ -1070,18 +1090,28 @@ for (const flags of ["u", "v"]) {
 }
 console.log(JSON.stringify(result));
 """
-IDENTIFIER_CASES = (
+LINE_TERMINATOR_CASES = (
     "structural-local-id-trailing-lf-id",
     "structural-local-id-trailing-lf-reference",
     "structural-extension-name-trailing-lf",
     "structural-extension-name-trailing-lf-annotated",
     "structural-required-extension-trailing-lf",
+    "structural-pack-version-trailing-lf",
+    "structural-decimal-operand-trailing-lf",
+)
+# Each grammar read as a whole-string match, written without an end anchor, and the reserved prefix
+# read as a prefix (Core §§2.2, 4, 5 and 9).
+WHOLE_STRING = (
+    r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*",
+    r"[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+",
+    r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)",
+    r"-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?",
 )
 
 
-def identifier_sweep(admits: Any) -> dict[str, Any]:
+def grammar_sweep(admits: Any) -> dict[str, Any]:
     grammars = []
-    for g, (head, tail) in enumerate(IDENTIFIER_BASES):
+    for g, (head, tail) in enumerate(GRAMMAR_BASES):
         one: dict[str, list[int]] = {"lead": [], "inner": [], "trail": []}
         for cp in every_code_point():
             c = chr(cp)
@@ -1092,26 +1122,25 @@ def identifier_sweep(admits: Any) -> dict[str, Any]:
             if admits(g, head + tail + c):
                 one["trail"].append(cp)
         grammars.append(one)
-    return {"grammars": grammars, "lines": [[admits(0, s), admits(1, s)] for s in IDENTIFIER_LINES]}
+    return {"grammars": grammars, "lines": [[admits(g, s) for g in range(len(GRAMMAR_BASES))] for s in GRAMMAR_LINES]}
 
 
-class DraftIdentifierPatternTests(unittest.TestCase):
-    """Issue #308 (RFC 0031, Unresolved question 5, answered): no local identifier or extension name
-    holds a line terminator, whatever an engine's anchors admit, and the patterns compile in every
-    engine RFC 0031 §1.7 lists."""
+class DraftAnchoredGrammarTests(unittest.TestCase):
+    """Issue #308 (RFC 0031, Unresolved question 5, answered): no local identifier, extension name,
+    pack version or decimal operand holds a line terminator, whatever an engine's anchors admit, and
+    the patterns compile in every engine RFC 0031 §1.7 lists."""
 
     @staticmethod
     def whole_string(g: int, s: str) -> bool:
-        # The grammar read as a whole-string match, written without an end anchor, and the reserved
-        # prefix read as a prefix (Core §9; the draft §9.1).
-        if g == 0:
-            return re.fullmatch(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*", s) is not None
-        return re.fullmatch(r"[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+", s) is not None and not s.startswith("org.judgmentpack.")
+        matched = re.fullmatch(WHOLE_STRING[g], s) is not None
+        return matched and not (g == 1 and s.startswith("org.judgmentpack."))
 
     def test_the_schema_holds_one_pattern_pair_per_grammar_at_every_position(self) -> None:
         schema = draft_schema()
         defs = schema["$defs"]
-        self.assertEqual({"type": "string", "pattern": LOCAL_ID, "not": LOCAL_ID_NOT}, defs["localId"])
+        self.assertEqual({"type": "string", "pattern": LOCAL_ID, "not": GRAMMAR_NOT}, defs["localId"])
+        self.assertEqual({"type": "string", "pattern": PACK_VERSION, "not": GRAMMAR_NOT}, schema["properties"]["version"])
+        self.assertEqual({"type": "string", "pattern": DECIMAL, "not": GRAMMAR_NOT}, defs["decimalString"])
         name = {"pattern": EXTENSION_NAME, "not": EXTENSION_NAME_NOT}
         self.assertEqual(name, defs["extensions"]["propertyNames"])
         self.assertEqual([{"const": ANNOTATIONS}, name], defs["annotatedExtensions"]["propertyNames"]["anyOf"])
@@ -1122,27 +1151,34 @@ class DraftIdentifierPatternTests(unittest.TestCase):
         text = (ROOT / "rfcs" / "0031-annotations-and-value-sets.md").read_text(encoding="utf-8")
         section = text[text.index("**5. Line feeds before the end anchor"):]
         block = json.loads(re.search(r"^```json\n(.*?)^```$", section, re.M | re.S).group(1))
-        defs = draft_schema()["$defs"]
-        self.assertEqual(defs["localId"], block["$defs/localId"])
-        self.assertEqual(defs["extensions"], block["$defs/extensions"])
-        self.assertEqual(defs["metadata"]["properties"]["requiredExtensions"]["items"], block["$defs/metadata/properties/requiredExtensions/items"])
+        schema = draft_schema()
+        defs = schema["$defs"]
+        self.assertEqual({
+            "properties/version": schema["properties"]["version"],
+            "$defs/localId": defs["localId"],
+            "$defs/decimalString": defs["decimalString"],
+            "$defs/extensions": defs["extensions"],
+            "$defs/metadata/properties/requiredExtensions/items": defs["metadata"]["properties"]["requiredExtensions"]["items"],
+        }, block)
 
     def admits_in_python(self) -> Any:
         # The engine of the repository's validator: jsonschema's `pattern` is re.search.
-        defs = draft_schema()["$defs"]
-        pairs = [(re.compile(holder["pattern"]), re.compile(holder["not"]["pattern"]))
-                 for holder in (defs["localId"], defs["extensions"]["propertyNames"])]
+        schema = draft_schema()
+        defs = schema["$defs"]
+        holders = (defs["localId"], defs["extensions"]["propertyNames"], schema["properties"]["version"], defs["decimalString"])
+        pairs = [(re.compile(holder["pattern"]), re.compile(holder["not"]["pattern"])) for holder in holders]
         return lambda g, s: bool(pairs[g][0].search(s)) and not pairs[g][1].search(s)
 
     def test_python_re_admits_exactly_the_whole_string_grammar(self) -> None:
-        self.assertEqual(identifier_sweep(self.whole_string), identifier_sweep(self.admits_in_python()))
+        self.assertEqual(grammar_sweep(self.whole_string), grammar_sweep(self.admits_in_python()))
 
     def test_the_released_patterns_admit_a_final_line_feed_in_python_re(self) -> None:
-        # What the `not` closes: the released grammar admits "name\n" where ECMA-262 refuses it.
-        self.assertIsNotNone(re.search(LOCAL_ID, "name\n"))
-        self.assertIsNotNone(re.search(RELEASED_EXTENSION_NAME, "com.example\n"))
-        self.assertFalse(self.admits_in_python()(0, "name\n"))
-        self.assertFalse(self.admits_in_python()(1, "com.example\n"))
+        # What the `not` closes: each released grammar admits a final line feed where ECMA-262 refuses it.
+        for g, (pattern, value) in enumerate(((LOCAL_ID, "name\n"), (RELEASED_EXTENSION_NAME, "com.example\n"),
+                                              (PACK_VERSION, "1.0.0\n"), (DECIMAL, "1.5\n"))):
+            with self.subTest(value=value.strip()):
+                self.assertIsNotNone(re.search(pattern, value))
+                self.assertFalse(self.admits_in_python()(g, value))
 
     def test_each_line_terminator_is_refused_once_at_every_position(self) -> None:
         validator = draft_validators()["base"]
@@ -1166,10 +1202,20 @@ class DraftIdentifierPatternTests(unittest.TestCase):
             pack["rules"][0]["extensions"][name] = {}
             pack["metadata"] = {"requiredExtensions": [name + ending]}
             positions.append((pack, "JPS-STRUCTURE-EXTENSION-NAME", "/metadata/requiredExtensions/0"))
+            pack = copy.deepcopy(base)
+            pack["version"] += ending
+            positions.append((pack, "JPS-STRUCTURE-PACK-VERSION", "/version"))
             for pack, code, path in positions:
                 with self.subTest(ending=ending.encode("unicode_escape").decode("ascii"), path=path.strip()):
                     self.assertEqual([(code, path)],
                                      [(d.code, d.path) for d in draft_structural_diagnostics(validator, pack)])
+            # A decimal operand sits inside the condition's oneOf, where the corpus admits what a
+            # validator reports for the other branches (assert_one_finding).
+            pack = copy.deepcopy(base)
+            pack["rules"][0]["when"] = {"op": "fact", "path": "/amount", "operator": "greater-than", "value": "10" + ending}
+            with self.subTest(ending=ending.encode("unicode_escape").decode("ascii"), path="/rules/0/when/value"):
+                assert_one_finding(self, "decimal operand", {"code": "JPS-STRUCTURE-DECIMAL-OPERAND", "path": "/rules/0/when/value"},
+                                   draft_structural_diagnostics(validator, pack))
 
     def test_each_case_is_valid_without_its_line_feed(self) -> None:
         # Each case holds only the defect it names (issue #304): the same pack without the line feed
@@ -1178,7 +1224,7 @@ class DraftIdentifierPatternTests(unittest.TestCase):
         validators = draft_validators()
         manifest = strict_json_loads(STAGED_MANIFEST_PATH.read_text(encoding="utf-8"))
         cases = {case["id"]: case for case in manifest["cases"]}
-        for case_id in IDENTIFIER_CASES:
+        for case_id in LINE_TERMINATOR_CASES:
             with self.subTest(case=case_id):
                 text = (STAGED / cases[case_id]["path"]).read_text(encoding="utf-8")
                 self.assertEqual(1, text.count("\\n\""))
@@ -1193,11 +1239,11 @@ class DraftIdentifierPatternTests(unittest.TestCase):
         match = re.fullmatch(r"v(\d+)\.\d+\.\d+", found)
         if match is None or int(match.group(1)) < 20:
             self.skipTest(f"node {found or 'of an unknown version'} is on PATH; the v-flag sweep needs Node 20 or later")
-        run = subprocess.run([node, "-e", NODE_IDENTIFIER_SWEEP, str(DRAFT_SCHEMA_PATH),
-                              json.dumps([IDENTIFIER_BASES, IDENTIFIER_LINES])],
+        run = subprocess.run([node, "-e", NODE_GRAMMAR_SWEEP, str(DRAFT_SCHEMA_PATH),
+                              json.dumps([GRAMMAR_BASES, GRAMMAR_LINES])],
                              capture_output=True, text=True, timeout=600, check=True)
         result = json.loads(run.stdout)
-        expected = identifier_sweep(self.whole_string)
+        expected = grammar_sweep(self.whole_string)
         self.assertEqual(expected, result["u"])
         self.assertEqual(expected, result["v"])
 

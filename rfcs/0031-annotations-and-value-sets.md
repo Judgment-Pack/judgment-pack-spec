@@ -1247,8 +1247,8 @@ requires, compatibility is explicit:
   real `extensions` object as well. With that exception, and as far as this record goes, changing
   only the selector is enough, and evaluation is unchanged. The next version's other changes are
   their own. One of them narrows what some validators admitted, never what Core `0.3.0`'s grammar
-  admits under ECMA-262: a local identifier or an extension name that ends in a line terminator is
-  refused in every engine (Unresolved question 5).
+  admits under ECMA-262: a local identifier, an extension name, a pack version or a decimal operand
+  that ends in a line terminator is refused in every engine (Unresolved question 5).
   - Labels kept in a vendor extension MAY be moved to the reserved name by hand, once they meet
     §§1.3–1.5. There is no automatic coercion: a vendor value outside those rules must be edited,
     not truncated, joined or dropped by a tool.
@@ -1486,8 +1486,9 @@ the table says so where each applies:
 - The `not` under an annotations object's `propertyNames` repeats a refusal the local-identifier
   grammar already makes, for engines whose `$` admits a trailing line feed. A key it refuses takes
   the grammar's code, `JPS-STRUCTURE-LOCAL-ID`, mapped from `not` there (§1.3).
-- The `not` beside the local-identifier grammar and the one beside the extension-name grammar
-  (Unresolved question 5) take their grammar's code: `JPS-STRUCTURE-LOCAL-ID`, and
+- The `not` beside the local-identifier, pack-version, decimal-operand and extension-name grammars
+  (Unresolved question 5) takes its grammar's code: `JPS-STRUCTURE-LOCAL-ID`,
+  `JPS-STRUCTURE-PACK-VERSION`, `JPS-STRUCTURE-DECIMAL-OPERAND`, and
   `JPS-STRUCTURE-EXTENSION-NAME` at the key or the item. A reserved name outside its definition's
   positions is refused by that `not` in place of the released pattern's lookahead, with the code it
   had.
@@ -1553,6 +1554,8 @@ is dispositioned (Unresolved question 3); the staged manifest lists them as `adv
 | `structural-extension-name-trailing-lf` | the key `"com.example.review-policy\n"` in the decision's `extensions` | `JPS-STRUCTURE-EXTENSION-NAME` at the key |
 | `structural-extension-name-trailing-lf-annotated` | the same key in a rule's `extensions`, beside annotations | `JPS-STRUCTURE-EXTENSION-NAME` at the key: one refusal, not one per branch of the `anyOf` |
 | `structural-required-extension-trailing-lf` | `"com.example.review-policy\n"` in `metadata.requiredExtensions`, beside the key without it | `JPS-STRUCTURE-EXTENSION-NAME` at `/metadata/requiredExtensions/0` |
+| `structural-pack-version-trailing-lf` | `"version": "0.1.0\n"` | `JPS-STRUCTURE-PACK-VERSION` at `/version` |
+| `structural-decimal-operand-trailing-lf` | an ordered comparison's operand `"10\n"` | `JPS-STRUCTURE-DECIMAL-OPERAND` at `/rules/0/when/value` |
 | `structural-annotations-key-too-long` | a 65-character key | `JPS-STRUCTURE-MAX-LENGTH` (new) at the key |
 | `structural-annotations-too-many-keys` | 17 keys | `JPS-STRUCTURE-MAX-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
 | `structural-annotations-too-many-strings` | a list of 17 | `JPS-STRUCTURE-MAXITEMS` at the list |
@@ -1749,6 +1752,8 @@ them.
   `semantic-required-extension-in-entry-value` pin the reading.
 - **5. Line feeds before the end anchor in Core's other patterns.** Answered by the maintainer
   (issue #308): closed in the next version beside this record, not left for a record of its own.
+  The answer was added by the maintainer's decision after round 1 and was not part of the round-1
+  review; the pull request that graduates this record has its own review, which covers it.
   An engine whose `$` matches before a final line feed admitted a vendor extension name such as
   `"com.example\n"` under Core `0.3.0`'s extension-name pattern, and a `localId` ending in a line
   feed under its local-identifier grammar, where an ECMA-262 engine refuses both, so two structural
@@ -1758,13 +1763,25 @@ them.
   extension-name grammar's reserved prefix moves from a lookahead, which RE2 cannot compile, into a
   `not` beside it that also holds that class, and the hyphen in its last class is escaped, which
   ECMA-262's `v` flag requires. Each `not` holds `"type": "string"`, as `annotationString`'s does,
-  so a non-string fails `type` alone. The definitions, by their place in the schema:
+  so a non-string fails `type` alone. The pack-version and decimal-operand grammars had the same
+  property (`"1.0.0\n"`, `"1.5\n"`), and the maintainer closed it there too, with the same `not`. The
+  definitions, by their place in the schema:
 
 ```json
 {
+  "properties/version": {
+    "type": "string",
+    "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+    "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+  },
   "$defs/localId": {
     "type": "string",
     "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+    "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+  },
+  "$defs/decimalString": {
+    "type": "string",
+    "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$",
     "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
   },
   "$defs/extensions": {
@@ -1784,7 +1801,7 @@ them.
 ```
 
 A refusal by a pattern or by the `not` beside it takes the grammar's code (Codes). Swept over every
-code point before, inside and after a name, and over names of more than one line, the two pattern
+code point before, inside and after a value, and over values of more than one line, the four pattern
 pairs admit exactly the same strings in every engine §1.7 lists: Python 3.12 `re`; ECMA-262 with the
 `u` and with the `v` flag in Node 22; RE2 through Go 1.26; Perl 5.30; Java 11's `java.util.regex`;
 and Ruby 2.7, whose `^` and `$` match at every line. Over that sweep they admit exactly what Core
@@ -1793,5 +1810,6 @@ admits holds only letters, digits, hyphens and full stops, which the class never
 still compare as a set (Codes), because an ECMA-262 or an RE2 engine reports the pattern and the
 `not` at one pointer, with one code, for a name that ends in a line feed. The staged cases
 `structural-local-id-trailing-lf-id`, `structural-local-id-trailing-lf-reference`,
-`structural-extension-name-trailing-lf`, `structural-extension-name-trailing-lf-annotated` and
-`structural-required-extension-trailing-lf` refuse one such name in each kind of position.
+`structural-extension-name-trailing-lf`, `structural-extension-name-trailing-lf-annotated`,
+`structural-required-extension-trailing-lf`, `structural-pack-version-trailing-lf` and
+`structural-decimal-operand-trailing-lf` refuse one such value in each kind of position.

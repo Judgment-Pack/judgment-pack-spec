@@ -35,7 +35,7 @@ The staged artifacts are:
 | Example pack | [`examples/staged/expense-approval-annotated.json`](../../examples/staged/expense-approval-annotated.json) |
 
 The schema is the Core `0.3.0` schema with RFC 0031's three fragments (its §§1.7, 2.7 and 3.3) and
-the identifier patterns of its answer to Unresolved question 5 (§§5 and 9 below), and nothing else,
+the patterns of its answer to Unresolved question 5 (§§2.2, 4, 5 and 9 below), and nothing else,
 apart from its `$id`, its description and the selector.
 
 ## 2. Normative representation
@@ -44,6 +44,12 @@ apart from its `$id`, its description and the selector.
 
 Unchanged. A duplicate member name inside an annotations object is refused by the carrier
 (`JPS-CARRIER-DUPLICATE-MEMBER`), as in any JSON object.
+
+### 2.2 Decimal grammar *(amended)*
+
+A decimal operand string matches its grammar as a whole string: it holds no line terminator,
+whatever a pattern's end anchor admits, and the schema refuses U+0000–U+001F, U+007F–U+009F and
+U+2028–U+202E in one, as in a local identifier (§5) (`JPS-STRUCTURE-DECIMAL-OPERAND`).
 
 ## 3. Conformance classes
 
@@ -95,6 +101,9 @@ Collection order is preserved for authoring and display but MUST NOT determine r
 rule covers `valueSets` and the entries of each set: their order carries no evaluation meaning. Entry
 order fixes the order of an expanded reference in the evaluation form (§8.5), which only makes that
 form deterministic.
+
+The pack `version` matches its three-component grammar as a whole string, and the schema refuses
+the same characters in it (`JPS-STRUCTURE-PACK-VERSION`).
 
 ### 4.1 Document ceiling profiles
 
@@ -414,8 +423,8 @@ Compatibility from `0.3.0` is explicit:
   each new shape: the reserved key, the root `valueSets` and the `valueSet` member.
 - **Semantic.** For a pack that uses neither feature, `EF(P)` is `P`, so this draft changes no
   result for it, apart from the one shape §9.1's reading of an `extensions` object refuses.
-- **Migrating up.** A local identifier or an extension name that ends in a line terminator is
-  refused in every engine (§§5 and 9). Core `0.3.0`'s grammar, read as ECMA-262 reads it, never
+- **Migrating up.** A local identifier, an extension name, a pack version or a decimal operand that
+  ends in a line terminator is refused in every engine (§§2.2, 4, 5 and 9). Core `0.3.0`'s grammar, read as ECMA-262 reads it, never
   admitted one; only a validator whose `$` admits a final line feed did. Apart from that, one shape
   aside, no `0.3.0` shape is refused by these rules: a pack whose required
   name appears only under a member named `extensions` inside data is refused, by §9.1's reading,
