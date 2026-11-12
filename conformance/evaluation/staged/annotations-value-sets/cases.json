@@ -1745,10 +1745,10 @@
             "state": "none"
           }
         },
-        "focus": "listing org.judgmentpack.annotations in the supported-extension set changes nothing: no rule reads that entry",
+        "focus": "listing org.judgmentpack.annotations in the supported-extension set changes nothing: it is not requirable, so the draft's section 8.2 ignores it",
         "specSection": "\u00a79.2"
       },
-      "heldBecause": "The released case schema's supportedExtensions refuses every org.judgmentpack. name (conformance/evaluation/manifest.schema.json, $defs/extensionName), so this row cannot be stated in it unchanged. It waits here until the case schema of the version that carries RFC 0031 decides whether a supported-extension set may name the annotations extension."
+      "heldBecause": "The released case schema's supportedExtensions refuses every org.judgmentpack. name (conformance/evaluation/manifest.schema.json, $defs/extensionName), so this row cannot be stated in it unchanged. The draft's section 8.2 says a name that is not requirable is ignored. The row is released when the case schema of the version that carries RFC 0031 admits specification-defined names (RFC 0031, Graduation)."
     }
   ],
   "pairs": [

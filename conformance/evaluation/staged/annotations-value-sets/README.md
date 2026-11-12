@@ -25,8 +25,9 @@ replaced by an implementation's output.
   `rfc-0031`;
 - `heldCases`: one row the released case schema cannot state, with the reason. The supported-extension
   row lists `org.judgmentpack.annotations` in its supported set, which the released schema's
-  `extensionName` refuses. It waits until the case schema of the version that carries RFC 0031
-  decides whether a supported set may name the extension;
+  `extensionName` refuses. The draft's §8.2 says a name that is not requirable is ignored; the row
+  is released when the case schema of the version that carries RFC 0031 admits
+  specification-defined names (RFC 0031, Graduation);
 - `pairs`: the 26 groups of rows RFC 0031's static check compares, each with its basis;
 - `ownEvaluationForm`: the packs that are their own evaluation form (no set, reference or
   annotation);

@@ -516,6 +516,18 @@
       "specSection": "\u00a74.1"
     },
     {
+      "id": "structural-annotations-key-and-string-too-long",
+      "path": "structural/annotations-key-and-string-too-long.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MAX-LENGTH",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+      },
+      "focus": "a 65-character key whose string has 257 characters: both refusals are at the key's pointer, so the pair is one finding",
+      "specSection": "\u00a74.1"
+    },
+    {
       "id": "structural-annotations-duplicate-string",
       "path": "structural/annotations-duplicate-string.json",
       "layer": "structural",
@@ -1932,7 +1944,7 @@
       "expectedResult": "valid",
       "expectedDiagnostic": null,
       "focus": "repeated entry values (\"tier-1\" and \"tier-1\") are valid at every layer; a tool that decides equality exactly may report JPS-VALUE-SET-DUPLICATE-VALUE at /valueSets/0/entries/1/value",
-      "specSection": "\u00a73.3.1"
+      "specSection": "\u00a76.9"
     },
     {
       "id": "advisory-value-set-duplicate-value-integer-and-fraction",
@@ -1941,7 +1953,7 @@
       "expectedResult": "valid",
       "expectedDiagnostic": null,
       "focus": "repeated entry values (1 and 1.0) are valid at every layer; a tool that decides equality exactly may report JPS-VALUE-SET-DUPLICATE-VALUE at /valueSets/0/entries/1/value",
-      "specSection": "\u00a73.3.1"
+      "specSection": "\u00a76.9"
     },
     {
       "id": "advisory-value-set-duplicate-value-integer-and-exponent",
@@ -1950,7 +1962,7 @@
       "expectedResult": "valid",
       "expectedDiagnostic": null,
       "focus": "repeated entry values (10 and 1E1) are valid at every layer; a tool that decides equality exactly may report JPS-VALUE-SET-DUPLICATE-VALUE at /valueSets/0/entries/1/value",
-      "specSection": "\u00a73.3.1"
+      "specSection": "\u00a76.9"
     },
     {
       "id": "advisory-value-set-duplicate-value-zero-and-negative-zero",
@@ -1959,7 +1971,7 @@
       "expectedResult": "valid",
       "expectedDiagnostic": null,
       "focus": "repeated entry values (0 and -0) are valid at every layer; a tool that decides equality exactly may report JPS-VALUE-SET-DUPLICATE-VALUE at /valueSets/0/entries/1/value",
-      "specSection": "\u00a73.3.1"
+      "specSection": "\u00a76.9"
     },
     {
       "id": "advisory-value-set-duplicate-value-member-order",
@@ -1968,7 +1980,7 @@
       "expectedResult": "valid",
       "expectedDiagnostic": null,
       "focus": "repeated entry values ({ \"a\": 1, \"b\": 2 } and { \"b\": 2, \"a\": 1 }) are valid at every layer; a tool that decides equality exactly may report JPS-VALUE-SET-DUPLICATE-VALUE at /valueSets/0/entries/1/value",
-      "specSection": "\u00a73.3.1"
+      "specSection": "\u00a76.9"
     },
     {
       "id": "advisory-value-set-duplicate-value-nested-arrays",
@@ -1977,7 +1989,7 @@
       "expectedResult": "valid",
       "expectedDiagnostic": null,
       "focus": "repeated entry values ([[1], [2]] and [[1], [2]]) are valid at every layer; a tool that decides equality exactly may report JPS-VALUE-SET-DUPLICATE-VALUE at /valueSets/0/entries/1/value",
-      "specSection": "\u00a73.3.1"
+      "specSection": "\u00a76.9"
     },
     {
       "id": "advisory-value-set-duplicate-value-descriptions",
@@ -1986,7 +1998,7 @@
       "expectedResult": "valid",
       "expectedDiagnostic": null,
       "focus": "equal values with different descriptions are valid; the advisory JPS-VALUE-SET-DUPLICATE-VALUE may name the later entry's value",
-      "specSection": "\u00a73.3.1"
+      "specSection": "\u00a76.9"
     },
     {
       "id": "valid-value-set-unrepresentable-numbers",
@@ -2076,7 +2088,7 @@
       "expectedResult": "valid",
       "expectedDiagnostic": null,
       "focus": "an unreferenced set is valid and inert; a pack-design tool may report JPS-VALUE-SET-UNREFERENCED at /valueSets/0",
-      "specSection": "\u00a73.3.1"
+      "specSection": "\u00a76.9"
     },
     {
       "id": "structural-profile-annotation-keys-base-over-base",

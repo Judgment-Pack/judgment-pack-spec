@@ -69,25 +69,12 @@ The check reads a reference as its set's values: the true set of an `in` conditi
 reference is the set of its entries' values, as for an inline operand. A validator MAY run the check
 on the pack's evaluation form (§8.5).
 
-Two further advisories are recommended. Like `JPS-RULES-OVERLAP`, they are not conformance
-requirements and never change a document's conformance:
-
-- **`JPS-VALUE-SET-DUPLICATE-VALUE`.** A tool that can decide equality of two entry values SHOULD
-  report each entry whose value equals an earlier entry's in the same set, at the later entry's
-  `value`. Equality is §7.4's: numbers by mathematical value (`1`, `1.0`, `1e0` and `10E-1` are
-  one value, and so are `0` and `-0`), strings by code points (the NFC and NFD spellings of one text
-  are two values), arrays item by item in order, objects by member name and value regardless of
-  member order, and no coercion (`1` and `"1"` are distinct, and so are `"1.0"` and `"1.00"`). A tool
-  that can compare a pair only through binary floating point cannot decide it, and reports nothing
-  for that pair. Normalizing a number literal needs no expansion of its exponent, and a tool SHOULD
-  NOT expand one.
-- **`JPS-VALUE-SET-UNREFERENCED`.** A pack-design tool SHOULD report a set that no condition
-  references.
-
-Where these two advisories live is open (RFC 0031, Unresolved question 3): beside
-`JPS-RULES-OVERLAP` in the document corpus's advisory vocabulary, or in the report contract
-[RFC 0027](../../rfcs/0027-pack-design-advisories.md) proposes. The staged document cases state the
-document result of each advisory case, which is `valid`, and do not state the advisory.
+This text defines no value-set advisory. RFC 0031 proposes two, `JPS-VALUE-SET-DUPLICATE-VALUE`
+and `JPS-VALUE-SET-UNREFERENCED`, as recommendations outside conformance; they are added to Core
+text when [RFC 0027](../../rfcs/0027-pack-design-advisories.md) is dispositioned, beside
+`JPS-RULES-OVERLAP` or in RFC 0027's report contract (RFC 0031, Unresolved question 3). The staged
+document cases state the document result of each advisory case, which is `valid`, and do not state
+the advisory.
 
 ## 4. Root object
 
@@ -180,14 +167,14 @@ An entry has these members and no others:
 - **Repeated values.** Two entries of one set may have equal values. That is not a conformance error
   at any layer. A repeated entry changes no evaluation result, since an inline `in` operand already
   admits repeated items. A consumer shows each entry as written, with its own description and
-  annotations. §3.3.1 recommends an advisory.
+  annotations.
 - **No nesting.** A set references no other set, and an entry has no `valueSet` member
   (`JPS-STRUCTURE-UNKNOWN-MEMBER`). An entry value that looks like a reference, such as
   `{"valueSet": "tier-codes"}`, is a literal JSON object, compared as one. There is no union,
   intersection or difference of sets.
 - **Unreferenced sets.** A set that no condition references is admitted and inert. Its entries take
-  no part in evaluation, and no collection-size or work limit counts them (§10). §3.3.1 recommends an
-  advisory.
+  no part in evaluation, and no evaluation-phase counter counts them; a limit on the pack as
+  presented does (§10).
 
 `valueSets` is a Core member, not an extension: a consumer that ignored the sets could not evaluate a
 condition that references one.
@@ -215,6 +202,14 @@ membership. Where this section leaves a comparison with a number open (§13), th
 the inline array's; a reference neither adds an input to it nor takes one out.
 
 ## 8. Resolution model
+
+### 8.2 Evaluation inputs *(amended)*
+
+The **Supported extensions** input reads: the set of `metadata.requiredExtensions` capabilities the
+implementation supports. A required capability outside that set is an evaluation error (§8.4),
+never a disposition (§9). A name in the set that no conforming pack can list in
+`metadata.requiredExtensions`, such as `org.judgmentpack.annotations` (§9.2), is not a capability:
+it is ignored, is not an error, and changes no result. The rest of §8.2 is unchanged.
 
 ### 8.5 The evaluation form *(new)*
 
@@ -302,8 +297,8 @@ carries it: there is no inheritance and no merging.
 `org.judgmentpack.annotations` MUST NOT appear in `metadata.requiredExtensions`, and the schema's
 item pattern there never admits it (`JPS-STRUCTURE-EXTENSION-NAME`); an evaluator reports
 `pack-not-conformant`, never `unsupported-required-extension`. Listing the name in a
-supported-extension set changes nothing. §9's general rule applies to what annotations mean: a
-consumer preserves them when round-tripping, and one that neither displays nor filters by them may
+supported-extension set changes nothing (§8.2). §9's general rule applies to what annotations mean:
+a consumer preserves them when round-tripping, and one that neither displays nor filters by them may
 disregard their content. It does not apply to their shape. The rules below are part of the schema,
 so a malformed annotation makes the pack not structurally conforming, and an implementation MUST NOT
 skip them because the extension is optional.
@@ -359,13 +354,17 @@ redaction: the omitted items remain in the pack's bytes.
 
 ## 10. Security and privacy considerations
 
-**Limits.** Document and carrier limits (bytes, nesting depth, string size) apply to `P` as presented,
-as to any input; a pack refused by one is refused as any input over that limit is. `EF(P)` is never
-admitted, and is never measured against a document limit. Collection-size and evaluation-work limits
-apply to the work `EF(P)` requires: a reference costs what its inline array costs. An implementation
-MUST NOT charge a collection-size limit to annotations, to value-set objects, or to the entries of a
-set that no condition references. A set referenced by many conditions expands to a large `EF(P)`; an
-evaluator SHOULD resolve a reference to the shared array, not copy it.
+**Limits.** Any limit an implementation applies to the pack as presented is a document limit,
+whatever the implementation calls it: bytes, nesting depth, string size, or a count of the parsed
+values or nodes of the whole document. Document limits apply to `P` as presented, as to any input,
+and count every annotation and every entry; a pack refused by one is refused as any input over that
+limit is. `EF(P)` is never admitted, and is never measured against a document limit. A
+collection-size or work counter charged while evaluating applies to the work `EF(P)` requires, and
+expansion is charged per reference: each reference costs what its inline twin would. An
+implementation MUST NOT charge an evaluation-phase counter for annotations, for value-set objects,
+or for the entries of a set that no condition references. A set referenced by many conditions
+expands to a large `EF(P)`; an evaluator SHOULD resolve a reference to the shared array, not copy
+it.
 
 **Untrusted display data (D1).** Annotation keys and strings, value-set and entry descriptions, and
 entry values when displayed, are display data from the pack's author, as untrusted as every other
@@ -426,9 +425,15 @@ and `JPS-STRUCTURE-LOCAL-ID`, from the `not` under an annotations object's `prop
 
 A case's findings compare as a set of (code, pointer) pairs. A keyword reported twice at one pointer,
 as some validators or regular-expression engines report it, is one finding, and the order of
-findings carries no meaning.
+findings carries no meaning. A key that the annotated `extensions` object's `propertyNames` refuses
+is one refusal, `JPS-STRUCTURE-EXTENSION-NAME` at the key, not one per branch of its `anyOf`.
 
-This draft has seven provisional codes, for `0.4.0-draft` only:
+A pointer to a refused key names the key's member, as Core's pointer for an extension-name refusal
+does. A refused key and a refused value at that key therefore share one pointer, so the pair yields
+one finding per code: a 65-character key whose value has 257 characters gives one
+`JPS-STRUCTURE-MAX-LENGTH`, not two.
+
+This draft has five provisional conformance codes, for `0.4.0-draft` only:
 
 | Code | Layer | Where |
 | --- | --- | --- |
@@ -437,5 +442,7 @@ This draft has seven provisional codes, for `0.4.0-draft` only:
 | `JPS-STRUCTURE-MAX-PROPERTIES` | structural | an annotations object over its key ceiling (§§4.1, 9.2) |
 | `JPS-STRUCTURE-VALUE-SET-REFERENCE` | structural | `value` beside `valueSet`, or `valueSet` with an operator other than `in` (§7.4) |
 | `JPS-SEMANTIC-UNRESOLVED-VALUE-SET` | semantic | a `valueSet` naming no declared set (§3.3) |
-| `JPS-VALUE-SET-DUPLICATE-VALUE` | advisory, outside conformance | a repeated entry value (§3.3.1) |
-| `JPS-VALUE-SET-UNREFERENCED` | advisory, outside conformance | a set no condition references (§3.3.1) |
+
+RFC 0031's two advisory codes, `JPS-VALUE-SET-DUPLICATE-VALUE` and `JPS-VALUE-SET-UNREFERENCED`, are
+not in this text (§3.3.1). The staged manifest lists them as `advisoryCodes`, the codes the RFC
+proposes outside conformance, and no case states them.

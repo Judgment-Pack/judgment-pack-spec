@@ -927,6 +927,55 @@ class DraftComparisonTests(unittest.TestCase):
                          [(d.code, d.path) for d in draft_structural_diagnostics(reporting_twice, pack)])
 
 
+class DraftCoordinationTests(unittest.TestCase):
+    OUTCOME_VALUES = "org.judgmentpack.outcome-values"
+
+    def test_the_shape_drafted_for_rfc_0016_admits_both_names_on_an_outcome_only(self) -> None:
+        # RFC 0031, Compatibility, "Coordination with RFC 0016": the definitions both records would
+        # need, applied to the staged schema with a stand-in for RFC 0016's value definition.
+        text = (ROOT / "rfcs" / "0031-annotations-and-value-sets.md").read_text(encoding="utf-8")
+        section = text[text.index("**Coordination with RFC 0016.**"):]
+        block = json.loads(re.search(r"^```json\n(.*?)^```$", section, re.M | re.S).group(1))
+        self.assertEqual({"outcomeExtensions", "requiredExtensionName"}, set(block))
+        schema = draft_schema()
+        defs = schema["$defs"]
+        vendor = defs["extensions"]["propertyNames"]
+        self.assertEqual([{"enum": [ANNOTATIONS, self.OUTCOME_VALUES]}, vendor],
+                         block["outcomeExtensions"]["propertyNames"]["anyOf"])
+        self.assertEqual([{"const": self.OUTCOME_VALUES}, vendor], block["requiredExtensionName"]["anyOf"])
+        defs.update(copy.deepcopy(block))
+        defs["outcomeValues"] = {"type": "object"}
+        defs["outcome"]["properties"]["extensions"] = {"$ref": "#/$defs/outcomeExtensions"}
+        defs["metadata"]["properties"]["requiredExtensions"]["items"] = {"$ref": "#/$defs/requiredExtensionName"}
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
+
+        def refused_at(value: dict[str, Any]) -> list[list[Any]]:
+            # A key's refusal names the key, as the code rule's pointers do.
+            return [list(error.absolute_path) + ([error.instance] if "propertyNames" in error.absolute_schema_path else [])
+                    for error in validator.iter_errors(value)]
+
+        pack = strict_json_loads((STAGED / "valid" / "annotations-positions.json").read_text(encoding="utf-8"))
+        pack["outcomes"][0]["extensions"][self.OUTCOME_VALUES] = {}
+        pack.setdefault("metadata", {})["requiredExtensions"] = [self.OUTCOME_VALUES, "com.example.authoring"]
+        self.assertEqual([], refused_at(pack))
+        on_rule = copy.deepcopy(pack)
+        on_rule["rules"][1]["extensions"] = {self.OUTCOME_VALUES: {}}
+        self.assertEqual([("JPS-STRUCTURE-EXTENSION-NAME", "/rules/1/extensions/" + self.OUTCOME_VALUES)],
+                         [(d.code, d.path) for d in draft_structural_diagnostics(validator, on_rule)])
+        future = copy.deepcopy(pack)
+        future["outcomes"][0]["extensions"]["org.judgmentpack.future"] = {}
+        self.assertEqual([["outcomes", 0, "extensions", "org.judgmentpack.future"]], refused_at(future))
+        requiring = copy.deepcopy(pack)
+        requiring["metadata"]["requiredExtensions"].append(ANNOTATIONS)
+        self.assertEqual([["metadata", "requiredExtensions", 2]], refused_at(requiring))
+        # Evaluation-form step 3 removes only the annotations member: RFC 0016's stays, and so
+        # does every name the pack requires.
+        form = evaluation_form(pack)
+        self.assertEqual({self.OUTCOME_VALUES: {}}, form["outcomes"][0]["extensions"])
+        present = {name for holder in schema_extension_holders(form) for name in holder["extensions"]}
+        self.assertLessEqual(set(pack["metadata"]["requiredExtensions"]), present)
+
+
 class DraftPublicationTests(unittest.TestCase):
     STAGED_PATHS = (
         "schema/staged/judgment-pack-core-0.4.0-draft.schema.json",

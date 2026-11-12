@@ -40,7 +40,8 @@ manifest edits nothing in the case. Its other members:
   gives its released result and diagnostic. A fixture that does not declare `0.3.0` is run unchanged
   and keeps its expectation too.
 - `newCodes` lists the five conformance codes the draft adds, and `advisoryCodes` the two advisory
-  codes, outside conformance, that no case states (below).
+  codes RFC 0031 proposes outside conformance and outside the draft's text, which no case states
+  (below).
 
 The 139 cases are:
 
@@ -73,10 +74,11 @@ ASCII. The expectations are RFC 0031's, never recorded from a run.
 ### Advisory cases
 
 RFC 0031 proposes two advisories, `JPS-VALUE-SET-DUPLICATE-VALUE` and `JPS-VALUE-SET-UNREFERENCED`.
-Where they live is open (its Unresolved question 3), and the released case schema admits only the
-`ruleOverlap` advisory under `advisory/`. So the cases named `advisory-value-set-*` sit under
-`valid/` and state only their document result, `valid`, which is what RFC 0031's Evidence bar asks of
-an advisory case. When the advisories have a home, these cases gain their expectations there.
+They are kept out of the draft's Core text until RFC 0027 is dispositioned (its Unresolved question
+3), and the released case schema admits only the `ruleOverlap` advisory under `advisory/`. So the
+cases named `advisory-value-set-*` sit under `valid/` and state only their document result, `valid`,
+which is what RFC 0031's Evidence bar asks of an advisory case. When the advisories have a home,
+these cases gain their expectations there.
 
 ### The code rule
 
