@@ -44,6 +44,39 @@ class ReleaseBuilderTests(unittest.TestCase):
         self.assertIn("(../docs/releases/v0.3.0.md)",
                       (ROOT / "releases" / "v0.3.0-rc.1.md").read_text(encoding="utf-8"))
 
+    def test_the_release_numbering_rule_is_recorded_with_its_exception(self) -> None:
+        versioning = re.sub(r"\s+", " ", (ROOT / "VERSIONING.md").read_text(encoding="utf-8"))
+        for text in ("## Release numbers and specVersion",
+                     "This rule is normative for every Core release from `v0.5.0` on.",
+                     "A Core release tag's major and minor numbers equal those of the `specVersion` the "
+                     "release carries.",
+                     "`specVersion` `0.5.0` is first released as tag `v0.5.0`.",
+                     "The patch number counts the later releases that carry the same `specVersion` "
+                     "unchanged: `v0.5.1`, `v0.5.2`, and so on.",
+                     "A pack's `specVersion` stays `0.5.0` under every such release.",
+                     "A new `specVersion` always takes a new minor (or major) number.",
+                     "Recorded exception: tag `v0.4.0` (2026-11-02) carries `specVersion` `0.3.0` "
+                     "unchanged; under this rule it would have been `v0.3.1`.",
+                     "no `specVersion` `0.4.0` is assigned: the version staged as `0.4.0-draft` is "
+                     "released as `0.5.0`",
+                     "A tag such as `v0.5.1` needs a reviewed change to the builder before it is cut."):
+            with self.subTest(text=text):
+                self.assertIn(text, versioning)
+        # The staged-selector section is history now; no sentence may still call it staged.
+        self.assertNotIn("## Staged draft Core selector 0.4.0-draft", versioning)
+        self.assertIn("## Core 0.5.0 was staged as 0.4.0-draft", versioning)
+
+    def test_the_builder_does_not_yet_build_a_patch_release(self) -> None:
+        # VERSIONING.md says a patch tag needs a builder change first. Until it lands, a v0.5.1 that
+        # carries specVersion 0.5.0 unchanged is refused, not built under a guessed identity.
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._release_tree(Path(directory), "0.5.0")
+            BUILD_RELEASE.validate_artifacts("0.5.0", "v0.5.0", root=root)
+            (root / "releases" / "v0.5.1.md").write_text("notes\n", encoding="utf-8")
+            with self.assertRaises(ValueError) as raised:
+                BUILD_RELEASE.validate_artifacts("0.5.1", "v0.5.1", root=root)
+            self.assertIn("conformance specVersion", str(raised.exception))
+
     def test_final_notes_name_both_candidates_the_leaf_and_the_pins(self) -> None:
         notes = (ROOT / "releases" / "v0.3.0.md").read_text(encoding="utf-8")
         inventory = json.loads(
