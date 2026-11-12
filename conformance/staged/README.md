@@ -52,7 +52,8 @@ reads more broadly; RFC 0031, Compatibility), and the staged example:
 | `valid/` | 34 | admitted shapes, the advisory cases and [the example](../../examples/staged/expense-approval-annotated.json) |
 
 Every fixture is written by hand, with no raw invisible character: each non-ASCII character is a JSON
-`\u` escape. The expectations are RFC 0031's, never recorded from a run.
+`\u` escape, and one outside the Basic Multilingual Plane is its surrogate pair, so every fixture is
+ASCII. The expectations are RFC 0031's, never recorded from a run.
 
 ### Advisory cases
 

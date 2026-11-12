@@ -490,6 +490,16 @@ class DraftDocumentCaseTests(unittest.TestCase):
                     self.assertTrue(c["path"].startswith("valid/"), "the released case schema keeps advisory/ for ruleOverlap")
                     self.assertNotIn("expectedAdvisories", c)
 
+    def test_staged_json_holds_no_raw_non_ascii_character(self) -> None:
+        # The README's promise: every non-ASCII character is a JSON escape, one outside the BMP as a
+        # surrogate pair, so no invisible character sits raw in a fixture.
+        files = [*STAGED.rglob("*.json"), *DRAFT_ROWS.rglob("*.json"), EXAMPLE_PATH, DRAFT_SCHEMA_PATH]
+        for path in files:
+            with self.subTest(path=path.relative_to(ROOT).as_posix()):
+                self.assertTrue(path.read_bytes().isascii())
+        non_bmp = strict_json_loads((STAGED / "valid" / "annotations-non-bmp.json").read_text(encoding="utf-8"))
+        self.assertEqual("\U0001F600" * 256, non_bmp["rules"][0]["extensions"][ANNOTATIONS]["label"])
+
     def test_cases_cite_sections_of_the_draft_or_of_core(self) -> None:
         sections = spec_sections(SPEC_PATH, DRAFT_TEXT_PATH)
         for case in self.manifest["cases"]:
