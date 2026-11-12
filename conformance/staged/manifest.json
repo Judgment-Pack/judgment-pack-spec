@@ -525,6 +525,18 @@
       "specSection": "\u00a79.2"
     },
     {
+      "id": "structural-annotations-list-item-number",
+      "path": "structural/annotations-list-item-number.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category/0"
+      },
+      "focus": "a list item that is a number is not an annotation string: one refusal, by type, since the refused-class not holds only for strings",
+      "specSection": "\u00a79.2"
+    },
+    {
       "id": "structural-annotations-control-nul",
       "path": "structural/annotations-control-nul.json",
       "layer": "structural",

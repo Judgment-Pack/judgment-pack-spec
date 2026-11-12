@@ -39,13 +39,14 @@ manifest edits nothing in the case. Its other members:
 - `newCodes` lists the five conformance codes the draft adds, and `advisoryCodes` the two advisory
   codes, outside conformance, that no case states (below).
 
-The 126 cases are RFC 0031's staged document table, the 18 profile cases its ceilings call for, two
-cases for its reading of an `extensions` object, and the staged example:
+The 127 cases are RFC 0031's staged document table, one case for its §1.7 (a number inside an
+annotation list), the 18 profile cases its ceilings call for, two cases for its reading of an
+`extensions` object, and the staged example:
 
 | Directory | Cases | What |
 | --- | ---: | --- |
 | `carrier/` | 1 | a duplicate key inside an annotations object |
-| `structural/` | 81 | refused annotations, sets, entries and references, and the profile ceilings |
+| `structural/` | 82 | refused annotations, sets, entries and references, and the profile ceilings |
 | `semantic/` | 10 | unresolved references, a duplicate set id, and a required name found only in data |
 | `valid/` | 34 | admitted shapes, the advisory cases and [the example](../../examples/staged/expense-approval-annotated.json) |
 
@@ -65,14 +66,13 @@ an advisory case. When the advisories have a home, these cases gain their expect
 Codes are provisional test metadata. A JSON Schema validator reports the keyword that fails, and
 RFC 0031's Codes section maps it to a code. The repository's tests (`tests/test_core_draft.py`) apply
 that rule and hold each case to the released corpus's strictness: the expected diagnostic, and no
-other outside the outermost `oneOf` that encloses it. Two readings are the harness's, stated here so
-an implementation can match them:
+other outside the outermost `oneOf` that encloses it. One reading is the harness's, stated here so
+an implementation can match it: a key the annotated `extensions` object's `propertyNames` refuses is
+one refusal, `JPS-STRUCTURE-EXTENSION-NAME` at the key, not one per branch of its `anyOf`.
 
-- a key the annotated `extensions` object's `propertyNames` refuses is one refusal,
-  `JPS-STRUCTURE-EXTENSION-NAME` at the key, not one per branch of its `anyOf`;
-- a non-string inside an annotation list fails both `type` and the refused-character `not`, whose
-  `pattern` every non-string satisfies. The case expects `JPS-STRUCTURE-TYPE`, and the `not` is read
-  as a consequence of that refusal at the same pointer.
+A non-string inside an annotation list needs no such reading. The refused-character `not` in
+`annotationString` holds `"type": "string"` beside its `pattern` (RFC 0031 §1.7), so a number or a
+list there fails `type` alone, and the case expects that one `JPS-STRUCTURE-TYPE`.
 
 ## How a staged case lands
 

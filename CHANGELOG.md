@@ -26,7 +26,7 @@ here.
   which no maintainer has assigned and no release carries ([VERSIONING.md](VERSIONING.md)). The
   staged schema is the `0.3.0` schema plus exactly the record's fragments. The staged Core text
   ([`spec/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md)) is marked normative for nothing.
-  Hand-written vectors sit in no corpus: 126 document cases in
+  Hand-written vectors sit in no corpus: 127 document cases in
   [`conformance/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/staged), with five provisional conformance codes,
   and 64 evaluation rows with their pairs in
   [`conformance/evaluation/staged/annotations-value-sets/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged/annotations-value-sets),

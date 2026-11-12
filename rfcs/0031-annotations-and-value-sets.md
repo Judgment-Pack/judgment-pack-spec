@@ -255,7 +255,7 @@ unchanged.
     "type": "string",
     "minLength": 1,
     "maxLength": 256,
-    "not": { "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+    "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
   },
   "annotations": {
     "type": "object",
@@ -309,6 +309,12 @@ The class is unanchored and sits under `not`: a string is refused when the class
 in it, so no end anchor is involved and a trailing line feed is refused like any other. Under
 `propertyNames` the same `not` refuses a key that ends in a line feed, which an engine whose `$`
 matches before a final line feed would otherwise admit (§1.3).
+
+In `annotationString` the `not` holds `"type": "string"` beside the class. A `pattern` holds for
+every instance that is not a string, so without it a list item that is a number or a list would
+fail `not` as well as `type`, and one wrong item would give two findings. With it, a non-string
+satisfies the `not` and is refused once, by `type`. A member name is always a string, so the `not`
+under `propertyNames` needs no `type`.
 
 **Keywords.** The annotation value uses `type` and `if`/`then`/`else`, not `oneOf`, so a validator
 reports the keyword that fails: `type` for a number or an object, `minLength` for an empty string,

@@ -127,6 +127,7 @@
       "minLength": 1,
       "maxLength": 256,
       "not": {
+        "type": "string",
         "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
       }
     },

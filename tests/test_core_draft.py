@@ -61,7 +61,10 @@ RELEASED_EXAMPLE_PATH = ROOT / "examples" / "minimal-expense-approval.json"
 ANNOTATIONS = "org.judgmentpack.annotations"
 LOCAL_ID = "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
 # RFC 0031 §1.4's refused class, as the schema holds it after JSON decoding.
-REFUSED_CLASS = "[\u0000-\u001f\u007f-\u009f -‮]"
+REFUSED_CLASS = "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+# The two `not` subschemas that hold it: under an annotations object's propertyNames, whose instances
+# are always strings, and in annotationString, where `type` keeps a non-string from failing it (§1.7).
+REFUSED_NOTS = ({"pattern": REFUSED_CLASS}, {"type": "string", "pattern": REFUSED_CLASS})
 NEW_CODES = [
     "JPS-STRUCTURE-MAX-LENGTH",
     "JPS-STRUCTURE-MIN-PROPERTIES",
@@ -136,7 +139,7 @@ def draft_schema_diagnostic(error: Any) -> Diagnostic:
         and schema_path[-4:] == ["then", "properties", "operator", "const"]
     ):
         return code("JPS-STRUCTURE-VALUE-SET-REFERENCE", instance_path)
-    if validator == "not" and error.validator_value == {"pattern": REFUSED_CLASS}:
+    if validator == "not" and error.validator_value in REFUSED_NOTS:
         # Under an annotations object's propertyNames the class repeats the local-identifier
         # grammar for engines whose `$` admits a final line feed, and takes its code (§1.3).
         if under_names:
@@ -173,25 +176,13 @@ def draft_walk(error: Any) -> Iterable[Any]:
 def draft_structural_diagnostics(validator: Draft202012Validator, value: Any) -> list[Diagnostic]:
     diagnostics: list[Diagnostic] = []
     seen: set[tuple[str, str, str]] = set()
-    consequences: set[str] = set()
     for top_level in validator.iter_errors(value):
         for error in draft_walk(top_level):
             item = draft_schema_diagnostic(error)
-            if (str(error.validator) == "not" and error.validator_value == {"pattern": REFUSED_CLASS}
-                    and not isinstance(error.instance, str)):
-                # annotationString's `not` holds a `pattern`, which every non-string satisfies, so a
-                # non-string there fails `not` as well as `type`. RFC 0031's table expects the type
-                # refusal alone. The `not` is counted as a consequence of that refusal, and only where
-                # the type refusal is reported at the same pointer (checked below).
-                consequences.add(item.path)
-                continue
             identity = (item.code, item.path, item.message)
             if identity not in seen:
                 seen.add(identity)
                 diagnostics.append(item)
-    typed = {d.path for d in diagnostics if d.code == "JPS-STRUCTURE-TYPE"}
-    for path in sorted(consequences - typed):
-        diagnostics.append(Diagnostic("JPS-STRUCTURE-NOT", path, "refused-class not on a non-string"))
     return diagnostics
 
 
@@ -554,7 +545,7 @@ class DraftDocumentCaseTests(unittest.TestCase):
                 for keyword, value in node.items():
                     if keyword in ("maxLength", "minProperties", "maxProperties"):
                         found.append(path + [keyword])
-                    if keyword == "not" and value in ({"required": ["value"]}, {"pattern": REFUSED_CLASS}):
+                    if keyword == "not" and value in ({"required": ["value"]}, *REFUSED_NOTS):
                         found.append(path + [keyword])
                     if keyword == "anyOf" and "propertyNames" in path:
                         found.append(path + [keyword])
