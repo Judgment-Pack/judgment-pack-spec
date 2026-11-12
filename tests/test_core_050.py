@@ -1108,7 +1108,13 @@ class AcceptanceRecordTests(unittest.TestCase):
                 "- Target: Core `specVersion` `0.5.0`, released under tag `v0.5.0`.",
                 "That is a same-vendor review, not a cross-vendor claim.",
                 "1. **Not met as written; waived.**",
-                "3. **Met by two same-vendor implementations**",
+                "3. **Met in part.** Two implementations have run the vectors",
+                "Neither passes every vector: both report the 18 document cases that declare the "
+                "`extended` profile as unsupported, and the second evaluator supports `base` only.",
+                "it has not run the seven document cases #308 added, the two fixtures #304 rewrote, or "
+                "anything under the selector `0.5.0`.",
+                "The maintainer directed acceptance on that basis; the reference runtime's take-up of "
+                "`0.5.0` is the follow-up.",
                 "5. **First half met; second half met in part.**",
                 "The candidate period is waived by the maintainer",
                 "<!-- RUNTIME-STATUS --> At acceptance, the reference runtime's main branch passes the "
@@ -1120,6 +1126,18 @@ class AcceptanceRecordTests(unittest.TestCase):
         # Item 5's second half is neither waived nor met in full.
         item_5 = text[text.index("5. **First half"):text.index("6. **Met**")]
         self.assertNotIn("waived", item_5)
+        # Item 3 is met in part, never met, in the record, the release notes and the changelog.
+        item_3 = text[text.index("3. **Met in part.**"):text.index("4. **Met.**")]
+        self.assertNotIn("**Met**", item_3)
+        self.assertNotIn("waived", item_3)
+        notes = " ".join((ROOT / "releases/v0.5.0.md").read_text(encoding="utf-8").split())
+        changelog = " ".join((ROOT / "CHANGELOG.md").read_text(encoding="utf-8").split())
+        for other in (notes, changelog):
+            self.assertIn("Item 3 is met in part" if other is changelog else "Item 3, two independently "
+                          "authored implementations passing every staged vector, is met in part", other)
+            self.assertIn("the two fixtures #304 rewrote, or anything under `0.5.0`", other)
+            self.assertNotRegex(other, r"[Ii]tem 3[^.]*is met(?! in part)")
+        self.assertNotIn("Met by two same-vendor implementations", text)
         index = (ROOT / "rfcs/README.md").read_text(encoding="utf-8")
         self.assertIn("| [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets "
                       "| Accepted |", index)

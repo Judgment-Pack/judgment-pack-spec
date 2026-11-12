@@ -36,7 +36,10 @@ candidate precedes it.
   (Core §11).
 - RFC 0031 is Accepted on its same-vendor round-1 review, with the different-vendor review waived by
   the maintainer; that is not a cross-vendor claim. Its Acceptance section states each evidence-bar
-  item, and the round-1 record gains a dated note.
+  item, and the round-1 record gains a dated note. Item 3 is met in part: both implementations are
+  by the drafting vendor, both report the 18 `extended`-profile document cases as unsupported, and
+  the reference runtime passed the vectors staged at c867b35 but has not run the seven cases #308
+  added, the two fixtures #304 rewrote, or anything under `0.5.0`, which is its follow-up.
 - The second evaluator is `tools/core_050_eval.py`. The site serves Core `0.5.0` at `/spec/0.5.0/`
   and keeps `/spec/0.3.0/` as a signpost to the tag.
 

@@ -1453,8 +1453,8 @@ vendor
 ([`rfcs/reviews/0031-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0031-round-1.md))
 and does not count. Item 3 was not met at round 1: one implementation existed, experimentally, and a
 second did not. A second evaluator has been added since, written from the text by the drafting
-vendor; what it covers is under Implementation, and whether it meets item 3 is the maintainer's
-judgment. Item 6 is met by the disposition of Unresolved question 1. Item 7's
+vendor; what it covers is under Implementation. At acceptance item 3 is met in part
+([Acceptance](#acceptance)). Item 6 is met by the disposition of Unresolved question 1. Item 7's
 coordination is drafted in this record (Compatibility, Coordination with RFC 0016). The other items
 stand as the round-1 review found them.
 
@@ -1469,9 +1469,15 @@ with the different-vendor review waived. Item by item:
    not a cross-vendor claim.
 2. **Met.** The vectors existed as staged files, were reviewed in round 1 and were held to the
    repository's checks, the static check included. They are released in the `0.5.0` corpora.
-3. **Met by two same-vendor implementations**: the project's reference runtime and the second
-   evaluator in this repository (`tools/core_050_eval.py`). Both are by the drafting vendor; neither
-   is a different vendor's.
+3. **Met in part.** Two implementations have run the vectors: the project's reference runtime and
+   the second evaluator in this repository (`tools/core_050_eval.py`). Both are by the drafting
+   vendor; neither is a different vendor's. Neither passes every vector: both report the 18
+   document cases that declare the `extended` profile as unsupported, and the second evaluator
+   supports `base` only. The reference runtime passed the 208 document cases and 82 rows staged at
+   c867b35, the held row held; it has not run the seven document cases #308 added, the two fixtures
+   #304 rewrote, or anything under the selector `0.5.0`. The second evaluator runs every row and
+   every other document case under `0.5.0`. The maintainer directed acceptance on that basis; the
+   reference runtime's take-up of `0.5.0` is the follow-up.
 4. **Met.** The draft schema carried the fragments under the repository's schema tests; it is
    released as the `0.5.0` Core schema.
 5. **First half met; second half met in part.** The published example
@@ -1746,8 +1752,8 @@ test tool, not a product, and makes no conformance claim. It covers:
 It supports `base` only. The 18 staged cases whose fixtures declare `extended` are checked to be
 refused with `profile-unsupported`, not run. Its mutation check found rules of Core §§7–8 that no
 evaluation row distinguishes, such as `suppress-rule`; its test states them as its own cases,
-which are not conformance rows. Whether this evaluator meets evidence bar item 3 is the
-maintainer's judgment. The scratch check described under Evidence is not an implementation, and
+which are not conformance rows. Evidence bar item 3 is met in part ([Acceptance](#acceptance)).
+The scratch check described under Evidence is not an implementation, and
 neither is the evaluator the round-1 review wrote.
 
 ## Unresolved questions
