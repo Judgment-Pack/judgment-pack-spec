@@ -22,6 +22,18 @@ conformance/dialect/** export-ignore -text
 # so no bundle carries it; acceptance removes this line, as for RFC 0018's Draft.
 spec/workflow.md export-ignore
 
+# The staged draft Core specVersion 0.4.0-draft carries RFC 0031, a Draft (conformance/staged/README.md).
+# Its schema, its text, its document cases and its example are normative for nothing and in no corpus,
+# so no bundle carries them. Its evaluation rows are under conformance/evaluation/staged, above.
+schema/staged export-ignore
+schema/staged/** export-ignore
+spec/staged export-ignore
+spec/staged/** export-ignore
+conformance/staged export-ignore
+conformance/staged/** export-ignore
+examples/staged export-ignore
+examples/staged/** export-ignore
+
 # Independently packaged Policy fixture/schema bytes must never undergo text conversion.
 schema/policy/** -text
 conformance/policy/** -text

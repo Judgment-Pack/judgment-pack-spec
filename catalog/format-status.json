@@ -22,7 +22,7 @@
       "lastReleased": null
     },
     "judgment-pack-core": {
-      "draftVersion": "0.3.0",
+      "draftVersion": "0.4.0-draft",
       "baseline": "v0.3.0",
       "lastReleased": "v0.4.0"
     },

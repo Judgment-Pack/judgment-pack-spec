@@ -1,0 +1,11 @@
+{
+  "reason": "RFC 0031 (#301, a Draft) gets a staged draft Core schema for the working selector 0.4.0-draft: the released 0.3.0 schema plus exactly the RFC's fragments (annotations, value sets, the valueSet reference). It is normative for nothing, not published and in no release bundle; the released 0.3.0 schema is unchanged.",
+  "changes": [
+    {
+      "path": "schema/staged/judgment-pack-core-0.4.0-draft.schema.json",
+      "family": "judgment-pack-core",
+      "from": null,
+      "to": "sha256:ff00d2a76b5dde8c47a1580cd0f499ad5c454ea833de11012e96ae549d04d878"
+    }
+  ]
+}

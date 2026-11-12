@@ -24,6 +24,10 @@ WITNESS_VECTORS = "conformance/witness"
 # published.
 DIALECT_VECTORS = "conformance/dialect"
 WORKFLOW_VECTORS = "conformance/workflow"
+# The staged draft Core specVersion 0.4.0-draft carries RFC 0031, a Draft, and is published nowhere:
+# the site serves neither its schema, its document cases nor its example, and its text is no page
+# (conformance/staged/README.md). Its evaluation rows are under STAGED_EVALUATION_ROWS.
+STAGED_DRAFT_DIRECTORIES = ("schema/staged", "conformance/staged", "examples/staged")
 UNPUBLISHED_DIRECTORIES = (
     STAGED_EVALUATION_ROWS,
     WITNESS_VECTORS,
@@ -31,6 +35,7 @@ UNPUBLISHED_DIRECTORIES = (
     WORKFLOW_VECTORS,
     "conformance/policy",
     "schema/policy",
+    *STAGED_DRAFT_DIRECTORIES,
 )
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear

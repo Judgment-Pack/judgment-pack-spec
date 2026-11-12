@@ -270,11 +270,14 @@ class FormatStatus(Fixture):
         # Hand-checked against releases/: v0.4.0 carries specVersion 0.3.0 unchanged, so it is the
         # last release of the families under 0.3.0 and v0.3.0 stays their baseline, after two
         # candidates; the Policy companion's only release is policy-v1.0.0-draft.1; the leaf shipped
-        # in rc.2 and the final; the contributors shape under 0.4.0 is staged and unreleased.
-        for family in ("judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest",
-                       "workflow"):
+        # in rc.2 and the final; the contributors shape under 0.4.0 is staged and unreleased. Core's
+        # draft version is the staged draft schema's selector, 0.4.0-draft (RFC 0031), which no
+        # release carries, so its baseline and last release are still those of 0.3.0.
+        for family in ("conformance/manifest", "conformance/evaluation/manifest", "workflow"):
             self.assertEqual(derived[family],
                              {"draftVersion": "0.3.0", "baseline": "v0.3.0", "lastReleased": "v0.4.0"})
+        self.assertEqual(derived["judgment-pack-core"],
+                         {"draftVersion": "0.4.0-draft", "baseline": "v0.3.0", "lastReleased": "v0.4.0"})
         self.assertEqual(derived["policy"], {"draftVersion": "1.0.0", "baseline": "policy-v1.0.0-draft.1",
                                              "lastReleased": "policy-v1.0.0-draft.1"})
         self.assertEqual(derived["retained-column"],
