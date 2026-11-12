@@ -88,9 +88,13 @@ from the pack fixture, the evidence document and the supported extensions, witho
 A row that pinned the intuitive, wrong class for the fifth case would fail there. The nonconforming
 fixture must fail for exactly one reason, as RFC 0013 requires of it.
 
-The specification repository owns no evaluator, so nothing here runs a case. To run one, give an
-evaluator the case's `pack`, its `facts`, its `evidenceAvailability` and its `supportedExtensions`,
-and compare the class it reports.
+The specification repository owns no evaluator for Core `0.3.0`, so nothing here runs a case under
+it. To run one, give an evaluator the case's `pack`, its `facts`, its `evidenceAvailability` and its
+`supportedExtensions`, and compare the class it reports. The repository's evaluator for the staged
+draft selector `0.4.0-draft` ([`tools/core_draft_eval.py`](../../../tools/core_draft_eval.py)) runs
+these rows with each pack's selector replaced, as the draft's rows carry them over
+([`annotations-value-sets/`](annotations-value-sets/README.md)); that checks them under the draft,
+not under `0.3.0`.
 
 ## Core routes (#219)
 

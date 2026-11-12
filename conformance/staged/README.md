@@ -95,6 +95,18 @@ A non-string inside an annotation list needs no such reading. The refused-charac
 `annotationString` holds `"type": "string"` beside its `pattern` (RFC 0031 §1.7), so a number or a
 list there fails `type` alone, and the case expects that one `JPS-STRUCTURE-TYPE`.
 
+### The second evaluator
+
+A second evaluator for the draft selector, written from the text in this repository
+([`tools/core_draft_eval.py`](../../tools/core_draft_eval.py)), admits every case here, and its test
+(`tests/test_core_draft_eval.py`) holds the result: each semantic case to its finding exactly,
+each structural or carrier case to its result and layer (it maps no schema keyword to a code), and
+each valid case to no finding. It also runs every case of the released manifest named by
+`carriesOver`, with the selector replaced. It reads only `base`: the 18 cases whose fixtures declare
+`extended` are checked to be refused with `profile-unsupported`, not run. It is a test tool by the
+drafts' own authoring vendor, not a product, and covers evaluation and the semantic checks; it
+makes no conformance claim, and running it is implementation experience like any other.
+
 ## How a staged case lands
 
 When the version that carries RFC 0031 opens, each case moves into that version's manifest as it

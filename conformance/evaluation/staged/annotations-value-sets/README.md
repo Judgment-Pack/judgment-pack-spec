@@ -9,10 +9,14 @@ version that carries RFC 0031, not for the next `suiteVersion` of Core `0.3.0`.
 The requirement they test is the draft's §8.5
 ([draft text](../../../../spec/staged/judgment-pack-core-0.4.0-draft.md)): for a semantically
 conforming pack `P`, an evaluator produces the result Core §§7–8 give its evaluation form `EF(P)`.
-The repository owns no evaluator and computes no disposition. Every expected disposition here is
-written by hand from Core §8, and the tests check only that each row could be run and that its pairs
-are well formed: no test shows that an expectation is right. Each one is reviewed by hand, and again
-by every implementation that runs the rows. A row an implementation disagrees with is a finding
+Every expected disposition here is written by hand from Core §8. The harness
+(`tests/test_core_draft.py`) checks that each row could be run and that its pairs are well formed. A
+second evaluator, written from the text in this repository
+([`tools/core_draft_eval.py`](../../../../tools/core_draft_eval.py)), runs every row, and its test
+(`tests/test_core_draft_eval.py`) holds each result to its expectation. It is a test tool by the
+drafts' own authoring vendor, not a product, so its agreement is one more reading of the text and
+does not show that an expectation is right. Each expectation is reviewed by hand, and again by every
+implementation that runs the rows. A row an implementation disagrees with is a finding
 against the row or against the implementation, settled in review, and an expectation is never
 replaced by an implementation's output.
 
