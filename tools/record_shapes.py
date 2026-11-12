@@ -21,6 +21,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 
@@ -283,8 +284,19 @@ def build_catalog(root: Path = ROOT) -> dict:
     }
 
 
+UNSEEN = frozenset({"Cc", "Cf", "Zl", "Zp"})
+
+
 def render(document: dict) -> str:
-    return json.dumps(document, indent=2, ensure_ascii=False) + "\n"
+    """The catalog file's text. A character a reader cannot see, or that reorders the line it is on
+    (a control, a format character, a line or paragraph separator), is written as its JSON escape,
+    so the file never carries one raw. The value read back is the same, and so is every digest: a
+    digest is taken over the normalized text, not over this file."""
+    text = json.dumps(document, indent=2, ensure_ascii=False)
+    return "".join(
+        json.dumps(ch, ensure_ascii=True)[1:-1] if ord(ch) > 0x7E and unicodedata.category(ch) in UNSEEN else ch
+        for ch in text
+    ) + "\n"
 
 
 def read_json(path: Path, what: str) -> object:

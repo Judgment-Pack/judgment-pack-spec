@@ -129,6 +129,26 @@ class Determinism(Fixture):
         self.assertEqual(first, shapes.render(shapes.build_catalog(self.root)))
 
 
+class UnseenCharacters(unittest.TestCase):
+    def test_the_catalog_file_writes_an_unseen_character_as_its_escape(self):
+        # Written by hand: a C1 control, a line separator, a right-to-left override, a zero-width
+        # space, a byte order mark and DELETE are escaped; a section sign and a character outside
+        # the Basic Multilingual Plane are left as they are.
+        value = {"text": "a\u009fb\u2028c\u202ed\u200be\ufefff\u007fg\u00a7h\U0001f600"}
+        self.assertEqual(
+            shapes.render(value),
+            '{\n  "text": "a\\u009fb\\u2028c\\u202ed\\u200be\\ufefff\\u007fg\u00a7h\U0001f600"\n}\n',
+        )
+        self.assertEqual(json.loads(shapes.render(value)), value)
+
+    def test_the_committed_catalog_carries_no_unseen_character(self):
+        import unicodedata
+        text = (ROOT / shapes.CATALOG).read_text("utf-8")
+        found = sorted({"U+%04X" % ord(ch) for ch in text
+                        if ch != "\n" and unicodedata.category(ch) in ("Cc", "Cf", "Zl", "Zp")})
+        self.assertEqual(found, [])
+
+
 class ChangeRecords(Fixture):
     PATH = "schema/workflow-1.schema.json"
 
