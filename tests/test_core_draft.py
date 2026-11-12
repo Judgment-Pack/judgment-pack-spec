@@ -13,6 +13,7 @@ import json
 import re
 import subprocess
 import sys
+import types
 import unittest
 from pathlib import Path
 from typing import Any, Iterable
@@ -174,12 +175,14 @@ def draft_walk(error: Any) -> Iterable[Any]:
 
 
 def draft_structural_diagnostics(validator: Draft202012Validator, value: Any) -> list[Diagnostic]:
+    # Findings are a set of (code, pointer) pairs (conformance/staged/README.md): a keyword reported
+    # twice at one pointer, whatever the messages say, is one finding.
     diagnostics: list[Diagnostic] = []
-    seen: set[tuple[str, str, str]] = set()
+    seen: set[tuple[str, str]] = set()
     for top_level in validator.iter_errors(value):
         for error in draft_walk(top_level):
             item = draft_schema_diagnostic(error)
-            identity = (item.code, item.path, item.message)
+            identity = (item.code, item.path)
             if identity not in seen:
                 seen.add(identity)
                 diagnostics.append(item)
@@ -327,8 +330,8 @@ def spec_sections(*paths: Path) -> set[str]:
 def assert_one_finding(test: unittest.TestCase, case_id: str, expected: dict[str, str],
                        diagnostics: list[Diagnostic]) -> None:
     """The released corpus's strictness (test_conformance_cases): the expected finding, and no other
-    outside the outermost oneOf that encloses it."""
-    pairs = [(d.code, d.path) for d in diagnostics]
+    outside the outermost oneOf that encloses it. Findings compare as a set of (code, pointer) pairs."""
+    pairs = list(dict.fromkeys((d.code, d.path) for d in diagnostics))
     wanted = (expected["code"], expected["path"])
     test.assertIn(wanted, pairs, f"{case_id}: expected {wanted}; got {pairs}")
     enclosing = [d.path for d in diagnostics if d.code == "JPS-STRUCTURE-ONEOF" and pointer_contains(d.path, wanted[1])]
@@ -743,6 +746,27 @@ class DraftSemanticReadingTests(unittest.TestCase):
         self.assertNotIn("extensions", form["rules"][1])
         empty = strict_json_loads((STAGED / "valid" / "annotations-empty-extensions.json").read_text(encoding="utf-8"))
         self.assertEqual({}, evaluation_form(empty)["rules"][0]["extensions"])
+
+
+class DraftComparisonTests(unittest.TestCase):
+    def test_findings_compare_as_a_set_of_code_and_pointer_pairs(self) -> None:
+        # One keyword reported twice at one pointer is one finding; another pair is still a stray.
+        path = "/rules/0/extensions/" + ANNOTATIONS
+        twice = [Diagnostic("JPS-STRUCTURE-MIN-PROPERTIES", path, "first report"),
+                 Diagnostic("JPS-STRUCTURE-MIN-PROPERTIES", path, "second report")]
+        expected = {"code": "JPS-STRUCTURE-MIN-PROPERTIES", "path": path}
+        assert_one_finding(self, "twice", expected, twice)
+        with self.assertRaises(AssertionError):
+            assert_one_finding(self, "stray", expected, twice + [Diagnostic("JPS-STRUCTURE-TYPE", path, "other")])
+        validator = draft_validators()["base"]
+        pack = strict_json_loads((STAGED / "structural" / "annotations-empty-object.json").read_text(encoding="utf-8"))
+        (error,) = validator.iter_errors(pack)
+        again = copy.copy(error)
+        again.message = "the same keyword, reported again with another message"
+        doubled = [error, again]
+        reporting_twice = types.SimpleNamespace(iter_errors=lambda _value: iter(doubled))
+        self.assertEqual([("JPS-STRUCTURE-MIN-PROPERTIES", path)],
+                         [(d.code, d.path) for d in draft_structural_diagnostics(reporting_twice, pack)])
 
 
 class DraftPublicationTests(unittest.TestCase):

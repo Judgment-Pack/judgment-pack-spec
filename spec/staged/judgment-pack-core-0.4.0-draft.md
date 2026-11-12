@@ -406,6 +406,10 @@ uses one; otherwise one new code per keyword. Two refusals take a code mapped fr
 `JPS-STRUCTURE-VALUE-SET-REFERENCE`, from `not` at the condition and from `const` at `…/operator`;
 and `JPS-STRUCTURE-LOCAL-ID`, from the `not` under an annotations object's `propertyNames`.
 
+A case's findings compare as a set of (code, pointer) pairs. A keyword reported twice at one pointer,
+as some validators or regular-expression engines report it, is one finding, and the order of
+findings carries no meaning.
+
 This draft has seven provisional codes, for `0.4.0-draft` only:
 
 | Code | Layer | Where |

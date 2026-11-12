@@ -65,7 +65,9 @@ an advisory case. When the advisories have a home, these cases gain their expect
 ### The code rule
 
 Codes are provisional test metadata. A JSON Schema validator reports the keyword that fails, and
-RFC 0031's Codes section maps it to a code. The repository's tests (`tests/test_core_draft.py`) apply
+RFC 0031's Codes section maps it to a code. Findings compare as a set of (code, pointer) pairs: a
+keyword reported twice at one pointer, as some validators or regular-expression engines report it,
+is one finding, and the order of findings carries no meaning. The repository's tests (`tests/test_core_draft.py`) apply
 that rule and hold each case to the released corpus's strictness: the expected diagnostic, and no
 other outside the outermost `oneOf` that encloses it. One reading is the harness's, stated here so
 an implementation can match it: a key the annotated `extensions` object's `propertyNames` refuses is
