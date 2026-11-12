@@ -1,22 +1,25 @@
 # RFC 0031: Annotations and annotated value sets
 
-- Status: Draft
+- Status: Accepted
 - Type: Standards track, draft maturity. A Core amendment: one specification-defined extension in
   the reserved namespace, one new root member and one new fact-condition member.
 - Created: 2026-11-11
-- Target: the next Core `specVersion` after `0.3.0`. No number is assigned here. A release tag is
-  not a selector: release `v0.4.0` carries `specVersion` `0.3.0`.
+- Accepted: 2026-11-12, by the maintainer, on the same-vendor round-1 review; see
+  [Acceptance](#acceptance).
+- Target: Core `specVersion` `0.5.0`, released under tag `v0.5.0`. It was staged under the working
+  selector `0.4.0-draft`, which was never released. Tag `v0.4.0` carries `specVersion` `0.3.0`, so
+  no `specVersion` `0.4.0` is assigned ([VERSIONING.md](../VERSIONING.md)).
 - Issue: [#301](https://github.com/Judgment-Pack/judgment-pack-spec/issues/301)
-- Staged draft: [`spec/staged/judgment-pack-core-0.4.0-draft.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md),
-  under a working selector no maintainer has assigned. This record stays a Draft.
+- Released text: [`spec/judgment-pack-core.md`](../spec/judgment-pack-core.md), Core `0.5.0`.
 
-> This is an open proposal, not part of the specification. See
+> This record is accepted and its content is part of Core `0.5.0`. See
 > [RFC 0000](0000-rfc-process.md) for the process and evidence bar.
 >
-> **This record is normative for nothing.** Every MUST, SHOULD and MAY below is proposed wording for
-> the Core version that might adopt it. This change edits neither the published schema, the Core
-> text, nor any released conformance corpus, and it creates no conformance claim. The vectors in
-> [Conformance](#conformance) are named and described here; none is a corpus file.
+> **This record is normative for nothing.** The MUST, SHOULD and MAY below were proposed wording;
+> Core `0.5.0`'s text, schema and corpora are what is released, and they govern where this record
+> differs. Below, "the staged" names what was staged under `0.4.0-draft` before the release, and
+> "the next selector" names `0.5.0`. The vectors in [Conformance](#conformance) are named and
+> described here; they are released in the `0.5.0` corpora.
 >
 > **Review standing.** [RFC 0009](0009-interim-review-regime.md) requires a recorded adversarial
 > review by a model from a different vendor, with a written disposition for each finding, on the
@@ -25,9 +28,9 @@
 > drafting vendor, run at the maintainer's direction, is recorded with the maintainer's disposition
 > of each finding at
 > [`rfcs/reviews/0031-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0031-round-1.md),
-> and this text is revised by that disposition. It does not count toward the requirement and makes
-> no cross-vendor claim. The different-vendor review, when it happens, is recorded as a later round
-> in `rfcs/reviews/`.
+> and this text is revised by that disposition. The maintainer waived the different-vendor review
+> for this record and accepted it on that round-1 review ([Acceptance](#acceptance)). That is a
+> same-vendor review, not a cross-vendor claim.
 >
 > **Terminology.** In this record an *annotation* is a key and its value inside the reserved
 > extension `org.judgmentpack.annotations`. The word has nothing to do with the JSON Schema sense,
@@ -1356,30 +1359,31 @@ evaluation, is Core's question. This record does not change it.
 
 ### Graduation
 
-If this record is accepted, one pull request releases the version that carries it. This record
-assigns no number to it.
+This record was graduated by one pull request, which releases Core `specVersion` `0.5.0` under tag
+`v0.5.0`. It is recorded here as done.
 
-- **The working selector is never released.** `0.4.0-draft` names staged artifacts only; no
-  release carries it as a `specVersion`. A reader of the released version refuses a pack declaring
-  `0.4.0-draft`, by the exact-selector rule (Core §4), as it refuses every selector other than its
-  own.
-- **Packs written to the working selector.** Such a pack moves by changing its `specVersion` to the
-  released one. That changes its bytes, so its digest changes too (§5), and it must then satisfy the
-  released rules, which may differ from the staged ones. No reader admits it under both selectors.
-  An implementation that admits `0.4.0-draft` meanwhile does so experimentally, outside every
-  conformance claim.
-- **What the releasing pull request retires.** The staged schema, delta text, document cases,
-  evaluation rows and example; the record-shape catalog's shape record for the staged schema; and
-  Core's `draftVersion` in that catalog. Their content moves into the released schema, Core text
-  and corpora under the released selector, with new `$id`, selector bytes and digests.
-- **The document cases and the `extended` profile.** The releasing pull request decides where the
-  cases that need the `extended` profile land: in the released document manifest, with a member
-  naming the reader profile, or in the `profiles.json` suite where Core `0.3.0`'s own `extended`
-  vectors are. `tools/profile_validation.py` gains the six rows of §7.
-- **The held evaluation row.** The new version's case schema admits specification-defined names in
-  a supported-extension set, and the row `annotations-supported-extension-set` is released with the
+- **The working selector was never released.** `0.4.0-draft` named staged artifacts only. The
+  version it staged is released as `0.5.0`, not `0.4.0`: tag `v0.4.0` carries `specVersion`
+  `0.3.0`, and under the release numbering rule ([VERSIONING.md](../VERSIONING.md)) a tag's major
+  and minor numbers are those of the `specVersion` it carries, so the number `0.4.0` is taken. A
+  `0.5.0` reader refuses a pack declaring `0.4.0-draft`, by the exact-selector rule (Core §4), as it
+  refuses every selector other than its own.
+- **Packs written to the working selector.** Such a pack moves by changing its `specVersion` to
+  `0.5.0`. That changes its bytes, so its digest changes too (§5), and it must then satisfy the
+  released rules (Core §11). No reader admits it under both selectors. An implementation that
+  admitted `0.4.0-draft` did so experimentally, outside every conformance claim.
+- **Retired.** The staged schema, delta text, document cases, evaluation rows and example. Their
+  content is in the released schema, Core text and corpora, under `$id`s in `/schema/0.5.0/`, the
+  selector `0.5.0` and new digests. The record-shape catalog's change record
+  `0009-core-0-5-0-released` records the staged schema's retirement, and Core's `draftVersion` there
+  reads `0.5.0`.
+- **The document cases and the `extended` profile.** The cases that need the `extended` profile are
+  released in the document manifest, which names the reader profiles its cases run under
+  (`readerProfiles`). `tools/profile_validation.py` applies the rows of §7.
+- **The held evaluation row.** The `0.5.0` case schema admits specification-defined names in a
+  supported-extension set, and the row `annotations-supported-extension-set` is released with the
   rest (Core §8.2 as amended, §1.2).
-- **The evidence bar.** Each item of [Evidence bar](#evidence-bar) holds first.
+- **The evidence bar.** [Acceptance](#acceptance) states each item.
 
 ## Security and privacy
 
@@ -1453,6 +1457,37 @@ vendor; what it covers is under Implementation, and whether it meets item 3 is t
 judgment. Item 6 is met by the disposition of Unresolved question 1. Item 7's
 coordination is drafted in this record (Compatibility, Coordination with RFC 0016). The other items
 stand as the round-1 review found them.
+
+### Acceptance
+
+On 2026-11-12 the maintainer accepted this record and directed its graduation into Core `0.5.0`,
+with the different-vendor review waived. Item by item:
+
+1. **Not met as written; waived.** No model from a different vendor reviewed this record. The
+   maintainer waived that review for this record and accepted the round-1 review by a model from
+   the drafting vendor, with its disposition, as the review of record. That is a same-vendor review,
+   not a cross-vendor claim.
+2. **Met.** The vectors existed as staged files, were reviewed in round 1 and were held to the
+   repository's checks, the static check included. They are released in the `0.5.0` corpora.
+3. **Met by two same-vendor implementations**: the project's reference runtime and the second
+   evaluator in this repository (`tools/core_050_eval.py`). Both are by the drafting vendor; neither
+   is a different vendor's.
+4. **Met.** The draft schema carried the fragments under the repository's schema tests; it is
+   released as the `0.5.0` Core schema.
+5. **First half met; second half met in part.** The published example
+   `examples/expense-approval-annotated.json` uses both features. The reference runtime has a
+   consumer view with its own tests, but its D1 isolation of Markdown text direction is open there.
+   The maintainer directed graduation on that basis.
+6. **Met** by the disposition of Unresolved question 1.
+7. **Met.** Core text is drafted for each row of §9, and the Core §9 paragraph is coordinated with
+   RFC 0016 (Compatibility, Coordination with RFC 0016).
+
+<!-- RUNTIME-STATUS -->
+At acceptance, the reference runtime's main branch passes the vectors staged at c867b35 (208
+document cases with 18 extended-profile cases reported unsupported; 82 rows; the held row held); it
+has not yet taken up the changes this pull request adds, and will vendor the released `0.5.0`.
+
+The candidate period is waived by the maintainer: `v0.5.0` has no release candidate.
 
 ### Codes
 
@@ -1690,8 +1725,9 @@ staged selector `0.4.0-draft`, with annotations, value sets and a filtered view,
 staged artifacts.
 
 A second evaluator now exists in this repository:
-[`tools/core_draft_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tools/core_draft_eval.py), with its test,
-[`tests/test_core_draft_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tests/test_core_draft_eval.py). It was written from Core, the
+[`tools/core_050_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tools/core_050_eval.py), with its test,
+[`tests/test_core_050_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tests/test_core_050_eval.py); it was staged as
+`tools/core_draft_eval.py` and renamed at the release. It was written from Core, the
 staged delta and this record alone, without reading or running the reference runtime. Its authoring
 vendor is the drafts' own, so it is a second reading of the text, not a different vendor's. It is a
 test tool, not a product, and makes no conformance claim. It covers:

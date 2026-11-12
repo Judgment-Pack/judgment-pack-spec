@@ -1027,6 +1027,48 @@ class CoordinationTests(unittest.TestCase):
         self.assertLessEqual(set(pack["metadata"]["requiredExtensions"]), present)
 
 
+class AcceptanceRecordTests(unittest.TestCase):
+    """RFC 0031 is Accepted on the same-vendor round-1 review, whose record is not rewritten."""
+
+    # SHA-256 of rfcs/reviews/0031-round-1.md as merged before the release (commit c33a9ac).
+    ROUND_1_SHA256 = "b6c0d23cde20af02557056c2ef15589ee0b542669e891d6ab8f376b5d7d1d73b"
+
+    def test_the_record_is_accepted_item_by_item(self) -> None:
+        raw = (ROOT / "rfcs/0031-annotations-and-value-sets.md").read_text(encoding="utf-8")
+        text = " ".join(raw.split())
+        self.assertIn("\n- Status: Accepted\n", raw)
+        self.assertNotIn("- Status: Draft", raw)
+        for sentence in (
+                "- Target: Core `specVersion` `0.5.0`, released under tag `v0.5.0`.",
+                "That is a same-vendor review, not a cross-vendor claim.",
+                "1. **Not met as written; waived.**",
+                "3. **Met by two same-vendor implementations**",
+                "5. **First half met; second half met in part.**",
+                "The candidate period is waived by the maintainer",
+                "<!-- RUNTIME-STATUS --> At acceptance, the reference runtime's main branch passes the "
+                "vectors staged at c867b35 (208 document cases with 18 extended-profile cases reported "
+                "unsupported; 82 rows; the held row held); it has not yet taken up the changes this pull "
+                "request adds, and will vendor the released `0.5.0`."):
+            with self.subTest(sentence=sentence[:40]):
+                self.assertIn(sentence, text)
+        # Item 5's second half is neither waived nor met in full.
+        item_5 = text[text.index("5. **First half"):text.index("6. **Met**")]
+        self.assertNotIn("waived", item_5)
+        index = (ROOT / "rfcs/README.md").read_text(encoding="utf-8")
+        self.assertIn("| [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets "
+                      "| Accepted |", index)
+
+    def test_the_round_1_record_gains_a_dated_note_and_is_otherwise_unchanged(self) -> None:
+        import hashlib
+        text = (ROOT / "rfcs/reviews/0031-round-1.md").read_text(encoding="utf-8")
+        heading, rest = text.split("\n\n", 1)
+        note, original_rest = rest.split("\n\n", 1)
+        self.assertTrue(note.startswith("> **Note (2026-11-12).** The working selector `0.4.0-draft`"))
+        self.assertIn("released as `specVersion` `0.5.0`", " ".join(note.split()))
+        original = heading + "\n\n" + original_rest
+        self.assertEqual(self.ROUND_1_SHA256, hashlib.sha256(original.encode("utf-8")).hexdigest())
+
+
 class PublicationTests(unittest.TestCase):
     """The graduation retired the staged paths; the released ones ship and are published."""
 

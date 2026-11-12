@@ -836,10 +836,10 @@ PAGES = (
         "rfcs/0031-annotations-and-value-sets.md",
         PurePosixPath("rfcs/0031-annotations-and-value-sets/index.html"),
         "RFC 0031: Annotations and annotated value sets",
-        "Draft: inert labels on the pack, outcomes and rules in a reserved extension, and named "
-        "value sets with annotated entries that an in condition may reference.",
+        "Accepted, released in Core 0.5.0: inert labels on the pack, outcomes and rules, and "
+        "named value sets that an in condition may reference.",
         "proposals",
-        "Draft proposal",
+        "Accepted design",
         source_ref="main",
     ),
     Page(
