@@ -927,7 +927,10 @@ A filtered view is not redaction either. The omitted items, and their annotation
 pack's bytes (see Security and privacy).
 
 D1 and D2 bind any consumer that displays or filters annotations, as Core §10's prohibitions bind
-every implementation. No Core conformance class tests display.
+every implementation. No Core conformance class tests display. They bind what is displayed to a
+person: a machine-readable form that carries each key and value with its exact code points, such as
+JSON a program reads, is data, not a display and not a listing under D2, and the consumer that
+displays a key or value read from it is the one bound.
 
 ### 9. Where each part lands
 

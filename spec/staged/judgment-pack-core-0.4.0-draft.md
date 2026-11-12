@@ -384,7 +384,10 @@ pack string. A consumer that displays one:
   requires (§9.2); and
 - SHOULD show annotations as the author's labels, visually distinct from Core members.
 
-D1 and D2 (§9.2) bind any consumer that displays or filters annotations. No Core conformance class
+D1 and D2 (§9.2) bind any consumer that displays or filters annotations. They bind what is
+displayed to a person: a machine-readable form that carries each key and value with its exact code
+points, such as JSON a program reads, is data, not a display and not a listing under D2, and the
+consumer that displays a key or value read from it is the one bound. No Core conformance class
 tests display. Annotations travel with the pack; authors should put neither secrets nor personal data
 in them.
 
