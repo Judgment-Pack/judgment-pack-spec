@@ -1,0 +1,47 @@
+{
+  "specVersion": "0.4.0-draft",
+  "id": "https://example.com/judgment-packs/annotations-display-hostile",
+  "version": "0.1.0",
+  "title": "Display-hostile annotation values",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept every request.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "markup": "<b onclick=\"x\">hi</b>",
+          "template": "{{ request.secret }}",
+          "formula": "=HYPERLINK(\"https://example.com/x\")",
+          "uri": "https://example.com/collect?id=1",
+          "bidi": [
+            "\u2067abc\u2069",
+            "\u200fmark",
+            "\u2068unterminated"
+          ],
+          "joiner": "a\u200db",
+          "outcome": "refer"
+        }
+      }
+    }
+  ]
+}

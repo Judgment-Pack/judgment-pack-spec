@@ -227,6 +227,16 @@ class StaticSiteTests(unittest.TestCase):
         # here: nothing under the staged directory is published, as an artifact or as a page.
         self._assert_nothing_published_under(STAGED_EVALUATION_ROWS)
 
+    def test_staged_draft_is_not_published(self) -> None:
+        # Held as the staged rows' exclusion is, for each directory, and for the draft text, which is
+        # no page: nothing the site writes is named for the draft selector.
+        for directory in STAGED_DRAFT_DIRECTORIES:
+            with self.subTest(directory=directory):
+                self._assert_nothing_published_under(directory)
+        self.assertEqual([], sorted(
+            path.relative_to(self.output).as_posix() for path in self.output.rglob("*0.4.0-draft*")
+        ))
+
     def test_witness_vectors_are_not_published(self) -> None:
         # The vectors are staged, and conformance/witness/README.md says the site does not serve
         # them; held as the staged rows' exclusion is.

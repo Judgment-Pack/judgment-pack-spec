@@ -1,0 +1,99 @@
+{
+  "specVersion": "0.4.0-draft",
+  "id": "https://example.com/judgment-packs/annotations-inert",
+  "version": "0.1.0",
+  "title": "Request intake",
+  "decision": {
+    "intent": "Decide whether an intake request is accepted or referred for review.",
+    "question": "Is the request accepted?"
+  },
+  "applicability": {
+    "op": "fact",
+    "path": "/request/kind",
+    "operator": "equals",
+    "value": "intake"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "tier": "standard"
+        }
+      }
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "tier": "review"
+        }
+      }
+    }
+  ],
+  "rules": [
+    {
+      "id": "priority-tier",
+      "description": "Accept a request in a priority tier.",
+      "when": {
+        "op": "fact",
+        "path": "/request/tier",
+        "operator": "in",
+        "value": [
+          "tier-1",
+          "tier-2"
+        ]
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "category": [
+            "intake"
+          ],
+          "review-cycle": "monthly"
+        }
+      }
+    },
+    {
+      "id": "flagged",
+      "description": "Refer a flagged request.",
+      "when": {
+        "op": "fact",
+        "path": "/request/flagged",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "refer",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "category": "risk"
+        }
+      }
+    }
+  ],
+  "escalation": {
+    "triggers": [
+      "not-applicable",
+      "unknown",
+      "conflict",
+      "no-match"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Intake reviewer"
+    }
+  },
+  "extensions": {
+    "org.judgmentpack.annotations": {
+      "category": "intake",
+      "owner-team": [
+        "intake",
+        "triage"
+      ]
+    }
+  }
+}

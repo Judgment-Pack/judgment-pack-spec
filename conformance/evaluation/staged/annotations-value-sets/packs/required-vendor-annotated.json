@@ -1,0 +1,80 @@
+{
+  "specVersion": "0.4.0-draft",
+  "id": "https://example.com/judgment-packs/annotations-inert",
+  "version": "0.1.0",
+  "title": "Request intake",
+  "decision": {
+    "intent": "Decide whether an intake request is accepted or referred for review.",
+    "question": "Is the request accepted?"
+  },
+  "applicability": {
+    "op": "fact",
+    "path": "/request/kind",
+    "operator": "equals",
+    "value": "intake"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "priority-tier",
+      "description": "Accept a request in a priority tier.",
+      "when": {
+        "op": "fact",
+        "path": "/request/tier",
+        "operator": "in",
+        "value": [
+          "tier-1",
+          "tier-2"
+        ]
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "category": "intake"
+        },
+        "com.example.review-policy": {
+          "reviewMode": "two-person"
+        }
+      }
+    },
+    {
+      "id": "flagged",
+      "description": "Refer a flagged request.",
+      "when": {
+        "op": "fact",
+        "path": "/request/flagged",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "refer",
+      "onUnknown": "ignore"
+    }
+  ],
+  "escalation": {
+    "triggers": [
+      "not-applicable",
+      "unknown",
+      "conflict",
+      "no-match"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Intake reviewer"
+    }
+  },
+  "metadata": {
+    "requiredExtensions": [
+      "com.example.review-policy"
+    ]
+  }
+}

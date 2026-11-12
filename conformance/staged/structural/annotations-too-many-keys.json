@@ -1,0 +1,53 @@
+{
+  "specVersion": "0.4.0-draft",
+  "id": "https://example.com/judgment-packs/annotations-too-many-keys",
+  "version": "0.1.0",
+  "title": "Malformed annotations",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept every request.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "key-00": "intake",
+          "key-01": "intake",
+          "key-02": "intake",
+          "key-03": "intake",
+          "key-04": "intake",
+          "key-05": "intake",
+          "key-06": "intake",
+          "key-07": "intake",
+          "key-08": "intake",
+          "key-09": "intake",
+          "key-10": "intake",
+          "key-11": "intake",
+          "key-12": "intake",
+          "key-13": "intake",
+          "key-14": "intake",
+          "key-15": "intake",
+          "key-16": "intake"
+        }
+      }
+    }
+  ]
+}
