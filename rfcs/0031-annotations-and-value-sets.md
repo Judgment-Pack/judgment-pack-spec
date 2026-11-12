@@ -1583,6 +1583,8 @@ is dispositioned (Unresolved question 3); the staged manifest lists them as `adv
 | `structural-value-set-entry-extension-*` | in an entry's `extensions`, one case each: `com.example.note` alone; `com.example.note` beside annotations; `org.judgmentpack.future` | `JPS-STRUCTURE-UNKNOWN-MEMBER` at `/valueSets/0/entries/0/extensions/` and the name |
 | `structural-annotations-required` | the name in `metadata.requiredExtensions` | `JPS-STRUCTURE-EXTENSION-NAME` at `/metadata/requiredExtensions/0` |
 | `structural-reserved-name-in-annotated-position` | `org.judgmentpack.future` in a rule's `extensions` | `JPS-STRUCTURE-EXTENSION-NAME` at `/rules/0/extensions/org.judgmentpack.future` |
+| `valid-extension-name-reserved-look-alike`, `valid-extension-name-reserved-look-alike-required` | `org.judgmentpackx.a` in a rule's `extensions`; the same name in `metadata.requiredExtensions`, run with it supported (added after the round-1 review) | valid: only names beginning `org.judgmentpack.`, with the dot, are reserved |
+| `valid-extension-name-two-label-reserved-stem` | the two-label name `org.judgmentpack` in a rule's `extensions` (added after the round-1 review) | valid: the grammar admits two labels, and the name lacks the reserved prefix's final dot |
 | `structural-annotations-not-object` | the extension's value is a string | `JPS-STRUCTURE-TYPE` at `…/org.judgmentpack.annotations` |
 | `structural-annotations-empty-object` | `{}` | `JPS-STRUCTURE-MIN-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
 | `structural-annotations-empty-object-*` | `{}` at the root, on an outcome and on a value-set entry, one case each | `JPS-STRUCTURE-MIN-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |

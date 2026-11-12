@@ -93,7 +93,7 @@ class ReleaseBuilderTests(unittest.TestCase):
                      "Stay on the `v0.3.0` bundle for the `retained-column/1` leaf.",
                      "https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json",
                      hashlib.sha256(schema.read_bytes()).hexdigest(),
-                     "366 conformance cases and 5 advisory cases", "103 rows, 29 pairs"):
+                     "369 conformance cases and 5 advisory cases", "103 rows, 29 pairs"):
             with self.subTest(text=text[:40]):
                 self.assertIn(text, notes)
         for name in ("schema/judgment-pack-core-0.3.0.schema.json",

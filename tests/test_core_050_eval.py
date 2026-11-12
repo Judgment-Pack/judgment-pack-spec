@@ -210,7 +210,7 @@ class DocumentCasesTest(unittest.TestCase):
                 tally.setdefault(key, 0)
             with self.subTest(case=case["id"]):
                 self.check_case(case, (ROOT / "conformance" / case["path"]).read_bytes(), tally)
-        self.assertEqual(371, len(document["cases"]))
+        self.assertEqual(374, len(document["cases"]))
         self.assertEqual(18, tally["extended, refused"])
         self.assertEqual(1, tally["semantic unsupported"])
 

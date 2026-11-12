@@ -3145,9 +3145,9 @@ SLIDES: tuple[Slide, ...] = (
             "the specification got fixed.",
         ),
         note=(
-            "Measured across 366 tests on the file format and 5 advisory vectors, plus 103 decision "
-            "scenarios, by the second implementation; the reference tool passes them as staged before "
-            "the release and has yet to take up the released corpus. At Core 0.3.0, 151 tests and 20 "
+            "Measured across 369 tests on the file format and 5 advisory vectors, plus 103 decision "
+            "scenarios, by the second implementation; the reference tool passed an earlier staged set "
+            "and has yet to take up the released corpus. At Core 0.3.0, 151 tests and 20 "
             "scenarios were replayed through both engines. One limit, stated plainly: both implementations trace to the same "
             "maintainer, and the second was written from reference texts that already carried the "
             "first's implementation notes — so the agreement <em>corroborates</em> that the "
@@ -3298,7 +3298,7 @@ SLIDES: tuple[Slide, ...] = (
         ),
         points=(
             "<strong>Ready today:</strong> the file specification, the checks that a file is sound, "
-            "and an agreed way to turn one into an answer — held in place by 366 tests on the format, "
+            "and an agreed way to turn one into an answer — held in place by 369 tests on the format, "
             "5 advisory vectors, and 103 tests on the answers.",
             "<strong>Tooling:</strong> the open-source reference runtime serves the same core through "
             "a CLI and stdio MCP, walks project-owned pack matrices, and reports informative coverage. "

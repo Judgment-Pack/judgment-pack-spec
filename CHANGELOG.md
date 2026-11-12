@@ -25,8 +25,10 @@ candidate precedes it.
   schema, document-manifest schema and evaluation-manifest schema replace `0.3.0`'s in place, and
   the workflow document schema's identifier moves to `/schema/0.5.0/`. Byte-identical copies of the
   four `0.3.0` schemas stay published at their `0.3.0` identifiers; the `0.3.0` text and corpora stay
-  at tag `v0.3.0`. The document corpus holds 366 conformance cases and 5 advisory cases, and the
-  evaluation corpus 103 rows with 29 pairs, both `suiteVersion` `0.5.0`.
+  at tag `v0.3.0`. The document corpus holds 369 conformance cases and 5 advisory cases, and the
+  evaluation corpus 103 rows with 29 pairs, both `suiteVersion` `0.5.0`. Three valid cases added
+  after the round-1 review pin that the reserved prefix `org.judgmentpack.` ends in its dot: the
+  names `org.judgmentpackx.a`, optional and required, and `org.judgmentpack` are admitted (Core §9).
 - **Why `0.5.0`.** Tag `v0.4.0` carries `specVersion` `0.3.0` unchanged. [VERSIONING.md](VERSIONING.md)
   now states the release numbering rule: a tag's major and minor numbers are those of the
   `specVersion` it carries, and its patch number counts later releases that carry it unchanged.

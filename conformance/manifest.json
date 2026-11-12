@@ -4377,6 +4377,36 @@
       "expectedDiagnostic": null,
       "focus": "the staged example: the expense example with annotations and one value set that two rules share, once under not",
       "specSection": "\u00a76.9"
+    },
+    {
+      "id": "valid-extension-name-reserved-look-alike",
+      "path": "valid/extension-name-reserved-look-alike.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "the optional extension org.judgmentpackx.a is admitted: only names beginning org.judgmentpack. with its final dot are reserved",
+      "specSection": "\u00a79"
+    },
+    {
+      "id": "valid-extension-name-reserved-look-alike-required",
+      "path": "valid/extension-name-reserved-look-alike-required.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "org.judgmentpackx.a may be required, and a consumer that supports it reads the pack: the name is a vendor name, not a reserved one",
+      "specSection": "\u00a79",
+      "supportedExtensions": [
+        "org.judgmentpackx.a"
+      ]
+    },
+    {
+      "id": "valid-extension-name-two-label-reserved-stem",
+      "path": "valid/extension-name-two-label-reserved-stem.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "the two-label name org.judgmentpack is admitted: the grammar admits two labels, and the reserved prefix org.judgmentpack. ends in a dot it lacks",
+      "specSection": "\u00a79"
     }
   ]
 }

@@ -346,7 +346,7 @@ class CoreSchemaTests(unittest.TestCase):
 
 
 class AddedDocumentCaseTests(unittest.TestCase):
-    """The document cases 0.5.0 adds: RFC 0031's, issue #304's and issue #308's."""
+    """The document cases 0.5.0 adds: RFC 0031's, issue #304's, issue #308's and the release review's."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -356,10 +356,10 @@ class AddedDocumentCaseTests(unittest.TestCase):
         cls.cases = added(MANIFEST_PATH, PREVIOUS_MANIFEST_PATH)
 
     def test_the_added_cases_follow_the_0_3_0_cases_in_the_manifest(self) -> None:
-        # The 0.3.0 cases come first, unchanged and in their order; the 215 added cases follow.
+        # The 0.3.0 cases come first, unchanged and in their order; the 218 added cases follow.
         self.assertEqual(self.released["cases"], self.manifest["cases"][: len(self.released["cases"])])
         self.assertEqual(self.cases, self.manifest["cases"][len(self.released["cases"]):])
-        self.assertEqual(215, len(self.cases))
+        self.assertEqual(218, len(self.cases))
         self.assertEqual(["base", "extended"], self.manifest["readerProfiles"])
         self.assertEqual(18, sum('"profile": "extended"' in (CONFORMANCE / c["path"]).read_text(encoding="utf-8")
                                  for c in self.cases))
@@ -1002,6 +1002,41 @@ class AnchoredGrammarTests(unittest.TestCase):
                 self.assertEqual(("valid", []), evaluate_text(text.replace("\\n\"", "\""), validators,
                                                                     ["com.example.review-policy"]))
 
+    def test_the_reserved_prefix_ends_in_its_dot(self) -> None:
+        # Core §9 reserves names beginning `org.judgmentpack.`, its final dot included. Three valid
+        # cases pin the names just outside it: `org.judgmentpackx.a`, optional and required, and
+        # the two-label `org.judgmentpack`, which the grammar admits. The same name moved inside
+        # the prefix is refused at each key and list item that holds it.
+        validators = core_validators()
+        manifest = strict_json_loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+        cases = {case["id"]: case for case in manifest["cases"]}
+        for case_id, name, supported, paths in (
+                ("valid-extension-name-reserved-look-alike", "org.judgmentpackx.a", [],
+                 ["/rules/0/extensions/org.judgmentpack.a"]),
+                ("valid-extension-name-reserved-look-alike-required", "org.judgmentpackx.a", ["org.judgmentpackx.a"],
+                 ["/metadata/requiredExtensions/0", "/rules/0/extensions/org.judgmentpack.a"]),
+                ("valid-extension-name-two-label-reserved-stem", "org.judgmentpack", [],
+                 ["/rules/0/extensions/org.judgmentpack.a"])):
+            with self.subTest(case=case_id):
+                case = cases[case_id]
+                self.assertEqual(("valid", None, supported),
+                                 (case["expectedResult"], case["expectedDiagnostic"], case.get("supportedExtensions", [])))
+                self.assertTrue(case["path"].startswith("valid/"))
+                text = (CONFORMANCE / case["path"]).read_text(encoding="utf-8")
+                value = strict_json_loads(text)
+                self.assertIn(name, value["rules"][0]["extensions"])
+                self.assertEqual(supported, value.get("metadata", {}).get("requiredExtensions", []))
+                self.assertEqual(("valid", []), evaluate_text(text, validators, supported))
+                if supported:
+                    # Unsupported, it is a vendor extension the reader lacks, not a reserved name.
+                    result, found = evaluate_text(text, validators, [])
+                    self.assertEqual(("unsupported", ["JPS-CAPABILITY-REQUIRED-EXTENSION"]),
+                                     (result, [d.code for d in found]))
+                inside = text.replace(f'"{name}"', '"org.judgmentpack.a"')
+                result, found = evaluate_text(inside, validators, ["org.judgmentpack.a"])
+                self.assertEqual(("invalid", [("JPS-STRUCTURE-EXTENSION-NAME", p) for p in paths]),
+                                 (result, sorted((d.code, d.path) for d in found)))
+
     def test_ecma_262_unicode_mode_agrees_with_python_re(self) -> None:
         node = shutil.which("node")
         if node is None:
@@ -1164,7 +1199,11 @@ class AcceptanceRecordTests(unittest.TestCase):
             self.assertIn("the two fixtures #304 rewrote, or anything under `0.5.0`", other)
             self.assertNotRegex(other, r"[Ii]tem 3[^.]*is met(?! in part)")
         self.assertNotIn("Met by two same-vendor implementations", text)
-        index = (ROOT / "rfcs/README.md").read_text(encoding="utf-8")
+        # The site says no more: the reference tool passed an earlier staged set, not the corpus.
+        site = " ".join((ROOT / "web/build.py").read_text(encoding="utf-8").split())
+        self.assertIn('the reference tool passed an earlier staged set " "and has yet to take up the released corpus.', site)
+        self.assertNotIn("passes them as staged", site)
+        index =(ROOT / "rfcs/README.md").read_text(encoding="utf-8")
         self.assertIn("| [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets "
                       "| Accepted |", index)
 
