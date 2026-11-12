@@ -21,9 +21,12 @@
 > **Review standing.** [RFC 0009](0009-interim-review-regime.md) requires a recorded adversarial
 > review by a model from a different vendor, with a written disposition for each finding, on the
 > pull request that creates this RFC. That review has not happened, and this record does not
-> claim it. When it happens, its record lives in `rfcs/reviews/` as `0031-round-1.md` and on, as
-> RFC 0016's records do there. A review by a model from the drafting vendor does not count toward
-> it.
+> claim it; the pull request that created this record was merged without it. A review by a model
+> from the drafting vendor, run at the maintainer's direction, is recorded with the maintainer's
+> disposition of each finding at [`rfcs/reviews/0031-round-1.md`](reviews/0031-round-1.md), and
+> this text is revised by that disposition. It does not count toward the requirement and makes no
+> cross-vendor claim. The different-vendor review, when it happens, is recorded as a later round
+> in `rfcs/reviews/`.
 >
 > **Terminology.** In this record an *annotation* is a key and its value inside the reserved
 > extension `org.judgmentpack.annotations`. The word has nothing to do with the JSON Schema sense,
