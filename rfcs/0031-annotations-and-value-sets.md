@@ -109,7 +109,10 @@ While this record was drafted, and again after its first review round, its schem
 examples were checked against a scratch copy of the Core schema with the fragments applied, using a
 general-purpose JSON Schema validator, a short checker for the semantic rules and the evaluation
 form, and the regular-expression engines of three languages for the character class and the key
-pattern of §1.7. That check is not committed and is not implementation evidence.
+pattern of §1.7. That check is not committed and is not implementation evidence. After the round-1
+review, the revised string pattern of §1.7 was swept over every code point in the engines §1.7
+lists; the repository's harness repeats that sweep for Python and, where Node is installed, for
+ECMA-262 in Unicode mode.
 
 ## Specification
 
@@ -172,9 +175,10 @@ An annotations object is a JSON object with 1 to 16 members (the base ceiling, �
   local-identifier grammar `^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$` (Core §5), and it has at most 64
   characters. A name that ends in a line feed is not a local identifier, whatever a pattern's end
   anchor admits. Some regular-expression engines let `$` match before a final line feed, so the
-  schema also refuses every character of §1.4's class in a key (§1.7), and the rule holds under
-  every engine. Core's own anchored patterns, its local-identifier grammar among them, have the
-  same latent property; this record does not change Core's.
+  schema also refuses, in a key, the controls, the two separators and the embeddings and overrides
+  (U+0000–U+001F, U+007F–U+009F and U+2028–U+202E; §1.7), and the rule holds in every engine §1.7
+  lists. Core's own anchored patterns, its local-identifier grammar among them, have the same
+  latent property; this record does not change Core's (Unresolved question 5).
 - **Values.** Each member value is either an annotation string (§1.4), or an array of 1 to 16
   annotation strings in which no string appears twice.
 - **String equality.** Two annotation strings are equal when they are the same sequence of Unicode
@@ -196,27 +200,73 @@ An annotation string:
 - has 1 to 256 characters, counted as Unicode code points, which is how JSON Schema `maxLength`
   counts them. A character outside the Basic Multilingual Plane counts once, though it is two
   UTF-16 code units and four UTF-8 bytes;
-- contains, after JSON unescaping, none of U+0000–U+001F (C0 controls, including tab, line feed
-  and escape), U+007F–U+009F (delete and the C1 controls, including U+0085 and the single-character
-  control sequence introducer U+009B), U+2028 and U+2029 (the line and paragraph separators), and
-  U+202A–U+202E (the bidirectional embeddings and overrides: LRE, RLE, PDF, LRO and RLO). The
-  refused code points are exactly U+0000–U+001F, U+007F–U+009F and U+2028–U+202E.
+- contains, after JSON unescaping, no character of the *refused class*:
+  - U+0000–U+001F and U+007F–U+009F, the C0 controls, delete and the C1 controls (including tab,
+    line feed, escape, U+0085 and the single-character control sequence introducer U+009B);
+  - U+2028 and U+2029, the line and paragraph separators;
+  - every bidirectional format character: U+061C (the Arabic letter mark), U+200E and U+200F (the
+    left-to-right and right-to-left marks), U+202A–U+202E (the embeddings and overrides LRE, RLE,
+    PDF, LRO and RLO) and U+2066–U+2069 (the isolates LRI, RLI, FSI and PDI); and
+  - every other invisible, default-ignorable character: U+00AD (soft hyphen), U+034F (combining
+    grapheme joiner), U+115F–U+1160, U+3164 and U+FFA0 (Hangul fillers), U+17B4–U+17B5 (Khmer
+    inherent vowels), U+180B–U+180F (Mongolian variation selectors and vowel separator),
+    U+200B–U+200D (zero-width space, non-joiner and joiner), U+2060–U+206F (word joiner, invisible
+    operators and the deprecated format characters, beside the isolates), U+FE00–U+FE0F
+    (variation selectors), U+FEFF (zero-width no-break space), U+FFF0–U+FFF8 (unassigned, reserved
+    as default-ignorable), U+1BCA0–U+1BCA3 (shorthand format controls), U+1D173–U+1D17A (musical
+    format controls) and U+E0000–U+E0FFF (the tag characters, the supplementary variation
+    selectors and the unassigned rest of that range); and
+- does not begin or end with a white-space character: one with the Unicode property White_Space,
+  which is exactly U+0009–U+000D, U+0020, U+0085, U+00A0, U+1680, U+2000–U+200A, U+2028, U+2029,
+  U+202F, U+205F and U+3000. Those the refused class holds are refused anywhere. The others are
+  admitted between two other characters. A string made only of white space begins with it, so it is
+  refused.
+
+The refused code points are exactly U+0000–U+001F, U+007F–U+009F, U+00AD, U+034F, U+061C,
+U+115F–U+1160, U+17B4–U+17B5, U+180B–U+180F, U+200B–U+200F, U+2028–U+202E, U+2060–U+206F, U+3164,
+U+FE00–U+FE0F, U+FEFF, U+FFA0, U+FFF0–U+FFF8, U+1BCA0–U+1BCA3, U+1D173–U+1D17A and
+U+E0000–U+E0FFF. Apart from the controls and the two separators, that is the Unicode property
+Default_Ignorable_Code_Point, as Unicode 17.0 defines it. The list, not the property, is the rule: a
+later Unicode version that changes the property does not change it.
 
 An annotation string is single-line text, meant as a filter key or a short label in compact views
-such as chips, table cells and terminal output. The reasons differ by kind:
+such as chips, table cells and terminal output, and compared by code points (§1.3). The reasons
+differ by kind:
 
 - **Controls and separators.** A C0 or C1 control, or a line or paragraph separator, breaks a line
   or a view, and a control sequence can take control of a terminal. Nothing a consumer does at
   display makes them safe in a one-line label.
-- **Embeddings and overrides.** These reorder the characters that follow them, so a label can
-  display in an order other than its logical one, and two different labels can look alike.
-  Isolating the label from the text around it does not undo that reordering inside the label.
-- **Marks and isolates.** U+200E, U+200F and U+2066–U+2069 are admitted. Right-to-left labels are
-  legitimate text and need them. A mark changes only how neutral characters next to it are
-  ordered, and an isolate confines its effect to its own run. What they can still do to the text
-  around a label, the isolation D1 requires contains (§6).
+- **Bidirectional format characters.** Each can make a label display in an order other than its
+  logical one, and make two different labels look alike. Embeddings and overrides reorder the
+  characters that follow them. A mark is an invisible strong character: it sets the direction of
+  the neutral characters beside it and, as a label's first strong character, the label's base
+  direction, so the logical string `"\u200Fapprove\u200F not\u200F do"`, isolated with its
+  direction taken from its content (`dir="auto"` or `<bdi>` in HTML), displays as "do not approve". An unbalanced isolate inside a label defeats the isolation a consumer adds with isolate
+  characters, the only isolation plain text, terminals, logs and spreadsheet cells have (D1): a
+  lone U+2069 closes the consumer's isolate early, and a lone U+2066–U+2068 leaves it open to the
+  end of the line. A label in a single right-to-left script displays correctly with none of them,
+  so the class refuses them all. D1 still requires isolating a label, because a label's own strong
+  characters affect the neutral text beside it.
+- **Invisible characters.** A default-ignorable character displays as nothing in most contexts, so
+  two labels that differ by one look alike: a list of distinct values shows `intake` twice when one
+  of them ends in U+200B, and a view filtered by one silently omits what carries the other (D2). Tag
+  characters can also spell invisible ASCII text, a channel aimed at automated readers of a pack.
+- **White space at either end.** Most displays trim it or do not show it, so `intake` and `intake`
+  followed by a space look alike for the same reason; a string of white space alone displays as
+  nothing, which makes it a second spelling of "no value" (§1.5).
 
-Every other character is admitted, including other format characters such as zero-width joiners.
+**The cost.** An annotation cannot hold an emoji sequence that needs a zero-width joiner or a
+variation selector (joined family and profession emoji, tag-sequence flags, the text and emoji
+presentation selectors), nor text whose correct shaping needs the zero-width joiner or non-joiner,
+as some spellings in Arabic-script and Indic-script writing do. An annotation is a short
+machine-comparable label, a filter key; free text belongs in the object's `description`, which
+admits every character and which D1 governs.
+
+Every other character is admitted, including format characters that are not default-ignorable (for
+example U+0600–U+0605 and U+FFF9–U+FFFB), combining marks, and characters of different scripts that
+look alike (U+0061 and U+0430). Those are why D2 requires a consumer that lists distinct values or
+states a filter to show every character outside printable ASCII unambiguously (§8).
+
 Core admits every character, refused here or not, in its free-text strings (titles, labels,
 descriptions, route names), in fact paths and in operands. Its identifiers, version strings,
 extension names and pack `id` are ASCII by their grammars (Core §5; the pack `id` is an RFC 3986
@@ -229,7 +279,9 @@ These are refused:
 
 - an empty annotations object `{}` (`JPS-STRUCTURE-MIN-PROPERTIES`);
 - an empty list `[]` (`JPS-STRUCTURE-COLLECTION-ARITY`); and
-- an empty string `""` (`JPS-STRUCTURE-MIN-LENGTH`).
+- an empty string `""` (`JPS-STRUCTURE-MIN-LENGTH`); and
+- a string made only of white space, such as `" "`, which begins with white space (§1.4,
+  `JPS-STRUCTURE-NOT`).
 
 Absence is the one spelling for "no annotations" and for "no value for this key", so "has the key"
 and "has a value for the key" never differ. This matches Core's `nonEmptyString` for its other
@@ -258,7 +310,10 @@ unchanged.
     "type": "string",
     "minLength": 1,
     "maxLength": 256,
-    "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+    "not": {
+      "type": "string",
+      "pattern": "[\u0000-\u001f\u007f-\u009f\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180b-\u180f\u200b-\u200f\u2028-\u202e\u2060-\u206f\u3164\ufe00-\ufe0f\ufeff\uffa0\ufff0-\ufff8\ud82f\udca0-\ud82f\udca3\ud834\udd73-\ud834\udd7a\udb40\udc00-\udb43\udfff]|^[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]|[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]$"
+    }
   },
   "annotations": {
     "type": "object",
@@ -304,16 +359,38 @@ unchanged.
 }
 ```
 
-**The character class.** It is written with JSON escapes (`\u0000`), not regular-expression
-escapes (the JSON text `\\u0000`, which reaches the engine as `\u0000` and which some engines cannot
-compile). After JSON decoding, the pattern holds the code points themselves, so every
-engine receives a plain character class of literal characters, whatever escape syntax it supports.
-The class is unanchored and sits under `not`: a string is refused when the class matches anywhere
-in it, so no end anchor is involved and a trailing line feed is refused like any other. Under
-`propertyNames` the same `not` refuses a key that ends in a line feed, which an engine whose `$`
-matches before a final line feed would otherwise admit (§1.3).
+**The patterns.** Both are written with JSON escapes (`\u0000`), not regular-expression escapes
+(the JSON text `\\u0000`, which reaches the engine as `\u0000` and which some engines cannot
+compile). After JSON decoding, a pattern holds the code points themselves, so an engine receives
+literal characters, whatever escape syntax it supports. A code point outside the Basic Multilingual
+Plane is written as its UTF-16 surrogate pair: `\ud82f\udca0` is U+1BCA0, and a JSON parser
+decodes the pair into that one code point, so `\ud82f\udca0-\ud82f\udca3` reaches the engine
+as the range U+1BCA0–U+1BCA3. A lone surrogate would not survive every JSON parser, so the ranges
+are not split into surrogate alternatives.
 
-In `annotationString` the `not` holds `"type": "string"` beside the class. A `pattern` holds for
+The string pattern is the refused class, unanchored, then the white space at either end:
+`[class]|^[white space]|[white space]$`. It sits under `not`, so a string is refused when any part
+matches. Every line terminator an engine's anchors know (U+000A, U+000D, U+0085, U+2028, U+2029) is
+in the class, so an engine whose `$` matches before a final line terminator, or whose `^` and `$`
+match at every line, refuses exactly the same strings. Under `propertyNames` the `not` holds the
+controls, the two separators and the embeddings and overrides only: a key is ASCII by the
+local-identifier grammar, and that `not` exists to refuse a key that ends in a line feed, which an
+engine whose `$` matches before a final line feed would otherwise admit (§1.3).
+
+**Engines.** The string pattern was swept over every code point, at the start of a string, inside it
+and at its end, and refused exactly the code points of §1.4 in: Python 3.12 `re` (the engine of the
+repository's validator); ECMA-262 in Unicode mode, with the `u` flag and with the `v` flag, in Node
+22; RE2, through Go 1.26's `regexp`; Perl 5.30; Java's `java.util.regex`; and Ruby 2.7. ECMA-262
+without Unicode mode does not compile it: it reads the pattern as UTF-16 code units, and the low
+surrogate of one pair followed by the high surrogate of the next is a range out of order. The JSON
+Schema 2020-12 core specification asks that patterns be built with the `u` flag or equivalent Unicode
+support. An engine that matches UTF-16 code units and has no Unicode mode cannot hold the three
+ranges outside the Basic Multilingual Plane at all; an implementation built on one applies them as
+a check of its own, with the same code and pointer. No other engine was tested, .NET's and PCRE2
+among them. Each pattern holds a literal U+0000, which a pattern interface that takes a
+NUL-terminated string truncates; such an interface needs another spelling of the same class.
+
+In `annotationString` the `not` holds `"type": "string"` beside the pattern. A `pattern` holds for
 every instance that is not a string, so without it a list item that is a number or a list would
 fail `not` as well as `type`, and one wrong item would give two findings. With it, a non-string
 satisfies the `not` and is refused once, by `type`. A member name is always a string, so the `not`
@@ -745,14 +822,17 @@ consumer that displays one:
   `metadata.reviews`;
 - MUST isolate each annotation key and string it shows inline with other text, so that a value's
   direction does not reorder the text around it. In HTML, for example, `<bdi>`, or `dir="auto"` on
-  the value's own element, does this. It SHOULD isolate the other display data the same way;
-- SHOULD, where it lists distinct annotation values or states a filter, make default-ignorable and
-  format characters visible, so that two values that look alike can be told apart; and
+  the value's own element, does this. Annotation strings hold no bidirectional format character
+  (§1.4), so isolation added with isolate characters, as in plain text, cannot be undone from
+  inside one. It SHOULD isolate the other display data the same way;
+- MUST, where it lists distinct annotation keys or values or states a filter, show them as D2
+  requires (§8), so that two values that look alike can be told apart; and
 - SHOULD show annotations as the author's labels, visually distinct from Core members.
 
 The fixture `valid-annotations-display-hostile` (see [Conformance](#conformance)) carries markup, a
-template, a formula prefix, a URI, bidirectional marks and isolates (one isolate left unterminated),
-a zero-width joiner and an outcome id as values. Validators accept it, and evaluation ignores it.
+template, a formula prefix, a URI, right-to-left text beside digits and neutral characters, a word
+spelled with a look-alike letter from another script, stacked combining marks, an inner em space and
+an outcome id as values: what §1.4 still admits. Validators accept it, and evaluation ignores it.
 How it is rendered is a consumer's test, not a Core class.
 
 ### 7. Ceilings
@@ -802,8 +882,17 @@ This section is informative except for D2.
 
 **D2, filtered views (normative).** A consumer that presents a filtered view of a pack MUST state,
 in the view, that it is filtered, and by which keys and values. A filtered view is one that omits
-outcomes, rules or entries because of their annotations. The view SHOULD state how many items it
-omits.
+outcomes, rules or entries because of their annotations. For each kind of item it filters, the
+view MUST state how many items it shows and how many the pack holds, for example "rules: 4 of 9".
+
+Wherever a consumer lists distinct annotation keys or values, or states a filter, it MUST show
+every character outside printable ASCII (U+0020–U+007E) in a key or value unambiguously: in a form
+from which the reader can recover each such code point, such as its `U+` number beside or in place
+of the glyph. Two different strings then never display alike, whatever the font. Showing a value in
+a filter's statement exactly as it is shown in the list it was picked from meets this when the list
+meets it.
+
+A review made from a filtered view covers only what the view showed. It is not a review of the pack.
 
 A filtered view is not a pack. It MUST NOT be offered for evaluation, signing or hashing as the
 pack. A disposition is always the whole pack's, and omitted items take part in every evaluation.
@@ -1054,12 +1143,19 @@ decision on the issue chose the reserved extension.
   - Vendor extensions remain available for structured data, except on sets and entries (§2.2).
 - **Trimming whitespace or normalizing case and Unicode.** Rejected. Equality is on code points
   (§1.3), and a validator that normalized would let two tools disagree about repeated strings in
-  a list.
-- **Refusing every bidirectional formatting character, or none.** Rejected (§1.4). Refusing the
-  marks and isolates would refuse legitimate right-to-left labels. Admitting the embeddings and
-  overrides would let a label display in an order other than its logical one, which isolation at
-  display does not undo. This record refuses the embeddings and overrides only, and D1 requires
-  isolation of what it admits.
+  a list. White space at either end is refused instead of trimmed (§1.4), so no string has a trimmed
+  twin.
+- **Refusing only the embeddings and overrides, and admitting the marks and isolates.** Rejected
+  in round 1 (§1.4). The first draft did this, reasoning that right-to-left labels need marks and
+  isolates. They do not: a label in one right-to-left script displays correctly without them, and a
+  mark or an unbalanced isolate can make a label display in an order other than its logical one or
+  defeat the isolation D1 requires.
+- **Admitting the invisible characters and requiring consumers to show them.** Rejected in round 1
+  (§1.4). A consumer that does not show them hides a rule from a filtered view, and a label gains
+  nothing from them that a short machine-comparable key needs. The cost, emoji sequences and
+  shaping that need joiners, is stated in §1.4. Refusing the format characters that are not
+  default-ignorable, and characters that look alike across scripts, would refuse ordinary text;
+  D2's display rule covers them instead.
 - **A registry of keys.** Rejected for now. Core infers no meaning from spelling (Core §5), and a
   registry is governance work that no evidence yet asks for. A project can document its own
   vocabulary (§8).
@@ -1148,10 +1244,15 @@ evaluation, is Core's question. This record does not change it.
 ## Security and privacy
 
 - **Display.** Annotations, set and entry descriptions and displayed entry values are untrusted
-  display data (D1). The refused characters (§1.4) remove line breaks, terminal control sequences
-  and bidirectional embeddings and overrides from annotations. Escaping, isolation of the
-  bidirectional text that remains, visible format characters in lists and filters, and refusal to
-  dereference are the consumer's duties.
+  display data (D1). The refused characters (§1.4) remove line breaks, terminal control sequences,
+  every bidirectional format character, the invisible default-ignorable characters and white space
+  at either end from annotations. Escaping, isolation of the bidirectional text that remains,
+  showing every character outside printable ASCII where values are listed or a filter is stated
+  (D2), and refusal to dereference are the consumer's duties.
+- **Filtered views.** A view filtered by an annotation value hides what does not match. D2 makes the
+  view say so, by which keys and values, and how many items of each kind it shows out of how many
+  the pack holds; and it makes two different values display differently where a reviewer picks one.
+  A review made from a filtered view covers only what it showed.
 - **Confusion.** A label such as `"status": "approved"` or `"priority": "first"` is the author's
   text, not a Core fact. Core has no rule priority (Core §6.5), and §4.2 makes a label unable to create
   one. D1 forbids presenting a label as a review or an approval.
@@ -1262,7 +1363,10 @@ This record proposes seven new provisional codes, and no others:
 | `valid-annotations-non-bmp` | a 256-character string of characters outside the BMP: code points are counted, not code units or bytes | valid |
 | `valid-annotations-one-element-list` | `["intake"]` on one rule, `"intake"` on another | valid |
 | `valid-annotations-nfc-nfd` | one list holding `"\u00e9"` and `"e\u0301"`, the NFC and NFD spellings of one text | valid: two strings, so `uniqueItems` holds |
-| `valid-annotations-display-hostile` | markup, a template, a formula prefix, a URI, bidirectional marks and isolates (one isolate unterminated), a zero-width joiner, an outcome id as values | valid |
+| `valid-annotations-display-hostile` | markup, a template, a formula prefix, a URI, right-to-left text beside digits and neutral characters, a look-alike letter from another script (U+0430), stacked combining marks, an inner em space, an outcome id as values | valid |
+| `valid-annotations-class-neighbours` | the code point just below and just above each refused range, inside a string (the nearest assigned one where that is unassigned), and the format characters U+0600, U+0605 and U+FFFB, which are not default-ignorable | valid |
+| `valid-annotations-inner-white-space` | each white-space character the refused class does not hold (U+0020, U+00A0, U+1680, U+2000, U+2003, U+200A, U+202F, U+205F, U+3000), between two other characters | valid |
+| `valid-annotations-edge-neighbours` | strings that begin and end with a code point next to a white-space character (U+0021, U+00A1, U+167F, U+1681, U+1FFE, U+2010, U+2027, U+2030, U+205E, U+2FFB, U+3001) | valid |
 | `structural-annotations-in-decision` | and one case each for `-evidence-requirement`, `-source`, `-exception`, `-escalation` and `-metadata` | `JPS-STRUCTURE-EXTENSION-NAME` at `…/extensions/org.judgmentpack.annotations` |
 | `structural-value-set-extensions-*` | `extensions` on a set object: one case holding annotations, one holding a vendor key | `JPS-STRUCTURE-UNKNOWN-MEMBER` at `/valueSets/0/extensions` |
 | `structural-value-set-entry-extension-*` | in an entry's `extensions`, one case each: `com.example.note` alone; `com.example.note` beside annotations; `org.judgmentpack.future` | `JPS-STRUCTURE-UNKNOWN-MEMBER` at `/valueSets/0/entries/0/extensions/` and the name |
@@ -1285,7 +1389,15 @@ This record proposes seven new provisional codes, and no others:
 | `structural-annotations-list-item-number` | `[1]` | `JPS-STRUCTURE-TYPE` once, at the item, `…/0` (§1.7) |
 | `structural-annotations-control-*` | one case each, escaped in the JSON: NUL, TAB, LF, ESC, DEL, U+0085, U+009B, U+2028, U+2029 | `JPS-STRUCTURE-NOT` at the string |
 | `structural-annotations-trailing-lf-*` | `"intake\n"`, escaped in the JSON: one case as a key's value, one as the last item of a list | `JPS-STRUCTURE-NOT` at the string |
-| `structural-annotations-bidi-*` | one case each, inside a string: U+202A, U+202B, U+202C, U+202D, U+202E | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-bidi-*` | one case each, inside a string: U+061C, U+200E, U+200F, U+202A, U+202B, U+202C, U+202D, U+202E, U+2066, U+2067, U+2068, U+2069 | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-bidi-reordered-label` | the round-1 review's `"\u200Fapprove\u200F not\u200F do"`, which displays as "do not approve" under automatic direction | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-invisible-*` | one case each, inside a string: U+00AD, U+034F, U+115F, U+1160, U+17B4, U+17B5, U+180B, U+180E, U+180F, U+200B, U+200C, U+200D, U+2060, U+2064, U+206A, U+206F, U+3164, U+FE00, U+FE0E, U+FE0F, U+FEFF, U+FFA0, U+FFF0, U+FFF8, U+1BCA0, U+1BCA3, U+1D173, U+1D17A, U+E0000, U+E0001, U+E0041, U+E007F, U+E0100, U+E0FFF | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-invisible-only` | a string that is only U+200D | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-tag-text` | `intake` followed by tag characters that spell `hidden note` | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-invisible-filter-twin` | the round-1 review's filter example: two rules, `intake` and `intake` followed by U+200B | `JPS-STRUCTURE-NOT` at the second rule's string |
+| `structural-annotations-leading-white-space-*`, `structural-annotations-trailing-white-space-*` | one case each, at the start and at the end of a string: U+0020, U+00A0, U+1680, U+2000, U+200A, U+202F, U+205F, U+3000 | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-white-space-only`, `structural-annotations-white-space-only-ideographic` | `" "`, and two U+3000 | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-trailing-white-space-list` | `"intake "` as the last item of a list | `JPS-STRUCTURE-NOT` at the item |
 | `carrier-annotations-duplicate-key` | one key twice in one annotations object | `JPS-CARRIER-DUPLICATE-MEMBER` |
 | `valid-value-sets-empty` | `"valueSets": []` and no reference | valid |
 | `structural-value-set-entries-empty` | `"entries": []` | `JPS-STRUCTURE-COLLECTION-ARITY` at `/valueSets/0/entries` |

@@ -11,6 +11,7 @@ import collections
 import copy
 import json
 import re
+import shutil
 import subprocess
 import sys
 import types
@@ -61,11 +62,31 @@ RELEASED_EXAMPLE_PATH = ROOT / "examples" / "minimal-expense-approval.json"
 
 ANNOTATIONS = "org.judgmentpack.annotations"
 LOCAL_ID = "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
-# RFC 0031 §1.4's refused class, as the schema holds it after JSON decoding.
-REFUSED_CLASS = "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
-# The two `not` subschemas that hold it: under an annotations object's propertyNames, whose instances
-# are always strings, and in annotationString, where `type` keeps a non-string from failing it (§1.7).
-REFUSED_NOTS = ({"pattern": REFUSED_CLASS}, {"type": "string", "pattern": REFUSED_CLASS})
+# RFC 0031 §1.3's class for annotation keys, and §1.4's pattern for annotation strings, as the schema
+# holds them after JSON decoding (§1.7).
+KEY_CLASS = "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+_WHITE_SPACE = "[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]"
+STRING_PATTERN = (
+    "[\u0000-\u001f\u007f-\u009f\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180b-\u180f\u200b-\u200f"
+    "\u2028-\u202e\u2060-\u206f\u3164\ufe00-\ufe0f\ufeff\uffa0\ufff0-\ufff8"
+    "\U0001bca0-\U0001bca3\U0001d173-\U0001d17a\U000e0000-\U000e0fff]"
+    f"|^{_WHITE_SPACE}|{_WHITE_SPACE}$"
+)
+# The two `not` subschemas: under an annotations object's propertyNames, whose instances are always
+# strings, and in annotationString, where `type` keeps a non-string from failing it (§1.7).
+REFUSED_NOTS = ({"pattern": KEY_CLASS}, {"type": "string", "pattern": STRING_PATTERN})
+# The same rule as §1.4 states it in words, written out by hand: the code points refused anywhere in
+# an annotation string, and Unicode's White_Space, refused at either end.
+REFUSED_ANYWHERE = (
+    (0x0000, 0x001F), (0x007F, 0x009F), (0x00AD, 0x00AD), (0x034F, 0x034F), (0x061C, 0x061C),
+    (0x115F, 0x1160), (0x17B4, 0x17B5), (0x180B, 0x180F), (0x200B, 0x200F), (0x2028, 0x202E),
+    (0x2060, 0x206F), (0x3164, 0x3164), (0xFE00, 0xFE0F), (0xFEFF, 0xFEFF), (0xFFA0, 0xFFA0),
+    (0xFFF0, 0xFFF8), (0x1BCA0, 0x1BCA3), (0x1D173, 0x1D17A), (0xE0000, 0xE0FFF),
+)
+WHITE_SPACE = (
+    (0x0009, 0x000D), (0x0020, 0x0020), (0x0085, 0x0085), (0x00A0, 0x00A0), (0x1680, 0x1680),
+    (0x2000, 0x200A), (0x2028, 0x2029), (0x202F, 0x202F), (0x205F, 0x205F), (0x3000, 0x3000),
+)
 NEW_CODES = [
     "JPS-STRUCTURE-MAX-LENGTH",
     "JPS-STRUCTURE-MIN-PROPERTIES",
@@ -738,6 +759,120 @@ class DraftEvaluationRowTests(unittest.TestCase):
                     else:
                         self.assertEqual([], diagnostics)
                         self.assertEqual(pack, evaluation_form(pack))
+
+
+def code_points(ranges: Iterable[tuple[int, int]]) -> set[int]:
+    return {cp for low, high in ranges for cp in range(low, high + 1)}
+
+
+def every_code_point() -> Iterable[int]:
+    # Every scalar value: a surrogate is not a character a JSON string can hold alone.
+    return (cp for cp in range(0x110000) if not 0xD800 <= cp <= 0xDFFF)
+
+
+# A Node script that sweeps the schema's string pattern under ECMA-262 Unicode mode. It reads the
+# schema with JSON.parse, so the surrogate-pair escapes decode as they do for any ECMA-262 validator.
+NODE_SWEEP = r"""
+const schema = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+const pattern = schema.$defs.annotationString.not.pattern;
+const result = {};
+try { new RegExp(pattern); result.withoutUnicodeMode = "compiles"; }
+catch (error) { result.withoutUnicodeMode = error.name; }
+for (const flags of ["u", "v"]) {
+  let re;
+  try { re = new RegExp(pattern, flags); } catch (error) { result[flags] = error.name; continue; }
+  const found = {inner: [], lead: [], trail: []};
+  for (let cp = 0; cp <= 0x10ffff; cp++) {
+    if (cp >= 0xd800 && cp <= 0xdfff) continue;
+    const c = String.fromCodePoint(cp);
+    if (re.test("a" + c + "a")) found.inner.push(cp);
+    if (re.test(c + "a")) found.lead.push(cp);
+    if (re.test("a" + c)) found.trail.push(cp);
+  }
+  result[flags] = found;
+}
+console.log(JSON.stringify(result));
+"""
+
+
+def stated_code_points(text: str, opening: str) -> set[int]:
+    """The code points a sentence lists, from `opening` to the full stop that ends it."""
+    flat = " ".join(text.split())
+    start = flat.index(opening) + len(opening)
+    sentence = flat[start:flat.index(".", start)]
+    ranges = [(int(low, 16), int(high or low, 16))
+              for low, high in re.findall(r"U\+([0-9A-F]{4,5})(?:–U\+([0-9A-F]{4,5}))?", sentence)]
+    return code_points(ranges)
+
+
+class DraftCharacterRuleTests(unittest.TestCase):
+    """RFC 0031 §1.4: what an annotation string refuses, checked against every code point."""
+
+    def string_pattern(self) -> str:
+        return draft_schema()["$defs"]["annotationString"]["not"]["pattern"]
+
+    def expected(self) -> dict[str, list[int]]:
+        anywhere = code_points(REFUSED_ANYWHERE)
+        at_an_end = sorted(anywhere | code_points(WHITE_SPACE))
+        return {"inner": sorted(anywhere), "lead": at_an_end, "trail": at_an_end}
+
+    def test_the_schema_holds_the_two_patterns(self) -> None:
+        defs = draft_schema()["$defs"]
+        self.assertEqual({"type": "string", "pattern": STRING_PATTERN}, defs["annotationString"]["not"])
+        self.assertEqual({"pattern": KEY_CLASS}, defs["annotations"]["propertyNames"]["not"])
+
+    def test_the_rfc_and_the_draft_text_state_the_hand_written_code_points(self) -> None:
+        for path in (ROOT / "rfcs" / "0031-annotations-and-value-sets.md", DRAFT_TEXT_PATH):
+            text = path.read_text(encoding="utf-8")
+            with self.subTest(path=path.relative_to(ROOT).as_posix()):
+                self.assertEqual(code_points(REFUSED_ANYWHERE),
+                                 stated_code_points(text, "The refused code points are exactly"))
+                self.assertEqual(code_points(WHITE_SPACE), stated_code_points(text, "White_Space, which is exactly"))
+
+    def test_python_re_refuses_exactly_the_stated_code_points(self) -> None:
+        # The engine of the repository's validator: jsonschema's `pattern` is re.search.
+        engine = re.compile(self.string_pattern())
+        found: dict[str, list[int]] = {"inner": [], "lead": [], "trail": []}
+        for cp in every_code_point():
+            c = chr(cp)
+            if engine.search("a" + c + "a"):
+                found["inner"].append(cp)
+            if engine.search(c + "a"):
+                found["lead"].append(cp)
+            if engine.search("a" + c):
+                found["trail"].append(cp)
+        self.assertEqual(self.expected(), found)
+
+    def test_the_validator_refuses_each_range_edge_and_admits_its_neighbours(self) -> None:
+        validator = Draft202012Validator(draft_schema()["$defs"]["annotationString"])
+        anywhere = code_points(REFUSED_ANYWHERE)
+        edges = {cp for low, high in REFUSED_ANYWHERE for cp in (low - 1, low, high, high + 1)} - {-1}
+        for cp in sorted(edges):
+            with self.subTest(code_point=f"U+{cp:04X}"):
+                self.assertEqual(cp in anywhere, not validator.is_valid("a" + chr(cp) + "a"))
+        for low, high in WHITE_SPACE:
+            for cp in (low, high):
+                with self.subTest(white_space=f"U+{cp:04X}"):
+                    self.assertFalse(validator.is_valid(chr(cp) + "a"))
+                    self.assertFalse(validator.is_valid("a" + chr(cp)))
+                    self.assertFalse(validator.is_valid(chr(cp)))
+                    self.assertEqual(cp in anywhere, not validator.is_valid("a" + chr(cp) + "a"))
+
+    def test_ecma_262_unicode_mode_refuses_exactly_the_stated_code_points(self) -> None:
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("no node on PATH; the ECMA-262 sweep needs Node 20 or later")
+        found = subprocess.run([node, "--version"], capture_output=True, text=True, timeout=60).stdout.strip()
+        match = re.fullmatch(r"v(\d+)\.\d+\.\d+", found)
+        if match is None or int(match.group(1)) < 20:
+            self.skipTest(f"node {found or 'of an unknown version'} is on PATH; the v-flag sweep needs Node 20 or later")
+        run = subprocess.run([node, "-e", NODE_SWEEP, str(DRAFT_SCHEMA_PATH)],
+                             capture_output=True, text=True, timeout=600, check=True)
+        result = json.loads(run.stdout)
+        # Without Unicode mode the surrogate pairs are code units, and one range is out of order.
+        self.assertEqual("SyntaxError", result["withoutUnicodeMode"])
+        self.assertEqual(self.expected(), result["u"])
+        self.assertEqual(self.expected(), result["v"])
 
 
 class DraftSemanticReadingTests(unittest.TestCase):

@@ -101,8 +101,35 @@
       "layer": "semantic",
       "expectedResult": "valid",
       "expectedDiagnostic": null,
-      "focus": "markup, a template, a formula prefix, a URI, bidirectional marks and isolates (one unterminated), a zero-width joiner and an outcome id as values; how it is displayed is a consumer's test",
+      "focus": "markup, a template, a formula prefix, a URI, right-to-left text beside digits and neutral characters, a word spelled with a look-alike letter from another script (U+0430), stacked combining marks, an inner em space and an outcome id as values: what the refused class still admits; how it is displayed is a consumer's test",
       "specSection": "\u00a710"
+    },
+    {
+      "id": "valid-annotations-class-neighbours",
+      "path": "valid/annotations-class-neighbours.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "the code point just below and just above each refused range, inside a string, and format characters that are not default-ignorable (U+0600, U+0605, U+FFFB): all admitted",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "valid-annotations-inner-white-space",
+      "path": "valid/annotations-inner-white-space.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "each white-space character the refused class does not hold, between two other characters: admitted",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "valid-annotations-edge-neighbours",
+      "path": "valid/annotations-edge-neighbours.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "the code points next to the white-space characters, at the start and the end of a string: admitted",
+      "specSection": "\u00a79.2"
     },
     {
       "id": "structural-annotations-in-decision",
@@ -762,6 +789,774 @@
         "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
       },
       "focus": "an annotation string holding the embedding or override U+202E is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-bidi-u061c",
+      "path": "structural/annotations-bidi-u061c.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the bidirectional format character U+061C is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-bidi-u200e",
+      "path": "structural/annotations-bidi-u200e.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the bidirectional format character U+200E is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-bidi-u200f",
+      "path": "structural/annotations-bidi-u200f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the bidirectional format character U+200F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-bidi-u2066",
+      "path": "structural/annotations-bidi-u2066.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the bidirectional format character U+2066 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-bidi-u2067",
+      "path": "structural/annotations-bidi-u2067.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the bidirectional format character U+2067 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-bidi-u2068",
+      "path": "structural/annotations-bidi-u2068.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the bidirectional format character U+2068 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-bidi-u2069",
+      "path": "structural/annotations-bidi-u2069.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the bidirectional format character U+2069 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-bidi-reordered-label",
+      "path": "structural/annotations-bidi-reordered-label.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/label"
+      },
+      "focus": "a label whose marks make it display as do not approve under automatic direction is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u00ad",
+      "path": "structural/annotations-invisible-u00ad.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+00AD is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u034f",
+      "path": "structural/annotations-invisible-u034f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+034F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u115f",
+      "path": "structural/annotations-invisible-u115f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+115F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u1160",
+      "path": "structural/annotations-invisible-u1160.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+1160 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u17b4",
+      "path": "structural/annotations-invisible-u17b4.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+17B4 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u17b5",
+      "path": "structural/annotations-invisible-u17b5.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+17B5 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u180b",
+      "path": "structural/annotations-invisible-u180b.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+180B is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u180e",
+      "path": "structural/annotations-invisible-u180e.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+180E is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u180f",
+      "path": "structural/annotations-invisible-u180f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+180F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u200b",
+      "path": "structural/annotations-invisible-u200b.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+200B is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u200c",
+      "path": "structural/annotations-invisible-u200c.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+200C is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u200d",
+      "path": "structural/annotations-invisible-u200d.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+200D is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u2060",
+      "path": "structural/annotations-invisible-u2060.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+2060 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u2064",
+      "path": "structural/annotations-invisible-u2064.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+2064 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u206a",
+      "path": "structural/annotations-invisible-u206a.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+206A is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u206f",
+      "path": "structural/annotations-invisible-u206f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+206F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u3164",
+      "path": "structural/annotations-invisible-u3164.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+3164 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ufe00",
+      "path": "structural/annotations-invisible-ufe00.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+FE00 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ufe0e",
+      "path": "structural/annotations-invisible-ufe0e.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+FE0E is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ufe0f",
+      "path": "structural/annotations-invisible-ufe0f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+FE0F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ufeff",
+      "path": "structural/annotations-invisible-ufeff.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+FEFF is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-uffa0",
+      "path": "structural/annotations-invisible-uffa0.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+FFA0 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ufff0",
+      "path": "structural/annotations-invisible-ufff0.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+FFF0 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ufff8",
+      "path": "structural/annotations-invisible-ufff8.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+FFF8 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u1bca0",
+      "path": "structural/annotations-invisible-u1bca0.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+1BCA0 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u1bca3",
+      "path": "structural/annotations-invisible-u1bca3.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+1BCA3 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u1d173",
+      "path": "structural/annotations-invisible-u1d173.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+1D173 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-u1d17a",
+      "path": "structural/annotations-invisible-u1d17a.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+1D17A is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ue0000",
+      "path": "structural/annotations-invisible-ue0000.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+E0000 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ue0001",
+      "path": "structural/annotations-invisible-ue0001.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+E0001 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ue0041",
+      "path": "structural/annotations-invisible-ue0041.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+E0041 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ue007f",
+      "path": "structural/annotations-invisible-ue007f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+E007F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ue0100",
+      "path": "structural/annotations-invisible-ue0100.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+E0100 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-ue0fff",
+      "path": "structural/annotations-invisible-ue0fff.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string holding the invisible default-ignorable character U+E0FFF is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-only",
+      "path": "structural/annotations-invisible-only.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "a string made only of a zero-width joiner displays as nothing and is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-tag-text",
+      "path": "structural/annotations-tag-text.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "a value followed by invisible tag characters that spell ASCII text is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-invisible-filter-twin",
+      "path": "structural/annotations-invisible-filter-twin.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/1/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "the round-1 review's filter example: a second rule's category that displays as intake but ends in U+200B is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-leading-white-space-u0020",
+      "path": "structural/annotations-leading-white-space-u0020.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that begins with the white-space character U+0020 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-trailing-white-space-u0020",
+      "path": "structural/annotations-trailing-white-space-u0020.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that ends with the white-space character U+0020 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-leading-white-space-u00a0",
+      "path": "structural/annotations-leading-white-space-u00a0.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that begins with the white-space character U+00A0 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-trailing-white-space-u00a0",
+      "path": "structural/annotations-trailing-white-space-u00a0.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that ends with the white-space character U+00A0 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-leading-white-space-u1680",
+      "path": "structural/annotations-leading-white-space-u1680.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that begins with the white-space character U+1680 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-trailing-white-space-u1680",
+      "path": "structural/annotations-trailing-white-space-u1680.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that ends with the white-space character U+1680 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-leading-white-space-u2000",
+      "path": "structural/annotations-leading-white-space-u2000.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that begins with the white-space character U+2000 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-trailing-white-space-u2000",
+      "path": "structural/annotations-trailing-white-space-u2000.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that ends with the white-space character U+2000 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-leading-white-space-u200a",
+      "path": "structural/annotations-leading-white-space-u200a.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that begins with the white-space character U+200A is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-trailing-white-space-u200a",
+      "path": "structural/annotations-trailing-white-space-u200a.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that ends with the white-space character U+200A is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-leading-white-space-u202f",
+      "path": "structural/annotations-leading-white-space-u202f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that begins with the white-space character U+202F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-trailing-white-space-u202f",
+      "path": "structural/annotations-trailing-white-space-u202f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that ends with the white-space character U+202F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-leading-white-space-u205f",
+      "path": "structural/annotations-leading-white-space-u205f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that begins with the white-space character U+205F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-trailing-white-space-u205f",
+      "path": "structural/annotations-trailing-white-space-u205f.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that ends with the white-space character U+205F is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-leading-white-space-u3000",
+      "path": "structural/annotations-leading-white-space-u3000.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that begins with the white-space character U+3000 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-trailing-white-space-u3000",
+      "path": "structural/annotations-trailing-white-space-u3000.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "an annotation string that ends with the white-space character U+3000 is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-white-space-only",
+      "path": "structural/annotations-white-space-only.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "a string made only of a space begins with white space and is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-white-space-only-ideographic",
+      "path": "structural/annotations-white-space-only-ideographic.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
+      },
+      "focus": "a string made only of ideographic spaces is refused",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-trailing-white-space-list",
+      "path": "structural/annotations-trailing-white-space-list.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/rules/0/extensions/org.judgmentpack.annotations/category/1"
+      },
+      "focus": "the last item of a list ending in a space is refused",
       "specSection": "\u00a79.2"
     },
     {

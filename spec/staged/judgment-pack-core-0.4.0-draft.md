@@ -311,7 +311,8 @@ skip them because the extension is optional.
 
 - Each member name is a local identifier (§5) of at most 64 characters. A name that ends in a line
   feed is not a local identifier, whatever a pattern's end anchor admits; the schema also refuses
-  every character of the refused class below in a key, so the rule holds under every engine.
+  U+0000–U+001F, U+007F–U+009F and U+2028–U+202E in a key, so the rule holds in every engine
+  tested (RFC 0031 §1.7).
 - Each member value is an annotation string, or an array of 1 to 16 annotation strings in which no
   string appears twice. A one-element array and the plain string are both admitted, and are
   different bytes.
@@ -320,14 +321,25 @@ skip them because the extension is optional.
 - Core assigns no meaning to any key or value, and meaning MUST NOT be inferred from their spelling.
 
 **Annotation strings.** An annotation string has 1 to 256 characters, counted as code points (a
-character outside the Basic Multilingual Plane counts once). After JSON unescaping it contains none
-of U+0000–U+001F, U+007F–U+009F and U+2028–U+202E: the C0 and C1 controls, delete, the line and
-paragraph separators, and the bidirectional embeddings and overrides. The marks U+200E and U+200F,
-the isolates U+2066–U+2069 and every other character are admitted.
+character outside the Basic Multilingual Plane counts once). After JSON unescaping it contains no
+character of the *refused class*: the C0 and C1 controls and delete; the line and paragraph
+separators; every bidirectional format character (the Arabic letter mark, the left-to-right and
+right-to-left marks, the embeddings and overrides, and the isolates); and every other invisible,
+default-ignorable character, the tag characters among them. The refused code points are exactly
+U+0000–U+001F, U+007F–U+009F, U+00AD, U+034F, U+061C, U+115F–U+1160, U+17B4–U+17B5, U+180B–U+180F,
+U+200B–U+200F, U+2028–U+202E, U+2060–U+206F, U+3164, U+FE00–U+FE0F, U+FEFF, U+FFA0, U+FFF0–U+FFF8,
+U+1BCA0–U+1BCA3, U+1D173–U+1D17A and U+E0000–U+E0FFF. It also does not begin or end with a
+character of the Unicode property White_Space, which is exactly U+0009–U+000D, U+0020, U+0085,
+U+00A0, U+1680, U+2000–U+200A, U+2028, U+2029, U+202F, U+205F and U+3000; those the refused class
+does not hold are admitted between two other characters. Every other character is admitted. An
+annotation is a short machine-comparable label: an emoji sequence that needs a joiner or a
+variation selector, and text whose shaping needs a joiner, cannot appear in one, and belong in a
+`description`.
 
 **Empty forms.** An empty annotations object (`JPS-STRUCTURE-MIN-PROPERTIES`), an empty list
-(`JPS-STRUCTURE-COLLECTION-ARITY`) and an empty string (`JPS-STRUCTURE-MIN-LENGTH`) are refused.
-Absence is the one spelling for "no annotations".
+(`JPS-STRUCTURE-COLLECTION-ARITY`) and an empty string (`JPS-STRUCTURE-MIN-LENGTH`) are refused, and
+so is a string made only of white space, which begins with it (`JPS-STRUCTURE-NOT`). Absence is the
+one spelling for "no annotations".
 
 **Duplicates.** A duplicate member name is refused by the carrier (§2.1). A repeated string in a list
 is refused (`JPS-STRUCTURE-UNIQUE-ITEMS`). The same key in two annotations objects is not a
@@ -335,10 +347,14 @@ duplicate.
 
 **Filtered views (D2).** A consumer that presents a filtered view of a pack, one that omits outcomes,
 rules or entries because of their annotations, MUST state in the view that it is filtered, and by
-which keys and values. The view SHOULD state how many items it omits. A filtered view is not a pack:
-it MUST NOT be offered for evaluation, signing or hashing as the pack. A disposition is always the
-whole pack's, and omitted items take part in every evaluation. A filtered view is not redaction: the
-omitted items remain in the pack's bytes.
+which keys and values. For each kind of item it filters, the view MUST state how many items it shows
+and how many the pack holds. Wherever a consumer lists distinct annotation keys or values, or states
+a filter, it MUST show every character outside printable ASCII (U+0020–U+007E) in a key or value
+unambiguously, in a form from which the reader can recover each such code point. A review made from
+a filtered view covers only what the view showed; it is not a review of the pack. A filtered view
+is not a pack: it MUST NOT be offered for evaluation, signing or hashing as the pack. A disposition
+is always the whole pack's, and omitted items take part in every evaluation. A filtered view is not
+redaction: the omitted items remain in the pack's bytes.
 
 ## 10. Security and privacy considerations
 
@@ -364,8 +380,8 @@ pack string. A consumer that displays one:
 - MUST isolate each annotation key and string it shows inline with other text, so that a value's
   direction does not reorder the text around it, and SHOULD isolate the other display data the same
   way;
-- SHOULD, where it lists distinct annotation values or states a filter, make default-ignorable and
-  format characters visible; and
+- MUST, where it lists distinct annotation keys or values or states a filter, show them as D2
+  requires (§9.2); and
 - SHOULD show annotations as the author's labels, visually distinct from Core members.
 
 D1 and D2 (§9.2) bind any consumer that displays or filters annotations. No Core conformance class
