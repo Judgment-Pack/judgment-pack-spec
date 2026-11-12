@@ -954,6 +954,50 @@
       "specSection": "\u00a78.5"
     },
     {
+      "id": "value-set-empty-collection",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-empty-collection.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "valueSets: [] declares no set and takes no part in evaluation: the evaluation form removes it",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "value-set-empty-collection-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the same pack without a valueSets member",
+      "specSection": "\u00a78.5"
+    },
+    {
       "id": "value-set-type-preserving-string",
       "origin": "rfc-0031",
       "pack": "packs/value-set-equality.json",
@@ -1317,6 +1361,50 @@
       "specSection": "\u00a77.4"
     },
     {
+      "id": "value-set-in-exception-no-match-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-exception.json",
+      "facts": {
+        "request": {
+          "tier": "tier-1"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a reference in an exception's when that does not match forces nothing, so the rule's outcome stands, as in the inline form",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-in-exception-no-match-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-exception-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-1"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the inline form of the non-matching exception row",
+      "specSection": "\u00a77.4"
+    },
+    {
       "id": "value-set-in-applicability-reference",
       "origin": "rfc-0031",
       "pack": "packs/value-set-applicability.json",
@@ -1462,6 +1550,98 @@
         }
       },
       "focus": "the inline form under not: a listed value makes the not false",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-all-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-all.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2",
+          "complete": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a reference under all in a rule's when reads as its inline array: the tier is an entry and the request is complete, so the all is true",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-all-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-all-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2",
+          "complete": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the inline form under all: the tier is an entry and the request is complete, so the all is true",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-any-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-any.json",
+      "facts": {
+        "request": {
+          "tier": "tier-3",
+          "escalated": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a reference under any in a rule's when reads as its inline array: the tier is an entry and the request is not escalated, so the reference alone makes the any true",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-any-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-any-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-3",
+          "escalated": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the inline form under any: the tier is an entry and the request is not escalated, so the reference alone makes the any true",
       "specSection": "\u00a77.4"
     },
     {
@@ -1707,6 +1887,14 @@
       ]
     },
     {
+      "id": "value-set-empty-collection-inert",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-empty-collection",
+        "value-set-empty-collection-baseline"
+      ]
+    },
+    {
       "id": "value-set-repeated-entries-match",
       "basis": "evaluation-form",
       "cases": [
@@ -1728,6 +1916,14 @@
       "cases": [
         "value-set-in-exception-reference",
         "value-set-in-exception-inline"
+      ]
+    },
+    {
+      "id": "value-set-in-exception-no-match",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-in-exception-no-match-reference",
+        "value-set-in-exception-no-match-inline"
       ]
     },
     {
@@ -1753,6 +1949,22 @@
         "value-set-under-not-listed-reference",
         "value-set-under-not-listed-inline"
       ]
+    },
+    {
+      "id": "value-set-under-all",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-under-all-reference",
+        "value-set-under-all-inline"
+      ]
+    },
+    {
+      "id": "value-set-under-any",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-under-any-reference",
+        "value-set-under-any-inline"
+      ]
     }
   ],
   "ownEvaluationForm": [
@@ -1764,6 +1976,8 @@
     "packs/value-set-inline.json",
     "packs/value-set-literal-annotations.json",
     "packs/value-set-repeated-inline.json",
+    "packs/value-set-under-all-inline.json",
+    "packs/value-set-under-any-inline.json",
     "packs/value-set-under-not-inline.json",
     "packs/vendor-optional.json"
   ]

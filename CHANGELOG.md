@@ -28,7 +28,7 @@ here.
   ([`spec/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md)) is marked normative for nothing.
   Hand-written vectors sit in no corpus: 139 document cases in
   [`conformance/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/staged), with five provisional conformance codes,
-  and 64 evaluation rows with their pairs in
+  and 72 evaluation rows with their pairs in
   [`conformance/evaluation/staged/annotations-value-sets/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged/annotations-value-sets),
   where one more row is held. An annotated expense example is staged too. Tests hold all of it to the
   repository's checks, including a static check of the paired rows, and check that every released
