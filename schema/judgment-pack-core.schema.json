@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://judgmentpack.org/schema/0.3.0/judgment-pack-core.schema.json",
+  "$id": "https://judgmentpack.org/schema/0.4.0/judgment-pack-core.schema.json",
   "title": "Judgment Pack Core",
-  "description": "Structural schema for 0.3.0. Conformance does not establish truth, authority, safety, or operational fitness.",
+  "description": "Structural schema for 0.4.0. Conformance does not establish truth, authority, safety, or operational fitness.",
   "$comment": "JPS structural conformance requires uri, date, and date-time format assertions even when a general-purpose validator treats format as annotation-only.",
   "type": "object",
   "additionalProperties": false,
@@ -21,7 +21,7 @@
       "default": "base"
     },
     "specVersion": {
-      "const": "0.3.0"
+      "const": "0.4.0"
     },
     "id": {
       "type": "string",
@@ -30,7 +30,11 @@
     },
     "version": {
       "type": "string",
-      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "not": {
+        "type": "string",
+        "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+      }
     },
     "title": {
       "$ref": "#/$defs/nonEmptyString"
@@ -81,6 +85,14 @@
       },
       "uniqueItems": true
     },
+    "valueSets": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/valueSet"
+      }
+    },
     "fallbackOutcome": {
       "$ref": "#/$defs/localId"
     },
@@ -91,7 +103,7 @@
       "$ref": "#/$defs/metadata"
     },
     "extensions": {
-      "$ref": "#/$defs/extensions"
+      "$ref": "#/$defs/annotatedExtensions"
     }
   },
   "$defs": {
@@ -101,18 +113,135 @@
     },
     "localId": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "not": {
+        "type": "string",
+        "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+      }
     },
     "decimalString": {
       "type": "string",
-      "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$"
+      "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$",
+      "not": {
+        "type": "string",
+        "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+      }
     },
     "extensions": {
       "type": "object",
       "propertyNames": {
-        "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+        "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+        "not": {
+          "type": "string",
+          "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+        }
       },
       "additionalProperties": true
+    },
+    "annotationString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "not": {
+        "type": "string",
+        "pattern": "[\u0000-\u001f\u007f-\u009f\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180b-\u180f\u200b-\u200f\u2028-\u202e\u2060-\u206f\u3164\ufe00-\ufe0f\ufeff\uffa0\ufff0-\ufff8\ud82f\udca0-\ud82f\udca3\ud834\udd73-\ud834\udd7a\udb40\udc00-\udb43\udfff]|^[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]|[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]$"
+      }
+    },
+    "annotations": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 16,
+      "propertyNames": {
+        "maxLength": 64,
+        "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+        "not": {
+          "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+        }
+      },
+      "additionalProperties": {
+        "type": ["string", "array"],
+        "if": {
+          "type": "string"
+        },
+        "then": {
+          "$ref": "#/$defs/annotationString"
+        },
+        "else": {
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/annotationString"
+          }
+        }
+      }
+    },
+    "annotatedExtensions": {
+      "type": "object",
+      "propertyNames": {
+        "anyOf": [
+          {
+            "const": "org.judgmentpack.annotations"
+          },
+          {
+            "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+            "not": {
+              "type": "string",
+              "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+            }
+          }
+        ]
+      },
+      "properties": {
+        "org.judgmentpack.annotations": {
+          "$ref": "#/$defs/annotations"
+        }
+      },
+      "additionalProperties": true
+    },
+    "entryExtensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "org.judgmentpack.annotations": {
+          "$ref": "#/$defs/annotations"
+        }
+      }
+    },
+    "valueSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "entries"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/localId"
+        },
+        "description": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 512,
+          "items": {
+            "$ref": "#/$defs/valueSetEntry"
+          }
+        }
+      }
+    },
+    "valueSetEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "value": true,
+        "description": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "extensions": {
+          "$ref": "#/$defs/entryExtensions"
+        }
+      }
     },
     "decision": {
       "type": "object",
@@ -219,7 +348,7 @@
           "$ref": "#/$defs/nonEmptyString"
         },
         "extensions": {
-          "$ref": "#/$defs/extensions"
+          "$ref": "#/$defs/annotatedExtensions"
         }
       }
     },
@@ -261,7 +390,7 @@
           "$ref": "#/$defs/nonEmptyString"
         },
         "extensions": {
-          "$ref": "#/$defs/extensions"
+          "$ref": "#/$defs/annotatedExtensions"
         }
       }
     },
@@ -639,7 +768,11 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+            "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+            "not": {
+              "type": "string",
+              "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+            }
           },
           "uniqueItems": true
         },
@@ -719,7 +852,7 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["op", "path", "operator", "value"],
+          "required": ["op", "path", "operator"],
           "properties": {
             "op": {
               "const": "fact"
@@ -739,7 +872,10 @@
                 "in"
               ]
             },
-            "value": true
+            "value": true,
+            "valueSet": {
+              "$ref": "#/$defs/localId"
+            }
           },
           "allOf": [
             {
@@ -780,6 +916,24 @@
                     "minItems": 1
                   }
                 }
+              }
+            },
+            {
+              "if": {
+                "required": ["valueSet"]
+              },
+              "then": {
+                "not": {
+                  "required": ["value"]
+                },
+                "properties": {
+                  "operator": {
+                    "const": "in"
+                  }
+                }
+              },
+              "else": {
+                "required": ["value"]
               }
             }
           ]

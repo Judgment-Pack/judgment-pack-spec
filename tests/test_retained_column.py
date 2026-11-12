@@ -12,6 +12,7 @@ from unittest.mock import patch
 
 from tools import dialect_verify as reader
 from tools import retained_column
+from test_retained_release import v0_3_0_source
 
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = json.loads((ROOT / 'conformance/retained-column/1/preparations.json').read_text())
@@ -182,7 +183,7 @@ class SelectedPreparations(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='retained-installation-') as temporary:
             root=Path(temporary)
             for name in (inventory_path,*inventory['files']):
-                target=root/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,target)
+                target=root/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(v0_3_0_source(name),target)
             identity=root/'release-identity.json'
             with patch.object(retained_column,'ROOT',root):
                 identity.write_text(json.dumps(final))

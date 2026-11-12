@@ -1,5 +1,5 @@
 {
-  "specVersion": "0.3.0",
+  "specVersion": "0.4.0",
   "id": "https://example.com/judgment-packs/non-array-authors",
   "version": "0.1.0",
   "title": "Authors without an array",

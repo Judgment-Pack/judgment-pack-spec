@@ -891,10 +891,12 @@ class DialectVectorTests(RecordingSet, unittest.TestCase):
             "schema/judgment-pack-core-0.2.0-draft.schema.json",
             READER.recording_schema("0.2.0-draft"),
         )
+        # Since Core 0.4.0 the live schema is 0.4.0's: a 0.3.0 recording's pack is held to the
+        # frozen 0.3.0 schema, and no 0.4.0 recording set exists yet, so 0.4.0 stays unread.
         self.assertEqual(
-            "schema/judgment-pack-core.schema.json", READER.recording_schema("0.3.0")
+            "schema/judgment-pack-core-0.3.0.schema.json", READER.recording_schema("0.3.0")
         )
-        for version in ("", "0.1.0-draft", "0.4.0"):
+        for version in ("", "0.1.0-draft", "0.4.0-draft", "0.4.0"):
             with self.subTest(version=version), self.assertRaises(READER.Refused) as refused:
                 READER.recording_schema(version)
             self.assertEqual("recording-version-unsupported", refused.exception.name)

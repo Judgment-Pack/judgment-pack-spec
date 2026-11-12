@@ -22,20 +22,42 @@ INVENTORY='releases/v0.3.0-rc.2.retained-column.json'
 FINAL_INVENTORY='releases/v0.3.0.retained-column.json'
 FINAL_FIXTURE_FILES=('releases/v0.3.0.md','releases/v0.3.0.milestone.json','rfcs/0029-retained-column-conversions.md',
                      'schema/judgment-pack-core.schema.json','conformance/manifest.json','conformance/evaluation/manifest.json')
+# Core 0.4.0 changed, in place, the three Core pins and four files of the v0.3.0 leaf. A fixture that
+# stands for a v0.3.0 tree takes those files' v0.3.0 bytes from the preserved copies
+# (tests/fixtures/historical-compatibility/README.md); every other file it copies is unchanged since.
+HISTORICAL='tests/fixtures/historical-compatibility/'
+V0_3_0_SOURCES={
+    'schema/judgment-pack-core.schema.json':'schema/judgment-pack-core-0.3.0.schema.json',
+    'conformance/manifest.json':HISTORICAL+'0.3.0-document-manifest.json',
+    'conformance/evaluation/manifest.json':HISTORICAL+'0.3.0-evaluation-manifest.json',
+    **{name:HISTORICAL+'v0.3.0/'+name for name in
+       ('spec/judgment-pack-core.md','spec/dialect.md','tools/dialect_verify.py','tools/dialect-verify-ts/src/vector.ts')},
+}
+
+
+def v0_3_0_source(name):
+    """The file holding the v0.3.0 bytes of a repository path."""
+    return ROOT/V0_3_0_SOURCES.get(name,name)
+
+
+def v0_3_0_tree(root,names):
+    for name in names:
+        target=root/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(v0_3_0_source(name),target)
 
 
 def final_fixture(root):
     """Copy the final's leaf set, both inventories and its Core pins; nothing is generated."""
     inventory=json.loads((ROOT/FINAL_INVENTORY).read_text())
-    for name in {INVENTORY,FINAL_INVENTORY,*inventory['files'],*FINAL_FIXTURE_FILES}:
-        target=root/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,target)
+    v0_3_0_tree(root,{INVENTORY,FINAL_INVENTORY,*inventory['files'],*FINAL_FIXTURE_FILES})
     return inventory
 
 
 class RetainedRelease(unittest.TestCase):
     def test_closed_inventory_and_non_circular_pins(self):
-        build_release.validate_retained_inventory(ROOT,'v0.3.0')
-        digest=lambda name:'sha256:'+hashlib.sha256((ROOT/name).read_bytes()).hexdigest()
+        with tempfile.TemporaryDirectory(prefix='retained-v0.3.0-') as temporary:
+            final_fixture(Path(temporary))
+            build_release.validate_retained_inventory(Path(temporary),'v0.3.0')
+        digest=lambda name:'sha256:'+hashlib.sha256(v0_3_0_source(name).read_bytes()).hexdigest()
         for inventory in (FINAL_INVENTORY,INVENTORY):
             manifest=json.loads((ROOT/inventory).read_text())
             self.assertNotIn(inventory,manifest['files'])
@@ -53,9 +75,7 @@ class RetainedRelease(unittest.TestCase):
         manifest=json.loads((ROOT/FINAL_INVENTORY).read_text())
         with tempfile.TemporaryDirectory(prefix='retained-inventory-') as temporary:
             root=Path(temporary)
-            for name in [FINAL_INVENTORY,*manifest['files']]:
-                destination=root/name;destination.parent.mkdir(parents=True,exist_ok=True)
-                shutil.copyfile(ROOT/name,destination)
+            v0_3_0_tree(root,[FINAL_INVENTORY,*manifest['files']])
             build_release.validate_retained_inventory(root,'v0.3.0')
             cases_path=root/manifest['corpus'];original_cases=cases_path.read_bytes();cases=json.loads(original_cases)
             del cases['inputs']['conformance/retained-column/1/preparations.json']
@@ -68,7 +88,7 @@ class RetainedRelease(unittest.TestCase):
             corpus=root/manifest['corpus'];corpus.write_bytes(corpus.read_bytes()+b' ')
             with self.assertRaisesRegex(ValueError,'immutable artifact bytes'):
                 build_release.validate_retained_inventory(root,'v0.3.0')
-            shutil.copyfile(ROOT/manifest['corpus'],corpus)
+            shutil.copyfile(v0_3_0_source(manifest['corpus']),corpus)
             (root/'conformance/retained-column/1/preparations.json').unlink()
             with self.assertRaisesRegex(ValueError,'complete artifact inventory'):
                 build_release.validate_retained_inventory(root,'v0.3.0')
@@ -79,8 +99,14 @@ class RetainedRelease(unittest.TestCase):
         self.assertEqual({'number':2,'title':'v0.3.0'},json.loads((ROOT/'releases/v0.3.0-rc.2.milestone.json').read_text()))
         self.assertIn('- Status: Accepted',(ROOT/'rfcs/0029-retained-column-conversions.md').read_text().splitlines())
         # RC2 is built only from its own tag: the final revised the leaf's support identity, so RC2's
-        # route refuses this tree instead of re-publishing RC2 with the final's readers.
-        with self.assertRaisesRegex(ValueError,'immutable artifact bytes'):
+        # route refuses a v0.3.0 tree instead of re-publishing RC2 with the final's readers. This tree,
+        # whose Core pins declare 0.4.0, the route refuses before it reads the leaf.
+        with tempfile.TemporaryDirectory(prefix='retained-v0.3.0-') as temporary:
+            root=Path(temporary);final_fixture(root)
+            v0_3_0_tree(root,['releases/v0.3.0-rc.2.json','releases/v0.3.0-rc.2.milestone.json','releases/v0.3.0-rc.2.md'])
+            with self.assertRaisesRegex(ValueError,'immutable artifact bytes'):
+                build_release.validate_artifacts('0.3.0-rc.2','v0.3.0-rc.2',root)
+        with self.assertRaisesRegex(ValueError,'release tag does not match the conformance specVersion'):
             build_release.validate_artifacts('0.3.0-rc.2','v0.3.0-rc.2')
 
     def test_rc2_scoped_mapping_inventory_and_acceptance_gates(self):
@@ -92,8 +118,7 @@ class RetainedRelease(unittest.TestCase):
                'conformance/manifest.json','conformance/evaluation/manifest.json'}
         with tempfile.TemporaryDirectory(prefix='rc2-adoption-fixture-') as temporary:
             root=Path(temporary)
-            for name in paths:
-                target=root/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,target)
+            v0_3_0_tree(root,paths)
             # The fixture stands in for RC2's tree: RC2's own bytes for the three files the final revised
             # live only at its tag, so the fixture's copy of the inventory is re-pinned to these copies.
             fixture=json.loads((root/INVENTORY).read_text())
@@ -128,7 +153,14 @@ class RetainedRelease(unittest.TestCase):
         self.assertIn('conformance/dialect/** export-ignore -text',attributes)
 
     def test_final_inventory_keeps_rc2s_leaf_bytes_but_its_support_identity(self):
-        build_release.validate_final_retained_inventory()
+        with tempfile.TemporaryDirectory(prefix='retained-v0.3.0-') as temporary:
+            root=Path(temporary);final_fixture(root)
+            build_release.validate_final_retained_inventory(root)
+            build_release.validate_reader_support_identity('v0.3.0',root)
+            build_release.validate_artifacts('0.3.0','v0.3.0',root)
+        # This tree is no v0.3.0 tree: its Core pins declare 0.4.0, and the route refuses it.
+        with self.assertRaisesRegex(ValueError,'release tag does not match the conformance specVersion'):
+            build_release.validate_artifacts('0.3.0','v0.3.0')
         build_release.validate_reader_support_identity('v0.3.0')
         final=json.loads((ROOT/FINAL_INVENTORY).read_text());candidate=json.loads((ROOT/INVENTORY).read_text())
         self.assertEqual(('v0.3.0','v0.3.0-rc.2'),(final['distribution'],candidate['distribution']))
@@ -141,7 +173,6 @@ class RetainedRelease(unittest.TestCase):
         self.assertEqual({'v0.3.0-rc.2':INVENTORY,'v0.3.0':FINAL_INVENTORY},build_release.RETAINED_INVENTORIES)
         self.assertEqual({'number':2,'title':'v0.3.0'},json.loads((ROOT/'releases/v0.3.0.milestone.json').read_text()))
         self.assertNotIn('v0.3.0',build_release.CORE_RC_IDENTITIES)
-        build_release.validate_artifacts('0.3.0','v0.3.0')
 
     def test_final_route_refuses_each_leaf_rule(self):
         # Disposable fixture of the final's tree; each refusal is restored before the next one.
@@ -243,8 +274,9 @@ class RetainedRelease(unittest.TestCase):
         self.assertIsNotNone(node,'the bundle probe runs the TypeScript reader')
         with tempfile.TemporaryDirectory(prefix='final-archive-fixture-') as temporary:
             root=Path(temporary);final_fixture(root)
-            for name in ('tools/build_release.py','tools/dialect_verify.py','requirements-dev.txt','.gitattributes'):
+            for name in ('tools/build_release.py','requirements-dev.txt','.gitattributes'):
                 (root/name).parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,root/name)
+            v0_3_0_tree(root,['tools/dialect_verify.py'])
             for name in ('README.md','LICENSE','NOTICE','CHANGELOG.md','VERSIONING.md','TESTING.md','SECURITY.md'):
                 (root/name).write_text('Hand-authored archive fixture, not release artifacts.\n')
             (root/'examples').mkdir();(root/'examples/control.json').write_text('{"fixture":true}\n')

@@ -1,0 +1,37 @@
+{
+  "specVersion": "0.4.0",
+  "id": "https://example.com/judgment-packs/annotations-invisible-ue0100",
+  "version": "0.1.0",
+  "title": "Malformed annotations",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept every request.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "category": "in\udb40\udd00take"
+        }
+      }
+    }
+  ]
+}

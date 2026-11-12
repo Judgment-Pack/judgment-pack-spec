@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://judgmentpack.org/schema/0.3.0/conformance/evaluation/manifest.schema.json",
+  "$id": "https://judgmentpack.org/schema/0.4.0/conformance/evaluation/manifest.schema.json",
   "title": "Judgment Pack evaluation corpus manifest",
   "description": "The case carrier for the evaluation corpus. It describes cases; it defines no evaluator and executes nothing.",
   "type": "object",
@@ -18,10 +18,10 @@
       "const": "./manifest.schema.json"
     },
     "suiteVersion": {
-      "const": "0.3.0"
+      "const": "0.4.0"
     },
     "specVersion": {
-      "const": "0.3.0"
+      "const": "0.4.0"
     },
     "status": {
       "enum": ["draft", "candidate", "release"]
@@ -36,6 +36,23 @@
       "items": {
         "$ref": "#/$defs/case"
       }
+    },
+    "pairs": {
+      "description": "Groups of rows that give one result for a stated reason, which a static check can confirm without an evaluator: equal evaluation forms (Core \u00a78.5), packs that differ only in an optional extension (Core \u00a79), or one input under supported-extension sets that differ only in a name Core \u00a78.2 ignores.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/pair"
+      }
+    },
+    "ownEvaluationForm": {
+      "description": "The pack fixtures that are their own evaluation form (Core \u00a78.5): no value set, no reference and no annotations.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^packs/[a-z0-9][a-z0-9-]*\\.json$"
+      }
     }
   },
   "$defs": {
@@ -46,6 +63,28 @@
     "extensionName": {
       "type": "string",
       "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+    },
+    "supportedExtensionName": {
+      "description": "A name a supported-extension set may hold: an extension name, or a specification-defined name, which Core \u00a78.2 ignores when no conforming pack can require it.",
+      "anyOf": [
+        { "$ref": "#/$defs/extensionName" },
+        { "enum": ["org.judgmentpack.annotations"] }
+      ]
+    },
+    "pair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "basis", "cases"],
+      "properties": {
+        "id": { "$ref": "#/$defs/localId" },
+        "basis": { "enum": ["evaluation-form", "optional-extension", "supported-extension-set"] },
+        "cases": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/localId" }
+        }
+      }
     },
     "reason": {
       "enum": [
@@ -200,7 +239,7 @@
         },
         "supportedExtensions": {
           "type": "array",
-          "items": { "$ref": "#/$defs/extensionName" },
+          "items": { "$ref": "#/$defs/supportedExtensionName" },
           "uniqueItems": true
         },
         "expectedDisposition": {

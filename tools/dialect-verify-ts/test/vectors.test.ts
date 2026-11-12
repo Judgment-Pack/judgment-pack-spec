@@ -52,8 +52,8 @@ const written = (v: JVal | undefined) => (v === undefined ? "absent" : Buffer.fr
 
 test("recorded evaluator versions are a closed set", () => {
   assert.equal(recordingSchema("0.2.0-draft"), "schema/judgment-pack-core-0.2.0-draft.schema.json");
-  assert.equal(recordingSchema("0.3.0"), "schema/judgment-pack-core.schema.json");
-  for (const version of ["", "0.1.0-draft", "0.4.0"]) {
+  assert.equal(recordingSchema("0.3.0"), "schema/judgment-pack-core-0.3.0.schema.json");
+  for (const version of ["", "0.1.0-draft", "0.4.0-draft", "0.4.0"]) {
     assert.throws(() => recordingSchema(version), (error: unknown) =>
       error instanceof VectorError && error.message === "recording-version-unsupported");
   }

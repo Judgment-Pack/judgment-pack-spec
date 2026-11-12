@@ -18,11 +18,14 @@ import zipfile
 
 from jsonschema import Draft202012Validator, FormatChecker
 import test_repository as current
+from test_retained_release import v0_3_0_source
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/fixtures/historical-compatibility"
 # Trusted immutable source commits/blobs and independently verified SHA-256 anchors.
 # 0.1 differs only by its previously published $id substitution; no Git history is required in CI.
+# The v0.3.0 rows are the files Core 0.4.0 changed in place: the three schemas, the two manifests and
+# the four files of the v0.3.0 retained-column leaf that changed (releases/v0.3.0.retained-column.json).
 ANCHORS = [{'tag': 'v0.1.0-draft',
   'commit': '80958f50c851e9809cb8036a23622391cf437c99',
   'source': 'schema/judgment-pack-core.schema.json',
@@ -88,7 +91,67 @@ ANCHORS = [{'tag': 'v0.1.0-draft',
   'sourceSha256': 'df577e6b8a6ab8e432c5e519a3c2e36c3b393ae060eba960bdaf1e5f55eebd72',
   'extractedDefinitions': ['DuplicateMemberError', 'strict_json_loads'],
   'target': 'tests/fixtures/historical-compatibility/tagged_carrier.py',
-  'targetSha256': 'cae9672d921872cdccd9672e0865374f86aa5bbe9e4d7551fa53960445a29fab'}]
+  'targetSha256': 'cae9672d921872cdccd9672e0865374f86aa5bbe9e4d7551fa53960445a29fab'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'schema/judgment-pack-core.schema.json',
+  'blob': 'be283e4bc0d40c130dc5ced06a55eef6aeead123',
+  'sourceSha256': '4ef5040ba5aeecc00bf4a23aca82812900a136d2119285bf1dac78b71ac64639',
+  'target': 'schema/judgment-pack-core-0.3.0.schema.json',
+  'targetSha256': '4ef5040ba5aeecc00bf4a23aca82812900a136d2119285bf1dac78b71ac64639',
+  'id': 'https://judgmentpack.org/schema/0.3.0/judgment-pack-core.schema.json'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'conformance/manifest.schema.json',
+  'blob': '10543b73505855ddb642deb75f514537e3b4f04c',
+  'sourceSha256': '3d14efea2186a0d630c5d980c683bca8b4d4576dbf7213ed6cc37e8199016fdf',
+  'target': 'schema/conformance-manifest-0.3.0.schema.json',
+  'targetSha256': '3d14efea2186a0d630c5d980c683bca8b4d4576dbf7213ed6cc37e8199016fdf',
+  'id': 'https://judgmentpack.org/schema/0.3.0/conformance/manifest.schema.json'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'conformance/evaluation/manifest.schema.json',
+  'blob': 'a609594e293f00b5110c45481d60fc3137c44e15',
+  'sourceSha256': '930d4c4e22ddc54f29c35090d6c979ad4e798c939509a7d6fac325c0dfd783da',
+  'target': 'schema/conformance-evaluation-manifest-0.3.0.schema.json',
+  'targetSha256': '930d4c4e22ddc54f29c35090d6c979ad4e798c939509a7d6fac325c0dfd783da',
+  'id': 'https://judgmentpack.org/schema/0.3.0/conformance/evaluation/manifest.schema.json'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'conformance/manifest.json',
+  'blob': '8e30bb2592401da4c0e2dff99f1a05c99c7d0c05',
+  'target': 'tests/fixtures/historical-compatibility/0.3.0-document-manifest.json',
+  'targetSha256': 'd494cef89a5602d83cd2ab3b390017abf5abafc9dd7be545939822fbcaee19e8'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'conformance/evaluation/manifest.json',
+  'blob': 'c2d63f03d5a13ecea5758662cdc18c967a4f97e9',
+  'target': 'tests/fixtures/historical-compatibility/0.3.0-evaluation-manifest.json',
+  'targetSha256': '096eeb558ca553f65b2cb2c989348375df4b17f0920a13a76968bc37d5490689'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'spec/judgment-pack-core.md',
+  'blob': '41eea195bf797c9195905b467dfc5c5e56cc654c',
+  'target': 'tests/fixtures/historical-compatibility/v0.3.0/spec/judgment-pack-core.md',
+  'targetSha256': '151d64678db709f91ab0729c2f75516b89a027e24a3e22e1788dcdf0aa6faabc'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'spec/dialect.md',
+  'blob': '297ce325217302147f84c95ff281d8334eeec36f',
+  'target': 'tests/fixtures/historical-compatibility/v0.3.0/spec/dialect.md',
+  'targetSha256': '729e491a0d855a51f69e9b9e7aadc24131209c388ee29e8820c57a7a7c845d5a'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'tools/dialect_verify.py',
+  'blob': '3dc1ac99c26a725f86103b1bcf1ff512c76ecee0',
+  'target': 'tests/fixtures/historical-compatibility/v0.3.0/tools/dialect_verify.py',
+  'targetSha256': 'fe3b773ce30ad8c395fe85500714a12d6cc4262ccc6bca05c44f7b3b40a60b60'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'tools/dialect-verify-ts/src/vector.ts',
+  'blob': '5c00c3a9961fc00dfc61c23c1fa0ce9925110dff',
+  'target': 'tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/vector.ts',
+  'targetSha256': '289b68479edf607df1480e46b0e6a6ee04091feb5dd56ddee696fbb2a337a1cb'}]
 
 SCHEMAS = [row for row in ANCHORS if row["target"].startswith("schema/")]
 
@@ -118,6 +181,17 @@ def tagged_carrier():
 
 
 class HistoricalReleaseTests(unittest.TestCase):
+    def test_the_v0_3_0_copies_are_the_retained_inventorys_bytes(self):
+        # Each preserved leaf copy has the digest the v0.3.0 inventory pins, and every leaf file whose
+        # live bytes differ from that pin has a preserved copy; the tests read that copy instead.
+        inventory = load("releases/v0.3.0.retained-column.json")["files"]
+        preserved = {row["source"] for row in ANCHORS if row["target"].startswith("tests/fixtures/historical-compatibility/v0.3.0/")}
+        for name in preserved:
+            self.assertEqual(inventory[name], "sha256:" + hashlib.sha256(v0_3_0_source(name).read_bytes()).hexdigest(), name)
+        changed = {name for name, pin in inventory.items()
+                   if pin != "sha256:" + hashlib.sha256((ROOT / name).read_bytes()).hexdigest()}
+        self.assertEqual(preserved, changed)
+
     def test_published_schema_and_source_fixture_byte_anchors(self):
         for row in ANCHORS:
             with self.subTest(path=row["target"]):
@@ -142,6 +216,18 @@ class HistoricalReleaseTests(unittest.TestCase):
                     changed = {**manifest, "status": status}
                     self.assertFalse(validator.is_valid(changed), "new maturity reinterprets a historical selector")
 
+    def test_the_0_3_0_manifests_validate_under_their_frozen_schemas_only(self):
+        # Core 0.4.0 replaced the manifest schemas in place; the 0.3.0 manifests stay valid under the
+        # copies published at /schema/0.3.0/ and are refused by the active schemas.
+        for kind, active in (("document", "conformance/manifest.schema.json"),
+                             ("evaluation", "conformance/evaluation/manifest.schema.json")):
+            manifest = json.loads((FIXTURES / f"0.3.0-{kind}-manifest.json").read_text())
+            frozen = f"schema/conformance-{'evaluation-' if kind == 'evaluation' else ''}manifest-0.3.0.schema.json"
+            validator = Draft202012Validator(load(frozen), format_checker=FormatChecker())
+            self.assertEqual([], list(validator.iter_errors(manifest)), f"released 0.3.0/{kind} manifest rejected")
+            self.assertFalse(Draft202012Validator(load(active), format_checker=FormatChecker()).is_valid(manifest),
+                             f"active {kind} manifest schema admits the 0.3.0 selector")
+
     def test_historical_selectors_refuse_current_only_profiles_and_routes(self):
         pack = json.loads((FIXTURES / "selector-only-surrogate.json").read_text())
         pack["title"] = "Hand-authored structural control"
@@ -151,7 +237,7 @@ class HistoricalReleaseTests(unittest.TestCase):
             "triggers": ["unknown"], "routes": [{"target": {"kind": "queue", "name": "Synthetic"}}]}}]
         for changed in variants:
             self.assertFalse(historical.is_valid(changed), "historical selector admitted newer-only shape")
-            migrated = {**changed, "specVersion": "0.3.0"}
+            migrated = {**changed, "specVersion": "0.4.0"}
             self.assertTrue(Draft202012Validator(load("schema/judgment-pack-core.schema.json"),
                                                 format_checker=FormatChecker()).is_valid(migrated))
         self.assertFalse(historical.is_valid({**pack, "specVersion": "0.3.0"}), "exact selector dispatch weakened")
@@ -159,14 +245,15 @@ class HistoricalReleaseTests(unittest.TestCase):
     def test_previous_canonical_urls_publish_the_trusted_promised_bytes(self):
         output = Path(tempfile.mkdtemp(prefix="historical-publisher-"))
         publisher()(output)
-        # This complete inventory is the five canonical IDs published at immutable v0.2.0-draft.
-        self.assertEqual(5, len(SCHEMAS))
+        # This complete inventory is the five canonical IDs published at immutable v0.2.0-draft and
+        # the three the v0.3.0 tag published, which Core 0.4.0 superseded in place.
+        self.assertEqual(8, len(SCHEMAS))
         for row in SCHEMAS:
             path = output / urlsplit(row["id"]).path.lstrip("/")
             self.assertTrue(path.is_file(), f"old canonical URL disappeared: {row['id']}")
             self.assertEqual(row["targetSha256"], hashlib.sha256(path.read_bytes()).hexdigest(),
                              "canonical URL serves rewritten historical bytes")
-        current_path = output / "schema/0.3.0/conformance/evaluation/manifest.schema.json"
+        current_path = output / "schema/0.4.0/conformance/evaluation/manifest.schema.json"
         self.assertTrue(current_path.is_file())
         self.assertEqual((ROOT / "conformance/evaluation/manifest.schema.json").read_bytes(), current_path.read_bytes())
 
@@ -179,7 +266,7 @@ class HistoricalReleaseTests(unittest.TestCase):
                  "conformance/evaluation/manifest.json", "releases/v0.3.0-rc.1.json", "releases/v0.3.0-rc.1.md",
                  "docs/releases/v0.3.0.md", "spec/judgment-pack-core.md", *(row["target"] for row in SCHEMAS)]
         for name in files:
-            shutil.copyfile(ROOT / name, fixture / name)
+            shutil.copyfile(v0_3_0_source(name), fixture / name)
         for name in ("README.md", "LICENSE", "NOTICE", "CHANGELOG.md", "VERSIONING.md", "TESTING.md", "SECURITY.md"):
             (fixture / name).write_text("Hand-authored archive fixture, not release artifacts.\n")
         (fixture / "examples/control.json").write_text('{"fixture":true}\n')
@@ -213,7 +300,7 @@ class HistoricalReleaseTests(unittest.TestCase):
         admitted = old.strict_json_loads(text)
         self.assertTrue(Draft202012Validator(load("schema/judgment-pack-core-0.2.0-draft.schema.json"),
                                             format_checker=FormatChecker()).is_valid(admitted))
-        migrated = text.replace('"0.2.0-draft"', '"0.3.0"', 1)
+        migrated = text.replace('"0.2.0-draft"', '"0.4.0"', 1)
         with self.assertRaises(current.UnpairedSurrogateError):
             current.strict_json_loads(migrated)
         repaired = migrated.replace('\\ud800', '\\ud83d\\ude00')

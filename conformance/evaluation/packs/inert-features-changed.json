@@ -1,0 +1,100 @@
+{
+  "specVersion": "0.4.0",
+  "id": "https://example.com/judgment-packs/annotations-inert-features",
+  "version": "0.1.0",
+  "title": "Expense intake",
+  "decision": {
+    "intent": "Decide whether an expense is approved or sent for review.",
+    "question": "Is the expense approved?"
+  },
+  "evidenceRequirements": [
+    {
+      "id": "receipt",
+      "description": "A receipt for the expense.",
+      "required": true,
+      "kind": "document"
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "approve",
+      "label": "Approve",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "tier": "review"
+        }
+      }
+    },
+    {
+      "id": "review",
+      "label": "Send for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "small-amount",
+      "description": "Approve a small expense.",
+      "when": {
+        "op": "fact",
+        "path": "/expense/small",
+        "operator": "equals",
+        "value": true
+      },
+      "outcome": "approve",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "category": [
+            "threshold",
+            "held-account"
+          ],
+          "review-cycle": "weekly"
+        }
+      }
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "held-account",
+      "description": "Escalate an expense on a held account.",
+      "when": {
+        "op": "fact",
+        "path": "/expense/held",
+        "operator": "equals",
+        "value": true
+      },
+      "effect": "escalate",
+      "onUnknown": "ignore"
+    }
+  ],
+  "fallbackOutcome": "review",
+  "escalation": {
+    "triggers": [
+      "missing-required-evidence",
+      "unknown",
+      "conflict"
+    ],
+    "routes": [
+      {
+        "target": {
+          "kind": "queue",
+          "name": "Evidence desk"
+        },
+        "triggers": [
+          "missing-required-evidence"
+        ]
+      },
+      {
+        "target": {
+          "kind": "human-role",
+          "name": "Duty reviewer"
+        }
+      }
+    ]
+  },
+  "extensions": {
+    "org.judgmentpack.annotations": {
+      "category": "finance"
+    }
+  }
+}

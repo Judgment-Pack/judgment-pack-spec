@@ -1,0 +1,3894 @@
+#!/usr/bin/env python3
+"""A preparation verifier written from the words of spec/dialect.md.
+
+The historical independence account below describes the original ordinary reader.
+The selected retained-column addition is same-vendor work under the authorized bounded
+exception, with no independent-authorship or cross-vendor-compliance claim.
+
+This is the first of the two readers RFC 0018 records (its Evidence): it recomputes a preparation
+from a dialect document, a case, the acquisitions and the trusted input profiles, at the
+preparation's own instant, writes it in the preparation's canonical form, takes its digest, and
+holds a runtime record's binding to it (spec/dialect.md §§3-11). It was written from that
+document's text, and from the two sections of the checkpoint witness statement it adopts (§1, the
+canonical form; §5, the key rule and the equation), and from nothing else: not the Runner's code,
+whose `verify-run` is a third reader of the same bytes.
+
+It reads the kind `operation` and the kind `research`, the two kinds the staged vectors exercise,
+and refuses every other kind as `kind-unread` (spec/dialect.md §4: a kind without vectors is defined
+and not claimable; reading one claims nothing). Since the amendment of 2026-10-15 it reads `operation`
+of the shapes `airbyte`, `mcp` and `http` (§4.1): a tool call for `mcp`, and for the others the request
+the gateway source takes, held to being an object, the template rules and its commitment, and not to a
+set of members. Since the Runner's version-3 vectors were staged it reads dialect versions 2 and 3. A
+document of version 3 is read as one of version 2, written one way (§2: no `provider`, `facts` or
+`evidence`, and no member written empty that the Runner's encoding leaves out when empty), its
+preparation of version 3 (§9.1); a source of `http`, `sql` or `web` is held to the form its kind names
+and then refused as `kind-unread`; and an unbound source (§4.4) is read with the binding document it is
+given, by making the bound dialect of the two and reading that as every dialect is read. Since the
+research-contract amendment (RFC 0018, round 8) it reads `research` as §§4.3, 4.4, 5.1, 5.2, 6.4, 9 and
+11 define it: the requested fields and capabilities, the research record's typed answers and their
+citations, the profiles a source is bound to, each retained response replayed under its own profile,
+and the reconciliation read; the Runner's twenty-six research vectors hold the kind. Its
+preparation reader uses the Python standard library alone; reading a complete recording uses the
+repository's JSON Schema dependency to validate its embedded Core pack.
+
+    python tools/dialect_verify.py --dialect mapping.json --case case.json \\
+        --acquisitions sources.json --profiles profiles.json --preparation preparation.json \\
+        [--binding binding.json] [--record record.jsonl] [--require-binding]
+
+It prints the report §11 gives, one JSON object in the preparation's canonical form, and exits 0
+for a reading, 1 for a refusal and 2 for a finding; it exits 3, printing no report, when it could
+not run at all. The reason for a refusal or a finding goes to standard error.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import hashlib
+import json
+import re
+import sys
+import datetime
+import binascii
+import functools
+from dataclasses import dataclass, field
+from decimal import Decimal
+from pathlib import Path
+from typing import Any, NoReturn
+
+try:
+    from tools import retained_column as retained
+except ModuleNotFoundError:
+    import retained_column as retained
+
+# ---------------------------------------------------------------------------------------------
+# Outcomes of a reading (§11)
+
+
+class Refused(Exception):
+    """A refusal: the reading reports nothing but its name."""
+
+    def __init__(self, name: str, detail: str = "") -> None:
+        super().__init__(f"{name}: {detail}" if detail else name)
+        self.name = name
+
+
+class Finding(Exception):
+    """A finding: the reading ends at it and reports it."""
+
+    def __init__(self, name: str, detail: str = "") -> None:
+        super().__init__(f"{name}: {detail}" if detail else name)
+        self.name = name
+
+
+def malformed(detail: str) -> Refused:
+    return Refused("input-malformed", detail)
+
+
+# ---------------------------------------------------------------------------------------------
+# Bounds (§12)
+
+DIALECT_BYTES = 131072
+ENVELOPE_BYTES = 2097152
+PROFILES_BYTES = 65536
+BINDING_BYTES = 65536
+PREPARATION_BYTES = 8388608
+RECORD_BYTES = 8388608
+MAX_SOURCES = 16
+MAX_RETAINED_RESPONSES = 64
+MAX_SCOPE = 64
+MAX_CLAUSES = 64
+MAX_LISTED = 64
+MAX_UNWRAP = 4
+MAX_UNWRAPPED_BYTES = 200000
+MAX_FACT_TARGETS = 256
+MAX_EVIDENCE_TARGETS = 128
+MAX_VALUE_DEPTH = 32
+MAX_DOCUMENT_DEPTH = 64
+MAX_NUMBER_CHARACTERS = 128
+MAX_EXPONENT = 308
+# §12, the research maxima of §4.3 and §6.4: strings counted after JSON decoding, in UTF-8 bytes but a
+# decimal string's, which is counted in characters.
+MAX_FIELDS = 64  # declared fields per source, and answer entries per record
+MAX_FIELD_NAME_BYTES = 64
+MAX_DESCRIPTION_BYTES = 2048
+MAX_MODEL_BYTES = 256
+MAX_EVIDENCE_BYTES = 4096
+MAX_TEXT_BYTES = 8192
+MAX_LIST_ITEMS = 64
+MAX_ITEM_BYTES = 1024
+MAX_DECIMAL_CHARACTERS = 128
+MAX_OBSERVATIONS = 64
+MAX_CITES = 64
+MAX_CAPABILITIES = 3
+MAX_WEB_ASSIGNMENTS = 2
+MAX_READ_SOURCES = 15
+
+# ---------------------------------------------------------------------------------------------
+# Reading a document (§1): strict, numbers kept as their literals
+
+INTEGER_LITERAL = re.compile(r"-?(?:0|[1-9][0-9]*)")
+LARGEST = 2**53 - 1
+
+
+@dataclass(frozen=True)
+class Num:
+    """A JSON number, read as its literal, its characters kept."""
+
+    literal: str
+
+    @property
+    def value(self) -> Decimal:
+        return Decimal(self.literal)
+
+    def is_integer(self) -> bool:
+        return (
+            INTEGER_LITERAL.fullmatch(self.literal) is not None
+            and abs(int(self.literal)) <= LARGEST
+        )
+
+
+# §12: a literal's exponent is the run of digits after its first `e` or `E`, past a sign there; a
+# literal with no such run has none.
+EXPONENT = re.compile(r"[^eE]*[eE][+-]?([0-9]+)")
+LITERAL_CHARACTERS = b"0123456789+-.eE"
+
+
+def _number_bounds(literal: str) -> None:
+    if len(literal) > MAX_NUMBER_CHARACTERS:
+        raise Refused("input-over-bound", "a number literal of more than 128 characters")
+    exponent = EXPONENT.match(literal)
+    if exponent and int(exponent.group(1)) > MAX_EXPONENT:
+        raise Refused("input-over-bound", "an exponent of magnitude over 308")
+
+
+def _number(literal: str) -> Num:
+    _number_bounds(literal)
+    return Num(literal)
+
+
+def measure(data: bytes, what: str, max_depth: int) -> None:
+    """§12: the bounds measured on a document's bytes before it is read (§11, the first phase):
+    its nesting, every object and every array one level from zero at the root, and each number
+    literal's characters and exponent, a literal being a maximal run of the characters 0-9, +, -, .,
+    e and E outside strings. It reads bytes, so it measures a document that is not JSON, or not
+    UTF-8, as well as one that is."""
+    depth = 0
+    in_string = escaped = False
+    position, length = 0, len(data)
+    while position < length:
+        byte = data[position]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif byte == 0x5C:
+                escaped = True
+            elif byte == 0x22:
+                in_string = False
+        elif byte == 0x22:
+            in_string = True
+        elif byte in b"[{":
+            depth += 1
+            if depth > max_depth:
+                raise Refused("input-over-bound", f"{what} nests more than {max_depth} levels")
+        elif byte in b"]}":
+            depth -= 1
+        elif byte in LITERAL_CHARACTERS:
+            end = position
+            while end < length and data[end] in LITERAL_CHARACTERS:
+                end += 1
+            _number_bounds(data[position:end].decode("ascii"))
+            position = end
+            continue
+        position += 1
+
+
+def _no_constants(name: str) -> Any:
+    raise malformed(f"{name} is not JSON")
+
+
+def _pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for name, value in pairs:
+        if name in result:
+            raise malformed("a member name given twice")
+        result[name] = value
+    return result
+
+
+def _well_formed(value: Any) -> None:
+    if isinstance(value, str):
+        try:
+            value.encode("utf-8")
+        except UnicodeEncodeError as error:
+            raise malformed("a string that is not well-formed Unicode") from error
+    elif isinstance(value, dict):
+        for name, member in value.items():
+            _well_formed(name)
+            _well_formed(member)
+    elif isinstance(value, list):
+        for item in value:
+            _well_formed(item)
+
+
+def value_depth(value: Any) -> int:
+    if isinstance(value, dict):
+        return 1 + max((value_depth(member) for member in value.values()), default=0)
+    if isinstance(value, list):
+        return 1 + max((value_depth(item) for item in value), default=0)
+    return 0
+
+
+def read_document(data: bytes, what: str, max_depth: int = MAX_DOCUMENT_DEPTH) -> Any:
+    """One JSON value, read strictly (§1), its bounds measured first."""
+    measure(data, what, max_depth)
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise malformed(f"{what} is not UTF-8") from error
+    if text.startswith("\ufeff"):
+        raise malformed(f"{what} begins with a byte order mark")
+    try:
+        value = json.loads(
+            text,
+            object_pairs_hook=_pairs,
+            parse_int=_number,
+            parse_float=_number,
+            parse_constant=_no_constants,
+        )
+    except (Refused, Finding):
+        raise
+    except (ValueError, RecursionError) as error:
+        raise malformed(f"{what} is not one JSON value") from error
+    _well_formed(value)
+    retained.remember(value, text)
+    return value
+
+
+# ---------------------------------------------------------------------------------------------
+# Values: forms, equality, pointers
+
+HEX = re.compile(r"[0-9a-f]*")
+DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
+TIMESTAMP = re.compile(r"([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})Z")
+CLASSES = ("asserted", "record", "generated")
+TYPES = ("string", "integer", "timestamp")
+AVAILABILITY = ("present", "absent", "unknown")
+STATUSES = ("resolved", "absent", "unknown")
+BINDING_KIND = "judgment-pack-runner/preparation/1"
+# §2: the dialect versions this document defines; this reader reads each (§11, `version-unread`).
+DEFINED_VERSIONS = (2, 3)
+READ_VERSIONS = (2, 3)
+# §4.3: the kinds version 3 adds but `research`, each defined and not read here; and the members each
+# names beside §4's, `profile`, `profileDigest` and `maxAge`: those it requires, and those it may give.
+VERSION_3_KINDS = {
+    "http": ({"method", "path"}, {"query", "body", "headers"}),
+    "sql": ({"statement", "bindings"}, set()),
+    "web": ({"url"}, set()),
+}
+# §4.3: a `research` source's members beside §4's, and its binding members (§4.4), all three or none.
+RESEARCH_MEMBERS = {"maxAge", "question", "constraints", "model", "evidence", "capabilities"}
+RESEARCH_OPTIONAL = {"fields", "results", "acquisitionSources"}
+RESEARCH_BINDING = ("profile", "profileDigest", "webProfiles")
+RESEARCH_TYPES = ("integer", "decimal", "boolean", "text", "text-list", "range")
+CAPABILITIES = ("answer", "search", "page")
+WEB_CAPABILITIES = ("search", "page")
+ANSWER_STATUSES = ("found", "not-found", "stale", "conflicting")
+# Core §2.2's decimal grammar, which a `decimal` answer matches whole (§4.3).
+DECIMAL = re.compile(r"-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?")
+ARRAY_INDEX = re.compile(r"0|[1-9][0-9]*")
+# §2: the members of version 2 alone, which a document of version 3 carries none of.
+VERSION_2_MEMBERS = ("provider", "facts", "evidence")
+# §4.4: an unbound `operation`'s catalog names, and the shapes that serve an operation (§4.1).
+UNBOUND_MEMBERS = ("platform", "operation", "shape", "record")
+OPERATION_SHAPES = ("airbyte", "mcp", "http")
+VERIFICATION = "verified acquisitions; session sealing and input truth are not established"
+
+
+def is_hex(value: Any, length: int) -> bool:
+    return isinstance(value, str) and len(value) == length and HEX.fullmatch(value) is not None
+
+
+def is_digest(value: Any) -> bool:
+    return isinstance(value, str) and DIGEST.fullmatch(value) is not None
+
+
+def is_integer(value: Any) -> bool:
+    return isinstance(value, Num) and value.is_integer()
+
+
+def integer_of(value: Num) -> int:
+    return int(value.literal)
+
+
+def _days_from_civil(year: int, month: int, day: int) -> int:
+    year -= month <= 2
+    era = (year if year >= 0 else year - 399) // 400
+    year_of_era = year - era * 400
+    day_of_year = (153 * (month + (-3 if month > 2 else 9)) + 2) // 5 + day - 1
+    day_of_era = year_of_era * 365 + year_of_era // 4 - year_of_era // 100 + day_of_year
+    return era * 146097 + day_of_era - 719468
+
+
+def instant(value: Any) -> int | None:
+    """§1: the seconds since 1970-01-01T00:00:00Z a timestamp names, or None."""
+    if not isinstance(value, str):
+        return None
+    match = TIMESTAMP.fullmatch(value)
+    if match is None:
+        return None
+    year, month, day, hour, minute, second = (int(part) for part in match.groups())
+    if not 1 <= month <= 12 or hour > 23 or minute > 59 or second > 59:
+        return None
+    leap = year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+    days_in_month = [31, 29 if leap else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1]
+    if not 1 <= day <= days_in_month:
+        return None
+    return _days_from_civil(year, month, day) * 86400 + hour * 3600 + minute * 60 + second
+
+
+def of_type(value: Any, kind: str) -> bool:
+    if kind == "string":
+        return isinstance(value, str)
+    if kind == "integer":
+        return is_integer(value)
+    return instant(value) is not None
+
+
+def json_equal(left: Any, right: Any) -> bool:
+    """JSON-equal (§6.3): type and value, numbers by their mathematical value."""
+    if isinstance(left, Num) or isinstance(right, Num):
+        return isinstance(left, Num) and isinstance(right, Num) and left.value == right.value
+    if isinstance(left, bool) or isinstance(right, bool):
+        return isinstance(left, bool) and isinstance(right, bool) and left == right
+    if left is None or right is None:
+        return left is None and right is None
+    if isinstance(left, str) or isinstance(right, str):
+        return isinstance(left, str) and isinstance(right, str) and left == right
+    if isinstance(left, list) and isinstance(right, list):
+        return len(left) == len(right) and all(json_equal(a, b) for a, b in zip(left, right))
+    if isinstance(left, dict) and isinstance(right, dict):
+        return left.keys() == right.keys() and all(json_equal(left[k], right[k]) for k in left)
+    return False
+
+
+ABSENT = object()
+
+
+def pointer_tokens(pointer: Any) -> list[str] | None:
+    """RFC 6901: the tokens of a pointer, or None when it is not one."""
+    if not isinstance(pointer, str):
+        return None
+    if pointer == "":
+        return []
+    if not pointer.startswith("/"):
+        return None
+    tokens = []
+    for raw in pointer[1:].split("/"):
+        if re.search(r"~(?![01])", raw):
+            return None
+        tokens.append(raw.replace("~1", "/").replace("~0", "~"))
+    return tokens
+
+
+def is_pointer(value: Any) -> bool:
+    return pointer_tokens(value) is not None
+
+
+def names_an_element(token: str, length: int) -> bool:
+    """§1: a token of decimal digits, with no leading zero but `0`, whose value is below the
+    array's length. The token is compared by its length first, so a token of any length is read
+    without converting it to a number: one longer than the length's own digits names no element."""
+    if re.fullmatch(r"0|[1-9][0-9]*", token) is None:
+        return False
+    bound = str(length)
+    if len(token) != len(bound):
+        return len(token) < len(bound)
+    return token < bound
+
+
+def resolve(document: Any, pointer: str) -> Any:
+    """The value a pointer resolves to, or ABSENT (§1)."""
+    tokens = pointer_tokens(pointer)
+    assert tokens is not None
+    current = document
+    for token in tokens:
+        if isinstance(current, dict):
+            if token not in current:
+                return ABSENT
+            current = current[token]
+        elif isinstance(current, list):
+            if not names_an_element(token, len(current)):
+                return ABSENT
+            current = current[int(token)]
+        else:
+            return ABSENT
+    return current
+
+
+def write_at(document: dict[str, Any], pointer: str, value: Any) -> None:
+    """§8.1: write a value at a fact target, creating each object on the way."""
+    tokens = pointer_tokens(pointer)
+    assert tokens
+    current = document
+    for token in tokens[:-1]:
+        nxt = current.get(token)
+        if not isinstance(nxt, dict):
+            nxt = {}
+            current[token] = nxt
+        current = nxt
+    current[tokens[-1]] = value
+
+
+def is_prefix(shorter: list[str], longer: list[str]) -> bool:
+    return len(shorter) <= len(longer) and longer[: len(shorter)] == shorter
+
+
+# ---------------------------------------------------------------------------------------------
+# The two canonical forms (§1, §9.5)
+
+
+class OutsideDomain(Exception):
+    """A value with no `canon` form."""
+
+
+def _canon_string(text: str) -> str:
+    out = ['"']
+    for character in text:
+        code = ord(character)
+        if character == '"':
+            out.append('\\"')
+        elif character == "\\":
+            out.append("\\\\")
+        elif character == "\b":
+            out.append("\\b")
+        elif character == "\f":
+            out.append("\\f")
+        elif character == "\n":
+            out.append("\\n")
+        elif character == "\r":
+            out.append("\\r")
+        elif character == "\t":
+            out.append("\\t")
+        elif code < 0x20:
+            out.append("\\u%04x" % code)
+        else:
+            out.append(character)
+    out.append('"')
+    return "".join(out)
+
+
+def _canon(value: Any) -> str:
+    if isinstance(value, dict):
+        names = sorted(value)  # Python orders str by code point
+        return "{" + ",".join(_canon_string(n) + ":" + _canon(value[n]) for n in names) + "}"
+    if isinstance(value, list):
+        return "[" + ",".join(_canon(item) for item in value) + "]"
+    if isinstance(value, str):
+        return _canon_string(value)
+    if value is True:
+        return "true"
+    if value is False:
+        return "false"
+    if value is None:
+        return "null"
+    if isinstance(value, Num):
+        if not value.is_integer():
+            raise OutsideDomain(value.literal)
+        return str(int(value.literal))
+    if isinstance(value, int):
+        if abs(value) > LARGEST:
+            raise OutsideDomain(str(value))
+        return str(value)
+    raise OutsideDomain(repr(value))
+
+
+def canon(value: Any) -> bytes:
+    """The gateway canonical form (§1)."""
+    return _canon(value).encode("utf-8")
+
+
+def in_canon_domain(value: Any) -> bool:
+    try:
+        canon(value)
+    except OutsideDomain:
+        return False
+    return True
+
+
+def digest_of(data: bytes) -> str:
+    return "sha256:" + hashlib.sha256(data).hexdigest()
+
+
+_PREPARATION_ESCAPES = {
+    '"': '\\"',
+    "\\": "\\\\",
+    "\b": "\\b",
+    "\t": "\\t",
+    "\n": "\\n",
+    "\f": "\\f",
+    "\r": "\\r",
+    "&": "\\u0026",
+    "<": "\\u003c",
+    ">": "\\u003e",
+    "\u2028": "\\u2028",
+    "\u2029": "\\u2029",
+}
+
+
+def _preparation_string(text: str) -> str:
+    out = ['"']
+    for character in text:
+        escape = _PREPARATION_ESCAPES.get(character)
+        if escape is not None:
+            out.append(escape)
+        elif ord(character) < 0x20:
+            out.append("\\u%04x" % ord(character))
+        else:
+            out.append(character)
+    out.append('"')
+    return "".join(out)
+
+
+def write_number(value: Num | int) -> str:
+    """§9.5: the literal, its characters kept; every number of a preparation is an integer."""
+    if isinstance(value, Num):
+        if not value.is_integer():
+            raise OutsideDomain(value.literal)
+        return value.literal
+    return str(value)
+
+
+def _preparation_form(value: Any) -> str:
+    if isinstance(value, dict):
+        names = sorted(value, key=lambda name: name.encode("utf-8"))
+        return (
+            "{"
+            + ",".join(_preparation_string(n) + ":" + _preparation_form(value[n]) for n in names)
+            + "}"
+        )
+    if isinstance(value, list):
+        return "[" + ",".join(_preparation_form(item) for item in value) + "]"
+    if isinstance(value, str):
+        return _preparation_string(value)
+    if value is True:
+        return "true"
+    if value is False:
+        return "false"
+    if value is None:
+        return "null"
+    if isinstance(value, (Num, int)) and not isinstance(value, bool):
+        return write_number(value)
+    raise OutsideDomain(repr(value))
+
+
+def preparation_bytes(value: Any) -> bytes:
+    """The canonical form of a preparation (§9.5)."""
+    return _preparation_form(value).encode("utf-8")
+
+
+def binding_of(digest: str) -> bytes:
+    """§9.5: the binding, these bytes exactly."""
+    return ('{"kind":"' + BINDING_KIND + '","digest":"' + digest + '"}').encode("ascii")
+
+
+# ---------------------------------------------------------------------------------------------
+# Ed25519: the key rule and the equation (checkpoint witness statement §5)
+
+P = 2**255 - 19
+L = 2**252 + 27742317777372353535851937790883648493
+D = (-121665 * pow(121666, P - 2, P)) % P
+SQRT_MINUS_ONE = pow(2, (P - 1) // 4, P)
+SMALL_ORDER = {
+    bytes.fromhex(h)
+    for h in (
+        "0100000000000000000000000000000000000000000000000000000000000000",
+        "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+        "0000000000000000000000000000000000000000000000000000000000000000",
+        "0000000000000000000000000000000000000000000000000000000000000080",
+        "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05",
+        "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc85",
+        "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a",
+        "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa",
+    )
+}
+
+
+def _x_from_y(y: int, sign: int) -> int | None:
+    numerator = (y * y - 1) % P
+    denominator = (D * y * y + 1) % P
+    x2 = numerator * pow(denominator, P - 2, P) % P
+    if x2 == 0:
+        return 0
+    x = pow(x2, (P + 3) // 8, P)
+    if (x * x - x2) % P != 0:
+        x = x * SQRT_MINUS_ONE % P
+    if (x * x - x2) % P != 0:
+        return None
+    if x & 1 != sign:
+        x = P - x
+    return x
+
+
+def key_refusal(key: bytes) -> str | None:
+    """The key rule, in its order; None for a key a reader may trust."""
+    encoded = int.from_bytes(key, "little")
+    y = encoded & ((1 << 255) - 1)
+    sign = encoded >> 255
+    if y >= P or (y in (1, P - 1) and sign == 1):
+        return "key-not-canonical"
+    if key in SMALL_ORDER:
+        return "key-small-order"
+    if _x_from_y(y, sign) is None:
+        return "key-not-on-curve"
+    return None
+
+
+def _add(a: tuple[int, int, int, int], b: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+    x1, y1, z1, t1 = a
+    x2, y2, z2, t2 = b
+    pa = (y1 - x1) * (y2 - x2) % P
+    pb = (y1 + x1) * (y2 + x2) % P
+    pc = 2 * t1 * t2 * D % P
+    pd = 2 * z1 * z2 % P
+    e, f, g, h = pb - pa, pd - pc, pd + pc, pb + pa
+    return (e * f % P, g * h % P, f * g % P, e * h % P)
+
+
+def _multiply(scalar: int, point: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+    result = (0, 1, 1, 0)
+    while scalar:
+        if scalar & 1:
+            result = _add(result, point)
+        point = _add(point, point)
+        scalar >>= 1
+    return result
+
+
+def _encode(point: tuple[int, int, int, int]) -> bytes:
+    x, y, z, _ = point
+    inverse = pow(z, P - 2, P)
+    x, y = x * inverse % P, y * inverse % P
+    return (y | ((x & 1) << 255)).to_bytes(32, "little")
+
+
+_BASE_Y = 4 * pow(5, P - 2, P) % P
+_BASE_X = _x_from_y(_BASE_Y, 0)
+BASE = (_BASE_X, _BASE_Y, 1, _BASE_X * _BASE_Y % P)
+
+
+def signature_verifies(key: bytes, message: bytes, signature: bytes) -> bool:
+    """[S]B - [h]A encodes to R, S below L: RFC 8032 without the cofactor."""
+    if len(signature) != 64 or key_refusal(key) is not None:
+        return False
+    r_bytes, s = signature[:32], int.from_bytes(signature[32:], "little")
+    if s >= L:
+        return False
+    encoded = int.from_bytes(key, "little")
+    y = encoded & ((1 << 255) - 1)
+    x = _x_from_y(y, encoded >> 255)
+    assert x is not None
+    a = (x, y, 1, x * y % P)
+    h = int.from_bytes(hashlib.sha512(r_bytes + key + message).digest(), "little") % L
+    ha = _multiply(h, a)
+    negative = ((P - ha[0]) % P, ha[1], ha[2], (P - ha[3]) % P)
+    return _encode(_add(_multiply(s, BASE), negative)) == r_bytes
+
+
+# ---------------------------------------------------------------------------------------------
+# The dialect document (§§2-8)
+
+
+def closed(value: Any, required: set[str], optional: set[str], what: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise malformed(f"{what} is not an object")
+    missing = required - set(value)
+    unknown = set(value) - required - optional
+    if missing or unknown:
+        raise malformed(f"{what}: members missing {sorted(missing)} or unknown {sorted(unknown)}")
+    return value
+
+
+@dataclass
+class Parameter:
+    name: str
+    type: str
+    pointer: str
+    origin: str  # "case", or the name of the source it is taken from
+
+
+@dataclass
+class Read:
+    unwrap: list[str]
+    copy: dict[str, Any] | None
+    rule: dict[str, Any] | None
+    as_written: dict[str, Any]
+    fact_targets: list[str] = field(default_factory=list)
+    evidence_targets: list[str] = field(default_factory=list)
+    # target -> the pointers of the value read the dialect could copy to it (§9.3)
+    candidates: dict[tuple[str, str], list[str]] = field(default_factory=dict)
+    # a reconciliation read's earlier research sources, in their order (§6.4); None for any other read
+    sources: list[str] | None = None
+    # fact target -> its conversion, reconciliation and quality declaration (§6.2a)
+    quality: dict[str, dict[str, Any]] = field(default_factory=dict)
+
+
+@dataclass
+class Research:
+    """A `research` source's recipe (§4.3) and, bound, its web assignments (§4.4)."""
+
+    question: Any
+    fields: list[dict[str, Any]]
+    types: dict[str, str]  # each declared field's type, by its name
+    capabilities: list[str]
+    model: str
+    request: dict[str, Any]  # the source's request but its `question`, which is instantiated
+    web: dict[str, tuple[str, str]] = field(default_factory=dict)  # capability -> (profile, digest)
+    result_member: str = "fields"
+
+
+@dataclass
+class Source:
+    name: str
+    kind: str
+    parameters: dict[str, Parameter]
+    read: Read
+    profile_id: str = ""
+    profile_digest: str = ""
+    max_age: int = 0
+    template: Any = None  # `arguments`, the request's template, whole
+    scope: dict[str, str] = field(default_factory=dict)  # each parameter of its scope, by its type
+    calculation: dict[str, Any] | None = None
+    research: Research | None = None
+
+
+@dataclass
+class Dialect:
+    document: dict[str, Any]
+    case_parameters: dict[str, Parameter]
+    case_read: Read
+    sources: list[Source]
+    admits: dict[tuple[str, str], list[str]]
+    version: int = 2
+    # the kinds of its sources this reader does not read, in their order (§11, `kind-unread`)
+    unread: list[str] = field(default_factory=list)
+    # each unbound source (§4.4) by its name: the `shape` and `record` it names
+    unbound: dict[str, tuple[str, str]] = field(default_factory=dict)
+    # each unbound `research` source by its name: the web capabilities it requests (§4.4)
+    unbound_research: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    # of a bound dialect, each source bound by the binding document: the unbound source's `shape` and
+    # `record`, which the profile it is bound to must serve (§4.4, §5.1)
+    bound_from: dict[str, tuple[str, str]] = field(default_factory=dict)
+
+
+def check_template(value: Any, scope: dict[str, str], what: str) -> None:
+    """§4.1: every template form is $param or $text, naming parameters in scope, never runAt."""
+    if isinstance(value, dict):
+        if any(name.startswith("$") for name in value):
+            if len(value) != 1:
+                raise malformed(f"{what}: a template form of more than one member")
+            (form, argument), = value.items()
+            if form == "$param":
+                if not isinstance(argument, str) or argument == "runAt" or argument not in scope:
+                    raise malformed(f"{what}: $param names no parameter in scope")
+            elif form == "$text":
+                if not isinstance(argument, str):
+                    raise malformed(f"{what}: $text is not a string")
+                for name in placeholders(argument, what):
+                    if name == "runAt" or scope.get(name) != "integer":
+                        raise malformed(f"{what}: a placeholder names no integer parameter")
+            else:
+                raise malformed(f"{what}: an unknown template form {form}")
+            return
+        for name, member in value.items():
+            check_template(member, scope, what)
+    elif isinstance(value, list):
+        for item in value:
+            check_template(item, scope, what)
+
+
+def is_string_template(value: Any, scope: dict[str, str]) -> bool:
+    """§4.1: a string, a $text, or a $param naming a parameter of type string or timestamp."""
+    if isinstance(value, str):
+        return True
+    if isinstance(value, dict) and len(value) == 1:
+        (form, argument), = value.items()
+        if form == "$text":
+            return True
+        if form == "$param":
+            return scope.get(argument) in ("string", "timestamp")
+    return False
+
+
+def check_request(value: Any, scope: dict[str, str], what: str) -> None:
+    """§4.1: `arguments`, the template of a request: an object, not a template form, held to the rules
+    of a template. What more it must be depends on the profile's shape and adapter, a finding
+    (`request_misfit`)."""
+    if not isinstance(value, dict) or any(name.startswith("$") for name in value):
+        raise malformed(f"{what}: arguments are not an object, or are a template form")
+    check_template(value, scope, what)
+
+
+def request_misfit(source: Source, profile: dict[str, Any]) -> str | None:
+    """§4.1: why a source's request does not fit its profile, `profile-mismatch`; None when it fits. A
+    tool call for `mcp`; for `http` and `airbyte`, any object, but that under `adapter-http` a `query`
+    is an object of string templates. A profile of shape `command` serves no operation."""
+    request = source.template
+    if profile["shape"] == "command":
+        return "a profile of shape command serves no operation"
+    if profile["shape"] == "mcp":
+        tool = request.get("tool")
+        if set(request) != {"tool", "arguments"} or not isinstance(tool, str) or not tool:
+            return "a request that is not a tool call, under a profile of shape mcp"
+        if tool not in profile.get("tools", []):
+            return "a tool the profile does not allow"
+    elif profile["adapter"]["name"] == "adapter-http" and "query" in request:
+        query = request["query"]
+        if (
+            not isinstance(query, dict)
+            or any(name.startswith("$") for name in query)
+            or not all(is_string_template(member, source.scope) for member in query.values())
+        ):
+            return "a query that is not an object of string templates, under adapter-http"
+    return None
+
+
+def placeholders(text: str, what: str = "a $text") -> list[str]:
+    """§4.1: `{{`, a parameter name, and the next `}}`."""
+    names = []
+    position = 0
+    while True:
+        start = text.find("{{", position)
+        if start < 0:
+            return names
+        end = text.find("}}", start + 2)
+        if end < 0:
+            raise malformed(f"{what}: a {{{{ with no }}}} after it")
+        names.append(text[start + 2 : end])
+        position = end + 2
+
+
+def check_condition(condition: Any, declared: dict[str, str], what: str, depth: int = 0) -> None:
+    if not isinstance(condition, dict) or not isinstance(condition.get("op"), str):
+        raise malformed(f"{what}: a condition is not an object with an op that is a string")
+    op = condition["op"]
+    shapes = {
+        "always": set(),
+        "exists": {"field"},
+        "equals": {"field", "to"},
+        "equalsParam": {"field", "param"},
+        "isTrue": {"field"},
+        "isDecimalString": {"field"},
+        "freshWithin": {"field", "asOf", "maxAge"},
+        "all": {"of"},
+        "any": {"of"},
+        "not": {"of"},
+    }
+    if op not in shapes:
+        raise malformed(f"{what}: an unknown op")
+    closed(condition, {"op"} | shapes[op], set(), what)
+    if "field" in condition and not is_pointer(condition["field"]):
+        raise malformed(f"{what}: a field that is not a pointer")
+    if op == "equals" and not in_canon_domain(condition["to"]):
+        raise malformed(f"{what}: a literal outside the canon domain")
+    for member in ("param", "asOf", "maxAge"):
+        if member in condition and not isinstance(condition[member], str):
+            raise malformed(f"{what}: {member} is not a string naming a parameter")
+    if op == "equalsParam" and condition["param"] not in declared:
+        raise malformed(f"{what}: equalsParam names a parameter the rule does not declare")
+    if op == "freshWithin":
+        # §6.3: `asOf` and `maxAge` name parameters the rule declares, which is the condition's
+        # form; that the one is a `timestamp` and the other an `integer` is part of its truth, so a
+        # declared parameter of another type makes it false, not the dialect malformed.
+        for member in ("asOf", "maxAge"):
+            if condition[member] not in declared:
+                raise malformed(f"{what}: {member} names a parameter the rule does not declare")
+    if op in ("all", "any"):
+        if not isinstance(condition["of"], list) or len(condition["of"]) > MAX_LISTED:
+            if isinstance(condition["of"], list):
+                raise Refused("input-over-bound", f"{what}: more than 64 conditions listed")
+            raise malformed(f"{what}: `of` is not a list")
+        for item in condition["of"]:
+            check_condition(item, declared, what, depth + 1)
+    if op == "not":
+        check_condition(condition["of"], declared, what, depth + 1)
+
+
+def fact_target(pointer: Any, what: str) -> str:
+    if not is_pointer(pointer) or pointer == "":
+        raise malformed(f"{what}: a fact target that is not a pointer other than the root")
+    return pointer
+
+
+QUALITY_TYPES = {"string", "decimal", "boolean", "date"}
+CONVERSION_KINDS = {
+    "decimal-from-text", "decimal-from-number", "boolean-from-text", "trim",
+    "collapse-whitespace", "date-from-text",
+}
+DECIMAL_TEXT = re.compile(r"-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?")
+QUALITY_WHITESPACE = "\u0009\u000a\u000b\u000c\u000d\u0020\u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"
+QUALITY_WHITESPACE_RUN = re.compile(f"[{QUALITY_WHITESPACE}]+")
+
+
+def check_conversion(value: Any, what: str) -> dict[str, Any]:
+    """§6.2a: the six closed deterministic conversion declarations."""
+    if not isinstance(value, dict):
+        raise malformed(f"{what}: convert is not an object")
+    kind = value.get("kind")
+    if kind not in CONVERSION_KINDS:
+        raise malformed(f"{what}: unknown conversion kind")
+    if kind == "decimal-from-text":
+        closed(value, {"kind", "decimalSeparator", "thousandsSeparator", "sign", "whitespace"}, set(), what)
+        if value["decimalSeparator"] not in (".", ","):
+            raise malformed(f"{what}: decimalSeparator")
+        if value["thousandsSeparator"] not in ("", ".", ",") or value["thousandsSeparator"] == value["decimalSeparator"]:
+            raise malformed(f"{what}: thousandsSeparator")
+        if value["sign"] not in ("none", "minus", "plus-minus") or value["whitespace"] not in ("reject", "trim"):
+            raise malformed(f"{what}: sign or whitespace")
+    elif kind == "boolean-from-text":
+        closed(value, {"kind", "true", "false"}, set(), what)
+        for member in ("true", "false"):
+            spellings = value[member]
+            if not isinstance(spellings, list) or not spellings or len(spellings) > 16 or not all(isinstance(x, str) for x in spellings):
+                raise malformed(f"{what}: {member} spellings")
+            if len(set(spellings)) != len(spellings):
+                raise malformed(f"{what}: repeated {member} spelling")
+        if set(value["true"]) & set(value["false"]):
+            raise malformed(f"{what}: a spelling is both true and false")
+    elif kind == "date-from-text":
+        closed(value, {"kind", "format"}, set(), what)
+        if value["format"] not in ("YYYY-MM-DD", "MM/DD/YYYY", "DD/MM/YYYY"):
+            raise malformed(f"{what}: unknown date format")
+    else:
+        closed(value, {"kind"}, set(), what)
+    return value
+
+
+def check_quality_fact(entry: dict[str, Any], what: str) -> dict[str, Any] | None:
+    """Read and close the optional per-target conversion/reconciliation/quality contract."""
+    new = set(entry) - {"target", "source"}
+    if not new:
+        return None
+    allowed = {"target", "source", "observations", "reconcile", "convert", "type", "required", "domain"}
+    if set(entry) - allowed:
+        raise malformed(f"{what}: unknown quality member")
+    if ("source" in entry) == ("observations" in entry):
+        raise malformed(f"{what}: exactly one of source and observations is required")
+    if "source" in entry and not is_pointer(entry["source"]):
+        raise malformed(f"{what}: source is not a pointer")
+    observations = entry.get("observations")
+    if observations is not None:
+        if not isinstance(observations, list) or len(observations) < 2:
+            raise malformed(f"{what}: observations are not a list of two to 16")
+        ids: list[str] = []
+        for index, observation in enumerate(observations):
+            closed(observation, {"id", "source"}, set(), f"{what} observation {index}")
+            if not isinstance(observation["id"], str) or not observation["id"] or not is_pointer(observation["source"]):
+                raise malformed(f"{what}: observation id or source")
+            ids.append(observation["id"])
+        if len(set(ids)) != len(ids):
+            raise malformed(f"{what}: repeated observation id")
+        reconcile = closed(entry.get("reconcile"), {"mode"}, {"precedence"}, f"{what} reconcile")
+        if reconcile["mode"] not in ("precedence", "agree", "first-present"):
+            raise malformed(f"{what}: reconciliation mode")
+        if reconcile["mode"] == "precedence":
+            precedence = reconcile.get("precedence")
+            if (not isinstance(precedence, list) or len(precedence) != len(ids)
+                    or not all(isinstance(item, str) for item in precedence)
+                    or set(precedence) != set(ids)):
+                raise malformed(f"{what}: precedence is not exactly the observation ids")
+        elif "precedence" in reconcile:
+            raise malformed(f"{what}: precedence is present for another mode")
+    elif "reconcile" in entry:
+        raise malformed(f"{what}: reconcile without observations")
+    if "convert" in entry:
+        check_conversion(entry["convert"], f"{what} convert")
+    if entry.get("type") not in QUALITY_TYPES:
+        raise malformed(f"{what}: quality type")
+    if not isinstance(entry.get("required"), bool):
+        raise malformed(f"{what}: required is not boolean")
+    if "domain" in entry:
+        domain = entry["domain"]
+        if not isinstance(domain, dict) or (set(domain) != {"in"} and set(domain) != {"decimalRange"}):
+            raise malformed(f"{what}: domain form")
+        if "in" in domain:
+            if not isinstance(domain["in"], list) or not domain["in"] or len(domain["in"]) > 64 or not all(in_canon_domain(x) for x in domain["in"]):
+                raise malformed(f"{what}: domain in list")
+        else:
+            bounds = closed(domain["decimalRange"], {"min", "max"}, set(), f"{what} decimal range")
+            if not all(isinstance(bounds[k], str) and DECIMAL_TEXT.fullmatch(bounds[k]) for k in ("min", "max")):
+                raise malformed(f"{what}: decimal range endpoint")
+            if Decimal(bounds["min"]) > Decimal(bounds["max"]):
+                raise malformed(f"{what}: reversed decimal range")
+    return entry
+
+
+def check_read(value: Any, scope: dict[str, str], what: str) -> Read:
+    read = closed(value, set(), {"unwrap", "copy", "rule"}, what)
+    if ("copy" in read) == ("rule" in read):
+        raise malformed(f"{what}: a read has exactly one of copy and rule")
+    unwrap = read.get("unwrap", [])
+    if "unwrap" in read:
+        if not isinstance(unwrap, list) or not unwrap:
+            raise malformed(f"{what}: unwrap is not a list of one to four pointers")
+        if len(unwrap) > MAX_UNWRAP:
+            raise Refused("input-over-bound", f"{what}: more than four unwrap pointers")
+        if not all(is_pointer(p) for p in unwrap):
+            raise malformed(f"{what}: an unwrap entry that is not a pointer")
+    result = Read(unwrap=list(unwrap), copy=None, rule=None, as_written=read)
+    if "copy" in read:
+        # §6.2: both arrays are required, as the Runner requires them, and either may be empty.
+        copy = closed(read["copy"], {"facts", "evidence"}, set(), what + " copy")
+        facts = copy["facts"]
+        evidence = copy["evidence"]
+        if not isinstance(facts, list) or not isinstance(evidence, list):
+            raise malformed(f"{what}: copy facts and evidence are arrays")
+        for entry in facts:
+            if not isinstance(entry, dict):
+                raise malformed(f"{what}: copy fact is not an object")
+            if "conversion" in entry and retained.selected():
+                closed(entry, {"target", "source", "conversion"}, set(), what)
+                retained.rule(entry["conversion"])
+                if not is_pointer(entry["source"]):
+                    raise malformed("a retained frame source must be a pointer")
+                quality = None
+            else:
+                quality = check_quality_fact(entry, what + " copy fact")
+            if quality is None and not (retained.selected() and "conversion" in entry):
+                closed(entry, {"target", "source"}, set(), what + " copy fact")
+            target = fact_target(entry["target"], what)
+            sources = [entry["source"]] if "source" in entry else [x["source"] for x in entry["observations"]]
+            result.fact_targets.append(target)
+            result.candidates.setdefault(("fact", target), []).extend(sources)
+            if quality is not None:
+                result.quality[target] = quality
+        seen_requirements: set[str] = set()
+        for entry in evidence:
+            closed(entry, {"requirement", "source"}, {"availability"} if retained.selected() else set(), what + " copy evidence")
+            if "availability" in entry:
+                retained.rule(entry["availability"], True)
+            requirement = entry["requirement"]
+            if not isinstance(requirement, str) or not requirement:
+                raise malformed(f"{what}: a requirement that is not a non-empty string")
+            if requirement in seen_requirements:
+                raise malformed(f"{what}: a copy names a requirement twice")
+            seen_requirements.add(requirement)
+            if not is_pointer(entry["source"]):
+                raise malformed(f"{what}: a copy source that is not a pointer")
+            result.evidence_targets.append(requirement)
+            result.candidates.setdefault(("evidence", requirement), []).append(entry["source"])
+        result.copy = {"facts": facts, "evidence": evidence}
+    else:
+        rule = closed(read["rule"], {"ruleVersion", "parameters", "clauses"}, set(), what + " rule")
+        if rule["ruleVersion"] != "1":
+            raise malformed(f"{what}: ruleVersion is not \"1\"")
+        declared = rule["parameters"]
+        if not isinstance(declared, dict):
+            raise malformed(f"{what}: rule parameters are not an object")
+        for name, kind in declared.items():
+            if kind not in TYPES:
+                raise malformed(f"{what}: a rule parameter of another type")
+            if scope.get(name) != kind:
+                raise malformed(f"{what}: a rule parameter not in scope with its type")
+        clauses = rule["clauses"]
+        if not isinstance(clauses, list) or not clauses:
+            raise malformed(f"{what}: clauses are not a non-empty array")
+        if len(clauses) > MAX_CLAUSES:
+            raise Refused("input-over-bound", f"{what}: more than 64 clauses")
+        fact_seen: list[str] = []
+        evidence_seen: list[str] = []
+        for clause in clauses:
+            closed(clause, {"when", "claim", "reason"}, set(), what + " clause")
+            check_condition(clause["when"], declared, what)
+            if not isinstance(clause["reason"], str):
+                raise malformed(f"{what}: a reason that is not a string")
+            claim = closed(
+                clause["claim"], {"facts", "evidence", "acquisitionStatus"}, set(), what + " claim"
+            )
+            if not isinstance(claim["facts"], list):
+                raise malformed(f"{what}: claim facts are not an array")
+            for entry in claim["facts"]:
+                closed(entry, {"pointer", "from"}, set(), what + " claim fact")
+                target = fact_target(entry["pointer"], what)
+                if not is_pointer(entry["from"]):
+                    raise malformed(f"{what}: a from that is not a pointer")
+                if target not in fact_seen:
+                    fact_seen.append(target)
+                candidates = result.candidates.setdefault(("fact", target), [])
+                candidates.append(entry["from"])
+            if not isinstance(claim["evidence"], dict):
+                raise malformed(f"{what}: claim evidence is not an object")
+            for requirement, availability in claim["evidence"].items():
+                if not requirement or availability not in AVAILABILITY:
+                    raise malformed(f"{what}: claim evidence of another form")
+                if requirement not in evidence_seen:
+                    evidence_seen.append(requirement)
+            if claim["acquisitionStatus"] not in STATUSES:
+                raise malformed(f"{what}: an acquisitionStatus of another value")
+        if clauses[-1]["when"] != {"op": "always"}:
+            raise malformed(f"{what}: the last clause's when is not always")
+        result.fact_targets = fact_seen
+        result.evidence_targets = evidence_seen
+        result.rule = rule
+    if not in_canon_domain(read):
+        raise malformed(f"{what}: a read outside the canon domain")
+    return result
+
+
+def not_written_empty(value: Any, members: tuple[str, ...], what: str) -> None:
+    """§2, version 3 written one way, by the Runner's encoding rule: of the members its encoding leaves
+    out when empty, one written as the empty array or the empty object is refused. They are `sources`,
+    `unmapped` and `unmappedEvidence`, the case's and a source's `parameters`, and the `facts` and
+    `evidence` of `admits`; every other member written empty is read."""
+    if isinstance(value, dict):
+        for member in members:
+            if member in value and isinstance(value[member], (list, dict)) and not value[member]:
+                raise malformed(f"{what}: {member} is written empty, which version 3 leaves out")
+
+
+def check_parameter_name(name: Any, what: str) -> None:
+    if not isinstance(name, str) or not name or name == "runAt":
+        raise malformed(f"{what}: a parameter name that is empty or runAt")
+
+
+def document_profile(document: Any, supported: tuple[str, ...] = ("base",)) -> str:
+    """Ceiling profile admission, before any other document interpretation."""
+    profile = document.get("profile", "base") if isinstance(document, dict) else "base"
+    if profile not in ("base", "extended"):
+        raise malformed("unknown document ceiling profile")
+    if profile not in supported:
+        raise Refused("profile-unsupported", profile)
+    return profile
+
+
+def admit_envelope(dialect: bytes, case: bytes, acquisitions: bytes,
+                   supported: tuple[str, ...] = ("base",)) -> str:
+    """Negotiate, then admit envelope byte sizes only; not full Dialect validation.
+
+    This admission phase can select either ceiling. The complete verifier still
+    advertises base only, since its later phases implement only base bounds.
+    """
+    profile = "base"
+    # Only the bounded declaration scan precedes negotiation. If it cannot identify
+    # a declaration, retain the existing byte/syntax refusal order below.
+    if len(dialect) <= DIALECT_BYTES * 2:
+        try:
+            declaration = read_document(dialect, "the dialect")
+        except Refused:
+            declaration = None
+        if declaration is not None:
+            profile = document_profile(declaration, supported)
+    multiplier = 2 if profile == "extended" else 1
+    if (len(dialect) > DIALECT_BYTES * multiplier
+            or len(dialect) + len(case) + len(acquisitions) > ENVELOPE_BYTES * multiplier):
+        raise Refused("input-over-bound", "the dialect, case and acquisitions")
+    return profile
+
+
+def parse_dialect(document: Any) -> Dialect:
+    document_profile(document)
+    named = isinstance(document, dict) and "formatVersion" in document
+    required = {"formatVersion", "id", "version", "case"} if named else {"version", "case"}
+    top = closed(document, required,
+                 {"profile", "sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"},
+                 "the dialect")
+    if named:
+        if top["formatVersion"] not in ("2.0.0", "3.0.0"):
+            raise malformed("an unknown dialect formatVersion")
+        identity = top["id"]
+        if not isinstance(identity, str) or not identity or len(identity.encode("utf-8")) > 1024 or any(ord(c) <= 32 or ord(c) == 127 for c in identity):
+            raise malformed("the dialect id is not a bounded opaque identifier")
+        if not isinstance(top["version"], str) or re.fullmatch(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", top["version"]) is None:
+            raise malformed("the dialect artifact version is not a three-component version")
+        version = 2 if top["formatVersion"] == "2.0.0" else 3
+    else:
+        if not (isinstance(top["version"], Num) and top["version"].is_integer()):
+            raise malformed("the dialect's version is not an integer")
+        version = integer_of(top["version"])
+        if version not in DEFINED_VERSIONS:
+            raise malformed("a dialect version this document does not define")
+    if version == 3 or named:
+        # §2: version 3 is written one way.
+        for name in VERSION_2_MEMBERS:
+            if name in top:
+                raise malformed(f"{name} is a member of version 2 alone")
+        not_written_empty(top, ("sources", "unmapped", "unmappedEvidence"), "the dialect")
+        not_written_empty(top["case"], ("parameters",), "the case")
+    if "provider" in top and top["provider"] != "":
+        raise malformed("provider is not the empty string")
+    for name in ("facts", "evidence"):
+        if name in top and top[name] is not None:
+            raise malformed(f"{name} is not null")
+    if not in_canon_domain(top):
+        raise malformed("the dialect is outside the canon domain")
+    for name, check in (("unmapped", is_pointer), ("unmappedEvidence", lambda v: isinstance(v, str) and v)):
+        if name in top:
+            items = top[name]
+            if not isinstance(items, list) or not all(check(i) for i in items):
+                raise malformed(f"{name} is not an array of its form")
+            if len(set(items)) != len(items):
+                raise malformed(f"{name} names one twice")
+
+    case = closed(top["case"], {"facts", "evidence"}, {"parameters"}, "case")
+    case_parameters: dict[str, Parameter] = {}
+    declared = case.get("parameters", {})
+    if not isinstance(declared, dict):
+        raise malformed("case parameters are not an object")
+    for name, declaration in declared.items():
+        check_parameter_name(name, "case")
+        closed(declaration, {"pointer", "type"}, set(), f"case parameter {name}")
+        if not is_pointer(declaration["pointer"]) or declaration["type"] not in TYPES:
+            raise malformed(f"case parameter {name} is not of its form")
+        case_parameters[name] = Parameter(name, declaration["type"], declaration["pointer"], "case")
+    if len(case_parameters) + 1 > MAX_SCOPE:
+        raise Refused("input-over-bound", "more than 64 parameters in the case's scope")
+    case_scope = {name: p.type for name, p in case_parameters.items()}
+    case_scope["runAt"] = "timestamp"
+    case_read = check_read(
+        {"copy": {"facts": case["facts"], "evidence": case["evidence"]}}, case_scope, "the case's read"
+    )
+
+    sources: list[Source] = []
+    raw_sources = top.get("sources", [])
+    if not isinstance(raw_sources, list):
+        raise malformed("sources is not an array")
+    if len(raw_sources) > MAX_SOURCES:
+        raise Refused("input-over-bound", "more than 16 sources")
+    unread: list[str] = []
+    unbound: dict[str, tuple[str, str]] = {}
+    unbound_research: dict[str, tuple[str, ...]] = {}
+    for index, raw in enumerate(raw_sources):
+        what = f"source {index}"
+        if not isinstance(raw, dict) or not isinstance(raw.get("name"), str):
+            raise malformed(f"{what} has no name")
+        name = raw["name"]
+        if not name or name == "case" or any(s.name == name for s in sources):
+            raise malformed(f"{what}: a name that is empty, case, or given twice")
+        kind = raw.get("kind")
+        if not isinstance(kind, str):
+            raise malformed(f"{what}: a kind that is not a string")
+        if (kind in VERSION_3_KINDS or kind == "research") and version == 2:
+            raise malformed(f"{what}: a kind of version 3 in a version-2 document")
+        # Every kind's form is checked, its common members (§4) and its own, before a kind this
+        # reader does not read is refused (§11): `kind-unread` comes after every form.
+        catalog: tuple[str, str] | None = None
+        if kind == "operation" and version == 3 and any(member in raw for member in UNBOUND_MEMBERS):
+            # §4.4: the unbound form, of version 3 alone. A version-2 source that names one of its
+            # members is refused below, as one that names a member its kind does not list (§4).
+            closed(
+                raw,
+                {"name", "kind", "read", "platform", "operation", "shape", "record", "maxAge", "arguments"},
+                {"parameters", "calculation"},
+                what,
+            )
+            for member in ("platform", "operation", "record"):
+                if not isinstance(raw[member], str) or not raw[member]:
+                    raise malformed(f"{what}: {member} is not a non-empty string")
+            if raw["shape"] not in OPERATION_SHAPES:
+                raise malformed(f"{what}: a shape other than airbyte, mcp and http")
+            catalog = (raw["shape"], raw["record"])
+            acquired = True
+        elif kind == "operation":
+            closed(
+                raw,
+                {"name", "kind", "read", "profile", "profileDigest", "maxAge", "arguments"},
+                {"parameters", "calculation"},
+                what,
+            )
+            acquired = True
+        elif kind == "selected-file":
+            closed(
+                raw,
+                {"name", "kind", "read", "provider"},
+                {"parameters", "profile", "profileDigest", "maxAge", "arguments"},
+                what,
+            )
+            drive = {"profile", "profileDigest", "maxAge", "arguments"}
+            if raw["provider"] == "local-file":
+                if drive & set(raw):
+                    raise malformed(f"{what}: a local file has no profile, maxAge or request")
+                acquired = False
+            elif raw["provider"] == "google-drive":
+                if not drive <= set(raw):
+                    raise malformed(f"{what}: a Drive file has a profile, maxAge and a request")
+                acquired = True
+            else:
+                raise malformed(f"{what}: a provider of another value")
+            unread.append(kind)
+        elif kind in VERSION_3_KINDS:
+            required, optional = VERSION_3_KINDS[kind]
+            closed(
+                raw,
+                {"name", "kind", "read", "profile", "profileDigest", "maxAge"} | required,
+                {"parameters"} | optional,
+                what,
+            )
+            acquired = True
+            unread.append(kind)
+        elif kind == "research":
+            # §4.3, §4.4: published unbound, with none of the three binding members, or bound, with all
+            # three; a source with only some of them, or an operation's catalog member, is malformed.
+            closed(raw, {"name", "kind", "read"} | RESEARCH_MEMBERS, {"parameters", *RESEARCH_BINDING, *RESEARCH_OPTIONAL}, what)
+            if ("fields" in raw) == ("results" in raw):
+                raise malformed(f"{what}: exactly one of fields and results is required")
+            given = [member for member in RESEARCH_BINDING if member in raw]
+            if given and len(given) != len(RESEARCH_BINDING):
+                raise malformed(f"{what}: some but not all of profile, profileDigest and webProfiles")
+            acquired = True
+        else:
+            raise malformed(f"{what}: a kind this version does not list")
+        parameters: dict[str, Parameter] = {}
+        declared = raw.get("parameters", {})
+        if not isinstance(declared, dict):
+            raise malformed(f"{what}: parameters are not an object")
+        if version == 3 or named:
+            not_written_empty(raw, ("parameters",), what)
+        for pname, declaration in declared.items():
+            check_parameter_name(pname, what)
+            if pname in case_parameters:
+                raise malformed(f"{what}: a source parameter shadows a case parameter")
+            closed(declaration, {"from", "pointer", "type"}, set(), f"{what} parameter {pname}")
+            origin = declaration["from"]
+            if not any(s.name == origin for s in sources):
+                raise malformed(f"{what}: a source parameter from no earlier source")
+            if not is_pointer(declaration["pointer"]) or declaration["type"] not in TYPES:
+                raise malformed(f"{what}: a source parameter not of its form")
+            parameters[pname] = Parameter(pname, declaration["type"], declaration["pointer"], origin)
+        scope = dict(case_scope)
+        scope.update({pname: p.type for pname, p in parameters.items()})
+        if len(scope) > MAX_SCOPE:
+            raise Refused("input-over-bound", f"{what}: more than 64 parameters in scope")
+        source = Source(name=name, kind=kind, parameters=parameters, read=Read([], None, None, {}))
+        if acquired:
+            # Every acquired source names its profile but an unbound one, which the binding document
+            # binds to one (§4.4).
+            if catalog is None and "profile" in raw:
+                if not isinstance(raw["profile"], str) or not raw["profile"]:
+                    raise malformed(f"{what}: profile is not a non-empty string")
+                if not is_digest(raw["profileDigest"]):
+                    raise malformed(f"{what}: profileDigest is not a digest")
+                source.profile_id = raw["profile"]
+                source.profile_digest = raw["profileDigest"]
+            if not is_integer(raw["maxAge"]) or not 1 <= integer_of(raw["maxAge"]) <= 86400:
+                raise malformed(f"{what}: maxAge is not an integer from 1 to 86400")
+            source.max_age = integer_of(raw["maxAge"])
+            source.scope = scope
+            if kind == "research":
+                source.research = check_research(raw, scope, what)
+            elif kind in VERSION_3_KINDS:
+                check_version_3_kind(raw, kind, scope, what)
+            else:
+                check_request(raw["arguments"], scope, f"{what} arguments")
+                source.template = raw["arguments"]
+        if catalog is not None:
+            unbound[name] = catalog
+        if source.research is not None and "profile" not in raw:
+            unbound_research[name] = tuple(c for c in source.research.capabilities if c in WEB_CAPABILITIES)
+        if "calculation" in raw:
+            calculation = closed(raw["calculation"], {"inputs", "tables"}, set(), f"{what} calculation")
+            inputs, tables = calculation["inputs"], calculation["tables"]
+            if not isinstance(inputs, dict) or not isinstance(tables, dict):
+                raise malformed(f"{what}: calculation inputs and tables are objects")
+            for bound in inputs.values():
+                if not isinstance(bound, str) or bound == "runAt" or bound not in scope:
+                    raise malformed(f"{what}: an input bound to no parameter in scope, or runAt")
+            for limit in tables.values():
+                if not is_integer(limit) or not 1 <= integer_of(limit) <= 315360000:
+                    raise malformed(f"{what}: a table limit of another form")
+            source.calculation = calculation
+        if source.research is not None:
+            source.read = check_research_read(raw["read"], scope, what + " read", source, sources)
+        else:
+            source.read = check_read(raw["read"], scope, what + " read")
+        sources.append(source)
+    # A source parameter's pointer is a fact target of the source it comes from (§3).
+    for source in sources:
+        for parameter in source.parameters.values():
+            origin = next(s for s in sources if s.name == parameter.origin)
+            if parameter.pointer not in origin.read.fact_targets:
+                raise malformed(f"{source.name}: a source parameter reads no fact target of {origin.name}")
+
+    # §8.1: targets never overlap; a requirement has one source; bounds.
+    every_fact: list[list[str]] = []
+    evidence_sources: dict[str, str] = {}
+    for owner, read in [("case", case_read)] + [(s.name, s.read) for s in sources]:
+        for target in read.fact_targets:
+            tokens = pointer_tokens(target)
+            assert tokens is not None
+            for other in every_fact:
+                if is_prefix(other, tokens) or is_prefix(tokens, other):
+                    raise malformed("two fact targets overlap")
+            every_fact.append(tokens)
+        for requirement in read.evidence_targets:
+            if requirement in evidence_sources:
+                raise malformed("a requirement is the evidence target of two sources")
+            evidence_sources[requirement] = owner
+    if len(every_fact) > MAX_FACT_TARGETS or len(evidence_sources) > MAX_EVIDENCE_TARGETS:
+        raise Refused("input-over-bound", "more fact or evidence targets than the bounds")
+
+    admits: dict[tuple[str, str], list[str]] = {}
+    if "admits" in top:
+        raw_admits = closed(top["admits"], set(), {"facts", "evidence"}, "admits")
+        if version == 3 or named:
+            not_written_empty(raw_admits, ("facts", "evidence"), "admits")
+        written_facts = {t for r in [case_read] + [s.read for s in sources] for t in r.fact_targets}
+        for member, kind, written in (("facts", "fact", written_facts), ("evidence", "evidence", set(evidence_sources))):
+            entries = raw_admits.get(member, {})
+            if not isinstance(entries, dict):
+                raise malformed(f"admits.{member} is not an object")
+            for target, classes in entries.items():
+                if target not in written:
+                    raise malformed(f"admits names a target no source writes")
+                if not isinstance(classes, list) or not all(c in CLASSES for c in classes):
+                    raise malformed("admits gives a list of another form")
+                admits[(kind, target)] = list(classes)
+
+    # A kind this reader does not read is refused by the caller once every form is checked, the binding
+    # document's among them (§11, the fifth and sixth phases).
+    return Dialect(top, case_parameters, case_read, sources, admits, version, unread, unbound, unbound_research=unbound_research)
+
+
+def check_version_3_kind(raw: dict[str, Any], kind: str, scope: dict[str, str], what: str) -> None:
+    """§4.3: the members `http`, `sql` and `web` name, held to the forms the text gives them. A source of
+    such a kind is held to its form, as every source is, and then not read (`kind-unread`). Where the
+    text names a member without a form — `http`'s `path` "a template that yields a path" and its
+    `headers` "the names of the headers", and a `sql` binding's `name` and `type` — this reader takes
+    the form a name or a path has: a string template for a path, and non-empty strings for names. (No
+    vector decides this.) A `research` source is read (`check_research`)."""
+
+    def string_template(value: Any, member: str) -> None:
+        check_template(value, scope, f"{what} {member}")
+        if not is_string_template(value, scope):
+            raise malformed(f"{what}: {member} is not a string template")
+
+    def names(value: Any, member: str) -> None:
+        if not isinstance(value, list) or not all(isinstance(item, str) and item for item in value):
+            raise malformed(f"{what}: {member} is not an array of non-empty strings")
+
+    if kind == "http":
+        if raw["method"] not in ("GET", "POST"):
+            raise malformed(f"{what}: a method other than GET and POST")
+        string_template(raw["path"], "path")
+        if "query" in raw:
+            query = raw["query"]
+            if not isinstance(query, dict) or any(name.startswith("$") for name in query):
+                raise malformed(f"{what}: query is not an object of string templates")
+            for name, member in query.items():
+                string_template(member, f"query {name}")
+        if "body" in raw:
+            if raw["method"] == "GET":
+                raise malformed(f"{what}: a body beside GET")
+            check_template(raw["body"], scope, f"{what} body")
+        if "headers" in raw:
+            names(raw["headers"], "headers")
+    elif kind == "sql":
+        if not isinstance(raw["statement"], str):
+            raise malformed(f"{what}: statement is not a string, and is never a template")
+        if not isinstance(raw["bindings"], list):
+            raise malformed(f"{what}: bindings is not an array")
+        for binding in raw["bindings"]:
+            closed(binding, {"name", "type", "value"}, set(), f"{what} binding")
+            names([binding["name"], binding["type"]], "a binding's name and type")
+            value = binding["value"]
+            if not isinstance(value, dict) or set(value) != {"$param"}:
+                raise malformed(f"{what}: a binding's value is not a $param form")
+            check_template(value, scope, f"{what} binding")
+    elif kind == "web":
+        url = raw["url"]
+        if not isinstance(url, str):
+            if not isinstance(url, dict) or set(url) != {"$param"}:
+                raise malformed(f"{what}: url is not a string or a $param form")
+            check_template(url, scope, f"{what} url")
+            if scope.get(url["$param"]) != "string":
+                raise malformed(f"{what}: url names a parameter that is not a string")
+
+
+# ---------------------------------------------------------------------------------------------
+# The research recipe (§4.3), its bound form (§4.4), and its reads (§4.3, §6.4)
+
+
+def utf8_length(text: str) -> int:
+    return len(text.encode("utf-8"))
+
+
+def check_capabilities(value: Any, what: str) -> list[str]:
+    """§4.3, §5.1: an array of distinct names from `answer`, `search` and `page`, in that order, of one
+    entry at least. More than three is over a maximum (§12), counted before any form."""
+    if not isinstance(value, list) or not value:
+        raise malformed(f"{what}: capabilities are not an array of one name at least")
+    if not all(isinstance(name, str) and name in CAPABILITIES for name in value):
+        raise malformed(f"{what}: a capability other than answer, search and page")
+    order = [CAPABILITIES.index(name) for name in value]
+    if any(earlier >= later for earlier, later in zip(order, order[1:])):
+        raise malformed(f"{what}: capabilities not distinct, or not in the order answer, search, page")
+    return list(value)
+
+
+def check_model(value: Any, what: str) -> str:
+    """§4.3: a non-empty string; more than 256 UTF-8 bytes is over a maximum (§12)."""
+    if not isinstance(value, str) or not value:
+        raise malformed(f"{what}: model is not a non-empty string")
+    return value
+
+
+def check_assignment(value: Any, what: str) -> tuple[str, str]:
+    """§4.4: exactly `profile`, a non-empty string, and `profileDigest`, a digest."""
+    entry = closed(value, {"profile", "profileDigest"}, set(), what)
+    if not isinstance(entry["profile"], str) or not entry["profile"]:
+        raise malformed(f"{what}: profile is not a non-empty string")
+    if not is_digest(entry["profileDigest"]):
+        raise malformed(f"{what}: profileDigest is not a digest")
+    return entry["profile"], entry["profileDigest"]
+
+
+def check_web_profiles(value: Any, capabilities: list[str], what: str) -> dict[str, tuple[str, str]]:
+    """§4.4: `webProfiles`, a closed object with exactly the `search` and `page` capabilities the source
+    requests as keys, each value an assignment; written even when empty."""
+    if not isinstance(value, dict):
+        raise malformed(f"{what}: webProfiles is not an object")
+    requested = {name for name in capabilities if name in WEB_CAPABILITIES}
+    if set(value) != requested:
+        raise malformed(f"{what}: webProfiles does not assign exactly the web capabilities requested")
+    return {name: check_assignment(value[name], f"{what} webProfiles {name}") for name in WEB_CAPABILITIES if name in value}
+
+
+def check_research(raw: dict[str, Any], scope: dict[str, str], what: str) -> Research:
+    """§4.3: a research recipe's members, each of its form. The maxima of §12 are counted before any form
+    (`count_bounds`); what is checked here is each member's form and minimum."""
+    question = raw["question"]
+    check_template(question, scope, f"{what} question")
+    if not is_string_template(question, scope):
+        raise malformed(f"{what}: question is not a string template")
+    if not isinstance(raw["constraints"], dict):
+        raise malformed(f"{what}: constraints is not an object")
+    model = check_model(raw["model"], what)
+    evidence = raw["evidence"]
+    if not isinstance(evidence, list) or not all(isinstance(item, str) and item for item in evidence):
+        raise malformed(f"{what}: evidence is not an array of non-empty strings")
+    result_member = "results" if "results" in raw else "fields"
+    fields = raw[result_member]
+    if not isinstance(fields, list) or not fields:
+        raise malformed(f"{what}: fields is not an array of one declaration at least")
+    types: dict[str, str] = {}
+    for index, declaration in enumerate(fields):
+        where = f"{what} field {index}"
+        if result_member == "results":
+            closed(declaration, {"id", "type", "required", "description", "cardinality"}, set(), where)
+            name = declaration["id"]
+            if declaration["type"] not in ("string", "decimal", "boolean", "string-list"):
+                raise malformed(f"{where}: a result type outside the closed set")
+        else:
+            closed(declaration, {"name", "type", "required", "description"}, {"cardinality"}, where)
+            name = declaration["name"]
+        if not isinstance(name, str) or not name or name == "case":
+            raise malformed(f"{where}: a name that is not a non-empty string other than case")
+        if name in types:
+            raise malformed(f"{where}: a field name given twice")
+        mapped_type = {"string": "text", "string-list": "text-list"}.get(declaration["type"], declaration["type"])
+        if result_member == "results" and declaration["cardinality"] == "many":
+            mapped_type += "[]"
+        if not isinstance(mapped_type, str) or (mapped_type not in RESEARCH_TYPES and not (mapped_type.endswith("[]") and mapped_type[:-2] in RESEARCH_TYPES)):
+            raise malformed(f"{where}: a type other than the six")
+        if not isinstance(declaration["required"], bool):
+            raise malformed(f"{where}: required is not a boolean")
+        if not isinstance(declaration["description"], str) or not declaration["description"]:
+            raise malformed(f"{where}: description is not a non-empty string")
+        if declaration.get("cardinality", "many" if declaration["type"] == "text-list" else "one") not in ("one", "many"):
+            raise malformed(f"{where}: cardinality is not one or many")
+        types[name] = mapped_type
+    capabilities = check_capabilities(raw["capabilities"], what)
+    if capabilities[0] != "answer":
+        raise malformed(f"{what}: capabilities without answer, which is required")
+    if "acquisitionSources" in raw:
+        declared_sources = raw["acquisitionSources"]
+        if not isinstance(declared_sources, list) or not declared_sources or len(declared_sources) > MAX_SOURCES:
+            raise malformed(f"{what}: acquisitionSources is not one to 16 entries")
+        for index, declared_source in enumerate(declared_sources):
+            closed(declared_source, {"profile", "version", "purpose", "scope", "freshness"}, set(), f"{what} acquisition source {index}")
+            if not all(isinstance(declared_source[k], str) and declared_source[k] for k in ("profile", "version", "purpose")):
+                raise malformed(f"{what}: acquisition source names")
+            if not isinstance(declared_source["scope"], dict) or not in_canon_domain(declared_source["scope"]):
+                raise malformed(f"{what}: acquisition source scope")
+            if not is_integer(declared_source["freshness"]) or not 0 <= integer_of(declared_source["freshness"]) <= 31536000:
+                raise malformed(f"{what}: acquisition source freshness")
+    request_names = ["constraints", "model", "evidence", result_member, "capabilities"]
+    if "acquisitionSources" in raw:
+        request_names.append("acquisitionSources")
+    request = {name: raw[name] for name in request_names}
+    normalized_fields = [({**declaration, "name": declaration["id"]} if result_member == "results" else declaration) for declaration in fields]
+    research = Research(question, normalized_fields, types, capabilities, model, request, result_member=result_member)
+    if "webProfiles" in raw:
+        research.web = check_web_profiles(raw["webProfiles"], capabilities, what)
+    return research
+
+
+def conditions_of(condition: dict[str, Any]) -> list[dict[str, Any]]:
+    """A condition and every condition within it, at any depth."""
+    found = [condition]
+    if condition["op"] in ("all", "any"):
+        for item in condition["of"]:
+            found.extend(conditions_of(item))
+    elif condition["op"] == "not":
+        found.extend(conditions_of(condition["of"]))
+    return found
+
+
+def leaves_of(rule: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        condition
+        for clause in rule["clauses"]
+        for condition in conditions_of(clause["when"])
+        if condition["op"] not in ("always", "all", "any", "not")
+    ]
+
+
+def check_research_read(
+    value: Any, scope: dict[str, str], what: str, source: Source, earlier: list[Source]
+) -> Read:
+    """§4.3, "Reading fields": a plain research read reads `R` through a closed list of pointers, and never
+    takes a value from under `values`; §6.4: or the read is a reconciliation."""
+    assert source.research is not None
+    if isinstance(value, dict) and "sources" in value:
+        return check_reconciliation(value, scope, what, source, earlier)
+    read = check_read(value, scope, what)
+    declared = source.research.types
+    result_member = source.research.result_member
+
+    def readable(pointer: str, taken: bool) -> None:
+        tokens = pointer_tokens(pointer)
+        assert tokens is not None
+        if tokens == [result_member]:
+            return
+        if len(tokens) >= 2 and tokens[0] == result_member and tokens[1] in declared:
+            rest = tokens[2:]
+            if not rest or rest[0] == "value" or rest in (["status"], ["cites"]):
+                return
+            if len(rest) == 3 and rest[0] == "values" and ARRAY_INDEX.fullmatch(rest[1]) and rest[2] == "value":
+                if taken:
+                    raise malformed(f"{what}: a value taken from under values, which a plain research read never takes")
+                return
+        raise malformed(f"{what}: a read pointer outside a research read's closed list")
+
+    # This reader takes an unwrap pointer, which takes the value read from where it points, as a from.
+    for pointer in read.unwrap:
+        readable(pointer, True)
+    if read.copy is not None:
+        for entry in read.copy["facts"]:
+            for pointer in ([entry["source"]] if "source" in entry else [item["source"] for item in entry["observations"]]):
+                readable(pointer, True)
+        for entry in read.copy["evidence"]:
+            readable(entry["source"], True)
+    else:
+        assert read.rule is not None
+        for condition in leaves_of(read.rule):
+            readable(condition["field"], False)
+        for clause in read.rule["clauses"]:
+            for entry in clause["claim"]["facts"]:
+                readable(entry["from"], True)
+    return read
+
+
+def status_guard(condition: Any, entry: list[str], status: str) -> bool:
+    """§6.4: exactly `{"op":"equals","field":"<entry>/status","to":S}`."""
+    return (
+        isinstance(condition, dict)
+        and set(condition) == {"op", "field", "to"}
+        and condition["op"] == "equals"
+        and isinstance(condition["to"], str)
+        and condition["to"] == status
+        and pointer_tokens(condition["field"]) == entry + ["status"]
+    )
+
+
+def absence_guard(condition: Any, entry: list[str]) -> bool:
+    """§6.4: exactly `{"op":"not","of":{"op":"exists","field":"<entry>"}}`."""
+    return (
+        isinstance(condition, dict)
+        and set(condition) == {"op", "of"}
+        and condition["op"] == "not"
+        and isinstance(condition["of"], dict)
+        and set(condition["of"]) == {"op", "field"}
+        and condition["of"]["op"] == "exists"
+        and pointer_tokens(condition["of"]["field"]) == entry
+    )
+
+
+def check_reconciliation(
+    value: Any, scope: dict[str, str], what: str, source: Source, earlier: list[Source]
+) -> Read:
+    """§6.4: `{"sources": [S, ...], "rule": R}`, on a version-3 `research` source: the earlier research
+    sources it reads, by name, and a version-1 rule over `{"current": C, "sources": U}`, whose pointers,
+    froms, guards, evidence and last clause are held to the section's forms."""
+    assert source.research is not None
+    raw = closed(value, {"sources", "rule"}, set(), what)
+    names = raw["sources"]
+    if not isinstance(names, list) or not names:
+        raise malformed(f"{what}: sources is not an array of one name at least")
+    research = {s.name: s for s in earlier if s.research is not None}
+    if not all(isinstance(name, str) and name in research for name in names):
+        raise malformed(f"{what}: a name that is not of an earlier research source")
+    if len(set(names)) != len(names):
+        raise malformed(f"{what}: a source named twice")
+    read = check_read({"rule": raw["rule"]}, scope, what)
+    read.as_written = raw
+    read.sources = list(names)
+    rule = read.rule
+    assert rule is not None
+    declared = {name: research[name].research.types for name in names}  # type: ignore[union-attr]
+
+    def entry_of(pointer: str) -> tuple[list[str], list[str]] | None:
+        tokens = pointer_tokens(pointer)
+        assert tokens is not None
+        if len(tokens) >= 3 and tokens[:2] == ["current", "fields"] and tokens[2] in source.research.types:
+            return tokens[:3], tokens[3:]
+        if (
+            len(tokens) >= 4
+            and tokens[0] == "sources"
+            and tokens[1] in declared
+            and tokens[2] == "fields"
+            and tokens[3] in declared[tokens[1]]
+        ):
+            return tokens[:4], tokens[4:]
+        return None
+
+    # The pointers a condition reads: a declared field's entry, its status, and its value or values.
+    for condition in leaves_of(rule):
+        found = entry_of(condition["field"])
+        if found is None or not (not found[1] or found[1] == ["status"] or found[1][0] in ("value", "values")):
+            raise malformed(f"{what}: a condition reads a pointer outside the reconciliation's")
+    selected: list[list[str]] = []
+    for clause in rule["clauses"]:
+        if clause["claim"]["evidence"]:
+            raise malformed(f"{what}: a reconciliation claim writes evidence")
+        for entry in clause["claim"]["facts"]:
+            found = entry_of(entry["from"])
+            if found is None or not found[1] or found[1][0] != "value":
+                raise malformed(f"{what}: a from outside the admissible set")
+            when = clause["when"]
+            guarded = status_guard(when, found[0], "found") or (
+                when["op"] == "all" and any(status_guard(item, found[0], "found") for item in when["of"])
+            )
+            if not guarded:
+                raise malformed(f"{what}: a value selected by a clause that does not guard it as found")
+            if found[0] not in selected:
+                selected.append(found[0])
+    every = [condition for clause in rule["clauses"] for condition in conditions_of(clause["when"])]
+    for entry in selected:
+        for status in ("not-found", "stale", "conflicting"):
+            if not any(status_guard(condition, entry, status) for condition in every):
+                raise malformed(f"{what}: a selected field with no {status} guard")
+        if not any(absence_guard(condition, entry) for condition in every):
+            raise malformed(f"{what}: a selected field with no absence guard")
+    last = rule["clauses"][-1]["claim"]
+    if last["facts"] or last["acquisitionStatus"] not in ("unknown", "absent"):
+        raise malformed(f"{what}: the last clause writes a fact, or is neither unknown nor absent")
+    return read
+
+
+def parse_binding(document: Any) -> dict[str, Any]:
+    """§4.4: the binding document, one object of exactly `dialect`, a digest, and `sources`, an object
+    mapping names to assignments: for an `operation` exactly `profile`, a non-empty string, and
+    `profileDigest`, a digest, and for `research` those and `webProfiles`. Which form an entry has is the
+    kind of the source it binds (`read_bound`)."""
+    binding = closed(document, {"dialect", "sources"}, set(), "the binding document")
+    if not is_digest(binding["dialect"]):
+        raise malformed("the binding document's dialect is not a digest")
+    if not isinstance(binding["sources"], dict):
+        raise malformed("the binding document's sources are not an object")
+    for name, entry in binding["sources"].items():
+        what = f"the binding document's entry {name}"
+        closed(entry, {"profile", "profileDigest"}, {"webProfiles"}, what)
+        check_assignment({"profile": entry["profile"], "profileDigest": entry["profileDigest"]}, what)
+    return binding
+
+
+def bind(document: dict[str, Any], binding: dict[str, Any]) -> dict[str, Any]:
+    """§4.4: the bound dialect, the unbound dialect with the binding applied: each `operation` the binding
+    document names with its `platform`, `operation`, `shape` and `record` removed and the `profile` and
+    `profileDigest` the binding gives it added; each `research` source with the three assignment members
+    added; every other member kept as written."""
+    sources = []
+    for source in document.get("sources", []):
+        entry = binding["sources"].get(source["name"])
+        if entry is not None:
+            source = {name: member for name, member in source.items() if name not in UNBOUND_MEMBERS}
+            source["profile"] = entry["profile"]
+            source["profileDigest"] = entry["profileDigest"]
+            if "webProfiles" in entry:
+                source["webProfiles"] = entry["webProfiles"]
+        sources.append(source)
+    return {**document, "sources": sources}
+
+
+def read_bound(dialect: Dialect, binding_document: Any, given: bool) -> Dialect:
+    """§4.4, verifying it: a dialect with an unbound source is read with its binding document, as the
+    bound dialect, with two checks more; the first here, the second a finding (`profile-mismatch`).
+    `given` says whether a binding document was supplied, whatever it holds: a document of `null` is
+    one, and not of the binding document's form."""
+    binding = parse_binding(binding_document) if given else None
+    if not dialect.unbound and not dialect.unbound_research:
+        if binding is not None:
+            raise malformed("a binding document beside a dialect with no unbound source")
+        return dialect
+    if binding is None:
+        raise malformed("a dialect with an unbound source and no binding document")
+    if binding["dialect"] != digest_of(canon(dialect.document)):
+        raise malformed("the binding document's dialect is not the given dialect's digest")
+    if set(binding["sources"]) != set(dialect.unbound) | set(dialect.unbound_research):
+        raise malformed("the binding document does not name exactly the dialect's unbound sources")
+    for name, entry in binding["sources"].items():
+        what = f"the binding document's entry {name}"
+        if name in dialect.unbound:
+            closed(entry, {"profile", "profileDigest"}, set(), what)
+        else:
+            # §4.4: for research, exactly `profile`, `profileDigest` and `webProfiles`, with exactly the
+            # web capabilities the source requests.
+            closed(entry, {"profile", "profileDigest", "webProfiles"}, set(), what)
+            check_web_profiles(entry["webProfiles"], list(dialect.unbound_research[name]), what)
+    bound = parse_dialect(bind(dialect.document, binding))
+    bound.bound_from = dict(dialect.unbound)
+    return bound
+
+
+def research_sources(dialect: Any) -> set[str]:
+    """The names of the dialect's sources of kind `research`, read wherever they can be, before any form
+    is checked: their acquisitions have a form of their own (§4.3, §5.2)."""
+    if not isinstance(dialect, dict) or not isinstance(dialect.get("sources"), list):
+        return set()
+    return {
+        source["name"]
+        for source in dialect["sources"]
+        if isinstance(source, dict) and source.get("kind") == "research" and isinstance(source.get("name"), str)
+    }
+
+
+def check_salts(value: Any, what: str) -> None:
+    salts = closed(value, {"args"}, {"statement"}, f"{what} salts")
+    if not all(is_hex(salt, 64) for salt in salts.values()):
+        raise malformed(f"{what}: a salt of another form")
+
+
+def check_typed(value: Any, kind: str, what: str) -> None:
+    """§4.3: a value of a field's declared type, in its exact encoding; `null` is never one. The maxima of
+    §12 are counted before any form (`count_bounds`)."""
+    if kind.endswith("[]"):
+        if not isinstance(value, list) or len(value) > MAX_LIST_ITEMS:
+            raise malformed(f"{what}: a value that is not of the declared type {kind}")
+        for index, item in enumerate(value):
+            check_typed(item, kind[:-2], f"{what} item {index}")
+        return
+    if kind == "integer":
+        ok = is_integer(value)
+    elif kind == "decimal":
+        ok = isinstance(value, str) and DECIMAL.fullmatch(value) is not None
+    elif kind == "boolean":
+        ok = isinstance(value, bool)
+    elif kind == "text":
+        ok = isinstance(value, str)
+    elif kind == "text-list":
+        ok = isinstance(value, list) and all(isinstance(item, str) for item in value)
+    else:
+        ok = isinstance(value, dict) and set(value) == {"min", "max"}
+        if ok:
+            low, high = value["min"], value["max"]
+            if is_integer(low) and is_integer(high):
+                ok = low.value <= high.value
+            elif all(isinstance(e, str) and DECIMAL.fullmatch(e) is not None for e in (low, high)):
+                # compared by exact decimal arithmetic, never binary floating point
+                ok = Decimal(low) <= Decimal(high)
+            else:
+                ok = False
+    if not ok:
+        raise malformed(f"{what}: a value that is not of the declared type {kind}")
+
+
+def check_cites(value: Any, responses: int, least: int, what: str) -> None:
+    """§4.3: distinct indices into the record's `responses`, each an integer from 0 below their number,
+    written without `-0`; more than 64 is over a maximum (§12), counted before any form."""
+    if not isinstance(value, list) or len(value) < least:
+        raise malformed(f"{what}: cites is not an array of {least} index at least")
+    seen: set[int] = set()
+    for index in value:
+        if not is_integer(index) or index.literal == "-0" or not 0 <= integer_of(index) < responses:
+            raise malformed(f"{what}: a citation that is not an index into the record's responses")
+        if integer_of(index) in seen:
+            raise malformed(f"{what}: an index cited twice")
+        seen.add(integer_of(index))
+
+
+def check_answers(answers: Any, research: Research, responses: int, what: str) -> None:
+    """§4.3, "Answers": `R.fields`, an entry for each declared field it answers, every required one among
+    them, each entry of its status's form."""
+    if not isinstance(answers, dict):
+        raise malformed(f"{what}: fields is not an object")
+    for name in answers:
+        if name not in research.types:
+            raise malformed(f"{what}: an answer for a field that is not declared")
+    for declaration in research.fields:
+        if declaration["required"] and declaration["name"] not in answers:
+            raise malformed(f"{what}: no entry for the required field {declaration['name']}")
+    for name, entry in answers.items():
+        where = f"{what} field {name}"
+        kind = research.types[name]
+        status = entry.get("status") if isinstance(entry, dict) else None
+        if status == ("present" if research.result_member == "results" else "found"):
+            closed(entry, {"status", "cites", "value"}, set(), where)
+            check_cites(entry["cites"], responses, 1, where)
+            check_typed(entry["value"], kind, where)
+        elif status == "conflicting":
+            closed(entry, {"status", "cites", "values"}, set(), where)
+            if entry["cites"] != []:
+                raise malformed(f"{where}: a conflicting entry's own cites is not []")
+            observations = entry["values"]
+            if not isinstance(observations, list) or len(observations) < 2:
+                raise malformed(f"{where}: values is not an array of two observations at least")
+            for index, observation in enumerate(observations):
+                closed(observation, {"value", "cites"}, set(), f"{where} observation {index}")
+                check_typed(observation["value"], kind, f"{where} observation {index}")
+                check_cites(observation["cites"], responses, 1, f"{where} observation {index}")
+            first = observations[0]["value"]
+            if all(json_equal(first, observation["value"]) for observation in observations):
+                raise malformed(f"{where}: no two conflicting values differ")
+        elif isinstance(status, str) and status in (
+            ("missing", "inaccessible", "stale") if research.result_member == "results" else ("not-found", "stale")
+        ):
+            needs_reason = research.result_member == "results"
+            required = {"status", "cites", "reason"} if needs_reason else {"status", "cites"}
+            closed(entry, required, set(), where)
+            check_cites(entry["cites"], responses, 0, where)
+            if "reason" in entry and (not isinstance(entry["reason"], str) or not entry["reason"]):
+                raise malformed(f"{where}: reason is not a non-empty string")
+        else:
+            raise malformed(f"{where}: an entry that is not an object of a known status")
+
+
+def check_acquisition_form(name: str, member: Any, research: Research | None) -> None:
+    """§5.2: an acquisition's form. A `research` source's response may lack `receipt` and `salts`, both
+    or neither; its result is the research record, of §4.3's form, its answers held to the source's
+    declarations and each retained response to its form here, where a missing `result` is no refusal
+    of form but `acquisition-missing` (§5.2)."""
+    what = f"acquisition {name}"
+    closed(member, {"response"}, set(), what)
+    if research is None:
+        response = closed(member["response"], {"result", "receipt", "salts"}, set(), what)
+    else:
+        response = closed(member["response"], {"result"}, {"receipt", "salts"}, what)
+        if ("receipt" in response) != ("salts" in response):
+            raise malformed(f"{what}: a research record's receipt and salts are both present or both absent")
+        result_member = research.result_member
+        required_record = {result_member, "responses", "execution"} if result_member == "results" else {result_member, "responses"}
+        optional_record = set() if result_member == "results" else {"execution"}
+        record = closed(response["result"], required_record, optional_record, f"{what}: the research record")
+        if not isinstance(record["responses"], list):
+            raise malformed(f"{what}: the research record's responses are not an array")
+        for index, entry in enumerate(record["responses"]):
+            where = f"{what} retained response {index}"
+            retained = closed(entry, {"profile", "request", "receipt", "salts"}, {"result"}, where)
+            profile = closed(retained["profile"], {"id", "digest"}, set(), f"{where} profile")
+            if not isinstance(profile["id"], str) or not profile["id"] or not is_digest(profile["digest"]):
+                raise malformed(f"{where}: a profile reference of another form")
+            if not isinstance(retained["request"], dict) or not in_canon_domain(retained["request"]):
+                raise malformed(f"{where}: a request that is not an object in the canon domain")
+            if not isinstance(retained["receipt"], dict):
+                raise malformed(f"{where}: the receipt is not an object")
+            check_salts(retained["salts"], where)
+        if "execution" in record:
+            execution = closed(record["execution"], {"resolvedSettings", "retainedBytes"}, set(), f"{what}: execution")
+            settings = closed(execution["resolvedSettings"], {"model", "profile", "version", "settings"}, set(), f"{what}: resolved settings")
+            if (not all(isinstance(settings[k], str) and settings[k] for k in ("model", "profile", "version"))
+                    or not isinstance(settings["settings"], dict) or not in_canon_domain(settings["settings"])):
+                raise malformed(f"{what}: resolved settings")
+            retained_bytes = execution["retainedBytes"]
+            if not isinstance(retained_bytes, list) or len(retained_bytes) > MAX_RETAINED_RESPONSES:
+                raise malformed(f"{what}: retainedBytes")
+            for index, item in enumerate(retained_bytes):
+                closed(item, {"mediaType", "base64"}, set(), f"{what}: retained bytes {index}")
+                if not isinstance(item["mediaType"], str) or not item["mediaType"] or not isinstance(item["base64"], str):
+                    raise malformed(f"{what}: retained bytes {index}")
+                try:
+                    base64.b64decode(item["base64"], validate=True)
+                except (ValueError, binascii.Error):
+                    raise malformed(f"{what}: retained bytes {index} is not base64")
+        check_answers(record[result_member], research, len(record["responses"]), f"{what}: the research record")
+    if "receipt" in response:
+        if not isinstance(response["receipt"], dict):
+            raise malformed(f"{what}: the receipt is not an object")
+        check_salts(response["salts"], what)
+
+
+def over_by_type(value: Any, kind: Any) -> bool:
+    """§11's third phase: a value measured by its field's declared type, when that type is one of §4.3's
+    six, against the maxima of §12; a value of another form is measured by nothing here."""
+    if isinstance(kind, str) and kind.endswith("[]"):
+        return isinstance(value, list) and (
+            len(value) > MAX_LIST_ITEMS or any(over_by_type(item, kind[:-2]) for item in value)
+        )
+    if kind == "text":
+        return isinstance(value, str) and utf8_length(value) > MAX_TEXT_BYTES
+    if kind == "text-list":
+        return isinstance(value, list) and (
+            len(value) > MAX_LIST_ITEMS
+            or any(isinstance(item, str) and utf8_length(item) > MAX_ITEM_BYTES for item in value)
+        )
+    if kind == "decimal":
+        return isinstance(value, str) and len(value) > MAX_DECIMAL_CHARACTERS
+    if kind == "range":
+        return isinstance(value, dict) and any(
+            isinstance(value.get(end), str) and len(value[end]) > MAX_DECIMAL_CHARACTERS for end in ("min", "max")
+        )
+    return False
+
+
+def research_bounds(dialect: Any, acquisitions: Any, profiles: Any, binding: Any) -> None:
+    """§12's research maxima (§4.3, §4.4, §5.1, §6.4), counted wherever they can be measured before any
+    form (§11, the third phase): on the dialect's `research` sources, the profiles' research
+    declarations, the binding document's research assignments and each research record."""
+
+    def over(detail: str) -> Refused:
+        return Refused("input-over-bound", detail)
+
+    def too_long(value: Any, limit: int) -> bool:
+        return isinstance(value, str) and utf8_length(value) > limit
+
+    def capabilities_over(value: Any) -> bool:
+        return isinstance(value, list) and len(value) > MAX_CAPABILITIES
+
+    def cites_over(value: Any) -> bool:
+        return isinstance(value, list) and len(value) > MAX_CITES
+
+    # each research source's declared types, by its name: a name declared twice is input-malformed once forms are
+    # checked; before that, its answers are measured by the first declaration whose `type` is one of the six
+    declared: dict[str, dict[str, Any]] = {}
+    sources = dialect.get("sources") if isinstance(dialect, dict) else None
+    for source in sources if isinstance(sources, list) else []:
+        if not isinstance(source, dict) or source.get("kind") != "research":
+            continue
+        types: dict[str, Any] = {}
+        fields = source.get("results", source.get("fields"))
+        if isinstance(fields, list):
+            if len(fields) > MAX_FIELDS:
+                raise over("more than 64 fields declared")
+            for declaration in fields:
+                if not isinstance(declaration, dict):
+                    continue
+                name = declaration.get("id", declaration.get("name"))
+                if too_long(name, MAX_FIELD_NAME_BYTES):
+                    raise over("a field name of more than 64 bytes")
+                if too_long(declaration.get("description"), MAX_DESCRIPTION_BYTES):
+                    raise over("a field description of more than 2048 bytes")
+                declared_type = declaration.get("type")
+                if "results" in source:
+                    declared_type = {"string": "text", "string-list": "text-list"}.get(declared_type, declared_type)
+                    if declaration.get("cardinality") == "many" and isinstance(declared_type, str):
+                        declared_type += "[]"
+                if (isinstance(name, str) and name not in types and isinstance(declared_type, str)
+                        and (declared_type in RESEARCH_TYPES
+                             or declared_type.endswith("[]") and declared_type[:-2] in RESEARCH_TYPES)):
+                    types[name] = declared_type
+        acquisition_sources = source.get("acquisitionSources")
+        if isinstance(acquisition_sources, list) and len(acquisition_sources) > MAX_SOURCES:
+            raise over("more than 16 acquisition sources")
+        if too_long(source.get("model"), MAX_MODEL_BYTES):
+            raise over("a model name of more than 256 bytes")
+        evidence = source.get("evidence")
+        if isinstance(evidence, list) and any(too_long(item, MAX_EVIDENCE_BYTES) for item in evidence):
+            raise over("an evidence instruction of more than 4096 bytes")
+        if capabilities_over(source.get("capabilities")):
+            raise over("more than three capabilities")
+        web = source.get("webProfiles")
+        if isinstance(web, dict) and len(web) > MAX_WEB_ASSIGNMENTS:
+            raise over("more than two web assignments")
+        read = source.get("read")
+        names = read.get("sources") if isinstance(read, dict) else None
+        if isinstance(names, list) and len(names) > MAX_READ_SOURCES:
+            raise over("more than 15 earlier sources read")
+        if isinstance(source.get("name"), str) and source["name"] not in declared:
+            declared[source["name"]] = types
+    for profile in profiles if isinstance(profiles, list) else []:
+        research = profile.get("research") if isinstance(profile, dict) else None
+        if isinstance(research, dict):
+            if capabilities_over(research.get("capabilities")):
+                raise over("a profile of more than three capabilities")
+            if too_long(research.get("model"), MAX_MODEL_BYTES):
+                raise over("a profile's model name of more than 256 bytes")
+    assigned = binding.get("sources") if isinstance(binding, dict) else None
+    if isinstance(assigned, dict):
+        for name, entry in assigned.items():
+            web = entry.get("webProfiles") if name in declared and isinstance(entry, dict) else None
+            if isinstance(web, dict) and len(web) > MAX_WEB_ASSIGNMENTS:
+                raise over("more than two web assignments")
+    for name, member in acquisitions.items() if isinstance(acquisitions, dict) else []:
+        response = member.get("response") if isinstance(member, dict) and name in declared else None
+        record = response.get("result") if isinstance(response, dict) else None
+        answers = record.get("results", record.get("fields")) if isinstance(record, dict) else None
+        execution = record.get("execution") if isinstance(record, dict) else None
+        retained_bytes = execution.get("retainedBytes") if isinstance(execution, dict) else None
+        if isinstance(retained_bytes, list) and len(retained_bytes) > MAX_RETAINED_RESPONSES:
+            raise over("more than 64 retained byte entries")
+        if not isinstance(answers, dict):
+            continue
+        if len(answers) > MAX_FIELDS:
+            raise over("more than 64 answer entries")
+        # every answer's name, declared or not, before any entry is inspected or its declaration looked up
+        if any(utf8_length(field_name) > MAX_FIELD_NAME_BYTES for field_name in answers):
+            raise over("an answer's field name of more than 64 bytes")
+        for field_name, entry in answers.items():
+            if not isinstance(entry, dict):
+                continue
+            kind = declared[name].get(field_name)
+            if cites_over(entry.get("cites")) or over_by_type(entry.get("value"), kind):
+                raise over(f"an answer over a maximum: {field_name}")
+            observations = entry.get("values")
+            if not isinstance(observations, list):
+                continue
+            if len(observations) > MAX_OBSERVATIONS:
+                raise over("more than 64 conflicting observations")
+            for observation in observations:
+                if isinstance(observation, dict) and (
+                    cites_over(observation.get("cites")) or over_by_type(observation.get("value"), kind)
+                ):
+                    raise over(f"an observation over a maximum: {field_name}")
+
+
+def count_bounds(dialect: Any, acquisitions: Any, profiles: Any = None, binding: Any = None) -> None:
+    """§12's counted bounds, and a result's nesting, taken on the documents read wherever the count
+    can be taken, before any form is checked (§11, the third phase)."""
+
+    def over(detail: str) -> Refused:
+        return Refused("input-over-bound", detail)
+
+    research_bounds(dialect, acquisitions, profiles, binding)
+    for profile in profiles if isinstance(profiles, list) else []:
+        scope = profile.get("endpointScope") if isinstance(profile, dict) else None
+        if isinstance(scope, list):
+            if len(scope) > 32 or any(isinstance(e, str) and utf8_length(e) > 2048 for e in scope):
+                raise over("an endpoint scope exceeds 32 entries or 2048 bytes per entry")
+    if isinstance(acquisitions, dict):
+        research = research_sources(dialect)
+        for name, member in acquisitions.items():
+            response = member.get("response") if isinstance(member, dict) else None
+            if isinstance(response, dict) and "result" in response:
+                if value_depth(response["result"]) > MAX_VALUE_DEPTH:
+                    raise over(f"acquisition {name}: a result nested more than 32 levels")
+                # the retained responses of a `research` source, at most 64 (§12)
+                record = response["result"]
+                if name in research and isinstance(record, dict) and isinstance(record.get("responses"), list):
+                    if len(record["responses"]) > MAX_RETAINED_RESPONSES:
+                        raise over(f"acquisition {name}: more than 64 retained responses")
+    if not isinstance(dialect, dict):
+        return
+    facts: set[str] = set()
+    evidence: set[str] = set()
+
+    def entries(value: Any) -> list[Any]:
+        return value if isinstance(value, list) else []
+
+    def copy_targets(copy: Any) -> None:
+        if isinstance(copy, dict):
+            for entry in entries(copy.get("facts")):
+                if isinstance(entry, dict) and isinstance(entry.get("target"), str):
+                    facts.add(entry["target"])
+                observations = entry.get("observations") if isinstance(entry, dict) else None
+                if isinstance(observations, list) and len(observations) > MAX_SOURCES:
+                    raise over("more than 16 observations for one target")
+            for entry in entries(copy.get("evidence")):
+                if isinstance(entry, dict) and isinstance(entry.get("requirement"), str):
+                    evidence.add(entry["requirement"])
+
+    def listed(condition: Any) -> None:
+        if not isinstance(condition, dict):
+            return
+        if condition.get("op") in ("all", "any") and isinstance(condition.get("of"), list):
+            if len(condition["of"]) > MAX_LISTED:
+                raise over("more than 64 conditions listed")
+            for item in condition["of"]:
+                listed(item)
+        elif condition.get("op") == "not":
+            listed(condition.get("of"))
+
+    case = dialect.get("case")
+    case_parameters = case.get("parameters") if isinstance(case, dict) else None
+    in_case = len(case_parameters) if isinstance(case_parameters, dict) else 0
+    if in_case + 1 > MAX_SCOPE:
+        raise over("more than 64 parameters in the case's scope")
+    if isinstance(case, dict):
+        copy_targets({"facts": case.get("facts"), "evidence": case.get("evidence")})
+    sources = dialect.get("sources")
+    if isinstance(sources, list):
+        if len(sources) > MAX_SOURCES:
+            raise over("more than 16 sources")
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            own = source.get("parameters")
+            if isinstance(own, dict) and in_case + len(own) + 1 > MAX_SCOPE:
+                raise over("more than 64 parameters in a scope")
+            read = source.get("read")
+            if not isinstance(read, dict):
+                continue
+            if isinstance(read.get("unwrap"), list) and len(read["unwrap"]) > MAX_UNWRAP:
+                raise over("more than four unwrap pointers")
+            copy_targets(read.get("copy"))
+            rule = read.get("rule")
+            clauses = rule.get("clauses") if isinstance(rule, dict) else None
+            if isinstance(clauses, list):
+                if len(clauses) > MAX_CLAUSES:
+                    raise over("more than 64 clauses")
+                for clause in clauses:
+                    if not isinstance(clause, dict):
+                        continue
+                    listed(clause.get("when"))
+                    claim = clause.get("claim")
+                    if isinstance(claim, dict):
+                        for entry in entries(claim.get("facts")):
+                            if isinstance(entry, dict) and isinstance(entry.get("pointer"), str):
+                                facts.add(entry["pointer"])
+                        if isinstance(claim.get("evidence"), dict):
+                            evidence.update(claim["evidence"])
+    if len(facts) > MAX_FACT_TARGETS or len(evidence) > MAX_EVIDENCE_TARGETS:
+        raise over("more fact or evidence targets than the bounds")
+
+
+# ---------------------------------------------------------------------------------------------
+# Input profiles (§5.1)
+
+
+def page_endpoint(value: Any) -> tuple[str, str] | None:
+    """The constrained page form, parsed as text; no URL parser or path decoding (§5.1)."""
+    if not isinstance(value, str) or len(value) > 2048 or not re.fullmatch(r"[\x21-\x7e]+", value):
+        return None
+    match = re.fullmatch(r"https://([A-Za-z0-9.-]+)(?::(?:443)?)?(/[^?#\\]*)?", value)
+    if match is None:
+        return None
+    host, path = match[1], match[2] or ""
+    labels = host.split(".")
+    if len(labels) < 2 or not re.match(r"[A-Za-z]", labels[-1]):
+        return None
+    if any(not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", label)
+           for label in labels):
+        return None
+    if re.search(r"%(?![0-9A-Fa-f]{2})", path):
+        return None
+    if re.search(r"%(?:2[fF]|5[cC])", path):  # Round 16: an escaped slash or backslash.
+        return None
+    # A dot segment, alone or before the first `;` or escaped delimiter of its segment (round 16).
+    heads = (re.split(r";|%3[bBfF]|%23|%00", segment, maxsplit=1)[0]
+             for segment in path.split("/"))
+    if any(re.fullmatch(r"(?:\.|%2[eE]){1,2}", head) for head in heads):
+        return None
+    return host.lower(), path  # ASCII host comparison only; signed bytes are never rewritten.
+
+
+def endpoint_in_scope(endpoint: Any, scope: list[str]) -> bool:
+    parsed = page_endpoint(endpoint)
+    if parsed is None:
+        return False
+    host, path = parsed
+    for entry in scope:
+        if entry == "https://*":
+            return True
+        prefix = page_endpoint(entry)
+        assert prefix is not None  # The profile's form was checked before any finding.
+        other_host, prefix_path = prefix
+        if host == other_host and (
+            prefix_path in ("", "/") or path == prefix_path
+            or path.startswith(prefix_path if prefix_path.endswith("/") else prefix_path + "/")
+        ):
+            return True
+    return False
+
+
+def parse_profiles(document: Any) -> dict[str, dict[str, Any]]:
+    if not isinstance(document, list):
+        raise malformed("the profiles are not an array")
+    profiles: dict[str, dict[str, Any]] = {}
+    for index, profile in enumerate(document):
+        what = f"profile {index}"
+        closed(
+            profile,
+            {"id", "publicKey", "class", "source", "authority", "shape", "adapter", "endpoint"},
+            {"tools", "calculator", "research", "endpointScope"} | ({"retainedColumnProducer", "conversionContracts"} if retained.selected() else set()),
+            what,
+        )
+        if not isinstance(profile["id"], str) or not profile["id"] or profile["id"] in profiles:
+            raise malformed(f"{what}: an id that is empty or given twice")
+        if not is_hex(profile["publicKey"], 64) or key_refusal(bytes.fromhex(profile["publicKey"])):
+            raise malformed(f"{what}: a key the key rule refuses")
+        if profile["class"] not in ("record", "generated"):
+            raise malformed(f"{what}: a class of another value")
+        if not isinstance(profile["source"], str) or not isinstance(profile["authority"], str):
+            raise malformed(f"{what}: source and authority are strings")
+        if profile["shape"] not in ("airbyte", "mcp", "http", "command"):
+            raise malformed(f"{what}: a shape of another value")
+        adapter = closed(profile["adapter"], {"name", "version", "digest"}, set(), what + " adapter")
+        if not isinstance(adapter["name"], str) or not isinstance(adapter["version"], str):
+            raise malformed(f"{what}: adapter name and version are strings")
+        if not is_digest(adapter["digest"]):
+            raise malformed(f"{what}: adapter digest is not a digest")
+        if profile["endpoint"] is not None and not isinstance(profile["endpoint"], str):
+            raise malformed(f"{what}: endpoint is a string or null")
+        if "tools" in profile:
+            tools = profile["tools"]
+            if (
+                not isinstance(tools, list)
+                or not all(isinstance(t, str) and t for t in tools)
+                or len(set(tools)) != len(tools)
+            ):
+                raise malformed(f"{what}: tools are distinct non-empty strings")
+        if profile["shape"] == "mcp" and not profile.get("tools"):
+            raise malformed(f"{what}: a profile of shape mcp gives tools, not empty")
+        if "calculator" in profile:
+            calculator = closed(profile["calculator"], {"name", "version"}, set(), what + " calculator")
+            if not isinstance(calculator["name"], str) or not isinstance(calculator["version"], str):
+                raise malformed(f"{what}: calculator name and version are strings")
+            if profile["class"] != "record" or profile["shape"] != "mcp":
+                raise malformed(f"{what}: a calculator's profile is record and mcp")
+        if "research" in profile:
+            # §5.1: a closed object of `capabilities` and, exactly when they include `answer`, `model`.
+            declaration = closed(profile["research"], {"capabilities"}, {"model"}, what + " research")
+            capabilities = check_capabilities(declaration["capabilities"], what + " research")
+            if ("answer" in capabilities) != ("model" in declaration):
+                raise malformed(f"{what}: a research declaration names a model exactly when it serves answer")
+            if "model" in declaration:
+                check_model(declaration["model"], what + " research")
+        if "endpointScope" in profile:
+            scope = profile["endpointScope"]
+            if (profile["endpoint"] is not None or profile["shape"] != "http"
+                    or adapter["name"] != "adapter-web"
+                    or ("research" in profile
+                        and profile["research"]["capabilities"] != ["page"])
+                    or (profile["class"] == "generated" and "research" not in profile)):
+                raise malformed(f"{what}: endpointScope is admitted only on page profiles")
+            if (not isinstance(scope, list) or not scope
+                    or not all(isinstance(e, str) and (e == "https://*" or page_endpoint(e))
+                               for e in scope)
+                    or len(set(scope)) != len(scope)):
+                raise malformed(f"{what}: endpointScope is not distinct endpoint prefixes")
+            if profile["class"] == "record" and "https://*" in scope:
+                raise malformed(f"{what}: a record profile cannot carry the endpoint wildcard")
+        if not in_canon_domain(profile):
+            raise malformed(f"{what}: outside the canon domain")
+        if retained.selected():
+            retained.profile(sys.modules[__name__], profile)
+        profiles[profile["id"]] = profile
+    return profiles
+
+
+# ---------------------------------------------------------------------------------------------
+# Templates and requests (§4.1)
+
+
+def instantiate(template: Any, values: dict[str, Any]) -> Any:
+    if isinstance(template, dict):
+        if len(template) == 1:
+            (form, argument), = template.items()
+            if form == "$param":
+                return values[argument]
+            if form == "$text":
+                text = argument
+                out = []
+                position = 0
+                while True:
+                    start = text.find("{{", position)
+                    if start < 0:
+                        out.append(text[position:])
+                        break
+                    end = text.find("}}", start + 2)
+                    out.append(text[position:start])
+                    out.append(str(integer_of(values[text[start + 2 : end]])))
+                    position = end + 2
+                return "".join(out)
+        return {name: instantiate(member, values) for name, member in template.items()}
+    if isinstance(template, list):
+        return [instantiate(item, values) for item in template]
+    return template
+
+
+def commits(template: Any) -> tuple[set[str], set[str]]:
+    """§4.1: the parameters a request commits, and those it carries only in ambiguous text."""
+    committed: set[str] = set()
+    ambiguous: set[str] = set()
+
+    def walk(value: Any) -> None:
+        if isinstance(value, dict):
+            if len(value) == 1 and next(iter(value)) in ("$param", "$text"):
+                (form, argument), = value.items()
+                if form == "$param":
+                    committed.add(argument)
+                else:
+                    names = set(placeholders(argument))
+                    if len(names) == 1:
+                        committed.update(names)
+                    else:
+                        ambiguous.update(names)
+                return
+            for member in value.values():
+                walk(member)
+        elif isinstance(value, list):
+            for item in value:
+                walk(item)
+
+    walk(template)
+    return committed, ambiguous - committed
+
+
+# ---------------------------------------------------------------------------------------------
+# Reads (§6)
+
+
+def apply_unwrap(value: Any, unwrap: list[str]) -> Any:
+    for pointer in unwrap:
+        text = resolve(value, pointer)
+        if not isinstance(text, str):
+            raise Finding("read-failed", "an unwrap pointer does not resolve to a string")
+        data = text.encode("utf-8")
+        if len(data) > MAX_UNWRAPPED_BYTES:
+            raise Refused("input-over-bound", "an unwrapped string of more than 200000 bytes")
+        try:
+            value = read_document(data, "an unwrapped string", MAX_VALUE_DEPTH)
+        except Refused as refusal:
+            if refusal.name == "input-over-bound":
+                raise
+            raise Finding("read-failed", "an unwrapped string that is not one JSON value") from refusal
+    return value
+
+
+def _source_text(value: Any) -> str:
+    if isinstance(value, Num):
+        return value.literal
+    return preparation_bytes(value).decode("utf-8")
+
+
+def _convert(value: Any, rule: dict[str, Any]) -> tuple[Any, str | None]:
+    """Apply one §6.2a conversion; return (ABSENT, code) on a recorded failure."""
+    if value is None:
+        return None, None
+    kind = rule["kind"]
+    if kind == "decimal-from-number":
+        if not isinstance(value, Num):
+            return ABSENT, "not-a-number"
+        match = re.fullmatch(r"(-?)([0-9]+)(?:\.([0-9]+))?(?:[eE]([+-]?[0-9]+))?", value.literal)
+        assert match is not None
+        sign, whole, fraction, exponent = match.groups()
+        digits = whole + (fraction or "")
+        point = len(whole) + int(exponent or "0")
+        if point <= 0:
+            expanded_whole, expanded_fraction = "0", "0" * -point + digits
+        elif point >= len(digits):
+            expanded_whole, expanded_fraction = digits + "0" * (point - len(digits)), ""
+        else:
+            expanded_whole, expanded_fraction = digits[:point], digits[point:]
+        expanded_whole = expanded_whole.lstrip("0") or "0"
+        expanded_fraction = expanded_fraction.rstrip("0")
+        rendered = expanded_whole + ("." + expanded_fraction if expanded_fraction else "")
+        if rendered == "0":
+            return "0", None
+        return ("-" if sign else "") + rendered, None
+    if not isinstance(value, str):
+        return ABSENT, "invalid-encoding"
+    if kind == "trim":
+        return value.strip(QUALITY_WHITESPACE), None
+    if kind == "collapse-whitespace":
+        return QUALITY_WHITESPACE_RUN.sub(" ", value.strip(QUALITY_WHITESPACE)), None
+    if kind == "boolean-from-text":
+        if value in rule["true"]:
+            return True, None
+        if value in rule["false"]:
+            return False, None
+        return ABSENT, "out-of-domain"
+    if kind == "decimal-from-text":
+        text = value.strip(QUALITY_WHITESPACE) if rule["whitespace"] == "trim" else value
+        if rule["whitespace"] == "reject" and text != text.strip(QUALITY_WHITESPACE):
+            return ABSENT, "invalid-encoding"
+        sign = ""
+        if text[:1] in ("+", "-"):
+            sign, text = text[0], text[1:]
+        if (sign == "+" and rule["sign"] != "plus-minus") or (sign == "-" and rule["sign"] == "none"):
+            return ABSENT, "invalid-encoding"
+        thousands = rule["thousandsSeparator"]
+        decimal_parts = text.split(rule["decimalSeparator"])
+        if len(decimal_parts) > 2:
+            return ABSENT, "not-a-number"
+        integer, fraction = decimal_parts[0], decimal_parts[1] if len(decimal_parts) == 2 else None
+        ascii_digits = lambda part: bool(part) and part.isascii() and part.isdigit()
+        if fraction is not None and not ascii_digits(fraction):
+            return ABSENT, "not-a-number"
+        groups = integer.split(thousands) if thousands else [integer]
+        if len(groups) == 1:
+            if not ascii_digits(integer) or (len(integer) > 1 and integer[0] == "0"):
+                return ABSENT, "not-a-number"
+        elif (not 1 <= len(groups[0]) <= 3 or not ascii_digits(groups[0]) or groups[0][0] == "0"
+              or any(len(group) != 3 or not ascii_digits(group) for group in groups[1:])):
+            return ABSENT, "not-a-number"
+        rendered = ("-" if sign == "-" else "") + "".join(groups)
+        if fraction is not None:
+            rendered += "." + fraction
+        if DECIMAL_TEXT.fullmatch(rendered) is None:
+            return ABSENT, "not-a-number"
+        return rendered, None
+    if kind == "date-from-text":
+        patterns = {
+            "YYYY-MM-DD": r"([0-9]{4})-([0-9]{2})-([0-9]{2})",
+            "MM/DD/YYYY": r"([0-9]{2})/([0-9]{2})/([0-9]{4})",
+            "DD/MM/YYYY": r"([0-9]{2})/([0-9]{2})/([0-9]{4})",
+        }
+        match = re.fullmatch(patterns[rule["format"]], value)
+        if match is None:
+            return ABSENT, "invalid-encoding"
+        a, b, c = (int(part) for part in match.groups())
+        year, month, day = (a, b, c) if rule["format"] == "YYYY-MM-DD" else (
+            (c, a, b) if rule["format"] == "MM/DD/YYYY" else (c, b, a)
+        )
+        try:
+            parsed = datetime.date(year, month, day)
+        except ValueError:
+            return ABSENT, "invalid-encoding"
+        return parsed.isoformat(), None
+    raise AssertionError(kind)
+
+
+def _quality_type(value: Any, kind: str) -> bool:
+    if value is None:
+        return False
+    if kind == "string":
+        return isinstance(value, str)
+    if kind == "decimal":
+        return isinstance(value, str) and DECIMAL_TEXT.fullmatch(value) is not None
+    if kind == "boolean":
+        return isinstance(value, bool)
+    if kind == "date":
+        try:
+            return isinstance(value, str) and datetime.date.fromisoformat(value).isoformat() == value
+        except ValueError:
+            return False
+    return False
+
+
+def copy_claim(copy: dict[str, Any], value: Any, transformations: dict[str, Any] | None = None) -> dict[str, Any]:
+    facts: dict[str, Any] = {}
+    availability: dict[str, Any] = {}
+    basis: set[str] = set()
+    for entry in copy["facts"]:
+        if retained.selected() and "conversion" in entry:
+            basis.add(entry["source"])
+            found = retained.application(sys.modules[__name__], entry, value, transformations if transformations is not None else {})
+            if found is not ABSENT:
+                write_at(facts, entry["target"], found)
+            continue
+        if set(entry) == {"target", "source"}:
+            basis.add(entry["source"])
+            found = resolve(value, entry["source"])
+            if found is ABSENT:
+                continue
+            if not in_canon_domain(found):
+                raise Finding("read-failed", "a copied value outside the canon domain")
+            write_at(facts, entry["target"], found)
+            continue
+        observations = entry["observations"] if "observations" in entry else [{"id": "source", "source": entry["source"]}]
+        basis.update(o["source"] for o in observations)
+        applications = []
+        present: list[tuple[str, Any]] = []
+        for observation in observations:
+            raw = resolve(value, observation["source"])
+            application: dict[str, Any] = {"id": observation["id"], "source": observation["source"], "state": "missing"}
+            if raw is not ABSENT:
+                converted, failure = _convert(raw, entry["convert"]) if "convert" in entry else (raw, None)
+                application.update({"state": "failed" if failure else "present", "sourceText": _source_text(raw)})
+                if "convert" in entry:
+                    application["rule"] = entry["convert"]
+                if failure:
+                    application["failure"] = {"code": failure}
+                else:
+                    application["result"] = converted
+                    present.append((observation["id"], converted))
+            applications.append(application)
+        findings: list[dict[str, str]] = []
+        chosen: str | None = None
+        found: Any = ABSENT
+        reconciliation: dict[str, Any] | None = None
+        if "reconcile" in entry:
+            mode = entry["reconcile"]["mode"]
+            order = entry["reconcile"].get("precedence", [o["id"] for o in observations])
+            reconciliation = {"mode": mode, "observed": [x[0] for x in present]}
+            if mode == "agree" and present:
+                found = present[0][1]
+                if any(not json_equal(found, x[1]) for x in present[1:]):
+                    found = ABSENT
+                    reconciliation["conflict"] = True
+                    findings.append({"code": "conflict"})
+                else:
+                    reconciliation["agreed"] = True
+            else:
+                by_id = dict(present)
+                chosen = next((name for name in order if name in by_id), None)
+                if chosen is not None:
+                    found = by_id[chosen]
+                    reconciliation["chosen"] = chosen
+        elif present:
+            chosen, found = present[0]
+        if found is ABSENT and entry.get("required") and not findings:
+            findings.append({"code": "missing-required"})
+        if found is not ABSENT and not _quality_type(found, entry.get("type", "string")):
+            findings.append({"code": "wrong-type"})
+            found = ABSENT
+        domain = entry.get("domain")
+        if found is not ABSENT and found is not None and domain is not None:
+            inside = any(json_equal(found, x) for x in domain["in"]) if "in" in domain else (
+                isinstance(found, str) and DECIMAL_TEXT.fullmatch(found) is not None
+                and Decimal(domain["decimalRange"]["min"]) <= Decimal(found) <= Decimal(domain["decimalRange"]["max"])
+            )
+            if not inside:
+                findings.append({"code": "out-of-domain"})
+                found = ABSENT
+        if transformations is not None and (set(entry) - {"target", "source"}):
+            record: dict[str, Any] = {"applications": applications, "findings": findings}
+            if reconciliation is not None:
+                record["reconciliation"] = reconciliation
+            transformations[entry["target"]] = record
+        if found is ABSENT:
+            continue
+        if not in_canon_domain(found):
+            raise Finding("read-failed", "a copied value outside the canon domain")
+        write_at(facts, entry["target"], found)
+    for entry in copy["evidence"]:
+        basis.add(entry["source"])
+        found = (retained.application(sys.modules[__name__], entry, value, transformations if transformations is not None else {}, True)
+                 if retained.selected() and "availability" in entry else resolve(value, entry["source"]))
+        if found is ABSENT:
+            continue
+        if found not in AVAILABILITY:
+            raise Finding("read-failed", "a copied availability of another value")
+        availability[entry["requirement"]] = found
+    return {
+        "facts": facts,
+        "evidenceAvailability": availability,
+        "acquisitionStatus": "resolved",
+        "reason": "copied",
+        "basis": sorted(basis),
+    }
+
+
+def evaluate(
+    condition: dict[str, Any],
+    value: Any,
+    params: dict[str, Any],
+    basis: set[str],
+    declared: dict[str, str],
+) -> bool:
+    op = condition["op"]
+    if op == "always":
+        return True
+    if op == "all":
+        return all(evaluate(c, value, params, basis, declared) for c in condition["of"])
+    if op == "any":
+        return any(evaluate(c, value, params, basis, declared) for c in condition["of"])
+    if op == "not":
+        return not evaluate(condition["of"], value, params, basis, declared)
+    basis.add(condition["field"])
+    found = resolve(value, condition["field"])
+    if found is ABSENT:
+        return False
+    if op == "exists":
+        return True
+    if op == "equals":
+        return json_equal(found, condition["to"])
+    if op == "equalsParam":
+        return json_equal(found, params[condition["param"]])
+    if op == "isTrue":
+        return found is True
+    if op == "isDecimalString":
+        return isinstance(found, str) and re.fullmatch(r"0|[1-9][0-9]*", found) is not None
+    if op == "freshWithin":
+        # True only for `N` of type `timestamp` and `M` of type `integer` (§6.3), as declared.
+        if declared[condition["asOf"]] != "timestamp" or declared[condition["maxAge"]] != "integer":
+            return False
+        field_instant = instant(found)
+        as_of = instant(params[condition["asOf"]])
+        if field_instant is None or as_of is None:
+            return False
+        return 0 <= as_of - field_instant <= integer_of(params[condition["maxAge"]])
+    raise AssertionError(op)
+
+
+def rule_claim(rule: dict[str, Any], value: Any, scope_values: dict[str, Any]) -> dict[str, Any]:
+    params = {name: scope_values[name] for name in rule["parameters"]}
+    basis: set[str] = set()
+    match = None
+    for clause in rule["clauses"]:
+        if evaluate(clause["when"], value, params, basis, rule["parameters"]):
+            match = clause
+            break
+    assert match is not None
+    facts: dict[str, Any] = {}
+    for entry in match["claim"]["facts"]:
+        found = resolve(value, entry["from"])
+        if found is ABSENT:
+            raise Finding("read-failed", "a from that does not resolve")
+        if not in_canon_domain(found):
+            raise Finding("read-failed", "a value outside the canon domain")
+        write_at(facts, entry["pointer"], found)
+    return {
+        "facts": facts,
+        "evidenceAvailability": dict(match["claim"]["evidence"]),
+        "acquisitionStatus": match["claim"]["acquisitionStatus"],
+        "reason": match["reason"],
+        "basis": sorted(basis),
+    }
+
+
+# ---------------------------------------------------------------------------------------------
+# Acquisitions (§5.2) and calculated values (§7)
+
+
+def check_acquisition(
+    source: Source, profile: dict[str, Any], response: dict[str, Any], request: Any, at: int
+) -> None:
+    result, receipt, salts = response["result"], response["receipt"], response["salts"]
+
+    def invalid(detail: str) -> Finding:
+        return Finding("acquisition-invalid", f"{source.name}: {detail}")
+
+    # Check 1, the members the time and session rules read among them (round 9, issue #182 item 4):
+    # each time a string with an instant (§1), `callIndex` an integer at least zero, and `sessionId` a
+    # string, not held to the gateway's token form. A member of another type or form makes the
+    # receipt malformed, before the time and session rules.
+    acquisition = receipt.get("acquisition")
+    served = instant(receipt.get("servedAt"))
+    forms = (
+        receipt.get("receiptVersion") == "3",
+        receipt.get("kind") == "acquisition",
+        is_hex(receipt.get("keyId"), 32),
+        is_hex(receipt.get("signature"), 128),
+        isinstance(receipt.get("source"), str),
+        isinstance(receipt.get("authority"), str),
+        isinstance(receipt.get("sessionId"), str),
+        is_integer(receipt.get("callIndex")) and integer_of(receipt["callIndex"]) >= 0,
+        is_digest(receipt.get("argumentsCommitment")),
+        is_digest(receipt.get("resultDigest")),
+        served is not None,
+        isinstance(acquisition, dict),
+    )
+    if not all(forms):
+        raise invalid("a receipt member not of its form")
+    observed = instant(acquisition.get("observedAt"))
+    if not (
+        isinstance(acquisition.get("adapter"), dict)
+        and isinstance(acquisition.get("shape"), str)
+        and (acquisition.get("endpoint") is None or isinstance(acquisition.get("endpoint"), str))
+        and observed is not None
+    ):
+        raise invalid("an acquisition member not of its form")
+    if "pageItems" in acquisition:
+        raise invalid("the receipt attests a page, which no preparation reads")
+    key = bytes.fromhex(profile["publicKey"])
+    if receipt["keyId"] != hashlib.sha256(key).hexdigest()[:32]:
+        raise invalid("keyId is not the profile key's")
+    unsigned = {name: member for name, member in receipt.items() if name != "signature"}
+    try:
+        message = b"judgment-pack-gateway/receipt/3:" + canon(unsigned)
+    except OutsideDomain as error:
+        raise invalid("a receipt outside the canon domain") from error
+    if not signature_verifies(key, message, bytes.fromhex(receipt["signature"])):
+        raise invalid("the signature does not verify")
+    if receipt["source"] != profile["source"] or receipt["authority"] != profile["authority"]:
+        raise invalid("source or authority is not the profile's")
+    for name in ("adapter", "shape", "endpoint"):
+        if name == "endpoint" and "endpointScope" in profile:
+            if not endpoint_in_scope(acquisition.get(name), profile["endpointScope"]):
+                raise invalid("acquisition.endpoint is outside the profile's scope")
+            continue
+        if not json_equal(acquisition.get(name), profile[name]):
+            raise invalid(f"acquisition.{name} is not the profile's")
+    commitment = hashlib.sha256(bytes.fromhex(salts["args"]) + b"args:" + canon(request)).hexdigest()
+    if receipt["argumentsCommitment"] != "sha256:" + commitment:
+        raise invalid("argumentsCommitment is not the request's")
+    try:
+        result_digest = digest_of(canon(result))
+    except OutsideDomain as error:
+        raise invalid("a result outside the canon domain") from error
+    if receipt["resultDigest"] != result_digest:
+        raise invalid("resultDigest is not the result's")
+    # The time rule: check 1 left a present instant in each, so `acquisition-stale` names only one
+    # outside the window.
+    assert served is not None and observed is not None
+    for seconds in (observed, served):
+        if not at - source.max_age <= seconds <= at + 30:
+            raise Finding("acquisition-stale", source.name)
+
+
+def sessions_in_a_form(receipts: list[dict[str, Any]]) -> bool:
+    """§5.2's session rule, over receipts check 1 held to their forms: `acquisition-sessions` names only
+    a well-formed session set that fails it."""
+    sessions = [r["sessionId"] for r in receipts]
+    indexes = [integer_of(r["callIndex"]) for r in receipts]
+    shared = len(set(sessions)) == 1 and len(set(indexes)) == len(indexes)
+    apart = len(set(sessions)) == len(sessions) and all(i == 0 for i in indexes)
+    return shared or apart
+
+
+def check_calculation(
+    source: Source, profile: dict[str, Any], value: Any, scope_values: dict[str, Any], at: int
+) -> dict[str, Any]:
+    def invalid(detail: str) -> Finding:
+        return Finding("calculation-invalid", f"{source.name}: {detail}")
+
+    answer = value.get("calculation") if isinstance(value, dict) else None
+    if not isinstance(answer, dict) or set(answer) != {"calculator", "status", "inputs", "asOf"}:
+        raise invalid("the value read has no calculation of its form")
+    if not isinstance(answer["calculator"], dict) or set(answer["calculator"]) != {"name", "version"}:
+        raise invalid("calculator is not of its form")
+    if answer["status"] not in ("computed", "input-missing", "cannot-compute"):
+        raise invalid("status of another value")
+    if not isinstance(answer["inputs"], dict) or not isinstance(answer["asOf"], dict):
+        raise invalid("inputs and asOf are objects")
+    if not json_equal(answer["calculator"], profile["calculator"]):
+        raise invalid("the calculator is not the profile's")
+    assert source.calculation is not None
+    bound, tables = source.calculation["inputs"], source.calculation["tables"]
+    for name, echoed in answer["inputs"].items():
+        if name not in bound:
+            raise invalid("an input echoed that is not bound")
+        try:
+            same = canon(echoed) == canon(scope_values[bound[name]])
+        except OutsideDomain:
+            same = False
+        if not same:
+            raise invalid("an input echoed that is not its parameter's value")
+    for name, as_of in answer["asOf"].items():
+        if name not in tables or instant(as_of) is None:
+            raise invalid("a table reported that is not named, or with no instant")
+    if answer["status"] == "computed":
+        if set(bound) - set(answer["inputs"]):
+            raise invalid("a bound input not echoed")
+        for name, limit in tables.items():
+            if name not in answer["asOf"]:
+                raise invalid("a named table not reported")
+            seconds = instant(answer["asOf"][name])
+            assert seconds is not None
+            if not at - integer_of(limit) <= seconds <= at + 30:
+                raise invalid("a table older than its limit, or in the future")
+    return answer
+
+
+# ---------------------------------------------------------------------------------------------
+# Recomputing a preparation (§§3-9)
+
+
+@dataclass
+class Outcome:
+    name: str
+    source: Source | None  # None for the case
+    read: Read
+    klass: str
+    generated: bool
+    parameters: dict[str, Any]
+    skipped: bool = False
+    request: Any = None
+    receipt: dict[str, Any] | None = None
+    claim: dict[str, Any] | None = None
+    answer: dict[str, Any] | None = None  # a calculator's calculation, as answered
+    # of an acquired `research` source: its citations, each retained response's in order and then the
+    # record's own when it has one (§9.1, §9.3); and the research record itself, for a later
+    # reconciliation (§6.4)
+    citations: list[dict[str, Any]] | None = None
+    record: Any = None
+    transformations: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class Computation:
+    preparation: dict[str, Any]
+    outcomes: list[Outcome]
+    facts: dict[str, Any]
+    evidence: dict[str, Any]
+
+
+def recompute(
+    dialect: Dialect,
+    case: Any,
+    acquisitions: dict[str, Any],
+    profiles: dict[str, dict[str, Any]],
+    verified_at: str,
+) -> Computation:
+    at = instant(verified_at)
+    assert at is not None
+    # 1. profile-mismatch
+    for source in dialect.sources:
+        if source.research is not None:
+            research_mismatch(source, profiles, acquisitions.get(source.name))
+            continue
+        profile = profiles.get(source.profile_id)
+        if profile is None or digest_of(canon(profile)) != source.profile_digest:
+            raise Finding("profile-mismatch", f"{source.name}: no trusted profile of that id and digest")
+        # This reader refuses web in §11's kind phase; every other non-research kind is ineligible.
+        if "endpointScope" in profile:
+            raise Finding("profile-mismatch", f"{source.name}: endpointScope needs a page binding")
+        # §4.4: a profile the binding document names serves the unbound source's shape and record.
+        catalog = dialect.bound_from.get(source.name)
+        if catalog is not None and (profile["shape"], profile["adapter"]["name"]) != catalog:
+            raise Finding("profile-mismatch", f"{source.name}: bound to a profile of another shape or record")
+        misfit = request_misfit(source, profile)
+        if misfit is not None:
+            raise Finding("profile-mismatch", f"{source.name}: {misfit}")
+        if ("calculator" in profile) != (source.calculation is not None):
+            raise Finding("profile-mismatch", f"{source.name}: calculation and calculator disagree")
+        if retained.selected():
+            retained.producer(sys.modules[__name__], source, profile)
+    # 2. parameter-invalid, the case's first
+    case_values: dict[str, Any] = {}
+    for name, parameter in dialect.case_parameters.items():
+        found = resolve(case, parameter.pointer)
+        if found is ABSENT or not of_type(found, parameter.type):
+            raise Finding("parameter-invalid", f"case parameter {name}")
+        case_values[name] = found
+
+    outcomes: list[Outcome] = []
+    case_scope = dict(case_values)
+    case_scope["runAt"] = verified_at
+    case_outcome = Outcome("case", None, dialect.case_read, "asserted", False, case_scope)
+    case_outcome.claim = copy_claim(dialect.case_read.copy or {}, case, case_outcome.transformations)
+    outcomes.append(case_outcome)
+
+    receipts: list[dict[str, Any]] = []
+    for source in dialect.sources:
+        profile = profiles[source.profile_id]
+        values = dict(case_values)
+        skipped = False
+        generated = profile["class"] == "generated"
+        for name, parameter in source.parameters.items():
+            origin = next(o for o in outcomes if o.name == parameter.origin)
+            generated = generated or origin.generated
+            if origin.skipped or origin.claim is None or origin.claim["acquisitionStatus"] != "resolved":
+                skipped = True
+                continue
+            found = resolve(origin.claim["facts"], parameter.pointer)
+            if found is ABSENT:
+                skipped = True
+                continue
+            if not of_type(found, parameter.type):
+                raise Finding("parameter-invalid", f"{source.name} parameter {name}")
+            values[name] = found
+        values["runAt"] = verified_at
+        outcome = Outcome(source.name, source, source.read, profile["class"], generated, values)
+        outcomes.append(outcome)
+        if skipped:
+            outcome.skipped = True
+            if source.name in acquisitions:
+                raise Finding("acquisition-unexpected", source.name)
+            outcome.claim = {
+                "acquisitionStatus": "unknown",
+                "basis": [],
+                "evidenceAvailability": {},
+                "facts": {},
+                "reason": "dependency-unavailable",
+            }
+            continue
+        if source.name not in acquisitions:
+            raise Finding("acquisition-missing", source.name)
+        response = acquisitions[source.name]["response"]
+        if source.research is not None:
+            acquire_research(source, outcome, response, profiles, receipts, at)
+            outcome.claim = research_claim(source, outcome, outcomes)
+            continue
+        outcome.request = instantiate(source.template, values)
+        check_acquisition(source, profile, response, outcome.request, at)
+        if retained.selected():
+            retained.producer(sys.modules[__name__], source, profile, response)
+        outcome.receipt = response["receipt"]
+        receipts.append(response["receipt"])
+        if not sessions_in_a_form(receipts):
+            raise Finding("acquisition-sessions", source.name)
+        value = apply_unwrap(response["result"], source.read.unwrap)
+        if source.calculation is not None:
+            outcome.answer = check_calculation(source, profile, value, values, at)
+            if outcome.answer["status"] != "computed":
+                outcome.claim = {
+                    "facts": {},
+                    "evidenceAvailability": {r: "unknown" for r in source.read.evidence_targets},
+                    "acquisitionStatus": "unknown",
+                    "reason": "calculation-" + outcome.answer["status"],
+                    "basis": ["/calculation/status"],
+                }
+                continue
+        if source.read.copy is not None:
+            outcome.claim = copy_claim(source.read.copy, value, outcome.transformations)
+        else:
+            assert source.read.rule is not None
+            outcome.claim = rule_claim(source.read.rule, value, values)
+    named = {s.name for s in dialect.sources}
+    for name in acquisitions:
+        if name not in named:
+            raise Finding("acquisition-unexpected", f"{name} names no source")
+
+    # 4. admission-refused
+    for outcome in outcomes:
+        for kind, targets in (("fact", outcome.read.fact_targets), ("evidence", outcome.read.evidence_targets)):
+            for target in targets:
+                admitted = dialect.admits.get((kind, target), ["asserted", "record"])
+                if outcome.klass not in admitted or (outcome.generated and "generated" not in admitted):
+                    raise Finding("admission-refused", f"{outcome.name} {target}")
+
+    return build(dialect, outcomes, verified_at)
+
+
+def research_mismatch(source: Source, profiles: dict[str, dict[str, Any]], member: Any) -> None:
+    """§4.4, §5.1, finding 1: a research source's AI profile, then its web profiles in `search`, `page`
+    order, then each retained response's profile in `R.responses` order. Each assigned profile is the
+    trusted one of its id and digest, of class `generated`, declaring the capability it serves and, when
+    it declares a model, the source's; the AI profile declares the model. A retained response names one
+    of the source's assignments."""
+    research = source.research
+    assert research is not None
+
+    def assigned(pid: str, digest: str, capability: str) -> None:
+        profile = profiles.get(pid)
+        if profile is None or digest_of(canon(profile)) != digest:
+            raise Finding("profile-mismatch", f"{source.name}: no trusted profile {pid} of that digest")
+        if profile["class"] != "generated":
+            raise Finding("profile-mismatch", f"{source.name}: {pid} is not of class generated")
+        declaration = profile.get("research")
+        if declaration is None or capability not in declaration["capabilities"]:
+            raise Finding("profile-mismatch", f"{source.name}: {pid} does not declare {capability}")
+        if declaration.get("model", research.model) != research.model:
+            raise Finding("profile-mismatch", f"{source.name}: {pid} declares another model")
+
+    assigned(source.profile_id, source.profile_digest, "answer")
+    for capability in WEB_CAPABILITIES:
+        if capability in research.web:
+            assigned(*research.web[capability], capability)
+    pairs = {(source.profile_id, source.profile_digest), *research.web.values()}
+    if member is None:
+        return
+    for index, retained in enumerate(member["response"]["result"]["responses"]):
+        reference = retained["profile"]
+        profile = profiles.get(reference["id"])
+        if profile is None or digest_of(canon(profile)) != reference["digest"]:
+            raise Finding("profile-mismatch", f"{source.name}: retained response {index} names no trusted profile")
+        if (reference["id"], reference["digest"]) not in pairs or profile["class"] != "generated":
+            raise Finding("profile-mismatch", f"{source.name}: retained response {index} names no assignment")
+
+
+def research_request(source: Source, values: dict[str, Any]) -> dict[str, Any]:
+    """§4.3: the source's request, exactly its recipe's members, `question` instantiated."""
+    assert source.research is not None
+    return {"question": instantiate(source.research.question, values), **source.research.request}
+
+
+def acquire_research(
+    source: Source,
+    outcome: Outcome,
+    response: dict[str, Any],
+    profiles: dict[str, dict[str, Any]],
+    receipts: list[dict[str, Any]],
+    at: int,
+) -> None:
+    """§5.2, §11, finding 3 for a `research` source: each retained response in `R.responses` order, its
+    checks completed before the next's, under its own trusted profile and over its own request; the
+    record in the canon domain; then the record's own receipt, when it has one, under the source's
+    profile and over the source's request. Every receipt joins the preparation's sessions in that order."""
+    outcome.request = research_request(source, outcome.parameters)
+    record = response["result"]
+    citations: list[dict[str, Any]] = []
+    for index, retained in enumerate(record["responses"]):
+        if "result" not in retained:
+            raise Finding("acquisition-missing", f"{source.name}: retained response {index} has no result")
+        check_acquisition(source, profiles[retained["profile"]["id"]], retained, retained["request"], at)
+        receipts.append(retained["receipt"])
+        if not sessions_in_a_form(receipts):
+            raise Finding("acquisition-sessions", f"{source.name}: retained response {index}")
+        citations.append(citation(retained["receipt"]))
+    if not in_canon_domain(record):
+        raise Finding("acquisition-invalid", f"{source.name}: the research record is outside the canon domain")
+    if "receipt" in response:
+        check_acquisition(source, profiles[source.profile_id], response, outcome.request, at)
+        receipts.append(response["receipt"])
+        if not sessions_in_a_form(receipts):
+            raise Finding("acquisition-sessions", f"{source.name}: the research record's own receipt")
+        outcome.receipt = response["receipt"]
+        citations.append(citation(response["receipt"]))
+    outcome.citations = citations
+    outcome.record = record
+
+
+def research_claim(source: Source, outcome: Outcome, outcomes: list[Outcome]) -> dict[str, Any]:
+    """§4.3, §6.4: a plain research read applies to `R`; a reconciliation to `{"current": C, "sources":
+    U}`, each earlier source it names that was acquired holding its record, a skipped one absent, the
+    whole held to the nesting bound before the rule applies."""
+    read = source.read
+    if read.sources is None:
+        value = apply_unwrap(outcome.record, read.unwrap)
+    else:
+        earlier = {o.name: o for o in outcomes}
+        value = {
+            "current": outcome.record,
+            "sources": {name: earlier[name].record for name in read.sources if not earlier[name].skipped},
+        }
+        if value_depth(value) > MAX_VALUE_DEPTH:
+            raise Refused("input-over-bound", f"{source.name}: the combined value nests more than 32 levels")
+    if read.copy is not None:
+        return copy_claim(read.copy, value, outcome.transformations)
+    assert read.rule is not None
+    return rule_claim(read.rule, value, outcome.parameters)
+
+
+def citation(receipt: dict[str, Any]) -> dict[str, Any]:
+    return {name: receipt[name] for name in ("callIndex", "sessionId", "signature")}
+
+
+def research_execution_lineage(record: dict[str, Any]) -> dict[str, Any]:
+    """Commit the resolved settings and decoded retained response bytes without repeating the bytes."""
+    execution = record["execution"]
+    return {
+        "resolvedSettings": execution["resolvedSettings"],
+        "retainedBytes": [
+            {
+                "mediaType": item["mediaType"],
+                "digest": digest_of(base64.b64decode(item["base64"], validate=True)),
+            }
+            for item in execution["retainedBytes"]
+        ],
+    }
+
+
+def read_digest(read: Read) -> str:
+    return digest_of(canon(read.as_written))
+
+
+def calculation_lineage(dialect: Dialect, outcome: Outcome) -> dict[str, Any]:
+    """§7: the calculation member of a calculated source's entries."""
+    assert outcome.source is not None and outcome.source.calculation is not None
+    assert outcome.answer is not None
+    bound = outcome.source.calculation["inputs"]
+    inputs = []
+    for name in sorted(outcome.answer["inputs"]):
+        parameter_name = bound[name]
+        parameter = outcome.source.parameters.get(parameter_name)
+        if parameter is None:
+            parameter = dialect.case_parameters[parameter_name]
+        inputs.append(
+            {"name": name, "parameter": parameter_name, "source": parameter.origin, "pointer": parameter.pointer}
+        )
+    return {
+        "calculator": outcome.answer["calculator"],
+        "status": outcome.answer["status"],
+        "asOf": outcome.answer["asOf"],
+        "inputs": inputs,
+    }
+
+
+def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Computation:
+    # §9.1: in versions 2 and 3 alike, `cites` is ordered by `callIndex`, those of one index in the order
+    # of `sources`, as the Runner writes it; in a preparation with a `research` source, in the order of
+    # `sources` instead, a research source adding its every citation in order, each other acquired source
+    # its one.
+    if any(source.research is not None for source in dialect.sources):
+        cites = []
+        for outcome in outcomes:
+            if outcome.citations is not None:
+                cites.extend(outcome.citations)
+            elif outcome.receipt is not None:
+                cites.append(citation(outcome.receipt))
+    else:
+        cites_order = []
+        for position, outcome in enumerate(outcomes):
+            if outcome.receipt is not None:
+                cites_order.append((integer_of(outcome.receipt["callIndex"]), position, citation(outcome.receipt)))
+        cites_order.sort(key=lambda item: (item[0], item[1]))
+        cites = [entry for _, _, entry in cites_order]
+
+    lineage = []
+    out_outcomes = []
+    facts_document: dict[str, Any] = {}
+    evidence_document: dict[str, Any] = {}
+    for outcome in outcomes:
+        assert outcome.claim is not None
+        claim = outcome.claim
+        status = claim["acquisitionStatus"]
+        reason = claim["reason"]
+        entry_outcome: dict[str, Any] = {
+            "name": outcome.name,
+            "parameters": dict(outcome.parameters),
+            "claim": claim,
+            "status": status,
+            "reason": reason,
+        }
+        if outcome.request is not None:
+            entry_outcome["arguments"] = outcome.request
+        out_outcomes.append(entry_outcome)
+        for kind, targets in (
+            ("fact", sorted(outcome.read.fact_targets)),
+            ("evidence", sorted(outcome.read.evidence_targets)),
+        ):
+            for target in targets:
+                if kind == "fact":
+                    present = resolve(claim["facts"], target) is not ABSENT
+                else:
+                    present = target in claim["evidenceAvailability"]
+                entry: dict[str, Any] = {
+                    "source": outcome.name,
+                    "kind": kind,
+                    "target": target,
+                    "class": outcome.klass,
+                    "generatedInfluence": outcome.generated,
+                    "present": present,
+                    "status": status,
+                    "reason": reason,
+                    "basis": list(claim["basis"]),
+                    "readDigest": read_digest(outcome.read),
+                }
+                if outcome.source is not None and outcome.source.parameters:
+                    entry["dependencies"] = [
+                        {"parameter": name, "source": parameter.origin,
+                         "pointer": parameter.pointer}
+                        for name, parameter in sorted(outcome.source.parameters.items())
+                    ]
+                candidates = sorted(set(outcome.read.candidates.get((kind, target), [])))
+                if candidates:
+                    entry["candidateFrom"] = candidates
+                if outcome.receipt is not None:
+                    entry["receipt"] = citation(outcome.receipt)
+                # §9.3, version 3: an acquired research source's citations, in the order `cites` has them
+                if outcome.citations is not None:
+                    entry["receipts"] = list(outcome.citations)
+                if outcome.answer is not None:
+                    entry["calculation"] = calculation_lineage(dialect, outcome)
+                if (outcome.source is not None and outcome.source.research is not None
+                        and outcome.source.research.result_member == "results" and outcome.record is not None):
+                    entry["researchExecution"] = research_execution_lineage(outcome.record)
+                if kind == "fact" and target in outcome.transformations:
+                    entry["transformation"] = outcome.transformations[target]
+                column_key = ("fact:" if kind == "fact" else "evidence:") + target
+                if retained.selected() and column_key in outcome.transformations:
+                    entry["columnTransformation"] = outcome.transformations[column_key]
+                lineage.append(entry)
+                if kind == "fact" and present:
+                    write_at(facts_document, target, resolve(claim["facts"], target))
+                if kind == "evidence" and present:
+                    evidence_document[target] = claim["evidenceAvailability"][target]
+    preparation = {
+        "version": dialect.version,
+        "verifiedAt": verified_at,
+        # the dialect digest (§2); of a dialect with an unbound source, the bound dialect's (§4.4)
+        "mappingDigest": digest_of(canon(dialect.document)),
+        "verification": VERIFICATION,
+        "cites": cites,
+        "lineage": lineage,
+        "outcomes": out_outcomes,
+    }
+    if retained.selected():
+        preparation["conversionContract"] = retained.CURRENT.get().selector
+    return Computation(preparation, outcomes, facts_document, evidence_document)
+
+
+# ---------------------------------------------------------------------------------------------
+# The record (§11)
+
+
+def _skip_string(text: str, i: int) -> int:
+    assert text[i] == '"'
+    i += 1
+    while text[i] != '"':
+        i += 2 if text[i] == "\\" else 1
+    return i + 1
+
+
+def _skip_value(text: str, i: int) -> int:
+    if text[i] == '"':
+        return _skip_string(text, i)
+    if text[i] in "{[":
+        depth = 0
+        while True:
+            c = text[i]
+            if c == '"':
+                i = _skip_string(text, i)
+                continue
+            if c in "{[":
+                depth += 1
+            elif c in "}]":
+                depth -= 1
+                if depth == 0:
+                    return i + 1
+            i += 1
+    while i < len(text) and text[i] not in ",}] \t\r\n":
+        i += 1
+    return i
+
+
+def top_level_members(text: str) -> list[tuple[str, str]]:
+    """Each top-level member's name and its value as the line writes it."""
+    members = []
+    i = 0
+    whitespace = " \t\r\n"
+    while text[i] in whitespace:
+        i += 1
+    assert text[i] == "{"
+    i += 1
+    while True:
+        while text[i] in whitespace:
+            i += 1
+        if text[i] == "}":
+            return members
+        end = _skip_string(text, i)
+        name = json.loads(text[i:end])
+        i = end
+        while text[i] in whitespace:
+            i += 1
+        assert text[i] == ":"
+        i += 1
+        while text[i] in whitespace:
+            i += 1
+        end = _skip_value(text, i)
+        members.append((name, text[i:end]))
+        i = end
+        while text[i] in whitespace:
+            i += 1
+        if text[i] == ",":
+            i += 1
+
+
+@dataclass
+class Record:
+    value: dict[str, Any]
+    binding: bytes | None
+
+
+@dataclass(frozen=True)
+class Recording:
+    """The version-bearing parts of a Runner recording, after their versions agree."""
+
+    evaluator_spec_version: str
+    schema: str
+    pack: bytes
+    record: bytes
+
+
+RECORDING_SCHEMAS = {
+    "0.2.0-draft": "schema/judgment-pack-core-0.2.0-draft.schema.json",
+    "0.3.0": "schema/judgment-pack-core.schema.json",
+}
+
+
+def recording_schema(version: Any) -> str:
+    """The Core schema for the closed set of evaluator versions a recording may name."""
+    if version not in RECORDING_SCHEMAS:
+        raise Refused("recording-version-unsupported", "the evaluator specification version")
+    return RECORDING_SCHEMAS[version]
+
+
+@functools.lru_cache(maxsize=len(RECORDING_SCHEMAS))
+def _recording_validator(schema_path: str) -> Any:
+    """Load one of the closed recording schemas without adding a preparation-reader dependency."""
+    from jsonschema import Draft202012Validator, FormatChecker
+
+    path = Path(__file__).resolve().parents[1] / schema_path
+    schema = json.loads(path.read_text(encoding="utf-8"))
+    Draft202012Validator.check_schema(schema)
+    return Draft202012Validator(schema, format_checker=FormatChecker())
+
+
+def _validate_recording_pack(pack_text: str, schema_path: str) -> None:
+    """Hold the embedded pack to the schema selected by its recorded evaluator version."""
+    # read_document has already established strict JSON. Parse once more into the ordinary JSON
+    # types expected by jsonschema; the preparation reader's Num preserves literals deliberately.
+    pack = json.loads(pack_text)
+    error = next(_recording_validator(schema_path).iter_errors(pack), None)
+    if error is not None:
+        raise Refused("recording-pack-invalid", f"release.pack does not validate against {schema_path}")
+
+
+def read_record(data: bytes) -> Any:
+    """The record read as one line holding one JSON value (§11, the second phase)."""
+    if b"\n" in data or b"\r" in data:
+        raise malformed("the record is not one line")
+    return read_document(data, "the record")
+
+
+# §11: two names differ "but for case" when they are equal once A-Z are mapped to a-z, and nothing
+# else is: ASCII case only, no other folding.
+ASCII_LOWER = str.maketrans("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
+
+
+def parse_record(data: bytes, value: Any) -> Record:
+    """The record's form (§11, the fourth phase), and its binding as the line writes it."""
+    if not isinstance(value, dict) or not isinstance(value.get("inputs"), dict):
+        raise malformed("the record is not an evaluation record with inputs")
+    binding = None
+    for name, raw in top_level_members(data.decode("utf-8")):
+        if name.translate(ASCII_LOWER) == "binding" and name != "binding":
+            raise malformed("a member named binding but for case")
+        if name == "binding":
+            binding = raw.encode("utf-8")
+    return Record(value, binding)
+
+
+def _record_bytes(held: dict[str, str]) -> bytes | None:
+    """The record bytes from an already-read export."""
+    if "auditBytes" in held:
+        try:
+            encoded = json.loads(held["auditBytes"])
+            if not isinstance(encoded, str):
+                raise malformed("run.auditBytes is not a string")
+            return base64.b64decode(encoded, validate=True)
+        except (ValueError, binascii.Error) as error:
+            raise malformed("run.auditBytes is not standard base64") from error
+    if "audit" in held:
+        return held["audit"].encode("utf-8")
+    return None
+
+
+def recording_of_export(data: bytes) -> Recording:
+    """Read a complete Runner recording and hold every copy of its Core version together."""
+    document = read_document(data, "run.json")
+    if not isinstance(document, dict):
+        raise malformed("run.json is not an object")
+    run = document.get("run")
+    release = document.get("release")
+    if not isinstance(run, dict) or not isinstance(release, dict):
+        raise malformed("run.json has no run or release object")
+    held = dict(top_level_members(dict(top_level_members(data.decode("utf-8")))["run"]))
+    record = _record_bytes(held)
+    if record is None:
+        raise malformed("run.json has no audit record")
+    decoded = read_record(record)
+    visible = run.get("audit")
+    result = run.get("result")
+    pack_text = release.get("pack")
+    if not isinstance(visible, dict) or not isinstance(decoded, dict) or not isinstance(result, dict):
+        raise malformed("run.json has no recorded result, visible audit, or decoded audit object")
+    if not isinstance(pack_text, str):
+        raise malformed("run.json release.pack is not a string")
+    pack_bytes = pack_text.encode("utf-8")
+    pack = read_document(pack_bytes, "release.pack")
+    if not isinstance(pack, dict):
+        raise malformed("release.pack is not an object")
+
+    version = result.get("evaluatorSpecVersion")
+    schema = recording_schema(version)
+
+    def audit_pack(value: dict[str, Any], what: str) -> Any:
+        member = value.get("pack")
+        if not isinstance(member, dict):
+            raise malformed(f"{what}.pack is not an object")
+        return member.get("specVersion")
+
+    copies = {
+        "release.pack.specVersion": pack.get("specVersion"),
+        "run.audit.evaluatorSpecVersion": visible.get("evaluatorSpecVersion"),
+        "run.audit.pack.specVersion": audit_pack(visible, "run.audit"),
+        "decoded audit evaluatorSpecVersion": decoded.get("evaluatorSpecVersion"),
+        "decoded audit pack.specVersion": audit_pack(decoded, "the decoded audit"),
+    }
+    disagreement = [name for name, value in copies.items() if value != version]
+    if disagreement:
+        raise Refused("recording-version-mismatch", ", ".join(disagreement))
+    _validate_recording_pack(pack_text, schema)
+    return Recording(version, schema, pack_bytes, record)
+
+
+def record_of_export(run: bytes) -> bytes | None:
+    """The record line a Runner export's run.json holds (conformance/dialect/README.md): the bytes
+    `run.auditBytes` holds in standard base64; or, in an export of version 2, which carries no bytes,
+    the member `run.audit`'s value exactly as run.json writes it, with no re-encoding (§11). None when
+    it holds neither."""
+    document = read_document(run, "run.json")
+    if not isinstance(document, dict) or not isinstance(document.get("run"), dict):
+        return None
+    held = dict(top_level_members(dict(top_level_members(run.decode("utf-8")))["run"]))
+    return _record_bytes(held)
+
+
+# ---------------------------------------------------------------------------------------------
+# The reading (§11)
+
+
+def unsigned_parameters(dialect: Dialect, computation: Computation) -> list[dict[str, Any]]:
+    entries: dict[str, dict[str, Any]] = {}
+    ordered = []
+    for outcome in computation.outcomes[1:]:
+        source = outcome.source
+        assert source is not None
+        if outcome.skipped or source.read.rule is None:
+            continue
+        if outcome.answer is not None and outcome.answer["status"] != "computed":
+            continue
+        targets = len(source.read.fact_targets) + len(source.read.evidence_targets)
+        if not targets:
+            continue
+        named: set[str] = set()
+
+        def walk(condition: dict[str, Any]) -> None:
+            op = condition["op"]
+            if op == "equalsParam":
+                named.add(condition["param"])
+            elif op == "freshWithin":
+                named.update((condition["asOf"], condition["maxAge"]))
+            elif op in ("all", "any"):
+                for c in condition["of"]:
+                    walk(c)
+            elif op == "not":
+                walk(condition["of"])
+
+        for clause in source.read.rule["clauses"]:
+            walk(clause["when"])
+        if source.research is not None:
+            # §11: a research source's own acquisition commits what its request commits only under the
+            # record's own receipt, the one receipt over the source's request (§5.2).
+            committed, ambiguous = commits(source.research.question)
+            if outcome.receipt is None:
+                committed = set()
+        else:
+            committed, ambiguous = commits(source.template)
+        if outcome.answer is not None and source.calculation is not None:
+            for name in outcome.answer["inputs"]:
+                committed.add(source.calculation["inputs"][name])
+        listed = []
+        for name in sorted(named - committed):
+            if name == "runAt":
+                listed.append({"name": name, "kind": "runAt"})
+                continue
+            parameter = source.parameters.get(name)
+            if parameter is None:
+                kind = "case"
+            else:
+                upstream = entries.get(parameter.origin)
+                if upstream is None:
+                    continue
+                kinds = {p["kind"] for p in upstream["parameters"]}
+                if kinds & {"case", "local-file", "upstream", "ambiguous-text"}:
+                    kind = "upstream"
+                else:
+                    kind = "upstream-runAt"
+            if kind in ("case", "local-file", "upstream") and name in ambiguous:
+                kind = "ambiguous-text"
+            listed.append({"name": name, "kind": kind})
+        if listed:
+            entry = {"source": source.name, "parameters": listed, "targets": targets}
+            entries[source.name] = entry
+            ordered.append(entry)
+    return ordered
+
+
+def unsigned_freshness(computation: Computation, verified_at: str) -> dict[str, Any] | None:
+    sources = []
+    for outcome in computation.outcomes[1:]:
+        # each source acquired: a research source too, whether or not its record has a receipt of its own
+        if outcome.skipped or (outcome.receipt is None and outcome.citations is None):
+            continue
+        checks = ["acquisition"]
+        if outcome.answer is not None and outcome.answer["status"] == "computed":
+            checks.append("calculation")
+        targets = len(outcome.read.fact_targets) + len(outcome.read.evidence_targets)
+        sources.append({"source": outcome.name, "checks": checks, "targets": targets})
+    if not sources:
+        return None
+    return {"against": "preparation.verifiedAt", "verifiedAt": verified_at, "sources": sources}
+
+
+def as_plain(value: Any) -> Any:
+    """A value with each number as Python reads it, for comparison and printing."""
+    if isinstance(value, Num):
+        return int(value.literal) if value.is_integer() else float(value.value)
+    if isinstance(value, dict):
+        return {name: as_plain(member) for name, member in value.items()}
+    if isinstance(value, list):
+        return [as_plain(item) for item in value]
+    return value
+
+
+@dataclass
+class Verification:
+    answer: dict[str, Any]
+    preparation: bytes | None = None
+    digest: str | None = None
+    facts: Any = None
+    evidence: Any = None
+
+
+def _verify(
+    dialect: bytes,
+    case: bytes,
+    acquisitions: bytes,
+    profiles: bytes,
+    preparation: bytes,
+    record: bytes | None = None,
+    require_binding: bool = False,
+    binding: bytes | None = None,
+) -> Verification:
+    """§11: a refusal, a finding, or a reading. `binding` is the binding document of a dialect with an
+    unbound source (§4.4), and None when none is given."""
+    result = Verification(answer={})
+    try:
+        if retained.selected():
+            retained.CURRENT.get().profiles_bytes = len(profiles)
+            caps = retained.CAPS["base"]
+            if len(dialect) > caps["documentBytes"] or len(dialect) + len(case) + len(acquisitions) + len(binding or b"") > caps["combinedBytes"]:
+                raise Refused("input-over-bound", "selected complete input")
+        else:
+            admit_envelope(dialect, case, acquisitions)
+        if len(profiles) > (retained.CAPS["base"]["profilesBytes"] if retained.selected() else PROFILES_BYTES):
+            raise Refused("input-over-bound", "the profiles")
+        if binding is not None and len(binding) > BINDING_BYTES:
+            raise Refused("input-over-bound", "the binding document")
+        if len(preparation) > (retained.CAPS["base"]["preparationBytes"] if retained.selected() else PREPARATION_BYTES) or (record is not None and len(record) > (retained.CAPS["base"]["recordBytes"] if retained.selected() else RECORD_BYTES)):
+            raise Refused("input-over-bound", "the preparation or the record")
+        # After §11 phase 0 negotiates the profile, measure every document's byte bounds
+        # before full document reading; then every document read; the counted bounds; every form; the kinds; and only then the
+        # recomputation.
+        documents = [
+            (dialect, "the dialect", MAX_DOCUMENT_DEPTH),
+            (case, "the case", MAX_VALUE_DEPTH),
+            (acquisitions, "the acquisitions", MAX_DOCUMENT_DEPTH),
+            (profiles, "the profiles", MAX_DOCUMENT_DEPTH),
+            (preparation, "the preparation", MAX_DOCUMENT_DEPTH),
+        ]
+        if record is not None:
+            documents.append((record, "the record", MAX_DOCUMENT_DEPTH))
+        if binding is not None:
+            documents.append((binding, "the binding document", MAX_DOCUMENT_DEPTH))
+        for data, what, depth in documents:
+            measure(data, what, depth)
+        dialect_document = read_document(dialect, "the dialect")
+        case_document = read_document(case, "the case", MAX_VALUE_DEPTH)
+        acquisitions_document = read_document(acquisitions, "the acquisitions")
+        profiles_document = read_document(profiles, "the profiles")
+        given = read_document(preparation, "the preparation")
+        if retained.selected():
+            case_document = retained.restore_case(sys.modules[__name__], case_document)
+            retained.restore_acquisitions(sys.modules[__name__], acquisitions_document)
+        record_document = read_record(record) if record is not None else None
+        binding_document = read_document(binding, "the binding document") if binding is not None else None
+        count_bounds(dialect_document, acquisitions_document, profiles_document, binding_document)
+        # §11, the fourth phase: a dialect of a version this reader does not read is refused before any
+        # form is checked. It reads both versions the text defines, 2 and 3.
+        if isinstance(dialect_document, dict) and is_integer(dialect_document.get("version")):
+            version = integer_of(dialect_document["version"])
+            if version in DEFINED_VERSIONS and version not in READ_VERSIONS:
+                raise Refused("version-unread", f"dialect version {version} is not read by this reader")
+        parsed_record = parse_record(record, record_document) if record is not None else None
+        if not isinstance(acquisitions_document, dict):
+            raise malformed("the acquisitions are not an object")
+        if not isinstance(given, dict) or instant(given.get("verifiedAt")) is None:
+            raise malformed("the preparation's verifiedAt is not a timestamp with an instant")
+        trusted = parse_profiles(profiles_document)
+        parsed_dialect = read_bound(parse_dialect(dialect_document), binding_document, binding is not None)
+        # Each acquisition's form is its source's kind's: a research record's answers are held to the
+        # source's declarations (§4.3, §5.2).
+        research = {s.name: s.research for s in parsed_dialect.sources if s.research is not None}
+        for name, member in acquisitions_document.items():
+            check_acquisition_form(name, member, research.get(name))
+        # §11, the sixth phase, once every form is checked: a kind this reader does not read.
+        if parsed_dialect.unread:
+            raise Refused("kind-unread", f"{parsed_dialect.unread[0]} is defined and not read by this reader")
+        verified_at = given["verifiedAt"]
+
+        computation = recompute(parsed_dialect, case_document, acquisitions_document, trusted, verified_at)
+        result.preparation = preparation_bytes(computation.preparation)
+        if retained.selected() and len(result.preparation) > retained.CAPS["base"]["preparationBytes"]:
+            raise Refused("input-over-bound", "complete recomputed preparation")
+        result.digest = digest_of(result.preparation)
+        result.facts = as_plain(computation.facts)
+        result.evidence = as_plain(computation.evidence)
+        try:
+            given_bytes = preparation_bytes(given)
+        except OutsideDomain:
+            given_bytes = None
+        if given_bytes != result.preparation:
+            raise Finding("preparation-differs")
+        binding = "not-checked"
+        if parsed_record is not None:
+            inputs = parsed_record.value["inputs"]
+            record_cites = parsed_record.value.get("cites", [])
+            cites = computation.preparation["cites"]
+            # As sets: a citation either side gives twice is one member, and how many times one is
+            # given is not compared (§11, finding 6).
+            same_cites = (
+                isinstance(record_cites, list)
+                and all(any(json_equal(a, b) for b in cites) for a in record_cites)
+                and all(any(json_equal(a, b) for b in record_cites) for a in cites)
+            )
+            if (
+                not json_equal(inputs.get("facts", ABSENT), computation.facts)
+                or not json_equal(inputs.get("evidence", ABSENT), computation.evidence)
+                or not same_cites
+            ):
+                raise Finding("record-inputs-differ")
+            if parsed_record.binding is None:
+                binding = "absent"
+            else:
+                member = parsed_record.value["binding"]
+                if not (isinstance(member, dict) and member.get("kind") == BINDING_KIND):
+                    raise Finding("binding-foreign-kind")
+                if parsed_record.binding != binding_of(result.digest):
+                    raise Finding("binding-mismatch")
+                binding = "matches"
+        if require_binding and binding != "matches":
+            raise Finding("unbound")
+        counts = {"asserted": 0, "record": 0, "generated": 0}
+        for entry in computation.preparation["lineage"]:
+            counts[entry["class"]] += 1
+        reading: dict[str, Any] = {
+            "digest": result.digest,
+            "binding": binding,
+            "facts": computation.facts,
+            "evidence": computation.evidence,
+            "targetsByClass": counts,
+        }
+        parameters = unsigned_parameters(parsed_dialect, computation)
+        if parameters:
+            reading["unsignedParameters"] = parameters
+        freshness = unsigned_freshness(computation, verified_at)
+        if freshness:
+            reading["unsignedFreshness"] = freshness
+        result.answer = {"reading": reading}
+    except Refused as refusal:
+        result.answer = {"refused": refusal.name, "detail": str(refusal)}
+    except Finding as finding:
+        result.answer = {"finding": finding.name, "detail": str(finding)}
+    return result
+
+
+def verify(dialect: bytes, case: bytes, acquisitions: bytes, profiles: bytes, preparation: bytes,
+           record: bytes | None = None, require_binding: bool = False, binding: bytes | None = None,
+           conversion_contract: bytes | None = None) -> Verification:
+    token = None
+    try:
+        if conversion_contract is not None:
+            token = retained.CURRENT.set(retained.begin(conversion_contract))
+        return _verify(dialect, case, acquisitions, profiles, preparation, record, require_binding, binding)
+    except (retained.engine.Refusal, UnicodeError) as error:
+        code = str(error) if isinstance(error, retained.engine.Refusal) else "input-malformed"
+        return Verification(answer={"finding" if code in ("read-failed", "profile-mismatch", "acquisition-invalid") else "refused": code})
+    finally:
+        if token is not None:
+            retained.CURRENT.reset(token)
+
+
+def verify_source_input(source_input: bytes, profiles: bytes, preparation: bytes,
+                        conversion_contract: bytes, record: bytes | None = None,
+                        require_binding: bool = False) -> Verification:
+    token = None
+    try:
+        token = retained.CURRENT.set(retained.begin(conversion_contract))
+        dialect, case, acquisitions, binding = retained.source_documents(sys.modules[__name__], source_input)
+        return _verify(dialect, case, acquisitions, profiles, preparation, record, require_binding, binding)
+    except (retained.engine.Refusal, UnicodeError, Refused, Finding) as error:
+        if isinstance(error, (Refused, Finding)):
+            return Verification(answer={"finding" if isinstance(error, Finding) else "refused": error.name})
+        code = str(error) if isinstance(error, retained.engine.Refusal) else "input-malformed"
+        return Verification(answer={"finding" if code in ("read-failed", "profile-mismatch", "acquisition-invalid") else "refused": code})
+    finally:
+        if token is not None:
+            retained.CURRENT.reset(token)
+
+
+def verify_export(data: bytes, profiles: bytes, conversion_contract: bytes,
+                  require_binding: bool = False) -> Verification:
+    token = None
+    try:
+        token = retained.CURRENT.set(retained.begin(conversion_contract))
+        inputs, record = retained.export_inputs(sys.modules[__name__], data)
+        last = None
+        for index, (source, preparation) in enumerate(inputs):
+            dialect, case, acquisitions, binding = retained.source_documents(sys.modules[__name__], source)
+            retained.CURRENT.get().origin = "asserted"
+            last = _verify(dialect, case, acquisitions, profiles, preparation,
+                           record if index == 1 else None, require_binding if index == 1 else False, binding)
+            if "reading" not in last.answer:
+                return last
+        assert last is not None
+        return last
+    except (retained.engine.Refusal, UnicodeError, Refused, Finding) as error:
+        if isinstance(error, (Refused, Finding)):
+            return Verification(answer={"finding" if isinstance(error, Finding) else "refused": error.name})
+        code = str(error) if isinstance(error, retained.engine.Refusal) else "input-malformed"
+        return Verification(answer={"finding" if code in ("read-failed", "profile-mismatch", "acquisition-invalid") else "refused": code})
+    finally:
+        if token is not None:
+            retained.CURRENT.reset(token)
+
+
+def report(answer: dict[str, Any]) -> dict[str, Any]:
+    """§11, the report: one object whose `result` is `reading`, `refusal` or `finding`, with exactly
+    the members that form carries."""
+    if "reading" in answer:
+        return {"result": "reading", **answer["reading"]}
+    if "finding" in answer:
+        return {"result": "finding", "finding": answer["finding"]}
+    if answer["refused"] == "profile-unsupported":
+        return {"result": "refusal", "refusal": "profile-unsupported", "profile": "extended"}
+    return {"result": "refusal", "refusal": answer["refused"]}
+
+
+# §11: a program exits 0 for a reading, 1 for a refusal, 2 for a finding, and 3 when it could not run.
+EXIT_STATUS = {"reading": 0, "refusal": 1, "finding": 2}
+COULD_NOT_RUN = 3
+
+
+class _Arguments(argparse.ArgumentParser):
+    def exit(self, status: int = 0, message: str | None = None) -> NoReturn:
+        # argparse leaves by this door when no reading was run, for its help or for an argument it
+        # does not take; §11 gives that one status, not argparse's 0 or 2, which are a reading's and
+        # a finding's.
+        super().exit(COULD_NOT_RUN, message)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _Arguments(description=__doc__.splitlines()[0])
+    parser.add_argument("--dialect", type=Path)
+    parser.add_argument("--case", type=Path)
+    parser.add_argument("--acquisitions", type=Path, help="absent: no acquisitions, {}")
+    parser.add_argument("--profiles", required=True, type=Path)
+    parser.add_argument("--preparation", type=Path)
+    parser.add_argument("--binding", type=Path, help="the binding document of a dialect with an unbound source")
+    parser.add_argument("--record", type=Path, help="one record line, without its newline")
+    parser.add_argument("--require-binding", action="store_true")
+    parser.add_argument("--conversion-contract", type=Path, help="exact selected contract, admitted against the immutable installed package before artifact reads")
+    parser.add_argument("--source-input", type=Path, help="complete persisted selected SourceInput")
+    parser.add_argument("--export", type=Path, help="complete selected verification export; preparation agreement only, no record-signature or chain-authority claim")
+    arguments = parser.parse_args(argv)
+    if arguments.source_input or arguments.export:
+        if not arguments.conversion_contract or arguments.source_input and arguments.export or any((arguments.dialect, arguments.case, arguments.acquisitions, arguments.binding)):
+            parser.error("select exactly one source-input/export adapter with an explicit conversion contract")
+        if arguments.source_input and not arguments.preparation:
+            parser.error("--source-input requires --preparation")
+    elif not all((arguments.dialect, arguments.case, arguments.preparation)):
+        parser.error("--dialect, --case and --preparation are required")
+    try:
+        selector = arguments.conversion_contract.read_bytes() if arguments.conversion_contract else None
+        if selector is not None:
+            try:
+                retained.begin(selector)
+            except (retained.engine.Refusal, UnicodeError) as error:
+                code = str(error) if isinstance(error, retained.engine.Refusal) else "input-malformed"
+                sys.stdout.buffer.write(preparation_bytes({"result": "refusal", "refusal": code}) + b"\n")
+                return 1
+        if arguments.export:
+            outcome = verify_export(arguments.export.read_bytes(), arguments.profiles.read_bytes(), selector, arguments.require_binding)
+        elif arguments.source_input:
+            outcome = verify_source_input(arguments.source_input.read_bytes(), arguments.profiles.read_bytes(), arguments.preparation.read_bytes(), selector,
+                                          arguments.record.read_bytes() if arguments.record else None, arguments.require_binding)
+        else:
+            documents = (
+                arguments.dialect.read_bytes(),
+                arguments.case.read_bytes(),
+                arguments.acquisitions.read_bytes() if arguments.acquisitions else b"{}",
+                arguments.profiles.read_bytes(),
+                arguments.preparation.read_bytes(),
+                arguments.record.read_bytes() if arguments.record else None,
+            )
+            binding = arguments.binding.read_bytes() if arguments.binding else None
+            outcome = verify(*documents, arguments.require_binding, binding, selector)
+        answer = report(outcome.answer)
+        line = preparation_bytes(answer) + b"\n"
+    except Exception as error:  # a file it cannot open, or a fault of its own: never 1 or 2
+        print(f"dialect_verify: could not run: {error!r}", file=sys.stderr)
+        return COULD_NOT_RUN
+    sys.stdout.buffer.write(line)
+    sys.stdout.flush()
+    if "detail" in outcome.answer:
+        print(f"dialect_verify: {outcome.answer['detail']}", file=sys.stderr)
+    return EXIT_STATUS[answer["result"]]
+
+
+if __name__ == "__main__":
+    sys.exit(main())

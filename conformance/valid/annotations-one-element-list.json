@@ -1,0 +1,58 @@
+{
+  "specVersion": "0.4.0",
+  "id": "https://example.com/judgment-packs/annotations-one-element-list",
+  "version": "0.1.0",
+  "title": "A one-element list and a plain string",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept a request made online.",
+      "when": {
+        "op": "fact",
+        "path": "/request/channel",
+        "operator": "equals",
+        "value": "online"
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "category": [
+            "intake"
+          ]
+        }
+      }
+    },
+    {
+      "id": "refer-request",
+      "description": "Refer a request made on any other channel.",
+      "when": {
+        "op": "fact",
+        "path": "/request/channel",
+        "operator": "not-equals",
+        "value": "online"
+      },
+      "outcome": "refer",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "category": "intake"
+        }
+      }
+    }
+  ]
+}

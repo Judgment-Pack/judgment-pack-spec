@@ -1,0 +1,72 @@
+{
+  "profile": "extended",
+  "specVersion": "0.4.0",
+  "id": "https://example.com/judgment-packs/profile-annotation-strings-33",
+  "version": "0.1.0",
+  "title": "Annotations at a profile ceiling",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept every request.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "category": [
+            "value-000",
+            "value-001",
+            "value-002",
+            "value-003",
+            "value-004",
+            "value-005",
+            "value-006",
+            "value-007",
+            "value-008",
+            "value-009",
+            "value-010",
+            "value-011",
+            "value-012",
+            "value-013",
+            "value-014",
+            "value-015",
+            "value-016",
+            "value-017",
+            "value-018",
+            "value-019",
+            "value-020",
+            "value-021",
+            "value-022",
+            "value-023",
+            "value-024",
+            "value-025",
+            "value-026",
+            "value-027",
+            "value-028",
+            "value-029",
+            "value-030",
+            "value-031",
+            "value-032"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "specVersion": "0.4.0",
+  "id": "https://example.com/judgment-packs/value-set-tiers",
+  "version": "0.1.0",
+  "title": "Priority tiers",
+  "decision": {
+    "intent": "Decide whether a request is on the priority track.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "priority-track",
+      "description": "A request in a priority tier is accepted.",
+      "when": {
+        "op": "fact",
+        "path": "/request/tier",
+        "operator": "in",
+        "valueSet": "priority-tiers"
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate"
+    }
+  ],
+  "valueSets": [
+    {
+      "id": "priority-tiers",
+      "entries": [
+        {
+          "value": "tier-1"
+        },
+        {
+          "value": "tier-2"
+        },
+        {
+          "value": "tier-3"
+        }
+      ]
+    }
+  ],
+  "escalation": {
+    "triggers": [
+      "unknown",
+      "no-match"
+    ],
+    "target": {
+      "kind": "queue",
+      "name": "Priority review"
+    }
+  }
+}

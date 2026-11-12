@@ -1,6 +1,9 @@
 # Historical compatibility evidence
 
-The three manifest files are exact published source bytes, not captured implementation output.
+The five manifest files are exact published source bytes, not captured implementation output.
+The files under `v0.3.0/` are the exact bytes, at the `v0.3.0` tag, of the four files of the
+`v0.3.0` retained column (`releases/v0.3.0.retained-column.json`) that Core `0.4.0` changed in
+place; tests that rebuild a `v0.3.0` tree read them instead of the live files.
 The carrier fragment extracts only `DuplicateMemberError` and `strict_json_loads` from the immutable
 0.2 source without changing those definitions; the import prelude permits offline CI execution.
 `selector-only-surrogate.json` is a handwritten synthetic compatibility counterexample. Tests pin
@@ -15,3 +18,12 @@ these trusted resources and source identities independently of the mutable curre
 - `tests/fixtures/historical-compatibility/0.2.0-draft-document-manifest.json`: source `0f30fd7b2c3fd7792249c8f3c5335b9e697a2c7a:conformance/manifest.json`, Git blob `25fc4ecb7b84f834df9c9591a0246ec2d38ef991`, preserved SHA-256 `ca3888de758e0e52632f3164bd40b41358cde19ea9ca238b50ff715b40713952`.
 - `tests/fixtures/historical-compatibility/0.2.0-draft-evaluation-manifest.json`: source `0f30fd7b2c3fd7792249c8f3c5335b9e697a2c7a:conformance/evaluation/manifest.json`, Git blob `5754af3f181af9f3ae165ae141e9a22c6764ad0d`, preserved SHA-256 `d2c8bf03285f5f3478f1c9074dcf0dfb2257211eba009879cd5d9f02cbb545b1`.
 - `tests/fixtures/historical-compatibility/tagged_carrier.py`: source `0f30fd7b2c3fd7792249c8f3c5335b9e697a2c7a:tests/test_repository.py`, Git blob `ca321e03408c4e51f4a0c674ab05802f18b35733`, preserved SHA-256 `cae9672d921872cdccd9672e0865374f86aa5bbe9e4d7551fa53960445a29fab`.
+- `schema/judgment-pack-core-0.3.0.schema.json`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:schema/judgment-pack-core.schema.json`, Git blob `be283e4bc0d40c130dc5ced06a55eef6aeead123`, preserved SHA-256 `4ef5040ba5aeecc00bf4a23aca82812900a136d2119285bf1dac78b71ac64639`.
+- `schema/conformance-manifest-0.3.0.schema.json`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:conformance/manifest.schema.json`, Git blob `10543b73505855ddb642deb75f514537e3b4f04c`, preserved SHA-256 `3d14efea2186a0d630c5d980c683bca8b4d4576dbf7213ed6cc37e8199016fdf`.
+- `schema/conformance-evaluation-manifest-0.3.0.schema.json`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:conformance/evaluation/manifest.schema.json`, Git blob `a609594e293f00b5110c45481d60fc3137c44e15`, preserved SHA-256 `930d4c4e22ddc54f29c35090d6c979ad4e798c939509a7d6fac325c0dfd783da`.
+- `tests/fixtures/historical-compatibility/0.3.0-document-manifest.json`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:conformance/manifest.json`, Git blob `8e30bb2592401da4c0e2dff99f1a05c99c7d0c05`, preserved SHA-256 `d494cef89a5602d83cd2ab3b390017abf5abafc9dd7be545939822fbcaee19e8`.
+- `tests/fixtures/historical-compatibility/0.3.0-evaluation-manifest.json`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:conformance/evaluation/manifest.json`, Git blob `c2d63f03d5a13ecea5758662cdc18c967a4f97e9`, preserved SHA-256 `096eeb558ca553f65b2cb2c989348375df4b17f0920a13a76968bc37d5490689`.
+- `tests/fixtures/historical-compatibility/v0.3.0/spec/judgment-pack-core.md`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:spec/judgment-pack-core.md`, Git blob `41eea195bf797c9195905b467dfc5c5e56cc654c`, preserved SHA-256 `151d64678db709f91ab0729c2f75516b89a027e24a3e22e1788dcdf0aa6faabc`.
+- `tests/fixtures/historical-compatibility/v0.3.0/spec/dialect.md`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:spec/dialect.md`, Git blob `297ce325217302147f84c95ff281d8334eeec36f`, preserved SHA-256 `729e491a0d855a51f69e9b9e7aadc24131209c388ee29e8820c57a7a7c845d5a`.
+- `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect_verify.py`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect_verify.py`, Git blob `3dc1ac99c26a725f86103b1bcf1ff512c76ecee0`, preserved SHA-256 `fe3b773ce30ad8c395fe85500714a12d6cc4262ccc6bca05c44f7b3b40a60b60`.
+- `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/vector.ts`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect-verify-ts/src/vector.ts`, Git blob `5c00c3a9961fc00dfc61c23c1fa0ce9925110dff`, preserved SHA-256 `289b68479edf607df1480e46b0e6a6ee04091feb5dd56ddee696fbb2a337a1cb`.

@@ -1,0 +1,55 @@
+{
+  "specVersion": "0.4.0",
+  "id": "https://example.com/judgment-packs/required-extension-in-entry-value",
+  "version": "0.1.0",
+  "title": "A required name only inside an entry value",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept a request in a priority tier.",
+      "when": {
+        "op": "fact",
+        "path": "/request/tier",
+        "operator": "in",
+        "valueSet": "priority-tiers"
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate"
+    }
+  ],
+  "valueSets": [
+    {
+      "id": "priority-tiers",
+      "entries": [
+        {
+          "value": {
+            "extensions": {
+              "com.example.effective-window": {
+                "days": 30
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "requiredExtensions": [
+      "com.example.effective-window"
+    ]
+  }
+}

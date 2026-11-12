@@ -1,0 +1,55 @@
+{
+  "specVersion": "0.4.0",
+  "id": "https://example.com/judgment-packs/annotations-too-many-strings",
+  "version": "0.1.0",
+  "title": "Malformed annotations",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept every request.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "category": [
+            "value-00",
+            "value-01",
+            "value-02",
+            "value-03",
+            "value-04",
+            "value-05",
+            "value-06",
+            "value-07",
+            "value-08",
+            "value-09",
+            "value-10",
+            "value-11",
+            "value-12",
+            "value-13",
+            "value-14",
+            "value-15",
+            "value-16"
+          ]
+        }
+      }
+    }
+  ]
+}
