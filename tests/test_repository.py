@@ -10,7 +10,7 @@ import unittest
 from dataclasses import dataclass
 from json.decoder import WHITESPACE, WHITESPACE_STR, JSONDecodeError, scanstring
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 from unittest.mock import patch
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -449,7 +449,15 @@ def extension_names(value: Any) -> set[str]:
     return names
 
 
-def semantic_diagnostics(value: dict[str, Any]) -> list[Diagnostic]:
+def semantic_diagnostics(
+    value: dict[str, Any],
+    extension_names_of: Callable[[Any], set[str]] = extension_names,
+) -> list[Diagnostic]:
+    """§3.3's checks. `extension_names_of` reads the names §9's required-extension rule may count.
+
+    The released corpus uses `extension_names`. The staged draft (tests/test_core_draft.py) passes
+    the reading RFC 0031 §4.1 states: only the `extensions` objects the schema defines as members.
+    """
     diagnostics: list[Diagnostic] = []
     collections = ("outcomes", "rules", "evidenceRequirements", "sources", "exceptions")
     for collection in collections:
@@ -566,7 +574,7 @@ def semantic_diagnostics(value: dict[str, Any]) -> list[Diagnostic]:
                 )
 
     declared_required = value.get("metadata", {}).get("requiredExtensions", [])
-    used_extensions = extension_names(value)
+    used_extensions = extension_names_of(value)
     for index, required in enumerate(declared_required):
         if required not in used_extensions:
             diagnostics.append(
@@ -1165,7 +1173,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             for path in CONFORMANCE.rglob("*.json")
             if not (path.name.endswith(".schema.json") or path.name in ("manifest.json", "cases.json"))
             and path.relative_to(CONFORMANCE).parts[0]
-            not in ("evaluation", "witness", "dialect", "policy", "workflow", "retained-column")
+            not in ("evaluation", "witness", "dialect", "policy", "workflow", "retained-column", "staged")
         }
 
         for path in sorted(listed - on_disk):
@@ -1182,7 +1190,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             named = root / "valid/named.json"
             named.parent.mkdir()
             named.write_text("{}")
-            for namespace in ("evaluation", "witness", "dialect", "policy", "workflow", "retained-column"):
+            for namespace in ("evaluation", "witness", "dialect", "policy", "workflow", "retained-column", "staged"):
                 owned = root / namespace / "owned.json"
                 owned.parent.mkdir()
                 owned.write_text("{}")
@@ -1384,7 +1392,14 @@ class RepositoryConformanceTests(unittest.TestCase):
         manifest = strict_json_loads(EVALUATION_MANIFEST_PATH.read_text(encoding="utf-8"))
         self._check_evaluation_cases(manifest["cases"], EVALUATION)
 
-    def _check_evaluation_cases(self, cases: list[dict[str, Any]], base: Path) -> None:
+    def _check_evaluation_cases(
+        self,
+        cases: list[dict[str, Any]],
+        base: Path,
+        validator: Draft202012Validator | None = None,
+        spec_version: str = SPEC_VERSION,
+        conformance: Callable[[Draft202012Validator, Any], list[Diagnostic]] = pack_conformance_diagnostics,
+    ) -> None:
         # Carrier well-formedness only: the specification repository owns no evaluator, so these
         # checks verify that each case could be run, never that a disposition is the right one.
         # `base` is the directory a case's `pack` path resolves against: the released corpus, or the
@@ -1394,6 +1409,10 @@ class RepositoryConformanceTests(unittest.TestCase):
         # conform — except for a fixture whose whole point is the §8.4 `pack-not-conformant` error, which
         # requires the opposite. The check is therefore conditional on what the case expects rather than
         # dropped: a fixture that quietly became conforming would make such a row unrunnable too.
+        #
+        # `validator`, `spec_version` and `conformance` default to the released corpus's. The staged
+        # draft's rows (tests/test_core_draft.py) pass its schema, selector and checks.
+        validator = validator or self.validator
         non_conformant_packs = {
             case["pack"]
             for case in cases
@@ -1418,7 +1437,7 @@ class RepositoryConformanceTests(unittest.TestCase):
                     )
                 if case["pack"] not in packs:
                     pack = strict_json_loads(pack_path.read_text(encoding="utf-8"))
-                    diagnostics = pack_conformance_diagnostics(self.validator, pack)
+                    diagnostics = conformance(validator, pack)
                     if expects_non_conformant_pack:
                         self.assertNotEqual(
                             [],
@@ -1426,7 +1445,7 @@ class RepositoryConformanceTests(unittest.TestCase):
                             f"{case['pack']} conforms, so no case can expect pack-not-conformant",
                         )
                     else:
-                        self.assertEqual(pack["specVersion"], SPEC_VERSION)
+                        self.assertEqual(pack["specVersion"], spec_version)
                         self.assertEqual([], diagnostics)
                     packs[case["pack"]] = pack
                     pack_diagnostics[case["pack"]] = diagnostics
@@ -1474,7 +1493,7 @@ class RepositoryConformanceTests(unittest.TestCase):
                 if disposition is None:
                     continue
 
-                disposition_validator = self.validator.evolve(schema={"$ref": "#/$defs/disposition"})
+                disposition_validator = validator.evolve(schema={"$ref": "#/$defs/disposition"})
                 self.assertEqual([], list(disposition_validator.iter_errors(disposition)))
                 reasons = disposition["reasons"]
                 self.assertEqual(reasons, sorted(set(reasons)), "reasons are a sorted set")

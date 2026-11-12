@@ -129,6 +129,26 @@ class Determinism(Fixture):
         self.assertEqual(first, shapes.render(shapes.build_catalog(self.root)))
 
 
+class UnseenCharacters(unittest.TestCase):
+    def test_the_catalog_file_writes_an_unseen_character_as_its_escape(self):
+        # Written by hand: a C1 control, a line separator, a right-to-left override, a zero-width
+        # space, a byte order mark and DELETE are escaped; a section sign and a character outside
+        # the Basic Multilingual Plane are left as they are.
+        value = {"text": "a\u009fb\u2028c\u202ed\u200be\ufefff\u007fg\u00a7h\U0001f600"}
+        self.assertEqual(
+            shapes.render(value),
+            '{\n  "text": "a\\u009fb\\u2028c\\u202ed\\u200be\\ufefff\\u007fg\u00a7h\U0001f600"\n}\n',
+        )
+        self.assertEqual(json.loads(shapes.render(value)), value)
+
+    def test_the_committed_catalog_carries_no_unseen_character(self):
+        import unicodedata
+        text = (ROOT / shapes.CATALOG).read_text("utf-8")
+        found = sorted({"U+%04X" % ord(ch) for ch in text
+                        if ch != "\n" and unicodedata.category(ch) in ("Cc", "Cf", "Zl", "Zp")})
+        self.assertEqual(found, [])
+
+
 class ChangeRecords(Fixture):
     PATH = "schema/workflow-1.schema.json"
 
@@ -270,17 +290,30 @@ class FormatStatus(Fixture):
         # Hand-checked against releases/: v0.4.0 carries specVersion 0.3.0 unchanged, so it is the
         # last release of the families under 0.3.0 and v0.3.0 stays their baseline, after two
         # candidates; the Policy companion's only release is policy-v1.0.0-draft.1; the leaf shipped
-        # in rc.2 and the final; the contributors shape under 0.4.0 is staged and unreleased.
-        for family in ("judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest",
-                       "workflow"):
+        # in rc.2 and the final; the contributors shape under 0.4.0 is staged and unreleased. Core's
+        # draft version is the staged draft schema's selector, 0.4.0-draft (RFC 0031), which no
+        # release carries, so its baseline and last release are still those of 0.3.0.
+        for family in ("conformance/manifest", "conformance/evaluation/manifest", "workflow"):
             self.assertEqual(derived[family],
                              {"draftVersion": "0.3.0", "baseline": "v0.3.0", "lastReleased": "v0.4.0"})
+        self.assertEqual(derived["judgment-pack-core"],
+                         {"draftVersion": "0.4.0-draft", "baseline": "v0.3.0", "lastReleased": "v0.4.0"})
         self.assertEqual(derived["policy"], {"draftVersion": "1.0.0", "baseline": "policy-v1.0.0-draft.1",
                                              "lastReleased": "policy-v1.0.0-draft.1"})
         self.assertEqual(derived["retained-column"],
                          {"draftVersion": "1", "baseline": "v0.3.0", "lastReleased": "v0.3.0"})
         self.assertEqual(derived["workflow-contributors"],
                          {"draftVersion": "0.4.0", "baseline": None, "lastReleased": None})
+
+    def test_the_readme_example_is_cores_record(self):
+        # catalog/README.md shows Core's record as its format-status example. Staging 0.4.0-draft
+        # moved Core's draftVersion and left the example behind once (#301), so it is held here.
+        lines = [line.strip() for line in (ROOT / "catalog/README.md").read_text("utf-8").splitlines()
+                 if line.strip().startswith('"judgment-pack-core": {')]
+        self.assertEqual(len(lines), 1)
+        example = json.loads("{" + lines[0] + "}")["judgment-pack-core"]
+        status = json.loads((ROOT / shapes.STATUS).read_text("utf-8"))["families"]
+        self.assertEqual(example, status["judgment-pack-core"])
 
     def test_a_status_record_that_differs_from_releases_fails(self):
         status = self.status()

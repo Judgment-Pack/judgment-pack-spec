@@ -24,6 +24,10 @@ WITNESS_VECTORS = "conformance/witness"
 # published.
 DIALECT_VECTORS = "conformance/dialect"
 WORKFLOW_VECTORS = "conformance/workflow"
+# The staged draft Core specVersion 0.4.0-draft carries RFC 0031, a Draft, and is published nowhere:
+# the site serves neither its schema, its document cases nor its example, and its text is no page
+# (conformance/staged/README.md). Its evaluation rows are under STAGED_EVALUATION_ROWS.
+STAGED_DRAFT_DIRECTORIES = ("schema/staged", "conformance/staged", "examples/staged")
 UNPUBLISHED_DIRECTORIES = (
     STAGED_EVALUATION_ROWS,
     WITNESS_VECTORS,
@@ -31,6 +35,7 @@ UNPUBLISHED_DIRECTORIES = (
     WORKFLOW_VECTORS,
     "conformance/policy",
     "schema/policy",
+    *STAGED_DRAFT_DIRECTORIES,
 )
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
@@ -221,6 +226,16 @@ class StaticSiteTests(unittest.TestCase):
         # the site does not serve them. A recursive copy of conformance/ would, so the claim is held
         # here: nothing under the staged directory is published, as an artifact or as a page.
         self._assert_nothing_published_under(STAGED_EVALUATION_ROWS)
+
+    def test_staged_draft_is_not_published(self) -> None:
+        # Held as the staged rows' exclusion is, for each directory, and for the draft text, which is
+        # no page: nothing the site writes is named for the draft selector.
+        for directory in STAGED_DRAFT_DIRECTORIES:
+            with self.subTest(directory=directory):
+                self._assert_nothing_published_under(directory)
+        self.assertEqual([], sorted(
+            path.relative_to(self.output).as_posix() for path in self.output.rglob("*0.4.0-draft*")
+        ))
 
     def test_witness_vectors_are_not_published(self) -> None:
         # The vectors are staged, and conformance/witness/README.md says the site does not serve

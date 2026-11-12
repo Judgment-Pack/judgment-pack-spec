@@ -1,0 +1,11 @@
+{
+  "reason": "RFC 0031 (#301, a Draft), after review: the staged draft schema's annotationString holds \"type\": \"string\" beside its refused-character pattern under not, so a non-string in an annotation list fails type alone, as RFC 0031 section 1.7 now writes it. Staged draft only; the released 0.3.0 schema is unchanged.",
+  "changes": [
+    {
+      "path": "schema/staged/judgment-pack-core-0.4.0-draft.schema.json",
+      "family": "judgment-pack-core",
+      "from": "sha256:ff00d2a76b5dde8c47a1580cd0f499ad5c454ea833de11012e96ae549d04d878",
+      "to": "sha256:b9b7da495415169b9a1398612bf5066c243975599a733a9053417e7a40a73060"
+    }
+  ]
+}

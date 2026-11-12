@@ -31,6 +31,12 @@ reviewed, held to the same checks as released rows, and runnable by hand — unt
   `export-ignore`, so no bundle carries a staged row whatever is staged when a release is cut. The
   directory is work in progress on `main`, reachable in the repository and nowhere else.
 
+Rows for the staged draft Core selector `0.4.0-draft`, which carries
+[RFC 0031](../../../rfcs/0031-annotations-and-value-sets.md), a Draft, are in
+[`annotations-value-sets/`](annotations-value-sets/README.md). Their packs declare that selector,
+so they wait for the version that carries RFC 0031, and its README states how they differ from
+the rows below.
+
 ## How a staged row lands
 
 When a later `specVersion` opens, each case moves into [`manifest.json`](../manifest.json) as it

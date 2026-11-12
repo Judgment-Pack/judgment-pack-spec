@@ -7,6 +7,8 @@
 - Target: the next Core `specVersion` after `0.3.0`. No number is assigned here. A release tag is
   not a selector: release `v0.4.0` carries `specVersion` `0.3.0`.
 - Issue: [#301](https://github.com/Judgment-Pack/judgment-pack-spec/issues/301)
+- Staged draft: [`spec/staged/judgment-pack-core-0.4.0-draft.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md),
+  under a working selector no maintainer has assigned. This record stays a Draft.
 
 > This is an open proposal, not part of the specification. See
 > [RFC 0000](0000-rfc-process.md) for the process and evidence bar.
@@ -253,7 +255,7 @@ unchanged.
     "type": "string",
     "minLength": 1,
     "maxLength": 256,
-    "not": { "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+    "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
   },
   "annotations": {
     "type": "object",
@@ -307,6 +309,12 @@ The class is unanchored and sits under `not`: a string is refused when the class
 in it, so no end anchor is involved and a trailing line feed is refused like any other. Under
 `propertyNames` the same `not` refuses a key that ends in a line feed, which an engine whose `$`
 matches before a final line feed would otherwise admit (§1.3).
+
+In `annotationString` the `not` holds `"type": "string"` beside the class. A `pattern` holds for
+every instance that is not a string, so without it a list item that is a number or a list would
+fail `not` as well as `type`, and one wrong item would give two findings. With it, a non-string
+satisfies the `not` and is refused once, by `type`. A member name is always a string, so the `not`
+under `propertyNames` needs no `type`.
 
 **Keywords.** The annotation value uses `type` and `if`/`then`/`else`, not `oneOf`, so a validator
 reports the keyword that fails: `type` for a number or an object, `minLength` for an empty string,
@@ -817,6 +825,7 @@ every implementation. No Core conformance class tests display.
 | Core §7.4 | the `valueSet` member (§3.1) |
 | Core §8 (new paragraph) | the evaluation form and §4.2's requirement, with its limit rule |
 | Core §9 | a paragraph on specification-defined extensions (their value is governed by their definition, which qualifies "Values may be any JSON value", line 950; each definition states where the name may appear and whether it may be required); then annotations: A1–A6, D2 |
+| Core §9 (clarification) | an `extensions` object is one the schema defines as a member of a Core object; a member named `extensions` inside an operand, an entry value or an extension's value is data, so a required name found only there is missing (§4.1; Compatibility; Unresolved question 4) |
 | Core §10 | D1; which limits §4.2 applies to the pack as presented and which to the work its evaluation form requires |
 | Core §11 | compatibility from `0.3.0` (see Compatibility) |
 | Core §13 | unchanged; content identity stays open |
@@ -1084,10 +1093,16 @@ requires, compatibility is explicit:
   schema also refuses each new shape: the reserved key, the root `valueSets` and the `valueSet`
   member. A writer targeting `0.3.0` cannot emit them.
 - **Semantic.** For a pack that uses neither feature, `EF(P)` is `P`, so this record changes no
-  result for it.
-- **Migrating up from `0.3.0`.** No `0.3.0` shape is refused by these rules. As far as this record
-  goes, changing only the selector is enough, and evaluation is unchanged. The next version's other
-  changes are their own.
+  result for it, apart from the one shape the clarification below refuses.
+- **Migrating up from `0.3.0`.** One shape aside, no `0.3.0` shape is refused by these rules. The
+  exception is a clarification of Core `0.3.0` §9, by which every required name "MUST appear as a
+  key in at least one `extensions` object": an `extensions` object is one the schema defines as a
+  member, and a member named `extensions` inside data, such as an item of an `in` operand, is not
+  one (§4.1). A `0.3.0` pack whose required name appears only under such a member is therefore
+  refused under the next selector (`JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION`). The repository's
+  released `0.3.0` checker reads Core §9 more broadly, counting such a member, and this record does
+  not change it. With that exception, and as far as this record goes, changing only the selector is
+  enough, and evaluation is unchanged. The next version's other changes are their own.
   - Labels kept in a vendor extension MAY be moved to the reserved name by hand, once they meet
     §§1.3–1.5. There is no automatic coercion: a vendor value outside those rules must be edited,
     not truncated, joined or dropped by a tool.
@@ -1252,6 +1267,7 @@ This record proposes seven new provisional codes, and no others:
 | `structural-reserved-name-in-annotated-position` | `org.judgmentpack.future` in a rule's `extensions` | `JPS-STRUCTURE-EXTENSION-NAME` at `/rules/0/extensions/org.judgmentpack.future` |
 | `structural-annotations-not-object` | the extension's value is a string | `JPS-STRUCTURE-TYPE` at `…/org.judgmentpack.annotations` |
 | `structural-annotations-empty-object` | `{}` | `JPS-STRUCTURE-MIN-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
+| `structural-annotations-empty-object-*` | `{}` at the root, on an outcome and on a value-set entry, one case each | `JPS-STRUCTURE-MIN-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
 | `structural-annotations-empty-list` | `"category": []` | `JPS-STRUCTURE-COLLECTION-ARITY` at `…/category` |
 | `structural-annotations-empty-string` | `"category": ""` | `JPS-STRUCTURE-MIN-LENGTH` at `…/category` |
 | `structural-annotations-key-grammar-*` | one case each: `Tier`, `tier_1`, `-tier`, `tier-`, `ti--er`, `1tier`, the empty key | `JPS-STRUCTURE-LOCAL-ID` at the key |
@@ -1263,6 +1279,7 @@ This record proposes seven new provisional codes, and no others:
 | `structural-annotations-duplicate-string` | `["intake", "intake"]` | `JPS-STRUCTURE-UNIQUE-ITEMS` at the list |
 | `structural-annotations-value-*` | one case each: a number, a Boolean, null, an object | `JPS-STRUCTURE-TYPE` at the value |
 | `structural-annotations-value-nested-list` | `[["intake"]]` | `JPS-STRUCTURE-TYPE` at the inner list, `…/0` |
+| `structural-annotations-list-item-number` | `[1]` | `JPS-STRUCTURE-TYPE` once, at the item, `…/0` (§1.7) |
 | `structural-annotations-control-*` | one case each, escaped in the JSON: NUL, TAB, LF, ESC, DEL, U+0085, U+009B, U+2028, U+2029 | `JPS-STRUCTURE-NOT` at the string |
 | `structural-annotations-trailing-lf-*` | `"intake\n"`, escaped in the JSON: one case as a key's value, one as the last item of a list | `JPS-STRUCTURE-NOT` at the string |
 | `structural-annotations-bidi-*` | one case each, inside a string: U+202A, U+202B, U+202C, U+202D, U+202E | `JPS-STRUCTURE-NOT` at the string |
@@ -1292,10 +1309,12 @@ This record proposes seven new provisional codes, and no others:
 | `valid-value-set-decimal-strings` | `"1.0"` and `"1.00"` | valid, no advisory (distinct strings) |
 | `valid-value-set-nfc-nfd` | `"\u00e9"` and `"e\u0301"`, the NFC and NFD spellings of one text | valid, no advisory (distinct strings) |
 | `valid-value-set-literal-object-entry` | an entry value `{"valueSet": "priority-tiers"}` | valid (a literal) |
+| `valid-extensions-member-in-data` | `{"extensions": {"org.judgmentpack.future": 1, "Bad": 2}}` as an entry value and as an `in` operand item | valid: data, which no extension-name rule reads (Compatibility) |
 | `valid-value-set-shared` | one set referenced by two rules, once under `not` | valid |
 | `valid-value-set-id-shared-with-outcome` | a set and an outcome with one id | valid (collection-local) |
 | `advisory-value-set-unreferenced` | a declared set that nothing references | valid, with advisory `JPS-VALUE-SET-UNREFERENCED` (new) |
 | `profile-<resource>-*` | for each of the six rows of §7: `base` + 1 under `base`; `base` + 1 under `extended`; `extended` + 1 under `extended` | refused with the row's code below; valid; refused with that code |
+| `valid-profile-<resource>-extended-at-extended`; `valid-profile-value-sets-base-at-base`, `valid-profile-value-set-entries-base-at-base` | each row of §7 exactly at its `extended` ceiling under `extended`; the two value-set rows exactly at `base` under `base` (the four annotation rows are at `base` in `valid-annotations-at-ceilings`) | valid |
 
 The profile cases' codes follow from the keyword that carries each ceiling:
 
@@ -1335,9 +1354,12 @@ row does. "Paired" rows share inputs and an expected result.
 | `value-set-shared-exclusive` | the expense example's shape, with one set referenced by an `in` rule and under `not` in the other | one outcome, no conflict |
 | `value-set-diverged-copies` | the same pack inline, with the two copies differing by one value, for a fact holding that value | `unresolved` with `conflict`: the hazard a shared set removes |
 | `value-set-in-exception` | a reference in an exception's `when` | paired with inline |
+| `value-set-in-exception-no-match` | a reference in an exception's `when` that the fact does not match | paired with inline: the rule's outcome stands |
 | `value-set-in-applicability` | a reference in `applicability`, not matching | `not-applicable`, paired with inline |
 | `value-set-under-not` | a reference under `not` | paired with inline |
+| `value-set-under-all`, `value-set-under-any` | a reference under `all`, and one under `any`, in a rule's `when` | paired with inline |
 | `value-set-unreferenced-inert` | a pack with an unreferenced set and without it | paired |
+| `value-set-empty-collection-inert` | `"valueSets": []` with no reference, and the pack without the member | paired |
 | `value-set-entry-annotations-inert` | entry annotations and descriptions present, absent, and changed | paired |
 | `value-set-literal-object-entry` | a fact `{"valueSet": "priority-tiers"}` against an entry holding that literal | match |
 | `value-set-literal-annotations-operand` | an inline `in` item `{"extensions": {"org.judgmentpack.annotations": {"tier": "x"}}}` against a fact holding exactly that object | match: the evaluation form acts on positions, not content |
@@ -1383,3 +1405,9 @@ The scratch check described under Evidence is not one.
    `JPS-VALUE-SET-DUPLICATE-VALUE` (§2.4) could join RFC 0027's report contract, or stay beside
    `JPS-RULES-OVERLAP` in the document corpus's advisory vocabulary. That depends on RFC 0027's
    disposition, which is open.
+4. **The reading of an `extensions` object.** §4.1 reads Core `0.3.0` §9's "at least one
+   `extensions` object" as the objects the schema defines as members, as RFC 0016 does. That
+   clarifies released text, and it refuses one shape the repository's released checker accepts
+   (Compatibility). It needs the review RFC 0009 requires, with its own disposition, before it
+   lands. The staged cases `semantic-required-extension-in-operand` and
+   `semantic-required-extension-in-entry-value` pin the reading meanwhile.

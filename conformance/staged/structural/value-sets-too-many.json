@@ -1,0 +1,559 @@
+{
+  "specVersion": "0.4.0-draft",
+  "id": "https://example.com/judgment-packs/value-sets-too-many",
+  "version": "0.1.0",
+  "title": "A malformed value set",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept a request in a priority tier.",
+      "when": {
+        "op": "fact",
+        "path": "/request/tier",
+        "operator": "in",
+        "valueSet": "priority-tiers"
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate"
+    }
+  ],
+  "valueSets": [
+    {
+      "id": "priority-tiers",
+      "entries": [
+        {
+          "value": "tier-1"
+        },
+        {
+          "value": "tier-2"
+        }
+      ]
+    },
+    {
+      "id": "set-00",
+      "entries": [
+        {
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "set-01",
+      "entries": [
+        {
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "set-02",
+      "entries": [
+        {
+          "value": 2
+        }
+      ]
+    },
+    {
+      "id": "set-03",
+      "entries": [
+        {
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "set-04",
+      "entries": [
+        {
+          "value": 4
+        }
+      ]
+    },
+    {
+      "id": "set-05",
+      "entries": [
+        {
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "set-06",
+      "entries": [
+        {
+          "value": 6
+        }
+      ]
+    },
+    {
+      "id": "set-07",
+      "entries": [
+        {
+          "value": 7
+        }
+      ]
+    },
+    {
+      "id": "set-08",
+      "entries": [
+        {
+          "value": 8
+        }
+      ]
+    },
+    {
+      "id": "set-09",
+      "entries": [
+        {
+          "value": 9
+        }
+      ]
+    },
+    {
+      "id": "set-10",
+      "entries": [
+        {
+          "value": 10
+        }
+      ]
+    },
+    {
+      "id": "set-11",
+      "entries": [
+        {
+          "value": 11
+        }
+      ]
+    },
+    {
+      "id": "set-12",
+      "entries": [
+        {
+          "value": 12
+        }
+      ]
+    },
+    {
+      "id": "set-13",
+      "entries": [
+        {
+          "value": 13
+        }
+      ]
+    },
+    {
+      "id": "set-14",
+      "entries": [
+        {
+          "value": 14
+        }
+      ]
+    },
+    {
+      "id": "set-15",
+      "entries": [
+        {
+          "value": 15
+        }
+      ]
+    },
+    {
+      "id": "set-16",
+      "entries": [
+        {
+          "value": 16
+        }
+      ]
+    },
+    {
+      "id": "set-17",
+      "entries": [
+        {
+          "value": 17
+        }
+      ]
+    },
+    {
+      "id": "set-18",
+      "entries": [
+        {
+          "value": 18
+        }
+      ]
+    },
+    {
+      "id": "set-19",
+      "entries": [
+        {
+          "value": 19
+        }
+      ]
+    },
+    {
+      "id": "set-20",
+      "entries": [
+        {
+          "value": 20
+        }
+      ]
+    },
+    {
+      "id": "set-21",
+      "entries": [
+        {
+          "value": 21
+        }
+      ]
+    },
+    {
+      "id": "set-22",
+      "entries": [
+        {
+          "value": 22
+        }
+      ]
+    },
+    {
+      "id": "set-23",
+      "entries": [
+        {
+          "value": 23
+        }
+      ]
+    },
+    {
+      "id": "set-24",
+      "entries": [
+        {
+          "value": 24
+        }
+      ]
+    },
+    {
+      "id": "set-25",
+      "entries": [
+        {
+          "value": 25
+        }
+      ]
+    },
+    {
+      "id": "set-26",
+      "entries": [
+        {
+          "value": 26
+        }
+      ]
+    },
+    {
+      "id": "set-27",
+      "entries": [
+        {
+          "value": 27
+        }
+      ]
+    },
+    {
+      "id": "set-28",
+      "entries": [
+        {
+          "value": 28
+        }
+      ]
+    },
+    {
+      "id": "set-29",
+      "entries": [
+        {
+          "value": 29
+        }
+      ]
+    },
+    {
+      "id": "set-30",
+      "entries": [
+        {
+          "value": 30
+        }
+      ]
+    },
+    {
+      "id": "set-31",
+      "entries": [
+        {
+          "value": 31
+        }
+      ]
+    },
+    {
+      "id": "set-32",
+      "entries": [
+        {
+          "value": 32
+        }
+      ]
+    },
+    {
+      "id": "set-33",
+      "entries": [
+        {
+          "value": 33
+        }
+      ]
+    },
+    {
+      "id": "set-34",
+      "entries": [
+        {
+          "value": 34
+        }
+      ]
+    },
+    {
+      "id": "set-35",
+      "entries": [
+        {
+          "value": 35
+        }
+      ]
+    },
+    {
+      "id": "set-36",
+      "entries": [
+        {
+          "value": 36
+        }
+      ]
+    },
+    {
+      "id": "set-37",
+      "entries": [
+        {
+          "value": 37
+        }
+      ]
+    },
+    {
+      "id": "set-38",
+      "entries": [
+        {
+          "value": 38
+        }
+      ]
+    },
+    {
+      "id": "set-39",
+      "entries": [
+        {
+          "value": 39
+        }
+      ]
+    },
+    {
+      "id": "set-40",
+      "entries": [
+        {
+          "value": 40
+        }
+      ]
+    },
+    {
+      "id": "set-41",
+      "entries": [
+        {
+          "value": 41
+        }
+      ]
+    },
+    {
+      "id": "set-42",
+      "entries": [
+        {
+          "value": 42
+        }
+      ]
+    },
+    {
+      "id": "set-43",
+      "entries": [
+        {
+          "value": 43
+        }
+      ]
+    },
+    {
+      "id": "set-44",
+      "entries": [
+        {
+          "value": 44
+        }
+      ]
+    },
+    {
+      "id": "set-45",
+      "entries": [
+        {
+          "value": 45
+        }
+      ]
+    },
+    {
+      "id": "set-46",
+      "entries": [
+        {
+          "value": 46
+        }
+      ]
+    },
+    {
+      "id": "set-47",
+      "entries": [
+        {
+          "value": 47
+        }
+      ]
+    },
+    {
+      "id": "set-48",
+      "entries": [
+        {
+          "value": 48
+        }
+      ]
+    },
+    {
+      "id": "set-49",
+      "entries": [
+        {
+          "value": 49
+        }
+      ]
+    },
+    {
+      "id": "set-50",
+      "entries": [
+        {
+          "value": 50
+        }
+      ]
+    },
+    {
+      "id": "set-51",
+      "entries": [
+        {
+          "value": 51
+        }
+      ]
+    },
+    {
+      "id": "set-52",
+      "entries": [
+        {
+          "value": 52
+        }
+      ]
+    },
+    {
+      "id": "set-53",
+      "entries": [
+        {
+          "value": 53
+        }
+      ]
+    },
+    {
+      "id": "set-54",
+      "entries": [
+        {
+          "value": 54
+        }
+      ]
+    },
+    {
+      "id": "set-55",
+      "entries": [
+        {
+          "value": 55
+        }
+      ]
+    },
+    {
+      "id": "set-56",
+      "entries": [
+        {
+          "value": 56
+        }
+      ]
+    },
+    {
+      "id": "set-57",
+      "entries": [
+        {
+          "value": 57
+        }
+      ]
+    },
+    {
+      "id": "set-58",
+      "entries": [
+        {
+          "value": 58
+        }
+      ]
+    },
+    {
+      "id": "set-59",
+      "entries": [
+        {
+          "value": 59
+        }
+      ]
+    },
+    {
+      "id": "set-60",
+      "entries": [
+        {
+          "value": 60
+        }
+      ]
+    },
+    {
+      "id": "set-61",
+      "entries": [
+        {
+          "value": 61
+        }
+      ]
+    },
+    {
+      "id": "set-62",
+      "entries": [
+        {
+          "value": 62
+        }
+      ]
+    },
+    {
+      "id": "set-63",
+      "entries": [
+        {
+          "value": 63
+        }
+      ]
+    }
+  ]
+}

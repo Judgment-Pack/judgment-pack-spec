@@ -120,6 +120,40 @@ release carries it. Any further release whose tag differs from its artifacts' `s
 own amendment of this document and its own reviewed identity in the builder; this section implies
 none.
 
+## Staged draft Core selector 0.4.0-draft
+
+[RFC 0031](rfcs/0031-annotations-and-value-sets.md), a Draft, targets the next Core `specVersion`
+after `0.3.0` and assigns it no number. So that implementations can admit packs that use its
+annotations and value sets, its schema, Core text, document cases, evaluation rows and example are
+staged under the working selector `0.4.0-draft`:
+[`spec/staged/judgment-pack-core-0.4.0-draft.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md)
+names them. No release is established by this staging, and the selector is not assigned.
+
+- **Not a release.** No tag carries `0.4.0-draft`, and it introduces no general rule. Every staged
+  path is `export-ignore`, so no release archive carries the staged schema, text, cases, rows or
+  example, and the site serves none of them. The schema's `$id` under `0.4.0-draft` is the staged
+  resource's identifier, not a publication, as the `0.4.0` path of RFC 0028's staged schema is.
+- **Not a claim.** No conformance claim may name `0.4.0-draft` or its staged vectors. A `0.3.0`
+  reader refuses a pack declaring it, by the exact selector.
+- **The suffix.** The `-draft` suffix stays retired for Core releases. Here it marks a selector that
+  no release carries, so that it cannot be mistaken for `specVersion` `0.4.0`, which is not assigned,
+  or for release `v0.4.0`, which carries `0.3.0`.
+- **Landing.** When the maintainers open the version that carries RFC 0031, they assign its
+  selector, and the staged artifacts take it; nothing staged binds the choice. RFC 0031 stays a Draft
+  until its own Evidence bar is met.
+
+The [record-shape catalog](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/catalog/README.md) lists every schema whose `$id` is in the
+specification's schema namespace, `https://judgmentpack.org/schema/`, so it lists the staged schema,
+as it lists RFC 0028's: family `judgment-pack-core` at `0.4.0-draft`, with its digest and its
+normalized text in `catalog/record-shapes.json` and its change records in `catalog/changes/`.
+Listing a shape publishes nothing. In `catalog/format-status.json`, Core's `draftVersion` is derived
+from the catalogued schemas and reads `0.4.0-draft`. That names the staged working selector; it is
+not an assigned next `specVersion`. Core's baseline and last release are unchanged. No release bundle
+carries the staged schema itself. A bundle that carries `catalog/` carries the catalog's record of
+the staged shape: its path, `$id`, digest and normalized text, its change records, and Core's
+`draftVersion`. Only release `v0.4.0`'s bundles carry `catalog/` today, and that tag precedes this
+staging.
+
 ## Pack versions
 
 The root `version` member identifies a revision of one pack series. It is independent of

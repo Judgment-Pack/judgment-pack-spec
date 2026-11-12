@@ -1,0 +1,71 @@
+{
+  "specVersion": "0.4.0-draft",
+  "id": "https://example.com/judgment-packs/extensions-member-in-data",
+  "version": "0.1.0",
+  "title": "A member named extensions inside data",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept a request in a priority tier.",
+      "when": {
+        "op": "fact",
+        "path": "/request/tier",
+        "operator": "in",
+        "valueSet": "priority-tiers"
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "refer-marked",
+      "description": "Refer a request whose marker is listed.",
+      "when": {
+        "op": "fact",
+        "path": "/request/marker",
+        "operator": "in",
+        "value": [
+          {
+            "extensions": {
+              "org.judgmentpack.future": 1,
+              "Bad": 2
+            }
+          }
+        ]
+      },
+      "outcome": "refer",
+      "onUnknown": "escalate"
+    }
+  ],
+  "valueSets": [
+    {
+      "id": "priority-tiers",
+      "entries": [
+        {
+          "value": "tier-1"
+        },
+        {
+          "value": {
+            "extensions": {
+              "org.judgmentpack.future": 1,
+              "Bad": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

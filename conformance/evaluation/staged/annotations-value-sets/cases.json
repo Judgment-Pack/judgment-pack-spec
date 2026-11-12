@@ -1,0 +1,1984 @@
+{
+  "status": "staged",
+  "stagedAfter": "0.3.0",
+  "specVersion": "0.4.0-draft",
+  "caseSchema": "../../manifest.schema.json#/$defs/case",
+  "carriesOver": [
+    "../../manifest.json",
+    "../cases.json"
+  ],
+  "cases": [
+    {
+      "id": "annotations-inert-outcome-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-baseline.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "annotations are inert: the pack without annotations gives the baseline's outcome result (the priority-tier rule alone is true)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-outcome-annotated",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-annotated.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "annotations are inert: the pack with annotations gives the baseline's outcome result (the priority-tier rule alone is true)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-outcome-changed",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-changed.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "annotations are inert: the pack with changed annotations gives the baseline's outcome result (the priority-tier rule alone is true)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-not-applicable-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-baseline.json",
+      "facts": {
+        "request": {
+          "kind": "renewal",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "not-applicable",
+        "reasons": [
+          "not-applicable"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "not-applicable"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack without annotations gives the baseline's not-applicable result (applicability is false)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-not-applicable-annotated",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-annotated.json",
+      "facts": {
+        "request": {
+          "kind": "renewal",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "not-applicable",
+        "reasons": [
+          "not-applicable"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "not-applicable"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with annotations gives the baseline's not-applicable result (applicability is false)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-not-applicable-changed",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-changed.json",
+      "facts": {
+        "request": {
+          "kind": "renewal",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "not-applicable",
+        "reasons": [
+          "not-applicable"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "not-applicable"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with changed annotations gives the baseline's not-applicable result (applicability is false)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-unknown-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-baseline.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack without annotations gives the baseline's unknown result (the tier is absent and its rule escalates on unknown)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-unknown-annotated",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-annotated.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with annotations gives the baseline's unknown result (the tier is absent and its rule escalates on unknown)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-unknown-changed",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-changed.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with changed annotations gives the baseline's unknown result (the tier is absent and its rule escalates on unknown)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-conflict-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-baseline.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-2",
+          "flagged": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "conflict"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack without annotations gives the baseline's conflict result (both rules are true and name different outcomes)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-conflict-annotated",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-annotated.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-2",
+          "flagged": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "conflict"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with annotations gives the baseline's conflict result (both rules are true and name different outcomes)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-conflict-changed",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-changed.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-2",
+          "flagged": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "conflict"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with changed annotations gives the baseline's conflict result (both rules are true and name different outcomes)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-no-match-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-baseline.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-9",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack without annotations gives the baseline's no-match result (neither rule is true and there is no fallback)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-no-match-annotated",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-annotated.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-9",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with annotations gives the baseline's no-match result (neither rule is true and there is no fallback)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-no-match-changed",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-changed.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-9",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with changed annotations gives the baseline's no-match result (neither rule is true and there is no fallback)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-mimic-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-baseline.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-2",
+          "flagged": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "conflict"
+          ]
+        }
+      },
+      "focus": "the baseline for labels that spell outcome ids, reasons and a route target",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-mimic",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-mimic.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-2",
+          "flagged": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "conflict"
+          ]
+        }
+      },
+      "focus": "labels spelling outcome ids, reason names and a route target, and priority first on one of two conflicting rules, change nothing: the conflict stays unresolved",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-error-class-unsupported-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/required-vendor-baseline.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedErrorClass": "unsupported-required-extension",
+      "focus": "a required vendor extension the evaluator does not support",
+      "specSection": "\u00a78.4"
+    },
+    {
+      "id": "annotations-inert-error-class-unsupported",
+      "origin": "rfc-0031",
+      "pack": "packs/required-vendor-annotated.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedErrorClass": "unsupported-required-extension",
+      "focus": "annotations in the same extensions object as an unsupported required vendor extension leave its class unchanged",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-error-class-malformed-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-baseline.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "present"
+      },
+      "supportedExtensions": [],
+      "expectedErrorClass": "malformed-input",
+      "focus": "an evidence document naming a requirement the pack does not declare is malformed input",
+      "specSection": "\u00a78.4"
+    },
+    {
+      "id": "annotations-inert-error-class-malformed",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-annotated.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "present"
+      },
+      "supportedExtensions": [],
+      "expectedErrorClass": "malformed-input",
+      "focus": "annotations beside a malformed evidence document leave its class unchanged",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-required-vendor-beside-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/required-vendor-baseline.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [
+        "com.example.review-policy"
+      ],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a supported required vendor extension, without annotations",
+      "specSection": "\u00a79.1"
+    },
+    {
+      "id": "annotations-required-vendor-beside",
+      "origin": "rfc-0031",
+      "pack": "packs/required-vendor-annotated.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [
+        "com.example.review-policy"
+      ],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the evaluation form keeps a required vendor key beside annotations, so the pack evaluates as its baseline",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-supported-extension-set-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-annotated.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "an annotated pack evaluated with an empty supported-extension set",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "annotations-malformed-too-many-keys",
+      "origin": "rfc-0031",
+      "pack": "packs/malformed-too-many-keys.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedErrorClass": "pack-not-conformant",
+      "focus": "an annotations object with 17 keys makes the pack not conforming: the result is pack-not-conformant, not the baseline's outcome",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "annotations-malformed-tab",
+      "origin": "rfc-0031",
+      "pack": "packs/malformed-tab.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedErrorClass": "pack-not-conformant",
+      "focus": "an annotation string with an embedded TAB makes the pack not conforming: the result is pack-not-conformant, not the baseline's outcome",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "extension-inert-vendor-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-baseline.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the baseline without a vendor extension",
+      "specSection": "\u00a79"
+    },
+    {
+      "id": "extension-inert-vendor",
+      "origin": "rfc-0031",
+      "pack": "packs/vendor-optional.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "an optional vendor extension changes no result, which Core section 9 states and no released row checks",
+      "specSection": "\u00a79"
+    },
+    {
+      "id": "value-set-substitution-match-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-reference.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a reference behaves as its inline array: the tier is an entry",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-substitution-match-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the inline form of the reference row: the tier is an entry",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-substitution-no-match-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-reference.json",
+      "facts": {
+        "request": {
+          "tier": "tier-9"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "a reference behaves as its inline array: the tier is no entry and there is no fallback",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-substitution-no-match-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-9"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "the inline form of the reference row: the tier is no entry and there is no fallback",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-substitution-unknown-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-reference.json",
+      "facts": {
+        "request": {}
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "a reference behaves as its inline array: the tier is absent and the rule escalates on unknown",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-substitution-unknown-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-inline.json",
+      "facts": {
+        "request": {}
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "unknown"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "unknown"
+          ]
+        }
+      },
+      "focus": "the inline form of the reference row: the tier is absent and the rule escalates on unknown",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-entry-annotations-inert-present",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-reference-annotated.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "entry annotations and descriptions are present",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "value-set-entry-annotations-inert-absent",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-reference.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "entry annotations and descriptions are absent",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "value-set-entry-annotations-inert-changed",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-reference-changed.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "entry annotations and descriptions are changed",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "value-set-unreferenced-inert",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-unreferenced.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a set that no condition references takes no part in evaluation",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "value-set-unreferenced-inert-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the same pack without the unreferenced set",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "value-set-empty-collection",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-empty-collection.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "valueSets: [] declares no set and takes no part in evaluation: the evaluation form removes it",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "value-set-empty-collection-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the same pack without a valueSets member",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "value-set-type-preserving-string",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-equality.json",
+      "facts": {
+        "request": {
+          "code": "1"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "the string \"1\" does not equal the entry 1: no coercion",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-type-preserving-boolean",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-equality.json",
+      "facts": {
+        "request": {
+          "code": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "true does not equal the entry \"true\": no coercion",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-decimal-string",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-equality.json",
+      "facts": {
+        "request": {
+          "code": "1.0"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "the string \"1.0\" does not equal the entry \"1.00\": decimal strings compare as strings",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-nfc-nfd",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-equality.json",
+      "facts": {
+        "request": {
+          "code": "\u00e9"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "the NFC spelling does not equal the entry's NFD spelling: strings compare by code point",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-numeric",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-equality.json",
+      "facts": {
+        "request": {
+          "code": 1.0
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the number 1.0 equals the entry 1 by mathematical value",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-composite",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-equality.json",
+      "facts": {
+        "request": {
+          "code": {
+            "b": 2,
+            "a": 1
+          }
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "an object equals the entry whose members differ only in order",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-literal-object-entry",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-equality.json",
+      "facts": {
+        "request": {
+          "code": {
+            "valueSet": "priority-tiers"
+          }
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a fact {\"valueSet\": \"priority-tiers\"} equals the entry holding that literal object",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-repeated-entries-match-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-repeated.json",
+      "facts": {
+        "request": {
+          "tier": "tier-1"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a set holding one value twice evaluates as its inline form with the same repeat: a fact holding the repeated value",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-repeated-entries-match-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-repeated-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-1"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the inline form with the same repeat: a fact holding the repeated value",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-repeated-entries-no-match-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-repeated.json",
+      "facts": {
+        "request": {
+          "tier": "tier-3"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "a set holding one value twice evaluates as its inline form with the same repeat: a fact holding no entry's value",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-repeated-entries-no-match-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-repeated-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-3"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "the inline form with the same repeat: a fact holding no entry's value",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-shared-exclusive",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-shared.json",
+      "facts": {
+        "expense": {
+          "category": "gift-card"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "reject",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "one set referenced by an in rule and under not in the other: exactly one rule is true, so one outcome and no conflict",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-diverged-copies",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-diverged-copies.json",
+      "facts": {
+        "expense": {
+          "category": "gift-card"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "conflict"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "conflict"
+          ]
+        }
+      },
+      "focus": "the same pack inline, with the copies differing by the fact's value: both rules are true, the hazard a shared set removes",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-in-exception-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-exception.json",
+      "facts": {
+        "request": {
+          "tier": "tier-9"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "refer",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a reference in an exception's when forces its outcome as the inline form does",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-in-exception-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-exception-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-9"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "refer",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the inline form of the exception row",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-in-exception-no-match-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-exception.json",
+      "facts": {
+        "request": {
+          "tier": "tier-1"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a reference in an exception's when that does not match forces nothing, so the rule's outcome stands, as in the inline form",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-in-exception-no-match-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-exception-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-1"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the inline form of the non-matching exception row",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-in-applicability-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-applicability.json",
+      "facts": {
+        "request": {
+          "kind": "transfer"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "not-applicable",
+        "reasons": [
+          "not-applicable"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "not-applicable"
+          ]
+        }
+      },
+      "focus": "a reference in applicability that does not match gives not-applicable",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-in-applicability-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-applicability-inline.json",
+      "facts": {
+        "request": {
+          "kind": "transfer"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "not-applicable",
+        "reasons": [
+          "not-applicable"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "not-applicable"
+          ]
+        }
+      },
+      "focus": "the inline form of the applicability row",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-not-unlisted-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-not.json",
+      "facts": {
+        "request": {
+          "tier": "tier-1"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a reference under not reads as its inline array: an unlisted value makes the not true",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-not-unlisted-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-not-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-1"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the inline form under not: an unlisted value makes the not true",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-not-listed-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-not.json",
+      "facts": {
+        "request": {
+          "tier": "tier-9"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "a reference under not reads as its inline array: a listed value makes the not false",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-not-listed-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-not-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-9"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "no-match"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "no-match"
+          ]
+        }
+      },
+      "focus": "the inline form under not: a listed value makes the not false",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-all-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-all.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2",
+          "complete": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a reference under all in a rule's when reads as its inline array: the tier is an entry and the request is complete, so the all is true",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-all-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-all-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2",
+          "complete": true
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the inline form under all: the tier is an entry and the request is complete, so the all is true",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-any-reference",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-any.json",
+      "facts": {
+        "request": {
+          "tier": "tier-3",
+          "escalated": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "a reference under any in a rule's when reads as its inline array: the tier is an entry and the request is not escalated, so the reference alone makes the any true",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-under-any-inline",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-under-any-inline.json",
+      "facts": {
+        "request": {
+          "tier": "tier-3",
+          "escalated": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "the inline form under any: the tier is an entry and the request is not escalated, so the reference alone makes the any true",
+      "specSection": "\u00a77.4"
+    },
+    {
+      "id": "value-set-literal-annotations-operand",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-literal-annotations.json",
+      "facts": {
+        "request": {
+          "marker": {
+            "extensions": {
+              "org.judgmentpack.annotations": {
+                "tier": "x"
+              }
+            }
+          }
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "accept",
+        "reasons": [],
+        "handoff": {
+          "state": "none"
+        }
+      },
+      "focus": "an inline in item holding the annotations name is data: the evaluation form acts on positions, not content, so it matches",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "value-set-unresolved-error-missing",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-unresolved.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedErrorClass": "pack-not-conformant",
+      "focus": "a reference that names no declared set makes the pack not conforming",
+      "specSection": "\u00a78.4"
+    },
+    {
+      "id": "value-set-unresolved-error-outcome-id",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-unresolved-outcome-id.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedErrorClass": "pack-not-conformant",
+      "focus": "a reference naming an id held only by an outcome names no declared set",
+      "specSection": "\u00a78.4"
+    },
+    {
+      "id": "value-set-unresolved-precedence",
+      "origin": "rfc-0031",
+      "pack": "packs/value-set-unresolved.json",
+      "facts": {
+        "request": {
+          "tier": "tier-2"
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "present"
+      },
+      "supportedExtensions": [],
+      "expectedErrorClass": "pack-not-conformant",
+      "focus": "an unresolved reference with a malformed evidence document: pack-not-conformant comes first in section 8.4's order",
+      "specSection": "\u00a78.4"
+    }
+  ],
+  "heldCases": [
+    {
+      "case": {
+        "id": "annotations-supported-extension-set",
+        "origin": "rfc-0031",
+        "pack": "packs/inert-annotated.json",
+        "facts": {
+          "request": {
+            "kind": "intake",
+            "tier": "tier-1",
+            "flagged": false
+          }
+        },
+        "evidenceAvailability": {},
+        "supportedExtensions": [
+          "org.judgmentpack.annotations"
+        ],
+        "expectedDisposition": {
+          "kind": "outcome",
+          "outcomeId": "accept",
+          "reasons": [],
+          "handoff": {
+            "state": "none"
+          }
+        },
+        "focus": "listing org.judgmentpack.annotations in the supported-extension set changes nothing: no rule reads that entry",
+        "specSection": "\u00a79.2"
+      },
+      "heldBecause": "The released case schema's supportedExtensions refuses every org.judgmentpack. name (conformance/evaluation/manifest.schema.json, $defs/extensionName), so this row cannot be stated in it unchanged. It waits here until the case schema of the version that carries RFC 0031 decides whether a supported-extension set may name the annotations extension."
+    }
+  ],
+  "pairs": [
+    {
+      "id": "annotations-inert-outcome",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-outcome-baseline",
+        "annotations-inert-outcome-annotated",
+        "annotations-inert-outcome-changed"
+      ]
+    },
+    {
+      "id": "annotations-inert-not-applicable",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-not-applicable-baseline",
+        "annotations-inert-not-applicable-annotated",
+        "annotations-inert-not-applicable-changed"
+      ]
+    },
+    {
+      "id": "annotations-inert-unknown",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-unknown-baseline",
+        "annotations-inert-unknown-annotated",
+        "annotations-inert-unknown-changed"
+      ]
+    },
+    {
+      "id": "annotations-inert-conflict",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-conflict-baseline",
+        "annotations-inert-conflict-annotated",
+        "annotations-inert-conflict-changed"
+      ]
+    },
+    {
+      "id": "annotations-inert-no-match",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-no-match-baseline",
+        "annotations-inert-no-match-annotated",
+        "annotations-inert-no-match-changed"
+      ]
+    },
+    {
+      "id": "annotations-inert-mimic",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-mimic-baseline",
+        "annotations-inert-mimic"
+      ]
+    },
+    {
+      "id": "annotations-inert-error-class-unsupported",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-error-class-unsupported-baseline",
+        "annotations-inert-error-class-unsupported"
+      ]
+    },
+    {
+      "id": "annotations-inert-error-class-malformed",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-error-class-malformed-baseline",
+        "annotations-inert-error-class-malformed"
+      ]
+    },
+    {
+      "id": "annotations-required-vendor-beside",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-required-vendor-beside-baseline",
+        "annotations-required-vendor-beside"
+      ]
+    },
+    {
+      "id": "annotations-supported-extension-set",
+      "basis": "supported-extension-set",
+      "cases": [
+        "annotations-supported-extension-set-baseline",
+        "annotations-supported-extension-set"
+      ]
+    },
+    {
+      "id": "extension-inert-vendor",
+      "basis": "optional-extension",
+      "cases": [
+        "extension-inert-vendor-baseline",
+        "extension-inert-vendor"
+      ]
+    },
+    {
+      "id": "value-set-substitution-match",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-substitution-match-reference",
+        "value-set-substitution-match-inline"
+      ]
+    },
+    {
+      "id": "value-set-substitution-no-match",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-substitution-no-match-reference",
+        "value-set-substitution-no-match-inline"
+      ]
+    },
+    {
+      "id": "value-set-substitution-unknown",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-substitution-unknown-reference",
+        "value-set-substitution-unknown-inline"
+      ]
+    },
+    {
+      "id": "value-set-entry-annotations-inert",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-entry-annotations-inert-present",
+        "value-set-entry-annotations-inert-absent",
+        "value-set-entry-annotations-inert-changed"
+      ]
+    },
+    {
+      "id": "value-set-unreferenced-inert",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-unreferenced-inert",
+        "value-set-unreferenced-inert-baseline"
+      ]
+    },
+    {
+      "id": "value-set-empty-collection-inert",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-empty-collection",
+        "value-set-empty-collection-baseline"
+      ]
+    },
+    {
+      "id": "value-set-repeated-entries-match",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-repeated-entries-match-reference",
+        "value-set-repeated-entries-match-inline"
+      ]
+    },
+    {
+      "id": "value-set-repeated-entries-no-match",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-repeated-entries-no-match-reference",
+        "value-set-repeated-entries-no-match-inline"
+      ]
+    },
+    {
+      "id": "value-set-in-exception",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-in-exception-reference",
+        "value-set-in-exception-inline"
+      ]
+    },
+    {
+      "id": "value-set-in-exception-no-match",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-in-exception-no-match-reference",
+        "value-set-in-exception-no-match-inline"
+      ]
+    },
+    {
+      "id": "value-set-in-applicability",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-in-applicability-reference",
+        "value-set-in-applicability-inline"
+      ]
+    },
+    {
+      "id": "value-set-under-not-unlisted",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-under-not-unlisted-reference",
+        "value-set-under-not-unlisted-inline"
+      ]
+    },
+    {
+      "id": "value-set-under-not-listed",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-under-not-listed-reference",
+        "value-set-under-not-listed-inline"
+      ]
+    },
+    {
+      "id": "value-set-under-all",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-under-all-reference",
+        "value-set-under-all-inline"
+      ]
+    },
+    {
+      "id": "value-set-under-any",
+      "basis": "evaluation-form",
+      "cases": [
+        "value-set-under-any-reference",
+        "value-set-under-any-inline"
+      ]
+    }
+  ],
+  "ownEvaluationForm": [
+    "packs/inert-baseline.json",
+    "packs/required-vendor-baseline.json",
+    "packs/value-set-applicability-inline.json",
+    "packs/value-set-diverged-copies.json",
+    "packs/value-set-exception-inline.json",
+    "packs/value-set-inline.json",
+    "packs/value-set-literal-annotations.json",
+    "packs/value-set-repeated-inline.json",
+    "packs/value-set-under-all-inline.json",
+    "packs/value-set-under-any-inline.json",
+    "packs/value-set-under-not-inline.json",
+    "packs/vendor-optional.json"
+  ]
+}

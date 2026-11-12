@@ -1,0 +1,71 @@
+{
+  "specVersion": "0.4.0-draft",
+  "id": "https://example.com/judgment-packs/annotations-value-set-entry",
+  "version": "0.1.0",
+  "title": "Annotations on value-set entries",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "tier": "standard"
+        }
+      }
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept a request in a priority tier.",
+      "when": {
+        "op": "fact",
+        "path": "/request/tier",
+        "operator": "in",
+        "valueSet": "priority-tiers"
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate"
+    }
+  ],
+  "valueSets": [
+    {
+      "id": "priority-tiers",
+      "description": "Tiers handled on the priority track.",
+      "entries": [
+        {
+          "value": "tier-1",
+          "description": "The first tier.",
+          "extensions": {
+            "org.judgmentpack.annotations": {
+              "review-cycle": "monthly"
+            }
+          }
+        },
+        {
+          "value": "tier-2",
+          "extensions": {
+            "org.judgmentpack.annotations": {
+              "review-cycle": "quarterly",
+              "category": [
+                "legacy",
+                "priority"
+              ]
+            }
+          }
+        },
+        {
+          "value": "tier-3"
+        }
+      ]
+    }
+  ]
+}

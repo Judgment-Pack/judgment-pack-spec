@@ -2439,6 +2439,10 @@ UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/workflow"),
     PurePosixPath("conformance/policy"),
     PurePosixPath("schema/policy"),
+    # The staged draft Core specVersion 0.4.0-draft (RFC 0031, a Draft) is published nowhere.
+    PurePosixPath("conformance/staged"),
+    PurePosixPath("schema/staged"),
+    PurePosixPath("examples/staged"),
 )
 
 

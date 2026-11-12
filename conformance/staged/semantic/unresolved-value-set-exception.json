@@ -1,0 +1,61 @@
+{
+  "specVersion": "0.4.0-draft",
+  "id": "https://example.com/judgment-packs/unresolved-value-set-exception",
+  "version": "0.1.0",
+  "title": "An unresolved reference in an exception",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031 under the staged draft selector.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept a request in a priority tier.",
+      "when": {
+        "op": "fact",
+        "path": "/request/tier",
+        "operator": "in",
+        "valueSet": "priority-tiers"
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "held-tier",
+      "description": "Escalate a request in a held tier.",
+      "when": {
+        "op": "fact",
+        "path": "/request/tier",
+        "operator": "in",
+        "valueSet": "held-tiers"
+      },
+      "effect": "escalate",
+      "onUnknown": "ignore"
+    }
+  ],
+  "valueSets": [
+    {
+      "id": "priority-tiers",
+      "entries": [
+        {
+          "value": "tier-1"
+        },
+        {
+          "value": "tier-2"
+        }
+      ]
+    }
+  ]
+}

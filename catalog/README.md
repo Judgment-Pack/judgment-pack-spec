@@ -33,6 +33,17 @@ under `https://judgmentpack.org/schema/`, the specification's published schema n
 else, such as an RFC's staged proposal under a `urn:` identifier, is listed under `outOfScope` and is
 not fingerprinted.
 
+A staged schema whose `$id` is in the namespace is in scope by the same rule. RFC 0028's staged
+`workflow-contributors-2.schema.json` is family `workflow-contributors` at `0.4.0`. The staged draft
+Core schema `schema/staged/judgment-pack-core-0.4.0-draft.schema.json`
+([RFC 0031](../rfcs/0031-annotations-and-value-sets.md), a Draft) is family `judgment-pack-core` at
+`0.4.0-draft`, the working selector no maintainer has assigned
+([VERSIONING.md](../VERSIONING.md), Staged draft Core selector). Listing a shape fingerprints it and
+publishes nothing. The staged directories are `export-ignore` and the site does not serve them, so
+no release bundle carries the staged schema itself. A bundle that carries this directory carries
+the catalog's record of the staged shape: its path, `$id`, version, digest and normalized text in
+`record-shapes.json`, and its change records.
+
 To stop a mistyped `$id` from dropping a shape silently, the tool refuses a tree in which:
 
 - a `*.schema.json` file under `schema/` or `conformance/` has an `$id` outside the namespace;
@@ -141,7 +152,7 @@ and no others:
 {
   "format": "judgment-pack-format-status/1",
   "families": {
-    "judgment-pack-core": { "draftVersion": "0.3.0", "baseline": "v0.3.0", "lastReleased": "v0.4.0" }
+    "judgment-pack-core": { "draftVersion": "0.4.0-draft", "baseline": "v0.3.0", "lastReleased": "v0.4.0" }
   }
 }
 ```
@@ -149,8 +160,10 @@ and no others:
 The check compares each record with what the tree and [`releases/`](../releases/) give:
 
 - **`draftVersion`**: the highest version among the family's catalogued schemas, which is the
-  version the draft text on `main` writes for that family. Semantic versions are ordered by SemVer
-  precedence, and bare format numbers numerically.
+  version the draft text on `main` writes for that family unless a staged schema is the highest.
+  Semantic versions are ordered by SemVer precedence, and bare format numbers numerically. Core's
+  reads `0.4.0-draft`, the staged schema's working selector (above). It is not an assigned next
+  `specVersion`, and the Core text on `main` still writes `0.3.0`.
 - **`lastReleased`**: the tag of the latest release that includes the family, pre-releases
   included, or `null`.
 - **`baseline`**: the tag of the latest including release that is not a candidate, or `null`.
