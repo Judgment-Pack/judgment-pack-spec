@@ -7,6 +7,8 @@
 - Target: the next Core `specVersion` after `0.3.0`. No number is assigned here. A release tag is
   not a selector: release `v0.4.0` carries `specVersion` `0.3.0`.
 - Issue: [#301](https://github.com/Judgment-Pack/judgment-pack-spec/issues/301)
+- Staged draft: [`spec/staged/judgment-pack-core-0.4.0-draft.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md),
+  under a working selector no maintainer has assigned. This record stays a Draft.
 
 > This is an open proposal, not part of the specification. See
 > [RFC 0000](0000-rfc-process.md) for the process and evidence bar.

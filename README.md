@@ -155,6 +155,7 @@ reproducing its corpus version, its results, or its every-row statement.
 | [`spec/dialect.md`](spec/dialect.md) | Normative prose for the preparation-verifier class, a companion document beside Core |
 | [Dialect vectors][staged-dialect] | 47 dialect vectors; staged (see below) |
 | [`spec/retained-column.md`](spec/retained-column.md) | Exact selected retained-column/1 support accepted at draft maturity for RC2; immutable publication and product support are separate gates |
+| [`spec/staged/judgment-pack-core-0.4.0-draft.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md) | Staged draft Core text for RFC 0031, a Draft, under the working selector `0.4.0-draft` that no release carries; normative for nothing, with a staged schema, [document cases](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/staged) and evaluation rows in no corpus (not served by the site) |
 | [`spec/policy.md`](spec/policy.md) | Policy companion accepted at draft maturity; publication requires its exact Policy tag and a maintainer-published GitHub release; [124 agreement vectors](conformance/policy/1.0.0/README.md) and [versioned schemas](schema/policy/1.0.0/) |
 | [`TESTING.md`](TESTING.md)                                                       | A 10–15 minute external testing exercise            |
 | [`VERSIONING.md`](VERSIONING.md)                                                 | Release and compatibility policy                    |

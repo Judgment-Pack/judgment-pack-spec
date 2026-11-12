@@ -22,6 +22,18 @@ here.
   expanded, so well-formed labels are inert and a reference equals its inline list. It targets the next `specVersion`
   after `0.3.0`, is normative for nothing, and changes neither the published schema, Core text nor
   any released conformance claim.
+- RFC 0031 (#301) is staged as a draft Core `specVersion`, under the working selector `0.4.0-draft`,
+  which no maintainer has assigned and no release carries ([VERSIONING.md](VERSIONING.md)). The
+  staged schema is the `0.3.0` schema plus exactly the record's fragments. The staged Core text
+  ([`spec/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md)) is marked normative for nothing.
+  Hand-written vectors sit in no corpus: 126 document cases in
+  [`conformance/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/staged), with five provisional conformance codes,
+  and 64 evaluation rows with their pairs in
+  [`conformance/evaluation/staged/annotations-value-sets/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged/annotations-value-sets),
+  where one more row is held. An annotated expense example is staged too. Tests hold all of it to the
+  repository's checks, including a static check of the paired rows, and check that every released
+  case and row still holds under the draft selector. Nothing staged is published or bundled. RFC 0031
+  stays a Draft, and the released schema, Core text and corpora are unchanged.
 - An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
   names the judge, the signer, the witness and the reader around a decision record: what each
   produces, trusts and never does, and which parts are not shipped. It defines nothing.

@@ -30,9 +30,9 @@ The staged artifacts are:
 | Artifact | Location |
 | --- | --- |
 | Structural schema, `$id` `https://judgmentpack.org/schema/0.4.0-draft/judgment-pack-core.schema.json` | [`schema/staged/judgment-pack-core-0.4.0-draft.schema.json`](../../schema/staged/judgment-pack-core-0.4.0-draft.schema.json) |
-| Document cases | `conformance/staged/`, with its README |
-| Evaluation rows | `conformance/evaluation/staged/annotations-value-sets/`, with its README |
-| Example pack | `examples/staged/expense-approval-annotated.json` |
+| Document cases | [`conformance/staged/`](../../conformance/staged/README.md) |
+| Evaluation rows | [`conformance/evaluation/staged/annotations-value-sets/`](../../conformance/evaluation/staged/annotations-value-sets/README.md) |
+| Example pack | [`examples/staged/expense-approval-annotated.json`](../../examples/staged/expense-approval-annotated.json) |
 
 The schema is the Core `0.3.0` schema with RFC 0031's three fragments (its §§1.7, 2.7 and 3.3) and
 nothing else, apart from its `$id`, its description and the selector.
