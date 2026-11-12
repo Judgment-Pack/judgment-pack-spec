@@ -284,19 +284,36 @@ def build_catalog(root: Path = ROOT) -> dict:
     }
 
 
-UNSEEN = frozenset({"Cc", "Cf", "Zl", "Zp"})
+# Controls, format characters, the line and paragraph separators, every space other than U+0020,
+# and code points that are unassigned, private-use or surrogates.
+UNSEEN = frozenset({"Cc", "Cf", "Zl", "Zp", "Zs", "Cn", "Co", "Cs"})
+# Unicode's Default_Ignorable_Code_Point property, which also holds characters of other categories
+# that display as nothing: the combining grapheme joiner, the Hangul fillers, the Khmer inherent
+# vowels and the variation selectors.
+DEFAULT_IGNORABLE = (
+    (0x00AD, 0x00AD), (0x034F, 0x034F), (0x061C, 0x061C), (0x115F, 0x1160), (0x17B4, 0x17B5),
+    (0x180B, 0x180F), (0x200B, 0x200F), (0x202A, 0x202E), (0x2060, 0x206F), (0x3164, 0x3164),
+    (0xFE00, 0xFE0F), (0xFEFF, 0xFEFF), (0xFFA0, 0xFFA0), (0xFFF0, 0xFFF8), (0x1BCA0, 0x1BCA3),
+    (0x1D173, 0x1D17A), (0xE0000, 0xE0FFF),
+)
+
+
+def unseen(ch: str) -> bool:
+    cp = ord(ch)
+    return cp > 0x7E and (
+        unicodedata.category(ch) in UNSEEN or any(low <= cp <= high for low, high in DEFAULT_IGNORABLE)
+    )
 
 
 def render(document: dict) -> str:
-    """The catalog file's text. A character a reader cannot see, or that reorders the line it is on
-    (a control, a format character, a line or paragraph separator), is written as its JSON escape,
-    so the file never carries one raw. The value read back is the same, and so is every digest: a
-    digest is taken over the normalized text, not over this file."""
+    """The catalog file's text. A character a reader cannot see, or cannot tell from another, or
+    that reorders the line it is on (a control, a format character, a line or paragraph separator,
+    a space other than U+0020, a default-ignorable character, an unassigned or private-use code
+    point), is written as its JSON escape, so the file never carries one raw. The value read back is
+    the same, and so is every digest: a digest is taken over the normalized text, not over this
+    file."""
     text = json.dumps(document, indent=2, ensure_ascii=False)
-    return "".join(
-        json.dumps(ch, ensure_ascii=True)[1:-1] if ord(ch) > 0x7E and unicodedata.category(ch) in UNSEEN else ch
-        for ch in text
-    ) + "\n"
+    return "".join(json.dumps(ch, ensure_ascii=True)[1:-1] if unseen(ch) else ch for ch in text) + "\n"
 
 
 def read_json(path: Path, what: str) -> object:
