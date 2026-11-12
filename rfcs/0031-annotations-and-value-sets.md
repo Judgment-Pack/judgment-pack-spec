@@ -1555,6 +1555,7 @@ is dispositioned (Unresolved question 3); the staged manifest lists them as `adv
 | `structural-value-set-reference-and-value` | both members | `JPS-STRUCTURE-VALUE-SET-REFERENCE` (new) at the condition, mapped from `not` |
 | `structural-fact-without-operand` | neither member | `JPS-STRUCTURE-REQUIRED-MEMBER` at `…/value` |
 | `structural-value-set-reference-operator-*` | one case each: `equals`, `not-equals`, `greater-than` | `JPS-STRUCTURE-VALUE-SET-REFERENCE` (new) at `…/operator`, mapped from `const` |
+| `structural-value-set-reference-and-value-operator-equals` | `value` and `valueSet` together, with operator `equals` | `JPS-STRUCTURE-VALUE-SET-REFERENCE` (new) at the condition; the same code at `…/operator` is admitted, inside the condition's `oneOf` |
 | `structural-value-set-reference-bad-id` | `"valueSet": "Tiers"` | `JPS-STRUCTURE-LOCAL-ID` at `…/valueSet` |
 | `structural-value-set-reference-in-value` | `"value": {"valueSet": "priority-tiers"}` with `in` | `JPS-STRUCTURE-IN-OPERAND` at `…/value` |
 | `semantic-unresolved-value-set-*` | one case each: in a rule, in an exception, in `applicability`, nested under `all` and `not`, with no `valueSets` member, with `valueSets: []`, and naming an id held only by an outcome | `JPS-SEMANTIC-UNRESOLVED-VALUE-SET` (new) at the `valueSet` member |
@@ -1597,10 +1598,12 @@ row does. "Paired" rows share inputs and an expected result.
 | --- | --- | --- |
 | `annotations-inert-<result>` | for each of `outcome`, `not-applicable`, `unknown` (unresolved), `conflict` and `no-match`: a baseline pack, the same pack annotated, and the same pack with changed annotations | paired: one disposition per result |
 | `annotations-inert-mimic` | labels spelling outcome ids, reason names and route targets, and `"priority": "first"` on one of two conflicting rules | the baseline's `unresolved` with `conflict` |
+| `annotations-inert-<result>` | for each of `missing-required-evidence`, `exception-escalation` and `fallback`: a second baseline with a required evidence requirement, an escalate exception, a `fallbackOutcome` and two escalation routes (one filtered by `missing-required-evidence`, one without triggers), annotated and with changed annotations | paired: `unresolved` with `missing-required-evidence` and both routes; `unresolved` with `exception-escalation` and the unfiltered route only; the fallback outcome with no route |
 | `annotations-inert-error-class` | annotations in the same `extensions` object as an unsupported required vendor extension; and annotations beside a malformed evidence document | the baseline's class: `unsupported-required-extension`; `malformed-input` |
 | `annotations-required-vendor-beside` | the first case of the row above, with the vendor name in the supported-extension set | paired with the pack without annotations: one disposition |
 | `annotations-supported-extension-set` | the baseline, with `org.judgmentpack.annotations` in the supported-extension set and without it | paired: one disposition (§1.2) |
 | `annotations-malformed-*` | one case each, on facts for which the well-formed baseline gives an outcome: an annotations object with 17 keys; an annotation string with an embedded TAB, escaped in the JSON | `pack-not-conformant`, not the baseline's disposition (§1.2) |
+| `annotations-listed-as-required` | the baseline, annotated, with `org.judgmentpack.annotations` in `metadata.requiredExtensions` | `pack-not-conformant`, never `unsupported-required-extension` (§1.2) |
 | `extension-inert-vendor` | a vendor optional extension present and absent, which Core §9 states but no row checks | paired |
 | `value-set-substitution-<case>` | for each of `match`, `no-match` and `unknown` (absent path): a reference and its inline form | paired |
 | `value-set-type-preserving` | fact `"1"` against entry `1`; fact `true` against entry `"true"` | no match |

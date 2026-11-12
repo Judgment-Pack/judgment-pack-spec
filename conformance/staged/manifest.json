@@ -1785,6 +1785,18 @@
       "specSection": "\u00a77.4"
     },
     {
+      "id": "structural-value-set-reference-and-value-operator-equals",
+      "path": "structural/value-set-reference-and-value-operator-equals.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-VALUE-SET-REFERENCE",
+        "path": "/rules/0/when"
+      },
+      "focus": "value and valueSet together with operator equals: refused at the condition, and a validator may also report the same code at /rules/0/when/operator, inside the condition's oneOf",
+      "specSection": "\u00a77.4"
+    },
+    {
       "id": "structural-value-set-reference-bad-id",
       "path": "structural/value-set-reference-bad-id.json",
       "layer": "structural",

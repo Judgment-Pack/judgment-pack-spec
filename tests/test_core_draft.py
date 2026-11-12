@@ -690,6 +690,7 @@ class DraftEvaluationRowTests(unittest.TestCase):
         stated = {
             "packs/malformed-too-many-keys.json": [("JPS-STRUCTURE-MAX-PROPERTIES", "/rules/0/extensions/" + ANNOTATIONS)],
             "packs/malformed-tab.json": [("JPS-STRUCTURE-NOT", "/rules/0/extensions/" + ANNOTATIONS + "/category")],
+            "packs/annotations-listed-as-required.json": [("JPS-STRUCTURE-EXTENSION-NAME", "/metadata/requiredExtensions/0")],
             "packs/value-set-unresolved.json": [("JPS-SEMANTIC-UNRESOLVED-VALUE-SET", "/rules/0/when/valueSet")],
             "packs/value-set-unresolved-outcome-id.json": [("JPS-SEMANTIC-UNRESOLVED-VALUE-SET", "/rules/0/when/valueSet")],
         }

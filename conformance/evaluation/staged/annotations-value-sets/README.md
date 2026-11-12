@@ -20,7 +20,7 @@ replaced by an implementation's output.
 
 [`cases.json`](cases.json) carries `"status": "staged"`, `stagedAfter`, the draft selector, and:
 
-- `cases`: 72 rows, each validating against the released case schema unchanged
+- `cases`: 82 rows, each validating against the released case schema unchanged
   ([`../../manifest.schema.json`](../../manifest.schema.json), `#/$defs/case`), each with origin
   `rfc-0031`;
 - `heldCases`: one row the released case schema cannot state, with the reason. The supported-extension
@@ -28,15 +28,15 @@ replaced by an implementation's output.
   `extensionName` refuses. The draft's §8.2 says a name that is not requirable is ignored; the row
   is released when the case schema of the version that carries RFC 0031 admits
   specification-defined names (RFC 0031, Graduation);
-- `pairs`: the 26 groups of rows RFC 0031's static check compares, each with its basis;
+- `pairs`: the 29 groups of rows RFC 0031's static check compares, each with its basis;
 - `ownEvaluationForm`: the packs that are their own evaluation form (no set, reference or
   annotation);
 - `carriesOver`: the released manifest and the staged rows of Core `0.3.0`, every row of which also
   holds under the draft once its pack's selector bytes are replaced.
 
-[`packs/`](packs/) holds the 33 packs. Four are not semantically conforming, each for one stated reason
-(two malformed annotations objects and two unresolved references); the rows that use them expect
-`pack-not-conformant`.
+[`packs/`](packs/) holds the 37 packs. Five are not semantically conforming, each for one stated reason
+(two malformed annotations objects, the annotations name listed as required, and two unresolved
+references); the rows that use them expect `pack-not-conformant`.
 
 ## The static check
 
@@ -55,10 +55,14 @@ pass by differing in identity.
 
 - **Inertness.** For each kind of result (an outcome, `not-applicable`, `unknown`, `conflict` and
   no match), a pack without annotations, with annotations, and with changed annotations give one
-  disposition. A label that spells an outcome id, a reason and a route target changes nothing. Two
-  error-class pairs show that annotations change neither `unsupported-required-extension` nor
-  `malformed-input`, and a required vendor key beside annotations still counts.
-- **Malformed annotations.** Too many keys, and a tab in a string: `pack-not-conformant`.
+  disposition. So do a missing required evidence requirement, an escalate exception and a fallback
+  outcome, on a pack with two escalation routes, one filtered and one not, so the routes a
+  disposition names are compared too. A label that spells an outcome id, a reason and a route
+  target changes nothing. Two error-class pairs show that annotations change neither
+  `unsupported-required-extension` nor `malformed-input`, and a required vendor key beside
+  annotations still counts.
+- **Malformed annotations.** Too many keys, and a tab in a string: `pack-not-conformant`. So is the
+  annotations name listed in `metadata.requiredExtensions`, never `unsupported-required-extension`.
 - **Substitution.** A reference and its inline array give one result: on a match, on no match, on
   an absent path, inside an exception that matches and one that does not, inside `applicability`,
   under `not`, `all` and `any`, with repeated entries, and with entry annotations present, absent or
