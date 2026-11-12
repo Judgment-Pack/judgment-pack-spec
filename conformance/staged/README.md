@@ -39,17 +39,28 @@ manifest edits nothing in the case. Its other members:
 - `newCodes` lists the five conformance codes the draft adds, and `advisoryCodes` the two advisory
   codes, outside conformance, that no case states (below).
 
-The 127 cases are RFC 0031's staged document table, one case for its §1.7 (a number inside an
-annotation list), the 18 profile cases its ceilings call for, two cases for its reading of an
-`extensions` object (a clarification of Core `0.3.0` §9, which the repository's released checker
-reads more broadly; RFC 0031, Compatibility), and the staged example:
+The 139 cases are:
+
+- RFC 0031's staged document table;
+- 26 profile cases for its ceilings: each of the six one over under `base`, admitted under
+  `extended`, and one over under `extended` (18), and each reached exactly, under `extended` for all
+  six and under `base` for the value-set rows (8), since `valid-annotations-at-ceilings` reaches the
+  four annotation rows under `base`;
+- an empty annotations object on the pack, an outcome and a value-set entry, beside the table's
+  case on a rule, so that each annotated position refuses a malformed annotation;
+- a number inside an annotation list (RFC 0031 §1.7);
+- three cases for its reading of an `extensions` object: two required names found only inside data,
+  refused (a clarification of Core `0.3.0` §9, which the repository's released checker reads more
+  broadly; RFC 0031, Compatibility), and a reserved and an ungrammatical name inside data, admitted;
+  and
+- the staged example.
 
 | Directory | Cases | What |
 | --- | ---: | --- |
 | `carrier/` | 1 | a duplicate key inside an annotations object |
-| `structural/` | 82 | refused annotations, sets, entries and references, and the profile ceilings |
+| `structural/` | 85 | refused annotations at every annotated position, sets, entries and references, and the profile ceilings |
 | `semantic/` | 10 | unresolved references, a duplicate set id, and a required name found only in data |
-| `valid/` | 34 | admitted shapes, the advisory cases and [the example](../../examples/staged/expense-approval-annotated.json) |
+| `valid/` | 43 | admitted shapes, every ceiling reached exactly, names inside data, the advisory cases and [the example](../../examples/staged/expense-approval-annotated.json) |
 
 Every fixture is written by hand, with no raw invisible character: each non-ASCII character is a JSON
 `\u` escape, and one outside the Basic Multilingual Plane is its surrogate pair, so every fixture is

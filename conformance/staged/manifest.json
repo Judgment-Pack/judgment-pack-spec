@@ -285,6 +285,42 @@
       "specSection": "\u00a79.2"
     },
     {
+      "id": "structural-annotations-empty-object-root",
+      "path": "structural/annotations-empty-object-root.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MIN-PROPERTIES",
+        "path": "/extensions/org.judgmentpack.annotations"
+      },
+      "focus": "an empty annotations object on the pack is refused, as on a rule",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-empty-object-outcome",
+      "path": "structural/annotations-empty-object-outcome.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MIN-PROPERTIES",
+        "path": "/outcomes/0/extensions/org.judgmentpack.annotations"
+      },
+      "focus": "an empty annotations object on an outcome is refused, as on a rule",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "structural-annotations-empty-object-entry",
+      "path": "structural/annotations-empty-object-entry.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MIN-PROPERTIES",
+        "path": "/valueSets/0/entries/0/extensions/org.judgmentpack.annotations"
+      },
+      "focus": "an empty annotations object on a value-set entry is refused, as on a rule",
+      "specSection": "\u00a76.9"
+    },
+    {
       "id": "structural-annotations-empty-list",
       "path": "structural/annotations-empty-list.json",
       "layer": "structural",
@@ -1086,6 +1122,15 @@
       "specSection": "\u00a79.1"
     },
     {
+      "id": "valid-extensions-member-in-data",
+      "path": "valid/extensions-member-in-data.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "an entry value and an in operand holding {\"extensions\": {\"org.judgmentpack.future\": 1, \"Bad\": 2}} are data: no extension-name rule reads them",
+      "specSection": "\u00a79.1"
+    },
+    {
       "id": "advisory-value-set-duplicate-value-string",
       "path": "valid/advisory-value-set-duplicate-value-string.json",
       "layer": "semantic",
@@ -1272,6 +1317,15 @@
       "specSection": "\u00a74.1"
     },
     {
+      "id": "valid-profile-annotation-keys-extended-at-extended",
+      "path": "valid/profile-annotation-keys-extended-at-extended.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "32 keys per annotations object under extended: its extended ceiling, reached exactly, is admitted",
+      "specSection": "\u00a74.1"
+    },
+    {
       "id": "structural-profile-annotation-strings-base-over-base",
       "path": "structural/profile-annotation-strings-base-over-base.json",
       "layer": "structural",
@@ -1302,6 +1356,15 @@
         "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
       },
       "focus": "33 strings per list under extended, one over its extended ceiling of 32",
+      "specSection": "\u00a74.1"
+    },
+    {
+      "id": "valid-profile-annotation-strings-extended-at-extended",
+      "path": "valid/profile-annotation-strings-extended-at-extended.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "32 strings per list under extended: its extended ceiling, reached exactly, is admitted",
       "specSection": "\u00a74.1"
     },
     {
@@ -1338,6 +1401,15 @@
       "specSection": "\u00a74.1"
     },
     {
+      "id": "valid-profile-annotation-key-characters-extended-at-extended",
+      "path": "valid/profile-annotation-key-characters-extended-at-extended.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "128 characters per key under extended: its extended ceiling, reached exactly, is admitted",
+      "specSection": "\u00a74.1"
+    },
+    {
       "id": "structural-profile-annotation-string-characters-base-over-base",
       "path": "structural/profile-annotation-string-characters-base-over-base.json",
       "layer": "structural",
@@ -1368,6 +1440,15 @@
         "path": "/rules/0/extensions/org.judgmentpack.annotations/category"
       },
       "focus": "513 characters per string under extended, one over its extended ceiling of 512",
+      "specSection": "\u00a74.1"
+    },
+    {
+      "id": "valid-profile-annotation-string-characters-extended-at-extended",
+      "path": "valid/profile-annotation-string-characters-extended-at-extended.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "512 characters per string under extended: its extended ceiling, reached exactly, is admitted",
       "specSection": "\u00a74.1"
     },
     {
@@ -1404,6 +1485,24 @@
       "specSection": "\u00a74.1"
     },
     {
+      "id": "valid-profile-value-sets-base-at-base",
+      "path": "valid/profile-value-sets-base-at-base.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "64 value sets under base: its base ceiling, reached exactly, is admitted",
+      "specSection": "\u00a74.1"
+    },
+    {
+      "id": "valid-profile-value-sets-extended-at-extended",
+      "path": "valid/profile-value-sets-extended-at-extended.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "128 value sets under extended: its extended ceiling, reached exactly, is admitted",
+      "specSection": "\u00a74.1"
+    },
+    {
       "id": "structural-profile-value-set-entries-base-over-base",
       "path": "structural/profile-value-set-entries-base-over-base.json",
       "layer": "structural",
@@ -1434,6 +1533,24 @@
         "path": "/valueSets/0/entries"
       },
       "focus": "1025 entries per set under extended, one over its extended ceiling of 1024",
+      "specSection": "\u00a74.1"
+    },
+    {
+      "id": "valid-profile-value-set-entries-base-at-base",
+      "path": "valid/profile-value-set-entries-base-at-base.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "512 entries per set under base: its base ceiling, reached exactly, is admitted",
+      "specSection": "\u00a74.1"
+    },
+    {
+      "id": "valid-profile-value-set-entries-extended-at-extended",
+      "path": "valid/profile-value-set-entries-extended-at-extended.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "1024 entries per set under extended: its extended ceiling, reached exactly, is admitted",
       "specSection": "\u00a74.1"
     },
     {
