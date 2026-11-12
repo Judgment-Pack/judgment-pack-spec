@@ -151,6 +151,7 @@ draft maturity; the rest is a cross-project exploratory record. It is a Draft ca
 [RFC 0031](0031-annotations-and-value-sets.md) proposes inert annotations on the pack, its
 outcomes and rules, in the reserved extension `org.judgmentpack.annotations`, and named value sets
 with annotated entries that an `in` condition may reference. One rule defines both: an evaluator
-gives a pack the result of its evaluation form, with annotations removed and references expanded.
+gives a conforming pack the result of its evaluation form, with annotations removed and references
+expanded.
 It is a Draft, normative for nothing; the published schema, Core text and released corpora are
 unchanged.

@@ -18,8 +18,8 @@ here.
   ceilings, refused empty forms and refused control characters. The extension is optional and never
   required. A pack may declare named value sets at its root, whose entries may carry descriptions
   and annotations, and an `in` condition may name one in place of an inline list. An evaluator must
-  give a pack the result of its evaluation form, with annotations removed and references expanded,
-  so labels are inert and a reference equals its inline list. It targets the next `specVersion`
+  give a conforming pack the result of its evaluation form, with annotations removed and references
+  expanded, so well-formed labels are inert and a reference equals its inline list. It targets the next `specVersion`
   after `0.3.0`, is normative for nothing, and changes neither the published schema, Core text nor
   any released conformance claim.
 - An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
