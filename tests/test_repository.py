@@ -31,13 +31,13 @@ EVALUATION_MANIFEST_SCHEMA_PATH = EVALUATION / "manifest.schema.json"
 # that moving them into the manifest edits nothing.
 EVALUATION_STAGED = EVALUATION / "staged"
 EVALUATION_STAGED_CASES_PATH = EVALUATION_STAGED / "cases.json"
-SPEC_VERSION = "0.4.0"
+SPEC_VERSION = "0.5.0"
 PREVIOUS_SPEC_VERSIONS = ("0.1.0-draft", "0.2.0-draft", "0.3.0")
 SCHEMA_ID = f"https://judgmentpack.org/schema/{SPEC_VERSION}/judgment-pack-core.schema.json"
 STATUS_VECTORS_PATH = ROOT / "tests" / "conformance-status-vectors.json"
 
 # Core §9.2's reserved name, and the subschemas the code rule of the corpus keys on
-# (conformance/README.md, "Codes"). Each is held only by a definition Core 0.4.0 adds or amends.
+# (conformance/README.md, "Codes"). Each is held only by a definition Core 0.5.0 adds or amends.
 ANNOTATIONS = "org.judgmentpack.annotations"
 LOCAL_ID = "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
 # Core §9.2's class for annotation keys, and its pattern for annotation strings, as the schema holds
@@ -340,7 +340,7 @@ def walk_schema_errors(error: Any) -> Iterable[Any]:
 
 def schema_diagnostic(error: Any) -> Diagnostic:
     """The corpus's code rule (conformance/README.md, "Codes"): the rules for the subschemas Core
-    0.4.0 adds or amends, then the keyword rule every earlier corpus used."""
+    0.5.0 adds or amends, then the keyword rule every earlier corpus used."""
     validator = str(error.validator)
     schema_path = [str(part) for part in error.absolute_schema_path]
     instance_path = list(error.absolute_path)
@@ -402,7 +402,7 @@ def schema_diagnostic(error: Any) -> Diagnostic:
 
 
 def keyword_diagnostic(error: Any) -> Diagnostic:
-    """The keyword rule of every corpus up to 0.3.0, which the 0.4.0 rule falls back to."""
+    """The keyword rule of every corpus up to 0.3.0, which the 0.5.0 rule falls back to."""
     validator = str(error.validator)
     schema_path = [str(part) for part in error.absolute_schema_path]
     instance_path = list(error.absolute_path)
@@ -609,7 +609,7 @@ def semantic_diagnostics(
 ) -> list[Diagnostic]:
     """§3.3's checks. `extension_names_of` reads the names §9's required-extension rule may count.
 
-    Core 0.4.0 counts only the `extensions` objects the schema defines as members (§9.1); the
+    Core 0.5.0 counts only the `extensions` objects the schema defines as members (§9.1); the
     repository's 0.3.0 checker counted a member so named anywhere (`extension_names`).
     """
     diagnostics: list[Diagnostic] = []
@@ -1554,7 +1554,7 @@ class RepositoryConformanceTests(unittest.TestCase):
                     assert_findings(self, case["id"], expected_findings(case), diagnostics)
 
     def test_more_than_one_expected_finding_is_stated_only_where_one_defect_gives_two(self) -> None:
-        # The 0.4.0 case schema's expectedDiagnostics lists every finding of one defect. One case
+        # The 0.5.0 case schema's expectedDiagnostics lists every finding of one defect. One case
         # uses it: value beside valueSet under the operator equals, refused at the condition and at
         # its operator (Core §7.4). Its expectedDiagnostic is the first item, so a consumer reading
         # only that member still reads a finding the case gives.

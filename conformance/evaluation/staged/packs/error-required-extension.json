@@ -1,5 +1,5 @@
 {
-  "specVersion": "0.4.0",
+  "specVersion": "0.5.0",
   "id": "https://example.invalid/judgment-packs/error-required-extension",
   "version": "0.1.0",
   "title": "Synthetic conforming fixture that requires an extension no evaluator supports",

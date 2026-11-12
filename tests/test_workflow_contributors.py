@@ -32,11 +32,11 @@ def js(request):
     return validate_event(json.loads(process.stdout))
 
 
-# RFC 0028 is a draft outside Core 0.4.0. Its packs are Core 0.3.0 documents whose bytes the bundles
+# RFC 0028 is a draft outside Core 0.5.0. Its packs are Core 0.3.0 documents whose bytes the bundles
 # pin by digest, so each pack is read with the Core schema its own selector names.
 CORE_SCHEMAS = {
     '0.3.0': ROOT / 'schema/judgment-pack-core-0.3.0.schema.json',
-    '0.4.0': ROOT / 'schema/judgment-pack-core.schema.json',
+    '0.5.0': ROOT / 'schema/judgment-pack-core.schema.json',
 }
 
 

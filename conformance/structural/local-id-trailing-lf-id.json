@@ -1,5 +1,5 @@
 {
-  "specVersion": "0.4.0",
+  "specVersion": "0.5.0",
   "id": "https://example.com/judgment-packs/local-id-trailing-lf-id",
   "version": "0.1.0",
   "title": "A rule id that ends in a line feed",

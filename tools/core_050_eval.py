@@ -1,8 +1,8 @@
-"""A second evaluator for Core `0.4.0`, written from the text.
+"""A second evaluator for Core `0.5.0`, written from the text.
 
 It was written, before the release, from three texts and nothing else: Core `0.3.0`, the staged
 delta of the working selector `0.4.0-draft` and RFC 0031 (rfcs/0031-annotations-and-value-sets.md).
-Those texts are Core `0.4.0` now (spec/judgment-pack-core.md), and the section numbers below are
+Those texts are Core `0.5.0` now (spec/judgment-pack-core.md), and the section numbers below are
 its. No other implementation was read, run or copied. Its authoring vendor is the texts' own, so it
 is a second reading of the text, not a different vendor's.
 
@@ -36,8 +36,8 @@ Core §4.1 names, `profile-unsupported`; Core §8.4 names no evaluation error cl
 module reports that refusal and no class.
 
 Usage:
-    python tools/core_040_eval.py rows
-    python tools/core_040_eval.py evaluate PACK FACTS [EVIDENCE] [--supported NAME]...
+    python tools/core_050_eval.py rows
+    python tools/core_050_eval.py evaluate PACK FACTS [EVIDENCE] [--supported NAME]...
 """
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 ROOT = Path(__file__).resolve().parents[1]
-SELECTOR = "0.4.0"
+SELECTOR = "0.5.0"
 SCHEMA_PATH = ROOT / "schema" / "judgment-pack-core.schema.json"
 EVALUATION = ROOT / "conformance" / "evaluation"
 ANNOTATIONS = "org.judgmentpack.annotations"
@@ -730,7 +730,7 @@ def main(argv: list[str]) -> int:
             if item.status != "passed":
                 print(f"{item.status}: {item.id}: got {canonical(item.got)}; expected {canonical(item.expected)}")
         counts = {status: sum(1 for item in results if item.status == status) for status in ("passed", "failed")}
-        print(f"core-040-eval: {counts['passed']} passed, {counts['failed']} failed")
+        print(f"core-050-eval: {counts['passed']} passed, {counts['failed']} failed")
         return 0 if counts["failed"] == 0 else 1
     if argv[:1] == ["evaluate"] and len(argv) >= 3:
         rest, supported = argv[1:], []

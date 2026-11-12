@@ -1,9 +1,9 @@
 # Staged evaluation rows
 
-Rows written for the `suiteVersion` **after** `0.4.0`. They are in no corpus.
+Rows written for the `suiteVersion` **after** `0.5.0`. They are in no corpus.
 
 The [evaluation corpus](../README.md) is frozen when its `specVersion` is released: rows are added
-only on the way to a later one, never inside a released one (Core §3.4.1). The `0.4.0`
+only on the way to a later one, never inside a released one (Core §3.4.1). The `0.5.0`
 [`manifest.json`](../manifest.json) remains unchanged when that version is tagged. This directory is
 where rows wait — designed,
 reviewed, held to the same checks as released rows, and runnable by hand — until a later
@@ -32,7 +32,7 @@ reviewed, held to the same checks as released rows, and runnable by hand — unt
   directory is work in progress on `main`, reachable in the repository and nowhere else.
 
 The rows of [RFC 0031](../../../rfcs/0031-annotations-and-value-sets.md), once staged here for the
-draft selector `0.4.0-draft`, are released in the `0.4.0` manifest.
+draft selector `0.4.0-draft`, are released in the `0.5.0` manifest.
 
 ## How a staged row lands
 
@@ -85,16 +85,16 @@ from the pack fixture, the evidence document and the supported extensions, witho
 A row that pinned the intuitive, wrong class for the fifth case would fail there. The nonconforming
 fixture must fail for exactly one reason, as RFC 0013 requires of it.
 
-The repository's second evaluator for Core `0.4.0`
-([`tools/core_040_eval.py`](../../../tools/core_040_eval.py)) runs these rows, as
-`tests/test_core_040_eval.py` does; it is a check written from the text, not a reference
+The repository's second evaluator for Core `0.5.0`
+([`tools/core_050_eval.py`](../../../tools/core_050_eval.py)) runs these rows, as
+`tests/test_core_050_eval.py` does; it is a check written from the text, not a reference
 implementation. To run one elsewhere, give an evaluator the case's `pack`, its `facts`, its
 `evidenceAvailability` and its `supportedExtensions`, and compare the class it reports.
 
 ## Core routes (#219)
 
 The `routes-` rows are hand-written expectations for the accepted routing change, staged after
-`0.4.0`; the released manifest is unchanged. The case carrier now admits `handoff.routes`
+`0.5.0`; the released manifest is unchanged. The case carrier now admits `handoff.routes`
 for these rows. They exercise conditional selection, ordered fan-out, unconditional routes,
 no selected route, duplicate targets, and legacy target-only bytes. Repository checks verify
 selection against each expected reason set; they are not execution of a Core evaluator.

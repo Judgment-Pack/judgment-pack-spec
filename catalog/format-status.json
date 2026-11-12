@@ -2,12 +2,12 @@
   "format": "judgment-pack-format-status/1",
   "families": {
     "conformance/evaluation/manifest": {
-      "draftVersion": "0.4.0",
+      "draftVersion": "0.5.0",
       "baseline": "v0.3.0",
       "lastReleased": "v0.4.0"
     },
     "conformance/manifest": {
-      "draftVersion": "0.4.0",
+      "draftVersion": "0.5.0",
       "baseline": "v0.3.0",
       "lastReleased": "v0.4.0"
     },
@@ -22,7 +22,7 @@
       "lastReleased": null
     },
     "judgment-pack-core": {
-      "draftVersion": "0.4.0",
+      "draftVersion": "0.5.0",
       "baseline": "v0.3.0",
       "lastReleased": "v0.4.0"
     },
@@ -42,7 +42,7 @@
       "lastReleased": "v0.3.0"
     },
     "workflow": {
-      "draftVersion": "0.4.0",
+      "draftVersion": "0.5.0",
       "baseline": "v0.3.0",
       "lastReleased": "v0.4.0"
     },

@@ -1,7 +1,7 @@
 # Conformance corpus
 
 This directory contains 366 focused conformance cases for testing the carrier, structural, and
-semantic requirements of Judgment Pack Core `0.4.0`, plus five advisory vectors. It is
+semantic requirements of Judgment Pack Core `0.5.0`, plus five advisory vectors. It is
 versioned with the draft but is not yet a complete or normative conformance suite. Evaluator
 behavior is out of scope *here*: it has its
 own corpus, in [`evaluation/`](evaluation/README.md), which is normative for the evaluator conformance
@@ -107,7 +107,7 @@ does. A refused key and a refused value at that key therefore share one pointer,
 one finding per code: a 65-character key whose value has 257 characters gives one
 `JPS-STRUCTURE-MAX-LENGTH`, not two.
 
-Core `0.4.0` added five codes (RFC 0031):
+Core `0.5.0` added five codes (RFC 0031):
 
 | Code | Layer | Where |
 | --- | --- | --- |
@@ -122,7 +122,7 @@ outside conformance (#307) and no case states them.
 
 Every fixture and evaluation pack RFC 0031 added is ASCII bytes: a character outside ASCII is a JSON
 escape, one outside the Basic Multilingual Plane a surrogate pair, so no invisible character sits raw
-in one (tests/test_core_040.py).
+in one (tests/test_core_050.py).
 
 ## Semantic checks represented here
 
@@ -144,7 +144,7 @@ covered — as a seed corpus with stated gaps — by [`evaluation/`](evaluation/
 expansion here should remain focused: one primary expectation per negative fixture, with positive,
 boundary, and adversarial counterparts added when the corresponding semantics become normative.
 
-Every fixture declares `specVersion` `0.4.0`, which is exact. `structural/invalid-spec-version.json`
+Every fixture declares `specVersion` `0.5.0`, which is exact. `structural/invalid-spec-version.json`
 instead declares `0.2.0-draft`, which is the negative case: an unedited pack of an earlier version must be
 re-declared to be structurally conforming to this release, and re-declaring it also opts it into this
 release's evaluator semantics without conferring conformance on any implementation (§11).

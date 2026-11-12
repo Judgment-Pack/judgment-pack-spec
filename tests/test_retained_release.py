@@ -22,7 +22,7 @@ INVENTORY='releases/v0.3.0-rc.2.retained-column.json'
 FINAL_INVENTORY='releases/v0.3.0.retained-column.json'
 FINAL_FIXTURE_FILES=('releases/v0.3.0.md','releases/v0.3.0.milestone.json','rfcs/0029-retained-column-conversions.md',
                      'schema/judgment-pack-core.schema.json','conformance/manifest.json','conformance/evaluation/manifest.json')
-# Core 0.4.0 changed, in place, the three Core pins and four files of the v0.3.0 leaf. A fixture that
+# Core 0.5.0 changed, in place, the three Core pins and four files of the v0.3.0 leaf. A fixture that
 # stands for a v0.3.0 tree takes those files' v0.3.0 bytes from the preserved copies
 # (tests/fixtures/historical-compatibility/README.md); every other file it copies is unchanged since.
 HISTORICAL='tests/fixtures/historical-compatibility/'
@@ -100,7 +100,7 @@ class RetainedRelease(unittest.TestCase):
         self.assertIn('- Status: Accepted',(ROOT/'rfcs/0029-retained-column-conversions.md').read_text().splitlines())
         # RC2 is built only from its own tag: the final revised the leaf's support identity, so RC2's
         # route refuses a v0.3.0 tree instead of re-publishing RC2 with the final's readers. This tree,
-        # whose Core pins declare 0.4.0, the route refuses before it reads the leaf.
+        # whose Core pins declare 0.5.0, the route refuses before it reads the leaf.
         with tempfile.TemporaryDirectory(prefix='retained-v0.3.0-') as temporary:
             root=Path(temporary);final_fixture(root)
             v0_3_0_tree(root,['releases/v0.3.0-rc.2.json','releases/v0.3.0-rc.2.milestone.json','releases/v0.3.0-rc.2.md'])
@@ -158,7 +158,7 @@ class RetainedRelease(unittest.TestCase):
             build_release.validate_final_retained_inventory(root)
             build_release.validate_reader_support_identity('v0.3.0',root)
             build_release.validate_artifacts('0.3.0','v0.3.0',root)
-        # This tree is no v0.3.0 tree: its Core pins declare 0.4.0, and the route refuses it.
+        # This tree is no v0.3.0 tree: its Core pins declare 0.5.0, and the route refuses it.
         with self.assertRaisesRegex(ValueError,'release tag does not match the conformance specVersion'):
             build_release.validate_artifacts('0.3.0','v0.3.0')
         build_release.validate_reader_support_identity('v0.3.0')

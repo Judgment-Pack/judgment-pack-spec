@@ -1,4 +1,4 @@
-"""Core `0.4.0`: what RFC 0031 and issue #308 add to the corpus, checked beyond the shared harness.
+"""Core `0.5.0`: what RFC 0031 and issue #308 add to the corpus, checked beyond the shared harness.
 
 tests/test_repository.py runs every document case and evaluation row of the released corpus with the
 code rule of conformance/README.md. These tests hold the cases and rows the release adds, which are
@@ -74,7 +74,7 @@ PREVIOUS_MANIFEST_PATH = HISTORICAL / "0.3.0-document-manifest.json"
 PREVIOUS_EVALUATION_MANIFEST_PATH = HISTORICAL / "0.3.0-evaluation-manifest.json"
 EXAMPLE_PATH = ROOT / "examples" / "expense-approval-annotated.json"
 RELEASED_EXAMPLE_PATH = ROOT / "examples" / "minimal-expense-approval.json"
-SELECTOR = '"specVersion": "0.4.0"'
+SELECTOR = '"specVersion": "0.5.0"'
 
 # The same rule as Core §9.2 states it in words, written out by hand: the code points refused anywhere in
 # an annotation string, and Unicode's White_Space, refused at either end.
@@ -248,15 +248,31 @@ class CoreSchemaTests(unittest.TestCase):
     def test_schema_is_draft_2020_12_with_the_released_identity(self) -> None:
         schema = core_schema()
         Draft202012Validator.check_schema(schema)
-        self.assertEqual("https://judgmentpack.org/schema/0.4.0/judgment-pack-core.schema.json", schema["$id"])
+        self.assertEqual("https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json", schema["$id"])
         self.assertEqual(SCHEMA_ID, schema["$id"])
-        self.assertEqual("0.4.0", schema["properties"]["specVersion"]["const"])
-        self.assertEqual("Structural schema for 0.4.0. Conformance does not establish truth, authority, safety, "
+        self.assertEqual("0.5.0", schema["properties"]["specVersion"]["const"])
+        self.assertEqual("Structural schema for 0.5.0. Conformance does not establish truth, authority, safety, "
                          "or operational fitness.", schema["description"])
+
+    def test_the_draft_selector_and_the_unassigned_0_4_0_are_refused(self) -> None:
+        # The text was staged as 0.4.0-draft and released as 0.5.0; tag v0.4.0 carries 0.3.0, so no
+        # specVersion 0.4.0 exists (VERSIONING.md). The exact selector refuses both, and §11 says how
+        # a draft pack moves.
+        validator = Draft202012Validator(core_schema(), format_checker=FormatChecker())
+        pack = strict_json_loads((ROOT / "examples/minimal-expense-approval.json").read_text(encoding="utf-8"))
+        self.assertEqual("0.5.0", pack["specVersion"])
+        self.assertEqual([], list(validator.iter_errors(pack)))
+        for selector in ("0.4.0-draft", "0.4.0", "0.3.0"):
+            errors = list(validator.iter_errors({**pack, "specVersion": selector}))
+            self.assertEqual([["specVersion"]], [list(error.absolute_path) for error in errors], selector)
+        text = " ".join((ROOT / "spec/judgment-pack-core.md").read_text(encoding="utf-8").split())
+        self.assertIn("A `0.5.0` reader refuses a pack declaring `0.4.0-draft` by the exact selector. A pack "
+                      "written to it moves up by changing its `specVersion` to `0.5.0`", text)
+        self.assertIn("release tag `v0.4.0` carries `0.3.0` unchanged, so this text is released as `0.5.0`", text)
 
     def test_schema_is_the_0_3_0_schema_plus_exactly_the_rfc_fragments(self) -> None:
         # Undo RFC 0031's fragments (§§1.7, 2.7, 3.3), issue #308's patterns and the identity: what
-        # remains must be the 0.3.0 schema, so 0.4.0 changes nothing the RFC does not name.
+        # remains must be the 0.3.0 schema, so 0.5.0 changes nothing the RFC does not name.
         released = strict_json_loads(PREVIOUS_SCHEMA_PATH.read_text(encoding="utf-8"))
         current = core_schema()
         defs = current["$defs"]
@@ -317,7 +333,7 @@ class CoreSchemaTests(unittest.TestCase):
 
 
 class AddedDocumentCaseTests(unittest.TestCase):
-    """The document cases 0.4.0 adds: RFC 0031's, issue #304's and issue #308's."""
+    """The document cases 0.5.0 adds: RFC 0031's, issue #304's and issue #308's."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -432,8 +448,8 @@ class AddedDocumentCaseTests(unittest.TestCase):
                             self.assertFalse(overlap, f"rules {a['id']} and {b['id']} overlap")
         self.assertGreater(decided, 0)
 
-    def test_the_code_rules_added_for_0_4_0_match_nothing_in_the_0_3_0_schema(self) -> None:
-        # Each rule the 0.4.0 code rule adds is keyed on a subschema only the RFC's fragments and
+    def test_the_code_rules_added_for_0_5_0_match_nothing_in_the_0_3_0_schema(self) -> None:
+        # Each rule the 0.5.0 code rule adds is keyed on a subschema only the RFC's fragments and
         # issue #308's patterns hold, so it cannot recode a 0.3.0 refusal. The 0.3.0 cases keep
         # their expectations (the ordering test above), and tests/test_repository.py runs them.
         released = strict_json_loads(PREVIOUS_SCHEMA_PATH.read_text(encoding="utf-8"))
@@ -480,7 +496,7 @@ class AnnotatedExampleTests(unittest.TestCase):
 
 
 class AddedEvaluationRowTests(unittest.TestCase):
-    """The evaluation rows 0.4.0 adds, beyond the shared checker: their pairs and stated reasons."""
+    """The evaluation rows 0.5.0 adds, beyond the shared checker: their pairs and stated reasons."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -502,7 +518,7 @@ class AddedEvaluationRowTests(unittest.TestCase):
 
     def test_the_row_0_3_0_could_not_state_is_stated(self) -> None:
         # Core §8.2: a name no conforming pack can require is ignored in a supported-extension set,
-        # and the 0.4.0 case schema admits it there. The 0.3.0 case schema refuses that row in exactly
+        # and the 0.5.0 case schema admits it there. The 0.3.0 case schema refuses that row in exactly
         # one place, the reserved name, and is otherwise the same row.
         current = case_validator(EVALUATION_MANIFEST_SCHEMA_PATH)
         previous = case_validator(PREVIOUS_MANIFEST_SCHEMA_PATH)
@@ -581,7 +597,7 @@ class AddedEvaluationRowTests(unittest.TestCase):
                 self.assertEqual(row["pack"] in listed, evaluation_form(pack) == pack)
 
     def test_every_0_3_0_row_is_carried_and_its_pack_is_its_own_evaluation_form(self) -> None:
-        # Each 0.3.0 row, and each row staged after the release, keeps its expectation under 0.4.0:
+        # Each 0.3.0 row, and each row staged after the release, keeps its expectation under 0.5.0:
         # its pack keeps its conformance result, and a conforming one is its own evaluation form, so
         # Core §8.5 gives it Core 0.3.0's result.
         staged = strict_json_loads(EVALUATION_STAGED_CASES_PATH.read_text(encoding="utf-8"))["cases"]
@@ -882,7 +898,7 @@ class AnchoredGrammarTests(unittest.TestCase):
 
     def test_each_case_is_valid_without_its_line_feed(self) -> None:
         # Each case holds only the defect it names (issue #304): the same pack without the line feed
-        # is valid under 0.4.0, for a reader supporting the one vendor name the required-name case
+        # is valid under 0.5.0, for a reader supporting the one vendor name the required-name case
         # lists.
         validators = core_validators()
         manifest = strict_json_loads(MANIFEST_PATH.read_text(encoding="utf-8"))
@@ -918,8 +934,8 @@ class ExtensionsReadingTests(unittest.TestCase):
         self.assertEqual(set(), schema_extension_names(pack) & {"com.example.effective-window"})
         self.assertIn("com.example.effective-window", extension_names(pack))
 
-    def test_the_reading_is_a_change_under_0_4_0_not_a_clarification(self) -> None:
-        # Round-1 finding H3: the narrow reading takes effect under 0.4.0. Neither text may present
+    def test_the_reading_is_a_change_under_0_5_0_not_a_clarification(self) -> None:
+        # Round-1 finding H3: the narrow reading takes effect under 0.5.0. Neither text may present
         # it as a clarification of Core 0.3.0, whose checker keeps the broad reading
         # (extension_names, above, is that checker's).
         for path in (ROOT / "rfcs" / "0031-annotations-and-value-sets.md", SPEC_PATH):
@@ -927,7 +943,7 @@ class ExtensionsReadingTests(unittest.TestCase):
             with self.subTest(path=path.relative_to(ROOT).as_posix()):
                 self.assertIsNone(re.search(r"clarif\w* (?:of )?(?:released text|Core `0\.3\.0`)", flat))
         flat = " ".join(SPEC_PATH.read_text(encoding="utf-8").split())
-        self.assertIn("This reading is a change that takes effect under `0.4.0`; it does not change "
+        self.assertIn("This reading is a change that takes effect under `0.5.0`; it does not change "
                       "Core `0.3.0`.", flat)
 
     def test_evaluation_form_of_the_rfc_examples(self) -> None:

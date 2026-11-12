@@ -10,7 +10,7 @@
 [![Good first issues](https://img.shields.io/github/issues/Judgment-Pack/judgment-pack-spec/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/Judgment-Pack/judgment-pack-spec/labels/good%20first%20issue)
 [![Open Source Helpers](https://www.codetriage.com/judgment-pack/judgment-pack-spec/badges/users.svg)](https://www.codetriage.com/judgment-pack/judgment-pack-spec)
 
-> **Status: `0.4.0`**
+> **Status: `0.5.0`**
 >
 > JPS is a draft specification in production use by adopters. It is not an industry standard, and
 > `0.x` drafts carry no compatibility guarantee: pin the exact draft and runtime release you verified.
@@ -112,7 +112,7 @@ The specification is successful only if independent implementations can exchange
 agree on its document structure and declared field and reference semantics — and, for evaluator
 conformance, on the result of applying it.
 
-Core `0.4.0` supports testing carrier, structural, and semantic document conformance, and
+Core `0.5.0` supports testing carrier, structural, and semantic document conformance, and
 defines a fourth class: evaluator conformance (§3.4), with normative condition and resolution
 semantics, one portable result (the §8.3 disposition), an error contract (§8.4), and a seed evaluation
 corpus. Document conformance is unchanged, and exactly one form of evaluator-conformance claim is
@@ -184,7 +184,7 @@ current landscape.
 
 ```json
 {
-  "specVersion": "0.4.0",
+  "specVersion": "0.5.0",
   "id": "https://example.com/judgment-packs/expense-approval",
   "version": "0.1.0",
   "title": "Expense approval",

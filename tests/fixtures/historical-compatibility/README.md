@@ -2,7 +2,7 @@
 
 The five manifest files are exact published source bytes, not captured implementation output.
 The files under `v0.3.0/` are the exact bytes, at the `v0.3.0` tag, of the four files of the
-`v0.3.0` retained column (`releases/v0.3.0.retained-column.json`) that Core `0.4.0` changed in
+`v0.3.0` retained column (`releases/v0.3.0.retained-column.json`) that Core `0.5.0` changed in
 place; tests that rebuild a `v0.3.0` tree read them instead of the live files.
 The carrier fragment extracts only `DuplicateMemberError` and `strict_json_loads` from the immutable
 0.2 source without changing those definitions; the import prelude permits offline CI execution.

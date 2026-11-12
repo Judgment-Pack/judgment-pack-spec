@@ -14,7 +14,7 @@ hand — as the [checkpoint witness vectors](../witness/README.md) and the
 - **Not part of any corpus.** The companion document's §14 holds a preparation verifier to the
   dialect vectors published with the specification version its claim names. No version publishes
   these, so no claim may cite them, and no conformance claim of the class is available until one
-  does. Nothing here changes Core `0.4.0`, its schema, its four classes, or either of its
+  does. Nothing here changes Core `0.5.0`, its schema, its four classes, or either of its
   corpora.
 - **Not published with the specification, and in no release bundle.** The site's build skips this
   directory, as it skips the other staged directories, and a test holds that nothing under it is
@@ -72,7 +72,7 @@ All 47 recordings are byte-exact Runner exports made under Core `0.2.0-draft`; t
 evidence, not `0.3.0` producer coverage. Their declaration is
 `run.result.evaluatorSpecVersion`. The two verifier tools accept that value only with the frozen
 `schema/judgment-pack-core-0.2.0-draft.schema.json`, or `0.3.0` only with the frozen
-`schema/judgment-pack-core-0.3.0.schema.json` (the live Core schema is `0.4.0`'s), and
+`schema/judgment-pack-core-0.3.0.schema.json` (the live Core schema is `0.5.0`'s), and
 require it to equal the embedded pack's version and both the visible and decoded signed audit's
 evaluator and pack versions. Any other value, any disagreement, or a pack that does not validate
 against the selected schema refuses the recording before its preparation is verified. The genuine
@@ -134,7 +134,7 @@ The companion document was not changed with this set: `spec/dialect.md` is a fil
 retained-column distribution, held to its digest by
 [`releases/v0.3.0.retained-column.json`](../../releases/v0.3.0.retained-column.json), and its Status
 already says that the forty-seven recordings are historical evidence, not `0.3.0` producer coverage.
-Core `0.4.0` revised it, to name the frozen `0.3.0` schema this set is read with; the `v0.3.0`
+Core `0.5.0` revised it, to name the frozen `0.3.0` schema this set is read with; the `v0.3.0`
 distribution keeps the bytes that inventory pins. Its next revision names this set.
 
 ## Companion hand-written cases

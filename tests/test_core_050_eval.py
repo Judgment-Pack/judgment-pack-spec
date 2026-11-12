@@ -1,7 +1,7 @@
-"""Every evaluation row and document case of Core `0.4.0`, run through the second evaluator.
+"""Every evaluation row and document case of Core `0.5.0`, run through the second evaluator.
 
-The evaluator (tools/core_040_eval.py) was written from Core `0.3.0`, the staged delta and RFC 0031
-alone, which are Core `0.4.0` now. These tests run every evaluation row of the manifest, every row
+The evaluator (tools/core_050_eval.py) was written from Core `0.3.0`, the staged delta and RFC 0031
+alone, which are Core `0.5.0` now. These tests run every evaluation row of the manifest, every row
 staged after `0.3.0`, and every document case through it, and compare each result with the
 expectation written by hand. A disagreement is a finding against the row or the evaluator, settled
 in review: no expectation is ever replaced by this evaluator's output. Only the `base` profile is
@@ -15,7 +15,7 @@ import unittest
 from pathlib import Path
 from typing import Any
 
-from tools import core_040_eval as ev
+from tools import core_050_eval as ev
 
 ROOT = ev.ROOT
 ROWS = ev.EVALUATION
@@ -39,7 +39,7 @@ def all_rows(document: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def added_packs(document: dict[str, Any]) -> set[str]:
-    """The packs of the rows `0.4.0` adds: those the `0.3.0` manifest does not name."""
+    """The packs of the rows `0.5.0` adds: those the `0.3.0` manifest does not name."""
     previous = {row["id"] for row in load(HISTORICAL / "0.3.0-evaluation-manifest.json")["cases"]}
     return {row["pack"] for row in document["cases"] if row["id"] not in previous}
 
@@ -58,7 +58,7 @@ def admitted(path: Path) -> dict[str, Any] | None:
 
 
 class RowsTest(unittest.TestCase):
-    """The 103 rows of conformance/evaluation/manifest.json: 20 of Core 0.3.0 and 83 that 0.4.0 adds."""
+    """The 103 rows of conformance/evaluation/manifest.json: 20 of Core 0.3.0 and 83 that 0.5.0 adds."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -66,7 +66,7 @@ class RowsTest(unittest.TestCase):
 
     def test_the_rows_declare_the_selector(self) -> None:
         self.assertEqual(ev.SELECTOR, self.document["specVersion"])
-        self.assertEqual("0.4.0", ev.SELECTOR)
+        self.assertEqual("0.5.0", ev.SELECTOR)
 
     def test_every_row_gives_its_expected_result(self) -> None:
         self.assertEqual(103, len(self.document["cases"]))
@@ -142,7 +142,7 @@ class PairsTest(unittest.TestCase):
             self.assertEqual({ev.ANNOTATIONS}, sets[0] ^ sets[1])
 
     def test_every_pack_is_its_own_evaluation_form_exactly_when_listed(self) -> None:
-        # The list names the packs of the rows 0.4.0 adds; every other conforming pack fixture is its
+        # The list names the packs of the rows 0.5.0 adds; every other conforming pack fixture is its
         # own evaluation form too, holding no value set and no annotation.
         listed = set(self.document["ownEvaluationForm"])
         added = added_packs(self.document)
@@ -183,12 +183,12 @@ def without_optional_extensions(form: dict[str, Any]) -> dict[str, Any]:
 
 
 class StagedRowsTest(unittest.TestCase):
-    """The rows staged after Core 0.3.0 (issue #219), which declare 0.4.0 since the graduation."""
+    """The rows staged after Core 0.3.0 (issue #219), which declare 0.5.0 since the graduation."""
 
     def test_staged_rows_of_core_0_3_0(self) -> None:
         manifest = ROOT / "conformance" / "evaluation" / "staged" / "cases.json"
         document = load(manifest)
-        self.assertEqual("0.4.0", document["stagedAfter"])
+        self.assertEqual("0.5.0", document["stagedAfter"])
         self.assertEqual(15, len(document["cases"]))
         for row in document["cases"]:
             with self.subTest(row=row["id"]):

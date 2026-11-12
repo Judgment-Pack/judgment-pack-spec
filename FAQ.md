@@ -21,7 +21,7 @@ judge their output — compilers, tests, CI. Most business agents have no such h
 the judgment behind a business decision explicit enough to test, the way a test suite makes "correct
 code" explicit. See [Why Judgment Pack?](docs/why.md).
 
-**Q3. Is JPS a standard yet?** No. It is a draft specification at `0.4.0` with no compatibility
+**Q3. Is JPS a standard yet?** No. It is a draft specification at `0.5.0` with no compatibility
 guarantee; any `0.x` release may change incompatibly.
 
 **Q4. Who is it for?** Tool and runtime implementers; standards and architecture reviewers;
@@ -71,7 +71,7 @@ together. Composing small packs is valuable — but composition is its own unsol
 ([RFC 0002](rfcs/0002-judgment-graph.md)), not an argument for one big document.
 
 **Q11. Is a Judgment Pack executable?** It is declarative — a pack contains no code and Core executes
-nothing. What `0.4.0` does define is what a runtime's evaluation must *mean*: §§7–8 are
+nothing. What `0.5.0` does define is what a runtime's evaluation must *mean*: §§7–8 are
 normative for the evaluator conformance class of §3.4, and §8.3 pins one portable result, the
 disposition. Applying an outcome is still outside Core, and a disposition authorizes nothing.
 
@@ -380,7 +380,7 @@ distinction. Conformance means the document agrees with the contract. Factual gr
 organizational authorization, and operational fitness are three separate claims a validator must
 never imply.
 
-**Q46. Is JPS ready for production?** Yes. JPS at `0.4.0` is in production use by adopters,
+**Q46. Is JPS ready for production?** Yes. JPS at `0.5.0` is in production use by adopters,
 through the pinned reference runtime, with a person accountable for every consequential outcome
 (Q48). It is still a draft: pin the exact draft and the runtime release you verified, since
 compatibility between drafts is not guaranteed and there is no certification programme yet. A pack

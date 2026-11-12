@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/fixtures/historical-compatibility"
 # Trusted immutable source commits/blobs and independently verified SHA-256 anchors.
 # 0.1 differs only by its previously published $id substitution; no Git history is required in CI.
-# The v0.3.0 rows are the files Core 0.4.0 changed in place: the three schemas, the two manifests and
+# The v0.3.0 rows are the files Core 0.5.0 changed in place: the three schemas, the two manifests and
 # the four files of the v0.3.0 retained-column leaf that changed (releases/v0.3.0.retained-column.json).
 ANCHORS = [{'tag': 'v0.1.0-draft',
   'commit': '80958f50c851e9809cb8036a23622391cf437c99',
@@ -225,7 +225,7 @@ class HistoricalReleaseTests(unittest.TestCase):
                     self.assertFalse(validator.is_valid(changed), "new maturity reinterprets a historical selector")
 
     def test_the_0_3_0_manifests_validate_under_their_frozen_schemas_only(self):
-        # Core 0.4.0 replaced the manifest schemas in place; the 0.3.0 manifests stay valid under the
+        # Core 0.5.0 replaced the manifest schemas in place; the 0.3.0 manifests stay valid under the
         # copies published at /schema/0.3.0/ and are refused by the active schemas.
         for kind, active in (("document", "conformance/manifest.schema.json"),
                              ("evaluation", "conformance/evaluation/manifest.schema.json")):
@@ -245,7 +245,7 @@ class HistoricalReleaseTests(unittest.TestCase):
             "triggers": ["unknown"], "routes": [{"target": {"kind": "queue", "name": "Synthetic"}}]}}]
         for changed in variants:
             self.assertFalse(historical.is_valid(changed), "historical selector admitted newer-only shape")
-            migrated = {**changed, "specVersion": "0.4.0"}
+            migrated = {**changed, "specVersion": "0.5.0"}
             self.assertTrue(Draft202012Validator(load("schema/judgment-pack-core.schema.json"),
                                                 format_checker=FormatChecker()).is_valid(migrated))
         self.assertFalse(historical.is_valid({**pack, "specVersion": "0.3.0"}), "exact selector dispatch weakened")
@@ -254,14 +254,14 @@ class HistoricalReleaseTests(unittest.TestCase):
         output = Path(tempfile.mkdtemp(prefix="historical-publisher-"))
         publisher()(output)
         # This complete inventory is the five canonical IDs published at immutable v0.2.0-draft and
-        # the four the v0.3.0 tag published that Core 0.4.0 superseded in place (workflow-1 among them).
+        # the four the v0.3.0 tag published that Core 0.5.0 superseded in place (workflow-1 among them).
         self.assertEqual(9, len(SCHEMAS))
         for row in SCHEMAS:
             path = output / urlsplit(row["id"]).path.lstrip("/")
             self.assertTrue(path.is_file(), f"old canonical URL disappeared: {row['id']}")
             self.assertEqual(row["targetSha256"], hashlib.sha256(path.read_bytes()).hexdigest(),
                              "canonical URL serves rewritten historical bytes")
-        current_path = output / "schema/0.4.0/conformance/evaluation/manifest.schema.json"
+        current_path = output / "schema/0.5.0/conformance/evaluation/manifest.schema.json"
         self.assertTrue(current_path.is_file())
         self.assertEqual((ROOT / "conformance/evaluation/manifest.schema.json").read_bytes(), current_path.read_bytes())
 
@@ -308,7 +308,7 @@ class HistoricalReleaseTests(unittest.TestCase):
         admitted = old.strict_json_loads(text)
         self.assertTrue(Draft202012Validator(load("schema/judgment-pack-core-0.2.0-draft.schema.json"),
                                             format_checker=FormatChecker()).is_valid(admitted))
-        migrated = text.replace('"0.2.0-draft"', '"0.4.0"', 1)
+        migrated = text.replace('"0.2.0-draft"', '"0.5.0"', 1)
         with self.assertRaises(current.UnpairedSurrogateError):
             current.strict_json_loads(migrated)
         repaired = migrated.replace('\\ud800', '\\ud83d\\ude00')

@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WEB_ROOT = ROOT / "web"
 DEFAULT_OUTPUT = ROOT / "public"
 TEMPLATE = Template((WEB_ROOT / "templates" / "page.html").read_text(encoding="utf-8"))
-SITE_VERSION = "0.4.0"
+SITE_VERSION = "0.5.0"
 TAGGED_SOURCE_REF = "v0.5.0"
 SITE_NAME = "Judgment Pack Specification"
 SITE_SHORT_NAME = "JPS"
@@ -361,8 +361,8 @@ PAGES = (
     ),
     Page(
         "spec/judgment-pack-core.md",
-        PurePosixPath("spec/0.4.0/index.html"),
-        "JPS Core 0.4.0",
+        PurePosixPath("spec/0.5.0/index.html"),
+        "JPS Core 0.5.0",
         "The normative prose for JPS carrier, structural, and semantic document conformance and for the evaluator conformance class.",
         "spec",
         "Normative prose",
@@ -915,7 +915,7 @@ PAGES = (
 NAVIGATION = (
     ("overview", "Overview", PurePosixPath("index.html")),
     ("why", "Why", PurePosixPath("why/index.html")),
-    ("spec", "Spec", PurePosixPath("spec/0.4.0/index.html")),
+    ("spec", "Spec", PurePosixPath("spec/0.5.0/index.html")),
     ("examples", "Examples", PurePosixPath("examples/index.html")),
     ("conformance", "Conformance", PurePosixPath("conformance/index.html")),
     ("faq", "FAQ", PurePosixPath("faq/index.html")),
@@ -1483,7 +1483,7 @@ def page_html(
         else:
             schema_meta += (
                 f'<link itemprop="isPartOf" href="{html.escape(config.base_url + "/#website", quote=True)}">'
-                f'<link itemprop="about" href="{html.escape(absolute_url(config.base_url, PurePosixPath("spec/0.4.0/index.html")), quote=True)}">'
+                f'<link itemprop="about" href="{html.escape(absolute_url(config.base_url, PurePosixPath("spec/0.5.0/index.html")), quote=True)}">'
             )
         if schema_type == "TechArticle":
             schema_meta += (
@@ -1561,7 +1561,7 @@ def raw_block(text: str, language: str = "json") -> str:
 # (summary, allowed-values-or-None). Powers the clickable-key cards and the schema field reference.
 KEY_REFERENCE: dict[str, tuple[str, tuple[str, ...] | None]] = {
     "profile": ("The document ceiling profile. Absent means base; extended requires explicit reader support and retains its declaration in the document identity.", ("base", "extended")),
-    "specVersion": ("The JPS specification version this document targets.", ("0.4.0",)),
+    "specVersion": ("The JPS specification version this document targets.", ("0.5.0",)),
     "id": ("A stable identifier. At the top level it is the pack's globally unique URI; inside outcomes, rules, evidence requirements, sources, and exceptions it is a pack-local id (lowercase, hyphenated).", None),
     "version": ("The pack's own semantic version (MAJOR.MINOR.PATCH), separate from specVersion.", None),
     "title": ("A short human-readable name for the pack.", None),
@@ -1965,7 +1965,7 @@ Use only a minimal synthetic reproduction, then
     the evidence, rules, exceptions, uncertainty, escalation criteria, and evaluations behind an AI
     agent's decisions.</p>
     <div class="hero-actions">
-      <a class="button button-primary" href="{html.escape(output_href(page.output, PurePosixPath('spec/0.4.0/index.html')))}">Read the specification</a>
+      <a class="button button-primary" href="{html.escape(output_href(page.output, PurePosixPath('spec/0.5.0/index.html')))}">Read the specification</a>
       <a class="button button-secondary" href="{html.escape(SLACK_URL)}" target="_blank" rel="noopener noreferrer">Join Slack</a>
       <a class="button button-secondary" href="{html.escape(GITHUB_ORG_URL)}" target="_blank" rel="noopener noreferrer">Browse repositories</a>
     </div>
@@ -2108,7 +2108,7 @@ not evaluation-corpus rows and assert no evaluator-conformance result.</p>
 <div class="notice notice-info"><strong>Keep the layers separate.</strong> A malformed carrier, a
 schema-shape failure, and a dangling local reference fail at different document-conformance layers.
 Missing evidence, unknown facts, conflicts, and no-match handling belong to the resolution model of
-§§7–8, which JPS 0.4.0 makes normative for the evaluator conformance class only.
+§§7–8, which JPS 0.5.0 makes normative for the evaluator conformance class only.
 A document-conformance result never depends on them, and the notes on this page are not corpus rows.</div>
 <h2 id="document">Annotated document</h2>
 <p>The complete validated pack. Each highlighted key links to its definition on the right — click a
@@ -2155,7 +2155,7 @@ must not fetch their source locators unless explicitly requested.</div>
   <li>Edit only a scratch copy to create a carrier, structural, or semantic failure.</li>
   <li>Compare what you observe with <a href="{html.escape(output_href(index_output, PurePosixPath('testing/index.html')))}">Test the preview</a>.</li>
 </ol>
-<p>The document examples below are about document conformance. JPS 0.4.0 also defines portable evaluation
+<p>The document examples below are about document conformance. JPS 0.5.0 also defines portable evaluation
 semantics, but an evaluator-conformance claim is made against the
 <a href="{html.escape(output_href(index_output, PurePosixPath('conformance/evaluation/index.html')))}">evaluation
 corpus</a>, never against an example. The edge notes on each page explain illustrative applicability,
@@ -2611,8 +2611,8 @@ conformance.
 
 ## Normative specification and artifacts
 
-- [JPS Core {SITE_VERSION}]({guide_url(PurePosixPath("spec/0.4.0/index.html"))}): normative prose for the four named conformance classes
-- [Core JSON Schema]({guide_url(PurePosixPath("schema/0.4.0/judgment-pack-core.schema.json"))}): normative structural schema
+- [JPS Core {SITE_VERSION}]({guide_url(PurePosixPath("spec/0.5.0/index.html"))}): normative prose for the four named conformance classes
+- [Core JSON Schema]({guide_url(PurePosixPath("schema/0.5.0/judgment-pack-core.schema.json"))}): normative structural schema
 - [Document-conformance corpus]({guide_url(PurePosixPath("conformance/index.html"))}): carrier, structural, and semantic cases
 - [Evaluation corpus]({guide_url(PurePosixPath("conformance/evaluation/index.html"))}): normative only for evaluator conformance
 - [The checkpoint witness statement]({guide_url(PurePosixPath("spec/checkpoint-witness/index.html"))}): a companion document, normative only for the witness-statement reader class; its vectors are staged until the next specVersion
@@ -3282,7 +3282,7 @@ SLIDES: tuple[Slide, ...] = (
         kicker="12 — Project status",
         heading="What works today, and what comes next",
         lede=(
-            "Current release: Core 0.4.0. A practical foundation for testing and evaluation — "
+            "Current release: Core 0.5.0. A practical foundation for testing and evaluation — "
             "with no stability promises yet, and not something to put in front of a consequential "
             "real decision today."
         ),
@@ -3313,7 +3313,7 @@ SLIDES: tuple[Slide, ...] = (
             "their formats and nothing in JPS defines them.",
         ),
         actions=(
-            ("Read the specification", "spec/0.4.0/index.html", False),
+            ("Read the specification", "spec/0.5.0/index.html", False),
             ("See a worked example", "examples/index.html", True),
             ("Tools, demos, and source", "implementations/index.html", True),
             ("View the roadmap", "project/roadmap/index.html", True),
@@ -3347,7 +3347,7 @@ SLIDES: tuple[Slide, ...] = (
             "yet."
         ),
         actions=(
-            ("Read the specification", "spec/0.4.0/index.html", False),
+            ("Read the specification", "spec/0.5.0/index.html", False),
             ("Contribute on GitHub", GITHUB_URL, True),
             ("Join the Slack community", SLACK_URL, True),
             ("How to contribute", "project/contributing/index.html", True),

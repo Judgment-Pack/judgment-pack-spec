@@ -1,11 +1,11 @@
-# Judgment Pack Core `0.4.0`
+# Judgment Pack Core `0.5.0`
 
 ## Status
 
 This document is a draft. It may change incompatibly and MUST NOT be represented as an
 industry standard or as suitable, by conformance alone, for consequential decisions.
 
-`0.4.0` defines four conformance classes: carrier, structural, and semantic document
+`0.5.0` defines four conformance classes: carrier, structural, and semantic document
 conformance, and evaluator conformance (§3.4). Sections 7 and 8 are normative for an implementation
 that claims the evaluator class and informative for every other consumer; a document-conformance
 claim does not depend on them. This release adds annotations, a specification-defined extension
@@ -341,7 +341,7 @@ disposition. Every other bullet above applies to the evaluator class unchanged.
 | Member                 | Required | Meaning                                                 |
 | ---------------------- | -------: | ------------------------------------------------------- |
 | `profile`             |       no | Ceiling profile: `base` (default) or `extended` (§4.1) |
-| `specVersion`          |      yes | Exact value `0.4.0`                               |
+| `specVersion`          |      yes | Exact value `0.5.0`                               |
 | `id`                   |      yes | Stable absolute URI identifying the pack series         |
 | `version`              |      yes | Three-component `MAJOR.MINOR.PATCH` revision string     |
 | `title`                |      yes | Non-empty human-readable title                          |
@@ -1157,10 +1157,10 @@ data, not an `extensions` object. So "every name in `metadata.requiredExtensions
 key in at least one `extensions` object" counts only those objects: a required name that appears only
 inside an operand or an entry value is missing, and the document is not semantically conforming.
 
-This reading is a change that takes effect under `0.4.0`; it does not change Core `0.3.0`. Core
+This reading is a change that takes effect under `0.5.0`; it does not change Core `0.3.0`. Core
 `0.3.0` §9 does not say whether a member named `extensions` inside data is an `extensions` object, a
 known open point of that text. The repository's `0.3.0` checker counts such a member anywhere in the
-document, and it is not changed. So one `0.3.0` shape is refused under `0.4.0` (§11).
+document, and it is not changed. So one `0.3.0` shape is refused under `0.5.0` (§11).
 
 This specification defines one such extension, `org.judgmentpack.annotations` (§9.2).
 [RFC 0016](../rfcs/0016-outcome-values.md), a Draft, would add its own name under this paragraph.
@@ -1305,10 +1305,10 @@ A published pack version SHOULD be immutable. Changed content SHOULD receive a n
 
 Compatibility from `0.3.0` is explicit:
 
-- **Reader and writer:** a `0.3.0` reader refuses a pack declaring `0.4.0`, by the exact selector,
+- **Reader and writer:** a `0.3.0` reader refuses a pack declaring `0.5.0`, by the exact selector,
   and does not acquire support by ignoring or replacing it. The `0.3.0` schema also refuses each new
   shape: the reserved annotations key, the root `valueSets` and the `valueSet` member.
-- **Semantic:** for a pack that uses neither feature, `EF(P)` is `P` (§8.5), so `0.4.0` changes no
+- **Semantic:** for a pack that uses neither feature, `EF(P)` is `P` (§8.5), so `0.5.0` changes no
   result for it, apart from the one shape §9.1's reading of an `extensions` object refuses.
 - **Migrating up:** a local identifier, an extension name, a pack version or a decimal operand that
   ends in a line terminator is refused in every engine (§§2.2, 4, 5 and 9). Core `0.3.0`'s grammar,
@@ -1326,9 +1326,11 @@ Compatibility from `0.3.0` is explicit:
 - **Released artifacts:** the `0.3.0` schema stays published at the identifier it was published
   under, and its text and corpora stay at the `v0.3.0` tag, unchanged.
 
-The working selector `0.4.0-draft`, under which this text was staged, was never released. A pack
-written to it moves up by changing its `specVersion` to `0.4.0`, which changes its bytes and digest,
-and must then satisfy these rules.
+The working selector `0.4.0-draft`, under which this text was staged, was never released, and no
+`specVersion` `0.4.0` exists: release tag `v0.4.0` carries `0.3.0` unchanged, so this text is released
+as `0.5.0` under the versioning rule (VERSIONING.md). A `0.5.0` reader refuses a pack declaring
+`0.4.0-draft` by the exact selector. A pack written to it moves up by changing its `specVersion` to
+`0.5.0`, which changes its bytes and digest, and must then satisfy these rules.
 
 Compatibility from `0.2.0-draft` to `0.3.0`, unchanged here, is explicit rather than inferred from a
 shared `0.x` prefix:
@@ -1353,7 +1355,7 @@ shared `0.x` prefix:
   evaluation corpus, including the selected escalation behavior. It is not semantically inert and
   creates, transfers or strengthens no implementation-conformance claim.
 
-An unedited `0.2.0-draft` or `0.3.0` pack is not structurally conforming to `0.4.0` because its
+An unedited `0.2.0-draft` or `0.3.0` pack is not structurally conforming to `0.5.0` because its
 selector is exact (§4). The `0.1.0-draft`, `0.2.0-draft` and `0.3.0` schemas remain published for
 documents retaining those selectors, with historical rules and identities preserved.
 

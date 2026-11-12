@@ -35,5 +35,5 @@ rfcs/reviews/*.md -whitespace
 schema/retained-column/** -text
 conformance/retained-column/** -text
 
-# Preserved v0.3.0 bytes of files Core 0.4.0 changed in place (tests/fixtures/historical-compatibility/README.md).
+# Preserved v0.3.0 bytes of files Core 0.5.0 changed in place (tests/fixtures/historical-compatibility/README.md).
 tests/fixtures/historical-compatibility/v0.3.0/** -text

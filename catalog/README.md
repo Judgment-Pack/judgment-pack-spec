@@ -90,8 +90,8 @@ library gives the same bytes for every schema the catalog admits.
     {
       "path": "schema/workflow-1.schema.json",
       "family": "workflow",
-      "id": "https://judgmentpack.org/schema/0.4.0/workflow-1.schema.json",
-      "version": "0.4.0",
+      "id": "https://judgmentpack.org/schema/0.5.0/workflow-1.schema.json",
+      "version": "0.5.0",
       "sha256": "sha256:...",
       "normalized": "{...}"
     }
@@ -145,7 +145,7 @@ and no others:
 {
   "format": "judgment-pack-format-status/1",
   "families": {
-    "judgment-pack-core": { "draftVersion": "0.4.0", "baseline": "v0.3.0", "lastReleased": "v0.4.0" }
+    "judgment-pack-core": { "draftVersion": "0.5.0", "baseline": "v0.3.0", "lastReleased": "v0.4.0" }
   }
 }
 ```
