@@ -3135,9 +3135,10 @@ SLIDES: tuple[Slide, ...] = (
             "the specification got fixed.",
         ),
         note=(
-            "Measured at Core 0.3.0 across 151 tests on the file format and 5 advisory vectors, plus "
-            "20 decision scenarios replayed through "
-            "both engines. One limit, stated plainly: both implementations trace to the same "
+            "Measured across 366 tests on the file format and 5 advisory vectors, plus 103 decision "
+            "scenarios, by the second implementation; the reference tool passes them as staged before "
+            "the release and has yet to take up the released corpus. At Core 0.3.0, 151 tests and 20 "
+            "scenarios were replayed through both engines. One limit, stated plainly: both implementations trace to the same "
             "maintainer, and the second was written from reference texts that already carried the "
             "first's implementation notes — so the agreement <em>corroborates</em> that the "
             "specification is precise rather than independently confirming it. Two genuinely "

@@ -181,8 +181,11 @@ class PackDesignAdvisoryTests(unittest.TestCase):
     def setUpClass(cls):
         cls.schema = load("report.schema.json")
         cls.validator = Draft202012Validator(cls.schema)
+        # RFC 0027 is a draft outside Core 0.4.0. Its reports bind packs that declare 0.3.0 by
+        # digest (test_digest_binding_uses_exact_retained_bytes), so the packs are read with the
+        # 0.3.0 schema their selector names.
         cls.core = Draft202012Validator(json.loads(
-            (ROOT / "schema" / "judgment-pack-core.schema.json").read_text()))
+            (ROOT / "schema" / "judgment-pack-core-0.3.0.schema.json").read_text()))
 
     def test_closed_report_schema_and_all_hand_written_controls(self):
         Draft202012Validator.check_schema(self.schema)
