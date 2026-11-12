@@ -40,9 +40,10 @@ manifest edits nothing in the case. Its other members:
   gives its released result and diagnostic. A fixture that does not declare `0.3.0` is run unchanged
   and keeps its expectation too.
 - `newCodes` lists the five conformance codes the draft adds, and `advisoryCodes` the two advisory
-  codes, outside conformance, that no case states (below).
+  codes RFC 0031 proposes outside conformance and outside the draft's text, which no case states
+  (below).
 
-The 139 cases are:
+The 208 cases are:
 
 - RFC 0031's staged document table;
 - 26 profile cases for its ceilings: each of the six one over under `base`, admitted under
@@ -53,17 +54,18 @@ The 139 cases are:
   case on a rule, so that each annotated position refuses a malformed annotation;
 - a number inside an annotation list (RFC 0031 §1.7);
 - three cases for its reading of an `extensions` object: two required names found only inside data,
-  refused (a clarification of Core `0.3.0` §9, which the repository's released checker reads more
-  broadly; RFC 0031, Compatibility), and a reserved and an ungrammatical name inside data, admitted;
+  refused (a reading that takes effect under the draft selector and does not change Core `0.3.0`,
+  whose released checker counts such a member; RFC 0031, Compatibility), and a reserved and an
+  ungrammatical name inside data, admitted;
   and
 - the staged example.
 
 | Directory | Cases | What |
 | --- | ---: | --- |
 | `carrier/` | 1 | a duplicate key inside an annotations object |
-| `structural/` | 85 | refused annotations at every annotated position, sets, entries and references, and the profile ceilings |
+| `structural/` | 151 | refused annotations at every annotated position, refused characters in annotation strings, sets, entries and references, and the profile ceilings |
 | `semantic/` | 10 | unresolved references, a duplicate set id, and a required name found only in data |
-| `valid/` | 43 | admitted shapes, every ceiling reached exactly, names inside data, the advisory cases and [the example](../../examples/staged/expense-approval-annotated.json) |
+| `valid/` | 46 | admitted shapes, the neighbours of every refused character range, every ceiling reached exactly, names inside data, the advisory cases and [the example](../../examples/staged/expense-approval-annotated.json) |
 
 Every fixture is written by hand, with no raw invisible character: each non-ASCII character is a JSON
 `\u` escape, and one outside the Basic Multilingual Plane is its surrogate pair, so every fixture is
@@ -72,10 +74,11 @@ ASCII. The expectations are RFC 0031's, never recorded from a run.
 ### Advisory cases
 
 RFC 0031 proposes two advisories, `JPS-VALUE-SET-DUPLICATE-VALUE` and `JPS-VALUE-SET-UNREFERENCED`.
-Where they live is open (its Unresolved question 3), and the released case schema admits only the
-`ruleOverlap` advisory under `advisory/`. So the cases named `advisory-value-set-*` sit under
-`valid/` and state only their document result, `valid`, which is what RFC 0031's Evidence bar asks of
-an advisory case. When the advisories have a home, these cases gain their expectations there.
+They are kept out of the draft's Core text until RFC 0027 is dispositioned (its Unresolved question
+3), and the released case schema admits only the `ruleOverlap` advisory under `advisory/`. So the
+cases named `advisory-value-set-*` sit under `valid/` and state only their document result, `valid`,
+which is what RFC 0031's Evidence bar asks of an advisory case. When the advisories have a home,
+these cases gain their expectations there.
 
 ### The code rule
 

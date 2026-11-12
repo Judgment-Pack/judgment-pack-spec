@@ -224,7 +224,9 @@ Core's that is reconciled with §§8.2–8.4 and §10.
   fifth member name, present only under the condition in the table above.
 - §9 reserves names beginning `org.judgmentpack.` for "future specification-defined extensions"
   and defines none. This would be the first, and §9 would say where such an extension's semantics
-  are found.
+  are found. [RFC 0031](0031-annotations-and-value-sets.md), also a Draft, drafts that §9
+  paragraph and the outcome `extensions` schema shape for both records (its Compatibility,
+  "Coordination with RFC 0016").
 - Core would say whether a facts document that holds a string with an unpaired surrogate is
   admitted. Whether the text is a carrier-conforming one and whether a facts document may hold
   it are two matters: §8.2 already holds the evidence-availability document to more than the

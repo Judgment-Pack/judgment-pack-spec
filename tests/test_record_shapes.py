@@ -141,11 +141,31 @@ class UnseenCharacters(unittest.TestCase):
         )
         self.assertEqual(json.loads(shapes.render(value)), value)
 
+    def test_the_catalog_file_escapes_what_displays_as_nothing_or_as_a_space(self):
+        # Written by hand: a combining grapheme joiner, a Hangul filler, a variation selector, one
+        # from the supplement, a no-break space, an ideographic space, two unassigned code points (one
+        # of them default-ignorable) and a private-use one are escaped, the supplementary ones as surrogate pairs; a precomposed
+        # letter, a combining acute accent and U+0020 are left as they are.
+        value = {"text": "a\u034fb\u3164c\ufe0fd\U000e0100e\u00a0f\u3000g\ufff0h\u0378h\ue000i\u00e9j\u0301 k"}
+        self.assertEqual(
+            shapes.render(value),
+            '{\n  "text": "a\\u034fb\\u3164c\\ufe0fd\\udb40\\udd00e\\u00a0f\\u3000g\\ufff0h\\u0378h\\ue000i\u00e9j\u0301 k"\n}\n',
+        )
+        self.assertEqual(json.loads(shapes.render(value)), value)
+
     def test_the_committed_catalog_carries_no_unseen_character(self):
         import unicodedata
         text = (ROOT / shapes.CATALOG).read_text("utf-8")
+        # Default_Ignorable_Code_Point, written out here by hand rather than taken from the tool.
+        ignorable = ((0x00AD, 0x00AD), (0x034F, 0x034F), (0x061C, 0x061C), (0x115F, 0x1160),
+                     (0x17B4, 0x17B5), (0x180B, 0x180F), (0x200B, 0x200F), (0x202A, 0x202E),
+                     (0x2060, 0x206F), (0x3164, 0x3164), (0xFE00, 0xFE0F), (0xFEFF, 0xFEFF),
+                     (0xFFA0, 0xFFA0), (0xFFF0, 0xFFF8), (0x1BCA0, 0x1BCA3), (0x1D173, 0x1D17A),
+                     (0xE0000, 0xE0FFF))
         found = sorted({"U+%04X" % ord(ch) for ch in text
-                        if ch != "\n" and unicodedata.category(ch) in ("Cc", "Cf", "Zl", "Zp")})
+                        if ch != "\n" and (ord(ch) > 0x7E or ch < " ") and (
+                            unicodedata.category(ch) in ("Cc", "Cf", "Zl", "Zp", "Zs", "Cn", "Co", "Cs")
+                            or any(low <= ord(ch) <= high for low, high in ignorable))})
         self.assertEqual(found, [])
 
 

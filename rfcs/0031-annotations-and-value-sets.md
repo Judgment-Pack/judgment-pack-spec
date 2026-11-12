@@ -20,10 +20,14 @@
 >
 > **Review standing.** [RFC 0009](0009-interim-review-regime.md) requires a recorded adversarial
 > review by a model from a different vendor, with a written disposition for each finding, on the
-> pull request that creates this RFC. That review has not happened, and this record does not
-> claim it. When it happens, its record lives in `rfcs/reviews/` as `0031-round-1.md` and on, as
-> RFC 0016's records do there. A review by a model from the drafting vendor does not count toward
-> it.
+> pull request that creates this RFC. That review has not happened, and this record does not claim
+> it; the pull request that created this record was merged without it. A review by a model from the
+> drafting vendor, run at the maintainer's direction, is recorded with the maintainer's disposition
+> of each finding at
+> [`rfcs/reviews/0031-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0031-round-1.md),
+> and this text is revised by that disposition. It does not count toward the requirement and makes
+> no cross-vendor claim. The different-vendor review, when it happens, is recorded as a later round
+> in `rfcs/reviews/`.
 >
 > **Terminology.** In this record an *annotation* is a key and its value inside the reserved
 > extension `org.judgmentpack.annotations`. The word has nothing to do with the JSON Schema sense,
@@ -100,13 +104,17 @@ to ignore labels without risk and must agree on what a reference means.
   admit its name.
 - **What is missing.** No published pack in this repository carries labels, and none uses a
   shared list on purpose. No pack therefore shows what sizes labels and sets reach in practice. The
-  ceilings in §7 are reasoned, not measured (Unresolved question 1).
+  ceilings in §7 are reasoned, not measured; the round-1 disposition accepts them as reasoned
+  (Unresolved question 1, answered).
 
 While this record was drafted, and again after its first review round, its schema fragments and
 examples were checked against a scratch copy of the Core schema with the fragments applied, using a
 general-purpose JSON Schema validator, a short checker for the semantic rules and the evaluation
 form, and the regular-expression engines of three languages for the character class and the key
-pattern of §1.7. That check is not committed and is not implementation evidence.
+pattern of §1.7. That check is not committed and is not implementation evidence. After the round-1
+review, the revised string pattern of §1.7 was swept over every code point in the engines §1.7
+lists; the repository's harness repeats that sweep for Python and, where Node is installed, for
+ECMA-262 in Unicode mode.
 
 ## Specification
 
@@ -148,7 +156,9 @@ it comes to admit ([RFC 0016](0016-outcome-values.md) proposes admitting its own
 lists it is therefore not structurally conforming (`JPS-STRUCTURE-EXTENSION-NAME`), and an
 evaluator reports `pack-not-conformant`, never `unsupported-required-extension` (Core §8.4).
 Listing the name in an implementation's supported-extension set changes nothing: no rule reads
-that entry.
+that entry. Core §8.2 does not say so today; this record proposes that it does (§9): a name in a
+supported-extension set that no conforming pack can list in `metadata.requiredExtensions` is not a
+capability, and it is ignored, is not an error, and changes no result.
 
 The reason is that an extension with no effect on evaluation gives a consumer nothing to
 support. Making it requirable would let a pack force a refusal from every evaluator that does
@@ -169,9 +179,10 @@ An annotations object is a JSON object with 1 to 16 members (the base ceiling, �
   local-identifier grammar `^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$` (Core §5), and it has at most 64
   characters. A name that ends in a line feed is not a local identifier, whatever a pattern's end
   anchor admits. Some regular-expression engines let `$` match before a final line feed, so the
-  schema also refuses every character of §1.4's class in a key (§1.7), and the rule holds under
-  every engine. Core's own anchored patterns, its local-identifier grammar among them, have the
-  same latent property; this record does not change Core's.
+  schema also refuses, in a key, the controls, the two separators and the embeddings and overrides
+  (U+0000–U+001F, U+007F–U+009F and U+2028–U+202E; §1.7), and the rule holds in every engine §1.7
+  lists. Core's own anchored patterns, its local-identifier grammar among them, have the same
+  latent property; this record does not change Core's (Unresolved question 5).
 - **Values.** Each member value is either an annotation string (§1.4), or an array of 1 to 16
   annotation strings in which no string appears twice.
 - **String equality.** Two annotation strings are equal when they are the same sequence of Unicode
@@ -193,27 +204,74 @@ An annotation string:
 - has 1 to 256 characters, counted as Unicode code points, which is how JSON Schema `maxLength`
   counts them. A character outside the Basic Multilingual Plane counts once, though it is two
   UTF-16 code units and four UTF-8 bytes;
-- contains, after JSON unescaping, none of U+0000–U+001F (C0 controls, including tab, line feed
-  and escape), U+007F–U+009F (delete and the C1 controls, including U+0085 and the single-character
-  control sequence introducer U+009B), U+2028 and U+2029 (the line and paragraph separators), and
-  U+202A–U+202E (the bidirectional embeddings and overrides: LRE, RLE, PDF, LRO and RLO). The
-  refused code points are exactly U+0000–U+001F, U+007F–U+009F and U+2028–U+202E.
+- contains, after JSON unescaping, no character of the *refused class*:
+  - U+0000–U+001F and U+007F–U+009F, the C0 controls, delete and the C1 controls (including tab,
+    line feed, escape, U+0085 and the single-character control sequence introducer U+009B);
+  - U+2028 and U+2029, the line and paragraph separators;
+  - every bidirectional format character: U+061C (the Arabic letter mark), U+200E and U+200F (the
+    left-to-right and right-to-left marks), U+202A–U+202E (the embeddings and overrides LRE, RLE,
+    PDF, LRO and RLO) and U+2066–U+2069 (the isolates LRI, RLI, FSI and PDI); and
+  - every other invisible, default-ignorable character: U+00AD (soft hyphen), U+034F (combining
+    grapheme joiner), U+115F–U+1160, U+3164 and U+FFA0 (Hangul fillers), U+17B4–U+17B5 (Khmer
+    inherent vowels), U+180B–U+180F (Mongolian variation selectors and vowel separator),
+    U+200B–U+200D (zero-width space, non-joiner and joiner), U+2060–U+206F (word joiner, invisible
+    operators and the deprecated format characters, beside the isolates), U+FE00–U+FE0F
+    (variation selectors), U+FEFF (zero-width no-break space), U+FFF0–U+FFF8 (unassigned, reserved
+    as default-ignorable), U+1BCA0–U+1BCA3 (shorthand format controls), U+1D173–U+1D17A (musical
+    format controls) and U+E0000–U+E0FFF (the tag characters, the supplementary variation
+    selectors and the unassigned rest of that range); and
+- does not begin or end with a white-space character: one with the Unicode property White_Space,
+  which is exactly U+0009–U+000D, U+0020, U+0085, U+00A0, U+1680, U+2000–U+200A, U+2028, U+2029,
+  U+202F, U+205F and U+3000. Those the refused class holds are refused anywhere. The others are
+  admitted between two other characters. A string made only of white space begins with it, so it is
+  refused.
+
+The refused code points are exactly U+0000–U+001F, U+007F–U+009F, U+00AD, U+034F, U+061C,
+U+115F–U+1160, U+17B4–U+17B5, U+180B–U+180F, U+200B–U+200F, U+2028–U+202E, U+2060–U+206F, U+3164,
+U+FE00–U+FE0F, U+FEFF, U+FFA0, U+FFF0–U+FFF8, U+1BCA0–U+1BCA3, U+1D173–U+1D17A and
+U+E0000–U+E0FFF. Apart from the controls and the two separators, that is the Unicode property
+Default_Ignorable_Code_Point, as Unicode 17.0 defines it. The list, not the property, is the rule: a
+later Unicode version that changes the property does not change it.
 
 An annotation string is single-line text, meant as a filter key or a short label in compact views
-such as chips, table cells and terminal output. The reasons differ by kind:
+such as chips, table cells and terminal output, and compared by code points (§1.3). The reasons
+differ by kind:
 
 - **Controls and separators.** A C0 or C1 control, or a line or paragraph separator, breaks a line
   or a view, and a control sequence can take control of a terminal. Nothing a consumer does at
   display makes them safe in a one-line label.
-- **Embeddings and overrides.** These reorder the characters that follow them, so a label can
-  display in an order other than its logical one, and two different labels can look alike.
-  Isolating the label from the text around it does not undo that reordering inside the label.
-- **Marks and isolates.** U+200E, U+200F and U+2066–U+2069 are admitted. Right-to-left labels are
-  legitimate text and need them. A mark changes only how neutral characters next to it are
-  ordered, and an isolate confines its effect to its own run. What they can still do to the text
-  around a label, the isolation D1 requires contains (§6).
+- **Bidirectional format characters.** Each can make a label display in an order other than its
+  logical one, and make two different labels look alike. Embeddings and overrides reorder the
+  characters that follow them. A mark is an invisible strong character: it sets the direction of the
+  neutral characters beside it and, as a label's first strong character, the label's base direction,
+  so the logical string `"\u200Fapprove\u200F not\u200F do"`, isolated with its direction taken from
+  its content (`dir="auto"` or `<bdi>` in HTML), displays as "do not approve". An unbalanced isolate
+  inside a label defeats the isolation a consumer adds with isolate characters, the only isolation
+  plain text, terminals, logs and spreadsheet cells have (D1): a lone U+2069 closes the consumer's
+  isolate early, and a lone U+2066–U+2068 leaves it open to the end of the line. A label in a single
+  right-to-left script displays correctly with none of them, so the class refuses them all. D1 still
+  requires isolating a label, because a label's own strong characters affect the neutral text beside
+  it.
+- **Invisible characters.** A default-ignorable character displays as nothing in most contexts, so
+  two labels that differ by one look alike: a list of distinct values shows `intake` twice when one
+  of them ends in U+200B, and a view filtered by one silently omits what carries the other (D2). Tag
+  characters can also spell invisible ASCII text, a channel aimed at automated readers of a pack.
+- **White space at either end.** Most displays trim it or do not show it, so `intake` and `intake`
+  followed by a space look alike for the same reason; a string of white space alone displays as
+  nothing, which makes it a second spelling of "no value" (§1.5).
 
-Every other character is admitted, including other format characters such as zero-width joiners.
+**The cost.** An annotation cannot hold an emoji sequence that needs a zero-width joiner or a
+variation selector (joined family and profession emoji, tag-sequence flags, the text and emoji
+presentation selectors), nor text whose correct shaping needs the zero-width joiner or non-joiner,
+as some spellings in Arabic-script and Indic-script writing do. An annotation is a short
+machine-comparable label, a filter key; free text belongs in the object's `description`, which
+admits every character and which D1 governs.
+
+Every other character is admitted, including format characters that are not default-ignorable (for
+example U+0600–U+0605 and U+FFF9–U+FFFB), combining marks, and characters of different scripts that
+look alike (U+0061 and U+0430). Those are why D2 requires a consumer that lists distinct values or
+states a filter to show every character outside printable ASCII unambiguously (§8).
+
 Core admits every character, refused here or not, in its free-text strings (titles, labels,
 descriptions, route names), in fact paths and in operands. Its identifiers, version strings,
 extension names and pack `id` are ASCII by their grammars (Core §5; the pack `id` is an RFC 3986
@@ -226,7 +284,9 @@ These are refused:
 
 - an empty annotations object `{}` (`JPS-STRUCTURE-MIN-PROPERTIES`);
 - an empty list `[]` (`JPS-STRUCTURE-COLLECTION-ARITY`); and
-- an empty string `""` (`JPS-STRUCTURE-MIN-LENGTH`).
+- an empty string `""` (`JPS-STRUCTURE-MIN-LENGTH`); and
+- a string made only of white space, such as `" "`, which begins with white space (§1.4,
+  `JPS-STRUCTURE-NOT`).
 
 Absence is the one spelling for "no annotations" and for "no value for this key", so "has the key"
 and "has a value for the key" never differ. This matches Core's `nonEmptyString` for its other
@@ -255,7 +315,10 @@ unchanged.
     "type": "string",
     "minLength": 1,
     "maxLength": 256,
-    "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+    "not": {
+      "type": "string",
+      "pattern": "[\u0000-\u001f\u007f-\u009f\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180b-\u180f\u200b-\u200f\u2028-\u202e\u2060-\u206f\u3164\ufe00-\ufe0f\ufeff\uffa0\ufff0-\ufff8\ud82f\udca0-\ud82f\udca3\ud834\udd73-\ud834\udd7a\udb40\udc00-\udb43\udfff]|^[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]|[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]$"
+    }
   },
   "annotations": {
     "type": "object",
@@ -301,16 +364,38 @@ unchanged.
 }
 ```
 
-**The character class.** It is written with JSON escapes (`\u0000`), not regular-expression
-escapes (the JSON text `\\u0000`, which reaches the engine as `\u0000` and which some engines cannot
-compile). After JSON decoding, the pattern holds the code points themselves, so every
-engine receives a plain character class of literal characters, whatever escape syntax it supports.
-The class is unanchored and sits under `not`: a string is refused when the class matches anywhere
-in it, so no end anchor is involved and a trailing line feed is refused like any other. Under
-`propertyNames` the same `not` refuses a key that ends in a line feed, which an engine whose `$`
-matches before a final line feed would otherwise admit (§1.3).
+**The patterns.** Both are written with JSON escapes (`\u0000`), not regular-expression escapes
+(the JSON text `\\u0000`, which reaches the engine as `\u0000` and which some engines cannot
+compile). After JSON decoding, a pattern holds the code points themselves, so an engine receives
+literal characters, whatever escape syntax it supports. A code point outside the Basic Multilingual
+Plane is written as its UTF-16 surrogate pair: `\ud82f\udca0` is U+1BCA0, and a JSON parser
+decodes the pair into that one code point, so `\ud82f\udca0-\ud82f\udca3` reaches the engine
+as the range U+1BCA0–U+1BCA3. A lone surrogate would not survive every JSON parser, so the ranges
+are not split into surrogate alternatives.
 
-In `annotationString` the `not` holds `"type": "string"` beside the class. A `pattern` holds for
+The string pattern is the refused class, unanchored, then the white space at either end:
+`[class]|^[white space]|[white space]$`. It sits under `not`, so a string is refused when any part
+matches. Every line terminator an engine's anchors know (U+000A, U+000D, U+0085, U+2028, U+2029) is
+in the class, so an engine whose `$` matches before a final line terminator, or whose `^` and `$`
+match at every line, refuses exactly the same strings. Under `propertyNames` the `not` holds the
+controls, the two separators and the embeddings and overrides only: a key is ASCII by the
+local-identifier grammar, and that `not` exists to refuse a key that ends in a line feed, which an
+engine whose `$` matches before a final line feed would otherwise admit (§1.3).
+
+**Engines.** The string pattern was swept over every code point, at the start of a string, inside it
+and at its end, and refused exactly the code points of §1.4 in: Python 3.12 `re` (the engine of the
+repository's validator); ECMA-262 in Unicode mode, with the `u` flag and with the `v` flag, in Node
+22; RE2, through Go 1.26's `regexp`; Perl 5.30; Java's `java.util.regex`; and Ruby 2.7. ECMA-262
+without Unicode mode does not compile it: it reads the pattern as UTF-16 code units, and the low
+surrogate of one pair followed by the high surrogate of the next is a range out of order. The JSON
+Schema 2020-12 core specification asks that patterns be built with the `u` flag or equivalent
+Unicode support. An engine that matches UTF-16 code units and has no Unicode mode cannot hold the
+three ranges outside the Basic Multilingual Plane at all; an implementation built on one applies
+them as a check of its own, with the same code and pointer. No other engine was tested, .NET's and
+PCRE2 among them. Each pattern holds a literal U+0000, which a pattern interface that takes a
+NUL-terminated string truncates; such an interface needs another spelling of the same class.
+
+In `annotationString` the `not` holds `"type": "string"` beside the pattern. A `pattern` holds for
 every instance that is not a string, so without it a list item that is a number or a list would
 fail `not` as well as `type`, and one wrong item would give two findings. With it, a non-string
 satisfies the `not` and is refused once, by `type`. A member name is always a string, so the `not`
@@ -401,13 +486,14 @@ Entry annotations use the same extension as every other position. One lookup rul
 
 #### 2.4 Repeated values (V4)
 
-Two entries of one set may have equal values under Core §7.4's type-preserving equality. That is
-not a conformance error at any layer. A tool that can decide equality of two entry values SHOULD
-report each entry whose value equals an earlier entry's with the advisory
-`JPS-VALUE-SET-DUPLICATE-VALUE`, at the later entry's `value`. A tool that cannot decide a pair,
-for example two number literals it cannot compare exactly, reports no advisory for that pair. An
-advisory never changes document conformance. Where the advisory lives is open, as for the
-unreferenced-set advisory (§2.6; Unresolved question 3).
+Two entries of one set may have equal values under Core §7.4's type-preserving equality. That is not
+a conformance error at any layer. This record recommends that a tool that can decide equality of two
+entry values report each entry whose value equals an earlier entry's with the advisory
+`JPS-VALUE-SET-DUPLICATE-VALUE`, at the later entry's `value`; a recommendation, not a requirement.
+A tool that cannot decide a pair, for example two number literals it cannot compare exactly, reports
+no advisory for that pair. An advisory never changes document conformance. Where the advisory lives
+is open, as for the unreferenced-set advisory (§2.6; Unresolved question 3), and it stays out of the
+next version's Core text until that is settled.
 
 **Evaluation is unaffected.** An inline `in` operand already admits repeated items, and a reference
 compares exactly as its inline array does (§4.2), so a repeated entry changes no result. The
@@ -422,8 +508,13 @@ description and annotations. Nothing requires a consumer to merge them.
 on exact comparison of arbitrary number literals, such as `1e400` against `10e399`, or
 `9007199254740993` against `9007199254740992`. Core places that comparison on evaluators
 (Core §7.4) and leaves a seam in it (Core §13); no document conformance result in Core `0.3.0`
-depends on it. A validator that compared through binary floating point would refuse a conforming
-set, and two validators would disagree about one document. The cost of admitting repeats is that
+depends on it. The diagnostic code reported for an already non-conforming document can: Core's
+`uniqueItems` compares numbers too, so two sets with one id whose entries differ only as
+`9007199254740993` and `9007199254740992` give `JPS-SEMANTIC-DUPLICATE-ID` from a validator that
+compares exactly and `JPS-STRUCTURE-UNIQUE-ITEMS` from one that compares through binary floating
+point; the document is refused either way. A validator that compared through binary floating point
+would refuse a conforming set, and two validators would disagree about whether one document
+conforms. The cost of admitting repeats is that
 one value can carry two descriptions, which a consumer shows as written.
 
 Equality, for the advisory, is Core §7.4's:
@@ -456,8 +547,11 @@ There is no union, intersection or difference of sets. An author lists the entri
 #### 2.6 Unreferenced sets (V8)
 
 A set that no condition references is admitted and inert. Its entries take no part in evaluation,
-and no collection-size or work limit counts them (§4.2). A pack-design tool SHOULD report it with
-the advisory `JPS-VALUE-SET-UNREFERENCED`. An advisory never changes document conformance.
+and no evaluation-phase counter counts them; a limit on the pack as presented does (§4.2).
+This record recommends that a pack-design tool report it with the advisory
+`JPS-VALUE-SET-UNREFERENCED`; a recommendation, not a requirement. An advisory never changes
+document conformance, and this one stays out of the next version's Core text for now (Unresolved
+question 3).
 
 Refusing an unreferenced set would make deleting the last reference to a set a breaking edit, and
 would prevent an author from declaring a set before the rule that uses it.
@@ -611,8 +705,10 @@ these three steps:
 Nothing else changes. The steps act on positions, not on content. A literal inside a `value`
 operand, an entry value and a vendor extension's value are never inspected. A literal that looks
 like a reference, or like an annotations object, stays exactly as it is. A member named
-`extensions` inside an entry value, as inside any operand, is data and not an `extensions` object,
-as RFC 0016 also reads Core §9. The `extensions` objects are the ones the schema defines as members.
+`extensions` inside an entry value, as inside any operand, is data and not an `extensions` object:
+under the next selector, the `extensions` objects are the ones the schema defines as members of
+Core objects. That reading is a change that takes effect under the next selector, not a reading of
+Core `0.3.0` (Compatibility). RFC 0016 reads "an `extensions` object" the same way.
 
 `EF(P)` is itself a semantically conforming pack of the same `specVersion`, with the same
 `profile`:
@@ -638,12 +734,18 @@ produce for `P` the result Core §§7–8 give `EF(P)`, with limits applied as b
 the byte-identical canonicalized disposition (Core §8.3), or an evaluation error of the same class
 (Core §8.4).
 
-- Document and carrier limits (Core §10: bytes, nesting depth, string size) apply to `P` as
-  presented, as to any input. A pack refused by one is refused as Core refuses any input over that
-  limit. `EF(P)` is never admitted, and is never measured against a document limit.
-- Collection-size and evaluation-work limits apply to the work `EF(P)` requires.
-- An implementation MUST NOT charge a collection-size limit to annotations, to value-set objects,
-  or to the entries of a set that no condition references.
+- **Document limits.** Any limit an implementation applies to the pack as presented is a document
+  limit for this rule, whatever the implementation calls it: bytes, nesting depth, string size, and
+  a count of parsed values or nodes over the whole document are all document limits (Core §10).
+  They apply to `P` as presented, as to any input, and they count every annotation and every entry
+  of every set, referenced or not. A pack refused by one is refused as Core refuses any input over
+  that limit. `EF(P)` is never admitted, and is never measured against a document limit.
+- **Evaluation-phase limits.** A collection-size or work counter that an implementation charges
+  while it evaluates applies to the work `EF(P)` requires. Expansion is charged per reference: each
+  reference costs what its inline twin would, so a set referenced by three conditions is charged
+  three times, once at each, as three inline arrays would be.
+- An implementation MUST NOT charge an evaluation-phase counter for annotations, for value-set
+  objects, or for the entries of a set that no condition references.
 
 A pack that is not semantically conforming has no evaluation form. An evaluator reports
 `pack-not-conformant` for it (Core §8.4), whether the fault is in an annotation, a set, a reference
@@ -681,12 +783,15 @@ evaluator that measured `EF(P)` against a document limit could refuse a pack pre
 limit, or admit one presented over it. Core §10 already places every input above a limit outside the
 portable claim, and the staged rows stay well inside any plausible limit.
 
-Collection-size and evaluation-work limits measure work, and the work is `EF(P)`'s. A reference
-costs what its inline array costs. Under [RFC 0008](0008-bounded-collection-quantifiers.md)'s work
+Evaluation-phase limits measure work, and the work is `EF(P)`'s. A reference costs what its inline
+twin costs, at each reference. Under [RFC 0008](0008-bounded-collection-quantifiers.md)'s work
 accounting, if adopted, an authored `in` operand reached through a reference is charged as the
 expanded array. Annotations, value-set objects and the entries of an unreferenced set take no part
-in evaluation, so no work or collection-size limit counts them. The ceilings of §7 bound them as
-document content.
+in evaluation, so no evaluation-phase counter counts them. A limit on the document as presented
+counts them like any other content: an implementation whose only collection-size limit is a cap on
+the parsed nodes of the whole document applies it at admission, as a document limit, and it counts
+every annotation and entry. The ceilings of §7 bound them as document content. No staged row
+reaches any limit, so these rules are stated, not tested by the corpus.
 
 The evaluation form defines an equivalence, not a processing step. An evaluator need not build
 `EF(P)`. Resolving a reference to the declared array without copying it satisfies §4.2.
@@ -742,14 +847,17 @@ consumer that displays one:
   `metadata.reviews`;
 - MUST isolate each annotation key and string it shows inline with other text, so that a value's
   direction does not reorder the text around it. In HTML, for example, `<bdi>`, or `dir="auto"` on
-  the value's own element, does this. It SHOULD isolate the other display data the same way;
-- SHOULD, where it lists distinct annotation values or states a filter, make default-ignorable and
-  format characters visible, so that two values that look alike can be told apart; and
+  the value's own element, does this. Annotation strings hold no bidirectional format character
+  (§1.4), so isolation added with isolate characters, as in plain text, cannot be undone from
+  inside one. It SHOULD isolate the other display data the same way;
+- MUST, where it lists distinct annotation keys or values or states a filter, show them as D2
+  requires (§8), so that two values that look alike can be told apart; and
 - SHOULD show annotations as the author's labels, visually distinct from Core members.
 
 The fixture `valid-annotations-display-hostile` (see [Conformance](#conformance)) carries markup, a
-template, a formula prefix, a URI, bidirectional marks and isolates (one isolate left unterminated),
-a zero-width joiner and an outcome id as values. Validators accept it, and evaluation ignores it.
+template, a formula prefix, a URI, right-to-left text beside digits and neutral characters, a word
+spelled with a look-alike letter from another script, stacked combining marks, an inner em space and
+an outcome id as values: what §1.4 still admits. Validators accept it, and evaluation ignores it.
 How it is rendered is a consumer's test, not a Core class.
 
 ### 7. Ceilings
@@ -771,7 +879,8 @@ The published schema carries the `base` maxima, as for every row.
 There is no ceiling on the total size of an annotations object. One is derived instead: at
 `base`, an object holds at most 16 × (64 + 16 × 256) = 66,560 characters, and at `extended`
 528,384. JSON Schema cannot state a sum, so a separate total would be a check outside the schema
-for no gain. The number of annotated objects is bounded by the document byte limit only, because
+for no gain. The document byte limit is the only aggregate bound on annotations in a pack. The
+number of annotated objects is bounded by it only, because
 Core defines no outcome or rule maximum (Core §4.1, line 376). That sentence stays true: these rows are
 not outcome, rule or reference maxima.
 
@@ -799,8 +908,17 @@ This section is informative except for D2.
 
 **D2, filtered views (normative).** A consumer that presents a filtered view of a pack MUST state,
 in the view, that it is filtered, and by which keys and values. A filtered view is one that omits
-outcomes, rules or entries because of their annotations. The view SHOULD state how many items it
-omits.
+outcomes, rules or entries because of their annotations. For each kind of item it filters, the
+view MUST state how many items it shows and how many the pack holds, for example "rules: 4 of 9".
+
+Wherever a consumer lists distinct annotation keys or values, or states a filter, it MUST show
+every character outside printable ASCII (U+0020–U+007E) in a key or value unambiguously: in a form
+from which the reader can recover each such code point, such as its `U+` number beside or in place
+of the glyph. Two different strings then never display alike, whatever the font. Showing a value in
+a filter's statement exactly as it is shown in the list it was picked from meets this when the list
+meets it.
+
+A review made from a filtered view covers only what the view showed. It is not a review of the pack.
 
 A filtered view is not a pack. It MUST NOT be offered for evaluation, signing or hashing as the
 pack. A disposition is always the whole pack's, and omitted items take part in every evaluation.
@@ -817,7 +935,8 @@ every implementation. No Core conformance class tests display.
 | --- | --- |
 | Core §2.1 | none; duplicate member names are already refused |
 | Core §3.3 | two bullets: value-set ids are unique; every `valueSet` resolves |
-| Core §3.3.1 | a reference reads as its set's values (§4.4); the two value-set advisories (§§2.4, 2.6), unless Unresolved question 3 places them elsewhere |
+| Core §3.3.1 | a reference reads as its set's values (§4.4); the two value-set advisories (§§2.4, 2.6) are not added here until RFC 0027 is dispositioned (Unresolved question 3) |
+| Core §8.2 | names in a supported-extension set that are not requirable are ignored (§1.2) |
 | Core §4 | a `valueSets` row in the root table; the collection-order sentence covers sets and entries |
 | Core §4.1 | the six rows of §7 |
 | Core §5 | value-set references join the list of references that resolve within one document (line 451) |
@@ -825,7 +944,7 @@ every implementation. No Core conformance class tests display.
 | Core §7.4 | the `valueSet` member (§3.1) |
 | Core §8 (new paragraph) | the evaluation form and §4.2's requirement, with its limit rule |
 | Core §9 | a paragraph on specification-defined extensions (their value is governed by their definition, which qualifies "Values may be any JSON value", line 950; each definition states where the name may appear and whether it may be required); then annotations: A1–A6, D2 |
-| Core §9 (clarification) | an `extensions` object is one the schema defines as a member of a Core object; a member named `extensions` inside an operand, an entry value or an extension's value is data, so a required name found only there is missing (§4.1; Compatibility; Unresolved question 4) |
+| Core §9 (change under the next selector) | an `extensions` object is one the schema defines as a member of a Core object; a member named `extensions` inside an operand, an entry value or an extension's value is data, so a required name found only there is missing (§4.1; Compatibility). It takes effect under the next selector and does not change Core `0.3.0` |
 | Core §10 | D1; which limits §4.2 applies to the pack as presented and which to the work its evaluation form requires |
 | Core §11 | compatibility from `0.3.0` (see Compatibility) |
 | Core §13 | unchanged; content identity stays open |
@@ -1051,12 +1170,19 @@ decision on the issue chose the reserved extension.
   - Vendor extensions remain available for structured data, except on sets and entries (§2.2).
 - **Trimming whitespace or normalizing case and Unicode.** Rejected. Equality is on code points
   (§1.3), and a validator that normalized would let two tools disagree about repeated strings in
-  a list.
-- **Refusing every bidirectional formatting character, or none.** Rejected (§1.4). Refusing the
-  marks and isolates would refuse legitimate right-to-left labels. Admitting the embeddings and
-  overrides would let a label display in an order other than its logical one, which isolation at
-  display does not undo. This record refuses the embeddings and overrides only, and D1 requires
-  isolation of what it admits.
+  a list. White space at either end is refused instead of trimmed (§1.4), so no string has a trimmed
+  twin.
+- **Refusing only the embeddings and overrides, and admitting the marks and isolates.** Rejected
+  in round 1 (§1.4). The first draft did this, reasoning that right-to-left labels need marks and
+  isolates. They do not: a label in one right-to-left script displays correctly without them, and a
+  mark or an unbalanced isolate can make a label display in an order other than its logical one or
+  defeat the isolation D1 requires.
+- **Admitting the invisible characters and requiring consumers to show them.** Rejected in round 1
+  (§1.4). A consumer that does not show them hides a rule from a filtered view, and a label gains
+  nothing from them that a short machine-comparable key needs. The cost, emoji sequences and
+  shaping that need joiners, is stated in §1.4. Refusing the format characters that are not
+  default-ignorable, and characters that look alike across scripts, would refuse ordinary text;
+  D2's display rule covers them instead.
 - **A registry of keys.** Rejected for now. Core infers no meaning from spelling (Core §5), and a
   registry is governance work that no evidence yet asks for. A project can document its own
   vocabulary (§8).
@@ -1076,8 +1202,8 @@ decision on the issue chose the reserved extension.
   annotations along.
 - **Two features in one record.** The slower one could hold back the other. They are severable
   (§9).
-- **Ceilings without measurement** (Unresolved question 1). These are also Core's first pack
-  ceilings beyond escalation routes.
+- **Ceilings without measurement** (Unresolved question 1, answered by accepting them as
+  reasoned). These are also Core's first pack ceilings beyond escalation routes.
 - **Repeated entries are admitted.** One value can carry two descriptions or two sets of labels
   (§2.4). Only an advisory reports it, and only from a tool that can decide the pair.
 - **No vendor data on sets or entries.** Data an author wants to attach to one set or one entry in
@@ -1093,16 +1219,25 @@ requires, compatibility is explicit:
   schema also refuses each new shape: the reserved key, the root `valueSets` and the `valueSet`
   member. A writer targeting `0.3.0` cannot emit them.
 - **Semantic.** For a pack that uses neither feature, `EF(P)` is `P`, so this record changes no
-  result for it, apart from the one shape the clarification below refuses.
+  result for it, apart from the one shape that the next selector's reading of an `extensions`
+  object refuses (below).
+- **The reading of an `extensions` object, a change under the next selector.** Core `0.3.0` §9 says
+  every required name "MUST appear as a key in at least one `extensions` object", and does not say
+  whether a member named `extensions` inside data, such as an item of an `in` operand, is one. That
+  is a known open point of the released text. The repository's released `0.3.0` checker counts such
+  a member; another reader may not. This record does not change Core `0.3.0`, its corpus or that
+  checker. Under the next selector, an `extensions` object is one the schema defines as a member of
+  a Core object, and a member named `extensions` inside an operand, an entry's value or an
+  extension's value is data (§4.1). The evaluation form needs that reading: under the broad one, a
+  required name found only in an unreferenced entry's value would be present in `P` and absent from
+  `EF(P)`, and `EF(P)` would not be semantically conforming.
 - **Migrating up from `0.3.0`.** One shape aside, no `0.3.0` shape is refused by these rules. The
-  exception is a clarification of Core `0.3.0` §9, by which every required name "MUST appear as a
-  key in at least one `extensions` object": an `extensions` object is one the schema defines as a
-  member, and a member named `extensions` inside data, such as an item of an `in` operand, is not
-  one (§4.1). A `0.3.0` pack whose required name appears only under such a member is therefore
-  refused under the next selector (`JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION`). The repository's
-  released `0.3.0` checker reads Core §9 more broadly, counting such a member, and this record does
-  not change it. With that exception, and as far as this record goes, changing only the selector is
-  enough, and evaluation is unchanged. The next version's other changes are their own.
+  exception is a `0.3.0` pack whose required name appears only under a member named `extensions`
+  inside data, which the broad reading admits. Under the next selector it is refused
+  (`JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION`), and moving it up means adding the name as a key of a
+  real `extensions` object as well. With that exception, and as far as this record goes, changing
+  only the selector is enough, and evaluation is unchanged. The next version's other changes are
+  their own.
   - Labels kept in a vendor extension MAY be moved to the reserved name by hand, once they meet
     §§1.3–1.5. There is no automatic coercion: a vendor value outside those rules must be edited,
     not truncated, joined or dropped by a tool.
@@ -1127,13 +1262,73 @@ requires, compatibility is explicit:
   positions of §1.1; the `requiredExtensions` item pattern never admits it (§1.2). Core §9 should
   gain one paragraph on specification-defined extensions, whichever record lands first. That
   paragraph states, for each such extension, where its name may appear and whether it may be
-  required. Each record then adds its own name.
+  required. Each record then adds its own name. The paragraph and the schema shape both records
+  need are drafted once, below (Coordination with RFC 0016).
 - [RFC 0008](0008-bounded-collection-quantifiers.md)'s work accounting would apply to the
   evaluation form (§4.3).
 - [RFC 0027](0027-pack-design-advisories.md)'s advisories would read a reference as its set
   (§4.4). The two value-set advisories may belong in its report contract (Unresolved question 3).
 - [RFC 0001](0001-pack-manifest.md)'s manifest digest is over exact bytes, so it covers
   annotations and sets (§5).
+
+**Coordination with RFC 0016.** RFC 0016 puts `org.judgmentpack.outcome-values` on an outcome's
+`extensions`, which is also an annotated position (§1.1), and makes it requirable. Whichever record
+lands second changes the outcome's `extensions` type and the `metadata.requiredExtensions` item. If
+both land, these definitions would do it:
+
+```json
+{
+  "outcomeExtensions": {
+    "type": "object",
+    "propertyNames": {
+      "anyOf": [
+        { "enum": ["org.judgmentpack.annotations", "org.judgmentpack.outcome-values"] },
+        { "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" }
+      ]
+    },
+    "properties": {
+      "org.judgmentpack.annotations": { "$ref": "#/$defs/annotations" },
+      "org.judgmentpack.outcome-values": { "$ref": "#/$defs/outcomeValues" }
+    },
+    "additionalProperties": true
+  },
+  "requiredExtensionName": {
+    "type": "string",
+    "anyOf": [
+      { "const": "org.judgmentpack.outcome-values" },
+      { "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" }
+    ]
+  }
+}
+```
+
+`outcomeExtensions` would be the type of each outcome's `extensions`; the root's and each rule's
+keep `annotatedExtensions` (§1.7), which never admits RFC 0016's name, and an entry's keeps
+`entryExtensions`. `requiredExtensionName` would be the item schema of
+`metadata.requiredExtensions`: it admits RFC 0016's name and, as today, every vendor name, and never
+`org.judgmentpack.annotations` (§1.2). `outcomeValues` is RFC 0016's definition of its value. The
+code rule of [Codes](#codes) maps a key refused by either `anyOf` to
+`JPS-STRUCTURE-EXTENSION-NAME`, as it maps `annotatedExtensions`'s.
+
+Evaluation-form step 3 removes only the member `org.judgmentpack.annotations` (§4.1). RFC 0016's
+member, beside it on an outcome, stays in `EF(P)` untouched, and its name, which a pack that uses it
+must require, still appears there. §4.1's argument that `EF(P)` keeps every required name holds
+with it.
+
+The shared Core §9 paragraph, drafted once here for both records (the staged draft's §9.1 carries
+the first two sentences' substance today):
+
+> **Specification-defined extensions.** A specification-defined extension is one whose name begins
+> with `org.judgmentpack.` and which this specification defines. Its value is governed by its
+> definition, which qualifies "Values may be any JSON value". Each definition states the
+> `extensions` objects in which its name may appear and whether the name may be listed in
+> `metadata.requiredExtensions`; a name whose definition does not admit it there is never
+> requirable. Every other name beginning with `org.judgmentpack.` is refused in every `extensions`
+> object and in `metadata.requiredExtensions`. An `extensions` object is one the schema defines as
+> a member of a Core object. The specification-defined extensions are
+> `org.judgmentpack.annotations` (§9.2: on the root, outcomes, rules and value-set entries; never
+> requirable) and, if RFC 0016 lands, `org.judgmentpack.outcome-values` (on outcomes; required by
+> every pack that uses it).
 
 **Questions this record leaves to Core.** A pack that annotations push over a documented byte
 limit is refused like any oversize pack. Core §8.4 calls a pack failing the carrier layer
@@ -1142,13 +1337,45 @@ limit is refused like any oversize pack. Core §8.4 calls a pack failing the car
 `pack-not-conformant`. Whether the second applies to the pack, which is "an input" to an
 evaluation, is Core's question. This record does not change it.
 
+### Graduation
+
+If this record is accepted, one pull request releases the version that carries it. This record
+assigns no number to it.
+
+- **The working selector is never released.** `0.4.0-draft` names staged artifacts only; no
+  release carries it as a `specVersion`. A reader of the released version refuses a pack declaring
+  `0.4.0-draft`, by the exact-selector rule (Core §4), as it refuses every selector other than its
+  own.
+- **Packs written to the working selector.** Such a pack moves by changing its `specVersion` to the
+  released one. That changes its bytes, so its digest changes too (§5), and it must then satisfy the
+  released rules, which may differ from the staged ones. No reader admits it under both selectors.
+  An implementation that admits `0.4.0-draft` meanwhile does so experimentally, outside every
+  conformance claim.
+- **What the releasing pull request retires.** The staged schema, delta text, document cases,
+  evaluation rows and example; the record-shape catalog's shape record for the staged schema; and
+  Core's `draftVersion` in that catalog. Their content moves into the released schema, Core text
+  and corpora under the released selector, with new `$id`, selector bytes and digests.
+- **The document cases and the `extended` profile.** The releasing pull request decides where the
+  cases that need the `extended` profile land: in the released document manifest, with a member
+  naming the reader profile, or in the `profiles.json` suite where Core `0.3.0`'s own `extended`
+  vectors are. `tools/profile_validation.py` gains the six rows of §7.
+- **The held evaluation row.** The new version's case schema admits specification-defined names in
+  a supported-extension set, and the row `annotations-supported-extension-set` is released with the
+  rest (Core §8.2 as amended, §1.2).
+- **The evidence bar.** Each item of [Evidence bar](#evidence-bar) holds first.
+
 ## Security and privacy
 
 - **Display.** Annotations, set and entry descriptions and displayed entry values are untrusted
-  display data (D1). The refused characters (§1.4) remove line breaks, terminal control sequences
-  and bidirectional embeddings and overrides from annotations. Escaping, isolation of the
-  bidirectional text that remains, visible format characters in lists and filters, and refusal to
-  dereference are the consumer's duties.
+  display data (D1). The refused characters (§1.4) remove line breaks, terminal control sequences,
+  every bidirectional format character, the invisible default-ignorable characters and white space
+  at either end from annotations. Escaping, isolation of the bidirectional text that remains,
+  showing every character outside printable ASCII where values are listed or a filter is stated
+  (D2), and refusal to dereference are the consumer's duties.
+- **Filtered views.** A view filtered by an annotation value hides what does not match. D2 makes the
+  view say so, by which keys and values, and how many items of each kind it shows out of how many
+  the pack holds; and it makes two different values display differently where a reviewer picks one.
+  A review made from a filtered view covers only what it showed.
 - **Confusion.** A label such as `"status": "approved"` or `"priority": "first"` is the author's
   text, not a Core fact. Core has no rule priority (Core §6.5), and §4.2 makes a label unable to create
   one. D1 forbids presenting a label as a review or an approval.
@@ -1200,6 +1427,14 @@ This record cannot move beyond Draft until all of the following hold.
 7. Core text is drafted for each row of this record's §9 table, and the Core §9 paragraph is coordinated with RFC
    0016.
 
+**Standing after round 1.** Item 1 is not met: the round-1 review was by a model from the drafting
+vendor
+([`rfcs/reviews/0031-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0031-round-1.md))
+and does not count. Item 3 is not met: one implementation exists, experimentally, and a second does
+not (Implementation). Item 6 is met by the disposition of Unresolved question 1. Item 7's
+coordination is drafted in this record (Compatibility, Coordination with RFC 0016). The other items
+stand as the round-1 review found them.
+
 ### Codes
 
 Codes are provisional test metadata, as the [conformance README](../conformance/README.md) says
@@ -1237,13 +1472,27 @@ A pointer to a refused key names the key's member, as Core's pointer for an exte
 does, for example `…/org.judgmentpack.annotations/Tier`. A pointer to an unknown member names that
 member. `…` stands for the path to the object the case puts the extension on.
 
-This record proposes seven new provisional codes, and no others:
+A refused key and a refused value at that key therefore share one pointer. Findings compare as a
+set of (code, pointer) pairs, so the pair yields one finding per code: a 65-character key whose
+value has 257 characters gives one `JPS-STRUCTURE-MAX-LENGTH`, not two
+(`structural-annotations-key-and-string-too-long`).
+
+**How findings compare.** A case's findings compare as a set of (code, pointer) pairs. A keyword
+reported twice at one pointer, as some validators or regular-expression engines report it, is one
+finding, and the order of findings carries no meaning. A key that the annotated `extensions`
+object's `propertyNames` refuses is one refusal, `JPS-STRUCTURE-EXTENSION-NAME` at the key, not one
+per branch of its `anyOf`. A validator may also report findings inside the outermost `oneOf` that
+encloses the stated one; Core's corpus admits those, and so does this record's.
+
+This record proposes five new provisional conformance codes, and no others:
 
 - structural: `JPS-STRUCTURE-MAX-LENGTH`, `JPS-STRUCTURE-MIN-PROPERTIES`,
-  `JPS-STRUCTURE-MAX-PROPERTIES` and `JPS-STRUCTURE-VALUE-SET-REFERENCE`;
-- semantic: `JPS-SEMANTIC-UNRESOLVED-VALUE-SET`; and
-- advisory, outside conformance: `JPS-VALUE-SET-UNREFERENCED` and `JPS-VALUE-SET-DUPLICATE-VALUE`
-  (Unresolved question 3).
+  `JPS-STRUCTURE-MAX-PROPERTIES` and `JPS-STRUCTURE-VALUE-SET-REFERENCE`; and
+- semantic: `JPS-SEMANTIC-UNRESOLVED-VALUE-SET`.
+
+It also proposes two advisory codes, outside conformance: `JPS-VALUE-SET-UNREFERENCED` and
+`JPS-VALUE-SET-DUPLICATE-VALUE`. They stay out of the Core text of the next version until RFC 0027
+is dispositioned (Unresolved question 3); the staged manifest lists them as `advisoryCodes`.
 
 ### Staged document cases
 
@@ -1259,7 +1508,10 @@ This record proposes seven new provisional codes, and no others:
 | `valid-annotations-non-bmp` | a 256-character string of characters outside the BMP: code points are counted, not code units or bytes | valid |
 | `valid-annotations-one-element-list` | `["intake"]` on one rule, `"intake"` on another | valid |
 | `valid-annotations-nfc-nfd` | one list holding `"\u00e9"` and `"e\u0301"`, the NFC and NFD spellings of one text | valid: two strings, so `uniqueItems` holds |
-| `valid-annotations-display-hostile` | markup, a template, a formula prefix, a URI, bidirectional marks and isolates (one isolate unterminated), a zero-width joiner, an outcome id as values | valid |
+| `valid-annotations-display-hostile` | markup, a template, a formula prefix, a URI, right-to-left text beside digits and neutral characters, a look-alike letter from another script (U+0430), stacked combining marks, an inner em space, an outcome id as values | valid |
+| `valid-annotations-class-neighbours` | the code point just below and just above each refused range, inside a string (the nearest assigned one where that is unassigned), and the format characters U+0600, U+0605 and U+FFFB, which are not default-ignorable | valid |
+| `valid-annotations-inner-white-space` | each white-space character the refused class does not hold (U+0020, U+00A0, U+1680, U+2000, U+2003, U+200A, U+202F, U+205F, U+3000), between two other characters | valid |
+| `valid-annotations-edge-neighbours` | strings that begin and end with a code point next to a white-space character (U+0021, U+00A1, U+167F, U+1681, U+1FFE, U+2010, U+2027, U+2030, U+205E, U+2FFB, U+3001) | valid |
 | `structural-annotations-in-decision` | and one case each for `-evidence-requirement`, `-source`, `-exception`, `-escalation` and `-metadata` | `JPS-STRUCTURE-EXTENSION-NAME` at `…/extensions/org.judgmentpack.annotations` |
 | `structural-value-set-extensions-*` | `extensions` on a set object: one case holding annotations, one holding a vendor key | `JPS-STRUCTURE-UNKNOWN-MEMBER` at `/valueSets/0/extensions` |
 | `structural-value-set-entry-extension-*` | in an entry's `extensions`, one case each: `com.example.note` alone; `com.example.note` beside annotations; `org.judgmentpack.future` | `JPS-STRUCTURE-UNKNOWN-MEMBER` at `/valueSets/0/entries/0/extensions/` and the name |
@@ -1276,13 +1528,22 @@ This record proposes seven new provisional codes, and no others:
 | `structural-annotations-too-many-keys` | 17 keys | `JPS-STRUCTURE-MAX-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
 | `structural-annotations-too-many-strings` | a list of 17 | `JPS-STRUCTURE-MAXITEMS` at the list |
 | `structural-annotations-string-too-long` | 257 characters | `JPS-STRUCTURE-MAX-LENGTH` (new) at the string |
+| `structural-annotations-key-and-string-too-long` | a 65-character key whose string has 257 characters | one `JPS-STRUCTURE-MAX-LENGTH` (new) at the key, the string's pointer too |
 | `structural-annotations-duplicate-string` | `["intake", "intake"]` | `JPS-STRUCTURE-UNIQUE-ITEMS` at the list |
 | `structural-annotations-value-*` | one case each: a number, a Boolean, null, an object | `JPS-STRUCTURE-TYPE` at the value |
 | `structural-annotations-value-nested-list` | `[["intake"]]` | `JPS-STRUCTURE-TYPE` at the inner list, `…/0` |
 | `structural-annotations-list-item-number` | `[1]` | `JPS-STRUCTURE-TYPE` once, at the item, `…/0` (§1.7) |
 | `structural-annotations-control-*` | one case each, escaped in the JSON: NUL, TAB, LF, ESC, DEL, U+0085, U+009B, U+2028, U+2029 | `JPS-STRUCTURE-NOT` at the string |
 | `structural-annotations-trailing-lf-*` | `"intake\n"`, escaped in the JSON: one case as a key's value, one as the last item of a list | `JPS-STRUCTURE-NOT` at the string |
-| `structural-annotations-bidi-*` | one case each, inside a string: U+202A, U+202B, U+202C, U+202D, U+202E | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-bidi-*` | one case each, inside a string: U+061C, U+200E, U+200F, U+202A, U+202B, U+202C, U+202D, U+202E, U+2066, U+2067, U+2068, U+2069 | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-bidi-reordered-label` | the round-1 review's `"\u200Fapprove\u200F not\u200F do"`, which displays as "do not approve" under automatic direction | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-invisible-*` | one case each, inside a string: U+00AD, U+034F, U+115F, U+1160, U+17B4, U+17B5, U+180B, U+180E, U+180F, U+200B, U+200C, U+200D, U+2060, U+2064, U+206A, U+206F, U+3164, U+FE00, U+FE0E, U+FE0F, U+FEFF, U+FFA0, U+FFF0, U+FFF8, U+1BCA0, U+1BCA3, U+1D173, U+1D17A, U+E0000, U+E0001, U+E0041, U+E007F, U+E0100, U+E0FFF | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-invisible-only` | a string that is only U+200D | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-tag-text` | `intake` followed by tag characters that spell `hidden note` | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-invisible-filter-twin` | the round-1 review's filter example: two rules, `intake` and `intake` followed by U+200B | `JPS-STRUCTURE-NOT` at the second rule's string |
+| `structural-annotations-leading-white-space-*`, `structural-annotations-trailing-white-space-*` | one case each, at the start and at the end of a string: U+0020, U+00A0, U+1680, U+2000, U+200A, U+202F, U+205F, U+3000 | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-white-space-only`, `structural-annotations-white-space-only-ideographic` | `" "`, and two U+3000 | `JPS-STRUCTURE-NOT` at the string |
+| `structural-annotations-trailing-white-space-list` | `"intake "` as the last item of a list | `JPS-STRUCTURE-NOT` at the item |
 | `carrier-annotations-duplicate-key` | one key twice in one annotations object | `JPS-CARRIER-DUPLICATE-MEMBER` |
 | `valid-value-sets-empty` | `"valueSets": []` and no reference | valid |
 | `structural-value-set-entries-empty` | `"entries": []` | `JPS-STRUCTURE-COLLECTION-ARITY` at `/valueSets/0/entries` |
@@ -1297,6 +1558,7 @@ This record proposes seven new provisional codes, and no others:
 | `structural-value-set-reference-and-value` | both members | `JPS-STRUCTURE-VALUE-SET-REFERENCE` (new) at the condition, mapped from `not` |
 | `structural-fact-without-operand` | neither member | `JPS-STRUCTURE-REQUIRED-MEMBER` at `…/value` |
 | `structural-value-set-reference-operator-*` | one case each: `equals`, `not-equals`, `greater-than` | `JPS-STRUCTURE-VALUE-SET-REFERENCE` (new) at `…/operator`, mapped from `const` |
+| `structural-value-set-reference-and-value-operator-equals` | `value` and `valueSet` together, with operator `equals` | `JPS-STRUCTURE-VALUE-SET-REFERENCE` (new) at the condition; the same code at `…/operator` is admitted, inside the condition's `oneOf` |
 | `structural-value-set-reference-bad-id` | `"valueSet": "Tiers"` | `JPS-STRUCTURE-LOCAL-ID` at `…/valueSet` |
 | `structural-value-set-reference-in-value` | `"value": {"valueSet": "priority-tiers"}` with `in` | `JPS-STRUCTURE-IN-OPERAND` at `…/value` |
 | `semantic-unresolved-value-set-*` | one case each: in a rule, in an exception, in `applicability`, nested under `all` and `not`, with no `valueSets` member, with `valueSets: []`, and naming an id held only by an outcome | `JPS-SEMANTIC-UNRESOLVED-VALUE-SET` (new) at the `valueSet` member |
@@ -1339,10 +1601,12 @@ row does. "Paired" rows share inputs and an expected result.
 | --- | --- | --- |
 | `annotations-inert-<result>` | for each of `outcome`, `not-applicable`, `unknown` (unresolved), `conflict` and `no-match`: a baseline pack, the same pack annotated, and the same pack with changed annotations | paired: one disposition per result |
 | `annotations-inert-mimic` | labels spelling outcome ids, reason names and route targets, and `"priority": "first"` on one of two conflicting rules | the baseline's `unresolved` with `conflict` |
+| `annotations-inert-<result>` | for each of `missing-required-evidence`, `exception-escalation` and `fallback`: a second baseline with a required evidence requirement, an escalate exception, a `fallbackOutcome` and two escalation routes (one filtered by `missing-required-evidence`, one without triggers), annotated and with changed annotations | paired: `unresolved` with `missing-required-evidence` and both routes; `unresolved` with `exception-escalation` and the unfiltered route only; the fallback outcome with no route |
 | `annotations-inert-error-class` | annotations in the same `extensions` object as an unsupported required vendor extension; and annotations beside a malformed evidence document | the baseline's class: `unsupported-required-extension`; `malformed-input` |
 | `annotations-required-vendor-beside` | the first case of the row above, with the vendor name in the supported-extension set | paired with the pack without annotations: one disposition |
 | `annotations-supported-extension-set` | the baseline, with `org.judgmentpack.annotations` in the supported-extension set and without it | paired: one disposition (§1.2) |
 | `annotations-malformed-*` | one case each, on facts for which the well-formed baseline gives an outcome: an annotations object with 17 keys; an annotation string with an embedded TAB, escaped in the JSON | `pack-not-conformant`, not the baseline's disposition (§1.2) |
+| `annotations-listed-as-required` | the baseline, annotated, with `org.judgmentpack.annotations` in `metadata.requiredExtensions` | `pack-not-conformant`, never `unsupported-required-extension` (§1.2) |
 | `extension-inert-vendor` | a vendor optional extension present and absent, which Core §9 states but no row checks | paired |
 | `value-set-substitution-<case>` | for each of `match`, `no-match` and `unknown` (absent path): a reference and its inline form | paired |
 | `value-set-type-preserving` | fact `"1"` against entry `1`; fact `true` against entry `"true"` | no match |
@@ -1387,27 +1651,55 @@ optional advisories (repeated entry values and unreferenced sets) and one evalua
 
 The hardest part is the duplicate advisory (§2.4), which needs exact comparison of number literals.
 An evaluator already needs that for Core §7.4's equality, and a tool that lacks it reports nothing
-for the pairs it cannot decide. No conformance result depends on it. Neither implementation exists.
-The scratch check described under Evidence is not one.
+for the pairs it cannot decide. No conformance result depends on it.
+
+One implementation exists, experimentally: a release of the project's reference runtime admits the
+staged selector `0.4.0-draft`, with annotations, value sets and a filtered view, built on the
+staged artifacts. A second, independently authored implementation does not exist. The scratch check
+described under Evidence is not one, and neither is the evaluator the round-1 review wrote. Evidence
+bar item 3 is therefore not met.
 
 ## Unresolved questions
 
-1. **The ceiling numbers.** The six numbers of §7 are reasoned from the intended use: short labels,
-   a few keys, and lists the size of an enumerated code list. No published pack uses either shape,
-   so none were measured. Raising a ceiling later is compatible and lowering one is not, so the
-   numbers err low. This stays open until packs exist, or until the disposition accepts the
-   reasoning.
-2. **More positions.** Annotations might also be wanted on the value-set object, on exceptions, on
-   evidence requirements or on sources, and vendor extensions on sets or entries (§2.2). Admitting
-   a position later is compatible, and removing one is not. This record admits only the positions
-   the issue names, and leaves the others open until someone asks for one.
-3. **Where the two value-set advisories live.** `JPS-VALUE-SET-UNREFERENCED` (§2.6) and
-   `JPS-VALUE-SET-DUPLICATE-VALUE` (§2.4) could join RFC 0027's report contract, or stay beside
-   `JPS-RULES-OVERLAP` in the document corpus's advisory vocabulary. That depends on RFC 0027's
-   disposition, which is open.
-4. **The reading of an `extensions` object.** §4.1 reads Core `0.3.0` §9's "at least one
-   `extensions` object" as the objects the schema defines as members, as RFC 0016 does. That
-   clarifies released text, and it refuses one shape the repository's released checker accepts
-   (Compatibility). It needs the review RFC 0009 requires, with its own disposition, before it
-   lands. The staged cases `semantic-required-extension-in-operand` and
-   `semantic-required-extension-in-entry-value` pin the reading meanwhile.
+The questions keep their numbers; those answered are listed after the open ones.
+
+**2. More positions.** Annotations might also be wanted on the value-set object, on exceptions, on
+evidence requirements or on sources, and vendor extensions on sets or entries (§2.2). Admitting a
+position later is compatible, and removing one is not. This record admits only the positions the
+issue names, and leaves the others open until someone asks for one. Deferring is safe: a later
+selector that admits more positions only turns refused shapes into admitted ones, so a pack written
+to this one holds none of them and its evaluation form is unchanged. The later record must extend
+evaluation-form step 3 (§4.1) to every position it admits.
+
+**3. Where the two value-set advisories live.** `JPS-VALUE-SET-UNREFERENCED` (§2.6) and
+`JPS-VALUE-SET-DUPLICATE-VALUE` (§2.4) could join RFC 0027's report contract, or stay beside
+`JPS-RULES-OVERLAP` in the document corpus's advisory vocabulary. That depends on RFC 0027's
+disposition, which is open. Deferred: the two codes stay out of the next version's Core text, whose
+§3.3.1 keeps only the reading of a reference as its set (§4.4), and they are added when RFC 0027 is
+dispositioned. An advisory never changes conformance, so the deferral cannot break a pack. The
+staged manifest lists the two codes as `advisoryCodes`, outside conformance, and no case states
+them.
+
+**5. Line feeds before the end anchor in Core's other patterns.** A separate candidate for the
+same version, not part of this record. An engine whose `$` matches before a final line feed admits
+a vendor extension name such as `"com.example\n"` under Core's extension-name pattern, and a
+`localId` ending in a line feed under the local-identifier grammar, where an ECMA-262 engine
+refuses both; so two structural validators can already disagree. This record closes that gap only
+for annotation keys (§1.3). Adding the same `not` to the extension-name and `localId` patterns
+changes the grammar of every Core object and belongs in its own record.
+
+**Answered questions.**
+
+- **1. The ceiling numbers.** Answered by the round-1 disposition: the six numbers of §7 are
+  accepted as reasoned. They are reasoned from the intended use: short labels, a few keys, and
+  lists the size of an enumerated code list. Measuring them needs packs that use the shapes, which
+  cannot exist before the version opens. Raising a ceiling later is compatible and lowering one is
+  not, so the numbers err low. The document byte limit is the only aggregate bound on annotations
+  (§7). Evidence bar item 6 is met by this answer.
+- **4. The reading of an `extensions` object.** Answered by the round-1 disposition (finding H3):
+  the narrow reading, the `extensions` objects the schema defines as members of Core objects, as a
+  change that takes effect under the next selector. It does not change how Core `0.3.0` reads
+  (Compatibility). Deferring it was not safe, because the evaluation form needs it (§4.1). Core
+  `0.3.0`'s ambiguity stays a known open point of the released text, and the released checker is
+  unchanged. The staged cases `semantic-required-extension-in-operand` and
+  `semantic-required-extension-in-entry-value` pin the reading.

@@ -33,12 +33,13 @@
           "template": "{{ request.secret }}",
           "formula": "=HYPERLINK(\"https://example.com/x\")",
           "uri": "https://example.com/collect?id=1",
-          "bidi": [
-            "\u2067abc\u2069",
-            "\u200fmark",
-            "\u2068unterminated"
+          "rtl": [
+            "\u05e9\u05dc\u05d5\u05dd 2-1",
+            "(\u05d0) [b]"
           ],
-          "joiner": "a\u200db",
+          "look-alike": "\u0430pprove",
+          "combining": "a\u0301\u0302\u0303\u0304",
+          "inner-space": "intake\u2003review",
           "outcome": "refer"
         }
       }

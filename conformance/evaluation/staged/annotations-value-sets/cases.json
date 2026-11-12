@@ -470,6 +470,306 @@
       "specSection": "\u00a78.5"
     },
     {
+      "id": "annotations-inert-missing-required-evidence-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-features-baseline.json",
+      "facts": {
+        "expense": {
+          "small": true,
+          "held": false
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "absent"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ],
+          "routes": [
+            {
+              "kind": "queue",
+              "name": "Evidence desk"
+            },
+            {
+              "kind": "human-role",
+              "name": "Duty reviewer"
+            }
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack without annotations gives the baseline's missing-required-evidence result (the required receipt is absent, so no rule is evaluated; both routes are selected, the queue by its trigger)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-missing-required-evidence-annotated",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-features-annotated.json",
+      "facts": {
+        "expense": {
+          "small": true,
+          "held": false
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "absent"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ],
+          "routes": [
+            {
+              "kind": "queue",
+              "name": "Evidence desk"
+            },
+            {
+              "kind": "human-role",
+              "name": "Duty reviewer"
+            }
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with annotations gives the baseline's missing-required-evidence result (the required receipt is absent, so no rule is evaluated; both routes are selected, the queue by its trigger)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-missing-required-evidence-changed",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-features-changed.json",
+      "facts": {
+        "expense": {
+          "small": true,
+          "held": false
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "absent"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "missing-required-evidence"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "missing-required-evidence"
+          ],
+          "routes": [
+            {
+              "kind": "queue",
+              "name": "Evidence desk"
+            },
+            {
+              "kind": "human-role",
+              "name": "Duty reviewer"
+            }
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with changed annotations gives the baseline's missing-required-evidence result (the required receipt is absent, so no rule is evaluated; both routes are selected, the queue by its trigger)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-exception-escalation-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-features-baseline.json",
+      "facts": {
+        "expense": {
+          "small": true,
+          "held": true
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "exception-escalation"
+          ],
+          "routes": [
+            {
+              "kind": "human-role",
+              "name": "Duty reviewer"
+            }
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack without annotations gives the baseline's exception-escalation result (a true escalate exception is a direct request; only the route without triggers is selected)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-exception-escalation-annotated",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-features-annotated.json",
+      "facts": {
+        "expense": {
+          "small": true,
+          "held": true
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "exception-escalation"
+          ],
+          "routes": [
+            {
+              "kind": "human-role",
+              "name": "Duty reviewer"
+            }
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with annotations gives the baseline's exception-escalation result (a true escalate exception is a direct request; only the route without triggers is selected)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-exception-escalation-changed",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-features-changed.json",
+      "facts": {
+        "expense": {
+          "small": true,
+          "held": true
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "unresolved",
+        "reasons": [
+          "exception-escalation"
+        ],
+        "handoff": {
+          "state": "requested",
+          "triggeredBy": [
+            "exception-escalation"
+          ],
+          "routes": [
+            {
+              "kind": "human-role",
+              "name": "Duty reviewer"
+            }
+          ]
+        }
+      },
+      "focus": "annotations are inert: the pack with changed annotations gives the baseline's exception-escalation result (a true escalate exception is a direct request; only the route without triggers is selected)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-fallback-baseline",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-features-baseline.json",
+      "facts": {
+        "expense": {
+          "small": false,
+          "held": false
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "review",
+        "reasons": [],
+        "handoff": {
+          "state": "none",
+          "routes": []
+        }
+      },
+      "focus": "annotations are inert: the pack without annotations gives the baseline's fallback result (no rule is true, so the fallback outcome is produced and no route is selected)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-fallback-annotated",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-features-annotated.json",
+      "facts": {
+        "expense": {
+          "small": false,
+          "held": false
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "review",
+        "reasons": [],
+        "handoff": {
+          "state": "none",
+          "routes": []
+        }
+      },
+      "focus": "annotations are inert: the pack with annotations gives the baseline's fallback result (no rule is true, so the fallback outcome is produced and no route is selected)",
+      "specSection": "\u00a78.5"
+    },
+    {
+      "id": "annotations-inert-fallback-changed",
+      "origin": "rfc-0031",
+      "pack": "packs/inert-features-changed.json",
+      "facts": {
+        "expense": {
+          "small": false,
+          "held": false
+        }
+      },
+      "evidenceAvailability": {
+        "receipt": "present"
+      },
+      "supportedExtensions": [],
+      "expectedDisposition": {
+        "kind": "outcome",
+        "outcomeId": "review",
+        "reasons": [],
+        "handoff": {
+          "state": "none",
+          "routes": []
+        }
+      },
+      "focus": "annotations are inert: the pack with changed annotations gives the baseline's fallback result (no rule is true, so the fallback outcome is produced and no route is selected)",
+      "specSection": "\u00a78.5"
+    },
+    {
       "id": "annotations-inert-error-class-unsupported-baseline",
       "origin": "rfc-0031",
       "pack": "packs/required-vendor-baseline.json",
@@ -649,6 +949,23 @@
       "supportedExtensions": [],
       "expectedErrorClass": "pack-not-conformant",
       "focus": "an annotation string with an embedded TAB makes the pack not conforming: the result is pack-not-conformant, not the baseline's outcome",
+      "specSection": "\u00a79.2"
+    },
+    {
+      "id": "annotations-listed-as-required",
+      "origin": "rfc-0031",
+      "pack": "packs/annotations-listed-as-required.json",
+      "facts": {
+        "request": {
+          "kind": "intake",
+          "tier": "tier-1",
+          "flagged": false
+        }
+      },
+      "evidenceAvailability": {},
+      "supportedExtensions": [],
+      "expectedErrorClass": "pack-not-conformant",
+      "focus": "org.judgmentpack.annotations listed in metadata.requiredExtensions makes the pack not conforming: the result is pack-not-conformant, never unsupported-required-extension",
       "specSection": "\u00a79.2"
     },
     {
@@ -1745,10 +2062,10 @@
             "state": "none"
           }
         },
-        "focus": "listing org.judgmentpack.annotations in the supported-extension set changes nothing: no rule reads that entry",
+        "focus": "listing org.judgmentpack.annotations in the supported-extension set changes nothing: it is not requirable, so the draft's section 8.2 ignores it",
         "specSection": "\u00a79.2"
       },
-      "heldBecause": "The released case schema's supportedExtensions refuses every org.judgmentpack. name (conformance/evaluation/manifest.schema.json, $defs/extensionName), so this row cannot be stated in it unchanged. It waits here until the case schema of the version that carries RFC 0031 decides whether a supported-extension set may name the annotations extension."
+      "heldBecause": "The released case schema's supportedExtensions refuses every org.judgmentpack. name (conformance/evaluation/manifest.schema.json, $defs/extensionName), so this row cannot be stated in it unchanged. The draft's section 8.2 says a name that is not requirable is ignored. The row is released when the case schema of the version that carries RFC 0031 admits specification-defined names (RFC 0031, Graduation)."
     }
   ],
   "pairs": [
@@ -1803,6 +2120,33 @@
       "cases": [
         "annotations-inert-mimic-baseline",
         "annotations-inert-mimic"
+      ]
+    },
+    {
+      "id": "annotations-inert-missing-required-evidence",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-missing-required-evidence-baseline",
+        "annotations-inert-missing-required-evidence-annotated",
+        "annotations-inert-missing-required-evidence-changed"
+      ]
+    },
+    {
+      "id": "annotations-inert-exception-escalation",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-exception-escalation-baseline",
+        "annotations-inert-exception-escalation-annotated",
+        "annotations-inert-exception-escalation-changed"
+      ]
+    },
+    {
+      "id": "annotations-inert-fallback",
+      "basis": "evaluation-form",
+      "cases": [
+        "annotations-inert-fallback-baseline",
+        "annotations-inert-fallback-annotated",
+        "annotations-inert-fallback-changed"
       ]
     },
     {
@@ -1969,6 +2313,7 @@
   ],
   "ownEvaluationForm": [
     "packs/inert-baseline.json",
+    "packs/inert-features-baseline.json",
     "packs/required-vendor-baseline.json",
     "packs/value-set-applicability-inline.json",
     "packs/value-set-diverged-copies.json",

@@ -69,25 +69,12 @@ The check reads a reference as its set's values: the true set of an `in` conditi
 reference is the set of its entries' values, as for an inline operand. A validator MAY run the check
 on the pack's evaluation form (§8.5).
 
-Two further advisories are recommended. Like `JPS-RULES-OVERLAP`, they are not conformance
-requirements and never change a document's conformance:
-
-- **`JPS-VALUE-SET-DUPLICATE-VALUE`.** A tool that can decide equality of two entry values SHOULD
-  report each entry whose value equals an earlier entry's in the same set, at the later entry's
-  `value`. Equality is §7.4's: numbers by mathematical value (`1`, `1.0`, `1e0` and `10E-1` are
-  one value, and so are `0` and `-0`), strings by code points (the NFC and NFD spellings of one text
-  are two values), arrays item by item in order, objects by member name and value regardless of
-  member order, and no coercion (`1` and `"1"` are distinct, and so are `"1.0"` and `"1.00"`). A tool
-  that can compare a pair only through binary floating point cannot decide it, and reports nothing
-  for that pair. Normalizing a number literal needs no expansion of its exponent, and a tool SHOULD
-  NOT expand one.
-- **`JPS-VALUE-SET-UNREFERENCED`.** A pack-design tool SHOULD report a set that no condition
-  references.
-
-Where these two advisories live is open (RFC 0031, Unresolved question 3): beside
-`JPS-RULES-OVERLAP` in the document corpus's advisory vocabulary, or in the report contract
-[RFC 0027](../../rfcs/0027-pack-design-advisories.md) proposes. The staged document cases state the
-document result of each advisory case, which is `valid`, and do not state the advisory.
+This text defines no value-set advisory. RFC 0031 proposes two, `JPS-VALUE-SET-DUPLICATE-VALUE`
+and `JPS-VALUE-SET-UNREFERENCED`, as recommendations outside conformance; they are added to Core
+text when [RFC 0027](../../rfcs/0027-pack-design-advisories.md) is dispositioned, beside
+`JPS-RULES-OVERLAP` or in RFC 0027's report contract (RFC 0031, Unresolved question 3). The staged
+document cases state the document result of each advisory case, which is `valid`, and do not state
+the advisory.
 
 ## 4. Root object
 
@@ -180,14 +167,14 @@ An entry has these members and no others:
 - **Repeated values.** Two entries of one set may have equal values. That is not a conformance error
   at any layer. A repeated entry changes no evaluation result, since an inline `in` operand already
   admits repeated items. A consumer shows each entry as written, with its own description and
-  annotations. §3.3.1 recommends an advisory.
+  annotations.
 - **No nesting.** A set references no other set, and an entry has no `valueSet` member
   (`JPS-STRUCTURE-UNKNOWN-MEMBER`). An entry value that looks like a reference, such as
   `{"valueSet": "tier-codes"}`, is a literal JSON object, compared as one. There is no union,
   intersection or difference of sets.
 - **Unreferenced sets.** A set that no condition references is admitted and inert. Its entries take
-  no part in evaluation, and no collection-size or work limit counts them (§10). §3.3.1 recommends an
-  advisory.
+  no part in evaluation, and no evaluation-phase counter counts them; a limit on the pack as
+  presented does (§10).
 
 `valueSets` is a Core member, not an extension: a consumer that ignored the sets could not evaluate a
 condition that references one.
@@ -215,6 +202,14 @@ membership. Where this section leaves a comparison with a number open (§13), th
 the inline array's; a reference neither adds an input to it nor takes one out.
 
 ## 8. Resolution model
+
+### 8.2 Evaluation inputs *(amended)*
+
+The **Supported extensions** input reads: the set of `metadata.requiredExtensions` capabilities the
+implementation supports. A required capability outside that set is an evaluation error (§8.4),
+never a disposition (§9). A name in the set that no conforming pack can list in
+`metadata.requiredExtensions`, such as `org.judgmentpack.annotations` (§9.2), is not a capability:
+it is ignored, is not an error, and changes no result. The rest of §8.2 is unchanged.
 
 ### 8.5 The evaluation form *(new)*
 
@@ -279,10 +274,11 @@ data, not an `extensions` object. So "every name in `metadata.requiredExtensions
 key in at least one `extensions` object" counts only those objects: a required name that appears only
 inside an operand or an entry value is missing (`JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION`).
 
-This clarifies Core `0.3.0` §9. The repository's released `0.3.0` checker reads that sentence more
-broadly, counting a member named `extensions` anywhere in the document, and it is not changed. So one
-`0.3.0` shape is refused under `0.4.0-draft` (§11). The clarification awaits its own review
-(RFC 0031, Unresolved question 4).
+This reading is a change that takes effect under this selector; it does not change Core `0.3.0`.
+Core `0.3.0` §9 does not say whether a member named `extensions` inside data is an `extensions`
+object, a known open point of the released text. The repository's released `0.3.0` checker counts
+such a member anywhere in the document, and it is not changed. So one `0.3.0` shape is refused under
+`0.4.0-draft` (§11).
 
 This draft defines one such extension, `org.judgmentpack.annotations` (§9.2).
 [RFC 0016](../../rfcs/0016-outcome-values.md), also a Draft, would add its own name under this
@@ -301,8 +297,8 @@ carries it: there is no inheritance and no merging.
 `org.judgmentpack.annotations` MUST NOT appear in `metadata.requiredExtensions`, and the schema's
 item pattern there never admits it (`JPS-STRUCTURE-EXTENSION-NAME`); an evaluator reports
 `pack-not-conformant`, never `unsupported-required-extension`. Listing the name in a
-supported-extension set changes nothing. §9's general rule applies to what annotations mean: a
-consumer preserves them when round-tripping, and one that neither displays nor filters by them may
+supported-extension set changes nothing (§8.2). §9's general rule applies to what annotations mean:
+a consumer preserves them when round-tripping, and one that neither displays nor filters by them may
 disregard their content. It does not apply to their shape. The rules below are part of the schema,
 so a malformed annotation makes the pack not structurally conforming, and an implementation MUST NOT
 skip them because the extension is optional.
@@ -311,7 +307,8 @@ skip them because the extension is optional.
 
 - Each member name is a local identifier (§5) of at most 64 characters. A name that ends in a line
   feed is not a local identifier, whatever a pattern's end anchor admits; the schema also refuses
-  every character of the refused class below in a key, so the rule holds under every engine.
+  U+0000–U+001F, U+007F–U+009F and U+2028–U+202E in a key, so the rule holds in every engine
+  tested (RFC 0031 §1.7).
 - Each member value is an annotation string, or an array of 1 to 16 annotation strings in which no
   string appears twice. A one-element array and the plain string are both admitted, and are
   different bytes.
@@ -320,14 +317,25 @@ skip them because the extension is optional.
 - Core assigns no meaning to any key or value, and meaning MUST NOT be inferred from their spelling.
 
 **Annotation strings.** An annotation string has 1 to 256 characters, counted as code points (a
-character outside the Basic Multilingual Plane counts once). After JSON unescaping it contains none
-of U+0000–U+001F, U+007F–U+009F and U+2028–U+202E: the C0 and C1 controls, delete, the line and
-paragraph separators, and the bidirectional embeddings and overrides. The marks U+200E and U+200F,
-the isolates U+2066–U+2069 and every other character are admitted.
+character outside the Basic Multilingual Plane counts once). After JSON unescaping it contains no
+character of the *refused class*: the C0 and C1 controls and delete; the line and paragraph
+separators; every bidirectional format character (the Arabic letter mark, the left-to-right and
+right-to-left marks, the embeddings and overrides, and the isolates); and every other invisible,
+default-ignorable character, the tag characters among them. The refused code points are exactly
+U+0000–U+001F, U+007F–U+009F, U+00AD, U+034F, U+061C, U+115F–U+1160, U+17B4–U+17B5, U+180B–U+180F,
+U+200B–U+200F, U+2028–U+202E, U+2060–U+206F, U+3164, U+FE00–U+FE0F, U+FEFF, U+FFA0, U+FFF0–U+FFF8,
+U+1BCA0–U+1BCA3, U+1D173–U+1D17A and U+E0000–U+E0FFF. It also does not begin or end with a
+character of the Unicode property White_Space, which is exactly U+0009–U+000D, U+0020, U+0085,
+U+00A0, U+1680, U+2000–U+200A, U+2028, U+2029, U+202F, U+205F and U+3000; those the refused class
+does not hold are admitted between two other characters. Every other character is admitted. An
+annotation is a short machine-comparable label: an emoji sequence that needs a joiner or a
+variation selector, and text whose shaping needs a joiner, cannot appear in one, and belong in a
+`description`.
 
 **Empty forms.** An empty annotations object (`JPS-STRUCTURE-MIN-PROPERTIES`), an empty list
-(`JPS-STRUCTURE-COLLECTION-ARITY`) and an empty string (`JPS-STRUCTURE-MIN-LENGTH`) are refused.
-Absence is the one spelling for "no annotations".
+(`JPS-STRUCTURE-COLLECTION-ARITY`) and an empty string (`JPS-STRUCTURE-MIN-LENGTH`) are refused, and
+so is a string made only of white space, which begins with it (`JPS-STRUCTURE-NOT`). Absence is the
+one spelling for "no annotations".
 
 **Duplicates.** A duplicate member name is refused by the carrier (§2.1). A repeated string in a list
 is refused (`JPS-STRUCTURE-UNIQUE-ITEMS`). The same key in two annotations objects is not a
@@ -335,20 +343,28 @@ duplicate.
 
 **Filtered views (D2).** A consumer that presents a filtered view of a pack, one that omits outcomes,
 rules or entries because of their annotations, MUST state in the view that it is filtered, and by
-which keys and values. The view SHOULD state how many items it omits. A filtered view is not a pack:
-it MUST NOT be offered for evaluation, signing or hashing as the pack. A disposition is always the
-whole pack's, and omitted items take part in every evaluation. A filtered view is not redaction: the
-omitted items remain in the pack's bytes.
+which keys and values. For each kind of item it filters, the view MUST state how many items it shows
+and how many the pack holds. Wherever a consumer lists distinct annotation keys or values, or states
+a filter, it MUST show every character outside printable ASCII (U+0020–U+007E) in a key or value
+unambiguously, in a form from which the reader can recover each such code point. A review made from
+a filtered view covers only what the view showed; it is not a review of the pack. A filtered view
+is not a pack: it MUST NOT be offered for evaluation, signing or hashing as the pack. A disposition
+is always the whole pack's, and omitted items take part in every evaluation. A filtered view is not
+redaction: the omitted items remain in the pack's bytes.
 
 ## 10. Security and privacy considerations
 
-**Limits.** Document and carrier limits (bytes, nesting depth, string size) apply to `P` as presented,
-as to any input; a pack refused by one is refused as any input over that limit is. `EF(P)` is never
-admitted, and is never measured against a document limit. Collection-size and evaluation-work limits
-apply to the work `EF(P)` requires: a reference costs what its inline array costs. An implementation
-MUST NOT charge a collection-size limit to annotations, to value-set objects, or to the entries of a
-set that no condition references. A set referenced by many conditions expands to a large `EF(P)`; an
-evaluator SHOULD resolve a reference to the shared array, not copy it.
+**Limits.** Any limit an implementation applies to the pack as presented is a document limit,
+whatever the implementation calls it: bytes, nesting depth, string size, or a count of the parsed
+values or nodes of the whole document. Document limits apply to `P` as presented, as to any input,
+and count every annotation and every entry; a pack refused by one is refused as any input over that
+limit is. `EF(P)` is never admitted, and is never measured against a document limit. A
+collection-size or work counter charged while evaluating applies to the work `EF(P)` requires, and
+expansion is charged per reference: each reference costs what its inline twin would. An
+implementation MUST NOT charge an evaluation-phase counter for annotations, for value-set objects,
+or for the entries of a set that no condition references. A set referenced by many conditions
+expands to a large `EF(P)`; an evaluator SHOULD resolve a reference to the shared array, not copy
+it.
 
 **Untrusted display data (D1).** Annotation keys and strings, value-set and entry descriptions, and
 entry values when displayed, are display data from the pack's author, as untrusted as every other
@@ -364,8 +380,8 @@ pack string. A consumer that displays one:
 - MUST isolate each annotation key and string it shows inline with other text, so that a value's
   direction does not reorder the text around it, and SHOULD isolate the other display data the same
   way;
-- SHOULD, where it lists distinct annotation values or states a filter, make default-ignorable and
-  format characters visible; and
+- MUST, where it lists distinct annotation keys or values or states a filter, show them as D2
+  requires (§9.2); and
 - SHOULD show annotations as the author's labels, visually distinct from Core members.
 
 D1 and D2 (§9.2) bind any consumer that displays or filters annotations. No Core conformance class
@@ -380,11 +396,12 @@ Compatibility from `0.3.0` is explicit:
   selector, and does not acquire support by ignoring or replacing it. The `0.3.0` schema also refuses
   each new shape: the reserved key, the root `valueSets` and the `valueSet` member.
 - **Semantic.** For a pack that uses neither feature, `EF(P)` is `P`, so this draft changes no
-  result for it, apart from the one shape §9.1's clarification refuses.
+  result for it, apart from the one shape §9.1's reading of an `extensions` object refuses.
 - **Migrating up.** One shape aside, no `0.3.0` shape is refused by these rules: a pack whose required
-  name appears only under a member named `extensions` inside an operand is refused, by §9.1's
-  clarification of Core `0.3.0` §9. Otherwise changing only the selector is enough, and evaluation is
-  unchanged. Labels kept in a vendor extension MAY be moved to the reserved name by
+  name appears only under a member named `extensions` inside data is refused, by §9.1's reading,
+  which takes effect under this selector. Such a pack moves up by also adding the name as a key of an
+  `extensions` object the schema defines. Otherwise changing only the selector is enough, and
+  evaluation is unchanged. Labels kept in a vendor extension MAY be moved to the reserved name by
   hand once they meet §9.2; there is no automatic coercion. An inline list MAY be replaced by a
   reference. Each such edit changes the bytes, so the pack SHOULD receive a new `version`.
 - **Migrating down.** `EF(P)` with the selector changed is evaluation-equivalent within §10's limit
@@ -408,9 +425,15 @@ and `JPS-STRUCTURE-LOCAL-ID`, from the `not` under an annotations object's `prop
 
 A case's findings compare as a set of (code, pointer) pairs. A keyword reported twice at one pointer,
 as some validators or regular-expression engines report it, is one finding, and the order of
-findings carries no meaning.
+findings carries no meaning. A key that the annotated `extensions` object's `propertyNames` refuses
+is one refusal, `JPS-STRUCTURE-EXTENSION-NAME` at the key, not one per branch of its `anyOf`.
 
-This draft has seven provisional codes, for `0.4.0-draft` only:
+A pointer to a refused key names the key's member, as Core's pointer for an extension-name refusal
+does. A refused key and a refused value at that key therefore share one pointer, so the pair yields
+one finding per code: a 65-character key whose value has 257 characters gives one
+`JPS-STRUCTURE-MAX-LENGTH`, not two.
+
+This draft has five provisional conformance codes, for `0.4.0-draft` only:
 
 | Code | Layer | Where |
 | --- | --- | --- |
@@ -419,5 +442,7 @@ This draft has seven provisional codes, for `0.4.0-draft` only:
 | `JPS-STRUCTURE-MAX-PROPERTIES` | structural | an annotations object over its key ceiling (§§4.1, 9.2) |
 | `JPS-STRUCTURE-VALUE-SET-REFERENCE` | structural | `value` beside `valueSet`, or `valueSet` with an operator other than `in` (§7.4) |
 | `JPS-SEMANTIC-UNRESOLVED-VALUE-SET` | semantic | a `valueSet` naming no declared set (§3.3) |
-| `JPS-VALUE-SET-DUPLICATE-VALUE` | advisory, outside conformance | a repeated entry value (§3.3.1) |
-| `JPS-VALUE-SET-UNREFERENCED` | advisory, outside conformance | a set no condition references (§3.3.1) |
+
+RFC 0031's two advisory codes, `JPS-VALUE-SET-DUPLICATE-VALUE` and `JPS-VALUE-SET-UNREFERENCED`, are
+not in this text (§3.3.1). The staged manifest lists them as `advisoryCodes`, the codes the RFC
+proposes outside conformance, and no case states them.

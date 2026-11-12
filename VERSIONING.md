@@ -139,8 +139,10 @@ names them. No release is established by this staging, and the selector is not a
   no release carries, so that it cannot be mistaken for `specVersion` `0.4.0`, which is not assigned,
   or for release `v0.4.0`, which carries `0.3.0`.
 - **Landing.** When the maintainers open the version that carries RFC 0031, they assign its
-  selector, and the staged artifacts take it; nothing staged binds the choice. RFC 0031 stays a Draft
-  until its own Evidence bar is met.
+  selector, and the staged artifacts take it; nothing staged binds the choice. A pack written to
+  `0.4.0-draft` moves up by changing its `specVersion`, which changes its bytes and digest, and must
+  then satisfy the released rules; RFC 0031's Graduation subsection lists the steps. RFC 0031 stays
+  a Draft until its own Evidence bar is met.
 
 The [record-shape catalog](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/catalog/README.md) lists every schema whose `$id` is in the
 specification's schema namespace, `https://judgmentpack.org/schema/`, so it lists the staged schema,

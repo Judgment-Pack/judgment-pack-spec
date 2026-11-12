@@ -1,0 +1,11 @@
+{
+  "reason": "RFC 0031 (#301, a Draft), after the round-1 review (rfcs/reviews/0031-round-1.md): the staged draft schema's annotationString refuses every bidirectional format character, the invisible and default-ignorable characters RFC 0031 section 1.4 lists (outside the BMP through surrogate-pair escapes), and a string that begins or ends with white space, as RFC 0031 section 1.7 now writes it. Staged draft only; the released 0.3.0 schema is unchanged.",
+  "changes": [
+    {
+      "path": "schema/staged/judgment-pack-core-0.4.0-draft.schema.json",
+      "family": "judgment-pack-core",
+      "from": "sha256:b9b7da495415169b9a1398612bf5066c243975599a733a9053417e7a40a73060",
+      "to": "sha256:97f1ef058fa9362f0107e05b5354a6346adc41be2e2d63b1efbb4803041b821f"
+    }
+  ]
+}
