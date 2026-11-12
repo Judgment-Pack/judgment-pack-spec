@@ -1,0 +1,17 @@
+{
+  "reason": "Core 0.5.0's document-manifest and evaluation-manifest schemas name a supported extension with the Core schema's extension-name pattern and its not, in place of a lookahead, so a name ending in a line terminator is refused in every engine (issue #308, RFC 0031); under ECMA-262 the two forms admit the same names. The document-manifest schema's expectedDiagnostics description names every finding a case gives.",
+  "changes": [
+    {
+      "path": "conformance/evaluation/manifest.schema.json",
+      "family": "conformance/evaluation/manifest",
+      "from": "sha256:053567c7c6eec5aca0f0d16e9a4ae369f04a72ef27d3be5b1b1757222d68d1b3",
+      "to": "sha256:e6f405bfaa0fe9b2739238fd7314d119cb9a0e968f04c9362e6ab6db7f7ff573"
+    },
+    {
+      "path": "conformance/manifest.schema.json",
+      "family": "conformance/manifest",
+      "from": "sha256:8aa57254b0e01e3c13b909c677521f4c6f418c44ba6ba01866bf16bcbe666c16",
+      "to": "sha256:f6257e885748552b35562802c93fcdbece8ca19f062042bc464e369a4308d375"
+    }
+  ]
+}

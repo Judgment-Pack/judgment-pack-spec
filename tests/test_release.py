@@ -96,6 +96,14 @@ class ReleaseBuilderTests(unittest.TestCase):
                      "Stay on the `v0.3.0` bundle for the `retained-column/1` leaf.",
                      "https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json",
                      hashlib.sha256(schema.read_bytes()).hexdigest(),
+                     *(f"`{schema_id}`, SHA-256 `{hashlib.sha256((ROOT / path).read_bytes()).hexdigest()}`"
+                       for schema_id, path in (
+                           ("https://judgmentpack.org/schema/0.5.0/conformance/manifest.schema.json",
+                            "conformance/manifest.schema.json"),
+                           ("https://judgmentpack.org/schema/0.5.0/conformance/evaluation/manifest.schema.json",
+                            "conformance/evaluation/manifest.schema.json"),
+                           ("https://judgmentpack.org/schema/0.5.0/workflow-1.schema.json",
+                            "schema/workflow-1.schema.json"))),
                      "369 conformance cases and 5 advisory cases", "103 rows, 29 pairs"):
             with self.subTest(text=text[:40]):
                 self.assertIn(text, notes)
