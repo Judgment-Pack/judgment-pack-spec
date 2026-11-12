@@ -53,8 +53,9 @@ The 139 cases are:
   case on a rule, so that each annotated position refuses a malformed annotation;
 - a number inside an annotation list (RFC 0031 §1.7);
 - three cases for its reading of an `extensions` object: two required names found only inside data,
-  refused (a clarification of Core `0.3.0` §9, which the repository's released checker reads more
-  broadly; RFC 0031, Compatibility), and a reserved and an ungrammatical name inside data, admitted;
+  refused (a reading that takes effect under the draft selector and does not change Core `0.3.0`,
+  whose released checker counts such a member; RFC 0031, Compatibility), and a reserved and an
+  ungrammatical name inside data, admitted;
   and
 - the staged example.
 

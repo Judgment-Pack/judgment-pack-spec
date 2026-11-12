@@ -691,8 +691,10 @@ these three steps:
 Nothing else changes. The steps act on positions, not on content. A literal inside a `value`
 operand, an entry value and a vendor extension's value are never inspected. A literal that looks
 like a reference, or like an annotations object, stays exactly as it is. A member named
-`extensions` inside an entry value, as inside any operand, is data and not an `extensions` object,
-as RFC 0016 also reads Core §9. The `extensions` objects are the ones the schema defines as members.
+`extensions` inside an entry value, as inside any operand, is data and not an `extensions` object:
+under the next selector, the `extensions` objects are the ones the schema defines as members of
+Core objects. That reading is a change that takes effect under the next selector, not a reading of
+Core `0.3.0` (Compatibility). RFC 0016 reads "an `extensions` object" the same way.
 
 `EF(P)` is itself a semantically conforming pack of the same `specVersion`, with the same
 `profile`:
@@ -917,7 +919,7 @@ every implementation. No Core conformance class tests display.
 | Core §7.4 | the `valueSet` member (§3.1) |
 | Core §8 (new paragraph) | the evaluation form and §4.2's requirement, with its limit rule |
 | Core §9 | a paragraph on specification-defined extensions (their value is governed by their definition, which qualifies "Values may be any JSON value", line 950; each definition states where the name may appear and whether it may be required); then annotations: A1–A6, D2 |
-| Core §9 (clarification) | an `extensions` object is one the schema defines as a member of a Core object; a member named `extensions` inside an operand, an entry value or an extension's value is data, so a required name found only there is missing (§4.1; Compatibility; Unresolved question 4) |
+| Core §9 (change under the next selector) | an `extensions` object is one the schema defines as a member of a Core object; a member named `extensions` inside an operand, an entry value or an extension's value is data, so a required name found only there is missing (§4.1; Compatibility). It takes effect under the next selector and does not change Core `0.3.0` |
 | Core §10 | D1; which limits §4.2 applies to the pack as presented and which to the work its evaluation form requires |
 | Core §11 | compatibility from `0.3.0` (see Compatibility) |
 | Core §13 | unchanged; content identity stays open |
@@ -1192,16 +1194,25 @@ requires, compatibility is explicit:
   schema also refuses each new shape: the reserved key, the root `valueSets` and the `valueSet`
   member. A writer targeting `0.3.0` cannot emit them.
 - **Semantic.** For a pack that uses neither feature, `EF(P)` is `P`, so this record changes no
-  result for it, apart from the one shape the clarification below refuses.
+  result for it, apart from the one shape that the next selector's reading of an `extensions`
+  object refuses (below).
+- **The reading of an `extensions` object, a change under the next selector.** Core `0.3.0` §9 says
+  every required name "MUST appear as a key in at least one `extensions` object", and does not say
+  whether a member named `extensions` inside data, such as an item of an `in` operand, is one. That
+  is a known open point of the released text. The repository's released `0.3.0` checker counts such
+  a member; another reader may not. This record does not change Core `0.3.0`, its corpus or that
+  checker. Under the next selector, an `extensions` object is one the schema defines as a member of
+  a Core object, and a member named `extensions` inside an operand, an entry's value or an
+  extension's value is data (§4.1). The evaluation form needs that reading: under the broad one, a
+  required name found only in an unreferenced entry's value would be present in `P` and absent from
+  `EF(P)`, and `EF(P)` would not be semantically conforming.
 - **Migrating up from `0.3.0`.** One shape aside, no `0.3.0` shape is refused by these rules. The
-  exception is a clarification of Core `0.3.0` §9, by which every required name "MUST appear as a
-  key in at least one `extensions` object": an `extensions` object is one the schema defines as a
-  member, and a member named `extensions` inside data, such as an item of an `in` operand, is not
-  one (§4.1). A `0.3.0` pack whose required name appears only under such a member is therefore
-  refused under the next selector (`JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION`). The repository's
-  released `0.3.0` checker reads Core §9 more broadly, counting such a member, and this record does
-  not change it. With that exception, and as far as this record goes, changing only the selector is
-  enough, and evaluation is unchanged. The next version's other changes are their own.
+  exception is a `0.3.0` pack whose required name appears only under a member named `extensions`
+  inside data, which the broad reading admits. Under the next selector it is refused
+  (`JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION`), and moving it up means adding the name as a key of a
+  real `extensions` object as well. With that exception, and as far as this record goes, changing
+  only the selector is enough, and evaluation is unchanged. The next version's other changes are
+  their own.
   - Labels kept in a vendor extension MAY be moved to the reserved name by hand, once they meet
     §§1.3–1.5. There is no automatic coercion: a vendor value outside those rules must be edited,
     not truncated, joined or dropped by a tool.
@@ -1520,9 +1531,13 @@ The scratch check described under Evidence is not one.
    `JPS-VALUE-SET-DUPLICATE-VALUE` (§2.4) could join RFC 0027's report contract, or stay beside
    `JPS-RULES-OVERLAP` in the document corpus's advisory vocabulary. That depends on RFC 0027's
    disposition, which is open.
-4. **The reading of an `extensions` object.** §4.1 reads Core `0.3.0` §9's "at least one
-   `extensions` object" as the objects the schema defines as members, as RFC 0016 does. That
-   clarifies released text, and it refuses one shape the repository's released checker accepts
-   (Compatibility). It needs the review RFC 0009 requires, with its own disposition, before it
-   lands. The staged cases `semantic-required-extension-in-operand` and
-   `semantic-required-extension-in-entry-value` pin the reading meanwhile.
+
+**Answered questions.**
+
+- **4. The reading of an `extensions` object.** Answered by the round-1 disposition (finding H3):
+  the narrow reading, the `extensions` objects the schema defines as members of Core objects, as a
+  change that takes effect under the next selector. It does not change how Core `0.3.0` reads
+  (Compatibility). Deferring it was not safe, because the evaluation form needs it (§4.1). Core
+  `0.3.0`'s ambiguity stays a known open point of the released text, and the released checker is
+  unchanged. The staged cases `semantic-required-extension-in-operand` and
+  `semantic-required-extension-in-entry-value` pin the reading.

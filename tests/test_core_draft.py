@@ -541,9 +541,10 @@ class DraftDocumentCaseTests(unittest.TestCase):
                     assert_one_finding(self, case["id"], case["expectedDiagnostic"], diagnostics)
 
     def test_every_released_document_case_holds_under_the_draft_selector(self) -> None:
-        # The draft refuses one 0.3.0 shape, by its clarification of Core 0.3.0 §9 (RFC 0031,
-        # Compatibility), and no released case has it: each released case, with its root selector's
-        # bytes replaced, gives its released result and diagnostic under the draft.
+        # The draft refuses one 0.3.0 shape, by its reading of an extensions object, a change under
+        # the draft selector (RFC 0031, Compatibility), and no released case has it: each released
+        # case, with its root selector's bytes replaced, gives its released result and diagnostic
+        # under the draft.
         # A fixture that does not declare 0.3.0 (the 0.2.0-draft negative case, malformed carriers)
         # is run unchanged and must also keep its expectation.
         replaced = 0
@@ -881,6 +882,18 @@ class DraftSemanticReadingTests(unittest.TestCase):
         pack = strict_json_loads((STAGED / "semantic" / "required-extension-in-entry-value.json").read_text(encoding="utf-8"))
         self.assertEqual(set(), schema_extension_names(pack) & {"com.example.effective-window"})
         self.assertIn("com.example.effective-window", extension_names(pack))
+
+    def test_the_reading_is_a_change_under_the_draft_selector_not_a_clarification(self) -> None:
+        # Round-1 finding H3: the narrow reading takes effect under the draft selector. Neither text
+        # may present it as a clarification of Core 0.3.0, whose released checker keeps the broad
+        # reading (extension_names, above, is that checker's).
+        for path in (ROOT / "rfcs" / "0031-annotations-and-value-sets.md", DRAFT_TEXT_PATH):
+            flat = " ".join(path.read_text(encoding="utf-8").split())
+            with self.subTest(path=path.relative_to(ROOT).as_posix()):
+                self.assertIsNone(re.search(r"clarif\w* (?:of )?(?:released text|Core `0\.3\.0`)", flat))
+        flat = " ".join(DRAFT_TEXT_PATH.read_text(encoding="utf-8").split())
+        self.assertIn("This reading is a change that takes effect under this selector; it does not change "
+                      "Core `0.3.0`.", flat)
 
     def test_evaluation_form_of_the_rfc_examples(self) -> None:
         positions = strict_json_loads((STAGED / "valid" / "annotations-positions.json").read_text(encoding="utf-8"))
