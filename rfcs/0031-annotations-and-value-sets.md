@@ -1471,9 +1471,9 @@ with the different-vendor review waived. Item by item:
    repository's checks, the static check included. They are released in the `0.5.0` corpora.
 3. **Met in part.** Two implementations have run the vectors: the project's reference runtime and
    the second evaluator in this repository (`tools/core_050_eval.py`). Both are by the drafting
-   vendor; neither is a different vendor's. Neither passes every vector: both report the 18
-   document cases that declare the `extended` profile as unsupported, and the second evaluator
-   supports `base` only. The reference runtime passed the 208 document cases and 82 rows staged at
+   vendor; neither is a different vendor's. Neither passes every vector: both refuse the 18
+   document cases that declare the `extended` profile, which neither supports, and the second
+   evaluator supports `base` only. The reference runtime passed the 208 document cases and 82 rows staged at
    c867b35, the held row held; it has not run the seven document cases #308 added, the two fixtures
    #304 rewrote, or anything under the selector `0.5.0`. The second evaluator runs every row and
    every other document case under `0.5.0`. The maintainer directed acceptance on that basis; the

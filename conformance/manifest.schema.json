@@ -300,7 +300,7 @@
           "uniqueItems": true
         },
         "expectedDiagnostics": {
-          "description": "Optional. Every finding the case's one defect gives, where it gives more than one. Findings compare as a set of code and pointer pairs; expectedDiagnostic is the first item.",
+          "description": "Optional. Every finding the case gives, where it gives more than one. Findings compare as a set of code and pointer pairs; expectedDiagnostic is the first item.",
           "type": "array",
           "minItems": 2,
           "uniqueItems": true,

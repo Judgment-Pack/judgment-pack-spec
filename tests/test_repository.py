@@ -1553,10 +1553,10 @@ class RepositoryConformanceTests(unittest.TestCase):
                 else:
                     assert_findings(self, case["id"], expected_findings(case), diagnostics)
 
-    def test_more_than_one_expected_finding_is_stated_only_where_one_defect_gives_two(self) -> None:
-        # The 0.5.0 case schema's expectedDiagnostics lists every finding of one defect. One case
-        # uses it: value beside valueSet under the operator equals, refused at the condition and at
-        # its operator (Core §7.4). Its expectedDiagnostic is the first item, so a consumer reading
+    def test_more_than_one_expected_finding_is_stated_only_for_the_two_refusal_case(self) -> None:
+        # The 0.5.0 case schema's expectedDiagnostics lists every finding of a case that gives more
+        # than one. One case uses it: value beside valueSet under the operator equals, two Core §7.4
+        # refusals of one condition, found at the condition and at its operator. Its expectedDiagnostic is the first item, so a consumer reading
         # only that member still reads a finding the case gives.
         listing = [case for case in self.manifest["cases"] if "expectedDiagnostics" in case]
         self.assertEqual(
@@ -1572,6 +1572,11 @@ class RepositoryConformanceTests(unittest.TestCase):
             case["expectedDiagnostics"],
         )
         self.assertEqual(case["expectedDiagnostics"][0], case["expectedDiagnostic"])
+        # It is described as the two refusals it holds, not as one defect.
+        self.assertNotIn("one defect", case["focus"])
+        self.assertIn("two section 7.4 refusals of one condition", case["focus"])
+        readme = " ".join((CONFORMANCE / "README.md").read_text(encoding="utf-8").split())
+        self.assertIn("which holds two §7.4 refusals of one condition", readme)
         _, diagnostics = evaluate_case(CONFORMANCE / case["path"], self.validators, [])
         dropped = [d for d in diagnostics if d.path != "/rules/0/when/operator"]
         with self.assertRaises(AssertionError):

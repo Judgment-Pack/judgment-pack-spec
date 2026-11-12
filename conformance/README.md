@@ -67,16 +67,19 @@ Each case records:
   for that case. When omitted, the capability set is empty. A specification-defined name such as
   `org.judgmentpack.annotations` may appear there; it is never requirable, so listing it changes
   nothing (Core §8.2); and
-- optional `expectedDiagnostics` — every finding of a case whose one defect gives more than one,
-  with `expectedDiagnostic` as its first item. One case uses it:
-  `structural-value-set-reference-and-value-operator-equals`, whose condition carries both `value`
-  and `valueSet` with the operator `equals`, and gives `JPS-STRUCTURE-VALUE-SET-REFERENCE` at
+- optional `expectedDiagnostics` — every finding of a case that gives more than one, with
+  `expectedDiagnostic` as its first item. One case uses it:
+  `structural-value-set-reference-and-value-operator-equals`, which holds two §7.4 refusals of one
+  condition: the condition carries both `value` and `valueSet`, and it carries `valueSet` under the
+  operator `equals` rather than `in`. It gives `JPS-STRUCTURE-VALUE-SET-REFERENCE` for each, at
   `/rules/0/when` and at `/rules/0/when/operator`.
 
 The manifest's `readerProfiles` names the ceiling profiles a reader runs the cases under (Core §4.1).
 A case whose fixture declares the `extended` profile is run by a reader that supports it, under the
 extended value of every row; a reader that supports only `base` refuses that fixture with the one
-diagnostic of §4.1 and reports the case unsupported, not failed.
+diagnostic of §4.1, `profile-unsupported`, and reports the case as not run under an unsupported
+profile, not failed. That is not the `expectedResult` `unsupported` below, which names a missing
+required extension.
 
 Advisory cases additionally record `expectedAdvisories`. `diagnosticVocabulary.advisory` closes the
 names those entries may use; advisory findings do not change `expectedResult` or

@@ -3790,7 +3790,7 @@
           "path": "/rules/0/when/operator"
         }
       ],
-      "focus": "value and valueSet together with operator equals: one defect, refused at the condition and at its operator, inside the condition's oneOf",
+      "focus": "value and valueSet together with operator equals: two section 7.4 refusals of one condition, both members present and valueSet under an operator other than in, found at the condition and at its operator, inside the condition's oneOf",
       "specSection": "\u00a77.4"
     },
     {

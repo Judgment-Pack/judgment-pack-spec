@@ -364,6 +364,15 @@ class AddedDocumentCaseTests(unittest.TestCase):
         self.assertEqual(18, sum('"profile": "extended"' in (CONFORMANCE / c["path"]).read_text(encoding="utf-8")
                                  for c in self.cases))
 
+    def test_the_readme_names_the_profile_refusal_apart_from_an_unsupported_result(self) -> None:
+        # A base-only reader's refusal of an extended fixture is Core §4.1's profile-unsupported, not
+        # the expectedResult unsupported, which names a missing required extension.
+        text = " ".join((CONFORMANCE / "README.md").read_text(encoding="utf-8").split())
+        self.assertIn("refuses that fixture with the one diagnostic of §4.1, `profile-unsupported`", text)
+        self.assertIn("That is not the `expectedResult` `unsupported` below, which names a missing "
+                      "required extension.", text)
+        self.assertNotIn("reports the case unsupported", text)
+
     def test_ids_and_paths_are_new(self) -> None:
         for field in ("id", "path"):
             released = {case[field] for case in self.released["cases"]}
@@ -1109,8 +1118,8 @@ class AcceptanceRecordTests(unittest.TestCase):
                 "That is a same-vendor review, not a cross-vendor claim.",
                 "1. **Not met as written; waived.**",
                 "3. **Met in part.** Two implementations have run the vectors",
-                "Neither passes every vector: both report the 18 document cases that declare the "
-                "`extended` profile as unsupported, and the second evaluator supports `base` only.",
+                "Neither passes every vector: both refuse the 18 document cases that declare the "
+                "`extended` profile, which neither supports, and the second evaluator supports `base` only.",
                 "it has not run the seven document cases #308 added, the two fixtures #304 rewrote, or "
                 "anything under the selector `0.5.0`.",
                 "The maintainer directed acceptance on that basis; the reference runtime's take-up of "
