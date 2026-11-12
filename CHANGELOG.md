@@ -48,6 +48,18 @@ here.
   annotations name in a supported-extension set ignored (draft §8.2); the two value-set advisories
   kept out of the draft's Core text; and more inertness rows, over evidence, exceptions, the
   fallback outcome and escalation routes. The draft schema's new digest has a change record.
+- A second evaluator for the staged draft selector `0.4.0-draft` (#301),
+  [`tools/core_draft_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tools/core_draft_eval.py), written from Core, the
+  staged delta and RFC 0031 alone, by the drafting model's own vendor. It admits a pack (the
+  carrier, the `base` profile, the staged schema and the semantic checks, written fresh), builds the
+  evaluation form and evaluates it under Core §§7–8. Its test, `tests/test_core_draft_eval.py`,
+  runs every staged evaluation row against its expectation (82 agree; the held row agrees and stays
+  held), the rows they carry over, the 29 pairs, and every staged and carried-over document case;
+  the 18 cases that declare `extended` are checked to be refused with `profile-unsupported`. It
+  also states, as its own cases, the rules of Core §§7–8 its mutation check found no row
+  distinguishes. It is a test tool, not a product, and makes no conformance claim; whether it meets
+  RFC 0031's evidence bar item 3 is the maintainer's judgment. RFC 0031 and the staged READMEs say
+  so. No case, row, fixture, schema or expectation changes.
 - An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
   names the judge, the signer, the witness and the reader around a decision record: what each
   produces, trusts and never does, and which parts are not shipped. It defines nothing.

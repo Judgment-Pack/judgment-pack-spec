@@ -1430,8 +1430,10 @@ This record cannot move beyond Draft until all of the following hold.
 **Standing after round 1.** Item 1 is not met: the round-1 review was by a model from the drafting
 vendor
 ([`rfcs/reviews/0031-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0031-round-1.md))
-and does not count. Item 3 is not met: one implementation exists, experimentally, and a second does
-not (Implementation). Item 6 is met by the disposition of Unresolved question 1. Item 7's
+and does not count. Item 3 was not met at round 1: one implementation existed, experimentally, and a
+second did not. A second evaluator has been added since, written from the text by the drafting
+vendor; what it covers is under Implementation, and whether it meets item 3 is the maintainer's
+judgment. Item 6 is met by the disposition of Unresolved question 1. Item 7's
 coordination is drafted in this record (Compatibility, Coordination with RFC 0016). The other items
 stand as the round-1 review found them.
 
@@ -1655,9 +1657,32 @@ for the pairs it cannot decide. No conformance result depends on it.
 
 One implementation exists, experimentally: a release of the project's reference runtime admits the
 staged selector `0.4.0-draft`, with annotations, value sets and a filtered view, built on the
-staged artifacts. A second, independently authored implementation does not exist. The scratch check
-described under Evidence is not one, and neither is the evaluator the round-1 review wrote. Evidence
-bar item 3 is therefore not met.
+staged artifacts.
+
+A second evaluator now exists in this repository:
+[`tools/core_draft_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tools/core_draft_eval.py), with its test,
+[`tests/test_core_draft_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tests/test_core_draft_eval.py). It was written from Core, the
+staged delta and this record alone, without reading or running the reference runtime. Its authoring
+vendor is the drafts' own, so it is a second reading of the text, not a different vendor's. It is a
+test tool, not a product, and makes no conformance claim. It covers:
+
+- admission as far as evaluation needs it: the carrier, the `base` profile, the staged schema
+  applied by a general-purpose JSON Schema validator, and the semantic checks of Core §3.3 and the
+  draft's §3.3, written fresh;
+- the evaluation form, and Core §§7–8 over it, to the full disposition or error class;
+- every staged evaluation row (each agrees with its expectation, and the held row agrees and stays
+  held), every row they carry over with its selector replaced, and the equality of each of the 29
+  pairs;
+- every staged document case, and every released one they carry over: the result, and each
+  semantic finding exactly. For a structural case it checks the result and the layer, not the
+  code, since it maps no schema keyword to a code.
+
+It supports `base` only. The 18 staged cases whose fixtures declare `extended` are checked to be
+refused with `profile-unsupported`, not run. Its mutation check found rules of Core §§7–8 that no
+evaluation row distinguishes, such as `suppress-rule`; its test states them as its own cases,
+which are not conformance rows. Whether this evaluator meets evidence bar item 3 is the
+maintainer's judgment. The scratch check described under Evidence is not an implementation, and
+neither is the evaluator the round-1 review wrote.
 
 ## Unresolved questions
 
