@@ -32,6 +32,19 @@ def js(request):
     return validate_event(json.loads(process.stdout))
 
 
+# RFC 0028 is a draft outside Core 0.5.0. Its packs are Core 0.3.0 documents whose bytes the bundles
+# pin by digest, so each pack is read with the Core schema its own selector names.
+CORE_SCHEMAS = {
+    '0.3.0': ROOT / 'schema/judgment-pack-core-0.3.0.schema.json',
+    '0.5.0': ROOT / 'schema/judgment-pack-core.schema.json',
+}
+
+
+def core_validator(pack):
+    schema = json.loads(CORE_SCHEMAS[pack['specVersion']].read_text())
+    return jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker())
+
+
 def validate_event(answer):
     if answer.get('result') in ('refusal', 'finding'):
         reader.form(answer, 'verifierReport')
@@ -69,9 +82,8 @@ class CompleteContributorTests(unittest.TestCase):
         for entry in manifest['files']:
             with self.subTest(path=entry['path']):
                 self.assertEqual(validator.is_valid(load(entry['path'])), entry['schemaValid'])
-        core = json.loads((ROOT / 'schema/judgment-pack-core.schema.json').read_text())
         for name in ('pack.json', 'pack-reversed.json'):
-            jsonschema.Draft202012Validator(core, format_checker=jsonschema.FormatChecker()).validate(load(name))
+            core_validator(load(name)).validate(load(name))
 
     def test_added_attribution_members_and_kind_values_have_fixture_witnesses(self):
         bundle = load('bundle.json')
@@ -169,8 +181,7 @@ class CompleteContributorTests(unittest.TestCase):
         for tail, spelling in ((70000, b'true'), (0, b'2.0'), (0, b'2e0')):
             bundle = load('bundle.json')
             raw = packs()['cases'].replace(b'"value": true', b'"value": '+spelling, 1) + b' '*tail
-            core = json.loads((ROOT / 'schema/judgment-pack-core.schema.json').read_text())
-            jsonschema.Draft202012Validator(core).validate(json.loads(raw))
+            core_validator(json.loads(raw)).validate(json.loads(raw))
             for row in bundle['stages'][0]['records']:
                 row['output']['lineage']['packDigest'] = 'sha256:'+hashlib.sha256(raw).hexdigest()
                 row['recordDigest'] = reader.digest(row['output'])

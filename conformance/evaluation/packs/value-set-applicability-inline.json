@@ -1,0 +1,50 @@
+{
+  "specVersion": "0.5.0",
+  "id": "https://example.com/judgment-packs/value-set-tiers",
+  "version": "0.1.0",
+  "title": "Intake kinds",
+  "decision": {
+    "intent": "Decide whether a request is on the priority track.",
+    "question": "Is the request accepted?"
+  },
+  "applicability": {
+    "op": "fact",
+    "path": "/request/kind",
+    "operator": "in",
+    "value": [
+      "new-intake",
+      "renewal"
+    ]
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "priority-track",
+      "description": "A request in a priority tier is accepted.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "escalate"
+    }
+  ],
+  "escalation": {
+    "triggers": [
+      "not-applicable"
+    ],
+    "target": {
+      "kind": "queue",
+      "name": "Priority review"
+    }
+  }
+}

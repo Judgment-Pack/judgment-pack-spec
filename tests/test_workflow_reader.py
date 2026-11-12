@@ -405,9 +405,19 @@ class ReaderTests(unittest.TestCase):
         e=Example(); reader=w.Reader(e.files,e.expect)
         error=dict(outputVersion='2',tool={'name':'jpack','version':'0.34.0'},command='experimental evaluate',status='error',
                    evaluationError={'class':'resource-exhaustion','phase':'evaluation','evaluatorSpecVersion':'0.2.0-draft'},diagnostics=[])
-        with self.assertRaises(w.Problem) as caught: reader.error_form(error)
-        self.assertEqual((caught.exception.result,caught.exception.code,caught.exception.detail),
-                         ('refusal','input-malformed','Core error phase'))
+        # The §1 Runtime pin predates Core 0.5.0, so no 0.5.0 envelope is read yet.
+        for stale in ('0.2.0-draft','0.4.0-draft','0.5.0'):
+            with self.assertRaises(w.Problem) as caught:
+                reader.error_form(dict(error,evaluationError=dict(error['evaluationError'],evaluatorSpecVersion=stale)))
+            self.assertEqual((caught.exception.result,caught.exception.code,caught.exception.detail),
+                             ('refusal','input-malformed','Core error phase'),stale)
+
+    def test_the_text_names_the_envelope_version_the_reader_reads(self):
+        # The text and the reader name one evaluator version, the one the §1 Runtime pin evaluates under.
+        text=' '.join((ROOT/'spec'/'workflow.md').read_text(encoding='utf-8').split())
+        self.assertIn('`evaluatorSpecVersion: "0.3.0"`. No `0.5.0` envelope is read yet: the §1 pin predates Core `0.5.0`',text)
+        self.assertNotIn('`evaluatorSpecVersion: "0.5.0"`',text)
+        self.assertIn("error['evaluatorSpecVersion']=='0.3.0'",(ROOT/'tools'/'workflow_reader.py').read_text(encoding='utf-8'))
 
     def test_empty_output_is_completed_zero(self):
         result=self.read(Example(case={'items':[]}).group())

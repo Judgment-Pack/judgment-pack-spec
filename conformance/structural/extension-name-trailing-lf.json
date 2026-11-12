@@ -1,0 +1,37 @@
+{
+  "specVersion": "0.5.0",
+  "id": "https://example.com/judgment-packs/extension-name-trailing-lf",
+  "version": "0.1.0",
+  "title": "A vendor extension name that ends in a line feed",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031.",
+    "question": "Is the request accepted?",
+    "extensions": {
+      "com.example.review-policy\n": {
+        "reviewMode": "two-person"
+      }
+    }
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept every request.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

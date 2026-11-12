@@ -1,0 +1,47 @@
+{
+  "specVersion": "0.5.0",
+  "id": "https://example.com/judgment-packs/annotations-in-source",
+  "version": "0.1.0",
+  "title": "Annotations in a position that refuses them",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031.",
+    "question": "Is the request accepted?"
+  },
+  "sources": [
+    {
+      "id": "policy",
+      "title": "Example policy",
+      "locator": {
+        "kind": "uri",
+        "value": "https://example.com/policy"
+      },
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "category": "intake"
+        }
+      }
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept every request.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore"
+    }
+  ]
+}

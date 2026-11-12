@@ -10,7 +10,7 @@ import unittest
 from dataclasses import dataclass
 from json.decoder import WHITESPACE, WHITESPACE_STR, JSONDecodeError, scanstring
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Mapping
 from unittest.mock import patch
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -31,10 +31,43 @@ EVALUATION_MANIFEST_SCHEMA_PATH = EVALUATION / "manifest.schema.json"
 # that moving them into the manifest edits nothing.
 EVALUATION_STAGED = EVALUATION / "staged"
 EVALUATION_STAGED_CASES_PATH = EVALUATION_STAGED / "cases.json"
-SPEC_VERSION = "0.3.0"
-PREVIOUS_SPEC_VERSIONS = ("0.1.0-draft", "0.2.0-draft")
+SPEC_VERSION = "0.5.0"
+PREVIOUS_SPEC_VERSIONS = ("0.1.0-draft", "0.2.0-draft", "0.3.0")
 SCHEMA_ID = f"https://judgmentpack.org/schema/{SPEC_VERSION}/judgment-pack-core.schema.json"
 STATUS_VECTORS_PATH = ROOT / "tests" / "conformance-status-vectors.json"
+
+# Core §9.2's reserved name, and the subschemas the code rule of the corpus keys on
+# (conformance/README.md, "Codes"). Each is held only by a definition Core 0.5.0 adds or amends.
+ANNOTATIONS = "org.judgmentpack.annotations"
+LOCAL_ID = "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+# Core §9.2's class for annotation keys, and its pattern for annotation strings, as the schema holds
+# them after JSON decoding.
+KEY_CLASS = "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+_WHITE_SPACE = "[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]"
+STRING_PATTERN = (
+    "[\u0000-\u001f\u007f-\u009f\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180b-\u180f\u200b-\u200f"
+    "\u2028-\u202e\u2060-\u206f\u3164\ufe00-\ufe0f\ufeff\uffa0\ufff0-\ufff8"
+    "\U0001bca0-\U0001bca3\U0001d173-\U0001d17a\U000e0000-\U000e0fff]"
+    f"|^{_WHITE_SPACE}|{_WHITE_SPACE}$"
+)
+# The two `not` subschemas: under an annotations object's propertyNames, whose instances are always
+# strings, and in annotationString, where `type` keeps a non-string from failing it.
+REFUSED_NOTS = ({"pattern": KEY_CLASS}, {"type": "string", "pattern": STRING_PATTERN})
+# Core §§2.2, 4, 5 and 9: beside the local-identifier, pack-version, decimal-operand and
+# extension-name grammars, a `not` refuses the class of an annotation key, so a value that ends in a
+# line terminator is refused whatever an engine's anchors admit. The extension-name grammar's
+# reserved prefix is in that `not`, not in a lookahead, and its class hyphen is escaped.
+RELEASED_EXTENSION_NAME = "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+EXTENSION_NAME = "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$"
+GRAMMAR_NOT = {"type": "string", "pattern": KEY_CLASS}
+PACK_VERSION = "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+DECIMAL = "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$"
+GRAMMAR_CODES = {
+    LOCAL_ID: "JPS-STRUCTURE-LOCAL-ID",
+    PACK_VERSION: "JPS-STRUCTURE-PACK-VERSION",
+    DECIMAL: "JPS-STRUCTURE-DECIMAL-OPERAND",
+}
+EXTENSION_NAME_NOT = {"type": "string", "pattern": "^org\\.judgmentpack\\.|" + KEY_CLASS}
 # §8.3: the reason vocabulary a disposition may carry.
 REASONS = {
     "not-applicable",
@@ -299,11 +332,77 @@ def parse_spec_section(spec_section: str) -> list[str]:
 
 def walk_schema_errors(error: Any) -> Iterable[Any]:
     yield error
+    if str(error.validator) == "anyOf" and "propertyNames" in [str(p) for p in error.absolute_schema_path]:
+        return  # one refusal, the key's: its branches are not separate findings
     for child in error.context:
         yield from walk_schema_errors(child)
 
 
 def schema_diagnostic(error: Any) -> Diagnostic:
+    """The corpus's code rule (conformance/README.md, "Codes"): the rules for the subschemas Core
+    0.5.0 adds or amends, then the keyword rule every earlier corpus used."""
+    validator = str(error.validator)
+    schema_path = [str(part) for part in error.absolute_schema_path]
+    instance_path = list(error.absolute_path)
+    under_names = "propertyNames" in schema_path
+    key = [error.instance] if under_names and isinstance(error.instance, str) else []
+
+    def code(name: str, path: list[Any]) -> Diagnostic:
+        return Diagnostic(name, pointer(path), error.message)
+
+    # The two mapped refusals of the reference rule (§7.4), checked first so that a reference
+    # inside an exception's `when` is not read as an exception-shape refusal.
+    if validator == "not" and error.validator_value == {"required": ["value"]}:
+        return code("JPS-STRUCTURE-VALUE-SET-REFERENCE", instance_path)
+    if (
+        validator == "const"
+        and error.validator_value == "in"
+        and instance_path[-1:] == ["operator"]
+        and schema_path[-4:] == ["then", "properties", "operator", "const"]
+    ):
+        return code("JPS-STRUCTURE-VALUE-SET-REFERENCE", instance_path)
+    if validator == "not" and error.validator_value in REFUSED_NOTS:
+        # Under an annotations object's propertyNames the class repeats the local-identifier
+        # grammar for engines whose `$` admits a final line feed, and takes its code (§9.2).
+        if under_names:
+            return code("JPS-STRUCTURE-LOCAL-ID", instance_path + key)
+        return code("JPS-STRUCTURE-NOT", instance_path)
+    if (
+        validator == "not"
+        and error.validator_value == GRAMMAR_NOT
+        and isinstance(error.schema, dict)
+        and error.schema.get("pattern") in GRAMMAR_CODES
+    ):
+        # The class repeats the grammar beside it, and takes that grammar's code.
+        return code(GRAMMAR_CODES[error.schema["pattern"]], instance_path)
+    if (validator == "not" and error.validator_value == EXTENSION_NAME_NOT) or (
+        validator == "pattern" and error.validator_value == EXTENSION_NAME
+    ):
+        # The extension-name grammar, its reserved prefix and the class are one code, at the key
+        # under propertyNames.
+        return code("JPS-STRUCTURE-EXTENSION-NAME", instance_path + key)
+    if (
+        validator == "anyOf"
+        and under_names
+        and isinstance(error.validator_value, list)
+        and error.validator_value[:1] == [{"const": ANNOTATIONS}]
+    ):
+        # A key refused by the extension-name grammar as a branch of an anyOf.
+        return code("JPS-STRUCTURE-EXTENSION-NAME", instance_path + key)
+    if validator == "pattern" and error.validator_value == LOCAL_ID and under_names:
+        return code("JPS-STRUCTURE-LOCAL-ID", instance_path + key)
+    new_keywords = {
+        "maxLength": "JPS-STRUCTURE-MAX-LENGTH",
+        "minProperties": "JPS-STRUCTURE-MIN-PROPERTIES",
+        "maxProperties": "JPS-STRUCTURE-MAX-PROPERTIES",
+    }
+    if validator in new_keywords:
+        return code(new_keywords[validator], instance_path + key)
+    return keyword_diagnostic(error)
+
+
+def keyword_diagnostic(error: Any) -> Diagnostic:
+    """The keyword rule of every corpus up to 0.3.0, which the 0.5.0 rule falls back to."""
     validator = str(error.validator)
     schema_path = [str(part) for part in error.absolute_schema_path]
     instance_path = list(error.absolute_path)
@@ -395,12 +494,14 @@ def schema_diagnostic(error: Any) -> Diagnostic:
 
 
 def structural_diagnostics(validator: Draft202012Validator, value: Any) -> list[Diagnostic]:
+    # Findings are a set of (code, pointer) pairs (conformance/README.md): a keyword reported twice
+    # at one pointer, and a grammar and its `not` that both refuse one value, are one finding.
     diagnostics: list[Diagnostic] = []
-    seen: set[tuple[str, str, str]] = set()
+    seen: set[tuple[str, str]] = set()
     for top_level in validator.iter_errors(value):
         for error in walk_schema_errors(top_level):
             item = schema_diagnostic(error)
-            identity = (item.code, item.path, item.message)
+            identity = (item.code, item.path)
             if identity not in seen:
                 seen.add(identity)
                 diagnostics.append(item)
@@ -435,7 +536,60 @@ def duplicate_id_diagnostics(value: dict[str, Any], collection: str) -> list[Dia
     return diagnostics
 
 
+def fact_conditions(value: dict[str, Any]) -> list[tuple[dict[str, Any], list[Any]]]:
+    """Every fact condition in every condition position §3.3 names, with its path."""
+    found: list[tuple[dict[str, Any], list[Any]]] = []
+
+    def walk(condition: Any, path: list[Any]) -> None:
+        if not isinstance(condition, dict):
+            return
+        op = condition.get("op")
+        if op == "fact":
+            found.append((condition, path))
+        elif op in ("all", "any"):
+            for index, child in enumerate(condition.get("conditions", [])):
+                walk(child, path + ["conditions", index])
+        elif op == "not":
+            walk(condition.get("condition"), path + ["condition"])
+
+    if "applicability" in value:
+        walk(value["applicability"], ["applicability"])
+    for index, rule in enumerate(value.get("rules", [])):
+        walk(rule.get("when"), ["rules", index, "when"])
+    for index, exception in enumerate(value.get("exceptions", [])):
+        walk(exception.get("when"), ["exceptions", index, "when"])
+    return found
+
+
+def schema_extension_holders(value: dict[str, Any]) -> list[dict[str, Any]]:
+    """The objects whose `extensions` member the schema defines, and that carry one (§9.1).
+
+    A member named `extensions` inside an operand, an entry value or an extension's own value is
+    data, not an `extensions` object. A value-set object has no such member (§6.9), and a pack whose
+    set carried one is refused before this is read.
+    """
+    holders: list[Any] = [value, value.get("decision"), value.get("escalation"), value.get("metadata")]
+    for collection in ("evidenceRequirements", "sources", "outcomes", "rules", "exceptions"):
+        holders.extend(value.get(collection, []))
+    for value_set in value.get("valueSets", []):
+        holders.extend(value_set.get("entries", []))
+    return [holder for holder in holders if isinstance(holder, dict) and isinstance(holder.get("extensions"), dict)]
+
+
+def schema_extension_objects(value: dict[str, Any]) -> list[dict[str, Any]]:
+    return [holder["extensions"] for holder in schema_extension_holders(value)]
+
+
+def schema_extension_names(value: Any) -> set[str]:
+    names: set[str] = set()
+    for extensions in schema_extension_objects(value):
+        names.update(extensions)
+    return names
+
+
 def extension_names(value: Any) -> set[str]:
+    """The names a member called `extensions` holds anywhere in the document: the reading of the
+    repository's 0.3.0 checker, kept for that version's corpus (Core §9.1)."""
     names: set[str] = set()
     if isinstance(value, dict):
         extensions = value.get("extensions")
@@ -451,12 +605,12 @@ def extension_names(value: Any) -> set[str]:
 
 def semantic_diagnostics(
     value: dict[str, Any],
-    extension_names_of: Callable[[Any], set[str]] = extension_names,
+    extension_names_of: Callable[[Any], set[str]] = schema_extension_names,
 ) -> list[Diagnostic]:
     """§3.3's checks. `extension_names_of` reads the names §9's required-extension rule may count.
 
-    The released corpus uses `extension_names`. The staged draft (tests/test_core_draft.py) passes
-    the reading RFC 0031 §4.1 states: only the `extensions` objects the schema defines as members.
+    Core 0.5.0 counts only the `extensions` objects the schema defines as members (§9.1); the
+    repository's 0.3.0 checker counted a member so named anywhere (`extension_names`).
     """
     diagnostics: list[Diagnostic] = []
     collections = ("outcomes", "rules", "evidenceRequirements", "sources", "exceptions")
@@ -584,7 +738,71 @@ def semantic_diagnostics(
                     f"required extension has no value in the document: {required}",
                 )
             )
+    diagnostics.extend(duplicate_id_diagnostics(value, "valueSets"))
+    declared_sets = {item["id"] for item in value.get("valueSets", [])}
+    for condition, path in fact_conditions(value):
+        if "valueSet" in condition and condition["valueSet"] not in declared_sets:
+            diagnostics.append(
+                Diagnostic(
+                    "JPS-SEMANTIC-UNRESOLVED-VALUE-SET",
+                    pointer(path + ["valueSet"]),
+                    f"value-set reference does not resolve: {condition['valueSet']}",
+                )
+            )
     return diagnostics
+
+
+def core_schema(profile: str = "base") -> dict[str, Any]:
+    """The published schema, with Core §4.1's ceilings for `profile`.
+
+    The published schema carries the base maxima. A reader supporting `extended` applies the
+    extended value of every row, as tools/profile_validation.py does. Each base value is asserted
+    before it is replaced, so a schema edit that moved one fails here instead of passing under a
+    stale patch.
+    """
+    if profile not in ("base", "extended"):
+        raise ValueError("unknown ceiling profile")
+    schema = strict_json_loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    if profile == "extended":
+        defs = schema["$defs"]
+        rows = (
+            (defs["escalation"]["properties"]["routes"], "maxItems", 8, 16),
+            (defs["disposition"]["properties"]["handoff"]["properties"]["routes"], "maxItems", 8, 16),
+            (defs["annotations"], "maxProperties", 16, 32),
+            (defs["annotations"]["additionalProperties"]["else"], "maxItems", 16, 32),
+            (defs["annotations"]["propertyNames"], "maxLength", 64, 128),
+            (defs["annotationString"], "maxLength", 256, 512),
+            (schema["properties"]["valueSets"], "maxItems", 64, 128),
+            (defs["valueSet"]["properties"]["entries"], "maxItems", 512, 1024),
+        )
+        for holder, keyword, base, extended in rows:
+            if holder[keyword] != base:
+                raise ValueError(f"base ceiling {keyword} is {holder[keyword]}, not {base}")
+            holder[keyword] = extended
+    return schema
+
+
+def core_validators() -> dict[str, Draft202012Validator]:
+    return {
+        profile: Draft202012Validator(core_schema(profile), format_checker=FormatChecker())
+        for profile in ("base", "extended")
+    }
+
+
+def profile_of(value: Any) -> str:
+    """The declared profile, for choosing ceilings; anything else is the schema's to refuse."""
+    profile = value.get("profile", "base") if isinstance(value, dict) else "base"
+    return profile if profile in ("base", "extended") else "base"
+
+
+Validators = Draft202012Validator | Mapping[str, Draft202012Validator]
+
+
+def validator_for(validators: Validators, value: Any) -> Draft202012Validator:
+    """One validator, or the validator of the ceiling profile `value` declares (§4.1)."""
+    if isinstance(validators, Mapping):
+        return validators[profile_of(value)]
+    return validators
 
 
 def unsupported_diagnostics(
@@ -606,11 +824,23 @@ def unsupported_diagnostics(
 
 def evaluate_case(
     path: Path,
-    validator: Draft202012Validator,
+    validators: Validators,
     supported_extensions: Iterable[str],
 ) -> tuple[str, list[Diagnostic]]:
     try:
-        value = strict_json_loads(path.read_text(encoding="utf-8"))
+        text = path.read_text(encoding="utf-8")
+    except UnicodeError as error:
+        return "invalid", [Diagnostic("JPS-CARRIER-INVALID-JSON", "", str(error))]
+    return evaluate_text(text, validators, supported_extensions)
+
+
+def evaluate_text(
+    text: str,
+    validators: Validators,
+    supported_extensions: Iterable[str],
+) -> tuple[str, list[Diagnostic]]:
+    try:
+        value = strict_json_loads(text)
     except DuplicateMemberError as error:
         return "invalid", [
             Diagnostic("JPS-CARRIER-DUPLICATE-MEMBER", error.path, str(error))
@@ -618,7 +848,7 @@ def evaluate_case(
     except (UnicodeError, json.JSONDecodeError, UnpairedSurrogateError, NonJSONConstantError) as error:
         return "invalid", [Diagnostic("JPS-CARRIER-INVALID-JSON", "", str(error))]
 
-    diagnostics = structural_diagnostics(validator, value)
+    diagnostics = structural_diagnostics(validator_for(validators, value), value)
     if diagnostics:
         return "invalid", diagnostics
 
@@ -632,7 +862,7 @@ def evaluate_case(
     return "valid", []
 
 
-def pack_conformance_diagnostics(validator: Draft202012Validator, pack: Any) -> list[Diagnostic]:
+def pack_conformance_diagnostics(validator: Validators, pack: Any) -> list[Diagnostic]:
     """Why a parsed pack is not a semantically conforming document (§3.3), or an empty list.
 
     The layers are ordered, as in `evaluate_case`: the semantic checks read a document the
@@ -642,10 +872,52 @@ def pack_conformance_diagnostics(validator: Draft202012Validator, pack: Any) -> 
     pack where one of those is `null` or a string it raises instead of reporting — and a fixture
     whose whole point is to be nonconforming is exactly where such a shape turns up.
     """
-    diagnostics = structural_diagnostics(validator, pack)
+    diagnostics = structural_diagnostics(validator_for(validator, pack), pack)
     if diagnostics:
         return diagnostics
     return semantic_diagnostics(pack)
+
+
+def assert_findings(
+    test: unittest.TestCase,
+    case_id: str,
+    expected: list[dict[str, str]],
+    diagnostics: list[Diagnostic],
+) -> None:
+    """The corpus's strictness: every expected finding, and no other outside the outermost oneOf
+    that encloses one of them. Findings compare as a set of (code, pointer) pairs."""
+    pairs = list(dict.fromkeys((d.code, d.path) for d in diagnostics))
+    wanted = [(item["code"], item["path"]) for item in expected]
+    for finding in wanted:
+        test.assertIn(finding, pairs, f"case {case_id!r}: expected {finding}; got {pairs}")
+    regions = []
+    for _, path in wanted:
+        enclosing = [
+            d.path
+            for d in diagnostics
+            if d.code == "JPS-STRUCTURE-ONEOF" and pointer_contains(d.path, path)
+        ]
+        if enclosing:
+            regions.append(min(enclosing, key=pointer_depth))
+    strays = [
+        pair
+        for pair in pairs
+        if pair not in wanted and not any(pointer_contains(region, pair[1]) for region in regions)
+    ]
+    test.assertEqual(
+        [],
+        strays,
+        f"case {case_id!r} expected only {wanted}"
+        + (f" and findings inside {regions}" if regions else "")
+        + f", but got stray diagnostic(s): {strays}; all diagnostics: {pairs}",
+    )
+
+
+def expected_findings(case: dict[str, Any]) -> list[dict[str, str]]:
+    """A case's expected findings: its `expectedDiagnostics`, or its one `expectedDiagnostic`."""
+    if "expectedDiagnostics" in case:
+        return case["expectedDiagnostics"]
+    return [case["expectedDiagnostic"]]
 
 
 # §8.4: the Core classes decided while admitting the inputs (§8.2), in the order they are evaluated.
@@ -693,7 +965,8 @@ class RepositoryConformanceTests(unittest.TestCase):
             MANIFEST_SCHEMA_PATH.read_text(encoding="utf-8")
         )
         cls.manifest = strict_json_loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-        cls.validator = Draft202012Validator(cls.schema, format_checker=FormatChecker())
+        cls.validators = core_validators()
+        cls.validator = cls.validators["base"]
         cls.manifest_registry = Registry().with_resource(
             SCHEMA_ID, Resource.from_contents(cls.schema)
         )
@@ -718,7 +991,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             case["path"].startswith("advisory/") for case in self.manifest["cases"]
         )
         conformance_count = len(self.manifest["cases"]) - advisory_count
-        self.assertEqual((151, 5), (conformance_count, advisory_count))
+        self.assertEqual((369, 5), (conformance_count, advisory_count))
         statements = (
             (
                 "README.md",
@@ -750,7 +1023,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             (
                 "web/build.py",
                 "the research-presentation summary advisory count",
-                f"{advisory_count} advisory vectors, and 20 tests on the answers",
+                f"{advisory_count} advisory vectors, and 103 tests on the answers",
             ),
         )
         for relative, where, expected in statements:
@@ -893,7 +1166,7 @@ class RepositoryConformanceTests(unittest.TestCase):
                 ):
                     with self.subTest(token=token, root=document == token):
                         path.write_text(document, encoding="utf-8")
-                        result, diagnostics = evaluate_case(path, self.validator, [])
+                        result, diagnostics = evaluate_case(path, self.validators, [])
                         self.assertEqual("invalid", result)
                         self.assertEqual(
                             [("JPS-CARRIER-INVALID-JSON", "")],
@@ -1268,60 +1541,46 @@ class RepositoryConformanceTests(unittest.TestCase):
                 except ValueError:
                     self.fail(f"case path escapes conformance directory: {case['path']}")
                 actual, diagnostics = evaluate_case(
-                    case_path, self.validator, case.get("supportedExtensions", [])
+                    case_path, self.validators, case.get("supportedExtensions", [])
                 )
                 self.assertEqual(
                     case["expectedResult"],
                     actual,
                     "\n".join(f"{item.code} {item.path}: {item.message}" for item in diagnostics),
                 )
-                expected = case["expectedDiagnostic"]
-                if expected is None:
+                if case["expectedDiagnostic"] is None:
                     self.assertEqual([], diagnostics)
                 else:
-                    matches = [
-                        item
-                        for item in diagnostics
-                        if item.code == expected["code"] and item.path == expected["path"]
-                    ]
-                    self.assertTrue(
-                        matches,
-                        f"expected {expected}; got "
-                        + repr([(item.code, item.path) for item in diagnostics]),
-                    )
+                    assert_findings(self, case["id"], expected_findings(case), diagnostics)
 
-                    enclosing_oneofs = [
-                        d.path
-                        for d in diagnostics
-                        if d.code == "JPS-STRUCTURE-ONEOF"
-                        and pointer_contains(d.path, expected["path"])
-                    ]
-                    all_diagnostics = [(d.code, d.path) for d in diagnostics]
-                    if enclosing_oneofs:
-                        outermost = min(enclosing_oneofs, key=pointer_depth)
-                        strays = [
-                            (d.code, d.path)
-                            for d in diagnostics
-                            if not pointer_contains(outermost, d.path)
-                        ]
-                        self.assertEqual(
-                            [],
-                            strays,
-                            f"case {case['id']!r} used enclosing oneOf node {outermost!r}, "
-                            f"but carried stray diagnostics outside it: {strays}; "
-                            f"all diagnostics: {all_diagnostics}",
-                        )
-                    else:
-                        expected_diagnostic = (expected["code"], expected["path"])
-                        if len(diagnostics) != 1 or all_diagnostics != [expected_diagnostic]:
-                            strays = [
-                                item for item in all_diagnostics if item != expected_diagnostic
-                            ] or all_diagnostics[1:]
-                            self.fail(
-                                f"case {case['id']!r} used node {expected['path']!r}: "
-                                f"expected only {expected_diagnostic}, but got stray diagnostic(s): "
-                                f"{strays}; all diagnostics: {all_diagnostics}"
-                            )
+    def test_more_than_one_expected_finding_is_stated_only_for_the_two_refusal_case(self) -> None:
+        # The 0.5.0 case schema's expectedDiagnostics lists every finding of a case that gives more
+        # than one. One case uses it: value beside valueSet under the operator equals, two Core §7.4
+        # refusals of one condition, found at the condition and at its operator. Its expectedDiagnostic is the first item, so a consumer reading
+        # only that member still reads a finding the case gives.
+        listing = [case for case in self.manifest["cases"] if "expectedDiagnostics" in case]
+        self.assertEqual(
+            ["structural-value-set-reference-and-value-operator-equals"],
+            [case["id"] for case in listing],
+        )
+        (case,) = listing
+        self.assertEqual(
+            [
+                {"code": "JPS-STRUCTURE-VALUE-SET-REFERENCE", "path": "/rules/0/when"},
+                {"code": "JPS-STRUCTURE-VALUE-SET-REFERENCE", "path": "/rules/0/when/operator"},
+            ],
+            case["expectedDiagnostics"],
+        )
+        self.assertEqual(case["expectedDiagnostics"][0], case["expectedDiagnostic"])
+        # It is described as the two refusals it holds, not as one defect.
+        self.assertNotIn("one defect", case["focus"])
+        self.assertIn("two section 7.4 refusals of one condition", case["focus"])
+        readme = " ".join((CONFORMANCE / "README.md").read_text(encoding="utf-8").split())
+        self.assertIn("which holds two §7.4 refusals of one condition", readme)
+        _, diagnostics = evaluate_case(CONFORMANCE / case["path"], self.validators, [])
+        dropped = [d for d in diagnostics if d.path != "/rules/0/when/operator"]
+        with self.assertRaises(AssertionError):
+            assert_findings(self, case["id"], case["expectedDiagnostics"], dropped)
 
     def test_examples_are_structurally_and_semantically_valid(self) -> None:
         for example_path in sorted((ROOT / "examples").glob("*.json")):
@@ -1396,9 +1655,9 @@ class RepositoryConformanceTests(unittest.TestCase):
         self,
         cases: list[dict[str, Any]],
         base: Path,
-        validator: Draft202012Validator | None = None,
+        validator: Validators | None = None,
         spec_version: str = SPEC_VERSION,
-        conformance: Callable[[Draft202012Validator, Any], list[Diagnostic]] = pack_conformance_diagnostics,
+        conformance: Callable[[Validators, Any], list[Diagnostic]] = pack_conformance_diagnostics,
     ) -> None:
         # Carrier well-formedness only: the specification repository owns no evaluator, so these
         # checks verify that each case could be run, never that a disposition is the right one.
@@ -1410,9 +1669,9 @@ class RepositoryConformanceTests(unittest.TestCase):
         # requires the opposite. The check is therefore conditional on what the case expects rather than
         # dropped: a fixture that quietly became conforming would make such a row unrunnable too.
         #
-        # `validator`, `spec_version` and `conformance` default to the released corpus's. The staged
-        # draft's rows (tests/test_core_draft.py) pass its schema, selector and checks.
-        validator = validator or self.validator
+        # `validator`, `spec_version` and `conformance` default to the released corpus's: a pack is
+        # checked under the ceilings of the profile it declares (§4.1).
+        validator = validator or self.validators
         non_conformant_packs = {
             case["pack"]
             for case in cases
@@ -1493,7 +1752,9 @@ class RepositoryConformanceTests(unittest.TestCase):
                 if disposition is None:
                     continue
 
-                disposition_validator = validator.evolve(schema={"$ref": "#/$defs/disposition"})
+                disposition_validator = validator_for(validator, pack).evolve(
+                    schema={"$ref": "#/$defs/disposition"}
+                )
                 self.assertEqual([], list(disposition_validator.iter_errors(disposition)))
                 reasons = disposition["reasons"]
                 self.assertEqual(reasons, sorted(set(reasons)), "reasons are a sorted set")
@@ -1819,10 +2080,12 @@ class RepositoryConformanceTests(unittest.TestCase):
         # are relative to the Runner's repository: they are not this repository's to resolve or
         # to change (conformance/dialect/README.md).
         runners_bytes = (ROOT / "conformance" / "dialect" / "vectors").resolve()
+        # A preserved v0.3.0 copy keeps its bytes, links relative to the path it was published at.
+        preserved = (ROOT / "tests" / "fixtures" / "historical-compatibility" / "v0.3.0").resolve()
         for markdown_path in sorted(ROOT.rglob("*.md")):
             if ".git" in markdown_path.parts:
                 continue
-            if runners_bytes in markdown_path.resolve().parents:
+            if runners_bytes in markdown_path.resolve().parents or preserved in markdown_path.resolve().parents:
                 continue
             text = markdown_path.read_text(encoding="utf-8")
             for raw_target in link_pattern.findall(text):

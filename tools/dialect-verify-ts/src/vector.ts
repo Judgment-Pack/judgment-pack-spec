@@ -22,7 +22,7 @@ export type Recording = {
 
 const RECORDING_SCHEMAS = new Map([
   ["0.2.0-draft", "schema/judgment-pack-core-0.2.0-draft.schema.json"],
-  ["0.3.0", "schema/judgment-pack-core.schema.json"],
+  ["0.3.0", "schema/judgment-pack-core-0.3.0.schema.json"],
 ] as const);
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");

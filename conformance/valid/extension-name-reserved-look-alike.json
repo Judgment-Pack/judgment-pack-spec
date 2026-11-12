@@ -1,0 +1,26 @@
+{
+  "specVersion": "0.5.0",
+  "id": "https://example.com/judgment-packs/extension-name-reserved-look-alike",
+  "version": "0.1.0",
+  "title": "Extension name that resembles the reserved prefix",
+  "decision": {
+    "intent": "Show that a vendor name whose second label extends judgmentpack is not reserved.",
+    "question": "Is the optional extension admitted?"
+  },
+  "outcomes": [
+    { "id": "accept", "label": "Accept" },
+    { "id": "reject", "label": "Reject" }
+  ],
+  "rules": [
+    {
+      "id": "literal-rule",
+      "description": "Carries an optional extension whose name begins org.judgmentpackx, not org.judgmentpack.",
+      "when": { "op": "literal", "value": true },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpackx.a": { "note": "vendor data" }
+      }
+    }
+  ]
+}

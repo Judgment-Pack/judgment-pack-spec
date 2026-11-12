@@ -1,0 +1,1923 @@
+{
+  "$schema": "./manifest.schema.json",
+  "suiteVersion": "0.3.0",
+  "specVersion": "0.3.0",
+  "status": "draft",
+  "validationProfile": {
+    "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+    "formatAssertionRequired": true,
+    "rejectDuplicateObjectMembers": true
+  },
+  "diagnosticVocabulary": {
+    "advisory": [
+      "JPS-RULES-OVERLAP"
+    ]
+  },
+  "cases": [
+    {
+      "id": "carrier-invalid-json",
+      "path": "carrier/malformed-json.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "malformed JSON is rejected before schema validation",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-duplicate-root-member",
+      "path": "carrier/duplicate-root-member.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-DUPLICATE-MEMBER",
+        "path": "/title"
+      },
+      "focus": "duplicate object member names are rejected during parsing",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-duplicate-nested-member",
+      "path": "carrier/duplicate-nested-member.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-DUPLICATE-MEMBER",
+        "path": "/outcomes/0/label"
+      },
+      "focus": "duplicate object member names are rejected below the root, not only at it",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-valid-surrogate-pair",
+      "path": "carrier/valid-surrogate-pair.json",
+      "layer": "carrier",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "valid surrogate pair escape in string value is accepted",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-lone-high-surrogate",
+      "path": "carrier/lone-high-surrogate.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "unpaired high surrogate escape in string value is rejected",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-lone-low-surrogate",
+      "path": "carrier/lone-low-surrogate.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "unpaired low surrogate escape in string value is rejected",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-reversed-surrogate-pair",
+      "path": "carrier/reversed-surrogate-pair.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "reversed surrogate pair escape in string value is rejected",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-trailing-non-whitespace",
+      "path": "carrier/trailing-non-whitespace.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "a complete JSON text followed by a non-whitespace character is rejected rather than read as its prefix",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-trailing-second-value",
+      "path": "carrier/trailing-second-value.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "a complete JSON text followed by a second JSON value is rejected rather than read as its first value",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-truncated-object",
+      "path": "carrier/truncated-object.json",
+      "layer": "carrier",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-CARRIER-INVALID-JSON",
+        "path": ""
+      },
+      "focus": "an object that ends before its closing brace is rejected as incomplete input",
+      "specSection": "§2"
+    },
+    {
+      "id": "carrier-trailing-whitespace",
+      "path": "carrier/trailing-whitespace.json",
+      "layer": "carrier",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "a valid document followed only by JSON whitespace is accepted",
+      "specSection": "§2"
+    },
+    {
+      "id": "structural-missing-spec-version",
+      "path": "structural/missing-spec-version.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/specVersion"
+      },
+      "focus": "missing required root member specVersion is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-id",
+      "path": "structural/missing-id.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/id"
+      },
+      "focus": "missing required root member id is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-version",
+      "path": "structural/missing-version.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/version"
+      },
+      "focus": "missing required root member version is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-title",
+      "path": "structural/missing-title.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/title"
+      },
+      "focus": "missing required root member title is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-outcomes",
+      "path": "structural/missing-outcomes.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/outcomes"
+      },
+      "focus": "missing required root member outcomes is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-rules",
+      "path": "structural/missing-rules.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/rules"
+      },
+      "focus": "missing required root member rules is rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-decision",
+      "path": "structural/missing-decision.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/decision"
+      },
+      "focus": "required root member",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-missing-locator-kind",
+      "path": "structural/missing-locator-kind.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/sources/0/locator/kind"
+      },
+      "focus": "source locator requires kind",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-missing-locator-value",
+      "path": "structural/missing-locator-value.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/sources/0/locator/value"
+      },
+      "focus": "source locator requires value",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-missing-citation-location",
+      "path": "structural/missing-citation-location.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/sources/0/citation/location"
+      },
+      "focus": "source citation requires location",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-missing-citation-excerpt",
+      "path": "structural/missing-citation-excerpt.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/sources/0/citation/excerpt"
+      },
+      "focus": "source citation requires excerpt",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-missing-target-kind",
+      "path": "structural/missing-target-kind.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/escalation/target/kind"
+      },
+      "focus": "escalation target requires kind",
+      "specSection": "§6.7"
+    },
+    {
+      "id": "structural-missing-target-name",
+      "path": "structural/missing-target-name.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/escalation/target/name"
+      },
+      "focus": "escalation target requires name",
+      "specSection": "§6.7"
+    },
+    {
+      "id": "structural-missing-review-reviewer",
+      "path": "structural/missing-review-reviewer.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/metadata/reviews/0/reviewer"
+      },
+      "focus": "metadata review requires reviewer",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-missing-review-reviewed-at",
+      "path": "structural/missing-review-reviewed-at.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/metadata/reviews/0/reviewedAt"
+      },
+      "focus": "metadata review requires reviewedAt",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-missing-review-disposition",
+      "path": "structural/missing-review-disposition.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/metadata/reviews/0/disposition"
+      },
+      "focus": "metadata review requires disposition",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-empty-title",
+      "path": "structural/empty-title.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MIN-LENGTH",
+        "path": "/title"
+      },
+      "focus": "root title must be a non-empty human-readable string",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-empty-decision-question",
+      "path": "structural/empty-decision-question.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MIN-LENGTH",
+        "path": "/decision/question"
+      },
+      "focus": "decision question must be a non-empty human-readable string",
+      "specSection": "§6.1"
+    },
+    {
+      "id": "structural-empty-outcome-label",
+      "path": "structural/empty-outcome-label.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MIN-LENGTH",
+        "path": "/outcomes/0/label"
+      },
+      "focus": "outcome label must be a non-empty human-readable string",
+      "specSection": "§6.4"
+    },
+    {
+      "id": "structural-empty-source-locator-value",
+      "path": "structural/empty-source-locator-value.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MIN-LENGTH",
+        "path": "/sources/0/locator/value"
+      },
+      "focus": "source locator value must be a non-empty string",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-non-array-sources",
+      "path": "structural/non-array-sources.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/sources"
+      },
+      "focus": "sources collection must be an array of source objects",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-empty-escalation-target-name",
+      "path": "structural/empty-escalation-target-name.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MIN-LENGTH",
+        "path": "/escalation/target/name"
+      },
+      "focus": "escalation target name must be a non-empty string",
+      "specSection": "§6.7"
+    },
+    {
+      "id": "structural-unknown-root-member",
+      "path": "structural/unknown-root-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/unexpectedRootMember"
+      },
+      "focus": "closed root object",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-relative-pack-id",
+      "path": "structural/relative-pack-id.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-FORMAT-URI",
+        "path": "/id"
+      },
+      "focus": "pack id is an absolute URI with format assertions enabled",
+      "specSection": "§5"
+    },
+    {
+      "id": "structural-invalid-published-date",
+      "path": "structural/invalid-published-date.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-FORMAT-DATE",
+        "path": "/sources/0/publishedAt"
+      },
+      "focus": "source publication date format assertion",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-invalid-created-at",
+      "path": "structural/invalid-created-at.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-FORMAT-DATE-TIME",
+        "path": "/metadata/createdAt"
+      },
+      "focus": "metadata creation timestamp format assertion",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-number-pack-id",
+      "path": "structural/number-pack-id.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/id"
+      },
+      "focus": "pack identifier sent as a JSON number, which only `type` refuses",
+      "specSection": "§5"
+    },
+    {
+      "id": "structural-number-published-date",
+      "path": "structural/number-published-date.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/sources/0/publishedAt"
+      },
+      "focus": "source publication date sent as a JSON number, which only `type` refuses",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-number-created-at",
+      "path": "structural/number-created-at.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/createdAt"
+      },
+      "focus": "metadata creation timestamp sent as a JSON number, which only `type` refuses",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-number-reviewed-at",
+      "path": "structural/number-reviewed-at.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/reviews/0/reviewedAt"
+      },
+      "focus": "review timestamp sent as a JSON number, which only `type` refuses",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-number-version",
+      "path": "structural/number-version.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/version"
+      },
+      "focus": "pack version must be a string",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-number-title",
+      "path": "structural/number-title.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/title"
+      },
+      "focus": "pack title must be a string",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-number-outcome-id",
+      "path": "structural/number-outcome-id.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/outcomes/0/id"
+      },
+      "focus": "local outcome identifiers must be strings",
+      "specSection": "§5"
+    },
+    {
+      "id": "structural-number-required-extension",
+      "path": "structural/number-required-extension.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "required-extension names must be strings",
+      "specSection": "§9",
+      "supportedExtensions": [
+        "com.example.review-policy"
+      ]
+    },
+    {
+      "id": "structural-empty-authors",
+      "path": "structural/empty-authors.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-COLLECTION-ARITY",
+        "path": "/metadata/authors"
+      },
+      "focus": "authors must contain at least one name",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-duplicate-authors",
+      "path": "structural/duplicate-authors.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/metadata/authors"
+      },
+      "focus": "author names must not repeat",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-non-array-authors",
+      "path": "structural/non-array-authors.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/authors"
+      },
+      "focus": "authors must be an array",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-duplicate-required-extensions",
+      "path": "structural/duplicate-required-extensions.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/metadata/requiredExtensions"
+      },
+      "focus": "required-extension names must not repeat",
+      "specSection": "§9",
+      "supportedExtensions": [
+        "com.example.review-policy"
+      ]
+    },
+    {
+      "id": "structural-non-array-required-extensions",
+      "path": "structural/non-array-required-extensions.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/requiredExtensions"
+      },
+      "focus": "requiredExtensions must be an array",
+      "specSection": "§9",
+      "supportedExtensions": [
+        "com.example.review-policy"
+      ]
+    },
+    {
+      "id": "structural-non-array-reviews",
+      "path": "structural/non-array-reviews.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/metadata/reviews"
+      },
+      "focus": "reviews must be an array even for one review",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-date-only-reviewed-at",
+      "path": "structural/date-only-reviewed-at.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-FORMAT-DATE-TIME",
+        "path": "/metadata/reviews/0/reviewedAt"
+      },
+      "focus": "review timestamp format assertion, which no other case reaches",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-invalid-local-id",
+      "path": "structural/invalid-local-id.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-LOCAL-ID",
+        "path": "/outcomes/0/id"
+      },
+      "focus": "local identifier grammar",
+      "specSection": "§5"
+    },
+    {
+      "id": "structural-invalid-pack-version",
+      "path": "structural/invalid-pack-version.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-PACK-VERSION",
+        "path": "/version"
+      },
+      "focus": "three-component pack version grammar",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-invalid-fact-path",
+      "path": "structural/invalid-fact-path.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-FACT-PATH",
+        "path": "/rules/0/when/path"
+      },
+      "focus": "fact path syntax",
+      "specSection": "§7.4"
+    },
+    {
+      "id": "structural-empty-any-condition",
+      "path": "structural/empty-any-condition.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-CONDITION-ARITY",
+        "path": "/rules/0/when/conditions"
+      },
+      "focus": "all and any require at least one child condition",
+      "specSection": "§7"
+    },
+    {
+      "id": "structural-force-outcome-missing-outcome",
+      "path": "structural/force-outcome-missing-outcome.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXCEPTION-SHAPE",
+        "path": "/exceptions/0/outcome"
+      },
+      "focus": "force-outcome exception requires exactly its outcome operand",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-suppress-rule-missing-target-rule",
+      "path": "structural/suppress-rule-missing-target-rule.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXCEPTION-SHAPE",
+        "path": "/exceptions/0/targetRule"
+      },
+      "focus": "suppress-rule exception requires its targetRule operand",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-suppress-rule-forbidden-outcome",
+      "path": "structural/suppress-rule-forbidden-outcome.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXCEPTION-SHAPE",
+        "path": "/exceptions/0/outcome"
+      },
+      "focus": "suppress-rule exception forbids an outcome operand",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-force-outcome-forbidden-target-rule",
+      "path": "structural/force-outcome-forbidden-target-rule.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXCEPTION-SHAPE",
+        "path": "/exceptions/0/targetRule"
+      },
+      "focus": "force-outcome exception forbids a targetRule operand",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-escalate-forbidden-target-rule",
+      "path": "structural/escalate-forbidden-target-rule.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXCEPTION-SHAPE",
+        "path": "/exceptions/0/targetRule"
+      },
+      "focus": "escalate exception forbids a targetRule operand",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-escalate-forbidden-outcome",
+      "path": "structural/escalate-forbidden-outcome.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXCEPTION-SHAPE",
+        "path": "/exceptions/0/outcome"
+      },
+      "focus": "escalate exception forbids an outcome operand",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-unqualified-extension",
+      "path": "structural/unqualified-extension.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/extensions/review-policy"
+      },
+      "focus": "reverse-domain extension namespace",
+      "specSection": "§9"
+    },
+    {
+      "id": "structural-invalid-spec-version",
+      "path": "structural/invalid-spec-version.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-SPEC-VERSION",
+        "path": "/specVersion"
+      },
+      "focus": "exact supported specification version; a pack still declaring 0.1.0-draft must be re-declared",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-too-few-outcomes",
+      "path": "structural/too-few-outcomes.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-COLLECTION-ARITY",
+        "path": "/outcomes"
+      },
+      "focus": "at least two outcomes are required",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-empty-rules",
+      "path": "structural/empty-rules.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-COLLECTION-ARITY",
+        "path": "/rules"
+      },
+      "focus": "at least one rule is required",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-reserved-extension-name",
+      "path": "structural/reserved-extension-name.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/extensions/org.judgmentpack.future"
+      },
+      "focus": "specification-reserved extension namespace",
+      "specSection": "§9"
+    },
+    {
+      "id": "structural-unqualified-required-extension",
+      "path": "structural/unqualified-required-extension.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "required extension names use a reverse-domain namespace",
+      "specSection": "§9"
+    },
+    {
+      "id": "structural-reserved-required-extension-name",
+      "path": "structural/reserved-required-extension-name.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "required extension names cannot use the specification-reserved namespace",
+      "specSection": "§9"
+    },
+    {
+      "id": "structural-unknown-decision-member",
+      "path": "structural/unknown-decision-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/decision/priority"
+      },
+      "focus": "closed nested Core object",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-evidence-requirement-member",
+      "path": "structural/unknown-evidence-requirement-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/evidenceRequirements/0/format"
+      },
+      "focus": "closed nested Core object",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-source-member",
+      "path": "structural/unknown-source-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/sources/0/url"
+      },
+      "focus": "closed nested Core object",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-outcome-member",
+      "path": "structural/unknown-outcome-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/outcomes/0/terminal"
+      },
+      "focus": "closed nested Core object",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-rule-member",
+      "path": "structural/unknown-rule-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/rules/0/priority"
+      },
+      "focus": "closed nested Core object",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-exception-member",
+      "path": "structural/unknown-exception-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/exceptions/0/priority"
+      },
+      "focus": "closed nested Core object",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-escalation-member",
+      "path": "structural/unknown-escalation-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/escalation/slaHours"
+      },
+      "focus": "closed nested Core object",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-metadata-member",
+      "path": "structural/unknown-metadata-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/metadata/updatedAt"
+      },
+      "focus": "closed nested Core object",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-source-locator-member",
+      "path": "structural/unknown-source-locator-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/sources/0/locator/unexpected"
+      },
+      "focus": "unknown members on a source locator are rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-source-citation-member",
+      "path": "structural/unknown-source-citation-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/sources/0/citation/unexpected"
+      },
+      "focus": "unknown members on a source citation are rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-escalation-target-member",
+      "path": "structural/unknown-escalation-target-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/escalation/target/unexpected"
+      },
+      "focus": "unknown members on an escalation target are rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-unknown-metadata-review-member",
+      "path": "structural/unknown-metadata-review-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/metadata/reviews/0/unexpected"
+      },
+      "focus": "unknown members on a metadata review are rejected",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-empty-escalation-triggers",
+      "path": "structural/empty-escalation-triggers.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ESCALATION-TRIGGERS",
+        "path": "/escalation/triggers"
+      },
+      "focus": "configured handoff intent has at least one trigger",
+      "specSection": "§6.7"
+    },
+    {
+      "id": "structural-non-array-escalation-triggers",
+      "path": "structural/non-array-escalation-triggers.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/escalation/triggers"
+      },
+      "focus": "escalation triggers must be an array of trigger names",
+      "specSection": "§6.7"
+    },
+    {
+      "id": "structural-invalid-ordered-decimal",
+      "path": "structural/invalid-ordered-decimal.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "ordered comparison operands use the decimal grammar",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "structural-decimal-operand-leading-plus",
+      "path": "structural/decimal-operand-leading-plus.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "ordered comparison rejects decimal operands with a leading plus sign",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "structural-decimal-operand-leading-zeros",
+      "path": "structural/decimal-operand-leading-zeros.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "ordered comparison rejects decimal operands with prohibited leading zeroes",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "structural-decimal-operand-bare-fraction",
+      "path": "structural/decimal-operand-bare-fraction.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "ordered comparison rejects decimal operands lacking an integer part before the point",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "structural-decimal-operand-trailing-point",
+      "path": "structural/decimal-operand-trailing-point.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "ordered comparison rejects decimal operands with a trailing decimal point and no fractional digits",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "structural-decimal-operand-exponent",
+      "path": "structural/decimal-operand-exponent.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "ordered comparison rejects decimal operands using exponent notation",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "structural-decimal-operand-surrounding-whitespace",
+      "path": "structural/decimal-operand-surrounding-whitespace.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "ordered comparison rejects decimal operands with surrounding whitespace",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "structural-decimal-operand-empty",
+      "path": "structural/decimal-operand-empty.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "ordered comparison rejects an empty string as a decimal operand",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "structural-decimal-operand-number",
+      "path": "structural/decimal-operand-number.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-DECIMAL-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "ordered comparison rejects decimal operands written as JSON numbers",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "structural-invalid-in-operand",
+      "path": "structural/invalid-in-operand.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-IN-OPERAND",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "membership comparison operands are non-empty arrays",
+      "specSection": "§7.4"
+    },
+    {
+      "id": "structural-empty-in-operand",
+      "path": "structural/empty-in-operand.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-COLLECTION-ARITY",
+        "path": "/rules/0/when/value"
+      },
+      "focus": "membership comparison rejects an empty array operand",
+      "specSection": "§7.4"
+    },
+    {
+      "id": "structural-non-object-root",
+      "path": "structural/non-object-root.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": ""
+      },
+      "focus": "the pack root is an object, not merely well-formed JSON",
+      "specSection": "§4"
+    },
+    {
+      "id": "structural-invalid-evidence-requirement-kind",
+      "path": "structural/invalid-evidence-requirement-kind.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ENUM",
+        "path": "/evidenceRequirements/0/kind"
+      },
+      "focus": "evidence requirement kind must be chosen from the closed vocabulary",
+      "specSection": "§6.2"
+    },
+    {
+      "id": "structural-invalid-source-locator-kind",
+      "path": "structural/invalid-source-locator-kind.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ENUM",
+        "path": "/sources/0/locator/kind"
+      },
+      "focus": "source locator kind must be chosen from the closed vocabulary",
+      "specSection": "§6.3"
+    },
+    {
+      "id": "structural-invalid-rule-on-unknown",
+      "path": "structural/invalid-rule-on-unknown.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ENUM",
+        "path": "/rules/0/onUnknown"
+      },
+      "focus": "rule onUnknown must be chosen from the closed vocabulary",
+      "specSection": "§6.5"
+    },
+    {
+      "id": "structural-invalid-exception-effect",
+      "path": "structural/invalid-exception-effect.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ENUM",
+        "path": "/exceptions/0/effect"
+      },
+      "focus": "exception effect must be chosen from the closed vocabulary",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-invalid-exception-on-unknown",
+      "path": "structural/invalid-exception-on-unknown.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ENUM",
+        "path": "/exceptions/0/onUnknown"
+      },
+      "focus": "exception onUnknown must be chosen from the closed vocabulary",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-invalid-escalation-trigger",
+      "path": "structural/invalid-escalation-trigger.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ENUM",
+        "path": "/escalation/triggers/0"
+      },
+      "focus": "escalation triggers must be chosen from the closed vocabulary",
+      "specSection": "§6.7"
+    },
+    {
+      "id": "structural-invalid-escalation-target-kind",
+      "path": "structural/invalid-escalation-target-kind.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ENUM",
+        "path": "/escalation/target/kind"
+      },
+      "focus": "escalation target kind must be chosen from the closed vocabulary",
+      "specSection": "§6.7"
+    },
+    {
+      "id": "structural-invalid-review-disposition",
+      "path": "structural/invalid-review-disposition.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ENUM",
+        "path": "/metadata/reviews/0/disposition"
+      },
+      "focus": "review disposition must be chosen from the closed vocabulary",
+      "specSection": "§6.8"
+    },
+    {
+      "id": "structural-duplicate-escalation-triggers",
+      "path": "structural/duplicate-escalation-triggers.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/escalation/triggers"
+      },
+      "focus": "repeated escalation triggers are rejected",
+      "specSection": "§6.7"
+    },
+    {
+      "id": "structural-duplicate-rule-source-refs",
+      "path": "structural/duplicate-rule-source-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/rules/0/sourceRefs"
+      },
+      "focus": "repeated rule source references are rejected",
+      "specSection": "§6.5"
+    },
+    {
+      "id": "structural-non-array-rule-evidence-refs",
+      "path": "structural/non-array-rule-evidence-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/rules/0/evidenceRequirementRefs"
+      },
+      "focus": "rule evidence references must be an array",
+      "specSection": "§6.5"
+    },
+    {
+      "id": "structural-non-array-rule-source-refs",
+      "path": "structural/non-array-rule-source-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/rules/0/sourceRefs"
+      },
+      "focus": "rule source references must be an array",
+      "specSection": "§6.5"
+    },
+    {
+      "id": "structural-non-array-exception-source-refs",
+      "path": "structural/non-array-exception-source-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-TYPE",
+        "path": "/exceptions/0/sourceRefs"
+      },
+      "focus": "exception source references must be an array",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-duplicate-rule-evidence-refs",
+      "path": "structural/duplicate-rule-evidence-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/rules/0/evidenceRequirementRefs"
+      },
+      "focus": "rule evidence references must not repeat",
+      "specSection": "§6.5"
+    },
+    {
+      "id": "structural-duplicate-exception-source-refs",
+      "path": "structural/duplicate-exception-source-refs.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/exceptions/0/sourceRefs"
+      },
+      "focus": "exception source references must not repeat",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "structural-duplicate-outcomes",
+      "path": "structural/duplicate-outcomes.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNIQUE-ITEMS",
+        "path": "/outcomes"
+      },
+      "focus": "identical outcome entries fail structural uniqueness before semantic duplicate-id validation",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-duplicate-outcome-id",
+      "path": "semantic/duplicate-outcome-id.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-DUPLICATE-ID",
+        "path": "/outcomes/1/id"
+      },
+      "focus": "outcome identifiers are unique within their collection",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-duplicate-rule-id",
+      "path": "semantic/duplicate-rule-id.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-DUPLICATE-ID",
+        "path": "/rules/1/id"
+      },
+      "focus": "rule identifiers are unique within their collection",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-duplicate-evidence-id",
+      "path": "semantic/duplicate-evidence-id.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-DUPLICATE-ID",
+        "path": "/evidenceRequirements/1/id"
+      },
+      "focus": "evidence requirement identifiers are unique within their collection",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-duplicate-source-id",
+      "path": "semantic/duplicate-source-id.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-DUPLICATE-ID",
+        "path": "/sources/1/id"
+      },
+      "focus": "source identifiers are unique within their collection",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-duplicate-exception-id",
+      "path": "semantic/duplicate-exception-id.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-DUPLICATE-ID",
+        "path": "/exceptions/1/id"
+      },
+      "focus": "exception identifiers are unique within their collection",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-dangling-rule-outcome",
+      "path": "semantic/dangling-rule-outcome.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-OUTCOME",
+        "path": "/rules/0/outcome"
+      },
+      "focus": "rule outcome resolves to a declared outcome",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-dangling-fallback-outcome",
+      "path": "semantic/dangling-fallback-outcome.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-OUTCOME",
+        "path": "/fallbackOutcome"
+      },
+      "focus": "fallback outcome resolves to a declared outcome",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-dangling-evidence-ref",
+      "path": "semantic/dangling-evidence-ref.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-EVIDENCE",
+        "path": "/rules/0/evidenceRequirementRefs/0"
+      },
+      "focus": "rule evidence reference resolves to a declared evidence requirement",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-dangling-source-ref",
+      "path": "semantic/dangling-source-ref.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-SOURCE",
+        "path": "/rules/0/sourceRefs/0"
+      },
+      "focus": "rule source reference resolves to a declared source",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-dangling-exception-target",
+      "path": "semantic/dangling-exception-target.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-RULE",
+        "path": "/exceptions/0/targetRule"
+      },
+      "focus": "exception target resolves to a declared rule",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-dangling-exception-outcome",
+      "path": "semantic/dangling-exception-outcome.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-OUTCOME",
+        "path": "/exceptions/0/outcome"
+      },
+      "focus": "exception outcome resolves to a declared outcome",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-dangling-exception-source-ref",
+      "path": "semantic/dangling-exception-source-ref.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-SOURCE",
+        "path": "/exceptions/0/sourceRefs/0"
+      },
+      "focus": "exception source reference resolves to a declared source",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-dangling-applicability-evidence",
+      "path": "semantic/dangling-applicability-evidence.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-EVIDENCE",
+        "path": "/applicability/evidenceRequirement"
+      },
+      "focus": "applicability evidence reference resolves to a declared requirement",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-dangling-exception-evidence",
+      "path": "semantic/dangling-exception-evidence.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-EVIDENCE",
+        "path": "/exceptions/0/when/evidenceRequirement"
+      },
+      "focus": "exception-condition evidence reference resolves to a declared requirement",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-wrong-kind-rule-outcome",
+      "path": "semantic/wrong-kind-rule-outcome.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-OUTCOME",
+        "path": "/rules/0/outcome"
+      },
+      "focus": "a rule identifier cannot satisfy an outcome reference",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-dangling-nested-evidence-present",
+      "path": "semantic/dangling-nested-evidence-present.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-UNRESOLVED-EVIDENCE",
+        "path": "/rules/0/when/condition/conditions/0/conditions/0/evidenceRequirement"
+      },
+      "focus": "reference validation recursively traverses nested condition nodes",
+      "specSection": "§3.3"
+    },
+    {
+      "id": "semantic-required-extension-unsupported",
+      "path": "semantic/required-extension-unsupported.json",
+      "layer": "semantic",
+      "expectedResult": "unsupported",
+      "expectedDiagnostic": {
+        "code": "JPS-CAPABILITY-REQUIRED-EXTENSION",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "consumer reports a declared required extension it does not support",
+      "specSection": "§9",
+      "supportedExtensions": []
+    },
+    {
+      "id": "semantic-missing-required-extension-value",
+      "path": "semantic/missing-required-extension-value.json",
+      "layer": "semantic",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "required extension declaration corresponds to a document extension value",
+      "specSection": "§9"
+    },
+    {
+      "id": "valid-minimal-literal",
+      "path": "valid/minimal-literal.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "minimal structurally and semantically conforming document",
+      "specSection": "§§2–7"
+    },
+    {
+      "id": "valid-condition-branches",
+      "path": "valid/condition-branches.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "literal, all, any, not, fact, and evidence-present condition shapes",
+      "specSection": "§7"
+    },
+    {
+      "id": "valid-exception-suppress-rule",
+      "path": "valid/exception-suppress-rule.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "suppress-rule exception branch and resolved target",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "valid-exception-force-outcome",
+      "path": "valid/exception-force-outcome.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "force-outcome exception branch and resolved outcome",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "valid-exception-escalate",
+      "path": "valid/exception-escalate.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "escalate exception branch without an outcome or target rule",
+      "specSection": "§6.6"
+    },
+    {
+      "id": "valid-required-extension-supported",
+      "path": "valid/required-extension-supported.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "consumer fully interprets a declared required extension it supports",
+      "specSection": "§9",
+      "supportedExtensions": [
+        "com.example.review-policy"
+      ]
+    },
+    {
+      "id": "valid-hostile-optional-extension-value",
+      "path": "valid/hostile-optional-extension-value.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "hostile-looking optional extension content remains inert data",
+      "specSection": "§§9–10"
+    },
+    {
+      "id": "valid-minimal-expense-approval",
+      "path": "valid/minimal-expense-approval.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "complete cross-feature expense-approval example",
+      "specSection": "§§4–9"
+    },
+    {
+      "id": "valid-decimal-operand-negative",
+      "path": "valid/decimal-operand-negative.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "ordered comparison accepts a negative fractional decimal operand",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "valid-decimal-operand-trailing-zero",
+      "path": "valid/decimal-operand-trailing-zero.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "ordered comparison accepts a decimal operand with significant trailing zeroes",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "valid-decimal-operand-long-fraction",
+      "path": "valid/decimal-operand-long-fraction.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "ordered comparison accepts a high-precision decimal operand whose identity would change if parsed as a float",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "valid-decimal-operand-equals-number",
+      "path": "valid/decimal-operand-equals-number.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "equality comparison accepts a JSON number operand",
+      "specSection": "§2.2"
+    },
+    {
+      "id": "valid-in-operand-one-item",
+      "path": "valid/in-operand-one-item.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "membership comparison accepts a one-item array operand",
+      "specSection": "§7.4"
+    },
+    {
+      "id": "escalation-routes",
+      "path": "valid/escalation-routes.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "escalation routes",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-both",
+      "path": "structural/escalation-routes-both.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ONEOF",
+        "path": "/escalation"
+      },
+      "focus": "escalation routes both",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-nine",
+      "path": "structural/escalation-routes-nine.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-MAXITEMS",
+        "path": "/escalation/routes"
+      },
+      "focus": "escalation routes nine",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-outside-trigger",
+      "path": "structural/escalation-routes-outside-trigger.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-NOT",
+        "path": "/escalation/routes/0/triggers"
+      },
+      "focus": "escalation routes outside trigger",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-empty-triggers",
+      "path": "structural/escalation-routes-empty-triggers.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-ESCALATION-TRIGGERS",
+        "path": "/escalation/routes/0/triggers"
+      },
+      "focus": "escalation routes empty triggers",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-empty",
+      "path": "structural/escalation-routes-empty.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-COLLECTION-ARITY",
+        "path": "/escalation/routes"
+      },
+      "focus": "escalation routes empty",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-unknown-member",
+      "path": "structural/escalation-routes-unknown-member.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-UNKNOWN-MEMBER",
+        "path": "/escalation/routes/0/extra"
+      },
+      "focus": "escalation routes unknown member",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-missing-target",
+      "path": "structural/escalation-routes-missing-target.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-REQUIRED-MEMBER",
+        "path": "/escalation/routes/0/target"
+      },
+      "focus": "escalation routes missing target",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "escalation-routes-eight",
+      "path": "valid/escalation-routes-eight.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "focus": "escalation routes eight",
+      "specSection": "\u00a76.7"
+    },
+    {
+      "id": "advisory-rules-overlap-exact",
+      "path": "advisory/rules-overlap-exact.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [
+        {
+          "code": "JPS-RULES-OVERLAP",
+          "certainty": "exact",
+          "severity": {
+            "validate": "warning",
+            "strict": "error",
+            "publish": "block"
+          },
+          "path": "/rules/0",
+          "rules": [
+            { "id": "r-medium", "outcome": "medium" },
+            { "id": "r-high", "outcome": "high" }
+          ],
+          "overlap": {
+            "path": "/score",
+            "from": "70",
+            "fromInclusive": true
+          },
+          "witnessFacts": { "score": "70" },
+          "effect": "Core §8 records conflict; the disposition is unresolved.",
+          "suggestedRewrite": {
+            "ruleId": "r-medium",
+            "when": {
+              "op": "all",
+              "conditions": [
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "greater-than-or-equal",
+                  "value": "40"
+                },
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "less-than",
+                  "value": "70"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "focus": "different outcomes with an exact non-empty numeric overlap",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-touching",
+      "path": "advisory/rules-touching.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [],
+      "focus": "adjacent numeric ranges touch at an exclusive boundary without overlapping",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-overlap-same-outcome",
+      "path": "advisory/rules-overlap-same-outcome.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [],
+      "focus": "overlapping rules that name the same outcome are compatible",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-exclusive-rewrite",
+      "path": "advisory/rules-exclusive-rewrite.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [],
+      "focus": "the suggested two-comparison rewrite makes the numeric bands exclusive",
+      "specSection": "§3.3.1"
+    },
+    {
+      "id": "advisory-rules-overlap-not-excluded",
+      "path": "advisory/rules-overlap-not-excluded.json",
+      "layer": "semantic",
+      "expectedResult": "valid",
+      "expectedDiagnostic": null,
+      "expectedAdvisories": [
+        {
+          "code": "JPS-RULES-OVERLAP",
+          "certainty": "not-excluded",
+          "severity": {
+            "validate": "warning",
+            "strict": "warning",
+            "publish": "warning"
+          },
+          "path": "/rules/0",
+          "rules": [
+            { "id": "r-medium", "outcome": "medium" },
+            { "id": "r-high", "outcome": "high" }
+          ],
+          "effect": "Core §8 records conflict; the disposition is unresolved.",
+          "suggestedRewrite": {
+            "ruleId": "r-medium",
+            "when": {
+              "op": "all",
+              "conditions": [
+                {
+                  "op": "fact",
+                  "path": "/score",
+                  "operator": "greater-than-or-equal",
+                  "value": "40"
+                },
+                {
+                  "op": "not",
+                  "condition": {
+                    "op": "fact",
+                    "path": "/priority",
+                    "operator": "greater-than-or-equal",
+                    "value": "70"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "focus": "conditions on independent fact paths do not exclude overlap",
+      "specSection": "§3.3.1"
+    }
+  ]
+}

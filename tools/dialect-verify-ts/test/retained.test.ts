@@ -19,9 +19,15 @@ test("installed identity is the v0.3.0 distribution", async () => {
   try {
     const inventoryPath = "releases/v0.3.0.retained-column.json";
     const inventory = JSON.parse(readFileSync(join(repo, inventoryPath), "utf8"));
+    // Core 0.5.0 changed four leaf files in place; their v0.3.0 bytes are preserved copies
+    // (tests/fixtures/historical-compatibility/README.md). Every other leaf file is unchanged since.
+    const preserved = new Set(["spec/judgment-pack-core.md", "spec/dialect.md", "tools/dialect_verify.py",
+                               "tools/dialect-verify-ts/src/vector.ts"]);
+    const source = (name: string) =>
+      join(repo, preserved.has(name) ? `tests/fixtures/historical-compatibility/v0.3.0/${name}` : name);
     for (const name of [inventoryPath, ...Object.keys(inventory.files)]) {
       mkdirSync(dirname(join(root, name)), { recursive: true });
-      copyFileSync(join(repo, name), join(root, name));
+      copyFileSync(source(name), join(root, name));
     }
     const installed = await import(pathToFileURL(join(root, "tools/dialect-verify-ts/src/retained.ts")).href);
     const commit = "a".repeat(40);
@@ -48,7 +54,7 @@ test("installed identity is the v0.3.0 distribution", async () => {
     const pinned = join(root, inventory.corpus);
     writeFileSync(pinned, readFileSync(pinned, "utf8") + " ");
     assert.throws(() => installed.installation.identity(), unsupported);
-    copyFileSync(join(repo, inventory.corpus), pinned);
+    copyFileSync(source(inventory.corpus), pinned);
     assert.deepEqual(installed.installation.identity(), spec);
     rmSync(join(root, "release-identity.json"));
     assert.throws(() => select("0.3.0"), unsupported);

@@ -1,0 +1,83 @@
+{
+  "specVersion": "0.5.0",
+  "id": "https://example.com/judgment-packs/annotations-class-neighbours",
+  "version": "0.1.0",
+  "title": "The neighbours of every refused range",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept every request.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "below-1": [
+            "a~b",
+            "a\u00acb",
+            "a\u034eb",
+            "a\u061bb",
+            "a\u115eb",
+            "a\u17b3b",
+            "a\u180ab",
+            "a\u200ab",
+            "a\u2027b"
+          ],
+          "below-2": [
+            "a\u205fb",
+            "a\u3163b",
+            "a\ufdffb",
+            "a\ufefcb",
+            "a\uff9fb",
+            "a\uffeeb",
+            "a\ud82f\udc9fb",
+            "a\ud834\udd72b"
+          ],
+          "above-1": [
+            "a b",
+            "a\u00a0b",
+            "a\u00aeb",
+            "a\u0350b",
+            "a\u061db",
+            "a\u1161b",
+            "a\u17b6b",
+            "a\u1810b",
+            "a\u2010b"
+          ],
+          "above-2": [
+            "a\u202fb",
+            "a\u2070b",
+            "a\u3165b",
+            "a\ufe10b",
+            "a\uff01b",
+            "a\uffa1b",
+            "a\ufff9b",
+            "a\ud834\udd7bb"
+          ],
+          "format": [
+            "a\u0600b",
+            "a\u0605b",
+            "a\ufffbb"
+          ]
+        }
+      }
+    }
+  ]
+}

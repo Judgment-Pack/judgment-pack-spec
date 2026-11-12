@@ -1,12 +1,14 @@
 # Versioning and release policy
 
 Core Judgment Pack Specification releases use Semantic Versioning identifiers with a leading `v` on
-Git tags. Specification `0.3.0` is identified by the exact tag `v0.3.0`; `0.2.0-draft` and
-`0.1.0-draft` keep the tags `v0.2.0-draft` and `v0.1.0-draft`. Only a tag and GitHub release
-published by the maintainers establish an immutable release; similarly named files on the mutable
-`main` branch do not. Release tag `v0.4.0` identifies a distribution that carries `specVersion`
-`0.3.0` unchanged, not a specification `0.4.0`; [its section](#release-v040-carries-specversion-030-unchanged)
-states the route.
+Git tags. Specification `0.3.0` is identified by the exact tag `v0.3.0` and specification `0.5.0`
+by `v0.5.0`; `0.2.0-draft` and `0.1.0-draft` keep the tags `v0.2.0-draft` and `v0.1.0-draft`.
+[The release numbering rule](#release-numbers-and-specversion) states how a tag's numbers relate to
+the `specVersion` it carries. Only a tag and GitHub release published by the maintainers establish
+an immutable release; similarly named files on the mutable `main` branch do not. Release tag
+`v0.4.0` identifies a distribution that carries `specVersion` `0.3.0` unchanged, not a specification
+`0.4.0`; [its section](#release-v040-carries-specversion-030-unchanged) states the route, and no
+`specVersion` `0.4.0` is assigned.
 
 `0.3.0` is the first Core `specVersion` without the
 retired `-draft` suffix; the identifiers and tags of `0.1.0-draft` and `0.2.0-draft` do not change.
@@ -34,6 +36,32 @@ else — the release notes of the version that preserved it publish the digest o
 Before `1.0.0`, a release may change reader, writer, or semantic behavior incompatibly. Its release
 notes must record the change and include a `specVersion` migration note, including when no automatic
 migration is available.
+
+## Release numbers and specVersion
+
+This rule is normative for every Core release from `v0.5.0` on.
+
+- **Major and minor.** A Core release tag's major and minor numbers equal those of the
+  `specVersion` the release carries. A `specVersion` is first released under the tag whose patch
+  number is `0`: `specVersion` `0.5.0` is first released as tag `v0.5.0`.
+- **Patch.** The patch number counts the later releases that carry the same `specVersion`
+  unchanged: `v0.5.1`, `v0.5.2`, and so on. Such a release may change documentation, tooling,
+  companion documents and staged drafts for a later version. It does not change the released
+  schema, the normative content of the Core text, or the released conformance cases and rows of that
+  `specVersion`, which are frozen when the `specVersion` is released (Core §3.4.1).
+- **The selector.** A pack's `specVersion` stays `0.5.0` under every such release. The tag is not a
+  pack selector: readers compare the complete `specVersion`, never the tag. A new `specVersion`
+  always takes a new minor (or major) number.
+
+Recorded exception: tag `v0.4.0` (2026-11-02) carries `specVersion` `0.3.0` unchanged; under this
+rule it would have been `v0.3.1`. It is published and immutable and stays as it is
+([its section](#release-v040-carries-specversion-030-unchanged)). Because that tag is taken, no
+`specVersion` `0.4.0` is assigned: the version staged as `0.4.0-draft` is released as `0.5.0`
+([its section](#core-050-was-staged-as-040-draft)).
+
+The release builder (`tools/build_release.py`) does not yet build a patch release: apart from the
+allowlisted mappings below, it holds a Core tag's schema and corpus pins to the tag's complete
+version. A tag such as `v0.5.1` needs a reviewed change to the builder before it is cut.
 
 ## Maturity levels
 
@@ -68,8 +96,9 @@ That first candidate is a distribution of the proposed exact `specVersion` `0.3.
 release candidacy does not establish the independent-evidence maturity `candidate`. Each RC bundle
 records its exact distribution tag and source commit in `release-identity.json`, alongside the map
 and exact RC notes. Other Core tags, apart from
-[release `v0.4.0`](#release-v040-carries-specversion-030-unchanged), still require their complete
-version to match the artifacts; no general prerelease compatibility rule is introduced.
+[release `v0.4.0`](#release-v040-carries-specversion-030-unchanged), follow
+[the release numbering rule](#release-numbers-and-specversion); no general prerelease compatibility
+rule is introduced.
 
 The candidate does not establish the final `0.3.0` immutable release or freeze its final corpus.
 Candidate test results identify the RC tag and commit and remain provisional; a final exact-version
@@ -111,50 +140,31 @@ Core schema and both corpus manifests to `0.3.0`, the version the mapping names.
 The tag name is not a pack selector. Packs keep declaring `specVersion` `0.3.0`; a pack declaring
 `0.4.0` is refused. A conformance claim still names `specVersion` `0.3.0` and its corpora, and a
 selected retained-column leaf claim is still made against a `v0.3.0` installation. In the format
-status records `v0.4.0` counts as the last release of the families it carries, but it is not their
-compatibility baseline, which stays `v0.3.0`.
+status records `v0.4.0` counted as the last release of the families it carries, but never as their
+compatibility baseline, which stayed `v0.3.0` until `v0.5.0`.
 
-This mapping is that tag's alone. No other tag may use it, and it introduces no general rule that a
-tag may differ from the `specVersion` of its artifacts. `specVersion` `0.4.0` is not assigned, and no
-release carries it. Any further release whose tag differs from its artifacts' `specVersion` needs its
-own amendment of this document and its own reviewed identity in the builder; this section implies
-none.
+This mapping is that tag's alone, and no other tag may use it. Under
+[the release numbering rule](#release-numbers-and-specversion), adopted after this tag, it would have
+been `v0.3.1`; it is that rule's recorded exception. `specVersion` `0.4.0` is not assigned, and no
+release carries it. Any release whose tag that rule does not give needs its own amendment of this
+document and its own reviewed identity in the builder; this section implies none.
 
-## Staged draft Core selector 0.4.0-draft
+## Core 0.5.0 was staged as 0.4.0-draft
 
-[RFC 0031](rfcs/0031-annotations-and-value-sets.md), a Draft, targets the next Core `specVersion`
-after `0.3.0` and assigns it no number. So that implementations can admit packs that use its
-annotations and value sets, its schema, Core text, document cases, evaluation rows and example are
-staged under the working selector `0.4.0-draft`:
-[`spec/staged/judgment-pack-core-0.4.0-draft.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md)
-names them. No release is established by this staging, and the selector is not assigned.
+[RFC 0031](rfcs/0031-annotations-and-value-sets.md) was staged before its release under the working
+selector `0.4.0-draft`: its schema, Core text, document cases, evaluation rows and example sat in
+staged paths that no release archive carried and the site did not serve, and no conformance claim
+could name them. That selector was never released, and the staged paths are retired. Tag `v0.4.0`
+already carried `0.3.0`, so under [the release numbering rule](#release-numbers-and-specversion) the
+staged version is released as `specVersion` `0.5.0` under tag `v0.5.0`, not as `0.4.0`.
 
-- **Not a release.** No tag carries `0.4.0-draft`, and it introduces no general rule. Every staged
-  path is `export-ignore`, so no release archive carries the staged schema, text, cases, rows or
-  example, and the site serves none of them. The schema's `$id` under `0.4.0-draft` is the staged
-  resource's identifier, not a publication, as the `0.4.0` path of RFC 0028's staged schema is.
-- **Not a claim.** No conformance claim may name `0.4.0-draft` or its staged vectors. A `0.3.0`
-  reader refuses a pack declaring it, by the exact selector.
-- **The suffix.** The `-draft` suffix stays retired for Core releases. Here it marks a selector that
-  no release carries, so that it cannot be mistaken for `specVersion` `0.4.0`, which is not assigned,
-  or for release `v0.4.0`, which carries `0.3.0`.
-- **Landing.** When the maintainers open the version that carries RFC 0031, they assign its
-  selector, and the staged artifacts take it; nothing staged binds the choice. A pack written to
-  `0.4.0-draft` moves up by changing its `specVersion`, which changes its bytes and digest, and must
-  then satisfy the released rules; RFC 0031's Graduation subsection lists the steps. RFC 0031 stays
-  a Draft until its own Evidence bar is met.
+A `0.5.0` reader refuses a pack declaring `0.4.0-draft`, by the exact selector. A pack written to the
+draft moves up by changing its `specVersion` to `0.5.0`, which changes its bytes and digest, and must
+then satisfy the released rules (Core §11). The `-draft` suffix stays retired for Core releases.
 
-The [record-shape catalog](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/catalog/README.md) lists every schema whose `$id` is in the
-specification's schema namespace, `https://judgmentpack.org/schema/`, so it lists the staged schema,
-as it lists RFC 0028's: family `judgment-pack-core` at `0.4.0-draft`, with its digest and its
-normalized text in `catalog/record-shapes.json` and its change records in `catalog/changes/`.
-Listing a shape publishes nothing. In `catalog/format-status.json`, Core's `draftVersion` is derived
-from the catalogued schemas and reads `0.4.0-draft`. That names the staged working selector; it is
-not an assigned next `specVersion`. Core's baseline and last release are unchanged. No release bundle
-carries the staged schema itself. A bundle that carries `catalog/` carries the catalog's record of
-the staged shape: its path, `$id`, digest and normalized text, its change records, and Core's
-`draftVersion`. Only release `v0.4.0`'s bundles carry `catalog/` today, and that tag precedes this
-staging.
+The [record-shape catalog](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/catalog/README.md)
+keeps the staged schema's history in its change records, ending with the record of its retirement.
+Core's `draftVersion` in `catalog/format-status.json` reads `0.5.0`.
 
 ## Pack versions
 

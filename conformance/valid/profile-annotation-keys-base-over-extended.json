@@ -1,0 +1,54 @@
+{
+  "profile": "extended",
+  "specVersion": "0.5.0",
+  "id": "https://example.com/judgment-packs/profile-annotation-keys-17",
+  "version": "0.1.0",
+  "title": "Annotations at a profile ceiling",
+  "decision": {
+    "intent": "Exercise one rule of RFC 0031.",
+    "question": "Is the request accepted?"
+  },
+  "outcomes": [
+    {
+      "id": "accept",
+      "label": "Accept"
+    },
+    {
+      "id": "refer",
+      "label": "Refer for review"
+    }
+  ],
+  "rules": [
+    {
+      "id": "accept-request",
+      "description": "Accept every request.",
+      "when": {
+        "op": "literal",
+        "value": true
+      },
+      "outcome": "accept",
+      "onUnknown": "ignore",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "key-000": "intake",
+          "key-001": "intake",
+          "key-002": "intake",
+          "key-003": "intake",
+          "key-004": "intake",
+          "key-005": "intake",
+          "key-006": "intake",
+          "key-007": "intake",
+          "key-008": "intake",
+          "key-009": "intake",
+          "key-010": "intake",
+          "key-011": "intake",
+          "key-012": "intake",
+          "key-013": "intake",
+          "key-014": "intake",
+          "key-015": "intake",
+          "key-016": "intake"
+        }
+      }
+    }
+  ]
+}

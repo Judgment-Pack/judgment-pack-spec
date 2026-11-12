@@ -12,6 +12,45 @@ here.
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
+
+## `0.5.0` — 2026-11-12
+
+Core `specVersion` `0.5.0`, tagged `v0.5.0`, releases [RFC 0031](rfcs/0031-annotations-and-value-sets.md)
+(#301), annotations and annotated value sets, with issues #304 and #308
+([release notes](releases/v0.5.0.md)). The maintainer waived the candidate period: no release
+candidate precedes it.
+
+- The text, schema, document cases, evaluation rows and example staged under the working selector
+  `0.4.0-draft` are released under `0.5.0`, and the staged paths are retired. The released Core
+  schema, document-manifest schema and evaluation-manifest schema replace `0.3.0`'s in place, and
+  the workflow document schema's identifier moves to `/schema/0.5.0/`. Byte-identical copies of the
+  four `0.3.0` schemas stay published at their `0.3.0` identifiers; the `0.3.0` text and corpora stay
+  at tag `v0.3.0`. The document corpus holds 369 conformance cases and 5 advisory cases, and the
+  evaluation corpus 103 rows with 29 pairs, both `suiteVersion` `0.5.0`. Three valid cases added
+  after the round-1 review pin that the reserved prefix `org.judgmentpack.` ends in its dot: the
+  names `org.judgmentpackx.a`, optional and required, and `org.judgmentpack` are admitted (Core §9).
+- **Why `0.5.0`.** Tag `v0.4.0` carries `specVersion` `0.3.0` unchanged. [VERSIONING.md](VERSIONING.md)
+  now states the release numbering rule: a tag's major and minor numbers are those of the
+  `specVersion` it carries, and its patch number counts later releases that carry it unchanged.
+  `v0.4.0` is the rule's recorded exception, so no `specVersion` `0.4.0` is assigned and the version
+  staged as `0.4.0-draft` is released as `0.5.0`. A `0.5.0` reader refuses a pack declaring
+  `0.4.0-draft`, by the exact selector; such a pack moves by changing its `specVersion` to `0.5.0`
+  (Core §11).
+- RFC 0031 is Accepted on its same-vendor round-1 review, with the different-vendor review waived by
+  the maintainer; that is not a cross-vendor claim. Its Acceptance section states each evidence-bar
+  item, and the round-1 record gains a dated note. Item 3 is met in part: both implementations are
+  by the drafting vendor, both refuse the 18 document cases that declare the `extended` profile,
+  which neither supports, and
+  the reference runtime passed the vectors staged at c867b35 but has not run the seven cases #308
+  added, the two fixtures #304 rewrote, or anything under `0.5.0`, which is its follow-up.
+- The second evaluator is `tools/core_050_eval.py`. The site serves Core `0.5.0` at `/spec/0.5.0/`
+  and keeps `/spec/0.3.0/` as a signpost to the tag.
+
+The entries below record the work in the order it landed, under the names it then had: RFC 0031 and
+its artifacts were a Draft staged under `0.4.0-draft`.
+
+### Added
+
 - RFC 0031 (#301), a Draft, proposes annotations and annotated value sets. Short labels on the
   pack, its outcomes and rules live in the reserved extension `org.judgmentpack.annotations`: keys
   from the local-identifier grammar, each mapped to a string or a list of distinct strings, with
@@ -26,11 +65,11 @@ here.
 - RFC 0031 (#301) is staged as a draft Core `specVersion`, under the working selector `0.4.0-draft`,
   which no maintainer has assigned and no release carries ([VERSIONING.md](VERSIONING.md)). The
   staged schema is the `0.3.0` schema plus exactly the record's fragments. The staged Core text
-  ([`spec/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md)) is marked normative for nothing.
-  Hand-written vectors sit in no corpus: 208 document cases in
-  [`conformance/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/staged), with five provisional conformance codes,
+  (`spec/staged/`, retired at the release) is marked normative for nothing.
+  Hand-written vectors sit in no corpus: 215 document cases in
+  `conformance/staged/`, with five provisional conformance codes,
   and 82 evaluation rows with their pairs in
-  [`conformance/evaluation/staged/annotations-value-sets/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged/annotations-value-sets),
+  `conformance/evaluation/staged/annotations-value-sets/`,
   where one more row is held. An annotated expense example is staged too. Tests hold all of it to the
   repository's checks, including a static check of the paired rows, and check that every released
   case and row still holds under the draft selector. Under the draft selector an `extensions` object
@@ -49,10 +88,10 @@ here.
   kept out of the draft's Core text; and more inertness rows, over evidence, exceptions, the
   fallback outcome and escalation routes. The draft schema's new digest has a change record.
 - A second evaluator for the staged draft selector `0.4.0-draft` (#301),
-  [`tools/core_draft_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tools/core_draft_eval.py), written from Core, the
+  `tools/core_draft_eval.py` (now `tools/core_050_eval.py`), written from Core, the
   staged delta and RFC 0031 alone, by the drafting model's own vendor. It admits a pack (the
   carrier, the `base` profile, the staged schema and the semantic checks, written fresh), builds the
-  evaluation form and evaluates it under Core §§7–8. Its test, `tests/test_core_draft_eval.py`,
+  evaluation form and evaluates it under Core §§7–8. Its test, `tests/test_core_draft_eval.py` (now `tests/test_core_050_eval.py`),
   runs every staged evaluation row against its expectation (82 agree; the held row agrees and stays
   held), the rows they carry over, the 29 pairs, and every staged and carried-over document case;
   the 18 cases that declare `extended` are checked to be refused with `profile-unsupported`. It
@@ -60,6 +99,16 @@ here.
   distinguishes. It is a test tool, not a product, and makes no conformance claim; whether it meets
   RFC 0031's evidence bar item 3 is the maintainer's judgment. RFC 0031 and the staged READMEs say
   so. No case, row, fixture, schema or expectation changes.
+- Under the staged selector `0.4.0-draft`, a local identifier, an extension name, a pack version or
+  a decimal operand holds no line terminator in any engine (#308; RFC 0031, Unresolved question 5,
+  answered). Some engines let `$` match before a final line feed, so `"name\n"` passed Core's
+  local-identifier pattern under one validator and failed under another. The staged schema adds a
+  `not` beside the local-identifier, pack-version and decimal-operand patterns and beside the
+  extension-name pattern, which also takes over the reserved prefix from a lookahead RE2 cannot
+  compile, and escapes a class hyphen ECMA-262's `v` flag refuses. The patterns admit the same
+  values in Python, ECMA-262 (`u` and `v`), RE2, Perl, Java and Ruby, and what Core
+  `0.3.0` admits under ECMA-262. Seven staged cases refuse one such value in each kind of position;
+  the draft schema's new digest has a change record. Core `0.3.0` is unchanged.
 - An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
   names the judge, the signer, the witness and the reader around a decision record: what each
   produces, trusts and never does, and which parts are not shipped. It defines nothing.

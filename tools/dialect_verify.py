@@ -3364,7 +3364,7 @@ class Recording:
 
 RECORDING_SCHEMAS = {
     "0.2.0-draft": "schema/judgment-pack-core-0.2.0-draft.schema.json",
-    "0.3.0": "schema/judgment-pack-core.schema.json",
+    "0.3.0": "schema/judgment-pack-core-0.3.0.schema.json",
 }
 
 

@@ -1,22 +1,25 @@
 # RFC 0031: Annotations and annotated value sets
 
-- Status: Draft
+- Status: Accepted
 - Type: Standards track, draft maturity. A Core amendment: one specification-defined extension in
   the reserved namespace, one new root member and one new fact-condition member.
 - Created: 2026-11-11
-- Target: the next Core `specVersion` after `0.3.0`. No number is assigned here. A release tag is
-  not a selector: release `v0.4.0` carries `specVersion` `0.3.0`.
+- Accepted: 2026-11-12, by the maintainer, on the same-vendor round-1 review; see
+  [Acceptance](#acceptance).
+- Target: Core `specVersion` `0.5.0`, released under tag `v0.5.0`. It was staged under the working
+  selector `0.4.0-draft`, which was never released. Tag `v0.4.0` carries `specVersion` `0.3.0`, so
+  no `specVersion` `0.4.0` is assigned ([VERSIONING.md](../VERSIONING.md)).
 - Issue: [#301](https://github.com/Judgment-Pack/judgment-pack-spec/issues/301)
-- Staged draft: [`spec/staged/judgment-pack-core-0.4.0-draft.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md),
-  under a working selector no maintainer has assigned. This record stays a Draft.
+- Released text: [`spec/judgment-pack-core.md`](../spec/judgment-pack-core.md), Core `0.5.0`.
 
-> This is an open proposal, not part of the specification. See
+> This record is accepted and its content is part of Core `0.5.0`. See
 > [RFC 0000](0000-rfc-process.md) for the process and evidence bar.
 >
-> **This record is normative for nothing.** Every MUST, SHOULD and MAY below is proposed wording for
-> the Core version that might adopt it. This change edits neither the published schema, the Core
-> text, nor any released conformance corpus, and it creates no conformance claim. The vectors in
-> [Conformance](#conformance) are named and described here; none is a corpus file.
+> **This record is normative for nothing.** The MUST, SHOULD and MAY below were proposed wording;
+> Core `0.5.0`'s text, schema and corpora are what is released, and they govern where this record
+> differs. Below, "the staged" names what was staged under `0.4.0-draft` before the release, and
+> "the next selector" names `0.5.0`. The vectors in [Conformance](#conformance) are named and
+> described here; they are released in the `0.5.0` corpora.
 >
 > **Review standing.** [RFC 0009](0009-interim-review-regime.md) requires a recorded adversarial
 > review by a model from a different vendor, with a written disposition for each finding, on the
@@ -25,9 +28,9 @@
 > drafting vendor, run at the maintainer's direction, is recorded with the maintainer's disposition
 > of each finding at
 > [`rfcs/reviews/0031-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0031-round-1.md),
-> and this text is revised by that disposition. It does not count toward the requirement and makes
-> no cross-vendor claim. The different-vendor review, when it happens, is recorded as a later round
-> in `rfcs/reviews/`.
+> and this text is revised by that disposition. The maintainer waived the different-vendor review
+> for this record and accepted it on that round-1 review ([Acceptance](#acceptance)). That is a
+> same-vendor review, not a cross-vendor claim.
 >
 > **Terminology.** In this record an *annotation* is a key and its value inside the reserved
 > extension `org.judgmentpack.annotations`. The word has nothing to do with the JSON Schema sense,
@@ -181,8 +184,8 @@ An annotations object is a JSON object with 1 to 16 members (the base ceiling, �
   anchor admits. Some regular-expression engines let `$` match before a final line feed, so the
   schema also refuses, in a key, the controls, the two separators and the embeddings and overrides
   (U+0000–U+001F, U+007F–U+009F and U+2028–U+202E; §1.7), and the rule holds in every engine §1.7
-  lists. Core's own anchored patterns, its local-identifier grammar among them, have the same
-  latent property; this record does not change Core's (Unresolved question 5).
+  lists. Core's local-identifier and extension-name patterns had the same latent property, and the
+  next version closes it for them too (Unresolved question 5, answered).
 - **Values.** Each member value is either an annotation string (§1.4), or an array of 1 to 16
   annotation strings in which no string appears twice.
 - **String equality.** Two annotation strings are equal when they are the same sequence of Unicode
@@ -307,7 +310,9 @@ These definitions would be added to `$defs`. `annotatedExtensions` replaces `ext
 type of the root's, each outcome's and each rule's `extensions` member. `entryExtensions` is the
 type of an entry's `extensions` (§2.7). Every other `extensions` member keeps the existing
 `extensions` definition, which refuses every reserved name. `metadata.requiredExtensions` is
-unchanged.
+unchanged by this fragment. The vendor-name branch of `annotatedExtensions` is the extension-name
+pattern pair of Unresolved question 5's answer, which the `extensions` definition and the
+`metadata.requiredExtensions` item take too.
 
 ```json
 {
@@ -346,7 +351,10 @@ unchanged.
     "propertyNames": {
       "anyOf": [
         { "const": "org.judgmentpack.annotations" },
-        { "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" }
+        {
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+          "not": { "type": "string", "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+        }
       ]
     },
     "properties": {
@@ -393,7 +401,8 @@ Unicode support. An engine that matches UTF-16 code units and has no Unicode mod
 three ranges outside the Basic Multilingual Plane at all; an implementation built on one applies
 them as a check of its own, with the same code and pointer. No other engine was tested, .NET's and
 PCRE2 among them. Each pattern holds a literal U+0000, which a pattern interface that takes a
-NUL-terminated string truncates; such an interface needs another spelling of the same class.
+NUL-terminated string truncates; such an interface needs another spelling of the same class. The
+identifier patterns of Unresolved question 5's answer were swept in the same engines.
 
 In `annotationString` the `not` holds `"type": "string"` beside the pattern. A `pattern` holds for
 every instance that is not a string, so without it a list item that is a number or a list would
@@ -927,7 +936,10 @@ A filtered view is not redaction either. The omitted items, and their annotation
 pack's bytes (see Security and privacy).
 
 D1 and D2 bind any consumer that displays or filters annotations, as Core §10's prohibitions bind
-every implementation. No Core conformance class tests display.
+every implementation. No Core conformance class tests display. They bind what is displayed to a
+person: a machine-readable form that carries each key and value with its exact code points, such as
+JSON a program reads, is data, not a display and not a listing under D2, and the consumer that
+displays a key or value read from it is the one bound.
 
 ### 9. Where each part lands
 
@@ -1237,7 +1249,9 @@ requires, compatibility is explicit:
   (`JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION`), and moving it up means adding the name as a key of a
   real `extensions` object as well. With that exception, and as far as this record goes, changing
   only the selector is enough, and evaluation is unchanged. The next version's other changes are
-  their own.
+  their own. One of them narrows what some validators admitted, never what Core `0.3.0`'s grammar
+  admits under ECMA-262: a local identifier, an extension name, a pack version or a decimal operand
+  that ends in a line terminator is refused in every engine (Unresolved question 5).
   - Labels kept in a vendor extension MAY be moved to the reserved name by hand, once they meet
     §§1.3–1.5. There is no automatic coercion: a vendor value outside those rules must be edited,
     not truncated, joined or dropped by a tool.
@@ -1283,7 +1297,10 @@ both land, these definitions would do it:
     "propertyNames": {
       "anyOf": [
         { "enum": ["org.judgmentpack.annotations", "org.judgmentpack.outcome-values"] },
-        { "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" }
+        {
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+          "not": { "type": "string", "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+        }
       ]
     },
     "properties": {
@@ -1296,7 +1313,10 @@ both land, these definitions would do it:
     "type": "string",
     "anyOf": [
       { "const": "org.judgmentpack.outcome-values" },
-      { "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" }
+      {
+        "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+        "not": { "type": "string", "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+      }
     ]
   }
 }
@@ -1339,30 +1359,31 @@ evaluation, is Core's question. This record does not change it.
 
 ### Graduation
 
-If this record is accepted, one pull request releases the version that carries it. This record
-assigns no number to it.
+This record was graduated by one pull request, which releases Core `specVersion` `0.5.0` under tag
+`v0.5.0`. It is recorded here as done.
 
-- **The working selector is never released.** `0.4.0-draft` names staged artifacts only; no
-  release carries it as a `specVersion`. A reader of the released version refuses a pack declaring
-  `0.4.0-draft`, by the exact-selector rule (Core §4), as it refuses every selector other than its
-  own.
-- **Packs written to the working selector.** Such a pack moves by changing its `specVersion` to the
-  released one. That changes its bytes, so its digest changes too (§5), and it must then satisfy the
-  released rules, which may differ from the staged ones. No reader admits it under both selectors.
-  An implementation that admits `0.4.0-draft` meanwhile does so experimentally, outside every
-  conformance claim.
-- **What the releasing pull request retires.** The staged schema, delta text, document cases,
-  evaluation rows and example; the record-shape catalog's shape record for the staged schema; and
-  Core's `draftVersion` in that catalog. Their content moves into the released schema, Core text
-  and corpora under the released selector, with new `$id`, selector bytes and digests.
-- **The document cases and the `extended` profile.** The releasing pull request decides where the
-  cases that need the `extended` profile land: in the released document manifest, with a member
-  naming the reader profile, or in the `profiles.json` suite where Core `0.3.0`'s own `extended`
-  vectors are. `tools/profile_validation.py` gains the six rows of §7.
-- **The held evaluation row.** The new version's case schema admits specification-defined names in
-  a supported-extension set, and the row `annotations-supported-extension-set` is released with the
+- **The working selector was never released.** `0.4.0-draft` named staged artifacts only. The
+  version it staged is released as `0.5.0`, not `0.4.0`: tag `v0.4.0` carries `specVersion`
+  `0.3.0`, and under the release numbering rule ([VERSIONING.md](../VERSIONING.md)) a tag's major
+  and minor numbers are those of the `specVersion` it carries, so the number `0.4.0` is taken. A
+  `0.5.0` reader refuses a pack declaring `0.4.0-draft`, by the exact-selector rule (Core §4), as it
+  refuses every selector other than its own.
+- **Packs written to the working selector.** Such a pack moves by changing its `specVersion` to
+  `0.5.0`. That changes its bytes, so its digest changes too (§5), and it must then satisfy the
+  released rules (Core §11). No reader admits it under both selectors. An implementation that
+  admitted `0.4.0-draft` did so experimentally, outside every conformance claim.
+- **Retired.** The staged schema, delta text, document cases, evaluation rows and example. Their
+  content is in the released schema, Core text and corpora, under `$id`s in `/schema/0.5.0/`, the
+  selector `0.5.0` and new digests. The record-shape catalog's change record
+  `0009-core-0-5-0-released` records the staged schema's retirement, and Core's `draftVersion` there
+  reads `0.5.0`.
+- **The document cases and the `extended` profile.** The cases that need the `extended` profile are
+  released in the document manifest, which names the reader profiles its cases run under
+  (`readerProfiles`). `tools/profile_validation.py` applies the rows of §7.
+- **The held evaluation row.** The `0.5.0` case schema admits specification-defined names in a
+  supported-extension set, and the row `annotations-supported-extension-set` is released with the
   rest (Core §8.2 as amended, §1.2).
-- **The evidence bar.** Each item of [Evidence bar](#evidence-bar) holds first.
+- **The evidence bar.** [Acceptance](#acceptance) states each item.
 
 ## Security and privacy
 
@@ -1432,10 +1453,47 @@ vendor
 ([`rfcs/reviews/0031-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0031-round-1.md))
 and does not count. Item 3 was not met at round 1: one implementation existed, experimentally, and a
 second did not. A second evaluator has been added since, written from the text by the drafting
-vendor; what it covers is under Implementation, and whether it meets item 3 is the maintainer's
-judgment. Item 6 is met by the disposition of Unresolved question 1. Item 7's
+vendor; what it covers is under Implementation. At acceptance item 3 is met in part
+([Acceptance](#acceptance)). Item 6 is met by the disposition of Unresolved question 1. Item 7's
 coordination is drafted in this record (Compatibility, Coordination with RFC 0016). The other items
 stand as the round-1 review found them.
+
+### Acceptance
+
+On 2026-11-12 the maintainer accepted this record and directed its graduation into Core `0.5.0`,
+with the different-vendor review waived. Item by item:
+
+1. **Not met as written; waived.** No model from a different vendor reviewed this record. The
+   maintainer waived that review for this record and accepted the round-1 review by a model from
+   the drafting vendor, with its disposition, as the review of record. That is a same-vendor review,
+   not a cross-vendor claim.
+2. **Met.** The vectors existed as staged files, were reviewed in round 1 and were held to the
+   repository's checks, the static check included. They are released in the `0.5.0` corpora.
+3. **Met in part.** Two implementations have run the vectors: the project's reference runtime and
+   the second evaluator in this repository (`tools/core_050_eval.py`). Both are by the drafting
+   vendor; neither is a different vendor's. Neither passes every vector: both refuse the 18
+   document cases that declare the `extended` profile, which neither supports, and the second
+   evaluator supports `base` only. The reference runtime passed the 208 document cases and 82 rows staged at
+   c867b35, the held row held; it has not run the seven document cases #308 added, the two fixtures
+   #304 rewrote, or anything under the selector `0.5.0`. The second evaluator runs every row and
+   every other document case under `0.5.0`. The maintainer directed acceptance on that basis; the
+   reference runtime's take-up of `0.5.0` is the follow-up.
+4. **Met.** The draft schema carried the fragments under the repository's schema tests; it is
+   released as the `0.5.0` Core schema.
+5. **First half met; second half met in part.** The published example
+   `examples/expense-approval-annotated.json` uses both features. The reference runtime has a
+   consumer view with its own tests, but its D1 isolation of Markdown text direction is open there.
+   The maintainer directed graduation on that basis.
+6. **Met** by the disposition of Unresolved question 1.
+7. **Met.** Core text is drafted for each row of §9, and the Core §9 paragraph is coordinated with
+   RFC 0016 (Compatibility, Coordination with RFC 0016).
+
+<!-- RUNTIME-STATUS -->
+At acceptance, the reference runtime's main branch passes the vectors staged at c867b35 (208
+document cases with 18 extended-profile cases reported unsupported; 82 rows; the held row held); it
+has not yet taken up the changes this pull request adds, and will vendor the released `0.5.0`.
+
+The candidate period is waived by the maintainer: `v0.5.0` has no release candidate.
 
 ### Codes
 
@@ -1459,7 +1517,7 @@ code is:
    `JPS-STRUCTURE-MAX-PROPERTIES`. The new codes separate words with hyphens, as `MIN-LENGTH` and
    `UNIQUE-ITEMS` do. `MAXITEMS` keeps the spelling Core's corpus already uses.
 
-Two refusals take a code mapped from a keyword other than the one the rule above would name, and
+Three refusals take a code mapped from a keyword other than the one the rule above would name, and
 the table says so where each applies:
 
 - A rule that ties members to one another takes one code named for the rule, whichever keyword
@@ -1469,6 +1527,12 @@ the table says so where each applies:
 - The `not` under an annotations object's `propertyNames` repeats a refusal the local-identifier
   grammar already makes, for engines whose `$` admits a trailing line feed. A key it refuses takes
   the grammar's code, `JPS-STRUCTURE-LOCAL-ID`, mapped from `not` there (§1.3).
+- The `not` beside the local-identifier, pack-version, decimal-operand and extension-name grammars
+  (Unresolved question 5) takes its grammar's code: `JPS-STRUCTURE-LOCAL-ID`,
+  `JPS-STRUCTURE-PACK-VERSION`, `JPS-STRUCTURE-DECIMAL-OPERAND`, and
+  `JPS-STRUCTURE-EXTENSION-NAME` at the key or the item. A reserved name outside its definition's
+  positions is refused by that `not` in place of the released pattern's lookahead, with the code it
+  had.
 
 A pointer to a refused key names the key's member, as Core's pointer for an extension-name refusal
 does, for example `…/org.judgmentpack.annotations/Tier`. A pointer to an unknown member names that
@@ -1519,6 +1583,8 @@ is dispositioned (Unresolved question 3); the staged manifest lists them as `adv
 | `structural-value-set-entry-extension-*` | in an entry's `extensions`, one case each: `com.example.note` alone; `com.example.note` beside annotations; `org.judgmentpack.future` | `JPS-STRUCTURE-UNKNOWN-MEMBER` at `/valueSets/0/entries/0/extensions/` and the name |
 | `structural-annotations-required` | the name in `metadata.requiredExtensions` | `JPS-STRUCTURE-EXTENSION-NAME` at `/metadata/requiredExtensions/0` |
 | `structural-reserved-name-in-annotated-position` | `org.judgmentpack.future` in a rule's `extensions` | `JPS-STRUCTURE-EXTENSION-NAME` at `/rules/0/extensions/org.judgmentpack.future` |
+| `valid-extension-name-reserved-look-alike`, `valid-extension-name-reserved-look-alike-required` | `org.judgmentpackx.a` in a rule's `extensions`; the same name in `metadata.requiredExtensions`, run with it supported (added after the round-1 review) | valid: only names beginning `org.judgmentpack.`, with the dot, are reserved |
+| `valid-extension-name-two-label-reserved-stem` | the two-label name `org.judgmentpack` in a rule's `extensions` (added after the round-1 review) | valid: the grammar admits two labels, and the name lacks the reserved prefix's final dot |
 | `structural-annotations-not-object` | the extension's value is a string | `JPS-STRUCTURE-TYPE` at `…/org.judgmentpack.annotations` |
 | `structural-annotations-empty-object` | `{}` | `JPS-STRUCTURE-MIN-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
 | `structural-annotations-empty-object-*` | `{}` at the root, on an outcome and on a value-set entry, one case each | `JPS-STRUCTURE-MIN-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
@@ -1526,6 +1592,13 @@ is dispositioned (Unresolved question 3); the staged manifest lists them as `adv
 | `structural-annotations-empty-string` | `"category": ""` | `JPS-STRUCTURE-MIN-LENGTH` at `…/category` |
 | `structural-annotations-key-grammar-*` | one case each: `Tier`, `tier_1`, `-tier`, `tier-`, `ti--er`, `1tier`, the empty key | `JPS-STRUCTURE-LOCAL-ID` at the key |
 | `structural-annotations-key-trailing-lf` | the key `"tier\n"`, escaped in the JSON | `JPS-STRUCTURE-LOCAL-ID` at the key: from `pattern`, or mapped from `not` under an engine whose `$` admits the line feed |
+| `structural-local-id-trailing-lf-id` | a rule id `"accept-request\n"`, escaped in the JSON | `JPS-STRUCTURE-LOCAL-ID` at `/rules/0/id`: from `pattern`, or mapped from `not` under an engine whose `$` admits the line feed (Unresolved question 5) |
+| `structural-local-id-trailing-lf-reference` | a rule's `outcome` `"accept\n"` | `JPS-STRUCTURE-LOCAL-ID` at `/rules/0/outcome`, before the reference is resolved |
+| `structural-extension-name-trailing-lf` | the key `"com.example.review-policy\n"` in the decision's `extensions` | `JPS-STRUCTURE-EXTENSION-NAME` at the key |
+| `structural-extension-name-trailing-lf-annotated` | the same key in a rule's `extensions`, beside annotations | `JPS-STRUCTURE-EXTENSION-NAME` at the key: one refusal, not one per branch of the `anyOf` |
+| `structural-required-extension-trailing-lf` | `"com.example.review-policy\n"` in `metadata.requiredExtensions`, beside the key without it | `JPS-STRUCTURE-EXTENSION-NAME` at `/metadata/requiredExtensions/0` |
+| `structural-pack-version-trailing-lf` | `"version": "0.1.0\n"` | `JPS-STRUCTURE-PACK-VERSION` at `/version` |
+| `structural-decimal-operand-trailing-lf` | an ordered comparison's operand `"10\n"` | `JPS-STRUCTURE-DECIMAL-OPERAND` at `/rules/0/when/value` |
 | `structural-annotations-key-too-long` | a 65-character key | `JPS-STRUCTURE-MAX-LENGTH` (new) at the key |
 | `structural-annotations-too-many-keys` | 17 keys | `JPS-STRUCTURE-MAX-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
 | `structural-annotations-too-many-strings` | a list of 17 | `JPS-STRUCTURE-MAXITEMS` at the list |
@@ -1660,8 +1733,9 @@ staged selector `0.4.0-draft`, with annotations, value sets and a filtered view,
 staged artifacts.
 
 A second evaluator now exists in this repository:
-[`tools/core_draft_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tools/core_draft_eval.py), with its test,
-[`tests/test_core_draft_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tests/test_core_draft_eval.py). It was written from Core, the
+[`tools/core_050_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tools/core_050_eval.py), with its test,
+[`tests/test_core_050_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tests/test_core_050_eval.py); it was staged as
+`tools/core_draft_eval.py` and renamed at the release. It was written from Core, the
 staged delta and this record alone, without reading or running the reference runtime. Its authoring
 vendor is the drafts' own, so it is a second reading of the text, not a different vendor's. It is a
 test tool, not a product, and makes no conformance claim. It covers:
@@ -1680,8 +1754,8 @@ test tool, not a product, and makes no conformance claim. It covers:
 It supports `base` only. The 18 staged cases whose fixtures declare `extended` are checked to be
 refused with `profile-unsupported`, not run. Its mutation check found rules of Core §§7–8 that no
 evaluation row distinguishes, such as `suppress-rule`; its test states them as its own cases,
-which are not conformance rows. Whether this evaluator meets evidence bar item 3 is the
-maintainer's judgment. The scratch check described under Evidence is not an implementation, and
+which are not conformance rows. Evidence bar item 3 is met in part ([Acceptance](#acceptance)).
+The scratch check described under Evidence is not an implementation, and
 neither is the evaluator the round-1 review wrote.
 
 ## Unresolved questions
@@ -1705,14 +1779,6 @@ dispositioned. An advisory never changes conformance, so the deferral cannot bre
 staged manifest lists the two codes as `advisoryCodes`, outside conformance, and no case states
 them.
 
-**5. Line feeds before the end anchor in Core's other patterns.** A separate candidate for the
-same version, not part of this record. An engine whose `$` matches before a final line feed admits
-a vendor extension name such as `"com.example\n"` under Core's extension-name pattern, and a
-`localId` ending in a line feed under the local-identifier grammar, where an ECMA-262 engine
-refuses both; so two structural validators can already disagree. This record closes that gap only
-for annotation keys (§1.3). Adding the same `not` to the extension-name and `localId` patterns
-changes the grammar of every Core object and belongs in its own record.
-
 **Answered questions.**
 
 - **1. The ceiling numbers.** Answered by the round-1 disposition: the six numbers of §7 are
@@ -1728,3 +1794,66 @@ changes the grammar of every Core object and belongs in its own record.
   `0.3.0`'s ambiguity stays a known open point of the released text, and the released checker is
   unchanged. The staged cases `semantic-required-extension-in-operand` and
   `semantic-required-extension-in-entry-value` pin the reading.
+- **5. Line feeds before the end anchor in Core's other patterns.** Answered by the maintainer
+  (issue #308): closed in the next version beside this record, not left for a record of its own.
+  The answer was added by the maintainer's decision after round 1 and was not part of the round-1
+  review; the pull request that graduates this record has its own review, which covers it.
+  An engine whose `$` matches before a final line feed admitted a vendor extension name such as
+  `"com.example\n"` under Core `0.3.0`'s extension-name pattern, and a `localId` ending in a line
+  feed under its local-identifier grammar, where an ECMA-262 engine refuses both, so two structural
+  validators could disagree on one document. Under the next selector no local identifier and no
+  extension name holds a line terminator, whatever an engine's anchors admit (the staged draft's §§5
+  and 9). The local-identifier grammar gains the class an annotation key's `not` holds (§1.3). The
+  extension-name grammar's reserved prefix moves from a lookahead, which RE2 cannot compile, into a
+  `not` beside it that also holds that class, and the hyphen in its last class is escaped, which
+  ECMA-262's `v` flag requires. Each `not` holds `"type": "string"`, as `annotationString`'s does,
+  so a non-string fails `type` alone. The pack-version and decimal-operand grammars had the same
+  property (`"1.0.0\n"`, `"1.5\n"`), and the maintainer closed it there too, with the same `not`. The
+  definitions, by their place in the schema:
+
+```json
+{
+  "properties/version": {
+    "type": "string",
+    "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+    "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+  },
+  "$defs/localId": {
+    "type": "string",
+    "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+    "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+  },
+  "$defs/decimalString": {
+    "type": "string",
+    "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$",
+    "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+  },
+  "$defs/extensions": {
+    "type": "object",
+    "propertyNames": {
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+      "not": { "type": "string", "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+    },
+    "additionalProperties": true
+  },
+  "$defs/metadata/properties/requiredExtensions/items": {
+    "type": "string",
+    "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+    "not": { "type": "string", "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+  }
+}
+```
+
+A refusal by a pattern or by the `not` beside it takes the grammar's code (Codes). Swept over every
+code point before, inside and after a value, and over values of more than one line, the four pattern
+pairs admit exactly the same strings in every engine §1.7 lists: Python 3.12 `re`; ECMA-262 with the
+`u` and with the `v` flag in Node 22; RE2 through Go 1.26; Perl 5.30; Java 11's `java.util.regex`;
+and Ruby 2.7, whose `^` and `$` match at every line. Over that sweep they admit exactly what Core
+`0.3.0`'s patterns admit under ECMA-262 in Unicode mode, as they must: a string the ECMA-262 grammar
+admits holds only letters, digits, hyphens and full stops, which the class never matches. Findings
+still compare as a set (Codes), because an ECMA-262 or an RE2 engine reports the pattern and the
+`not` at one pointer, with one code, for a name that ends in a line feed. The staged cases
+`structural-local-id-trailing-lf-id`, `structural-local-id-trailing-lf-reference`,
+`structural-extension-name-trailing-lf`, `structural-extension-name-trailing-lf-annotated`,
+`structural-required-extension-trailing-lf`, `structural-pack-version-trailing-lf` and
+`structural-decimal-operand-trailing-lf` refuse one such value in each kind of position.

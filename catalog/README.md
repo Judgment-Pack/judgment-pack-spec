@@ -34,15 +34,8 @@ else, such as an RFC's staged proposal under a `urn:` identifier, is listed unde
 not fingerprinted.
 
 A staged schema whose `$id` is in the namespace is in scope by the same rule. RFC 0028's staged
-`workflow-contributors-2.schema.json` is family `workflow-contributors` at `0.4.0`. The staged draft
-Core schema `schema/staged/judgment-pack-core-0.4.0-draft.schema.json`
-([RFC 0031](../rfcs/0031-annotations-and-value-sets.md), a Draft) is family `judgment-pack-core` at
-`0.4.0-draft`, the working selector no maintainer has assigned
-([VERSIONING.md](../VERSIONING.md), Staged draft Core selector). Listing a shape fingerprints it and
-publishes nothing. The staged directories are `export-ignore` and the site does not serve them, so
-no release bundle carries the staged schema itself. A bundle that carries this directory carries
-the catalog's record of the staged shape: its path, `$id`, version, digest and normalized text in
-`record-shapes.json`, and its change records.
+`workflow-contributors-2.schema.json` is family `workflow-contributors` at `0.4.0`. Listing a shape
+fingerprints it and publishes nothing.
 
 To stop a mistyped `$id` from dropping a shape silently, the tool refuses a tree in which:
 
@@ -97,8 +90,8 @@ library gives the same bytes for every schema the catalog admits.
     {
       "path": "schema/workflow-1.schema.json",
       "family": "workflow",
-      "id": "https://judgmentpack.org/schema/0.3.0/workflow-1.schema.json",
-      "version": "0.3.0",
+      "id": "https://judgmentpack.org/schema/0.5.0/workflow-1.schema.json",
+      "version": "0.5.0",
       "sha256": "sha256:...",
       "normalized": "{...}"
     }
@@ -152,7 +145,7 @@ and no others:
 {
   "format": "judgment-pack-format-status/1",
   "families": {
-    "judgment-pack-core": { "draftVersion": "0.4.0-draft", "baseline": "v0.3.0", "lastReleased": "v0.4.0" }
+    "judgment-pack-core": { "draftVersion": "0.5.0", "baseline": "v0.5.0", "lastReleased": "v0.5.0" }
   }
 }
 ```
@@ -161,9 +154,7 @@ The check compares each record with what the tree and [`releases/`](../releases/
 
 - **`draftVersion`**: the highest version among the family's catalogued schemas, which is the
   version the draft text on `main` writes for that family unless a staged schema is the highest.
-  Semantic versions are ordered by SemVer precedence, and bare format numbers numerically. Core's
-  reads `0.4.0-draft`, the staged schema's working selector (above). It is not an assigned next
-  `specVersion`, and the Core text on `main` still writes `0.3.0`.
+  Semantic versions are ordered by SemVer precedence, and bare format numbers numerically.
 - **`lastReleased`**: the tag of the latest release that includes the family, pre-releases
   included, or `null`.
 - **`baseline`**: the tag of the latest including release that is not a candidate, or `null`.
@@ -180,7 +171,7 @@ release counts from that commit onward. A release includes a family when:
 A candidate is a release whose version carries VERSIONING.md's `-rc.N` or `-alpha.N` distribution
 suffix. A candidate counts for `lastReleased` but is never a `baseline`. So does any other Core
 distribution whose tag is not its `specVersion`. Release `v0.4.0` is the one such distribution: it
-carries `specVersion` `0.3.0` unchanged and is not a candidate, but `v0.3.0` stays the baseline of
+carries `specVersion` `0.3.0` unchanged and is not a candidate, but `v0.3.0` stayed the baseline of
 what it carries. A Policy companion release (`policy-v<releaseVersion>`) freezes its format on first
 publication, so it is a baseline.
 
@@ -196,7 +187,8 @@ using the same normalization. An implementation's own catalog needs `id`, `famil
 
 It then compares that catalog with this one, at the release tag it names, as follows. Tag `v0.3.0`
 has no catalog. An implementation of `specVersion` `0.3.0` reads the one at tag `v0.4.0`, which
-carries that version unchanged, and names `v0.4.0` as the catalog it compared with.
+carries that version unchanged, and names `v0.4.0` as the catalog it compared with. An implementation
+of `specVersion` `0.5.0` reads the one at tag `v0.5.0`; the `v0.5.0` bundles do not carry it.
 
 1. For each `id` the implementation carries, find the entry with the same `id` in this catalog.
 2. A missing `id`, or the same `id` with a different `sha256`, is a **finding**. The implementation

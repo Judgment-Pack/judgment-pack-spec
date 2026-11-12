@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://judgmentpack.org/schema/0.3.0/conformance/manifest.schema.json",
+  "$id": "https://judgmentpack.org/schema/0.5.0/conformance/manifest.schema.json",
   "title": "Judgment Pack conformance manifest",
   "type": "object",
   "additionalProperties": false,
@@ -10,6 +10,7 @@
     "specVersion",
     "status",
     "validationProfile",
+    "readerProfiles",
     "diagnosticVocabulary",
     "cases"
   ],
@@ -18,10 +19,10 @@
       "const": "./manifest.schema.json"
     },
     "suiteVersion": {
-      "const": "0.3.0"
+      "const": "0.5.0"
     },
     "specVersion": {
-      "const": "0.3.0"
+      "const": "0.5.0"
     },
     "status": {
       "enum": ["draft", "candidate", "release"]
@@ -46,6 +47,10 @@
         }
       }
     },
+    "readerProfiles": {
+      "description": "The ceiling profiles a reader runs the cases under (Core \u00a74.1). A case whose fixture declares the extended profile is run by a reader supporting it, under the extended value of every row.",
+      "const": ["base", "extended"]
+    },
     "diagnosticVocabulary": {
       "type": "object",
       "additionalProperties": false,
@@ -68,7 +73,18 @@
   "$defs": {
     "extensionName": {
       "type": "string",
-      "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+      "not": {
+        "type": "string",
+        "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+      }
+    },
+    "supportedExtensionName": {
+      "description": "A name a supported-extension set may hold: an extension name, or a specification-defined name, which Core \u00a78.2 ignores when no conforming pack can require it.",
+      "anyOf": [
+        { "$ref": "#/$defs/extensionName" },
+        { "enum": ["org.judgmentpack.annotations"] }
+      ]
     },
     "diagnostic": {
       "type": "object",
@@ -283,9 +299,18 @@
         "supportedExtensions": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/extensionName"
+            "$ref": "#/$defs/supportedExtensionName"
           },
           "uniqueItems": true
+        },
+        "expectedDiagnostics": {
+          "description": "Optional. Every finding the case gives, where it gives more than one. Findings compare as a set of code and pointer pairs; expectedDiagnostic is the first item.",
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/diagnostic"
+          }
         },
         "expectedAdvisories": {
           "type": "array",
@@ -332,6 +357,10 @@
           "else": {
             "not": { "required": ["expectedAdvisories"] }
           }
+        },
+        {
+          "if": { "required": ["expectedDiagnostics"] },
+          "then": { "properties": { "expectedResult": { "const": "invalid" } } }
         }
       ]
     }

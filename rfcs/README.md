@@ -27,7 +27,7 @@ describes, and they did so before it was written.
 Acceptance and incorporation are different events. [RFC 0000](0000-rfc-process.md) makes acceptance
 the approval of a design at the maturity the RFC names; RFC 0006's text landed in the same merge,
 which is a precedent and not a rule. [RFC 0013](0013-evaluator-error-and-precedence-cases.md) is
-accepted and awaits incorporation: its rows are staged for the `suiteVersion` after `0.3.0`,
+accepted and awaits incorporation: its rows are staged for the `suiteVersion` after `0.5.0`,
 are in no released corpus, and land when a later `specVersion` opens.
 
 The purpose of this directory is to make the project's open design questions *visible* rather than
@@ -78,7 +78,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0028](0028-complete-workflow-contributors.md) | Complete workflow contributor attribution | Draft | Specification (amendment to Draft workflow; target Spec 0.5.0, unpublished) |
 | [0029](0029-retained-column-conversions.md) | Exact selected retained columns, custody, producer grammar and role ceilings | Accepted | Selected Dialect companion for immutable Core RC2 at draft maturity; acceptance is separate from publication |
 | [0030](0030-agent-principals-and-delegated-authority.md) | Agent principals and delegated authority | Draft | Mixed: the delegation statement is standards track at draft maturity (a proposed companion beside Core); the rest is a cross-project exploratory record (agent, gateway, Desk) |
-| [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets | Draft | Specification (Core amendment proposed for the next `specVersion` after `0.3.0`; released conformance unchanged) |
+| [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets | Accepted | Specification (Core amendment released in Core `0.5.0`, staged as `0.4.0-draft`; accepted on a same-vendor review, the different-vendor review waived) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
