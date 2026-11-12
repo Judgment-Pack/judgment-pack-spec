@@ -19,7 +19,6 @@ from tools import core_050_eval as ev
 
 ROOT = ev.ROOT
 ROWS = ev.EVALUATION
-HISTORICAL = ROOT / "tests" / "fixtures" / "historical-compatibility"
 
 
 def load(path: Path) -> Any:
@@ -36,12 +35,6 @@ def rows_document() -> dict[str, Any]:
 
 def all_rows(document: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {row["id"]: row for row in document["cases"]}
-
-
-def added_packs(document: dict[str, Any]) -> set[str]:
-    """The packs of the rows `0.5.0` adds: those the `0.3.0` manifest does not name."""
-    previous = {row["id"] for row in load(HISTORICAL / "0.3.0-evaluation-manifest.json")["cases"]}
-    return {row["pack"] for row in document["cases"] if row["id"] not in previous}
 
 
 def result_of(row: dict[str, Any], base: Path = ROWS) -> tuple[str, Any]:
@@ -142,27 +135,17 @@ class PairsTest(unittest.TestCase):
             self.assertEqual({ev.ANNOTATIONS}, sets[0] ^ sets[1])
 
     def test_every_pack_is_its_own_evaluation_form_exactly_when_listed(self) -> None:
-        # The list names the packs of the rows 0.5.0 adds; every other conforming pack fixture is its
-        # own evaluation form too, holding no value set and no annotation.
+        # The list names exactly the pack fixtures that are their own evaluation form (Core §8.5),
+        # whichever version's rows use them: every conforming pack whose form equals the pack itself,
+        # and no pack that is not conforming.
         listed = set(self.document["ownEvaluationForm"])
-        added = added_packs(self.document)
-        seen = set()
+        own = set()
         for path in sorted((ROWS / "packs").glob("*.json")):
             name = f"packs/{path.name}"
             pack = admitted(path)
-            if name not in added:
-                with self.subTest(pack=name):
-                    self.assertNotIn(name, listed)
-                    self.assertTrue(pack is None or ev.json_equal(ev.evaluation_form(pack), pack))
-                continue
-            if pack is None:
-                self.assertNotIn(name, listed)
-                continue
-            with self.subTest(pack=name):
-                own = ev.json_equal(ev.evaluation_form(pack), pack)
-                self.assertEqual(name in listed, own)
-                seen.add(name)
-        self.assertLessEqual(listed, seen)
+            if pack is not None and ev.json_equal(ev.evaluation_form(pack), pack):
+                own.add(name)
+        self.assertEqual(sorted(own), sorted(listed))
 
 
 def without_optional_extensions(form: dict[str, Any]) -> dict[str, Any]:

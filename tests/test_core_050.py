@@ -589,7 +589,9 @@ class AddedEvaluationRowTests(unittest.TestCase):
     def test_own_evaluation_forms_are_exactly_those_listed(self) -> None:
         listed = set(self.document["ownEvaluationForm"])
         self.assertEqual(sorted(listed), self.document["ownEvaluationForm"])
-        for row in self.rows:
+        # Every row of the corpus, not only the rows 0.5.0 adds: the list is of pack fixtures.
+        self.assertLessEqual(listed, {row["pack"] for row in self.document["cases"]})
+        for row in self.document["cases"]:
             if row.get("expectedErrorClass") == "pack-not-conformant":
                 continue
             with self.subTest(row=row["id"]):

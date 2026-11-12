@@ -2855,8 +2855,12 @@
     }
   ],
   "ownEvaluationForm": [
+    "packs/data-request-intake-triage.json",
+    "packs/decimal-threshold-fee.json",
+    "packs/direct-exception-escalation.json",
     "packs/inert-baseline.json",
     "packs/inert-features-baseline.json",
+    "packs/partial-trigger-conflict.json",
     "packs/required-vendor-baseline.json",
     "packs/value-set-applicability-inline.json",
     "packs/value-set-diverged-copies.json",
