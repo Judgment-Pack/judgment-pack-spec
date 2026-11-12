@@ -207,14 +207,14 @@ class ChangeRecords(Fixture):
         self.assertEqual([], shapes.check(self.root))
 
     def test_the_next_change_record_follows_the_highest_number_across_a_gap(self):
-        # Renumber the last record to 0007, so the numbers have a gap and the tree holds no 0004.
+        # Renumber the last record three past its number, so the numbers have a gap below it.
         last = sorted((self.root / shapes.CHANGES).iterdir())[-1]
-        self.assertLess(int(shapes.RECORD_FILE.match(last.name).group(1)), 7)
-        last.rename(last.with_name("0007-x.json"))
+        gap = int(shapes.RECORD_FILE.match(last.name).group(1)) + 3
+        last.rename(last.with_name("%04d-x.json" % gap))
         self.assertEqual([], shapes.check(self.root))
         self.change_shape()
         written = shapes.write_record(self.root, "retitle-workflow", "Retitle for a test")
-        self.assertEqual("0008-retitle-workflow.json", written.name)
+        self.assertEqual("%04d-retitle-workflow.json" % (gap + 1), written.name)
         self.assertEqual([], shapes.check(self.root))
 
     def test_a_stale_catalog_fails(self):

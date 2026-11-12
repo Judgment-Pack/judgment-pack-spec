@@ -27,7 +27,7 @@ here.
   which no maintainer has assigned and no release carries ([VERSIONING.md](VERSIONING.md)). The
   staged schema is the `0.3.0` schema plus exactly the record's fragments. The staged Core text
   ([`spec/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/staged/judgment-pack-core-0.4.0-draft.md)) is marked normative for nothing.
-  Hand-written vectors sit in no corpus: 208 document cases in
+  Hand-written vectors sit in no corpus: 213 document cases in
   [`conformance/staged/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/staged), with five provisional conformance codes,
   and 82 evaluation rows with their pairs in
   [`conformance/evaluation/staged/annotations-value-sets/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/evaluation/staged/annotations-value-sets),
@@ -60,6 +60,15 @@ here.
   distinguishes. It is a test tool, not a product, and makes no conformance claim; whether it meets
   RFC 0031's evidence bar item 3 is the maintainer's judgment. RFC 0031 and the staged READMEs say
   so. No case, row, fixture, schema or expectation changes.
+- Under the staged selector `0.4.0-draft`, a local identifier or an extension name holds no line
+  terminator in any engine (#308; RFC 0031, Unresolved question 5, answered). Some engines let `$`
+  match before a final line feed, so `"name\n"` passed Core's local-identifier pattern under one
+  validator and failed under another. The staged schema adds a `not` beside the local-identifier
+  pattern and beside the extension-name pattern, which also takes over the reserved prefix from a
+  lookahead RE2 cannot compile, and escapes a class hyphen ECMA-262's `v` flag refuses. The patterns
+  admit the same names in Python, ECMA-262 (`u` and `v`), RE2, Perl, Java and Ruby, and what Core
+  `0.3.0` admits under ECMA-262. Five staged cases refuse one such name in each kind of position;
+  the draft schema's new digest has a change record. Core `0.3.0` is unchanged.
 - An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
   names the judge, the signer, the witness and the reader around a decision record: what each
   produces, trusts and never does, and which parts are not shipped. It defines nothing.

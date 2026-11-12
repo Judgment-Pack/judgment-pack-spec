@@ -76,6 +76,16 @@ STRING_PATTERN = (
 # The two `not` subschemas: under an annotations object's propertyNames, whose instances are always
 # strings, and in annotationString, where `type` keeps a non-string from failing it (§1.7).
 REFUSED_NOTS = ({"pattern": KEY_CLASS}, {"type": "string", "pattern": STRING_PATTERN})
+# Issue #308 (RFC 0031, Unresolved question 5, answered): beside the local-identifier grammar and the
+# extension-name grammar, a `not` refuses the same class as an annotation key's, so a name that ends
+# in a line terminator is refused whatever an engine's anchors admit. The extension-name grammar's
+# reserved prefix moves from a lookahead, which RE2 cannot compile, into that `not`, and its class
+# hyphen is escaped, which ECMA-262's `v` flag requires. Each `not` holds `"type": "string"`, so a
+# non-string fails `type` alone, as in annotationString.
+RELEASED_EXTENSION_NAME = "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+EXTENSION_NAME = "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$"
+LOCAL_ID_NOT = {"type": "string", "pattern": KEY_CLASS}
+EXTENSION_NAME_NOT = {"type": "string", "pattern": "^org\\.judgmentpack\\.|" + KEY_CLASS}
 # The same rule as §1.4 states it in words, written out by hand: the code points refused anywhere in
 # an annotation string, and Unicode's White_Space, refused at either end.
 REFUSED_ANYWHERE = (
@@ -168,6 +178,15 @@ def draft_schema_diagnostic(error: Any) -> Diagnostic:
         if under_names:
             return code("JPS-STRUCTURE-LOCAL-ID", instance_path + key)
         return code("JPS-STRUCTURE-NOT", instance_path)
+    if validator == "not" and error.validator_value == LOCAL_ID_NOT:
+        # Issue #308: the class repeats the local-identifier grammar and takes its code.
+        return code("JPS-STRUCTURE-LOCAL-ID", instance_path)
+    if (validator == "not" and error.validator_value == EXTENSION_NAME_NOT) or (
+        validator == "pattern" and error.validator_value == EXTENSION_NAME
+    ):
+        # Issue #308: the extension-name grammar, its reserved prefix and the class are one code,
+        # at the key under propertyNames, as the released grammar's refusal is.
+        return code("JPS-STRUCTURE-EXTENSION-NAME", instance_path + key)
     if (
         validator == "anyOf"
         and under_names
@@ -495,6 +514,14 @@ class DraftSchemaTests(unittest.TestCase):
              "else": {"required": ["value"]}},
             fact["allOf"].pop(),
         )
+        # Issue #308 (RFC 0031, Unresolved question 5, answered): the identifier patterns.
+        self.assertEqual(LOCAL_ID_NOT, defs["localId"].pop("not"))
+        self.assertEqual({"pattern": RELEASED_EXTENSION_NAME}, released["$defs"]["extensions"]["propertyNames"])
+        self.assertEqual({"pattern": EXTENSION_NAME, "not": EXTENSION_NAME_NOT}, defs["extensions"]["propertyNames"])
+        defs["extensions"]["propertyNames"] = {"pattern": RELEASED_EXTENSION_NAME}
+        required = defs["metadata"]["properties"]["requiredExtensions"]
+        self.assertEqual({"type": "string", "pattern": EXTENSION_NAME, "not": EXTENSION_NAME_NOT}, required["items"])
+        required["items"] = {"type": "string", "pattern": RELEASED_EXTENSION_NAME}
         for member in ("$id", "description"):
             draft[member] = released[member]
         draft["properties"]["specVersion"] = released["properties"]["specVersion"]
@@ -709,7 +736,9 @@ class DraftDocumentCaseTests(unittest.TestCase):
                 for keyword, value in node.items():
                     if keyword in ("maxLength", "minProperties", "maxProperties"):
                         found.append(path + [keyword])
-                    if keyword == "not" and value in ({"required": ["value"]}, *REFUSED_NOTS):
+                    if keyword == "not" and value in ({"required": ["value"]}, *REFUSED_NOTS, LOCAL_ID_NOT, EXTENSION_NAME_NOT):
+                        found.append(path + [keyword])
+                    if keyword == "pattern" and value == EXTENSION_NAME:
                         found.append(path + [keyword])
                     if keyword == "anyOf" and "propertyNames" in path:
                         found.append(path + [keyword])
@@ -1003,6 +1032,174 @@ class DraftCharacterRuleTests(unittest.TestCase):
         self.assertEqual("SyntaxError", result["withoutUnicodeMode"])
         self.assertEqual(self.expected(), result["u"])
         self.assertEqual(self.expected(), result["v"])
+
+
+# Issue #308: the two identifier grammars, each code point before, inside and after a name, and
+# strings of more than one line, where engines' anchors differ.
+IDENTIFIER_BASES = (("na", "me"), ("com.ex", "ample"))
+IDENTIFIER_LINES = (
+    "name", "name\n", "name\r", "name\r\n", "name\u0085", "name\u2028", "name\u2029", "BAD\nname",
+    "name\nBAD", "\nname", "com.example", "com.example\n", "com.example\r", "com.example\u2028",
+    "BAD\ncom.example", "com.example\nBAD", "org.judgmentpack.annotations", "org.judgmentpack.future",
+    "com.example\norg.judgmentpack.x", "org.judgmentpack.x\ncom.example", "org.judgmentpackx.y",
+    "orgxjudgmentpack.y", "com.example-x", "com.example.a-b-", "com.-x", "a.b",
+)
+NODE_IDENTIFIER_SWEEP = r"""
+const schema = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+const [bases, lines] = JSON.parse(process.argv[2]);
+const pairs = [schema.$defs.localId, schema.$defs.extensions.propertyNames];
+const result = {};
+for (const flags of ["u", "v"]) {
+  let res;
+  try { res = pairs.map(p => [new RegExp(p.pattern, flags), new RegExp(p.not.pattern, flags)]); }
+  catch (error) { result[flags] = error.name; continue; }
+  const admits = (g, s) => res[g][0].test(s) && !res[g][1].test(s);
+  const found = {grammars: [], lines: lines.map(s => [admits(0, s), admits(1, s)])};
+  bases.forEach(([head, tail], g) => {
+    const one = {lead: [], inner: [], trail: []};
+    for (let cp = 0; cp <= 0x10ffff; cp++) {
+      if (cp >= 0xd800 && cp <= 0xdfff) continue;
+      const c = String.fromCodePoint(cp);
+      if (admits(g, c + head + tail)) one.lead.push(cp);
+      if (admits(g, head + c + tail)) one.inner.push(cp);
+      if (admits(g, head + tail + c)) one.trail.push(cp);
+    }
+    found.grammars.push(one);
+  });
+  result[flags] = found;
+}
+console.log(JSON.stringify(result));
+"""
+IDENTIFIER_CASES = (
+    "structural-local-id-trailing-lf-id",
+    "structural-local-id-trailing-lf-reference",
+    "structural-extension-name-trailing-lf",
+    "structural-extension-name-trailing-lf-annotated",
+    "structural-required-extension-trailing-lf",
+)
+
+
+def identifier_sweep(admits: Any) -> dict[str, Any]:
+    grammars = []
+    for g, (head, tail) in enumerate(IDENTIFIER_BASES):
+        one: dict[str, list[int]] = {"lead": [], "inner": [], "trail": []}
+        for cp in every_code_point():
+            c = chr(cp)
+            if admits(g, c + head + tail):
+                one["lead"].append(cp)
+            if admits(g, head + c + tail):
+                one["inner"].append(cp)
+            if admits(g, head + tail + c):
+                one["trail"].append(cp)
+        grammars.append(one)
+    return {"grammars": grammars, "lines": [[admits(0, s), admits(1, s)] for s in IDENTIFIER_LINES]}
+
+
+class DraftIdentifierPatternTests(unittest.TestCase):
+    """Issue #308 (RFC 0031, Unresolved question 5, answered): no local identifier or extension name
+    holds a line terminator, whatever an engine's anchors admit, and the patterns compile in every
+    engine RFC 0031 §1.7 lists."""
+
+    @staticmethod
+    def whole_string(g: int, s: str) -> bool:
+        # The grammar read as a whole-string match, written without an end anchor, and the reserved
+        # prefix read as a prefix (Core §9; the draft §9.1).
+        if g == 0:
+            return re.fullmatch(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*", s) is not None
+        return re.fullmatch(r"[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+", s) is not None and not s.startswith("org.judgmentpack.")
+
+    def test_the_schema_holds_one_pattern_pair_per_grammar_at_every_position(self) -> None:
+        schema = draft_schema()
+        defs = schema["$defs"]
+        self.assertEqual({"type": "string", "pattern": LOCAL_ID, "not": LOCAL_ID_NOT}, defs["localId"])
+        name = {"pattern": EXTENSION_NAME, "not": EXTENSION_NAME_NOT}
+        self.assertEqual(name, defs["extensions"]["propertyNames"])
+        self.assertEqual([{"const": ANNOTATIONS}, name], defs["annotatedExtensions"]["propertyNames"]["anyOf"])
+        self.assertEqual({"type": "string", **name}, defs["metadata"]["properties"]["requiredExtensions"]["items"])
+        self.assertNotIn("(?!", json.dumps(schema))
+
+    def test_the_rfc_states_the_patterns(self) -> None:
+        text = (ROOT / "rfcs" / "0031-annotations-and-value-sets.md").read_text(encoding="utf-8")
+        section = text[text.index("**5. Line feeds before the end anchor"):]
+        block = json.loads(re.search(r"^```json\n(.*?)^```$", section, re.M | re.S).group(1))
+        defs = draft_schema()["$defs"]
+        self.assertEqual(defs["localId"], block["$defs/localId"])
+        self.assertEqual(defs["extensions"], block["$defs/extensions"])
+        self.assertEqual(defs["metadata"]["properties"]["requiredExtensions"]["items"], block["$defs/metadata/properties/requiredExtensions/items"])
+
+    def admits_in_python(self) -> Any:
+        # The engine of the repository's validator: jsonschema's `pattern` is re.search.
+        defs = draft_schema()["$defs"]
+        pairs = [(re.compile(holder["pattern"]), re.compile(holder["not"]["pattern"]))
+                 for holder in (defs["localId"], defs["extensions"]["propertyNames"])]
+        return lambda g, s: bool(pairs[g][0].search(s)) and not pairs[g][1].search(s)
+
+    def test_python_re_admits_exactly_the_whole_string_grammar(self) -> None:
+        self.assertEqual(identifier_sweep(self.whole_string), identifier_sweep(self.admits_in_python()))
+
+    def test_the_released_patterns_admit_a_final_line_feed_in_python_re(self) -> None:
+        # What the `not` closes: the released grammar admits "name\n" where ECMA-262 refuses it.
+        self.assertIsNotNone(re.search(LOCAL_ID, "name\n"))
+        self.assertIsNotNone(re.search(RELEASED_EXTENSION_NAME, "com.example\n"))
+        self.assertFalse(self.admits_in_python()(0, "name\n"))
+        self.assertFalse(self.admits_in_python()(1, "com.example\n"))
+
+    def test_each_line_terminator_is_refused_once_at_every_position(self) -> None:
+        validator = draft_validators()["base"]
+        base = strict_json_loads((STAGED / "valid" / "annotations-one-element-list.json").read_text(encoding="utf-8"))
+        name = "com.example.review-policy"
+        for ending in ("\n", "\r", "\r\n", "\u0085", "\u2028", "\u2029"):
+            positions = []
+            pack = copy.deepcopy(base)
+            pack["rules"][0]["id"] += ending
+            positions.append((pack, "JPS-STRUCTURE-LOCAL-ID", "/rules/0/id"))
+            pack = copy.deepcopy(base)
+            pack["rules"][0]["outcome"] += ending
+            positions.append((pack, "JPS-STRUCTURE-LOCAL-ID", "/rules/0/outcome"))
+            pack = copy.deepcopy(base)
+            pack["decision"]["extensions"] = {name + ending: {}}
+            positions.append((pack, "JPS-STRUCTURE-EXTENSION-NAME", "/decision/extensions/" + name + ending))
+            pack = copy.deepcopy(base)
+            pack["rules"][0]["extensions"][name + ending] = {}
+            positions.append((pack, "JPS-STRUCTURE-EXTENSION-NAME", "/rules/0/extensions/" + name + ending))
+            pack = copy.deepcopy(base)
+            pack["rules"][0]["extensions"][name] = {}
+            pack["metadata"] = {"requiredExtensions": [name + ending]}
+            positions.append((pack, "JPS-STRUCTURE-EXTENSION-NAME", "/metadata/requiredExtensions/0"))
+            for pack, code, path in positions:
+                with self.subTest(ending=ending.encode("unicode_escape").decode("ascii"), path=path.strip()):
+                    self.assertEqual([(code, path)],
+                                     [(d.code, d.path) for d in draft_structural_diagnostics(validator, pack)])
+
+    def test_each_case_is_valid_without_its_line_feed(self) -> None:
+        # Each case holds only the defect it names (issue #304): the same pack without the line feed
+        # is valid under the draft selector, for a reader supporting the one vendor name the
+        # required-name case lists.
+        validators = draft_validators()
+        manifest = strict_json_loads(STAGED_MANIFEST_PATH.read_text(encoding="utf-8"))
+        cases = {case["id"]: case for case in manifest["cases"]}
+        for case_id in IDENTIFIER_CASES:
+            with self.subTest(case=case_id):
+                text = (STAGED / cases[case_id]["path"]).read_text(encoding="utf-8")
+                self.assertEqual(1, text.count("\\n\""))
+                self.assertEqual(("valid", []), draft_evaluate_text(text.replace("\\n\"", "\""), validators,
+                                                                    ["com.example.review-policy"]))
+
+    def test_ecma_262_unicode_mode_agrees_with_python_re(self) -> None:
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("no node on PATH; the ECMA-262 sweep needs Node 20 or later")
+        found = subprocess.run([node, "--version"], capture_output=True, text=True, timeout=60).stdout.strip()
+        match = re.fullmatch(r"v(\d+)\.\d+\.\d+", found)
+        if match is None or int(match.group(1)) < 20:
+            self.skipTest(f"node {found or 'of an unknown version'} is on PATH; the v-flag sweep needs Node 20 or later")
+        run = subprocess.run([node, "-e", NODE_IDENTIFIER_SWEEP, str(DRAFT_SCHEMA_PATH),
+                              json.dumps([IDENTIFIER_BASES, IDENTIFIER_LINES])],
+                             capture_output=True, text=True, timeout=600, check=True)
+        result = json.loads(run.stdout)
+        expected = identifier_sweep(self.whole_string)
+        self.assertEqual(expected, result["u"])
+        self.assertEqual(expected, result["v"])
 
 
 class DraftSemanticReadingTests(unittest.TestCase):

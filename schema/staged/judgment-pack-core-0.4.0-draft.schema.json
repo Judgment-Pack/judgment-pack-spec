@@ -109,7 +109,11 @@
     },
     "localId": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "not": {
+        "type": "string",
+        "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+      }
     },
     "decimalString": {
       "type": "string",
@@ -118,7 +122,11 @@
     "extensions": {
       "type": "object",
       "propertyNames": {
-        "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+        "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+        "not": {
+          "type": "string",
+          "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+        }
       },
       "additionalProperties": true
     },
@@ -168,7 +176,11 @@
             "const": "org.judgmentpack.annotations"
           },
           {
-            "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+            "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+            "not": {
+              "type": "string",
+              "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+            }
           }
         ]
       },
@@ -748,7 +760,11 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$"
+            "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+            "not": {
+              "type": "string",
+              "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]"
+            }
           },
           "uniqueItems": true
         },

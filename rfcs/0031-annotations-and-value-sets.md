@@ -181,8 +181,8 @@ An annotations object is a JSON object with 1 to 16 members (the base ceiling, �
   anchor admits. Some regular-expression engines let `$` match before a final line feed, so the
   schema also refuses, in a key, the controls, the two separators and the embeddings and overrides
   (U+0000–U+001F, U+007F–U+009F and U+2028–U+202E; §1.7), and the rule holds in every engine §1.7
-  lists. Core's own anchored patterns, its local-identifier grammar among them, have the same
-  latent property; this record does not change Core's (Unresolved question 5).
+  lists. Core's local-identifier and extension-name patterns had the same latent property, and the
+  next version closes it for them too (Unresolved question 5, answered).
 - **Values.** Each member value is either an annotation string (§1.4), or an array of 1 to 16
   annotation strings in which no string appears twice.
 - **String equality.** Two annotation strings are equal when they are the same sequence of Unicode
@@ -307,7 +307,9 @@ These definitions would be added to `$defs`. `annotatedExtensions` replaces `ext
 type of the root's, each outcome's and each rule's `extensions` member. `entryExtensions` is the
 type of an entry's `extensions` (§2.7). Every other `extensions` member keeps the existing
 `extensions` definition, which refuses every reserved name. `metadata.requiredExtensions` is
-unchanged.
+unchanged by this fragment. The vendor-name branch of `annotatedExtensions` is the extension-name
+pattern pair of Unresolved question 5's answer, which the `extensions` definition and the
+`metadata.requiredExtensions` item take too.
 
 ```json
 {
@@ -346,7 +348,10 @@ unchanged.
     "propertyNames": {
       "anyOf": [
         { "const": "org.judgmentpack.annotations" },
-        { "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" }
+        {
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+          "not": { "type": "string", "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+        }
       ]
     },
     "properties": {
@@ -393,7 +398,8 @@ Unicode support. An engine that matches UTF-16 code units and has no Unicode mod
 three ranges outside the Basic Multilingual Plane at all; an implementation built on one applies
 them as a check of its own, with the same code and pointer. No other engine was tested, .NET's and
 PCRE2 among them. Each pattern holds a literal U+0000, which a pattern interface that takes a
-NUL-terminated string truncates; such an interface needs another spelling of the same class.
+NUL-terminated string truncates; such an interface needs another spelling of the same class. The
+identifier patterns of Unresolved question 5's answer were swept in the same engines.
 
 In `annotationString` the `not` holds `"type": "string"` beside the pattern. A `pattern` holds for
 every instance that is not a string, so without it a list item that is a number or a list would
@@ -1240,7 +1246,9 @@ requires, compatibility is explicit:
   (`JPS-SEMANTIC-MISSING-REQUIRED-EXTENSION`), and moving it up means adding the name as a key of a
   real `extensions` object as well. With that exception, and as far as this record goes, changing
   only the selector is enough, and evaluation is unchanged. The next version's other changes are
-  their own.
+  their own. One of them narrows what some validators admitted, never what Core `0.3.0`'s grammar
+  admits under ECMA-262: a local identifier or an extension name that ends in a line terminator is
+  refused in every engine (Unresolved question 5).
   - Labels kept in a vendor extension MAY be moved to the reserved name by hand, once they meet
     §§1.3–1.5. There is no automatic coercion: a vendor value outside those rules must be edited,
     not truncated, joined or dropped by a tool.
@@ -1286,7 +1294,10 @@ both land, these definitions would do it:
     "propertyNames": {
       "anyOf": [
         { "enum": ["org.judgmentpack.annotations", "org.judgmentpack.outcome-values"] },
-        { "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" }
+        {
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+          "not": { "type": "string", "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+        }
       ]
     },
     "properties": {
@@ -1299,7 +1310,10 @@ both land, these definitions would do it:
     "type": "string",
     "anyOf": [
       { "const": "org.judgmentpack.outcome-values" },
-      { "pattern": "^(?!org\\.judgmentpack\\.)[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" }
+      {
+        "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+        "not": { "type": "string", "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+      }
     ]
   }
 }
@@ -1462,7 +1476,7 @@ code is:
    `JPS-STRUCTURE-MAX-PROPERTIES`. The new codes separate words with hyphens, as `MIN-LENGTH` and
    `UNIQUE-ITEMS` do. `MAXITEMS` keeps the spelling Core's corpus already uses.
 
-Two refusals take a code mapped from a keyword other than the one the rule above would name, and
+Three refusals take a code mapped from a keyword other than the one the rule above would name, and
 the table says so where each applies:
 
 - A rule that ties members to one another takes one code named for the rule, whichever keyword
@@ -1472,6 +1486,11 @@ the table says so where each applies:
 - The `not` under an annotations object's `propertyNames` repeats a refusal the local-identifier
   grammar already makes, for engines whose `$` admits a trailing line feed. A key it refuses takes
   the grammar's code, `JPS-STRUCTURE-LOCAL-ID`, mapped from `not` there (§1.3).
+- The `not` beside the local-identifier grammar and the one beside the extension-name grammar
+  (Unresolved question 5) take their grammar's code: `JPS-STRUCTURE-LOCAL-ID`, and
+  `JPS-STRUCTURE-EXTENSION-NAME` at the key or the item. A reserved name outside its definition's
+  positions is refused by that `not` in place of the released pattern's lookahead, with the code it
+  had.
 
 A pointer to a refused key names the key's member, as Core's pointer for an extension-name refusal
 does, for example `…/org.judgmentpack.annotations/Tier`. A pointer to an unknown member names that
@@ -1529,6 +1548,11 @@ is dispositioned (Unresolved question 3); the staged manifest lists them as `adv
 | `structural-annotations-empty-string` | `"category": ""` | `JPS-STRUCTURE-MIN-LENGTH` at `…/category` |
 | `structural-annotations-key-grammar-*` | one case each: `Tier`, `tier_1`, `-tier`, `tier-`, `ti--er`, `1tier`, the empty key | `JPS-STRUCTURE-LOCAL-ID` at the key |
 | `structural-annotations-key-trailing-lf` | the key `"tier\n"`, escaped in the JSON | `JPS-STRUCTURE-LOCAL-ID` at the key: from `pattern`, or mapped from `not` under an engine whose `$` admits the line feed |
+| `structural-local-id-trailing-lf-id` | a rule id `"accept-request\n"`, escaped in the JSON | `JPS-STRUCTURE-LOCAL-ID` at `/rules/0/id`: from `pattern`, or mapped from `not` under an engine whose `$` admits the line feed (Unresolved question 5) |
+| `structural-local-id-trailing-lf-reference` | a rule's `outcome` `"accept\n"` | `JPS-STRUCTURE-LOCAL-ID` at `/rules/0/outcome`, before the reference is resolved |
+| `structural-extension-name-trailing-lf` | the key `"com.example.review-policy\n"` in the decision's `extensions` | `JPS-STRUCTURE-EXTENSION-NAME` at the key |
+| `structural-extension-name-trailing-lf-annotated` | the same key in a rule's `extensions`, beside annotations | `JPS-STRUCTURE-EXTENSION-NAME` at the key: one refusal, not one per branch of the `anyOf` |
+| `structural-required-extension-trailing-lf` | `"com.example.review-policy\n"` in `metadata.requiredExtensions`, beside the key without it | `JPS-STRUCTURE-EXTENSION-NAME` at `/metadata/requiredExtensions/0` |
 | `structural-annotations-key-too-long` | a 65-character key | `JPS-STRUCTURE-MAX-LENGTH` (new) at the key |
 | `structural-annotations-too-many-keys` | 17 keys | `JPS-STRUCTURE-MAX-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
 | `structural-annotations-too-many-strings` | a list of 17 | `JPS-STRUCTURE-MAXITEMS` at the list |
@@ -1708,14 +1732,6 @@ dispositioned. An advisory never changes conformance, so the deferral cannot bre
 staged manifest lists the two codes as `advisoryCodes`, outside conformance, and no case states
 them.
 
-**5. Line feeds before the end anchor in Core's other patterns.** A separate candidate for the
-same version, not part of this record. An engine whose `$` matches before a final line feed admits
-a vendor extension name such as `"com.example\n"` under Core's extension-name pattern, and a
-`localId` ending in a line feed under the local-identifier grammar, where an ECMA-262 engine
-refuses both; so two structural validators can already disagree. This record closes that gap only
-for annotation keys (§1.3). Adding the same `not` to the extension-name and `localId` patterns
-changes the grammar of every Core object and belongs in its own record.
-
 **Answered questions.**
 
 - **1. The ceiling numbers.** Answered by the round-1 disposition: the six numbers of §7 are
@@ -1731,3 +1747,51 @@ changes the grammar of every Core object and belongs in its own record.
   `0.3.0`'s ambiguity stays a known open point of the released text, and the released checker is
   unchanged. The staged cases `semantic-required-extension-in-operand` and
   `semantic-required-extension-in-entry-value` pin the reading.
+- **5. Line feeds before the end anchor in Core's other patterns.** Answered by the maintainer
+  (issue #308): closed in the next version beside this record, not left for a record of its own.
+  An engine whose `$` matches before a final line feed admitted a vendor extension name such as
+  `"com.example\n"` under Core `0.3.0`'s extension-name pattern, and a `localId` ending in a line
+  feed under its local-identifier grammar, where an ECMA-262 engine refuses both, so two structural
+  validators could disagree on one document. Under the next selector no local identifier and no
+  extension name holds a line terminator, whatever an engine's anchors admit (the staged draft's §§5
+  and 9). The local-identifier grammar gains the class an annotation key's `not` holds (§1.3). The
+  extension-name grammar's reserved prefix moves from a lookahead, which RE2 cannot compile, into a
+  `not` beside it that also holds that class, and the hyphen in its last class is escaped, which
+  ECMA-262's `v` flag requires. Each `not` holds `"type": "string"`, as `annotationString`'s does,
+  so a non-string fails `type` alone. The definitions, by their place in the schema:
+
+```json
+{
+  "$defs/localId": {
+    "type": "string",
+    "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+    "not": { "type": "string", "pattern": "[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+  },
+  "$defs/extensions": {
+    "type": "object",
+    "propertyNames": {
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+      "not": { "type": "string", "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+    },
+    "additionalProperties": true
+  },
+  "$defs/metadata/properties/requiredExtensions/items": {
+    "type": "string",
+    "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9\\-]*)+$",
+    "not": { "type": "string", "pattern": "^org\\.judgmentpack\\.|[\u0000-\u001f\u007f-\u009f\u2028-\u202e]" }
+  }
+}
+```
+
+A refusal by a pattern or by the `not` beside it takes the grammar's code (Codes). Swept over every
+code point before, inside and after a name, and over names of more than one line, the two pattern
+pairs admit exactly the same strings in every engine §1.7 lists: Python 3.12 `re`; ECMA-262 with the
+`u` and with the `v` flag in Node 22; RE2 through Go 1.26; Perl 5.30; Java 11's `java.util.regex`;
+and Ruby 2.7, whose `^` and `$` match at every line. Over that sweep they admit exactly what Core
+`0.3.0`'s patterns admit under ECMA-262 in Unicode mode, as they must: a string the ECMA-262 grammar
+admits holds only letters, digits, hyphens and full stops, which the class never matches. Findings
+still compare as a set (Codes), because an ECMA-262 or an RE2 engine reports the pattern and the
+`not` at one pointer, with one code, for a name that ends in a line feed. The staged cases
+`structural-local-id-trailing-lf-id`, `structural-local-id-trailing-lf-reference`,
+`structural-extension-name-trailing-lf`, `structural-extension-name-trailing-lf-annotated` and
+`structural-required-extension-trailing-lf` refuse one such name in each kind of position.

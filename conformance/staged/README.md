@@ -43,7 +43,7 @@ manifest edits nothing in the case. Its other members:
   codes RFC 0031 proposes outside conformance and outside the draft's text, which no case states
   (below).
 
-The 208 cases are:
+The 213 cases are:
 
 - RFC 0031's staged document table;
 - 26 profile cases for its ceilings: each of the six one over under `base`, admitted under
@@ -57,13 +57,17 @@ The 208 cases are:
   refused (a reading that takes effect under the draft selector and does not change Core `0.3.0`,
   whose released checker counts such a member; RFC 0031, Compatibility), and a reserved and an
   ungrammatical name inside data, admitted;
+- five cases for issue #308 (RFC 0031, Unresolved question 5, answered): a local identifier ending
+  in a line feed as a rule id and as an outcome reference, and an extension name ending in one as a
+  key of an `extensions` object without annotations and of one with them, and as an item of
+  `metadata.requiredExtensions`;
   and
 - the staged example.
 
 | Directory | Cases | What |
 | --- | ---: | --- |
 | `carrier/` | 1 | a duplicate key inside an annotations object |
-| `structural/` | 151 | refused annotations at every annotated position, refused characters in annotation strings, sets, entries and references, and the profile ceilings |
+| `structural/` | 156 | refused annotations at every annotated position, refused characters in annotation strings, sets, entries and references, the profile ceilings, and identifiers ending in a line feed |
 | `semantic/` | 10 | unresolved references, a duplicate set id, and a required name found only in data |
 | `valid/` | 46 | admitted shapes, the neighbours of every refused character range, every ceiling reached exactly, names inside data, the advisory cases and [the example](../../examples/staged/expense-approval-annotated.json) |
 
@@ -90,6 +94,11 @@ that rule and hold each case to the released corpus's strictness: the expected d
 other outside the outermost `oneOf` that encloses it. One reading is the harness's, stated here so
 an implementation can match it: a key the annotated `extensions` object's `propertyNames` refuses is
 one refusal, `JPS-STRUCTURE-EXTENSION-NAME` at the key, not one per branch of its `anyOf`.
+
+The set comparison is still needed after issue #308. The `not` beside the local-identifier and the
+extension-name patterns takes its grammar's code, and an ECMA-262 or an RE2 engine reports both the
+pattern and the `not` for a name that ends in a line feed, at one pointer; as a set they are one
+finding. A key and its value that both exceed a length share a pointer and a code the same way.
 
 Each case holds exactly the defect, or the property, it names (issue #304). The `oneOf` rule above
 admits what a validator reports inside a `oneOf` for the case's own defect, never the finding of a

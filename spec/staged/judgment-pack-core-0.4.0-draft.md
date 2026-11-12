@@ -35,7 +35,8 @@ The staged artifacts are:
 | Example pack | [`examples/staged/expense-approval-annotated.json`](../../examples/staged/expense-approval-annotated.json) |
 
 The schema is the Core `0.3.0` schema with RFC 0031's three fragments (its §§1.7, 2.7 and 3.3) and
-nothing else, apart from its `$id`, its description and the selector.
+the identifier patterns of its answer to Unresolved question 5 (§§5 and 9 below), and nothing else,
+apart from its `$id`, its description and the selector.
 
 ## 2. Normative representation
 
@@ -117,6 +118,12 @@ or reference maxima, and none is defined. The maximum on entries does not limit 
 operand, on which Core sets no maximum.
 
 ## 5. Identity and references
+
+A local object identifier matches `^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$` as a whole string: it holds no
+line feed or other line terminator, whatever a pattern's end anchor admits. Some regular-expression
+engines let `$` match before a final line feed, so the schema also refuses U+0000–U+001F,
+U+007F–U+009F and U+2028–U+202E in a local identifier, as in an annotation key (§9.2), and the rule
+holds in every engine RFC 0031 §1.7 lists (`JPS-STRUCTURE-LOCAL-ID`).
 
 All rule, outcome, source, evidence-requirement, exception and value-set references resolve within
 one document.
@@ -259,6 +266,13 @@ The evaluation form defines an equivalence, not a processing step. An evaluator 
 The rest of §9 is unchanged. Its sentence on reserved names reads: "Names beginning with
 `org.judgmentpack.` are reserved for specification-defined extensions (§9.1)."
 
+An extension name, as a key of an `extensions` object or an item of `metadata.requiredExtensions`,
+matches `^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+$` as a whole string: it holds no line feed or other
+line terminator, whatever a pattern's end anchor admits. The schema refuses the reserved prefix with
+a `not` beside that pattern, not with a lookahead, so that every engine RFC 0031 §1.7 lists can
+compile it, and the same `not` refuses the characters §5 refuses in a local identifier
+(`JPS-STRUCTURE-EXTENSION-NAME`).
+
 ### 9.1 Specification-defined extensions *(new)*
 
 A specification-defined extension is one whose name begins with `org.judgmentpack.` and which this
@@ -400,7 +414,10 @@ Compatibility from `0.3.0` is explicit:
   each new shape: the reserved key, the root `valueSets` and the `valueSet` member.
 - **Semantic.** For a pack that uses neither feature, `EF(P)` is `P`, so this draft changes no
   result for it, apart from the one shape §9.1's reading of an `extensions` object refuses.
-- **Migrating up.** One shape aside, no `0.3.0` shape is refused by these rules: a pack whose required
+- **Migrating up.** A local identifier or an extension name that ends in a line terminator is
+  refused in every engine (§§5 and 9). Core `0.3.0`'s grammar, read as ECMA-262 reads it, never
+  admitted one; only a validator whose `$` admits a final line feed did. Apart from that, one shape
+  aside, no `0.3.0` shape is refused by these rules: a pack whose required
   name appears only under a member named `extensions` inside data is refused, by §9.1's reading,
   which takes effect under this selector. Such a pack moves up by also adding the name as a key of an
   `extensions` object the schema defines. Otherwise changing only the selector is enough, and

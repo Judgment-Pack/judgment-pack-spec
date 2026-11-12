@@ -468,6 +468,66 @@
       "specSection": "\u00a79.2"
     },
     {
+      "id": "structural-local-id-trailing-lf-id",
+      "path": "structural/local-id-trailing-lf-id.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-LOCAL-ID",
+        "path": "/rules/0/id"
+      },
+      "focus": "a rule id ending in a line feed is not a local identifier under any engine: refused by the pattern, or by the not beside it where an engine's $ admits the line feed",
+      "specSection": "\u00a75"
+    },
+    {
+      "id": "structural-local-id-trailing-lf-reference",
+      "path": "structural/local-id-trailing-lf-reference.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-LOCAL-ID",
+        "path": "/rules/0/outcome"
+      },
+      "focus": "an outcome reference ending in a line feed is not a local identifier under any engine, so it is refused before it is resolved",
+      "specSection": "\u00a75"
+    },
+    {
+      "id": "structural-extension-name-trailing-lf",
+      "path": "structural/extension-name-trailing-lf.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/decision/extensions/com.example.review-policy\n"
+      },
+      "focus": "a vendor extension name ending in a line feed, as a key of an extensions object that admits no annotations, is refused under any engine",
+      "specSection": "\u00a79"
+    },
+    {
+      "id": "structural-extension-name-trailing-lf-annotated",
+      "path": "structural/extension-name-trailing-lf-annotated.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/rules/0/extensions/com.example.review-policy\n"
+      },
+      "focus": "a vendor extension name ending in a line feed, as a key of a rule's annotated extensions object, is one refusal at the key under any engine",
+      "specSection": "\u00a79"
+    },
+    {
+      "id": "structural-required-extension-trailing-lf",
+      "path": "structural/required-extension-trailing-lf.json",
+      "layer": "structural",
+      "expectedResult": "invalid",
+      "expectedDiagnostic": {
+        "code": "JPS-STRUCTURE-EXTENSION-NAME",
+        "path": "/metadata/requiredExtensions/0"
+      },
+      "focus": "a required extension name ending in a line feed is refused under any engine, beside the same name without it as a key",
+      "specSection": "\u00a79"
+    },
+    {
       "id": "structural-annotations-key-too-long",
       "path": "structural/annotations-key-too-long.json",
       "layer": "structural",
