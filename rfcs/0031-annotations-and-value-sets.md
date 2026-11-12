@@ -1267,6 +1267,7 @@ This record proposes seven new provisional codes, and no others:
 | `structural-reserved-name-in-annotated-position` | `org.judgmentpack.future` in a rule's `extensions` | `JPS-STRUCTURE-EXTENSION-NAME` at `/rules/0/extensions/org.judgmentpack.future` |
 | `structural-annotations-not-object` | the extension's value is a string | `JPS-STRUCTURE-TYPE` at `…/org.judgmentpack.annotations` |
 | `structural-annotations-empty-object` | `{}` | `JPS-STRUCTURE-MIN-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
+| `structural-annotations-empty-object-*` | `{}` at the root, on an outcome and on a value-set entry, one case each | `JPS-STRUCTURE-MIN-PROPERTIES` (new) at `…/org.judgmentpack.annotations` |
 | `structural-annotations-empty-list` | `"category": []` | `JPS-STRUCTURE-COLLECTION-ARITY` at `…/category` |
 | `structural-annotations-empty-string` | `"category": ""` | `JPS-STRUCTURE-MIN-LENGTH` at `…/category` |
 | `structural-annotations-key-grammar-*` | one case each: `Tier`, `tier_1`, `-tier`, `tier-`, `ti--er`, `1tier`, the empty key | `JPS-STRUCTURE-LOCAL-ID` at the key |
@@ -1278,6 +1279,7 @@ This record proposes seven new provisional codes, and no others:
 | `structural-annotations-duplicate-string` | `["intake", "intake"]` | `JPS-STRUCTURE-UNIQUE-ITEMS` at the list |
 | `structural-annotations-value-*` | one case each: a number, a Boolean, null, an object | `JPS-STRUCTURE-TYPE` at the value |
 | `structural-annotations-value-nested-list` | `[["intake"]]` | `JPS-STRUCTURE-TYPE` at the inner list, `…/0` |
+| `structural-annotations-list-item-number` | `[1]` | `JPS-STRUCTURE-TYPE` once, at the item, `…/0` (§1.7) |
 | `structural-annotations-control-*` | one case each, escaped in the JSON: NUL, TAB, LF, ESC, DEL, U+0085, U+009B, U+2028, U+2029 | `JPS-STRUCTURE-NOT` at the string |
 | `structural-annotations-trailing-lf-*` | `"intake\n"`, escaped in the JSON: one case as a key's value, one as the last item of a list | `JPS-STRUCTURE-NOT` at the string |
 | `structural-annotations-bidi-*` | one case each, inside a string: U+202A, U+202B, U+202C, U+202D, U+202E | `JPS-STRUCTURE-NOT` at the string |
@@ -1307,10 +1309,12 @@ This record proposes seven new provisional codes, and no others:
 | `valid-value-set-decimal-strings` | `"1.0"` and `"1.00"` | valid, no advisory (distinct strings) |
 | `valid-value-set-nfc-nfd` | `"\u00e9"` and `"e\u0301"`, the NFC and NFD spellings of one text | valid, no advisory (distinct strings) |
 | `valid-value-set-literal-object-entry` | an entry value `{"valueSet": "priority-tiers"}` | valid (a literal) |
+| `valid-extensions-member-in-data` | `{"extensions": {"org.judgmentpack.future": 1, "Bad": 2}}` as an entry value and as an `in` operand item | valid: data, which no extension-name rule reads (Compatibility) |
 | `valid-value-set-shared` | one set referenced by two rules, once under `not` | valid |
 | `valid-value-set-id-shared-with-outcome` | a set and an outcome with one id | valid (collection-local) |
 | `advisory-value-set-unreferenced` | a declared set that nothing references | valid, with advisory `JPS-VALUE-SET-UNREFERENCED` (new) |
 | `profile-<resource>-*` | for each of the six rows of §7: `base` + 1 under `base`; `base` + 1 under `extended`; `extended` + 1 under `extended` | refused with the row's code below; valid; refused with that code |
+| `valid-profile-<resource>-extended-at-extended`; `valid-profile-value-sets-base-at-base`, `valid-profile-value-set-entries-base-at-base` | each row of §7 exactly at its `extended` ceiling under `extended`; the two value-set rows exactly at `base` under `base` (the four annotation rows are at `base` in `valid-annotations-at-ceilings`) | valid |
 
 The profile cases' codes follow from the keyword that carries each ceiling:
 
@@ -1350,9 +1354,12 @@ row does. "Paired" rows share inputs and an expected result.
 | `value-set-shared-exclusive` | the expense example's shape, with one set referenced by an `in` rule and under `not` in the other | one outcome, no conflict |
 | `value-set-diverged-copies` | the same pack inline, with the two copies differing by one value, for a fact holding that value | `unresolved` with `conflict`: the hazard a shared set removes |
 | `value-set-in-exception` | a reference in an exception's `when` | paired with inline |
+| `value-set-in-exception-no-match` | a reference in an exception's `when` that the fact does not match | paired with inline: the rule's outcome stands |
 | `value-set-in-applicability` | a reference in `applicability`, not matching | `not-applicable`, paired with inline |
 | `value-set-under-not` | a reference under `not` | paired with inline |
+| `value-set-under-all`, `value-set-under-any` | a reference under `all`, and one under `any`, in a rule's `when` | paired with inline |
 | `value-set-unreferenced-inert` | a pack with an unreferenced set and without it | paired |
+| `value-set-empty-collection-inert` | `"valueSets": []` with no reference, and the pack without the member | paired |
 | `value-set-entry-annotations-inert` | entry annotations and descriptions present, absent, and changed | paired |
 | `value-set-literal-object-entry` | a fact `{"valueSet": "priority-tiers"}` against an entry holding that literal | match |
 | `value-set-literal-annotations-operand` | an inline `in` item `{"extensions": {"org.judgmentpack.annotations": {"tier": "x"}}}` against a fact holding exactly that object | match: the evaluation form acts on positions, not content |

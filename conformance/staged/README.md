@@ -18,7 +18,10 @@ corpus, held to the repository's checks, and runnable by hand.
 - **Not published, and in no release bundle.** The site's build skips this directory, the staged
   schema and the staged example, and a test holds that none is served. A release bundle is a
   `git archive`, and [`.gitattributes`](../../.gitattributes) marks this directory, `schema/staged/`,
-  `spec/staged/` and `examples/staged/` `export-ignore`.
+  `spec/staged/` and `examples/staged/` `export-ignore`. The record-shape catalog lists the staged
+  schema, because its `$id` is in the specification's schema namespace, so a bundle that carries
+  `catalog/` carries the staged shape's digest and normalized text, never these cases
+  ([VERSIONING.md](../../VERSIONING.md), Staged draft Core selector).
 
 ## What is here
 

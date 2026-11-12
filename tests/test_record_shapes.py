@@ -285,6 +285,16 @@ class FormatStatus(Fixture):
         self.assertEqual(derived["workflow-contributors"],
                          {"draftVersion": "0.4.0", "baseline": None, "lastReleased": None})
 
+    def test_the_readme_example_is_cores_record(self):
+        # catalog/README.md shows Core's record as its format-status example. Staging 0.4.0-draft
+        # moved Core's draftVersion and left the example behind once (#301), so it is held here.
+        lines = [line.strip() for line in (ROOT / "catalog/README.md").read_text("utf-8").splitlines()
+                 if line.strip().startswith('"judgment-pack-core": {')]
+        self.assertEqual(len(lines), 1)
+        example = json.loads("{" + lines[0] + "}")["judgment-pack-core"]
+        status = json.loads((ROOT / shapes.STATUS).read_text("utf-8"))["families"]
+        self.assertEqual(example, status["judgment-pack-core"])
+
     def test_a_status_record_that_differs_from_releases_fails(self):
         status = self.status()
         status["families"]["judgment-pack-core"]["lastReleased"] = "v0.3.0-rc.2"

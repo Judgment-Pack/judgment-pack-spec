@@ -34,8 +34,11 @@ here.
   repository's checks, including a static check of the paired rows, and check that every released
   case and row still holds under the draft selector. The draft reads Core `0.3.0` §9's `extensions`
   object as one the schema defines, a clarification that refuses one `0.3.0` shape the released
-  checker accepts; that checker is unchanged. Nothing staged is published or bundled. RFC 0031
-  stays a Draft, and the released schema, Core text and corpora are unchanged.
+  checker accepts; that checker is unchanged. The staged directories are excluded from release
+  archives and from the site. The record-shape catalog lists the staged schema, whose `$id` is in the
+  specification's schema namespace, with its shape and digest, and Core's `draftVersion` there names
+  the working selector, not an assigned `specVersion`. RFC 0031 stays a Draft, and the released
+  schema, Core text and corpora are unchanged.
 - An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
   names the judge, the signer, the witness and the reader around a decision record: what each
   produces, trusts and never does, and which parts are not shipped. It defines nothing.
