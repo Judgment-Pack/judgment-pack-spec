@@ -78,6 +78,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0028](0028-complete-workflow-contributors.md) | Complete workflow contributor attribution | Draft | Specification (amendment to Draft workflow; target Spec 0.5.0, unpublished) |
 | [0029](0029-retained-column-conversions.md) | Exact selected retained columns, custody, producer grammar and role ceilings | Accepted | Selected Dialect companion for immutable Core RC2 at draft maturity; acceptance is separate from publication |
 | [0030](0030-agent-principals-and-delegated-authority.md) | Agent principals and delegated authority | Draft | Mixed: the delegation statement is standards track at draft maturity (a proposed companion beside Core); the rest is a cross-project exploratory record (agent, gateway, Desk) |
+| [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets | Draft | Specification (Core amendment proposed for the next `specVersion` after `0.3.0`; released conformance unchanged) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -146,3 +147,11 @@ subject's own access untouched, and the connection grant is a principal-held res
 run records would name actor, subject and delegation. Its delegation statement is standards track at
 draft maturity; the rest is a cross-project exploratory record. It is a Draft carried in release
 `v0.4.0`, normative for nothing; no conformance class is claimed and nothing is committed for `0.5.0`.
+
+[RFC 0031](0031-annotations-and-value-sets.md) proposes inert annotations on the pack, its
+outcomes and rules, in the reserved extension `org.judgmentpack.annotations`, and named value sets
+with annotated entries that an `in` condition may reference. One rule defines both: an evaluator
+gives a conforming pack the result of its evaluation form, with annotations removed and references
+expanded.
+It is a Draft, normative for nothing; the published schema, Core text and released corpora are
+unchanged.

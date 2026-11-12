@@ -12,6 +12,16 @@ here.
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
+- RFC 0031 (#301), a Draft, proposes annotations and annotated value sets. Short labels on the
+  pack, its outcomes and rules live in the reserved extension `org.judgmentpack.annotations`: keys
+  from the local-identifier grammar, each mapped to a string or a list of distinct strings, with
+  ceilings, refused empty forms and refused control characters. The extension is optional and never
+  required. A pack may declare named value sets at its root, whose entries may carry descriptions
+  and annotations, and an `in` condition may name one in place of an inline list. An evaluator must
+  give a conforming pack the result of its evaluation form, with annotations removed and references
+  expanded, so well-formed labels are inert and a reference equals its inline list. It targets the next `specVersion`
+  after `0.3.0`, is normative for nothing, and changes neither the published schema, Core text nor
+  any released conformance claim.
 - An informative concept page, [Roles in a record](docs/concepts/roles-in-a-record.md) (#275),
   names the judge, the signer, the witness and the reader around a decision record: what each
   produces, trusts and never does, and which parts are not shipped. It defines nothing.
