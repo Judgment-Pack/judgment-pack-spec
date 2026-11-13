@@ -194,8 +194,9 @@ using the same normalization. An implementation's own catalog needs `id`, `famil
 It then compares that catalog with this one, at the release tag it names, as follows. Tag `v0.3.0`
 has no catalog. An implementation of `specVersion` `0.3.0` reads the one at tag `v0.4.0`, which
 carries that version unchanged, and names `v0.4.0` as the catalog it compared with. An implementation
-of `specVersion` `0.5.0` reads the one at tag `v0.5.1`, which carries that version unchanged and
-whose bundles carry it; the `v0.5.0` bundles do not.
+of `specVersion` `0.5.0` reads the one at tag `v0.5.1` or at a later patch tag, such as `v0.5.2`,
+each of which carries that version unchanged and whose bundles carry it; the `v0.5.0` bundles do
+not.
 
 1. For each `id` the implementation carries, find the entry with the same `id` in this catalog.
 2. A missing `id`, or the same `id` with a different `sha256`, is a **finding**. The implementation

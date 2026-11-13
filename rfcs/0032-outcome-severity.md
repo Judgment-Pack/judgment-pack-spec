@@ -496,7 +496,8 @@ document corpus does for a `base`-only reader.
   plans the check and a view; it would be a second reader. Nothing has been built there.
 
 RFC 0000 asks for two plausible independent implementations before a stable feature is accepted.
-One exists; the second is planned.
+One exists. The second that is planned is the reference runtime; it is by the same maintainer and
+would not be independent.
 
 ## Unresolved questions
 
@@ -527,6 +528,14 @@ pull request merged), and copied verbatim to
 [`rfcs/reviews/0032-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0032-round-1.md).
 The maintainer accepted that round as the review of record, and the decisions as its disposition
 records them, with one change: D19 is (b), not the (a) the round accepted for the Draft.
+
+The changes made at acceptance come after the commits that round read, and the round does not cover
+them: D19 (b), the companion's Status and its section 9, and this section. A pre-release review,
+again by a model from the drafting vendor, is recorded on
+[pull request 322](https://github.com/Judgment-Pack/judgment-pack-spec/pull/322) and covers them.
+
+`GOVERNANCE.md` provides no waiver. This acceptance, and pull request 322 that records it, are
+merged without the review it requires, as RFC 0031's were.
 
 **What this leaves unestablished.**
 
