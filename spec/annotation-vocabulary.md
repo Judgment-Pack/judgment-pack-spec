@@ -107,10 +107,27 @@ spellings of a value (Core §9.2). This key has one spelling, and an outcome has
 ### 2.6 Inertness
 
 There is no new rule. Core §8.5 removes each outcome's annotations from the evaluation form, so an
-evaluator never reads `severity`. Given the same facts document, evidence-availability document and
-supported-extension set, a pack gives the result that the same pack with the key removed gives,
-byte for byte, because the two have equal evaluation forms. That holds for every value, a value this
-document refuses included.
+evaluator never reads `severity`.
+
+**The pack with the key removed.** For a semantically conforming pack, *the same pack with the key
+removed* is the pack these steps give, applied to each outcome whose annotations hold `severity`, in
+the way Core §8.5 step 3 removes the annotations member:
+
+1. the member `severity` is removed from the outcome's annotations object;
+2. if that leaves the annotations object empty, the member `org.judgmentpack.annotations` is
+   removed from the outcome's `extensions` object; and
+3. if that leaves the `extensions` object empty, the outcome's `extensions` member is removed.
+
+Nothing else changes: every other annotation key, and every other member of the `extensions`
+object, is kept. Two other readings are not this one. Removing only the member can leave an empty
+annotations object, which Core §9.2 refuses, so the result is not a conforming pack. Removing the
+annotations object but keeping an `extensions` object it leaves empty gives a pack whose evaluation
+form keeps that empty object (Core §8.5 keeps an `extensions` object already empty in the pack it
+reads), so its evaluation form is not the pack's.
+
+Given the same facts document, evidence-availability document and supported-extension set, a pack
+gives the result that the same pack with the key removed gives, byte for byte, because the two have
+equal evaluation forms. That holds for every value, a value this document refuses included.
 
 A severity orders no rules, breaks no conflict, selects no outcome, changes no handoff, and appears
 in no disposition. A vocabulary checker's refusal (§6.3) is not a Core result. The pack stays
@@ -136,33 +153,46 @@ A vocabulary checker SHOULD report the advisory `JPS-VOCABULARY-SEVERITY-IDENTIF
    is a level; and
 3. that segment is not the outcome's level.
 
-The advisory changes no result and is never a refusal, and its absence states nothing. It does not
-infer that the outcome has the level its identifier spells (Core §5): it reports that two things the
-author wrote disagree, so that the author can look. It is not reported when the two agree, when the
-outcome has no stated severity, or when the outcome's value is refused (the refusal is reported
-instead). It is not reported for a segment that contains a level and is not one (`review-highest`,
-`refer-lowest`), or for a level that is not the last segment (`high-volume-refer`).
+A segment is as Core §5's grammar for a local identifier, `^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$`, makes
+it: a run of lowercase letters and digits between single hyphens, so the last segment is what
+follows the last hyphen. A checker that reports this advisory for any pack claims it, and MUST then
+report it exactly when the three conditions hold, at that pointer, and nowhere else. A checker that
+never reports it does not claim it, and meets §6 without it.
+
+The advisory changes no result and is never a refusal, and its absence from a checker that does not
+claim it states nothing. It does not infer that the outcome has the level its identifier spells
+(Core §5): it reports that two things the author wrote disagree, so that the author can look. It is
+not reported when the two agree, when the outcome has no stated severity, or when the outcome's
+value is refused (the refusal is reported instead). It is not reported for a segment that contains
+a level and is not one (`review-highest`, `refer-lowest`), or for a level that is not the last
+segment (`high-volume-refer`).
 
 ## 4. Consumer views
 
-This section is normative for a consumer that applies this document.
+This section is informative, except for its statements marked MUST or MUST NOT. Each of those stops
+a view from misstating what the author wrote, and binds a consumer that applies this document, as
+Core §9.2's D1 and D2 bind any consumer that displays or filters annotations. No conformance class
+tests this section: the vocabulary checker (§6) reads packs, not views, and no Core class tests
+display.
 
-- **A fixed place.** A view of a pack's outcomes SHOULD show each outcome's level in one fixed place,
+- **A fixed place.** A view of a pack's outcomes can show each outcome's level in one fixed place,
   the same for every outcome, such as a column or the same position beside each label. For an
   outcome with no stated severity, that place MUST show no level: it is left empty, or holds a
   fixed marker such as "no severity stated".
 - **Values outside the vocabulary.** A value that is not a level MUST NOT be shown in that place as
-  if it were one, and MUST NOT be case-folded or otherwise mapped onto a level. A view MAY show it as
+  if it were one, and MUST NOT be case-folded or otherwise mapped onto a level. A view can show it as
   written, marked as outside the vocabulary, under Core's display rules (Core §9.2, D2: each
   character outside printable ASCII shown so that its code point can be recovered).
 - **Order.** A view that orders outcomes by severity orders them by §2.2's order, most severe first
-  or least severe first, and says which. Outcomes of the same level keep document order. Outcomes
-  with no stated severity, and outcomes whose value is not a level, are placed together after the
-  ranked outcomes, never among them.
+  or least severe first, and says which. Outcomes of the same level keep document order. The
+  unranked outcomes, those with no stated severity and those whose value is not a level (a value
+  the vocabulary checker refuses, `High` and `["high"]` included), come together after the ranked
+  outcomes, in document order. A view MUST NOT place an unranked outcome among the ranked ones, or
+  at the level its value resembles (§2.3, §2.4).
 - **No arithmetic.** A view MUST NOT present a level as a number or a score, and MUST NOT derive a
   severity for a pack, a rule or a disposition from its outcomes' levels, for instance by taking the
   highest.
-- **Dispositions.** A disposition of kind `outcome` MAY be shown with its outcome's level, labelled
+- **Dispositions.** A disposition of kind `outcome` can be shown with its outcome's level, labelled
   as the outcome's. A disposition of kind `not-applicable` or `unresolved` names no outcome and has
   no severity (Core §8.3). A view MUST NOT give it one, for instance the level of an outcome that a
   conflicting rule names.
@@ -170,13 +200,13 @@ This section is normative for a consumer that applies this document.
   §9.2's filtered-view rule (D2) applies to it: it states that it is filtered, by which key and
   values, and how many outcomes it shows of how many the pack holds.
 - **The author's statement.** A level is the pack author's statement. A view MUST NOT present it as
-  measured, computed, reviewed or approved (Core §3.5; RFC 0031 §8).
-- **Comparison.** A comparison of two versions of a pack SHOULD report a change of an outcome's
-  level as a change, including a level added or removed. An annotation change is a change of the
-  pack's content (Core §5, §11).
+  measured, computed, reviewed or approved (Core §3.5; RFC 0031 §6, D1).
+- **Comparison.** A comparison of two versions of a pack is expected to report a change of an
+  outcome's level as a change, including a level added or removed. An annotation change is a change
+  of the pack's content (Core §5, §11).
 - **Two meanings of "severity".** An advisory diagnostic's severity, as the document corpus records
   it for each check mode ([`conformance/README.md`](../conformance/README.md), Layers), is not an
-  outcome's level. A view SHOULD NOT show the two in one place.
+  outcome's level. Showing the two in one place invites reading one as the other.
 
 ## 5. What this document does not define
 
@@ -198,19 +228,31 @@ A **vocabulary checker** checks a pack against this document and reports a resul
 and its advisories. Every report MUST state the vocabulary version the checker applied, `1.0.0`
 for this text.
 
-### 6.2 Core first
+### 6.2 Core `0.5.0` first
 
-A vocabulary checker MUST first establish that the pack is a semantically conforming Core `0.5.0`
+The vocabulary applies only to `specVersion` `0.5.0`. A pack declaring another selector is reported
+not applied, for that reason. A pack declares another selector when its `specVersion` is a string
+other than `0.5.0`, such as `0.3.0` or `0.6.0`. The selector is read after only the parsing needed
+to find it and before Core's structural layer, as a reader dispatches on the complete selector
+(Core §11); a pack whose `specVersion` is missing or is not a string is Core's refusal.
+
+A vocabulary checker MUST then establish that the pack is a semantically conforming Core `0.5.0`
 document (Core §3.3). When Core refuses the pack, the checker reports that the vocabulary was not
-applied, with Core's refusal, and reports no finding of this document. So an empty value, a value
-that begins or ends with white space, an empty list, and a value that is neither a string nor a
-list are Core's refusals, never this document's: in the repository's document corpus they are
-`JPS-STRUCTURE-MIN-LENGTH`, `JPS-STRUCTURE-NOT`, `JPS-STRUCTURE-COLLECTION-ARITY` and
-`JPS-STRUCTURE-TYPE`. A checker that cannot establish conformance, for instance for a ceiling
-profile (Core §4.1) it does not support, also reports the vocabulary not applied, and says why.
+applied, with the Core layer that refused it, and reports no finding of this document. So an empty
+value, a value that begins or ends with white space, an empty list, and a value that is neither a
+string nor a list are Core's refusals, never this document's: in the repository's document corpus
+they are `JPS-STRUCTURE-MIN-LENGTH`, `JPS-STRUCTURE-NOT`, `JPS-STRUCTURE-COLLECTION-ARITY` and
+`JPS-STRUCTURE-TYPE`, at the structural layer. A checker that cannot establish conformance for a
+ceiling profile (Core §4.1) it does not support also reports the vocabulary not applied, for that
+reason.
 
-The check does not depend on the checker's supported extensions. Annotations are never requirable
-(Core §9.2), and a required extension the checker does not support is not a reason to skip it.
+Whenever the vocabulary is not applied, the report MUST say which of the three is the reason:
+another selector, Core's refusal (with the layer), or an unsupported ceiling profile. A report of
+"not applied" is never a pass and never a refusal of this document.
+
+The check does not depend on the checker's supported extensions. It reads only annotation values,
+whose shape Core's schema fixes whatever extension a pack requires (Core §9.2), so a required
+extension the checker does not support is not a reason to skip it.
 
 ### 6.3 What a checker MUST refuse
 
@@ -288,6 +330,11 @@ This document has its own version, `MAJOR.MINOR.PATCH`, starting at `1.0.0`.
 - **Major.** Anything that refuses a pack an earlier version passed, or that changes the order or
   meaning of a level: removing, renaming or reordering a level, defining another position, or
   defining another key.
+
+While Core's schema does not list the levels, a minor version adds a level without a Core release.
+Once a Core selector's schema lists them (RFC 0032, D18), that selector freezes the list it adopted:
+a level that a later minor version adds reaches Core only through a new selector, and each such
+selector records which version `1.x` of this document it froze.
 
 While RFC 0032 is a Draft, every version of this document is `proposed`.
 

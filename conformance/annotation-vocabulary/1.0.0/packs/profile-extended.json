@@ -1,0 +1,95 @@
+{
+  "specVersion": "0.5.0",
+  "profile": "extended",
+  "id": "https://example.com/judgment-packs/expense-approval-severity",
+  "version": "0.1.0",
+  "title": "Expense approval",
+  "decision": {
+    "intent": "Decide whether an expense claim is approved, referred or declined.",
+    "question": "Is the expense claim approved?"
+  },
+  "outcomes": [
+    {
+      "id": "approve",
+      "label": "Approve"
+    },
+    {
+      "id": "note",
+      "label": "Approve with a note"
+    },
+    {
+      "id": "refer",
+      "label": "Refer to a reviewer",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "severity": "hihg"
+        }
+      }
+    },
+    {
+      "id": "decline",
+      "label": "Decline"
+    }
+  ],
+  "rules": [
+    {
+      "id": "within-limit",
+      "description": "Approve a claim within the limit.",
+      "when": {
+        "op": "fact",
+        "path": "/expense/band",
+        "operator": "equals",
+        "value": "within-limit"
+      },
+      "outcome": "approve",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "near-limit",
+      "description": "Approve a claim near the limit, with a note.",
+      "when": {
+        "op": "fact",
+        "path": "/expense/band",
+        "operator": "equals",
+        "value": "near-limit"
+      },
+      "outcome": "note",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "over-limit",
+      "description": "Refer a claim over the limit.",
+      "when": {
+        "op": "fact",
+        "path": "/expense/band",
+        "operator": "equals",
+        "value": "over-limit"
+      },
+      "outcome": "refer",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "no-receipt",
+      "description": "Decline a claim with no receipt.",
+      "when": {
+        "op": "fact",
+        "path": "/expense/receipt",
+        "operator": "equals",
+        "value": "missing"
+      },
+      "outcome": "decline",
+      "onUnknown": "escalate"
+    }
+  ],
+  "escalation": {
+    "triggers": [
+      "unknown",
+      "conflict",
+      "no-match"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Expense reviewer"
+    }
+  }
+}

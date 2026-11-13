@@ -19,9 +19,10 @@
 >
 > **Review standing.** [RFC 0009](0009-interim-review-regime.md) requires a recorded adversarial
 > review by a model from a different vendor, with a written maintainer disposition for each
-> finding, on the pull request that creates this RFC. That review has not happened, and this record
-> does not claim it. No review by a model from the drafting vendor has happened either. The
-> decisions below are numbered so that a review can disposition each one.
+> finding, on the pull request that creates this RFC. That cross-vendor review has not happened, and
+> this record does not claim it. One review round by a model from the drafting vendor is recorded on
+> the pull request; it is a same-vendor review, not the RFC 0009 review. The decisions below are
+> numbered so that a review can disposition each one.
 
 ## Summary
 
@@ -31,9 +32,10 @@ the annotation vocabulary, which has its own version, starting at `1.0.0`, and s
 A vocabulary checker refuses any other value, and any list, with one stated code. Absence means no
 stated severity, never a default. Core `0.5.0` is untouched: its schema, text and corpora keep
 their bytes, `spec validate` accepts what it accepts today, and Core §8.5's evaluation form already
-removes outcome annotations, so the key is inert with no new rule. The values and their order are
-written so that a later selector can adopt them, in Core's schema or as a typed outcome member,
-without a second vocabulary. This is one key, not a registry.
+removes outcome annotations, so the key is inert with no new rule: a pack and the same pack with the
+key removed, as companion §2.6 defines that removal, have equal evaluation forms. The values and
+their order are written so that a later selector can adopt them, in Core's schema or as a typed
+outcome member, without a second vocabulary. This is one key, not a registry.
 
 ## Problem
 
@@ -94,10 +96,12 @@ annotation vocabulary `1.0.0`. In brief:
 - an outcome identifier should not repeat the level, and a recommended advisory reports one that
   ends in a level the annotation contradicts (§3);
 - consumer views show a level in a fixed place, order by the vocabulary, and never compute with
-  levels (§4);
+  levels; the section is informative except the statements that stop a view misstating the author
+  (§4);
 - no suggested action is defined (§5);
-- a vocabulary checker admits the pack under Core first, then refuses each outcome whose value is
-  not a level, with `JPS-VOCABULARY-SEVERITY-VALUE` (§6);
+- a vocabulary checker applies only to `specVersion` `0.5.0`, admits the pack under Core first,
+  then refuses each outcome whose value is not a level, with `JPS-VOCABULARY-SEVERITY-VALUE`, and
+  says why whenever it does not apply the vocabulary (§6);
 - no pack declares the version it was written to; the checker states the version it applied (§7);
 - one key, not a registry, and the bar for a second (§8); the document's own versioning (§9); and
   its machine-readable form (§10).
@@ -186,10 +190,11 @@ handle two forms for no gain.
 `hіgh` be shown as `high`, a display of something the author did not write. Core already
 refuses a value with white space at either end.
 
-**D9. Core first: the vocabulary applies only to a pack Core admits.** *Maintainer's decision.*
+**D9. Core first: the vocabulary applies only to a `0.5.0` pack Core admits.** *Maintainer's
+decision.*
 
-- (a) **Core first** (recommended): a pack Core refuses is reported `not-checked`, with Core's
-  refusal, and takes no vocabulary finding. An empty string is therefore Core's
+- (a) **Core first** (recommended): a pack Core refuses is reported `not-checked`, with the Core
+  layer that refused it, and takes no vocabulary finding. An empty string is therefore Core's
   `JPS-STRUCTURE-MIN-LENGTH`, not the vocabulary's code, and so are `"high "`
   (`JPS-STRUCTURE-NOT`), a number (`JPS-STRUCTURE-TYPE`) and `[]`
   (`JPS-STRUCTURE-COLLECTION-ARITY`).
@@ -198,9 +203,15 @@ refuses a value with white space at either end.
 *Why:* Core's layering (Core §3.3; conformance/README.md, "Validation proceeds in layer order")
 stops a document at the first layer it fails. A second code for one refusal would make the codes
 disagree between tools that do and do not run the vocabulary. This departs from #320's reading
-that an empty string is refused "with the code": it is refused, but with Core's code. A required
-extension the checker does not support does not stop the check, because annotations are never
-requirable (Core §9.2).
+that an empty string is refused "with the code": it is refused, but with Core's code.
+
+The vocabulary applies only to `specVersion` `0.5.0`: a pack declaring another selector, earlier
+(`0.3.0`) or later (`0.6.0`), is reported not applied for that reason, read before Core's structural
+layer, so that it does not read as a pack Core `0.5.0` refused. A checker that does not support the
+pack's ceiling profile reports it not applied for that reason too. The report always says which of
+the three reasons it is (D21). A required extension the checker does not support does not stop the
+check: the check reads only annotation values, whose shape Core's schema fixes whatever extension
+a pack requires (Core §9.2).
 
 **D10. Codes.** *Maintainer's decision* (spelling).
 
@@ -209,11 +220,12 @@ requirable (Core §9.2).
   **`JPS-VOCABULARY-SEVERITY-IDENTIFIER`** for the advisory, at `/outcomes/<i>/id` (recommended).
 - (b) One code per kind of refusal (unknown, case, list).
 
-*Why:* the repository's codes are `JPS-<LAYER>-<NAME>`; `VOCABULARY` names the layer above Core's
-`CARRIER`, `STRUCTURE` and `SEMANTIC`. One refusal code matches Core's practice of naming a code
-for the rule that fails, not for each way of failing it (RFC 0031, Codes). Findings compare as a
-set of code and pointer pairs, as in Core's corpus. The codes are provisional test metadata, as
-every code is.
+*Why:* the repository's codes put a family after `JPS-`: Core's layers (`CARRIER`, `STRUCTURE`,
+`SEMANTIC`), a missing capability (`CAPABILITY`) and the overlap advisory (`RULES`).
+`VOCABULARY` names this document's check, which runs after Core's layers. One refusal code matches
+Core's practice of naming a code for the rule that fails, not for each way of failing it (RFC 0031,
+Codes). Findings compare as a set of code and pointer pairs, as in Core's corpus. The codes are
+provisional test metadata, as every code is.
 
 **D11. Identifiers should not repeat the level, with a recommended advisory.** *Maintainer's
 decision.*
@@ -227,7 +239,10 @@ decision.*
 can look; it infers no level from the identifier (Core §5), changes no result and never refuses. It
 is silent when the two agree, when there is no annotation, when the value is refused, for a segment
 that merely contains a level (`review-highest`) and for a level that is not the last segment
-(`high-volume-refer`). (c) would read a level from an identifier alone, which Core §5 forbids.
+(`high-volume-refer`). Segments are as Core §5's identifier grammar makes them. The advisory is a
+SHOULD, but a checker that reports it claims it and MUST report it exactly when the three
+conditions hold and nowhere else, so that rows can compare advisories as sets for every checker
+that claims it. (c) would read a level from an identifier alone, which Core §5 forbids.
 
 **D12. A suggested action is deliberately not defined.**
 
@@ -238,18 +253,24 @@ priority or mapping from another scale (companion §5).
 
 **D13. Consumer views.** *Maintainer's decision* (strength).
 
-- (a) **Normative for a consumer that applies the companion** (recommended): a fixed place, SHOULD;
-  no level shown for an outcome without one, MUST; a value outside the vocabulary never shown or
-  ranked as a level, MUST; ordering by the vocabulary with unranked outcomes together after the
-  ranked ones; no arithmetic and no derived pack, rule or disposition severity, MUST; filtering is
-  Core's filtered view (D2 of Core §9.2); a level is the author's statement, MUST; a comparison
-  reports a change of level, SHOULD.
-- (b) All informative.
+- (a) **Informative, except the statements that stop a view misstating the author** (recommended),
+  as RFC 0031 §8 is informative except D2. Normative (MUST) for a consumer that applies the
+  companion: no level shown for an outcome without one; a value outside the vocabulary never shown
+  as a level or mapped onto one; an unranked outcome never placed among the ranked ones or at the
+  level its value resembles; no arithmetic and no derived pack, rule or disposition severity; no
+  severity for a disposition that names no outcome; a level never presented as measured, reviewed
+  or approved (RFC 0031 §6, D1). Informative: a fixed place for the level; ordering by the
+  vocabulary, with the unranked outcomes together after the ranked ones, in document order, a
+  refused value among them; filtering as Core's filtered view (Core §9.2, D2, which already binds);
+  a comparison that reports a change of level. No conformance class tests the section.
+- (b) Normative throughout, with SHOULD for the presentation statements.
+- (c) All informative.
 
 *Why:* the issue's acceptance asks that a view list each outcome's level in a fixed place and show
-none for a pack without one. The MUSTs are each a way a view could misstate the pack; the SHOULDs
-are presentation. A disposition that names no outcome has no severity, which stops a view from
-giving an `unresolved` conflict the higher of its two outcomes' levels.
+none for a pack without one. The MUSTs are each a way a view could misstate the pack; the rest is
+presentation, which no class tests and which (b) would make normative without a test. A
+disposition that names no outcome has no severity, which stops a view from giving an `unresolved`
+conflict the higher of its two outcomes' levels.
 
 **D14. No in-pack declaration of the vocabulary version.** *Maintainer's decision.*
 
@@ -275,8 +296,13 @@ new key (companion §9).
 **D16. Inertness needs no new rule.**
 
 *Why:* Core §8.5 removes each outcome's annotations from the evaluation form, so a pack evaluates as
-the same pack with the key removed, byte for byte, whatever the value. A vocabulary refusal is not
-a Core result: the pack stays semantically conforming and is evaluated, and nothing reports
+the same pack with the key removed, byte for byte, whatever the value. "The key removed" is defined
+in companion §2.6, following §8.5 step 3: remove the member; if the annotations object is then
+empty, remove it; if that leaves the outcome's `extensions` object empty, remove that too. Read
+otherwise it is false when `severity` is an outcome's only annotation key: removing only the member
+leaves `{}`, which Core §9.2 refuses, and keeping an emptied `extensions: {}` gives a pack whose
+evaluation form keeps it (§8.5 keeps an `extensions` object already empty). A vocabulary refusal is
+not a Core result: the pack stays semantically conforming and is evaluated, and nothing reports
 `pack-not-conformant` for it (companion §2.6, §6.4).
 
 **D17. One key, not a registry; the bar for a second key.**
@@ -296,7 +322,9 @@ selector, not now.
   `vocabulary.json`, verbatim. No new member, no change to the evaluation form, and every pack the
   vocabulary passes stays conforming. The vocabulary checker's refusal becomes Core's
   structural refusal, mapped by RFC 0031's code rule (`enum` would take a new structural code), and
-  the companion then states that Core enforces the key.
+  the companion then states that Core enforces the key. From then on the selector's schema freezes
+  the list: a level that a later minor version of the companion adds reaches Core only through a
+  new selector, and that selector records which companion version `1.x` it froze.
 - (b) Option 3: a typed optional outcome member, such as `severity`, with the same four values and
   order. It must say what the evaluation form does with the member (remove it, as §8.5 removes
   annotations, or state that it is inert because no step reads it), that the disposition does not
@@ -311,9 +339,10 @@ conforming under the next selector, which makes the vocabulary a preview of that
 **D19. Publication in `v0.5.2`: proposed and staged.** *Maintainer's decision.*
 
 - (a) **Staged** (recommended): while this RFC is a Draft the companion is `export-ignore`, as
-  `spec/workflow.md` is for RFC 0020, has no site page, and is read at the tag; the rows are staged
-  under `conformance/annotation-vocabulary/`, in no corpus, bundle or claim. The patch release
-  carries Core unchanged.
+  `spec/workflow.md` is for RFC 0020, and has no site page: it is read in the repository, where the
+  site's links to it point, on `main`. The tag's tree holds the same file, and no bundle does. The
+  rows are staged under `conformance/annotation-vocabulary/`, in no corpus, bundle or claim. The
+  patch release carries Core unchanged.
 - (b) The maintainer accepts this RFC before `v0.5.2`; acceptance removes the `export-ignore` line,
   and the companion gets a page and ships in the bundle. The rows stay staged either way.
 
@@ -331,9 +360,12 @@ with an embedded fragment and no `$id` is neither, and is exactly what D18 (a) w
 
 **D21. The vocabulary-checker class.**
 
-*Why:* the class is what a tool claims when it applies the companion: Core admission first (D9),
-the refusals of §6.3 for every outcome, the version it applied in every report (D14), no repair of a
-value, and a refusal never reported as a Core result (D16).
+*Why:* the class is what a tool claims when it applies the companion: the selector and Core
+admission first (D9), the refusals of §6.3 for every outcome, the version it applied in every
+report (D14), the reason whenever it reports the vocabulary not applied (another selector, Core's
+refusal with the layer, or an unsupported ceiling profile; D9), no repair of a value, and a refusal
+never reported as a Core result (D16). The identifier advisory is a SHOULD; a checker that reports
+it claims it, and MUST then report it exactly where the companion's §3.1 says (D11).
 
 ## Alternatives
 
@@ -400,14 +432,17 @@ advisories.
 | `refuse-look-alike` | `hіgh` | valid | refused |
 | `refuse-list-one` | `["high"]` | valid | refused |
 | `refuse-list-two` | `["low", "high"]` | valid | refused |
-| `core-empty-string` | `""` | `JPS-STRUCTURE-MIN-LENGTH` | not checked |
-| `core-trailing-space` | `"high "` | `JPS-STRUCTURE-NOT` | not checked |
-| `core-number` | `3` | `JPS-STRUCTURE-TYPE` | not checked |
-| `core-empty-list` | `[]` | `JPS-STRUCTURE-COLLECTION-ARITY` | not checked |
-| `not-checked-rule` | `sev1` on a rule | valid | pass |
-| `not-checked-root` | `sev1` on the root | valid | pass |
-| `not-checked-entry` | `sev1` on a value-set entry | valid | pass |
-| `not-checked-other-keys` | `severity-level` and `risk` on an outcome | valid | pass |
+| `core-empty-string` | `""` | `JPS-STRUCTURE-MIN-LENGTH` | not checked: Core refused it |
+| `core-trailing-space` | `"high "` | `JPS-STRUCTURE-NOT` | not checked: Core refused it |
+| `core-number` | `3` | `JPS-STRUCTURE-TYPE` | not checked: Core refused it |
+| `core-empty-list` | `[]` | `JPS-STRUCTURE-COLLECTION-ARITY` | not checked: Core refused it |
+| `selector-earlier` | `hihg`, `specVersion` `0.3.0` | `JPS-STRUCTURE-SPEC-VERSION` | not checked: another selector |
+| `selector-later` | `hihg`, `specVersion` `0.6.0` | `JPS-STRUCTURE-SPEC-VERSION` | not checked: another selector |
+| `profile-extended` | `hihg`, profile `extended` | valid, for a reader that supports `extended` | refused; not run by a `base`-only checker |
+| `ignored-rule` | `sev1` on a rule | valid | pass |
+| `ignored-root` | `sev1` on the root | valid | pass |
+| `ignored-entry` | `sev1` on a value-set entry | valid | pass |
+| `ignored-other-keys` | `severity-level` and `risk` on an outcome | valid | pass |
 | `refuse-with-unsupported-extension` | `hihg`, and a required extension the checker lacks | unsupported | refused |
 | `advisory-identifier-disagrees` | `refer-high` at `low` | valid | pass, advisory |
 | `advisory-identifier-whole` | `critical` at `low` | valid | pass, advisory |
@@ -421,10 +456,17 @@ advisories.
 The pair `inert-severity` holds the three `inert-` packs to equal evaluation forms and to the same
 hand-written disposition for each of five facts documents: an outcome twice, a conflict, an
 unknown, and not applicable. `tests/test_annotation_vocabulary.py` also removes the key from every
-admitted row's pack and holds the evaluation form unchanged, and applies the `vocabulary.json`
-fragment with a general JSON Schema validator, which must refuse exactly the outcomes the checker
-refuses. Core `0.5.0`'s schema and corpora do not change, and the builder's patch-release check
-holds them to `releases/v0.5.0.normative.json`.
+admitted row's pack, as companion §2.6 defines the removal, and holds the evaluation form and each
+evaluation result unchanged; it holds the two other readings of the removal to what §2.6 says of
+them (one is refused by Core, the other has another evaluation form). It applies the
+`vocabulary.json` fragment with a general JSON Schema validator, which must refuse exactly the
+outcomes the checker refuses. Core `0.5.0`'s schema and corpora do not change, and the builder's
+patch-release check holds them to `releases/v0.5.0.normative.json`.
+
+The checker reports the vocabulary not applied, and why, for the selector rows and the `core-`
+rows. The `profile-extended` row records what a checker that supports `extended` gives; the
+reference checker supports only `base`, so it reports that row not run, not failed, as Core's
+document corpus does for a `base`-only reader.
 
 ## Implementation
 

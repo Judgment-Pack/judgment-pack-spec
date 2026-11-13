@@ -10,6 +10,7 @@
       "pack": "packs/each-level.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "each of the four levels, once each, on four outcomes",
@@ -20,6 +21,7 @@
       "pack": "packs/no-severity.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "a pack with no annotations and no severity passes: absence is no stated severity, never a refusal",
@@ -30,6 +32,7 @@
       "pack": "packs/some-outcomes.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "one outcome with a level beside another key, one with annotations but no severity, two with no annotations",
@@ -40,6 +43,7 @@
       "pack": "packs/unknown-value.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "refused",
+      "expectedReason": null,
       "expectedFindings": [
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       ],
@@ -52,6 +56,7 @@
       "pack": "packs/wrong-case.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "refused",
+      "expectedReason": null,
       "expectedFindings": [
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/1/extensions/org.judgmentpack.annotations/severity" },
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/3/extensions/org.judgmentpack.annotations/severity" }
@@ -65,6 +70,7 @@
       "pack": "packs/none-value.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "refused",
+      "expectedReason": null,
       "expectedFindings": [
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       ],
@@ -77,6 +83,7 @@
       "pack": "packs/informational-value.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "refused",
+      "expectedReason": null,
       "expectedFindings": [
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/0/extensions/org.judgmentpack.annotations/severity" }
       ],
@@ -89,6 +96,7 @@
       "pack": "packs/look-alike.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "refused",
+      "expectedReason": null,
       "expectedFindings": [
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       ],
@@ -101,6 +109,7 @@
       "pack": "packs/list-one.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "refused",
+      "expectedReason": null,
       "expectedFindings": [
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       ],
@@ -113,6 +122,7 @@
       "pack": "packs/list-two.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "refused",
+      "expectedReason": null,
       "expectedFindings": [
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       ],
@@ -128,6 +138,7 @@
         "diagnostic": { "code": "JPS-STRUCTURE-MIN-LENGTH", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       },
       "expectedResult": "not-checked",
+      "expectedReason": "core-refused",
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "an empty string is Core's refusal, so the vocabulary is not applied and reports no finding of its own",
@@ -141,6 +152,7 @@
         "diagnostic": { "code": "JPS-STRUCTURE-NOT", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       },
       "expectedResult": "not-checked",
+      "expectedReason": "core-refused",
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "a value ending in white space is Core's refusal; nothing is trimmed into a level",
@@ -154,6 +166,7 @@
         "diagnostic": { "code": "JPS-STRUCTURE-TYPE", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       },
       "expectedResult": "not-checked",
+      "expectedReason": "core-refused",
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "a number is neither a string nor a list: Core's refusal",
@@ -167,46 +180,92 @@
         "diagnostic": { "code": "JPS-STRUCTURE-COLLECTION-ARITY", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       },
       "expectedResult": "not-checked",
+      "expectedReason": "core-refused",
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "an empty list is Core's refusal, before the vocabulary's refusal of every list",
       "section": "§6.2"
     },
     {
-      "id": "not-checked-rule",
+      "id": "selector-earlier",
+      "pack": "packs/selector-earlier.json",
+      "expectedCore": {
+        "result": "invalid",
+        "diagnostic": { "code": "JPS-STRUCTURE-SPEC-VERSION", "path": "/specVersion" }
+      },
+      "expectedResult": "not-checked",
+      "expectedReason": "spec-version",
+      "expectedFindings": [],
+      "expectedAdvisories": [],
+      "focus": "an earlier selector, 0.3.0, with the misspelt level hihg: the vocabulary applies only to 0.5.0, so it is not applied, for that reason, and not as a pack Core 0.5.0 refused",
+      "section": "§6.2"
+    },
+    {
+      "id": "selector-later",
+      "pack": "packs/selector-later.json",
+      "expectedCore": {
+        "result": "invalid",
+        "diagnostic": { "code": "JPS-STRUCTURE-SPEC-VERSION", "path": "/specVersion" }
+      },
+      "expectedResult": "not-checked",
+      "expectedReason": "spec-version",
+      "expectedFindings": [],
+      "expectedAdvisories": [],
+      "focus": "a later selector, 0.6.0, with the misspelt level hihg: not applied, for that reason; a later selector's meaning for the key is that selector's",
+      "section": "§6.2"
+    },
+    {
+      "id": "profile-extended",
+      "pack": "packs/profile-extended.json",
+      "expectedCore": { "result": "valid", "diagnostic": null },
+      "expectedResult": "refused",
+      "expectedReason": null,
+      "expectedFindings": [
+        { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
+      ],
+      "expectedAdvisories": [],
+      "focus": "hihg in a pack that declares the extended profile: the expectations are a reader's that supports extended; a checker that supports only base reports the vocabulary not applied, with the reason profile-unsupported, and the row as not run, not failed",
+      "section": "§6.2"
+    },
+    {
+      "id": "ignored-rule",
       "pack": "packs/rule-position.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "severity sev1 on a rule: the key has no defined meaning there, and is neither checked nor refused",
       "section": "§2.1"
     },
     {
-      "id": "not-checked-root",
+      "id": "ignored-root",
       "pack": "packs/root-position.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "severity sev1 on the root: not checked",
       "section": "§2.1"
     },
     {
-      "id": "not-checked-entry",
+      "id": "ignored-entry",
       "pack": "packs/entry-position.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "severity sev1 on a value-set entry: not checked",
       "section": "§2.1"
     },
     {
-      "id": "not-checked-other-keys",
+      "id": "ignored-other-keys",
       "pack": "packs/other-keys.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "severity-level and risk on an outcome are a project's own keys: only the exact key severity is defined",
@@ -220,6 +279,7 @@
         "diagnostic": { "code": "JPS-CAPABILITY-REQUIRED-EXTENSION", "path": "/metadata/requiredExtensions/0" }
       },
       "expectedResult": "refused",
+      "expectedReason": null,
       "expectedFindings": [
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       ],
@@ -232,6 +292,7 @@
       "pack": "packs/identifier-disagrees.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [
         { "code": "JPS-VOCABULARY-SEVERITY-IDENTIFIER", "path": "/outcomes/2/id" }
@@ -244,6 +305,7 @@
       "pack": "packs/identifier-whole.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [
         { "code": "JPS-VOCABULARY-SEVERITY-IDENTIFIER", "path": "/outcomes/3/id" }
@@ -256,6 +318,7 @@
       "pack": "packs/identifier-agrees.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "refer-high whose level is high: they agree, so no advisory (the identifier still should not repeat it)",
@@ -266,6 +329,7 @@
       "pack": "packs/identifier-contains.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "review-highest: a segment that contains a level is not one",
@@ -276,6 +340,7 @@
       "pack": "packs/identifier-not-last.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "high-volume-refer: a level that is not the last segment",
@@ -286,6 +351,7 @@
       "pack": "packs/identifier-no-severity.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "refer-high with no stated severity: nothing to disagree with, and no level is inferred from the identifier",
@@ -296,6 +362,7 @@
       "pack": "packs/identifier-refused-value.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "refused",
+      "expectedReason": null,
       "expectedFindings": [
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/2/extensions/org.judgmentpack.annotations/severity" }
       ],
@@ -308,6 +375,7 @@
       "pack": "packs/inert-baseline.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "the inertness pair's baseline, with no annotations",
@@ -318,6 +386,7 @@
       "pack": "packs/inert-levels.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "pass",
+      "expectedReason": null,
       "expectedFindings": [],
       "expectedAdvisories": [],
       "focus": "the baseline with a level on every outcome",
@@ -328,6 +397,7 @@
       "pack": "packs/inert-refused.json",
       "expectedCore": { "result": "valid", "diagnostic": null },
       "expectedResult": "refused",
+      "expectedReason": null,
       "expectedFindings": [
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/0/extensions/org.judgmentpack.annotations/severity" },
         { "code": "JPS-VOCABULARY-SEVERITY-VALUE", "path": "/outcomes/1/extensions/org.judgmentpack.annotations/severity" },
@@ -380,7 +450,7 @@
           "expectedDisposition": { "kind": "not-applicable", "reasons": ["not-applicable"], "handoff": { "state": "requested", "triggeredBy": ["not-applicable"] } }
         }
       ],
-      "focus": "a level, and a refused value, on every outcome: the three packs have equal evaluation forms and give the same disposition for each facts document",
+      "focus": "a level, and a refused value, on every outcome: the three packs have equal evaluation forms and give the same disposition for each facts document. The baseline is not inert-levels with the key removed (one of its outcomes also carries another key); the removal is the one §2.6 defines (the member, then an emptied annotations object, then an emptied extensions object), and the tests apply it to every admitted row's pack",
       "section": "§2.6"
     }
   ]
