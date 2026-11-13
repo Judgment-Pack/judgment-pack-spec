@@ -375,16 +375,19 @@ class FormatStatus(Fixture):
         self.assertFalse(releases["v0.5.0"]["candidate"])
         self.assertEqual(derived["judgment-pack-core"]["baseline"], "v0.5.0")
         self.assertEqual([], shapes.check(self.root))
-        # Without v0.5.0's notes the tree reads as it did at v0.4.0: that tag is the four families'
-        # last release and v0.3.0 stays their baseline.
-        notes = self.root / "releases" / "v0.5.0.md"
-        kept = notes.read_bytes()
-        notes.unlink()
+        # Without v0.5.0's notes, and the later files that name that release, the tree reads as it
+        # did at v0.4.0: that tag is the four families' last release and v0.3.0 stays their baseline.
+        later = [self.root / "releases" / name
+                 for name in ("v0.5.0.md", "v0.5.0.normative.json", "v0.5.1.md")]
+        kept = {path: path.read_bytes() for path in later if path.exists()}
+        for path in kept:
+            path.unlink()
         derived = shapes.derive_status(self.root, shapes.build_catalog(self.root))
         self.assertEqual(derived["judgment-pack-core"]["baseline"], "v0.3.0")
         self.assertEqual({family for family, record in derived.items()
                           if record["lastReleased"] == "v0.4.0"}, four)
-        notes.write_bytes(kept)
+        for path, data in kept.items():
+            path.write_bytes(data)
         # The mapping is what keeps the staged shape unpublished: losing it, or moving its
         # specVersion, is a fault in the status records and not a new baseline accepted silently.
         mapping = self.root / "releases" / "v0.4.0.json"
@@ -393,6 +396,44 @@ class FormatStatus(Fixture):
         self.assertTrue(any("family workflow-contributors" in fault for fault in shapes.check(self.root)))
         mapping.unlink()
         self.assertTrue(any("family workflow-contributors" in fault for fault in shapes.check(self.root)))
+
+    def test_a_patch_release_carries_its_spec_version_and_becomes_its_baseline(self):
+        four = {"judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest", "workflow"}
+        notes = self.root / "releases" / "v0.5.1.md"
+        notes.unlink(missing_ok=True)
+        before = shapes.derive_status(self.root, shapes.build_catalog(self.root))
+        notes.write_text("# v0.5.1\n", "utf-8")
+        catalog = shapes.build_catalog(self.root)
+        releases = shapes.load_releases(self.root, catalog)
+        # v0.5.1 carries 0.5.0, the specVersion its numbers give, so it is no candidate; v0.4.0,
+        # whose mapping names 0.3.0, stays the recorded exception that establishes no baseline.
+        self.assertEqual("0.5.0", releases["v0.5.1"]["specVersion"])
+        self.assertFalse(releases["v0.5.1"]["candidate"])
+        self.assertEqual(four, releases["v0.5.1"]["families"])
+        self.assertTrue(releases["v0.4.0"]["candidate"])
+        after = shapes.derive_status(self.root, catalog)
+        self.assertEqual(four, {family for family in after if after[family] != before[family]})
+        for family in four:
+            with self.subTest(family=family):
+                self.assertEqual({"draftVersion": "0.5.0", "baseline": "v0.5.0", "lastReleased": "v0.5.0"},
+                                 before[family])
+                self.assertEqual({"draftVersion": "0.5.0", "baseline": "v0.5.1", "lastReleased": "v0.5.1"},
+                                 after[family])
+
+    def test_a_patch_tag_of_a_spec_version_no_release_carries_is_refused(self):
+        # v0.4.1 would carry 0.4.0, and v0.4.0 carries 0.3.0: without the refusal it would publish
+        # the staged workflow-contributors shape under 0.4.0 as a baseline. v0.6.1 has no v0.6.0.
+        for tag, carried in (("v0.4.1", "0.4.0"), ("v0.6.1", "0.6.0")):
+            with self.subTest(tag=tag):
+                notes = self.root / "releases" / ("%s.md" % tag)
+                notes.write_text("# %s\n" % tag, "utf-8")
+                with self.assertRaisesRegex(shapes.ShapeError,
+                                            "releases/%s.md is a patch release of specVersion %s, "
+                                            "which no release in releases/ first released as v%s"
+                                            % (tag, carried, carried)):
+                    shapes.check(self.root)
+                notes.unlink()
+        self.assertEqual([], shapes.check(self.root))
 
     def test_a_release_naming_a_schema_the_catalog_lacks_is_refused(self):
         write_json(self.root / "releases" / "v0.3.0.extra.json",

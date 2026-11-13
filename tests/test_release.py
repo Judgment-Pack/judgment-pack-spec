@@ -61,23 +61,58 @@ class ReleaseBuilderTests(unittest.TestCase):
                      "unchanged; under this rule it would have been `v0.3.1`.",
                      "no `specVersion` `0.4.0` is assigned: the version staged as `0.4.0-draft` is "
                      "released as `0.5.0`",
-                     "A tag such as `v0.5.1` needs a reviewed change to the builder before it is cut."):
+                     "it derives the `specVersion` a Core tag carries from the tag's major and minor "
+                     "numbers (`vX.Y.Z` carries `X.Y.0`)",
+                     "For a patch tag it also requires the normative artifacts to be byte-identical to "
+                     "those the `X.Y.0` release published",
+                     "`releases/vX.Y.0.normative.json`, whose own SHA-256 the builder pins.",
+                     "so tag `v0.4.1`, which would carry the never-released `0.4.0`, is refused.",
+                     "In `catalog/format-status.json` a patch tag is not a candidate.",
+                     "it becomes the last release and the baseline of the families whose `$id` is "
+                     "under that `specVersion`"):
             with self.subTest(text=text):
                 self.assertIn(text, versioning)
+        self.assertNotIn("does not yet build a patch release", versioning)
         # The staged-selector section is history now; no sentence may still call it staged.
         self.assertNotIn("## Staged draft Core selector 0.4.0-draft", versioning)
         self.assertIn("## Core 0.5.0 was staged as 0.4.0-draft", versioning)
 
-    def test_the_builder_does_not_yet_build_a_patch_release(self) -> None:
-        # VERSIONING.md says a patch tag needs a builder change first. Until it lands, a v0.5.1 that
-        # carries specVersion 0.5.0 unchanged is refused, not built under a guessed identity.
+    def test_a_tag_carries_the_spec_version_its_major_and_minor_numbers_give(self) -> None:
+        for version, carried in (("0.5.0", "0.5.0"), ("0.5.1", "0.5.0"), ("0.5.12", "0.5.0"),
+                                 ("1.2.3", "1.2.0"), ("0.6.0", "0.6.0"),
+                                 # A prerelease suffix is never stripped.
+                                 ("0.5.1-rc.1", "0.5.1-rc.1"), ("0.3.0-rc.1", "0.3.0-rc.1"),
+                                 ("0.2.0-draft", "0.2.0-draft")):
+            with self.subTest(version=version):
+                self.assertEqual(carried, BUILD_RELEASE.carried_spec_version(version))
+        for tag, patch in (("v0.5.1", True), ("v1.0.3", True), ("v0.5.0", False),
+                           ("v0.4.0", False), ("v0.5.1-rc.1", False), ("v0.3.0-rc.2", False),
+                           ("policy-v1.0.0-draft.1", False)):
+            with self.subTest(tag=tag):
+                self.assertIs(patch, BUILD_RELEASE.is_patch_release(tag))
+
+    def test_a_minor_tag_is_held_to_its_own_spec_version(self) -> None:
+        # v0.6.0 on a tree that still carries 0.5.0 is not a patch and carries 0.6.0: refused.
         with tempfile.TemporaryDirectory() as directory:
             root = self._release_tree(Path(directory), "0.5.0")
             BUILD_RELEASE.validate_artifacts("0.5.0", "v0.5.0", root=root)
-            (root / "releases" / "v0.5.1.md").write_text("notes\n", encoding="utf-8")
+            (root / "releases" / "v0.6.0.md").write_text("notes\n", encoding="utf-8")
             with self.assertRaises(ValueError) as raised:
-                BUILD_RELEASE.validate_artifacts("0.5.1", "v0.5.1", root=root)
+                BUILD_RELEASE.validate_artifacts("0.6.0", "v0.6.0", root=root)
             self.assertIn("conformance specVersion", str(raised.exception))
+
+    def test_a_patch_tag_of_a_never_released_spec_version_is_refused(self) -> None:
+        # Every pin of this tree names 0.4.0, which tag v0.4.0 did not carry, so v0.4.1 has no
+        # released specVersion to carry. The pins agree; the refusal is the missing release record.
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._release_tree(Path(directory), "0.4.0")
+            (root / "releases" / "v0.4.1.md").write_text("notes\n", encoding="utf-8")
+            with self.assertRaises(ValueError) as raised:
+                BUILD_RELEASE.validate_artifacts("0.4.1", "v0.4.1", root=root)
+            self.assertIn("v0.4.1 would carry specVersion 0.4.0, which has no recorded release",
+                          str(raised.exception))
+            self.assertNotIn("0.4.0", BUILD_RELEASE.NORMATIVE_RECORDS)
+            self.assertEqual(["0.5.0"], list(BUILD_RELEASE.NORMATIVE_RECORDS))
 
     def test_the_0_5_0_notes_state_the_selector_and_the_waived_candidate_period(self) -> None:
         notes = re.sub(r"\s+", " ", (ROOT / "releases" / "v0.5.0.md").read_text(encoding="utf-8"))
@@ -853,15 +888,20 @@ class CoreCarriedReleaseTests(unittest.TestCase):
                 self.assertIn("mapping does not match", result.stderr)
 
     def test_no_other_tag_can_use_the_mapping(self):
+        # With no mapping, a tag carries what the release numbering rule gives: v0.4.1 carries 0.4.0,
+        # v0.5.0 carries 0.5.0 and so on, and the 0.3.0 pins refuse each. v0.3.1 would carry 0.3.0,
+        # which has no normative record, because the rule is normative from v0.5.0 on and v0.4.0
+        # is the distribution that would have been v0.3.1.
         for tag in ("v0.3.1", "v0.4.1", "v0.5.0", "v1.0.0", "v0.4.0-rc.1", "v0.4.0-alpha.1"):
             version = tag[1:]
+            unmapped = ("specVersion 0.3.0, which has no recorded release" if tag == "v0.3.1"
+                        else "conformance specVersion")
             for mapping, message in (
                     # This tag's bytes copied under another tag's name; then renamed to fit it.
                     (self.IDENTITY, "only the allowlisted Core distributions"),
                     ({**self.IDENTITY, "releaseVersion": version, "tag": tag},
                      "only the allowlisted Core distributions"),
-                    # And with no mapping at all, the tag's own version is held to the 0.3.0 pins.
-                    (None, "conformance specVersion")):
+                    (None, unmapped)):
                 with self.subTest(tag=tag, mapping=mapping):
                     case = self.fresh_case()
                     (case.root / f"releases/{self.TAG}.json").unlink()
@@ -873,22 +913,36 @@ class CoreCarriedReleaseTests(unittest.TestCase):
                     self.assertNotEqual(0, result.returncode)
                     self.assertIn(message, result.stderr)
 
-    def test_the_catalog_and_the_mapping_join_this_tags_bundle_only(self):
+    def test_the_mapping_joins_this_tags_bundle_only_and_the_catalog_carried_bundles_only(self):
         # bundle_paths reads the schema/ and conformance/ children from this repository's commit.
         current = BUILD_RELEASE.bundle_paths(self.TAG, "HEAD")
         self.assertIn("catalog", current)
         self.assertIn(f"releases/{self.TAG}.json", current)
         self.assertIn(f"releases/{self.TAG}.md", current)
         for path in ("tools/retained_column.py", "requirements-dev.txt", "rfcs",
-                     "releases/v0.3.0.retained-column.json", "releases/v0.3.0.md"):
+                     "releases/v0.3.0.retained-column.json", "releases/v0.3.0.md",
+                     "releases/v0.5.0.normative.json"):
             with self.subTest(absent=path):
                 self.assertNotIn(path, current)
-        for tag in ("v0.3.0", "v0.3.0-rc.1", "v0.3.0-rc.2", "v0.3.1", "v0.5.0", "v0.2.0-draft",
+        # A patch tag also carries a released specVersion unchanged: the catalog and the record its
+        # bytes are held to join its bundle, and v0.4.0's mapping does not.
+        patch = BUILD_RELEASE.bundle_paths("v0.5.1", "HEAD")
+        notes = BUILD_RELEASE.core_release_notes_path("v0.5.1").relative_to(ROOT).as_posix()
+        for path in ("catalog", "releases/v0.5.0.normative.json", notes):
+            with self.subTest(patch=path):
+                self.assertIn(path, patch)
+        self.assertNotIn(f"releases/{self.TAG}.json", patch)
+        self.assertNotIn("releases/v0.5.1.json", patch)
+        for tag in ("v0.3.0", "v0.3.0-rc.1", "v0.3.0-rc.2", "v0.5.0", "v0.2.0-draft",
                     "policy-v1.0.0-draft.1"):
             with self.subTest(tag=tag):
                 paths = BUILD_RELEASE.bundle_paths(tag, "HEAD")
                 self.assertNotIn("catalog", paths)
                 self.assertNotIn(f"releases/{self.TAG}.json", paths)
+                self.assertNotIn("releases/v0.5.0.normative.json", paths)
+        # A patch tag of a specVersion with no record has no bundle.
+        with self.assertRaisesRegex(ValueError, "which has no recorded release"):
+            BUILD_RELEASE.bundle_paths("v0.3.1", "HEAD")
 
     def test_a_tree_whose_core_moved_is_refused(self):
         # The route carries 0.3.0: a re-pinned Core under this tag is not this release.
@@ -961,6 +1015,201 @@ class CoreCarriedReleaseTests(unittest.TestCase):
                      "same-vendor review, not a cross-vendor claim"):
             with self.subTest(text=text):
                 self.assertIn(text, notes)
+
+
+class CorePatchReleaseTests(unittest.TestCase):
+    """A patch tag carries its X.Y.0 release unchanged: real tags and the builder CLI.
+
+    The tree holds the normative files of specVersion 0.5.0 byte for byte, copied from this
+    repository and held to releases/v0.5.0.normative.json, and hand-authored files for the rest.
+    """
+
+    TAG = "v0.5.1"
+    RECORD = "releases/v0.5.0.normative.json"
+    IDENTITY = {"releaseVersion": "0.5.1", "tag": TAG, "specVersion": "0.5.0", "maturity": "draft",
+                "distribution": "specification-unchanged"}
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        record = json.loads((ROOT / self.RECORD).read_text(encoding="utf-8"))
+        for path, digest in record["files"].items():
+            data = (ROOT / path).read_bytes()
+            # The live tree carries 0.5.0 now. Once Core moves on, read preserved copies instead.
+            if "sha256:" + hashlib.sha256(data).hexdigest() != digest:
+                raise AssertionError(f"{path} is no longer the v0.5.0 bytes; use a preserved copy")
+            (self.root / path).parent.mkdir(parents=True, exist_ok=True)
+            (self.root / path).write_bytes(data)
+        for directory in ("tools", "examples", "catalog", "releases"):
+            (self.root / directory).mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / "tools/build_release.py", self.root / "tools/build_release.py")
+        shutil.copyfile(ROOT / self.RECORD, self.root / self.RECORD)
+        for name in ("README.md", "LICENSE", "NOTICE", "CHANGELOG.md", "VERSIONING.md",
+                     "TESTING.md", "SECURITY.md"):
+            (self.root / name).write_text("Hand-authored release fixture.\n")
+        (self.root / "examples/example.json").write_text('{"specVersion":"0.5.0"}\n')
+        (self.root / "catalog/record-shapes.json").write_text('{"format":"fixture"}\n')
+        (self.root / "releases/v0.5.0.md").write_text("# Hand-authored earlier notes\n")
+        (self.root / f"releases/{self.TAG}.md").write_text("# Hand-authored notes\n")
+        self.git("init", "--quiet")
+
+    git = CoreCarriedReleaseTests.git
+    commit = CoreCarriedReleaseTests.commit
+    run_builder = CoreCarriedReleaseTests.run_builder
+
+    def fresh_case(self):
+        case = CorePatchReleaseTests(methodName="runTest")
+        case.setUp()
+        self.addCleanup(case.doCleanups)
+        return case
+
+    def refused(self, case, tag=None):
+        tag = tag or self.TAG
+        if not (case.root / f"releases/{tag}.md").exists():
+            (case.root / f"releases/{tag}.md").write_text("# Hand-authored notes\n")
+        result = case.run_builder(case.commit(tag=tag), tag=tag)
+        self.assertNotEqual(0, result.returncode)
+        return result.stderr
+
+    def test_v0_5_1_builds_carrying_0_5_0_with_a_generated_identity(self):
+        commit = self.commit()
+        result = self.run_builder(commit)
+        self.assertEqual(0, result.returncode, result.stderr)
+        prefix = "judgment-pack-spec-0.5.1/"
+        expected = {**self.IDENTITY, "sourceCommit": commit}
+        tar = self.root / "dist/judgment-pack-spec_0.5.1_artifacts.tar.gz"
+        zip_path = tar.with_name("judgment-pack-spec_0.5.1_artifacts.zip")
+        with tarfile.open(tar) as archive:
+            names = {m.name for m in archive.getmembers() if m.isfile()}
+            self.assertEqual(expected, json.load(archive.extractfile(prefix + "release-identity.json")))
+            schema = json.load(archive.extractfile(prefix + "schema/judgment-pack-core.schema.json"))
+            self.assertEqual("https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json",
+                             schema["$id"])
+            core = archive.extractfile(prefix + "schema/judgment-pack-core.schema.json").read()
+        record = json.loads((ROOT / self.RECORD).read_text(encoding="utf-8"))
+        self.assertEqual(record["files"]["schema/judgment-pack-core.schema.json"],
+                         "sha256:" + hashlib.sha256(core).hexdigest())
+        for member in (f"releases/{self.TAG}.md", self.RECORD, "catalog/record-shapes.json"):
+            with self.subTest(member=member):
+                self.assertIn(prefix + member, names)
+        # Exactly this tag's notes and the record it is held to: no mapping, no earlier notes.
+        self.assertEqual({prefix + f"releases/{self.TAG}.md", prefix + self.RECORD},
+                         {name for name in names if name.startswith(prefix + "releases/")})
+        self.assertEqual([], [name for name in names if name.startswith(prefix + "tools/")])
+        with zipfile.ZipFile(zip_path) as archive:
+            self.assertEqual(names, {n for n in archive.namelist() if not n.endswith("/")})
+            self.assertEqual(expected, json.loads(archive.read(prefix + "release-identity.json")))
+        self.assertEqual([hashlib.sha256(p.read_bytes()).hexdigest() + "  " + p.name
+                          for p in (tar, zip_path)],
+                         (self.root / "dist/checksums.txt").read_text().splitlines())
+
+    def test_a_later_patch_tag_carries_the_same_spec_version(self):
+        (self.root / "releases/v0.5.2.md").write_text("# Hand-authored notes\n")
+        result = self.run_builder(self.commit(tag="v0.5.2"), tag="v0.5.2")
+        self.assertEqual(0, result.returncode, result.stderr)
+        with tarfile.open(self.root / "dist/judgment-pack-spec_0.5.2_artifacts.tar.gz") as archive:
+            identity = json.load(archive.extractfile("judgment-pack-spec-0.5.2/release-identity.json"))
+        self.assertEqual(("0.5.2", "v0.5.2", "0.5.0"),
+                         (identity["releaseVersion"], identity["tag"], identity["specVersion"]))
+
+    def test_changed_normative_bytes_are_refused(self):
+        # One file of each kind the record holds; a byte appended to a JSON file keeps it JSON.
+        for path in ("spec/judgment-pack-core.md", "schema/judgment-pack-core.schema.json",
+                     "schema/workflow-1.schema.json", "conformance/manifest.schema.json",
+                     "conformance/evaluation/manifest.schema.json",
+                     "conformance/valid/minimal-expense-approval.json",
+                     "conformance/advisory/rules-touching.json",
+                     "conformance/evaluation/packs/value-set-reference.json"):
+            with self.subTest(path=path):
+                case = self.fresh_case()
+                with (case.root / path).open("ab") as stream:
+                    stream.write(b"\n")
+                self.assertIn(f"v0.5.1 changes normative artifacts of specVersion 0.5.0: {path}",
+                              self.refused(case))
+        # A file the manifests name, removed, is a change too.
+        case = self.fresh_case()
+        (case.root / "conformance/carrier/malformed-json.json").unlink()
+        self.assertIn("changes normative artifacts of specVersion 0.5.0: "
+                      "conformance/carrier/malformed-json.json", self.refused(case))
+
+    def test_a_row_added_to_a_corpus_is_refused(self):
+        def add(case, path, row):
+            value = json.loads((case.root / path).read_text(encoding="utf-8"))
+            value["cases"].append(row)
+            (case.root / path).write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+
+        # A document case over a file already in the corpus changes only the manifest's bytes.
+        case = self.fresh_case()
+        add(case, "conformance/manifest.json",
+            {"id": "added", "path": "valid/minimal-expense-approval.json", "layer": "valid",
+             "expectedResult": "valid", "focus": "added", "specSection": "§1"})
+        self.assertIn("v0.5.1 changes normative artifacts of specVersion 0.5.0: "
+                      "conformance/manifest.json", self.refused(case))
+        # An evaluation row over a new pack also brings that pack into the derived inventory.
+        case = self.fresh_case()
+        add(case, "conformance/evaluation/manifest.json", {"id": "added", "pack": "packs/added.json"})
+        (case.root / "conformance/evaluation/packs/added.json").write_text("{}\n")
+        self.assertIn("v0.5.1's normative artifact inventory differs from v0.5.0's record",
+                      self.refused(case))
+
+    def test_a_new_schema_under_the_carried_spec_version_is_refused(self):
+        case = self.fresh_case()
+        (case.root / "schema/added.schema.json").write_text(json.dumps(
+            {"$id": "https://judgmentpack.org/schema/0.5.0/added.schema.json"}) + "\n")
+        self.assertIn("v0.5.1's normative artifact inventory differs from v0.5.0's record",
+                      self.refused(case))
+        # A schema under another version is no normative artifact of 0.5.0: the control.
+        case = self.fresh_case()
+        (case.root / "schema/added.schema.json").write_text(json.dumps(
+            {"$id": "https://judgmentpack.org/schema/0.6.0/added.schema.json"}) + "\n")
+        result = case.run_builder(case.commit())
+        self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_an_edited_or_missing_record_is_refused(self):
+        # Editing the record to match a changed file is caught by the record's pinned digest.
+        case = self.fresh_case()
+        path = "spec/judgment-pack-core.md"
+        with (case.root / path).open("ab") as stream:
+            stream.write(b"\n")
+        record = json.loads((case.root / self.RECORD).read_text(encoding="utf-8"))
+        record["files"][path] = "sha256:" + hashlib.sha256((case.root / path).read_bytes()).hexdigest()
+        (case.root / self.RECORD).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        self.assertIn(f"the normative record {self.RECORD} differs from the bytes the builder pins",
+                      self.refused(case))
+        case = self.fresh_case()
+        (case.root / self.RECORD).unlink()
+        self.assertIn(f"the normative record {self.RECORD} differs from the bytes the builder pins",
+                      self.refused(case))
+
+    def test_a_patch_tag_has_no_mapping(self):
+        case = self.fresh_case()
+        (case.root / f"releases/{self.TAG}.json").write_text(json.dumps(self.IDENTITY) + "\n")
+        self.assertIn("only the allowlisted Core distributions", self.refused(case))
+
+    def test_the_rule_does_not_reach_other_tags(self):
+        # v0.6.0 carries 0.6.0, not 0.5.0, and a prerelease suffix is never stripped.
+        for tag in ("v0.6.0", "v0.6.1", "v0.5.1-rc.1", "v0.5.1-alpha.1"):
+            with self.subTest(tag=tag):
+                self.assertIn("conformance specVersion", self.refused(self.fresh_case(), tag=tag))
+
+    def test_the_record_is_the_v0_5_0_bytes_the_builder_pins(self):
+        self.assertEqual({"0.5.0": (self.RECORD, hashlib.sha256((ROOT / self.RECORD).read_bytes()).hexdigest())},
+                         BUILD_RELEASE.NORMATIVE_RECORDS)
+        record = json.loads((ROOT / self.RECORD).read_text(encoding="utf-8"))
+        self.assertEqual({"tag", "sourceCommit", "specVersion", "files"}, set(record))
+        self.assertEqual(("v0.5.0", "0.5.0"), (record["tag"], record["specVersion"]))
+        self.assertRegex(record["sourceCommit"], r"^[0-9a-f]{40}$")
+        self.assertEqual(BUILD_RELEASE.normative_paths("0.5.0"), set(record["files"]))
+        # The record agrees with the four schema digests the v0.5.0 notes published.
+        notes = (ROOT / "releases/v0.5.0.md").read_text(encoding="utf-8")
+        for path in ("schema/judgment-pack-core.schema.json", "conformance/manifest.schema.json",
+                     "conformance/evaluation/manifest.schema.json", "schema/workflow-1.schema.json"):
+            with self.subTest(path=path):
+                self.assertIn(record["files"][path].removeprefix("sha256:"), notes)
+        # 369 conformance and 5 advisory cases, 41 evaluation packs, the two manifests, their two
+        # schemas, the Core and workflow schemas and the Core text.
+        self.assertEqual(374 + 41 + 2 + 2 + 2 + 1, len(record["files"]))
 
 
 if __name__ == "__main__":

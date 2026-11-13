@@ -64,15 +64,36 @@ CORE_FINAL_IDENTITY = {"releaseVersion": "0.3.0", "tag": CORE_FINAL_TAG, "specVe
 
 # A release that carries the released specVersion 0.3.0 unchanged. Core is not re-pinned, so its tag
 # is a distribution identity and not a pack selector (VERSIONING.md). The mapping is exact and this
-# tag alone may use it; no rule lets any other tag differ from the artifacts' specVersion.
+# tag alone may use it: it is the release numbering rule's recorded exception, since under that rule
+# the tag would have been v0.3.1.
 CORE_CARRIED_TAG = "v0.4.0"
+CORE_UNCHANGED_DISTRIBUTION = "specification-unchanged"
 CORE_CARRIED_IDENTITY = {"releaseVersion": "0.4.0", "tag": CORE_CARRIED_TAG, "specVersion": "0.3.0",
-                         "maturity": "draft", "distribution": "specification-unchanged"}
+                         "maturity": "draft", "distribution": CORE_UNCHANGED_DISTRIBUTION}
 CORE_MAPPED_IDENTITIES = {**CORE_RC_IDENTITIES, CORE_CARRIED_TAG: CORE_CARRIED_IDENTITY}
-# The record-shape catalog joins this tag's bundle only: earlier tags have no such directory, and
+# The record-shape catalog joins the bundles of the releases that carry a released specVersion
+# unchanged: this tag and every patch tag. Tags before v0.4.0 have no such directory, and
 # `git archive` refuses a path their tree lacks.
 CORE_CARRIED_BUNDLE_PATHS = ("catalog",)
 GENERATED_IDENTITIES = {**CORE_MAPPED_IDENTITIES, CORE_FINAL_TAG: CORE_FINAL_IDENTITY}
+
+# The release numbering rule (VERSIONING.md, "Release numbers and specVersion"): a plain tag vX.Y.Z
+# carries specVersion X.Y.0, and a patch tag (Z > 0) carries that released specVersion unchanged. A
+# prerelease suffix is never stripped: an unmapped prerelease tag carries its own complete version,
+# which no Core artifact names, so the pins refuse it.
+PLAIN_VERSION = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
+SCHEMA_NAMESPACE = "https://judgmentpack.org/schema/"
+# A patch release's normative artifacts are byte-identical to those of the X.Y.0 release. Each entry
+# names the record of that release's normative bytes and the SHA-256 of the record itself, so the
+# record cannot change without a reviewed change here. releases/v0.5.0.normative.json was derived
+# from the blobs of tag v0.5.0 (commit 171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae) with `git show`,
+# over the paths normative_paths() gives for that tree; it agrees with `git archive` of the tag and
+# with the four schema digests releases/v0.5.0.md publishes. A specVersion with no entry has no
+# patch release: 0.4.0 was never released, and the rule is normative from v0.5.0 on.
+NORMATIVE_RECORDS = {
+    "0.5.0": ("releases/v0.5.0.normative.json",
+              "86e175e8786eb6e08a215178ba7099edb074193c83c5ee2dc6a12012555b4aaa"),
+}
 FINAL_RETAINED_INVENTORY = "releases/v0.3.0.retained-column.json"
 RETAINED_INVENTORIES = {CORE_RC2_TAG: RETAINED_INVENTORY, CORE_FINAL_TAG: FINAL_RETAINED_INVENTORY}
 FINAL_REVISED_LEAF_FILES = frozenset({"spec/retained-column.md", "spec/judgment-pack-core.md",
@@ -283,6 +304,9 @@ def bundle_paths(tag: str, commit: str) -> tuple[str, ...]:
         paths.extend((f"releases/{tag}.json", "docs/releases/v0.3.0.md"))
     if tag == CORE_CARRIED_TAG:
         paths.extend((f"releases/{tag}.json", *CORE_CARRIED_BUNDLE_PATHS))
+    if is_patch_release(tag):
+        record, _ = normative_record(tag)
+        paths.extend((*CORE_CARRIED_BUNDLE_PATHS, record))
     if tag in RETAINED_INVENTORIES:
         paths.extend((*RETAINED_BUNDLE_PATHS, RETAINED_INVENTORIES[tag], f"releases/{tag}.milestone.json"))
     return (*paths, core_release_notes_path(tag).relative_to(ROOT).as_posix())
@@ -316,13 +340,94 @@ def release_version(tag: str) -> str:
     return tag[1:]
 
 
-def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
-    """Check exact format pins; only the reviewed mappings give a separate distribution identity.
+def carried_spec_version(version: str) -> str:
+    """The specVersion a Core release version carries under the release numbering rule.
 
-    The RC distributes proposed 0.3.0 artifacts, not a released conformance corpus.
-    No arbitrary prerelease suffix may be stripped to infer a compatible specVersion.
-    The v0.3.0 final carries RC2's selected leaf under its own inventory and no mapping.
-    v0.4.0 carries the released specVersion 0.3.0 unchanged, so its pins stay at 0.3.0.
+    A plain X.Y.Z carries X.Y.0. Any other version is returned whole: no prerelease suffix is
+    stripped to infer a compatible specVersion. A reviewed mapping overrides this (v0.4.0, the RCs).
+    """
+    plain = PLAIN_VERSION.fullmatch(version)
+    return f"{plain.group(1)}.{plain.group(2)}.0" if plain else version
+
+
+def is_patch_release(tag: str) -> bool:
+    """A plain Core tag vX.Y.Z with Z > 0 and no reviewed mapping: a later release of X.Y.0."""
+    if tag in CORE_MAPPED_IDENTITIES or not tag.startswith("v"):
+        return False
+    plain = PLAIN_VERSION.fullmatch(tag[1:])
+    return plain is not None and plain.group(3) != "0"
+
+
+def normative_record(tag: str) -> tuple[str, str]:
+    """The record of the normative bytes a patch tag carries, and the record's pinned SHA-256."""
+    spec_version = carried_spec_version(release_version(tag))
+    if spec_version not in NORMATIVE_RECORDS:
+        raise ValueError(f"{tag} would carry specVersion {spec_version}, which has no recorded "
+                         "release: a patch tag carries a released specVersion unchanged")
+    return NORMATIVE_RECORDS[spec_version]
+
+
+def normative_paths(spec_version: str, root: Path = ROOT) -> set[str]:
+    """The files a patch release carries unchanged, derived from the tree rather than listed.
+
+    The Core text and schema, both corpus manifests, every document case and evaluation pack they
+    name, and every schema in schema/ or conformance/ whose `$id` is under this specVersion (the
+    families the record-shape catalog counts as released with it). The errata, the READMEs and the
+    examples are not among them: an erratum or a clearer explanation may follow a release.
+    """
+    paths = {"spec/judgment-pack-core.md", "schema/judgment-pack-core.schema.json",
+             "conformance/manifest.json", "conformance/evaluation/manifest.json"}
+    document = json.loads((root / "conformance" / "manifest.json").read_text("utf-8"))
+    paths.update("conformance/" + case["path"] for case in document["cases"])
+    evaluation = json.loads((root / "conformance" / "evaluation" / "manifest.json").read_text("utf-8"))
+    paths.update("conformance/evaluation/" + case["pack"] for case in evaluation["cases"])
+    prefix = f"{SCHEMA_NAMESPACE}{spec_version}/"
+    for directory in ("schema", "conformance"):
+        for path in (root / directory).rglob("*.schema.json"):
+            schema = json.loads(path.read_text("utf-8"))
+            if isinstance(schema, dict) and str(schema.get("$id", "")).startswith(prefix):
+                paths.add(path.relative_to(root).as_posix())
+    return paths
+
+
+def validate_unchanged_normative_artifacts(tag: str, root: Path = ROOT) -> None:
+    """Hold a patch release's normative artifacts to the bytes its X.Y.0 release recorded."""
+    record_path, pinned = normative_record(tag)
+    spec_version = carried_spec_version(release_version(tag))
+    record = root / record_path
+    if not record.is_file() or sha256(record) != pinned:
+        raise ValueError(f"the normative record {record_path} differs from the bytes the builder pins")
+    files = json.loads(record.read_text("utf-8"))["files"]
+    if set(files) != normative_paths(spec_version, root):
+        raise ValueError(f"{tag}'s normative artifact inventory differs from v{spec_version}'s record")
+    changed = sorted(path for path, digest in files.items()
+                     if not (root / path).is_file() or digest != "sha256:" + sha256(root / path))
+    if changed:
+        raise ValueError(f"{tag} changes normative artifacts of specVersion {spec_version}: "
+                         + ", ".join(changed))
+
+
+def release_identity(tag: str, root: Path = ROOT) -> dict | None:
+    """The distribution identity a bundle carries as release-identity.json, if it has one."""
+    if tag in GENERATED_IDENTITIES:
+        return dict(GENERATED_IDENTITIES[tag])
+    if is_patch_release(tag):
+        version = release_version(tag)
+        manifest = json.loads((root / "conformance" / "manifest.json").read_text("utf-8"))
+        return {"releaseVersion": version, "tag": tag, "specVersion": carried_spec_version(version),
+                "maturity": manifest["status"], "distribution": CORE_UNCHANGED_DISTRIBUTION}
+    return None
+
+
+def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
+    """Check exact format pins against the specVersion the tag carries.
+
+    A plain tag vX.Y.Z carries X.Y.0, and a patch tag must carry that release's normative bytes
+    unchanged. Only the reviewed mappings give another distribution identity: the RCs distribute
+    proposed 0.3.0 artifacts, not a released conformance corpus, and v0.4.0 carries the released
+    specVersion 0.3.0 unchanged, so its pins stay at 0.3.0. No arbitrary prerelease suffix may be
+    stripped to infer a compatible specVersion. The v0.3.0 final carries RC2's selected leaf under
+    its own inventory and no mapping.
     """
     if version != release_version(tag):
         raise ValueError("release version does not match the exact tag")
@@ -335,6 +440,8 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
         if json.loads(mapping.read_text("utf-8")) != CORE_MAPPED_IDENTITIES[tag]:
             raise ValueError("Core release mapping does not match the reviewed identity")
         version = CORE_MAPPED_IDENTITIES[tag]["specVersion"]
+    else:
+        version = carried_spec_version(version)
     manifest = json.loads((root / "conformance" / "manifest.json").read_text("utf-8"))
     evaluation = json.loads(
         (root / "conformance" / "evaluation" / "manifest.json").read_text("utf-8")
@@ -360,6 +467,8 @@ def validate_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     )
     if schema.get("$id") != expected_schema_id:
         raise ValueError("schema $id does not point at the exact release version")
+    if is_patch_release(tag):
+        validate_unchanged_normative_artifacts(tag, root)
     if tag in RETAINED_INVENTORIES:
         if tag == CORE_FINAL_TAG:
             validate_final_retained_inventory(root)
@@ -422,9 +531,10 @@ def build(tag: str, commit: str, output: Path) -> list[Path]:
     artifact = "judgment-pack-policy" if is_policy_tag(tag) else "judgment-pack-spec"
     prefix = f"{artifact}-{version}/"
     extra = ()
-    if tag in GENERATED_IDENTITIES:
+    identity = release_identity(tag)
+    if identity is not None:
         # This generated member is covered by both archive checksums/attestations.
-        identity = {**GENERATED_IDENTITIES[tag], "sourceCommit": git("rev-parse", "--verify", f"{commit}^{{commit}}")}
+        identity = {**identity, "sourceCommit": git("rev-parse", "--verify", f"{commit}^{{commit}}")}
         encoded = json.dumps(identity, sort_keys=True, separators=(",", ":")) + "\n"
         extra = (f"--add-virtual-file={prefix}release-identity.json:{encoded}",)
     common = (
