@@ -51,8 +51,10 @@ import sys
 import datetime
 import binascii
 import functools
+import math
 from dataclasses import dataclass, field
 from decimal import Decimal
+from fractions import Fraction
 from pathlib import Path
 from typing import Any, NoReturn
 
@@ -279,6 +281,19 @@ BINDING_KIND = "judgment-pack-runner/preparation/1"
 # §2: the dialect versions this document defines; this reader reads each (§11, `version-unread`).
 DEFINED_VERSIONS = (2, 3)
 READ_VERSIONS = (2, 3)
+# §2.1, §2.2: the named formats this document defines, and those this reader reads (§11, `version-unread`).
+DEFINED_FORMATS = ("2.0.0", "3.0.0", "4.0.0")
+READ_FORMATS = ("2.0.0", "3.0.0", "4.0.0")
+# §2.2 (proposed): format 4.0.0, its rule version, its parameter types and its bounds.
+FORMAT_4 = "4.0.0"
+RULE_2 = "2.0.0"
+TYPES_4 = TYPES + ("decimal", "string-list", "address-range-list")
+LIST_TYPES = ("string-list", "address-range-list")
+RELATIONS = ("less-than", "less-than-or-equal", "greater-than", "greater-than-or-equal")
+MAX_DERIVED = 16
+MAX_LITERAL_BYTES = 8192
+MAX_LIST_ELEMENTS = 1024
+MAX_LIST_ELEMENT_BYTES = 1024
 # §4.3: the kinds version 3 adds but `research`, each defined and not read here; and the members each
 # names beside §4's, `profile`, `profileDigest` and `maxAge`: those it requires, and those it may give.
 VERSION_3_KINDS = {
@@ -352,7 +367,28 @@ def of_type(value: Any, kind: str) -> bool:
         return isinstance(value, str)
     if kind == "integer":
         return is_integer(value)
+    # §2.2.2: the three types format 4.0.0 adds
+    if kind == "decimal":
+        return is_decimal_string(value)
+    if kind == "string-list":
+        return isinstance(value, list) and all(isinstance(item, str) for item in value)
+    if kind == "address-range-list":
+        return isinstance(value, list) and all(address_range_of(item) is not None for item in value)
     return instant(value) is not None
+
+
+def is_decimal_string(value: Any) -> bool:
+    """Core §2.2's decimal grammar, at most 128 characters (§2.2.2)."""
+    return isinstance(value, str) and len(value) <= 128 and DECIMAL.fullmatch(value) is not None
+
+
+def list_bounds(value: Any, what: str) -> None:
+    """§2.2.7: a list parameter's value, measured when the parameter takes it."""
+    if isinstance(value, list):
+        if len(value) > MAX_LIST_ELEMENTS:
+            raise Refused("input-over-bound", f"{what}: a list of more than 1024 elements")
+        if any(isinstance(item, str) and len(item.encode("utf-8")) > MAX_LIST_ELEMENT_BYTES for item in value):
+            raise Refused("input-over-bound", f"{what}: a list element of more than 1024 bytes")
 
 
 def json_equal(left: Any, right: Any) -> bool:
@@ -731,6 +767,9 @@ class Read:
     sources: list[str] | None = None
     # fact target -> its conversion, reconciliation and quality declaration (§6.2a)
     quality: dict[str, dict[str, Any]] = field(default_factory=dict)
+    # §2.2.4: the rule's version, and each derived value it declares by name, with its built-in
+    rule_version: str = "1"
+    builtins: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -779,6 +818,10 @@ class Dialect:
     # of a bound dialect, each source bound by the binding document: the unbound source's `shape` and
     # `record`, which the profile it is bound to must serve (§4.4, §5.1)
     bound_from: dict[str, tuple[str, str]] = field(default_factory=dict)
+    # §2.2: the named format, when the document names one; and in format 4.0.0 the case's rule, a read
+    # whose digest is the case's read's (§2.2.1)
+    format: str | None = None
+    case_rule: Read | None = None
 
 
 def check_template(value: Any, scope: dict[str, str], what: str) -> None:
@@ -1023,7 +1066,7 @@ def check_quality_fact(entry: dict[str, Any], what: str) -> dict[str, Any] | Non
     return entry
 
 
-def check_read(value: Any, scope: dict[str, str], what: str) -> Read:
+def check_read(value: Any, scope: dict[str, str], what: str, format4: bool = False) -> Read:
     read = closed(value, set(), {"unwrap", "copy", "rule"}, what)
     if ("copy" in read) == ("rule" in read):
         raise malformed(f"{what}: a read has exactly one of copy and rule")
@@ -1079,60 +1122,252 @@ def check_read(value: Any, scope: dict[str, str], what: str) -> Read:
             result.candidates.setdefault(("evidence", requirement), []).append(entry["source"])
         result.copy = {"facts": facts, "evidence": evidence}
     else:
-        rule = closed(read["rule"], {"ruleVersion", "parameters", "clauses"}, set(), what + " rule")
-        if rule["ruleVersion"] != "1":
-            raise malformed(f"{what}: ruleVersion is not \"1\"")
-        declared = rule["parameters"]
-        if not isinstance(declared, dict):
-            raise malformed(f"{what}: rule parameters are not an object")
-        for name, kind in declared.items():
-            if kind not in TYPES:
-                raise malformed(f"{what}: a rule parameter of another type")
-            if scope.get(name) != kind:
-                raise malformed(f"{what}: a rule parameter not in scope with its type")
-        clauses = rule["clauses"]
-        if not isinstance(clauses, list) or not clauses:
-            raise malformed(f"{what}: clauses are not a non-empty array")
-        if len(clauses) > MAX_CLAUSES:
-            raise Refused("input-over-bound", f"{what}: more than 64 clauses")
-        fact_seen: list[str] = []
-        evidence_seen: list[str] = []
-        for clause in clauses:
-            closed(clause, {"when", "claim", "reason"}, set(), what + " clause")
-            check_condition(clause["when"], declared, what)
-            if not isinstance(clause["reason"], str):
-                raise malformed(f"{what}: a reason that is not a string")
-            claim = closed(
-                clause["claim"], {"facts", "evidence", "acquisitionStatus"}, set(), what + " claim"
-            )
-            if not isinstance(claim["facts"], list):
-                raise malformed(f"{what}: claim facts are not an array")
-            for entry in claim["facts"]:
-                closed(entry, {"pointer", "from"}, set(), what + " claim fact")
-                target = fact_target(entry["pointer"], what)
-                if not is_pointer(entry["from"]):
-                    raise malformed(f"{what}: a from that is not a pointer")
-                if target not in fact_seen:
-                    fact_seen.append(target)
-                candidates = result.candidates.setdefault(("fact", target), [])
-                candidates.append(entry["from"])
-            if not isinstance(claim["evidence"], dict):
-                raise malformed(f"{what}: claim evidence is not an object")
-            for requirement, availability in claim["evidence"].items():
-                if not requirement or availability not in AVAILABILITY:
-                    raise malformed(f"{what}: claim evidence of another form")
-                if requirement not in evidence_seen:
-                    evidence_seen.append(requirement)
-            if claim["acquisitionStatus"] not in STATUSES:
-                raise malformed(f"{what}: an acquisitionStatus of another value")
-        if clauses[-1]["when"] != {"op": "always"}:
-            raise malformed(f"{what}: the last clause's when is not always")
-        result.fact_targets = fact_seen
-        result.evidence_targets = evidence_seen
-        result.rule = rule
+        check_rule(read["rule"], scope, what, result, format4)
     if not in_canon_domain(read):
         raise malformed(f"{what}: a read outside the canon domain")
     return result
+
+
+def check_rule(raw: Any, scope: dict[str, str], what: str, result: Read, format4: bool,
+               only_2: bool = False) -> None:
+    """§6.3's rule, version 1; and in format 4.0.0 also version 2.0.0 (§2.2.4), the only version the
+    case's rule takes (`only_2`)."""
+    if format4 and isinstance(raw, dict) and raw.get("ruleVersion") == RULE_2:
+        check_rule_2(raw, scope, what, result)
+        return
+    if only_2:
+        raise malformed(f"{what}: the case's rule is not of ruleVersion \"2.0.0\"")
+    rule = closed(raw, {"ruleVersion", "parameters", "clauses"}, set(), what + " rule")
+    if rule["ruleVersion"] != "1":
+        raise malformed(f"{what}: ruleVersion is not \"1\"")
+    declared = rule["parameters"]
+    if not isinstance(declared, dict):
+        raise malformed(f"{what}: rule parameters are not an object")
+    for name, kind in declared.items():
+        if kind not in TYPES:
+            raise malformed(f"{what}: a rule parameter of another type")
+        if scope.get(name) != kind:
+            raise malformed(f"{what}: a rule parameter not in scope with its type")
+    clauses = rule["clauses"]
+    if not isinstance(clauses, list) or not clauses:
+        raise malformed(f"{what}: clauses are not a non-empty array")
+    if len(clauses) > MAX_CLAUSES:
+        raise Refused("input-over-bound", f"{what}: more than 64 clauses")
+    fact_seen: list[str] = []
+    evidence_seen: list[str] = []
+    for clause in clauses:
+        closed(clause, {"when", "claim", "reason"}, set(), what + " clause")
+        check_condition(clause["when"], declared, what)
+        if not isinstance(clause["reason"], str):
+            raise malformed(f"{what}: a reason that is not a string")
+        claim = closed(
+            clause["claim"], {"facts", "evidence", "acquisitionStatus"}, set(), what + " claim"
+        )
+        if not isinstance(claim["facts"], list):
+            raise malformed(f"{what}: claim facts are not an array")
+        for entry in claim["facts"]:
+            closed(entry, {"pointer", "from"}, set(), what + " claim fact")
+            target = fact_target(entry["pointer"], what)
+            if not is_pointer(entry["from"]):
+                raise malformed(f"{what}: a from that is not a pointer")
+            if target not in fact_seen:
+                fact_seen.append(target)
+            candidates = result.candidates.setdefault(("fact", target), [])
+            candidates.append(entry["from"])
+        if not isinstance(claim["evidence"], dict):
+            raise malformed(f"{what}: claim evidence is not an object")
+        for requirement, availability in claim["evidence"].items():
+            if not requirement or availability not in AVAILABILITY:
+                raise malformed(f"{what}: claim evidence of another form")
+            if requirement not in evidence_seen:
+                evidence_seen.append(requirement)
+        if claim["acquisitionStatus"] not in STATUSES:
+            raise malformed(f"{what}: an acquisitionStatus of another value")
+    if clauses[-1]["when"] != {"op": "always"}:
+        raise malformed(f"{what}: the last clause's when is not always")
+    result.fact_targets = fact_seen
+    result.evidence_targets = evidence_seen
+    result.rule = rule
+
+
+# §2.2.4: rule version 2.0.0's leaves, each with the members beside its operand, and the leaves whose
+# operand may be a derived value
+LEAVES_2 = {
+    "exists": set(),
+    "equals": {"to"},
+    "equalsParam": {"param"},
+    "isTrue": set(),
+    "isDecimalString": set(),
+    "freshWithin": {"asOf", "maxAge"},
+    "aheadWithin": {"asOf", "maxAhead"},
+    "compareParam": {"relation", "param"},
+    "inParam": {"param"},
+}
+DERIVED_OPERAND = ("exists", "equals", "equalsParam", "compareParam")
+# the types each parameter-naming member requires; None admits every declared type
+PARAMETER_TYPES_2: dict[tuple[str, str], tuple[str, ...] | None] = {
+    ("equalsParam", "param"): None,
+    ("freshWithin", "asOf"): ("timestamp",),
+    ("freshWithin", "maxAge"): ("integer",),
+    ("aheadWithin", "asOf"): ("timestamp",),
+    ("aheadWithin", "maxAhead"): ("integer",),
+    ("compareParam", "param"): ("integer", "decimal"),
+    ("inParam", "param"): LIST_TYPES,
+}
+
+
+def check_condition_2(condition: Any, declared: dict[str, str], derived: dict[str, str], what: str) -> None:
+    """§2.2.4: a condition of rule version 2.0.0. Unlike version 1's `freshWithin`, a parameter of another
+    type than its condition requires is refused here, never read as false."""
+    if not isinstance(condition, dict) or not isinstance(condition.get("op"), str):
+        raise malformed(f"{what}: a condition is not an object with an op that is a string")
+    op = condition["op"]
+    if op == "always":
+        closed(condition, {"op"}, set(), what)
+        return
+    if op in ("all", "any"):
+        closed(condition, {"op", "of"}, set(), what)
+        if not isinstance(condition["of"], list):
+            raise malformed(f"{what}: `of` is not a list")
+        if len(condition["of"]) > MAX_LISTED:
+            raise Refused("input-over-bound", f"{what}: more than 64 conditions listed")
+        for item in condition["of"]:
+            check_condition_2(item, declared, derived, what)
+        return
+    if op == "not":
+        closed(condition, {"op", "of"}, set(), what)
+        check_condition_2(condition["of"], declared, derived, what)
+        return
+    if op not in LEAVES_2:
+        raise malformed(f"{what}: an unknown op")
+    closed(condition, {"op"} | LEAVES_2[op], {"field", "derived"} if op in DERIVED_OPERAND else {"field"}, what)
+    if ("field" in condition) == ("derived" in condition):
+        raise malformed(f"{what}: a leaf names exactly one of field and derived")
+    if "field" in condition and not is_pointer(condition["field"]):
+        raise malformed(f"{what}: a field that is not a pointer")
+    if "derived" in condition and not (isinstance(condition["derived"], str) and condition["derived"] in derived):
+        raise malformed(f"{what}: a derived value the rule does not declare")
+    if op == "equals" and not in_canon_domain(condition["to"]):
+        raise malformed(f"{what}: a literal outside the canon domain")
+    if op == "compareParam" and condition["relation"] not in RELATIONS:
+        raise malformed(f"{what}: a relation other than the four")
+    for member in LEAVES_2[op] - {"to", "relation"}:
+        name = condition[member]
+        if not isinstance(name, str) or name not in declared:
+            raise malformed(f"{what}: {member} names no parameter the rule declares")
+        admitted = PARAMETER_TYPES_2[(op, member)]
+        if admitted is not None and declared[name] not in admitted:
+            raise malformed(f"{what}: {member} names a parameter of a type {op} does not take")
+
+
+def check_operand(value: Any, declared: dict[str, str], kind: str, what: str) -> None:
+    """§2.2.5: exactly `{"field": P}` or `{"param": N}`, N declared of the type the built-in takes."""
+    operand = closed(value, set(), {"field", "param"}, what)
+    if len(operand) != 1:
+        raise malformed(f"{what}: an operand names exactly one of field and param")
+    if "field" in operand:
+        if not is_pointer(operand["field"]):
+            raise malformed(f"{what}: an operand field that is not a pointer")
+    elif not isinstance(operand["param"], str) or declared.get(operand["param"]) != kind:
+        raise malformed(f"{what}: an operand param that names no declared parameter of type {kind}")
+
+
+def check_derived(value: Any, declared: dict[str, str], what: str) -> dict[str, str]:
+    """§2.2.5: one to 16 derived values, each name new, each speed naming an earlier distance and duration."""
+    if not isinstance(value, list) or not value:
+        raise malformed(f"{what}: derived is not an array of one to 16 derived values")
+    if len(value) > MAX_DERIVED:
+        raise Refused("input-over-bound", f"{what}: more than 16 derived values")
+    names: dict[str, str] = {}
+    for index, entry in enumerate(value):
+        here = f"{what} derived {index}"
+        builtin = entry.get("builtin") if isinstance(entry, dict) else None
+        if builtin == "duration":
+            closed(entry, {"name", "builtin", "from", "to"}, set(), here)
+            for end in ("from", "to"):
+                check_operand(entry[end], declared, "timestamp", f"{here} {end}")
+        elif builtin == "distance":
+            closed(entry, {"name", "builtin", "from", "to"}, set(), here)
+            for end in ("from", "to"):
+                point = closed(entry[end], {"latitude", "longitude"}, set(), f"{here} {end}")
+                for member in ("latitude", "longitude"):
+                    check_operand(point[member], declared, "decimal", f"{here} {end} {member}")
+        elif builtin == "speed":
+            closed(entry, {"name", "builtin", "distance", "duration"}, set(), here)
+            if not all(isinstance(entry[m], str) and names.get(entry[m]) == m for m in ("distance", "duration")):
+                raise malformed(f"{here}: a speed names no earlier distance and duration")
+        else:
+            raise malformed(f"{here}: an unknown built-in")
+        name = entry["name"]
+        if not isinstance(name, str) or not name or name in names:
+            raise malformed(f"{here}: a name that is empty or given twice")
+        names[name] = builtin
+    return names
+
+
+def check_rule_2(raw: Any, scope: dict[str, str], what: str, result: Read) -> None:
+    """§2.2.4: rule version 2.0.0."""
+    rule = closed(raw, {"ruleVersion", "parameters", "clauses"}, {"derived"}, what + " rule")
+    declared = rule["parameters"]
+    if not isinstance(declared, dict):
+        raise malformed(f"{what}: rule parameters are not an object")
+    for name, kind in declared.items():
+        if kind not in TYPES_4:
+            raise malformed(f"{what}: a rule parameter of another type")
+        if scope.get(name) != kind:
+            raise malformed(f"{what}: a rule parameter not in scope with its type")
+    derived = check_derived(rule["derived"], declared, what) if "derived" in rule else {}
+    clauses = rule["clauses"]
+    if not isinstance(clauses, list) or not clauses:
+        raise malformed(f"{what}: clauses are not a non-empty array")
+    if len(clauses) > MAX_CLAUSES:
+        raise Refused("input-over-bound", f"{what}: more than 64 clauses")
+    fact_seen: list[str] = []
+    evidence_seen: list[str] = []
+    for clause in clauses:
+        closed(clause, {"when", "claim", "reason"}, set(), what + " clause")
+        check_condition_2(clause["when"], declared, derived, what)
+        if not isinstance(clause["reason"], str):
+            raise malformed(f"{what}: a reason that is not a string")
+        claim = closed(clause["claim"], {"facts", "evidence", "acquisitionStatus"}, set(), what + " claim")
+        if not isinstance(claim["facts"], list):
+            raise malformed(f"{what}: claim facts are not an array")
+        for entry in claim["facts"]:
+            closed(entry, {"pointer"}, {"from", "value", "derived"}, what + " claim fact")
+            if len(entry) != 2:
+                raise malformed(f"{what}: a claim fact names exactly one of from, value and derived")
+            target = fact_target(entry["pointer"], what)
+            if "from" in entry:
+                if not is_pointer(entry["from"]):
+                    raise malformed(f"{what}: a from that is not a pointer")
+                result.candidates.setdefault(("fact", target), []).append(entry["from"])
+            elif "value" in entry:
+                literal = entry["value"]
+                if isinstance(literal, str):
+                    if len(literal.encode("utf-8")) > MAX_LITERAL_BYTES:
+                        raise Refused("input-over-bound", f"{what}: a literal of more than 8192 bytes")
+                elif not (isinstance(literal, bool) or is_integer(literal)):
+                    raise malformed(f"{what}: a literal that is not a string, a boolean or an integer")
+            elif not (isinstance(entry["derived"], str) and entry["derived"] in derived):
+                raise malformed(f"{what}: a claim fact names a derived value the rule does not declare")
+            if target not in fact_seen:
+                fact_seen.append(target)
+        if not isinstance(claim["evidence"], dict):
+            raise malformed(f"{what}: claim evidence is not an object")
+        for requirement, availability in claim["evidence"].items():
+            if not requirement or availability not in AVAILABILITY:
+                raise malformed(f"{what}: claim evidence of another form")
+            if requirement not in evidence_seen:
+                evidence_seen.append(requirement)
+        if claim["acquisitionStatus"] not in STATUSES:
+            raise malformed(f"{what}: an acquisitionStatus of another value")
+    if clauses[-1]["when"] != {"op": "always"}:
+        raise malformed(f"{what}: the last clause's when is not always")
+    result.fact_targets = fact_seen
+    result.evidence_targets = evidence_seen
+    result.rule = rule
+    result.rule_version = RULE_2
+    result.builtins = derived
 
 
 def not_written_empty(value: Any, members: tuple[str, ...], what: str) -> None:
@@ -1193,7 +1428,7 @@ def parse_dialect(document: Any) -> Dialect:
                  {"profile", "sources", "admits", "unmapped", "unmappedEvidence", "provider", "facts", "evidence"},
                  "the dialect")
     if named:
-        if top["formatVersion"] not in ("2.0.0", "3.0.0"):
+        if top["formatVersion"] not in DEFINED_FORMATS:
             raise malformed("an unknown dialect formatVersion")
         identity = top["id"]
         if not isinstance(identity, str) or not identity or len(identity.encode("utf-8")) > 1024 or any(ord(c) <= 32 or ord(c) == 127 for c in identity):
@@ -1229,7 +1464,10 @@ def parse_dialect(document: Any) -> Dialect:
             if len(set(items)) != len(items):
                 raise malformed(f"{name} names one twice")
 
-    case = closed(top["case"], {"facts", "evidence"}, {"parameters"}, "case")
+    # §2.2: format 4.0.0 is format 3.0.0's family, with a rule on the case and rule version 2.0.0.
+    format4 = named and top["formatVersion"] == FORMAT_4
+    types = TYPES_4 if format4 else TYPES
+    case = closed(top["case"], {"facts", "evidence"}, {"parameters", "rule"} if format4 else {"parameters"}, "case")
     case_parameters: dict[str, Parameter] = {}
     declared = case.get("parameters", {})
     if not isinstance(declared, dict):
@@ -1237,7 +1475,7 @@ def parse_dialect(document: Any) -> Dialect:
     for name, declaration in declared.items():
         check_parameter_name(name, "case")
         closed(declaration, {"pointer", "type"}, set(), f"case parameter {name}")
-        if not is_pointer(declaration["pointer"]) or declaration["type"] not in TYPES:
+        if not is_pointer(declaration["pointer"]) or declaration["type"] not in types:
             raise malformed(f"case parameter {name} is not of its form")
         case_parameters[name] = Parameter(name, declaration["type"], declaration["pointer"], "case")
     if len(case_parameters) + 1 > MAX_SCOPE:
@@ -1247,6 +1485,14 @@ def parse_dialect(document: Any) -> Dialect:
     case_read = check_read(
         {"copy": {"facts": case["facts"], "evidence": case["evidence"]}}, case_scope, "the case's read"
     )
+    case_rule: Read | None = None
+    if "rule" in case:
+        # §2.2.1: the case's read is then the copy and the rule, under one read digest.
+        case_read.as_written = {"copy": case_read.as_written["copy"], "rule": case["rule"]}
+        case_rule = Read([], None, None, case_read.as_written)
+        check_rule(case["rule"], case_scope, "the case's rule", case_rule, True, only_2=True)
+        if not in_canon_domain(case_read.as_written):
+            raise malformed("the case's rule is outside the canon domain")
 
     sources: list[Source] = []
     raw_sources = top.get("sources", [])
@@ -1351,7 +1597,7 @@ def parse_dialect(document: Any) -> Dialect:
             origin = declaration["from"]
             if not any(s.name == origin for s in sources):
                 raise malformed(f"{what}: a source parameter from no earlier source")
-            if not is_pointer(declaration["pointer"]) or declaration["type"] not in TYPES:
+            if not is_pointer(declaration["pointer"]) or declaration["type"] not in types:
                 raise malformed(f"{what}: a source parameter not of its form")
             parameters[pname] = Parameter(pname, declaration["type"], declaration["pointer"], origin)
         scope = dict(case_scope)
@@ -1399,7 +1645,7 @@ def parse_dialect(document: Any) -> Dialect:
         if source.research is not None:
             source.read = check_research_read(raw["read"], scope, what + " read", source, sources)
         else:
-            source.read = check_read(raw["read"], scope, what + " read")
+            source.read = check_read(raw["read"], scope, what + " read", format4)
         sources.append(source)
     # A source parameter's pointer is a fact target of the source it comes from (§3).
     for source in sources:
@@ -1411,7 +1657,8 @@ def parse_dialect(document: Any) -> Dialect:
     # §8.1: targets never overlap; a requirement has one source; bounds.
     every_fact: list[list[str]] = []
     evidence_sources: dict[str, str] = {}
-    for owner, read in [("case", case_read)] + [(s.name, s.read) for s in sources]:
+    case_reads = [("case", case_read)] + ([("case", case_rule)] if case_rule is not None else [])
+    for owner, read in case_reads + [(s.name, s.read) for s in sources]:
         for target in read.fact_targets:
             tokens = pointer_tokens(target)
             assert tokens is not None
@@ -1431,7 +1678,7 @@ def parse_dialect(document: Any) -> Dialect:
         raw_admits = closed(top["admits"], set(), {"facts", "evidence"}, "admits")
         if version == 3 or named:
             not_written_empty(raw_admits, ("facts", "evidence"), "admits")
-        written_facts = {t for r in [case_read] + [s.read for s in sources] for t in r.fact_targets}
+        written_facts = {t for _, r in case_reads for t in r.fact_targets} | {t for s in sources for t in s.read.fact_targets}
         for member, kind, written in (("facts", "fact", written_facts), ("evidence", "evidence", set(evidence_sources))):
             entries = raw_admits.get(member, {})
             if not isinstance(entries, dict):
@@ -1445,7 +1692,9 @@ def parse_dialect(document: Any) -> Dialect:
 
     # A kind this reader does not read is refused by the caller once every form is checked, the binding
     # document's among them (§11, the fifth and sixth phases).
-    return Dialect(top, case_parameters, case_read, sources, admits, version, unread, unbound, unbound_research=unbound_research)
+    return Dialect(top, case_parameters, case_read, sources, admits, version, unread, unbound,
+                   unbound_research=unbound_research, format=top["formatVersion"] if named else None,
+                   case_rule=case_rule)
 
 
 def check_version_3_kind(raw: dict[str, Any], kind: str, scope: dict[str, str], what: str) -> None:
@@ -2206,6 +2455,34 @@ def count_bounds(dialect: Any, acquisitions: Any, profiles: Any = None, binding:
         elif condition.get("op") == "not":
             listed(condition.get("of"))
 
+    # §2.2.7: in format 4.0.0, a rule's derived values and its literals are counted too, and the case's
+    # rule with every source's, by a reader of the format; one that does not read it counts as for 3.0.0
+    # and then refuses the document in phase 4.
+    format4 = dialect.get("formatVersion") == FORMAT_4 and FORMAT_4 in READ_FORMATS
+
+    def rule_counts(rule: Any) -> None:
+        clauses = rule.get("clauses") if isinstance(rule, dict) else None
+        if format4 and isinstance(rule, dict) and isinstance(rule.get("derived"), list):
+            if len(rule["derived"]) > MAX_DERIVED:
+                raise over("more than 16 derived values")
+        if isinstance(clauses, list):
+            if len(clauses) > MAX_CLAUSES:
+                raise over("more than 64 clauses")
+            for clause in clauses:
+                if not isinstance(clause, dict):
+                    continue
+                listed(clause.get("when"))
+                claim = clause.get("claim")
+                if isinstance(claim, dict):
+                    for entry in entries(claim.get("facts")):
+                        if isinstance(entry, dict) and isinstance(entry.get("pointer"), str):
+                            facts.add(entry["pointer"])
+                        literal = entry.get("value") if format4 and isinstance(entry, dict) else None
+                        if isinstance(literal, str) and utf8_length(literal) > MAX_LITERAL_BYTES:
+                            raise over("a literal of more than 8192 bytes")
+                    if isinstance(claim.get("evidence"), dict):
+                        evidence.update(claim["evidence"])
+
     case = dialect.get("case")
     case_parameters = case.get("parameters") if isinstance(case, dict) else None
     in_case = len(case_parameters) if isinstance(case_parameters, dict) else 0
@@ -2213,6 +2490,8 @@ def count_bounds(dialect: Any, acquisitions: Any, profiles: Any = None, binding:
         raise over("more than 64 parameters in the case's scope")
     if isinstance(case, dict):
         copy_targets({"facts": case.get("facts"), "evidence": case.get("evidence")})
+        if format4:
+            rule_counts(case.get("rule"))
     sources = dialect.get("sources")
     if isinstance(sources, list):
         if len(sources) > MAX_SOURCES:
@@ -2229,22 +2508,7 @@ def count_bounds(dialect: Any, acquisitions: Any, profiles: Any = None, binding:
             if isinstance(read.get("unwrap"), list) and len(read["unwrap"]) > MAX_UNWRAP:
                 raise over("more than four unwrap pointers")
             copy_targets(read.get("copy"))
-            rule = read.get("rule")
-            clauses = rule.get("clauses") if isinstance(rule, dict) else None
-            if isinstance(clauses, list):
-                if len(clauses) > MAX_CLAUSES:
-                    raise over("more than 64 clauses")
-                for clause in clauses:
-                    if not isinstance(clause, dict):
-                        continue
-                    listed(clause.get("when"))
-                    claim = clause.get("claim")
-                    if isinstance(claim, dict):
-                        for entry in entries(claim.get("facts")):
-                            if isinstance(entry, dict) and isinstance(entry.get("pointer"), str):
-                                facts.add(entry["pointer"])
-                        if isinstance(claim.get("evidence"), dict):
-                            evidence.update(claim["evidence"])
+            rule_counts(read.get("rule"))
     if len(facts) > MAX_FACT_TARGETS or len(evidence) > MAX_EVIDENCE_TARGETS:
         raise over("more fact or evidence targets than the bounds")
 
@@ -2737,6 +3001,354 @@ def rule_claim(rule: dict[str, Any], value: Any, scope_values: dict[str, Any]) -
 
 
 # ---------------------------------------------------------------------------------------------
+# Format 4.0.0 (§2.2, proposed): addresses, the built-in derived values, and rule version 2.0.0
+
+OCTET = re.compile(r"0|[1-9][0-9]{0,2}")
+HEXTET = re.compile(r"[0-9A-Fa-f]{1,4}")
+PREFIX_LENGTH = re.compile(r"0|[1-9][0-9]{0,2}")
+
+
+def ipv4_value(text: str) -> int | None:
+    """§2.2.3: four decimal octets, none with a leading zero, each at most 255."""
+    parts = text.split(".")
+    if len(parts) != 4:
+        return None
+    value = 0
+    for part in parts:
+        if OCTET.fullmatch(part) is None or int(part) > 255:
+            return None
+        value = value << 8 | int(part)
+    return value
+
+
+def _hextets(text: str, last: bool) -> list[int] | None:
+    if text == "":
+        return []
+    items = text.split(":")
+    groups: list[int] = []
+    for index, item in enumerate(items):
+        if last and index == len(items) - 1 and "." in item:
+            low = ipv4_value(item)
+            if low is None:
+                return None
+            groups += [low >> 16, low & 0xFFFF]
+        elif HEXTET.fullmatch(item) is None:
+            return None
+        else:
+            groups.append(int(item, 16))
+    return groups
+
+
+def ipv6_value(text: str) -> int | None:
+    """§2.2.3: RFC 4291 §2.2's three text forms, without a zone, a bracket or a prefix."""
+    if "::" in text:
+        head, _, tail = text.partition("::")
+        if "::" in tail:
+            return None
+        before, after = _hextets(head, False), _hextets(tail, True)
+        if before is None or after is None or len(before) + len(after) > 7:
+            return None
+        groups = before + [0] * (8 - len(before) - len(after)) + after
+    else:
+        found = _hextets(text, True)
+        if found is None or len(found) != 8:
+            return None
+        groups = found
+    value = 0
+    for group in groups:
+        value = value << 16 | group
+    return value
+
+
+def address_of(text: Any) -> tuple[int, int] | None:
+    """§2.2.3: an address's width, 32 or 128 bits, and its value; None for anything else."""
+    if not isinstance(text, str):
+        return None
+    if ":" in text:
+        value = ipv6_value(text)
+        return None if value is None else (128, value)
+    value = ipv4_value(text)
+    return None if value is None else (32, value)
+
+
+def address_range_of(text: Any) -> tuple[int, int, int] | None:
+    """§2.2.3: an address range's width, base and prefix length; None unless every bit after the prefix
+    is zero."""
+    if not isinstance(text, str) or text.count("/") != 1:
+        return None
+    address, _, length = text.partition("/")
+    found = address_of(address)
+    if found is None or PREFIX_LENGTH.fullmatch(length) is None:
+        return None
+    width, value = found
+    prefix = int(length)
+    if prefix > width or value & ((1 << (width - prefix)) - 1):
+        return None
+    return width, value, prefix
+
+
+def in_address_range(address: tuple[int, int], address_range: tuple[int, int, int]) -> bool:
+    width, value = address
+    range_width, base, prefix = address_range
+    return width == range_width and value >> (width - prefix) == base >> (width - prefix)
+
+
+# §2.2.5: the fixed-point arithmetic of `distance`, every value an integer standing for itself over SCALE
+SCALE = 10**30
+PI_SCALED = 3141592653589793238462643383279
+HALF_PI_SCALED = PI_SCALED // 2
+RADIUS_MM = 6371008800
+
+
+def sin_scaled(x: int) -> int:
+    square = x * x // SCALE
+    term = total = x
+    k = 1
+    while True:
+        term = term * square // (SCALE * (2 * k) * (2 * k + 1))
+        if term == 0:
+            break
+        total = total - term if k % 2 else total + term
+        k += 1
+    return min(max(total, 0), SCALE)
+
+
+def cos_scaled(x: int) -> int:
+    square = x * x // SCALE
+    term = total = SCALE
+    k = 1
+    while True:
+        term = term * square // (SCALE * (2 * k - 1) * (2 * k))
+        if term == 0:
+            break
+        total = total - term if k % 2 else total + term
+        k += 1
+    return min(max(total, 0), SCALE)
+
+
+def asin_scaled(s: int) -> int:
+    if sin_scaled(HALF_PI_SCALED) <= s:
+        return HALF_PI_SCALED
+    low, high = 0, HALF_PI_SCALED
+    while high - low > 1:
+        middle = (low + high) // 2
+        if sin_scaled(middle) <= s:
+            low = middle
+        else:
+            high = middle
+    return low
+
+
+def angle_scaled(degrees: Fraction, per_pi: int) -> int:
+    """⌊degrees × PI_SCALED / per_pi⌋, exactly: per_pi 180 for an angle, 360 for its half."""
+    return degrees.numerator * PI_SCALED // (per_pi * degrees.denominator)
+
+
+def central_angle_scaled(latitude_1: Fraction, longitude_1: Fraction, latitude_2: Fraction, longitude_2: Fraction) -> int:
+    """§2.2.5, steps 1 to 5: half the central angle, in radians at SCALE."""
+    across = abs(latitude_2 - latitude_1)
+    around = abs(longitude_2 - longitude_1)
+    if around > 180:
+        around = 360 - around
+    sin_a = sin_scaled(angle_scaled(across, 360))
+    sin_b = sin_scaled(angle_scaled(around, 360))
+    cosines = cos_scaled(angle_scaled(abs(latitude_1), 180)) * cos_scaled(angle_scaled(abs(latitude_2), 180)) // SCALE
+    h = min(sin_a * sin_a // SCALE + cosines * (sin_b * sin_b // SCALE) // SCALE, SCALE)
+    return asin_scaled(math.isqrt(h * SCALE))
+
+
+def distance_mm(latitude_1: Fraction, longitude_1: Fraction, latitude_2: Fraction, longitude_2: Fraction) -> int:
+    """§2.2.5, step 6: the distance in whole millimetres, rounded down."""
+    return 2 * RADIUS_MM * central_angle_scaled(latitude_1, longitude_1, latitude_2, longitude_2) // SCALE
+
+
+@dataclass
+class Derived:
+    """§2.2.5: a derived value, or none; and the fields and parameters it read."""
+
+    value: Num | None
+    fields: set[str]
+    parameters: set[str]
+
+
+def _operand(spec: dict[str, Any], value: Any, params: dict[str, Any]) -> tuple[Any, set[str], set[str]]:
+    if "field" in spec:
+        return resolve(value, spec["field"]), {spec["field"]}, set()
+    return params[spec["param"]], set(), {spec["param"]}
+
+
+def _coordinate(found: Any, bound: int) -> Fraction | None:
+    if not is_decimal_string(found):
+        return None
+    number = Fraction(found)
+    return number if -bound <= number <= bound else None
+
+
+def derive(declarations: list[dict[str, Any]], value: Any, params: dict[str, Any]) -> dict[str, Derived]:
+    derived: dict[str, Derived] = {}
+    for declaration in declarations:
+        builtin = declaration["builtin"]
+        result: Num | None = None
+        if builtin == "duration":
+            start, start_fields, start_params = _operand(declaration["from"], value, params)
+            end, end_fields, end_params = _operand(declaration["to"], value, params)
+            first, second = instant(start), instant(end)
+            if first is not None and second is not None:
+                result = Num(str(second - first))
+            derived[declaration["name"]] = Derived(result, start_fields | end_fields, start_params | end_params)
+        elif builtin == "distance":
+            coordinates: list[Fraction | None] = []
+            fields: set[str] = set()
+            parameters: set[str] = set()
+            for end in ("from", "to"):
+                for member, bound in (("latitude", 90), ("longitude", 180)):
+                    found, more_fields, more_params = _operand(declaration[end][member], value, params)
+                    fields |= more_fields
+                    parameters |= more_params
+                    coordinates.append(_coordinate(found, bound))
+            if all(c is not None for c in coordinates):
+                result = Num(str(distance_mm(*coordinates)))  # type: ignore[arg-type]
+            derived[declaration["name"]] = Derived(result, fields, parameters)
+        else:
+            distance, duration = derived[declaration["distance"]], derived[declaration["duration"]]
+            if distance.value is not None and duration.value is not None and integer_of(duration.value) != 0:
+                result = Num(str(integer_of(distance.value) // abs(integer_of(duration.value))))
+            derived[declaration["name"]] = Derived(
+                result, distance.fields | duration.fields, distance.parameters | duration.parameters
+            )
+    return derived
+
+
+def _comparable(value: Any) -> Decimal | None:
+    if is_integer(value):
+        return Decimal(value.literal)
+    if is_decimal_string(value):
+        return Decimal(value)
+    return None
+
+
+def evaluate_2(
+    condition: dict[str, Any],
+    value: Any,
+    params: dict[str, Any],
+    derived: dict[str, Derived],
+    basis: set[str],
+    declared: dict[str, str],
+) -> bool:
+    op = condition["op"]
+    if op == "always":
+        return True
+    if op == "all":
+        return all(evaluate_2(c, value, params, derived, basis, declared) for c in condition["of"])
+    if op == "any":
+        return any(evaluate_2(c, value, params, derived, basis, declared) for c in condition["of"])
+    if op == "not":
+        return not evaluate_2(condition["of"], value, params, derived, basis, declared)
+    if "derived" in condition:
+        held = derived[condition["derived"]]
+        basis.update(held.fields)
+        found = ABSENT if held.value is None else held.value
+    else:
+        basis.add(condition["field"])
+        found = resolve(value, condition["field"])
+    if found is ABSENT:
+        return False
+    if op == "exists":
+        return True
+    if op == "equals":
+        return json_equal(found, condition["to"])
+    if op == "equalsParam":
+        return json_equal(found, params[condition["param"]])
+    if op == "isTrue":
+        return found is True
+    if op == "isDecimalString":
+        return isinstance(found, str) and re.fullmatch(r"0|[1-9][0-9]*", found) is not None
+    if op in ("freshWithin", "aheadWithin"):
+        field_instant = instant(found)
+        as_of = instant(params[condition["asOf"]])
+        if field_instant is None or as_of is None:
+            return False
+        if op == "freshWithin":
+            return 0 <= as_of - field_instant <= integer_of(params[condition["maxAge"]])
+        return 0 <= field_instant - as_of <= integer_of(params[condition["maxAhead"]])
+    if op == "compareParam":
+        left = _comparable(found)
+        if left is None:
+            return False
+        right = _comparable(params[condition["param"]])
+        assert right is not None
+        relation = condition["relation"]
+        if relation == "less-than":
+            return left < right
+        if relation == "less-than-or-equal":
+            return left <= right
+        if relation == "greater-than":
+            return left > right
+        return left >= right
+    if op == "inParam":
+        elements = params[condition["param"]]
+        if declared[condition["param"]] == "string-list":
+            return isinstance(found, str) and any(found == element for element in elements)
+        address = address_of(found)
+        if address is None:
+            return False
+        return any(in_address_range(address, address_range_of(element)) for element in elements)  # type: ignore[arg-type]
+    raise AssertionError(op)
+
+
+def rule_claim_2(read: Read, value: Any, scope_values: dict[str, Any]) -> tuple[dict[str, Any], dict[tuple[str, str], dict[str, Any]]]:
+    """§2.2.4: the claim of a rule of version 2.0.0, and each target's `derivation` (§2.2.6)."""
+    rule = read.rule
+    assert rule is not None
+    params = {name: scope_values[name] for name in rule["parameters"]}
+    derived = derive(rule.get("derived", []), value, params)
+    basis: set[str] = set()
+    match = None
+    for clause in rule["clauses"]:
+        if evaluate_2(clause["when"], value, params, derived, basis, rule["parameters"]):
+            match = clause
+            break
+    assert match is not None
+    facts: dict[str, Any] = {}
+    derivations: dict[tuple[str, str], dict[str, Any]] = {}
+    for entry in match["claim"]["facts"]:
+        if "from" in entry:
+            found = resolve(value, entry["from"])
+            if found is ABSENT:
+                raise Finding("read-failed", "a from that does not resolve")
+            if not in_canon_domain(found):
+                raise Finding("read-failed", "a value outside the canon domain")
+            how: dict[str, Any] = {"by": "pointer", "from": entry["from"]}
+        elif "value" in entry:
+            found = entry["value"]
+            how = {"by": "literal"}
+        else:
+            held = derived[entry["derived"]]
+            if held.value is None:
+                raise Finding("read-failed", "a derived value that has none")
+            found = held.value
+            how = {
+                "by": "builtin",
+                "builtin": read.builtins[entry["derived"]],
+                "derived": entry["derived"],
+                "fields": sorted(held.fields),
+                "parameters": sorted(held.parameters),
+            }
+        write_at(facts, entry["pointer"], found)
+        derivations[("fact", entry["pointer"])] = how
+    for requirement in match["claim"]["evidence"]:
+        derivations[("evidence", requirement)] = {"by": "literal"}
+    claim = {
+        "facts": facts,
+        "evidenceAvailability": dict(match["claim"]["evidence"]),
+        "acquisitionStatus": match["claim"]["acquisitionStatus"],
+        "reason": match["reason"],
+        "basis": sorted(basis),
+    }
+    return claim, derivations
+
+
+# ---------------------------------------------------------------------------------------------
 # Acquisitions (§5.2) and calculated values (§7)
 
 
@@ -2893,6 +3505,11 @@ class Outcome:
     citations: list[dict[str, Any]] | None = None
     record: Any = None
     transformations: dict[str, Any] = field(default_factory=dict)
+    # §2.2.6: a rule of version 2.0.0's `derivation` of each target, by (kind, target); and the case's
+    # rule's claim and derivations, in format 4.0.0
+    derivations: dict[tuple[str, str], dict[str, Any]] | None = None
+    rule_claim: dict[str, Any] | None = None
+    rule_derivations: dict[tuple[str, str], dict[str, Any]] | None = None
 
 
 @dataclass
@@ -2938,6 +3555,8 @@ def recompute(
     case_values: dict[str, Any] = {}
     for name, parameter in dialect.case_parameters.items():
         found = resolve(case, parameter.pointer)
+        if parameter.type in LIST_TYPES:
+            list_bounds(found, f"case parameter {name}")
         if found is ABSENT or not of_type(found, parameter.type):
             raise Finding("parameter-invalid", f"case parameter {name}")
         case_values[name] = found
@@ -2947,6 +3566,9 @@ def recompute(
     case_scope["runAt"] = verified_at
     case_outcome = Outcome("case", None, dialect.case_read, "asserted", False, case_scope)
     case_outcome.claim = copy_claim(dialect.case_read.copy or {}, case, case_outcome.transformations)
+    if dialect.case_rule is not None:
+        # §2.2.1: the case's rule reads the case document, after its copy.
+        case_outcome.rule_claim, case_outcome.rule_derivations = rule_claim_2(dialect.case_rule, case, case_scope)
     outcomes.append(case_outcome)
 
     receipts: list[dict[str, Any]] = []
@@ -2965,6 +3587,8 @@ def recompute(
             if found is ABSENT:
                 skipped = True
                 continue
+            if parameter.type in LIST_TYPES:
+                list_bounds(found, f"{source.name} parameter {name}")
             if not of_type(found, parameter.type):
                 raise Finding("parameter-invalid", f"{source.name} parameter {name}")
             values[name] = found
@@ -3012,6 +3636,8 @@ def recompute(
                 continue
         if source.read.copy is not None:
             outcome.claim = copy_claim(source.read.copy, value, outcome.transformations)
+        elif source.read.rule_version == RULE_2:
+            outcome.claim, outcome.derivations = rule_claim_2(source.read, value, values)
         else:
             assert source.read.rule is not None
             outcome.claim = rule_claim(source.read.rule, value, values)
@@ -3020,9 +3646,10 @@ def recompute(
         if name not in named:
             raise Finding("acquisition-unexpected", f"{name} names no source")
 
-    # 4. admission-refused
+    # 4. admission-refused, the case's rule's targets with the case's (§2.2.1)
     for outcome in outcomes:
-        for kind, targets in (("fact", outcome.read.fact_targets), ("evidence", outcome.read.evidence_targets)):
+        reads = [outcome.read] + ([dialect.case_rule] if outcome.source is None and dialect.case_rule is not None else [])
+        for kind, targets in [(k, t) for r in reads for k, t in (("fact", r.fact_targets), ("evidence", r.evidence_targets))]:
             for target in targets:
                 admitted = dialect.admits.get((kind, target), ["asserted", "record"])
                 if outcome.klass not in admitted or (outcome.generated and "generated" not in admitted):
@@ -3202,71 +3829,88 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
     evidence_document: dict[str, Any] = {}
     for outcome in outcomes:
         assert outcome.claim is not None
-        claim = outcome.claim
-        status = claim["acquisitionStatus"]
-        reason = claim["reason"]
         entry_outcome: dict[str, Any] = {
             "name": outcome.name,
             "parameters": dict(outcome.parameters),
-            "claim": claim,
-            "status": status,
-            "reason": reason,
+            "claim": outcome.claim,
+            "status": outcome.claim["acquisitionStatus"],
+            "reason": outcome.claim["reason"],
         }
         if outcome.request is not None:
             entry_outcome["arguments"] = outcome.request
+        # §2.2.6: the case's rule, in format 4.0.0, is its outcome's `rule`, and its targets' entries follow
+        # the case's copy's.
+        segments: list[tuple[Read, dict[str, Any], dict[tuple[str, str], dict[str, Any]] | None]] = [
+            (outcome.read, outcome.claim, outcome.derivations)
+        ]
+        if outcome.rule_claim is not None:
+            assert dialect.case_rule is not None
+            entry_outcome["rule"] = {
+                "claim": outcome.rule_claim,
+                "status": outcome.rule_claim["acquisitionStatus"],
+                "reason": outcome.rule_claim["reason"],
+            }
+            segments.append((dialect.case_rule, outcome.rule_claim, outcome.rule_derivations))
         out_outcomes.append(entry_outcome)
-        for kind, targets in (
-            ("fact", sorted(outcome.read.fact_targets)),
-            ("evidence", sorted(outcome.read.evidence_targets)),
-        ):
-            for target in targets:
-                if kind == "fact":
-                    present = resolve(claim["facts"], target) is not ABSENT
-                else:
-                    present = target in claim["evidenceAvailability"]
-                entry: dict[str, Any] = {
-                    "source": outcome.name,
-                    "kind": kind,
-                    "target": target,
-                    "class": outcome.klass,
-                    "generatedInfluence": outcome.generated,
-                    "present": present,
-                    "status": status,
-                    "reason": reason,
-                    "basis": list(claim["basis"]),
-                    "readDigest": read_digest(outcome.read),
-                }
-                if outcome.source is not None and outcome.source.parameters:
-                    entry["dependencies"] = [
-                        {"parameter": name, "source": parameter.origin,
-                         "pointer": parameter.pointer}
-                        for name, parameter in sorted(outcome.source.parameters.items())
-                    ]
-                candidates = sorted(set(outcome.read.candidates.get((kind, target), [])))
-                if candidates:
-                    entry["candidateFrom"] = candidates
-                if outcome.receipt is not None:
-                    entry["receipt"] = citation(outcome.receipt)
-                # §9.3, version 3: an acquired research source's citations, in the order `cites` has them
-                if outcome.citations is not None:
-                    entry["receipts"] = list(outcome.citations)
-                if outcome.answer is not None:
-                    entry["calculation"] = calculation_lineage(dialect, outcome)
-                if (outcome.source is not None and outcome.source.research is not None
-                        and outcome.source.research.result_member == "results" and outcome.record is not None):
-                    entry["researchExecution"] = research_execution_lineage(outcome.record)
-                if kind == "fact" and target in outcome.transformations:
-                    entry["transformation"] = outcome.transformations[target]
-                column_key = ("fact:" if kind == "fact" else "evidence:") + target
-                if retained.selected() and column_key in outcome.transformations:
-                    entry["columnTransformation"] = outcome.transformations[column_key]
-                lineage.append(entry)
-                if kind == "fact" and present:
-                    write_at(facts_document, target, resolve(claim["facts"], target))
-                if kind == "evidence" and present:
-                    evidence_document[target] = claim["evidenceAvailability"][target]
+        for read, claim, derivations in segments:
+            status = claim["acquisitionStatus"]
+            reason = claim["reason"]
+            for kind, targets in (
+                ("fact", sorted(read.fact_targets)),
+                ("evidence", sorted(read.evidence_targets)),
+            ):
+                for target in targets:
+                    if kind == "fact":
+                        present = resolve(claim["facts"], target) is not ABSENT
+                    else:
+                        present = target in claim["evidenceAvailability"]
+                    entry: dict[str, Any] = {
+                        "source": outcome.name,
+                        "kind": kind,
+                        "target": target,
+                        "class": outcome.klass,
+                        "generatedInfluence": outcome.generated,
+                        "present": present,
+                        "status": status,
+                        "reason": reason,
+                        "basis": list(claim["basis"]),
+                        "readDigest": read_digest(read),
+                    }
+                    if outcome.source is not None and outcome.source.parameters:
+                        entry["dependencies"] = [
+                            {"parameter": name, "source": parameter.origin,
+                             "pointer": parameter.pointer}
+                            for name, parameter in sorted(outcome.source.parameters.items())
+                        ]
+                    candidates = sorted(set(read.candidates.get((kind, target), [])))
+                    if candidates:
+                        entry["candidateFrom"] = candidates
+                    if outcome.receipt is not None:
+                        entry["receipt"] = citation(outcome.receipt)
+                    # §9.3, version 3: an acquired research source's citations, in the order `cites` has them
+                    if outcome.citations is not None:
+                        entry["receipts"] = list(outcome.citations)
+                    if outcome.answer is not None:
+                        entry["calculation"] = calculation_lineage(dialect, outcome)
+                    if (outcome.source is not None and outcome.source.research is not None
+                            and outcome.source.research.result_member == "results" and outcome.record is not None):
+                        entry["researchExecution"] = research_execution_lineage(outcome.record)
+                    if kind == "fact" and target in outcome.transformations:
+                        entry["transformation"] = outcome.transformations[target]
+                    column_key = ("fact:" if kind == "fact" else "evidence:") + target
+                    if retained.selected() and column_key in outcome.transformations:
+                        entry["columnTransformation"] = outcome.transformations[column_key]
+                    # §2.2.6: every target of a rule of version 2.0.0, written by its match or not
+                    if read.rule_version == RULE_2:
+                        entry["derivation"] = (derivations or {}).get((kind, target), {"by": "none"})
+                    lineage.append(entry)
+                    if kind == "fact" and present:
+                        write_at(facts_document, target, resolve(claim["facts"], target))
+                    if kind == "evidence" and present:
+                        evidence_document[target] = claim["evidenceAvailability"][target]
     preparation = {
-        "version": dialect.version,
+        # §2.2.6: a preparation of format 4.0.0 names its format; an earlier one its integer version
+        **({"formatVersion": FORMAT_4} if dialect.format == FORMAT_4 else {"version": dialect.version}),
         "verifiedAt": verified_at,
         # the dialect digest (§2); of a dialect with an unbound source, the bound dialect's (§4.4)
         "mappingDigest": digest_of(canon(dialect.document)),
@@ -3501,9 +4145,46 @@ def record_of_export(run: bytes) -> bytes | None:
 # The reading (§11)
 
 
+def parameters_named(rule: dict[str, Any]) -> set[str]:
+    """§11: the parameters a rule's conditions name, at any depth; and of a rule of version 2.0.0, every
+    parameter a derived value it declares reads (§2.2.6)."""
+    named: set[str] = set()
+
+    def walk(condition: dict[str, Any]) -> None:
+        op = condition["op"]
+        if op in ("equalsParam", "compareParam", "inParam"):
+            named.add(condition["param"])
+        elif op == "freshWithin":
+            named.update((condition["asOf"], condition["maxAge"]))
+        elif op == "aheadWithin":
+            named.update((condition["asOf"], condition["maxAhead"]))
+        elif op in ("all", "any"):
+            for c in condition["of"]:
+                walk(c)
+        elif op == "not":
+            walk(condition["of"])
+
+    for clause in rule["clauses"]:
+        walk(clause["when"])
+    for declaration in rule.get("derived", []):
+        operands = [declaration.get(end) for end in ("from", "to")]
+        if declaration["builtin"] == "distance":
+            operands = [point[member] for point in operands for member in ("latitude", "longitude")]
+        named.update(o["param"] for o in operands if isinstance(o, dict) and "param" in o)
+    return named
+
+
 def unsigned_parameters(dialect: Dialect, computation: Computation) -> list[dict[str, Any]]:
     entries: dict[str, dict[str, Any]] = {}
     ordered = []
+    # §2.2.6: in format 4.0.0, the case's rule reads parameters no receipt commits: its entry is first.
+    case_rule = dialect.case_rule
+    if case_rule is not None and case_rule.rule is not None:
+        targets = len(case_rule.fact_targets) + len(case_rule.evidence_targets)
+        listed = [{"name": name, "kind": "runAt" if name == "runAt" else "case"}
+                  for name in sorted(parameters_named(case_rule.rule))]
+        if targets and listed:
+            ordered.append({"source": "case", "parameters": listed, "targets": targets})
     for outcome in computation.outcomes[1:]:
         source = outcome.source
         assert source is not None
@@ -3514,22 +4195,7 @@ def unsigned_parameters(dialect: Dialect, computation: Computation) -> list[dict
         targets = len(source.read.fact_targets) + len(source.read.evidence_targets)
         if not targets:
             continue
-        named: set[str] = set()
-
-        def walk(condition: dict[str, Any]) -> None:
-            op = condition["op"]
-            if op == "equalsParam":
-                named.add(condition["param"])
-            elif op == "freshWithin":
-                named.update((condition["asOf"], condition["maxAge"]))
-            elif op in ("all", "any"):
-                for c in condition["of"]:
-                    walk(c)
-            elif op == "not":
-                walk(condition["of"])
-
-        for clause in source.read.rule["clauses"]:
-            walk(clause["when"])
+        named = parameters_named(source.read.rule)
         if source.research is not None:
             # §11: a research source's own acquisition commits what its request commits only under the
             # record's own receipt, the one receipt over the source's request (§5.2).
@@ -3664,6 +4330,11 @@ def _verify(
             version = integer_of(dialect_document["version"])
             if version in DEFINED_VERSIONS and version not in READ_VERSIONS:
                 raise Refused("version-unread", f"dialect version {version} is not read by this reader")
+        # and a named format this document defines that this reader does not read (§2.2)
+        if isinstance(dialect_document, dict) and isinstance(dialect_document.get("formatVersion"), str):
+            selector = dialect_document["formatVersion"]
+            if selector in DEFINED_FORMATS and selector not in READ_FORMATS:
+                raise Refused("version-unread", f"dialect format {selector} is not read by this reader")
         parsed_record = parse_record(record, record_document) if record is not None else None
         if not isinstance(acquisitions_document, dict):
             raise malformed("the acquisitions are not an object")

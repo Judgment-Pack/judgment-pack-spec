@@ -1,0 +1,6 @@
+{
+  "request": {"id": "R-316"},
+  "settings": {"allowedRanges": ["192.0.2.0/24", "2001:db8::/32"], "maxSpeed": 250000},
+  "previous": {"at": "2026-11-12T10:00:00Z", "latitude": "40.7128", "longitude": "-74.0060"},
+  "current": {"at": "2026-11-12T18:00:00Z", "latitude": "51.5074", "longitude": "-0.1278", "address": "2001:db8::7"}
+}

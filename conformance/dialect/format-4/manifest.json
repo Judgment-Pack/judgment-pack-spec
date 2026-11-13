@@ -1,0 +1,71 @@
+{
+  "status": "staged; proposed format 4.0.0, not a published conformance corpus",
+  "rfc": 18,
+  "companion": "spec/dialect.md §2.2",
+  "cases": [
+    {
+      "name": "case-rule-no-sources",
+      "files": {
+        "dialect.json": "835516014bdf423a266e7aa9aad28a884a948c8854bdb70a6be47aecd78b26cd",
+        "dialect.canonical.json": "f00efeb40b7ce2a27088d98f8932f33bc9ccc7f7caba39dd50d2d4445af28a85",
+        "case-read.canonical.json": "21d9ac231b47a7ad1e903b01f6a343e98679085994725ed8aefa548005c2c55d",
+        "case.json": "645efc87800458467ee77fa7e79ce719e12cb5bae4fe3ed2bb714190f6279849",
+        "sources.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+        "profiles.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "preparation.json": "a8688b12543d23119867fc9e84fc323bca2e99dcc7a4865af5107af621f9dadd"
+      },
+      "dialectDigest": "sha256:f00efeb40b7ce2a27088d98f8932f33bc9ccc7f7caba39dd50d2d4445af28a85",
+      "readDigest": "sha256:21d9ac231b47a7ad1e903b01f6a343e98679085994725ed8aefa548005c2c55d",
+      "preparationDigest": "sha256:a8688b12543d23119867fc9e84fc323bca2e99dcc7a4865af5107af621f9dadd",
+      "expectedReport": {
+        "binding": "not-checked",
+        "digest": "sha256:a8688b12543d23119867fc9e84fc323bca2e99dcc7a4865af5107af621f9dadd",
+        "evidence": {},
+        "facts": {"request": {"id": "R-316"}, "signIn": {"distanceMm": 5570229873, "plausible": true, "speedMmPerS": 193410}},
+        "result": "reading",
+        "targetsByClass": {"asserted": 4, "generated": 0, "record": 0},
+        "unsignedParameters": [
+          {"source": "case", "parameters": [{"name": "allowedRanges", "kind": "case"}, {"name": "maxSpeed", "kind": "case"}], "targets": 3}
+        ]
+      },
+      "expectedReportOfAReaderThatDoesNotReadTheFormat": {"refusal": "version-unread", "result": "refusal"}
+    },
+    {
+      "name": "source-rule",
+      "files": {
+        "dialect.json": "effa5232a8a241652bca9924411b997da477be604e04f299caa6e29079f19981",
+        "dialect.canonical.json": "95c85cb203a9e35de4afc2c6e64e734c2b7c80cb3f9aac59594ed8b749b4bab6",
+        "case.json": "2b1d7359b12a79e7c8aa2444cdd784eef2bfad557c36f4dd7a308bc90428dd88",
+        "sources.json": "c848ac4980ea6574e6261b281daac799aaebddde5047bca3e36c83cb61fcd272",
+        "profiles.json": "b4db9d1497648344d0aa78a43cb1dc129f44341867ef11c23ee3469ba59a7dda",
+        "preparation.json": "f37e4e283e1c8ddd703bfa5014b326fc88ad9a60e3ff2698937ed8b6ab93e068"
+      },
+      "dialectDigest": "sha256:95c85cb203a9e35de4afc2c6e64e734c2b7c80cb3f9aac59594ed8b749b4bab6",
+      "preparationDigest": "sha256:f37e4e283e1c8ddd703bfa5014b326fc88ad9a60e3ff2698937ed8b6ab93e068",
+      "expectedReport": {
+        "binding": "not-checked",
+        "digest": "sha256:f37e4e283e1c8ddd703bfa5014b326fc88ad9a60e3ff2698937ed8b6ab93e068",
+        "evidence": {"intake-form": "present", "sponsor-endorsement": "present"},
+        "facts": {"case": {"id": "REQ-316"}, "request": {"ageSeconds": 9000, "screened": true, "tags": ["data-access", "external"]}, "sponsor": {"id": "S-316"}},
+        "result": "reading",
+        "targetsByClass": {"asserted": 1, "generated": 0, "record": 8},
+        "unsignedFreshness": {"against": "preparation.verifiedAt", "verifiedAt": "2026-11-12T18:00:00Z", "sources": [
+          {"source": "intake", "checks": ["acquisition"], "targets": 5},
+          {"source": "sponsor", "checks": ["acquisition"], "targets": 2}
+        ]},
+        "unsignedParameters": [
+          {"source": "intake", "parameters": [{"name": "runAt", "kind": "runAt"}], "targets": 5},
+          {"source": "sponsor", "parameters": [{"name": "reviewWindow", "kind": "case"}, {"name": "runAt", "kind": "runAt"}, {"name": "tags", "kind": "upstream-runAt"}], "targets": 2}
+        ]
+      },
+      "expectedOutcomes": {"case": ["resolved", "copied"], "intake": ["resolved", "matching-request"], "sponsor": ["resolved", "sponsor-on-record"], "endorsement": ["unknown", "dependency-unavailable"]},
+      "expectedDerivations": {
+        "case": {},
+        "intake": {"/request/ageSeconds": {"by": "builtin", "builtin": "duration", "derived": "age", "fields": ["/submittedAt"], "parameters": ["runAt"]}, "/request/approver": {"by": "none"}, "/request/screened": {"by": "literal"}, "/request/tags": {"by": "pointer", "from": "/tags"}, "intake-form": {"by": "literal"}},
+        "sponsor": {"/sponsor/id": {"by": "pointer", "from": "/sponsor/id"}, "sponsor-endorsement": {"by": "literal"}},
+        "endorsement": {"/endorsement/approved": {"by": "none"}}
+      },
+      "expectedReportOfAReaderThatDoesNotReadTheFormat": {"refusal": "version-unread", "result": "refusal"}
+    }
+  ]
+}

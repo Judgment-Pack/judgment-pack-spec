@@ -99,6 +99,15 @@ versioned acquisition-source declarations and retained execution evidence. The h
 quality vectors are staged beside, but are not recordings from, the Runner vectors. Runner #86
 and Gateway #275 remain implementation work outside this companion change.
 
+The dialect-format amendment of 2026-11-12 (issue #316, RFC 0018, proposed) adds a third named
+format, `4.0.0` (§2.2): a rule on the case, list and decimal parameter types, rule version `2.0.0`
+with ordered comparison, membership, a forward freshness window and literal claim values, and three
+built-in derived values, `duration`, `distance` and `speed`, in exact integer arithmetic. It changes
+no answer to a document of an earlier format, nor any digest, preparation or vector of one. The
+Python reader reads it; the TypeScript reader refuses it `version-unread`; no preparer writes it; and
+its vectors are hand-written and staged under `conformance/dialect/format-4/`, beside the
+forty-seven and not among them.
+
 **Its sources.** Where the Runner's words define the format, this document keeps them; where they
 describe the Runner rather than the format, it says what the format is.
 
@@ -278,7 +287,7 @@ A document in either named format has these REQUIRED root members, instead of th
 
 | Member | Form | Meaning |
 | --- | --- | --- |
-| `formatVersion` | exactly `"2.0.0"` or `"3.0.0"` | selects the translation forms of integer version 2 or 3 respectively, with the identity and encoding rules here |
+| `formatVersion` | exactly `"2.0.0"` or `"3.0.0"`, or `"4.0.0"`, proposed (§2.2) | selects the translation forms of integer version 2 or 3 respectively, with the identity and encoding rules here; `"4.0.0"` selects version 3's with §2.2's additions |
 | `id` | a non-empty string of at most 1024 UTF-8 bytes, with no ASCII control character, space or DEL | stable, opaque artifact-series identifier; compared as written, without URI, Unicode or case normalization |
 | `version` | a string matching `(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)` in its entirety | independent artifact version, using Core's three-component grammar |
 
@@ -301,7 +310,7 @@ The canonical document includes all three identity members. Its digest is over t
 canonical bytes, never a projection into a legacy format. Changing id, artifact version, format,
 source binding or translation content changes that digest. A preparation's integer `version`
 remains **2 or 3**, selected by the translation family; it identifies the preparation format,
-not the artifact version. Its `mappingDigest` commits the complete named document. Historical
+not the artifact version. A preparation of format `4.0.0` carries `formatVersion` instead (§2.2.6). Its `mappingDigest` commits the complete named document. Historical
 preparation bytes and vectors are not rewritten.
 
 Binding (§4.4) keeps the identity members and transforms only the permitted source assignments.
@@ -326,6 +335,285 @@ reviewed release; upgrades are separate operations. Promotion of a pre-1.0 artif
 is a product publication policy, not a preparation-verifier rule. A product using that policy MUST
 publish and pin the promoted content before the job starts, rather than relabeling an existing job.
 
+## 2.2. Format 4.0.0, proposed
+
+The amendment of 2026-11-12 (RFC 0018, issue #316) proposes a third named format, `4.0.0`. It is
+**proposed**: one of the repository's two readers reads it, no preparer writes it, and its vectors
+are hand-written and staged under `conformance/dialect/format-4/`, in no corpus; no claim of §14
+names it. Format `4.0.0` is format `3.0.0`'s family, every rule of §2.1 holding, with a rule on the
+case (§2.2.1), three parameter types (§2.2.2, §2.2.3), a rule version `2.0.0` (§2.2.4) with
+built-in derived values (§2.2.5), and the preparation form that records them (§2.2.6). It has no
+integer twin: no integer `version` `4` is defined, and a document whose `version` is `4` is refused
+as §2 refuses every version it does not define. Formats `2`, `3`, `2.0.0` and `3.0.0`, their documents, digests,
+preparations and vectors, are unchanged, and none of them admits a form this section adds: a
+document of one that writes one is refused, `input-malformed`.
+
+A document of format `4.0.0` has §2.1's three REQUIRED identity members, `formatVersion` being
+exactly `"4.0.0"`, and every member of §§2–8 keeps its form there, but for these:
+
+| Where | In format `4.0.0` |
+| --- | --- |
+| `case` (§3) | MAY also carry `rule`, a rule of version `2.0.0` over the case document (§2.2.1) |
+| a parameter's type (§3) | also `decimal`, `string-list` or `address-range-list` (§2.2.2) |
+| a source's `read.rule` (§6.3) | of version `"1"` or `"2.0.0"` (§2.2.4); a `research` source's read and §6.4's reconciliation keep version `"1"` alone |
+| the preparation (§9.1) | `formatVersion`, the string `"4.0.0"`, in place of `version` (§2.2.6) |
+
+A dialect and a pack still name neither the other. The format adds no member that names a
+connection, an endpoint or a credential: those remain an installation's, in its binding document
+(§4.4) and its trusted profiles (§5.1).
+
+### 2.2.1 The case's rule
+
+`case.rule`, optional, is a rule of version `2.0.0` (§2.2.4); a case's rule of version `"1"`, or of
+any other version, is refused. It derives facts and evidence availability from the case document
+without a source: its value read is the case document (§6.1), with no `unwrap`, and its scope is the
+case's (§3), the case parameters and `runAt`. The case's `facts` and `evidence` stay REQUIRED, and
+either may be empty.
+
+With a rule, the case's read is `{"copy": {"facts": F, "evidence": V}, "rule": R}`, `R` the case's
+`rule` as the dialect writes it, and the case's read digest (§6) is that object's. The copy applies,
+then the rule, each to the case document, each giving its own claim. The case's targets are the
+copy's and the rule's, and §8.1 holds them together: no fact target of the rule may equal, or be a
+prefix by whole tokens of, one of the copy's or another source's, nor have one of them as its prefix;
+and no requirement may be both the copy's and the rule's. The rule's targets have the case's class,
+`asserted`, and its generated influence, `false`, and §8.2 admits them as it admits the copy's.
+
+### 2.2.2 Parameter types
+
+Format `4.0.0` adds three types to §3's three, which a case parameter, a source parameter and a rule
+of version `2.0.0` may declare. A parameter's value not of its type is `parameter-invalid`, as in §3.
+
+- `decimal`: a string matching Core §2.2's decimal grammar as a whole, of at most 128 characters
+  under every profile. The length is part of the type, and the type decides answers, not only
+  refusals: whether a value is comparable (§2.2.4) and whether it is a coordinate (§2.2.5). It is
+  therefore a domain, not a resource ceiling, and like the domains Core §4.1 names it does not
+  change with the profile: `extended` does not raise it, though it raises the 128 characters of a
+  research decimal string (§12). A JSON number is not of the type, nor are `"1e3"`, `"+1"`, `"01.5"`
+  and `".5"`.
+- `string-list`: an array of strings. It MAY be empty, and MAY hold one string more than once.
+- `address-range-list`: an array of address ranges (§2.2.3), each a string. It MAY be empty, MAY
+  hold one range more than once, and MAY hold ranges of both families. An array holding a string that
+  is not an address range is not of the type.
+
+A list parameter's value holds at most 1024 elements under every profile, and each string in it at
+most 1024 UTF-8 bytes under `base` and 2048 under `extended` (§2.2.7). A parameter of a new type is
+otherwise a parameter as §3's are: a `$param` (§4.1) and a calculator's input (§7) may name one, and
+carry its value as written. A `$text` placeholder and a string template under `adapter-http` take
+only the types §4.1 names.
+
+### 2.2.3 Address ranges
+
+An **address** is a string that is an IPv4 or an IPv6 address written as text, and nothing else:
+
+- an IPv4 address is four decimal octets separated by `.`, each `0` or a digit other than `0`
+  followed by at most two digits, and at most 255: `192.0.2.1`. `192.0.2.017` and `192.0.2.256` are
+  not addresses;
+- an IPv6 address is one of RFC 4291 §2.2's three text forms: eight groups of one to four
+  hexadecimal digits, in either case, separated by `:`; or fewer groups with one `::`, written once,
+  standing for one or more groups of zeros; and, in either, the last two groups MAY be written as an
+  IPv4 address of the form above. A zone (`%` and what follows), brackets, a prefix, white space or
+  any other character makes a string no address.
+
+An address's **family** is IPv4 when it holds no `:`, and IPv6 otherwise; its **value** is its 32 or
+128 bits. An **address range** is an address, `/`, and a prefix length `L`, written `0` or a digit
+other than `0` followed by at most two digits, at most 32 for IPv4 and 128 for IPv6, whose bits after
+the first `L` are all zero: `192.0.2.0/24`, `2001:db8::/32` and `0.0.0.0/0` are ranges, and
+`192.0.2.1/24` is not. An address is **in** a range when the two are of one family and their first
+`L` bits are equal. The families never meet: `::ffff:192.0.2.1`, an IPv6 address, is in no IPv4
+range, and an IPv4 address is in no IPv6 range, `::/0` included.
+
+### 2.2.4 Rule version 2.0.0
+
+A rule whose `ruleVersion` is the string `"2.0.0"` is §6.3's rule with the changes below; every rule
+of §6.3 that they do not change holds, its match, its last clause, its bounds and the `canon` domain
+of its literals among them. Version `"1"` is unchanged, and no other string names a rule version.
+
+A rule of version `2.0.0` is an object of exactly `ruleVersion`, `parameters` and `clauses`, as in
+§6.3, and `derived`, optional, an array of one to 16 derived values (§2.2.5), which a rule with none
+leaves out: `derived` written as the empty array is refused. Each parameter it declares is of one of
+the six types (§2.2.2), and in its scope with that type.
+
+**Leaves.** A leaf names exactly one operand: `field`, a pointer into the value read, as in §6.3; or,
+for `exists`, `equals`, `equalsParam` and `compareParam` alone, `derived`, the name of a derived value
+the rule declares. A leaf whose operand is a derived value that has none (§2.2.5) is a leaf whose
+operand does not resolve. Version `2.0.0` has §6.3's conditions and three more, each of exactly the
+members shown, `P` standing for the leaf's operand and `N` and `M` naming parameters the rule declares:
+
+| Condition | True when |
+| --- | --- |
+| `{"op": "aheadWithin", "field": P, "asOf": N, "maxAhead": M}` | `P` resolves to a string with an instant, and `0 ≤ instant(P) − instant(N) ≤` the value of `M`, in seconds |
+| `{"op": "compareParam", "field": P, "relation": R, "param": N}` | `P` resolves to a comparable value, and it stands to `N`'s value in the relation `R`: `less-than`, `less-than-or-equal`, `greater-than` or `greater-than-or-equal`, `P`'s value on the left |
+| `{"op": "inParam", "field": P, "param": N}` | `P` resolves to a member of `N`'s list, as below |
+
+**A parameter's type is the leaf's form.** In version `2.0.0` a leaf that names a parameter of a type
+its member does not take is refused with the dialect, and is never false as §6.3's `freshWithin`
+is: `freshWithin`'s and `aheadWithin`'s `asOf` take `timestamp`, and their `maxAge` and `maxAhead`
+`integer`; `compareParam`'s `param` takes `integer` or `decimal`; `inParam`'s takes `string-list` or
+`address-range-list`; and `equalsParam`'s takes any of the six.
+
+**Comparison.** A value is **comparable** when it is an integer (§1) or a string of type `decimal`
+(§2.2.2). Two comparable values are compared by their mathematical value, exactly, with no rounding
+and no scale: `"0.750"` is neither less nor greater than `"0.75"`, and `100` is greater than
+`"99.999"`. Any other value — a number that is not an integer, a string outside the decimal grammar
+such as `"1e3"`, a boolean, `null`, an array, an object — is not comparable: `compareParam` over it
+is false whatever its relation, `not` over that is true, and the dialect is not malformed. This is
+Core §7.4's ordered comparison, which reads only decimal strings and coerces no JSON number, widened
+to the integers of §1 alone, which this document reads exactly, their literal kept; every other
+number stays outside, as Core keeps every number outside. `equals` and `equalsParam` keep §6.3's
+JSON-equal, under which `"0.750"` and `"0.75"` are two strings, not equal.
+
+**Membership.** A value is a member of a `string-list` when it is a string equal, code point for
+code point, to one of the list's: no case folding, no Unicode normalization and no trimming, so that
+`"Beta"` is not `"beta"`, and the precomposed `é` is not `e` followed by U+0301. It is a member of an
+`address-range-list` when it is an address (§2.2.3) in one of the list's ranges. A value of any other
+form is a member of no list, and the empty list has no member.
+
+**Claims.** A claim form's `facts` is an array of objects of exactly `pointer`, a fact target, and
+one of:
+
+- `from`, a pointer into the value read, as in §6.3;
+- `value`, a **literal**: a string of at most 8192 UTF-8 bytes, `true`, `false`, or an integer (§1).
+  `null`, a number that is not an integer, an array and an object are refused; a decimal is written
+  as a string;
+- `derived`, the name of a derived value the rule declares.
+
+The claim's `facts` is `{}` with, for each entry of the match in order, written at `P` (§8.1):
+`from`'s value, as §6.3 writes it, its failures `read-failed`; the literal as the dialect writes it;
+or the derived value, an integer, and when it has none the read fails, `read-failed`. Every entry is
+applied, so an earlier entry's failure fails the read even when a later entry writes the same
+pointer; and a pointer that two entries write holds the later entry's value, and carries the later
+entry's `derivation` (§2.2.6). The claim's
+`basis` is §6.3's, with, for every leaf evaluated whose operand is a derived value, the fields that
+value reads (§2.2.5), whether or not it has one. A claim's literal or derived value adds nothing to
+`basis`. A rule's targets are §8's, every pointer of every claim form's `facts`, whatever its kind,
+included; `candidateFrom` (§9.3) lists `from` pointers alone, so that a target written only by
+literals and derived values has none.
+
+### 2.2.5 Built-in derived values
+
+A **derived value** is an object of exactly `name`, a non-empty string that no earlier derived value
+of the rule has; `builtin`, one of `duration`, `distance` and `speed`; and the members its built-in
+takes. The rule computes each, once, before its first clause and in the order it declares them,
+from the value read and its parameters, with integer arithmetic alone and no call of any kind. Each
+is an integer, or **none**. An **operand** is an object of exactly one member: `{"field": P}`, the
+value at `P` in the value read; or `{"param": N}`, the value of a parameter the rule declares, which
+MUST be of the type the built-in takes, or the rule is refused.
+
+- `{"name": X, "builtin": "duration", "from": A, "to": B}`, `A` and `B` operands of type
+  `timestamp`: `instant(B) − instant(A)`, in seconds, negative when `B` is the earlier; none when
+  either does not resolve to a string with an instant.
+- `{"name": X, "builtin": "distance", "from": {"latitude": A, "longitude": O}, "to": {"latitude":
+  A', "longitude": O'}}`, each of the four an operand of type `decimal`, in degrees, north and east
+  positive: the great-circle distance between the two points on a sphere of radius 6371008800
+  millimetres, the Earth's mean radius as geodesy gives it to the decimetre, in whole millimetres,
+  by the algorithm below. It is none when a coordinate does not resolve to a
+  string of type `decimal`, or a latitude is outside −90 to 90 or a longitude outside −180 to 180,
+  each bound included in its range.
+- `{"name": X, "builtin": "speed", "distance": D, "duration": T}`, `D` and `T` the names of a
+  `distance` and a `duration` declared before it: `⌊d / |t|⌋`, in millimetres per second; none when
+  either has none, or `t` is `0`. A rule that must tell a zero duration apart tests the duration
+  (`{"op": "equals", "derived": T, "to": 0}`) before the speed.
+
+A derived value's **fields** are the `field` pointers its operands name, and, for `speed`, its
+distance's and its duration's; its **parameters** are likewise the parameters they name.
+
+**The distance algorithm.** Every quantity below is an integer `x` that stands for `x / S`, with
+`S = 10^30`; `Π = 3141592653589793238462643383279`, which is `⌊π·S⌋`; and `H = ⌊Π / 2⌋`. `⌊a / b⌋`
+is the quotient of `a` by `b` rounded down, and every quotient below is of numbers at least zero.
+
+1. Each coordinate is the exact rational number its decimal string writes. `Δφ` is the absolute
+   difference of the two latitudes; `Δλ` is the absolute difference of the two longitudes, or, when
+   that is over 180, 360 less it; all exactly.
+2. An angle of `q = n / d` degrees, `d > 0`, is `rad(q, k) = ⌊n·Π / (k·d)⌋`, `k` being 180 for the
+   angle and 360 for half of it. Each angle below is from 0 to `H`.
+3. For `0 ≤ x ≤ H`, with `x2 = ⌊x·x / S⌋`: `sin(x)` is `t0 − t1 + t2 − …`, `t0 = x` and
+   `t(k) = ⌊t(k−1)·x2 / (S·2k·(2k+1))⌋`; and `cos(x)` is the same sum with `t0 = S` and
+   `t(k) = ⌊t(k−1)·x2 / (S·(2k−1)·2k)⌋`. Each sum stops before its first term that is `0`, and is
+   then raised to `0` if below it and lowered to `S` if above it.
+4. `a = sin(rad(Δφ, 360))`, `b = sin(rad(Δλ, 360))`, `c = ⌊cos(rad(|φ1|, 180))·cos(rad(|φ2|, 180)) / S⌋`,
+   and `h` is `⌊a·a / S⌋ + ⌊c·⌊b·b / S⌋ / S⌋`, lowered to `S` if above it.
+5. `r = ⌊√(h·S)⌋`, the integer square root. Half the central angle, `y`, is `H` when `sin(H) ≤ r`;
+   otherwise it is the result of this bisection: `lo = 0` and `hi = H`; while `hi − lo > 1`, with
+   `m = ⌊(lo + hi) / 2⌋`, `lo` becomes `m` when `sin(m) ≤ r`, and `hi` becomes `m` otherwise; `y` is
+   the last `lo`.
+6. The distance is `⌊2·6371008800·y / S⌋`.
+
+Identical points are `0` apart; two antipodal points, and two points 180 degrees apart on the
+equator, are `20015114442` apart; and every point at a pole is `0` from every other point at it.
+
+**Its accuracy.** The algorithm is the distance, and its accuracy is a statement about it, not a
+tolerance a reader may use: every reader gives the algorithm's integer, exactly. Its arithmetic was
+measured against the same sphere's distance computed by another formula, the arctangent form of the
+central angle, in decimal arithmetic at 100 significant digits, before step 6's rounding down. Over
+5000 pseudo-random pairs of coordinates written to nine decimal places, the two differed by at most
+5·10⁻¹⁸ millimetres. Near an antipode the difference is larger, because there the sine that step 5
+inverts is flattest, so that a unit of `r` moves `y` the most: at most 2·10⁻⁷ millimetres at the
+exact antipodes among fifteen edge cases; at most 2.6·10⁻⁶ millimetres over 400 pseudo-random
+pairs within 10⁻⁹ degrees of an antipode, written to twelve decimal places; and 7.7·10⁻⁶
+millimetres at an edge case 10⁻¹² degrees from one. The built-in's value is therefore the floor of
+the sphere's distance for every input tried whose distance lies more than 10⁻⁵ millimetres from a
+whole millimetre, and within one millimetre of it for the rest. This is a measurement over the
+inputs tried, not a bound shown for every input; the reference,
+`tools/dialect_builtins_reference.py`, repeats it, and fails at a difference of one micrometre.
+The model is a separate matter: a sphere differs from the Earth's ellipsoid by up to about 0.5
+percent of a distance, so the built-in gives a distance on the sphere, not one on the Earth.
+
+### 2.2.6 The preparation of format 4.0.0
+
+A preparation of a dialect of format `4.0.0` has `formatVersion`, the string `"4.0.0"`, in place of
+§9.1's `version`, and every other member §9.1 gives it; `verification` and the binding's `kind`
+(§9.5) are unchanged. It differs from a preparation of version 3 in these alone:
+
+- **The case outcome.** When the case has a rule, the case's outcome (§9.2) also carries `rule`, an
+  object of exactly `claim`, the rule's claim (§2.2.4); `status`, its `acquisitionStatus`; and
+  `reason`, its `reason`. The outcome's `claim`, `status` and `reason` stay the copy's.
+- **Lineage.** The case's entries (§9.3) are its copy's, in §9.3's order, then its rule's, in the
+  same order; a rule's entries have the rule's claim's `status`, `reason` and `basis`, and the case's
+  read digest.
+- **`derivation`.** Each lineage entry of a target of a rule of version `2.0.0`, the case's or a
+  source's, carries `derivation`, how the match wrote it: `{"by": "pointer", "from": Q}`, copied from
+  `Q`; `{"by": "literal"}`, a literal, as is every requirement of the match's `evidence`;
+  `{"by": "builtin", "builtin": B, "derived": X, "fields": F, "parameters": N}`, the derived value
+  `X` of built-in `B`, `F` and `N` its fields and parameters (§2.2.5), each distinct and ordered by
+  code point; or `{"by": "none"}`, when the match does not write the target. A pointer that two
+  entries of the match write carries the later entry's (§2.2.4). A read that was not applied has no
+  match, and each of its targets carries `{"by": "none"}`: every target of a skipped source (§9.2),
+  and of a source whose calculator did not compute (§7), the requirements that §7's claim marks
+  `unknown` included. An entry of a copy, or of a rule of version `"1"`, carries none.
+- **The parameters used.** Each outcome's `parameters` (§9.2) gives every parameter of its scope its
+  value as written, every element of a list included, so the preparation's digest commits each value
+  a rule compared, and a recomputation from another value differs (§11, finding 5).
+- **`unsignedParameters`** (§11) has, before any source's, an entry for the case when its rule has a
+  target and names a parameter, `{"source": "case", "parameters": L, "targets": T}`, `L` each such
+  parameter as `{"name", "kind"}`, ordered by name, of kind `case`, or `runAt` for `runAt`, and `T`
+  the number of the rule's targets. In format `4.0.0` the parameters a rule names are also
+  `aheadWithin`'s `asOf` and `maxAhead`, `compareParam`'s and `inParam`'s `param`, and each `param`
+  operand of a derived value the rule declares, whether or not a clause reads that value.
+
+### 2.2.7 Bounds and refusals
+
+- A rule declares at most 16 derived values; a literal is at most 8192 UTF-8 bytes, Core §4.1's
+  dialect text-value ceiling, 16384 under `extended`; and a list parameter's value holds at most 1024
+  elements, each string of it at most 1024 UTF-8 bytes, Core §4.1's dialect text-list item ceiling,
+  2048 under `extended`. Core §4.1's table has no row for the number of derived values or of a
+  list's elements, and until it has one these two maxima are the same under every profile. A
+  `decimal`'s 128 characters are its type's (§2.2.2), not a bound, and the same under every profile.
+- A reader of the format measures the derived values and the literals, and §12's counts over the
+  case's rule, in §11's phase 3, wherever measurable before any form. A list parameter's elements and
+  their bytes are measured when the parameter takes its value, during recomputation and before its
+  type is checked, as an unwrapped string's bytes are (§11). Over any of these maxima the reading is
+  refused, `input-over-bound`; a `decimal` over its characters is not of its type,
+  `parameter-invalid`. Every form this section gives, written otherwise, is `input-malformed`.
+- **A reader that does not read the format.** One written to the text before this amendment defines
+  no format `4.0.0`: it takes §11's phases 0 to 3 as for any document, so that a document of the
+  format with 17 sources is `input-over-bound` to it, and refuses one that passes them in phase 5, as
+  an unknown selector (§2.1), `input-malformed`. One written to this text that does not read the
+  format takes §11's phases 0 to 3 as for format `3.0.0`, and refuses the document `version-unread`
+  in phase 4, before any form. Neither reads anything more of it, and neither changes its answer to
+  any document of an earlier format.
+
+What a rule of version `2.0.0` establishes, and what it does not, is §13's.
+
 ## 3. The case and parameters
 
 `case` is an object of exactly `parameters`, an object, optional, absent being the empty object;
@@ -334,8 +622,9 @@ the source named `case`, of class `asserted`: what `facts` and `evidence` copy f
 document is what the operator supplied.
 
 A **parameter** has a name, a type and a value. The types are `string`, a JSON string; `integer`,
-an integer (§1); and `timestamp`, a string that has an instant (§1). A name is a non-empty string,
-and `runAt` is reserved.
+an integer (§1); and `timestamp`, a string that has an instant (§1). Format `4.0.0` adds `decimal`,
+`string-list` and `address-range-list` (§2.2.2). A name is a non-empty string, and `runAt` is
+reserved.
 
 - A **case parameter** is declared in `case.parameters` as `"name": {"pointer": P, "type": T}`,
   exactly those two members. Its value is the case document's value at `P`, which MUST resolve and
@@ -353,7 +642,8 @@ and `runAt` is reserved.
   (§9.1). A derivation rule may read it (§6.3); a request template that names it is refused (§4.1).
 
 A source's **scope** is the case parameters, its own source parameters, and `runAt`, at most 64
-parameters. The case's scope is the case parameters and `runAt`.
+parameters. The case's scope is the case parameters and `runAt`, which the case's rule reads in
+format `4.0.0` (§2.2.1).
 
 ## 4. Sources and their kinds
 
@@ -1043,7 +1333,8 @@ not read here.
 A **read** turns the **value read** into a **claim**, an object of exactly `facts`,
 `evidenceAvailability`, `acquisitionStatus`, `reason` and `basis`. A source's `read` is an object of
 `unwrap`, optional, and exactly one of `copy` and `rule`. The case's read is
-`{"copy": {"facts": F, "evidence": V}}`, `F` and `V` the case's `facts` and `evidence`.
+`{"copy": {"facts": F, "evidence": V}}`, `F` and `V` the case's `facts` and `evidence`; in format
+`4.0.0`, a case with a rule has the read `{"copy": {"facts": F, "evidence": V}, "rule": R}` (§2.2.1).
 For research only, §6.4 also admits the form `{"sources": [S, ...], "rule": R}`.
 
 The **read digest** of a source is the digest of its `read`'s `canon` bytes, as the dialect writes
@@ -1160,7 +1451,8 @@ dialect digest. No product may convert a value on the way to a pack outside this
 ### 6.3 Rule
 
 `rule` is a **derivation rule**, version 1: the portable derivation rule the Runner vendors, cited in
-the Status, restated here whole.
+the Status, restated here whole. In format `4.0.0` a rule MAY also be of version `2.0.0` (§2.2.4),
+which this section does not describe.
 
 A rule is an object of exactly `ruleVersion`, the string `"1"`; `parameters`, an object mapping each
 parameter the rule reads to its type; and `clauses`, an array of one to 64 clauses, the last of
@@ -1378,7 +1670,7 @@ A preparation is a JSON object of exactly:
 
 | Member | Form | Meaning |
 | --- | --- | --- |
-| `version` | the integer `2`, or `3` | the preparation format: the legacy dialect's integer `version`, or the family selected by a named dialect's `formatVersion` (§2.1); never its artifact `version` |
+| `version` | the integer `2`, or `3` | the preparation format: the legacy dialect's integer `version`, or the family selected by a named dialect's `formatVersion` (§2.1); never its artifact `version`. A preparation of a dialect of format `4.0.0` has `formatVersion`, `"4.0.0"`, in its place (§2.2.6) |
 | `verifiedAt` | a timestamp | the instant: the one every freshness check is held to, and the value of `runAt` |
 | `mappingDigest` | a digest | the dialect digest (§2) |
 | `verification` | the string `verified acquisitions; session sealing and input truth are not established` | the preparer's account of its checks, the same in every preparation of this version |
@@ -1409,7 +1701,9 @@ its read does not apply. An outcome is an object of:
   `"unknown"`, `basis` `[]`, `evidenceAvailability` `{}`, `facts` `{}` and `reason`
   `"dependency-unavailable"`, giving no fact and no availability;
 - `status`: the claim's `acquisitionStatus`, so `unknown` for a skipped source;
-- `reason`: the claim's `reason`, so `dependency-unavailable` for a skipped source.
+- `reason`: the claim's `reason`, so `dependency-unavailable` for a skipped source;
+- `rule`: in format `4.0.0`, for the case when it has a rule, that rule's claim, status and reason
+  (§2.2.6); absent otherwise.
 
 The vector `skipped-source-dependency-unavailable` holds this form.
 
@@ -1435,6 +1729,7 @@ ordered by code point. (No vector decides facts before evidence.) An entry is an
 | `receipt` | the acquisition's citation; for `research`, the record's own citation when it has one; absent for the case, a local file, a skipped source and a research record with no receipt of its own |
 | `receipts` | added in version 3: for an acquired `research` source, the same ordered list of citations it adds to `cites` (§9.1), including the record's own when present; absent otherwise |
 | `calculation` | §7, for a calculated source that was acquired; absent otherwise |
+| `derivation` | added in format `4.0.0`: for a target of a rule of version `2.0.0`, how the match wrote it (§2.2.6); absent otherwise |
 
 `candidateFrom` lists what the dialect could read into a target, and not what was read; `basis`
 lists what was read to decide.
@@ -1707,7 +2002,8 @@ the refusal, at the first of these phases that fails, in this order:
    Type-dependent maxima measure each value by its field's declared `type` when that `type`
    is one of §4.3's six types, and not otherwise;
 4. a dialect document that is an object whose `version` is an integer of a version this document
-   defines, `2` or `3`, that the verifier does not read: `version-unread`;
+   defines, `2` or `3`, that the verifier does not read, or whose `formatVersion` is `"4.0.0"`, a
+   format the verifier does not read (§2.2.7): `version-unread`;
 5. every document's form — the dialect against §§2–8, every rule they give it included, and each of
    its sources against §4's members and its kind's, whichever its kind, and each reconciliation
    read against §6.4; the binding document against §4.4; a profile against §5.1 and the key rule;
@@ -1729,8 +2025,9 @@ other rules here.)
 
 Some bounds are measured later, because they cannot be measured sooner: an unwrapped string's
 bytes, and the nesting and number literals of the value it holds, are measured when it is
-unwrapped (§6.1), during recomputation. Over them the reading is refused, `input-over-bound`, with
-nothing reported but the refusal. The nesting of §6.4's combined value is likewise measured
+unwrapped (§6.1), during recomputation; and in format `4.0.0` a list parameter's elements and their
+bytes, when the parameter takes its value (§2.2.7). Over them the reading is refused,
+`input-over-bound`, with nothing reported but the refusal. The nesting of §6.4's combined value is likewise measured
 when it is formed, before its rule runs, with the same refusal.
 
 **Findings.** Otherwise it recomputes the preparation at the given preparation's `verifiedAt`, by
@@ -1740,7 +2037,7 @@ when it is formed, before its rule runs, with the same refusal.
    source its AI profile first, its web profiles in `search`, `page` order when assigned, then
    each retained response's profile in `R.responses` order;
 2. for the case: `parameter-invalid` (§3), its parameters in their order, then `read-failed` for its
-   read (§6.2);
+   read (§6.2), in format `4.0.0` its copy's and then its rule's (§2.2.1);
 3. for each source in its order: `parameter-invalid` for a source parameter it declares, in their
    order (§3); then, for its acquisition and its read, `acquisition-missing`,
    `acquisition-unexpected`, `acquisition-invalid`, `acquisition-stale`, `acquisition-sessions`
@@ -1802,7 +2099,8 @@ entry for each source that was acquired, whose read is a rule that was applied (
 source, not a calculator that did not compute), that has a target, and whose rule's conditions name
 a parameter that its own acquisition does not commit. The parameters a rule's conditions name are,
 at any depth, `equalsParam`'s `param` and `freshWithin`'s `asOf` and `maxAge`, and not those it only
-declares. A source's own acquisition commits a parameter its request commits (§4.1), and an input
+declares; a rule of version `2.0.0` names more, and in format `4.0.0` the case's rule has an entry
+too, before every source's (§2.2.6). A source's own acquisition commits a parameter its request commits (§4.1), and an input
 its calculator echoed that is bound to the parameter (§7); another source's receipt commits nothing
 for it. An entry is `{"source", "parameters", "targets"}`: the source's name; each such parameter as
 `{"name", "kind"}`, ordered by name; and the number of the source's targets. The kinds:
@@ -1852,9 +2150,12 @@ version 3's research bounds added:
   64 clauses in one rule; 64 conditions listed by one `all` or `any`; four `unwrap` pointers;
   200000 bytes in one unwrapped string; and 256 fact targets and 128 evidence targets;
 - at most 32 levels of nesting in a value a read applies to — the case document, a result, an
-  unwrapped value — and at most 64 in any document; and
+  unwrapped value — and at most 64 in any document;
 - number literals of at most 128 characters, whose exponent, when they have one, has a magnitude of
-  at most 308.
+  at most 308; and
+- in format `4.0.0`, §2.2.7's: 16 derived values in one rule; 8192 UTF-8 bytes in one literal; and
+  1024 elements in one list parameter's value, each at most 1024 UTF-8 bytes. A `decimal`'s 128
+  characters are its type's (§2.2.2), not one of these bounds.
 
 For research, §4.3's maxima also hold: 64 declared fields and 64 answer entries per source;
 64 UTF-8 bytes per field name; 2048 per description; 256 per model name; 4096 per evidence
@@ -1904,6 +2205,15 @@ cited by URL alone is no retained response; the claim it supports is the answer'
 
   Does not establish: that the rule is right for the pack, or reads what its author meant; that a
   target with no value has none in the system.
+
+- **A derived value or a literal, in a rule of version `2.0.0` (§2.2).** Establishes: that each
+  derived value is its built-in's integer arithmetic (§2.2.5) over the values the rule read, and
+  each literal the dialect's, recomputed from the inputs without a call, at that instant.
+
+  Does not establish: that an instant or a coordinate it read is true, or names where or when
+  anything was; that a sphere is a fit model of the Earth for a purpose, the distance being one on
+  the sphere; that anything travelled at a speed derived; that a list or a range a parameter holds
+  is the right one, which is the operator's say, and which `unsignedParameters` names.
 
 - **A calculated value's lineage.** Establishes: that the calculator's answer, in the bytes
   acquired, echoed the inputs bound to this case, and reported its tables as of instants within
@@ -2005,3 +2315,5 @@ of this class MUST NOT be described as establishing anything §13 says a prepara
 establish.
 
 Until a specification version publishes the dialect vectors, no claim of this class is available.
+No claim names format `4.0.0` (§2.2): its vectors are hand-written and staged, and no specification
+version publishes them.

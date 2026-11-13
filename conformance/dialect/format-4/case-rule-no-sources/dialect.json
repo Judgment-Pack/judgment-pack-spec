@@ -1,0 +1,47 @@
+{
+  "formatVersion": "4.0.0",
+  "id": "urn:judgmentpack:dialect:sign-in-review",
+  "version": "0.1.0",
+  "case": {
+    "parameters": {
+      "allowedRanges": {"pointer": "/settings/allowedRanges", "type": "address-range-list"},
+      "maxSpeed": {"pointer": "/settings/maxSpeed", "type": "integer"}
+    },
+    "facts": [{"target": "/request/id", "source": "/request/id"}],
+    "evidence": [],
+    "rule": {
+      "ruleVersion": "2.0.0",
+      "parameters": {"allowedRanges": "address-range-list", "maxSpeed": "integer"},
+      "derived": [
+        {"name": "elapsed", "builtin": "duration", "from": {"field": "/previous/at"}, "to": {"field": "/current/at"}},
+        {"name": "apart", "builtin": "distance",
+         "from": {"latitude": {"field": "/previous/latitude"}, "longitude": {"field": "/previous/longitude"}},
+         "to": {"latitude": {"field": "/current/latitude"}, "longitude": {"field": "/current/longitude"}}},
+        {"name": "pace", "builtin": "speed", "distance": "apart", "duration": "elapsed"}
+      ],
+      "clauses": [
+        {
+          "when": {"op": "all", "of": [
+            {"op": "inParam", "field": "/current/address", "param": "allowedRanges"},
+            {"op": "compareParam", "derived": "pace", "relation": "less-than-or-equal", "param": "maxSpeed"}
+          ]},
+          "claim": {
+            "facts": [
+              {"pointer": "/signIn/plausible", "value": true},
+              {"pointer": "/signIn/distanceMm", "derived": "apart"},
+              {"pointer": "/signIn/speedMmPerS", "derived": "pace"}
+            ],
+            "evidence": {},
+            "acquisitionStatus": "resolved"
+          },
+          "reason": "plausible"
+        },
+        {
+          "when": {"op": "always"},
+          "claim": {"facts": [{"pointer": "/signIn/plausible", "value": false}], "evidence": {}, "acquisitionStatus": "resolved"},
+          "reason": "implausible"
+        }
+      ]
+    }
+  }
+}

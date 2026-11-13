@@ -12,6 +12,17 @@ here.
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
+- An amendment to RFC 0018 (#316) proposes dialect format `4.0.0` (`spec/dialect.md` §2.2): a
+  named format with no integer twin, adding a rule on the case, `decimal`, `string-list` and
+  `address-range-list` parameters, rule version `2.0.0` (ordered comparison, membership, a forward
+  freshness window, literal claim values) and the built-in derived values `duration`, `distance`
+  and `speed` in exact integer arithmetic, with the preparation form that records them. Its
+  vectors are hand-written and staged under `conformance/dialect/format-4/`; the Python reader
+  reads the format and the TypeScript reader refuses it `version-unread`. Formats 2, 3, `2.0.0`
+  and `3.0.0`, their digests and vectors, and Core are unchanged. The workflow schemas do not yet
+  name the format, and no claim names it. Its review is round 17 of RFC 0018, recorded in
+  `rfcs/reviews/0018-round-17.md` (three MEDIUM and five LOW, all applied; same vendor, not a
+  cross-vendor claim).
 
 ## `0.5.0` — 2026-11-12
 

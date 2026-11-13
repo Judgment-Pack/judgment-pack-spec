@@ -1,9 +1,11 @@
 # Historical compatibility evidence
 
 The five manifest files are exact published source bytes, not captured implementation output.
-The files under `v0.3.0/` are the exact bytes, at the `v0.3.0` tag, of the four files of the
-`v0.3.0` retained column (`releases/v0.3.0.retained-column.json`) that Core `0.5.0` changed in
-place; tests that rebuild a `v0.3.0` tree read them instead of the live files.
+The files under `v0.3.0/` are the exact bytes, at the `v0.3.0` tag, of the files of the
+`v0.3.0` retained column (`releases/v0.3.0.retained-column.json`) changed in place since: four by
+Core `0.5.0`, and `tools/dialect-verify-ts/src/verify.ts` by the proposed dialect format `4.0.0`
+(RFC 0018's amendment of 2026-11-12); tests that rebuild a `v0.3.0` tree read them instead of the
+live files.
 The carrier fragment extracts only `DuplicateMemberError` and `strict_json_loads` from the immutable
 0.2 source without changing those definitions; the import prelude permits offline CI execution.
 `selector-only-surrogate.json` is a handwritten synthetic compatibility counterexample. Tests pin
@@ -28,3 +30,4 @@ these trusted resources and source identities independently of the mutable curre
 - `tests/fixtures/historical-compatibility/v0.3.0/spec/dialect.md`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:spec/dialect.md`, Git blob `297ce325217302147f84c95ff281d8334eeec36f`, preserved SHA-256 `729e491a0d855a51f69e9b9e7aadc24131209c388ee29e8820c57a7a7c845d5a`.
 - `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect_verify.py`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect_verify.py`, Git blob `3dc1ac99c26a725f86103b1bcf1ff512c76ecee0`, preserved SHA-256 `fe3b773ce30ad8c395fe85500714a12d6cc4262ccc6bca05c44f7b3b40a60b60`.
 - `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/vector.ts`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect-verify-ts/src/vector.ts`, Git blob `5c00c3a9961fc00dfc61c23c1fa0ce9925110dff`, preserved SHA-256 `289b68479edf607df1480e46b0e6a6ee04091feb5dd56ddee696fbb2a337a1cb`.
+- `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/verify.ts`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect-verify-ts/src/verify.ts`, Git blob `219a598513e2172e856742764c012bfbcf888c94`, preserved SHA-256 `5ae002b07b0f9d3755c9d00bc828420e27b9927948402d8e4b266540c4f5cc1b`.

@@ -1,0 +1,94 @@
+{
+  "formatVersion": "4.0.0",
+  "id": "urn:judgmentpack:dialect:format-4-source-rule",
+  "version": "0.1.0",
+  "case": {
+    "parameters": {
+      "requestId": {"pointer": "/id", "type": "string"},
+      "reviewWindow": {"pointer": "/reviewWindow", "type": "integer"}
+    },
+    "facts": [{"target": "/case/id", "source": "/id"}],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "intake",
+      "kind": "operation",
+      "profile": "records",
+      "profileDigest": "sha256:087b1a7ced505aa303235a17e1f7199c5c7a98b0ca21ca244bf26551f89ceb8a",
+      "maxAge": 300,
+      "arguments": {"tool": "lookup", "arguments": {"table": "requests", "id": {"$param": "requestId"}}},
+      "read": {"rule": {
+        "ruleVersion": "2.0.0",
+        "parameters": {"requestId": "string", "runAt": "timestamp"},
+        "derived": [{"name": "age", "builtin": "duration", "from": {"field": "/submittedAt"}, "to": {"param": "runAt"}}],
+        "clauses": [
+          {"when": {"op": "all", "of": [{"op": "equalsParam", "field": "/id", "param": "requestId"}, {"op": "exists", "field": "/approver"}]},
+           "claim": {"facts": [
+             {"pointer": "/request/tags", "from": "/tags"},
+             {"pointer": "/request/approver", "from": "/approver"},
+             {"pointer": "/request/screened", "value": true},
+             {"pointer": "/request/ageSeconds", "derived": "age"}
+           ], "evidence": {"intake-form": "present"}, "acquisitionStatus": "resolved"},
+           "reason": "matching-request-with-approver"},
+          {"when": {"op": "equalsParam", "field": "/id", "param": "requestId"},
+           "claim": {"facts": [
+             {"pointer": "/request/tags", "from": "/tags"},
+             {"pointer": "/request/screened", "value": true},
+             {"pointer": "/request/ageSeconds", "derived": "age"}
+           ], "evidence": {"intake-form": "present"}, "acquisitionStatus": "resolved"},
+           "reason": "matching-request"},
+          {"when": {"op": "always"},
+           "claim": {"facts": [], "evidence": {"intake-form": "unknown"}, "acquisitionStatus": "unknown"},
+           "reason": "no-matching-request"}
+        ]
+      }}
+    },
+    {
+      "name": "sponsor",
+      "kind": "operation",
+      "profile": "records",
+      "profileDigest": "sha256:087b1a7ced505aa303235a17e1f7199c5c7a98b0ca21ca244bf26551f89ceb8a",
+      "maxAge": 300,
+      "parameters": {"tags": {"from": "intake", "pointer": "/request/tags", "type": "string-list"}},
+      "arguments": {"tool": "lookup", "arguments": {"table": "sponsors", "request": {"$param": "requestId"}}},
+      "read": {"rule": {
+        "ruleVersion": "2.0.0",
+        "parameters": {"tags": "string-list", "reviewWindow": "integer", "runAt": "timestamp"},
+        "clauses": [
+          {"when": {"op": "all", "of": [
+             {"op": "equalsParam", "field": "/tags", "param": "tags"},
+             {"op": "aheadWithin", "field": "/reviewBy", "asOf": "runAt", "maxAhead": "reviewWindow"}
+           ]},
+           "claim": {"facts": [{"pointer": "/sponsor/id", "from": "/sponsor/id"}], "evidence": {"sponsor-endorsement": "present"}, "acquisitionStatus": "resolved"},
+           "reason": "sponsor-on-record"},
+          {"when": {"op": "always"},
+           "claim": {"facts": [], "evidence": {"sponsor-endorsement": "unknown"}, "acquisitionStatus": "unknown"},
+           "reason": "no-sponsor-on-record"}
+        ]
+      }}
+    },
+    {
+      "name": "endorsement",
+      "kind": "operation",
+      "profile": "records",
+      "profileDigest": "sha256:087b1a7ced505aa303235a17e1f7199c5c7a98b0ca21ca244bf26551f89ceb8a",
+      "maxAge": 300,
+      "parameters": {"approver": {"from": "intake", "pointer": "/request/approver", "type": "string"}},
+      "arguments": {"tool": "lookup", "arguments": {"table": "endorsements", "approver": {"$param": "approver"}}},
+      "read": {"rule": {
+        "ruleVersion": "2.0.0",
+        "parameters": {"approver": "string"},
+        "clauses": [
+          {"when": {"op": "equalsParam", "field": "/approver", "param": "approver"},
+           "claim": {"facts": [{"pointer": "/endorsement/approved", "from": "/approved"}], "evidence": {}, "acquisitionStatus": "resolved"},
+           "reason": "endorsed"},
+          {"when": {"op": "always"},
+           "claim": {"facts": [], "evidence": {}, "acquisitionStatus": "unknown"},
+           "reason": "not-endorsed"}
+        ]
+      }}
+    }
+  ],
+  "admits": {"facts": {"/request/screened": ["record"]}}
+}

@@ -25,7 +25,8 @@ FIXTURES = ROOT / "tests/fixtures/historical-compatibility"
 # Trusted immutable source commits/blobs and independently verified SHA-256 anchors.
 # 0.1 differs only by its previously published $id substitution; no Git history is required in CI.
 # The v0.3.0 rows are the files Core 0.5.0 changed in place: the three schemas, the two manifests and
-# the four files of the v0.3.0 retained-column leaf that changed (releases/v0.3.0.retained-column.json).
+# the four files of the v0.3.0 retained-column leaf that changed (releases/v0.3.0.retained-column.json);
+# and the fifth leaf file, verify.ts, that the dialect format 4.0.0 amendment (#316) changed.
 ANCHORS = [{'tag': 'v0.1.0-draft',
   'commit': '80958f50c851e9809cb8036a23622391cf437c99',
   'source': 'schema/judgment-pack-core.schema.json',
@@ -159,7 +160,13 @@ ANCHORS = [{'tag': 'v0.1.0-draft',
   'source': 'tools/dialect-verify-ts/src/vector.ts',
   'blob': '5c00c3a9961fc00dfc61c23c1fa0ce9925110dff',
   'target': 'tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/vector.ts',
-  'targetSha256': '289b68479edf607df1480e46b0e6a6ee04091feb5dd56ddee696fbb2a337a1cb'}]
+  'targetSha256': '289b68479edf607df1480e46b0e6a6ee04091feb5dd56ddee696fbb2a337a1cb'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'tools/dialect-verify-ts/src/verify.ts',
+  'blob': '219a598513e2172e856742764c012bfbcf888c94',
+  'target': 'tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/verify.ts',
+  'targetSha256': '5ae002b07b0f9d3755c9d00bc828420e27b9927948402d8e4b266540c4f5cc1b'}]
 
 SCHEMAS = [row for row in ANCHORS if row["target"].startswith("schema/")]
 
