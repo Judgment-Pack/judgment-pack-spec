@@ -145,7 +145,7 @@ and no others:
 {
   "format": "judgment-pack-format-status/1",
   "families": {
-    "judgment-pack-core": { "draftVersion": "0.5.0", "baseline": "v0.5.1", "lastReleased": "v0.5.1" }
+    "judgment-pack-core": { "draftVersion": "0.5.0", "baseline": "v0.5.2", "lastReleased": "v0.5.2" }
   }
 }
 ```

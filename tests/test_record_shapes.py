@@ -310,14 +310,15 @@ class FormatStatus(Fixture):
         self.assertEqual(derived, json.loads((ROOT / shapes.STATUS).read_text("utf-8"))["families"])
         # Hand-checked against releases/: the four families Core 0.5.0 moved in place draft 0.5.0.
         # releases/v0.5.0.md, with no mapping (its tag is its specVersion), made v0.5.0 their last
-        # release and baseline, and releases/v0.5.1.md, a patch tag carrying 0.5.0 unchanged, makes
-        # v0.5.1 both now. v0.4.0, which carries 0.3.0 unchanged, is neither.
+        # release and baseline, and releases/v0.5.1.md and releases/v0.5.2.md, patch tags carrying
+        # 0.5.0 unchanged, made v0.5.1 both and then v0.5.2 both now. v0.4.0, which carries 0.3.0
+        # unchanged, is neither.
         # The Policy companion's only release is policy-v1.0.0-draft.1; the leaf shipped in rc.2 and
         # the final; the contributors shape under 0.4.0 is staged and unreleased.
         for family in ("judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest",
                        "workflow"):
             self.assertEqual(derived[family],
-                             {"draftVersion": "0.5.0", "baseline": "v0.5.1", "lastReleased": "v0.5.1"})
+                             {"draftVersion": "0.5.0", "baseline": "v0.5.2", "lastReleased": "v0.5.2"})
         self.assertEqual(derived["policy"], {"draftVersion": "1.0.0", "baseline": "policy-v1.0.0-draft.1",
                                              "lastReleased": "policy-v1.0.0-draft.1"})
         self.assertEqual(derived["retained-column"],
@@ -342,7 +343,7 @@ class FormatStatus(Fixture):
         faults = shapes.check(self.root)
         self.assertEqual(1, len(faults), faults)
         self.assertIn("family judgment-pack-core", faults[0])
-        self.assertIn('"lastReleased": "v0.5.1"', faults[0].split("give", 1)[1])
+        self.assertIn('"lastReleased": "v0.5.2"', faults[0].split("give", 1)[1])
 
     def test_a_candidate_is_released_but_is_not_a_baseline(self):
         (self.root / "releases" / "v0.4.0-rc.1.md").write_text("# v0.4.0-rc.1\n", "utf-8")
@@ -351,7 +352,7 @@ class FormatStatus(Fixture):
         derived = shapes.derive_status(self.root, shapes.build_catalog(self.root))
         self.assertEqual(derived["workflow-contributors"],
                          {"draftVersion": "0.4.0", "baseline": None, "lastReleased": "v0.4.0-rc.1"})
-        self.assertEqual(derived["workflow"]["lastReleased"], "v0.5.1")
+        self.assertEqual(derived["workflow"]["lastReleased"], "v0.5.2")
         faults = shapes.check(self.root)
         self.assertEqual(1, len(faults), faults)
         self.assertIn("family workflow-contributors", faults[0])
@@ -368,19 +369,20 @@ class FormatStatus(Fixture):
                          {"draftVersion": "0.4.0", "baseline": None, "lastReleased": None})
         four = {"judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest", "workflow"}
         # v0.4.0 includes the four families its mapping's specVersion 0.3.0 names, and is never a
-        # baseline; v0.5.0, whose tag is its specVersion, is no candidate either, and v0.5.1, which
-        # carries 0.5.0 unchanged, is now their last release and baseline.
+        # baseline; v0.5.0, whose tag is its specVersion, is no candidate either, and v0.5.2, the
+        # later of the two patch tags that carry 0.5.0 unchanged, is now their last release and
+        # baseline.
         releases = shapes.load_releases(self.root, catalog)
         self.assertEqual(four, releases["v0.4.0"]["families"])
         self.assertTrue(releases["v0.4.0"]["candidate"])
         self.assertEqual(four, releases["v0.5.0"]["families"])
         self.assertFalse(releases["v0.5.0"]["candidate"])
-        self.assertEqual(derived["judgment-pack-core"]["baseline"], "v0.5.1")
+        self.assertEqual(derived["judgment-pack-core"]["baseline"], "v0.5.2")
         self.assertEqual([], shapes.check(self.root))
         # Without v0.5.0's notes, and the later files that name that release, the tree reads as it
         # did at v0.4.0: that tag is the four families' last release and v0.3.0 stays their baseline.
         later = [self.root / "releases" / name
-                 for name in ("v0.5.0.md", "v0.5.0.normative.json", "v0.5.1.md")]
+                 for name in ("v0.5.0.md", "v0.5.0.normative.json", "v0.5.1.md", "v0.5.2.md")]
         kept = {path: path.read_bytes() for path in later if path.exists()}
         for path in kept:
             path.unlink()
@@ -401,26 +403,32 @@ class FormatStatus(Fixture):
 
     def test_a_patch_release_carries_its_spec_version_and_becomes_its_baseline(self):
         four = {"judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest", "workflow"}
-        notes = self.root / "releases" / "v0.5.1.md"
-        notes.unlink(missing_ok=True)
+        patches = ("v0.5.1", "v0.5.2")
+        for tag in patches:
+            (self.root / "releases" / f"{tag}.md").unlink(missing_ok=True)
         before = shapes.derive_status(self.root, shapes.build_catalog(self.root))
-        notes.write_text("# v0.5.1\n", "utf-8")
-        catalog = shapes.build_catalog(self.root)
-        releases = shapes.load_releases(self.root, catalog)
-        # v0.5.1 carries 0.5.0, the specVersion its numbers give, so it is no candidate; v0.4.0,
-        # whose mapping names 0.3.0, stays the recorded exception that establishes no baseline.
-        self.assertEqual("0.5.0", releases["v0.5.1"]["specVersion"])
-        self.assertFalse(releases["v0.5.1"]["candidate"])
-        self.assertEqual(four, releases["v0.5.1"]["families"])
-        self.assertTrue(releases["v0.4.0"]["candidate"])
-        after = shapes.derive_status(self.root, catalog)
-        self.assertEqual(four, {family for family in after if after[family] != before[family]})
         for family in four:
             with self.subTest(family=family):
                 self.assertEqual({"draftVersion": "0.5.0", "baseline": "v0.5.0", "lastReleased": "v0.5.0"},
                                  before[family])
-                self.assertEqual({"draftVersion": "0.5.0", "baseline": "v0.5.1", "lastReleased": "v0.5.1"},
-                                 after[family])
+        # Each patch tag in turn: it carries 0.5.0, the specVersion its numbers give, so it is no
+        # candidate, and it moves the four families' baseline and last release to itself; v0.4.0,
+        # whose mapping names 0.3.0, stays the recorded exception that establishes no baseline.
+        for tag in patches:
+            with self.subTest(tag=tag):
+                (self.root / "releases" / f"{tag}.md").write_text(f"# {tag}\n", "utf-8")
+                catalog = shapes.build_catalog(self.root)
+                releases = shapes.load_releases(self.root, catalog)
+                self.assertEqual("0.5.0", releases[tag]["specVersion"])
+                self.assertFalse(releases[tag]["candidate"])
+                self.assertEqual(four, releases[tag]["families"])
+                self.assertTrue(releases["v0.4.0"]["candidate"])
+                after = shapes.derive_status(self.root, catalog)
+                self.assertEqual(four, {family for family in after if after[family] != before[family]})
+                for family in four:
+                    self.assertEqual({"draftVersion": "0.5.0", "baseline": tag, "lastReleased": tag},
+                                     after[family])
+                before = after
 
     def test_a_patch_tag_of_a_spec_version_no_release_carries_is_refused(self):
         # v0.4.1 would carry 0.4.0, and v0.4.0 carries 0.3.0: without the refusal it would publish

@@ -750,6 +750,7 @@ class StaticSiteTests(unittest.TestCase):
             "project/releases/0.4.0/index.html": "releases/v0.4.0.md",
             "project/releases/0.5.0/index.html": "releases/v0.5.0.md",
             "project/releases/0.5.1/index.html": "releases/v0.5.1.md",
+            "project/releases/0.5.2/index.html": "releases/v0.5.2.md",
         }
         for output, source in cases.items():
             with self.subTest(output=output):
@@ -805,6 +806,22 @@ class StaticSiteTests(unittest.TestCase):
         overview = (self.output / "index.html").read_text(encoding="utf-8")
         self.assertIn('<meta name="generator" content="jps-site-build 0.5.0">', overview)
         self.assertFalse((self.output / "spec/0.5.1").exists())
+
+    def test_the_0_5_2_release_page_says_it_carries_0_5_0_and_the_site_stays_on_0_5_0(self) -> None:
+        page = self.output / "project/releases/0.5.2/index.html"
+        text = page.read_text(encoding="utf-8")
+        for phrase in ("Consumers pinned to", "What a pack author does", "What is in the bundles",
+                       "What this release does not establish", "annotation vocabulary"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+        # The notes link to the companion's page, which this release is the first to publish.
+        self.assertIn("../../../spec/annotation-vocabulary/", inspect(page).links)
+        project = (self.output / "project/index.html").read_text(encoding="utf-8")
+        self.assertIn('href="releases/0.5.2/"', project)
+        self.assertIn("0.5.2 release", project)
+        overview = (self.output / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<meta name="generator" content="jps-site-build 0.5.0">', overview)
+        self.assertFalse((self.output / "spec/0.5.2").exists())
 
     def test_the_0_4_0_release_page_says_it_carries_0_3_0(self) -> None:
         page = (self.output / "project/releases/0.4.0/index.html").read_text(encoding="utf-8")

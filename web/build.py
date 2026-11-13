@@ -865,6 +865,15 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "releases/v0.5.2.md",
+        PurePosixPath("project/releases/0.5.2/index.html"),
+        "0.5.2 release notes",
+        "A release that carries specVersion 0.5.0 unchanged: the annotation vocabulary 1.0.0, proposed, "
+        "what a pack author does, what is in the bundle, and what the release does not establish.",
+        "project",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.5.1.md",
         PurePosixPath("project/releases/0.5.1/index.html"),
         "0.5.1 release notes",
@@ -2394,6 +2403,7 @@ def build_project_index(output_root: Path) -> None:
         (
             "Release and direction",
             (
+                ("0.5.2 release", "Carries specVersion 0.5.0 unchanged: the proposed annotation vocabulary 1.0.0, one key for outcome severity, and what consumers do (nothing).", "project/releases/0.5.2/index.html"),
                 ("0.5.1 release", "Carries specVersion 0.5.0 unchanged: the proposed dialect format 4.0.0, the patch-release tooling, and what consumers do (nothing).", "project/releases/0.5.1/index.html"),
                 ("0.5.0 release", "Core 0.5.0: annotations and value sets, compatibility, migration from 0.3.0 and bundle contents.", "project/releases/0.5.0/index.html"),
                 ("0.4.0 release", "Carries specVersion 0.3.0 unchanged: included work, bundle contents, and what consumers do (nothing).", "project/releases/0.4.0/index.html"),

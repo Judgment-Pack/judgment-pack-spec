@@ -12,6 +12,17 @@ here.
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
+
+## `0.5.2` — 2026-11-13
+
+A release that carries Core `specVersion` `0.5.0` unchanged, byte for byte, as `v0.5.1` does: packs
+keep declaring `0.5.0`, the tag name is not a selector, and consumers pinned to `v0.5.0` or `v0.5.1`
+need do nothing. It adds the annotation vocabulary `1.0.0`, status `proposed`, beside Core. The
+[release notes](releases/v0.5.2.md) give its scope, what a pack author does, what is and is not in its
+bundles, and what it does not establish.
+
+### Added
+
 - RFC 0032 (#320), accepted at draft maturity on a same-vendor review with the different-vendor
   review waived, adds the annotation vocabulary `1.0.0`, status `proposed`
   (`spec/annotation-vocabulary.md`), a companion with its own version that defines one well-known
