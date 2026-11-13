@@ -397,6 +397,17 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "spec/annotation-vocabulary.md",
+        PurePosixPath("spec/annotation-vocabulary/index.html"),
+        "The annotation vocabulary",
+        "A companion document of the specification: one well-known annotation key, severity on an "
+        "outcome, with four ordered levels. Version 1.0.0, proposed; normative for the vocabulary "
+        "checker only, and inert in evaluation.",
+        "spec",
+        "Normative for the vocabulary-checker class; version 1.0.0 proposed",
+        source_ref="main",
+    ),
+    Page(
         "spec/policy.md",
         PurePosixPath("spec/policy/index.html"),
         "Policy content and governing adoption",
@@ -846,11 +857,11 @@ PAGES = (
         "rfcs/0032-outcome-severity.md",
         PurePosixPath("rfcs/0032-outcome-severity/index.html"),
         "RFC 0032: Outcome severity",
-        "Draft: one well-known annotation key, severity on an outcome, with four ordered levels, "
-        "in a proposed companion with its own version. Core 0.5.0 is unchanged and the key is "
-        "inert in evaluation.",
+        "Accepted standards-track RFC at draft maturity: one well-known annotation key, severity on "
+        "an outcome, with four ordered levels, in a companion with its own version, the annotation "
+        "vocabulary 1.0.0. Core 0.5.0 is unchanged and the key is inert in evaluation.",
         "proposals",
-        "Draft proposal",
+        "Accepted standards-track RFC",
         source_ref="main",
     ),
     Page(
@@ -1834,8 +1845,6 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
             ),
         }
     )
-    # RFC 0032's proposed companion has no page while the RFC is a Draft; links to it read the source.
-    routes["spec/annotation-vocabulary.md"] = GITHUB_BLOB_ROOT + "main/spec/annotation-vocabulary.md"
     # Review and proposal files stay source-only until their own adoption or release.
     # Schema resources also resolve directly at their exact, format-versioned $id URLs.
     for directory in ("conformance/policy", "schema/policy", "rfcs/workflow-contributors",
@@ -2511,8 +2520,8 @@ def build_license(output_root: Path) -> None:
 # (conformance/witness/README.md); the companion document they belong to is published. The dialect
 # vectors are staged since RFC 0018's acceptance too (conformance/dialect/README.md), and the
 # companion document they belong to, spec/dialect.md, is published. The annotation vocabulary's
-# rows are staged as well (conformance/annotation-vocabulary/README.md), and the companion document
-# RFC 0032 proposes has no page while that RFC is a Draft.
+# rows are staged as well, since RFC 0032's acceptance (conformance/annotation-vocabulary/README.md),
+# and the companion document they belong to, spec/annotation-vocabulary.md, is published.
 UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/evaluation/staged"),
     PurePosixPath("conformance/witness"),
@@ -2654,6 +2663,7 @@ conformance.
 - [Evaluation corpus]({guide_url(PurePosixPath("conformance/evaluation/index.html"))}): normative only for evaluator conformance
 - [The checkpoint witness statement]({guide_url(PurePosixPath("spec/checkpoint-witness/index.html"))}): a companion document, normative only for the witness-statement reader class; its vectors are staged until the next specVersion
 - [The dialect]({guide_url(PurePosixPath("spec/dialect/index.html"))}): a companion document, normative only for the preparation-verifier reader class; its vectors are staged until the next specVersion
+- [The annotation vocabulary]({guide_url(PurePosixPath("spec/annotation-vocabulary/index.html"))}): a companion document, normative only for the vocabulary-checker class; version 1.0.0 is proposed, and its rows are staged
 - [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
 
 ## Explanations and direct answers

@@ -12,15 +12,20 @@ here.
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
-- RFC 0032 (#320) proposes the annotation vocabulary `1.0.0` (`spec/annotation-vocabulary.md`), a
-  companion with its own version that defines one well-known annotation key, `severity` on an
-  outcome, with the ordered levels `low`, `medium`, `high` and `critical`. Absence states no
-  severity; a vocabulary checker applies only to `specVersion` `0.5.0`, refuses any other value and
-  any list with `JPS-VOCABULARY-SEVERITY-VALUE` after Core admits the pack, and recommends the advisory `JPS-VOCABULARY-SEVERITY-IDENTIFIER` for an outcome identifier
-  that ends in another level. The key is inert by Core §8.5. The companion is a Draft's proposal,
-  normative for nothing and in no bundle; its hand-written rows and machine-readable form are staged
-  under `conformance/annotation-vocabulary/1.0.0/`, and `tools/annotation_vocabulary.py` is the one
-  reader. Core `0.5.0`'s schema, text and corpora are unchanged.
+- RFC 0032 (#320), accepted at draft maturity on a same-vendor review with the different-vendor
+  review waived, adds the annotation vocabulary `1.0.0`, status `proposed`
+  (`spec/annotation-vocabulary.md`), a companion with its own version that defines one well-known
+  annotation key, `severity` on an outcome, with the ordered levels `low`, `medium`, `high` and
+  `critical`. Absence states no severity; a vocabulary checker applies only to `specVersion`
+  `0.5.0`, refuses any other value and any list with `JPS-VOCABULARY-SEVERITY-VALUE` after Core
+  admits the pack, and recommends the advisory `JPS-VOCABULARY-SEVERITY-IDENTIFIER` for an outcome
+  identifier that ends in another level. The key is inert by Core §8.5. The companion is normative
+  for the vocabulary-checker class, published and bundled; Core `0.5.0` §1.1 does not list it. Its
+  hand-written rows and machine-readable form stay staged under
+  `conformance/annotation-vocabulary/1.0.0/`, in no corpus, bundle or claim, and
+  `tools/annotation_vocabulary.py` is the one reader. The review round is copied to
+  `rfcs/reviews/0032-round-1.md` (same vendor, not a cross-vendor claim). Core `0.5.0`'s schema,
+  text and corpora are unchanged.
 
 ## `0.5.1` — 2026-11-13
 

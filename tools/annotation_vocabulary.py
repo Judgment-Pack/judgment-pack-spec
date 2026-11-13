@@ -1,7 +1,7 @@
-"""A reference checker for the proposed annotation vocabulary `1.0.0`.
+"""A reference checker for the annotation vocabulary `1.0.0`, status proposed.
 
-It was written from the companion text, spec/annotation-vocabulary.md, which RFC 0032 proposes and
-which is normative for nothing while that RFC is a Draft. It is the one reader of the vocabulary; no
+It was written from the companion text, spec/annotation-vocabulary.md, whose design record, RFC 0032,
+is accepted at draft maturity. It is the one reader of the vocabulary; no
 second, independently written reader exists. What it is not: a product, a conformance claim, or a
 source of expectations. The staged rows' expectations were written by hand.
 

@@ -1,9 +1,11 @@
 # Annotation vocabulary rows (staged, proposed)
 
-Hand-written rows for the proposed annotation vocabulary `1.0.0`
-([`spec/annotation-vocabulary.md`](../../spec/annotation-vocabulary.md), proposed by
-[RFC 0032](../../rfcs/0032-outcome-severity.md), a Draft). They are not a conformance corpus: no
-bundle carries them, the site does not serve them, and no claim may cite them. They are not
+Hand-written rows for the annotation vocabulary `1.0.0`, status `proposed`
+([`spec/annotation-vocabulary.md`](../../spec/annotation-vocabulary.md), the companion whose design
+record, [RFC 0032](../../rfcs/0032-outcome-severity.md), is accepted at draft maturity). They stay
+staged since that acceptance, as the dialect's and the checkpoint witness's vectors do: the companion
+is published and bundled, and the rows are not. They are not a conformance corpus: no bundle carries
+them, the site does not serve them, and no claim may cite them. They are not
 recordings. Every expectation was written by hand from the companion text and Core `0.5.0`, and the
 reference checker, [`tools/annotation_vocabulary.py`](../../tools/annotation_vocabulary.py), is held
 to them, never the other way round. It is the one reader; no second, independently written reader
