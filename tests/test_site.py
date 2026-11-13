@@ -24,6 +24,9 @@ WITNESS_VECTORS = "conformance/witness"
 # published.
 DIALECT_VECTORS = "conformance/dialect"
 WORKFLOW_VECTORS = "conformance/workflow"
+# The annotation vocabulary's hand-written rows are staged (conformance/annotation-vocabulary/README.md),
+# and the companion document RFC 0032 proposes has no page while that RFC is a Draft.
+ANNOTATION_VOCABULARY_ROWS = "conformance/annotation-vocabulary"
 # The staged draft Core specVersion 0.4.0-draft graduated to the released 0.5.0 in place; its staged
 # directories are retired, and nothing the site writes is named for the draft selector.
 RETIRED_DRAFT_DIRECTORIES = ("schema/staged", "conformance/staged", "examples/staged")
@@ -32,6 +35,7 @@ UNPUBLISHED_DIRECTORIES = (
     WITNESS_VECTORS,
     DIALECT_VECTORS,
     WORKFLOW_VECTORS,
+    ANNOTATION_VOCABULARY_ROWS,
     "conformance/policy",
     "schema/policy",
 )
@@ -272,6 +276,21 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("Accepted standards-track RFC", page)
         index = (self.output / "rfcs" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="0018-dialect/"', index)
+
+    def test_annotation_vocabulary_draft_is_browsable_and_its_rows_stay_staged(self) -> None:
+        # RFC 0032 is a Draft: its page exists, the companion it proposes has none, and links to the
+        # companion and to the staged rows read the source.
+        page = self.output / "rfcs" / "0032-outcome-severity" / "index.html"
+        document = page.read_text(encoding="utf-8")
+        self.assertIn('<span class="artifact-label">Draft proposal</span>', document)
+        links = inspect(page).links
+        self.assertIn(
+            "https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/annotation-vocabulary.md",
+            links,
+        )
+        self.assertFalse((self.output / "spec" / "annotation-vocabulary").exists())
+        self.assertIn("0032-outcome-severity/", inspect(self.output / "rfcs" / "index.html").links)
+        self._assert_nothing_published_under(ANNOTATION_VOCABULARY_ROWS)
 
     def test_pack_design_advisory_draft_is_browsable_with_source_only_artifacts(self) -> None:
         page = self.output / "rfcs/0027-pack-design-advisories/index.html"

@@ -79,6 +79,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0029](0029-retained-column-conversions.md) | Exact selected retained columns, custody, producer grammar and role ceilings | Accepted | Selected Dialect companion for immutable Core RC2 at draft maturity; acceptance is separate from publication |
 | [0030](0030-agent-principals-and-delegated-authority.md) | Agent principals and delegated authority | Draft | Mixed: the delegation statement is standards track at draft maturity (a proposed companion beside Core); the rest is a cross-project exploratory record (agent, gateway, Desk) |
 | [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets | Accepted | Specification (Core amendment released in Core `0.5.0`, staged as `0.4.0-draft`; accepted on a same-vendor review, the different-vendor review waived) |
+| [0032](0032-outcome-severity.md) | Outcome severity, one well-known annotation key | Draft | Specification (a proposed companion beside Core, the annotation vocabulary `1.0.0`; Core `0.5.0` unchanged; target release `v0.5.2`) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -155,3 +156,10 @@ gives a conforming pack the result of its evaluation form, with annotations remo
 expanded.
 It is a Draft, normative for nothing; the published schema, Core text and released corpora are
 unchanged.
+
+[RFC 0032](0032-outcome-severity.md) proposes one well-known annotation key, `severity` on an
+outcome, with four ordered levels (`low`, `medium`, `high`, `critical`), in a new companion with its
+own version, [the annotation vocabulary](../spec/annotation-vocabulary.md) `1.0.0`. Absence states
+no severity, a vocabulary checker refuses any other value and any list, and the key is inert in
+evaluation by Core §8.5. It is one key, not a registry. It is a Draft, normative for nothing; Core
+`0.5.0`'s schema, text and corpora are unchanged, and its rows are staged.
