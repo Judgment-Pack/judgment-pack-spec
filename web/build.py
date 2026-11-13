@@ -843,6 +843,17 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0032-outcome-severity.md",
+        PurePosixPath("rfcs/0032-outcome-severity/index.html"),
+        "RFC 0032: Outcome severity",
+        "Draft: one well-known annotation key, severity on an outcome, with four ordered levels, "
+        "in a proposed companion with its own version. Core 0.5.0 is unchanged and the key is "
+        "inert in evaluation.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.5.1.md",
         PurePosixPath("project/releases/0.5.1/index.html"),
         "0.5.1 release notes",
@@ -1823,9 +1834,12 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
             ),
         }
     )
+    # RFC 0032's proposed companion has no page while the RFC is a Draft; links to it read the source.
+    routes["spec/annotation-vocabulary.md"] = GITHUB_BLOB_ROOT + "main/spec/annotation-vocabulary.md"
     # Review and proposal files stay source-only until their own adoption or release.
     # Schema resources also resolve directly at their exact, format-versioned $id URLs.
-    for directory in ("conformance/policy", "schema/policy", "rfcs/workflow-contributors", "rfcs/retained-column-conversion"):
+    for directory in ("conformance/policy", "schema/policy", "rfcs/workflow-contributors",
+                      "rfcs/retained-column-conversion", "conformance/annotation-vocabulary"):
         for path in (ROOT / directory).rglob("*"):
             source = path.relative_to(ROOT).as_posix()
             if path.is_file():
@@ -2496,11 +2510,14 @@ def build_license(output_root: Path) -> None:
 # witness vectors are staged too, since RFC 0017's acceptance, until the next specVersion opens
 # (conformance/witness/README.md); the companion document they belong to is published. The dialect
 # vectors are staged since RFC 0018's acceptance too (conformance/dialect/README.md), and the
-# companion document they belong to, spec/dialect.md, is published.
+# companion document they belong to, spec/dialect.md, is published. The annotation vocabulary's
+# rows are staged as well (conformance/annotation-vocabulary/README.md), and the companion document
+# RFC 0032 proposes has no page while that RFC is a Draft.
 UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/evaluation/staged"),
     PurePosixPath("conformance/witness"),
     PurePosixPath("conformance/dialect"),
+    PurePosixPath("conformance/annotation-vocabulary"),
     PurePosixPath("conformance/workflow"),
     PurePosixPath("conformance/policy"),
     PurePosixPath("schema/policy"),

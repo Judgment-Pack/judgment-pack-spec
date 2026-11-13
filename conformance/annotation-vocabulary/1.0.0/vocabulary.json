@@ -1,0 +1,30 @@
+{
+  "vocabulary": "annotation-vocabulary",
+  "version": "1.0.0",
+  "status": "proposed",
+  "companion": "spec/annotation-vocabulary.md",
+  "rfc": "rfcs/0032-outcome-severity.md",
+  "coreSpecVersion": "0.5.0",
+  "annotationsExtension": "org.judgmentpack.annotations",
+  "keys": [
+    {
+      "key": "severity",
+      "positions": ["outcome"],
+      "valueForm": "string",
+      "values": ["low", "medium", "high", "critical"],
+      "order": "ascending",
+      "absence": "no stated severity",
+      "refusal": "JPS-VOCABULARY-SEVERITY-VALUE",
+      "identifierAdvisory": "JPS-VOCABULARY-SEVERITY-IDENTIFIER",
+      "outcomeAnnotationsSchema": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          }
+        }
+      }
+    }
+  ]
+}

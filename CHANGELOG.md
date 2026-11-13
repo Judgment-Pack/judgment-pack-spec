@@ -12,6 +12,15 @@ here.
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
+- RFC 0032 (#320) proposes the annotation vocabulary `1.0.0` (`spec/annotation-vocabulary.md`), a
+  companion with its own version that defines one well-known annotation key, `severity` on an
+  outcome, with the ordered levels `low`, `medium`, `high` and `critical`. Absence states no
+  severity; a vocabulary checker applies only to `specVersion` `0.5.0`, refuses any other value and
+  any list with `JPS-VOCABULARY-SEVERITY-VALUE` after Core admits the pack, and recommends the advisory `JPS-VOCABULARY-SEVERITY-IDENTIFIER` for an outcome identifier
+  that ends in another level. The key is inert by Core §8.5. The companion is a Draft's proposal,
+  normative for nothing and in no bundle; its hand-written rows and machine-readable form are staged
+  under `conformance/annotation-vocabulary/1.0.0/`, and `tools/annotation_vocabulary.py` is the one
+  reader. Core `0.5.0`'s schema, text and corpora are unchanged.
 
 ## `0.5.1` — 2026-11-13
 

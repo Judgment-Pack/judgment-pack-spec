@@ -1,0 +1,96 @@
+{
+  "specVersion": "0.5.0",
+  "id": "https://example.com/judgment-packs/access-review-severity",
+  "version": "0.1.0",
+  "title": "Access review",
+  "decision": {
+    "intent": "Decide what happens to an account's access at its periodic review.",
+    "question": "Is the account's access kept?"
+  },
+  "applicability": {
+    "op": "fact",
+    "path": "/account/reviewed",
+    "operator": "equals",
+    "value": true
+  },
+  "outcomes": [
+    {
+      "id": "keep",
+      "label": "Keep access",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "severity": "low"
+        }
+      }
+    },
+    {
+      "id": "refer",
+      "label": "Refer to the access owner",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "severity": "high"
+        }
+      }
+    },
+    {
+      "id": "revoke",
+      "label": "Revoke access",
+      "extensions": {
+        "org.judgmentpack.annotations": {
+          "severity": "critical",
+          "owner": "access-team"
+        }
+      }
+    }
+  ],
+  "rules": [
+    {
+      "id": "in-use",
+      "description": "Keep access used in the review period.",
+      "when": {
+        "op": "fact",
+        "path": "/account/last-use",
+        "operator": "equals",
+        "value": "inside-period"
+      },
+      "outcome": "keep",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "unused",
+      "description": "Revoke access not used in the review period.",
+      "when": {
+        "op": "fact",
+        "path": "/account/last-use",
+        "operator": "equals",
+        "value": "outside-period"
+      },
+      "outcome": "revoke",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "unapproved",
+      "description": "Refer access with no recorded approval.",
+      "when": {
+        "op": "fact",
+        "path": "/account/approval",
+        "operator": "equals",
+        "value": "missing"
+      },
+      "outcome": "refer",
+      "onUnknown": "escalate"
+    }
+  ],
+  "escalation": {
+    "triggers": [
+      "not-applicable",
+      "unknown",
+      "conflict",
+      "no-match"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Access reviewer"
+    }
+  }
+}
