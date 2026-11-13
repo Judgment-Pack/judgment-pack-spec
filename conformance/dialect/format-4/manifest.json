@@ -1,0 +1,34 @@
+{
+  "status": "staged; proposed format 4.0.0, not a published conformance corpus",
+  "rfc": 18,
+  "companion": "spec/dialect.md §2.2",
+  "cases": [
+    {
+      "name": "case-rule-no-sources",
+      "files": {
+        "dialect.json": "835516014bdf423a266e7aa9aad28a884a948c8854bdb70a6be47aecd78b26cd",
+        "dialect.canonical.json": "f00efeb40b7ce2a27088d98f8932f33bc9ccc7f7caba39dd50d2d4445af28a85",
+        "case-read.canonical.json": "21d9ac231b47a7ad1e903b01f6a343e98679085994725ed8aefa548005c2c55d",
+        "case.json": "645efc87800458467ee77fa7e79ce719e12cb5bae4fe3ed2bb714190f6279849",
+        "sources.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+        "profiles.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "preparation.json": "a8688b12543d23119867fc9e84fc323bca2e99dcc7a4865af5107af621f9dadd"
+      },
+      "dialectDigest": "sha256:f00efeb40b7ce2a27088d98f8932f33bc9ccc7f7caba39dd50d2d4445af28a85",
+      "readDigest": "sha256:21d9ac231b47a7ad1e903b01f6a343e98679085994725ed8aefa548005c2c55d",
+      "preparationDigest": "sha256:a8688b12543d23119867fc9e84fc323bca2e99dcc7a4865af5107af621f9dadd",
+      "expectedReport": {
+        "binding": "not-checked",
+        "digest": "sha256:a8688b12543d23119867fc9e84fc323bca2e99dcc7a4865af5107af621f9dadd",
+        "evidence": {},
+        "facts": {"request": {"id": "R-316"}, "signIn": {"distanceMm": 5570229873, "plausible": true, "speedMmPerS": 193410}},
+        "result": "reading",
+        "targetsByClass": {"asserted": 4, "generated": 0, "record": 0},
+        "unsignedParameters": [
+          {"source": "case", "parameters": [{"name": "allowedRanges", "kind": "case"}, {"name": "maxSpeed", "kind": "case"}], "targets": 3}
+        ]
+      },
+      "expectedReportOfAReaderThatDoesNotReadTheFormat": {"refusal": "version-unread", "result": "refusal"}
+    }
+  ]
+}

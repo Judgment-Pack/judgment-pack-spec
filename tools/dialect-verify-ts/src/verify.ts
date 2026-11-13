@@ -24,6 +24,10 @@ export type Inputs = {
 // §2: the dialect versions the text defines, and those this verifier reads: both (§11, `version-unread`).
 const DEFINED_VERSIONS = ["2", "3"];
 const READ_VERSIONS = ["2", "3"];
+// §2.1, §2.2: the named formats the text defines, and those this verifier reads. Format 4.0.0 is proposed,
+// and this verifier does not read it yet: a document of it is refused `version-unread` in phase 4.
+const DEFINED_FORMATS = ["2.0.0", "3.0.0", "4.0.0"];
+const READ_FORMATS = ["2.0.0", "3.0.0"];
 
 export type Result = {
   kind: "reading" | "finding" | "refusal";
@@ -151,6 +155,12 @@ function reading(inputs: Inputs, keep: (b: Uint8Array) => void): Result {
   if (dialectValue.t === "obj" && isInteger(version)) {
     const v = String(intValue(version));
     if (DEFINED_VERSIONS.includes(v) && !READ_VERSIONS.includes(v)) throw new Refusal("version-unread", `dialect version ${v} is not read by this verifier`);
+  }
+  const selector = member(dialectValue, "formatVersion");
+  if (dialectValue.t === "obj" && selector !== undefined && selector.t === "str") {
+    if (DEFINED_FORMATS.includes(selector.v) && !READ_FORMATS.includes(selector.v)) {
+      throw new Refusal("version-unread", `dialect format ${selector.v} is not read by this verifier`);
+    }
   }
 
   // phase 5: every document's form; a dialect with an unbound source is read with its binding document, as the

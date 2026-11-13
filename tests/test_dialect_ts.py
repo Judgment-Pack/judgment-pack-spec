@@ -152,3 +152,29 @@ class SecondDialectReaderTest(unittest.TestCase):
             code = "reading" if result["result"] == "reading" else f"{result['result']}:{result[result['result']]}"
             with self.subTest(case=name):
                 self.assertEqual(expected, code)
+
+    def test_the_typescript_reader_does_not_read_format_4_yet(self) -> None:
+        # Format 4.0.0 (spec/dialect.md §2.2) is proposed and read by the first reader alone: the second
+        # defines the selector and refuses a document of it `version-unread` in phase 4, before any form,
+        # as the staged manifest gives a reader that does not read the format.
+        node = self.node()
+        root = ROOT / "conformance" / "dialect" / "format-4"
+        entry = json.loads((root / "manifest.json").read_text(encoding="utf-8"))["cases"][0]
+        directory = root / entry["name"]
+        files = {m: (directory / f"{m if m != 'acquisitions' else 'sources'}.json").read_bytes()
+                 for m in ("dialect", "case", "acquisitions", "profiles", "preparation")}
+        malformed = json.loads(files["dialect"])
+        malformed["case"]["rule"]["ruleVersion"] = "1"
+        batch = []
+        for dialect in (files["dialect"], json.dumps(malformed).encode("utf-8")):
+            encoded = {m: base64.b64encode(dialect if m == "dialect" else files[m]).decode("ascii") for m in files}
+            batch.append({**encoded, "record": None, "binding": None, "requireBinding": False})
+        run = subprocess.run(
+            [node, "--disable-wasm-trap-handler", "--no-warnings", "--input-type=module", "--eval", BATCH % json.dumps(str(READER))],
+            input=json.dumps(batch).encode("utf-8"),
+            capture_output=True,
+            timeout=600,
+        )
+        self.assertEqual(run.returncode, 0, run.stderr.decode("utf-8", "replace")[-4000:])
+        expected = entry["expectedReportOfAReaderThatDoesNotReadTheFormat"]
+        self.assertEqual([expected, expected], [json.loads(report) for report in json.loads(run.stdout)])
