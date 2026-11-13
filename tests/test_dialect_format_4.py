@@ -375,6 +375,41 @@ class FormatFourBoundTests(unittest.TestCase):
         self.assertEqual("preparation-differs", self.refusal(document, {"t": "1." + "0" * 126}))
         self.assertEqual("parameter-invalid", self.refusal(document, {"t": "1." + "0" * 127}))
 
+    def test_the_literal_and_the_list_element_take_core_4_1s_base_rows(self) -> None:
+        # §2.2.7: a literal takes Core §4.1's row "Dialect text value bytes" and a list element its row
+        # "Dialect text-list item bytes", the rows a research text value and text-list item take (§12).
+        # The reader takes all four maxima from one table, which holds the `base` column of Core's.
+        core = (ROOT / "spec" / "judgment-pack-core.md").read_text(encoding="utf-8")
+        table = {}
+        for line in core.splitlines():
+            cells = [cell.strip() for cell in line.strip("|").split("|")]
+            if line.startswith("| Dialect ") and len(cells) == 3:
+                table[cells[0]] = (cells[1], cells[2])
+        self.assertEqual({"Dialect text value bytes": ("8192", "16384"),
+                          "Dialect text-list item bytes": ("1024", "2048")},
+                         {row: table.get(row) for row in READER.CORE_CEILINGS_BASE})
+        self.assertEqual({row: int(table[row][0]) for row in READER.CORE_CEILINGS_BASE}, READER.CORE_CEILINGS_BASE)
+        text = READER.CORE_CEILINGS_BASE["Dialect text value bytes"]
+        item = READER.CORE_CEILINGS_BASE["Dialect text-list item bytes"]
+        self.assertEqual((text, text, item, item), (READER.MAX_LITERAL_BYTES, READER.MAX_TEXT_BYTES,
+                                                    READER.MAX_LIST_ELEMENT_BYTES, READER.MAX_ITEM_BYTES))
+
+    def test_a_document_of_the_format_declaring_extended_is_refused_profile_unsupported(self) -> None:
+        # §2.2.7 and §2: the reader supports `base` alone, so it refuses a document of the format that declares
+        # `extended` in phase 0, before any bound is measured, a literal over base's bound included.
+        over = frame(simple_rule([{"pointer": "/x", "value": "é" * 4096 + "a"}]))
+        directory = FORMAT_4 / "case-rule-no-sources"
+        vector = json.loads((directory / "dialect.json").read_bytes())
+        for document in (frame(simple_rule([{"pointer": "/x", "value": 1}])), over, vector):
+            with self.subTest(document=sorted(document["case"])):
+                result = run({"profile": "extended", **document}, {}, "2026-11-12T18:00:00Z")
+                self.assertEqual("profile-unsupported", result.answer.get("refused"), result.answer)
+                self.assertEqual({"result": "refusal", "refusal": "profile-unsupported", "profile": "extended"},
+                                 READER.report(result.answer))
+        # The control: the same documents declaring `base` are read under base's bounds.
+        self.assertEqual("preparation-differs", self.refusal({"profile": "base", **frame(simple_rule([{"pointer": "/x", "value": 1}]))}))
+        self.assertEqual("input-over-bound", self.refusal({"profile": "base", **over}))
+
     def test_the_counted_bounds_hold_the_case_rule(self) -> None:
         clauses = [{**resolved([{"pointer": f"/x{i}", "value": 1}], "r"), "when": {"op": "exists", "field": "/x"}}
                    for i in range(64)] + [{**resolved([], "r"), "when": ALWAYS}]

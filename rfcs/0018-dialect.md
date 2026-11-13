@@ -16,7 +16,8 @@
   round 15), 2026-10-18 (traversal spellings in a constrained page path, issue #214,
   option C, round 16), 2026-10-22 (dialect-owned conversions, reconciliation and quality findings,
   issue #170; typed research results, source profiles and retained execution evidence, issue #169),
-  2026-11-12 (dialect format 4.0.0, proposed, issue #316)
+  2026-11-12 (dialect format 4.0.0, proposed, issue #316), 2026-11-13 (format 4.0.0's bounds stated
+  once, issue #324)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -1103,6 +1104,47 @@ format; the TypeScript reader refuses it `version-unread`, which a test holds. N
 16. **A preparer.** The reference Runner does not read or write the format, and no recording of it
     exists.
 
+## Amendment of 2026-11-13: format 4.0.0's bounds stated once
+
+This amendment answers part of
+[issue #324](https://github.com/Judgment-Pack/judgment-pack-spec/issues/324). It changes the
+proposed format `4.0.0` of the amendment of 2026-11-12 and no accepted text, and the format stays
+proposed. The Specification and companion are amended equally, in §§2.2.2, 2.2.4 and 2.2.7. Core
+is unchanged, and so is every file of the `0.5.0` normative record.
+
+**The problem.** §2.2.4 gave a literal's bound as 8192 UTF-8 bytes, with no profile, where §2.2.7
+gave the bound under each profile, so the text stated one bound two ways. And §2.2.2 said the
+`decimal` type's 128 characters do not change with the profile, without naming Core §4.1's row
+"Dialect decimal string characters", 128 under `base` and 256 under `extended`, which a reader can
+take for the type's length.
+
+**The decisions.**
+
+1. **§2.2.7 states the format's bounds, and §§2.2.2 and 2.2.4 point to it.** A literal is at most
+   Core §4.1's "Dialect text value bytes" and a list element at most its "Dialect text-list item
+   bytes", each under the document's profile; the bundled verifiers support `base` alone and refuse
+   a document of the format that declares `extended`, `profile-unsupported`, before they measure
+   any of these. *Why:* a number written in two places can come to differ, and the rule by profile
+   was already §2.2.7's.
+2. **§2.2.2 names the row the `decimal` type does not take.** Core §4.1's "Dialect decimal string
+   characters" is the ceiling of a research decimal string (§12), which `extended` raises; the
+   type's 128 characters are a domain and stay the same under every profile, as decision 7 of the
+   amendment of 2026-11-12 gives. *Why:* the same number under a similar name invites the reading
+   that `extended` widens the type, which would change answers, not only refusals.
+3. **One table in the Python reader.** The reader takes the literal's and the list element's bounds,
+   and §12's research text value and text-list item bounds, from one table of Core §4.1's `base`
+   rows, and a test holds that table equal to Core's. *Why:* two constants for one row can drift.
+
+**Compatibility.** No answer changes. Under `base` every bound keeps its value, and a document of
+the format that declares `extended` was refused `profile-unsupported` before this amendment and
+still is. No digest, preparation or vector of any format changes.
+
+**Conformance.** Four rows join the format's staged rows, now 171: a literal of 8192 UTF-8 bytes and
+one of 8193, and a list element of 1024 bytes and one of 1025, each written in two-byte characters,
+so that a reader that counts characters instead of bytes answers the longer one wrongly. A reader
+test holds both readers' refusal of a document of the format that declares `extended`. None of the
+rows is in a corpus or a claim.
+
 ## Specification
 
 This section is the text proposed to land: the proposed companion document `spec/dialect.md`, its
@@ -1345,9 +1387,10 @@ of version `2.0.0` may declare. A parameter's value not of its type is `paramete
   under every profile. The length is part of the type, and the type decides answers, not only
   refusals: whether a value is comparable (§2.2.4) and whether it is a coordinate (§2.2.5). It is
   therefore a domain, not a resource ceiling, and like the domains Core §4.1 names it does not
-  change with the profile: `extended` does not raise it, though it raises the 128 characters of a
-  research decimal string (§12). A JSON number is not of the type, nor are `"1e3"`, `"+1"`, `"01.5"`
-  and `".5"`.
+  change with the profile. Core §4.1's row "Dialect decimal string characters", 128 under `base` and
+  256 under `extended`, is the ceiling of a research decimal string (§12) and does not apply to this
+  type: `extended` raises that ceiling, not this length. A JSON number is not of the type, nor are
+  `"1e3"`, `"+1"`, `"01.5"` and `".5"`.
 - `string-list`: an array of strings. It MAY be empty, and MAY hold one string more than once.
 - `address-range-list`: an array of address ranges (§2.2.3), each a string. It MAY be empty, MAY
   hold one range more than once, and MAY hold ranges of both families. An array holding a string that
@@ -1430,9 +1473,9 @@ form is a member of no list, and the empty list has no member.
 one of:
 
 - `from`, a pointer into the value read, as in §6.3;
-- `value`, a **literal**: a string of at most 8192 UTF-8 bytes, `true`, `false`, or an integer (§1).
-  `null`, a number that is not an integer, an array and an object are refused; a decimal is written
-  as a string;
+- `value`, a **literal**: a string, of at most §2.2.7's bound on a literal under the document's
+  profile, `true`, `false`, or an integer (§1). `null`, a number that is not an integer, an array
+  and an object are refused; a decimal is written as a string;
 - `derived`, the name of a derived value the rule declares.
 
 The claim's `facts` is `{}` with, for each entry of the match in order, written at `P` (§8.1):
@@ -1550,12 +1593,15 @@ A preparation of a dialect of format `4.0.0` has `formatVersion`, the string `"4
 
 #### 2.2.7 Bounds and refusals
 
-- A rule declares at most 16 derived values; a literal is at most 8192 UTF-8 bytes, Core §4.1's
-  dialect text-value ceiling, 16384 under `extended`; and a list parameter's value holds at most 1024
-  elements, each string of it at most 1024 UTF-8 bytes, Core §4.1's dialect text-list item ceiling,
-  2048 under `extended`. Core §4.1's table has no row for the number of derived values or of a
-  list's elements, and until it has one these two maxima are the same under every profile. A
+- These are the format's bounds; §2.2.2 and §2.2.4 point here. A rule declares at most 16 derived
+  values; a literal is at most 8192 UTF-8 bytes under `base` and 16384 under `extended`, Core §4.1's
+  row "Dialect text value bytes"; and a list parameter's value holds at most 1024 elements, each
+  string of it at most 1024 UTF-8 bytes under `base` and 2048 under `extended`, Core §4.1's row
+  "Dialect text-list item bytes". Core §4.1's table has no row for the number of derived values or
+  of a list's elements, and until it has one these two maxima are the same under every profile. A
   `decimal`'s 128 characters are its type's (§2.2.2), not a bound, and the same under every profile.
+  The bundled verifiers support only `base` (§2): each refuses a document of the format that
+  declares `extended`, `profile-unsupported`, before it measures any of these.
 - A reader of the format measures the derived values and the literals, and §12's counts over the
   case's rule, in §11's phase 3, wherever measurable before any form. A list parameter's elements and
   their bytes are measured when the parameter takes its value, during recomputation and before its

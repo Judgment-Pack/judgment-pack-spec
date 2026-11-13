@@ -13,6 +13,19 @@ here.
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
 
+### Changed
+
+- An amendment to RFC 0018 (#324) states the bounds of the proposed dialect format `4.0.0` once, in
+  `spec/dialect.md` §2.2.7: a literal is at most Core §4.1's "Dialect text value bytes" and a list
+  element at most its "Dialect text-list item bytes", under the document's profile, and §2.2.4
+  points there instead of giving 8192 bytes alone. §2.2.2 names Core §4.1's "Dialect decimal string
+  characters" as the research decimal ceiling that `extended` raises, not the `decimal` type's 128
+  characters. The Python reader takes these bounds from one table of Core §4.1's `base` rows, and a
+  test holds both bundled readers' refusal of a document of the format that declares `extended`,
+  `profile-unsupported`. Four staged rows hold a literal and a list element at their `base` bounds
+  and one byte over (171 rows). No answer, digest or vector changes; Core `0.5.0`'s schema, text and
+  corpora are unchanged.
+
 ## `0.5.2` — 2026-11-13
 
 A release that carries Core `specVersion` `0.5.0` unchanged, byte for byte, as `v0.5.1` does: packs
