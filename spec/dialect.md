@@ -601,7 +601,7 @@ A preparation of a dialect of format `4.0.0` has `formatVersion`, the string `"4
   of a list's elements, and until it has one these two maxima are the same under every profile. A
   `decimal`'s 128 characters are its type's (§2.2.2), not a bound, and the same under every profile.
   The bundled verifiers support only `base` (§2): each refuses a document of the format that
-  declares `extended`, `profile-unsupported`, before it measures any of these.
+  §11's phase 0 finds declaring `extended`, `profile-unsupported`, before it measures any of these.
 - A reader of the format measures the derived values and the literals, and §12's counts over the
   case's rule, in §11's phase 3, wherever measurable before any form. A list parameter's elements and
   their bytes are measured when the parameter takes its value, during recomputation and before its

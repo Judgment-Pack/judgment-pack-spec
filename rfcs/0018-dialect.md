@@ -1070,8 +1070,9 @@ format; the TypeScript reader refuses it `version-unread`, which a test holds. N
    requires an integer `version`. A workflow stage that names a dialect of format `4.0.0` is not
    admitted in `0.5.x`: RFC 0020 §3 refuses its selector `version-unread`, and
    `schema/workflow-1.schema.json` is in the `0.5.0` normative record, which every `0.5.x` release
-   carries byte for byte. Its admission waits for `specVersion` `0.6.0` and for a release-digest
-   encoding of a dialect of format `4.0.0`, which RFC 0020 has to define: RFC 0020 §1 names the
+   carries byte for byte. Its admission cannot come before `specVersion` `0.6.0`, and it needs the
+   format's acceptance and a release-digest encoding of a dialect of format `4.0.0`, which is
+   RFC 0020's to define and is not decided: RFC 0020 §1 names the
    release digest by the reference Runner's encoding at a commit, and that encoding has no form of
    the format. No recording holds a preparation of the format until the recording schema changes in
    its own document. The amendment of 2026-11-13 gives this question's text.
@@ -1611,7 +1612,7 @@ A preparation of a dialect of format `4.0.0` has `formatVersion`, the string `"4
   of a list's elements, and until it has one these two maxima are the same under every profile. A
   `decimal`'s 128 characters are its type's (§2.2.2), not a bound, and the same under every profile.
   The bundled verifiers support only `base` (§2): each refuses a document of the format that
-  declares `extended`, `profile-unsupported`, before it measures any of these.
+  §11's phase 0 finds declaring `extended`, `profile-unsupported`, before it measures any of these.
 - A reader of the format measures the derived values and the literals, and §12's counts over the
   case's rule, in §11's phase 3, wherever measurable before any form. A list parameter's elements and
   their bytes are measured when the parameter takes its value, during recomputation and before its
