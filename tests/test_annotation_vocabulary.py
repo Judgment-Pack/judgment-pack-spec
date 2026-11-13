@@ -1,8 +1,8 @@
-"""The proposed annotation vocabulary `1.0.0` (RFC 0032), its staged rows and its reference checker.
+"""The annotation vocabulary `1.0.0`, status proposed (RFC 0032), its staged rows and its checker.
 
-The companion, spec/annotation-vocabulary.md, is normative for nothing while RFC 0032 is a Draft,
-and its rows under conformance/annotation-vocabulary/1.0.0/ are staged: in no corpus and no bundle.
-Every expectation in the rows was written by hand. These tests hold:
+RFC 0032 is accepted at draft maturity. The companion, spec/annotation-vocabulary.md, is published
+and bundled; its rows under conformance/annotation-vocabulary/1.0.0/ stay staged: in no corpus and
+no bundle. Every expectation in the rows was written by hand. These tests hold:
 
 - the machine-readable form, the checker and the companion text to one list of levels, one order,
   one position, one value form and two codes, each read from the companion's own sentences;
@@ -15,9 +15,10 @@ Every expectation in the rows was written by hand. These tests hold:
   removal, changes neither; and the two other readings of the removal are not §2.6's;
 - a second reading of the refusal: the fragment in vocabulary.json, applied by a general JSON
   Schema validator, refuses exactly the outcomes the checker refuses; and
-- that neither the companion nor the rows reach a release bundle, and no bundled file links to them.
+- that the companion reaches a release bundle and the rows do not, and that no bundled file links
+  to the rows.
 
-The site's exclusion of the rows is held in tests/test_site.py.
+The companion's page, and the site's exclusion of the rows, are held in tests/test_site.py.
 """
 from __future__ import annotations
 
@@ -453,18 +454,41 @@ class Inertness(unittest.TestCase):
                       inertness)
 
 
-class NotReleased(unittest.TestCase):
-    def test_no_bundle_carries_the_companion_or_the_rows(self) -> None:
-        # As for RFC 0020's Draft: the proposed companion is normative for nothing, so no bundle
-        # carries it, and the rows are staged. Published companions and the corpus are the controls.
+class Released(unittest.TestCase):
+    def test_the_rfc_is_accepted_on_a_recorded_review_and_core_is_untouched(self) -> None:
+        # Accepted as RFC 0031 was: a same-vendor round, the different-vendor review waived, and
+        # the round copied into the repository as RFC 0018's acceptance did. The vocabulary keeps
+        # its status, and Core 0.5.0 is frozen, so its §1.1 does not list the companion.
+        rfc = RFC.read_text(encoding="utf-8")
+        self.assertIn("\n- Status: Accepted\n", rfc)
+        self.assertNotIn("- Status: Draft", rfc)
+        self.assertIn("\n- Accepted: 2026-11-13, by the maintainer,", rfc)
+        acceptance = rfc[rfc.index("\n## Acceptance\n"):]
+        for phrase in ("The different-vendor review was waived.", "D19 (b)"):
+            self.assertIn(phrase, acceptance)
+        review = (ROOT / "rfcs" / "reviews" / "0032-round-1.md").read_text(encoding="utf-8")
+        self.assertIn("## Review record (same vendor, not a cross-vendor claim)", review)
+        index = (ROOT / "rfcs" / "README.md").read_text(encoding="utf-8")
+        self.assertIn("| [0032](0032-outcome-severity.md) | Outcome severity, one well-known annotation key "
+                      "| Accepted |", index)
+        companion = COMPANION.read_text(encoding="utf-8")
+        self.assertIn("This text is annotation vocabulary version `1.0.0`, status `proposed`.", companion)
+        self.assertNotIn("normative for nothing", companion)
+        core = (ROOT / "spec" / "judgment-pack-core.md").read_text(encoding="utf-8")
+        self.assertNotIn("annotation-vocabulary", core[core.index("### 1.1"):core.index("## 2.")])
+
+    def test_bundles_carry_the_companion_and_not_the_rows(self) -> None:
+        # As for RFC 0018's acceptance: the accepted companion is bundled, and its rows stay staged,
+        # with the machine-readable form among them. The other published companions and the corpus
+        # are the controls.
         excluded = [
-            "spec/annotation-vocabulary.md",
             "conformance/annotation-vocabulary",
             "conformance/annotation-vocabulary/1.0.0/vocabulary.json",
             "conformance/annotation-vocabulary/1.0.0/manifest.json",
             "conformance/annotation-vocabulary/1.0.0/packs/each-level.json",
         ]
-        released = ["spec/dialect.md", "spec/judgment-pack-core.md", "conformance/manifest.json"]
+        released = ["spec/annotation-vocabulary.md", "spec/dialect.md", "spec/judgment-pack-core.md",
+                    "conformance/manifest.json"]
         try:
             completed = subprocess.run(
                 ["git", "check-attr", "export-ignore", "--", *excluded, *released],
@@ -492,10 +516,10 @@ class NotReleased(unittest.TestCase):
         BUILD_RELEASE.validate_unchanged_normative_artifacts("v0.5.2")
 
     def test_no_bundled_file_links_to_an_export_ignored_file(self) -> None:
-        # A bundle leaves out the companion and the rows (export-ignore), so a relative link to
-        # either from a Markdown file the bundle carries would dangle there. Such a file names them
-        # in backticks, as CHANGELOG.md does for RFC 0020's `spec/workflow.md`. The bundled files are
-        # the builder's own list, less what export-ignore removes.
+        # A bundle leaves out the rows (export-ignore), so a relative link to them from a Markdown
+        # file the bundle carries would dangle there; the companion, now bundled, links to them on
+        # the repository instead. The bundled files are the builder's own list, less what
+        # export-ignore removes.
         def export_ignored(paths: list[str]) -> set[str]:
             completed = subprocess.run(["git", "check-attr", "export-ignore", "--", *paths],
                                        cwd=ROOT, check=True, capture_output=True, text=True)
@@ -511,7 +535,7 @@ class NotReleased(unittest.TestCase):
         try:
             bundled = sorted(set(candidates) - export_ignored(candidates))
             self.assertIn("CHANGELOG.md", bundled)
-            self.assertNotIn("spec/annotation-vocabulary.md", bundled)
+            self.assertIn("spec/annotation-vocabulary.md", bundled)
             targets: dict[str, list[str]] = {}
             for name in bundled:
                 for link in re.findall(r"\]\(([^)\s]+)\)", (root / name).read_text(encoding="utf-8")):

@@ -17,7 +17,8 @@
 > Release tag [`v0.4.0`](releases/v0.4.0.md) carries `specVersion` `0.3.0` unchanged.
 > [`v0.5.0`](releases/v0.5.0.md) releases `specVersion` `0.5.0`, staged as `0.4.0-draft`; no
 > `specVersion` `0.4.0` is assigned. [`v0.5.1`](releases/v0.5.1.md) carries `specVersion` `0.5.0`
-> unchanged.
+> unchanged, and so does [`v0.5.2`](releases/v0.5.2.md), which adds the proposed annotation
+> vocabulary `1.0.0` beside Core.
 
 ## Project ecosystem and where to contribute
 

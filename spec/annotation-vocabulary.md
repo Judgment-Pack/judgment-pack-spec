@@ -2,17 +2,28 @@
 
 ## Status
 
-This is the proposed companion text of [RFC 0032](../rfcs/0032-outcome-severity.md), a Draft. It is
-normative for nothing. Acceptance would place it beside Core `0.5.0`, with the vocabulary-checker
-class of §6.
+This document is a companion document of the Judgment Pack specification, at draft maturity. It is
+normative for one conformance class, the *vocabulary checker* (§6), and for a consumer that applies
+it in the statements §4 marks MUST or MUST NOT, and for nothing else. It is published beside the
+released Core `0.5.0`, first in release `v0.5.2`, and carries no `specVersion` of its own. Core
+`0.5.0`'s §1.1 does not list it, because a release that carries Core `0.5.0` changes no Core text
+([VERSIONING.md](../VERSIONING.md)); its standing comes from its design record's acceptance.
+
+Its design record is [RFC 0032](../rfcs/0032-outcome-severity.md), accepted on 2026-11-13 at draft
+maturity, which is informative. The maintainer accepted it on a review by a model from the drafting
+vendor, with the different-vendor review of the interim review regime waived, as the RFC's
+Acceptance section records.
 
 This text is annotation vocabulary version `1.0.0`, status `proposed`. The version is this
 document's own: it is not a Core `specVersion`, it is not a release tag, and no pack declares it
-(§7). Its machine-readable form and its hand-written rows are staged under
-[`conformance/annotation-vocabulary/1.0.0/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/annotation-vocabulary/1.0.0).
-They are not a conformance corpus, no bundle carries them, and no claim may cite them. The
-repository's reference checker, `tools/annotation_vocabulary.py`, is the one reader; no second,
-independently written reader exists.
+(§7). It is proposed because its machine-readable form and its hand-written rows are staged under
+[`conformance/annotation-vocabulary/1.0.0/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/annotation-vocabulary/1.0.0),
+and one reader reads it. The rows are not a conformance corpus, no bundle carries them, the site
+does not serve them, and no claim may cite them; until a specification version publishes rows for
+it, no vocabulary-checker conformance claim is available. The repository's reference checker,
+`tools/annotation_vocabulary.py`, is the one reader; no second, independently written reader
+exists. What a later version may change is §9's: within version `1`, a later version only adds
+levels, so a pack that passes `1.0.0` passes every later `1.y`.
 
 Core `0.5.0` is unchanged by this document. Every pack Core accepts it still accepts, every pack it
 refuses it still refuses, and every evaluation gives the result it gave.
@@ -336,7 +347,8 @@ Once a Core selector's schema lists them (RFC 0032, D18), that selector freezes 
 a level that a later minor version adds reaches Core only through a new selector, and each such
 selector records which version `1.x` of this document it froze.
 
-While RFC 0032 is a Draft, every version of this document is `proposed`.
+Version `1.0.0` is `proposed` for the reasons its Status gives: its rows are staged, and one
+reader reads it.
 
 ## 10. Machine-readable form
 

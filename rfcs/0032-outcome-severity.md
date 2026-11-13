@@ -1,28 +1,37 @@
 # RFC 0032: Outcome severity, one well-known annotation key
 
-- Status: Draft
-- Type: Standards track, draft maturity. A proposed companion document beside Core, the annotation
+- Status: Accepted
+- Type: Standards track, draft maturity. A companion document beside Core, the annotation
   vocabulary, with its own version, `1.0.0`. Not a Core amendment.
 - Created: 2026-11-13
+- Accepted: 2026-11-13, by the maintainer, on the same-vendor review recorded on pull request 321,
+  with the different-vendor review waived; see [Acceptance](#acceptance).
 - Target: specification release `v0.5.2`, a patch release that carries Core `specVersion` `0.5.0`
-  unchanged ([VERSIONING.md](../VERSIONING.md)). The companion is normative for nothing until this
-  RFC is accepted.
+  unchanged ([VERSIONING.md](../VERSIONING.md)).
 - Issue: [#320](https://github.com/Judgment-Pack/judgment-pack-spec/issues/320)
-- Proposed text: [`spec/annotation-vocabulary.md`](../spec/annotation-vocabulary.md)
+- Companion text: [`spec/annotation-vocabulary.md`](../spec/annotation-vocabulary.md), annotation
+  vocabulary `1.0.0`, status `proposed`
 - Staged rows: [`conformance/annotation-vocabulary/`](../conformance/annotation-vocabulary/README.md)
 - Related: [RFC 0031](0031-annotations-and-value-sets.md) (accepted, Core `0.5.0`),
   [RFC 0016](0016-outcome-values.md) (Draft), [#306](https://github.com/Judgment-Pack/judgment-pack-spec/issues/306)
   (annotation positions)
 
-> This record is a Draft, and it and the companion it proposes are normative for nothing. See
-> [RFC 0000](0000-rfc-process.md) for the process and its bar.
+> This record is accepted at draft maturity, and it is informative. The companion document
+> [`spec/annotation-vocabulary.md`](../spec/annotation-vocabulary.md) is the normative text, for the
+> vocabulary-checker class and for a consumer that applies it, and for nothing else; where this
+> record and the companion differ, the companion governs. The sections below describe the draft as
+> it was proposed. See [RFC 0000](0000-rfc-process.md) for the process and its bar.
 >
 > **Review standing.** [RFC 0009](0009-interim-review-regime.md) requires a recorded adversarial
 > review by a model from a different vendor, with a written maintainer disposition for each
 > finding, on the pull request that creates this RFC. That cross-vendor review has not happened, and
 > this record does not claim it. One review round by a model from the drafting vendor is recorded on
-> the pull request; it is a same-vendor review, not the RFC 0009 review. The decisions below are
-> numbered so that a review can disposition each one.
+> the pull request that created this record, with the maintainer's disposition of each finding, and
+> is copied verbatim to
+> [`rfcs/reviews/0032-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0032-round-1.md).
+> The maintainer waived the different-vendor review for this record and accepted it on that
+> same-vendor review ([Acceptance](#acceptance)). That is a same-vendor review, not a cross-vendor
+> claim. The decisions below are numbered so that a review can disposition each one.
 
 ## Summary
 
@@ -85,7 +94,7 @@ this record does not open a registry, and it says what a second key would need (
 
 ## Specification
 
-The proposed normative text is [`spec/annotation-vocabulary.md`](../spec/annotation-vocabulary.md),
+The normative text is [`spec/annotation-vocabulary.md`](../spec/annotation-vocabulary.md),
 annotation vocabulary `1.0.0`. In brief:
 
 - the key `severity` is defined in an outcome's annotations object, and nowhere else (§2.1);
@@ -351,6 +360,13 @@ the proposal visible and no claim made. The proposed dialect format `4.0.0` did 
 `v0.5.1` bundle undecided, but as §2.2 of a companion already accepted; a new companion whose RFC is
 a Draft follows RFC 0020's rule instead.
 
+*Decided at acceptance: (b).* The review of record accepted (a) for the Draft and left acceptance
+to a separate decision. The maintainer then accepted this record before `v0.5.2`, so that the
+vocabulary ships in that release as text a consumer can rely on ([Acceptance](#acceptance)). The
+companion's `export-ignore` line is removed, it has a page of its own, and the `v0.5.2` bundles
+carry it. Its rows and `vocabulary.json` stay staged, as (b) says, and as the vectors of
+RFC 0017 and RFC 0018 stayed staged at their acceptance.
+
 **D20. The machine-readable form is a plain `vocabulary.json`, not a schema file.**
 
 *Why:* a `*.schema.json` under `conformance/` would be a schema family for the record-shape catalog
@@ -480,17 +496,77 @@ document corpus does for a `base`-only reader.
   plans the check and a view; it would be a second reader. Nothing has been built there.
 
 RFC 0000 asks for two plausible independent implementations before a stable feature is accepted.
-One exists; the second is planned.
+One exists. The second that is planned is the reference runtime; it is by the same maintainer and
+would not be independent.
 
 ## Unresolved questions
 
 1. **An informational level** below `low` (D5 b): wait for packs that ask for it, or add it in `1.0.0`.
+   *At acceptance:* `1.0.0` has none (D5 a); a minor version can add one (companion §9).
 2. **A second independent reader** before acceptance, or acceptance at draft maturity on one reader
-   (D19).
+   (D19). *At acceptance:* accepted at draft maturity on one reader; a second reader is still to be
+   written.
 3. **Positions** (D4; [#306](https://github.com/Judgment-Pack/judgment-pack-spec/issues/306)): whether
    a later version should define the key anywhere else.
 4. **An identifier with a level and no annotation** (D11 c): whether a checker should say anything.
 5. **The next selector's path** (D18): option 2 or option 3, decided when that selector opens.
 6. **The rows' future**: whether they join a corpus, with a `suiteVersion`, when Core `0.6.0` opens,
    or stay the companion's own.
-7. **Review**: the RFC 0009 review this record does not have.
+7. **Review**: the RFC 0009 review this record does not have. *At acceptance:* waived by the
+   maintainer for this record ([Acceptance](#acceptance)); it has still not happened.
+
+## Acceptance
+
+On 2026-11-13 the maintainer accepted this record at draft maturity, with D19 (b), so that the
+annotation vocabulary `1.0.0` ships in `v0.5.2`. The different-vendor review was waived.
+
+**What acceptance rests on.** One review round by a model from the drafting vendor, read-only, by a
+reviewer that did not write the change, recorded on
+[pull request 321](https://github.com/Judgment-Pack/judgment-pack-spec/pull/321) with the
+maintainer's disposition of each finding (one HIGH, six MEDIUM and seven LOW, each fixed before that
+pull request merged), and copied verbatim to
+[`rfcs/reviews/0032-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0032-round-1.md).
+The maintainer accepted that round as the review of record, and the decisions as its disposition
+records them, with one change: D19 is (b), not the (a) the round accepted for the Draft.
+
+The changes made at acceptance come after the commits that round read, and the round does not cover
+them: D19 (b), the companion's Status and its section 9, and this section. A pre-release review,
+again by a model from the drafting vendor, is recorded on
+[pull request 322](https://github.com/Judgment-Pack/judgment-pack-spec/pull/322) and covers them.
+
+`GOVERNANCE.md` provides no waiver. This acceptance, and pull request 322 that records it, are
+merged without the review it requires, as RFC 0031's were.
+
+**What this leaves unestablished.**
+
+- **No different-vendor review.** RFC 0009's review has not happened; the maintainer waived it for
+  this record. This is a same-vendor review, not a cross-vendor claim.
+- **One reader.** The repository's checker, `tools/annotation_vocabulary.py`, is the only
+  implementation of the vocabulary checker, written by the drafting vendor. The fragment in
+  `vocabulary.json`, applied by a general JSON Schema validator, is a second reading of the refusal
+  alone, not an independent implementation. RFC 0000's two independent implementations are not
+  shown; that bar is for a stable feature, and this acceptance is at draft maturity.
+- **No second implementation.** No reference runtime release applies the vocabulary or shows a
+  level in a view;
+  [runtime #405](https://github.com/Judgment-Pack/judgment-pack-runtime/issues/405) plans one.
+- **One row not run.** The `profile-extended` row records what a checker that supports `extended`
+  gives; the one reader supports `base` only, so no checker has run it.
+- **No outside comment.** The record was public for less than a day before acceptance, and no one
+  outside the project commented on it (GOVERNANCE.md, Interim review regime).
+
+**What lands, and what does not.**
+
+- The companion, [`spec/annotation-vocabulary.md`](../spec/annotation-vocabulary.md), is normative
+  at draft maturity for the vocabulary-checker class (companion §6) and for a consumer that applies
+  it (the statements companion §4 marks MUST or MUST NOT), and for nothing else. Its `export-ignore`
+  line is removed, the site publishes it as a page of its own, and the `v0.5.2` bundles carry it.
+- Its version `1.0.0` keeps the status `proposed`. Its rows and `vocabulary.json` stay staged under
+  [`conformance/annotation-vocabulary/`](../conformance/annotation-vocabulary/README.md): in no
+  corpus and no bundle, not served by the site, and citable by no claim. Until a specification
+  version publishes rows for the class, no vocabulary-checker conformance claim is available
+  (Unresolved question 6).
+- Core `0.5.0` does not change: its text, schema and corpora keep their bytes. So Core §1.1, which
+  lists the companion documents normative for a class, does not list this one, because a release
+  that carries `0.5.0` changes no Core text (VERSIONING.md, "Release numbers and specVersion"). The
+  companion's standing rests on this acceptance and on its own Status section; the next selector's
+  §1.1 is where it would be listed.

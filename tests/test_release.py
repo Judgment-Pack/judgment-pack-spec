@@ -1288,5 +1288,98 @@ class CorePatchReleaseTests(unittest.TestCase):
                 self.assertIn(record["files"][path].removeprefix("sha256:"), notes)
 
 
+class SecondPatchReleaseTests(unittest.TestCase):
+    """v0.5.2: the second patch tag that carries 0.5.0 unchanged, beside the annotation vocabulary.
+
+    The builder's refusals are held by CorePatchReleaseTests, whose fixture builds any patch tag;
+    these hold the prepared files of this one.
+    """
+
+    TAG = "v0.5.2"
+    RECORD = "releases/v0.5.0.normative.json"
+    IDENTITY = {"releaseVersion": "0.5.2", "tag": TAG, "specVersion": "0.5.0", "maturity": "draft",
+                "distribution": "specification-unchanged"}
+
+    def test_the_prepared_files_are_this_tags(self):
+        # The live tree holds 0.5.0's normative bytes, so it builds as v0.5.2, with no mapping.
+        BUILD_RELEASE.validate_artifacts("0.5.2", self.TAG)
+        self.assertFalse((ROOT / f"releases/{self.TAG}.json").exists())
+        self.assertEqual(self.IDENTITY, BUILD_RELEASE.release_identity(self.TAG))
+        # The next milestone number after v0.5.1's 9.
+        self.assertEqual({"number": 10, "title": "v0.5.2"},
+                         json.loads((ROOT / f"releases/{self.TAG}.milestone.json").read_text()))
+        self.assertEqual("# v0.5.2", (ROOT / f"releases/{self.TAG}.md").read_text().splitlines()[0])
+        paths = BUILD_RELEASE.bundle_paths(self.TAG, "HEAD")
+        notes = BUILD_RELEASE.core_release_notes_path(self.TAG).relative_to(ROOT).as_posix()
+        self.assertEqual(f"releases/{self.TAG}.md", notes)
+        for path in ("catalog", self.RECORD, notes, "spec"):
+            with self.subTest(present=path):
+                self.assertIn(path, paths)
+        for path in ("releases/v0.5.1.md", f"releases/{self.TAG}.json", "rfcs", "tools"):
+            with self.subTest(absent=path):
+                self.assertNotIn(path, paths)
+        # The bundle carries the companion and not its rows (export-ignore is what archive honours).
+        try:
+            attributes = dict(line.rsplit(": export-ignore: ", 1) for line in subprocess.run(
+                ["git", "check-attr", "export-ignore", "--", "spec/annotation-vocabulary.md",
+                 "conformance/annotation-vocabulary/1.0.0/vocabulary.json", "catalog/format-status.json",
+                 self.RECORD, notes],
+                cwd=ROOT, check=True, capture_output=True, text=True).stdout.splitlines())
+        except (OSError, subprocess.CalledProcessError) as error:
+            self.skipTest(f"git cannot read attributes here: {error}")
+        self.assertEqual({"spec/annotation-vocabulary.md": "unspecified",
+                          "conformance/annotation-vocabulary/1.0.0/vocabulary.json": "set",
+                          "catalog/format-status.json": "unspecified", self.RECORD: "unspecified",
+                          notes: "unspecified"}, attributes)
+
+    def test_the_notes_state_what_a_consumer_and_an_author_need(self):
+        notes = re.sub(r"\s+", " ", (ROOT / f"releases/{self.TAG}.md").read_text(encoding="utf-8"))
+        record = json.loads((ROOT / self.RECORD).read_text(encoding="utf-8"))
+        for text in ("`v0.5.2` carries Core `specVersion` `0.5.0` unchanged, as `v0.5.1` does",
+                     "Packs keep declaring exact `specVersion` `0.5.0`.",
+                     "The tag name is not a selector.",
+                     "Core `0.5.0`'s normative files are byte for byte those tag `v0.5.0` released",
+                     "The builder refuses a patch tag, or a bundle, whose files differ from that record.",
+                     "Consumers pinned to `v0.5.0` or `v0.5.1` need do nothing.",
+                     "**The annotation vocabulary `1.0.0`, proposed (#320).**",
+                     "`low` < `medium` < `high` < `critical`",
+                     "`JPS-VOCABULARY-SEVERITY-VALUE`", "`JPS-VOCABULARY-SEVERITY-IDENTIFIER`",
+                     "Core `0.5.0` §1.1 does not list it",
+                     "This release closes #320.",
+                     "**Reader compatibility:**", "**Writer compatibility:**",
+                     "**Semantic compatibility:**", "**Migration compatibility:**",
+                     "| Reference runtime `v0.44.0` and later | read; no change needed | no released "
+                     "version checks it; a later, unpublished runtime release may, with no version "
+                     "promised |",
+                     "| Reference Runner | as its own release notes state; no change needed |",
+                     "| Reference gateway | no change needed | no change needed |",
+                     "## What a pack author does", "Nothing is required.",
+                     "## Migration note", "## What is in the bundles", "They do not hold:",
+                     "now with `spec/annotation-vocabulary.md`",
+                     "`conformance/annotation-vocabulary/`, `conformance/dialect/`",
+                     "Stay on the `v0.3.0` bundle for the `retained-column/1` leaf",
+                     "## What this release does not establish",
+                     "same-vendor review, not a cross-vendor claim",
+                     "https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json",
+                     f"`releases/v0.5.0.normative.json`, SHA-256 `{BUILD_RELEASE.NORMATIVE_RECORDS['0.5.0'][1]}`",
+                     f"`{record['sourceCommit']}`", f"each of the {len(record['files'])} normative files",
+                     "`releaseVersion` `0.5.2`, tag `v0.5.2`",
+                     "`distribution` `specification-unchanged`"):
+            with self.subTest(text=text[:40]):
+                self.assertIn(text, notes)
+        # Derived from the v0.5.1 and v0.5.2 bundles the builder wrote, compared file by file.
+        self.assertIn("Of the files both hold, only these differ: `README.md`, `CHANGELOG.md`, "
+                      "`catalog/format-status.json`", notes)
+        for path in ("schema/judgment-pack-core.schema.json", "conformance/manifest.schema.json",
+                     "conformance/evaluation/manifest.schema.json", "schema/workflow-1.schema.json"):
+            with self.subTest(path=path):
+                self.assertIn(record["files"][path].removeprefix("sha256:"), notes)
+        # The rows the notes count are the staged manifest's.
+        manifest = json.loads((ROOT / "conformance/annotation-vocabulary/1.0.0/manifest.json")
+                              .read_text(encoding="utf-8"))
+        self.assertIn(f"{len(manifest['rows'])} hand-written rows and one pair", notes)
+        self.assertEqual(1, len(manifest["pairs"]))
+
+
 if __name__ == "__main__":
     unittest.main()

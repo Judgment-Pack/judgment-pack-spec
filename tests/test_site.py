@@ -24,8 +24,9 @@ WITNESS_VECTORS = "conformance/witness"
 # published.
 DIALECT_VECTORS = "conformance/dialect"
 WORKFLOW_VECTORS = "conformance/workflow"
-# The annotation vocabulary's hand-written rows are staged (conformance/annotation-vocabulary/README.md),
-# and the companion document RFC 0032 proposes has no page while that RFC is a Draft.
+# The annotation vocabulary's hand-written rows are staged since RFC 0032's acceptance, and the site
+# serves nothing under this directory either (conformance/annotation-vocabulary/README.md). The
+# companion document they belong to is published.
 ANNOTATION_VOCABULARY_ROWS = "conformance/annotation-vocabulary"
 # The staged draft Core specVersion 0.4.0-draft graduated to the released 0.5.0 in place; its staged
 # directories are retired, and nothing the site writes is named for the draft selector.
@@ -277,20 +278,42 @@ class StaticSiteTests(unittest.TestCase):
         index = (self.output / "rfcs" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="0018-dialect/"', index)
 
-    def test_annotation_vocabulary_draft_is_browsable_and_its_rows_stay_staged(self) -> None:
-        # RFC 0032 is a Draft: its page exists, the companion it proposes has none, and links to the
-        # companion and to the staged rows read the source.
-        page = self.output / "rfcs" / "0032-outcome-severity" / "index.html"
-        document = page.read_text(encoding="utf-8")
-        self.assertIn('<span class="artifact-label">Draft proposal</span>', document)
-        links = inspect(page).links
+    def test_annotation_vocabulary_rows_are_not_published(self) -> None:
+        # Staged since RFC 0032's acceptance, and conformance/annotation-vocabulary/README.md says the
+        # site does not serve them; held as the other staged directories are.
+        self._assert_nothing_published_under(ANNOTATION_VOCABULARY_ROWS)
+
+    def test_annotation_vocabulary_companion_document_is_published(self) -> None:
+        # RFC 0032 is accepted and its text landed: the companion document is a page of its own,
+        # labelled with its version and status, and the RFC's page links to that page, not to the
+        # source. Core 0.5.0 is frozen, so its §1.1 does not list this companion.
+        document = (self.output / "spec" / "annotation-vocabulary" / "index.html").read_text(
+            encoding="utf-8"
+        )
         self.assertIn(
+            '<span class="artifact-label">Normative for the vocabulary-checker class; version 1.0.0 '
+            "proposed</span>",
+            document,
+        )
+        for heading in ("2. The key <code>severity</code>", "6. The vocabulary checker"):
+            self.assertIn(heading, document)
+        self.assertIn("status <code>proposed</code>", document)
+        core = (self.output / "spec" / "0.5.0" / "index.html").read_text(encoding="utf-8")
+        self.assertNotIn('href="../annotation-vocabulary/"', core)
+        page = self.output / "rfcs" / "0032-outcome-severity" / "index.html"
+        self.assertIn(
+            '<span class="artifact-label">Accepted standards-track RFC</span>',
+            page.read_text(encoding="utf-8"),
+        )
+        links = inspect(page).links
+        self.assertIn("../../spec/annotation-vocabulary/", links)
+        self.assertNotIn(
             "https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/spec/annotation-vocabulary.md",
             links,
         )
-        self.assertFalse((self.output / "spec" / "annotation-vocabulary").exists())
         self.assertIn("0032-outcome-severity/", inspect(self.output / "rfcs" / "index.html").links)
-        self._assert_nothing_published_under(ANNOTATION_VOCABULARY_ROWS)
+        guide = (self.output / "llms.txt").read_text(encoding="utf-8")
+        self.assertIn(f"{self.base_url}/spec/annotation-vocabulary/", guide)
 
     def test_pack_design_advisory_draft_is_browsable_with_source_only_artifacts(self) -> None:
         page = self.output / "rfcs/0027-pack-design-advisories/index.html"
@@ -721,11 +744,13 @@ class StaticSiteTests(unittest.TestCase):
             "conformance/evaluation/index.html": "conformance/evaluation/README.md",
             "spec/checkpoint-witness/index.html": "spec/checkpoint-witness.md",
             "spec/dialect/index.html": "spec/dialect.md",
+            "spec/annotation-vocabulary/index.html": "spec/annotation-vocabulary.md",
             # Rendered from the immutable final notes; docs/releases/v0.3.0.md is only a pointer.
             "project/releases/0.3.0/index.html": "releases/v0.3.0.md",
             "project/releases/0.4.0/index.html": "releases/v0.4.0.md",
             "project/releases/0.5.0/index.html": "releases/v0.5.0.md",
             "project/releases/0.5.1/index.html": "releases/v0.5.1.md",
+            "project/releases/0.5.2/index.html": "releases/v0.5.2.md",
         }
         for output, source in cases.items():
             with self.subTest(output=output):
@@ -781,6 +806,22 @@ class StaticSiteTests(unittest.TestCase):
         overview = (self.output / "index.html").read_text(encoding="utf-8")
         self.assertIn('<meta name="generator" content="jps-site-build 0.5.0">', overview)
         self.assertFalse((self.output / "spec/0.5.1").exists())
+
+    def test_the_0_5_2_release_page_says_it_carries_0_5_0_and_the_site_stays_on_0_5_0(self) -> None:
+        page = self.output / "project/releases/0.5.2/index.html"
+        text = page.read_text(encoding="utf-8")
+        for phrase in ("Consumers pinned to", "What a pack author does", "What is in the bundles",
+                       "What this release does not establish", "annotation vocabulary"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+        # The notes link to the companion's page, which this release is the first to publish.
+        self.assertIn("../../../spec/annotation-vocabulary/", inspect(page).links)
+        project = (self.output / "project/index.html").read_text(encoding="utf-8")
+        self.assertIn('href="releases/0.5.2/"', project)
+        self.assertIn("0.5.2 release", project)
+        overview = (self.output / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<meta name="generator" content="jps-site-build 0.5.0">', overview)
+        self.assertFalse((self.output / "spec/0.5.2").exists())
 
     def test_the_0_4_0_release_page_says_it_carries_0_3_0(self) -> None:
         page = (self.output / "project/releases/0.4.0/index.html").read_text(encoding="utf-8")

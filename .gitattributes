@@ -22,10 +22,10 @@ conformance/dialect/** export-ignore -text
 # so no bundle carries it; acceptance removes this line, as for RFC 0018's Draft.
 spec/workflow.md export-ignore
 
-# The annotation vocabulary RFC 0032 proposes is normative for nothing while the RFC is a draft, so
-# no bundle carries the companion; acceptance removes its line, as for RFC 0020's. Its rows are
-# hand-written and staged, in no corpus (conformance/annotation-vocabulary/README.md).
-spec/annotation-vocabulary.md export-ignore
+# The annotation vocabulary's rows and its machine-readable form are staged since RFC 0032's
+# acceptance, hand-written and in no corpus (conformance/annotation-vocabulary/README.md), so no
+# bundle carries them. The companion document they belong to, spec/annotation-vocabulary.md, is
+# published and no longer export-ignore.
 conformance/annotation-vocabulary export-ignore
 conformance/annotation-vocabulary/** export-ignore
 
