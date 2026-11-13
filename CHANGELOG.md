@@ -25,6 +25,9 @@ here.
   `profile-unsupported`. Four staged rows hold a literal and a list element at their `base` bounds
   and one byte over (171 rows). No answer, digest or vector changes; Core `0.5.0`'s schema, text and
   corpora are unchanged.
+- RFC 0018's open question 2 on format `4.0.0` (#324) records that a workflow stage naming a dialect
+  of the format is not admitted in `0.5.x`: admission waits for `specVersion` `0.6.0` and for a
+  release-digest encoding of the format, which RFC 0020 has to define. No workflow schema changes.
 
 ## `0.5.2` — 2026-11-13
 

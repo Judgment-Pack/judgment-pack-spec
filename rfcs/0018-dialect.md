@@ -17,7 +17,7 @@
   option C, round 16), 2026-10-22 (dialect-owned conversions, reconciliation and quality findings,
   issue #170; typed research results, source profiles and retained execution evidence, issue #169),
   2026-11-12 (dialect format 4.0.0, proposed, issue #316), 2026-11-13 (format 4.0.0's bounds stated
-  once, issue #324)
+  once, and a workflow stage's admission of the format, issue #324)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -1067,8 +1067,14 @@ format; the TypeScript reader refuses it `version-unread`, which a test holds. N
    TypeScript reader does not read the format; until it does, one reader's answers are the vectors'.
 2. **The schemas outside this amendment.** `schema/workflow-1*.schema.json` enumerates a dialect's
    `formatVersion` as `2.0.0` and `3.0.0`, and `schema/dialect-recording/1/preparation.schema.json`
-   requires an integer `version`. A workflow cannot pin a dialect of format `4.0.0`, and no recording
-   holds its preparation, until each changes in its own document.
+   requires an integer `version`. A workflow stage that names a dialect of format `4.0.0` is not
+   admitted in `0.5.x`: RFC 0020 §3 refuses its selector `version-unread`, and
+   `schema/workflow-1.schema.json` is in the `0.5.0` normative record, which every `0.5.x` release
+   carries byte for byte. Its admission waits for `specVersion` `0.6.0` and for a release-digest
+   encoding of a dialect of format `4.0.0`, which RFC 0020 has to define: RFC 0020 §1 names the
+   release digest by the reference Runner's encoding at a commit, and that encoding has no form of
+   the format. No recording holds a preparation of the format until the recording schema changes in
+   its own document. The amendment of 2026-11-13 gives this question's text.
 3. **Units and model.** Millimetres and millimetres per second, rounded down, and the sphere of
    radius 6371008800 mm. Whether an ellipsoidal distance or another unit is wanted is open.
 4. **The accuracy statement** is a measurement over the inputs tried, not a bound shown for every
@@ -1144,6 +1150,10 @@ one of 8193, and a list element of 1024 bytes and one of 1025, each written in t
 so that a reader that counts characters instead of bytes answers the longer one wrongly. A reader
 test holds both readers' refusal of a document of the format that declares `extended`. None of the
 rows is in a corpus or a claim.
+
+**What this amendment leaves open.** A workflow stage that names a dialect of the format, and a
+recording of its preparation, are open question 2 of the amendment of 2026-11-12, whose text this
+amendment replaces.
 
 ## Specification
 
