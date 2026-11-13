@@ -3,13 +3,13 @@
   "families": {
     "conformance/evaluation/manifest": {
       "draftVersion": "0.5.0",
-      "baseline": "v0.5.0",
-      "lastReleased": "v0.5.0"
+      "baseline": "v0.5.1",
+      "lastReleased": "v0.5.1"
     },
     "conformance/manifest": {
       "draftVersion": "0.5.0",
-      "baseline": "v0.5.0",
-      "lastReleased": "v0.5.0"
+      "baseline": "v0.5.1",
+      "lastReleased": "v0.5.1"
     },
     "decision-record": {
       "draftVersion": "1",
@@ -23,8 +23,8 @@
     },
     "judgment-pack-core": {
       "draftVersion": "0.5.0",
-      "baseline": "v0.5.0",
-      "lastReleased": "v0.5.0"
+      "baseline": "v0.5.1",
+      "lastReleased": "v0.5.1"
     },
     "policy": {
       "draftVersion": "1.0.0",
@@ -43,8 +43,8 @@
     },
     "workflow": {
       "draftVersion": "0.5.0",
-      "baseline": "v0.5.0",
-      "lastReleased": "v0.5.0"
+      "baseline": "v0.5.1",
+      "lastReleased": "v0.5.1"
     },
     "workflow-contributors": {
       "draftVersion": "0.4.0",

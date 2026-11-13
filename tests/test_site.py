@@ -706,6 +706,7 @@ class StaticSiteTests(unittest.TestCase):
             "project/releases/0.3.0/index.html": "releases/v0.3.0.md",
             "project/releases/0.4.0/index.html": "releases/v0.4.0.md",
             "project/releases/0.5.0/index.html": "releases/v0.5.0.md",
+            "project/releases/0.5.1/index.html": "releases/v0.5.1.md",
         }
         for output, source in cases.items():
             with self.subTest(output=output):
@@ -748,6 +749,19 @@ class StaticSiteTests(unittest.TestCase):
         project = (self.output / "project/index.html").read_text(encoding="utf-8")
         self.assertIn('href="releases/0.5.0/"', project)
         self.assertIn("0.5.0 release", project)
+
+    def test_the_0_5_1_release_page_says_it_carries_0_5_0_and_the_site_stays_on_0_5_0(self) -> None:
+        page = (self.output / "project/releases/0.5.1/index.html").read_text(encoding="utf-8")
+        for text in ("Consumers pinned to", "What is in the bundles", "Dialect format", "4.0.0"):
+            with self.subTest(text=text):
+                self.assertIn(text, page)
+        project = (self.output / "project/index.html").read_text(encoding="utf-8")
+        self.assertIn('href="releases/0.5.1/"', project)
+        self.assertIn("0.5.1 release", project)
+        # The release re-pins nothing, so the site's Core version does not move.
+        overview = (self.output / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<meta name="generator" content="jps-site-build 0.5.0">', overview)
+        self.assertFalse((self.output / "spec/0.5.1").exists())
 
     def test_the_0_4_0_release_page_says_it_carries_0_3_0(self) -> None:
         page = (self.output / "project/releases/0.4.0/index.html").read_text(encoding="utf-8")

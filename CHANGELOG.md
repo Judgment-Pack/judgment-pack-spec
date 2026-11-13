@@ -12,6 +12,16 @@ here.
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
+
+## `0.5.1` — 2026-11-13
+
+A release that carries Core `specVersion` `0.5.0` unchanged, byte for byte, the first patch release
+under the release numbering rule: packs keep declaring `0.5.0`, the tag name is not a selector, and
+consumers pinned to `v0.5.0` need do nothing. The [release notes](releases/v0.5.1.md) give its scope
+and what is and is not in its bundles.
+
+### Added
+
 - An amendment to RFC 0018 (#316) proposes dialect format `4.0.0` (`spec/dialect.md` §2.2): a
   named format with no integer twin, adding a rule on the case, `decimal`, `string-list` and
   `address-range-list` parameters, rule version `2.0.0` (ordered comparison, membership, a forward
@@ -23,6 +33,16 @@ here.
   name the format, and no claim names it. Its review is round 17 of RFC 0018, recorded in
   `rfcs/reviews/0018-round-17.md` (three MEDIUM and five LOW, all applied; same vendor, not a
   cross-vendor claim).
+
+### Changed
+
+- The builder can cut a patch release (#314). A tag `vX.Y.Z` carries `specVersion` `X.Y.0`, and
+  `v0.4.0` stays the one recorded exception. A patch release's normative artifacts must be byte for
+  byte those of its `X.Y.0` release, as `releases/v0.5.0.normative.json` records them for `0.5.0`;
+  the builder pins that record's SHA-256 and refuses a patch tag whose files differ, and a patch tag
+  of a `specVersion` no release carries. A patch bundle carries `catalog/`, the record and a
+  generated `release-identity.json`. In `catalog/format-status.json` a patch tag is a baseline, not a
+  candidate. `VERSIONING.md` and `catalog/README.md` state the rule.
 
 ## `0.5.0` — 2026-11-12
 

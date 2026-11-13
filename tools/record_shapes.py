@@ -56,6 +56,7 @@ SEMVER = re.compile(
     r"(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?$"
 )
 FORMAT_VERSION = re.compile(r"^(0|[1-9][0-9]*)$")
+PLAIN_VERSION = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
 NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 RECORD_FILE = re.compile(r"^([0-9]{4})-([a-z0-9]+(?:-[a-z0-9]+)*)\.json$")
 DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -441,6 +442,13 @@ def check_changes(root: Path, catalog: dict) -> list[str]:
 
 # Releases and format status -----------------------------------------------------------------------
 
+def carried_spec_version(version: str) -> str:
+    """VERSIONING.md's release numbering rule: a plain Core version X.Y.Z carries specVersion X.Y.0.
+    Any other version is its own; a mapping file in releases/ overrides both."""
+    plain = PLAIN_VERSION.match(version)
+    return "%s.%s.0" % plain.group(1, 2) if plain else version
+
+
 def load_releases(root: Path, catalog: dict) -> dict[str, dict]:
     """Read releases/: each release with its route, version, families and candidacy."""
     directory = root / RELEASES
@@ -455,7 +463,8 @@ def load_releases(root: Path, catalog: dict) -> dict[str, dict]:
             version = match.group(2)
             prerelease = SEMVER.match(version).group(4)
             releases[tag] = {"route": match.group(1) or "core", "version": version,
-                             "specVersion": version if match.group(1) is None else None,
+                             "specVersion": carried_spec_version(version)
+                             if match.group(1) is None else None,
                              "candidate": bool(prerelease)
                              and prerelease.split(".")[0] in CANDIDATE_IDENTIFIERS,
                              "families": set()}
@@ -489,16 +498,31 @@ def load_releases(root: Path, catalog: dict) -> dict[str, dict]:
                 raise ShapeError("%s/%s names the schema %s, which the catalog does not hold"
                                  % (RELEASES, name, reference))
             releases[tag]["families"].update(entry["family"] for entry in entries)
-    for release in releases.values():
+    for tag, release in releases.items():
         if release["route"] == "core":
             # A Core release publishes the schemas whose `$id` names its specVersion.
             prefix = NAMESPACE + str(release["specVersion"]) + "/"
             release["families"].update(entry["family"] for entry in catalog["schemas"]
                                        if entry["id"].startswith(prefix))
-            # A Core distribution whose tag is not its specVersion establishes no baseline: a
-            # candidate, or v0.4.0, which carries specVersion 0.3.0 unchanged and is no candidate.
-            if release["specVersion"] != release["version"]:
+            # A Core distribution whose specVersion is not the one its tag's numbers give establishes
+            # no baseline: a candidate, or v0.4.0, which carries specVersion 0.3.0 unchanged and is
+            # no candidate. A patch tag carries what its numbers give and can be a baseline.
+            carried = carried_spec_version(release["version"])
+            if release["specVersion"] != carried:
                 release["candidate"] = True
+            # A patch tag carries a specVersion that its X.Y.0 tag released, with the normative record
+            # the builder holds it to; otherwise it would publish the shapes of a version no release
+            # carries, or name a release the builder refuses (v0.3.1: v0.3.0 has no record).
+            if carried != release["version"] and PLAIN_VERSION.match(release["version"]):
+                first = releases.get("v" + carried)
+                if first is None or first["route"] != "core" or first["specVersion"] != carried:
+                    raise ShapeError("%s/%s.md is a patch release of specVersion %s, which no release "
+                                     "in %s/ first released as v%s" % (RELEASES, tag, carried, RELEASES,
+                                                                      carried))
+                record = "%s/v%s.normative.json" % (RELEASES, carried)
+                if not (root / record).is_file():
+                    raise ShapeError("%s/%s.md is a patch release of specVersion %s, which has no "
+                                     "normative record %s" % (RELEASES, tag, carried, record))
     return releases
 
 

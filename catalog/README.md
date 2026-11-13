@@ -145,7 +145,7 @@ and no others:
 {
   "format": "judgment-pack-format-status/1",
   "families": {
-    "judgment-pack-core": { "draftVersion": "0.5.0", "baseline": "v0.5.0", "lastReleased": "v0.5.0" }
+    "judgment-pack-core": { "draftVersion": "0.5.0", "baseline": "v0.5.1", "lastReleased": "v0.5.1" }
   }
 }
 ```
@@ -164,16 +164,22 @@ release counts from that commit onward. A release includes a family when:
 
 - for a Core tag `v<version>`, one of the family's schemas has an `$id` under
   `<namespace><specVersion>/`, where `specVersion` comes from the release's mapping file
-  `releases/<tag>.json` when that file exists and is otherwise `<version>`; or
+  `releases/<tag>.json` when that file exists and is otherwise the one VERSIONING.md's release
+  numbering rule gives: `X.Y.0` for a tag `vX.Y.Z`, and the whole `<version>` for a tag with a
+  prerelease suffix; or
 - a `releases/*.json` data file whose `tag` or `distribution` is the release names one of the
   family's schemas, by path in `schema` or by path or `$id` in the values of `schemas`.
 
 A candidate is a release whose version carries VERSIONING.md's `-rc.N` or `-alpha.N` distribution
 suffix. A candidate counts for `lastReleased` but is never a `baseline`. So does any other Core
-distribution whose tag is not its `specVersion`. Release `v0.4.0` is the one such distribution: it
-carries `specVersion` `0.3.0` unchanged and is not a candidate, but `v0.3.0` stayed the baseline of
-what it carries. A Policy companion release (`policy-v<releaseVersion>`) freezes its format on first
-publication, so it is a baseline.
+distribution whose `specVersion` is not the one its tag's numbers give. Release `v0.4.0` is the one
+such distribution: it carries `specVersion` `0.3.0` unchanged and is not a candidate, but `v0.3.0`
+stayed the baseline of what it carries. A patch tag such as `v0.5.1` carries the `specVersion` its
+numbers give (`0.5.0`), byte for byte, so it is not a candidate and becomes the baseline and the
+last release of that version's families. The check refuses a patch tag whose `specVersion` no
+release `vX.Y.0` in `releases/` carries, or that has no normative record
+`releases/vX.Y.0.normative.json`. A Policy companion release (`policy-v<releaseVersion>`)
+freezes its format on first publication, so it is a baseline.
 
 When a pull request prepares a release, or moves a family's draft version, it updates this file in
 the same change. The check's failure message gives the derived record.
@@ -188,7 +194,8 @@ using the same normalization. An implementation's own catalog needs `id`, `famil
 It then compares that catalog with this one, at the release tag it names, as follows. Tag `v0.3.0`
 has no catalog. An implementation of `specVersion` `0.3.0` reads the one at tag `v0.4.0`, which
 carries that version unchanged, and names `v0.4.0` as the catalog it compared with. An implementation
-of `specVersion` `0.5.0` reads the one at tag `v0.5.0`; the `v0.5.0` bundles do not carry it.
+of `specVersion` `0.5.0` reads the one at tag `v0.5.1`, which carries that version unchanged and
+whose bundles carry it; the `v0.5.0` bundles do not.
 
 1. For each `id` the implementation carries, find the entry with the same `id` in this catalog.
 2. A missing `id`, or the same `id` with a different `sha256`, is a **finding**. The implementation
