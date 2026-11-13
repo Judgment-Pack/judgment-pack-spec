@@ -510,14 +510,19 @@ def load_releases(root: Path, catalog: dict) -> dict[str, dict]:
             carried = carried_spec_version(release["version"])
             if release["specVersion"] != carried:
                 release["candidate"] = True
-            # A patch tag carries a specVersion that its X.Y.0 tag released; otherwise it would
-            # publish the shapes of a version no release carries.
+            # A patch tag carries a specVersion that its X.Y.0 tag released, with the normative record
+            # the builder holds it to; otherwise it would publish the shapes of a version no release
+            # carries, or name a release the builder refuses (v0.3.1: v0.3.0 has no record).
             if carried != release["version"] and PLAIN_VERSION.match(release["version"]):
                 first = releases.get("v" + carried)
                 if first is None or first["route"] != "core" or first["specVersion"] != carried:
                     raise ShapeError("%s/%s.md is a patch release of specVersion %s, which no release "
                                      "in %s/ first released as v%s" % (RELEASES, tag, carried, RELEASES,
                                                                       carried))
+                record = "%s/v%s.normative.json" % (RELEASES, carried)
+                if not (root / record).is_file():
+                    raise ShapeError("%s/%s.md is a patch release of specVersion %s, which has no "
+                                     "normative record %s" % (RELEASES, tag, carried, record))
     return releases
 
 

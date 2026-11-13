@@ -9,6 +9,8 @@ import hashlib
 import json
 import re
 import subprocess
+import tarfile
+import zipfile
 from pathlib import Path
 
 
@@ -362,8 +364,9 @@ def normative_record(tag: str) -> tuple[str, str]:
     """The record of the normative bytes a patch tag carries, and the record's pinned SHA-256."""
     spec_version = carried_spec_version(release_version(tag))
     if spec_version not in NORMATIVE_RECORDS:
-        raise ValueError(f"{tag} would carry specVersion {spec_version}, which has no recorded "
-                         "release: a patch tag carries a released specVersion unchanged")
+        raise ValueError(f"{tag} would carry specVersion {spec_version}, which has no normative "
+                         "record: a patch tag carries the recorded normative files of a released "
+                         "specVersion unchanged")
     return NORMATIVE_RECORDS[spec_version]
 
 
@@ -405,6 +408,42 @@ def validate_unchanged_normative_artifacts(tag: str, root: Path = ROOT) -> None:
     if changed:
         raise ValueError(f"{tag} changes normative artifacts of specVersion {spec_version}: "
                          + ", ".join(changed))
+
+
+def archive_digests(archive: Path, prefix: str) -> dict[str, str]:
+    """The SHA-256 of each regular file in a bundle, by its path under the bundle's prefix."""
+    digests = {}
+    if archive.name.endswith(".zip"):
+        with zipfile.ZipFile(archive) as bundle:
+            for member in bundle.infolist():
+                if not member.is_dir() and member.filename.startswith(prefix):
+                    digests[member.filename[len(prefix):]] = (
+                        "sha256:" + hashlib.sha256(bundle.read(member)).hexdigest())
+        return digests
+    with tarfile.open(archive, "r:gz") as bundle:
+        for member in bundle.getmembers():
+            if member.isfile() and member.name.startswith(prefix):
+                data = bundle.extractfile(member).read()
+                digests[member.name[len(prefix):]] = "sha256:" + hashlib.sha256(data).hexdigest()
+    return digests
+
+
+def validate_bundled_normative_artifacts(tag: str, archives: list[Path], prefix: str,
+                                         root: Path = ROOT) -> None:
+    """Hold each patch bundle, as archived, to the record the worktree was held to.
+
+    The worktree check cannot see what an export attribute in .gitattributes leaves out of, or
+    rewrites in, an archive, so every recorded file and the record itself are read back here.
+    """
+    record_path, pinned = normative_record(tag)
+    expected = {**json.loads((root / record_path).read_text("utf-8"))["files"],
+                record_path: "sha256:" + pinned}
+    for archive in archives:
+        bundled = archive_digests(archive, prefix)
+        wrong = sorted(path for path, digest in expected.items() if bundled.get(path) != digest)
+        if wrong:
+            raise ValueError(f"{archive.name} does not carry {tag}'s recorded normative artifacts: "
+                             + ", ".join(wrong))
 
 
 def release_identity(tag: str, root: Path = ROOT) -> dict | None:
@@ -558,6 +597,13 @@ def build(tag: str, commit: str, output: Path) -> list[Path]:
         cwd=ROOT,
         check=True,
     )
+    if is_patch_release(tag):
+        try:
+            validate_bundled_normative_artifacts(tag, archives, prefix)
+        except ValueError:
+            for archive in archives:
+                archive.unlink(missing_ok=True)
+            raise
     checksums = output / "checksums.txt"
     checksums.write_text(
         "".join(f"{sha256(path)}  {path.name}\n" for path in archives),

@@ -436,6 +436,29 @@ class FormatStatus(Fixture):
                     shapes.check(self.root)
                 notes.unlink()
         self.assertEqual([], shapes.check(self.root))
+        # v0.3.0 released 0.3.0 but has no normative record, so the builder refuses v0.3.1 and so
+        # does this check; v0.5.1 is refused the same way once 0.5.0's record is gone.
+        for tag, carried, gone in (("v0.3.1", "0.3.0", None), ("v0.5.1", "0.5.0", "v0.5.0.normative.json")):
+            with self.subTest(tag=tag):
+                notes = self.root / "releases" / ("%s.md" % tag)
+                kept = notes.read_bytes() if notes.exists() else None
+                notes.write_text("# %s\n" % tag, "utf-8")
+                record = self.root / "releases" / gone if gone else None
+                data = record.read_bytes() if record else None
+                if record:
+                    record.unlink()
+                with self.assertRaisesRegex(shapes.ShapeError,
+                                            "releases/%s.md is a patch release of specVersion %s, "
+                                            "which has no normative record releases/v%s.normative.json"
+                                            % (tag, carried, carried)):
+                    shapes.check(self.root)
+                if record:
+                    record.write_bytes(data)
+                if kept is None:
+                    notes.unlink()
+                else:
+                    notes.write_bytes(kept)
+        self.assertEqual([], shapes.check(self.root))
 
     def test_a_release_naming_a_schema_the_catalog_lacks_is_refused(self):
         write_json(self.root / "releases" / "v0.3.0.extra.json",

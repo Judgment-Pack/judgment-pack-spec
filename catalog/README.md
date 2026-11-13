@@ -177,7 +177,8 @@ such distribution: it carries `specVersion` `0.3.0` unchanged and is not a candi
 stayed the baseline of what it carries. A patch tag such as `v0.5.1` carries the `specVersion` its
 numbers give (`0.5.0`), byte for byte, so it is not a candidate and becomes the baseline and the
 last release of that version's families. The check refuses a patch tag whose `specVersion` no
-release `vX.Y.0` in `releases/` carries. A Policy companion release (`policy-v<releaseVersion>`)
+release `vX.Y.0` in `releases/` carries, or that has no normative record
+`releases/vX.Y.0.normative.json`. A Policy companion release (`policy-v<releaseVersion>`)
 freezes its format on first publication, so it is a baseline.
 
 When a pull request prepares a release, or moves a family's draft version, it updates this file in

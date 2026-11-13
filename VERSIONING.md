@@ -66,20 +66,22 @@ never strips a prerelease suffix. For a patch tag it also requires the normative
 byte-identical to those the `X.Y.0` release published: the Core text and schema, both corpus
 manifests, every document case and evaluation pack they name, and every schema whose `$id` is under
 `X.Y.0`. It compares them with a record of those bytes, `releases/vX.Y.0.normative.json`, whose own
-SHA-256 the builder pins. `releases/v0.5.0.normative.json` was derived from the files of tag
-`v0.5.0` as Git stores them, and agrees with an archive of that tag and with the schema digests its
-notes publish. A `specVersion` with no such record has no patch release, so tag `v0.4.1`, which would
-carry the never-released `0.4.0`, is refused. The errata, the READMEs and the examples are not held:
-an erratum (`conformance/evaluation/errata.md`) or a clearer explanation may follow a release. A
-patch release's bundles also carry `catalog/`, that record and a generated `release-identity.json`
-naming the release's version, its tag, the `specVersion` it carries, the corpus maturity and the
+SHA-256 the builder pins. It compares the files in the worktree before it archives the release, and
+in each bundle after, so an export attribute in `.gitattributes` cannot leave a recorded file out.
+`releases/v0.5.0.normative.json` was derived from the files of tag `v0.5.0` as Git stores them, and
+agrees with an archive of that tag and with the schema digests its notes publish. A `specVersion`
+with no such record has no patch release, so tag `v0.4.1`, which would carry the never-released
+`0.4.0`, is refused, and so is `v0.3.1`, because `0.3.0` has no record. The errata, the READMEs and
+the examples are not held: an erratum (`conformance/evaluation/errata.md`) or a clearer explanation
+may follow a release. A patch release's bundles also carry `catalog/`, that record and a generated
+`release-identity.json` naming the release's version, its tag, the `specVersion` it carries, the corpus maturity and the
 distribution `specification-unchanged`.
 
 In `catalog/format-status.json` a patch tag is not a candidate. It carries the shapes of its
 `specVersion` unchanged, so it becomes the last release and the baseline of the families whose
 `$id` is under that `specVersion`, exactly as a later release of them would; no other record moves.
 The record-shape check refuses a patch tag whose `specVersion` no `X.Y.0` release in `releases/`
-carries.
+carries, or that has no normative record.
 
 ## Maturity levels
 

@@ -66,7 +66,11 @@ class ReleaseBuilderTests(unittest.TestCase):
                      "For a patch tag it also requires the normative artifacts to be byte-identical to "
                      "those the `X.Y.0` release published",
                      "`releases/vX.Y.0.normative.json`, whose own SHA-256 the builder pins.",
-                     "so tag `v0.4.1`, which would carry the never-released `0.4.0`, is refused.",
+                     "so tag `v0.4.1`, which would carry the never-released `0.4.0`, is refused, and so "
+                     "is `v0.3.1`, because `0.3.0` has no record.",
+                     "It compares the files in the worktree before it archives the release, and in each "
+                     "bundle after, so an export attribute in `.gitattributes` cannot leave a recorded "
+                     "file out.",
                      "In `catalog/format-status.json` a patch tag is not a candidate.",
                      "it becomes the last release and the baseline of the families whose `$id` is "
                      "under that `specVersion`"):
@@ -109,7 +113,7 @@ class ReleaseBuilderTests(unittest.TestCase):
             (root / "releases" / "v0.4.1.md").write_text("notes\n", encoding="utf-8")
             with self.assertRaises(ValueError) as raised:
                 BUILD_RELEASE.validate_artifacts("0.4.1", "v0.4.1", root=root)
-            self.assertIn("v0.4.1 would carry specVersion 0.4.0, which has no recorded release",
+            self.assertIn("v0.4.1 would carry specVersion 0.4.0, which has no normative record",
                           str(raised.exception))
             self.assertNotIn("0.4.0", BUILD_RELEASE.NORMATIVE_RECORDS)
             self.assertEqual(["0.5.0"], list(BUILD_RELEASE.NORMATIVE_RECORDS))
@@ -894,7 +898,7 @@ class CoreCarriedReleaseTests(unittest.TestCase):
         # is the distribution that would have been v0.3.1.
         for tag in ("v0.3.1", "v0.4.1", "v0.5.0", "v1.0.0", "v0.4.0-rc.1", "v0.4.0-alpha.1"):
             version = tag[1:]
-            unmapped = ("specVersion 0.3.0, which has no recorded release" if tag == "v0.3.1"
+            unmapped = ("specVersion 0.3.0, which has no normative record" if tag == "v0.3.1"
                         else "conformance specVersion")
             for mapping, message in (
                     # This tag's bytes copied under another tag's name; then renamed to fit it.
@@ -941,7 +945,7 @@ class CoreCarriedReleaseTests(unittest.TestCase):
                 self.assertNotIn(f"releases/{self.TAG}.json", paths)
                 self.assertNotIn("releases/v0.5.0.normative.json", paths)
         # A patch tag of a specVersion with no record has no bundle.
-        with self.assertRaisesRegex(ValueError, "which has no recorded release"):
+        with self.assertRaisesRegex(ValueError, "which has no normative record"):
             BUILD_RELEASE.bundle_paths("v0.3.1", "HEAD")
 
     def test_a_tree_whose_core_moved_is_refused(self):
@@ -1182,6 +1186,23 @@ class CorePatchReleaseTests(unittest.TestCase):
         self.assertIn(f"the normative record {self.RECORD} differs from the bytes the builder pins",
                       self.refused(case))
 
+    def test_a_bundle_that_leaves_out_recorded_files_is_refused(self):
+        # The worktree holds every recorded file at its digest; an export attribute changes only
+        # what git archive writes, so the builder must read each bundle back.
+        for attribute, missing in (
+                ("conformance/valid/** export-ignore", "conformance/valid/"),
+                ("releases/v0.5.0.normative.json export-ignore", self.RECORD),
+                ("spec/judgment-pack-core.md export-ignore", "spec/judgment-pack-core.md")):
+            with self.subTest(attribute=attribute):
+                case = self.fresh_case()
+                (case.root / ".gitattributes").write_text(attribute + "\n")
+                stderr = self.refused(case)
+                self.assertIn("judgment-pack-spec_0.5.1_artifacts.tar.gz does not carry v0.5.1's "
+                              "recorded normative artifacts: ", stderr)
+                self.assertIn(missing, stderr.split("recorded normative artifacts: ", 1)[1])
+                # No bundle is left behind for a later step to publish.
+                self.assertEqual([], sorted((case.root / "dist").glob("*")))
+
     def test_a_patch_tag_has_no_mapping(self):
         case = self.fresh_case()
         (case.root / f"releases/{self.TAG}.json").write_text(json.dumps(self.IDENTITY) + "\n")
@@ -1236,8 +1257,9 @@ class CorePatchReleaseTests(unittest.TestCase):
         for text in ("`v0.5.1` carries Core `specVersion` `0.5.0` unchanged.",
                      "Packs keep declaring exact `specVersion` `0.5.0`.",
                      "The tag name is not a selector.",
-                     "Core `0.5.0`'s schema, text and conformance material are byte for byte those tag "
-                     "`v0.5.0` released",
+                     "Core `0.5.0`'s normative files are byte for byte those tag `v0.5.0` released",
+                     "The builder refuses a patch tag, or a bundle, whose files differ from that record.",
+                     "The errata, the READMEs and the examples are not in the record.",
                      "Consumers pinned to `v0.5.0` need do nothing.",
                      "**Dialect format `4.0.0`, proposed (#316).**", "rule on the case",
                      "`string-list` and `address-range-list`", "ordered comparison",
