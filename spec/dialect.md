@@ -387,9 +387,10 @@ of version `2.0.0` may declare. A parameter's value not of its type is `paramete
   under every profile. The length is part of the type, and the type decides answers, not only
   refusals: whether a value is comparable (§2.2.4) and whether it is a coordinate (§2.2.5). It is
   therefore a domain, not a resource ceiling, and like the domains Core §4.1 names it does not
-  change with the profile: `extended` does not raise it, though it raises the 128 characters of a
-  research decimal string (§12). A JSON number is not of the type, nor are `"1e3"`, `"+1"`, `"01.5"`
-  and `".5"`.
+  change with the profile. Core §4.1's row "Dialect decimal string characters", 128 under `base` and
+  256 under `extended`, is the ceiling of a research decimal string (§12) and does not apply to this
+  type: `extended` raises that ceiling, not this length. A JSON number is not of the type, nor are
+  `"1e3"`, `"+1"`, `"01.5"` and `".5"`.
 - `string-list`: an array of strings. It MAY be empty, and MAY hold one string more than once.
 - `address-range-list`: an array of address ranges (§2.2.3), each a string. It MAY be empty, MAY
   hold one range more than once, and MAY hold ranges of both families. An array holding a string that
@@ -472,9 +473,9 @@ form is a member of no list, and the empty list has no member.
 one of:
 
 - `from`, a pointer into the value read, as in §6.3;
-- `value`, a **literal**: a string of at most 8192 UTF-8 bytes, `true`, `false`, or an integer (§1).
-  `null`, a number that is not an integer, an array and an object are refused; a decimal is written
-  as a string;
+- `value`, a **literal**: a string, of at most §2.2.7's bound on a literal under the document's
+  profile, `true`, `false`, or an integer (§1). `null`, a number that is not an integer, an array
+  and an object are refused; a decimal is written as a string;
 - `derived`, the name of a derived value the rule declares.
 
 The claim's `facts` is `{}` with, for each entry of the match in order, written at `P` (§8.1):
@@ -592,12 +593,15 @@ A preparation of a dialect of format `4.0.0` has `formatVersion`, the string `"4
 
 ### 2.2.7 Bounds and refusals
 
-- A rule declares at most 16 derived values; a literal is at most 8192 UTF-8 bytes, Core §4.1's
-  dialect text-value ceiling, 16384 under `extended`; and a list parameter's value holds at most 1024
-  elements, each string of it at most 1024 UTF-8 bytes, Core §4.1's dialect text-list item ceiling,
-  2048 under `extended`. Core §4.1's table has no row for the number of derived values or of a
-  list's elements, and until it has one these two maxima are the same under every profile. A
+- These are the format's bounds; §2.2.2 and §2.2.4 point here. A rule declares at most 16 derived
+  values; a literal is at most 8192 UTF-8 bytes under `base` and 16384 under `extended`, Core §4.1's
+  row "Dialect text value bytes"; and a list parameter's value holds at most 1024 elements, each
+  string of it at most 1024 UTF-8 bytes under `base` and 2048 under `extended`, Core §4.1's row
+  "Dialect text-list item bytes". Core §4.1's table has no row for the number of derived values or
+  of a list's elements, and until it has one these two maxima are the same under every profile. A
   `decimal`'s 128 characters are its type's (§2.2.2), not a bound, and the same under every profile.
+  The bundled verifiers support only `base` (§2): each refuses a document of the format that
+  §11's phase 0 finds declaring `extended`, `profile-unsupported`, before it measures any of these.
 - A reader of the format measures the derived values and the literals, and §12's counts over the
   case's rule, in §11's phase 3, wherever measurable before any form. A list parameter's elements and
   their bytes are measured when the parameter takes its value, during recomputation and before its

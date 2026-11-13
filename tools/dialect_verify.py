@@ -109,6 +109,15 @@ MAX_VALUE_DEPTH = 32
 MAX_DOCUMENT_DEPTH = 64
 MAX_NUMBER_CHARACTERS = 128
 MAX_EXPONENT = 308
+# Core §4.1's ceiling table: the `base` column of the rows that hold two of this document's bounds.
+# This reader supports `base` alone (§2): a document that declares `extended` is refused
+# `profile-unsupported` in phase 0, before anything is measured (admit_envelope), so no `extended`
+# value is read here. A research text value (§12) and a literal of format 4.0.0 (§2.2.7) take the
+# text-value row; a research text-list item and a list parameter's element take the text-list item row.
+CORE_CEILINGS_BASE = {
+    "Dialect text value bytes": 8192,
+    "Dialect text-list item bytes": 1024,
+}
 # §12, the research maxima of §4.3 and §6.4: strings counted after JSON decoding, in UTF-8 bytes but a
 # decimal string's, which is counted in characters.
 MAX_FIELDS = 64  # declared fields per source, and answer entries per record
@@ -116,9 +125,9 @@ MAX_FIELD_NAME_BYTES = 64
 MAX_DESCRIPTION_BYTES = 2048
 MAX_MODEL_BYTES = 256
 MAX_EVIDENCE_BYTES = 4096
-MAX_TEXT_BYTES = 8192
+MAX_TEXT_BYTES = CORE_CEILINGS_BASE["Dialect text value bytes"]
 MAX_LIST_ITEMS = 64
-MAX_ITEM_BYTES = 1024
+MAX_ITEM_BYTES = CORE_CEILINGS_BASE["Dialect text-list item bytes"]
 MAX_DECIMAL_CHARACTERS = 128
 MAX_OBSERVATIONS = 64
 MAX_CITES = 64
@@ -291,9 +300,9 @@ TYPES_4 = TYPES + ("decimal", "string-list", "address-range-list")
 LIST_TYPES = ("string-list", "address-range-list")
 RELATIONS = ("less-than", "less-than-or-equal", "greater-than", "greater-than-or-equal")
 MAX_DERIVED = 16
-MAX_LITERAL_BYTES = 8192
+MAX_LITERAL_BYTES = CORE_CEILINGS_BASE["Dialect text value bytes"]
 MAX_LIST_ELEMENTS = 1024
-MAX_LIST_ELEMENT_BYTES = 1024
+MAX_LIST_ELEMENT_BYTES = CORE_CEILINGS_BASE["Dialect text-list item bytes"]
 # §4.3: the kinds version 3 adds but `research`, each defined and not read here; and the members each
 # names beside §4's, `profile`, `profileDigest` and `maxAge`: those it requires, and those it may give.
 VERSION_3_KINDS = {
@@ -386,9 +395,9 @@ def list_bounds(value: Any, what: str) -> None:
     """§2.2.7: a list parameter's value, measured when the parameter takes it."""
     if isinstance(value, list):
         if len(value) > MAX_LIST_ELEMENTS:
-            raise Refused("input-over-bound", f"{what}: a list of more than 1024 elements")
+            raise Refused("input-over-bound", f"{what}: a list of more than {MAX_LIST_ELEMENTS} elements")
         if any(isinstance(item, str) and len(item.encode("utf-8")) > MAX_LIST_ELEMENT_BYTES for item in value):
-            raise Refused("input-over-bound", f"{what}: a list element of more than 1024 bytes")
+            raise Refused("input-over-bound", f"{what}: a list element of more than {MAX_LIST_ELEMENT_BYTES} bytes")
 
 
 def json_equal(left: Any, right: Any) -> bool:
@@ -1345,7 +1354,7 @@ def check_rule_2(raw: Any, scope: dict[str, str], what: str, result: Read) -> No
                 literal = entry["value"]
                 if isinstance(literal, str):
                     if len(literal.encode("utf-8")) > MAX_LITERAL_BYTES:
-                        raise Refused("input-over-bound", f"{what}: a literal of more than 8192 bytes")
+                        raise Refused("input-over-bound", f"{what}: a literal of more than {MAX_LITERAL_BYTES} bytes")
                 elif not (isinstance(literal, bool) or is_integer(literal)):
                     raise malformed(f"{what}: a literal that is not a string, a boolean or an integer")
             elif not (isinstance(entry["derived"], str) and entry["derived"] in derived):
@@ -2479,7 +2488,7 @@ def count_bounds(dialect: Any, acquisitions: Any, profiles: Any = None, binding:
                             facts.add(entry["pointer"])
                         literal = entry.get("value") if format4 and isinstance(entry, dict) else None
                         if isinstance(literal, str) and utf8_length(literal) > MAX_LITERAL_BYTES:
-                            raise over("a literal of more than 8192 bytes")
+                            raise over(f"a literal of more than {MAX_LITERAL_BYTES} bytes")
                     if isinstance(claim.get("evidence"), dict):
                         evidence.update(claim["evidence"])
 

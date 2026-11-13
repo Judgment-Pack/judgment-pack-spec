@@ -174,6 +174,11 @@ class SecondDialectReaderTest(unittest.TestCase):
                 encoded = {m: base64.b64encode(dialect if m == "dialect" else files[m]).decode("ascii") for m in files}
                 batch.append({**encoded, "record": None, "binding": None, "requireBinding": False})
                 expected.append(entry["expectedReportOfAReaderThatDoesNotReadTheFormat"])
+            # and the vector declaring `extended`: like the first reader (§2.2.7), refused in phase 0
+            extended = json.dumps({"profile": "extended", **json.loads(files["dialect"])}).encode("utf-8")
+            encoded = {m: base64.b64encode(extended if m == "dialect" else files[m]).decode("ascii") for m in files}
+            batch.append({**encoded, "record": None, "binding": None, "requireBinding": False})
+            expected.append({"result": "refusal", "refusal": "profile-unsupported", "profile": "extended"})
         run = subprocess.run(
             [node, "--disable-wasm-trap-handler", "--no-warnings", "--input-type=module", "--eval", BATCH % json.dumps(str(READER))],
             input=json.dumps(batch).encode("utf-8"),

@@ -55,8 +55,11 @@ A row with `dialect` gives the whole dialect instead. `expectedClaim` gives memb
 rule's claim; `expectedRefusal` and `expectedFinding` the report's code. A reading is read from the
 case outcome's `rule` (§2.2.6) of the preparation the verifier recomputes, given a preparation of
 `verifiedAt` alone, which therefore differs. A row's dialect with a source is read only as far as
-its forms: given no profile, a source that passes them ends `profile-mismatch`. The bounds one over
-each maximum are reader tests in `tests/test_dialect_format_4.py`, not rows, and so are a source
-parameter's bounds and a calculator that did not compute, on copies of `source-rule/` signed again
-under the same key, and the preserved `v0.3.0` reader's refusal of both end-to-end dialects
-(§2.2.7).
+its forms: given no profile, a source that passes them ends `profile-mismatch`. Four rows hold the
+two bounds §2.2.7 takes from Core §4.1's rows, under `base`: a literal of 8192 UTF-8 bytes and one of
+8193, and a list element of 1024 and one of 1025, each written in two-byte characters so that the
+count is of bytes. The other bounds one over each maximum are reader tests in
+`tests/test_dialect_format_4.py`, not rows, and so are a document of the format that declares
+`extended`, which both readers refuse `profile-unsupported`, a source parameter's bounds and a
+calculator that did not compute, on copies of `source-rule/` signed again under the same key, and the
+preserved `v0.3.0` reader's refusal of both end-to-end dialects (§2.2.7).
