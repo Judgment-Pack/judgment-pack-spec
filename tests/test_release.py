@@ -1211,6 +1211,60 @@ class CorePatchReleaseTests(unittest.TestCase):
         # schemas, the Core and workflow schemas and the Core text.
         self.assertEqual(374 + 41 + 2 + 2 + 2 + 1, len(record["files"]))
 
+    def test_the_prepared_files_are_this_tags(self):
+        # The live tree holds 0.5.0's normative bytes, so it builds as v0.5.1, with no mapping.
+        BUILD_RELEASE.validate_artifacts("0.5.1", self.TAG)
+        self.assertFalse((ROOT / f"releases/{self.TAG}.json").exists())
+        self.assertEqual(self.IDENTITY, BUILD_RELEASE.release_identity(self.TAG))
+        self.assertEqual({"number": 9, "title": "v0.5.1"},
+                         json.loads((ROOT / f"releases/{self.TAG}.milestone.json").read_text()))
+        self.assertEqual("# v0.5.1", (ROOT / f"releases/{self.TAG}.md").read_text().splitlines()[0])
+        try:
+            attributes = subprocess.run(
+                ["git", "check-attr", "export-ignore", "--", "catalog/record-shapes.json",
+                 "catalog/format-status.json", "catalog/README.md", self.RECORD],
+                cwd=ROOT, check=True, capture_output=True, text=True).stdout.splitlines()
+        except (OSError, subprocess.CalledProcessError) as error:
+            self.skipTest(f"git cannot read attributes here: {error}")
+        for line in attributes:
+            with self.subTest(line=line):
+                self.assertTrue(line.endswith(": export-ignore: unspecified"))
+
+    def test_the_notes_state_what_a_consumer_needs(self):
+        notes = re.sub(r"\s+", " ", (ROOT / f"releases/{self.TAG}.md").read_text(encoding="utf-8"))
+        record = json.loads((ROOT / self.RECORD).read_text(encoding="utf-8"))
+        for text in ("`v0.5.1` carries Core `specVersion` `0.5.0` unchanged.",
+                     "Packs keep declaring exact `specVersion` `0.5.0`.",
+                     "The tag name is not a selector.",
+                     "Core `0.5.0`'s schema, text and conformance material are byte for byte those tag "
+                     "`v0.5.0` released",
+                     "Consumers pinned to `v0.5.0` need do nothing.",
+                     "**Dialect format `4.0.0`, proposed (#316).**", "rule on the case",
+                     "`string-list` and `address-range-list`", "ordered comparison",
+                     "forward-looking freshness window", "literal claim values",
+                     "`duration`, `distance` and `speed`",
+                     "The TypeScript reader only refuses it, `version-unread`, so no second independent "
+                     "reader exists",
+                     "**Release tooling for a patch release (#314).**",
+                     "This release closes #316 and #314.",
+                     "**Reader compatibility:**", "**Writer compatibility:**",
+                     "**Semantic compatibility:**", "**Migration compatibility:**",
+                     "| Reference runtime `v0.44.0` and later | read | no released version reads it |",
+                     "## Migration note", "## What is in the bundles", "They do not hold:",
+                     "Stay on the `v0.3.0` bundle for the `retained-column/1` leaf",
+                     "same-vendor review, not a cross-vendor claim",
+                     "https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json",
+                     f"`releases/v0.5.0.normative.json`, SHA-256 `{BUILD_RELEASE.NORMATIVE_RECORDS['0.5.0'][1]}`",
+                     f"`{record['sourceCommit']}`", f"each of the {len(record['files'])} normative files",
+                     "`distribution` `specification-unchanged`"):
+            with self.subTest(text=text[:40]):
+                self.assertIn(text, notes)
+        # The pinned schema digests are the record's, which are v0.5.0's.
+        for path in ("schema/judgment-pack-core.schema.json", "conformance/manifest.schema.json",
+                     "conformance/evaluation/manifest.schema.json", "schema/workflow-1.schema.json"):
+            with self.subTest(path=path):
+                self.assertIn(record["files"][path].removeprefix("sha256:"), notes)
+
 
 if __name__ == "__main__":
     unittest.main()
