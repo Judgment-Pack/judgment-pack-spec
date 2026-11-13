@@ -4,18 +4,24 @@
 The companion fixes `distance` as one exact integer algorithm: a haversine in fixed point at scale
 10**30, an arcsine by bisection, rounded down to a millimetre. This script does not run that
 algorithm to produce a value. It computes the great-circle distance on the same sphere with another
-formula, the arctangent form of the central angle, in decimal arithmetic at 90 significant digits,
-with its own series for the sine, the cosine, the arctangent and pi. The hand-written vectors take
-their expected millimetres from it, at inputs whose distance lies far from a whole millimetre.
+formula, the arctangent form of the central angle, in decimal arithmetic at 100 significant digits,
+each series summed until its term is below 10**-95, with its own series for the sine, the cosine, the
+arctangent and pi. The hand-written vectors take their expected millimetres from it, at inputs whose
+distance lies far from a whole millimetre.
 
     python3 tools/dialect_builtins_reference.py distance LAT1 LON1 LAT2 LON2
         prints the reference distance in millimetres, to twelve decimal places, and its floor.
 
     python3 tools/dialect_builtins_reference.py sweep [COUNT]
         compares the reference reader's algorithm (tools/dialect_verify.py), before its final
-        rounding, with this reference over fixed edge cases and COUNT pseudo-random pairs (default
-        2000), and prints the largest difference in millimetres. It exits 1 when a difference
-        reaches one micrometre, the bound the companion states for the sweep.
+        rounding, with this reference over three sets: fixed edge cases; COUNT pseudo-random pairs
+        written to nine decimal places (default 2000); and NEAR pseudo-random pairs within 10**-9
+        degrees of antipodal, written to twelve (default 400), where the arcsine's sine is flattest.
+        It prints the largest difference in millimetres in each set, and exits 1 when a difference
+        reaches one micrometre.
+
+    python3 tools/dialect_builtins_reference.py sweep COUNT NEAR
+        the same, with NEAR near-antipodal pairs.
 
 Neither mode shows that the bound holds for every input: the sweep measures the inputs it tries.
 """
@@ -28,9 +34,9 @@ from decimal import Decimal, localcontext
 from fractions import Fraction
 from pathlib import Path
 
-PRECISION = 90
+PRECISION = 100  # significant digits of every operation
 RADIUS_MM = Decimal(6371008800)
-EPSILON = Decimal(10) ** -(PRECISION + 5)
+EPSILON = Decimal(10) ** -(PRECISION - 5)  # where each series stops
 
 
 def _pi() -> Decimal:
@@ -89,7 +95,7 @@ def _cos(x: Decimal) -> Decimal:
 def reference_mm(latitude_1: str, longitude_1: str, latitude_2: str, longitude_2: str) -> Decimal:
     """The great-circle distance on the sphere of radius 6371008800 mm, by the arctangent form."""
     with localcontext() as context:
-        context.prec = PRECISION + 10
+        context.prec = PRECISION
         pi = _pi()
         radians = pi / 180
         phi_1, phi_2 = Decimal(latitude_1) * radians, Decimal(latitude_2) * radians
@@ -131,6 +137,8 @@ EDGES = [
     ("12.5", "179.5", "-12.5", "-179.5"),
     ("40.7128", "-74.0060", "51.5074", "-0.1278"),
     ("-33.8688", "151.2093", "35.6762", "139.6503"),
+    # 10**-12 degrees from an antipode, where round 17 of RFC 0018 found the largest difference
+    ("73.945916067075", "-120.961330246977", "-73.945916067075", "59.038669753022"),
 ]
 
 
@@ -144,18 +152,44 @@ def _random_coordinates(generator: random.Random) -> tuple[str, str, str, str]:
     return number(90), number(180), number(90), number(180)
 
 
-def sweep(count: int) -> int:
+def _near_antipodal(generator: random.Random) -> tuple[str, str, str, str]:
+    """A point written to twelve decimal places, and another within 10**-9 degrees, in each of its
+    coordinates, of the point's antipode."""
+    unit = 10**12
+
+    def written(picodegrees: int) -> str:
+        sign = "-" if picodegrees < 0 else ""
+        whole, fraction = divmod(abs(picodegrees), unit)
+        return f"{sign}{whole}.{fraction:012d}"
+
+    latitude = generator.randint(-89 * unit, 89 * unit)
+    longitude = generator.randint(-179 * unit, 179 * unit)
+    across = longitude - 180 * unit if longitude > 0 else longitude + 180 * unit
+    # an offset of 0, or of 1 to 900 picodegrees, spread over three orders of magnitude
+    shift = lambda: generator.choice((-1, 1)) * generator.randint(0, 9) * 10 ** generator.randint(0, 2)  # noqa: E731
+    return written(latitude), written(longitude), written(-latitude + shift()), written(across + shift())
+
+
+def sweep(count: int, near: int = 400) -> int:
     reader = _reader()
     generator = random.Random(316)
-    pairs = list(EDGES) + [_random_coordinates(generator) for _ in range(count)]
-    worst, where = Fraction(0), pairs[0]
-    for coordinates in pairs:
-        expected = Fraction(reference_mm(*coordinates))
-        difference = abs(algorithm_unrounded_mm(reader, coordinates) - expected)
-        if difference > worst:
-            worst, where = difference, coordinates
-    print(f"pairs {len(pairs)}; largest difference {float(worst):.3e} mm at {' '.join(where)}")
-    return 0 if worst < Fraction(1, 1000) else 1
+    sets = (
+        ("edge cases", list(EDGES)),
+        ("pseudo-random pairs", [_random_coordinates(generator) for _ in range(count)]),
+        ("near-antipodal pairs", [_near_antipodal(generator) for _ in range(near)]),
+    )
+    status = 0
+    for name, pairs in sets:
+        worst, where = Fraction(0), pairs[0] if pairs else ()
+        for coordinates in pairs:
+            expected = Fraction(reference_mm(*coordinates))
+            difference = abs(algorithm_unrounded_mm(reader, coordinates) - expected)
+            if difference > worst:
+                worst, where = difference, coordinates
+        print(f"{name}: {len(pairs)}; largest difference {float(worst):.3e} mm at {' '.join(where)}")
+        if worst >= Fraction(1, 1000):
+            status = 1
+    return status
 
 
 def main(argv: list[str]) -> int:
@@ -163,8 +197,8 @@ def main(argv: list[str]) -> int:
         value = reference_mm(*argv[1:])
         print(f"{value:.12f} mm; floor {int(value // 1)}")
         return 0
-    if argv and argv[0] == "sweep" and len(argv) <= 2:
-        return sweep(int(argv[1]) if len(argv) == 2 else 2000)
+    if argv and argv[0] == "sweep" and len(argv) <= 3:
+        return sweep(*(int(a) for a in argv[1:])) if len(argv) > 1 else sweep(2000)
     print(__doc__, file=sys.stderr)
     return 3
 

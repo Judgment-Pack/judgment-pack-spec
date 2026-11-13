@@ -159,16 +159,21 @@ class SecondDialectReaderTest(unittest.TestCase):
         # as the staged manifest gives a reader that does not read the format.
         node = self.node()
         root = ROOT / "conformance" / "dialect" / "format-4"
-        entry = json.loads((root / "manifest.json").read_text(encoding="utf-8"))["cases"][0]
-        directory = root / entry["name"]
-        files = {m: (directory / f"{m if m != 'acquisitions' else 'sources'}.json").read_bytes()
-                 for m in ("dialect", "case", "acquisitions", "profiles", "preparation")}
-        malformed = json.loads(files["dialect"])
-        malformed["case"]["rule"]["ruleVersion"] = "1"
-        batch = []
-        for dialect in (files["dialect"], json.dumps(malformed).encode("utf-8")):
-            encoded = {m: base64.b64encode(dialect if m == "dialect" else files[m]).decode("ascii") for m in files}
-            batch.append({**encoded, "record": None, "binding": None, "requireBinding": False})
+        batch, expected = [], []
+        for entry in json.loads((root / "manifest.json").read_text(encoding="utf-8"))["cases"]:
+            directory = root / entry["name"]
+            files = {m: (directory / f"{m if m != 'acquisitions' else 'sources'}.json").read_bytes()
+                     for m in ("dialect", "case", "acquisitions", "profiles", "preparation")}
+            # each vector, and a copy of it malformed in the format's own forms
+            malformed = json.loads(files["dialect"])
+            if "rule" in malformed["case"]:
+                malformed["case"]["rule"]["ruleVersion"] = "1"
+            else:
+                malformed["sources"][0]["read"]["rule"]["ruleVersion"] = "2"
+            for dialect in (files["dialect"], json.dumps(malformed).encode("utf-8")):
+                encoded = {m: base64.b64encode(dialect if m == "dialect" else files[m]).decode("ascii") for m in files}
+                batch.append({**encoded, "record": None, "binding": None, "requireBinding": False})
+                expected.append(entry["expectedReportOfAReaderThatDoesNotReadTheFormat"])
         run = subprocess.run(
             [node, "--disable-wasm-trap-handler", "--no-warnings", "--input-type=module", "--eval", BATCH % json.dumps(str(READER))],
             input=json.dumps(batch).encode("utf-8"),
@@ -176,5 +181,4 @@ class SecondDialectReaderTest(unittest.TestCase):
             timeout=600,
         )
         self.assertEqual(run.returncode, 0, run.stderr.decode("utf-8", "replace")[-4000:])
-        expected = entry["expectedReportOfAReaderThatDoesNotReadTheFormat"]
-        self.assertEqual([expected, expected], [json.loads(report) for report in json.loads(run.stdout)])
+        self.assertEqual(expected, [json.loads(report) for report in json.loads(run.stdout)])

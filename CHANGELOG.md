@@ -20,7 +20,9 @@ here.
   vectors are hand-written and staged under `conformance/dialect/format-4/`; the Python reader
   reads the format and the TypeScript reader refuses it `version-unread`. Formats 2, 3, `2.0.0`
   and `3.0.0`, their digests and vectors, and Core are unchanged. The workflow schemas do not yet
-  name the format, and no claim names it.
+  name the format, and no claim names it. Its review is round 17 of RFC 0018, recorded in
+  `rfcs/reviews/0018-round-17.md` (three MEDIUM and five LOW, all applied; same vendor, not a
+  cross-vendor claim).
 
 ## `0.5.0` — 2026-11-12
 

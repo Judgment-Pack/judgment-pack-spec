@@ -152,9 +152,10 @@ Both readers consume these same files; paired reader tests add the empty, missin
 mutations. No model or web request was made to write any of them.
 
 [`format-4/`](format-4/README.md) holds the hand-written vectors of the proposed dialect format
-`4.0.0` (the companion's §2.2): one end-to-end vector, a case rule with no source, and one row for
-each new form and refusal. They are not Runner recordings, no preparer writes the format, and only
-the first reader reads it; the second refuses it `version-unread`.
+`4.0.0` (the companion's §2.2): two end-to-end vectors, a case rule with no source and three
+sources read by rules of version `2.0.0`, and one row for each new form and refusal. They are not
+Runner recordings, no preparer writes the format, and only the first reader reads it; the second
+refuses it `version-unread`.
 
 ## What a vector holds, and the answer a verifier gives
 

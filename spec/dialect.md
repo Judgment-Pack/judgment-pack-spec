@@ -383,18 +383,23 @@ and no requirement may be both the copy's and the rule's. The rule's targets hav
 Format `4.0.0` adds three types to §3's three, which a case parameter, a source parameter and a rule
 of version `2.0.0` may declare. A parameter's value not of its type is `parameter-invalid`, as in §3.
 
-- `decimal`: a string matching Core §2.2's decimal grammar as a whole, of at most 128 characters,
-  Core §4.1's dialect decimal-string ceiling under `base`. A JSON number is not of the type, nor are
-  `"1e3"`, `"+1"`, `"01.5"` and `".5"`.
+- `decimal`: a string matching Core §2.2's decimal grammar as a whole, of at most 128 characters
+  under every profile. The length is part of the type, and the type decides answers, not only
+  refusals: whether a value is comparable (§2.2.4) and whether it is a coordinate (§2.2.5). It is
+  therefore a domain, not a resource ceiling, and like the domains Core §4.1 names it does not
+  change with the profile: `extended` does not raise it, though it raises the 128 characters of a
+  research decimal string (§12). A JSON number is not of the type, nor are `"1e3"`, `"+1"`, `"01.5"`
+  and `".5"`.
 - `string-list`: an array of strings. It MAY be empty, and MAY hold one string more than once.
 - `address-range-list`: an array of address ranges (§2.2.3), each a string. It MAY be empty, MAY
   hold one range more than once, and MAY hold ranges of both families. An array holding a string that
   is not an address range is not of the type.
 
-A list parameter's value holds at most 1024 elements, and each string in it at most 1024 UTF-8 bytes
-(§2.2.7). A parameter of a new type is otherwise a parameter as §3's are: a `$param` (§4.1) and a
-calculator's input (§7) may name one, and carry its value as written. A `$text` placeholder and a
-string template under `adapter-http` take only the types §4.1 names.
+A list parameter's value holds at most 1024 elements under every profile, and each string in it at
+most 1024 UTF-8 bytes under `base` and 2048 under `extended` (§2.2.7). A parameter of a new type is
+otherwise a parameter as §3's are: a `$param` (§4.1) and a calculator's input (§7) may name one, and
+carry its value as written. A `$text` placeholder and a string template under `adapter-http` take
+only the types §4.1 names.
 
 ### 2.2.3 Address ranges
 
@@ -474,7 +479,10 @@ one of:
 
 The claim's `facts` is `{}` with, for each entry of the match in order, written at `P` (§8.1):
 `from`'s value, as §6.3 writes it, its failures `read-failed`; the literal as the dialect writes it;
-or the derived value, an integer, and when it has none the read fails, `read-failed`. The claim's
+or the derived value, an integer, and when it has none the read fails, `read-failed`. Every entry is
+applied, so an earlier entry's failure fails the read even when a later entry writes the same
+pointer; and a pointer that two entries write holds the later entry's value, and carries the later
+entry's `derivation` (§2.2.6). The claim's
 `basis` is §6.3's, with, for every leaf evaluated whose operand is a derived value, the fields that
 value reads (§2.2.5), whether or not it has one. A claim's literal or derived value adds nothing to
 `basis`. A rule's targets are §8's, every pointer of every claim form's `facts`, whatever its kind,
@@ -536,12 +544,16 @@ equator, are `20015114442` apart; and every point at a pole is `0` from every ot
 **Its accuracy.** The algorithm is the distance, and its accuracy is a statement about it, not a
 tolerance a reader may use: every reader gives the algorithm's integer, exactly. Its arithmetic was
 measured against the same sphere's distance computed by another formula, the arctangent form of the
-central angle, in decimal arithmetic at 90 significant digits, over fourteen edge cases and 5000
-pseudo-random pairs of coordinates written to nine decimal places: before step 6's rounding down,
-the two differed by at most 2·10⁻⁷ millimetres, at an antipodal pair among the edge cases. The
-built-in's value is therefore the floor of the sphere's distance for every input tried whose
-distance lies more than that from a whole millimetre, and within one millimetre of it for the rest. This is a
-measurement over the inputs tried, not a bound shown for every input; the reference,
+central angle, in decimal arithmetic at 100 significant digits, before step 6's rounding down. Over
+5000 pseudo-random pairs of coordinates written to nine decimal places, the two differed by at most
+5·10⁻¹⁸ millimetres. Near an antipode the difference is larger, because there the sine that step 5
+inverts is flattest, so that a unit of `r` moves `y` the most: at most 2·10⁻⁷ millimetres at the
+exact antipodes among fifteen edge cases; at most 2.6·10⁻⁶ millimetres over 400 pseudo-random
+pairs within 10⁻⁹ degrees of an antipode, written to twelve decimal places; and 7.7·10⁻⁶
+millimetres at an edge case 10⁻¹² degrees from one. The built-in's value is therefore the floor of
+the sphere's distance for every input tried whose distance lies more than 10⁻⁵ millimetres from a
+whole millimetre, and within one millimetre of it for the rest. This is a measurement over the
+inputs tried, not a bound shown for every input; the reference,
 `tools/dialect_builtins_reference.py`, repeats it, and fails at a difference of one micrometre.
 The model is a separate matter: a sphere differs from the Earth's ellipsoid by up to about 0.5
 percent of a distance, so the built-in gives a distance on the sphere, not one on the Earth.
@@ -563,8 +575,11 @@ A preparation of a dialect of format `4.0.0` has `formatVersion`, the string `"4
   `Q`; `{"by": "literal"}`, a literal, as is every requirement of the match's `evidence`;
   `{"by": "builtin", "builtin": B, "derived": X, "fields": F, "parameters": N}`, the derived value
   `X` of built-in `B`, `F` and `N` its fields and parameters (§2.2.5), each distinct and ordered by
-  code point; or `{"by": "none"}`, when the match does not write the target. An entry of a copy, or
-  of a rule of version `"1"`, carries none.
+  code point; or `{"by": "none"}`, when the match does not write the target. A pointer that two
+  entries of the match write carries the later entry's (§2.2.4). A read that was not applied has no
+  match, and each of its targets carries `{"by": "none"}`: every target of a skipped source (§9.2),
+  and of a source whose calculator did not compute (§7), the requirements that §7's claim marks
+  `unknown` included. An entry of a copy, or of a rule of version `"1"`, carries none.
 - **The parameters used.** Each outcome's `parameters` (§9.2) gives every parameter of its scope its
   value as written, every element of a list included, so the preparation's digest commits each value
   a rule compared, and a recomputation from another value differs (§11, finding 5).
@@ -578,10 +593,11 @@ A preparation of a dialect of format `4.0.0` has `formatVersion`, the string `"4
 ### 2.2.7 Bounds and refusals
 
 - A rule declares at most 16 derived values; a literal is at most 8192 UTF-8 bytes, Core §4.1's
-  dialect text-value ceiling under `base`; a list parameter's value holds at most 1024 elements, each
-  string of it at most 1024 UTF-8 bytes, Core §4.1's dialect text-list item ceiling under `base`; and
-  a `decimal` is at most 128 characters (§2.2.2). Core §4.1's table has no row for derived values or
-  a list's elements, and until it has one these two maxima are the same under every profile.
+  dialect text-value ceiling, 16384 under `extended`; and a list parameter's value holds at most 1024
+  elements, each string of it at most 1024 UTF-8 bytes, Core §4.1's dialect text-list item ceiling,
+  2048 under `extended`. Core §4.1's table has no row for the number of derived values or of a
+  list's elements, and until it has one these two maxima are the same under every profile. A
+  `decimal`'s 128 characters are its type's (§2.2.2), not a bound, and the same under every profile.
 - A reader of the format measures the derived values and the literals, and §12's counts over the
   case's rule, in §11's phase 3, wherever measurable before any form. A list parameter's elements and
   their bytes are measured when the parameter takes its value, during recomputation and before its
@@ -589,10 +605,12 @@ A preparation of a dialect of format `4.0.0` has `formatVersion`, the string `"4
   refused, `input-over-bound`; a `decimal` over its characters is not of its type,
   `parameter-invalid`. Every form this section gives, written otherwise, is `input-malformed`.
 - **A reader that does not read the format.** One written to the text before this amendment defines
-  no format `4.0.0`, and refuses a document of it as an unknown selector (§2.1), `input-malformed`.
-  One written to this text that does not read the format takes §11's phases 0 to 3 as for format
-  `3.0.0`, and refuses the document `version-unread` in phase 4, before any form. Neither reads
-  anything more of it, and neither changes its answer to any document of an earlier format.
+  no format `4.0.0`: it takes §11's phases 0 to 3 as for any document, so that a document of the
+  format with 17 sources is `input-over-bound` to it, and refuses one that passes them in phase 5, as
+  an unknown selector (§2.1), `input-malformed`. One written to this text that does not read the
+  format takes §11's phases 0 to 3 as for format `3.0.0`, and refuses the document `version-unread`
+  in phase 4, before any form. Neither reads anything more of it, and neither changes its answer to
+  any document of an earlier format.
 
 What a rule of version `2.0.0` establishes, and what it does not, is §13's.
 
@@ -2135,9 +2153,9 @@ version 3's research bounds added:
   unwrapped value — and at most 64 in any document;
 - number literals of at most 128 characters, whose exponent, when they have one, has a magnitude of
   at most 308; and
-- in format `4.0.0`, §2.2.7's: 16 derived values in one rule; 8192 UTF-8 bytes in one literal;
-  1024 elements in one list parameter's value, each at most 1024 UTF-8 bytes; and 128 characters in
-  one `decimal`.
+- in format `4.0.0`, §2.2.7's: 16 derived values in one rule; 8192 UTF-8 bytes in one literal; and
+  1024 elements in one list parameter's value, each at most 1024 UTF-8 bytes. A `decimal`'s 128
+  characters are its type's (§2.2.2), not one of these bounds.
 
 For research, §4.3's maxima also hold: 64 declared fields and 64 answer entries per source;
 64 UTF-8 bytes per field name; 2048 per description; 256 per model name; 4096 per evidence

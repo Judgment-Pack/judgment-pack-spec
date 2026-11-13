@@ -1,4 +1,4 @@
-"""Dialect format 4.0.0 (spec/dialect.md §2.2, proposed): the hand-written rows and the end-to-end vector
+"""Dialect format 4.0.0 (spec/dialect.md §2.2, proposed): the hand-written rows and the end-to-end vectors
 under conformance/dialect/format-4/, the bounds and refusals, and the formats before it unchanged.
 
 The expected answers are hand-written, never recorded from the reader under test; the distances among them
@@ -8,13 +8,15 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import importlib.util
 import json
+import sys
 import unittest
 from pathlib import Path
 from typing import Any
 from unittest import mock
 
-from test_dialect import READER, ROOT
+from test_dialect import READER, RFC_8032_TEST_1, ROOT, signer
 
 FORMAT_4 = ROOT / "conformance" / "dialect" / "format-4"
 ID = "urn:judgmentpack:dialect:format-4-vectors"
@@ -141,27 +143,47 @@ class FormatFourRowTests(unittest.TestCase):
                 self.assertEqual(("some", {"value": expected}), (rule["reason"], rule["claim"]["facts"]), name)
 
 
+INPUTS = ("dialect.json", "case.json", "sources.json", "profiles.json", "preparation.json")
+
+
 class FormatFourVectorTests(unittest.TestCase):
-    def test_the_end_to_end_vector(self) -> None:
+    def test_the_end_to_end_vectors(self) -> None:
         manifest = json.loads((FORMAT_4 / "manifest.json").read_text(encoding="utf-8"))
-        self.assertEqual(["case-rule-no-sources"], [entry["name"] for entry in manifest["cases"]])
+        self.assertEqual(["case-rule-no-sources", "source-rule"], [entry["name"] for entry in manifest["cases"]])
         for entry in manifest["cases"]:
             directory = FORMAT_4 / entry["name"]
+            self.assertEqual(sorted(entry["files"]), sorted(p.name for p in directory.iterdir()))
             files = {name: (directory / name).read_bytes() for name in entry["files"]}
             for name, sha in entry["files"].items():
                 self.assertEqual(sha, hashlib.sha256(files[name]).hexdigest(), name)
             dialect = READER.read_document(files["dialect.json"], "dialect")
             self.assertEqual(files["dialect.canonical.json"], READER.canon(dialect))
             self.assertEqual(entry["dialectDigest"], READER.digest_of(READER.canon(dialect)))
-            parsed = READER.parse_dialect(dialect)
-            self.assertEqual(files["case-read.canonical.json"], READER.canon(parsed.case_read.as_written))
-            self.assertEqual(entry["readDigest"], READER.digest_of(files["case-read.canonical.json"]))
-            result = READER.verify(files["dialect.json"], files["case.json"], files["sources.json"],
-                                   files["profiles.json"], files["preparation.json"])
+            if "readDigest" in entry:
+                parsed = READER.parse_dialect(dialect)
+                self.assertEqual(files["case-read.canonical.json"], READER.canon(parsed.case_read.as_written))
+                self.assertEqual(entry["readDigest"], READER.digest_of(files["case-read.canonical.json"]))
+            result = READER.verify(*(files[name] for name in INPUTS))
             self.assertEqual(entry["preparationDigest"], result.digest)
             self.assertEqual(entry["expectedReport"], json.loads(READER.preparation_bytes(READER.report(result.answer))))
             # the given preparation is written in its canonical form (§9.5)
             self.assertEqual(files["preparation.json"], READER.preparation_bytes(READER.read_document(files["preparation.json"], "p")))
+            preparation = json.loads(files["preparation.json"])
+            if "expectedOutcomes" in entry:
+                self.assertEqual(entry["expectedOutcomes"],
+                                 {o["name"]: [o["status"], o["reason"]] for o in preparation["outcomes"]})
+            if "expectedDerivations" in entry:
+                # §2.2.6: every entry of a target of a rule of version 2.0.0 carries `derivation`, a skipped
+                # source's among them; an entry of a copy carries none
+                derivations: dict[str, dict[str, Any]] = {name: {} for name in entry["expectedDerivations"]}
+                for line in preparation["lineage"]:
+                    if "derivation" in line:
+                        derivations[line["source"]][line["target"]] = line["derivation"]
+                self.assertEqual(entry["expectedDerivations"], derivations)
+            with mock.patch.object(READER, "READ_FORMATS", ("2.0.0", "3.0.0")):
+                refused = READER.verify(*(files[name] for name in INPUTS))
+            self.assertEqual(entry["expectedReportOfAReaderThatDoesNotReadTheFormat"],
+                             json.loads(READER.preparation_bytes(READER.report(refused.answer))))
 
     def test_the_end_to_end_vector_under_another_parameter_or_time(self) -> None:
         directory = FORMAT_4 / "case-rule-no-sources"
@@ -186,6 +208,106 @@ class FormatFourVectorTests(unittest.TestCase):
         self.assertEqual({"by": "none"}, lineage["/signIn/distanceMm"]["derivation"])
         self.assertFalse(lineage["/signIn/distanceMm"]["present"])
         self.assertNotIn("derivation", lineage["/request/id"])
+
+
+def source_rule(result: Any = None, dialect: Any = None, profiles: Any = None) -> list[bytes]:
+    """The source vector's inputs changed: each acquisition's result, the dialect or the profiles, then every
+    profileDigest set to its profile's and each receipt committed to its result again and signed under the
+    vector's key, RFC 8032 section 7.1 TEST 1's published seed (source-rule/ in format-4/README.md)."""
+    directory = FORMAT_4 / "source-rule"
+    document = json.loads((directory / "dialect.json").read_bytes())
+    acquisitions = json.loads((directory / "sources.json").read_bytes())
+    trusted = json.loads((directory / "profiles.json").read_bytes())
+    for change, value in ((dialect, document), (profiles, trusted)):
+        if change is not None:
+            change(value)
+    for name, member in acquisitions.items():
+        if result is not None:
+            result(name, member["response"]["result"])
+    seed, public = RFC_8032_TEST_1
+    _, sign = signer(bytes.fromhex(seed))
+    digests = {p["id"]: READER.digest_of(READER.canon(READER.read_document(json.dumps(p).encode(), "p"))) for p in trusted}
+    for source in document["sources"]:
+        source["profileDigest"] = digests[source["profile"]]
+    for member in acquisitions.values():
+        receipt = member["response"]["receipt"]
+        changed = READER.read_document(json.dumps(member["response"]["result"]).encode(), "result")
+        receipt["resultDigest"] = READER.digest_of(READER.canon(changed))
+        receipt["keyId"] = hashlib.sha256(bytes.fromhex(public)).hexdigest()[:32]
+        del receipt["signature"]
+        message = b"judgment-pack-gateway/receipt/3:" + READER.canon(READER.read_document(json.dumps(receipt).encode(), "r"))
+        receipt["signature"] = sign(message).hex()
+    return [json.dumps(document).encode(), (directory / "case.json").read_bytes(), json.dumps(acquisitions).encode(),
+            json.dumps(trusted).encode(), (directory / "preparation.json").read_bytes()]
+
+
+class FormatFourSourceTests(unittest.TestCase):
+    def answer(self, inputs: list[bytes]) -> Any:
+        return READER.verify(*inputs)
+
+    def test_the_vector_signed_again_unchanged_is_still_read(self) -> None:
+        # the helper's own control: signed again with no change, the vector still reads
+        self.assertIn("reading", self.answer(source_rule()).answer)
+
+    def test_a_source_list_parameter_at_and_over_its_bounds(self) -> None:
+        # §2.2.7: a source parameter's elements and their bytes are measured when it takes its value, from
+        # the claim of the source it comes from, before its type is checked
+        for tags, expected in (
+            (["a"] * 1024, "preparation-differs"),
+            (["a"] * 1025, "input-over-bound"),
+            (["é" * 512], "preparation-differs"),
+            (["é" * 512 + "a"], "input-over-bound"),
+            (["a"] * 1024 + [1], "input-over-bound"),
+            (["a"] * 1023 + [1], "parameter-invalid"),
+        ):
+            def change(name: str, result: dict[str, Any], tags: list[Any] = tags) -> None:
+                result["tags"] = tags
+            with self.subTest(count=len(tags), first=tags[0]):
+                answer = self.answer(source_rule(change)).answer
+                self.assertEqual(expected, answer.get("refused") or answer.get("finding"), answer)
+
+    def test_a_calculator_that_did_not_compute_writes_derivation_none(self) -> None:
+        # §2.2.6: a read that was not applied writes none of its targets, each `{"by": "none"}`, the
+        # requirement the calculator's answer marks `unknown` included
+        calculator = {"name": "review-window", "version": "1.0.0"}
+
+        def dialect(document: dict[str, Any]) -> None:
+            sponsor = document["sources"][1]
+            sponsor["profile"] = "calculated-records"
+            sponsor["calculation"] = {"inputs": {}, "tables": {}}
+
+        def profiles(trusted: list[dict[str, Any]]) -> None:
+            trusted.append({**trusted[0], "id": "calculated-records", "calculator": calculator})
+
+        def result(name: str, value: dict[str, Any]) -> None:
+            if name == "sponsor":
+                value["calculation"] = {"calculator": calculator, "status": "input-missing", "inputs": {}, "asOf": {}}
+
+        inputs = source_rule(result, dialect, profiles)
+        recomputed = json.loads(self.answer(inputs).preparation)
+        lineage = {(e["source"], e["target"]): e for e in recomputed["lineage"]}
+        self.assertEqual(({"by": "none"}, False), (lineage[("sponsor", "/sponsor/id")]["derivation"],
+                                                    lineage[("sponsor", "/sponsor/id")]["present"]))
+        self.assertEqual(({"by": "none"}, True), (lineage[("sponsor", "sponsor-endorsement")]["derivation"],
+                                                   lineage[("sponsor", "sponsor-endorsement")]["present"]))
+        # the source's acquisition still has its derivations
+        self.assertEqual({"by": "pointer", "from": "/tags"}, lineage[("intake", "/request/tags")]["derivation"])
+        reading = self.answer(inputs[:4] + [READER.preparation_bytes(recomputed)]).answer["reading"]
+        # a calculator that did not compute has no unsignedParameters entry (§11)
+        self.assertEqual(["intake"], [e["source"] for e in reading["unsignedParameters"]])
+
+    def test_a_repeated_pointer_takes_the_last_entrys_value_and_derivation(self) -> None:
+        # §2.2.4: every entry of the match is applied in order, so an earlier `from` is still read; the last
+        # entry at a pointer gives its value and its derivation; candidateFrom keeps every `from`
+        rule = simple_rule([{"pointer": "/x", "from": "/y"}, {"pointer": "/x", "value": 1}])
+        recomputed = json.loads(run(frame(rule), {"y": 2}, "2026-11-12T18:00:00Z").preparation)
+        entry = next(e for e in recomputed["lineage"] if e["target"] == "/x")
+        self.assertEqual(({"by": "literal"}, ["/y"]), (entry["derivation"], entry["candidateFrom"]))
+        self.assertEqual({"x": 1}, recomputed["outcomes"][0]["rule"]["claim"]["facts"])
+        rule = simple_rule([{"pointer": "/x", "value": 1}, {"pointer": "/x", "from": "/y"}])
+        recomputed = json.loads(run(frame(rule), {"y": 2}, "2026-11-12T18:00:00Z").preparation)
+        entry = next(e for e in recomputed["lineage"] if e["target"] == "/x")
+        self.assertEqual({"by": "pointer", "from": "/y"}, entry["derivation"])
 
 
 def frame(rule: dict[str, Any], parameters: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -293,9 +415,33 @@ class FormatFourPhaseTests(unittest.TestCase):
         self.assertEqual("input-over-bound", READER.verify(*inputs).answer.get("refused"))
 
     def test_a_reader_from_before_the_format_refuses_an_unknown_selector(self) -> None:
+        many = json.loads(self.end_to_end()[0])
+        many["sources"] = [{}] * 17
         with mock.patch.object(READER, "READ_FORMATS", ("2.0.0", "3.0.0")), \
              mock.patch.object(READER, "DEFINED_FORMATS", ("2.0.0", "3.0.0")):
             self.assertEqual("input-malformed", READER.verify(*self.end_to_end()).answer.get("refused"))
+            # only once phases 0 to 3 pass (§2.2.7)
+            self.assertEqual("input-over-bound", READER.verify(json.dumps(many).encode(),
+                                                               *self.end_to_end()[1:]).answer.get("refused"))
+
+    def test_the_preserved_v0_3_0_reader_refuses_the_format_once_phases_0_to_3_pass(self) -> None:
+        # The v0.3.0 reader, preserved byte for byte, is one written to the text before this amendment;
+        # it imports tools/retained_column.py, which is this tree's.
+        path = ROOT / "tests/fixtures/historical-compatibility/v0.3.0/tools/dialect_verify.py"
+        spec = importlib.util.spec_from_file_location("dialect_verify_v0_3_0", path)
+        old = importlib.util.module_from_spec(spec)
+        with mock.patch.object(sys, "path", [str(ROOT / "tools"), *sys.path]), \
+             mock.patch.dict(sys.modules, {spec.name: old}):
+            spec.loader.exec_module(old)
+        refusal = lambda inputs: json.loads(old.preparation_bytes(old.report(old.verify(*inputs).answer)))
+        for entry in json.loads((FORMAT_4 / "manifest.json").read_text(encoding="utf-8"))["cases"]:
+            with self.subTest(entry["name"]):
+                inputs = [(FORMAT_4 / entry["name"] / name).read_bytes() for name in INPUTS]
+                self.assertEqual({"refusal": "input-malformed", "result": "refusal"}, refusal(inputs))
+                many = json.loads(inputs[0])
+                many["sources"] = [{}] * 17
+                self.assertEqual({"refusal": "input-over-bound", "result": "refusal"},
+                                 refusal([json.dumps(many).encode(), *inputs[1:]]))
 
     def test_format_3_and_rule_version_1_are_unchanged(self) -> None:
         version_1 = {"ruleVersion": "1", "parameters": {"n": "integer"}, "clauses": [
@@ -341,6 +487,12 @@ class FormatFourPhaseTests(unittest.TestCase):
         self.assertEqual([{"source": "case", "parameters": [{"name": "runAt", "kind": "runAt"}], "targets": 1}],
                          reading(frame(rule, parameters))["unsignedParameters"])
         rule["clauses"] = [{**resolved([], "r"), "when": {"op": "compareParam", "field": "/m", "relation": "less-than", "param": "n"}},
+                           {**resolved([{"pointer": "/x", "value": 1}], "r"), "when": ALWAYS}]
+        self.assertEqual([{"name": "n", "kind": "case"}, {"name": "runAt", "kind": "runAt"}],
+                         reading(frame(rule, parameters))["unsignedParameters"][0]["parameters"])
+        # aheadWithin names its asOf and its maxAhead, with no derived value reading runAt
+        del rule["derived"]
+        rule["clauses"] = [{**resolved([], "r"), "when": {"op": "aheadWithin", "field": "/m", "asOf": "runAt", "maxAhead": "n"}},
                            {**resolved([{"pointer": "/x", "value": 1}], "r"), "when": ALWAYS}]
         self.assertEqual([{"name": "n", "kind": "case"}, {"name": "runAt", "kind": "runAt"}],
                          reading(frame(rule, parameters))["unsignedParameters"][0]["parameters"])
