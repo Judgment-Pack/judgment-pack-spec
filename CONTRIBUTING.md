@@ -54,6 +54,10 @@ A pull request should:
 
 Normative changes are not accepted solely because the reference implementation supports them.
 
+A pull request reaches main through the merge queue (squash). The queue checks the pull request on
+top of main and of the pull requests ahead of it before main moves, so a branch is not brought up
+to date with main by hand. A new push to a pull request cancels its check run in progress.
+
 ## Local checks
 
 CI runs the repository checks on Python 3.12. That is what the workflow currently uses rather
@@ -100,6 +104,8 @@ record, a record that names a wrong digest, or a status record that `releases/` 
 
 Contributions must be signed off using Git's `--signoff` option. The sign-off certifies the
 Developer Certificate of Origin 1.1: <https://developercertificate.org/>.
+The `DCO` check (`.github/workflows/dco.yml`) requires on every commit of a pull request a
+`Signed-off-by:` line naming the commit's own author; a commit an app made is exempt.
 
 ## License
 

@@ -1,0 +1,55 @@
+name: DCO
+
+# Every commit of a pull request carries `Signed-off-by:` naming its own author (CONTRIBUTING.md).
+# Required by branch protection under the name `DCO`. It runs on the pull request and again on the
+# merge queue's group, where it checks the commits of the pull request that group was made for, so
+# the queue never waits on a check that does not run there.
+
+on:
+  pull_request:
+  merge_group:
+
+concurrency:
+  group: dco-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  dco:
+    name: DCO
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every commit is signed off by its author
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          PR: ${{ github.event.pull_request.number }}
+          GROUP_REF: ${{ github.event.merge_group.head_ref }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" = merge_group ]; then
+            # gh-readonly-queue/<base>/pr-<number>-<sha>
+            PR=$(printf '%s' "$GROUP_REF" | sed -n 's#^gh-readonly-queue/.*/pr-\([0-9][0-9]*\)-[0-9a-f]*$#\1#p')
+          fi
+          case "$PR" in ''|*[!0-9]*) echo "::error::no pull request number (event $EVENT, ref $GROUP_REF)"; exit 1;; esac
+          fail=0; n=0
+          while IFS=$'\t' read -r sha name email msg; do
+            n=$((n + 1))
+            # A commit an app made (its author a `[bot]` account) is exempt, as the DCO app held it.
+            case "$name" in *'[bot]') echo "bot  $sha  $name"; continue;; esac
+            if printf '%s' "$msg" | base64 -d | tr -d '\r' | grep -qxF "Signed-off-by: $name <$email>"; then
+              echo "ok   $sha  $name <$email>"
+            else
+              echo "::error::commit $sha is not signed off by its author: a line 'Signed-off-by: $name <$email>' is missing"
+              fail=1
+            fi
+          done < <(gh api --paginate "repos/$REPO/pulls/$PR/commits" \
+                     -q '.[] | [.sha, .commit.author.name, .commit.author.email, (.commit.message | @base64)] | @tsv')
+          [ "$n" -gt 0 ] || { echo "::error::pull request #$PR lists no commits"; exit 1; }
+          echo "pull request #$PR: $n commit(s) checked"
+          exit "$fail"
