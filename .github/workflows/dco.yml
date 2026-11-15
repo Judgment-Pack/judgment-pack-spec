@@ -34,6 +34,7 @@ jobs:
           set -euo pipefail
           if [ "$EVENT" = merge_group ]; then
             # gh-readonly-queue/<base>/pr-<number>-<sha>
+            GROUP_REF=${GROUP_REF#refs/heads/}  # the event gives the full ref
             PR=$(printf '%s' "$GROUP_REF" | sed -n 's#^gh-readonly-queue/.*/pr-\([0-9][0-9]*\)-[0-9a-f]*$#\1#p')
           fi
           case "$PR" in ''|*[!0-9]*) echo "::error::no pull request number (event $EVENT, ref $GROUP_REF)"; exit 1;; esac
