@@ -733,15 +733,29 @@ def run(files: dict[str, bytes]) -> Any:
                          files["preparation.json"], binding=files.get("binding.json"))
 
 
-def check_reading(name: str, expected: dict[str, Any], answer: dict[str, Any], preparation: dict[str, Any]) -> None:
+def check_reading(name: str, case: dict[str, Any], answer: dict[str, Any], preparation: dict[str, Any]) -> None:
+    expected = case["expected"]
     assert "reading" in answer, (name, answer)
     reading = answer["reading"]
     assert READER.as_plain(reading["facts"]) == expected["facts"], (name, reading["facts"])
     outcomes = {o["name"]: o for o in preparation["outcomes"]}
+    # each case parameter's value, by its one-token pointer into the case
+    values = {p: case["case"][d["pointer"][1:]] for p, d in case["dialect"]["case"]["parameters"].items()}
+    declared = {s["name"]: s for s in case["dialect"]["sources"]}
     for source, want in expected["outcomes"].items():
         got = outcomes[source]
         assert (got["status"], got["reason"]) == (want["status"], want["reason"]), (name, source, got["status"], got["reason"])
         assert READER.as_plain(got.get("paging")) == want.get("paging"), (name, source, got.get("paging"))
+        if want.get("paging") is None:
+            continue
+        # RFC 0033 section 8, by hand: the outcome carries Q0 as `arguments`, formed here from the case, and
+        # each lineage entry of the source carries `receipts`, its pages' citations in call order, and no `receipt`
+        assert got["arguments"] == instantiate(declared[source]["arguments"], values), (name, source, got["arguments"])
+        lines = [line for line in preparation["lineage"] if line["source"] == source]
+        for line in lines:
+            assert "receipt" not in line, (name, source, line)
+            assert [c["callIndex"] for c in line["receipts"]] == list(range(want["paging"]["pages"])), (name, source, line)
+            assert len({c["sessionId"] for c in line["receipts"]}) == 1, (name, source, line)
     assert [[c["sessionId"], c["callIndex"]] for c in READER.as_plain(preparation["cites"])] == expected["cites"], name
     if "unsignedParameters" in expected:
         assert reading.get("unsignedParameters", []) == expected["unsignedParameters"], (name, reading)
@@ -771,7 +785,7 @@ def main(argv: list[str]) -> int:
                 files["preparation.json"] = recomputed
         result = run(files)
         if expected["result"] == "reading":
-            check_reading(name, expected, result.answer, json.loads(files["preparation.json"]))
+            check_reading(name, case, result.answer, json.loads(files["preparation.json"]))
         else:
             got = {"result": "refusal", "refusal": result.answer["refused"]} if "refused" in result.answer else \
                   {"result": "finding", "finding": result.answer.get("finding")}

@@ -31,9 +31,12 @@ profile holds. The profiles are three: `feed`, of shape `mcp`; `web`, of shape `
   reading, with its `facts`, each named source's outcome `status`, `reason` and `paging` (absent for
   an outcome that has none), `cites` as `[sessionId, callIndex]` pairs in their order, and, where
   given, `unsignedParameters`; and of a reading also `preparationDigest`;
-- `expectedReportOfAReaderThatDoesNotReadTheFormat`: `version-unread` for a document of format
-  `4.1.0` (RFC 0033 section 11); the two vectors of format `4.0.0` are answered by such a reader as
-  by one that reads the format, `input-malformed`.
+- `expectedReportOfAReaderThatDoesNotReadTheFormat`: the report of a reader written to the RFC's
+  text that reads format `4.0.0` and not `4.1.0`, such as the first reader with `4.1.0` taken out of
+  the formats it reads, as its test runs it: `version-unread` for a document of format `4.1.0` (RFC
+  0033 section 11), and `input-malformed` for the two vectors of format `4.0.0`, as a reader of
+  either format answers them. It does not describe the second reader, which reads neither format
+  and refuses every vector `version-unread`; its test does not read this member.
 
 A reader written to the text before the amendment, such as the preserved `v0.3.0` reader, refuses
 every vector `input-malformed` (section 11). The repository's first reader,
