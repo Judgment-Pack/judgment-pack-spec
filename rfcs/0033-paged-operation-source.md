@@ -165,8 +165,9 @@ lacks, and the second page adds it.
 A paged source's member of the acquisitions is `{"pages": [P0, P1, ...]}`, exactly, of at least one
 element. Each `Pi` is `{"result": R, "receipt": E, "salts": S}`, exactly, the form that §5.2's
 `response` has, and is the gateway's acquire answer for call `i`, as the preparer kept it. For a
-paged source, a `{"response"}` member is `input-malformed`, and so is `{"pages"}` for a source that
-is not paged. More elements than the "Dialect retained responses" row allows is
+paged source, a member that has `response` is `input-malformed`, and so is a member that has
+`pages` for a source that is not paged; a member that has both is of neither form, and is
+`input-malformed` for every source. More elements than the "Dialect retained responses" row allows is
 `input-over-bound`, in phase 3 (section 7).
 
 A skipped paged source that has a member is `acquisition-unexpected` (§5.2), as any skipped source
@@ -183,12 +184,14 @@ before it takes the next. Each page gives its findings in this order:
 4. The page's session: `Ei.sessionId` is `E0.sessionId`; `Ei.callIndex` is `i`; `Ei.prevSignature`
    is `null` for `i = 0`, and `Ei−1.signature` otherwise. For `i = 0` also, no receipt of an earlier
    source names `E0.sessionId`. Otherwise: `acquisition-sessions`.
-5. The page's value read, `vi`: §6.1's `unwrap` applied to `R`. Then `items` MUST resolve in `vi` to
-   an array, and `next`'s parent to an object; otherwise `read-failed`. The member that `next`
-   names, when it is spelled as `noNext` declares (absent, `null` or `""`), names no next
-   reference. When it is a string that is not `""`, that string is `ri`, and its bytes are measured
-   (section 7). Anything else is `read-failed`: a value of another type, `null` or an absent member
-   when `noNext` declares another spelling, and `""` when `noNext` is not `"empty-string"`.
+5. The page's value read, `vi`: §6.1's `unwrap` applied to `R`. Then, in this order: `items` MUST
+   resolve in `vi` to an array, and then `next`'s parent to an object; otherwise `read-failed`.
+   Then the member that `next` names is read. When it is spelled as `noNext` declares (absent,
+   `null` or `""`), it names no next reference. When it is a string that is not `""`, that string
+   is `ri`, and its bytes are then measured (section 7). Anything else is `read-failed`: a value of
+   another type, `null` or an absent member when `noNext` declares another spelling, and `""` when
+   `noNext` is not `"empty-string"`. So a page whose `items` is not an array is `read-failed`
+   whatever its reference's size, and only a reference is measured.
 6. When page `i` names no next reference, the loop ends there, and its **end** is `no-next`. When
    it names one and `i + 1` is `maxPages`, the loop ends there, and its end is `bound`: `ri` is not
    followed, so it is measured for bytes in step 5 and not checked for repeats, since no page is
@@ -328,6 +331,14 @@ answer, not where the pack does.
   read, a part of a retained result, once, `items` holds each record a second time, and `last`
   holds the last page's value read a second time, so the joined value is about twice the pages'
   values read plus the last page's once more, and is bounded by the retained pages.
+- The preparation keeps §12's 8388608 bytes, and its `references` are a part of it that page
+  content sizes. In §9.5's form a reference grows by up to six times: `<`, `>` and `&` are written
+  `<`, `>` and `&`, and a control character other than the five with a short escape
+  as `\u00` and two digits. Up to 2 MiB of references can lie within the combined bound, so a
+  preparation whose references are mostly such characters can exceed 8 MiB. It fails closed: a
+  preparer cannot write it, and a verifier refuses it `input-over-bound` in phase 1. But the
+  source's pages, not the dialect, decide whether a read stays within it, and this amendment adds no
+  bound on the references' total.
 - The Runner's limits are a preparer's own: 1 MiB per acquisition, which holds for each page, and
   2 MiB per run input, which equals the combined bound under `base`. With full pages a paged read
   holds one or two pages; holding more is unresolved question 9. The bundled verifiers support
@@ -548,7 +559,11 @@ paged source's rule that the amended passages name.
   should show the rest (question 8).
 - **Disclosure.** A reference can carry a query's state, such as a filter or a scope identifier. It
   is already in the committed requests and the retained results. The preparation now carries it in
-  `references`, as it carries every request in `arguments`.
+  `references`, as it carries every request in `arguments`. A reference can also be a signed or
+  bearer-like token, which a holder may present to the source to read on until it expires. A
+  preparation may travel further than the raw results, to a record's reader or an auditor who is
+  not given the pages, so a preparer and an operator treat `references` as they treat the results:
+  a source whose references grant access is one whose preparations are held as its results are.
 
 ## Conformance
 
@@ -563,6 +578,8 @@ refusal row. Each name takes the prefix `paged-`.
 | `three-pages-no-next`: shape `mcp`, three pages, the third naming none | positive | reading; `paging` `no-next`, 3; three `cites` and `receipts` in call order |
 | `one-page`: the first page names none | positive | reading; 1 page |
 | `ends-at-bound`: `maxPages` 2, the second page names a reference | positive | reading; `bound` |
+| `max-pages-one`: `maxPages` 1, page 0 names a reference | positive | reading; `bound`, 1 page, `references` `[]` |
+| `reference-repeated-at-bound`: `maxPages` 2, page 1 names page 0's reference again | positive | reading; `bound` (not followed, so not a repeat) |
 | `bound-rule-unknown`: a rule claims `unknown` when `/end` is `bound` | positive | reading; status `unknown` |
 | `fills-added`: a window, `Q0` without the member | positive | reading |
 | `fills-replaced`: `Q0`'s member from a case parameter | positive | reading; the parameter committed by page 0 |
@@ -574,13 +591,18 @@ refusal row. Each name takes the prefix `paged-`.
 | `last-is-the-last-page`: three pages, the first `{"items": [...], "incomplete": true}` with a reference and the third `"incomplete": false` naming none; the same rule | positive | reading; `no-next`; status not `unknown` (a reader that sets `last` to the first page claims `unknown`) |
 | `page-flag-at-values`: three pages, the second `"incomplete": true`; a rule claims `unknown` when `/values/1/incomplete` is `true` | positive | reading; status `unknown` |
 | `http-query`: `adapter-http`, `fills` `/query/pageToken` | positive | reading |
+| `http-body`: `adapter-http`, `body` an object, `fills` `/body/cursor` | positive | reading |
+| `unbound-paged`: an unbound operation (§4.4) carrying `paging`, bound by a binding document | positive | reading; `paging` as written |
 | `beside-unpaged`: a paged and an unpaged source, sessions apart | positive | reading; `cites` in the order of `sources` |
 | `two-paged-sessions-apart`: two paged sources, each in a session of its own | positive | reading; `cites` in the order of `sources`, each source's pages in call order |
 | `cites-order-paged-skipped`: a skipped paged source, and two unpaged sources sharing one session at call indexes 1 and 0, in the order of `sources` | positive | reading; `cites` in the order of `sources`, call index 1 first |
 | `max-pages-at-row`: 64 of 64 | boundary | reading |
 | `max-pages-over-row`: `maxPages` 65 | boundary | refusal `input-over-bound` |
 | `pages-over-row`: 65 pages retained | boundary | refusal `input-over-bound` |
-| `reference-at-bytes`, `reference-over-bytes`: 8192 and 8193 bytes, two-byte characters | boundary | reading; refusal `input-over-bound` |
+| `reference-at-bytes`: 4096 two-byte characters, 8192 bytes | boundary | reading |
+| `reference-over-bytes`: 4096 two-byte characters and one one-byte character, 8193 bytes | boundary | refusal `input-over-bound` |
+| `reference-over-bytes-at-bound`: `maxPages` 2, page 1 naming an 8193-byte reference that is not followed | boundary | refusal `input-over-bound` |
+| `items-before-reference-bytes`: one page, `items` not an array, naming an 8193-byte reference | negative | `read-failed`, not `input-over-bound` |
 | `joined-nesting-at-bound`: a page's value read at 30 levels, the joined value at 32 | boundary | reading |
 | `joined-nesting-over`: a page's value read at 31 levels, the joined value at 33 | boundary | refusal `input-over-bound` |
 | `page-result-nesting-at-bound`: page 1's `result` at 32 levels, unwrapped to a shallow value | boundary | reading |
@@ -590,6 +612,7 @@ refusal row. Each name takes the prefix `paged-`.
 | `page-items-receipt`: page 1's receipt carries `pageItems` | negative | `acquisition-invalid` |
 | `prev-signature-malformed`: page 1's `prevSignature` neither `null` nor a signature in form | negative | `acquisition-invalid` |
 | `stale-last-page` | negative | `acquisition-stale` |
+| `stale-middle-page`: three pages, page 1's times outside `maxAge` | negative | `acquisition-stale` |
 | `call-index-gap`: calls 0 and 2, page 1 asked twice and the second kept | adversarial | `acquisition-sessions` |
 | `call-index-reordered`: calls 1 and 0, requests in loop order | adversarial | `acquisition-sessions` |
 | `page-from-another-session` | adversarial | `acquisition-sessions` |
@@ -600,20 +623,23 @@ refusal row. Each name takes the prefix `paged-`.
 | `page-missing`: page 0 names a reference below the bound, no page 1 | negative | `acquisition-missing` |
 | `page-after-end` | adversarial | `acquisition-unexpected` |
 | `page-beyond-bound`: `maxPages` 2, three retained | adversarial | `acquisition-unexpected` |
-| `skipped-paged-with-member`: a skipped paged source with a `{"pages"}` member | negative | `acquisition-unexpected` |
+| `skipped-paged-with-member`: a skipped paged source with a member that has `pages` | negative | `acquisition-unexpected` |
 | `reference-repeated`, `reference-number`, `next-parent-absent`, `items-not-array` | negative | `read-failed` |
 | `reference-equals-q0`: page 0 names the string `Q0` holds at `fills` | adversarial | `read-failed` |
 | `end-spelling-undeclared`: `noNext` `"null"`, the last page's `next` member `""` | negative | `read-failed` |
+| `end-absent-member-null`: `noNext` `"absent"`, the last page's `next` member `null` | negative | `read-failed` |
 | `next-misspelled`: `noNext` `"null"`, `next`'s last token misspelled, so every page's member is absent | negative | `read-failed` |
 | `read-failed-before-invalid`: page 0's `items` not an array, and page 1's receipt not verifying | negative | `read-failed` (page 0's finding precedes page 1's) |
 | `end-changed`, `reference-dropped`: the preparation's `paging` rewritten | adversarial | `preparation-differs` |
 | `cites-by-call-index-paged-skipped`: `cites-order-paged-skipped`'s preparation with `cites` ordered by call index | adversarial | `preparation-differs` |
-| `paging-in-4.0.0`, `paging-with-calculation`, `fills-in-template-form`, `fills-parent-unresolved`, `pages-empty`, `max-pages-zero`, `response-form-for-paged`, `pages-form-for-unpaged`, `no-next-unknown` | negative | refusal `input-malformed` |
+| `paging-in-4.0.0`, `paging-with-calculation`, `fills-in-template-form`, `fills-parent-unresolved`, `pages-empty`, `max-pages-zero`, `response-form-for-paged`, `pages-form-for-unpaged`, `pages-and-response`, `no-next-unknown` | negative | refusal `input-malformed` |
 | `max-pages-not-integer`: `maxPages` `1e3` | negative | refusal `input-malformed` |
 | `pages-over-row-in-4.0.0`: 65 pages retained in a document of format `4.0.0` | negative | refusal `input-malformed`, not `input-over-bound` |
 | `fills-tool`: shape `mcp`, `fills` `/tool` | negative | `profile-mismatch` |
 | `fills-path`, `fills-method`: `adapter-http`, `fills` `/path` and `/method` | negative | `profile-mismatch` |
 | `fills-connection`: shape `http` under a connection's profile, `fills` `/connection` | negative | `profile-mismatch` |
+| `fills-arguments-itself`, `fills-query-itself`, `fills-body-itself`: `fills` `/arguments` under shape `mcp`, and `/query` and `/body` under `adapter-http` | negative | `profile-mismatch` |
+| `fills-query-three-tokens`: `adapter-http`, `fills` `/query/filter/cursor`, `Q0`'s `query` holding `filter` as an object so that the parent resolves | negative | `profile-mismatch` |
 | `format-4.1.0-unread`: a reader of this text that does not read the format; and the preserved `v0.3.0` reader | negative | refusal `version-unread`; refusal `input-malformed` |
 
 ## Implementation
