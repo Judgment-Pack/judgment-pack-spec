@@ -1,0 +1,55 @@
+{
+  "formatVersion": "4.1.0",
+  "id": "urn:judgmentpack:dialect:paged-vectors",
+  "version": "0.1.0",
+  "case": {
+    "parameters": {
+      "since": {
+        "pointer": "/since",
+        "type": "string"
+      }
+    },
+    "facts": [],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "changes",
+      "kind": "operation",
+      "profile": "connection",
+      "profileDigest": "sha256:cb854c7276b7b69e51cfb19d3283993130d94b7ae7a82f840702df9e1e3e63b5",
+      "maxAge": 300,
+      "arguments": {
+        "connection": "conn-1",
+        "revision": "rev-1",
+        "read": "changes"
+      },
+      "paging": {
+        "next": "/next",
+        "noNext": "absent",
+        "fills": "/connection",
+        "items": "/items",
+        "maxPages": 8
+      },
+      "read": {
+        "copy": {
+          "facts": [
+            {
+              "target": "/changes/end",
+              "source": "/end"
+            },
+            {
+              "target": "/changes/items",
+              "source": "/items"
+            },
+            {
+              "target": "/changes/pages",
+              "source": "/pages"
+            }
+          ],
+          "evidence": []
+        }
+      }
+    }
+  ]
+}

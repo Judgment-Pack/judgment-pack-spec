@@ -1,0 +1,61 @@
+{
+  "formatVersion": "4.1.0",
+  "id": "urn:judgmentpack:dialect:paged-vectors",
+  "version": "0.1.0",
+  "case": {
+    "parameters": {
+      "since": {
+        "pointer": "/since",
+        "type": "string"
+      }
+    },
+    "facts": [],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "changes",
+      "kind": "operation",
+      "platform": "change-feed",
+      "operation": "list-changes",
+      "shape": "mcp",
+      "record": "adapter-mcp",
+      "maxAge": 300,
+      "arguments": {
+        "tool": "list-changes",
+        "arguments": {
+          "since": {
+            "$param": "since"
+          },
+          "limit": 2
+        }
+      },
+      "paging": {
+        "next": "/next",
+        "noNext": "absent",
+        "fills": "/arguments/cursor",
+        "items": "/items",
+        "maxPages": 8
+      },
+      "read": {
+        "copy": {
+          "facts": [
+            {
+              "target": "/changes/end",
+              "source": "/end"
+            },
+            {
+              "target": "/changes/items",
+              "source": "/items"
+            },
+            {
+              "target": "/changes/pages",
+              "source": "/pages"
+            }
+          ],
+          "evidence": []
+        }
+      }
+    }
+  ]
+}

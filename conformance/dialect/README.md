@@ -157,6 +157,12 @@ sources read by rules of version `2.0.0`, and one row for each new form and refu
 Runner recordings, no preparer writes the format, and only the first reader reads it; the second
 refuses it `version-unread`.
 
+[`format-4.1/`](format-4.1/README.md) holds the hand-written vectors of the proposed dialect format
+`4.1.0`, a paged `operation` source ([RFC 0033](../../rfcs/0033-paged-operation-source.md), in
+Review): one for each row of the RFC's Conformance table. The companion is unchanged; only the first
+reader reads the format, the second refuses it `version-unread`, and the preserved `v0.3.0` reader
+refuses it `input-malformed`.
+
 ## What a vector holds, and the answer a verifier gives
 
 Each vector is a directory. Of its files, a preparation verifier reads:

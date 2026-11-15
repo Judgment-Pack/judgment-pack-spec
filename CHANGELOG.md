@@ -18,6 +18,11 @@ here.
   reference, or at a declared bound, and the preparation records which. The pages' records are
   joined in call order, duplicates kept, and read once. `pageItems` stays refused.
   `spec/dialect.md`, its vectors and its readers are unchanged.
+- RFC 0033's staged vectors (#328): `conformance/dialect/format-4.1/` holds one hand-written vector
+  for each row of the RFC's Conformance table, marked proposed. The Python reader reads format
+  `4.1.0` (paging, the walk, the joined value with `last`, the bounds and the preparation); the
+  TypeScript reader defines the selector and refuses it `version-unread`. Format `4.0.0` and earlier
+  are read as before, and `spec/dialect.md` is unchanged.
 
 ### Changed
 

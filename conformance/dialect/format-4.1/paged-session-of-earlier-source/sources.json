@@ -1,0 +1,131 @@
+{
+ "lookup": {
+  "response": {
+   "result": {
+    "id": "R-1"
+   },
+   "receipt": {
+    "acquisition": {
+     "adapter": {
+      "name": "adapter-mcp",
+      "version": "stand-in",
+      "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+     },
+     "endpoint": "stdio:change-feed",
+     "observedAt": "2026-11-15T11:59:00Z",
+     "peerIdentity": null,
+     "schema": null,
+     "shape": "mcp",
+     "snapshot": "paged",
+     "statement": null,
+     "upstreamToken": null
+    },
+    "argumentsCommitment": "sha256:949a6a577fbd4f2d47b90abe8f612317b288d1d1d8471b5a02894fe9d24617f7",
+    "authority": "test",
+    "callIndex": 0,
+    "caller": null,
+    "keyId": "21fe31dfa154a261626bf854046fd227",
+    "kind": "acquisition",
+    "prevSignature": null,
+    "receiptVersion": "3",
+    "resultDigest": "sha256:daefb7c5efad36c41eb2cfb7dff84970b70522e9e033af697d4fd970a819f9ac",
+    "servedAt": "2026-11-15T11:59:00Z",
+    "sessionId": "paged.session.1",
+    "source": "changes/feed",
+    "signature": "da610a82215468ee305628ad5bca3ed664926775133873c6467219a33375feeb9c0c89590dc53480c717e20445d99368c6074a7f1fc713443a09f98b3ff7dc01"
+   },
+   "salts": {
+    "args": "d4e35acb093913c5c87967caa6b7d66ca4bf66162f0170fc638364b4b5967ee5"
+   }
+  }
+ },
+ "changes": {
+  "pages": [
+   {
+    "result": {
+     "items": [
+      {
+       "id": "c1"
+      }
+     ],
+     "next": "t1"
+    },
+    "receipt": {
+     "acquisition": {
+      "adapter": {
+       "name": "adapter-mcp",
+       "version": "stand-in",
+       "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+      },
+      "endpoint": "stdio:change-feed",
+      "observedAt": "2026-11-15T11:59:00Z",
+      "peerIdentity": null,
+      "schema": null,
+      "shape": "mcp",
+      "snapshot": "paged",
+      "statement": null,
+      "upstreamToken": null
+     },
+     "argumentsCommitment": "sha256:d712d16446edb29380de710f2ca355510ab286a4ceb59a821577f0d04960aa41",
+     "authority": "test",
+     "callIndex": 0,
+     "caller": null,
+     "keyId": "21fe31dfa154a261626bf854046fd227",
+     "kind": "acquisition",
+     "prevSignature": null,
+     "receiptVersion": "3",
+     "resultDigest": "sha256:2f4b696a2d2774958b6a9b8d6778a958ded2ec709d8bae6f9140266cf517af60",
+     "servedAt": "2026-11-15T11:59:00Z",
+     "sessionId": "paged.session.1",
+     "source": "changes/feed",
+     "signature": "cf0567ed6bbdefa623acd50ebf4ef2792f350417afc5e071fc1517033c103ecb7b985e7540022ee6af1960479b9cc9e00163acd7540ac8b3fb2186e8ccd8fa0b"
+    },
+    "salts": {
+     "args": "0fce5eb441c88b6f43dfb4070e12bea61ab39f9108243eacdca320381e84eb30"
+    }
+   },
+   {
+    "result": {
+     "items": [
+      {
+       "id": "c2"
+      }
+     ]
+    },
+    "receipt": {
+     "acquisition": {
+      "adapter": {
+       "name": "adapter-mcp",
+       "version": "stand-in",
+       "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+      },
+      "endpoint": "stdio:change-feed",
+      "observedAt": "2026-11-15T11:59:00Z",
+      "peerIdentity": null,
+      "schema": null,
+      "shape": "mcp",
+      "snapshot": "paged",
+      "statement": null,
+      "upstreamToken": null
+     },
+     "argumentsCommitment": "sha256:5e3bcba7f7d9424e8f747fcdfc57af6180e1ce7de029cd9082cb5494e3ae37e5",
+     "authority": "test",
+     "callIndex": 1,
+     "caller": null,
+     "keyId": "21fe31dfa154a261626bf854046fd227",
+     "kind": "acquisition",
+     "prevSignature": "cf0567ed6bbdefa623acd50ebf4ef2792f350417afc5e071fc1517033c103ecb7b985e7540022ee6af1960479b9cc9e00163acd7540ac8b3fb2186e8ccd8fa0b",
+     "receiptVersion": "3",
+     "resultDigest": "sha256:cd8eb549e98498155796cdba3f50796dc79c04ddcb858992af93ac09831272ea",
+     "servedAt": "2026-11-15T11:59:00Z",
+     "sessionId": "paged.session.1",
+     "source": "changes/feed",
+     "signature": "9dbfd5f1c0f79773c0934f4ab2de5a9f5507ef44135001242ead81ee32e3a8452650fa5bddd6089a8cc5833bce0e05f5533386a2bef516422ee7994e33fac208"
+    },
+    "salts": {
+     "args": "87744d95d4c21cbdaf473dcca4b102ba2676520a44b4b7957619b103b9cc8cb2"
+    }
+   }
+  ]
+ }
+}

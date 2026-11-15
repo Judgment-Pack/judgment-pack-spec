@@ -1,0 +1,91 @@
+{
+ "changes": {
+  "pages": [
+   {
+    "result": {
+     "items": [
+      {
+       "id": "c1"
+      }
+     ],
+     "next": "t1"
+    },
+    "receipt": {
+     "acquisition": {
+      "adapter": {
+       "name": "adapter-mcp",
+       "version": "stand-in",
+       "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+      },
+      "endpoint": "stdio:change-feed",
+      "observedAt": "2026-11-15T11:59:00Z",
+      "peerIdentity": null,
+      "schema": null,
+      "shape": "mcp",
+      "snapshot": "paged",
+      "statement": null,
+      "upstreamToken": null
+     },
+     "argumentsCommitment": "sha256:f2fdd1f3fdb518bbd14506ef15cb45a374f64b95063ed90f9715f78388d29abb",
+     "authority": "test",
+     "callIndex": 1,
+     "caller": null,
+     "keyId": "21fe31dfa154a261626bf854046fd227",
+     "kind": "acquisition",
+     "prevSignature": "492c70d9c6368bf0ab7c4a2f1ba2a65bf72fc34a98a68a49df13fdc31578f18277aa1ccb9af1b622ce2ea39bfcc535f748096ad87d17bed1d0f37f3c79f5fe0b",
+     "receiptVersion": "3",
+     "resultDigest": "sha256:2f4b696a2d2774958b6a9b8d6778a958ded2ec709d8bae6f9140266cf517af60",
+     "servedAt": "2026-11-15T11:59:00Z",
+     "sessionId": "paged.session.1",
+     "source": "changes/feed",
+     "signature": "1649b2eed7df99dc5d1c3afa94725632d2647a375d782f01dc48d18d6b2a5bc5e54555f9dc891bcb3932c3b4bd2648bb6dd1b523e717eba5982165eaaebfa20b"
+    },
+    "salts": {
+     "args": "d5a2907c0b89dcf18b75fcdbc4c822468ade2b4fbe7d4089d533adeeb37abe83"
+    }
+   },
+   {
+    "result": {
+     "items": [
+      {
+       "id": "c2"
+      }
+     ]
+    },
+    "receipt": {
+     "acquisition": {
+      "adapter": {
+       "name": "adapter-mcp",
+       "version": "stand-in",
+       "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+      },
+      "endpoint": "stdio:change-feed",
+      "observedAt": "2026-11-15T11:59:00Z",
+      "peerIdentity": null,
+      "schema": null,
+      "shape": "mcp",
+      "snapshot": "paged",
+      "statement": null,
+      "upstreamToken": null
+     },
+     "argumentsCommitment": "sha256:f5df5e737121a81ca8a2c31238aa392d178399ca210595c05f55a67674b629b5",
+     "authority": "test",
+     "callIndex": 0,
+     "caller": null,
+     "keyId": "21fe31dfa154a261626bf854046fd227",
+     "kind": "acquisition",
+     "prevSignature": null,
+     "receiptVersion": "3",
+     "resultDigest": "sha256:cd8eb549e98498155796cdba3f50796dc79c04ddcb858992af93ac09831272ea",
+     "servedAt": "2026-11-15T11:59:00Z",
+     "sessionId": "paged.session.1",
+     "source": "changes/feed",
+     "signature": "492c70d9c6368bf0ab7c4a2f1ba2a65bf72fc34a98a68a49df13fdc31578f18277aa1ccb9af1b622ce2ea39bfcc535f748096ad87d17bed1d0f37f3c79f5fe0b"
+    },
+    "salts": {
+     "args": "9eb9ab05ad1563cbc95c7733c834c9d1f7eb2777bc8940b61900ad0d05dea01a"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,9 @@
+{
+  "dialect": "sha256:17de2d3928bfd1a6ed27b07ea539e50b03e71af4b49159ee8d80cc046fb002de",
+  "sources": {
+    "changes": {
+      "profile": "feed",
+      "profileDigest": "sha256:8510e05ea3c82072b3f0affabd1aa3045affd7ab3d6454c4f4a1168bbd2f3e9b"
+    }
+  }
+}

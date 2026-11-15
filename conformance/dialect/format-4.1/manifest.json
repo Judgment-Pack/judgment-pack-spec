@@ -1,0 +1,3276 @@
+{
+ "status": "staged; proposed format 4.1.0 (RFC 0033, in Review), not a published conformance corpus",
+ "rfc": 33,
+ "companion": "spec/dialect.md is unchanged; RFC 0033's Specification",
+ "verifiedAt": "2026-11-15T12:00:00Z",
+ "signing": {
+  "identity": "RFC 8032, section 7.1, TEST 1",
+  "publicKey": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+ },
+ "cases": [
+  {
+   "name": "paged-three-pages-no-next",
+   "row": "three-pages-no-next",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "01e0d82091182ebd35ece505771e2a0501bab1aeb77dbc0263cb1f9f87572af3"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       },
+       {
+        "id": "c3"
+       },
+       {
+        "id": "c4"
+       },
+       {
+        "id": "c5"
+       }
+      ],
+      "pages": 3
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 3,
+       "references": [
+        "t1",
+        "t2"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.1",
+      2
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:01e0d82091182ebd35ece505771e2a0501bab1aeb77dbc0263cb1f9f87572af3"
+  },
+  {
+   "name": "paged-one-page",
+   "row": "one-page",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "9d5a72c69503ebdac74f2c0a7c7fadacd2695d669aa875a0007d06d295c63a7e",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "29b00298943f2a3c1bf5c903d989da2ff5c4f694a1982a0183a79f36b910cdf9"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       }
+      ],
+      "pages": 1
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 1,
+       "references": []
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:29b00298943f2a3c1bf5c903d989da2ff5c4f694a1982a0183a79f36b910cdf9"
+  },
+  {
+   "name": "paged-ends-at-bound",
+   "row": "ends-at-bound",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "5e9f03d70dd974f438a1d9d12190e9602ffc16d0dcf2b4bd32f29a5250a414e2",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "8fff5983ec338ad6678fced7deec7cf3a4ba630c3e74d1e675410662bf977d02",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "0e1f8a4d02e2265b78cd5bf2b4b559cdaa172ffd16c6179cd33cded408a63585"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "bound",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       },
+       {
+        "id": "c3"
+       },
+       {
+        "id": "c4"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "bound",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:0e1f8a4d02e2265b78cd5bf2b4b559cdaa172ffd16c6179cd33cded408a63585"
+  },
+  {
+   "name": "paged-max-pages-one",
+   "row": "max-pages-one",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "b20cf3e4ed2460432449f94daa62e2b4f9897d35fa00d656b83fd397f10a355a",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "e73bb67af5f8a71e49c082cb2e28bd17e629bbd5d3e8c74e5f945d2ec32b9c96",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "b2c8a1462b7280802b3c9067df18dfd06ca06a849259ee286b48926ca7ed9fc1"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "bound",
+      "items": [
+       {
+        "id": "c1"
+       }
+      ],
+      "pages": 1
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "bound",
+       "pages": 1,
+       "references": []
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:b2c8a1462b7280802b3c9067df18dfd06ca06a849259ee286b48926ca7ed9fc1"
+  },
+  {
+   "name": "paged-reference-repeated-at-bound",
+   "row": "reference-repeated-at-bound",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "5e9f03d70dd974f438a1d9d12190e9602ffc16d0dcf2b4bd32f29a5250a414e2",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "62c57b2e41dfe3cc8d1abbc3cd9442f2e2a1a19693085a060a9efe27a9552784",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "f50c84972fe80d9089188de45f154f8ff81bc37fb97801819e64792168df72df"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "bound",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "bound",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:f50c84972fe80d9089188de45f154f8ff81bc37fb97801819e64792168df72df"
+  },
+  {
+   "name": "paged-bound-rule-unknown",
+   "row": "bound-rule-unknown",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "6ccb2e74d371416b0ad426d682a90dba518a6c3bc09aff0d2e0c72883cb19642",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "11c631c53c9a47886cb1a81d96b35313ecedcebaa76ada87838ba1b9f9f1f72d",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "2aeab6663ff0b081766c177f4fd8ae7a4e170f0def00b3fc517810e8d344e66e"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {},
+    "outcomes": {
+     "changes": {
+      "status": "unknown",
+      "reason": "partial-read",
+      "paging": {
+       "end": "bound",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:2aeab6663ff0b081766c177f4fd8ae7a4e170f0def00b3fc517810e8d344e66e"
+  },
+  {
+   "name": "paged-fills-added",
+   "row": "fills-added",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "97e48848fa86bda7a901226c367ae3997bc63f9a0600f35ea01bc84b889da538",
+    "case.json": "db7d491564fc74001616b6b42a2b58e2048c58b68de9e29d4041379143cd3153",
+    "sources.json": "3d7853eb9c0cf3d574a5cc113937ce8d5c34a8fe41c9d97b205b2a40fee39a35",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "ff9fd8a0172f32591c9e70faed18c5b5792dd5511ade223e476336658e6af7bc"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "w1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:ff9fd8a0172f32591c9e70faed18c5b5792dd5511ade223e476336658e6af7bc"
+  },
+  {
+   "name": "paged-fills-replaced",
+   "row": "fills-replaced",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "9ac2427746224526140788c9c2566c828802143750508da6bb4178a5de9ae5a0",
+    "case.json": "10e2044292d7252f6fdedb1cbe5b00a12893222d348596b756a536f3fff51c0c",
+    "sources.json": "51451a03f6db2f375b08e955abc45b67d26b4cc7db2447df47ea18977c0a7884",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "1f7982edf69f43e2b2d4c18f64c29c2bd031bd070e7b507469ad40658caf4fc3"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ]
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "continues",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ],
+    "unsignedParameters": []
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:1f7982edf69f43e2b2d4c18f64c29c2bd031bd070e7b507469ad40658caf4fc3"
+  },
+  {
+   "name": "paged-end-absent",
+   "row": "end-absent",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "f79147f2de28431cc6487b872e830221a96c634b56aff9e9b6bc5db89c3a3f65",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "f964de519e2a13e245e283323b33fd1abb0b9f8b8c68d20ae48a2d0efec64f74"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:f964de519e2a13e245e283323b33fd1abb0b9f8b8c68d20ae48a2d0efec64f74"
+  },
+  {
+   "name": "paged-end-null",
+   "row": "end-null",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "9085038c56138c5496c467bab5a5ac2e278d259631331a89d59af6f7ae30f557",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "43a6ad3034bb38c1ef576a75ed3ff7df0f7ff068b58199fa1734191936359ba9",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "4a5357d9d95a17517a974cad5f67877c4edbb703b8da63cad91ff66cf384d1b8"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:4a5357d9d95a17517a974cad5f67877c4edbb703b8da63cad91ff66cf384d1b8"
+  },
+  {
+   "name": "paged-end-empty-string",
+   "row": "end-empty-string",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "67af087fe79e5d7ac93ba7dd84201c66a6c370395348fbf7dafc97fe743d54e0",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "1a3b13737618868e1d3316c962cd0eeee6070a257aaef3c489e91a6d9befd60a",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "258f14ee182b8b86cacce3d3b4885e817a37d8d711379bbff087b54ea91246eb"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:258f14ee182b8b86cacce3d3b4885e817a37d8d711379bbff087b54ea91246eb"
+  },
+  {
+   "name": "paged-empty-middle-page",
+   "row": "empty-middle-page",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "d4927eea4bb435f5c40b729e87537a6f62a9c2062b732ead480bcb897043693d",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "66a3e5294bfbeff2c06b548ca6bccf726f1ee8ccb1bd493d5304c331161bfe58"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 3
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 3,
+       "references": [
+        "t1",
+        "t2"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.1",
+      2
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:66a3e5294bfbeff2c06b548ca6bccf726f1ee8ccb1bd493d5304c331161bfe58"
+  },
+  {
+   "name": "paged-duplicates-kept",
+   "row": "duplicates-kept",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "a9b761ec9a4aea248a8aaf2672138a65d5a92743219edde0efcad37d1551174f",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "aeaee885a1652489b3a3421e54421aba95c27c57161e6f301bb44045efebbbbb"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       },
+       {
+        "id": "c2"
+       },
+       {
+        "id": "c3"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:aeaee885a1652489b3a3421e54421aba95c27c57161e6f301bb44045efebbbbb"
+  },
+  {
+   "name": "paged-references-equivalent-not-equal",
+   "row": "references-equivalent-not-equal",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "8153f7e501ccb219b8f5ed6d39dd5bb4a5b0897103a29b71714e2b52fe3d9a25",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "425dbd3c7b636b180db0911f41162dbd84f88cc1f74aaf754267fbee89a72a55"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       },
+       {
+        "id": "c3"
+       }
+      ],
+      "pages": 3
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 3,
+       "references": [
+        "é",
+        "é"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.1",
+      2
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:425dbd3c7b636b180db0911f41162dbd84f88cc1f74aaf754267fbee89a72a55"
+  },
+  {
+   "name": "paged-last-page-incomplete",
+   "row": "last-page-incomplete",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "153409e5641d17b248fbbd261dd8faaaee7ccea7917f688cdfb3af9143072ea4",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "a9d8db71424705950a33a324e54ed6b19de5d1b43f0db180452222ff7157aae9",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "ac7d58318d22c74f91e7765d2ea63dafcd552c815fc78867d1a491b59477fbe0"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {},
+    "outcomes": {
+     "changes": {
+      "status": "unknown",
+      "reason": "incomplete-read",
+      "paging": {
+       "end": "no-next",
+       "pages": 3,
+       "references": [
+        "t1",
+        "t2"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.1",
+      2
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:ac7d58318d22c74f91e7765d2ea63dafcd552c815fc78867d1a491b59477fbe0"
+  },
+  {
+   "name": "paged-last-is-the-last-page",
+   "row": "last-is-the-last-page",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "153409e5641d17b248fbbd261dd8faaaee7ccea7917f688cdfb3af9143072ea4",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "e5bb6f0c25ce3d8caddc9d8a46a13eb71b5f8994704dd2bd2f0d2ef89a83da2b",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "af6f88c8780c0171bfa562c379bb0d8b681e829669e047e426578aadd25d3061"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       },
+       {
+        "id": "c3"
+       }
+      ]
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "whole-read",
+      "paging": {
+       "end": "no-next",
+       "pages": 3,
+       "references": [
+        "t1",
+        "t2"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.1",
+      2
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:af6f88c8780c0171bfa562c379bb0d8b681e829669e047e426578aadd25d3061"
+  },
+  {
+   "name": "paged-page-flag-at-values",
+   "row": "page-flag-at-values",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "159330a95d61f176552fd8991535696d32e0ab58c33a5f1a71571a4c041a57b9",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "e34d73a2281dd26c733f478aad323a97733886181ae006ca8c7100346a7fe21b",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "65f03f82ad8ea8dd299c99014e5d653c9bbb0c663f6a986ea992a8d6ec4b04c2"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {},
+    "outcomes": {
+     "changes": {
+      "status": "unknown",
+      "reason": "incomplete-page",
+      "paging": {
+       "end": "no-next",
+       "pages": 3,
+       "references": [
+        "t1",
+        "t2"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.1",
+      2
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:65f03f82ad8ea8dd299c99014e5d653c9bbb0c663f6a986ea992a8d6ec4b04c2"
+  },
+  {
+   "name": "paged-http-query",
+   "row": "http-query",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "7eb2957c5ab4e621379968e6278bbec0900c2becef80d746bfb802afbe84dd13",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "68f2fed89ec01e24c68d87fe74761b72a9101bd961ab1272a772447cb75f7ccc",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "309c1fef520b98fb5b9c8733979fc517396adaf2911db5a74331b2209ab259d8"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "q1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:309c1fef520b98fb5b9c8733979fc517396adaf2911db5a74331b2209ab259d8"
+  },
+  {
+   "name": "paged-http-body",
+   "row": "http-body",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "ad906150ec4c2f0e04ce47001b253668cc0c22b856e467e82e0ad14d9003b6b6",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "a2606131503171dd176fe4b35f354caeda9fd948fbad786fc201bf83e3a49692",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "0610ec0f44ae89677a1bfcd5fb28cc8a86364da91675317ec3d3576c1c99af1b"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "b1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:0610ec0f44ae89677a1bfcd5fb28cc8a86364da91675317ec3d3576c1c99af1b"
+  },
+  {
+   "name": "paged-unbound-paged",
+   "row": "unbound-paged",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "6d642a287dbd02db0a04dfe59eb0837aa5f016f70d41cb9d4fc82d4ecb7c4df3",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "01e0d82091182ebd35ece505771e2a0501bab1aeb77dbc0263cb1f9f87572af3",
+    "binding.json": "afe71f0a538c9fddabc05f2c582dd1ac15148b1cf053c997b3d198d8dda34edf"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       },
+       {
+        "id": "c3"
+       },
+       {
+        "id": "c4"
+       },
+       {
+        "id": "c5"
+       }
+      ],
+      "pages": 3
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 3,
+       "references": [
+        "t1",
+        "t2"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.1",
+      2
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:01e0d82091182ebd35ece505771e2a0501bab1aeb77dbc0263cb1f9f87572af3"
+  },
+  {
+   "name": "paged-beside-unpaged",
+   "row": "beside-unpaged",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "f1e653a8c413576795a9310da22fe22dc69ec74609d405003bf06d0375154b15",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "445bcd388b0210e64131de1169bdc83f5d4e034fb27a1217f6fb1a75e7d37235",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "b05399f7b67944a691cdf7002032cbee8b114dc4181c25840ebf9c1ae1c37860"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     },
+     "lookup": {
+      "id": "R-1"
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     },
+     "lookup": {
+      "status": "resolved",
+      "reason": "copied"
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.2",
+      0
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:b05399f7b67944a691cdf7002032cbee8b114dc4181c25840ebf9c1ae1c37860"
+  },
+  {
+   "name": "paged-two-paged-sessions-apart",
+   "row": "two-paged-sessions-apart",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "9b904f0f5f1ef2d2c8f09fec6b91526dc3997e7e0de4ef2f6303c4f67c937fb6",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "4a57bbdba613850abd1e2a71665cbd212d90fa0867ee8956c45050e222a33501",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "4894cb8461754f49c2485f6baf5e0774919d1d7c07cb8b4cb2a54f2a8da7c525"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     },
+     "updates": {
+      "items": [
+       {
+        "id": "u1"
+       },
+       {
+        "id": "u2"
+       }
+      ]
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     },
+     "updates": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "v1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.2",
+      0
+     ],
+     [
+      "paged.session.2",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:4894cb8461754f49c2485f6baf5e0774919d1d7c07cb8b4cb2a54f2a8da7c525"
+  },
+  {
+   "name": "paged-cites-order-paged-skipped",
+   "row": "cites-order-paged-skipped",
+   "kind": "positive",
+   "files": {
+    "dialect.json": "045b5feca41ee3524470f361c10f68beff81c7e66aaec2bd4888c8a3588c9f52",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "833424861da4f1c1a49712c189e6a9f9faf0868ea4fea6fbb0b8661bbfd8bb94",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "627d08a2a2729209a749127d83b9fea83da29f06f01925d690864059c5971bd3"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "first": {
+      "id": "R-1"
+     },
+     "second": {
+      "id": "R-2"
+     }
+    },
+    "outcomes": {
+     "first": {
+      "status": "resolved",
+      "reason": "copied"
+     },
+     "second": {
+      "status": "resolved",
+      "reason": "copied"
+     },
+     "changes": {
+      "status": "unknown",
+      "reason": "dependency-unavailable"
+     }
+    },
+    "cites": [
+     [
+      "paged.session.3",
+      1
+     ],
+     [
+      "paged.session.3",
+      0
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:627d08a2a2729209a749127d83b9fea83da29f06f01925d690864059c5971bd3"
+  },
+  {
+   "name": "paged-max-pages-at-row",
+   "row": "max-pages-at-row",
+   "kind": "boundary",
+   "files": {
+    "dialect.json": "7a3d30f772bb13d85778170b762a9f3d96b400fd686e2f032e82314c348d9a9a",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "115662227d928cb7b5f7a3c73f6108cc8c27deaef24084097d4fb4f9cda27a6e",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "9d4d9aa37b932c3258860b5233c764c106847f1680e956d7451ec1379eba8945"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "bound",
+      "items": [
+       {
+        "id": "c0"
+       },
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       },
+       {
+        "id": "c3"
+       },
+       {
+        "id": "c4"
+       },
+       {
+        "id": "c5"
+       },
+       {
+        "id": "c6"
+       },
+       {
+        "id": "c7"
+       },
+       {
+        "id": "c8"
+       },
+       {
+        "id": "c9"
+       },
+       {
+        "id": "c10"
+       },
+       {
+        "id": "c11"
+       },
+       {
+        "id": "c12"
+       },
+       {
+        "id": "c13"
+       },
+       {
+        "id": "c14"
+       },
+       {
+        "id": "c15"
+       },
+       {
+        "id": "c16"
+       },
+       {
+        "id": "c17"
+       },
+       {
+        "id": "c18"
+       },
+       {
+        "id": "c19"
+       },
+       {
+        "id": "c20"
+       },
+       {
+        "id": "c21"
+       },
+       {
+        "id": "c22"
+       },
+       {
+        "id": "c23"
+       },
+       {
+        "id": "c24"
+       },
+       {
+        "id": "c25"
+       },
+       {
+        "id": "c26"
+       },
+       {
+        "id": "c27"
+       },
+       {
+        "id": "c28"
+       },
+       {
+        "id": "c29"
+       },
+       {
+        "id": "c30"
+       },
+       {
+        "id": "c31"
+       },
+       {
+        "id": "c32"
+       },
+       {
+        "id": "c33"
+       },
+       {
+        "id": "c34"
+       },
+       {
+        "id": "c35"
+       },
+       {
+        "id": "c36"
+       },
+       {
+        "id": "c37"
+       },
+       {
+        "id": "c38"
+       },
+       {
+        "id": "c39"
+       },
+       {
+        "id": "c40"
+       },
+       {
+        "id": "c41"
+       },
+       {
+        "id": "c42"
+       },
+       {
+        "id": "c43"
+       },
+       {
+        "id": "c44"
+       },
+       {
+        "id": "c45"
+       },
+       {
+        "id": "c46"
+       },
+       {
+        "id": "c47"
+       },
+       {
+        "id": "c48"
+       },
+       {
+        "id": "c49"
+       },
+       {
+        "id": "c50"
+       },
+       {
+        "id": "c51"
+       },
+       {
+        "id": "c52"
+       },
+       {
+        "id": "c53"
+       },
+       {
+        "id": "c54"
+       },
+       {
+        "id": "c55"
+       },
+       {
+        "id": "c56"
+       },
+       {
+        "id": "c57"
+       },
+       {
+        "id": "c58"
+       },
+       {
+        "id": "c59"
+       },
+       {
+        "id": "c60"
+       },
+       {
+        "id": "c61"
+       },
+       {
+        "id": "c62"
+       },
+       {
+        "id": "c63"
+       }
+      ],
+      "pages": 64
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "bound",
+       "pages": 64,
+       "references": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15",
+        "t16",
+        "t17",
+        "t18",
+        "t19",
+        "t20",
+        "t21",
+        "t22",
+        "t23",
+        "t24",
+        "t25",
+        "t26",
+        "t27",
+        "t28",
+        "t29",
+        "t30",
+        "t31",
+        "t32",
+        "t33",
+        "t34",
+        "t35",
+        "t36",
+        "t37",
+        "t38",
+        "t39",
+        "t40",
+        "t41",
+        "t42",
+        "t43",
+        "t44",
+        "t45",
+        "t46",
+        "t47",
+        "t48",
+        "t49",
+        "t50",
+        "t51",
+        "t52",
+        "t53",
+        "t54",
+        "t55",
+        "t56",
+        "t57",
+        "t58",
+        "t59",
+        "t60",
+        "t61",
+        "t62",
+        "t63"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.1",
+      2
+     ],
+     [
+      "paged.session.1",
+      3
+     ],
+     [
+      "paged.session.1",
+      4
+     ],
+     [
+      "paged.session.1",
+      5
+     ],
+     [
+      "paged.session.1",
+      6
+     ],
+     [
+      "paged.session.1",
+      7
+     ],
+     [
+      "paged.session.1",
+      8
+     ],
+     [
+      "paged.session.1",
+      9
+     ],
+     [
+      "paged.session.1",
+      10
+     ],
+     [
+      "paged.session.1",
+      11
+     ],
+     [
+      "paged.session.1",
+      12
+     ],
+     [
+      "paged.session.1",
+      13
+     ],
+     [
+      "paged.session.1",
+      14
+     ],
+     [
+      "paged.session.1",
+      15
+     ],
+     [
+      "paged.session.1",
+      16
+     ],
+     [
+      "paged.session.1",
+      17
+     ],
+     [
+      "paged.session.1",
+      18
+     ],
+     [
+      "paged.session.1",
+      19
+     ],
+     [
+      "paged.session.1",
+      20
+     ],
+     [
+      "paged.session.1",
+      21
+     ],
+     [
+      "paged.session.1",
+      22
+     ],
+     [
+      "paged.session.1",
+      23
+     ],
+     [
+      "paged.session.1",
+      24
+     ],
+     [
+      "paged.session.1",
+      25
+     ],
+     [
+      "paged.session.1",
+      26
+     ],
+     [
+      "paged.session.1",
+      27
+     ],
+     [
+      "paged.session.1",
+      28
+     ],
+     [
+      "paged.session.1",
+      29
+     ],
+     [
+      "paged.session.1",
+      30
+     ],
+     [
+      "paged.session.1",
+      31
+     ],
+     [
+      "paged.session.1",
+      32
+     ],
+     [
+      "paged.session.1",
+      33
+     ],
+     [
+      "paged.session.1",
+      34
+     ],
+     [
+      "paged.session.1",
+      35
+     ],
+     [
+      "paged.session.1",
+      36
+     ],
+     [
+      "paged.session.1",
+      37
+     ],
+     [
+      "paged.session.1",
+      38
+     ],
+     [
+      "paged.session.1",
+      39
+     ],
+     [
+      "paged.session.1",
+      40
+     ],
+     [
+      "paged.session.1",
+      41
+     ],
+     [
+      "paged.session.1",
+      42
+     ],
+     [
+      "paged.session.1",
+      43
+     ],
+     [
+      "paged.session.1",
+      44
+     ],
+     [
+      "paged.session.1",
+      45
+     ],
+     [
+      "paged.session.1",
+      46
+     ],
+     [
+      "paged.session.1",
+      47
+     ],
+     [
+      "paged.session.1",
+      48
+     ],
+     [
+      "paged.session.1",
+      49
+     ],
+     [
+      "paged.session.1",
+      50
+     ],
+     [
+      "paged.session.1",
+      51
+     ],
+     [
+      "paged.session.1",
+      52
+     ],
+     [
+      "paged.session.1",
+      53
+     ],
+     [
+      "paged.session.1",
+      54
+     ],
+     [
+      "paged.session.1",
+      55
+     ],
+     [
+      "paged.session.1",
+      56
+     ],
+     [
+      "paged.session.1",
+      57
+     ],
+     [
+      "paged.session.1",
+      58
+     ],
+     [
+      "paged.session.1",
+      59
+     ],
+     [
+      "paged.session.1",
+      60
+     ],
+     [
+      "paged.session.1",
+      61
+     ],
+     [
+      "paged.session.1",
+      62
+     ],
+     [
+      "paged.session.1",
+      63
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:9d4d9aa37b932c3258860b5233c764c106847f1680e956d7451ec1379eba8945"
+  },
+  {
+   "name": "paged-max-pages-over-row",
+   "row": "max-pages-over-row",
+   "kind": "boundary",
+   "files": {
+    "dialect.json": "8872631ed76df77340d3984aff487602443166a3e592d4a8164f6ef47f05ad0d",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "12cabe2d01021c1ca2dc30a73bb36c7d0eedf450a25058c4785296304abe7402",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-over-bound"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-pages-over-row",
+   "row": "pages-over-row",
+   "kind": "boundary",
+   "files": {
+    "dialect.json": "7a3d30f772bb13d85778170b762a9f3d96b400fd686e2f032e82314c348d9a9a",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "e1d393aa2aa710a69e575566bfd580a5964fc9122ed09ae7bde3122640fdc53e",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-over-bound"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-reference-at-bytes",
+   "row": "reference-at-bytes",
+   "kind": "boundary",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "befb7ccea0f98a60e30d6dad2ff8158927e70766bd79fd848618c4579a3b1a53",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "f2d8931b3b813d445ad0de012adbd2c4625cef979ba2c05d5aac0b5bca345075"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:f2d8931b3b813d445ad0de012adbd2c4625cef979ba2c05d5aac0b5bca345075"
+  },
+  {
+   "name": "paged-reference-over-bytes",
+   "row": "reference-over-bytes",
+   "kind": "boundary",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "a93cb2153917d6aae37871f2704d68b5b8a4194e016a924325dec56cab645062",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-over-bound"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-reference-over-bytes-at-bound",
+   "row": "reference-over-bytes-at-bound",
+   "kind": "boundary",
+   "files": {
+    "dialect.json": "5e9f03d70dd974f438a1d9d12190e9602ffc16d0dcf2b4bd32f29a5250a414e2",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "d3d8df2a3fc7d3c48997b3878907c5506fff4e7ad9d0cf1332911a908d031c33",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-over-bound"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-items-before-reference-bytes",
+   "row": "items-before-reference-bytes",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "3424c200af806d9070b2b69da8f2268868055aa43503ae0c572827511f684412",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "read-failed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-joined-nesting-at-bound",
+   "row": "joined-nesting-at-bound",
+   "kind": "boundary",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "e9157a5ca50db7ad16c100bd2b35e28e89755f3e7e7c756405cf19c985b8e290",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "b3c85b9a30d8f561588e1aee5b66eee7afc8d1eb0bf5a305df5a1478aa329be0"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       }
+      ],
+      "pages": 1
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 1,
+       "references": []
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:b3c85b9a30d8f561588e1aee5b66eee7afc8d1eb0bf5a305df5a1478aa329be0"
+  },
+  {
+   "name": "paged-joined-nesting-over",
+   "row": "joined-nesting-over",
+   "kind": "boundary",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "acb84038e8a3a9805c68fc49edeab709aab09df026edd88593519cb7644e5776",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-over-bound"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-page-result-nesting-at-bound",
+   "row": "page-result-nesting-at-bound",
+   "kind": "boundary",
+   "files": {
+    "dialect.json": "72d23de530e88d5d222bf63fd2aadf13715f51ec72d47e922278c51797cbe5c8",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "25cd10b422406a24bb271de5347a4f0a9fdcbf57ab7ad0d2a96a25d64a137f39",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "0d191476acba33bae2e39ca7413a9b2089db7cf5d8bc21c83fe2fcad27ed7770"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       }
+      ],
+      "pages": 2
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 2,
+       "references": [
+        "t1"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:0d191476acba33bae2e39ca7413a9b2089db7cf5d8bc21c83fe2fcad27ed7770"
+  },
+  {
+   "name": "paged-page-result-nesting-over",
+   "row": "page-result-nesting-over",
+   "kind": "boundary",
+   "files": {
+    "dialect.json": "72d23de530e88d5d222bf63fd2aadf13715f51ec72d47e922278c51797cbe5c8",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "7b04db68c71596dbec0e9f137fff74f1c3ae15261c97f7227f8e754e0da83d14",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-over-bound"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-request-not-formed",
+   "row": "request-not-formed",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "a792f5e7b2dba6e53bcd3b355cc7bc35c5a347d58421665c16d5ce68512c171d",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-invalid"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-pages-swapped",
+   "row": "pages-swapped",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "f64e237e8482dcb4d6ad7b0597b9de1c0ae190d83a6c8a7a85784d4e00067a62",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-invalid"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-page-items-receipt",
+   "row": "page-items-receipt",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "fd7f22c00f501ebcee43b7916ff48081be4465cb795282b222520ae876c473d3",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-invalid"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-prev-signature-malformed",
+   "row": "prev-signature-malformed",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "002d7d83c8511c272baa65ab20c11605f86b93a0923da398c5dcc5dafeff3d55",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-invalid"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-stale-last-page",
+   "row": "stale-last-page",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "9172b190a0219223ec35b4c66276704e5b9729008461184a62d9cc3e9909632a",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-stale"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-stale-middle-page",
+   "row": "stale-middle-page",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "6d21f1d065de2859c4b93fb7ac84b05ecbae435d4af6982c76d64c8f52e82351",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-stale"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-call-index-gap",
+   "row": "call-index-gap",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "db575d45b80156411bf8f140723ed1900b42fffe973f72b292a755df5d64d126",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-sessions"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-call-index-reordered",
+   "row": "call-index-reordered",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "f71989d5feb86214e593e2ce169cb060ff2abe9c1ae39ac9756797dc5c82dcb9",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-sessions"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-page-from-another-session",
+   "row": "page-from-another-session",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "20a762133179a12fd52edc54872729dcd64e365669beb89708a84c58e9a07f82",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-sessions"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-chain-broken",
+   "row": "chain-broken",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "0bfadba1ffaafef7043cae9a4eed20c88d8974f3188a96882f26e53db21ca5b6",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-sessions"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-session-shared",
+   "row": "session-shared",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "f1e653a8c413576795a9310da22fe22dc69ec74609d405003bf06d0375154b15",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "d938a8dd476e9ee29c19242a54770df3a2a2df53a0d24a1e88dadf945fe01636",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-sessions"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-session-of-earlier-source",
+   "row": "session-of-earlier-source",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "58dd2c4c5e6f99d6c3a9880eefc42ef3b90c7acaa65517de23da903caf78fe1e",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "af33e5332677e9c5f608c6e3441ceea669148b01d9564a6b1f1875e815e849e1",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-sessions"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-two-paged-one-session",
+   "row": "two-paged-one-session",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "9b904f0f5f1ef2d2c8f09fec6b91526dc3997e7e0de4ef2f6303c4f67c937fb6",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "9650eb0791319221d116ba9e9faaecacb238d6b48d5098c46e94f0ae22898646",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-sessions"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-page-missing",
+   "row": "page-missing",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "521ea22d1d32301e6d1941a90de3d7e4bbc4b1f39093e01bb2bbe3b8e5e8bb04",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-missing"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-page-after-end",
+   "row": "page-after-end",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "609b16dfc94cac3a235f03f96e861b67e640745c45eb158070a76f161fdb4c39",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-unexpected"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-page-beyond-bound",
+   "row": "page-beyond-bound",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "5e9f03d70dd974f438a1d9d12190e9602ffc16d0dcf2b4bd32f29a5250a414e2",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "c16ade644bb022b42bec9005795fa32fd0426495735eed8567452d50dad172cc",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-unexpected"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-skipped-paged-with-member",
+   "row": "skipped-paged-with-member",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "388ab0fba290d90de5447d6329743ad4cc09f63a2f7ff145126ba7d8fc9a0486",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "ebc1859657c641b37523f5d208ac038857fd20282032ed3b6c1bc6c5cd2fdfac",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-unexpected"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-reference-repeated",
+   "row": "reference-repeated",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "394b23fa5784ccafd28f78fd86ccb9daba93dbf40a07e3beb030c29f7b952076",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "read-failed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-reference-number",
+   "row": "reference-number",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "165be457770d9f3c84a696cc08f623e7c28035e075144676bf6b04ac209eaf96",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "read-failed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-next-parent-absent",
+   "row": "next-parent-absent",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "12fd38d5e6a1a13ca0685ffc586ec4b6009c7d0a156a20fabf1c09eb52cbddad",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "018ec8b5c835dd435cbf2c2cbca2193184676e60d80c941aec2cae2f1ff0012e",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "read-failed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-items-not-array",
+   "row": "items-not-array",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "f805a8a414c866ccaf3af1e31969c155034e7203db8ea853ab8705794e2ab2d1",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "read-failed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-reference-equals-q0",
+   "row": "reference-equals-q0",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "9ac2427746224526140788c9c2566c828802143750508da6bb4178a5de9ae5a0",
+    "case.json": "10e2044292d7252f6fdedb1cbe5b00a12893222d348596b756a536f3fff51c0c",
+    "sources.json": "69df0b46032733d183e1d236151f9bc8808684e7722089972b8ea464e363cb69",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "read-failed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-end-spelling-undeclared",
+   "row": "end-spelling-undeclared",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9085038c56138c5496c467bab5a5ac2e278d259631331a89d59af6f7ae30f557",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "47605f90c13f24b35b2a16cf5f1c627e4d0e9f7c9ca931c1c0ff683765f2b674",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "read-failed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-end-absent-member-null",
+   "row": "end-absent-member-null",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "432f6cbe05a0ab20b989b097818d1eeb431b4603f55c65cee40b911b1e0e352c",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "read-failed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-next-misspelled",
+   "row": "next-misspelled",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "b495e8b854fefd158bbb506763f23412f13b6aa1669fdff8accdaadadb64e8f4",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "9bcd93a00d7cff703ef351919223bd99d6d55fd15da64d12e0d5f31cc1ff311d",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "read-failed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-read-failed-before-invalid",
+   "row": "read-failed-before-invalid",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "0a1cbab549da63b8ecd80fa34996c67a0da323d3ba9f37390d6a4b81ca27a2e3",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "read-failed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-end-changed",
+   "row": "end-changed",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "2d2755c37357b4990abf14368905165044ebb824db766e99217ec9bd1fbaed8c"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "preparation-differs"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-reference-dropped",
+   "row": "reference-dropped",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "45eb5593c8e010f46ac0a9074277257c8ca6b6c6e255ee62c00641b3001d6087"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "preparation-differs"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-cites-by-call-index-paged-skipped",
+   "row": "cites-by-call-index-paged-skipped",
+   "kind": "adversarial",
+   "files": {
+    "dialect.json": "045b5feca41ee3524470f361c10f68beff81c7e66aaec2bd4888c8a3588c9f52",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "833424861da4f1c1a49712c189e6a9f9faf0868ea4fea6fbb0b8661bbfd8bb94",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "591f7e1c27c81e6f6eb129b760e55a93f3477629495ee7698ce718935e89a8f5"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "preparation-differs"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-paging-in-4.0.0",
+   "row": "paging-in-4.0.0",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "f3262a3a8a80dfe88629166ccbb9263766c0b7b71122f0a8cac4bab5ea784248",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "1855f3bc49f1fb6974fb50283c3e3ca0ac3ec6f0073c5d19f0398fe09b05f3ff",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   }
+  },
+  {
+   "name": "paged-paging-with-calculation",
+   "row": "paging-with-calculation",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "730bd1d2ba1eb485a93be2007667331885e3bf6a8fe0d2308490f0b6bde064ca",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-fills-in-template-form",
+   "row": "fills-in-template-form",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "312c098093a7fafb7aae1262bbf0fc5242b07cfce94f8a3b99502126e25abe38",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "233955b635e6c31cd959fc91a7b4ec9705b9e5720f2fb3db6bcabf8262cc5c46",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-fills-parent-unresolved",
+   "row": "fills-parent-unresolved",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "8db2999e64d76cc662053137886f0c87610b3a850aaa5ecb83a80021ca874ff8",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-pages-empty",
+   "row": "pages-empty",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "4d13e14161bc6c0325bae28ff3f772cc7c878a484d72c239f776101c28e3358e",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-max-pages-zero",
+   "row": "max-pages-zero",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "809c2b2740f57a94fef26e679d648a2ff0261a88733b3f1f43336ba3a19a7789",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-response-form-for-paged",
+   "row": "response-form-for-paged",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "1855f3bc49f1fb6974fb50283c3e3ca0ac3ec6f0073c5d19f0398fe09b05f3ff",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-pages-form-for-unpaged",
+   "row": "pages-form-for-unpaged",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "74274f61a326ef5e6ca76952568d907559fc7d238a896fd8657fb66e8e1c4f67",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "5fa47d6cd6edfa1ed7125fd08de45c16618637a9dfc0f2223b65256922be4004",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-pages-and-response",
+   "row": "pages-and-response",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "28d4d1d26fee98fa184645f5f1ab5a375024b884a272e4a033f753621de4fb15",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-no-next-unknown",
+   "row": "no-next-unknown",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9ab15006cb45cb8ffe78f28aff752ea6eb05e221a5ed34034e16f143ffaff7ad",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-max-pages-not-integer",
+   "row": "max-pages-not-integer",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "2718639ab9d61272d1d6145d5cb00641e3cf69cc2fc970a22d08b623d070654f",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-pages-over-row-in-4.0.0",
+   "row": "pages-over-row-in-4.0.0",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "b476b3ad0b47ef3e3fcc17d12103d1a5dbb508dadf48186eba77d4e523fad84d",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "6fe46d04d69037eec4bac3e1bf8f6cb151f7428ff775f627edd957a4c9e1b1e2",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   }
+  },
+  {
+   "name": "paged-fills-tool",
+   "row": "fills-tool",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "7a39e18276a7adb5d0fd51fde5b5854695b819caecab2ceb1ad4e693cd420eae",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "9552fe27836c67ba6b371b689467206135feb408d21ae93cff1e98be0354a9c0",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "profile-mismatch"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-fills-path",
+   "row": "fills-path",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "7ea2d081d16877d99b8bfcb134c7730a2bf6ee7b8a98381be97582694d65cec9",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "c71ae6520513aadb785e884d29cc1c8a8a2c4d041551563e8e2b1b5426de7f54",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "profile-mismatch"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-fills-method",
+   "row": "fills-method",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "256e211bda90d0b6f82d64a5f84d36eca7f05983be0615be1ab3cfefe05bab12",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "9b143ed98312a25dce0c8a0fd5a0736f72d2f85a4f8c4950d73678f9576aa0f2",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "profile-mismatch"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-fills-connection",
+   "row": "fills-connection",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "042f3176984955bc937da6f9e7347cae57ae6c2e936dc4e0bcb2df564a76d80c",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "ea4ca16f12f3aa71bcf455023eac626ef1ccd2c0776d8cc33fa72038634c62e4",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "profile-mismatch"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-fills-arguments-itself",
+   "row": "fills-arguments-itself",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "10ba9e30b98c73204daaaf848ed3946811ec8967fc8c5f345451e5c3b8e0f75a",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "4a514bf6aad8f782258117633cefd55af123acffefadeec581856c62acada200",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "profile-mismatch"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-fills-query-itself",
+   "row": "fills-query-itself",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "573fb96e58770a05aa9696b2041c4f0c28e411be868fcdff8cf0df5edeee22b6",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "5889486ea7a2ee837718695913df59a56e43c6504e8f68ee5f7abe79a3165b29",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "profile-mismatch"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-fills-body-itself",
+   "row": "fills-body-itself",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "4edb954d030b74b8ba72c71eb46d1eb668a438f7149203c83f5a17e59f12d981",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "db171e29d2a35b62fb4665230f2e92b540126677505b6dbd121bd977b83a289f",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "profile-mismatch"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-fills-query-three-tokens",
+   "row": "fills-query-three-tokens",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "f9c601dc1e7aadafce6b5595024fc8cdd843d84a9adb8da5f7398064ab5c4e27",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "14a5e6365ecbafc96701f59225a2316d71d6bb0232842965db8ec3b234e12419",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "profile-mismatch"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-format-4.1.0-unread",
+   "row": "format-4.1.0-unread",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "01e0d82091182ebd35ece505771e2a0501bab1aeb77dbc0263cb1f9f87572af3"
+   },
+   "expected": {
+    "result": "reading",
+    "facts": {
+     "changes": {
+      "end": "no-next",
+      "items": [
+       {
+        "id": "c1"
+       },
+       {
+        "id": "c2"
+       },
+       {
+        "id": "c3"
+       },
+       {
+        "id": "c4"
+       },
+       {
+        "id": "c5"
+       }
+      ],
+      "pages": 3
+     }
+    },
+    "outcomes": {
+     "changes": {
+      "status": "resolved",
+      "reason": "copied",
+      "paging": {
+       "end": "no-next",
+       "pages": 3,
+       "references": [
+        "t1",
+        "t2"
+       ]
+      }
+     }
+    },
+    "cites": [
+     [
+      "paged.session.1",
+      0
+     ],
+     [
+      "paged.session.1",
+      1
+     ],
+     [
+      "paged.session.1",
+      2
+     ]
+    ]
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   },
+   "preparationDigest": "sha256:01e0d82091182ebd35ece505771e2a0501bab1aeb77dbc0263cb1f9f87572af3"
+  }
+ ]
+}

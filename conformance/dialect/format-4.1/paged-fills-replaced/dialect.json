@@ -1,0 +1,78 @@
+{
+  "formatVersion": "4.1.0",
+  "id": "urn:judgmentpack:dialect:paged-vectors",
+  "version": "0.1.0",
+  "case": {
+    "parameters": {
+      "cursor": {
+        "pointer": "/cursor",
+        "type": "string"
+      }
+    },
+    "facts": [],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "changes",
+      "kind": "operation",
+      "profile": "feed",
+      "profileDigest": "sha256:8510e05ea3c82072b3f0affabd1aa3045affd7ab3d6454c4f4a1168bbd2f3e9b",
+      "maxAge": 300,
+      "arguments": {
+        "tool": "list-changes",
+        "arguments": {
+          "cursor": {
+            "$param": "cursor"
+          }
+        }
+      },
+      "paging": {
+        "next": "/next",
+        "noNext": "absent",
+        "fills": "/arguments/cursor",
+        "items": "/items",
+        "maxPages": 8
+      },
+      "read": {
+        "rule": {
+          "ruleVersion": "1",
+          "parameters": {
+            "cursor": "string"
+          },
+          "clauses": [
+            {
+              "when": {
+                "op": "equalsParam",
+                "field": "/values/0/start",
+                "param": "cursor"
+              },
+              "claim": {
+                "facts": [
+                  {
+                    "pointer": "/changes/items",
+                    "from": "/items"
+                  }
+                ],
+                "evidence": {},
+                "acquisitionStatus": "resolved"
+              },
+              "reason": "continues"
+            },
+            {
+              "when": {
+                "op": "always"
+              },
+              "claim": {
+                "facts": [],
+                "evidence": {},
+                "acquisitionStatus": "unknown"
+              },
+              "reason": "does-not-continue"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
