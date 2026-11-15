@@ -1,0 +1,402 @@
+{
+  "status": "staged",
+  "specVersion": "0.6.0",
+  "issue": 326,
+  "schema": "https://judgmentpack.org/schema/dialect-recording/2/preparation.schema.json",
+  "cases": [
+    {
+      "name": "format-4.0.0-case-rule",
+      "path": "format-4.0.0-case-rule.json",
+      "base": "format-4/case-rule-no-sources",
+      "rule": "a preparation of format 4.0.0 with a case rule and derivations",
+      "change": [],
+      "sha256": "a8688b12543d23119867fc9e84fc323bca2e99dcc7a4865af5107af621f9dadd",
+      "expected": {
+        "schema": "valid",
+        "reader": {
+          "result": "reading"
+        }
+      }
+    },
+    {
+      "name": "format-4.1.0-paged",
+      "path": "format-4.1.0-paged.json",
+      "base": "format-4.1/paged-three-pages-no-next",
+      "rule": "a preparation of format 4.1.0 with a paged source",
+      "change": [],
+      "sha256": "01e0d82091182ebd35ece505771e2a0501bab1aeb77dbc0263cb1f9f87572af3",
+      "expected": {
+        "schema": "valid",
+        "reader": {
+          "result": "reading"
+        }
+      }
+    },
+    {
+      "name": "version-in-place-of-format",
+      "path": "version-in-place-of-format.json",
+      "base": "format-4/case-rule-no-sources",
+      "rule": "formatVersion is required, and version is no member",
+      "change": [
+        {
+          "op": "remove",
+          "path": "/formatVersion"
+        },
+        {
+          "op": "add",
+          "path": "/version",
+          "value": 3
+        }
+      ],
+      "sha256": "9604c2f8bc0e6afc424b5bd2a7e2759d9371c3a44b0acd1d85d63d4f4f25b5df",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "format-version-unknown",
+      "path": "format-version-unknown.json",
+      "base": "format-4/case-rule-no-sources",
+      "rule": "formatVersion is 4.0.0 or 4.1.0",
+      "change": [
+        {
+          "op": "replace",
+          "path": "/formatVersion",
+          "value": "4.2.0"
+        }
+      ],
+      "sha256": "79d91a9c0aee503b48f2b368a2e59368c98da0f3b8c1472b1fe58efdce7b91ae",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "rule-member-extra",
+      "path": "rule-member-extra.json",
+      "base": "format-4/case-rule-no-sources",
+      "rule": "the case rule's outcome is exactly claim, status and reason",
+      "change": [
+        {
+          "op": "add",
+          "path": "/outcomes/0/rule/note",
+          "value": "added"
+        }
+      ],
+      "sha256": "455d9345675d3db6c30ccad6f12d7d8ce04204d8c168e16df59207be6b3c914c",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "rule-member-missing",
+      "path": "rule-member-missing.json",
+      "base": "format-4/case-rule-no-sources",
+      "rule": "the case rule's outcome is exactly claim, status and reason",
+      "change": [
+        {
+          "op": "remove",
+          "path": "/outcomes/0/rule/reason"
+        }
+      ],
+      "sha256": "c3ad3113a07928cb23d65fa005b62edef58418fa2f3b43d62b8ac4b4ece39de2",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "rule-on-source-outcome",
+      "path": "rule-on-source-outcome.json",
+      "base": "format-4.1/paged-three-pages-no-next",
+      "rule": "rule is on the case's outcome alone",
+      "change": [
+        {
+          "op": "add",
+          "path": "/outcomes/1/rule",
+          "value": {
+            "claim": {
+              "acquisitionStatus": "resolved",
+              "basis": [
+                "/end",
+                "/items",
+                "/pages"
+              ],
+              "evidenceAvailability": {},
+              "facts": {
+                "changes": {
+                  "end": "no-next",
+                  "items": [
+                    {
+                      "id": "c1"
+                    },
+                    {
+                      "id": "c2"
+                    },
+                    {
+                      "id": "c3"
+                    },
+                    {
+                      "id": "c4"
+                    },
+                    {
+                      "id": "c5"
+                    }
+                  ],
+                  "pages": 3
+                }
+              },
+              "reason": "copied"
+            },
+            "status": "resolved",
+            "reason": "copied"
+          }
+        }
+      ],
+      "sha256": "4f80d32cf5e6c102040068c700e41aa22e799b99ef4afc97115190b79da60b21",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "derivation-form-unknown",
+      "path": "derivation-form-unknown.json",
+      "base": "format-4/case-rule-no-sources",
+      "rule": "a derivation is one of the four closed forms",
+      "change": [
+        {
+          "op": "replace",
+          "path": "/lineage/2/derivation",
+          "value": {
+            "by": "formula"
+          }
+        }
+      ],
+      "sha256": "fbab775990956fe0c130a9fef5584cc5e797020901ed21defc59e009ecfc2be4",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "derivation-builtin-unknown",
+      "path": "derivation-builtin-unknown.json",
+      "base": "format-4/case-rule-no-sources",
+      "rule": "a builtin derivation names duration, distance or speed",
+      "change": [
+        {
+          "op": "replace",
+          "path": "/lineage/1/derivation/builtin",
+          "value": "area"
+        }
+      ],
+      "sha256": "36e916536afc216acce0d40c232c84b3edf804083727ba2075c2a981d6b1d2e3",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "derivation-member-extra",
+      "path": "derivation-member-extra.json",
+      "base": "format-4/case-rule-no-sources",
+      "rule": "each derivation form is closed",
+      "change": [
+        {
+          "op": "add",
+          "path": "/lineage/2/derivation/from",
+          "value": "/value"
+        }
+      ],
+      "sha256": "a935377086ff1ea715e09233c8af0f445a31c6d20de395befe30877058ec01d6",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "derivation-parameters-repeated",
+      "path": "derivation-parameters-repeated.json",
+      "base": "format-4/case-rule-no-sources",
+      "rule": "a builtin derivation's parameters are unique",
+      "change": [
+        {
+          "op": "replace",
+          "path": "/lineage/1/derivation/parameters",
+          "value": [
+            "runAt",
+            "runAt"
+          ]
+        }
+      ],
+      "sha256": "7e2beee4720070c2f6581fcf8a4277f2654eac7b0a45cdf04f0043accfe3147f",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "paging-on-case",
+      "path": "paging-on-case.json",
+      "base": "format-4.1/paged-three-pages-no-next",
+      "rule": "paging is never on the case's outcome",
+      "change": [
+        {
+          "op": "add",
+          "path": "/outcomes/0/paging",
+          "value": {
+            "end": "no-next",
+            "pages": 3,
+            "references": [
+              "t1",
+              "t2"
+            ]
+          }
+        }
+      ],
+      "sha256": "be0ee803f966cb6da500b95d5cc0012eb52bf66307643adec796687f97ae7716",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "paging-in-format-4.0.0",
+      "path": "paging-in-format-4.0.0.json",
+      "base": "format-4.1/paged-three-pages-no-next",
+      "rule": "paging is added in format 4.1.0",
+      "change": [
+        {
+          "op": "replace",
+          "path": "/formatVersion",
+          "value": "4.0.0"
+        }
+      ],
+      "sha256": "fe9a2eea9f7a86f838fe2ab9993d9257afdacdb9c3d289ff0d299e6dfd3e3c8e",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "paging-end-unknown",
+      "path": "paging-end-unknown.json",
+      "base": "format-4.1/paged-three-pages-no-next",
+      "rule": "paging's end is no-next or bound",
+      "change": [
+        {
+          "op": "replace",
+          "path": "/outcomes/1/paging/end",
+          "value": "exhausted"
+        }
+      ],
+      "sha256": "c05197865814419c27c661afb18bdf4ad1035742237cd6ee938a775f685da68f",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "paging-pages-zero",
+      "path": "paging-pages-zero.json",
+      "base": "format-4.1/paged-three-pages-no-next",
+      "rule": "paging's pages is at least 1",
+      "change": [
+        {
+          "op": "replace",
+          "path": "/outcomes/1/paging/pages",
+          "value": 0
+        }
+      ],
+      "sha256": "c374b2674eb25d80949dfd9b9a8c87365ec7be939c4289e57bff7f58e1ce673f",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "paging-member-extra",
+      "path": "paging-member-extra.json",
+      "base": "format-4.1/paged-three-pages-no-next",
+      "rule": "paging is exactly end, pages and references",
+      "change": [
+        {
+          "op": "add",
+          "path": "/outcomes/1/paging/items",
+          "value": 3
+        }
+      ],
+      "sha256": "f50b8da13c6538ac660d10c6cbc512e2a0650e6a110067f7378b5343668ddde9",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    },
+    {
+      "name": "paging-reference-empty",
+      "path": "paging-reference-empty.json",
+      "base": "format-4.1/paged-three-pages-no-next",
+      "rule": "a followed reference is a string of at least one character",
+      "change": [
+        {
+          "op": "replace",
+          "path": "/outcomes/1/paging/references/0",
+          "value": ""
+        }
+      ],
+      "sha256": "4f310a3c7b7c2edd250ae1ee3dc0f8c2268873bcb9e0794569e96e7d8824d346",
+      "expected": {
+        "schema": "invalid",
+        "reader": {
+          "result": "finding",
+          "finding": "preparation-differs"
+        }
+      }
+    }
+  ]
+}

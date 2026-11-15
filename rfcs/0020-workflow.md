@@ -87,8 +87,8 @@ name a dialect of the proposed formats `4.0.0` (RFC 0018, the amendment of 2026-
 amendment of the same date answers the other two. It is staged for `specVersion` `0.6.0` and changes
 nothing of `0.5.x`: `schema/workflow-1.schema.json`, in the `0.5.0` normative record, is unchanged,
 and under `0.5.x` a stage naming either format is still refused `version-unread` (§3). The RFC stays
-Draft. Each decision is taken at the recommended answer unless the maintainer answers otherwise on
-#326.
+Draft. Each decision is taken at the recommended answer unless the maintainer answers otherwise
+on #326.
 
 **The problem.** §1 defines the release digest by the reference Runner's encoding at
 `66e264e`, a typed decoding of the retained release followed by an encoding. That decoding keeps only
@@ -146,6 +146,12 @@ them to this text.
 with that `$id` and with `"4.0.0"` and `"4.1.0"` added to a named dialect reference's
 `formatVersion`, and differs in nothing else. No release carries it and the site does not serve it
 until `0.6.0` is released. §3 names the two formats as staged.
+
+**Staged vectors.** `conformance/dialect/workflow-format-4/` holds a workflow stage of each format,
+its dialect the staged format vectors' own, with the dialect digest and the release digest written
+by hand: each workflow document is valid against the staged schema and not against the published
+one, `release_digest_bytes` gives each release digest, and the workflow reader refuses each stage
+`version-unread`. They are in no corpus and no claim.
 
 **What stays open.** A stage of either format is admitted only once that format is accepted. The
 workflow reader (`tools/workflow_reader.py`) refuses both `version-unread`, as `0.5.x` does, until

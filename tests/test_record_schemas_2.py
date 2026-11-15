@@ -7,6 +7,7 @@ no preparation or export of version 1's form validates against version 2 (decisi
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import unittest
 from pathlib import Path
@@ -116,6 +117,83 @@ class Version2Tests(unittest.TestCase):
         _, value = found[0]
         both = {**copy.deepcopy(value), "formatVersion": "4.0.0"}
         self.assertFalse(self.valid(2, "preparation", both))
+
+    def test_every_member_and_value_version_2_adds_is_carried_by_a_reading(self) -> None:
+        forms, builtins, ends = set(), set(), set()
+        rules = 0
+        for _, value in readings():
+            rules += sum("rule" in outcome for outcome in value["outcomes"])
+            ends |= {outcome["paging"]["end"] for outcome in value["outcomes"] if "paging" in outcome}
+            for entry in value["lineage"]:
+                if "derivation" in entry:
+                    forms.add(entry["derivation"]["by"])
+                    builtins.add(entry["derivation"].get("builtin"))
+        self.assertGreater(rules, 0)
+        self.assertEqual({"pointer", "literal", "builtin", "none"}, forms)
+        self.assertEqual({None, "duration", "distance", "speed"}, builtins)
+        self.assertEqual({"no-next", "bound"}, ends)
+
+
+def patched(value: object, operations: list[dict]) -> object:
+    """RFC 6902's add, replace and remove, as the manifest of recording-2 states each change."""
+    value = copy.deepcopy(value)
+    for operation in operations:
+        *parents, last = operation["path"].split("/")[1:]
+        target = value
+        for part in parents:
+            target = target[int(part)] if isinstance(target, list) else target[part]
+        key = int(last) if isinstance(target, list) else last
+        if operation["op"] == "remove":
+            del target[key]
+        else:
+            if operation["op"] == "add":
+                assert isinstance(target, dict) and key not in target, operation
+            target[key] = copy.deepcopy(operation["value"])
+    return value
+
+
+class RecordingVectorTests(unittest.TestCase):
+    """conformance/dialect/recording-2/: both readings' preparations, and one refusal per rule version 2 adds."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.validator = validators()[(2, "preparation")]
+        cls.manifest = json.loads((DIALECT / "recording-2" / "manifest.json").read_text(encoding="utf-8"))
+
+    def test_the_manifest_names_every_file_and_rebuilds_it_from_its_base(self) -> None:
+        cases = self.manifest["cases"]
+        self.assertEqual(17, len(cases))
+        self.assertEqual(NAMESPACE + VERSION_2["preparation"], self.manifest["schema"])
+        self.assertEqual(sorted([case["path"] for case in cases] + ["README.md", "manifest.json"]),
+                         sorted(path.name for path in (DIALECT / "recording-2").iterdir()))
+        for case in cases:
+            with self.subTest(vector=case["name"]):
+                raw = (DIALECT / "recording-2" / case["path"]).read_bytes()
+                self.assertEqual(case["sha256"], hashlib.sha256(raw).hexdigest())
+                base = json.loads((DIALECT / case["base"] / "preparation.json").read_text(encoding="utf-8"))
+                self.assertEqual(patched(base, case["change"]), json.loads(raw))
+                self.assertEqual(case["change"] == [], case["expected"]["schema"] == "valid")
+
+    def test_the_schema_admits_the_two_readings_and_refuses_each_change(self) -> None:
+        for case in self.manifest["cases"]:
+            with self.subTest(vector=case["name"]):
+                value = read(DIALECT / "recording-2" / case["path"])
+                self.assertEqual(case["expected"]["schema"] == "valid", self.validator.is_valid(value))
+
+    def test_the_python_reader_agrees(self) -> None:
+        from test_dialect import READER
+        for case in self.manifest["cases"]:
+            with self.subTest(vector=case["name"]):
+                base = DIALECT / case["base"]
+                result = READER.verify((base / "dialect.json").read_bytes(), (base / "case.json").read_bytes(),
+                                       (base / "sources.json").read_bytes(), (base / "profiles.json").read_bytes(),
+                                       (DIALECT / "recording-2" / case["path"]).read_bytes(),
+                                       binding=(base / "binding.json").read_bytes() if (base / "binding.json").exists() else None)
+                expected = case["expected"]["reader"]
+                if expected["result"] == "reading":
+                    self.assertIn("reading", result.answer)
+                else:
+                    self.assertEqual(expected["finding"], result.answer.get("finding"), result.answer)
 
 
 if __name__ == "__main__":

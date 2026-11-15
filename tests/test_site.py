@@ -31,6 +31,7 @@ ANNOTATION_VOCABULARY_ROWS = "conformance/annotation-vocabulary"
 # The staged draft Core specVersion 0.4.0-draft graduated to the released 0.5.0 in place; its staged
 # directories are retired, and nothing the site writes is named for the draft selector.
 RETIRED_DRAFT_DIRECTORIES = ("schema/staged", "conformance/staged", "examples/staged")
+STAGED_SCHEMAS_0_6_0 = ("schema/workflow-1-0.6.0.schema.json", "schema/dialect-recording/2")
 UNPUBLISHED_DIRECTORIES = (
     STAGED_EVALUATION_ROWS,
     WITNESS_VECTORS,
@@ -39,6 +40,9 @@ UNPUBLISHED_DIRECTORIES = (
     ANNOTATION_VOCABULARY_ROWS,
     "conformance/policy",
     "schema/policy",
+    # Staged for specVersion 0.6.0 (issue #326); mirrors UNPUBLISHED_ARTIFACT_DIRECTORIES in web/build.py.
+    STAGED_SCHEMAS_0_6_0[0],
+    STAGED_SCHEMAS_0_6_0[1],
 )
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
@@ -216,7 +220,7 @@ class StaticSiteTests(unittest.TestCase):
             for source in (ROOT / directory).rglob("*.json"):
                 relative = source.relative_to(ROOT)
                 if any(
-                    relative.as_posix().startswith(directory + "/")
+                    relative.as_posix() == directory or relative.as_posix().startswith(directory + "/")
                     for directory in UNPUBLISHED_DIRECTORIES
                 ):
                     continue
@@ -230,6 +234,16 @@ class StaticSiteTests(unittest.TestCase):
         # the site does not serve them. A recursive copy of conformance/ would, so the claim is held
         # here: nothing under the staged directory is published, as an artifact or as a page.
         self._assert_nothing_published_under(STAGED_EVALUATION_ROWS)
+
+    def test_the_schemas_staged_for_0_6_0_are_not_published(self) -> None:
+        # RFC 0020's and RFC 0018's amendments of 2026-11-15 say the site does not serve them until
+        # 0.6.0 is released (issue #326), as an artifact or at their $id paths.
+        for source in STAGED_SCHEMAS_0_6_0:
+            with self.subTest(source=source):
+                self.assertTrue((ROOT / source).exists(), source)
+                self.assertFalse((self.output / "artifacts" / source).exists(), source)
+        self.assertFalse((self.output / "schema" / "0.6.0").exists())
+        self.assertFalse((self.output / "schema" / "dialect-recording" / "2").exists())
 
     def test_the_retired_draft_is_not_published(self) -> None:
         # The draft graduated in place: its staged directories are gone from the source and the

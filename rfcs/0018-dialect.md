@@ -1232,7 +1232,11 @@ preparation schema and not against its export schema, and no bundled reader read
 **Conformance.** Every reading among the staged vectors of `format-4/` and `format-4.1/` validates
 against version 2's preparation schema and none against version 1's; none of the 190 staged
 preparations of version 1's form validates against version 2's, nor any of the 93 staged recordings
-against version 2's export schema. None is in a corpus or a claim.
+against version 2's export schema. The staged vectors of `conformance/dialect/recording-2/` hold
+both readings' preparations and one refusal for each rule version 2 adds, each a reading's
+preparation changed in that rule alone, and the Python reader answers `preparation-differs` for each
+refusal. None is in a corpus or a claim. No release carries version 2, and the site does not serve
+it, until `0.6.0` is released.
 
 **What this amendment leaves open.** Reading `0.5.0` recordings, as above. A preparer: the reference
 Runner writes neither format, and no recording of either exists.

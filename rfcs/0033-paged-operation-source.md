@@ -233,9 +233,9 @@ order (gateway §1.2), so a sequence that passes here is one the gateway's own v
 1. Check 1, in step 2: `acquisition-invalid` (recommended).
 2. Step 4: `acquisition-sessions`, as a chain that does not join.
 
-*Recommended: option 1*, taken at the recommended answer unless the maintainer answers otherwise on
-#326. *Why:* the receipt's own members show the departure, so it is a receipt not of its form, and
-the earlier check finds it; step 4 keeps what only a comparison shows, of a page with the pages
+*Recommended: option 1*, taken at the recommended answer unless the maintainer answers otherwise
+on #326. *Why:* the receipt's own members show the departure, so it is a receipt not of its form,
+and the earlier check finds it; step 4 keeps what only a comparison shows, of a page with the pages
 before it or with its position: another session, a gap, an order, or a chain that does not join. A
 receipt of `callIndex` `0` and `prevSignature` `null` at a later position is of its form, and step
 4's (`call-index-reordered`).

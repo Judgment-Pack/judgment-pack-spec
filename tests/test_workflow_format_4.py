@@ -120,6 +120,12 @@ class ReleaseDigestTests(unittest.TestCase):
             encoding.release_digest_bytes(value)
         self.assertEqual("input-malformed", caught.exception.name)
 
+    def test_the_staged_schema_is_in_no_bundle(self) -> None:
+        attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines()
+        for line in ("schema/workflow-1-0.6.0.schema.json export-ignore", "schema/dialect-recording/2 export-ignore",
+                     "schema/dialect-recording/2/** export-ignore", "conformance/dialect/** export-ignore -text"):
+            self.assertIn(line, attributes)
+
     def test_other_formats_keep_the_pinned_encoding(self) -> None:
         (line, _), _ = worked_examples()
         for mapping in ({"formatVersion": "3.0.0", "id": "urn:example:dialect:three", "version": "1.0.0", "sources": []},
@@ -127,6 +133,48 @@ class ReleaseDigestTests(unittest.TestCase):
             value = d.read_document(line.encode("utf-8"), "release")
             value["inputMapping"] = d.read_document(d.canon(mapping), "mapping")
             self.assertEqual(encoding.release_bytes(value), encoding.release_digest_bytes(value))
+
+
+class StagedStageVectorTests(unittest.TestCase):
+    """conformance/dialect/workflow-format-4/: a stage of each format, with its dialect and release digests."""
+
+    DIRECTORY = ROOT / "conformance" / "dialect" / "workflow-format-4"
+
+    def test_each_stage_is_admitted_by_the_staged_schema_with_the_digests_given(self) -> None:
+        from tools import workflow_reader as reader
+        manifest = load(self.DIRECTORY / "manifest.json")
+        cases = manifest["cases"]
+        self.assertEqual(["4.0.0", "4.1.0"], [case["formatVersion"] for case in cases])
+        self.assertEqual(load(STAGED)["$id"], manifest["schema"])
+        self.assertEqual(sorted([f for c in cases for f in (c["workflow"], c["release"])] + ["README.md", "manifest.json"]),
+                         sorted(path.name for path in self.DIRECTORY.iterdir()))
+        staged = jsonschema.Draft202012Validator(load(STAGED), format_checker=jsonschema.FormatChecker())
+        published = jsonschema.Draft202012Validator(load(PUBLISHED), format_checker=jsonschema.FormatChecker())
+        for case in cases:
+            with self.subTest(stage=case["name"]):
+                workflow, release = load(self.DIRECTORY / case["workflow"]), load(self.DIRECTORY / case["release"])
+                dialect = load(ROOT / "conformance" / "dialect" / case["dialect"])
+                self.assertEqual([], [error.message for error in staged.iter_errors(workflow)])
+                self.assertFalse(published.is_valid(workflow))
+                (stage,) = workflow["stages"]
+                self.assertEqual({"formatVersion": case["formatVersion"], "id": dialect["id"],
+                                  "version": dialect["version"], "digest": case["dialectDigest"]}, stage["dialect"])
+                raw_dialect = (ROOT / "conformance" / "dialect" / case["dialect"]).read_bytes()
+                self.assertEqual(case["dialectDigest"],
+                                 "sha256:" + hashlib.sha256(d.canon(d.read_document(raw_dialect, "dialect"))).hexdigest())
+                self.assertEqual(dialect, release["inputMapping"])
+                self.assertEqual(stage["pack"]["digest"], release["packDigest"])
+                value = d.read_document((self.DIRECTORY / case["release"]).read_bytes(), "release")
+                self.assertEqual(case["releaseDigest"],
+                                 "sha256:" + hashlib.sha256(encoding.release_digest_bytes(value)).hexdigest())
+                self.assertNotEqual(case["releaseDigest"],
+                                    "sha256:" + hashlib.sha256(encoding.release_bytes(value)).hexdigest())
+                # the workflow reader stays a 0.5.x reader of the selector until the format is accepted
+                self.assertEqual("version-unread", case["expected"]["workflowReader"])
+                form = {name: member for name, member in stage.items() if name != "sample"}
+                with self.assertRaises(reader.Problem) as caught:
+                    reader.Reader.stage_form(object.__new__(reader.Reader), form, 0)
+                self.assertEqual(("refusal", "version-unread"), (caught.exception.result, caught.exception.code))
 
 
 if __name__ == "__main__":
