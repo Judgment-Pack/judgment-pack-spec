@@ -13,6 +13,16 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The merge queue's group: the pull request on top of main and of the groups ahead of it, checked
+  # before main moves (docs/releasing.md, "Merging").
+  merge_group:
+
+# A new push to a pull request cancels that pull request's run in progress. A push to main and a
+# merge group each have a group of their own commit, so no run of main, which a release takes as
+# its evidence, is ever cancelled or dropped as a pending duplicate.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -67,10 +77,13 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
+          GROUP_BASE: ${{ github.event.merge_group.base_sha }}
         run: |
           set -o pipefail
           if [ "$EVENT" = pull_request ]; then
             scripts/dev/check.sh --all --changed "origin/$BASE_REF" | tee "${{ runner.temp }}/checks.log"
+          elif [ "$EVENT" = merge_group ]; then
+            scripts/dev/check.sh --all --changed "$GROUP_BASE" | tee "${{ runner.temp }}/checks.log"
           else
             scripts/dev/check.sh --all | tee "${{ runner.temp }}/checks.log"
           fi
