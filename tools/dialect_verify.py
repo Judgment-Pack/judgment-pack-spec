@@ -50,6 +50,7 @@ import re
 import sys
 import datetime
 import binascii
+import copy as _copy
 import functools
 import math
 from dataclasses import dataclass, field
@@ -291,10 +292,19 @@ BINDING_KIND = "judgment-pack-runner/preparation/1"
 DEFINED_VERSIONS = (2, 3)
 READ_VERSIONS = (2, 3)
 # §2.1, §2.2: the named formats this document defines, and those this reader reads (§11, `version-unread`).
-DEFINED_FORMATS = ("2.0.0", "3.0.0", "4.0.0")
-READ_FORMATS = ("2.0.0", "3.0.0", "4.0.0")
+DEFINED_FORMATS = ("2.0.0", "3.0.0", "4.0.0", "4.1.0")
+READ_FORMATS = ("2.0.0", "3.0.0", "4.0.0", "4.1.0")
 # §2.2 (proposed): format 4.0.0, its rule version, its parameter types and its bounds.
 FORMAT_4 = "4.0.0"
+# RFC 0033 (proposed, in Review; the companion is unchanged): format 4.1.0, format 4.0.0's family and a
+# paged `operation` source. Its Specification's sections are cited "RFC 0033 section n".
+FORMAT_41 = "4.1.0"
+FORMATS_4 = (FORMAT_4, FORMAT_41)
+PAGING_MEMBERS = {"next", "noNext", "fills", "items", "maxPages"}
+NO_NEXT = ("absent", "null", "empty-string")
+# RFC 0033 section 7: a next reference takes Core §4.1's row "Dialect text value bytes", and maxPages
+# and the pages retained for one source the row "Dialect retained responses" (MAX_RETAINED_RESPONSES).
+MAX_REFERENCE_BYTES = CORE_CEILINGS_BASE["Dialect text value bytes"]
 RULE_2 = "2.0.0"
 TYPES_4 = TYPES + ("decimal", "string-list", "address-range-list")
 LIST_TYPES = ("string-list", "address-range-list")
@@ -808,6 +818,8 @@ class Source:
     scope: dict[str, str] = field(default_factory=dict)  # each parameter of its scope, by its type
     calculation: dict[str, Any] | None = None
     research: Research | None = None
+    # RFC 0033 section 2: a paged source's `paging`, as written; None for every other source
+    paging: dict[str, Any] | None = None
 
 
 @dataclass
@@ -903,6 +915,79 @@ def request_misfit(source: Source, profile: dict[str, Any]) -> str | None:
         ):
             return "a query that is not an object of string templates, under adapter-http"
     return None
+
+
+def is_template_form(value: Any) -> bool:
+    return isinstance(value, dict) and any(name.startswith("$") for name in value)
+
+
+def check_paging(value: Any, template: Any, what: str) -> dict[str, Any]:
+    """RFC 0033 section 2: `paging`, an object of exactly `next`, `noNext`, `fills`, `items` and `maxPages`,
+    each of its form, `input-malformed` otherwise. `fills`'s parent resolves, in the request as the dialect
+    writes it, to an object that is not a template form and lies within none. A `maxPages` above the row is
+    refused in phase 3 (`count_bounds`), before this."""
+    paging = closed(value, PAGING_MEMBERS, set(), f"{what} paging")
+    for member in ("next", "fills"):
+        if not is_pointer(paging[member]) or paging[member] == "":
+            raise malformed(f"{what}: paging {member} is not a pointer other than the root")
+    if not is_pointer(paging["items"]):
+        raise malformed(f"{what}: paging items is not a pointer")
+    if paging["noNext"] not in NO_NEXT:
+        raise malformed(f"{what}: paging noNext is not absent, null or empty-string")
+    if not is_integer(paging["maxPages"]) or integer_of(paging["maxPages"]) < 1:
+        raise malformed(f"{what}: paging maxPages is not an integer of at least 1")
+    if integer_of(paging["maxPages"]) > MAX_RETAINED_RESPONSES:
+        raise Refused("input-over-bound", f"{what}: paging maxPages above the row")
+    tokens = pointer_tokens(paging["fills"])
+    assert tokens
+    current = template
+    for token in tokens[:-1]:
+        if is_template_form(current):
+            raise malformed(f"{what}: paging fills lies within a template form")
+        if isinstance(current, dict) and token in current:
+            current = current[token]
+        elif isinstance(current, list) and names_an_element(token, len(current)):
+            current = current[int(token)]
+        else:
+            raise malformed(f"{what}: paging fills's parent does not resolve in the request")
+    if not isinstance(current, dict) or is_template_form(current):
+        raise malformed(f"{what}: paging fills's parent is not an object, or is a template form")
+    return paging
+
+
+def paging_misfit(source: Source, profile: dict[str, Any]) -> str | None:
+    """RFC 0033 section 2: a paged source is admitted under a profile of shape `mcp`, `fills` naming a member
+    within the tool call's `arguments`, or of shape `http` under `adapter-http`, `fills` naming a member of
+    `query` (exactly two tokens) or within an object `body`; under any other profile, or naming any other
+    member, `profile-mismatch`. None when it fits."""
+    assert source.paging is not None
+    tokens = pointer_tokens(source.paging["fills"])
+    assert tokens
+    if profile["shape"] == "mcp":
+        if tokens[0] == "arguments" and len(tokens) >= 2:
+            return None
+        return "paging fills names no member within the tool call's arguments"
+    if profile["shape"] == "http" and profile["adapter"]["name"] == "adapter-http":
+        if tokens[0] == "query" and len(tokens) == 2:
+            return None
+        if tokens[0] == "body" and len(tokens) >= 2 and isinstance(source.template.get("body"), dict):
+            return None
+        return "paging fills names no member of query or within an object body"
+    return "a paged source under a profile that admits no paging"
+
+
+def with_reference(request: Any, pointer: str, reference: str) -> Any:
+    """RFC 0033 section 3: the first request with the member `fills` names set to a next reference, replaced
+    where it is held and added where it is not, and nothing else changed."""
+    tokens = pointer_tokens(pointer)
+    assert tokens
+    formed = _copy.deepcopy(request)
+    current = formed
+    for token in tokens[:-1]:
+        current = current[token] if isinstance(current, dict) else current[int(token)]
+    assert isinstance(current, dict)
+    current[tokens[-1]] = reference
+    return formed
 
 
 def placeholders(text: str, what: str = "a $text") -> list[str]:
@@ -1473,8 +1558,11 @@ def parse_dialect(document: Any) -> Dialect:
             if len(set(items)) != len(items):
                 raise malformed(f"{name} names one twice")
 
-    # §2.2: format 4.0.0 is format 3.0.0's family, with a rule on the case and rule version 2.0.0.
-    format4 = named and top["formatVersion"] == FORMAT_4
+    # §2.2: format 4.0.0 is format 3.0.0's family, with a rule on the case and rule version 2.0.0; and
+    # format 4.1.0 is 4.0.0's, with a paged `operation` source (RFC 0033 section 1).
+    format4 = named and top["formatVersion"] in FORMATS_4
+    paged_format = named and top["formatVersion"] == FORMAT_41
+    operation_optional = {"parameters", "calculation"} | ({"paging"} if paged_format else set())
     types = TYPES_4 if format4 else TYPES
     case = closed(top["case"], {"facts", "evidence"}, {"parameters", "rule"} if format4 else {"parameters"}, "case")
     case_parameters: dict[str, Parameter] = {}
@@ -1533,7 +1621,7 @@ def parse_dialect(document: Any) -> Dialect:
             closed(
                 raw,
                 {"name", "kind", "read", "platform", "operation", "shape", "record", "maxAge", "arguments"},
-                {"parameters", "calculation"},
+                operation_optional,
                 what,
             )
             for member in ("platform", "operation", "record"):
@@ -1547,7 +1635,7 @@ def parse_dialect(document: Any) -> Dialect:
             closed(
                 raw,
                 {"name", "kind", "read", "profile", "profileDigest", "maxAge", "arguments"},
-                {"parameters", "calculation"},
+                operation_optional,
                 what,
             )
             acquired = True
@@ -1635,6 +1723,11 @@ def parse_dialect(document: Any) -> Dialect:
             else:
                 check_request(raw["arguments"], scope, f"{what} arguments")
                 source.template = raw["arguments"]
+                if "paging" in raw:
+                    # RFC 0033 section 2: never beside `calculation`; an unbound operation keeps it as written
+                    if "calculation" in raw:
+                        raise malformed(f"{what}: paging on a source that has calculation")
+                    source.paging = check_paging(raw["paging"], raw["arguments"], what)
         if catalog is not None:
             unbound[name] = catalog
         if source.research is not None and "profile" not in raw:
@@ -2274,6 +2367,25 @@ def check_acquisition_form(name: str, member: Any, research: Research | None) ->
         check_salts(response["salts"], what)
 
 
+def check_pages_form(name: str, member: Any) -> None:
+    """RFC 0033 section 4: a paged source's member, `{"pages": [P0, ...]}` exactly, of at least one element,
+    each `{"result", "receipt", "salts"}` exactly, as §5.2's `response`. A member with `response`, or with
+    both, is of no form for a paged source: `input-malformed`."""
+    what = f"acquisition {name}"
+    closed(member, {"pages"}, set(), what)
+    pages = member["pages"]
+    if not isinstance(pages, list) or not pages:
+        raise malformed(f"{what}: pages is not an array of at least one page")
+    if len(pages) > MAX_RETAINED_RESPONSES:
+        raise Refused("input-over-bound", f"{what}: more than 64 pages retained")
+    for index, page in enumerate(pages):
+        where = f"{what} page {index}"
+        closed(page, {"result", "receipt", "salts"}, set(), where)
+        if not isinstance(page["receipt"], dict):
+            raise malformed(f"{where}: the receipt is not an object")
+        check_salts(page["salts"], where)
+
+
 def over_by_type(value: Any, kind: Any) -> bool:
     """§11's third phase: a value measured by its field's declared type, when that type is one of §4.3's
     six, against the maxima of §12; a value of another form is measured by nothing here."""
@@ -2416,6 +2528,28 @@ def count_bounds(dialect: Any, acquisitions: Any, profiles: Any = None, binding:
         return Refused("input-over-bound", detail)
 
     research_bounds(dialect, acquisitions, profiles, binding)
+    # RFC 0033 section 7: in a document of format 4.1.0, by a reader of the format, `maxPages` when it is an
+    # integer, and in every acquisitions member that has `pages`, before any form decides whether its
+    # source is paged, the number of its elements and the nesting of each element's `result`. A reader of
+    # this text that does not read the format takes phase 3 as for format 4.0.0 (section 11).
+    selector = dialect.get("formatVersion") if isinstance(dialect, dict) else None
+    paged = selector == FORMAT_41 and FORMAT_41 in READ_FORMATS
+    if paged:
+        sources = dialect.get("sources")
+        for source in sources if isinstance(sources, list) else []:
+            paging = source.get("paging") if isinstance(source, dict) else None
+            most = paging.get("maxPages") if isinstance(paging, dict) else None
+            if is_integer(most) and integer_of(most) > MAX_RETAINED_RESPONSES:
+                raise over("a paged source's maxPages above 64")
+        for name, member in acquisitions.items() if isinstance(acquisitions, dict) else []:
+            pages = member.get("pages") if isinstance(member, dict) else None
+            if not isinstance(pages, list):
+                continue
+            if len(pages) > MAX_RETAINED_RESPONSES:
+                raise over(f"acquisition {name}: more than 64 pages retained")
+            for index, page in enumerate(pages):
+                if isinstance(page, dict) and "result" in page and value_depth(page["result"]) > MAX_VALUE_DEPTH:
+                    raise over(f"acquisition {name}: page {index}'s result nested more than 32 levels")
     for profile in profiles if isinstance(profiles, list) else []:
         scope = profile.get("endpointScope") if isinstance(profile, dict) else None
         if isinstance(scope, list):
@@ -2467,7 +2601,7 @@ def count_bounds(dialect: Any, acquisitions: Any, profiles: Any = None, binding:
     # §2.2.7: in format 4.0.0, a rule's derived values and its literals are counted too, and the case's
     # rule with every source's, by a reader of the format; one that does not read it counts as for 3.0.0
     # and then refuses the document in phase 4.
-    format4 = dialect.get("formatVersion") == FORMAT_4 and FORMAT_4 in READ_FORMATS
+    format4 = (dialect.get("formatVersion") in FORMATS_4 and FORMAT_4 in READ_FORMATS) or paged
 
     def rule_counts(rule: Any) -> None:
         clauses = rule.get("clauses") if isinstance(rule, dict) else None
@@ -3362,7 +3496,8 @@ def rule_claim_2(read: Read, value: Any, scope_values: dict[str, Any]) -> tuple[
 
 
 def check_acquisition(
-    source: Source, profile: dict[str, Any], response: dict[str, Any], request: Any, at: int
+    source: Source, profile: dict[str, Any], response: dict[str, Any], request: Any, at: int,
+    page: bool = False,
 ) -> None:
     result, receipt, salts = response["result"], response["receipt"], response["salts"]
 
@@ -3388,6 +3523,9 @@ def check_acquisition(
         is_digest(receipt.get("resultDigest")),
         served is not None,
         isinstance(acquisition, dict),
+        # RFC 0033 section 4, step 2: a page's chain is read (step 4), so check 1 holds it to its form
+        not page or ("prevSignature" in receipt
+                     and (receipt["prevSignature"] is None or is_hex(receipt["prevSignature"], 128))),
     )
     if not all(forms):
         raise invalid("a receipt member not of its form")
@@ -3519,6 +3657,9 @@ class Outcome:
     derivations: dict[tuple[str, str], dict[str, Any]] | None = None
     rule_claim: dict[str, Any] | None = None
     rule_derivations: dict[tuple[str, str], dict[str, Any]] | None = None
+    # RFC 0033 section 8: an acquired paged source's `paging`, the loop's end, its pages and the references
+    # followed
+    paging: dict[str, Any] | None = None
 
 
 @dataclass
@@ -3527,6 +3668,102 @@ class Computation:
     outcomes: list[Outcome]
     facts: dict[str, Any]
     evidence: dict[str, Any]
+
+
+def walk_pages(
+    source: Source,
+    profile: dict[str, Any],
+    pages: list[Any],
+    request: Any,
+    at: int,
+    earlier: list[dict[str, Any]],
+) -> tuple[Any, list[dict[str, Any]], dict[str, Any]]:
+    """RFC 0033 sections 3 to 6: a paged source's pages walked from page 0, each finished before the next is
+    taken: `acquisition-missing`; §5.2's checks 1 to 5 over the page's own request, `acquisition-invalid`,
+    and its times, `acquisition-stale`; its session, `acquisition-sessions`; its value read, `read-failed`,
+    its next reference's bytes measured when it is read. Then a page retained after the last page the walk
+    took, `acquisition-unexpected`, and the joined value, its nesting measured when it is formed. `earlier`
+    holds every receipt of an earlier source. Gives the joined value, the pages' receipts in call order and
+    the preparation's `paging`."""
+    paging = source.paging
+    assert paging is not None
+    most = integer_of(paging["maxPages"])
+    first_at_fills = resolve(request, paging["fills"])
+    next_tokens = pointer_tokens(paging["next"])
+    assert next_tokens
+    # the pointer without its last token: a token holds no unescaped `/`, so the parent ends at the last one
+    next_parent = paging["next"].rsplit("/", 1)[0]
+    references: list[str] = []
+    receipts: list[dict[str, Any]] = []
+    values: list[Any] = []
+    items: list[Any] = []
+    index = 0
+    while True:
+        where = f"{source.name} page {index}"
+        if index >= len(pages):
+            raise Finding("acquisition-missing", where)
+        page = pages[index]
+        asked = request if index == 0 else with_reference(request, paging["fills"], references[-1])
+        check_acquisition(source, profile, page, asked, at, page=True)
+        receipt = page["receipt"]
+        # step 4: calls 0 to n-1 of one session that no earlier source names, chained in call order
+        if index == 0:
+            joined_chain = receipt["prevSignature"] is None and all(
+                r["sessionId"] != receipt["sessionId"] for r in earlier)
+        else:
+            joined_chain = (receipt["sessionId"] == receipts[0]["sessionId"]
+                            and receipt["prevSignature"] == receipts[-1]["signature"])
+        if not joined_chain or integer_of(receipt["callIndex"]) != index:
+            raise Finding("acquisition-sessions", where)
+        receipts.append(receipt)
+        # step 5: the page's value read, its records, the next reference's parent, then its member
+        value = apply_unwrap(page["result"], source.read.unwrap)
+        records = resolve(value, paging["items"])
+        if not isinstance(records, list):
+            raise Finding("read-failed", f"{where}: items is not an array")
+        parent = resolve(value, next_parent)
+        if not isinstance(parent, dict):
+            raise Finding("read-failed", f"{where}: next's parent is not an object")
+        named = parent.get(next_tokens[-1], ABSENT)
+        if named is ABSENT:
+            spelling: str | None = "absent"
+        elif named is None:
+            spelling = "null"
+        elif isinstance(named, str) and named == "":
+            spelling = "empty-string"
+        else:
+            spelling = None
+        reference: str | None = None
+        if spelling is not None:
+            if spelling != paging["noNext"]:
+                raise Finding("read-failed", f"{where}: an end spelled as noNext does not declare")
+        elif isinstance(named, str):
+            if utf8_length(named) > MAX_REFERENCE_BYTES:
+                raise Refused("input-over-bound", f"{where}: a next reference of more than 8192 bytes")
+            reference = named
+        else:
+            raise Finding("read-failed", f"{where}: a next reference of another type")
+        values.append(value)
+        items.extend(records)
+        # step 6: the end, or the next page; a repeated reference is never followed
+        if reference is None:
+            end = "no-next"
+            break
+        if index + 1 == most:
+            end = "bound"
+            break
+        if reference in references or (isinstance(first_at_fills, str) and reference == first_at_fills):
+            raise Finding("read-failed", f"{where}: a next reference the loop has followed")
+        references.append(reference)
+        index += 1
+    if len(pages) > index + 1:
+        raise Finding("acquisition-unexpected", f"{source.name} page {index + 1}, after the loop's end")
+    # section 6: the joined value; section 7: its nesting, `values` included, measured when it is formed
+    count = Num(str(len(values)))
+    joined = {"end": end, "items": items, "last": values[-1], "pages": count, "values": values}
+    if value_depth(joined) > MAX_VALUE_DEPTH:
+        raise Refused("input-over-bound", f"{source.name}: a joined value nested more than 32 levels")
+    return joined, receipts, {"end": end, "pages": count, "references": references}
 
 
 def recompute(
@@ -3554,6 +3791,8 @@ def recompute(
         if catalog is not None and (profile["shape"], profile["adapter"]["name"]) != catalog:
             raise Finding("profile-mismatch", f"{source.name}: bound to a profile of another shape or record")
         misfit = request_misfit(source, profile)
+        if misfit is None and source.paging is not None:
+            misfit = paging_misfit(source, profile)
         if misfit is not None:
             raise Finding("profile-mismatch", f"{source.name}: {misfit}")
         if ("calculator" in profile) != (source.calculation is not None):
@@ -3581,6 +3820,11 @@ def recompute(
     outcomes.append(case_outcome)
 
     receipts: list[dict[str, Any]] = []
+    # RFC 0033 section 4, the sessions across sources: §5.2's two forms hold over the receipts of the
+    # sources that are not paged (`receipts`); a paged source's session is its own, so a receipt of any
+    # other source that names it is `acquisition-sessions`. `every` holds each earlier source's receipts.
+    every: list[dict[str, Any]] = []
+    paged_sessions: set[str] = set()
     for source in dialect.sources:
         profile = profiles[source.profile_id]
         values = dict(case_values)
@@ -3618,9 +3862,27 @@ def recompute(
             continue
         if source.name not in acquisitions:
             raise Finding("acquisition-missing", source.name)
+        if source.paging is not None:
+            outcome.request = instantiate(source.template, values)
+            value, pages, outcome.paging = walk_pages(
+                source, profile, acquisitions[source.name]["pages"], outcome.request, at, every)
+            outcome.citations = [citation(r) for r in pages]
+            every.extend(pages)
+            paged_sessions.add(pages[0]["sessionId"])
+            # section 6: the source's read applies once, to the joined value, and unwrap is not applied again
+            if source.read.copy is not None:
+                outcome.claim = copy_claim(source.read.copy, value, outcome.transformations)
+            elif source.read.rule_version == RULE_2:
+                outcome.claim, outcome.derivations = rule_claim_2(source.read, value, values)
+            else:
+                assert source.read.rule is not None
+                outcome.claim = rule_claim(source.read.rule, value, values)
+            continue
         response = acquisitions[source.name]["response"]
         if source.research is not None:
-            acquire_research(source, outcome, response, profiles, receipts, at)
+            held = len(receipts)
+            acquire_research(source, outcome, response, profiles, receipts, at, paged_sessions)
+            every.extend(receipts[held:])
             outcome.claim = research_claim(source, outcome, outcomes)
             continue
         outcome.request = instantiate(source.template, values)
@@ -3629,7 +3891,8 @@ def recompute(
             retained.producer(sys.modules[__name__], source, profile, response)
         outcome.receipt = response["receipt"]
         receipts.append(response["receipt"])
-        if not sessions_in_a_form(receipts):
+        every.append(response["receipt"])
+        if not sessions_in_a_form(receipts) or response["receipt"]["sessionId"] in paged_sessions:
             raise Finding("acquisition-sessions", source.name)
         value = apply_unwrap(response["result"], source.read.unwrap)
         if source.calculation is not None:
@@ -3717,6 +3980,7 @@ def acquire_research(
     profiles: dict[str, dict[str, Any]],
     receipts: list[dict[str, Any]],
     at: int,
+    paged_sessions: set[str] = frozenset(),  # type: ignore[assignment]
 ) -> None:
     """§5.2, §11, finding 3 for a `research` source: each retained response in `R.responses` order, its
     checks completed before the next's, under its own trusted profile and over its own request; the
@@ -3730,7 +3994,7 @@ def acquire_research(
             raise Finding("acquisition-missing", f"{source.name}: retained response {index} has no result")
         check_acquisition(source, profiles[retained["profile"]["id"]], retained, retained["request"], at)
         receipts.append(retained["receipt"])
-        if not sessions_in_a_form(receipts):
+        if not sessions_in_a_form(receipts) or retained["receipt"]["sessionId"] in paged_sessions:
             raise Finding("acquisition-sessions", f"{source.name}: retained response {index}")
         citations.append(citation(retained["receipt"]))
     if not in_canon_domain(record):
@@ -3738,7 +4002,7 @@ def acquire_research(
     if "receipt" in response:
         check_acquisition(source, profiles[source.profile_id], response, outcome.request, at)
         receipts.append(response["receipt"])
-        if not sessions_in_a_form(receipts):
+        if not sessions_in_a_form(receipts) or response["receipt"]["sessionId"] in paged_sessions:
             raise Finding("acquisition-sessions", f"{source.name}: the research record's own receipt")
         outcome.receipt = response["receipt"]
         citations.append(citation(response["receipt"]))
@@ -3817,7 +4081,9 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
     # of `sources`, as the Runner writes it; in a preparation with a `research` source, in the order of
     # `sources` instead, a research source adding its every citation in order, each other acquired source
     # its one.
-    if any(source.research is not None for source in dialect.sources):
+    # RFC 0033 section 8: and in format 4.1.0, in a preparation of a dialect that declares a paged source,
+    # acquired or skipped, in the order of `sources` too, a paged source adding its pages' in call order.
+    if any(source.research is not None or source.paging is not None for source in dialect.sources):
         cites = []
         for outcome in outcomes:
             if outcome.citations is not None:
@@ -3847,6 +4113,8 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
         }
         if outcome.request is not None:
             entry_outcome["arguments"] = outcome.request
+        if outcome.paging is not None:
+            entry_outcome["paging"] = outcome.paging
         # §2.2.6: the case's rule, in format 4.0.0, is its outcome's `rule`, and its targets' entries follow
         # the case's copy's.
         segments: list[tuple[Read, dict[str, Any], dict[tuple[str, str], dict[str, Any]] | None]] = [
@@ -3919,7 +4187,7 @@ def build(dialect: Dialect, outcomes: list[Outcome], verified_at: str) -> Comput
                         evidence_document[target] = claim["evidenceAvailability"][target]
     preparation = {
         # §2.2.6: a preparation of format 4.0.0 names its format; an earlier one its integer version
-        **({"formatVersion": FORMAT_4} if dialect.format == FORMAT_4 else {"version": dialect.version}),
+        **({"formatVersion": dialect.format} if dialect.format in FORMATS_4 else {"version": dialect.version}),
         "verifiedAt": verified_at,
         # the dialect digest (§2); of a dialect with an unbound source, the bound dialect's (§4.4)
         "mappingDigest": digest_of(canon(dialect.document)),
@@ -4354,8 +4622,12 @@ def _verify(
         # Each acquisition's form is its source's kind's: a research record's answers are held to the
         # source's declarations (§4.3, §5.2).
         research = {s.name: s.research for s in parsed_dialect.sources if s.research is not None}
+        paged = {s.name for s in parsed_dialect.sources if s.paging is not None}
         for name, member in acquisitions_document.items():
-            check_acquisition_form(name, member, research.get(name))
+            if name in paged:
+                check_pages_form(name, member)
+            else:
+                check_acquisition_form(name, member, research.get(name))
         # §11, the sixth phase, once every form is checked: a kind this reader does not read.
         if parsed_dialect.unread:
             raise Refused("kind-unread", f"{parsed_dialect.unread[0]} is defined and not read by this reader")
