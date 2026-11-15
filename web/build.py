@@ -865,6 +865,16 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0033-paged-operation-source.md",
+        PurePosixPath("rfcs/0033-paged-operation-source/index.html"),
+        "RFC 0033: A paged operation source",
+        "Draft: an operation source read in pages, one gateway session's calls, each request formed "
+        "from the page before; a proposed dialect format 4.1.0.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.5.2.md",
         PurePosixPath("project/releases/0.5.2/index.html"),
         "0.5.2 release notes",
