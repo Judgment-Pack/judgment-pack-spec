@@ -24,9 +24,23 @@ here.
   `4.1.0` (paging, the walk, the joined value with `last`, the bounds and the preparation); the
   TypeScript reader defines the selector and refuses it `version-unread`. Format `4.0.0` and earlier
   are read as before, and `spec/dialect.md` is unchanged.
+- Formats `4.0.0` and `4.1.0` in workflows and recordings (#326), staged for `0.6.0`, each decision
+  taken at its recommended answer unless the maintainer answers otherwise. RFC 0020's amendment
+  proposal writes the release digest of a stage of either format into its own text: SHA-256 of the
+  `canon` bytes of the whole retained release, with two worked examples. A staged
+  `schema/workflow-1-0.6.0.schema.json` adds both formats to a named dialect reference. RFC 0018's
+  amendment adds version 2 of the dialect-recording schemas for preparations of both formats; it
+  does not read version 1's form, and version 1 is unchanged. Reading `0.5.0` recordings is left
+  as a follow-up. `conformance/dialect/workflow-format-4/` and `conformance/dialect/recording-2/`
+  hold the staged vectors. No release carries the staged schemas and the site does not serve them;
+  every `0.5.x` file is unchanged.
 
 ### Changed
 
+- RFC 0033 section 4 (#326): a paged receipt whose `prevSignature` breaks gateway section 1.2
+  within the receipt is `acquisition-invalid` (check 1). That covers a signature at `callIndex` 0
+  and `null` at a later one. Before, step 4 answered `acquisition-sessions`. The Python reader
+  applies the rule, and two staged vectors carry it.
 - An amendment to RFC 0018 (#324) states the bounds of the proposed dialect format `4.0.0` once, in
   `spec/dialect.md` §2.2.7: a literal is at most Core §4.1's "Dialect text value bytes" and a list
   element at most its "Dialect text-list item bytes", under the document's profile, and §2.2.4
