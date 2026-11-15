@@ -25,8 +25,10 @@ export type Inputs = {
 const DEFINED_VERSIONS = ["2", "3"];
 const READ_VERSIONS = ["2", "3"];
 // §2.1, §2.2: the named formats the text defines, and those this verifier reads. Format 4.0.0 is proposed,
-// and this verifier does not read it yet: a document of it is refused `version-unread` in phase 4.
-const DEFINED_FORMATS = ["2.0.0", "3.0.0", "4.0.0"];
+// and this verifier does not read it yet: a document of it is refused `version-unread` in phase 4. So is a
+// document of format 4.1.0, the paged source RFC 0033 proposes (its section 11): phases 0 to 3 are taken as
+// for format 4.0.0, and nothing of the format's own is measured.
+const DEFINED_FORMATS = ["2.0.0", "3.0.0", "4.0.0", "4.1.0"];
 const READ_FORMATS = ["2.0.0", "3.0.0"];
 
 export type Result = {
