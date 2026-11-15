@@ -17,13 +17,15 @@ a file it would write differs from the one on disk.
 
 from __future__ import annotations
 
+import base64
+import contextlib
 import copy
 import hashlib
 import importlib.util
 import json
 import sys
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Iterator
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "conformance" / "dialect" / "format-4.1"
@@ -107,6 +109,12 @@ CONNECTION = {"id": "connection", "publicKey": PUBLIC, "class": "record", "sourc
               "endpoint": None}
 PROFILES = [FEED, WEB, CONNECTION]
 BY_ID = {p["id"]: p for p in PROFILES}
+# a research profile (§4.3, §5.1), given beside the three to the one row that declares a `research` source
+MODEL = "synthetic-research-model-1"
+ASSISTANT = {"id": "assistant", "publicKey": PUBLIC, "class": "generated", "source": "research/answers",
+             "authority": "test", "shape": "http",
+             "adapter": {"name": "adapter-sources", "version": "stand-in", "digest": ADAPTER_DIGEST},
+             "endpoint": "https://answers.example.test", "research": {"capabilities": ["answer"], "model": MODEL}}
 
 # --- Requests (RFC 0033 section 3, formed here) --------------------------------------------------------
 
@@ -133,11 +141,23 @@ def formed(first: dict[str, Any], fills: str, reference: str) -> dict[str, Any]:
 
 
 _salts = [0]
+_salt_label = [""]
 
 
 def salt() -> str:
     _salts[0] += 1
-    return hashlib.sha256(f"paged-vectors salt {_salts[0]}".encode()).hexdigest()
+    return hashlib.sha256(f"paged-vectors salt {_salt_label[0]}{_salts[0]}".encode()).hexdigest()
+
+
+@contextlib.contextmanager
+def salts_apart(label: str) -> Iterator[None]:
+    """Salts of their own for a row added after the first staging, so that no earlier vector's bytes move."""
+    held = (_salts[0], _salt_label[0])
+    _salts[0], _salt_label[0] = 0, label + " "
+    try:
+        yield
+    finally:
+        _salts[0], _salt_label[0] = held
 
 
 def page(profile: dict[str, Any], request: Any, result: Any, session: str, index: int, prev: str | None,
@@ -275,10 +295,11 @@ CASES: list[dict[str, Any]] = []
 
 def row(name: str, kind: str, row_name: str, document: dict[str, Any], acquisitions: dict[str, Any],
         expected: dict[str, Any], case: dict[str, Any] = CASE, binding: Any = None,
-        preparation: Callable[[dict[str, Any]], dict[str, Any]] | None = None, unread: Any = UNREAD) -> None:
+        preparation: Callable[[dict[str, Any]], dict[str, Any]] | None = None, unread: Any = UNREAD,
+        profiles: list[dict[str, Any]] = PROFILES) -> None:
     CASES.append({"name": "paged-" + name, "kind": kind, "row": row_name, "dialect": document, "case": case,
                   "sources": acquisitions, "binding": binding, "expected": expected, "rewrite": preparation,
-                  "unread": unread})
+                  "unread": unread, "profiles": profiles})
 
 
 def reading(facts: Any, outcomes: dict[str, Any], cite: list[list[Any]], **more: Any) -> dict[str, Any]:
@@ -543,12 +564,37 @@ def build_rows() -> None:
         {"changes": {"pages": two_pages},
          "updates": {"pages": pages(FEED, q0(updates), "/arguments/cursor", results((["u1"], None)), session=S1)}},
         finding("acquisition-sessions"))
+    # a later research source whose record's own receipt is the next call of the paged session
+    research = {"name": "summary", "kind": "research", "profile": "assistant", "profileDigest": digest(ASSISTANT),
+                "webProfiles": {}, "maxAge": 300, "question": "Summarize the changes.", "constraints": {"synthetic": True},
+                "model": MODEL, "evidence": ["Use only the retained responses."],
+                "results": [{"id": "summary", "type": "string", "required": True, "description": "The summary.",
+                             "cardinality": "one"}],
+                "capabilities": ["answer"],
+                "read": {"copy": {"facts": [{"target": "/summary/state", "source": "/results/summary/status"}], "evidence": []}}}
+    research_asked = {name: research[name] for name in ("question", "constraints", "model", "evidence", "results", "capabilities")}
+    record = {"results": {"summary": {"status": "missing", "cites": [], "reason": "No summary was retained."}},
+              "responses": [],
+              "execution": {"resolvedSettings": {"model": MODEL, "profile": "assistant", "version": "1",
+                                                 "settings": {"temperature": "0"}},
+                            "retainedBytes": [{"mediaType": "application/json",
+                                               "base64": base64.b64encode(b'{"status":"missing"}').decode("ascii")}]}}
+    with salts_apart("research-in-paged-session"):
+        summary = page(ASSISTANT, research_asked, record, S1, 2, tail[-1]["receipt"]["signature"])
+    row("research-in-paged-session", "negative", "research-in-paged-session", dialect(src, research),
+        {"changes": {"pages": tail}, "summary": {"response": summary}},
+        finding("acquisition-sessions"), profiles=[*PROFILES, ASSISTANT])
     row("page-missing", "negative", "page-missing", dialect(src), pages_of(results((["c1"], "t1"))), finding("acquisition-missing"))
     after_end = pages(FEED, first, "/arguments/cursor", results((["c1"], None), (["c2"], None)), next_of=lambda r: "t1")
     row("page-after-end", "adversarial", "page-after-end", dialect(src), {"changes": {"pages": after_end}},
         finding("acquisition-unexpected"))
     row("page-beyond-bound", "adversarial", "page-beyond-bound", dialect(two),
         pages_of(results((["c1"], "t1"), (["c2"], "t2"), (["c3"], None))), finding("acquisition-unexpected"))
+    # the joined value would nest 33 levels, but it is formed only after the page retained after the end is refused
+    with salts_apart("unexpected-before-joined-nesting"):
+        beyond_deep = pages_of([deep31, {"items": items("c2")}], next_of=lambda r: "t1")
+    row("unexpected-before-joined-nesting", "negative", "unexpected-before-joined-nesting", dialect(src),
+        beyond_deep, finding("acquisition-unexpected"))
     alone = page(FEED, q0(a), {"id": "R-1"}, S3, 0, None)
     row("skipped-paged-with-member", "negative", "skipped-paged-with-member", dialect(a, skipped),
         {"first": {"response": alone},
@@ -624,7 +670,12 @@ def build_rows() -> None:
         {"changes": {"pages": three, "response": three[0]}}, malformed)
     row("no-next-unknown", "negative", "no-next-unknown", dialect(paged(paging={**PAGING, "noNext": "missing"})),
         {"changes": {"pages": three}}, malformed)
+    row("pages-form-for-undeclared", "negative", "pages-form-for-undeclared", dialect(src),
+        {"changes": {"pages": three}, "elsewhere": {"pages": [as_response["changes"]["response"]]}}, malformed)
     row("max-pages-not-integer", "negative", "max-pages-not-integer",
+        dialect(paged(paging={**PAGING, "maxPages": "2"})), {"changes": {"pages": three}}, malformed)
+    # 1e3 is outside the canon domain (§1): phase 3 does not measure it, and the dialect is input-malformed
+    row("max-pages-exponent-not-measured", "negative", "max-pages-exponent-not-measured",
         dialect(paged(paging={**PAGING, "maxPages": Literal("1e3")})), {"changes": {"pages": three}}, malformed)
     many = [{"items": items(f"c{i}"), "next": f"t{i + 1}"} for i in range(65)]
     row("pages-over-row-in-4.0.0", "negative", "pages-over-row-in-4.0.0", dialect(unpaged_changes, fmt="4.0.0"),
@@ -647,8 +698,12 @@ def build_rows() -> None:
     fills_row("fills-arguments-itself", FEED, LIST, "/arguments")
     fills_row("fills-query-itself", WEB, get, "/query")
     fills_row("fills-body-itself", WEB, post, "/body")
-    fills_row("fills-query-three-tokens", WEB, {"method": "GET", "path": "/v1/records", "query": {"filter": {"kind": "open"}}},
-              "/query/filter/cursor")
+    # §4.1 holds query's members to string templates, so a parent of three tokens under query is no object:
+    # input-malformed by section 2's parent rule, before any profile is read
+    three_tokens = paged(profile=WEB, arguments={"method": "GET", "path": "/v1/records", "query": {"filter": "open"}},
+                         paging={**PAGING, "fills": "/query/filter/cursor"})
+    row("fills-query-three-tokens", "negative", "fills-query-three-tokens", dialect(three_tokens),
+        {"changes": {"pages": pages(WEB, q0(three_tokens), "/query/filter/cursor", one)}}, malformed)
 
     # --- a reader that does not read the format ---
     row("format-4.1.0-unread", "negative", "format-4.1.0-unread", dialect(src), {"changes": {"pages": three}},
@@ -665,7 +720,7 @@ def inputs_of(case: dict[str, Any], preparation: bytes) -> dict[str, bytes]:
         "dialect.json": (text(case["dialect"], 2) + "\n").encode("utf-8"),
         "case.json": (text(case["case"], 2) + "\n").encode("utf-8"),
         "sources.json": (text(case["sources"], 1) + "\n").encode("utf-8"),
-        "profiles.json": (text(PROFILES, 2) + "\n").encode("utf-8"),
+        "profiles.json": (text(case["profiles"], 2) + "\n").encode("utf-8"),
         "preparation.json": preparation,
     }
     if case["binding"] is not None:

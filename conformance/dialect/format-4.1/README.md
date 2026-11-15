@@ -21,7 +21,8 @@ vectors whose answer is `preparation-differs` hold a reading's preparation rewri
 Every receipt is signed under RFC 8032 section 7.1 TEST 1's published seed, whose public key each
 profile holds. The profiles are three: `feed`, of shape `mcp`; `web`, of shape `http` under
 `adapter-http`; and `connection`, of shape `http` under another adapter, which admits no paging.
-Every value is synthetic.
+`paged-research-in-paged-session` alone is given a fourth, `assistant`, the research profile of its
+`research` source. Every value is synthetic.
 
 [`manifest.json`](manifest.json) pins each file by its SHA-256 and gives each vector:
 
@@ -52,13 +53,12 @@ reader only for the canonical forms, the Ed25519 arithmetic and each reading's r
 preparation, which it then holds to the hand-written answer; it stops at the first disagreement.
 `python3 tools/paged_source_vectors.py --check` writes nothing and exits 1 when a file differs.
 
-## Rows that do not isolate what they name
+## Rows answered by a rule outside `paging`'s own members
 
-Two rows give the expected answer for a reason before the one their name gives:
-
-- `paged-fills-query-three-tokens`: §4.1 already holds `adapter-http`'s `query` to an object of
-  string templates, so a `query` holding `filter` as an object, which the row needs for `fills`'s
-  parent to resolve, is `profile-mismatch` by that rule before the paging rule is reached.
-- `paged-max-pages-not-integer`: `1e3` lies outside the `canon` domain, so the dialect is
-  `input-malformed` by §1 before `paging`'s form is read. `paged-max-pages-zero` reaches the
-  paging rule.
+- `paged-max-pages-exponent-not-measured`: `1e3` lies outside the `canon` domain, so the dialect is
+  `input-malformed` by §1 before `paging`'s form is read, and phase 3, which measures `maxPages`
+  only when it is an integer, does not refuse it `input-over-bound`. `paged-max-pages-not-integer`
+  (`"2"`) and `paged-max-pages-zero` reach the paging rule.
+- `paged-fills-query-three-tokens`: §4.1 holds `adapter-http`'s `query` to an object of string
+  templates, so the parent of a `fills` of three tokens under `query` is a string or a template
+  form, never an object: `input-malformed` by section 2's parent rule, before any profile is read.

@@ -23,9 +23,7 @@
         "method": "GET",
         "path": "/v1/records",
         "query": {
-          "filter": {
-            "kind": "open"
-          }
+          "filter": "open"
         }
       },
       "paging": {

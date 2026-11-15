@@ -33,7 +33,7 @@
         "noNext": "absent",
         "fills": "/arguments/cursor",
         "items": "/items",
-        "maxPages": 1e3
+        "maxPages": "2"
       },
       "read": {
         "copy": {

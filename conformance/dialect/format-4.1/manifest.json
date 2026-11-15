@@ -2482,6 +2482,26 @@
    }
   },
   {
+   "name": "paged-research-in-paged-session",
+   "row": "research-in-paged-session",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9a25f52d2fce8e686ac15bcc01ebe7341dfca40704258e254c040a708c156d49",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "c4c29c59db1ec88efba7e2d167f99c4c4b87e16b818300edbb68e1cac3dc3f17",
+    "profiles.json": "dbf4038df0e703479d96d136c7f8b546582ee9ef777025983effbdb174c1a33d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-sessions"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
    "name": "paged-page-missing",
    "row": "page-missing",
    "kind": "negative",
@@ -2529,6 +2549,26 @@
     "dialect.json": "5e9f03d70dd974f438a1d9d12190e9602ffc16d0dcf2b4bd32f29a5250a414e2",
     "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
     "sources.json": "c16ade644bb022b42bec9005795fa32fd0426495735eed8567452d50dad172cc",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-unexpected"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-unexpected-before-joined-nesting",
+   "row": "unexpected-before-joined-nesting",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "a4df859824398a5849deaa90a10a4c5e32c8cd48c2a658b6eeece1c6250d5277",
     "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
     "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
    },
@@ -3002,8 +3042,48 @@
    }
   },
   {
+   "name": "paged-pages-form-for-undeclared",
+   "row": "pages-form-for-undeclared",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "2842668b4683c38e31e708b867a486020717cdbe2099bc7b8bad1f8bc93f578a",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
    "name": "paged-max-pages-not-integer",
    "row": "max-pages-not-integer",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "35795c2030df53e1fb65814d84628190dbcbaa554e6784a078ee7a956cad24cf",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "aa00edb53dd39582ad7d7f19bb6dc7b11e9247875d4f853059270bbd0d045af7",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "refusal",
+    "refusal": "input-malformed"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-max-pages-exponent-not-measured",
+   "row": "max-pages-exponent-not-measured",
    "kind": "negative",
    "files": {
     "dialect.json": "2718639ab9d61272d1d6145d5cb00641e3cf69cc2fc970a22d08b623d070654f",
@@ -3186,15 +3266,15 @@
    "row": "fills-query-three-tokens",
    "kind": "negative",
    "files": {
-    "dialect.json": "f9c601dc1e7aadafce6b5595024fc8cdd843d84a9adb8da5f7398064ab5c4e27",
+    "dialect.json": "8cc890bbba92792815b80c536a0d03c403210651a50ba5a710b1cbd3dd2f9a97",
     "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
-    "sources.json": "14a5e6365ecbafc96701f59225a2316d71d6bb0232842965db8ec3b234e12419",
+    "sources.json": "564f19315d0be8f027b1fe74f0ed7c047afd631165acc06ee967d51f20a603bc",
     "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
     "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
    },
    "expected": {
-    "result": "finding",
-    "finding": "profile-mismatch"
+    "result": "refusal",
+    "refusal": "input-malformed"
    },
    "expectedReportOfAReaderThatDoesNotReadTheFormat": {
     "refusal": "version-unread",

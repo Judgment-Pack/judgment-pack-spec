@@ -1,0 +1,154 @@
+{
+ "changes": {
+  "pages": [
+   {
+    "result": {
+     "items": [
+      {
+       "id": "c1"
+      }
+     ],
+     "next": "t1"
+    },
+    "receipt": {
+     "acquisition": {
+      "adapter": {
+       "name": "adapter-mcp",
+       "version": "stand-in",
+       "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+      },
+      "endpoint": "stdio:change-feed",
+      "observedAt": "2026-11-15T11:59:00Z",
+      "peerIdentity": null,
+      "schema": null,
+      "shape": "mcp",
+      "snapshot": "paged",
+      "statement": null,
+      "upstreamToken": null
+     },
+     "argumentsCommitment": "sha256:9f608adf14606da0e8daae5cbed2046fdc0be6037be47f1b2b560c8c700c7d98",
+     "authority": "test",
+     "callIndex": 0,
+     "caller": null,
+     "keyId": "21fe31dfa154a261626bf854046fd227",
+     "kind": "acquisition",
+     "prevSignature": null,
+     "receiptVersion": "3",
+     "resultDigest": "sha256:2f4b696a2d2774958b6a9b8d6778a958ded2ec709d8bae6f9140266cf517af60",
+     "servedAt": "2026-11-15T11:59:00Z",
+     "sessionId": "paged.session.1",
+     "source": "changes/feed",
+     "signature": "ec414771813907f1687eb36dca8dba1184e5ae94cd65b911c2a2165d200bcd4cf69c7f935cb2730d8d4ef2fb8659a0831abcbe8b3a468e79583722a039d01407"
+    },
+    "salts": {
+     "args": "4e4a5cb69f3182eb049994e0926a0ad376b120138ae0b629b55441d85fdfcfb5"
+    }
+   },
+   {
+    "result": {
+     "items": [
+      {
+       "id": "c2"
+      }
+     ]
+    },
+    "receipt": {
+     "acquisition": {
+      "adapter": {
+       "name": "adapter-mcp",
+       "version": "stand-in",
+       "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+      },
+      "endpoint": "stdio:change-feed",
+      "observedAt": "2026-11-15T11:59:00Z",
+      "peerIdentity": null,
+      "schema": null,
+      "shape": "mcp",
+      "snapshot": "paged",
+      "statement": null,
+      "upstreamToken": null
+     },
+     "argumentsCommitment": "sha256:7016923934f82f97222c7a3e37b9d51d22eef9061bbf2c156be19872182c4f9b",
+     "authority": "test",
+     "callIndex": 1,
+     "caller": null,
+     "keyId": "21fe31dfa154a261626bf854046fd227",
+     "kind": "acquisition",
+     "prevSignature": "ec414771813907f1687eb36dca8dba1184e5ae94cd65b911c2a2165d200bcd4cf69c7f935cb2730d8d4ef2fb8659a0831abcbe8b3a468e79583722a039d01407",
+     "receiptVersion": "3",
+     "resultDigest": "sha256:cd8eb549e98498155796cdba3f50796dc79c04ddcb858992af93ac09831272ea",
+     "servedAt": "2026-11-15T11:59:00Z",
+     "sessionId": "paged.session.1",
+     "source": "changes/feed",
+     "signature": "a584abee6d06b5f4735dda4b42166386b70096318fcea0c94375cb6c3b80667da84c343bada0ce5da595a1aa0c490fd07c939f12c7e31caa896125fef5f48e06"
+    },
+    "salts": {
+     "args": "b0da3d2163982ad885f973453e3c4ddc53e5d81dd86389b2eccc1dc775e9605f"
+    }
+   }
+  ]
+ },
+ "summary": {
+  "response": {
+   "result": {
+    "results": {
+     "summary": {
+      "status": "missing",
+      "cites": [],
+      "reason": "No summary was retained."
+     }
+    },
+    "responses": [],
+    "execution": {
+     "resolvedSettings": {
+      "model": "synthetic-research-model-1",
+      "profile": "assistant",
+      "version": "1",
+      "settings": {
+       "temperature": "0"
+      }
+     },
+     "retainedBytes": [
+      {
+       "mediaType": "application/json",
+       "base64": "eyJzdGF0dXMiOiJtaXNzaW5nIn0="
+      }
+     ]
+    }
+   },
+   "receipt": {
+    "acquisition": {
+     "adapter": {
+      "name": "adapter-sources",
+      "version": "stand-in",
+      "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+     },
+     "endpoint": "https://answers.example.test",
+     "observedAt": "2026-11-15T11:59:00Z",
+     "peerIdentity": null,
+     "schema": null,
+     "shape": "http",
+     "snapshot": "paged",
+     "statement": null,
+     "upstreamToken": null
+    },
+    "argumentsCommitment": "sha256:f4c2a6a88bb17c6b644db5985b668d2856c222401e50cfe6bbe9e7d74667d4a8",
+    "authority": "test",
+    "callIndex": 2,
+    "caller": null,
+    "keyId": "21fe31dfa154a261626bf854046fd227",
+    "kind": "acquisition",
+    "prevSignature": "a584abee6d06b5f4735dda4b42166386b70096318fcea0c94375cb6c3b80667da84c343bada0ce5da595a1aa0c490fd07c939f12c7e31caa896125fef5f48e06",
+    "receiptVersion": "3",
+    "resultDigest": "sha256:19ce33e365737687e414967d1630fb0ae8190626885b624dc123c901faf4c043",
+    "servedAt": "2026-11-15T11:59:00Z",
+    "sessionId": "paged.session.1",
+    "source": "research/answers",
+    "signature": "16798e8e17befb71b51507be614619fd5fcf804bf5d045e345dd32f0648950bfc3c8410337d7924c0cb3b89134e8b9740f9d5b832f0517efbec60807819a2f0d"
+   },
+   "salts": {
+    "args": "1e67431560fee7939c52ce7b0a1cda545e7bc8e0428a8183cac2b8b0df70770e"
+   }
+  }
+ }
+}

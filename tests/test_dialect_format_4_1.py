@@ -60,7 +60,7 @@ def conformance_rows() -> list[str]:
 class PagedSourceVectorTests(unittest.TestCase):
     def test_one_vector_for_each_row_of_the_conformance_table(self) -> None:
         rows = conformance_rows()
-        self.assertEqual(84, len(rows))
+        self.assertEqual(88, len(rows))
         entries = manifest()["cases"]
         self.assertEqual(rows, [entry["row"] for entry in entries])
         self.assertEqual(["paged-" + row for row in rows], [entry["name"] for entry in entries])

@@ -119,7 +119,9 @@ by URL.
   - a profile of shape `mcp`: a member within the tool call's `arguments`. `fills`'s first token is
     `arguments`, and it has at least a second. It never names `tool`, nor `arguments` itself.
   - a profile of shape `http` whose `adapter.name` is exactly `adapter-http`: a member of `query`,
-    where `fills` is exactly two tokens, the first `query`; or a member within `body`, where
+    where `fills` is two tokens, the first `query` (§4.1 leaves no longer one formable: `query`'s
+    members are string templates, so the parent of a longer `fills` under `query` is no object,
+    `input-malformed` by the rule above); or a member within `body`, where
     `fills`'s first token is `body`, it has at least a second, and `body` is an object. It never
     names `method`, `path`, `query` itself or `body` itself.
 
@@ -140,8 +142,9 @@ by URL.
   continuation of the same read, such as a page token. A `query` member stays one query value only
   because the adapter encodes each value it writes into the URL, so that a reference holding `&` or
   `=` adds no parameter; the reference gateway's `adapter-http` does, and no verifier checks it.
-- A `maxPages` that is not an integer (§1), such as `1e3` or `2.0`, or is below 1, is
-  `input-malformed`, in phase 5, whatever its magnitude. An integer above the row under the
+- A `maxPages` that is not an integer (§1), or is below 1, is `input-malformed`, in phase 5,
+  whatever its magnitude. Not an integer: a string, `true`, or a number such as `1e3` or `2.0`,
+  which §1 already refuses, since the dialect is then outside the `canon` domain. An integer above the row under the
   document's profile is `input-over-bound`, in §11's phase 3 (section 7).
 - A `noNext` of another value is `input-malformed`.
 
@@ -166,7 +169,8 @@ A paged source's member of the acquisitions is `{"pages": [P0, P1, ...]}`, exact
 element. Each `Pi` is `{"result": R, "receipt": E, "salts": S}`, exactly, the form that §5.2's
 `response` has, and is the gateway's acquire answer for call `i`, as the preparer kept it. For a
 paged source, a member that has `response` is `input-malformed`, and so is a member that has
-`pages` for a source that is not paged; a member that has both is of neither form, and is
+`pages` whose name is not a paged source's, a name of no source among them; §5.2's form holds for
+every other member, as in format `4.0.0`. A member that has both is of neither form, and is
 `input-malformed` for every source. More elements than the "Dialect retained responses" row allows is
 `input-over-bound`, in phase 3 (section 7).
 
@@ -203,12 +207,14 @@ before it takes the next. Each page gives its findings in this order:
    two references, each followed.
 
 After the walk, an element of `pages` after the last page the walk took is `acquisition-unexpected`.
-Then the source's read is applied to the joined value (section 6), giving `read-failed` as §6 gives
+The joined value is formed, and its nesting measured (section 7), after that check. Then the
+source's read is applied to the joined value (section 6), giving `read-failed` as §6 gives
 it.
 
 **The sessions across sources.** §5.2's two forms hold, as written, over the receipts of the
-sources that are not paged. A paged source's session is its own: a receipt of another source that
-names it is `acquisition-sessions`, at the first such receipt in the order of `sources`. Step 4
+sources that are not paged. A paged source's session is its own: a receipt of another source, a
+`research` source's retained responses and its record's own receipt among them, that names it is
+`acquisition-sessions`, at the first such receipt in the order of `sources`. Step 4
 holds the same in the other direction. The pages are calls `0` to `n−1` of that session, chained by
 `prevSignature`. *Why:* only a session of its own lets the call indexes and the chain show that no
 call came between two pages. The gateway already holds `callIndex` contiguous and the chain in
@@ -323,8 +329,8 @@ answer, not where the pack does.
   page whose value read is nested at more than 30 levels is refused here, although its result is
   within the bound. Each element of `items` is a part of its page's value read, and sits two
   levels below the root too; `last` sits one level below it, and holds a value that `values` holds
-  one level deeper; so `values` decides. It is measured when the value is formed, before the read
-  applies, as §6.4's combined value is, and refused `input-over-bound` otherwise.
+  one level deeper; so `values` decides. It is measured when the value is formed, after the walk's
+  `acquisition-unexpected` (section 4) and before the read applies, as §6.4's combined value is, and refused `input-over-bound` otherwise.
 - The dialect, the case and the acquisitions, every page included, stay within §12's combined
   bound, 2097152 bytes under `base`. The dialect has no byte bound per acquisition, and this adds
   none per page. The joined value adds no byte bound of its own: `values` holds each page's value
@@ -620,9 +626,11 @@ refusal row. Each name takes the prefix `paged-`.
 | `session-shared`: a later unpaged source's receipt in the paged session | negative | `acquisition-sessions` |
 | `session-of-earlier-source`: page 0 in the session of an earlier unpaged source | negative | `acquisition-sessions` |
 | `two-paged-one-session`: the second paged source's page 0 in the first's session | adversarial | `acquisition-sessions` |
+| `research-in-paged-session`: a later `research` source whose record's own receipt is in the paged session | negative | `acquisition-sessions` |
 | `page-missing`: page 0 names a reference below the bound, no page 1 | negative | `acquisition-missing` |
 | `page-after-end` | adversarial | `acquisition-unexpected` |
 | `page-beyond-bound`: `maxPages` 2, three retained | adversarial | `acquisition-unexpected` |
+| `unexpected-before-joined-nesting`: page 0 naming none, its value read at 31 levels, and a page retained after it | negative | `acquisition-unexpected`, not `input-over-bound` |
 | `skipped-paged-with-member`: a skipped paged source with a member that has `pages` | negative | `acquisition-unexpected` |
 | `reference-repeated`, `reference-number`, `next-parent-absent`, `items-not-array` | negative | `read-failed` |
 | `reference-equals-q0`: page 0 names the string `Q0` holds at `fills` | adversarial | `read-failed` |
@@ -633,13 +641,15 @@ refusal row. Each name takes the prefix `paged-`.
 | `end-changed`, `reference-dropped`: the preparation's `paging` rewritten | adversarial | `preparation-differs` |
 | `cites-by-call-index-paged-skipped`: `cites-order-paged-skipped`'s preparation with `cites` ordered by call index | adversarial | `preparation-differs` |
 | `paging-in-4.0.0`, `paging-with-calculation`, `fills-in-template-form`, `fills-parent-unresolved`, `pages-empty`, `max-pages-zero`, `response-form-for-paged`, `pages-form-for-unpaged`, `pages-and-response`, `no-next-unknown` | negative | refusal `input-malformed` |
-| `max-pages-not-integer`: `maxPages` `1e3` | negative | refusal `input-malformed` |
+| `pages-form-for-undeclared`: a member that has `pages` under a name of no source | negative | refusal `input-malformed` |
+| `max-pages-not-integer`: `maxPages` `"2"`, a string | negative | refusal `input-malformed` |
+| `max-pages-exponent-not-measured`: `maxPages` `1e3`, outside the `canon` domain (§1), so phase 3 does not measure it | negative | refusal `input-malformed`, not `input-over-bound` |
 | `pages-over-row-in-4.0.0`: 65 pages retained in a document of format `4.0.0` | negative | refusal `input-malformed`, not `input-over-bound` |
 | `fills-tool`: shape `mcp`, `fills` `/tool` | negative | `profile-mismatch` |
 | `fills-path`, `fills-method`: `adapter-http`, `fills` `/path` and `/method` | negative | `profile-mismatch` |
 | `fills-connection`: shape `http` under a connection's profile, `fills` `/connection` | negative | `profile-mismatch` |
 | `fills-arguments-itself`, `fills-query-itself`, `fills-body-itself`: `fills` `/arguments` under shape `mcp`, and `/query` and `/body` under `adapter-http` | negative | `profile-mismatch` |
-| `fills-query-three-tokens`: `adapter-http`, `fills` `/query/filter/cursor`, `Q0`'s `query` holding `filter` as an object so that the parent resolves | negative | `profile-mismatch` |
+| `fills-query-three-tokens`: `adapter-http`, `fills` `/query/filter/cursor`, `Q0`'s `query` holding `filter` as a literal string, so that the parent is no object (section 2) | negative | refusal `input-malformed` |
 | `format-4.1.0-unread`: a reader of this text that does not read the format; and the preserved `v0.3.0` reader | negative | refusal `version-unread`; refusal `input-malformed` |
 
 ## Implementation
