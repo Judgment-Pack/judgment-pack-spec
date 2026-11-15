@@ -1,7 +1,8 @@
 """Version 2 of the dialect-recording schemas: preparations of the proposed formats 4.0.0 and 4.1.0 and an
 export carrying one, staged for specVersion 0.6.0 (RFC 0018, the amendment of 2026-11-15, issue #326).
 
-Every reading among the staged vectors of both formats validates against version 2 and none against version 1."""
+Every reading among the staged vectors of both formats validates against version 2 and none against version 1;
+no preparation or export of version 1's form validates against version 2 (decision 3)."""
 
 from __future__ import annotations
 
@@ -13,7 +14,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
-from test_record_schemas import exports, read
+from test_record_schemas import exports, preparations, read
 
 ROOT = Path(__file__).resolve().parents[1]
 DIALECT = ROOT / "conformance" / "dialect"
@@ -98,6 +99,23 @@ class Version2Tests(unittest.TestCase):
                 carried["run"]["input"]["preparation"] = preparation
                 self.assertTrue(self.valid(2, "export", carried), where)
                 self.assertFalse(self.valid(1, "export", carried))
+
+    def test_version_2_does_not_read_version_1s_form(self) -> None:
+        # decision 3: a preparation of version 2 or 3, and an export carrying one, are version 1's alone
+        found = preparations()
+        self.assertEqual(190, len(found))
+        for where, value in found:
+            with self.subTest(vector=where):
+                self.assertTrue(self.valid(1, "preparation", value))
+                self.assertFalse(self.valid(2, "preparation", value))
+        for where, value in exports():
+            with self.subTest(recording=where):
+                self.assertTrue(self.valid(1, "export", value))
+                self.assertFalse(self.valid(2, "export", value))
+        # a preparation of version 1's form given a format selector is still not version 2's form
+        _, value = found[0]
+        both = {**copy.deepcopy(value), "formatVersion": "4.0.0"}
+        self.assertFalse(self.valid(2, "preparation", both))
 
 
 if __name__ == "__main__":

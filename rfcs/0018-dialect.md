@@ -1162,7 +1162,7 @@ amendment replaces.
 
 This amendment is **proposed**, for
 [issue #326](https://github.com/Judgment-Pack/judgment-pack-spec/issues/326) (milestone `v0.6.0`).
-It answers that issue's second decision; [RFC 0020](0020-workflow.md)'s amendment
+It answers that issue's second and third decisions; [RFC 0020](0020-workflow.md)'s amendment
 proposal of the same date answers the first, the release digest of a stage of either format. Each
 decision is taken at the recommended answer unless the maintainer answers otherwise on #326. It is
 staged for `specVersion` `0.6.0`. The Specification and companion are unchanged, and so is every
@@ -1188,7 +1188,7 @@ outcome alone, exactly `{claim, status, reason}`; `derivation` on a lineage entr
 four closed forms; and, in format `4.1.0` alone, `paging` on a source's outcome, exactly
 `{end, pages, references}`, never on the case's. `receipts` is admitted on an entry as version 1
 admits it in version 3. `export.schema.json` of version 2 is version 1's carrying that preparation,
-and changes nothing else, its evaluator versions included. The orders the prose gives,
+and changes nothing else, its evaluator versions included (decision 3). The orders the prose gives,
 of `cites` among them, stay outside a schema, as in version 1. *Why:* version 1 is published at its
 `$id` and the record-shape catalog pins its digest, so widening it in place would change what a
 published identifier admits; a format is a selector a reader reads before anything else (§2.1), so
@@ -1208,12 +1208,33 @@ it refuses is one the Python reader does not read as given. The TypeScript reade
 (`tools/dialect-verify-ts`) reads neither format and refuses every document of either
 `version-unread`, by name, before any preparation is read, as its test holds.
 
-**Conformance.** Every reading among the staged vectors of `format-4/` and `format-4.1/` validates
-against version 2's preparation schema and none against version 1's. None is in a corpus or a
-claim.
+**Decision 3, version 1's form and `0.5.0` recordings.** The options for version 2 and version 1's
+form:
 
-**What this amendment leaves open.** Whether version 2 reads version 1's form, and `0.5.0`
-recordings. A preparer: the reference
+1. Version 2 does not read version 1's form: a preparation of version 2 or 3, and an export
+   carrying one, are version 1's, read by version 1's schema as published (recommended).
+2. Version 2 reads both forms, and version 1 is retired.
+
+*Recommended: option 1.* *Why:* the two forms are told apart by their selector alone (§2.1), so
+each version reads exactly one and neither changes what the other admits; retiring version 1 would
+move every published recording to a new identifier for no new form.
+
+Whether a bundled reader reads `0.5.0` recordings first: *recommended, not first.* A recording's
+Core version is the export's evaluator version, which bears on every dialect format alike: both
+bundled readers, and both versions' export schemas, read `0.2.0-draft` and `0.3.0` alone (Status,
+"Recorded evaluator versions"). Reading `0.5.0` changes that paragraph of the published companion
+and both readers' tables, and needs a Runner recording under Core `0.5.0` as its vector, of which
+none is published. It is a follow-up of its own, not filed by this amendment. Until it lands, a
+recording of a preparation of either format under Core `0.5.0` validates against version 2's
+preparation schema and not against its export schema, and no bundled reader reads it, as for a
+`0.5.0` recording of format `3.0.0`.
+
+**Conformance.** Every reading among the staged vectors of `format-4/` and `format-4.1/` validates
+against version 2's preparation schema and none against version 1's; none of the 190 staged
+preparations of version 1's form validates against version 2's, nor any of the 93 staged recordings
+against version 2's export schema. None is in a corpus or a claim.
+
+**What this amendment leaves open.** Reading `0.5.0` recordings, as above. A preparer: the reference
 Runner writes neither format, and no recording of either exists.
 
 ## Specification
