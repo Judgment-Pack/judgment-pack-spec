@@ -1,6 +1,6 @@
 # RFC 0033: A paged operation source
 
-- Status: Draft
+- Status: Review
 - Type: Standards track, draft maturity. An amendment of the dialect companion,
   [`spec/dialect.md`](../spec/dialect.md), whose design record is [RFC 0018](0018-dialect.md): a
   named format `4.1.0`, proposed, of format `4.0.0`'s family.
@@ -10,10 +10,10 @@
   record is the Runner's `docs/design/paging.md`; RFC 0018's amendment of 2026-11-12, format
   `4.0.0`, proposed
 
-> This Draft is normative for nothing. [`spec/dialect.md`](../spec/dialect.md) is unchanged by it:
+> This RFC, in Review, is normative for nothing. [`spec/dialect.md`](../spec/dialect.md) is unchanged by it:
 > the Specification below gives the text proposed for the companion, which lands only after
 > acceptance, staged vectors, and the agreement of the reference Runner and a second reader on them.
-> No schema, vector, reader or preparer changes with this Draft, and Core `0.5.0` is untouched.
+> No schema, vector, reader or preparer changes with this RFC, and Core `0.5.0` is untouched.
 
 ## Summary
 
@@ -693,7 +693,11 @@ refusal row. Each name takes the prefix `paged-`.
 10. **`adapter-airbyte`.** Its every answer carries `pageItems`. Open: whether a paged source should
     ever read such pages.
 11. **The review.** Under RFC 0009 the pull request that moves this Draft to Review carries a
-    recorded adversarial review and its dispositions. None has run.
+    recorded adversarial review and its dispositions. A review ran on the pull request that created
+    this Draft (#329), and another on the one that moves it to Review (#330); each is recorded on
+    its pull request with its dispositions, and this text is revised by them. Both are by a model
+    from the drafting vendor. The maintainer waived the different-vendor review for this work: they
+    are same-vendor reviews, not a cross-vendor claim.
 12. **The last page's members.** Resolved: the joined value carries `last`, the last page's value
     read whole, the same JSON value as `values`'s last element (section 6). A rule tests the last
     page's flag at `/last` followed by the flag's pointer, with one clause whatever the page count,
