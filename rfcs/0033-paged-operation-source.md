@@ -466,8 +466,9 @@ paged source's rule that the amended passages name.
   are not read here." becomes: "The receipt's `caller`, its `statement` and its `witness` are the
   gateway's verifier's to read (gateway §1.4, §4), and are not read here. Its chain
   (`prevSignature`) is read for a paged source's pages alone: check 1 holds it to its form, `null`
-  or a signature, and the paged session rule holds page 0's to `null` and each later page's to the
-  `signature` of the page before. For every other acquisition it is not read here."
+  or a signature, and to `null` exactly when the receipt's own `callIndex` is `0`; the paged
+  session rule holds each later page's to the `signature` of the page before. For every other
+  acquisition it is not read here."
 - **§9.1, the `version` row.** "A preparation of a dialect of format `4.0.0` has `formatVersion`,
   `"4.0.0"`, in its place (§2.2.6)" becomes "A preparation of a dialect of format `4.0.0` or
   `4.1.0` has `formatVersion`, `"4.0.0"` or `"4.1.0"`, in its place (§2.2.6, and the paged source's
