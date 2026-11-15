@@ -534,6 +534,15 @@ def build_rows() -> None:
         pages_of(two_named, per_page={1: {"change": page_items}}), finding("acquisition-invalid"))
     row("prev-signature-malformed", "negative", "prev-signature-malformed", dialect(src),
         pages_of(two_named, per_page={1: {"prev": "not-a-signature"}}), finding("acquisition-invalid"))
+    # a receipt at odds with its own callIndex is check 1's, before step 4 reads the chain (issue #326)
+    with salts_apart("prev-signature-at-call-0"):
+        at_call_0 = pages_of(two_named, per_page={0: {"prev": "ab" * 64}})
+    row("prev-signature-at-call-0", "negative", "prev-signature-at-call-0", dialect(src), at_call_0,
+        finding("acquisition-invalid"))
+    with salts_apart("prev-signature-null-after-0"):
+        null_after_0 = pages_of(two_named, per_page={1: {"prev": None}})
+    row("prev-signature-null-after-0", "negative", "prev-signature-null-after-0", dialect(src), null_after_0,
+        finding("acquisition-invalid"))
     row("stale-last-page", "negative", "stale-last-page", dialect(src),
         pages_of(two_named, per_page={1: {"at": STALE}}), finding("acquisition-stale"))
     row("stale-middle-page", "negative", "stale-middle-page", dialect(src),

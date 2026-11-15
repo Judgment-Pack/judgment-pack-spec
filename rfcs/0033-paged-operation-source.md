@@ -6,6 +6,8 @@
   named format `4.1.0`, proposed, of format `4.0.0`'s family.
 - Created: 2026-11-15
 - Issue: [#328](https://github.com/Judgment-Pack/judgment-pack-spec/issues/328), milestone `v0.6.0`
+- Amended: 2026-11-15, for [#326](https://github.com/Judgment-Pack/judgment-pack-spec/issues/326):
+  a `prevSignature` at odds with its receipt's own `callIndex` is check 1's (section 4), proposed
 - Related: judgment-pack-runner #247 and its proposal, judgment-pack-runner #287, whose design
   record is the Runner's `docs/design/paging.md`; RFC 0018's amendment of 2026-11-12, format
   `4.0.0`, proposed
@@ -183,8 +185,10 @@ before it takes the next. Each page gives its findings in this order:
 1. When the acquisitions hold no `Pi`: `acquisition-missing`.
 2. §5.2's checks 1 to 5 on `Pi`, under the source's profile, with check 4 opened over `Qi`:
    `acquisition-invalid`. Check 1's refusal of `pageItems` holds for every page. Since the rule in
-   step 4 reads `prevSignature`, check 1 holds it to its form, `null` or a signature (gateway
-   §1.2a).
+   step 4 reads `prevSignature`, check 1 holds it to its form (gateway §1.2a), and to gateway §1.2's
+   rule within the receipt: `null` when the receipt's own `callIndex` is `0`, and a signature
+   otherwise. So a signature at call 0, or `null` after it, is `acquisition-invalid` here, before
+   step 4 reads the chain.
 3. §5.2's times, for each page against `verifiedAt` under the source's `maxAge`:
    `acquisition-stale`.
 4. The page's session: `Ei.sessionId` is `E0.sessionId`; `Ei.callIndex` is `i`; `Ei.prevSignature`
@@ -222,6 +226,20 @@ holds the same in the other direction. The pages are calls `0` to `n−1` of tha
 call came between two pages. The gateway already holds `callIndex` contiguous and the chain in
 order (gateway §1.2), so a sequence that passes here is one the gateway's own verifier walks.
 
+**`prevSignature` at odds with its receipt's call index (issue #326).** A receipt whose
+`prevSignature` is a signature at `callIndex` `0`, or `null` at a later one, departs from gateway
+§1.2 within itself, before any other page is read. The options:
+
+1. Check 1, in step 2: `acquisition-invalid` (recommended).
+2. Step 4: `acquisition-sessions`, as a chain that does not join.
+
+*Recommended: option 1*, taken at the recommended answer unless the maintainer answers otherwise on
+#326. *Why:* the receipt's own members show the departure, so it is a receipt not of its form, and
+the earlier check finds it; step 4 keeps what only a comparison shows, of a page with the pages
+before it or with its position: another session, a gap, an order, or a chain that does not join. A
+receipt of `callIndex` `0` and `prevSignature` `null` at a later position is of its form, and step
+4's (`call-index-reordered`).
+
 **A known limit: a key rotated within a session.** Check 2 holds every page under the profile's
 one `publicKey`. A gateway that rotates its key between two pages of one session signs the later
 pages under a key the profile does not name, and the first of them is `acquisition-invalid`. The
@@ -241,7 +259,7 @@ profile names one key, and this amendment adds none.
 | more pages than `maxPages` | `acquisition-unexpected`; over the row, `input-over-bound` |
 | a page the loop calls for that is not retained | `acquisition-missing` |
 | a next reference of another type or spelled as an end `noNext` does not declare, a repeated one, or a missing `items` array or `next` parent | `read-failed` |
-| a page whose `prevSignature` is neither `null` nor a signature in form | `acquisition-invalid` (check 1) |
+| a page whose `prevSignature` is neither `null` nor a signature in form, a signature at `callIndex` `0`, or `null` at a later one | `acquisition-invalid` (check 1) |
 | a page whose receipt carries `pageItems` | `acquisition-invalid` |
 
 ### 5. The end of the loop
@@ -621,6 +639,8 @@ refusal row. Each name takes the prefix `paged-`.
 | `pages-swapped` | adversarial | `acquisition-invalid` |
 | `page-items-receipt`: page 1's receipt carries `pageItems` | negative | `acquisition-invalid` |
 | `prev-signature-malformed`: page 1's `prevSignature` neither `null` nor a signature in form | negative | `acquisition-invalid` |
+| `prev-signature-at-call-0`: page 0's `prevSignature` a signature in form, at `callIndex` `0` | negative | `acquisition-invalid`, not `acquisition-sessions` |
+| `prev-signature-null-after-0`: page 1's `prevSignature` `null`, at `callIndex` `1` | negative | `acquisition-invalid`, not `acquisition-sessions` |
 | `stale-last-page` | negative | `acquisition-stale` |
 | `stale-middle-page`: three pages, page 1's times outside `maxAge` | negative | `acquisition-stale` |
 | `call-index-gap`: calls 0 and 2, page 1 asked twice and the second kept | adversarial | `acquisition-sessions` |
