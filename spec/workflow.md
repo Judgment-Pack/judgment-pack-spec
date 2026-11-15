@@ -49,6 +49,11 @@ encoding references at that pin are `internal/runner/model.go` (`Release`),
 It is not a file-byte digest.
 The Runner's `docs/MAPPING-V2.md` at `66e264e`, "Dialect version 3", documents the version-3
 encoding; "Release checks, runtime and offline verification" documents the run export (§7).
+Staged for `specVersion` `0.6.0` (issue #326), a stage whose dialect is of format `4.0.0` or
+`4.1.0` takes no Runner encoding: its release digest is SHA-256 of the `canon` bytes of the whole
+retained release, every member as retained, none removed or defaulted, with no typed decoding. A
+release outside the `canon` domain has no such digest and is `input-malformed`. A run export's
+embedded `release` is digested by the same rule. Every other format keeps the encoding above.
 
 The runtime reference is judgment-pack-runtime `v0.34.0` at
 `785ea58927255b775a774e29952c560591429cd3`. Its `README.md`,
@@ -113,6 +118,8 @@ the conditional `selection` and `sample` below. `dialect` selects exactly one of
 - `{version, digest}` for an integer-format dialect, where `version` is integer `2` or `3`;
 - `{formatVersion, id, version, digest}` for a named dialect, where `formatVersion` is exactly
   `"2.0.0"` or `"3.0.0"`, and `id` and string artifact `version` have dialect §2.1's forms.
+  Staged for `specVersion` `0.6.0`, `formatVersion` may also be `"4.0.0"` or `"4.1.0"`, once the
+  dialect admits that format, with §1's release digest; under `0.5.x` both are unknown values.
 
 For a named reference, the consumer MUST check the supplied published document's `formatVersion`,
 `id`, artifact `version` and canonical `digest`, all exactly. The format selector is not an
