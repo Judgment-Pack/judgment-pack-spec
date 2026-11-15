@@ -22,7 +22,8 @@ request member it fills, where a page's records are, and a bound on pages. Its p
 session's calls 0 to n−1, each with its own signed receipt, and each request after the first is the
 first with that member set to the reference the page before named. The loop ends at a page that
 names no next reference, or at the bound, and the preparation records which. The pages' records are
-joined in call order, duplicates kept, and the source's read applies once to the joined value. A
+joined in call order, duplicates kept, beside each page's whole value read, and the source's read
+applies once to the joined value. A
 verifier forms every request again and refuses a page that departs, with the dialect's existing
 findings. `pageItems` stays refused. The form is a new named format, `4.1.0`; no document of an
 earlier format changes its answer.
@@ -108,10 +109,26 @@ by URL.
   form. Its last token names a member of that object, which the object may or may not hold.
   Otherwise the dialect is `input-malformed`. (The parent is literal, so every page's request has
   it.)
-- Under a profile of shape `mcp`, `fills` names a member within the call's `arguments`: its first
-  token is `arguments`, and it has a second. Under a profile whose adapter is `adapter-http`, it
-  names a member of `query`, or a member within an object `body`. Otherwise the source is
-  `profile-mismatch` (§4.1, §5.1), as any request that does not fit its profile is.
+- `paging` is admitted under exactly two kinds of profile, and under each `fills` may name only
+  these members of the request:
+  - a profile of shape `mcp`: a member within the tool call's `arguments`. `fills`'s first token is
+    `arguments`, and it has at least a second. It never names `tool`, nor `arguments` itself.
+  - a profile of shape `http` whose `adapter.name` is exactly `adapter-http`: a member of `query`,
+    where `fills` is exactly two tokens, the first `query`; or a member within `body`, where
+    `fills`'s first token is `body`, it has at least a second, and `body` is an object. It never
+    names `method`, `path`, `query` itself or `body` itself.
+
+  A paged source under any other profile is `profile-mismatch` (§4.1, §5.1), as any request that
+  does not fit its profile is: shape `airbyte`; shape `command`; and shape `http` under any other
+  adapter, a connection's request `{connection, revision, read, …}` among them. So is a `fills`
+  that names any other member under the two profiles above. *Why:* a connection's request names the
+  connection, its revision and its read, which choose what is read and in which scope, and the
+  dialect does not know which of a connection's members do which. Under the two profiles admitted,
+  the tool, the method, the path and the endpoint lie outside every member `fills` may name: the
+  profile's `tools`, the template and check 3 pin them. So no next reference can choose the next
+  call's connection, endpoint, host, revision or scope through the request's form. What a member
+  within a tool's `arguments` or a request's `query` or `body` means is the tool's or the service's,
+  and the dialect author chooses it, as they choose the template.
 - A `maxPages` that is not an integer, or is below 1, is `input-malformed`. One above the row under
   the document's profile is `input-over-bound`, in §11's phase 3.
 
@@ -202,15 +219,27 @@ pages, a verifier answers `acquisition-missing` at the page the loop calls for.
 
 ### 6. The joined value and the read
 
-The **joined value** of a paged source is the object `{"end": E, "items": I, "pages": N}`:
+The **joined value** of a paged source is the object
+`{"end": E, "items": I, "pages": N, "values": V}`:
 
 - `E` is `"no-next"` or `"bound"`;
 - `I` is every page's `items` array, concatenated in call order, each element as the page holds it;
-- `N` is the number of pages read.
+- `N` is the number of pages read;
+- `V` is `[v0, ..., vn−1]`, each page's value read (section 4, step 5), whole, in call order.
 
 The source's `copy` or `rule` (§6.2, §6.3) applies once, to the joined value, as the value read,
 and `unwrap` is not applied again. The claim, its class (the profile's, §5.1), its targets and its
 lineage are one source's, as for any `operation`.
+
+**A page's own members are kept.** A page's value read may carry more than its records and its
+next reference: a flag that the read is incomplete, a count, a warning. `V` keeps each page's,
+so a rule can test any page's flag, at `/values/i/` and the flag's pointer within the page, as a
+rule over an unpaged read tests it at the flag's pointer. The last page's flag is tested with the
+page count beside it: a clause that tests `/pages` equal to 3 and `/values/2/incomplete` equal to
+`true`, one such clause for each count up to `maxPages` that the author wants covered. *Why:* a
+joined value of `items` alone would let a last page `{"items": [...], "incomplete": true}` that
+names no next reference read as a whole read, ending `no-next`, where an unpaged read of the same
+answer could test `/incomplete`.
 
 **Duplicates are kept.** An element that appears on two pages appears twice in `I`, and nothing is
 removed or merged. *Why:* the dialect has no record identity. Equality of two JSON values is not
@@ -233,13 +262,17 @@ answer, not where the pack does.
 - A next reference is at most Core §4.1's "Dialect text value bytes" (8192 UTF-8 bytes under
   `base`). It is measured when read, during recomputation, as an unwrapped string's bytes are, and
   refused `input-over-bound` with nothing else reported.
-- The joined value's nesting is at most §12's value nesting (32 levels under `base`). It is
-  measured when the value is formed, before the read applies, as §6.4's combined value is, and
-  refused `input-over-bound` otherwise.
+- The joined value's nesting, `values` included, is at most §12's value nesting (32 levels under
+  `base`). Each page's value read sits two levels below the joined value's root, in `values`, so a
+  page whose value read is nested at more than 30 levels is refused here, although its result is
+  within the bound; each element of `items` lies within its page's value read, at the same depth or
+  deeper, so `values` decides. It is measured when the value is formed, before the read applies, as
+  §6.4's combined value is, and refused `input-over-bound` otherwise.
 - The dialect, the case and the acquisitions, every page included, stay within §12's combined
   bound, 2097152 bytes under `base`. The dialect has no byte bound per acquisition, and this adds
-  none per page. The joined value adds no byte bound of its own, since each element is a value read
-  from a retained page.
+  none per page. The joined value adds no byte bound of its own: `values` holds each page's value
+  read, a part of a retained result, once, and `items` holds each record a second time, so the
+  joined value is about twice the pages' values read, and is bounded by the retained pages.
 - The Runner's limits are a preparer's own: 1 MiB per acquisition, which holds for each page, and
   2 MiB per run input, which equals the combined bound under `base`. With full pages a paged read
   holds one or two pages; holding more is unresolved question 9. The bundled verifiers support
@@ -354,12 +387,15 @@ reader that does not read paging never reads one page of a paged source as a who
   the combined byte bound, and the references and the joined value are bounded (section 7).
 - **What a source can steer.** A next reference fills one declared member and nothing else. It
   cannot change a tool, a method or a path (section 2), nor the endpoint, which the profile pins
-  and check 3 holds. It is never followed as a URL or spliced into a template.
+  and check 3 holds. Paging is admitted only under a tool call's `arguments` and an `adapter-http`
+  request's `query` and `body` (section 2), so no reference fills a member that selects a
+  connection, its revision or its read. It is never followed as a URL or spliced into a template.
 - **Choosing among answers.** The call indexes and the chain show that no call came between two
   pages. They do not show a call after the last page, or a whole session begun and dropped
   (section 9).
 - **A partial read.** A loop that ends at `bound` read part of the source. Its preparation says so,
-  and a rule can test `/end` and claim `unknown`. A pack decided on a partial read without such a
+  and a rule can test `/end` and claim `unknown`. A page that says of itself that the read is
+  incomplete keeps saying so in `/values` (section 6). A pack decided on a partial read without such a
   test is the dialect author's choice, and §13 says what was not established.
 - **A wrong `next` pointer.** A member name misspelled in `next` reads as absent, so the loop ends
   after one page with end `no-next`. The rule that the parent must resolve catches a wrong parent,
@@ -388,13 +424,14 @@ refusal row. Each name takes the prefix `paged-`.
 | `end-null`, `end-empty-string` | positive | reading; `no-next` |
 | `empty-middle-page`: `items` `[]` with a reference | positive | reading |
 | `duplicates-kept`: one element on two pages | positive | reading; it appears twice in `items` |
+| `last-page-incomplete`: three pages, the third `{"items": [...], "incomplete": true}` naming none; a rule claims `unknown` when `/pages` is 3 and `/values/2/incomplete` is `true` | positive | reading; `no-next`; status `unknown` |
 | `http-query`: `adapter-http`, `fills` `/query/pageToken` | positive | reading |
 | `beside-unpaged`: a paged and an unpaged source, sessions apart | positive | reading; `cites` in the order of `sources` |
 | `max-pages-at-row`: 64 of 64 | boundary | reading |
 | `max-pages-over-row`: `maxPages` 65 | boundary | refusal `input-over-bound` |
 | `pages-over-row`: 65 pages retained | boundary | refusal `input-over-bound` |
 | `reference-at-bytes`, `reference-over-bytes`: 8192 and 8193 bytes, two-byte characters | boundary | reading; refusal `input-over-bound` |
-| `joined-nesting-over` | boundary | refusal `input-over-bound` |
+| `joined-nesting-over`: a page's value read at 31 levels, the joined value at 33 | boundary | refusal `input-over-bound` |
 | `request-not-formed`: page 1 asked with another reference | negative | `acquisition-invalid` |
 | `pages-swapped` | adversarial | `acquisition-invalid` |
 | `page-items-receipt`: page 1's receipt carries `pageItems` | negative | `acquisition-invalid` |
@@ -411,6 +448,7 @@ refusal row. Each name takes the prefix `paged-`.
 | `end-changed`, `reference-dropped`: the preparation's `paging` rewritten | adversarial | `preparation-differs` |
 | `paging-in-4.0.0`, `paging-with-calculation`, `fills-in-template-form`, `pages-empty`, `max-pages-zero`, `response-form-for-paged` | negative | refusal `input-malformed` |
 | `fills-tool`: shape `mcp`, `fills` `/tool` | negative | `profile-mismatch` |
+| `fills-connection`: shape `http` under a connection's profile, `fills` `/connection` | negative | `profile-mismatch` |
 | `format-4.1.0-unread`: a reader of this text that does not read the format; and the preserved `v0.3.0` reader | negative | refusal `version-unread`; refusal `input-malformed` |
 
 ## Implementation
