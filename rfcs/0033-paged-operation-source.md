@@ -22,9 +22,9 @@ request member it fills, where a page's records are, and a bound on pages. Its p
 session's calls 0 to n−1, each with its own signed receipt, and each request after the first is the
 first with that member set to the reference the page before named. The loop ends at a page that
 names no next reference, or at the bound, and the preparation records which. The pages' records are
-joined in call order, duplicates kept, beside each page's whole value read, and the source's read
-applies once to the joined value. A
-verifier forms every request again and refuses a page that departs, with the dialect's existing
+joined in call order, duplicates kept, beside each page's whole value read and the last page's
+again, and the source's read applies once to the joined value. A verifier forms every request
+again and refuses a page that departs, with the dialect's existing
 findings. `pageItems` stays refused. The form is a new named format, `4.1.0`; no document of an
 earlier format changes its answer.
 
@@ -238,12 +238,21 @@ the occurrence at its deadline (question 4).
 ### 6. The joined value and the read
 
 The **joined value** of a paged source is the object
-`{"end": X, "items": I, "pages": N, "values": V}`:
+`{"end": X, "items": I, "last": L, "pages": N, "values": V}`:
 
 - `X` is `"no-next"` or `"bound"`;
 - `I` is every page's `items` array, concatenated in call order, each element as the page holds it;
+- `L` is the last page's value read (section 4, step 5), whole: the same JSON value as `V`'s
+  element `N − 1`;
 - `N` is the number of pages read;
 - `V` is `[v0, ..., vn−1]`, each page's value read (section 4, step 5), whole, in call order.
+
+`N` is at least 1, so `L` is always present and `pages` is never 0. The acquisitions member of a
+paged source holds at least one page (section 4: `{"pages": []}` is `input-malformed`); the walk
+takes page 0 before any other, and a page 0 not retained is `acquisition-missing`; and the reading
+ends at its first finding (§11), so the read over the joined value applies only after a walk that
+took page 0, and every page after it that the loop called for, without a finding. A skipped paged source is not walked, and
+its claim is §9.2's, with no read, so it forms no joined value.
 
 The source's `copy` or `rule` (§6.2, §6.3) applies once, to the joined value, as the value read,
 and `unwrap` is not applied again. The claim, its class (the profile's, §5.1), its targets and its
@@ -252,12 +261,15 @@ lineage are one source's, as for any `operation`.
 **A page's own members are kept.** A page's value read may carry more than its records and its
 next reference: a flag that the read is incomplete, a count, a warning. `V` keeps each page's,
 so a rule can test any page's flag, at `/values/i` followed by the flag's pointer within the
-page, as a rule over an unpaged read tests it at the flag's pointer. The last page's flag is tested with the
-page count beside it: a clause that tests `/pages` equal to 3 and `/values/2/incomplete` equal to
-`true`, one such clause for each count up to `maxPages` that the author wants covered. *Why:* a
-joined value of `items` alone would let a last page `{"items": [...], "incomplete": true}` that
-names no next reference read as a whole read, ending `no-next`, where an unpaged read of the same
-answer could test `/incomplete`.
+page, as a rule over an unpaged read tests it at the flag's pointer. The last page's flag is tested
+at `/last` followed by the same pointer, `/last/incomplete`, whatever the page count: one clause,
+not one per count up to `maxPages`. *Why:* a joined value of `items` alone would let a last page
+`{"items": [...], "incomplete": true}` that names no next reference read as a whole read, ending
+`no-next`, where an unpaged read of the same answer could test `/incomplete`. And without `last`,
+the last page sits at `/values/` followed by an index that a pointer names as a fixed number, so a
+rule would need a clause for each count. `L` adds nothing that `V` does not hold: a verifier forms
+it again from `V` (section 9), and a reader that sets it to another page's value read reads the
+rule over another value, which the vector `last-is-the-last-page` shows (Conformance).
 
 **Duplicates are kept.** An element that appears on two pages appears twice in `I`, and nothing is
 removed or merged. *Why:* the dialect has no record identity. Equality of two JSON values is not
@@ -290,13 +302,15 @@ answer, not where the pack does.
   `base`). Each page's value read sits two levels below the joined value's root, in `values`, so a
   page whose value read is nested at more than 30 levels is refused here, although its result is
   within the bound. Each element of `items` is a part of its page's value read, and sits two
-  levels below the root too, so `values` decides. It is measured when the value is formed, before the read applies, as
-  §6.4's combined value is, and refused `input-over-bound` otherwise.
+  levels below the root too; `last` sits one level below it, and holds a value that `values` holds
+  one level deeper; so `values` decides. It is measured when the value is formed, before the read
+  applies, as §6.4's combined value is, and refused `input-over-bound` otherwise.
 - The dialect, the case and the acquisitions, every page included, stay within §12's combined
   bound, 2097152 bytes under `base`. The dialect has no byte bound per acquisition, and this adds
   none per page. The joined value adds no byte bound of its own: `values` holds each page's value
-  read, a part of a retained result, once, and `items` holds each record a second time, so the
-  joined value is about twice the pages' values read, and is bounded by the retained pages.
+  read, a part of a retained result, once, `items` holds each record a second time, and `last`
+  holds the last page's value read a second time, so the joined value is about twice the pages'
+  values read plus the last page's once more, and is bounded by the retained pages.
 - The Runner's limits are a preparer's own: 1 MiB per acquisition, which holds for each page, and
   2 MiB per run input, which equals the combined bound under `base`. With full pages a paged read
   holds one or two pages; holding more is unresolved question 9. The bundled verifiers support
@@ -334,7 +348,9 @@ Proposed for §13, beside "An acquisition of class `record`":
   that the pages are calls 0 to n−1 of one session that no other source used, chained in that
   order; that each request after the first is the first with one member set to the reference the
   page before named; and that the loop ended where its pages say, at a page that named no next
-  reference or at the declared bound.
+  reference or at the declared bound. The joined value's members are formed from those pages
+  alone: `last` is derived from `values`, its last element, and a verifier forms it again as it
+  forms `end`, `items` and `pages`, so it establishes nothing beyond the pages.
 
   Does not establish: that the session is sealed, or that no call was made in it after the last
   page (the seal is not read here, question 1); that the caller did not discard a whole
@@ -452,8 +468,9 @@ follows when the format lands.
   (section 9).
 - **A partial read.** A loop that ends at `bound` read part of the source. Its preparation says so,
   and a rule can test `/end` and claim `unknown`. A page that says of itself that the read is
-  incomplete keeps saying so in `/values` (section 6). A pack decided on a partial read without such a
-  test is the dialect author's choice, and §13 says what was not established.
+  incomplete keeps saying so in `/values`, and the last page in `/last` too, which one clause tests
+  whatever the page count (section 6). A pack decided on a partial read without such a test is the
+  dialect author's choice, and §13 says what was not established.
 - **A wrong `next` pointer.** A member name misspelled in `next` reads as absent. Under `noNext`
   `"null"` or `"empty-string"`, that is `read-failed` at page 0, so the misspelling does not pass
   as a short read. Under `noNext` `"absent"` it ends the loop after one page with end `no-next`,
@@ -483,7 +500,9 @@ refusal row. Each name takes the prefix `paged-`.
 | `end-absent`, `end-null`, `end-empty-string`: the last page's `next` member absent, `null` and `""`, each under the `noNext` that declares it | positive | reading; `no-next` |
 | `empty-middle-page`: `items` `[]` with a reference | positive | reading |
 | `duplicates-kept`: one element on two pages | positive | reading; it appears twice in `items` |
-| `last-page-incomplete`: three pages, the third `{"items": [...], "incomplete": true}` naming none; a rule claims `unknown` when `/pages` is 3 and `/values/2/incomplete` is `true` | positive | reading; `no-next`; status `unknown` |
+| `last-page-incomplete`: three pages, the third `{"items": [...], "incomplete": true}` naming none; a rule claims `unknown` when `/last/incomplete` is `true` | positive | reading; `no-next`; status `unknown` |
+| `last-is-the-last-page`: three pages, the first `{"items": [...], "incomplete": true}` with a reference and the third `"incomplete": false` naming none; the same rule | positive | reading; `no-next`; status not `unknown` (a reader that sets `last` to the first page claims `unknown`) |
+| `page-flag-at-values`: three pages, the second `"incomplete": true`; a rule claims `unknown` when `/values/1/incomplete` is `true` | positive | reading; status `unknown` |
 | `http-query`: `adapter-http`, `fills` `/query/pageToken` | positive | reading |
 | `beside-unpaged`: a paged and an unpaged source, sessions apart | positive | reading; `cites` in the order of `sources` |
 | `two-paged-sessions-apart`: two paged sources, each in a session of its own | positive | reading; `cites` in the order of `sources`, each source's pages in call order |
@@ -575,3 +594,9 @@ refusal row. Each name takes the prefix `paged-`.
     ever read such pages.
 11. **The review.** Under RFC 0009 the pull request that moves this Draft to Review carries a
     recorded adversarial review and its dispositions. None has run.
+12. **The last page's members.** Resolved: the joined value carries `last`, the last page's value
+    read whole, the same JSON value as `values`'s last element (section 6). A rule tests the last
+    page's flag at `/last` followed by the flag's pointer, with one clause whatever the page count,
+    where it needed one clause per count before. `last` adds nothing beyond `values`, so it changes
+    nothing a verifier establishes (section 9). `pages` is never 0, so `last` is always present.
+    Decided before Review, because adding a member later would change what a rule reads.
