@@ -1,0 +1,696 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/dialect-recording/2/preparation.schema.json",
+  "title": "A dialect preparation, formats 4.0.0 and 4.1.0",
+  "description": "Informative, at draft maturity, staged for specVersion 0.6.0 (RFC 0018, the amendment of 2026-11-15, issue #326). The preparation of a dialect of the proposed format 4.0.0 (spec/dialect.md section 2.2.6) or 4.1.0 (RFC 0033 section 8), which a preparer writes and a dialect recording carries as run.input.preparation: section 9's preparation with formatVersion in place of version, the case outcome's rule, each lineage entry's derivation and, in format 4.1.0, an acquired paged source's outcome paging and its entries' receipts. A preparation of version 2 or 3 is version 1's, which this version does not read. Every object the dialect defines is closed (section 1); the prose does not name every member of a transformation's applications or of its reconciliation, so those stay open. Core section 1.1 does not list this schema among the normative artifacts, so publishing it changes no format's normative status; where it and the prose differ, the prose controls and the difference is a specification defect. Format assertions are required. Outside it: the canonical form and digest (section 9.5), every order the prose gives (cites, lineage, a derivation's fields and parameters, a paged source's receipts), runAt's equality with verifiedAt, that a paging outcome's references number one fewer than its pages, that only a rule of version 2.0.0 writes a derivation, that the unsignedParameters of the reading (section 11) has the case's entry first, which is the verifier's report and not a member of the preparation, every derivation and comparison of section 11, and number literals, so 1.0 passes here where section 1 refuses it.",
+  "type": "object",
+  "required": [
+    "formatVersion",
+    "verifiedAt",
+    "mappingDigest",
+    "verification",
+    "cites",
+    "lineage",
+    "outcomes"
+  ],
+  "properties": {
+    "formatVersion": {
+      "enum": [
+        "4.0.0",
+        "4.1.0"
+      ]
+    },
+    "verifiedAt": {
+      "$ref": "#/$defs/instant"
+    },
+    "mappingDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "verification": {
+      "const": "verified acquisitions; session sealing and input truth are not established"
+    },
+    "cites": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/citation"
+      }
+    },
+    "lineage": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/lineageEntry"
+      }
+    },
+    "outcomes": {
+      "description": "The case's outcome first, which alone may carry rule and never carries paging, then one for each source, which never carries rule.",
+      "type": "array",
+      "minItems": 1,
+      "prefixItems": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/outcome"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "case"
+                },
+                "paging": {
+                  "not": {}
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/outcome"
+          },
+          {
+            "properties": {
+              "rule": {
+                "not": {}
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "description": "Every number of a preparation is an integer, from -(2^53-1) to 2^53-1 (section 1).",
+      "$ref": "#/$defs/integersOnly"
+    },
+    {
+      "description": "paging is added in format 4.1.0.",
+      "if": {
+        "properties": {
+          "formatVersion": {
+            "const": "4.0.0"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "outcomes": {
+            "items": {
+              "properties": {
+                "paging": {
+                  "not": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "instant": {
+      "description": "A timestamp with an instant (section 1): YYYY-MM-DDThh:mm:ssZ, UTC, whole seconds, naming a date and time that exist.",
+      "type": "string",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z(?![\\s\\S])",
+      "format": "date-time"
+    },
+    "pointer": {
+      "description": "An RFC 6901 JSON Pointer.",
+      "type": "string",
+      "pattern": "^(?:/(?:[^~]|~[01])*)*(?![\\s\\S])"
+    },
+    "pointers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/pointer"
+      },
+      "uniqueItems": true
+    },
+    "status": {
+      "enum": [
+        "resolved",
+        "absent",
+        "unknown"
+      ]
+    },
+    "integersOnly": {
+      "if": {
+        "type": "number"
+      },
+      "then": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991
+      },
+      "items": {
+        "$ref": "#/$defs/integersOnly"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/integersOnly"
+      }
+    },
+    "citation": {
+      "description": "An acquisition's citation: those three members of its receipt (section 5.2).",
+      "type": "object",
+      "required": [
+        "callIndex",
+        "sessionId",
+        "signature"
+      ],
+      "properties": {
+        "callIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{128}(?![\\s\\S])"
+        }
+      },
+      "additionalProperties": false
+    },
+    "claim": {
+      "description": "Section 6: an object of exactly facts, evidenceAvailability, acquisitionStatus, reason and basis.",
+      "type": "object",
+      "required": [
+        "facts",
+        "evidenceAvailability",
+        "acquisitionStatus",
+        "reason",
+        "basis"
+      ],
+      "properties": {
+        "facts": {
+          "type": "object"
+        },
+        "evidenceAvailability": {
+          "type": "object",
+          "propertyNames": {
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "enum": [
+              "present",
+              "absent",
+              "unknown"
+            ]
+          }
+        },
+        "acquisitionStatus": {
+          "$ref": "#/$defs/status"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "basis": {
+          "$ref": "#/$defs/pointers"
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcome": {
+      "description": "Section 9.2, with rule (section 2.2.6) and paging (RFC 0033 section 8). arguments is present for a source acquired and absent otherwise.",
+      "type": "object",
+      "required": [
+        "name",
+        "parameters",
+        "claim",
+        "status",
+        "reason"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "runAt"
+          ],
+          "properties": {
+            "runAt": {
+              "$ref": "#/$defs/instant"
+            }
+          }
+        },
+        "arguments": true,
+        "claim": {
+          "$ref": "#/$defs/claim"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "rule": {
+          "$ref": "#/$defs/ruleOutcome"
+        },
+        "paging": {
+          "$ref": "#/$defs/paging"
+        }
+      },
+      "additionalProperties": false
+    },
+    "lineageEntry": {
+      "description": "Section 9.3, with transformation (section 6.2a), researchExecution (section 4.3) and derivation (section 2.2.6). An acquired paged source's entries carry receipts and no receipt (RFC 0033 section 8).",
+      "type": "object",
+      "required": [
+        "source",
+        "kind",
+        "target",
+        "class",
+        "generatedInfluence",
+        "present",
+        "status",
+        "reason",
+        "basis",
+        "readDigest"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "fact",
+            "evidence"
+          ]
+        },
+        "target": {
+          "description": "A requirement id, or for a fact a fact target: a pointer, which this minimum keeps from being the empty string (section 8.1).",
+          "type": "string",
+          "minLength": 1
+        },
+        "class": {
+          "enum": [
+            "asserted",
+            "record",
+            "generated"
+          ]
+        },
+        "generatedInfluence": {
+          "type": "boolean"
+        },
+        "present": {
+          "type": "boolean"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "basis": {
+          "$ref": "#/$defs/pointers"
+        },
+        "dependencies": {
+          "description": "Present only for a source that declares a source parameter.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "parameter",
+              "source",
+              "pointer"
+            ],
+            "properties": {
+              "parameter": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "pointer": {
+                "$ref": "#/$defs/pointer"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "candidateFrom": {
+          "description": "Absent when there is none.",
+          "allOf": [
+            {
+              "$ref": "#/$defs/pointers"
+            }
+          ],
+          "minItems": 1
+        },
+        "readDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "receipt": {
+          "$ref": "#/$defs/citation"
+        },
+        "receipts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/citation"
+          }
+        },
+        "calculation": {
+          "$ref": "#/$defs/calculation"
+        },
+        "transformation": {
+          "$ref": "#/$defs/transformation"
+        },
+        "researchExecution": {
+          "$ref": "#/$defs/researchExecution"
+        },
+        "derivation": {
+          "$ref": "#/$defs/derivation"
+        }
+      },
+      "additionalProperties": false,
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "fact"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "$ref": "#/$defs/pointer"
+          }
+        }
+      }
+    },
+    "calculation": {
+      "description": "Section 7: the calculator, status and asOf as answered, and one input for each input echoed.",
+      "type": "object",
+      "required": [
+        "calculator",
+        "status",
+        "inputs",
+        "asOf"
+      ],
+      "properties": {
+        "calculator": {
+          "type": "object",
+          "required": [
+            "name",
+            "version"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "status": {
+          "enum": [
+            "computed",
+            "input-missing",
+            "cannot-compute"
+          ]
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "parameter",
+              "source",
+              "pointer"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "parameter": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "pointer": {
+                "$ref": "#/$defs/pointer"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "asOf": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/instant"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "transformation": {
+      "description": "Section 6.2a: exactly applications and findings, and reconciliation when declared. The prose names an application's id, source and state; its other members, and a reconciliation's, are not described here.",
+      "type": "object",
+      "required": [
+        "applications",
+        "findings"
+      ],
+      "properties": {
+        "applications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "source",
+              "state"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "source": {
+                "$ref": "#/$defs/pointer"
+              },
+              "state": {
+                "enum": [
+                  "missing",
+                  "present",
+                  "failed"
+                ]
+              }
+            }
+          }
+        },
+        "findings": {
+          "type": "array"
+        },
+        "reconciliation": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "researchExecution": {
+      "description": "Section 4.3: the resolved settings, and a media type and digest for each retained byte entry.",
+      "type": "object",
+      "required": [
+        "resolvedSettings",
+        "retainedBytes"
+      ],
+      "properties": {
+        "resolvedSettings": {
+          "type": "object",
+          "required": [
+            "model",
+            "profile",
+            "version",
+            "settings"
+          ],
+          "properties": {
+            "model": {
+              "type": "string",
+              "minLength": 1
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "settings": {
+              "type": "object"
+            }
+          },
+          "additionalProperties": false
+        },
+        "retainedBytes": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "required": [
+              "mediaType",
+              "digest"
+            ],
+            "properties": {
+              "mediaType": {
+                "type": "string"
+              },
+              "digest": {
+                "$ref": "#/$defs/digest"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ruleOutcome": {
+      "description": "Section 2.2.6: the case rule's claim, and its acquisitionStatus and reason.",
+      "type": "object",
+      "required": [
+        "claim",
+        "status",
+        "reason"
+      ],
+      "properties": {
+        "claim": {
+          "$ref": "#/$defs/claim"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "paging": {
+      "description": "RFC 0033 section 8: the loop's end, the number of pages, and the next references the loop followed, in call order.",
+      "type": "object",
+      "required": [
+        "end",
+        "pages",
+        "references"
+      ],
+      "properties": {
+        "end": {
+          "enum": [
+            "no-next",
+            "bound"
+          ]
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "derivation": {
+      "description": "Section 2.2.6: how the match of a rule of version 2.0.0 wrote the target.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "by",
+            "from"
+          ],
+          "properties": {
+            "by": {
+              "const": "pointer"
+            },
+            "from": {
+              "$ref": "#/$defs/pointer"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "by"
+          ],
+          "properties": {
+            "by": {
+              "const": "literal"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "by",
+            "builtin",
+            "derived",
+            "fields",
+            "parameters"
+          ],
+          "properties": {
+            "by": {
+              "const": "builtin"
+            },
+            "builtin": {
+              "enum": [
+                "duration",
+                "distance",
+                "speed"
+              ]
+            },
+            "derived": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fields": {
+              "$ref": "#/$defs/pointers"
+            },
+            "parameters": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "by"
+          ],
+          "properties": {
+            "by": {
+              "const": "none"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

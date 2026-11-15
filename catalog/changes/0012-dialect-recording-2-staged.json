@@ -1,0 +1,17 @@
+{
+  "reason": "Staged for specVersion 0.6.0 (#326): version 2 of the dialect-recording schemas, for preparations of the proposed dialect formats 4.0.0 and 4.1.0 and an export carrying one. Version 1 is unchanged. The schemas are informative and at draft maturity; no format's normative status changes.",
+  "changes": [
+    {
+      "path": "schema/dialect-recording/2/export.schema.json",
+      "family": "dialect-recording",
+      "from": null,
+      "to": "sha256:503b4b1a4cfb62204987b2e34316ecb62253c182b7ae718495251b4a94b03962"
+    },
+    {
+      "path": "schema/dialect-recording/2/preparation.schema.json",
+      "family": "dialect-recording",
+      "from": null,
+      "to": "sha256:0144e89eb8bc087f23b1e0d9df374a0df50d9e03a1c93875865459618bab935a"
+    }
+  ]
+}

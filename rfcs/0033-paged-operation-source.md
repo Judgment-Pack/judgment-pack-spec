@@ -535,7 +535,9 @@ paged source's rule that the amended passages name.
   0021), under another digest.
 - **Outside the companion.** As with format `4.0.0` (RFC 0018, the amendment of 2026-11-12, open
   question 2), no workflow schema names `4.1.0`, and the dialect-recording preparation schema
-  requires an integer `version`. So neither admits the format until those documents change.
+  requires an integer `version`. So neither admits the format until those documents change. The
+  amendments of 2026-11-15 of RFC 0018 and RFC 0020 propose both changes for `0.6.0` (issue #326):
+  the workflow schema staged at `0.6.0` names `4.1.0`, and `schema/dialect-recording/2/` reads it.
 
 ## Security and privacy
 

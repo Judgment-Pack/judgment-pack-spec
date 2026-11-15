@@ -17,7 +17,8 @@
   option C, round 16), 2026-10-22 (dialect-owned conversions, reconciliation and quality findings,
   issue #170; typed research results, source profiles and retained execution evidence, issue #169),
   2026-11-12 (dialect format 4.0.0, proposed, issue #316), 2026-11-13 (format 4.0.0's bounds stated
-  once, and a workflow stage's admission of the format, issue #324)
+  once, and a workflow stage's admission of the format, issue #324), 2026-11-15 (recordings of
+  formats 4.0.0 and 4.1.0, proposed, issue #326)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -1075,7 +1076,8 @@ format; the TypeScript reader refuses it `version-unread`, which a test holds. N
    RFC 0020's to define and is not decided: RFC 0020 §1 names the
    release digest by the reference Runner's encoding at a commit, and that encoding has no form of
    the format. No recording holds a preparation of the format until the recording schema changes in
-   its own document. The amendment of 2026-11-13 gives this question's text.
+   its own document. The amendment of 2026-11-13 gives this question's text. The amendments of
+   2026-11-15, this RFC's and RFC 0020's, propose an answer for `0.6.0` (issue #326).
 3. **Units and model.** Millimetres and millimetres per second, rounded down, and the sphere of
    radius 6371008800 mm. Whether an ellipsoidal distance or another unit is wanted is open.
 4. **The accuracy statement** is a measurement over the inputs tried, not a bound shown for every
@@ -1155,6 +1157,64 @@ rows is in a corpus or a claim.
 **What this amendment leaves open.** A workflow stage that names a dialect of the format, and a
 recording of its preparation, are open question 2 of the amendment of 2026-11-12, whose text this
 amendment replaces.
+
+## Amendment of 2026-11-15: recordings of formats 4.0.0 and 4.1.0 (proposed)
+
+This amendment is **proposed**, for
+[issue #326](https://github.com/Judgment-Pack/judgment-pack-spec/issues/326) (milestone `v0.6.0`).
+It answers that issue's second decision; [RFC 0020](0020-workflow.md)'s amendment
+proposal of the same date answers the first, the release digest of a stage of either format. Each
+decision is taken at the recommended answer unless the maintainer answers otherwise on #326. It is
+staged for `specVersion` `0.6.0`. The Specification and companion are unchanged, and so is every
+file of the `0.5.0` normative record and `schema/dialect-recording/1/`. Formats `4.0.0` and `4.1.0`
+([RFC 0033](0033-paged-operation-source.md)) stay proposed.
+
+**The problem.** `schema/dialect-recording/1/preparation.schema.json` requires an integer `version`,
+`2` or `3`. A preparation of format `4.0.0` has `formatVersion` in its place, the case outcome's
+`rule` and each entry's `derivation` (§2.2.6); one of format `4.1.0` has besides an acquired paged
+source's outcome `paging` and its entries' `receipts` with no `receipt` (RFC 0033 section 8). No
+recording schema describes either, so no recording of a run prepared through one has a form.
+
+**Decision 2, a recording schema for the two formats.** The options:
+
+1. A version 2 of the family, `schema/dialect-recording/2/`, for preparations of formats `4.0.0` and
+   `4.1.0` alone, beside version 1 unchanged (recommended).
+2. Version 1 widened in place to a choice between its integer `version` and `formatVersion`.
+3. One version for each format: `4.0.0` now, and another for `4.1.0`.
+
+*Recommended: option 1.* `preparation.schema.json` of version 2 is version 1's, with these
+changes: `formatVersion`, `"4.0.0"` or `"4.1.0"`, in place of `version`; `rule` on the case's
+outcome alone, exactly `{claim, status, reason}`; `derivation` on a lineage entry, one of §2.2.6's
+four closed forms; and, in format `4.1.0` alone, `paging` on a source's outcome, exactly
+`{end, pages, references}`, never on the case's. `receipts` is admitted on an entry as version 1
+admits it in version 3. `export.schema.json` of version 2 is version 1's carrying that preparation,
+and changes nothing else, its evaluator versions included. The orders the prose gives,
+of `cites` among them, stay outside a schema, as in version 1. *Why:* version 1 is published at its
+`$id` and the record-shape catalog pins its digest, so widening it in place would change what a
+published identifier admits; a format is a selector a reader reads before anything else (§2.1), so
+one version for the family of `4.0.0`, with `4.1.0`'s additions held to its selector, keeps each
+format's forms apart without a third version within one release.
+
+**`unsignedParameters` is the reading's.** §2.2.6 lists the case's `unsignedParameters` entry among
+the ways a preparation of format `4.0.0` differs, but `unsignedParameters` is a member of the
+verifier's reading (§11), recomputed and never written into the preparation. Version 2 has no
+member for it: the reader recomputes the case's entry, and each staged vector's manifest gives it.
+
+**Which reader checks it.** The schema is informative and no reader validates a preparation
+against it: both recompute the preparation and compare its digest (§11). The Python reader
+(`tools/dialect_verify.py`) reads both formats and is the reader version 2 is held to: every
+reading of the staged vectors of both formats validates against it, and every staged preparation
+it refuses is one the Python reader does not read as given. The TypeScript reader
+(`tools/dialect-verify-ts`) reads neither format and refuses every document of either
+`version-unread`, by name, before any preparation is read, as its test holds.
+
+**Conformance.** Every reading among the staged vectors of `format-4/` and `format-4.1/` validates
+against version 2's preparation schema and none against version 1's. None is in a corpus or a
+claim.
+
+**What this amendment leaves open.** Whether version 2 reads version 1's form, and `0.5.0`
+recordings. A preparer: the reference
+Runner writes neither format, and no recording of either exists.
 
 ## Specification
 
