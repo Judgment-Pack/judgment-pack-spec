@@ -80,7 +80,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0030](0030-agent-principals-and-delegated-authority.md) | Agent principals and delegated authority | Draft | Mixed: the delegation statement is standards track at draft maturity (a proposed companion beside Core); the rest is a cross-project exploratory record (agent, gateway, Desk) |
 | [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets | Accepted | Specification (Core amendment released in Core `0.5.0`, staged as `0.4.0-draft`; accepted on a same-vendor review, the different-vendor review waived) |
 | [0032](0032-outcome-severity.md) | Outcome severity, one well-known annotation key | Accepted | Specification (a companion beside Core, [the annotation vocabulary](../spec/annotation-vocabulary.md) `1.0.0`, status `proposed`, released in `v0.5.2`; Core `0.5.0` unchanged; its rows staged; accepted on a same-vendor review, the different-vendor review waived) |
-| [0033](0033-paged-operation-source.md) | A paged operation source | Draft | Specification (an amendment of the dialect companion, a proposed named format `4.1.0`; [`spec/dialect.md`](../spec/dialect.md) unchanged) |
+| [0033](0033-paged-operation-source.md) | A paged operation source | Review | Specification (an amendment of the dialect companion, a proposed named format `4.1.0`; [`spec/dialect.md`](../spec/dialect.md) unchanged) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -171,5 +171,5 @@ corpus, and one reader reads it. Core `0.5.0`'s schema, text and corpora are unc
 pages: one gateway session's calls, each request formed from the case and the page before, the loop
 ending at a page that names no next reference or at a declared bound, and the pages' records joined
 in call order into one value read. It would be a named dialect format `4.1.0`, of format `4.0.0`'s
-family. It is a Draft, normative for nothing; the companion, its vectors and its readers are
+family. It is in Review, normative for nothing; the companion, its vectors and its readers are
 unchanged.

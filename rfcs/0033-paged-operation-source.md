@@ -1,6 +1,6 @@
 # RFC 0033: A paged operation source
 
-- Status: Draft
+- Status: Review
 - Type: Standards track, draft maturity. An amendment of the dialect companion,
   [`spec/dialect.md`](../spec/dialect.md), whose design record is [RFC 0018](0018-dialect.md): a
   named format `4.1.0`, proposed, of format `4.0.0`'s family.
@@ -10,10 +10,10 @@
   record is the Runner's `docs/design/paging.md`; RFC 0018's amendment of 2026-11-12, format
   `4.0.0`, proposed
 
-> This Draft is normative for nothing. [`spec/dialect.md`](../spec/dialect.md) is unchanged by it:
+> This RFC, in Review, is normative for nothing. [`spec/dialect.md`](../spec/dialect.md) is unchanged by it:
 > the Specification below gives the text proposed for the companion, which lands only after
 > acceptance, staged vectors, and the agreement of the reference Runner and a second reader on them.
-> No schema, vector, reader or preparer changes with this Draft, and Core `0.5.0` is untouched.
+> No schema, vector, reader or preparer changes with this RFC, and Core `0.5.0` is untouched.
 
 ## Summary
 
@@ -22,9 +22,9 @@ request member it fills, where a page's records are, and a bound on pages. Its p
 session's calls 0 to n−1, each with its own signed receipt, and each request after the first is the
 first with that member set to the reference the page before named. The loop ends at a page that
 names no next reference, or at the bound, and the preparation records which. The pages' records are
-joined in call order, duplicates kept, beside each page's whole value read, and the source's read
-applies once to the joined value. A
-verifier forms every request again and refuses a page that departs, with the dialect's existing
+joined in call order, duplicates kept, beside each page's whole value read and the last page's
+again, and the source's read applies once to the joined value. A verifier forms every request
+again and refuses a page that departs, with the dialect's existing
 findings. `pageItems` stays refused. The form is a new named format, `4.1.0`; no document of an
 earlier format changes its answer.
 
@@ -83,13 +83,13 @@ forms below and nothing else:
 | the acquisitions (§5.2) | a paged source's member is `{"pages": [...]}` (section 4) |
 | §11, phase 4 | names `"4.1.0"` beside `"4.0.0"` (section 11) |
 | the preparation (§9) | `formatVersion` `"4.1.0"`; a paged source's outcome, lineage and citations (section 8) |
-| §11, phase 3 | measures `maxPages` and `pages` (section 7) |
-| §5.2's sessions and its last paragraph; §11's later-measured bounds and finding 3 | amended (section 12) |
+| §11, phase 3 | measures `maxPages`, the number of `pages`, and each page's `result` nesting (section 7) |
+| the passages of §§2.1, 5.2, 9, 11, 12, 13 and 14 that section 12 lists | amended (section 12) |
 
 In a document of format `2`, `3`, `2.0.0`, `3.0.0` or `4.0.0`, `paging` is a member §4.1 does not
-list, `input-malformed`, and so is an acquisitions member of the form `{"pages"}`. Phase 3 does not
-measure either in such a document (section 7), so past phase 4 its answer is that refusal in
-phase 5, whatever their size.
+list, `input-malformed`, and so is an acquisitions member that has `pages`. Phase 3 measures none of
+them in such a document (section 7), so past phase 4 its answer is that refusal in phase 5, whatever
+their size or nesting.
 
 ### 2. Declaring paging
 
@@ -126,14 +126,20 @@ by URL.
   A paged source under any other profile is `profile-mismatch` (§4.1, §5.1), as any request that
   does not fit its profile is: shape `airbyte`; shape `command`; and shape `http` under any other
   adapter, a connection's request `{connection, revision, read, …}` among them. So is a `fills`
-  that names any other member under the two profiles above. *Why:* a connection's request names the
-  connection, its revision and its read, which choose what is read and in which scope, and the
-  dialect does not know which of a connection's members do which. Under the two profiles admitted,
-  the tool, the method, the path and the endpoint lie outside every member `fills` may name: the
-  profile's `tools`, the template and check 3 pin them. So no next reference can choose the next
-  call's connection, endpoint, host, revision or scope through the request's form. What a member
-  within a tool's `arguments` or a request's `query` or `body` means is the tool's or the service's,
-  and the dialect author chooses it, as they choose the template.
+  that names any other member under the two profiles above. *Why:* a connection's request is held
+  out because its members are known by their form to choose what is read: the connection, its
+  revision and its read. Under the two profiles admitted, the tool, the method, the path and the
+  endpoint lie outside every member `fills` may name: the profile's `tools`, the template and
+  check 3 pin them. So no next reference can choose the next call's tool, method, path, endpoint or
+  host. It can choose whatever else the filled member means. The dialect knows no more of what a
+  member within a tool's `arguments` or a request's `query` or `body` means than it knows of a
+  connection's members: under `mcp` an argument may select the scope or the read as well as
+  continue one, and so may a `body` member. The next reference is the source's content, and the
+  member it fills carries what the source wrote. The dialect author chooses `fills`, as they choose
+  the template, and SHOULD name only a member that the tool or the service defines as an opaque
+  continuation of the same read, such as a page token. A `query` member stays one query value only
+  because the adapter encodes each value it writes into the URL, so that a reference holding `&` or
+  `=` adds no parameter; the reference gateway's `adapter-http` does, and no verifier checks it.
 - A `maxPages` that is not an integer (§1), such as `1e3` or `2.0`, or is below 1, is
   `input-malformed`, in phase 5, whatever its magnitude. An integer above the row under the
   document's profile is `input-over-bound`, in §11's phase 3 (section 7).
@@ -159,8 +165,9 @@ lacks, and the second page adds it.
 A paged source's member of the acquisitions is `{"pages": [P0, P1, ...]}`, exactly, of at least one
 element. Each `Pi` is `{"result": R, "receipt": E, "salts": S}`, exactly, the form that §5.2's
 `response` has, and is the gateway's acquire answer for call `i`, as the preparer kept it. For a
-paged source, a `{"response"}` member is `input-malformed`, and so is `{"pages"}` for a source that
-is not paged. More elements than the "Dialect retained responses" row allows is
+paged source, a member that has `response` is `input-malformed`, and so is a member that has
+`pages` for a source that is not paged; a member that has both is of neither form, and is
+`input-malformed` for every source. More elements than the "Dialect retained responses" row allows is
 `input-over-bound`, in phase 3 (section 7).
 
 A skipped paged source that has a member is `acquisition-unexpected` (§5.2), as any skipped source
@@ -177,18 +184,23 @@ before it takes the next. Each page gives its findings in this order:
 4. The page's session: `Ei.sessionId` is `E0.sessionId`; `Ei.callIndex` is `i`; `Ei.prevSignature`
    is `null` for `i = 0`, and `Ei−1.signature` otherwise. For `i = 0` also, no receipt of an earlier
    source names `E0.sessionId`. Otherwise: `acquisition-sessions`.
-5. The page's value read, `vi`: §6.1's `unwrap` applied to `R`. Then `items` MUST resolve in `vi` to
-   an array, and `next`'s parent to an object; otherwise `read-failed`. The member that `next`
-   names, when it is spelled as `noNext` declares (absent, `null` or `""`), names no next
-   reference. When it is a string that is not `""`, that string is `ri`, and its bytes are measured
-   (section 7). Anything else is `read-failed`: a value of another type, `null` or an absent member
-   when `noNext` declares another spelling, and `""` when `noNext` is not `"empty-string"`.
+5. The page's value read, `vi`: §6.1's `unwrap` applied to `R`. Then, in this order: `items` MUST
+   resolve in `vi` to an array, and then `next`'s parent to an object; otherwise `read-failed`.
+   Then the member that `next` names is read. When it is spelled as `noNext` declares (absent,
+   `null` or `""`), it names no next reference. When it is a string that is not `""`, that string
+   is `ri`, and its bytes are then measured (section 7). Anything else is `read-failed`: a value of
+   another type, `null` or an absent member when `noNext` declares another spelling, and `""` when
+   `noNext` is not `"empty-string"`. So a page whose `items` is not an array is `read-failed`
+   whatever its reference's size, and only a reference is measured.
 6. When page `i` names no next reference, the loop ends there, and its **end** is `no-next`. When
    it names one and `i + 1` is `maxPages`, the loop ends there, and its end is `bound`: `ri` is not
    followed, so it is measured for bytes in step 5 and not checked for repeats, since no page is
    read with it. Otherwise an `ri` equal to an earlier page's reference, or to the string `Q0`
-   holds at `fills`, is `read-failed`, because the loop would read a page it has read; and the walk
-   takes page `i + 1`.
+   holds at `fills` when it holds a string there, is `read-failed`, because the loop would read a
+   page it has read; and the walk takes page `i + 1`. Two references are equal when they are equal
+   code point for code point, as §2.2.4 compares a string with a list's: no case folding, no
+   Unicode normalization and no trimming, so that a precomposed `é` and `e` followed by U+0301 are
+   two references, each followed.
 
 After the walk, an element of `pages` after the last page the walk took is `acquisition-unexpected`.
 Then the source's read is applied to the joined value (section 6), giving `read-failed` as §6 gives
@@ -238,12 +250,21 @@ the occurrence at its deadline (question 4).
 ### 6. The joined value and the read
 
 The **joined value** of a paged source is the object
-`{"end": X, "items": I, "pages": N, "values": V}`:
+`{"end": X, "items": I, "last": L, "pages": N, "values": V}`:
 
 - `X` is `"no-next"` or `"bound"`;
 - `I` is every page's `items` array, concatenated in call order, each element as the page holds it;
+- `L` is the last page's value read (section 4, step 5), whole: the same JSON value as `V`'s
+  element `N − 1`;
 - `N` is the number of pages read;
 - `V` is `[v0, ..., vn−1]`, each page's value read (section 4, step 5), whole, in call order.
+
+`N` is at least 1, so `L` is always present and `pages` is never 0. The acquisitions member of a
+paged source holds at least one page (section 4: `{"pages": []}` is `input-malformed`); the walk
+takes page 0 before any other, and a page 0 not retained is `acquisition-missing`; and the reading
+ends at its first finding (§11), so the read over the joined value applies only after a walk that
+took page 0, and every page after it that the loop called for, without a finding. A skipped paged source is not walked, and
+its claim is §9.2's, with no read, so it forms no joined value.
 
 The source's `copy` or `rule` (§6.2, §6.3) applies once, to the joined value, as the value read,
 and `unwrap` is not applied again. The claim, its class (the profile's, §5.1), its targets and its
@@ -252,12 +273,15 @@ lineage are one source's, as for any `operation`.
 **A page's own members are kept.** A page's value read may carry more than its records and its
 next reference: a flag that the read is incomplete, a count, a warning. `V` keeps each page's,
 so a rule can test any page's flag, at `/values/i` followed by the flag's pointer within the
-page, as a rule over an unpaged read tests it at the flag's pointer. The last page's flag is tested with the
-page count beside it: a clause that tests `/pages` equal to 3 and `/values/2/incomplete` equal to
-`true`, one such clause for each count up to `maxPages` that the author wants covered. *Why:* a
-joined value of `items` alone would let a last page `{"items": [...], "incomplete": true}` that
-names no next reference read as a whole read, ending `no-next`, where an unpaged read of the same
-answer could test `/incomplete`.
+page, as a rule over an unpaged read tests it at the flag's pointer. The last page's flag is tested
+at `/last` followed by the same pointer, `/last/incomplete`, whatever the page count: one clause,
+not one per count up to `maxPages`. *Why:* a joined value of `items` alone would let a last page
+`{"items": [...], "incomplete": true}` that names no next reference read as a whole read, ending
+`no-next`, where an unpaged read of the same answer could test `/incomplete`. And without `last`,
+the last page sits at `/values/` followed by an index that a pointer names as a fixed number, so a
+rule would need a clause for each count. `L` adds nothing that `V` does not hold: a verifier forms
+it again from `V` (section 9), and a reader that sets it to another page's value read reads the
+rule over another value, which the vector `last-is-the-last-page` shows (Conformance).
 
 **Duplicates are kept.** An element that appears on two pages appears twice in `I`, and nothing is
 removed or merged. *Why:* the dialect has no record identity. Equality of two JSON values is not
@@ -277,12 +301,20 @@ answer, not where the pack does.
 
 - `maxPages`, and the number of pages retained for one paged source, are at most Core §4.1's
   "Dialect retained responses": 64 under `base` and 128 under `extended`. A page is a retained
-  response, the same row a `research` source's responses take. They are measured in phase 3, and
-  only in a document whose `formatVersion` is `"4.1.0"`: `maxPages` when it is an integer (§1), and
-  `pages` when it is an array, in every acquisitions member of the form `{"pages"}`, before phase 5
-  decides whether its source is paged. Otherwise phase 3 measures neither, and phase 5 decides:
-  in a document of an earlier format either is `input-malformed` (section 1), and so is a
-  `maxPages` that is not an integer, such as `1e3` (section 2).
+  response, the same row a `research` source's responses take.
+- Each page's `result` is held to §12's nesting of a value a read applies to, 32 levels under
+  `base`, as every acquisition's result is: a page is an acquisition (section 4), and §11's phase 3
+  measures "the nesting of each acquisition's result".
+- These are measured in phase 3, wherever measurable before any form, and only in a document whose
+  `formatVersion` is `"4.1.0"`: `maxPages` when it is an integer (§1); and, in every acquisitions
+  member that has `pages`, before phase 5 decides whether its source is paged, the number of
+  elements of `pages` when it is an array, and the nesting of the `result` of each element that is
+  an object with a `result` member. Otherwise phase 3 measures none of them, and phase 5 decides:
+  in a document of an earlier format `paging` and a member that has `pages` are `input-malformed`
+  (section 1), and so is a `maxPages` that is not an integer, such as `1e3` (section 2). So a page
+  whose `result` nests 33 levels is refused `input-over-bound` in phase 3, before any page's
+  receipt is checked, whatever its value read would be after `unwrap`, and every reader refuses it
+  there alike.
 - A next reference is at most Core §4.1's "Dialect text value bytes" (8192 UTF-8 bytes under
   `base`). It is measured when read, during recomputation, as an unwrapped string's bytes are, and
   refused `input-over-bound` with nothing else reported.
@@ -290,13 +322,23 @@ answer, not where the pack does.
   `base`). Each page's value read sits two levels below the joined value's root, in `values`, so a
   page whose value read is nested at more than 30 levels is refused here, although its result is
   within the bound. Each element of `items` is a part of its page's value read, and sits two
-  levels below the root too, so `values` decides. It is measured when the value is formed, before the read applies, as
-  §6.4's combined value is, and refused `input-over-bound` otherwise.
+  levels below the root too; `last` sits one level below it, and holds a value that `values` holds
+  one level deeper; so `values` decides. It is measured when the value is formed, before the read
+  applies, as §6.4's combined value is, and refused `input-over-bound` otherwise.
 - The dialect, the case and the acquisitions, every page included, stay within §12's combined
   bound, 2097152 bytes under `base`. The dialect has no byte bound per acquisition, and this adds
   none per page. The joined value adds no byte bound of its own: `values` holds each page's value
-  read, a part of a retained result, once, and `items` holds each record a second time, so the
-  joined value is about twice the pages' values read, and is bounded by the retained pages.
+  read, a part of a retained result, once, `items` holds each record a second time, and `last`
+  holds the last page's value read a second time, so the joined value is about twice the pages'
+  values read plus the last page's once more, and is bounded by the retained pages.
+- The preparation keeps §12's 8388608 bytes, and its `references` are a part of it that page
+  content sizes. In §9.5's form a reference grows by up to six times: `<`, `>` and `&` are written
+  `<`, `>` and `&`, and a control character other than the five with a short escape
+  as `\u00` and two digits. Up to 2 MiB of references can lie within the combined bound, so a
+  preparation whose references are mostly such characters can exceed 8 MiB. It fails closed: a
+  preparer cannot write it, and a verifier refuses it `input-over-bound` in phase 1. But the
+  source's pages, not the dialect, decide whether a read stays within it, and this amendment adds no
+  bound on the references' total.
 - The Runner's limits are a preparer's own: 1 MiB per acquisition, which holds for each page, and
   2 MiB per run input, which equals the combined bound under `base`. With full pages a paged read
   holds one or two pages; holding more is unresolved question 9. The bundled verifiers support
@@ -315,12 +357,20 @@ with these additions:
   (§9.2), and no other outcome carries `paging`.
 - **Lineage.** Each entry of an acquired paged source carries `receipts`, its pages' citations
   (§5.2) in call order, and no `receipt`: one citation per page, as the Runner's design asks.
-- **`cites`.** In a preparation with a paged source, `cites` is in the order of `sources`, as it is
-  with a `research` source (§9.1). Each paged source adds its pages' citations in call order, a
-  `research` source adds its list, and every other acquired source adds its one citation.
+- **`cites`.** In a preparation of a dialect that declares a paged source, acquired or skipped,
+  `cites` is in the order of `sources`, as it is with a `research` source (§9.1). Each acquired
+  paged source adds its pages' citations in call order, a `research` source adds its list, every
+  other acquired source adds its one citation, and a skipped source adds none. The order is keyed
+  on the dialect, not on what was acquired, so that a skipped paged source changes it as an
+  acquired one does: with the paged source skipped and two unpaged sources sharing a session at
+  call indexes 1 and 0, in the order of `sources`, `cites` holds the call at index 1 first. §9.1's
+  rule for a `research` source reads "in a preparation with one", which leaves the same question
+  open for a skipped `research` source; this amendment does not settle it (unresolved question 13).
 - **`unsignedParameters`** (§11). A paged source's acquisition commits a parameter that `Q0`
   commits (§4.1). A parameter carried only at `fills` is committed by the first page's receipt, and
-  by none after it.
+  by none after it. A starting cursor that the case carries from an earlier run is committed so,
+  and is not in `unsignedParameters`; that it continues the earlier run is not established
+  (section 9).
 - **`unsignedFreshness`** keeps one entry per acquired source, `checks` `["acquisition"]`, judged
   for every page.
 - `verification` is unchanged: the pages are verified acquisitions, and a session's sealing is not
@@ -331,16 +381,22 @@ with these additions:
 Proposed for §13, beside "An acquisition of class `record`":
 
 - **A paged acquisition, verified.** Establishes: for each page, what an acquisition establishes;
-  that the pages are calls 0 to n−1 of one session that no other source used, chained in that
-  order; that each request after the first is the first with one member set to the reference the
+  that the pages are calls 0 to n−1 of one session that no other source of this preparation
+  names, chained in that order; that each request after the first is the first with one member set to the reference the
   page before named; and that the loop ended where its pages say, at a page that named no next
-  reference or at the declared bound.
+  reference or at the declared bound. The joined value's members are formed from those pages
+  alone: `last` is derived from `values`, its last element, and a verifier forms it again as it
+  forms `end`, `items` and `pages`, so it establishes nothing beyond the pages.
 
   Does not establish: that the session is sealed, or that no call was made in it after the last
   page (the seal is not read here, question 1); that the caller did not discard a whole
   session and begin again; that the source did not change between pages, so that records moved,
   repeated or were skipped; that the joined records are distinct, or complete for any window when
-  the loop ended at `bound`; that a reference means what the source says it means.
+  the loop ended at `bound`; that a reference means what the source says it means; that no other
+  preparation, of this run or another, read the same session; that `Q0`'s reference or window
+  continues from an earlier run: the starting cursor is the case's, which `Q0` commits, so it is
+  absent from `unsignedParameters` and yet only the operator says it is where the last run
+  stopped, and a gap of changes skipped between two runs is not shown.
 
 ### 10. `pageItems`
 
@@ -365,9 +421,17 @@ reader that does not read paging never reads one page of a paged source as a who
 
 ### 12. Sentences of the companion this amends
 
-Four passages of `spec/dialect.md` say what is true of every acquisition today, and are amended as
-follows when the format lands.
+These passages of `spec/dialect.md` say what is true of every format, acquisition or preparation
+today, and are amended as follows when the format lands. Sections 1 to 11 land beside §2.2, as the
+paged source's rule that the amended passages name.
 
+- **§2.1, the `formatVersion` row.** Its form becomes "exactly `"2.0.0"` or `"3.0.0"`, or
+  `"4.0.0"` or `"4.1.0"`, proposed (§2.2, and the paged source's rule)", and its meaning adds:
+  "`"4.1.0"` selects `"4.0.0"`'s with the paged source's additions".
+- **§5.2, the opening.** "of the form `{"response": {"result": R, "receipt": E, "salts": S}}`,
+  exactly, except for `research` as below" becomes "…, exactly, except for `research` as below and,
+  in format `4.1.0`, a paged source, whose member is `{"pages": [...]}` as the paged source's rule
+  gives it".
 - **§5.2, the sessions.** After "The form is read from the receipts and from nothing else.", add:
   "In format `4.1.0` the two forms hold over the receipts of the sources that are not paged; a
   paged source's session is its own, as the paged source's rule gives it."
@@ -378,6 +442,26 @@ follows when the format lands.
   (`prevSignature`) is read for a paged source's pages alone: check 1 holds it to its form, `null`
   or a signature, and the paged session rule holds page 0's to `null` and each later page's to the
   `signature` of the page before. For every other acquisition it is not read here."
+- **§9.1, the `version` row.** "A preparation of a dialect of format `4.0.0` has `formatVersion`,
+  `"4.0.0"`, in its place (§2.2.6)" becomes "A preparation of a dialect of format `4.0.0` or
+  `4.1.0` has `formatVersion`, `"4.0.0"` or `"4.1.0"`, in its place (§2.2.6, and the paged source's
+  rule)".
+- **§9.1, the `cites` paragraph.** At its end, add: "In format `4.1.0`, in a preparation of a
+  dialect that declares a paged source, acquired or skipped, `cites` is in the order of `sources`:
+  each acquired paged source adds its pages' citations in call order, a `research` source its list
+  as above, and every other acquired source its one citation."
+- **§9.2, the outcome's members.** Add: "`paging`: in format `4.1.0`, for an acquired paged source,
+  the loop's end, the number of pages and the next references followed (the paged source's rule);
+  absent otherwise."
+- **§9.3, the `receipt` and `receipts` rows.** `receipt` is also absent for an acquired paged
+  source. `receipts` adds: "in format `4.1.0`, for an acquired paged source, its pages' citations in
+  call order, the list it adds to `cites`".
+- **§11, phase 3.** After "the nesting of each acquisition's result", add: "each page of a paged
+  source being an acquisition; and, in format `4.1.0`, `maxPages` and the number of pages retained
+  for one paged source (the paged source's rule)".
+- **§11, phase 4.** "or whose `formatVersion` is `"4.0.0"`, a format the verifier does not read
+  (§2.2.7)" becomes "or whose `formatVersion` is `"4.0.0"` or `"4.1.0"`, a format the verifier does
+  not read (§2.2.7, and the paged source's rule)".
 - **§11, the bounds measured later.** The paragraph that begins "Some bounds are measured later"
   adds a paged source's next reference, whose bytes are measured when step 5 reads it, and its
   joined value, whose nesting is measured when it is formed, before the read applies; over either
@@ -395,12 +479,20 @@ follows when the format lands.
   `acquisition-unexpected` of a page retained after the end. A receipt of a later source that names
   a paged source's session is `acquisition-sessions` at that later source, in its place among its
   own findings."
+- **§12, the bound list.** Add an item: "in format `4.1.0`, the paged source's: `maxPages`, and the
+  pages retained for one paged source, at most 64; a next reference at most 8192 UTF-8 bytes; and
+  a joined value nested at most 32 levels. Each page's result is a result, held to the 32 levels
+  above."
+- **§13, the list.** Section 9's entry, after "An acquisition of class `record`".
+- **§14, its last paragraph.** "No claim names format `4.0.0` (§2.2): its vectors are hand-written
+  and staged" becomes "No claim names format `4.0.0` (§2.2) or `4.1.0`: their vectors are
+  hand-written and staged".
 
 ### 13. Out of scope
 
 - A cursor kept between runs, per job and source. That is the Runner's (its design, 4.1 and 4.2):
   it fills a case parameter, which `Q0` carries, so the case retained in the run says where the
-  first page began.
+  first page began. That it is where the earlier run stopped is the operator's say (section 9).
 - A cursor or high-water mark kept by the gateway. Paging stays the caller's.
 - Throttling and retries inside the loop. These follow the Runner's retry policy. A page answered
   `429` or `503` takes no call index, so asking it again in the same session leaves no gap.
@@ -445,15 +537,20 @@ follows when the format lands.
 - **What a source can steer.** A next reference fills one declared member and nothing else. It
   cannot change a tool, a method or a path (section 2), nor the endpoint, which the profile pins
   and check 3 holds. Paging is admitted only under a tool call's `arguments` and an `adapter-http`
-  request's `query` and `body` (section 2), so no reference fills a member that selects a
-  connection, its revision or its read. It is never followed as a URL or spliced into a template.
+  request's `query` and `body` (section 2), so no reference fills a member of a connection's
+  request. Within those, the reference is the source's content, and the filled member means what
+  the tool or the service says: an argument that selects a scope or a read takes what the source
+  wrote. So a dialect author names in `fills` only an opaque continuation member (section 2). A
+  `query` member stays one value by the adapter's encoding of query values, which no verifier
+  checks. A reference is never followed as a URL or spliced into a template.
 - **Choosing among answers.** The call indexes and the chain show that no call came between two
   pages. They do not show a call after the last page, or a whole session begun and dropped
   (section 9).
 - **A partial read.** A loop that ends at `bound` read part of the source. Its preparation says so,
   and a rule can test `/end` and claim `unknown`. A page that says of itself that the read is
-  incomplete keeps saying so in `/values` (section 6). A pack decided on a partial read without such a
-  test is the dialect author's choice, and §13 says what was not established.
+  incomplete keeps saying so in `/values`, and the last page in `/last` too, which one clause tests
+  whatever the page count (section 6). A pack decided on a partial read without such a test is the
+  dialect author's choice, and §13 says what was not established.
 - **A wrong `next` pointer.** A member name misspelled in `next` reads as absent. Under `noNext`
   `"null"` or `"empty-string"`, that is `read-failed` at page 0, so the misspelling does not pass
   as a short read. Under `noNext` `"absent"` it ends the loop after one page with end `no-next`,
@@ -462,7 +559,11 @@ follows when the format lands.
   should show the rest (question 8).
 - **Disclosure.** A reference can carry a query's state, such as a filter or a scope identifier. It
   is already in the committed requests and the retained results. The preparation now carries it in
-  `references`, as it carries every request in `arguments`.
+  `references`, as it carries every request in `arguments`. A reference can also be a signed or
+  bearer-like token, which a holder may present to the source to read on until it expires. A
+  preparation may travel further than the raw results, to a record's reader or an auditor who is
+  not given the pages, so a preparer and an operator treat `references` as they treat the results:
+  a source whose references grant access is one whose preparations are held as its results are.
 
 ## Conformance
 
@@ -477,27 +578,41 @@ refusal row. Each name takes the prefix `paged-`.
 | `three-pages-no-next`: shape `mcp`, three pages, the third naming none | positive | reading; `paging` `no-next`, 3; three `cites` and `receipts` in call order |
 | `one-page`: the first page names none | positive | reading; 1 page |
 | `ends-at-bound`: `maxPages` 2, the second page names a reference | positive | reading; `bound` |
+| `max-pages-one`: `maxPages` 1, page 0 names a reference | positive | reading; `bound`, 1 page, `references` `[]` |
+| `reference-repeated-at-bound`: `maxPages` 2, page 1 names page 0's reference again | positive | reading; `bound` (not followed, so not a repeat) |
 | `bound-rule-unknown`: a rule claims `unknown` when `/end` is `bound` | positive | reading; status `unknown` |
 | `fills-added`: a window, `Q0` without the member | positive | reading |
 | `fills-replaced`: `Q0`'s member from a case parameter | positive | reading; the parameter committed by page 0 |
 | `end-absent`, `end-null`, `end-empty-string`: the last page's `next` member absent, `null` and `""`, each under the `noNext` that declares it | positive | reading; `no-next` |
 | `empty-middle-page`: `items` `[]` with a reference | positive | reading |
 | `duplicates-kept`: one element on two pages | positive | reading; it appears twice in `items` |
-| `last-page-incomplete`: three pages, the third `{"items": [...], "incomplete": true}` naming none; a rule claims `unknown` when `/pages` is 3 and `/values/2/incomplete` is `true` | positive | reading; `no-next`; status `unknown` |
+| `references-equivalent-not-equal`: three pages, page 0 naming a precomposed `é` and page 1 `e` followed by U+0301 | positive | reading; three pages, both references followed |
+| `last-page-incomplete`: three pages, the third `{"items": [...], "incomplete": true}` naming none; a rule claims `unknown` when `/last/incomplete` is `true` | positive | reading; `no-next`; status `unknown` |
+| `last-is-the-last-page`: three pages, the first `{"items": [...], "incomplete": true}` with a reference and the third `"incomplete": false` naming none; the same rule | positive | reading; `no-next`; status not `unknown` (a reader that sets `last` to the first page claims `unknown`) |
+| `page-flag-at-values`: three pages, the second `"incomplete": true`; a rule claims `unknown` when `/values/1/incomplete` is `true` | positive | reading; status `unknown` |
 | `http-query`: `adapter-http`, `fills` `/query/pageToken` | positive | reading |
+| `http-body`: `adapter-http`, `body` an object, `fills` `/body/cursor` | positive | reading |
+| `unbound-paged`: an unbound operation (§4.4) carrying `paging`, bound by a binding document | positive | reading; `paging` as written |
 | `beside-unpaged`: a paged and an unpaged source, sessions apart | positive | reading; `cites` in the order of `sources` |
 | `two-paged-sessions-apart`: two paged sources, each in a session of its own | positive | reading; `cites` in the order of `sources`, each source's pages in call order |
+| `cites-order-paged-skipped`: a skipped paged source, and two unpaged sources sharing one session at call indexes 1 and 0, in the order of `sources` | positive | reading; `cites` in the order of `sources`, call index 1 first |
 | `max-pages-at-row`: 64 of 64 | boundary | reading |
 | `max-pages-over-row`: `maxPages` 65 | boundary | refusal `input-over-bound` |
 | `pages-over-row`: 65 pages retained | boundary | refusal `input-over-bound` |
-| `reference-at-bytes`, `reference-over-bytes`: 8192 and 8193 bytes, two-byte characters | boundary | reading; refusal `input-over-bound` |
+| `reference-at-bytes`: 4096 two-byte characters, 8192 bytes | boundary | reading |
+| `reference-over-bytes`: 4096 two-byte characters and one one-byte character, 8193 bytes | boundary | refusal `input-over-bound` |
+| `reference-over-bytes-at-bound`: `maxPages` 2, page 1 naming an 8193-byte reference that is not followed | boundary | refusal `input-over-bound` |
+| `items-before-reference-bytes`: one page, `items` not an array, naming an 8193-byte reference | negative | `read-failed`, not `input-over-bound` |
 | `joined-nesting-at-bound`: a page's value read at 30 levels, the joined value at 32 | boundary | reading |
 | `joined-nesting-over`: a page's value read at 31 levels, the joined value at 33 | boundary | refusal `input-over-bound` |
+| `page-result-nesting-at-bound`: page 1's `result` at 32 levels, unwrapped to a shallow value | boundary | reading |
+| `page-result-nesting-over`: page 0's receipt failing check 2, and page 1's `result` at 33 levels, unwrapped to a shallow string | boundary | refusal `input-over-bound` in phase 3, not `acquisition-invalid` |
 | `request-not-formed`: page 1 asked with another reference | negative | `acquisition-invalid` |
 | `pages-swapped` | adversarial | `acquisition-invalid` |
 | `page-items-receipt`: page 1's receipt carries `pageItems` | negative | `acquisition-invalid` |
 | `prev-signature-malformed`: page 1's `prevSignature` neither `null` nor a signature in form | negative | `acquisition-invalid` |
 | `stale-last-page` | negative | `acquisition-stale` |
+| `stale-middle-page`: three pages, page 1's times outside `maxAge` | negative | `acquisition-stale` |
 | `call-index-gap`: calls 0 and 2, page 1 asked twice and the second kept | adversarial | `acquisition-sessions` |
 | `call-index-reordered`: calls 1 and 0, requests in loop order | adversarial | `acquisition-sessions` |
 | `page-from-another-session` | adversarial | `acquisition-sessions` |
@@ -508,19 +623,23 @@ refusal row. Each name takes the prefix `paged-`.
 | `page-missing`: page 0 names a reference below the bound, no page 1 | negative | `acquisition-missing` |
 | `page-after-end` | adversarial | `acquisition-unexpected` |
 | `page-beyond-bound`: `maxPages` 2, three retained | adversarial | `acquisition-unexpected` |
-| `skipped-paged-with-member`: a skipped paged source with a `{"pages"}` member | negative | `acquisition-unexpected` |
+| `skipped-paged-with-member`: a skipped paged source with a member that has `pages` | negative | `acquisition-unexpected` |
 | `reference-repeated`, `reference-number`, `next-parent-absent`, `items-not-array` | negative | `read-failed` |
 | `reference-equals-q0`: page 0 names the string `Q0` holds at `fills` | adversarial | `read-failed` |
 | `end-spelling-undeclared`: `noNext` `"null"`, the last page's `next` member `""` | negative | `read-failed` |
+| `end-absent-member-null`: `noNext` `"absent"`, the last page's `next` member `null` | negative | `read-failed` |
 | `next-misspelled`: `noNext` `"null"`, `next`'s last token misspelled, so every page's member is absent | negative | `read-failed` |
 | `read-failed-before-invalid`: page 0's `items` not an array, and page 1's receipt not verifying | negative | `read-failed` (page 0's finding precedes page 1's) |
 | `end-changed`, `reference-dropped`: the preparation's `paging` rewritten | adversarial | `preparation-differs` |
-| `paging-in-4.0.0`, `paging-with-calculation`, `fills-in-template-form`, `fills-parent-unresolved`, `pages-empty`, `max-pages-zero`, `response-form-for-paged`, `pages-form-for-unpaged`, `no-next-unknown` | negative | refusal `input-malformed` |
+| `cites-by-call-index-paged-skipped`: `cites-order-paged-skipped`'s preparation with `cites` ordered by call index | adversarial | `preparation-differs` |
+| `paging-in-4.0.0`, `paging-with-calculation`, `fills-in-template-form`, `fills-parent-unresolved`, `pages-empty`, `max-pages-zero`, `response-form-for-paged`, `pages-form-for-unpaged`, `pages-and-response`, `no-next-unknown` | negative | refusal `input-malformed` |
 | `max-pages-not-integer`: `maxPages` `1e3` | negative | refusal `input-malformed` |
 | `pages-over-row-in-4.0.0`: 65 pages retained in a document of format `4.0.0` | negative | refusal `input-malformed`, not `input-over-bound` |
 | `fills-tool`: shape `mcp`, `fills` `/tool` | negative | `profile-mismatch` |
 | `fills-path`, `fills-method`: `adapter-http`, `fills` `/path` and `/method` | negative | `profile-mismatch` |
 | `fills-connection`: shape `http` under a connection's profile, `fills` `/connection` | negative | `profile-mismatch` |
+| `fills-arguments-itself`, `fills-query-itself`, `fills-body-itself`: `fills` `/arguments` under shape `mcp`, and `/query` and `/body` under `adapter-http` | negative | `profile-mismatch` |
+| `fills-query-three-tokens`: `adapter-http`, `fills` `/query/filter/cursor`, `Q0`'s `query` holding `filter` as an object so that the parent resolves | negative | `profile-mismatch` |
 | `format-4.1.0-unread`: a reader of this text that does not read the format; and the preserved `v0.3.0` reader | negative | refusal `version-unread`; refusal `input-malformed` |
 
 ## Implementation
@@ -574,4 +693,19 @@ refusal row. Each name takes the prefix `paged-`.
 10. **`adapter-airbyte`.** Its every answer carries `pageItems`. Open: whether a paged source should
     ever read such pages.
 11. **The review.** Under RFC 0009 the pull request that moves this Draft to Review carries a
-    recorded adversarial review and its dispositions. None has run.
+    recorded adversarial review and its dispositions. A review ran on the pull request that created
+    this Draft (#329), and another on the one that moves it to Review (#330); each is recorded on
+    its pull request with its dispositions, and this text is revised by them. Both are by a model
+    from the drafting vendor. The maintainer waived the different-vendor review for this work: they
+    are same-vendor reviews, not a cross-vendor claim.
+12. **The last page's members.** Resolved: the joined value carries `last`, the last page's value
+    read whole, the same JSON value as `values`'s last element (section 6). A rule tests the last
+    page's flag at `/last` followed by the flag's pointer, with one clause whatever the page count,
+    where it needed one clause per count before. `last` adds nothing beyond `values`, so it changes
+    nothing a verifier establishes (section 9). `pages` is never 0, so `last` is always present.
+    Decided before Review, because adding a member later would change what a rule reads.
+13. **A skipped `research` source and `cites`.** §9.1 orders `cites` by `sources` "in a preparation
+    with" a `research` source, and does not say whether a skipped one counts; no vector decides it.
+    This amendment keys its own rule on the dialect (section 8), and leaves §9.1's rule as written
+    in every format, since settling it changes the text of formats this amendment does not touch.
+    Open: whether a later amendment keys the `research` rule on the dialect too.
