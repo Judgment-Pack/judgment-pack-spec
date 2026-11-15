@@ -13,7 +13,9 @@
 > This RFC, in Review, is normative for nothing. [`spec/dialect.md`](../spec/dialect.md) is unchanged by it:
 > the Specification below gives the text proposed for the companion, which lands only after
 > acceptance, staged vectors, and the agreement of the reference Runner and a second reader on them.
-> No schema, vector, reader or preparer changes with this RFC, and Core `0.5.0` is untouched.
+> Its vectors are staged as proposed, and the reference reader (`tools/dialect_verify.py`) reads
+> format `4.1.0` to check them; no schema or preparer changes with this RFC, and Core `0.5.0` is
+> untouched.
 
 ## Summary
 
