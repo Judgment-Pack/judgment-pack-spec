@@ -1,0 +1,151 @@
+{
+ "changes": {
+  "pages": [
+   {
+    "result": {
+     "items": [
+      {
+       "id": "c1"
+      }
+     ],
+     "detail": {
+      "a": {
+       "a": {
+        "a": {
+         "a": {
+          "a": {
+           "a": {
+            "a": {
+             "a": {
+              "a": {
+               "a": {
+                "a": {
+                 "a": {
+                  "a": {
+                   "a": {
+                    "a": {
+                     "a": {
+                      "a": {
+                       "a": {
+                        "a": {
+                         "a": {
+                          "a": {
+                           "a": {
+                            "a": {
+                             "a": {
+                              "a": {
+                               "a": {
+                                "a": {
+                                 "a": {
+                                  "a": {
+                                   "a": 1
+                                  }
+                                 }
+                                }
+                               }
+                              }
+                             }
+                            }
+                           }
+                          }
+                         }
+                        }
+                       }
+                      }
+                     }
+                    }
+                   }
+                  }
+                 }
+                }
+               }
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    },
+    "receipt": {
+     "acquisition": {
+      "adapter": {
+       "name": "adapter-mcp",
+       "version": "stand-in",
+       "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+      },
+      "endpoint": "stdio:change-feed",
+      "observedAt": "2026-11-15T11:59:00Z",
+      "peerIdentity": null,
+      "schema": null,
+      "shape": "mcp",
+      "snapshot": "paged",
+      "statement": null,
+      "upstreamToken": null
+     },
+     "argumentsCommitment": "sha256:f25381f79c0f36b072334a0faac3e98955310f4ae62d95217d6257f780ecfe99",
+     "authority": "test",
+     "callIndex": 0,
+     "caller": null,
+     "keyId": "21fe31dfa154a261626bf854046fd227",
+     "kind": "acquisition",
+     "prevSignature": null,
+     "receiptVersion": "3",
+     "resultDigest": "sha256:e4234481ed9f8efcb715c26856ab84c3933d2b47fcddf55261820f5080c20db2",
+     "servedAt": "2026-11-15T11:59:00Z",
+     "sessionId": "paged.session.1",
+     "source": "changes/feed",
+     "signature": "a8c5d721676c7170e2bc292ebe41f47a63a50c60a9469107f718b403f9839ee2c93c870a422625af33ec76e3b14b105e87f5ba8725586d40a7aa71d089f9ea0f"
+    },
+    "salts": {
+     "args": "b4f3cbaf5ba9fed0d8b6f37cd0280d70c3b0bbac002dd5c3b40c4dccdd6b7390"
+    }
+   },
+   {
+    "result": {
+     "items": [
+      {
+       "id": "c2"
+      }
+     ]
+    },
+    "receipt": {
+     "acquisition": {
+      "adapter": {
+       "name": "adapter-mcp",
+       "version": "stand-in",
+       "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+      },
+      "endpoint": "stdio:change-feed",
+      "observedAt": "2026-11-15T11:59:00Z",
+      "peerIdentity": null,
+      "schema": null,
+      "shape": "mcp",
+      "snapshot": "paged",
+      "statement": null,
+      "upstreamToken": null
+     },
+     "argumentsCommitment": "sha256:6fef60acb541237b3be2c92b0998f068db9bd29ece59565cbc4825c2788f02b8",
+     "authority": "test",
+     "callIndex": 1,
+     "caller": null,
+     "keyId": "21fe31dfa154a261626bf854046fd227",
+     "kind": "acquisition",
+     "prevSignature": "a8c5d721676c7170e2bc292ebe41f47a63a50c60a9469107f718b403f9839ee2c93c870a422625af33ec76e3b14b105e87f5ba8725586d40a7aa71d089f9ea0f",
+     "receiptVersion": "3",
+     "resultDigest": "sha256:cd8eb549e98498155796cdba3f50796dc79c04ddcb858992af93ac09831272ea",
+     "servedAt": "2026-11-15T11:59:00Z",
+     "sessionId": "paged.session.1",
+     "source": "changes/feed",
+     "signature": "a133a39988d21802ab0ce119470f16838f6aaed449c6a31913b6e1d54eaec70a3092b6240c1d8248fc2f4b82158e3821722f04c1692f1a1430d27dcf7f67a00a"
+    },
+    "salts": {
+     "args": "bddaf6088cf3d0489bedaf9aad5e7833d2d63a88121419947a3b4be475564214"
+    }
+   }
+  ]
+ }
+}

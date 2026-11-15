@@ -1,0 +1,48 @@
+{
+ "changes": {
+  "pages": [
+   {
+    "result": {
+     "items": [
+      {
+       "id": "c1"
+      }
+     ]
+    },
+    "receipt": {
+     "acquisition": {
+      "adapter": {
+       "name": "adapter-http",
+       "version": "stand-in",
+       "digest": "sha256:ef47e9f081a3618a6c4c2f73e31175bd26b96714c4b26d42c0cd03c84c5e034e"
+      },
+      "endpoint": "https://records.example.test",
+      "observedAt": "2026-11-15T11:59:00Z",
+      "peerIdentity": null,
+      "schema": null,
+      "shape": "http",
+      "snapshot": "paged",
+      "statement": null,
+      "upstreamToken": null
+     },
+     "argumentsCommitment": "sha256:219c9f73cbfe9e24c95aab3b15598bf17b501599713e36afad2176b01605603f",
+     "authority": "test",
+     "callIndex": 0,
+     "caller": null,
+     "keyId": "21fe31dfa154a261626bf854046fd227",
+     "kind": "acquisition",
+     "prevSignature": null,
+     "receiptVersion": "3",
+     "resultDigest": "sha256:5c7051530a33e0ede8b9c6e85c141089daf4411648ed5f2973b7601995c9ad2a",
+     "servedAt": "2026-11-15T11:59:00Z",
+     "sessionId": "paged.session.1",
+     "source": "records/web",
+     "signature": "bb4c0e97af20b3560ea5b1d6b198b11ddf43122c51952d9dfa7609c7fe5e69235b7db3ff949545f93278e78b7f80636973fadc1977e081d99cf889f606f62f06"
+    },
+    "salts": {
+     "args": "5e160677681d193743ebf0faec27eb62167b6b2275302ffa0ce63a249535079f"
+    }
+   }
+  ]
+ }
+}

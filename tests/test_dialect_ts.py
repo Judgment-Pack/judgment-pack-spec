@@ -187,3 +187,29 @@ class SecondDialectReaderTest(unittest.TestCase):
         )
         self.assertEqual(run.returncode, 0, run.stderr.decode("utf-8", "replace")[-4000:])
         self.assertEqual(expected, [json.loads(report) for report in json.loads(run.stdout)])
+
+    def test_the_typescript_reader_does_not_read_format_4_1(self) -> None:
+        # Format 4.1.0, the paged source RFC 0033 proposes, is read by the first reader alone: the second
+        # defines the selector and takes phases 0 to 3 as for format 4.0.0, so it refuses every staged vector
+        # `version-unread` in phase 4, those over the format's own bounds among them (RFC 0033 section 11);
+        # it does not read format 4.0.0 either, so the two vectors of that format are refused alike.
+        node = self.node()
+        root = ROOT / "conformance" / "dialect" / "format-4.1"
+        batch, expected = [], []
+        for entry in json.loads((root / "manifest.json").read_text(encoding="utf-8"))["cases"]:
+            directory = root / entry["name"]
+            files = {m: (directory / f"{m if m != 'acquisitions' else 'sources'}.json").read_bytes()
+                     for m in ("dialect", "case", "acquisitions", "profiles", "preparation")}
+            encoded = {m: base64.b64encode(files[m]).decode("ascii") for m in files}
+            binding = directory / "binding.json"
+            batch.append({**encoded, "record": None, "requireBinding": False,
+                          "binding": base64.b64encode(binding.read_bytes()).decode("ascii") if binding.is_file() else None})
+            expected.append({"refusal": "version-unread", "result": "refusal"})
+        run = subprocess.run(
+            [node, "--disable-wasm-trap-handler", "--no-warnings", "--input-type=module", "--eval", BATCH % json.dumps(str(READER))],
+            input=json.dumps(batch).encode("utf-8"),
+            capture_output=True,
+            timeout=600,
+        )
+        self.assertEqual(run.returncode, 0, run.stderr.decode("utf-8", "replace")[-4000:])
+        self.assertEqual(expected, [json.loads(report) for report in json.loads(run.stdout)])

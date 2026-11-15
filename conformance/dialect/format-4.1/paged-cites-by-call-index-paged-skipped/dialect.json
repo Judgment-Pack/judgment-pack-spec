@@ -1,0 +1,117 @@
+{
+  "formatVersion": "4.1.0",
+  "id": "urn:judgmentpack:dialect:paged-vectors",
+  "version": "0.1.0",
+  "case": {
+    "parameters": {
+      "since": {
+        "pointer": "/since",
+        "type": "string"
+      }
+    },
+    "facts": [],
+    "evidence": []
+  },
+  "sources": [
+    {
+      "name": "first",
+      "kind": "operation",
+      "profile": "feed",
+      "profileDigest": "sha256:8510e05ea3c82072b3f0affabd1aa3045affd7ab3d6454c4f4a1168bbd2f3e9b",
+      "maxAge": 300,
+      "arguments": {
+        "tool": "get-record",
+        "arguments": {
+          "id": "first"
+        }
+      },
+      "read": {
+        "copy": {
+          "facts": [
+            {
+              "target": "/first/cursor",
+              "source": "/cursor"
+            },
+            {
+              "target": "/first/id",
+              "source": "/id"
+            }
+          ],
+          "evidence": []
+        }
+      }
+    },
+    {
+      "name": "second",
+      "kind": "operation",
+      "profile": "feed",
+      "profileDigest": "sha256:8510e05ea3c82072b3f0affabd1aa3045affd7ab3d6454c4f4a1168bbd2f3e9b",
+      "maxAge": 300,
+      "arguments": {
+        "tool": "get-record",
+        "arguments": {
+          "id": "second"
+        }
+      },
+      "read": {
+        "copy": {
+          "facts": [
+            {
+              "target": "/second/id",
+              "source": "/id"
+            }
+          ],
+          "evidence": []
+        }
+      }
+    },
+    {
+      "name": "changes",
+      "kind": "operation",
+      "profile": "feed",
+      "profileDigest": "sha256:8510e05ea3c82072b3f0affabd1aa3045affd7ab3d6454c4f4a1168bbd2f3e9b",
+      "maxAge": 300,
+      "arguments": {
+        "tool": "list-changes",
+        "arguments": {
+          "cursor": {
+            "$param": "start"
+          }
+        }
+      },
+      "parameters": {
+        "start": {
+          "from": "first",
+          "pointer": "/first/cursor",
+          "type": "string"
+        }
+      },
+      "paging": {
+        "next": "/next",
+        "noNext": "absent",
+        "fills": "/arguments/cursor",
+        "items": "/items",
+        "maxPages": 8
+      },
+      "read": {
+        "copy": {
+          "facts": [
+            {
+              "target": "/changes/end",
+              "source": "/end"
+            },
+            {
+              "target": "/changes/items",
+              "source": "/items"
+            },
+            {
+              "target": "/changes/pages",
+              "source": "/pages"
+            }
+          ],
+          "evidence": []
+        }
+      }
+    }
+  ]
+}
