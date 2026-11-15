@@ -12,6 +12,12 @@ here.
   report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
   analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
   This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
+- RFC 0033 (#328), a Draft, proposes a paged `operation` source for the dialect, as a named format
+  `4.1.0` of format `4.0.0`'s family. The pages are one gateway session's calls 0 to n−1, and each
+  request is formed from the case and the page before. The loop ends at a page with no next
+  reference, or at a declared bound, and the preparation records which. The pages' records are
+  joined in call order, duplicates kept, and read once. `pageItems` stays refused.
+  `spec/dialect.md`, its vectors and its readers are unchanged.
 
 ### Changed
 
