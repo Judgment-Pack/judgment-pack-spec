@@ -82,6 +82,8 @@ stable feature requires two independent implementations and conformance cases.
 | [0032](0032-outcome-severity.md) | Outcome severity, one well-known annotation key | Accepted | Specification (a companion beside Core, [the annotation vocabulary](../spec/annotation-vocabulary.md) `1.0.0`, status `proposed`, released in `v0.5.2`; Core `0.5.0` unchanged; its rows staged; accepted on a same-vendor review, the different-vendor review waived) |
 | [0033](0033-paged-operation-source.md) | A paged operation source | Review | Specification (an amendment of the dialect companion, a proposed named format `4.1.0`; [`spec/dialect.md`](../spec/dialect.md) unchanged) |
 | [0034](0034-registry-profile.md) | The registry profile — declared entry kinds and environment overlays | Draft | Specification (a proposed companion beside Core, `spec/registry.md`, with its own format selectors and release route; Core unchanged) |
+| [0035](0035-registry-references.md) | Registry references — entries and pinned secrets | Draft | Specification (part of the proposed registry companion of RFC 0034) |
+| [0036](0036-registry-emitter-contract.md) | The registry emitter contract and its conformance harness | Draft | Specification (part of the proposed registry companion of RFC 0034) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -182,5 +184,11 @@ unchanged.
   order with a value-free report; resolution to one document per environment; and a strict YAML
   subset for authoring.
 - JPS defines no domain kinds.
-- It is the first of five registry records: 0035 to 0038 are to follow.
+- It is the first of five registry records.
+  - [RFC 0035](0035-registry-references.md) defines entry references and secret references pinned
+    to a version, with each environment's secrets drawn from its own projects.
+  - [RFC 0036](0036-registry-emitter-contract.md) defines emitters as pure functions from a request
+    to a file set. The host does every write and the `--check` comparison, and a conformance
+    harness lets any repository check its own emitters.
+  - RFCs 0037 and 0038 are to follow.
 - It is a Draft, normative for nothing, and Core is unchanged.

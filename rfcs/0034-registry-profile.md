@@ -137,7 +137,7 @@ A reader refuses a document over a bound with the bound's diagnostic, before int
   },
   "secrets": ["/password"],
   "references": [ { "pointer": "/database", "kinds": ["database"] } ],
-  "overlayable": ["/connectionLimit"],
+  "overlayable": ["/connectionLimit", "/password"],
   "bounds": { "maxEntries": 1000, "maxEntryBytes": 16384 }
 }
 ```
@@ -252,18 +252,20 @@ values.
     { "kind": "database", "id": "billing", "owner": "team-billing", "value": { "engine": "postgres" } },
     { "kind": "db-role", "id": "billing-api", "owner": "team-billing",
       "value": { "database": "entry:database/billing", "privileges": ["read", "write"],
-                 "password": "secret:env/BILLING_DB_PASSWORD", "connectionLimit": 20 } },
+                 "password": "secret:gcp-sm:projects/example-dev/secrets/billing-db/versions/3",
+                 "connectionLimit": 20 } },
     { "kind": "db-role", "id": "billing-backfill", "owner": "team-billing", "environments": ["dev", "staging"],
       "value": { "database": "entry:database/billing", "privileges": ["read"] } }
   ],
   "overlays": [
     { "environment": "prod",
-      "patches": [ { "kind": "db-role", "id": "billing-api", "set": { "/connectionLimit": 120 } } ] }
+      "patches": [ { "kind": "db-role", "id": "billing-api", "set": { "/connectionLimit": 120,
+        "/password": "secret:gcp-sm:projects/example-prod/secrets/billing-db/versions/7" } } ] }
   ]
 }
 ```
 
-The reference forms `entry:` and `secret:` above are illustrative. RFC 0035 defines them.
+The reference forms `entry:` and `secret:` above are defined by RFC 0035. The example omits the staging overlay, which would set its own `/password`, and the `secretScopes` member RFC 0035 adds.
 
 **Members of a registry document.**
 
@@ -314,7 +316,8 @@ Resolution of a valid registry for one environment `e` produces a resolved regis
   "entries": [
     { "kind": "db-role", "id": "billing-api", "owner": "team-billing",
       "value": { "database": "entry:database/billing", "privileges": ["read", "write"],
-                 "password": "secret:env/BILLING_DB_PASSWORD", "connectionLimit": 120 } }
+                 "password": "secret:gcp-sm:projects/example-prod/secrets/billing-db/versions/7",
+                 "connectionLimit": 120 } }
   ]
 }
 ```
