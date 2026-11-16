@@ -97,7 +97,12 @@ Every document is I-JSON (RFC 7493):
 - no duplicate member names;
 - no lone surrogates;
 - every number is either an integer whose magnitude is at most 2^53 − 1, or a finite decimal that
-  round-trips through an IEEE 754 double.
+  round-trips through an IEEE 754 double, by value: the exact decimal value of the literal equals
+  the exact decimal value of the shortest decimal that reads back as the same double. `1.50` and
+  `0.1` are admitted, and `0.10000000000000001` is not;
+- no number is negative zero (`-0`, `-0.0`, `-0e0`), because its canonical form would be `0`.
+
+A number outside these rules is `REG-DOC-NUMBER`.
 
 A document's identity bytes are its RFC 8785 (JCS) canonical form, and every digest in this
 companion is `sha256:` followed by 64 lowercase hexadecimal digits of SHA-256 over those bytes.
@@ -153,7 +158,9 @@ A reader refuses a document over a bound with the bound's diagnostic, before int
   beyond identity. Enforcement belongs to the repository's own review rules (for example, code
   owners).
 - **`entryId.pattern`**: the grammar of entry ids, in the pattern subset of §2.2. It defaults to
-  `^[a-z][a-z0-9-]{0,62}$`. An id never exceeds 128 characters, whatever the pattern allows.
+  `^[a-z][a-z0-9-]{0,62}$`. Whatever the pattern allows, an id is also held to RFC 0035's
+  `entry-id` grammar: 1 to 128 characters from U+0021 to U+007E, with no `/` and no `#`. An id
+  that fails either is `REG-ENTRY-ID`, so every valid entry can be referenced.
 - **`schema`**: the schema each entry's value MUST satisfy, in the closed subset of §2.1, after
   overlays are applied (§5).
 - **`secrets`**: pointer patterns (§2.3) that name members holding a secret. At each matched
@@ -232,6 +239,25 @@ escapes for this companion only.
 A pattern that can match no position the schema allows makes the kind declaration invalid. A
 reader determines this from `properties`, `items` and `additionalProperties`, and does not search
 values.
+
+#### 2.4 Kind versions
+
+A kind's `version` follows these rules, so that a SemVer range over kind versions (RFC 0036 §1)
+means something:
+
+- **A patch version** changes only annotations (§2.1) and `description`. Every value has the same
+  diagnostics under both versions.
+- **A minor version** may only widen: every value valid under the previous version is valid under
+  the new one. It may add optional members, widen an `enum`, relax a bound, add `overlayable`
+  patterns, raise `bounds`, and set `deprecated`. It MUST NOT change `kind`, `entryId`, `secrets`
+  or `references`, because each of those can make a valid registry invalid or change what an
+  emitter must treat as a reference.
+- **Anything else is a new major version.**
+
+Validation checks a registry against the exact kinds it pins, and does not compare two versions
+of a kind. A tool that compares them, such as a check on a kind's pull request, applies these
+rules. A consumer that reads a kind by range MUST accept members it does not know, because a minor
+version may add them.
 
 ### 3. Registry document
 
@@ -419,6 +445,18 @@ restriction.
 - A deprecated element warns and keeps working until 2.0.
 - A reader claims conformance to an exact release and its complete vector set.
 
+**Selectors across 1.x.** A reader lists the exact selectors it supports, and a writer writes the
+lowest selector whose format expresses the document. A registry that uses no member added after
+`1.0.0` is written, and resolved, as `1.0.0`. So a reader of `1.0.0` keeps reading every document
+that does not need a later member. A document that needs one is refused by an older reader rather
+than misread. Consumers that take resolved documents (emitters, RFC 0036; the start-up package)
+declare the selectors they accept, and the producer writes one of them or refuses.
+
+**Deprecation.** The published diagnostic code list gives each code a status, `active` or
+`deprecated`. Selectors, members, codes, rules and kinds can each be deprecated within 1.x. A
+deprecated one keeps its meaning and produces a warning where it is used. Nothing deprecated is
+removed before 2.0.
+
 **Related artifacts.** The Go start-up package that reads resolved registries is proposed at
 `github.com/Judgment-Pack/judgment-pack-runtime/startup`, a nested module of the reference runtime
 tagged `startup/vX.Y.Z`. It is product code, not part of this companion: it is named here so its
@@ -547,10 +585,9 @@ which is RFC 0000's bar. A TypeScript reader (the dialect has one) is a possible
    conformant reader. Should patterns that backtracking engines handle catastrophically also be
    refused, to protect non-conformant consumers that reuse the kind's patterns, or is the
    linear-time requirement enough?
-3. **Kind versions over time.** Validation checks one registry against the exact kinds it pins. A
-   rule for when a kind's new version is compatible (for example, "a minor version only adds
-   optional members") would let tooling flag a breaking kind change. Is that a check in this
-   companion, or tooling outside it?
+3. **Kind versions over time.** Settled in §2.4: the compatibility rule is part of the companion,
+   and comparing two versions is a tool's check, not validation's. Open: whether the companion
+   should publish that comparison as a conformance-tested operation.
 4. **Cross-registry references.** References stay within one registry here. A platform with
    several registries may need to name another's entries, which is left to a later minor version.
 5. **Numbers.** Allowing non-integers at all invites float disagreements between emitters' target

@@ -78,46 +78,78 @@ caller binds a path (the reference Runner's input binding, the reference runtime
 ### 2. Reading the file
 
 The reader does these steps in order. The first failure refuses the acquisition with the code
-shown, and the diagnostic names the code and the file's sha256, never a value.
+shown, and later steps do not run. **A diagnostic carries its code, the file's sha256 and its
+size, and nothing else**: no value, member name, pointer or position, because before step 6 any of
+those could be part of a sensitive value (a map key is data). Each rule below is decided by the
+file's bytes alone, so a vector states one expected code.
 
-1. **Read at most `maxBytes` bytes.** A larger file is refused (`TF-SIZE`). The sha256 of the
-   bytes is computed here and recorded whatever happens next.
-2. **Parse strict JSON.** The input must be UTF-8 with no byte-order mark, with nesting at most 128
-   deep, with no duplicate member name in any object, and with numbers kept as their decimal text,
-   never as binary floating point (`TF-JSON`). A binary plan file fails here, and the diagnostic
-   says to pass the output of `terraform show -json` instead.
-3. **Check the format.** The top level MUST have `format_version`, a string in the accepted list
-   (§3) (`TF-FORMAT`). A raw state file, which has no `format_version`, is refused here.
-4. **Check the document.** A `plan` MUST have `planned_values` or `resource_changes`. A `state`
-   MUST have `values` and no `resource_changes` (`TF-DOCUMENT`).
-5. **Check the sensitivity markers.** Every resource whose values are read MUST carry its mirror:
-   - `sensitive_values`, for a resource under `planned_values`, `prior_state` or state `values`;
-   - `before_sensitive` and `after_sensitive`, for a change under `resource_changes`.
+1. **Size.** The reader computes the sha256 of the **whole** file as supplied, and its length in
+   bytes. A file longer than `maxBytes` is refused (`TF-SIZE`) without being parsed. The hash and
+   size are recorded whatever happens next.
+2. **Strict JSON** (`TF-JSON`). The bytes MUST be:
+   - UTF-8 with no byte-order mark, and no lone surrogate escape;
+   - one JSON value, with nothing after it but whitespace;
+   - nested at most 128 deep, where the top-level value is depth 1 and each value inside an object
+     or array is one deeper than its container;
+   - free of duplicate member names in any object.
 
-   Every output MUST carry `sensitive`. A file in which some read value lacks its mirror is refused
-   (`TF-SENSITIVITY`). An empty mirror (`{}` or `false`) is a marker that nothing there is
-   sensitive. A missing mirror is not.
-6. **Drop sensitive values.**
-   - Every position whose mirror is `true` is removed, with all it contains.
-   - A mirror member that is `true` above an object or array removes the whole subtree.
-   - An output with `sensitive: true` is removed.
+   Numbers are kept as their decimal text, never as binary floating point. A binary plan file
+   fails here, and the message says to pass the output of `terraform show -json` instead.
+3. **Format** (`TF-FORMAT`). The top-level value MUST be an object with `format_version`, a string
+   in the accepted table for the source's `document` (§3). A raw state file, which has no
+   `format_version`, is refused here.
+4. **Document** (`TF-DOCUMENT`).
+   - A `plan` MUST have `planned_values`, an object. Its `resource_changes`, when present, MUST be
+     an array, and when absent reads as an empty one.
+   - A `state` MUST NOT have `planned_values` or `resource_changes`. Its `values`, when present,
+     MUST be an object, and when absent reads as a state with no resources.
+5. **Sensitivity markers** (`TF-SENSITIVITY`). The **read section** is `resource_changes` for a
+   `plan`, and every resource under `values.root_module` and its `child_modules`, recursively, for
+   a `state`. **Every** resource in the read section, selected or not, MUST carry its mirror:
+   - for a `plan`, each item of `resource_changes` has `change.before_sensitive` and
+     `change.after_sensitive`;
+   - for a `state`, each resource has `sensitive_values`.
 
-   Removal leaves the member absent, so a pack reading it sees `unknown`. It is never replaced by
-   a placeholder, so no reader can mistake a placeholder for a value. The acquisition records the
-   count of removed positions, not their pointers.
-7. **Select** (§4), and build the acquired value (§5).
+   A mirror is `true`, `false`, or an object or array that mirrors the value's shape. An empty
+   mirror (`{}`, `[]` or `false`) is a marker that nothing there is sensitive. A missing mirror, or
+   one of another JSON type, refuses the file. The check runs before selection, so its outcome does
+   not depend on `select`.
+6. **Removal of sensitive values.** In each value of the read section (a change's `before` and
+   `after`, a state resource's `values`), every position whose mirror is `true` is removed, with all
+   it contains, by these rules:
+   - **An object member** is removed, and the member is then absent.
+   - **An array element** is never removed alone, because the elements after it would shift and a
+     pack would read the wrong one. The whole array that holds it is removed instead. If that array
+     is itself an array element, the rule applies again, up to the nearest object member, which is
+     removed.
+   - A mirror position that does not exist in the value is ignored.
 
-The members `configuration`, `variables`, `relevant_attributes` and `checks` are never read.
-Variable values carry no sensitivity mirror in these formats, and a configuration can embed
-literals.
+   A removed value is never replaced by a placeholder, so nothing can compare equal to it and a
+   pack reading it sees `unknown`. **`removedSensitive`** counts the object members removed. Each
+   removal counts once, however much it contained. Pointers in `after_unknown` (§5) that fall at or
+   below a removed position are dropped as well.
+7. **Selection** (§4), then the acquired value (§5). Only the selected resources' values continue,
+   and only these sanitized values can ever reach facts, lineage, a record or a message.
+
+The reader never reads `configuration`, `variables`, `relevant_attributes`, `checks`,
+`prior_state`, `planned_values` (beyond step 4's check), `output_changes` or `outputs`. Variable
+values carry no sensitivity mirror in these formats, a configuration can embed literals, and
+outputs are not resources. A pack that needs an output's value is out of scope for the first
+version (Unresolved question 4).
 
 ### 3. Accepted formats
 
-The companion keeps a table of accepted `format_version` values per `document`. Each row is backed
-by vectors made with the Terraform release that writes it. The first table holds the versions the
-reference vectors are recorded with. A version not in the table, including a newer minor of a
-listed major, is refused (`TF-FORMAT`). The table grows by a patch release of the companion, with
-vectors, and never shrinks within a dialect version.
+The companion keeps a table of accepted `format_version` values per `document`. Each row is
+backed by vectors made with the Terraform release that writes it. The first table holds the
+versions the reference vectors are recorded with. A version not in the table, including a newer
+minor of a listed major, is refused (`TF-FORMAT`).
+
+The table grows by a patch release of the companion, with vectors, and never shrinks within a
+dialect version. Because two readers of one dialect version can then hold tables of different
+releases, **the table has its own release number**. A reader's claim names the table release it
+implements, each vector names the release that added its row, and a reader is held only to the
+vectors of the releases it claims. A file whose `format_version` is in a later table than the
+reader's is `TF-FORMAT` for that reader, and that is the expected result for its claim.
 
 This is deliberately stricter than Terraform's own compatibility promise for the JSON output. A
 new minor may add members, and the sensitivity mirror of a new member is exactly what a reader must
@@ -129,14 +161,16 @@ not guess.
 
 | Member | Form | Meaning |
 |---|---|---|
-| `types` | a non-empty array of distinct resource type names, such as `google_cloud_run_v2_service` | only resources of these types |
+| `types` | a non-empty array of at most 64 distinct resource type names, such as `google_cloud_run_v2_service` | only resources of these types |
 | `mode` | `managed` or `data`, optional (default `managed`) | |
-| `address` | a pattern, optional | only resources whose address matches; `*` matches any run of characters other than `.` and `[`, and nothing else is special |
+| `address` | a pattern of at most 512 characters, optional | only resources whose **whole** address matches. `*` matches any run, possibly empty, of characters other than `.`, `[` and `]`, and every other character matches itself |
 | `actions` | an array of plan actions, optional, `plan` only | only changes whose `change.actions` include one of these: `create`, `update`, `delete`, `read` or `no-op` |
-| `max` | an integer from 1 to 10000, optional (default 1000) | more resources than this refuse the acquisition (`TF-SELECT-BOUND`) |
+| `max` | an integer from 1 to 10000, optional (default 1000) | more selected resources than this refuse the acquisition (`TF-SELECT-BOUND`) |
 
-Resources in child modules are included, with their full address. Selection that matches nothing
-yields an empty array, which is not an error: "no database is destroyed" is a valid fact.
+`actions` on a `state` source, or a malformed `select`, makes the dialect invalid (dialect §11),
+not the file. Resources in child modules are included, with their full address. Selection that
+matches nothing yields an empty array, which is not an error: "no database is destroyed" is a
+valid fact.
 
 ### 5. The acquired value
 
@@ -145,18 +179,23 @@ selected resource:
 
 - **For `state`**: `{"address", "type", "name", "mode", "providerName", "index"?, "values"}`, with
   `values` the resource's values after §2.
-- **For `plan`**: the same members, plus `actions` (the change's `actions`, as written), `before`
-  and `after` (the change's values after §2), and `afterUnknown`. The last is the list of pointers,
-  in `after`, of values known only after apply, taken from `after_unknown` and sorted. A value that
-  is unknown at plan time is absent from `after`, so a pack reading it sees `unknown`.
+- **For `plan`**: the same members, with `actions` (the change's `actions`, as written), `before`
+  and `after` (the change's values after §2) in place of `values`, and `afterUnknown`. The last is
+  the list of JSON Pointers, in `after`, of values known only after apply, taken from
+  `after_unknown`, with those under a removed position dropped, and sorted. A value that is unknown
+  at plan time is absent from `after`, so a pack reading it sees `unknown`.
 
-Numbers are kept as decimal strings in RFC 0037's normal form, so ordered comparisons are defined.
+**Numbers** become decimal strings in RFC 0037's normal form (§2 rule 1 there): no exponent, no
+leading `+`, no trailing zero after the point, and `0` for every zero, including `-0`. A number
+whose normal form would be longer than 64 characters refuses the file (`TF-NUMBER`), because no
+fact comparison needs it and its expansion would be unbounded (`1e1000000`).
+
 The dialect's reads (copy and rule, §6) then turn the acquired value into facts, as for any other
 source.
 
 The acquisition record carries `{"kind": "terraform-file", "document", "formatVersion",
-"sha256", "bytes", "removedSensitive", "selected"}`. It carries no path: a path names a machine, not
-the evidence.
+"formatTable", "sha256", "bytes", "removedSensitive", "selected"}`, with `formatTable` the table
+release (§3). It carries no path: a path names a machine, not the evidence.
 
 ### 6. One decision per resource
 
@@ -200,10 +239,11 @@ exactly, so the same file gives the same facts either way.
 ## Security and privacy
 
 - **Secrets.** Sensitive values are removed before selection, and before anything else sees them,
-  in §2 step 6. A file without mirrors is refused, not read optimistically. `variables` and
-  `configuration` are never read.
-- **Diagnostics** carry codes, the file's digest and pointers to the failing position. They never
-  carry values or resource attribute contents.
+  in §2 step 6. A file without mirrors, on any resource, is refused, not read optimistically. A
+  sensitive array element takes its whole array with it, so no index shifts. `variables`,
+  `configuration`, `prior_state` and outputs are never read.
+- **Diagnostics** carry the code, the file's sha256 and its size only. They never carry a value, a
+  member name or a pointer, since before removal a member name can itself be sensitive data.
 - **No execution and no network.** The source reads bytes, nothing else.
 - **Bounded.** The file size, nesting depth, selection size and pattern form are all bounded. The
   pattern has no backtracking.
@@ -220,12 +260,24 @@ exactly, so the same file gives the same facts either way.
 real project or credential:
 - **Plans:** create, update, delete and replace, and a plan with values unknown until apply.
 - **State.**
-- **Sensitivity:** a sensitive attribute, a sensitive nested block, and a sensitive output.
-- **Refusals:**
-  - a missing mirror on one resource;
-  - a raw state file, and a binary plan;
-  - an unaccepted `format_version`;
-  - a duplicate member name, too deep, too large, and over the selection bound.
+- **Sensitivity:**
+  - a sensitive attribute, and a sensitive nested block;
+  - a sensitive element of a list, which removes the list;
+  - a sensitive element of a list nested in a list;
+  - an `after_unknown` pointer under a removed position;
+  - a sensitive output, which is never read either way.
+- **Refusals**, each with one expected code:
+  - a missing mirror on a selected resource, and on an unselected one (both `TF-SENSITIVITY`);
+  - a raw state file (`TF-FORMAT`), and a binary plan (`TF-JSON`);
+  - an unaccepted `format_version`, and one from a later table release than the claim;
+  - a duplicate member name, depth 128 and 129, and trailing data (`TF-JSON`);
+  - `maxBytes` and one byte more (`TF-SIZE`), with the sha256 of the whole file in both;
+  - a number with an exponent that expands past 64 characters (`TF-NUMBER`);
+  - a selection of `max` and of one more (`TF-SELECT-BOUND`);
+  - a state with no `values` (accepted, empty) and a state with `resource_changes`
+    (`TF-DOCUMENT`).
+- **Diagnostics:** a vector whose refused file has a sensitive member name, asserting that the
+  name does not appear in the diagnostic.
 - **Selection:** child-module addresses, `count` and `for_each` indexes, and data sources.
 
 Every vector asserts that no value marked sensitive appears in the acquired value, the facts, the
@@ -246,4 +298,7 @@ lineage or any diagnostic.
    with.
 3. **OpenTofu.** It writes the same JSON forms today. Whether `terraform-file` names both, or a
    sibling kind follows, depends on whether the formats diverge.
-4. **Review regime:** as in RFC 0034, question 1.
+4. **Outputs.** Plan and state outputs carry their own sensitivity markers, and some checks
+   (an exported endpoint, for example) want them. They are left out of the first version to keep
+   one read section per document.
+5. **Review regime:** as in RFC 0034, question 1.

@@ -80,6 +80,8 @@ standardizes how every emitter is run and checked.
     { "kind": "db-role", "id": "https://example.invalid/kinds/db-role", "versions": "^1.2.0" },
     { "kind": "database", "id": "https://example.invalid/kinds/database", "versions": "^1.0.0" }
   ],
+  "input": "resolved",
+  "requestVersions": ["1.0.0"],
   "environments": "each",
   "options": { "type": "object", "additionalProperties": false,
                "properties": { "schemaName": { "type": "string" } } },
@@ -88,17 +90,37 @@ standardizes how every emitter is run and checked.
 }
 ```
 
-**Manifest members.**
+**Manifest members.** No other member is permitted, and every member not marked optional is
+required.
 
-- **`reads`**: the kinds the emitter reads, by kind id and a SemVer range. The range syntax is
-  `^x.y.z`, `~x.y.z`, `=x.y.z`, or a space-separated pair `>=a <b`.
+- **`emitterManifestVersion`**: the exact selector, `"1.0.0"`.
+- **`id`**: an absolute URI. **`version`**: strict SemVer 2.0.0 with no build metadata.
+- **`owner`**: as a kind's `owner` (RFC 0034 §2). **`description`** (optional): informative.
+- **`reads`**: the kinds the emitter reads, by kind name, kind id and a SemVer range over kind
+  versions. The range syntax is `^x.y.z`, `~x.y.z`, `=x.y.z`, or a space-separated pair `>=a <b`.
+  A range means what it does because kind versions follow RFC 0034 §2.4. A manifest that must not
+  take even a widening change pins one version with `=x.y.z`.
+- **`input`** (optional, default `"resolved"`): `"resolved"`, for resolved registries, or
+  `"factsContracts"`, for facts contracts (RFC 0037 §1). The request's form follows it (§2).
+- **`requestVersions`**: a non-empty array of the exact `emitRequestVersion` selectors the emitter
+  accepts. The host writes the highest one it supports in this list, or refuses the run
+  (`EMIT-REQUEST-VERSION`) if there is none. So a host of a later 1.x minor keeps running every
+  emitter written for `1.0.0`.
 - **`environments`**: either `"each"` (one request per environment) or `"all"` (one request
-  holding every environment's resolved document).
-- **`options`**: a schema in RFC 0034's subset, for the emitter's options document.
-- **`command`**: an argv the host runs from the repository root. It is not a shell string.
+  holding every environment's resolved document). It is required with `"resolved"` and absent with
+  `"factsContracts"`, since contracts do not vary by environment.
+- **`options`** (optional, default `{"type": "object", "additionalProperties": false}`): a schema
+  in RFC 0034's subset, for the emitter's options document.
+- **`command`**: an argv the host runs from the repository root. It is not a shell string. Its
+  first item is a program name with no `/`, found on `PATH`, or a relative path inside the
+  repository.
 - **`owns`**: glob patterns, relative to the repository root, that name every path the emitter
   writes. The globs use `*` (one segment), `**` (any number of segments) and literal characters
   only.
+- **`env`** (optional): names of environment variables passed to the emitter (§4), each matching
+  `^[A-Z_][A-Z0-9_]{0,63}$`, and none of `PATH`, `HOME`, `LANG`, `TZ` or `SOURCE_DATE_EPOCH`.
+- **`deprecated`** (optional): a boolean. The host and the harness run a deprecated emitter, with
+  the warning `EMIT-DEPRECATED`.
 
 **Rules.**
 - The globs of two manifests in one repository MUST NOT overlap. The host refuses to run either
@@ -127,6 +149,30 @@ The host forms the request as follows:
 `resolved` holds one document for `"each"`, or every environment in the registry's order for
 `"all"`. A kind outside a range refuses the run (`EMIT-KIND-RANGE`) before the emitter starts.
 
+**Versions inside the request.** Request `1.0.0` carries resolved documents of
+`resolvedFormatVersion` `1.0.0` and facts contracts of `factsContractVersion` `1.0.0`. A later
+request minor may carry later ones. The host never writes a request version the manifest does not
+list, so an emitter never sees a selector it did not declare. A registry that needs a later
+resolved format than any listed request version can carry refuses the run
+(`EMIT-REQUEST-VERSION`), and is never written down to an older one.
+
+**The facts-contracts form.** With `input: "factsContracts"`, the request holds
+`factsContracts`, an array of facts contracts sorted by `id` then `version`, in place of
+`resolved`. A request never has both. The host forms it as follows:
+1. It generates a contract (RFC 0037 §4) for each pinned kind the manifest reads, from the
+   registry and the kinds supplied, and adds each authored contract the caller names with
+   `--facts-contract FILE`.
+2. It removes every generated contract of a kind the manifest does not read. Authored contracts
+   are passed as named.
+3. It checks each remaining kind's version against the manifest's range, as above.
+4. It validates `options` against the manifest's schema.
+5. It writes the request in its RFC 8785 canonical form.
+
+The registry is optional in this form: with no `--registry`, only authored contracts are sent.
+
+**The response.** An emitter answers with an `emitResponseVersion` whose major and minor do not
+exceed the request's. A host accepts every response version of 1.x it supports.
+
 ### 3. The response
 
 ```json
@@ -144,7 +190,10 @@ The host forms the request as follows:
 
 - **One response on standard output**, then exit 0. A non-zero exit, or output that is not one
   valid response, is an emitter failure (`EMIT-PROCESS`, `EMIT-RESPONSE`).
-- **Standard error is passed through to the caller's standard error**, truncated at 64 KiB.
+- **Standard error is not shown by default.** The host reads at most 64 KiB of it, reports only
+  its byte count, and discards it. With `--emitter-stderr` it passes that much through to the
+  caller's standard error, for an author debugging locally. An emitter sees reference strings,
+  and a CI log should not receive whatever it chooses to print.
 
 **Each file** carries a `path` and exactly one of these:
 - `text`: UTF-8 that ends with a line feed and contains no carriage return;
@@ -186,7 +235,8 @@ jpack emit --manifest tools/emit-db-bootstrap/emitter.json --registry registry.j
 **Running the emitter:**
 - **Environment.** The host runs `command` with an environment that holds only `PATH`, `HOME`
   (set to a fresh empty directory) and `LANG=C.UTF-8`, plus the variables the manifest lists in
-  an optional `env` array (names only; values come from the caller's environment).
+  `env` (names only; values come from the caller's environment). The host never prints, records
+  or reports an `env` value, only the names of those that were unset.
 - **Working directory and input.** The working directory is the repository root, and standard
   input is the request.
 - **Time limit.** The host imposes a wall-clock limit, 120 s by default and set by `--timeout`.
@@ -253,16 +303,33 @@ jpack emit conformance --manifest emitter.json --vectors tools/emit-db-bootstrap
    it substitutes a crafted response for the emitter's, to confirm the host refuses each one.
 4. **Kind filtering.** The request never contains an undeclared kind. The harness adds an entry of
    a synthetic undeclared kind to each vector's registry and checks that the response is unchanged.
-5. **References.** Every string at a secret position in the request must appear unchanged in the
-   output, or not at all, and never partially. Reference text is the only secret-adjacent material
-   an emitter sees, and RFC 0035 forbids anything resolving it.
+   For `input: "factsContracts"` it adds that kind's declaration and pin, and checks the same. A
+   vector with no registry (authored contracts only) skips this check, with that reason.
+5. **References.** For each string R at a secret position in the request, and each output file
+   (as text, or its bytes read as Latin-1 for `base64`), the check fails when the file contains a
+   run of at least 32 consecutive characters of R (or all of R, if R is shorter) that does not
+   lie inside a complete occurrence of R. A complete occurrence passes, and absence passes. The
+   longest project id is 30 characters, so a project id or a secret name written on its own never
+   fails, while a reference cut short or rewritten around its name and version does. Reference
+   text is the only secret-adjacent material an emitter sees, and RFC 0035 forbids anything
+   resolving it. A facts-contracts request holds no secret position, so the check is skipped, with
+   that reason.
 6. **No stray writes.** On platforms where it can, the harness runs the emitter in a fresh
    temporary copy of the repository and reports any file the emitter created or changed itself
    (`EMIT-STRAY-WRITE`).
 
-**The harness report** uses `harnessReportVersion` `"1.0.0"` and has one row per vector and per
-check, with pass, fail or skip (and the reason for a skip). The harness exits 0 when every row
-passes, 1 when a check fails, and 2 when it could not run.
+**Harness levels.** The checks a run applies are fixed by a **harness level**, a string such as
+`"1.0"`. A vector directory names its level in `vectors/harness.json` (`{"harnessLevel": "1.0"}`),
+and a run applies exactly that level's checks. Level `1.0` is checks 1–6 as written here. A later
+1.x minor may define a new level that adds checks, and an author moves to it by changing that one
+file. A vector set that passes at its level keeps passing under every later 1.x harness. A
+missing file means level `1.0`. A check added at a later level may run at earlier levels only as
+an informative row, which never fails a run.
+
+**The harness report** uses `harnessReportVersion` `"1.0.0"`, names the level it applied, and has
+one row per vector and per check, with pass, fail, skip (and the reason for a skip) or info. The
+harness exits 0 when every row passes or is skipped or informative, 1 when a check fails, and 2
+when it could not run.
 
 ### 6. Reference emitters
 
@@ -286,10 +353,17 @@ may change formatting, and the adopter's `--check` shows it.
 The stable promise of the registry companion (RFC 0034 §8) covers:
 - the manifest, request, response and harness-report formats;
 - the host's behaviour and exit codes;
-- the harness's checks.
+- the harness's checks at each level.
 
-Checks may be added, and a new one starts as a warning for one minor version before it can fail
-a vector. The promise does not cover any emitter's output.
+Within 1.x:
+- no member, code, rule or check is removed or changes meaning;
+- a check that can fail a vector is added only at a new harness level (§5), so nothing that passes
+  today fails later without its author opting in;
+- a host keeps writing every request version it wrote before (§1, `requestVersions`);
+- a manifest member, an `EMIT-` code or a check can be deprecated (RFC 0034 §8), and keeps working,
+  with a warning, until 2.0.
+
+The promise does not cover any emitter's output.
 
 ## Alternatives
 
@@ -323,6 +397,9 @@ writing and check mode.
   command its manifest names, from the repository. The contract does not make running someone
   else's emitter safe.
 - **Disclosure.** Check-mode and harness output never prints file contents, only paths and codes.
+  An emitter's standard error is discarded unless the caller asks for it (`--emitter-stderr`),
+  since an emitter sees reference strings and may print them. The host never prints an `env`
+  value.
 
 ## Conformance
 
@@ -335,8 +412,17 @@ For the host, the vectors cover:
 - overlapping `owns`;
 - a kind range miss;
 - options failing their schema;
-- emitter exit codes, malformed responses, and oversized standard error;
-- check mode's four kinds of difference.
+- emitter exit codes, malformed responses, and oversized standard error, which is not shown
+  without `--emitter-stderr`;
+- check mode's four kinds of difference;
+- `requestVersions` with no version the host writes, and a registry that needs a later resolved
+  format than the listed versions carry;
+- the facts-contracts form: generated and authored contracts, kind filtering, and a manifest that
+  gives `environments` with it;
+- an unknown manifest member, and a deprecated manifest.
+
+For harness levels: a vector set with no `harness.json`, one at level `1.0`, and one at an unknown
+level (the harness could not run, exit 2).
 
 For the harness, each check has a passing emitter and a failing one, including emitters that:
 - read the clock;
@@ -362,6 +448,7 @@ The adopting organization's own emitters are the first third-party users of the 
    emitters that are shared between organizations.
 2. **Whether a Terraform-variables emitter is generic enough** to be a reference emitter, or always
    adopter-specific. Its natural form is a `.tfvars.json` per environment from declared kinds.
-3. **Range syntax.** Is a SemVer range on kind versions enough, or should a manifest pin exact
-   kind digests, trading upgrades for certainty?
+3. **Range syntax.** RFC 0034 §2.4 now gives ranges their meaning, and `=x.y.z` pins one version.
+   Open: whether a manifest should also be able to pin a kind's digest, for an emitter that must
+   not see even an annotation change.
 4. **Review regime:** as in RFC 0034, question 1.

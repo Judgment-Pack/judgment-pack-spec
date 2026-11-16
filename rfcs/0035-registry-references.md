@@ -39,10 +39,11 @@ which members hold references. This RFC defines what a reference is:
 ## Evidence
 
 - The adopting organization behind RFC 0034 references database roles, groups and secrets between
-  entries. It deploys to Cloud Run with secrets in Secret Manager, injected by the platform as
-  environment variables or mounted files. Its start-up loader reads those, never the store.
-- Secret Manager versions are positive integers, and the alias `latest` is a moving pointer. Cloud
-  Run accepts a pinned version or `latest`, so pinning is a choice the registry can enforce.
+  entries. Its services keep their secrets in Secret Manager, and the platform they run on injects
+  them as environment variables or mounted files. Its start-up loader reads those, never the store.
+- Secret Manager versions are positive integers, and the alias `latest` is a moving pointer.
+  Platforms that inject Secret Manager secrets accept either a pinned version or `latest`, so
+  pinning is a choice the registry can enforce.
 
 ## Specification
 
@@ -93,9 +94,20 @@ name       = 1*255( ALPHA / DIGIT / "_" / "-" )
 version    = %x31-39 *8DIGIT ; a positive integer, at most 9 digits, no leading zero
 ```
 
-`latest`, an alias, or a project number in place of a project id are refused (`REF-SECRET-PIN`),
-as is anything the grammar does not match (`REF-SECRET-FORM`). A store other than the ones the
-companion version defines is `REF-SECRET-STORE`. Further stores (other clouds' secret managers, a
+A reference that fails is given exactly one code, by the first of these that applies:
+
+1. **`REF-SECRET-FORM`**: the value is not a string, does not begin with `secret:`, or has no `:`
+   after the store.
+2. **`REF-SECRET-STORE`**: the store is not one the companion version defines.
+3. **`REF-SECRET-PIN`**: the locator has the six segments
+   `projects/<p>/secrets/<n>/versions/<v>`, `<n>` matches `name`, and either `<v>` contains a
+   character other than a digit (`latest`, or any alias), or `<p>` is all digits (a project number,
+   which is not the project id that scopes compare).
+4. **`REF-SECRET-FORM`**: anything else the grammar does not match. This includes a version of
+   `0`, a version with a leading zero, a version of ten or more digits, and a malformed project id.
+
+So "not pinned" is reserved for a reference that names a secret correctly but floats, or names
+its project by number. A version number that is out of range is a form error. Further stores (other clouds' secret managers, a
 Vault-compatible store) are added by later minor format versions, each with its own locator
 grammar and pin rule.
 
@@ -178,7 +190,8 @@ refuses a store it does not know rather than passing it.
     first;
   - a pointer into a value that an overlay changed.
 - **Secret errors:**
-  - `latest`, a zero version, a leading zero, a 10-digit version, and a project number;
+  - `latest`, an alias and a project number (`REF-SECRET-PIN`), and a zero version, a leading
+    zero and a 10-digit version (`REF-SECRET-FORM`), each with its expected code;
   - an unknown store;
   - a scope miss, a shared scope, and missing scopes (a warning).
 - **A position matched by both `references` and `secrets`.**

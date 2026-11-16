@@ -81,7 +81,7 @@ document, the **facts contract**:
     { "pointer": "/value/password", "type": "object", "present": "optional", "secretReference": true },
     { "pointer": "/value/password/store", "type": "string", "present": "always", "values": ["gcp-sm"] },
     { "pointer": "/value/password/scope", "type": "string", "present": "always" },
-    { "pointer": "/references/value~1database/value/engine", "type": "string", "present": "always" }
+    { "pointer": "/references/~1database/value/engine", "type": "string", "present": "always" }
   ]
 }
 ```
@@ -190,7 +190,9 @@ then reports, without evaluating:
 | `FACTS-POINTER-UNKNOWN` | reads a pointer the contract does not list |
 | `FACTS-TYPE-ORDERED` | uses an ordered comparison on a pointer whose type is not `decimal` |
 | `FACTS-VALUE-UNREACHABLE` | compares with `equals`, `not-equals` or `in` against a value that is outside the pointer's `values`, or of another type |
-| `FACTS-OPTIONAL-UNHANDLED` | reads an `optional` pointer in a rule whose `onUnknown` is not set (a warning, since `unknown` handling is the pack's choice) |
+
+Reading an `optional` pointer needs no advisory: Core requires every rule to state `onUnknown`
+(§6.5), so how a rule treats an absent fact is always declared.
 
 These are advisories. They never change an evaluation, and Core is unchanged. They are what makes a
 pack fail its CI when the registry's kinds move under it.
@@ -198,9 +200,11 @@ pack fail its CI when the registry's kinds move under it.
 ### 6. Typed facts builders: a reference emitter
 
 A contract, generated (§4) or authored by hand, is the input of a reference emitter under
-RFC 0036. That emitter extends RFC 0036 §1 by one manifest member, `"input": "factsContracts"`. With
-it, the request carries `factsContracts`, an array of contracts, in place of `resolved`. Everything
-else in RFC 0036 (the host, check mode and the harness) applies unchanged.
+RFC 0036. Its manifest says `"input": "factsContracts"`, which RFC 0036 defines in its
+manifest format `1.0.0` (§1) along with the request form it gives (§2): the request carries
+`factsContracts`, an array of contracts, in place of `resolved`. The host's check mode applies as
+for any emitter. The harness's kind-filtering and reference checks apply as RFC 0036 §5 states
+for this form.
 
 **What the emitter generates.**
 
@@ -238,8 +242,8 @@ pack by §5.
 
 - Core is unchanged: packs and evaluators see ordinary facts documents.
 - The batch format is the runtime's existing one.
-- The emitter extension is one optional manifest member, and an RFC 0036 host that predates it
-  refuses a manifest with it (closed members), which is the intended failure.
+- The contracts input is part of RFC 0036's first manifest and request formats, so every
+  conformant host supports it. There is no older host to fall back from.
 
 ## Security and privacy
 
@@ -280,6 +284,5 @@ Every vector also asserts that no secret reference string appears in a facts doc
 
 1. **Where a project declares the contract a pack follows**: in the runtime's project configuration
    (product), or in the pack itself as an annotation (format).
-2. **Whether `FACTS-OPTIONAL-UNHANDLED` should exist at all**, given `onUnknown` defaults.
-3. **Two levels of references**, for grant → role → database. This is deferred until a case needs it.
-4. **Review regime:** as in RFC 0034, question 1.
+2. **Two levels of references**, for grant → role → database. This is deferred until a case needs it.
+3. **Review regime:** as in RFC 0034, question 1.
