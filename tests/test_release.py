@@ -1022,11 +1022,43 @@ class CoreCarriedReleaseTests(unittest.TestCase):
                 self.assertIn(text, notes)
 
 
+def _schema_id(path: str) -> str:
+    return "https://judgmentpack.org/schema/0.5.0/" + path
+
+
+# A hand-authored tree that stands for a released specVersion 0.5.0: one file of each kind the
+# normative record holds (#319), none of them this repository's bytes, so the patch-release tests
+# hold the builder whatever specVersion the live tree carries.
+PATCH_FIXTURE_FILES = {
+    "spec/judgment-pack-core.md": "Core fixture, not a specification.\n",
+    "schema/judgment-pack-core.schema.json": json.dumps({
+        "$id": _schema_id("judgment-pack-core.schema.json"),
+        "properties": {"specVersion": {"const": "0.5.0"}}}) + "\n",
+    "schema/workflow-1.schema.json": json.dumps({"$id": _schema_id("workflow-1.schema.json")}) + "\n",
+    "conformance/manifest.schema.json": json.dumps(
+        {"$id": _schema_id("conformance/manifest.schema.json")}) + "\n",
+    "conformance/evaluation/manifest.schema.json": json.dumps(
+        {"$id": _schema_id("conformance/evaluation/manifest.schema.json")}) + "\n",
+    "conformance/manifest.json": json.dumps({
+        "specVersion": "0.5.0", "suiteVersion": "0.5.0", "status": "draft", "cases": [
+            {"id": "valid", "path": "valid/minimal-expense-approval.json"},
+            {"id": "advisory", "path": "advisory/rules-touching.json"},
+            {"id": "carrier", "path": "carrier/malformed-json.json"}]}, indent=2) + "\n",
+    "conformance/evaluation/manifest.json": json.dumps({
+        "specVersion": "0.5.0", "suiteVersion": "0.5.0", "status": "draft", "cases": [
+            {"id": "value-set", "pack": "packs/value-set-reference.json"}]}, indent=2) + "\n",
+    "conformance/valid/minimal-expense-approval.json": '{"specVersion":"0.5.0","fixture":"valid"}\n',
+    "conformance/advisory/rules-touching.json": '{"specVersion":"0.5.0","fixture":"advisory"}\n',
+    "conformance/carrier/malformed-json.json": '{"specVersion":"0.5.0",\n',
+    "conformance/evaluation/packs/value-set-reference.json": '{"specVersion":"0.5.0","fixture":"pack"}\n',
+}
+
+
 class CorePatchReleaseTests(unittest.TestCase):
     """A patch tag carries its X.Y.0 release unchanged: real tags and the builder CLI.
 
-    The tree holds the normative files of specVersion 0.5.0 byte for byte, copied from this
-    repository and held to releases/v0.5.0.normative.json, and hand-authored files for the rest.
+    The tree is hand-authored (PATCH_FIXTURE_FILES), with its own normative record. Its builder is
+    this repository's, with only the record's pinned digest replaced by the fixture record's.
     """
 
     TAG = "v0.5.1"
@@ -1038,18 +1070,23 @@ class CorePatchReleaseTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
-        record = json.loads((ROOT / self.RECORD).read_text(encoding="utf-8"))
-        for path, digest in record["files"].items():
-            data = (ROOT / path).read_bytes()
-            # The live tree carries 0.5.0 now. Once Core moves on, read preserved copies instead.
-            if "sha256:" + hashlib.sha256(data).hexdigest() != digest:
-                raise AssertionError(f"{path} is no longer the v0.5.0 bytes; use a preserved copy")
+        files = {}
+        for path, text in PATCH_FIXTURE_FILES.items():
             (self.root / path).parent.mkdir(parents=True, exist_ok=True)
-            (self.root / path).write_bytes(data)
+            (self.root / path).write_text(text, encoding="utf-8")
+            files[path] = "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
         for directory in ("tools", "examples", "catalog", "releases"):
             (self.root / directory).mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(ROOT / "tools/build_release.py", self.root / "tools/build_release.py")
-        shutil.copyfile(ROOT / self.RECORD, self.root / self.RECORD)
+        record = json.dumps({"tag": "v0.5.0", "sourceCommit": "0" * 40, "specVersion": "0.5.0",
+                             "files": files}, indent=2) + "\n"
+        (self.root / self.RECORD).write_text(record, encoding="utf-8")
+        self.record_digest = hashlib.sha256(record.encode("utf-8")).hexdigest()
+        builder = (ROOT / "tools/build_release.py").read_text(encoding="utf-8")
+        pinned = f'"0.5.0": ("{self.RECORD}",\n              "{BUILD_RELEASE.NORMATIVE_RECORDS["0.5.0"][1]}"),'
+        self.assertEqual(1, builder.count(pinned), "the builder's record pin moved; update the fixture")
+        (self.root / "tools/build_release.py").write_text(
+            builder.replace(pinned, f'"0.5.0": ("{self.RECORD}",\n              "{self.record_digest}"),'),
+            encoding="utf-8")
         for name in ("README.md", "LICENSE", "NOTICE", "CHANGELOG.md", "VERSIONING.md",
                      "TESTING.md", "SECURITY.md"):
             (self.root / name).write_text("Hand-authored release fixture.\n")
@@ -1058,6 +1095,7 @@ class CorePatchReleaseTests(unittest.TestCase):
         (self.root / "releases/v0.5.0.md").write_text("# Hand-authored earlier notes\n")
         (self.root / f"releases/{self.TAG}.md").write_text("# Hand-authored notes\n")
         self.git("init", "--quiet")
+        self.assertEqual(set(files), BUILD_RELEASE.normative_paths("0.5.0", self.root))
 
     git = CoreCarriedReleaseTests.git
     commit = CoreCarriedReleaseTests.commit
@@ -1092,9 +1130,11 @@ class CorePatchReleaseTests(unittest.TestCase):
             self.assertEqual("https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json",
                              schema["$id"])
             core = archive.extractfile(prefix + "schema/judgment-pack-core.schema.json").read()
-        record = json.loads((ROOT / self.RECORD).read_text(encoding="utf-8"))
+            bundled_record = archive.extractfile(prefix + self.RECORD).read()
+        record = json.loads((self.root / self.RECORD).read_text(encoding="utf-8"))
         self.assertEqual(record["files"]["schema/judgment-pack-core.schema.json"],
                          "sha256:" + hashlib.sha256(core).hexdigest())
+        self.assertEqual(self.record_digest, hashlib.sha256(bundled_record).hexdigest())
         for member in (f"releases/{self.TAG}.md", self.RECORD, "catalog/record-shapes.json"):
             with self.subTest(member=member):
                 self.assertIn(prefix + member, names)
@@ -1222,7 +1262,30 @@ class CorePatchReleaseTests(unittest.TestCase):
         self.assertEqual({"tag", "sourceCommit", "specVersion", "files"}, set(record))
         self.assertEqual(("v0.5.0", "0.5.0"), (record["tag"], record["specVersion"]))
         self.assertRegex(record["sourceCommit"], r"^[0-9a-f]{40}$")
-        self.assertEqual(BUILD_RELEASE.normative_paths("0.5.0"), set(record["files"]))
+        # The live tree need not hold 0.5.0 (#319): the paths are those the v0.5.0 manifests name,
+        # read from their preserved copies, and the record holds every preserved file at its bytes.
+        preserved = ROOT / "tests/fixtures/historical-compatibility"
+        document = json.loads((preserved / "0.5.0-document-manifest.json").read_text(encoding="utf-8"))
+        evaluation = json.loads((preserved / "0.5.0-evaluation-manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual({"spec/judgment-pack-core.md", "schema/judgment-pack-core.schema.json",
+                          "schema/workflow-1.schema.json", "conformance/manifest.json",
+                          "conformance/manifest.schema.json", "conformance/evaluation/manifest.json",
+                          "conformance/evaluation/manifest.schema.json",
+                          *("conformance/" + case["path"] for case in document["cases"]),
+                          *("conformance/evaluation/" + case["pack"] for case in evaluation["cases"])},
+                         set(record["files"]))
+        for path, copy in (("spec/judgment-pack-core.md", "tests/fixtures/historical-compatibility/v0.5.0/spec/judgment-pack-core.md"),
+                           ("schema/judgment-pack-core.schema.json", "schema/judgment-pack-core-0.5.0.schema.json"),
+                           ("schema/workflow-1.schema.json", "schema/workflow-1-0.5.0.schema.json"),
+                           ("conformance/manifest.schema.json", "schema/conformance-manifest-0.5.0.schema.json"),
+                           ("conformance/evaluation/manifest.schema.json",
+                            "schema/conformance-evaluation-manifest-0.5.0.schema.json"),
+                           ("conformance/manifest.json", "tests/fixtures/historical-compatibility/0.5.0-document-manifest.json"),
+                           ("conformance/evaluation/manifest.json",
+                            "tests/fixtures/historical-compatibility/0.5.0-evaluation-manifest.json")):
+            with self.subTest(path=path):
+                self.assertEqual(record["files"][path],
+                                 "sha256:" + hashlib.sha256((ROOT / copy).read_bytes()).hexdigest())
         # The record agrees with the four schema digests the v0.5.0 notes published.
         notes = (ROOT / "releases/v0.5.0.md").read_text(encoding="utf-8")
         for path in ("schema/judgment-pack-core.schema.json", "conformance/manifest.schema.json",
@@ -1234,8 +1297,11 @@ class CorePatchReleaseTests(unittest.TestCase):
         self.assertEqual(374 + 41 + 2 + 2 + 2 + 1, len(record["files"]))
 
     def test_the_prepared_files_are_this_tags(self):
-        # The live tree holds 0.5.0's normative bytes, so it builds as v0.5.1, with no mapping.
-        BUILD_RELEASE.validate_artifacts("0.5.1", self.TAG)
+        # v0.5.1 is built from its tag, with no mapping. The live tree carries a later specVersion,
+        # so it is refused for v0.5.1 (#319); the fixture above holds the builder for the tag.
+        with self.assertRaises(ValueError) as raised:
+            BUILD_RELEASE.validate_artifacts("0.5.1", self.TAG)
+        self.assertIn("conformance specVersion", str(raised.exception))
         self.assertFalse((ROOT / f"releases/{self.TAG}.json").exists())
         self.assertEqual(self.IDENTITY, BUILD_RELEASE.release_identity(self.TAG))
         self.assertEqual({"number": 9, "title": "v0.5.1"},
@@ -1302,8 +1368,11 @@ class SecondPatchReleaseTests(unittest.TestCase):
                 "distribution": "specification-unchanged"}
 
     def test_the_prepared_files_are_this_tags(self):
-        # The live tree holds 0.5.0's normative bytes, so it builds as v0.5.2, with no mapping.
-        BUILD_RELEASE.validate_artifacts("0.5.2", self.TAG)
+        # v0.5.2 is built from its tag, with no mapping. The live tree carries a later specVersion,
+        # so it is refused for v0.5.2 (#319).
+        with self.assertRaises(ValueError) as raised:
+            BUILD_RELEASE.validate_artifacts("0.5.2", self.TAG)
+        self.assertIn("conformance specVersion", str(raised.exception))
         self.assertFalse((ROOT / f"releases/{self.TAG}.json").exists())
         self.assertEqual(self.IDENTITY, BUILD_RELEASE.release_identity(self.TAG))
         # The next milestone number after v0.5.1's 9.

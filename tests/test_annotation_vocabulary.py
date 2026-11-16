@@ -516,15 +516,18 @@ class Released(unittest.TestCase):
                 self.assertEqual("unspecified", attributes.get(path))
 
     def test_a_patch_tag_carries_core_unchanged_beside_the_vocabulary(self) -> None:
-        # The builder's own patch-release check: Core 0.5.0's normative files are the bytes the
-        # record names, and nothing added here joins that set (it is derived from the tree).
-        paths = BUILD_RELEASE.normative_paths("0.5.0")
-        self.assertIn("conformance/manifest.json", paths)
-        added = [path for path in paths
-                 if path.startswith("conformance/annotation-vocabulary/")
-                 or path == "spec/annotation-vocabulary.md"]
-        self.assertEqual([], added)
-        BUILD_RELEASE.validate_unchanged_normative_artifacts("v0.5.2")
+        # The builder's own patch-release check: a Core release's normative files are derived from
+        # the tree, and nothing added here joins them, whatever specVersion the tree carries. The
+        # record v0.5.2 was held to names none of the vocabulary's files either; that tag's own
+        # build is held by the release tests' fixture, not by the live tree (#319).
+        version = json.loads((ROOT / "conformance" / "manifest.json").read_text(encoding="utf-8"))["specVersion"]
+        record = json.loads((ROOT / "releases" / "v0.5.0.normative.json").read_text(encoding="utf-8"))
+        for paths in (BUILD_RELEASE.normative_paths(version), set(record["files"])):
+            self.assertIn("conformance/manifest.json", paths)
+            added = [path for path in paths
+                     if path.startswith("conformance/annotation-vocabulary/")
+                     or path == "spec/annotation-vocabulary.md"]
+            self.assertEqual([], added)
 
     def test_no_bundled_file_links_to_an_export_ignored_file(self) -> None:
         # A bundle leaves out the rows (export-ignore), so a relative link to them from a Markdown
