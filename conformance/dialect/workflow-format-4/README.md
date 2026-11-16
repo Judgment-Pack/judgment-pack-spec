@@ -24,9 +24,10 @@ Each stage is terminal, since no stage consumes it, so it carries no `selection`
 §3). A fourth case, `stage-4.0.0-terminal-selection`, is the format `4.0.0` stage with
 `selection: {mode: "reviewer"}` added. The schemas cannot see which stages consume which, so the
 staged schema admits it; the workflow reader refuses it `input-malformed`, naming the rule
-("selection belongs to producing stages only"), which outranks the stage's `version-unread`.
+("selection belongs to producing stages only").
 
 The Python reader's `release_digest_bytes` (`tools/workflow_reader_encoding.py`) gives both release
 digests, and the pinned Runner encoding would give others, since it drops the case's `rule` and the
-source's `paging`. The workflow reader still refuses each stage `version-unread`, as a `0.5.x` reader
-does, until the format is accepted. `tests/test_workflow_format_4.py` holds them to the manifest.
+source's `paging`. The workflow reader admits each stage's selector (`admitted` in the manifest), and
+the stage's dialect reference, not the release, selects that digest rule.
+`tests/test_workflow_format_4.py` holds them to the manifest.

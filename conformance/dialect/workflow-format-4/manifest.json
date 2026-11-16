@@ -15,7 +15,7 @@
       "expected": {
         "stagedSchema": "valid",
         "publishedSchema": "invalid",
-        "workflowReader": "version-unread"
+        "workflowReader": "admitted"
       }
     },
     {
@@ -29,7 +29,7 @@
       "expected": {
         "stagedSchema": "valid",
         "publishedSchema": "invalid",
-        "workflowReader": "version-unread"
+        "workflowReader": "admitted"
       }
     },
     {
@@ -43,7 +43,7 @@
       "expected": {
         "stagedSchema": "valid",
         "publishedSchema": "invalid",
-        "workflowReader": "version-unread"
+        "workflowReader": "admitted"
       }
     },
     {

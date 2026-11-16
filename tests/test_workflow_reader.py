@@ -5,6 +5,7 @@ workflow conformance fixtures. Existing dialect recordings exercise the reused d
 """
 import base64
 import copy
+import hashlib
 import json
 import unittest
 from unittest.mock import patch
@@ -21,6 +22,30 @@ def decoded(value): return d.read_document(d.canon(value),'test value')
 def hashvalue(value): return d.digest_of(d.canon(value))
 
 
+def general_canon(value):
+    """A general-purpose serializer, not the reader's: sorted keys, no whitespace, UTF-8; an integer
+    literal the dialect decoder kept is written as that integer."""
+    def number(member):
+        if isinstance(member,d.Num) and member.is_integer(): return int(member.literal)
+        raise TypeError(type(member).__name__)
+    return json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False,default=number).encode('utf-8')
+
+
+def release_pin(release, dialect):
+    """The frozen release digest a writer records for a stage of this dialect. For format 4.0.0 or 4.1.0
+    it is RFC 0020 section 1's, SHA-256 of the whole release, computed here with a general-purpose
+    serializer and never by the reader; otherwise it is the pinned typed encoding's."""
+    if dialect.get('formatVersion') in ('4.0.0','4.1.0'):
+        return 'sha256:'+hashlib.sha256(general_canon(release)).hexdigest()
+    return d.digest_of(encoding.release_bytes(decoded(release)))
+
+
+def named_identity(release, dialect):
+    """A named dialect's identity in its release, as the Runner retains it; none for an integer one."""
+    if 'formatVersion' in dialect: release['dialect']={'id':dialect['id'],'version':dialect['version'],'digest':hashvalue(dialect)}
+    else: release.pop('dialect',None)
+
+
 def change_run(example, mutate):
     """Repin literal retained bytes after a diagnostic mutation, never reader output."""
     number=len(example.instances[0]['attempts'])
@@ -33,7 +58,7 @@ def change_run(example, mutate):
     return example.finish()
 
 
-def replace_frozen_stage(example, sid, published, binding=None):
+def replace_frozen_stage(example, sid, published, binding=None, change_release=None):
     """Change a root-only unit prefix's declared inputs before any attempt."""
     assert len(example.epochs)==1
     parsed=d.parse_dialect(decoded(published))
@@ -42,11 +67,12 @@ def replace_frozen_stage(example, sid, published, binding=None):
     definition=example.workflow['stages'][index]
     definition['dialect']={k:published[k] for k in (('formatVersion','id','version') if 'formatVersion' in published else ('version',))}
     definition['dialect']['digest']=hashvalue(published)
-    release=copy.deepcopy(example.release); release['inputMapping']=bound
+    release=copy.deepcopy(example.release); release['inputMapping']=bound; named_identity(release,published)
+    if change_release is not None: change_release(release)
     frozen=example.frozen[index]
     frozen.update(publishedDialectDigest=hashvalue(published),boundDialectDigest=hashvalue(bound),
                   bindingDocumentDigest=hashvalue(binding) if binding is not None else None,
-                  releaseDigest=d.digest_of(encoding.release_bytes(decoded(release))))
+                  releaseDigest=release_pin(release,published))
     for name,value in [('dialect.json',published),('bound-dialect.json',bound),('release.json',release)]:
         example.files[f'stages/{sid}/{name}']=d.canon(value)
     if binding is not None: example.files[f'stages/{sid}/binding.json']=d.canon(binding)
@@ -64,7 +90,7 @@ class Example:
     This builds a test subject from contract expressions; it never calls Reader,
     candidate measurement, or replay to obtain expected control bytes.
     """
-    def __init__(self, children=False, limits=None, case=None, mapping=None, profiles=None):
+    def __init__(self, children=False, limits=None, case=None, mapping=None, profiles=None, pin=None):
         self.files={}; self.case=case if case is not None else {'items':[{'id':'a'},{'id':'b'}]}
         self.mapping={'version':2,'provider':'','facts':None,'evidence':None,
                       'case':{'facts':[{'target':'/items','source':'/items'}],'evidence':[]}}
@@ -77,6 +103,8 @@ class Example:
                       'createdAt':'2026-10-17T00:00:00Z','config':'','lock':'','validation':None,'sample':{},'preview':None,
                       'tests':'','inputMapping':self.mapping}
         if self.profiles: self.release['inputProfiles']=self.profiles
+        named_identity(self.release,self.mapping)
+        pin=release_pin if pin is None else pin
         root=dict(id='root',dialect={**({k:self.mapping[k] for k in ('formatVersion','id','version')} if 'formatVersion' in self.mapping else {'version':self.mapping['version']}),'digest':hashvalue(self.mapping)},pack={'id':self.pack['id'],'digest':hashvalue(self.pack)},
                   input={'root':True},execution='once',caseBindings=[],outputs={'pointer':'/items','cardinality':'many'},
                   relation={'label':'related','direction':'output-to-parent'})
@@ -93,7 +121,7 @@ class Example:
         for stage in stages:
             sid=stage['id']; f=dict(stage=sid,publishedDialectDigest=hashvalue(self.mapping),bindingDocumentDigest=None,
                                   boundDialectDigest=hashvalue(self.mapping),packDigest=hashvalue(self.pack),
-                                  releaseDigest=d.digest_of(encoding.release_bytes(decoded(self.release))),runtimeDigest=self.runtime)
+                                  releaseDigest=pin(self.release,self.mapping),runtimeDigest=self.runtime)
             self.frozen.append(f)
             for name,value in [('pack.json',self.pack),('release.json',self.release),('dialect.json',self.mapping),('bound-dialect.json',self.mapping),('profiles.json',self.profiles)]:
                 self.files[f'stages/{sid}/{name}']=d.canon(value)
@@ -600,6 +628,95 @@ class ReaderTests(unittest.TestCase):
         r=w.Reader(e.files,e.expect,True)
         r.preflight(); r.pins(); r.verify_preparations()
         self.assertEqual(r.replay()['result'],'reading')
+
+
+FOUR={'formatVersion':'4.0.0','id':'urn:example:dialect:four','version':'1.0.0',
+      'case':{'facts':[{'target':'/items','source':'/items'}],'evidence':[],
+              'rule':{'ruleVersion':'2.0.0','parameters':{},
+                      'clauses':[{'when':{'op':'always'},'reason':'reviewed',
+                                  'claim':{'facts':[{'pointer':'/reviewed','value':True}],'evidence':{},'acquisitionStatus':'resolved'}}]}}}
+
+
+def typed_pin(release, dialect):
+    """The digest the pinned Runner encoding gives, which drops the case's `rule`: what a 0.5.x writer records."""
+    return d.digest_of(encoding.release_bytes(decoded(release)))
+
+
+class FormatFourStageTests(unittest.TestCase):
+    """Core 0.6.0: a stage whose dialect is of format 4.0.0 or 4.1.0 (RFC 0020 §1, §3 and §7).
+
+    Hand-written unit bundles, as above; the frozen release digest is computed with a general-purpose
+    serializer (release_pin), never by the reader."""
+
+    def read(self,e,exit=0):
+        result=w.verify(e.files,e.expect,comparison_trace=True)
+        self.assertEqual(result.exit_code,exit,result.detail)
+        return result
+
+    def test_a_format_4_0_0_stage_is_read_with_its_whole_release_digested(self):
+        e=Example(mapping=copy.deepcopy(FOUR)).group()
+        retained=e.files['stages/root/release.json']
+        release=json.loads(retained)
+        self.assertEqual(general_canon(release),retained)  # the two serializers agree on these bytes
+        self.assertIn('rule',release['inputMapping']['case'])
+        self.assertEqual('sha256:'+hashlib.sha256(retained).hexdigest(),e.frozen[0]['releaseDigest'])
+        self.assertNotEqual(typed_pin(release,FOUR),e.frozen[0]['releaseDigest'])
+        run=json.loads(e.files['instances/root-instance/attempts/1/run.json'])
+        self.assertEqual((3,FOUR,e.frozen[0]['releaseDigest']),(run['version'],run['run']['input']['source']['mapping'],run['releaseDigest']))
+        result=self.read(e)
+        self.assertEqual('complete',result.report['completion'])
+        self.assertEqual(2,len(e.output_sets[0]['records']))
+
+    def test_a_format_4_0_0_release_pinned_under_the_runner_encoding_is_a_mismatch(self):
+        e=Example(mapping=copy.deepcopy(FOUR),pin=typed_pin).group()
+        result=self.read(e,2)
+        self.assertEqual('digest-mismatch',result.report['finding'])
+        self.assertIn('release.json release digest',result.detail)
+
+    def test_the_release_is_open_and_each_runner_member_it_keeps_is_held(self):
+        four=lambda change=None:replace_frozen_stage(Example(),'root',copy.deepcopy(FOUR),change_release=change)
+        self.assertEqual(0,self.read(four()).exit_code)
+        bare=lambda r:[r.pop(k) for k in list(r) if k not in ('id','packDigest','runtimeDigest','inputMapping')]
+        self.assertEqual(0,self.read(four(bare)).exit_code)
+        for name,wrong in (('packId','https://example.invalid/other'),('pack','{}'),('inputProfiles',[{'id':'p'}]),
+                           ('dialect',{'id':FOUR['id'],'version':'9.9.9','digest':hashvalue(FOUR)})):
+            with self.subTest(member=name):
+                self.assertEqual('stage-binding-mismatch',self.read(four(lambda r:r.__setitem__(name,wrong)),2).report['finding'])
+        # a member the four required ones do not name is retained and digested, never refused
+        self.assertEqual(0,self.read(four(lambda r:r.__setitem__('config',7))).exit_code)
+        for name in ('id','packDigest','runtimeDigest','inputMapping'):
+            with self.subTest(required=name):
+                self.assertEqual('input-malformed',self.read(four(lambda r:r.pop(name)),1).report['refusal'])
+
+    def test_a_paged_source_must_fit_its_profile(self):
+        directory=ROOT/'conformance/dialect/format-4.1/paged-three-pages-no-next'
+        dialect=json.loads((directory/'dialect.json').read_bytes())
+        feed,web,_=json.loads((directory/'profiles.json').read_bytes())
+        self.assertEqual('4.1.0',dialect['formatVersion'])
+        self.assertEqual(hashvalue(feed),dialect['sources'][0]['profileDigest'])
+        self.assertEqual(0,self.read(replace_frozen_stage(Example(profiles=[feed]),'root',dialect)).exit_code)
+        # an http profile admits fills only in query or body; the call's arguments are neither
+        web=dict(web,id='feed'); unfit=copy.deepcopy(dialect); unfit['sources'][0]['profileDigest']=hashvalue(web)
+        self.assertIsNone(d.request_misfit(d.parse_dialect(decoded(unfit)).sources[0],web))
+        e=replace_frozen_stage(Example(profiles=[web]),'root',unfit)
+        self.assertEqual('stage-binding-mismatch',self.read(e,2).report['finding'])
+
+    def test_the_stage_reference_not_the_release_selects_the_rule(self):
+        three=copy.deepcopy(FOUR); three['formatVersion']='3.0.0'; three['case'].pop('rule')
+        for stage,claimed in ((three,FOUR),(FOUR,three)):
+            with self.subTest(stage=stage['formatVersion'],claimed=claimed['formatVersion']):
+                e=replace_frozen_stage(Example(),'root',copy.deepcopy(stage),
+                                       change_release=lambda r:r.__setitem__('inputMapping',copy.deepcopy(claimed)))
+                # pinned under the stage's rule, the digest holds; the mapping the release claims is what differs
+                self.assertEqual('stage-binding-mismatch',self.read(e,2).report['finding'])
+
+    def test_other_named_formats_stay_unread(self):
+        for version in ('4.2.0','5.0.0'):
+            with self.subTest(formatVersion=version):
+                e=replace_frozen_stage(Example(),'root',copy.deepcopy(FOUR))
+                definition=json.loads(e.files['workflow.json']); definition['stages'][0]['dialect']['formatVersion']=version
+                e.files['workflow.json']=d.canon(definition)
+                self.assertEqual('version-unread',self.read(e,1).report['refusal'])
 
 
 class RetainedEncodingTests(unittest.TestCase):

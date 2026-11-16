@@ -199,6 +199,8 @@ def check(reader):
             o=obj(observation); iid=o.get('instance'); n=ints(o.get('number'),None)
             if isinstance(iid,str) and n is not None: observations[f'instances/{iid}/attempts/{n}/run.json']=o
     dialects={}
+    # RFC 0020 §1: a stage's dialect reference selects its release's rule; with no readable workflow, the pinned one.
+    stage_formats={s['id']:obj(s.get('dialect')).get('formatVersion') for s in stages if isinstance(s,dict) and isinstance(s.get('id'),str)} if workflow_readable else {}
     for path,value in documents.items():
         name=path.rsplit('/',1)[-1]
         if name in ('dialect.json','bound-dialect.json') and path.startswith('stages/'):
@@ -207,7 +209,8 @@ def check(reader):
                 dialects[path]=parsed
                 if parsed.unread: problem('kind-unread',parsed.unread[0])
         elif name=='profiles.json' and path.startswith('stages/'): capture(lambda value=value:d.parse_profiles(value))
-        elif name=='release.json' and path.startswith('stages/'): capture(lambda value=value:encoding.release_bytes(value))
+        elif name=='release.json' and path.startswith('stages/'):
+            capture(lambda value=value,path=path:encoding.release_digest_bytes(value,stage_formats.get(path.split('/')[1])))
         elif path.startswith('selections/'):
             count(obj(value).get('selected'),probe.limits['maxRecords'],'selected record count')
             if selector(value,'selectionVersion',{1}): capture(lambda value=value:probe.selection_form(value))

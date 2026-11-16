@@ -164,11 +164,17 @@ def release_bytes(value):
     return retained_bytes(project('release',value))
 
 
-# RFC 0020 section 1, staged for specVersion 0.6.0 (issue #326): a release whose inputMapping is of
-# dialect format 4.0.0 or 4.1.0 is digested by the RFC's own text, not by the pinned Runner encoding
-# above, whose typed decoding drops members it does not declare (the case's `rule`, a source's
-# `paging`). The workflow reader still refuses such a stage `version-unread` (stage_form), as 0.5.x does.
+# RFC 0020 section 1, for specVersion 0.6.0 (issue #326): a stage whose dialect is of format 4.0.0 or
+# 4.1.0 takes no Runner encoding. Its release is digested by the RFC's own text, not by the pinned
+# Runner encoding above, whose typed decoding drops members it does not declare (the case's `rule`, a
+# source's `paging`). The stage's dialect reference, not the release, selects the rule.
 NAMED_FORMATS_4 = ('4.0.0', '4.1.0')
+
+
+def takes_no_runner_encoding(format_version):
+    """Whether a stage whose dialect reference has this `formatVersion` (None for an integer reference)
+    takes no Runner encoding (RFC 0020 section 1)."""
+    return format_version in NAMED_FORMATS_4
 
 
 def release_form_4(value):
@@ -180,14 +186,13 @@ def release_form_4(value):
     if not isinstance(value.get('inputMapping'), dict): raise d.malformed('a format 4.x release needs an inputMapping object')
 
 
-def release_digest_bytes(value):
-    """The bytes a release digest is taken of: for a format 4.x release, the `canon` bytes of the whole
-    retained object, every member as retained and none defaulted; otherwise the pinned encoding's."""
+def release_digest_bytes(value, format_version):
+    """The bytes a release digest is taken of, under the rule the stage's dialect reference selects by its
+    `format_version` (None for an integer reference): for format 4.0.0 or 4.1.0, the `canon` bytes of the
+    whole retained object, every member as retained and none defaulted; otherwise the pinned encoding's.
+    The release's own inputMapping never selects the rule."""
     if not isinstance(value, dict): raise d.malformed('release must be an object')
-    # RFC 0020 selects the rule by the stage's dialect; the reader holds the release's inputMapping
-    # equal to that dialect (stage-binding-mismatch otherwise, workflow_reader.py), so the two agree.
-    mapping = value.get('inputMapping')
-    if isinstance(mapping, dict) and mapping.get('formatVersion') in NAMED_FORMATS_4:
+    if takes_no_runner_encoding(format_version):
         release_form_4(value)
         try:
             return d.canon(value)

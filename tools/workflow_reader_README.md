@@ -70,6 +70,16 @@ report counts. No workflow replay or accounting helper is shared with Runner.
   (including -0, decimals and exponents) survive, and HTML/U+2028/U+2029 are
   escaped. This differs from dialect `canon`. Retained triggers remain
   unsupported and return operational error.
+- For Core `0.6.0`, a stage whose named dialect reference has `formatVersion`
+  `4.0.0` or `4.1.0` is read under RFC 0020 §1, §3 and §7: the stage's
+  reference, not the release, selects the rule. Its release takes no Runner
+  encoding. It is open, its digest is SHA-256 of `canon` over the whole
+  retained release, and its embedded mapping and each run's source mapping are
+  compared with the bound dialect as retained. A Runner member it retains
+  (`packId`, `pack`, `inputProfiles`, `dialect`) is held to the stage as before;
+  an absent one is not required. Run exports stay versions 2 and 3. A paged
+  source's `paging` must fit its profile (RFC 0033 §2), as in the dialect reader.
+  Every other format keeps the pinned encoding.
 - Run exports v2/v3 are the recorded scope. The reviewed RFC 0022 clarification
   now explicitly makes v4/v5 `version-unread`, before supported closed forms.
   Separately retained signature bytes are pinned and counted; authentication is

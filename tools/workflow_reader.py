@@ -174,6 +174,7 @@ class RetainedAttempt:
     preparation: dict | None = None
     audit: dict | None = None
     facts: dict | None = None
+    evidence: dict | None = None
     preparation_answer: dict | None = None
 
 
@@ -314,7 +315,8 @@ class Reader:
         if not skip_ref:
             ref=s['dialect']; require(isinstance(ref,dict),'dialect reference')
             if 'formatVersion' in ref:
-                if ref['formatVersion'] not in ('2.0.0','3.0.0'): refuse('version-unread','named dialect selector')
+                # Core 0.6.0 (RFC 0020 §3): 4.0.0 and 4.1.0 with §1's release digest; any other value is unread.
+                if ref['formatVersion'] not in ('2.0.0','3.0.0')+encoding.NAMED_FORMATS_4: refuse('version-unread','named dialect selector')
                 closed(ref,{'formatVersion','id','version','digest'}); text(ref['id'],1,1024)
                 require(not any(ord(c)<=32 or ord(c)==127 for c in ref['id']),'named dialect id')
                 require(isinstance(ref['version'],str) and re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)',ref['version']) is not None,'named artifact version')
@@ -346,6 +348,17 @@ class Reader:
             if mode=='disposition':
                 require(s['outputs']['cardinality']=='one','disposition selection requires one')
                 self.rule_form(selection['rule'])
+
+    def format_of(self,sid):
+        """The stage's dialect formatVersion, None for an integer reference or an unknown stage: it, not the
+        release, selects RFC 0020 §1's encoding rule."""
+        definition=self.definitions.get(sid) if sid is not None else None
+        return definition['dialect'].get('formatVersion') if definition is not None else None
+
+    def retained_mapping(self,sid,mapping):
+        """A mapping as compared with the bound dialect: as retained for a stage that takes no Runner
+        encoding (RFC 0020 §1, §7), otherwise under the pinned typed encoding."""
+        return mapping if encoding.takes_no_runner_encoding(self.format_of(sid)) else encoding.mapping(mapping)
 
     def rule_form(self,r):
         require(isinstance(r,dict),'selection rule')
@@ -441,7 +454,7 @@ class Reader:
             d.parse_profiles(profiles)
             release=self.load(prefix+'release.json',24*1024*1024)
             require(isinstance(release,dict),'release object')
-            encoding.release_bytes(release)  # check retained typed representation
+            encoding.release_digest_bytes(release,self.format_of(sid))  # check the release's form under the stage's rule
             pack=self.load(prefix+'pack.json',10*1024*1024)
             require(isinstance(pack,dict),'pack object')
             self.stages[sid]=Stage(self.definitions[sid],f,published,bound,parsed,release,pack)
@@ -601,7 +614,7 @@ class Reader:
             for key,file in [('publishedDialectDigest','dialect.json'),('boundDialectDigest','bound-dialect.json'),('packDigest','pack.json')]:
                 self.hash_check(self.files[path+file],f[key],path+file)
             if f['bindingDocumentDigest'] is not None: self.hash_check(self.files[path+'binding.json'],f['bindingDocumentDigest'],path+'binding.json')
-            self.hash_check(encoding.release_bytes(r),f['releaseDigest'],path+'release.json typed digest')
+            self.hash_check(encoding.release_digest_bytes(r,self.format_of(sid)),f['releaseDigest'],path+'release.json release digest')
             if sid not in self.expect.runtime_digests: raise OperationalError('independent Runtime pin missing for '+sid)
             check(f['runtimeDigest']==self.expect.runtime_digests[sid],'digest-mismatch','independent Runtime pin '+sid)
             ref=stage.definition['dialect']
@@ -614,8 +627,9 @@ class Reader:
                 if o[pin] is not None: self.hash_check(retained.files[path+PIN_FILES[pin]],o[pin],path+PIN_FILES[pin])
             if retained.run is not None:
                 export=retained.export
-                self.hash_check(encoding.release_bytes(export['release']),export['releaseDigest'],'run embedded release digest')
                 sid=self.identity_stage.get(iid)
+                # The attempt's stage selects the rule; an attempt of no known stage keeps the pinned one.
+                self.hash_check(encoding.release_digest_bytes(export['release'],self.format_of(sid)),export['releaseDigest'],'run embedded release digest')
                 if sid in self.stages:
                     check(export['releaseDigest']==self.stages[sid].frozen['releaseDigest'],'digest-mismatch','run release association')
                 check(retained.files[path+'sources.json']==retained.source_bytes,'digest-mismatch','exact sources span')
@@ -632,15 +646,21 @@ class Reader:
         for sid,stage in self.stages.items():
             path=f'stages/{sid}/'; f=stage.frozen; r=stage.release
             check(same(stage.parsed.document,stage.bound),'stage-binding-mismatch','bound expansion '+sid)
-            check('inputMapping' in r and same(encoding.mapping(r['inputMapping']),stage.bound),'stage-binding-mismatch','release embedded mapping '+sid)
-            check(r.get('packDigest')==f['packDigest'] and r.get('runtimeDigest')==f['runtimeDigest'] and r.get('packId')==stage.pack.get('id'),
-                  'stage-binding-mismatch','release pack/runtime '+sid)
-            check(isinstance(r.get('pack'),str) and r['pack'].encode()==self.files[path+'pack.json'],'stage-binding-mismatch','release exact pack '+sid)
-            check(self.files[path+'profiles.json']==d.canon(r.get('inputProfiles',[])),'stage-binding-mismatch','profiles are release inputProfiles')
+            check('inputMapping' in r and same(self.retained_mapping(sid,r['inputMapping']),stage.bound),'stage-binding-mismatch','release embedded mapping '+sid)
+            check(r.get('packDigest')==f['packDigest'] and r.get('runtimeDigest')==f['runtimeDigest'],'stage-binding-mismatch','release pack/runtime '+sid)
+            # RFC 0020 §1: a release of a stage that takes no Runner encoding is open, and requires none of
+            # the Runner's other members; each one it retains is still held to the stage's own.
+            open_release=encoding.takes_no_runner_encoding(self.format_of(sid))
+            if not open_release or 'packId' in r:
+                check(r.get('packId')==stage.pack.get('id'),'stage-binding-mismatch','release pack/runtime '+sid)
+            if not open_release or 'pack' in r:
+                check(isinstance(r.get('pack'),str) and r['pack'].encode()==self.files[path+'pack.json'],'stage-binding-mismatch','release exact pack '+sid)
+            if not open_release or 'inputProfiles' in r:
+                check(self.files[path+'profiles.json']==d.canon(r.get('inputProfiles',[])),'stage-binding-mismatch','profiles are release inputProfiles')
             for profile in self.parsed[path+'profiles.json']:
                 held=self.trusted.get(profile['id'])
                 check(held is not None and same(held,profile),'stage-binding-mismatch','profile lacks independent historical trust')
-            if 'formatVersion' in stage.published:
+            if 'formatVersion' in stage.published and (not open_release or 'dialect' in r):
                 check(r.get('dialect')=={k:stage.published[k] for k in ('id','version')}|{'digest':f['publishedDialectDigest']},
                       'stage-binding-mismatch','release named dialect identity')
             for source in stage.parsed.sources:
@@ -652,7 +672,10 @@ class Reader:
                         if 'endpointScope' in profile: raise d.Finding('profile-mismatch','endpointScope needs a page binding')
                         bound=stage.parsed.bound_from.get(source.name)
                         if bound is not None and (profile['shape'],profile['adapter']['name'])!=bound: raise d.Finding('profile-mismatch')
-                        if d.request_misfit(source,profile) is not None or (('calculator' in profile)!=(source.calculation is not None)): raise d.Finding('profile-mismatch')
+                        misfit=d.request_misfit(source,profile)
+                        # RFC 0033 §2: a paged source (format 4.1.0) fits only a profile that admits its paging.
+                        if misfit is None and source.paging is not None: misfit=d.paging_misfit(source,profile)
+                        if misfit is not None or (('calculator' in profile)!=(source.calculation is not None)): raise d.Finding('profile-mismatch')
                     for kind,targets in [('fact',source.read.fact_targets),('evidence',source.read.evidence_targets)]:
                         for target in targets:
                             admitted=stage.parsed.admits.get((kind,target),['asserted','record'])
@@ -690,20 +713,13 @@ class Reader:
             if 'finding' in answer.answer:
                 if first_finding is None: first_finding=answer.answer.get('detail',answer.answer['finding'])
             else:
-                # Preserve number literals for output payloads; .facts intentionally exposes plain values.
-                recomputed=d.read_document(answer.preparation,'recomputed preparation')
-                retained.facts={}
-                for outcome in recomputed['outcomes']:
-                    claim=outcome.get('claim')
-                    if isinstance(claim,dict): self.merge_fact_objects(retained.facts,claim.get('facts',{}))
-                retained.preparation=recomputed
+                # §3: outputs resolve in the prepared facts document, the dialect reader's own, number
+                # literals kept (its .facts exposes plain values). Rebuilding it from the outcomes' claims
+                # misses the claim of a format 4.0.0 case rule, which the case's outcome carries beside its own.
+                reading=answer.answer['reading']
+                retained.facts=copy.deepcopy(reading['facts']); retained.evidence=copy.deepcopy(reading['evidence'])
+                retained.preparation=d.read_document(answer.preparation,'recomputed preparation')
         if first_finding is not None: finding('preparation-mismatch',first_finding)
-
-    @staticmethod
-    def merge_fact_objects(target,source):
-        for k,v in source.items():
-            if isinstance(v,dict) and isinstance(target.get(k),dict): Reader.merge_fact_objects(target[k],v)
-            else: target[k]=copy.deepcopy(v)
 
     def prefix(self,count,results=None):
         epochs=copy.deepcopy(self.epochs[:count])
@@ -970,7 +986,7 @@ class Reader:
         if retained.run is not None:
             run=retained.run; source=run['input']['source']
             check(d.preparation_bytes(source.get('case',{}))==d.preparation_bytes(self.case_values[iid]),'case-mismatch','retained source case')
-            check(same(encoding.mapping(source['mapping']),stage.bound),'stage-binding-mismatch','retained run source mapping')
+            check(same(self.retained_mapping(sid,source['mapping']),stage.bound),'stage-binding-mismatch','retained run source mapping')
             if 'mappingDigest' in source: check(source['mappingDigest']==stage.frozen['boundDialectDigest'],'digest-mismatch','retained mapping digest')
             check(run.get('releaseId')==stage.release.get('id'),'inventory-mismatch','retained run release id')
         has_prep=retained.preparation is not None; has_audit=retained.audit is not None
@@ -978,7 +994,7 @@ class Reader:
         if retained.run is not None:
             check(('preparation' in retained.run['input'])==has_prep,'inventory-mismatch','unpinned embedded preparation')
         if has_prep and retained.run is not None:
-            for member,expected in [('facts',retained.facts),('evidence',self.preparation_evidence(retained.preparation))]:
+            for member,expected in [('facts',retained.facts),('evidence',retained.evidence)]:
                 if member in retained.run['input']: check(d.json_equal(retained.run['input'][member],expected),'preparation-mismatch','retained '+member)
         if o['state']=='suppressed':
             check(all(o[k] is None for k in ARTIFACT_PINS) and sid in cutoff,'inventory-mismatch','unproved suppression')
@@ -1047,13 +1063,6 @@ class Reader:
                 for name in ('payload.json','record.json'):
                     path=f'outputs/{sid}/{iid}/{index}/{name}'
                     check(path in self.files and self.files[path]==self.immutable[path],'output-mismatch','emitted artifact '+path)
-
-    @staticmethod
-    def preparation_evidence(preparation):
-        result={}
-        for outcome in preparation['outcomes']:
-            if isinstance(outcome.get('claim'),dict): result.update(outcome['claim'].get('evidenceAvailability',{}))
-        return result
 
     def failed_preparation(self,stage,retained,instance,failure):
         at=retained.run['finishedAt']  # Exact terminal-check instant under RFC 0024's added writer constraint.

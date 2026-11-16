@@ -98,12 +98,12 @@ class ReleaseDigestTests(unittest.TestCase):
                 self.assertEqual(stated, "sha256:" + hashlib.sha256(raw).hexdigest())
                 value = d.read_document(raw, "worked example")
                 self.assertEqual(raw, d.canon(value))
-                self.assertEqual(raw, encoding.release_digest_bytes(value))
+                self.assertEqual(raw, encoding.release_digest_bytes(value, value["inputMapping"]["formatVersion"]))
 
     def test_the_pinned_encoding_drops_the_members_the_formats_add(self) -> None:
         (rule_line, rule_digest), (paged_line, paged_digest) = worked_examples()
         for line, stated, member in ((rule_line, rule_digest, b'"rule"'), (paged_line, paged_digest, b'"paging"')):
-            pinned = encoding.release_bytes(d.read_document(line.encode("utf-8"), "worked example"))
+            pinned = encoding.release_bytes(d.read_document(line.encode("utf-8"), "worked example"))  # the 0.5.x rule
             self.assertNotIn(member, pinned)
             self.assertNotEqual(stated, "sha256:" + hashlib.sha256(pinned).hexdigest())
 
@@ -116,7 +116,7 @@ class ReleaseDigestTests(unittest.TestCase):
                        lambda v: v["inputMapping"]["case"]["rule"].__setitem__("ruleVersion", "1")):
             changed = copy.deepcopy(value)
             change(changed)
-            self.assertNotEqual(stated, "sha256:" + hashlib.sha256(encoding.release_digest_bytes(changed)).hexdigest())
+            self.assertNotEqual(stated, "sha256:" + hashlib.sha256(encoding.release_digest_bytes(changed, "4.0.0")).hexdigest())
 
     def test_a_release_without_a_required_member_is_refused(self) -> None:
         (line, _), _ = worked_examples()
@@ -127,7 +127,7 @@ class ReleaseDigestTests(unittest.TestCase):
                 change(changed)
                 with self.subTest(member=name, changed=changed.get(name, "absent")):
                     with self.assertRaises(d.Refused) as caught:
-                        encoding.release_digest_bytes(changed)
+                        encoding.release_digest_bytes(changed, "4.0.0")
                     self.assertEqual("input-malformed", caught.exception.name)
 
     def test_the_rfc_lists_the_runner_members_the_vector_carries(self) -> None:
@@ -147,7 +147,7 @@ class ReleaseDigestTests(unittest.TestCase):
         (line, _), _ = worked_examples()
         value = d.read_document(line[:-1].encode("utf-8") + b',"weight":1.5}', "release")
         with self.assertRaises(d.Refused) as caught:
-            encoding.release_digest_bytes(value)
+            encoding.release_digest_bytes(value, "4.0.0")
         self.assertEqual("input-malformed", caught.exception.name)
 
     def test_the_0_6_0_schema_is_bundled_and_the_vectors_are_not(self) -> None:
@@ -159,11 +159,21 @@ class ReleaseDigestTests(unittest.TestCase):
 
     def test_other_formats_keep_the_pinned_encoding(self) -> None:
         (line, _), _ = worked_examples()
-        for mapping in ({"formatVersion": "3.0.0", "id": "urn:example:dialect:three", "version": "1.0.0", "sources": []},
-                        {"version": 3, "sources": []}):
+        for mapping, format_version in (({"formatVersion": "3.0.0", "id": "urn:example:dialect:three", "version": "1.0.0",
+                                          "sources": []}, "3.0.0"), ({"version": 3, "sources": []}, None)):
             value = d.read_document(line.encode("utf-8"), "release")
             value["inputMapping"] = d.read_document(d.canon(mapping), "mapping")
-            self.assertEqual(encoding.release_bytes(value), encoding.release_digest_bytes(value))
+            self.assertEqual(encoding.release_bytes(value), encoding.release_digest_bytes(value, format_version))
+
+    def test_the_stage_reference_not_the_release_selects_the_rule(self) -> None:
+        # RFC 0020 section 1: a 4.0.0 release under a stage of another format takes that stage's rule, and back
+        (line, _), _ = worked_examples()
+        value = d.read_document(line.encode("utf-8"), "release")
+        for format_version in ("3.0.0", None, "4.2.0"):
+            self.assertEqual(encoding.release_bytes(value), encoding.release_digest_bytes(value, format_version))
+        value["inputMapping"] = d.read_document(d.canon({"version": 3, "case": {"facts": [], "evidence": []}}), "mapping")
+        for format_version in ("4.0.0", "4.1.0"):
+            self.assertEqual(d.canon(value), encoding.release_digest_bytes(value, format_version))
 
 
 class StagedStageVectorTests(unittest.TestCase):
@@ -197,18 +207,16 @@ class StagedStageVectorTests(unittest.TestCase):
                 self.assertEqual(stage["pack"]["digest"], release["packDigest"])
                 value = d.read_document((self.DIRECTORY / case["release"]).read_bytes(), "release")
                 self.assertEqual(case["releaseDigest"],
-                                 "sha256:" + hashlib.sha256(encoding.release_digest_bytes(value)).hexdigest())
+                                 "sha256:" + hashlib.sha256(encoding.release_digest_bytes(value, case["formatVersion"])).hexdigest())
                 self.assertNotEqual(case["releaseDigest"],
                                     "sha256:" + hashlib.sha256(encoding.release_bytes(value)).hexdigest())
-                # the workflow reader stays a 0.5.x reader of the selector until the format is accepted
+                # the workflow reader reads the selector as Core 0.6.0 does (its contract has no `sample`)
                 form = {name: member for name, member in stage.items() if name != "sample"}
-                with self.assertRaises(reader.Problem) as caught:
-                    reader.Reader.stage_form(object.__new__(reader.Reader), form, 0)
-                self.assertEqual(("refusal", "version-unread"), (caught.exception.result, caught.exception.code))
+                reader.Reader.stage_form(object.__new__(reader.Reader), form, 0)
                 # selection is present exactly on a consumed stage; the one stage here is terminal
                 probe = object.__new__(reader.Reader)
                 probe.stage_order = [stage["id"]]
-                if case["expected"]["workflowReader"] == "version-unread":
+                if case["expected"]["workflowReader"] == "admitted":
                     self.assertNotIn("selection", stage)
                     self.assertEqual({stage["id"]: []}, probe.consumers_form(workflow["stages"]))
                 else:
