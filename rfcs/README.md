@@ -81,6 +81,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets | Accepted | Specification (Core amendment released in Core `0.5.0`, staged as `0.4.0-draft`; accepted on a same-vendor review, the different-vendor review waived) |
 | [0032](0032-outcome-severity.md) | Outcome severity, one well-known annotation key | Accepted | Specification (a companion beside Core, [the annotation vocabulary](../spec/annotation-vocabulary.md) `1.0.0`, status `proposed`, released in `v0.5.2`; Core `0.5.0` unchanged; its rows staged; accepted on a same-vendor review, the different-vendor review waived) |
 | [0033](0033-paged-operation-source.md) | A paged operation source | Review | Specification (an amendment of the dialect companion, a proposed named format `4.1.0`; [`spec/dialect.md`](../spec/dialect.md) unchanged) |
+| [0034](0034-registry-profile.md) | The registry profile — declared entry kinds and environment overlays | Draft | Specification (a proposed companion beside Core, `spec/registry.md`, with its own format selectors and release route; Core unchanged) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -173,3 +174,13 @@ ending at a page that names no next reference or at a declared bound, and the pa
 in call order into one value read. It would be a named dialect format `4.1.0`, of format `4.0.0`'s
 family. It is in Review, normative for nothing; the companion, its vectors and its readers are
 unchanged.
+
+[RFC 0034](0034-registry-profile.md) proposes a registry companion beside Core.
+- It covers a canonical JSON registry of entries of kinds the adopter declares, each kind with a
+  closed JSON Schema subset, bounds, an owner, and the members that may vary by environment, hold
+  secret references or reference other entries; per-environment overlays; a fixed validation
+  order with a value-free report; resolution to one document per environment; and a strict YAML
+  subset for authoring.
+- JPS defines no domain kinds.
+- It is the first of five registry records: 0035 to 0038 are to follow.
+- It is a Draft, normative for nothing, and Core is unchanged.
