@@ -1,14 +1,24 @@
 # RFC 0037: Generated facts contracts — registry entries as pack facts, and typed facts builders
 
-- Status: Draft
+- Status: Accepted
 - Type: Standards track, part of the proposed registry companion (`spec/registry.md`) of
   [RFC 0034](0034-registry-profile.md), intended for stable maturity with it. Core is unchanged.
 - Created: 2026-11-16
+- Accepted: 2026-11-16, by the maintainer, on the same-vendor review recorded on pull request 340,
+  with the different-vendor review waived; see [Acceptance](#acceptance).
 - Issue: [#339](https://github.com/Judgment-Pack/judgment-pack-spec/issues/339) (the registry line)
 - Related: RFC 0034 (kinds, resolution), RFC 0035 (references), RFC 0036 (the emitter contract);
   Core §7.4 (fact comparison) and §2.2 (the decimal grammar)
 
-> This RFC, a Draft, is normative for nothing. Core is untouched.
+> **Accepted** on 2026-11-16 ([Acceptance](#acceptance)). The Specification below is the text
+> proposed for the registry companion, `spec/registry.md`, which does not exist yet. Until that
+> text is released, this record is normative for nothing. Core is untouched.
+>
+> **Review standing.** [RFC 0009](0009-interim-review-regime.md) asks for a recorded adversarial
+> review by a model from a different vendor. That review has not happened, and this record does not
+> claim it. One review round by a model from the drafting vendor covered RFCs 0034 to 0038 together;
+> it is copied verbatim to [`rfcs/reviews/0034-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0034-round-1.md). That is a
+> same-vendor review, not a cross-vendor claim.
 
 ## Summary
 
@@ -279,6 +289,28 @@ Every vector also asserts that no secret reference string appears in a facts doc
 2. **The Python reader of RFC 0034,** for contract generation, facts mapping and the pack checks.
    Builders are reference-emitter output, so their goldens are checked by the harness, not by a
    second reader.
+
+## Acceptance
+
+On 2026-11-16 the maintainer accepted RFCs 0034 to 0038 together, the registry line's five records.
+The different-vendor review was waived (RFC 0034, Unresolved question 1).
+
+**What acceptance rests on.** One review round by a model from the drafting vendor, read-only, by a
+reviewer that did not write the records, over all five. It is recorded on
+[pull request 340](https://github.com/Judgment-Pack/judgment-pack-spec/pull/340) with the
+maintainer's disposition of each finding (seven HIGH, nine MEDIUM and two LOW, each fixed in that
+pull request), and copied verbatim to [`rfcs/reviews/0034-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0034-round-1.md).
+
+The changes made after that round are not covered by it: nothing in this record, and the Status lines, notices,
+this section and the index rows that record the acceptance.
+
+**What this leaves unestablished.**
+
+- **No different-vendor review.** RFC 0009's review has not happened. This is a same-vendor review,
+  not a cross-vendor claim.
+- **No companion text yet.** Acceptance settles the design. The normative text, its schemas and its
+  vectors come in later pull requests, and the stable-maturity bar (two readers agreeing on every
+  vector) is met there, not here.
 
 ## Unresolved questions
 
