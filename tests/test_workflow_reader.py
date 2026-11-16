@@ -406,7 +406,7 @@ class ReaderTests(unittest.TestCase):
         error=dict(outputVersion='2',tool={'name':'jpack','version':'0.34.0'},command='experimental evaluate',status='error',
                    evaluationError={'class':'resource-exhaustion','phase':'evaluation','evaluatorSpecVersion':'0.2.0-draft'},diagnostics=[])
         # The §1 Runtime pin predates Core 0.5.0, so no 0.5.0 envelope is read yet.
-        for stale in ('0.2.0-draft','0.4.0-draft','0.5.0'):
+        for stale in ('0.2.0-draft','0.4.0-draft','0.5.0','0.6.0'):
             with self.assertRaises(w.Problem) as caught:
                 reader.error_form(dict(error,evaluationError=dict(error['evaluationError'],evaluatorSpecVersion=stale)))
             self.assertEqual((caught.exception.result,caught.exception.code,caught.exception.detail),

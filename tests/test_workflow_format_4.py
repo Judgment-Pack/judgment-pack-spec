@@ -1,6 +1,7 @@
-"""Dialect formats 4.0.0 and 4.1.0 in a workflow stage, staged for specVersion 0.6.0 (issue #326; RFC 0020,
-the amendment proposal of 2026-11-15): the staged workflow schema, and the release digest RFC 0020 section 1
-writes into its own text for the two formats, held to the RFC's worked examples."""
+"""Dialect formats 4.0.0 and 4.1.0 in a workflow stage, for specVersion 0.6.0 (issue #326; RFC 0020, the
+amendment of 2026-11-15): the workflow schema of 0.6.0, which Core 0.6.0 moved in place from its staged
+copy, and the release digest RFC 0020 section 1 writes into its own text for the two formats, held to the
+RFC's worked examples."""
 
 from __future__ import annotations
 
@@ -22,8 +23,9 @@ from tools import dialect_verify as d  # noqa: E402
 from tools import workflow_reader_encoding as encoding  # noqa: E402
 
 RFC = ROOT / "rfcs" / "0020-workflow.md"
+# The 0.6.0 schema is the one staged for it, moved in place; 0.5.0's stays as its preserved copy.
 PUBLISHED = ROOT / "schema" / "workflow-1.schema.json"
-STAGED = ROOT / "schema" / "workflow-1-0.6.0.schema.json"
+PREVIOUS = ROOT / "schema" / "workflow-1-0.5.0.schema.json"
 
 
 def load(path: Path) -> dict:
@@ -49,24 +51,26 @@ def worked_examples() -> list[tuple[str, str]]:
     return found
 
 
-class StagedSchemaTests(unittest.TestCase):
-    def test_the_staged_schema_is_the_published_one_with_the_two_formats(self) -> None:
-        published, staged = load(PUBLISHED), load(STAGED)
-        self.assertEqual("https://judgmentpack.org/schema/0.6.0/workflow-1.schema.json", staged["$id"])
-        expected = copy.deepcopy(published)
-        expected["$id"] = staged["$id"]
+class SchemaTests(unittest.TestCase):
+    def test_the_0_6_0_schema_is_the_0_5_0_one_with_the_two_formats(self) -> None:
+        previous, published = load(PREVIOUS), load(PUBLISHED)
+        self.assertEqual("https://judgmentpack.org/schema/0.6.0/workflow-1.schema.json", published["$id"])
+        self.assertEqual("https://judgmentpack.org/schema/0.5.0/workflow-1.schema.json", previous["$id"])
+        self.assertFalse((ROOT / "schema" / "workflow-1-0.6.0.schema.json").exists())
+        expected = copy.deepcopy(previous)
+        expected["$id"] = published["$id"]
         expected["$defs"]["dialectReference"]["oneOf"][1]["properties"]["formatVersion"]["enum"] += ["4.0.0", "4.1.0"]
-        self.assertEqual(expected, staged)
+        self.assertEqual(expected, published)
 
-    def test_the_published_schema_still_refuses_the_two_formats(self) -> None:
-        validator = reference_validator(load(PUBLISHED))
+    def test_the_0_5_0_schema_still_refuses_the_two_formats(self) -> None:
+        validator = reference_validator(load(PREVIOUS))
         for format_version in ("2.0.0", "3.0.0"):
             self.assertTrue(validator.is_valid(named(format_version)), format_version)
         for format_version in ("4.0.0", "4.1.0"):
             self.assertFalse(validator.is_valid(named(format_version)), format_version)
 
-    def test_the_staged_schema_admits_the_two_formats_and_no_other(self) -> None:
-        validator = reference_validator(load(STAGED))
+    def test_the_0_6_0_schema_admits_the_two_formats_and_no_other(self) -> None:
+        validator = reference_validator(load(PUBLISHED))
         for format_version in ("2.0.0", "3.0.0", "4.0.0", "4.1.0"):
             self.assertTrue(validator.is_valid(named(format_version)), format_version)
         for format_version in ("4.2.0", "5.0.0", "4.0", 4, None):
@@ -146,10 +150,11 @@ class ReleaseDigestTests(unittest.TestCase):
             encoding.release_digest_bytes(value)
         self.assertEqual("input-malformed", caught.exception.name)
 
-    def test_the_staged_schema_is_in_no_bundle(self) -> None:
+    def test_the_0_6_0_schema_is_bundled_and_the_vectors_are_not(self) -> None:
         attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines()
-        for line in ("schema/workflow-1-0.6.0.schema.json export-ignore", "schema/dialect-recording/2 export-ignore",
-                     "schema/dialect-recording/2/** export-ignore", "conformance/dialect/** export-ignore -text"):
+        self.assertEqual([], [line for line in attributes if line.startswith("schema/workflow-1")])
+        for line in ("schema/dialect-recording/2 export-ignore", "schema/dialect-recording/2/** export-ignore",
+                     "conformance/dialect/** export-ignore -text"):
             self.assertIn(line, attributes)
 
     def test_other_formats_keep_the_pinned_encoding(self) -> None:
@@ -166,22 +171,22 @@ class StagedStageVectorTests(unittest.TestCase):
 
     DIRECTORY = ROOT / "conformance" / "dialect" / "workflow-format-4"
 
-    def test_each_stage_is_admitted_by_the_staged_schema_with_the_digests_given(self) -> None:
+    def test_each_stage_is_admitted_by_the_0_6_0_schema_with_the_digests_given(self) -> None:
         from tools import workflow_reader as reader
         manifest = load(self.DIRECTORY / "manifest.json")
         cases = manifest["cases"]
         self.assertEqual(["4.0.0", "4.1.0", "4.0.0", "4.0.0"], [case["formatVersion"] for case in cases])
-        self.assertEqual(load(STAGED)["$id"], manifest["schema"])
+        self.assertEqual(load(PUBLISHED)["$id"], manifest["schema"])
         self.assertEqual({f for c in cases for f in (c["workflow"], c["release"])} | {"README.md", "manifest.json"},
                          {path.name for path in self.DIRECTORY.iterdir()})
-        staged = jsonschema.Draft202012Validator(load(STAGED), format_checker=jsonschema.FormatChecker())
         published = jsonschema.Draft202012Validator(load(PUBLISHED), format_checker=jsonschema.FormatChecker())
+        previous = jsonschema.Draft202012Validator(load(PREVIOUS), format_checker=jsonschema.FormatChecker())
         for case in cases:
             with self.subTest(stage=case["name"]):
                 workflow, release = load(self.DIRECTORY / case["workflow"]), load(self.DIRECTORY / case["release"])
                 dialect = load(ROOT / "conformance" / "dialect" / case["dialect"])
-                self.assertEqual([], [error.message for error in staged.iter_errors(workflow)])
-                self.assertFalse(published.is_valid(workflow))
+                self.assertEqual([], [error.message for error in published.iter_errors(workflow)])
+                self.assertFalse(previous.is_valid(workflow))
                 (stage,) = workflow["stages"]
                 self.assertEqual({"formatVersion": case["formatVersion"], "id": dialect["id"],
                                   "version": dialect["version"], "digest": case["dialectDigest"]}, stage["dialect"])

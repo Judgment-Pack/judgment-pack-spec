@@ -46,6 +46,9 @@ STAGED = av.STAGED
 COMPANION = ROOT / "spec" / "annotation-vocabulary.md"
 RFC = ROOT / "rfcs" / "0032-outcome-severity.md"
 ANNOTATIONS = ev.ANNOTATIONS
+# The vocabulary applies to Core 0.5.0 alone (§6.2), so a row's Core result is 0.5.0's, read with the
+# preserved 0.5.0 schema; Core 0.6.0, whose rules are the same, has its own selector.
+CORE_0_5_0_SCHEMA = ROOT / "schema" / "judgment-pack-core-0.5.0.schema.json"
 
 
 def manifest() -> dict[str, Any]:
@@ -218,7 +221,7 @@ class CoreResult(unittest.TestCase):
     """What Core `0.5.0` says of each row: the vocabulary changes none of it (§2.6, §6.2)."""
 
     def test_each_row_has_its_core_result(self) -> None:
-        validators = core_validators()
+        validators = core_validators(CORE_0_5_0_SCHEMA)
         for row in manifest()["rows"]:
             with self.subTest(row=row["id"]):
                 text = (STAGED / row["pack"]).read_text(encoding="utf-8")
@@ -231,9 +234,14 @@ class CoreResult(unittest.TestCase):
                     assert_findings(self, row["id"], [expected["diagnostic"]], diagnostics)
                 # The second evaluator admits what the corpus harness calls valid or unsupported,
                 # except a pack that declares `extended`, which as a base-only reader it does not run.
+                # It reads 0.6.0 as well, whose rules are 0.5.0's (Core §11): a pack that 0.5.0
+                # refuses by that selector alone it admits.
                 layer = ev.admit_pack(text).layer
                 if declares_extended(text):
                     self.assertEqual("profile", layer)
+                elif json.loads(text).get("specVersion") == "0.6.0":
+                    self.assertEqual("JPS-STRUCTURE-SPEC-VERSION", expected["diagnostic"]["code"])
+                    self.assertIsNone(layer)
                 else:
                     self.assertEqual(expected["result"] != "invalid", layer is None)
 
@@ -393,7 +401,9 @@ class Inertness(unittest.TestCase):
             with self.subTest(row=row["id"]):
                 self.assertIsNone(ev.admit_pack(stripped_text).layer)
                 self.assertTrue(ev.json_equal(ev.evaluation_form(admission.pack), ev.evaluation_form(stripped)))
-                self.assertEqual("pass", av.check(stripped_text)["result"])
+                # A pack of another selector is not checked (§6.2), with the key or without it.
+                applies = not av.declares_another_selector(stripped_text)
+                self.assertEqual("pass" if applies else "not-checked", av.check(stripped_text)["result"])
                 for facts in FACTS:
                     got = outcome_of(text, facts)
                     self.assertEqual(got, outcome_of(stripped_text, facts), facts)
@@ -420,7 +430,7 @@ class Inertness(unittest.TestCase):
 
         # Removing only the member leaves `{}`, which Core §9.2 refuses: not a conforming pack.
         member_only = ev.dump_json(member_only_removed(pack))
-        result, diagnostics = evaluate_text(member_only, core_validators(), [])
+        result, diagnostics = evaluate_text(member_only, core_validators(CORE_0_5_0_SCHEMA), [])
         self.assertEqual("invalid", result)
         self.assertIn(f"/outcomes/0/extensions/{ANNOTATIONS}", {diagnostic.path for diagnostic in diagnostics})
         self.assertEqual("structural", ev.admit_pack(member_only).layer)
@@ -458,7 +468,8 @@ class Released(unittest.TestCase):
     def test_the_rfc_is_accepted_on_a_recorded_review_and_core_is_untouched(self) -> None:
         # Accepted as RFC 0031 was: a same-vendor round, the different-vendor review waived, and
         # the round copied into the repository as RFC 0018's acceptance did. The vocabulary keeps
-        # its status, and Core 0.5.0 is frozen, so its §1.1 does not list the companion.
+        # its status, and Core 0.5.0 is frozen, so its §1.1 does not list the companion; nor does
+        # Core 0.6.0's, which changes no rule of 0.5.0, while the vocabulary stays on 0.5.0 (§6.2).
         rfc = RFC.read_text(encoding="utf-8")
         self.assertIn("\n- Status: Accepted\n", rfc)
         self.assertNotIn("- Status: Draft", rfc)

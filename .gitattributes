@@ -22,11 +22,9 @@ conformance/dialect/** export-ignore -text
 # so no bundle carries it; acceptance removes this line, as for RFC 0018's Draft.
 spec/workflow.md export-ignore
 
-# Staged for specVersion 0.6.0 (issue #326): the workflow schema that names dialect formats 4.0.0 and
-# 4.1.0, and version 2 of the dialect-recording schemas, are normative for nothing until 0.6.0 is
-# released, so no bundle carries them. Their vectors are under conformance/dialect, above. The
-# record-shape catalog still lists their shapes and digests.
-schema/workflow-1-0.6.0.schema.json export-ignore
+# Staged for specVersion 0.6.0 (issue #326): version 2 of the dialect-recording schemas is
+# normative for nothing until 0.6.0 is released, so no bundle carries it. Its vectors are under
+# conformance/dialect, above. The record-shape catalog still lists its shapes and digests.
 schema/dialect-recording/2 export-ignore
 schema/dialect-recording/2/** export-ignore
 
@@ -52,3 +50,6 @@ conformance/retained-column/** -text
 
 # Preserved v0.3.0 bytes of files Core 0.5.0 changed in place (tests/fixtures/historical-compatibility/README.md).
 tests/fixtures/historical-compatibility/v0.3.0/** -text
+
+# Preserved v0.5.0 bytes of the Core text Core 0.6.0 changed in place (tests/fixtures/historical-compatibility/README.md).
+tests/fixtures/historical-compatibility/v0.5.0/** -text

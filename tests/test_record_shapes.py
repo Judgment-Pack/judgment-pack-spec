@@ -12,9 +12,10 @@ import unittest
 
 from tools import record_shapes as shapes
 
-# The families whose draft version a staged schema has moved past their last release: the workflow
-# schema staged under specVersion 0.6.0 (#326).
-DRAFT = {"workflow": "0.6.0"}
+# The families whose draft version has moved past their last release: the four Core 0.6.0 moves in
+# place (#326), the workflow schema among them, which was staged under 0.6.0 before.
+DRAFT = {family: "0.6.0" for family in
+         ("judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest", "workflow")}
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -316,10 +317,10 @@ class FormatStatus(Fixture):
         # releases/v0.5.0.md, with no mapping (its tag is its specVersion), made v0.5.0 their last
         # release and baseline, and releases/v0.5.1.md and releases/v0.5.2.md, patch tags carrying
         # 0.5.0 unchanged, made v0.5.1 both and then v0.5.2 both now. v0.4.0, which carries 0.3.0
-        # unchanged, is neither.
+        # unchanged, is neither. Core 0.6.0, in place (#326), moves the four families' draft version
+        # and not their release.
         # The Policy companion's only release is policy-v1.0.0-draft.1; the leaf shipped in rc.2 and
-        # the final; the contributors shape under 0.4.0 is staged and unreleased. The workflow schema
-        # staged under 0.6.0 (#326) moves that family's draft version, and not its release.
+        # the final; the contributors shape under 0.4.0 is staged and unreleased.
         for family in ("judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest",
                        "workflow"):
             self.assertEqual(derived[family],

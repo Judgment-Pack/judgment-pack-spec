@@ -1,0 +1,59 @@
+{
+  "reason": "Core 0.6.0 (#326) replaces the released 0.5.0 schemas in place, as 0.5.0 replaced 0.3.0 (#312): the active Core, document-manifest and evaluation-manifest schemas carry 0.6.0 and change nothing else, and the workflow-1 identifier moves to /schema/0.6.0/ with the schema staged for 0.6.0, which admits dialect formats 4.0.0 and 4.1.0 in a named dialect reference and differs from the 0.5.0 schema in nothing else. Byte-identical copies of the four 0.5.0 schemas stay at schema/*-0.5.0.schema.json, served at their 0.5.0 identifiers. Core's rules are those of 0.5.0, unchanged.",
+  "changes": [
+    {
+      "path": "conformance/evaluation/manifest.schema.json",
+      "family": "conformance/evaluation/manifest",
+      "from": "sha256:e6f405bfaa0fe9b2739238fd7314d119cb9a0e968f04c9362e6ab6db7f7ff573",
+      "to": "sha256:6854b832acc6d58d66aedecc7865ba1c7432faa33317162562be22a2fc2b127a"
+    },
+    {
+      "path": "conformance/manifest.schema.json",
+      "family": "conformance/manifest",
+      "from": "sha256:f6257e885748552b35562802c93fcdbece8ca19f062042bc464e369a4308d375",
+      "to": "sha256:2c1de6bf151c2857ddce0d582e247e9442c42bf591a72a01b70fde13793abc22"
+    },
+    {
+      "path": "schema/conformance-evaluation-manifest-0.5.0.schema.json",
+      "family": "conformance/evaluation/manifest",
+      "from": null,
+      "to": "sha256:e6f405bfaa0fe9b2739238fd7314d119cb9a0e968f04c9362e6ab6db7f7ff573"
+    },
+    {
+      "path": "schema/conformance-manifest-0.5.0.schema.json",
+      "family": "conformance/manifest",
+      "from": null,
+      "to": "sha256:f6257e885748552b35562802c93fcdbece8ca19f062042bc464e369a4308d375"
+    },
+    {
+      "path": "schema/judgment-pack-core-0.5.0.schema.json",
+      "family": "judgment-pack-core",
+      "from": null,
+      "to": "sha256:0b962622a8331febcc1ad7d3d3f0b3386689bc04afd57ebc96fe5dfb16ab78e7"
+    },
+    {
+      "path": "schema/judgment-pack-core.schema.json",
+      "family": "judgment-pack-core",
+      "from": "sha256:0b962622a8331febcc1ad7d3d3f0b3386689bc04afd57ebc96fe5dfb16ab78e7",
+      "to": "sha256:ea6355aad0a0cf3a331404713a56676f5febf5b25c5f5796daf6664beb5a202c"
+    },
+    {
+      "path": "schema/workflow-1-0.5.0.schema.json",
+      "family": "workflow",
+      "from": null,
+      "to": "sha256:d0c0867b73b5bc13374b3e8960802d35b5efaac527aa6e2d6b45c34c9b2f59a1"
+    },
+    {
+      "path": "schema/workflow-1-0.6.0.schema.json",
+      "family": "workflow",
+      "from": "sha256:53d31516f20baada679708b167f1bf9a1ddce1ad027bd9100c0c1145194e687e",
+      "to": null
+    },
+    {
+      "path": "schema/workflow-1.schema.json",
+      "family": "workflow",
+      "from": "sha256:d0c0867b73b5bc13374b3e8960802d35b5efaac527aa6e2d6b45c34c9b2f59a1",
+      "to": "sha256:53d31516f20baada679708b167f1bf9a1ddce1ad027bd9100c0c1145194e687e"
+    }
+  ]
+}

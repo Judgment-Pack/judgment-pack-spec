@@ -31,8 +31,8 @@ EVALUATION_MANIFEST_SCHEMA_PATH = EVALUATION / "manifest.schema.json"
 # that moving them into the manifest edits nothing.
 EVALUATION_STAGED = EVALUATION / "staged"
 EVALUATION_STAGED_CASES_PATH = EVALUATION_STAGED / "cases.json"
-SPEC_VERSION = "0.5.0"
-PREVIOUS_SPEC_VERSIONS = ("0.1.0-draft", "0.2.0-draft", "0.3.0")
+SPEC_VERSION = "0.6.0"
+PREVIOUS_SPEC_VERSIONS = ("0.1.0-draft", "0.2.0-draft", "0.3.0", "0.5.0")
 SCHEMA_ID = f"https://judgmentpack.org/schema/{SPEC_VERSION}/judgment-pack-core.schema.json"
 STATUS_VECTORS_PATH = ROOT / "tests" / "conformance-status-vectors.json"
 
@@ -752,8 +752,8 @@ def semantic_diagnostics(
     return diagnostics
 
 
-def core_schema(profile: str = "base") -> dict[str, Any]:
-    """The published schema, with Core §4.1's ceilings for `profile`.
+def core_schema(profile: str = "base", path: Path = SCHEMA_PATH) -> dict[str, Any]:
+    """The published schema, or the preserved copy at `path`, with Core §4.1's ceilings for `profile`.
 
     The published schema carries the base maxima. A reader supporting `extended` applies the
     extended value of every row, as tools/profile_validation.py does. Each base value is asserted
@@ -762,7 +762,7 @@ def core_schema(profile: str = "base") -> dict[str, Any]:
     """
     if profile not in ("base", "extended"):
         raise ValueError("unknown ceiling profile")
-    schema = strict_json_loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    schema = strict_json_loads(path.read_text(encoding="utf-8"))
     if profile == "extended":
         defs = schema["$defs"]
         rows = (
@@ -782,9 +782,9 @@ def core_schema(profile: str = "base") -> dict[str, Any]:
     return schema
 
 
-def core_validators() -> dict[str, Draft202012Validator]:
+def core_validators(path: Path = SCHEMA_PATH) -> dict[str, Draft202012Validator]:
     return {
-        profile: Draft202012Validator(core_schema(profile), format_checker=FormatChecker())
+        profile: Draft202012Validator(core_schema(profile, path), format_checker=FormatChecker())
         for profile in ("base", "extended")
     }
 
@@ -2082,12 +2082,17 @@ class RepositoryConformanceTests(unittest.TestCase):
         # are relative to the Runner's repository: they are not this repository's to resolve or
         # to change (conformance/dialect/README.md).
         runners_bytes = (ROOT / "conformance" / "dialect" / "vectors").resolve()
-        # A preserved v0.3.0 copy keeps its bytes, links relative to the path it was published at.
-        preserved = (ROOT / "tests" / "fixtures" / "historical-compatibility" / "v0.3.0").resolve()
+        # A preserved v0.3.0 or v0.5.0 copy keeps its bytes, links relative to the path it was
+        # published at.
+        preserved = tuple(
+            (ROOT / "tests" / "fixtures" / "historical-compatibility" / tag).resolve()
+            for tag in ("v0.3.0", "v0.5.0")
+        )
         for markdown_path in sorted(ROOT.rglob("*.md")):
             if ".git" in markdown_path.parts:
                 continue
-            if runners_bytes in markdown_path.resolve().parents or preserved in markdown_path.resolve().parents:
+            parents = markdown_path.resolve().parents
+            if runners_bytes in parents or any(copy in parents for copy in preserved):
                 continue
             text = markdown_path.read_text(encoding="utf-8")
             for raw_target in link_pattern.findall(text):

@@ -120,7 +120,8 @@ class ReleaseBuilderTests(unittest.TestCase):
 
     def test_the_0_5_0_notes_state_the_selector_and_the_waived_candidate_period(self) -> None:
         notes = re.sub(r"\s+", " ", (ROOT / "releases" / "v0.5.0.md").read_text(encoding="utf-8"))
-        schema = ROOT / "schema" / "judgment-pack-core.schema.json"
+        # Core 0.6.0 moved the four schemas in place; their 0.5.0 bytes are the preserved copies.
+        schema = ROOT / "schema" / "judgment-pack-core-0.5.0.schema.json"
         for text in ("Packs declare exact `specVersion` `0.5.0`, and the tag equals the selector",
                      "The text was staged under the working selector `0.4.0-draft`, which was never released.",
                      "no `specVersion` `0.4.0` is assigned",
@@ -138,11 +139,11 @@ class ReleaseBuilderTests(unittest.TestCase):
                      *(f"`{schema_id}`, SHA-256 `{hashlib.sha256((ROOT / path).read_bytes()).hexdigest()}`"
                        for schema_id, path in (
                            ("https://judgmentpack.org/schema/0.5.0/conformance/manifest.schema.json",
-                            "conformance/manifest.schema.json"),
+                            "schema/conformance-manifest-0.5.0.schema.json"),
                            ("https://judgmentpack.org/schema/0.5.0/conformance/evaluation/manifest.schema.json",
-                            "conformance/evaluation/manifest.schema.json"),
+                            "schema/conformance-evaluation-manifest-0.5.0.schema.json"),
                            ("https://judgmentpack.org/schema/0.5.0/workflow-1.schema.json",
-                            "schema/workflow-1.schema.json"))),
+                            "schema/workflow-1-0.5.0.schema.json"))),
                      "369 conformance cases and 5 advisory cases", "103 rows, 29 pairs"):
             with self.subTest(text=text[:40]):
                 self.assertIn(text, notes)
