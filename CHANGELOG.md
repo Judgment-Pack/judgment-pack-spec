@@ -37,7 +37,7 @@ here.
 
 ### Changed
 
-- `spec/dialect.md` §2.2.6 (#335): `unsignedParameters` is no longer listed among the ways a format
+- `spec/dialect.md` §2.2.6 and its copy in RFC 0018 (#335): `unsignedParameters` is no longer listed among the ways a format
   `4.0.0` preparation differs. It is a member of the reading (§11), not of the preparation, and the
   case's entry is now stated as a difference of the reading. Text only: no reader, vector, schema or
   digest changes.
