@@ -223,14 +223,18 @@ class ReleaseBuilderTests(unittest.TestCase):
             (ROOT / "conformance" / "manifest.json").read_text(encoding="utf-8")
         )
         version = manifest["specVersion"]
-        self.assertEqual("0.5.0", version)
+        self.assertEqual("0.6.0", version)
         BUILD_RELEASE.validate_artifacts(version, f"v{version}")
         # The ordinary path: the tag is the specVersion, so the release has no distribution mapping,
-        # no generated identity and the notes and milestone link the workflow reads.
-        self.assertNotIn("v0.5.0", BUILD_RELEASE.CORE_MAPPED_IDENTITIES)
-        self.assertNotIn("v0.5.0", BUILD_RELEASE.GENERATED_IDENTITIES)
-        self.assertFalse((ROOT / "releases" / "v0.5.0.json").exists())
-        self.assertEqual("# v0.5.0", (ROOT / "releases" / "v0.5.0.md").read_text(encoding="utf-8").splitlines()[0])
+        # no generated identity, no normative record and the notes and milestone link the workflow reads.
+        self.assertNotIn("v0.6.0", BUILD_RELEASE.CORE_MAPPED_IDENTITIES)
+        self.assertNotIn("v0.6.0", BUILD_RELEASE.GENERATED_IDENTITIES)
+        self.assertFalse((ROOT / "releases" / "v0.6.0.json").exists())
+        self.assertFalse((ROOT / "releases" / "v0.6.0.normative.json").exists())
+        self.assertEqual("# v0.6.0", (ROOT / "releases" / "v0.6.0.md").read_text(encoding="utf-8").splitlines()[0])
+        self.assertEqual({"number": 8, "title": "v0.6.0"},
+                         json.loads((ROOT / "releases" / "v0.6.0.milestone.json").read_text(encoding="utf-8")))
+        # The release before it keeps its own notes and milestone link.
         self.assertEqual({"number": 6, "title": "v0.5.0"},
                          json.loads((ROOT / "releases" / "v0.5.0.milestone.json").read_text(encoding="utf-8")))
 

@@ -1,10 +1,9 @@
-# Dialect format 4.1.0 vectors (staged, proposed)
+# Dialect format 4.1.0 vectors
 
-Hand-written vectors for the proposed dialect format `4.1.0`, a paged `operation` source
-([RFC 0033](../../../rfcs/0033-paged-operation-source.md), in Review). The companion,
-[`spec/dialect.md`](../../../spec/dialect.md), is unchanged: the format is the RFC's Specification
-until it is accepted. These vectors are not a conformance corpus and not recordings: no preparer
-writes the format, and no claim may cite them. The vectors of format `4.0.0`
+Hand-written vectors for dialect format `4.1.0`, a paged `operation` source
+([`spec/dialect.md`](../../../spec/dialect.md) §2.3, [RFC 0033](../../../rfcs/0033-paged-operation-source.md)),
+of `specVersion` `0.6.0`. These vectors are not a conformance corpus and not recordings, and no
+claim may cite them. The vectors of format `4.0.0`
 ([`format-4/`](../format-4/README.md)), the forty-seven staged Runner vectors and the format `2.0.0`
 and `3.0.0` identity examples are unchanged.
 

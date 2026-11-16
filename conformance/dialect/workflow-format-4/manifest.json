@@ -1,5 +1,5 @@
 {
-  "status": "staged",
+  "status": "hand-written, not a published conformance corpus",
   "specVersion": "0.6.0",
   "issue": 326,
   "schema": "https://judgmentpack.org/schema/0.6.0/workflow-1.schema.json",

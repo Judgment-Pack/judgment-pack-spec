@@ -46,7 +46,7 @@ def named(format_version: object) -> dict:
 def worked_examples() -> list[tuple[str, str]]:
     """The amendment's worked examples: each one-line JSON block and the digest the text gives it."""
     text = RFC.read_text(encoding="utf-8")
-    section = text.split("## Amendment proposal of 2026-11-15", 1)[1].split("\n## ", 1)[0]
+    section = text.split("## Amendment of 2026-11-15", 1)[1].split("\n## ", 1)[0]
     found = re.findall(r"```json\n(.*?)\n```\n\nIts release digest is\n`(sha256:[0-9a-f]{64})`", section, re.S)
     return found
 
@@ -79,10 +79,11 @@ class SchemaTests(unittest.TestCase):
         self.assertFalse(validator.is_valid({"version": 4, "digest": "sha256:" + "a" * 64}))
         self.assertTrue(validator.is_valid({"version": 3, "digest": "sha256:" + "a" * 64}))
 
-    def test_the_companion_names_the_two_formats_as_staged(self) -> None:
+    def test_the_companion_names_the_two_formats_since_0_6_0(self) -> None:
         for path in (RFC, ROOT / "spec" / "workflow.md"):
             text = path.read_text(encoding="utf-8")
-            self.assertIn("Staged for `specVersion` `0.6.0`, `formatVersion` may also be `\"4.0.0\"` or `\"4.1.0\"`", text)
+            self.assertIn("Since `specVersion` `0.6.0`, `formatVersion` may also be `\"4.0.0\"` or `\"4.1.0\"`", text)
+            self.assertNotIn("Staged for `specVersion` `0.6.0`", text)
             self.assertIn("a stage whose dialect is of format `4.0.0` or\n`4.1.0` takes no Runner encoding", text)
 
 
@@ -150,12 +151,13 @@ class ReleaseDigestTests(unittest.TestCase):
             encoding.release_digest_bytes(value, "4.0.0")
         self.assertEqual("input-malformed", caught.exception.name)
 
-    def test_the_0_6_0_schema_is_bundled_and_the_vectors_are_not(self) -> None:
+    def test_the_0_6_0_schemas_are_bundled_and_the_vectors_are_not(self) -> None:
+        # Released with 0.6.0: the workflow schema and version 2 of the dialect-recording schemas are in
+        # the bundle; the format vectors stay in no corpus and no bundle.
         attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines()
-        self.assertEqual([], [line for line in attributes if line.startswith("schema/workflow-1")])
-        for line in ("schema/dialect-recording/2 export-ignore", "schema/dialect-recording/2/** export-ignore",
-                     "conformance/dialect/** export-ignore -text"):
-            self.assertIn(line, attributes)
+        self.assertEqual([], [line for line in attributes
+                              if line.startswith(("schema/workflow-1", "schema/dialect-recording"))])
+        self.assertIn("conformance/dialect/** export-ignore -text", attributes)
 
     def test_other_formats_keep_the_pinned_encoding(self) -> None:
         (line, _), _ = worked_examples()

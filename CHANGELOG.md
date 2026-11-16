@@ -7,11 +7,55 @@ here.
 
 ### Added
 
-- RFC 0027 (#252) proposes bounded optional pack-design advisories for compatible agreement,
-  scoped coverage and reachability, exception effects and unknown blocking. A closed finite-domain
-  report proposal binds exact pack/domain bytes, distinguishes proof from possibility and incomplete
-  analysis, and carries explicit resource limits and hand-written positive/adversarial cases.
-  This targets specification `0.6.0`; it changes no Core resolution or released conformance claim.
+- RFC 0027 (#252), a Draft, proposes bounded optional pack-design advisories for compatible
+  agreement, scoped coverage and reachability, exception effects and unknown blocking. A closed
+  finite-domain report proposal binds exact pack/domain bytes, distinguishes proof from possibility
+  and incomplete analysis, and carries explicit resource limits and hand-written
+  positive/adversarial cases. It was proposed for specification `0.6.0` and is not released in it;
+  it changes no Core resolution or released conformance claim.
+
+## `0.6.0` — 2026-11-16
+
+Core `specVersion` `0.6.0`, tagged `v0.6.0`, releases the dialect formats `4.0.0` and `4.1.0` and a
+workflow stage that names them (#326, #328; [release notes](releases/v0.6.0.md)). The maintainer
+waived the candidate period: no release candidate precedes it.
+
+- **Core's rules are `0.5.0`'s.** The selector moves in place: Core's text, schema and both corpora
+  name `0.6.0`, and no carrier, structural, semantic or evaluation rule differs, so a `0.5.0` pack
+  whose selector alone changes keeps every verdict and disposition (Core §11). Of the files the move
+  touches, 435 change the selector alone: 423 conformance files (262 structural, 64 valid, 51
+  evaluation, 28 semantic, 12 carrier, 5 advisory and the manifest), 6 examples and 6 site demos.
+  Byte-identical copies of the four `0.5.0` schemas stay published at their `0.5.0` identifiers,
+  and the workflow schema staged for `0.6.0` replaces `schema/workflow-1.schema.json` in place. The
+  document corpus holds 369 conformance cases and 5 advisory cases, and the evaluation corpus 103
+  rows with 29 pairs, both `suiteVersion` `0.6.0`. The second evaluator, `tools/core_050_eval.py`,
+  admits `0.5.0` and `0.6.0`.
+- **Dialect formats `4.0.0` and `4.1.0`.** RFC 0018's amendments of 2026-11-12, 2026-11-13 and
+  2026-11-15 are adopted for `0.6.0`, and RFC 0033 (#328) is accepted: its sections 1 to 11 land as
+  `spec/dialect.md` §2.3, format `4.1.0`, and the sentences its section 12 lists are amended in
+  §§2.1, 5.2, 9, 11, 12, 13 and 14, with RFC 0018's copy of the text. "Proposed" and "staged" are
+  gone from both formats' text, vectors and schemas; the vectors stay hand-written and in no corpus,
+  and no claim names either format.
+- **Recordings and workflow stages (#326).** `schema/dialect-recording/2/` is released, informative:
+  the bundles carry it and the site serves it at its `$id`s. RFC 0020's amendment of 2026-11-15 is
+  accepted for `0.6.0`; the RFC stays a Draft. `spec/workflow.md` says "since `0.6.0`" where it said
+  "staged for".
+- **The workflow reader** (`tools/workflow_reader.py`) reads a stage of format `4.0.0` or `4.1.0`:
+  the stage's dialect reference selects the release digest rule, an open release's Runner members
+  are checked when present, a paged source's profile fit is checked, and a preparation's facts are
+  the dialect reader's prepared facts document. `conformance/dialect/workflow-format-4/` marks each
+  stage admitted.
+- **Patch-release tests (#319).** `tests/test_release.py` holds the patch-release refusals to a
+  hand-authored fixture and a test-local normative record, not to the live tree, so the move to a
+  new `specVersion` leaves them unchanged.
+- The reviews are those on pull requests 329, 331 and 332, by a model of the drafting vendor:
+  same-vendor reviews, not a cross-vendor claim. The maintainer waived the review by another vendor.
+
+The entries below record the work in the order it landed, under the names it then had: formats
+`4.0.0` and `4.1.0` were proposed, and their artifacts staged for `0.6.0`.
+
+### Added
+
 - RFC 0033 (#328), a Draft, proposes a paged `operation` source for the dialect, as a named format
   `4.1.0` of format `4.0.0`'s family. The pages are one gateway session's calls 0 to n−1, and each
   request is formed from the case and the page before. The loop ends at a page with no next

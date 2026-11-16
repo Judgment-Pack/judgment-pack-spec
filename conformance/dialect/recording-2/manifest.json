@@ -1,5 +1,5 @@
 {
-  "status": "staged",
+  "status": "hand-written, not a published conformance corpus",
   "specVersion": "0.6.0",
   "issue": 326,
   "schema": "https://judgmentpack.org/schema/dialect-recording/2/preparation.schema.json",

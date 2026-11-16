@@ -868,10 +868,20 @@ PAGES = (
         "rfcs/0033-paged-operation-source.md",
         PurePosixPath("rfcs/0033-paged-operation-source/index.html"),
         "RFC 0033: A paged operation source",
-        "Draft: an operation source read in pages, one gateway session's calls, each request formed "
-        "from the page before; a proposed dialect format 4.1.0.",
+        "Accepted standards-track RFC at draft maturity: an operation source read in pages, one gateway "
+        "session's calls, each request formed from the page before; dialect format 4.1.0, landed in "
+        "spec/dialect.md for specVersion 0.6.0.",
         "proposals",
-        "Draft proposal",
+        "Accepted standards-track RFC",
+        source_ref="main",
+    ),
+    Page(
+        "releases/v0.6.0.md",
+        PurePosixPath("project/releases/0.6.0/index.html"),
+        "0.6.0 release notes",
+        "Core 0.6.0, whose rules are 0.5.0's: the dialect formats 4.0.0 and 4.1.0, a paged operation "
+        "source, recordings and workflow stages of both, compatibility and bundle contents.",
+        "project",
         source_ref="main",
     ),
     Page(
@@ -2413,6 +2423,7 @@ def build_project_index(output_root: Path) -> None:
         (
             "Release and direction",
             (
+                ("0.6.0 release", "Core 0.6.0, whose rules are 0.5.0's: dialect formats 4.0.0 and 4.1.0, a paged operation source, compatibility and bundle contents.", "project/releases/0.6.0/index.html"),
                 ("0.5.2 release", "Carries specVersion 0.5.0 unchanged: the proposed annotation vocabulary 1.0.0, one key for outcome severity, and what consumers do (nothing).", "project/releases/0.5.2/index.html"),
                 ("0.5.1 release", "Carries specVersion 0.5.0 unchanged: the proposed dialect format 4.0.0, the patch-release tooling, and what consumers do (nothing).", "project/releases/0.5.1/index.html"),
                 ("0.5.0 release", "Core 0.5.0: annotations and value sets, compatibility, migration from 0.3.0 and bundle contents.", "project/releases/0.5.0/index.html"),
@@ -2551,8 +2562,6 @@ UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/workflow"),
     PurePosixPath("conformance/policy"),
     PurePosixPath("schema/policy"),
-    # Staged for specVersion 0.6.0 (issue #326), served once 0.6.0 is released (.gitattributes).
-    PurePosixPath("schema/dialect-recording/2"),
 )
 
 
@@ -2796,6 +2805,9 @@ CANONICAL_SCHEMA_SOURCES = (
     "schema/decision-record/1/checkpoint.schema.json",
     "schema/dialect-recording/1/export.schema.json",
     "schema/dialect-recording/1/preparation.schema.json",
+    # Version 2, for formats 4.0.0 and 4.1.0, released with 0.6.0 (issue #326).
+    "schema/dialect-recording/2/export.schema.json",
+    "schema/dialect-recording/2/preparation.schema.json",
 )
 
 

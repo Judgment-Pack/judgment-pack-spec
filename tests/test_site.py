@@ -31,7 +31,8 @@ ANNOTATION_VOCABULARY_ROWS = "conformance/annotation-vocabulary"
 # The staged draft Core specVersion 0.4.0-draft graduated to the released 0.5.0 in place; its staged
 # directories are retired, and nothing the site writes is named for the draft selector.
 RETIRED_DRAFT_DIRECTORIES = ("schema/staged", "conformance/staged", "examples/staged")
-STAGED_SCHEMAS_0_6_0 = ("schema/dialect-recording/2",)
+# Version 2 of the dialect-recording schemas, staged for 0.6.0, is published with it (issue #326).
+RELEASED_SCHEMAS_0_6_0 = ("schema/dialect-recording/2",)
 UNPUBLISHED_DIRECTORIES = (
     STAGED_EVALUATION_ROWS,
     WITNESS_VECTORS,
@@ -40,8 +41,6 @@ UNPUBLISHED_DIRECTORIES = (
     ANNOTATION_VOCABULARY_ROWS,
     "conformance/policy",
     "schema/policy",
-    # Staged for specVersion 0.6.0 (issue #326); mirrors UNPUBLISHED_ARTIFACT_DIRECTORIES in web/build.py.
-    *STAGED_SCHEMAS_0_6_0,
 )
 
 # The retired pre-publication brand, and the raw hosting domain its identifiers used, must not appear
@@ -235,14 +234,15 @@ class StaticSiteTests(unittest.TestCase):
         # here: nothing under the staged directory is published, as an artifact or as a page.
         self._assert_nothing_published_under(STAGED_EVALUATION_ROWS)
 
-    def test_the_schemas_staged_for_0_6_0_are_not_published(self) -> None:
-        # RFC 0018's amendment of 2026-11-15 says the site does not serve them until 0.6.0 is
-        # released (issue #326), as an artifact or at their $id paths.
-        for source in STAGED_SCHEMAS_0_6_0:
-            with self.subTest(source=source):
-                self.assertTrue((ROOT / source).exists(), source)
-                self.assertFalse((self.output / "artifacts" / source).exists(), source)
-        self.assertFalse((self.output / "schema" / "dialect-recording" / "2").exists())
+    def test_the_schemas_released_with_0_6_0_are_published(self) -> None:
+        # RFC 0018's amendment of 2026-11-15: the site serves version 2 once 0.6.0 is released
+        # (issue #326), as an artifact and at its $id paths, byte for byte.
+        for source in RELEASED_SCHEMAS_0_6_0:
+            for name in ("export.schema.json", "preparation.schema.json"):
+                with self.subTest(source=source, name=name):
+                    bytes_ = (ROOT / source / name).read_bytes()
+                    self.assertEqual(bytes_, (self.output / "artifacts" / source / name).read_bytes())
+                    self.assertEqual(bytes_, (self.output / source / name).read_bytes())
 
     def test_the_workflow_schema_naming_formats_4_is_the_one_served_under_0_6_0(self) -> None:
         # The staged workflow schema became schema/workflow-1.schema.json in place, at its $id
@@ -773,6 +773,7 @@ class StaticSiteTests(unittest.TestCase):
             "project/releases/0.5.0/index.html": "releases/v0.5.0.md",
             "project/releases/0.5.1/index.html": "releases/v0.5.1.md",
             "project/releases/0.5.2/index.html": "releases/v0.5.2.md",
+            "project/releases/0.6.0/index.html": "releases/v0.6.0.md",
         }
         for output, source in cases.items():
             with self.subTest(output=output):
@@ -936,6 +937,8 @@ class StaticSiteTests(unittest.TestCase):
                     "schema/decision-record/1/checkpoint.schema.json",
                     "schema/dialect-recording/1/export.schema.json",
                     "schema/dialect-recording/1/preparation.schema.json",
+                    "schema/dialect-recording/2/export.schema.json",
+                    "schema/dialect-recording/2/preparation.schema.json",
                 )
             },
         }

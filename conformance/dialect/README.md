@@ -151,20 +151,20 @@ and decoded retained bytes in lineage, and its changed-bytes twin gives `prepara
 Both readers consume these same files; paired reader tests add the empty, missing and one-over-bound
 mutations. No model or web request was made to write any of them.
 
-[`format-4/`](format-4/README.md) holds the hand-written vectors of the proposed dialect format
-`4.0.0` (the companion's §2.2): two end-to-end vectors, a case rule with no source and three
-sources read by rules of version `2.0.0`, and one row for each new form and refusal. They are not
-Runner recordings, no preparer writes the format, and only the first reader reads it; the second
-refuses it `version-unread`.
+[`format-4/`](format-4/README.md) holds the hand-written vectors of dialect format `4.0.0` (the
+companion's §2.2), of `specVersion` `0.6.0`: two end-to-end vectors, a case rule with no source and
+three sources read by rules of version `2.0.0`, and one row for each new form and refusal. They are
+not Runner recordings, and only the first reader reads the format; the second refuses it
+`version-unread`.
 
-[`format-4.1/`](format-4.1/README.md) holds the hand-written vectors of the proposed dialect format
-`4.1.0`, a paged `operation` source ([RFC 0033](../../rfcs/0033-paged-operation-source.md), in
-Review): one for each row of the RFC's Conformance table. The companion is unchanged; only the first
-reader reads the format, the second refuses it `version-unread`, and the preserved `v0.3.0` reader
-refuses it `input-malformed`.
+[`format-4.1/`](format-4.1/README.md) holds the hand-written vectors of dialect format `4.1.0`, a
+paged `operation` source (the companion's §2.3, [RFC 0033](../../rfcs/0033-paged-operation-source.md)),
+of `specVersion` `0.6.0`: one for each row of the RFC's Conformance table. Only the first reader
+reads the format, the second refuses it `version-unread`, and the preserved `v0.3.0` reader refuses
+it `input-malformed`.
 
 [`recording-2/`](recording-2/README.md) and [`workflow-format-4/`](workflow-format-4/README.md) are
-staged for `0.6.0` (issue #326): preparations valid and invalid against version 2 of the
+of `specVersion` `0.6.0` (issue #326), hand-written and in no corpus: preparations valid and invalid against version 2 of the
 dialect-recording schemas, one for each rule it adds, and a workflow stage of each of formats `4.0.0`
 and `4.1.0` with its dialect and release digests.
 
