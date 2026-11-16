@@ -85,6 +85,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0035](0035-registry-references.md) | Registry references — entries and pinned secrets | Draft | Specification (part of the proposed registry companion of RFC 0034) |
 | [0036](0036-registry-emitter-contract.md) | The registry emitter contract and its conformance harness | Draft | Specification (part of the proposed registry companion of RFC 0034) |
 | [0037](0037-generated-facts-contracts.md) | Generated facts contracts: registry entries as pack facts, and typed facts builders | Draft | Specification (part of the proposed registry companion of RFC 0034) |
+| [0038](0038-terraform-file-source.md) | A file-sourced dialect source: Terraform plan and state JSON | Draft | Specification (dialect companion) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -194,5 +195,7 @@ unchanged.
   - [RFC 0037](0037-generated-facts-contracts.md) turns registry entries into pack facts for the
     outcome gate, generates a facts contract from each kind, and feeds typed Go and TypeScript
     facts builders.
-  - RFC 0038 is to follow.
+  - [RFC 0038](0038-terraform-file-source.md) adds a dialect source kind that reads Terraform plan
+    and state JSON files only, records their sha256, drops every sensitive value, and refuses a
+    file without sensitivity markers or of an unlisted format version.
 - It is a Draft, normative for nothing, and Core is unchanged.

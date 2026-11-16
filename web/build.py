@@ -915,6 +915,16 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0038-terraform-file-source.md",
+        PurePosixPath("rfcs/0038-terraform-file-source/index.html"),
+        "RFC 0038: A Terraform plan and state file source",
+        "Draft: a dialect source that reads Terraform plan and state JSON files only, records "
+        "their digest and drops every sensitive value.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.5.2.md",
         PurePosixPath("project/releases/0.5.2/index.html"),
         "0.5.2 release notes",
