@@ -63,7 +63,7 @@
     {"code": "REG-VALUE-DEPRECATED", "severity": "warning", "status": "active", "section": "§7.2", "meaning": "a value is at a position marked deprecated"},
     {"code": "REG-BOUND-ENTRIES", "severity": "error", "status": "active", "section": "§7.1", "meaning": "a kind has more entries than its maxEntries"},
     {"code": "REG-BOUND-ENTRY-BYTES", "severity": "error", "status": "active", "section": "§7.1", "meaning": "a resolved value is larger than its kind's maxEntryBytes"},
-    {"code": "REG-BOUND-VALIDATION-WORK", "severity": "error", "status": "active", "section": "§7.2", "meaning": "value validation passed the reader's work bound, and later values were not checked"},
+    {"code": "REG-BOUND-VALIDATION-WORK", "severity": "error", "status": "active", "section": "§7.2", "meaning": "value validation passed the reader's work bound, and this value and later ones were not checked"},
     {"code": "REG-REPORT-TRUNCATED", "severity": "warning", "status": "active", "section": "§7.4", "meaning": "the report holds its first 1000 diagnostics and more were found"},
     {"code": "REF-ENTRY-FORM", "severity": "error", "status": "active", "section": "§6.2", "meaning": "a value at a reference position is not an entry reference"},
     {"code": "REF-ENTRY-KIND", "severity": "error", "status": "active", "section": "§6.2", "meaning": "a reference names a kind its position does not allow"},

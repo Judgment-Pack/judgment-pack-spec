@@ -150,9 +150,10 @@ reads that form, never the literal as written. An integer literal is its own can
 other literal is written as JCS writes the double it equals: `20.000` becomes `20`, `1.50` becomes
 `1.5` and `1e2` becomes `100`. So trailing zeros after the point, and an exponent, never outlive
 admission, and an admitted number is at most 25 bytes. The rule adds no bound beyond the number
-rule above. A reader may refuse early a literal with more than 17 significant digits, or whose
-leading digit's exponent is outside −324 to 308, because no such literal meets it; it is
-`REG-DOC-NUMBER` (step 3).
+rule above. A reader may refuse early a literal other than zero that has more than 17 significant
+digits, counted once leading and trailing zeros are dropped, or whose leading significant digit's
+exponent is outside −324 to 308, because no such literal meets it; it is `REG-DOC-NUMBER`
+(step 3). So `1.00000000000000000000` is admitted as `1`, and `0e999999` as `0`.
 
 A number is compared, and is canonical, by its value: `1.50` and `1.5` are the same number, and
 both are written `1.5` in JCS.
@@ -311,9 +312,9 @@ and `not`, with `propertyNames` counting as one. The 4 097th is `REG-KIND-SCHEMA
 
 **Expanded size.** A schema's expanded size is also at most 4 096. It counts the subschemas that
 validation can visit at one position: the root schema and its subschemas as the size limit counts
-them, except that each `$ref` also counts the expanded size of the definition it names, every time
-it is reached. A definition that no `$ref` reaches is not counted here, since the size limit
-already holds it. So a chain of definitions that each name the next one sixteen times is refused,
+them, but without the members of `$defs`. Instead, each `$ref` also counts the expanded size of the
+definition it names, every time it is reached. A definition that no `$ref` reaches is not counted
+here, since the size limit already holds it. So a chain of definitions that each name the next one sixteen times is refused,
 even though it is small as written. A reader computes each definition's expanded size once, and
 may stop counting past 4 096. A schema over the bound is `REG-KIND-SCHEMA-LIMIT` at `/schema`.
 The check runs only when the schema has no other error.
@@ -339,7 +340,11 @@ A pattern is at most 256 code points. It is a sequence of these, and nothing els
 - **quantifiers** `*`, `+`, `?`, `{n}`, `{n,}` and `{n,m}`, each after an atom (a literal, an
   escape, `.`, a class or a group) and never after another quantifier, so lazy and possessive forms
   are refused. `n` and `m` are 1 to 4 digits with no leading zero (or `0`), and `n ≤ m ≤ 1000`. A `{`
-  that does not begin a quantifier, and a `}` or `]` that ends nothing, are refused;
+  that does not begin a quantifier, and a `}` or `]` that ends nothing, are refused. Along any
+  chain of quantifiers nested through groups, the product of their counts is at most 1 000:
+  `{n,m}` counts m, `{n}` and `{n,}` count n, and `*`, `+`, `?` and a count of 0 count 1, except
+  that `{0}` and `{0,0}` end the chain below them. So `(a{32}){32}` is refused, and
+  `(a{10}){100}` is admitted;
 - **bracket classes** `[ … ]`, with an optional leading `^`, holding literal code points, the escapes
   above, `\-`, and ranges `a-b` whose ends are a literal or an escaped code point and whose first
   end is not greater than its second. A class is not empty (`[]` and `[^]` are refused), holds no
@@ -362,7 +367,7 @@ that a reader's engine cannot compile within its own limits is not pinned by thi
 **Program size.** A pattern's size is counted on the pattern as written, by these rules:
 
 - each literal code point, escape, `.`, class, `^` and `$` counts 1;
-- a group counts 2 plus its content;
+- a group counts its content, since its capture is not relied on;
 - `*` counts 2 plus its atom, and `+` and `?` count 1 plus their atom;
 - `{n}` counts n times its atom; `{n,}` counts 1 plus n times its atom (`{0,}` counts as `*`);
   `{n,m}` counts m times its atom plus m − n;
@@ -372,7 +377,8 @@ that a reader's engine cannot compile within its own limits is not pinned by thi
 
 A pattern of size over 4 096 is `REG-KIND-PATTERN-LIMIT` at its pointer. A kind's patterns are
 also held together to 65 536. They are counted with `entryId.pattern` first and then the
-schema's patterns in reading order (§3.3), and the pattern that
+schema's patterns in reading order (§3.3); the default `entryId` pattern, when `entryId` is absent,
+is not counted. The pattern that
 would take the total past 65 536 is `REG-KIND-PATTERN-LIMIT` at its pointer. A refused pattern
 is not counted, so each later pattern is judged against the patterns admitted before it. The
 size bounds what a linear-time matcher builds: `{n,m}` makes m copies of its atom, so without a
@@ -763,10 +769,11 @@ A keyword that does not apply to the value's type (`maxLength` on a number, say)
 **Work bound.** The bounds of §3.3, §3.4 and §7.1 keep each check finite, but a registry of many
 large values can still make value validation costly. A reader MAY stop value validation once its
 work over the registry passes a bound of its own. It then reports `REG-BOUND-VALIDATION-WORK`, an
-error, at the value it stopped at, and checks no later value against its schema. The reference
-runtime counts in units of about one schema node visited, and stops past 67 108 864 (2^26). A
-value equal to one it has already checked against the same kind costs only its lookup, one
-unit per 16 bytes of its canonical form. Every other step still
+error, at the value it stopped at, and checks neither that value nor any it reaches later against
+its schema. The reference
+runtime counts in units of about one schema node visited, and stops past 67 108 864 (2^26). Every
+value costs one unit per 16 bytes of its canonical form. A value equal to one already checked
+against the same kind declaration (by digest) costs nothing more. Every other step still
 runs. A registry that passes one reader's bound and not another's is not pinned by this version
 (§17). A conformance row stays well within the reference runtime's bound.
 
@@ -891,8 +898,9 @@ subset is refused with a report, and nothing is written.
   is `REG-YAML-DOCUMENTS`;
 - **UTF-8** with no byte-order mark, holding only characters YAML allows, and none of U+0085,
   U+2028 and U+2029 as characters (`REG-YAML-ENCODING`). YAML 1.1 reads those three as line
-  breaks and YAML 1.2 does not, so a file that holds one would be read two ways. Written as the
-  escapes `\N`, `\L` and `\P` in a double-quoted scalar, they have one reading and are admitted;
+  breaks and YAML 1.2 does not, so a file that holds one would be read two ways. Written as an
+  escape in a double-quoted scalar (`\N`, `\L`, `\P`, or a `\x`, `\u` or `\U` escape of the
+  code point), they have one reading and are admitted;
 - **no tags** (`REG-YAML-TAG`), **no anchors or aliases** (`REG-YAML-ANCHOR`), **no merge key**
   `<<` (`REG-YAML-MERGE`);
 - **no empty node** (`REG-YAML-EMPTY`): write `null` or `""`;
@@ -1218,7 +1226,7 @@ source are the dialect's ([`dialect.md`](dialect.md) §4.5).
 | `REG-VALUE-DEPRECATED` | warning | §7.2 | a value is at a position marked deprecated |
 | `REG-BOUND-ENTRIES` | error | §7.1 | a kind has more entries than its maxEntries |
 | `REG-BOUND-ENTRY-BYTES` | error | §7.1 | a resolved value is larger than its kind's maxEntryBytes |
-| `REG-BOUND-VALIDATION-WORK` | error | §7.2 | value validation passed the reader's work bound, and later values were not checked |
+| `REG-BOUND-VALIDATION-WORK` | error | §7.2 | value validation passed the reader's work bound, and this value and later ones were not checked |
 | `REG-REPORT-TRUNCATED` | warning | §7.4 | the report holds its first 1000 diagnostics and more were found |
 | `REF-ENTRY-FORM` | error | §6.2 | a value at a reference position is not an entry reference |
 | `REF-ENTRY-KIND` | error | §6.2 | a reference names a kind its position does not allow |
