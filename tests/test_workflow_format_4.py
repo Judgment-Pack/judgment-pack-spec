@@ -197,6 +197,8 @@ class StagedStageVectorTests(unittest.TestCase):
             with self.subTest(stage=case["name"]):
                 workflow, release = load(self.DIRECTORY / case["workflow"]), load(self.DIRECTORY / case["release"])
                 dialect = load(ROOT / "conformance" / "dialect" / case["dialect"])
+                # the manifest names each schema by its version: 0.6.0's admits the stage, 0.5.0's does not
+                self.assertEqual(("valid", "invalid"), (case["expected"]["schema-0.6.0"], case["expected"]["schema-0.5.0"]))
                 self.assertEqual([], [error.message for error in published.iter_errors(workflow)])
                 self.assertFalse(previous.is_valid(workflow))
                 (stage,) = workflow["stages"]

@@ -816,9 +816,9 @@ def main(argv: list[str]) -> int:
                 directory.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(b)
     manifest = {
-        "status": "staged; proposed format 4.1.0 (RFC 0033, in Review), not a published conformance corpus",
+        "status": "hand-written; format 4.1.0 of specVersion 0.6.0 (RFC 0033, accepted), not a published conformance corpus",
         "rfc": 33,
-        "companion": "spec/dialect.md is unchanged; RFC 0033's Specification",
+        "companion": "spec/dialect.md §2.3",
         "verifiedAt": VERIFIED_AT,
         "signing": {"identity": "RFC 8032, section 7.1, TEST 1", "publicKey": PUBLIC},
         "cases": manifest_cases,

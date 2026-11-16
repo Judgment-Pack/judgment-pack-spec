@@ -48,7 +48,7 @@ waived the candidate period: no release candidate precedes it.
 - **Patch-release tests (#319).** `tests/test_release.py` holds the patch-release refusals to a
   hand-authored fixture and a test-local normative record, not to the live tree, so the move to a
   new `specVersion` leaves them unchanged.
-- The reviews are those on pull requests 329, 331 and 332, by a model of the drafting vendor:
+- The reviews are those on pull requests 329, 330, 331 and 332, by a model of the drafting vendor:
   same-vendor reviews, not a cross-vendor claim. The maintainer waived the review by another vendor.
 
 The entries below record the work in the order it landed, under the names it then had: formats

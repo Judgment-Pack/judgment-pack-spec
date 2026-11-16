@@ -4,8 +4,9 @@ This directory holds 47 vectors for the dialect, written for the preparation-ver
 the companion document [`spec/dialect.md`](../../spec/dialect.md) defines, recorded under Core
 `0.2.0-draft`; and, apart from them, the [Core `0.3.0` recording set](#the-core-030-recording-set),
 which holds 46 recordings made under Core `0.3.0`. Its design record,
-[RFC 0018](../../rfcs/0018-dialect.md), was accepted on 2026-10-15, and the vectors are **staged**
-until the next `specVersion` opens. They are in no corpus.
+[RFC 0018](../../rfcs/0018-dialect.md), was accepted on 2026-10-15, and the vectors are **staged**:
+`specVersion` `0.6.0` opened and left them here, and a later one may move them into a corpus. They
+are in no corpus.
 
 This directory is where they wait — reviewed, held to the same checks as a corpus, and runnable by
 hand — as the [checkpoint witness vectors](../witness/README.md) and the
@@ -14,7 +15,7 @@ hand — as the [checkpoint witness vectors](../witness/README.md) and the
 - **Not part of any corpus.** The companion document's §14 holds a preparation verifier to the
   dialect vectors published with the specification version its claim names. No version publishes
   these, so no claim may cite them, and no conformance claim of the class is available until one
-  does. Nothing here changes Core `0.5.0`, its schema, its four classes, or either of its
+  does. Nothing here changes Core `0.6.0`, its schema, its four classes, or either of its
   corpora.
 - **Not published with the specification, and in no release bundle.** The site's build skips this
   directory, as it skips the other staged directories, and a test holds that nothing under it is
