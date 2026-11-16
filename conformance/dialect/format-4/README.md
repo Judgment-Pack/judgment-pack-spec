@@ -1,8 +1,8 @@
-# Dialect format 4.0.0 vectors (staged, proposed)
+# Dialect format 4.0.0 vectors
 
-Hand-written vectors for the proposed dialect format `4.0.0` ([`spec/dialect.md`](../../../spec/dialect.md)
-§2.2, RFC 0018's amendment of 2026-11-12). They are not a conformance corpus, and they are not
-recordings: no preparer writes format `4.0.0`, and every expected answer here was written by hand,
+Hand-written vectors for dialect format `4.0.0` ([`spec/dialect.md`](../../../spec/dialect.md)
+§2.2, RFC 0018's amendment of 2026-11-12), of `specVersion` `0.6.0`. They are not a conformance
+corpus, and they are not recordings: every expected answer here was written by hand,
 the distances computed by [`tools/dialect_builtins_reference.py`](../../../tools/dialect_builtins_reference.py),
 which takes another method on the same sphere, and not by the reader under test. One of the
 repository's two readers reads the format; the other refuses it `version-unread`. No claim may cite

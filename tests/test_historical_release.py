@@ -27,6 +27,8 @@ FIXTURES = ROOT / "tests/fixtures/historical-compatibility"
 # The v0.3.0 rows are the files Core 0.5.0 changed in place: the three schemas, the two manifests and
 # the four files of the v0.3.0 retained-column leaf that changed (releases/v0.3.0.retained-column.json);
 # and the fifth leaf file, verify.ts, that the dialect format 4.0.0 amendment (#316) changed.
+# The v0.5.0 rows are the files Core 0.6.0 changed in place: the four schemas, the two manifests and
+# the Core text.
 ANCHORS = [{'tag': 'v0.1.0-draft',
   'commit': '80958f50c851e9809cb8036a23622391cf437c99',
   'source': 'schema/judgment-pack-core.schema.json',
@@ -166,7 +168,57 @@ ANCHORS = [{'tag': 'v0.1.0-draft',
   'source': 'tools/dialect-verify-ts/src/verify.ts',
   'blob': '219a598513e2172e856742764c012bfbcf888c94',
   'target': 'tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/verify.ts',
-  'targetSha256': '5ae002b07b0f9d3755c9d00bc828420e27b9927948402d8e4b266540c4f5cc1b'}]
+  'targetSha256': '5ae002b07b0f9d3755c9d00bc828420e27b9927948402d8e4b266540c4f5cc1b'},
+ {'tag': 'v0.5.0',
+  'commit': '171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae',
+  'source': 'schema/judgment-pack-core.schema.json',
+  'blob': '54a40ef012054c71b648311820863de36f8e2553',
+  'sourceSha256': 'fb182fd0ab7fc303618ce9a63834616527a68b63b165e7ed3e76f48f29978da0',
+  'target': 'schema/judgment-pack-core-0.5.0.schema.json',
+  'targetSha256': 'fb182fd0ab7fc303618ce9a63834616527a68b63b165e7ed3e76f48f29978da0',
+  'id': 'https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json'},
+ {'tag': 'v0.5.0',
+  'commit': '171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae',
+  'source': 'conformance/manifest.schema.json',
+  'blob': '16219e4130fed9aa8b21c24ae20f2fabb8802ae9',
+  'sourceSha256': 'd835195ecf4c0f214d78d106256f9b61fa006d4888a1b7c115c65b837d0496ed',
+  'target': 'schema/conformance-manifest-0.5.0.schema.json',
+  'targetSha256': 'd835195ecf4c0f214d78d106256f9b61fa006d4888a1b7c115c65b837d0496ed',
+  'id': 'https://judgmentpack.org/schema/0.5.0/conformance/manifest.schema.json'},
+ {'tag': 'v0.5.0',
+  'commit': '171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae',
+  'source': 'conformance/evaluation/manifest.schema.json',
+  'blob': '3ac390191045ecc2beb4a2d600ed78065f3dc5bb',
+  'sourceSha256': '7bc20cd13d074c56d151f90bd72ed8bed8d3bbd1481fcfe9218987652aafa1e8',
+  'target': 'schema/conformance-evaluation-manifest-0.5.0.schema.json',
+  'targetSha256': '7bc20cd13d074c56d151f90bd72ed8bed8d3bbd1481fcfe9218987652aafa1e8',
+  'id': 'https://judgmentpack.org/schema/0.5.0/conformance/evaluation/manifest.schema.json'},
+ {'tag': 'v0.5.0',
+  'commit': '171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae',
+  'source': 'schema/workflow-1.schema.json',
+  'blob': '25f499b94e8491f5049675c60630dbc62741154a',
+  'sourceSha256': '74b13dc5b1cbf011ddefbb43490d4f615b20238033fd910feecfd10207e1907b',
+  'target': 'schema/workflow-1-0.5.0.schema.json',
+  'targetSha256': '74b13dc5b1cbf011ddefbb43490d4f615b20238033fd910feecfd10207e1907b',
+  'id': 'https://judgmentpack.org/schema/0.5.0/workflow-1.schema.json'},
+ {'tag': 'v0.5.0',
+  'commit': '171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae',
+  'source': 'conformance/manifest.json',
+  'blob': '73b628730e33e9afb826c07cc171a116c6949169',
+  'target': 'tests/fixtures/historical-compatibility/0.5.0-document-manifest.json',
+  'targetSha256': 'd43196f372a33f73611b1b144d252e34f4157662a4e1014ac22041a93e61d060'},
+ {'tag': 'v0.5.0',
+  'commit': '171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae',
+  'source': 'conformance/evaluation/manifest.json',
+  'blob': 'a1190122ecec6fb80e5a03ae41c505397945b6bf',
+  'target': 'tests/fixtures/historical-compatibility/0.5.0-evaluation-manifest.json',
+  'targetSha256': '7338b786e9370582f3c833c2c51ef8c6f572ddad670b79e6182bc5044ffce320'},
+ {'tag': 'v0.5.0',
+  'commit': '171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae',
+  'source': 'spec/judgment-pack-core.md',
+  'blob': '3826afb5d40acbd26e24631e19156bfe6bbd25b1',
+  'target': 'tests/fixtures/historical-compatibility/v0.5.0/spec/judgment-pack-core.md',
+  'targetSha256': '1d5f90cf4f200d87a34c39abc5b5d4dffb5262cbcc79346c974a90ab2630654b'}]
 
 SCHEMAS = [row for row in ANCHORS if row["target"].startswith("schema/")]
 
@@ -231,17 +283,22 @@ class HistoricalReleaseTests(unittest.TestCase):
                     changed = {**manifest, "status": status}
                     self.assertFalse(validator.is_valid(changed), "new maturity reinterprets a historical selector")
 
-    def test_the_0_3_0_manifests_validate_under_their_frozen_schemas_only(self):
-        # Core 0.5.0 replaced the manifest schemas in place; the 0.3.0 manifests stay valid under the
-        # copies published at /schema/0.3.0/ and are refused by the active schemas.
-        for kind, active in (("document", "conformance/manifest.schema.json"),
-                             ("evaluation", "conformance/evaluation/manifest.schema.json")):
-            manifest = json.loads((FIXTURES / f"0.3.0-{kind}-manifest.json").read_text())
-            frozen = f"schema/conformance-{'evaluation-' if kind == 'evaluation' else ''}manifest-0.3.0.schema.json"
-            validator = Draft202012Validator(load(frozen), format_checker=FormatChecker())
-            self.assertEqual([], list(validator.iter_errors(manifest)), f"released 0.3.0/{kind} manifest rejected")
-            self.assertFalse(Draft202012Validator(load(active), format_checker=FormatChecker()).is_valid(manifest),
-                             f"active {kind} manifest schema admits the 0.3.0 selector")
+    def test_the_0_3_0_and_0_5_0_manifests_validate_under_their_frozen_schemas_only(self):
+        # Core 0.5.0 and then Core 0.6.0 replaced the manifest schemas in place; the 0.3.0 and 0.5.0
+        # manifests stay valid under the copies published at /schema/0.3.0/ and /schema/0.5.0/, and
+        # are refused by the active schemas and by each other's copies.
+        for version, other in (("0.3.0", "0.5.0"), ("0.5.0", "0.3.0")):
+            for kind, active in (("document", "conformance/manifest.schema.json"),
+                                 ("evaluation", "conformance/evaluation/manifest.schema.json")):
+                with self.subTest(version=version, kind=kind):
+                    manifest = json.loads((FIXTURES / f"{version}-{kind}-manifest.json").read_text())
+                    frozen = f"schema/conformance-{'evaluation-' if kind == 'evaluation' else ''}manifest-{{}}.schema.json"
+                    validator = Draft202012Validator(load(frozen.format(version)), format_checker=FormatChecker())
+                    self.assertEqual([], list(validator.iter_errors(manifest)), f"released {version}/{kind} manifest rejected")
+                    self.assertFalse(Draft202012Validator(load(active), format_checker=FormatChecker()).is_valid(manifest),
+                                     f"active {kind} manifest schema admits the {version} selector")
+                    self.assertFalse(Draft202012Validator(load(frozen.format(other)), format_checker=FormatChecker())
+                                     .is_valid(manifest), f"the {other} {kind} manifest schema admits {version}")
 
     def test_historical_selectors_refuse_current_only_profiles_and_routes(self):
         pack = json.loads((FIXTURES / "selector-only-surrogate.json").read_text())
@@ -252,7 +309,7 @@ class HistoricalReleaseTests(unittest.TestCase):
             "triggers": ["unknown"], "routes": [{"target": {"kind": "queue", "name": "Synthetic"}}]}}]
         for changed in variants:
             self.assertFalse(historical.is_valid(changed), "historical selector admitted newer-only shape")
-            migrated = {**changed, "specVersion": "0.5.0"}
+            migrated = {**changed, "specVersion": "0.6.0"}
             self.assertTrue(Draft202012Validator(load("schema/judgment-pack-core.schema.json"),
                                                 format_checker=FormatChecker()).is_valid(migrated))
         self.assertFalse(historical.is_valid({**pack, "specVersion": "0.3.0"}), "exact selector dispatch weakened")
@@ -260,15 +317,16 @@ class HistoricalReleaseTests(unittest.TestCase):
     def test_previous_canonical_urls_publish_the_trusted_promised_bytes(self):
         output = Path(tempfile.mkdtemp(prefix="historical-publisher-"))
         publisher()(output)
-        # This complete inventory is the five canonical IDs published at immutable v0.2.0-draft and
-        # the four the v0.3.0 tag published that Core 0.5.0 superseded in place (workflow-1 among them).
-        self.assertEqual(9, len(SCHEMAS))
+        # This complete inventory is the five canonical IDs published at immutable v0.2.0-draft, the
+        # four the v0.3.0 tag published that Core 0.5.0 superseded in place (workflow-1 among them),
+        # and the four the v0.5.0 tag published that Core 0.6.0 superseded in place.
+        self.assertEqual(13, len(SCHEMAS))
         for row in SCHEMAS:
             path = output / urlsplit(row["id"]).path.lstrip("/")
             self.assertTrue(path.is_file(), f"old canonical URL disappeared: {row['id']}")
             self.assertEqual(row["targetSha256"], hashlib.sha256(path.read_bytes()).hexdigest(),
                              "canonical URL serves rewritten historical bytes")
-        current_path = output / "schema/0.5.0/conformance/evaluation/manifest.schema.json"
+        current_path = output / "schema/0.6.0/conformance/evaluation/manifest.schema.json"
         self.assertTrue(current_path.is_file())
         self.assertEqual((ROOT / "conformance/evaluation/manifest.schema.json").read_bytes(), current_path.read_bytes())
 
@@ -315,7 +373,7 @@ class HistoricalReleaseTests(unittest.TestCase):
         admitted = old.strict_json_loads(text)
         self.assertTrue(Draft202012Validator(load("schema/judgment-pack-core-0.2.0-draft.schema.json"),
                                             format_checker=FormatChecker()).is_valid(admitted))
-        migrated = text.replace('"0.2.0-draft"', '"0.5.0"', 1)
+        migrated = text.replace('"0.2.0-draft"', '"0.6.0"', 1)
         with self.assertRaises(current.UnpairedSurrogateError):
             current.strict_json_loads(migrated)
         repaired = migrated.replace('\\ud800', '\\ud83d\\ude00')

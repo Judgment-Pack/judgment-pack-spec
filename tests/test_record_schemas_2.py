@@ -1,7 +1,7 @@
-"""Version 2 of the dialect-recording schemas: preparations of the proposed formats 4.0.0 and 4.1.0 and an
-export carrying one, staged for specVersion 0.6.0 (RFC 0018, the amendment of 2026-11-15, issue #326).
+"""Version 2 of the dialect-recording schemas: preparations of formats 4.0.0 and 4.1.0 and an export
+carrying one, released with specVersion 0.6.0 (RFC 0018, the amendment of 2026-11-15, issue #326).
 
-Every reading among the staged vectors of both formats validates against version 2 and none against version 1;
+Every reading among the hand-written vectors of both formats validates against version 2 and none against version 1;
 no preparation or export of version 1's form validates against version 2 (decision 3)."""
 
 from __future__ import annotations
@@ -64,7 +64,7 @@ class Version2Tests(unittest.TestCase):
                 Draft202012Validator.check_schema(schema)
                 self.assertEqual(NAMESPACE + path, schema["$id"])
                 self.assertTrue(schema["description"].startswith(
-                    "Informative, at draft maturity, staged for specVersion 0.6.0 (RFC 0018, the amendment of "
+                    "Informative, at draft maturity, released with specVersion 0.6.0 (RFC 0018, the amendment of "
                     "2026-11-15, issue #326). "))
                 self.assertIn("Core section 1.1 does not list this schema among the normative artifacts, so "
                               "publishing it changes no format's normative status", schema["description"])

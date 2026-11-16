@@ -74,7 +74,8 @@ PREVIOUS_MANIFEST_PATH = HISTORICAL / "0.3.0-document-manifest.json"
 PREVIOUS_EVALUATION_MANIFEST_PATH = HISTORICAL / "0.3.0-evaluation-manifest.json"
 EXAMPLE_PATH = ROOT / "examples" / "expense-approval-annotated.json"
 RELEASED_EXAMPLE_PATH = ROOT / "examples" / "minimal-expense-approval.json"
-SELECTOR = '"specVersion": "0.5.0"'
+# Core 0.6.0 keeps 0.5.0's rules (§11): what 0.5.0 added is held here under the current selector.
+SELECTOR = '"specVersion": "0.6.0"'
 
 # The same rule as Core §9.2 states it in words, written out by hand: the code points refused anywhere in
 # an annotation string, and Unicode's White_Space, refused at either end.
@@ -261,11 +262,35 @@ class CoreSchemaTests(unittest.TestCase):
     def test_schema_is_draft_2020_12_with_the_released_identity(self) -> None:
         schema = core_schema()
         Draft202012Validator.check_schema(schema)
-        self.assertEqual("https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json", schema["$id"])
+        self.assertEqual("https://judgmentpack.org/schema/0.6.0/judgment-pack-core.schema.json", schema["$id"])
         self.assertEqual(SCHEMA_ID, schema["$id"])
-        self.assertEqual("0.5.0", schema["properties"]["specVersion"]["const"])
-        self.assertEqual("Structural schema for 0.5.0. Conformance does not establish truth, authority, safety, "
+        self.assertEqual("0.6.0", schema["properties"]["specVersion"]["const"])
+        self.assertEqual("Structural schema for 0.6.0. Conformance does not establish truth, authority, safety, "
                          "or operational fitness.", schema["description"])
+
+    def test_0_6_0_is_the_0_5_0_schema_with_only_its_identity_changed(self) -> None:
+        # Core 0.6.0 changes no rule (§11): the active schema is the preserved 0.5.0 schema with its
+        # `$id`, its description and the selector constant changed, and nothing else.
+        released = strict_json_loads((ROOT / "schema/judgment-pack-core-0.5.0.schema.json").read_text(encoding="utf-8"))
+        self.assertEqual("https://judgmentpack.org/schema/0.5.0/judgment-pack-core.schema.json", released["$id"])
+        self.assertEqual("0.5.0", released["properties"]["specVersion"]["const"])
+        current = core_schema()
+        for member in ("$id", "description"):
+            current[member] = released[member]
+        current["properties"]["specVersion"] = released["properties"]["specVersion"]
+        self.assertEqual(released, current)
+        text = " ".join(SPEC_PATH.read_text(encoding="utf-8").split())
+        for statement in ("Core's rules are those of `0.5.0`, unchanged: no carrier, structural, semantic or "
+                          "evaluation rule differs, and a `0.5.0` pack whose selector alone is changed keeps "
+                          "every verdict and every disposition (§11).",
+                          "Compatibility from `0.5.0` is explicit:",
+                          "a `0.5.0` reader refuses a pack declaring `0.6.0`, and a `0.6.0` reader refuses a "
+                          "pack declaring `0.5.0`, by the exact selector (§4)",
+                          "**Semantic:** no rule of §§2–10 changes.",
+                          "Every row of the `0.5.0` corpora keeps its expectation, with only the selector of "
+                          "its pack changed."):
+            with self.subTest(statement=statement[:40]):
+                self.assertIn(statement, text)
 
     def test_the_draft_selector_and_the_unassigned_0_4_0_are_refused(self) -> None:
         # The text was staged as 0.4.0-draft and released as 0.5.0; tag v0.4.0 carries 0.3.0, so no
@@ -273,9 +298,9 @@ class CoreSchemaTests(unittest.TestCase):
         # a draft pack moves.
         validator = Draft202012Validator(core_schema(), format_checker=FormatChecker())
         pack = strict_json_loads((ROOT / "examples/minimal-expense-approval.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.0", pack["specVersion"])
+        self.assertEqual("0.6.0", pack["specVersion"])
         self.assertEqual([], list(validator.iter_errors(pack)))
-        for selector in ("0.4.0-draft", "0.4.0", "0.3.0"):
+        for selector in ("0.4.0-draft", "0.4.0", "0.3.0", "0.5.0"):
             errors = list(validator.iter_errors({**pack, "specVersion": selector}))
             self.assertEqual([["specVersion"]], [list(error.absolute_path) for error in errors], selector)
         text = " ".join((ROOT / "spec/judgment-pack-core.md").read_text(encoding="utf-8").split())
@@ -285,7 +310,8 @@ class CoreSchemaTests(unittest.TestCase):
 
     def test_schema_is_the_0_3_0_schema_plus_exactly_the_rfc_fragments(self) -> None:
         # Undo RFC 0031's fragments (§§1.7, 2.7, 3.3), issue #308's patterns and the identity: what
-        # remains must be the 0.3.0 schema, so 0.5.0 changes nothing the RFC does not name.
+        # remains must be the 0.3.0 schema, so 0.5.0, and 0.6.0 after it, change nothing the RFC does
+        # not name.
         released = strict_json_loads(PREVIOUS_SCHEMA_PATH.read_text(encoding="utf-8"))
         current = core_schema()
         defs = current["$defs"]
@@ -641,7 +667,7 @@ class AddedEvaluationRowTests(unittest.TestCase):
         self.assertEqual(len(carried_packs | added_packs), len(packs))
         word = number_word
         for statement in (
-            f"`0.5.0` holds {len(cases)} rows over {len(packs)} pack fixtures: {len(carried)} rows carried "
+            f"`0.6.0` holds {len(cases)} rows over {len(packs)} pack fixtures: {len(carried)} rows carried "
             f"from Core `0.3.0` over {len(carried_packs)} packs, and {len(self.rows)} rows added with "
             f"[RFC 0031] over {len(added_packs)} packs. {len(dispositions)} rows expect a disposition and "
             f"{sum(errors.values())} expect an error class. {len(pairs)} pairs group "
@@ -672,7 +698,7 @@ class AddedEvaluationRowTests(unittest.TestCase):
         self.assertEqual(len(self.rows), sum(row["origin"] == "rfc-0031" for row in cases))
 
     def test_every_0_3_0_row_is_carried_and_its_pack_is_its_own_evaluation_form(self) -> None:
-        # Each 0.3.0 row, and each row staged after the release, keeps its expectation under 0.5.0:
+        # Each 0.3.0 row, and each row staged after the release, keeps its expectation under 0.5.0 and 0.6.0:
         # its pack keeps its conformance result, and a conforming one is its own evaluation form, so
         # Core §8.5 gives it Core 0.3.0's result.
         staged = strict_json_loads(EVALUATION_STAGED_CASES_PATH.read_text(encoding="utf-8"))["cases"]
@@ -1070,8 +1096,8 @@ class ExtensionsReadingTests(unittest.TestCase):
             with self.subTest(path=path.relative_to(ROOT).as_posix()):
                 self.assertIsNone(re.search(r"clarif\w* (?:of )?(?:released text|Core `0\.3\.0`)", flat))
         flat = " ".join(SPEC_PATH.read_text(encoding="utf-8").split())
-        self.assertIn("This reading is a change that takes effect under `0.5.0`; it does not change "
-                      "Core `0.3.0`.", flat)
+        self.assertIn("This reading is a change that takes effect under `0.5.0`, and `0.6.0` keeps it; it "
+                      "does not change Core `0.3.0`.", flat)
 
     def test_evaluation_form_of_the_rfc_examples(self) -> None:
         positions = strict_json_loads((CONFORMANCE / "valid" / "annotations-positions.json").read_text(encoding="utf-8"))

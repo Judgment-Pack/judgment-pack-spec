@@ -1,4 +1,4 @@
-"""Dialect format 4.0.0 (spec/dialect.md §2.2, proposed): the hand-written rows and the end-to-end vectors
+"""Dialect format 4.0.0 (spec/dialect.md §2.2): the hand-written rows and the end-to-end vectors
 under conformance/dialect/format-4/, the bounds and refusals, and the formats before it unchanged.
 
 The expected answers are hand-written, never recorded from the reader under test; the distances among them

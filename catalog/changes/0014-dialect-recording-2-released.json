@@ -1,0 +1,17 @@
+{
+  "reason": "Released with specVersion 0.6.0 (#326): the descriptions of version 2 of the dialect-recording schemas say released rather than staged, and name format 4.1.0's preparation by spec/dialect.md section 2.3.8 rather than RFC 0033. No shape changes; the schemas stay informative, at draft maturity.",
+  "changes": [
+    {
+      "path": "schema/dialect-recording/2/export.schema.json",
+      "family": "dialect-recording",
+      "from": "sha256:503b4b1a4cfb62204987b2e34316ecb62253c182b7ae718495251b4a94b03962",
+      "to": "sha256:460c51b51c8452434734073f529d6e7f7bf233577bdf90530e4154a99542666e"
+    },
+    {
+      "path": "schema/dialect-recording/2/preparation.schema.json",
+      "family": "dialect-recording",
+      "from": "sha256:0144e89eb8bc087f23b1e0d9df374a0df50d9e03a1c93875865459618bab935a",
+      "to": "sha256:545518ffdf476d6dc79b560ab8909f38964c99420a8265212010e18531aeeeba"
+    }
+  ]
+}

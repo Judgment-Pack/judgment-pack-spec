@@ -1,11 +1,13 @@
 # Historical compatibility evidence
 
-The five manifest files are exact published source bytes, not captured implementation output.
+The seven manifest files are exact published source bytes, not captured implementation output.
 The files under `v0.3.0/` are the exact bytes, at the `v0.3.0` tag, of the files of the
 `v0.3.0` retained column (`releases/v0.3.0.retained-column.json`) changed in place since: four by
 Core `0.5.0`, and `tools/dialect-verify-ts/src/verify.ts` by the proposed dialect format `4.0.0`
 (RFC 0018's amendment of 2026-11-12); tests that rebuild a `v0.3.0` tree read them instead of the
 live files.
+The file under `v0.5.0/` is the exact bytes, at the `v0.5.0` tag, of the Core text Core `0.6.0`
+changed in place, with the `0.5.0` schemas under `schema/` and the two `0.5.0-*-manifest.json` files.
 The carrier fragment extracts only `DuplicateMemberError` and `strict_json_loads` from the immutable
 0.2 source without changing those definitions; the import prelude permits offline CI execution.
 `selector-only-surrogate.json` is a handwritten synthetic compatibility counterexample. Tests pin
@@ -31,3 +33,10 @@ these trusted resources and source identities independently of the mutable curre
 - `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect_verify.py`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect_verify.py`, Git blob `3dc1ac99c26a725f86103b1bcf1ff512c76ecee0`, preserved SHA-256 `fe3b773ce30ad8c395fe85500714a12d6cc4262ccc6bca05c44f7b3b40a60b60`.
 - `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/vector.ts`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect-verify-ts/src/vector.ts`, Git blob `5c00c3a9961fc00dfc61c23c1fa0ce9925110dff`, preserved SHA-256 `289b68479edf607df1480e46b0e6a6ee04091feb5dd56ddee696fbb2a337a1cb`.
 - `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/verify.ts`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect-verify-ts/src/verify.ts`, Git blob `219a598513e2172e856742764c012bfbcf888c94`, preserved SHA-256 `5ae002b07b0f9d3755c9d00bc828420e27b9927948402d8e4b266540c4f5cc1b`.
+- `schema/judgment-pack-core-0.5.0.schema.json`: source `171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae:schema/judgment-pack-core.schema.json`, Git blob `54a40ef012054c71b648311820863de36f8e2553`, preserved SHA-256 `fb182fd0ab7fc303618ce9a63834616527a68b63b165e7ed3e76f48f29978da0`.
+- `schema/conformance-manifest-0.5.0.schema.json`: source `171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae:conformance/manifest.schema.json`, Git blob `16219e4130fed9aa8b21c24ae20f2fabb8802ae9`, preserved SHA-256 `d835195ecf4c0f214d78d106256f9b61fa006d4888a1b7c115c65b837d0496ed`.
+- `schema/conformance-evaluation-manifest-0.5.0.schema.json`: source `171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae:conformance/evaluation/manifest.schema.json`, Git blob `3ac390191045ecc2beb4a2d600ed78065f3dc5bb`, preserved SHA-256 `7bc20cd13d074c56d151f90bd72ed8bed8d3bbd1481fcfe9218987652aafa1e8`.
+- `schema/workflow-1-0.5.0.schema.json`: source `171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae:schema/workflow-1.schema.json`, Git blob `25f499b94e8491f5049675c60630dbc62741154a`, preserved SHA-256 `74b13dc5b1cbf011ddefbb43490d4f615b20238033fd910feecfd10207e1907b`.
+- `tests/fixtures/historical-compatibility/0.5.0-document-manifest.json`: source `171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae:conformance/manifest.json`, Git blob `73b628730e33e9afb826c07cc171a116c6949169`, preserved SHA-256 `d43196f372a33f73611b1b144d252e34f4157662a4e1014ac22041a93e61d060`.
+- `tests/fixtures/historical-compatibility/0.5.0-evaluation-manifest.json`: source `171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae:conformance/evaluation/manifest.json`, Git blob `a1190122ecec6fb80e5a03ae41c505397945b6bf`, preserved SHA-256 `7338b786e9370582f3c833c2c51ef8c6f572ddad670b79e6182bc5044ffce320`.
+- `tests/fixtures/historical-compatibility/v0.5.0/spec/judgment-pack-core.md`: source `171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae:spec/judgment-pack-core.md`, Git blob `3826afb5d40acbd26e24631e19156bfe6bbd25b1`, preserved SHA-256 `1d5f90cf4f200d87a34c39abc5b5d4dffb5262cbcc79346c974a90ab2630654b`.

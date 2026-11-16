@@ -51,7 +51,8 @@ def admitted(path: Path) -> dict[str, Any] | None:
 
 
 class RowsTest(unittest.TestCase):
-    """The 103 rows of conformance/evaluation/manifest.json: 20 of Core 0.3.0 and 83 that 0.5.0 adds."""
+    """The 103 rows of conformance/evaluation/manifest.json: 20 of Core 0.3.0 and 83 that 0.5.0 adds,
+    each declaring 0.6.0, which keeps 0.5.0's rules."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -59,7 +60,29 @@ class RowsTest(unittest.TestCase):
 
     def test_the_rows_declare_the_selector(self) -> None:
         self.assertEqual(ev.SELECTOR, self.document["specVersion"])
-        self.assertEqual("0.5.0", ev.SELECTOR)
+        self.assertEqual("0.6.0", ev.SELECTOR)
+
+    def test_0_5_0_and_0_6_0_are_read_alike_and_no_other_selector_is(self) -> None:
+        # Core 0.6.0 keeps 0.5.0's rules (§11): a pack whose selector alone differs gives the same
+        # admission and the same result under either, each held to its own published schema. Every
+        # other selector is refused structurally, never read as the nearest one.
+        self.assertEqual({"0.5.0": "schema/judgment-pack-core-0.5.0.schema.json",
+                          "0.6.0": "schema/judgment-pack-core.schema.json"},
+                         {k: v.relative_to(ROOT).as_posix() for k, v in ev.SCHEMAS.items()})
+        for selector, path in ev.SCHEMAS.items():
+            schema = load(path)
+            self.assertEqual(f"https://judgmentpack.org/schema/{selector}/judgment-pack-core.schema.json", schema["$id"])
+            self.assertEqual(selector, schema["properties"]["specVersion"]["const"])
+        current = b'"specVersion": "0.6.0"'
+        for row in self.document["cases"]:
+            with self.subTest(row=row["id"]):
+                self.assertEqual(1, (ROWS / row["pack"]).read_bytes().count(current))
+                got = ev.run_row(row, ROWS).expected_form()
+                earlier = ev.run_row(row, ROWS, replace=(current, b'"specVersion": "0.5.0"')).expected_form()
+                self.assertEqual(show(got), show(earlier))
+                for other in (b"0.4.0-draft", b"0.3.0", b"0.6.1", b"0.7.0", b""):
+                    refused = ev.run_row(row, ROWS, replace=(current, b'"specVersion": "' + other + b'"'))
+                    self.assertEqual(("expectedErrorClass", ev.PACK_NOT_CONFORMANT), refused.expected_form(), other)
 
     def test_every_row_gives_its_expected_result(self) -> None:
         self.assertEqual(103, len(self.document["cases"]))
@@ -166,12 +189,12 @@ def without_optional_extensions(form: dict[str, Any]) -> dict[str, Any]:
 
 
 class StagedRowsTest(unittest.TestCase):
-    """The rows staged after Core 0.3.0 (issue #219), which declare 0.5.0 since the graduation."""
+    """The rows staged after Core 0.3.0 (issue #219), which declare the current selector, 0.6.0."""
 
     def test_staged_rows_of_core_0_3_0(self) -> None:
         manifest = ROOT / "conformance" / "evaluation" / "staged" / "cases.json"
         document = load(manifest)
-        self.assertEqual("0.5.0", document["stagedAfter"])
+        self.assertEqual("0.6.0", document["stagedAfter"])
         self.assertEqual(15, len(document["cases"]))
         for row in document["cases"]:
             with self.subTest(row=row["id"]):

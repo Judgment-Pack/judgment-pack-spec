@@ -1,23 +1,36 @@
 # RFC 0033: A paged operation source
 
-- Status: Review
+- Status: Accepted
 - Type: Standards track, draft maturity. An amendment of the dialect companion,
   [`spec/dialect.md`](../spec/dialect.md), whose design record is [RFC 0018](0018-dialect.md): a
-  named format `4.1.0`, proposed, of format `4.0.0`'s family.
+  named format `4.1.0`, of format `4.0.0`'s family.
 - Created: 2026-11-15
+- Accepted: 2026-11-16
 - Issue: [#328](https://github.com/Judgment-Pack/judgment-pack-spec/issues/328), milestone `v0.6.0`
 - Amended: 2026-11-15, for [#326](https://github.com/Judgment-Pack/judgment-pack-spec/issues/326):
-  a `prevSignature` at odds with its receipt's own `callIndex` is check 1's (section 4), proposed
+  a `prevSignature` at odds with its receipt's own `callIndex` is check 1's (section 4)
 - Related: judgment-pack-runner #247 and its proposal, judgment-pack-runner #287, whose design
   record is the Runner's `docs/design/paging.md`; RFC 0018's amendment of 2026-11-12, format
-  `4.0.0`, proposed
+  `4.0.0`
 
-> This RFC, in Review, is normative for nothing. [`spec/dialect.md`](../spec/dialect.md) is unchanged by it:
-> the Specification below gives the text proposed for the companion, which lands only after
-> acceptance, staged vectors, and the agreement of the reference Runner and a second reader on them.
-> Its vectors are staged as proposed, and the reference reader (`tools/dialect_verify.py`) reads
-> format `4.1.0` to check them; no schema or preparer changes with this RFC, and Core `0.5.0` is
-> untouched.
+> **Adoption record.** This RFC is accepted by the single maintainer under the interim review
+> regime ([RFC 0009](0009-interim-review-regime.md)), at draft maturity, for `specVersion` `0.6.0`,
+> on issue [#328](https://github.com/Judgment-Pack/judgment-pack-spec/issues/328), with the decision
+> of issue [#326](https://github.com/Judgment-Pack/judgment-pack-spec/issues/326) taken at section
+> 4's recommended option. The reviews are those recorded on pull requests 329, 330, 331 and 332, by a
+> model of the drafting vendor: same-vendor reviews, not a cross-vendor claim. The maintainer
+> waived the review by another vendor for this work.
+>
+> **What lands.** Sections 1 to 11 below land as [`spec/dialect.md`](../spec/dialect.md) §2.3,
+> named format `4.1.0`, each "section n" read as §2.3.n; section 9's entry lands in §13; and the
+> sentences section 12 lists are amended there, each naming §2.3 for "the paged source's rule"
+> (RFC 0018, the amendment of 2026-11-16). The companion is the normative text, and this record is
+> informative. The vectors under `conformance/dialect/format-4.1/` stay hand-written, in no corpus
+> and in no claim (§14). The reference reader (`tools/dialect_verify.py`) reads the format; the
+> TypeScript reader refuses it `version-unread`. The reference Runner prepares paged sources since
+> its pull request 299 (`v0.34.0`), which closed judgment-pack-runner #247; this repository runs
+> none of the Runner's tests, and no Runner recording of the format is among the vectors, so the
+> Runner's agreement on them is not claimed here. Core `0.6.0`'s rules are `0.5.0`'s.
 
 ## Summary
 

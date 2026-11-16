@@ -1,5 +1,5 @@
-"""Dialect format 4.1.0, a paged `operation` source (RFC 0033, in Review; spec/dialect.md is unchanged): the
-staged vectors under conformance/dialect/format-4.1/, one for each row of the RFC's Conformance table, read by
+"""Dialect format 4.1.0, a paged `operation` source (spec/dialect.md §2.3; RFC 0033, accepted): the
+hand-written vectors under conformance/dialect/format-4.1/, one for each row of the RFC's Conformance table, read by
 the first reader, by one that does not read the format, and by the preserved v0.3.0 reader.
 
 The expected answers are hand-written in tools/paged_source_vectors.py and pinned in the manifest; a

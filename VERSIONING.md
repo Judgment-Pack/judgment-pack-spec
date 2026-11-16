@@ -1,8 +1,8 @@
 # Versioning and release policy
 
 Core Judgment Pack Specification releases use Semantic Versioning identifiers with a leading `v` on
-Git tags. Specification `0.3.0` is identified by the exact tag `v0.3.0` and specification `0.5.0`
-by `v0.5.0`; `0.2.0-draft` and `0.1.0-draft` keep the tags `v0.2.0-draft` and `v0.1.0-draft`.
+Git tags. Specification `0.3.0` is identified by the exact tag `v0.3.0`, specification `0.5.0`
+by `v0.5.0` and specification `0.6.0` by `v0.6.0`; `0.2.0-draft` and `0.1.0-draft` keep the tags `v0.2.0-draft` and `v0.1.0-draft`.
 [The release numbering rule](#release-numbers-and-specversion) states how a tag's numbers relate to
 the `specVersion` it carries. Only a tag and GitHub release published by the maintainers establish
 an immutable release; similarly named files on the mutable `main` branch do not. Release tag

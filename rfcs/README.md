@@ -19,7 +19,8 @@ directory. Its vectors are staged, as RFC 0013's rows are, until a later `specVe
 [RFC 0018](0018-dialect.md) is accepted in the same form: the normative statement of the dialect and
 its preparation verifier is the companion document [`spec/dialect.md`](../spec/dialect.md), not this
 directory, and its forty-seven vectors are staged until a later `specVersion` opens; it was amended
-in place on 2026-10-15 and 2026-10-16, its status unchanged.
+in place on 2026-10-15 and 2026-10-16, its status unchanged, and its formats `4.0.0` and `4.1.0` are
+adopted for `specVersion` `0.6.0`.
 [RFC 0014](0014-lineage-record-and-action-binding.md) is the first accepted cross-project record,
 and a retrospective one: the gateway's `SPEC.md` and the runtime's decision records govern what it
 describes, and they did so before it was written.
@@ -27,7 +28,7 @@ describes, and they did so before it was written.
 Acceptance and incorporation are different events. [RFC 0000](0000-rfc-process.md) makes acceptance
 the approval of a design at the maturity the RFC names; RFC 0006's text landed in the same merge,
 which is a precedent and not a rule. [RFC 0013](0013-evaluator-error-and-precedence-cases.md) is
-accepted and awaits incorporation: its rows are staged for the `suiteVersion` after `0.5.0`,
+accepted and awaits incorporation: its rows are staged for the `suiteVersion` after `0.6.0`,
 are in no released corpus, and land when a later `specVersion` opens.
 
 The purpose of this directory is to make the project's open design questions *visible* rather than
@@ -74,13 +75,13 @@ stable feature requires two independent implementations and conformance cases.
 | [0024] | Retained workflow admission proofs | Draft | Specification (a proposed amendment to the Draft workflow; unresolved portable encoding) |
 | [0025](0025-core-escalation-routes.md) | Core escalation routes | Accepted design (#219); review pending | Specification (Core) |
 | [0026](0026-document-ceiling-profiles.md) | Document ceiling profiles | Accepted design (#232); review pending | Specification and companions |
-| [0027](0027-pack-design-advisories.md) | Bounded pack-design advisories | Draft | Optional tooling contract proposed for Core `0.6.0`; released conformance unchanged |
+| [0027](0027-pack-design-advisories.md) | Bounded pack-design advisories | Draft | Optional tooling contract, proposed for Core `0.6.0` and not released in it; released conformance unchanged |
 | [0028](0028-complete-workflow-contributors.md) | Complete workflow contributor attribution | Draft | Specification (amendment to Draft workflow; target Spec 0.5.0, unpublished) |
 | [0029](0029-retained-column-conversions.md) | Exact selected retained columns, custody, producer grammar and role ceilings | Accepted | Selected Dialect companion for immutable Core RC2 at draft maturity; acceptance is separate from publication |
 | [0030](0030-agent-principals-and-delegated-authority.md) | Agent principals and delegated authority | Draft | Mixed: the delegation statement is standards track at draft maturity (a proposed companion beside Core); the rest is a cross-project exploratory record (agent, gateway, Desk) |
 | [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets | Accepted | Specification (Core amendment released in Core `0.5.0`, staged as `0.4.0-draft`; accepted on a same-vendor review, the different-vendor review waived) |
 | [0032](0032-outcome-severity.md) | Outcome severity, one well-known annotation key | Accepted | Specification (a companion beside Core, [the annotation vocabulary](../spec/annotation-vocabulary.md) `1.0.0`, status `proposed`, released in `v0.5.2`; Core `0.5.0` unchanged; its rows staged; accepted on a same-vendor review, the different-vendor review waived) |
-| [0033](0033-paged-operation-source.md) | A paged operation source | Review | Specification (an amendment of the dialect companion, a proposed named format `4.1.0`; [`spec/dialect.md`](../spec/dialect.md) unchanged) |
+| [0033](0033-paged-operation-source.md) | A paged operation source | Accepted | Specification (an amendment of the dialect companion, named format `4.1.0`, landed as [`spec/dialect.md`](../spec/dialect.md) §2.3 for `specVersion` `0.6.0`; accepted on same-vendor reviews, the different-vendor review waived) |
 | [0034](0034-registry-profile.md) | The registry profile — declared entry kinds and environment overlays | Accepted | Specification (a proposed companion beside Core, `spec/registry.md`, with its own format selectors and release route; Core unchanged; accepted on a same-vendor review, the different-vendor review waived) |
 | [0035](0035-registry-references.md) | Registry references — entries and pinned secrets | Accepted | Specification (part of the proposed registry companion of RFC 0034; accepted on a same-vendor review, the different-vendor review waived) |
 | [0036](0036-registry-emitter-contract.md) | The registry emitter contract and its conformance harness | Accepted | Specification (part of the proposed registry companion of RFC 0034; accepted on a same-vendor review, the different-vendor review waived) |
@@ -99,7 +100,10 @@ preparation-verifier class; the reference Runner's 47 preparation vectors are st
 `specVersion`, in no corpus. It was amended on 2026-10-15 for every gateway source shape in version
 2, the unbound source form in version 3 and version 3 as the reference Runner reads it; on
 2026-10-16 for the name an unbound operation's record carries, the research vectors staged and the
-skipped source's form.
+skipped source's form; and on 2026-11-12, 2026-11-13 and 2026-11-15 for format `4.0.0` and the
+recordings of formats `4.0.0` and `4.1.0`, which the maintainer adopted for `specVersion` `0.6.0` on
+2026-11-16, when RFC 0033's format `4.1.0` landed as §2.3. The vectors of both formats are
+hand-written, in no corpus.
 
 RFC 0019 is a cross-project record outside the specification: a catalog's entry format,
 manifest, tests and contribution rules, and a desk's browse. Amended 2026-10-15 for
@@ -118,7 +122,9 @@ The catalog's checker and fixtures follow in their own pull request on `judgment
 RFC 0019 stays a Draft; a hosted registry remains out of scope (Unresolved question 4).
 
 RFC 0020 proposes `spec/workflow.md` beside Core, with a reader class and fixtures from a
-two-stage run, none recorded yet.
+two-stage run, none recorded yet. Its amendment of 2026-11-15, a stage of dialect format `4.0.0` or
+`4.1.0` digested whole with no Runner encoding, is accepted for `specVersion` `0.6.0`, and the
+workflow schema of `0.6.0` names both formats; the RFC stays a Draft.
 
 RFC 0024 proposes public accounting epochs for independently checkable workflow byte refusals,
 with proof bytes included in actual bundle bounds. Its encoding and transitions have explicit
@@ -175,9 +181,10 @@ corpus, and one reader reads it. Core `0.5.0`'s schema, text and corpora are unc
 [RFC 0033](0033-paged-operation-source.md) proposes that an `operation` source may be read in
 pages: one gateway session's calls, each request formed from the case and the page before, the loop
 ending at a page that names no next reference or at a declared bound, and the pages' records joined
-in call order into one value read. It would be a named dialect format `4.1.0`, of format `4.0.0`'s
-family. It is in Review, normative for nothing; the companion, its vectors and its readers are
-unchanged.
+in call order into one value read. It is a named dialect format `4.1.0`, of format `4.0.0`'s
+family. It is accepted at draft maturity, on same-vendor reviews with the different-vendor review
+waived, and lands as `spec/dialect.md` §2.3 for `specVersion` `0.6.0`; its vectors are hand-written,
+in no corpus, and the first of the two readers reads it.
 
 [RFC 0034](0034-registry-profile.md) proposes a registry companion beside Core.
 - It covers a canonical JSON registry of entries of kinds the adopter declares, each kind with a

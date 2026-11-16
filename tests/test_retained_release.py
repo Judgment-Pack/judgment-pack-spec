@@ -160,7 +160,7 @@ class RetainedRelease(unittest.TestCase):
             build_release.validate_final_retained_inventory(root)
             build_release.validate_reader_support_identity('v0.3.0',root)
             build_release.validate_artifacts('0.3.0','v0.3.0',root)
-        # This tree is no v0.3.0 tree: its Core pins declare 0.5.0, and the route refuses it.
+        # This tree is no v0.3.0 tree: its Core pins declare a later specVersion, and the route refuses it.
         with self.assertRaisesRegex(ValueError,'release tag does not match the conformance specVersion'):
             build_release.validate_artifacts('0.3.0','v0.3.0')
         build_release.validate_reader_support_identity('v0.3.0')

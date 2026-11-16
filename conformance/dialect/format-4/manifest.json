@@ -1,5 +1,5 @@
 {
-  "status": "staged; proposed format 4.0.0, not a published conformance corpus",
+  "status": "hand-written; format 4.0.0 of specVersion 0.6.0, not a published conformance corpus",
   "rfc": 18,
   "companion": "spec/dialect.md §2.2",
   "cases": [

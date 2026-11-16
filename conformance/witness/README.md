@@ -4,7 +4,8 @@ This directory holds 54 vectors for the checkpoint witness statement, written fo
 witness-statement reader class that the companion document
 [`spec/checkpoint-witness.md`](../../spec/checkpoint-witness.md) defines. Its design record,
 [RFC 0017](../../rfcs/0017-checkpoint-witness-statement.md), was accepted on 2026-10-12, and the
-vectors are **staged** until the next `specVersion` opens. They are in no corpus.
+vectors are **staged**: `specVersion` `0.6.0` opened and left them here, and a later one may move
+them into a corpus. They are in no corpus.
 
 This directory is where they wait — reviewed, held to the same checks as a corpus, and runnable by
 hand — until a later `specVersion` opens and they move into a corpus, as the
@@ -13,7 +14,7 @@ hand — until a later `specVersion` opens and they move into a corpus, as the
 - **Not part of any corpus.** The companion document's §11 holds a witness-statement reader to the
   witness vectors published with the specification version its claim names. No version publishes
   these, so no claim may cite them, and no conformance claim of the reader class is available
-  until one does. Nothing here changes Core `0.5.0`, its schema, its four
+  until one does. Nothing here changes Core `0.6.0`, its schema, its four
   classes, or either of its corpora.
 - **Not published with the specification, and in no release bundle.** The site's build skips this
   directory, as it skips the staged evaluation rows, and a test holds that nothing under it is

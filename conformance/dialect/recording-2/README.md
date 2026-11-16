@@ -1,9 +1,9 @@
-# Recording schema version 2 vectors (staged for `0.6.0`)
+# Recording schema version 2 vectors
 
 Hand-written vectors for version 2 of the dialect-recording schemas,
-[`schema/dialect-recording/2/`](../../../schema/dialect-recording/2/), proposed by RFC 0018's
-amendment of 2026-11-15 (issue #326). They are not a conformance corpus and not recordings: no
-preparer writes formats `4.0.0` or `4.1.0`, and no claim may cite them.
+[`schema/dialect-recording/2/`](../../../schema/dialect-recording/2/), of RFC 0018's amendment of
+2026-11-15 (issue #326), released with `specVersion` `0.6.0`. They are not a conformance corpus and
+not recordings, and no claim may cite them.
 
 Each file is a preparation. Two are valid against version 2: a preparation of format `4.0.0` with a
 case rule and derivations, byte for byte the one of
