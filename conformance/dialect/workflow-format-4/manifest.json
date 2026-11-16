@@ -31,6 +31,20 @@
         "publishedSchema": "invalid",
         "workflowReader": "version-unread"
       }
+    },
+    {
+      "name": "stage-4.0.0-runner-members",
+      "formatVersion": "4.0.0",
+      "dialect": "format-4/case-rule-no-sources/dialect.json",
+      "workflow": "stage-4.0.0.workflow.json",
+      "release": "stage-4.0.0.runner-release.json",
+      "dialectDigest": "sha256:f00efeb40b7ce2a27088d98f8932f33bc9ccc7f7caba39dd50d2d4445af28a85",
+      "releaseDigest": "sha256:b54ba834d013b369b2c1c51dc4a33372c8ab7bb36b9f28172d4611c52009c7f8",
+      "expected": {
+        "stagedSchema": "valid",
+        "publishedSchema": "invalid",
+        "workflowReader": "version-unread"
+      }
     }
   ]
 }

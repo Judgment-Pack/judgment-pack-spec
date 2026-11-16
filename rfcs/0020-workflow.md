@@ -107,9 +107,13 @@ only in its offline `verify-preparation`.
 *Recommended: option 1.* The release digest of a stage whose dialect is of format `4.0.0` or `4.1.0`
 is SHA-256 of the `canon` bytes (§1) of the whole retained release: every member as retained, none
 removed, none defaulted, no typed decoding. A release outside the `canon` domain has no such digest
-and is refused `input-malformed`. The same rule digests a run export's embedded `release`. Formats
-`2.0.0` and `3.0.0` and integer versions `2` and `3` keep the pinned encoding, so no digest of theirs
-changes. *Why:* option 2 has no commit to pin, and any pin would tie the digest to one product's
+and is refused `input-malformed`. The same rule digests a run export's embedded `release`. The
+retained release is open, with `id`, `packDigest`, `runtimeDigest` and `inputMapping` required
+(§1): every member a Runner retains, `createdAt`, `preview`, `validation` and `sample` among them,
+is digested and held to the `canon` domain, and each Runner release recorded among the dialect
+vectors (`conformance/dialect/vectors/`) is in that domain. §7's sentence on decoding and encoding
+by the pinned reference takes the two formats as its exception. Formats `2.0.0` and `3.0.0` and
+integer versions `2` and `3` keep the pinned encoding, so no digest of theirs changes. *Why:* option 2 has no commit to pin, and any pin would tie the digest to one product's
 declarations, dropping again whatever a later format adds; option 3 leaves a Runner unable to admit a
 recorded job on either format. A digest of every member needs no list of members to keep, and a
 second reader computes it with the `canon` form it already has.
@@ -151,7 +155,8 @@ until `0.6.0` is released. §3 names the two formats as staged.
 its dialect the staged format vectors' own, with the dialect digest and the release digest written
 by hand: each workflow document is valid against the staged schema and not against the published
 one, `release_digest_bytes` gives each release digest, and the workflow reader refuses each stage
-`version-unread`. They are in no corpus and no claim.
+`version-unread`. A third case gives the format `4.0.0` stage a release with every member §1 lists
+for the Runner, 21 in all, with hand-written values. They are in no corpus and no claim.
 
 **What stays open.** A stage of either format is admitted only once that format is accepted. The
 workflow reader (`tools/workflow_reader.py`) refuses both `version-unread`, as `0.5.x` does, until
@@ -317,10 +322,20 @@ It is not a file-byte digest.
 The Runner's `docs/MAPPING-V2.md` at `66e264e`, "Dialect version 3", documents the version-3
 encoding; "Release checks, runtime and offline verification" documents the run export (§7).
 Staged for `specVersion` `0.6.0` (issue #326), a stage whose dialect is of format `4.0.0` or
-`4.1.0` takes no Runner encoding: its release digest is SHA-256 of the `canon` bytes of the whole
-retained release, every member as retained, none removed or defaulted, with no typed decoding. A
-release outside the `canon` domain has no such digest and is `input-malformed`. A run export's
-embedded `release` is digested by the same rule. Every other format keeps the encoding above.
+`4.1.0` takes no Runner encoding; the stage's dialect reference, not the release, selects this rule.
+Its retained release is an object with at least `id`, a string; `packDigest` and `runtimeDigest`,
+digests; and `inputMapping`, an object, the bound dialect (§7). It is open, the one exception to
+the closed forms above: any other member the workflow runner retains is admitted as retained, and
+none of them is required. For instance, not as a pin, judgment-pack-runner's `Release` at `ea45017`
+retains `schemaVersion`, `pack`, `packId`, `packVersion`, `title`, `createdAt`, `config`, `lock`,
+`validation`, `sample`, `preview` and `tests` besides those four, and `dialect`, `inputProfiles`,
+`mappingWarnings`, `testEvidence` and `suppliedReviewedSet` when it has them. The release digest is
+SHA-256 of the `canon` bytes of the whole retained release, every member as retained, none removed
+or defaulted, with no typed decoding. The `canon` domain holds over every member, `preview`,
+`validation` and `sample` among them: a release with a number outside it in any member, a
+non-integer literal included, has no such digest and is `input-malformed`, and so is one that lacks
+a required member or has one of another form. A run export's embedded `release` is digested by the
+same rule. Every other format keeps the encoding above.
 
 The runtime reference is judgment-pack-runtime `v0.34.0` at
 `785ea58927255b775a774e29952c560591429cd3`. Its `README.md`,
@@ -696,7 +711,9 @@ integer version 3 omits those legacy members. Named formats use dialect §2.1's 
 identity-bearing form; do not insert legacy members, remove identity, or substitute the integer
 family before digesting. The release form and encoding are pinned by §1, including its named
 `dialect` identity when present and research source members. Decode and encode using that exact
-reference; do not normalize the forms alike or silently use a newer installed writer.
+reference; do not normalize the forms alike or silently use a newer installed writer. Staged for
+`specVersion` `0.6.0`, a release of a stage of format `4.0.0` or `4.1.0` is the exception: it is
+neither decoded nor encoded, and its digest is §1's, of the whole retained release.
 
 `instances` holds 1 to `limits.maxInstances` entries, ordered by stage, then selected parent
 order. Each is exactly `{id, stage, parentRecord, selectionDigest, inputDigest, caseDigest,

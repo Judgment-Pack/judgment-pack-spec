@@ -50,10 +50,20 @@ It is not a file-byte digest.
 The Runner's `docs/MAPPING-V2.md` at `66e264e`, "Dialect version 3", documents the version-3
 encoding; "Release checks, runtime and offline verification" documents the run export (§7).
 Staged for `specVersion` `0.6.0` (issue #326), a stage whose dialect is of format `4.0.0` or
-`4.1.0` takes no Runner encoding: its release digest is SHA-256 of the `canon` bytes of the whole
-retained release, every member as retained, none removed or defaulted, with no typed decoding. A
-release outside the `canon` domain has no such digest and is `input-malformed`. A run export's
-embedded `release` is digested by the same rule. Every other format keeps the encoding above.
+`4.1.0` takes no Runner encoding; the stage's dialect reference, not the release, selects this rule.
+Its retained release is an object with at least `id`, a string; `packDigest` and `runtimeDigest`,
+digests; and `inputMapping`, an object, the bound dialect (§7). It is open, the one exception to
+the closed forms above: any other member the workflow runner retains is admitted as retained, and
+none of them is required. For instance, not as a pin, judgment-pack-runner's `Release` at `ea45017`
+retains `schemaVersion`, `pack`, `packId`, `packVersion`, `title`, `createdAt`, `config`, `lock`,
+`validation`, `sample`, `preview` and `tests` besides those four, and `dialect`, `inputProfiles`,
+`mappingWarnings`, `testEvidence` and `suppliedReviewedSet` when it has them. The release digest is
+SHA-256 of the `canon` bytes of the whole retained release, every member as retained, none removed
+or defaulted, with no typed decoding. The `canon` domain holds over every member, `preview`,
+`validation` and `sample` among them: a release with a number outside it in any member, a
+non-integer literal included, has no such digest and is `input-malformed`, and so is one that lacks
+a required member or has one of another form. A run export's embedded `release` is digested by the
+same rule. Every other format keeps the encoding above.
 
 The runtime reference is judgment-pack-runtime `v0.34.0` at
 `785ea58927255b775a774e29952c560591429cd3`. Its `README.md`,
@@ -429,7 +439,9 @@ integer version 3 omits those legacy members. Named formats use dialect §2.1's 
 identity-bearing form; do not insert legacy members, remove identity, or substitute the integer
 family before digesting. The release form and encoding are pinned by §1, including its named
 `dialect` identity when present and research source members. Decode and encode using that exact
-reference; do not normalize the forms alike or silently use a newer installed writer.
+reference; do not normalize the forms alike or silently use a newer installed writer. Staged for
+`specVersion` `0.6.0`, a release of a stage of format `4.0.0` or `4.1.0` is the exception: it is
+neither decoded nor encoded, and its digest is §1's, of the whole retained release.
 
 `instances` holds 1 to `limits.maxInstances` entries, ordered by stage, then selected parent
 order. Each is exactly `{id, stage, parentRecord, selectionDigest, inputDigest, caseDigest,

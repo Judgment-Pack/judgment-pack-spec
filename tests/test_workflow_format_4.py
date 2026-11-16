@@ -104,14 +104,40 @@ class ReleaseDigestTests(unittest.TestCase):
             self.assertNotEqual(stated, "sha256:" + hashlib.sha256(pinned).hexdigest())
 
     def test_every_member_counts_and_none_is_defaulted(self) -> None:
+        # the form is open: a member the four required ones do not name is admitted and digested
         (line, stated), _ = worked_examples()
         value = d.read_document(line.encode("utf-8"), "worked example")
         for change in (lambda v: v.__setitem__("note", None),
-                       lambda v: v["inputMapping"]["case"]["rule"].__setitem__("ruleVersion", "1"),
-                       lambda v: v.pop("runtimeDigest")):
+                       lambda v: v.__setitem__("createdAt", "2026-11-15T12:00:00Z"),
+                       lambda v: v["inputMapping"]["case"]["rule"].__setitem__("ruleVersion", "1")):
             changed = copy.deepcopy(value)
             change(changed)
             self.assertNotEqual(stated, "sha256:" + hashlib.sha256(encoding.release_digest_bytes(changed)).hexdigest())
+
+    def test_a_release_without_a_required_member_is_refused(self) -> None:
+        (line, _), _ = worked_examples()
+        value = d.read_document(line.encode("utf-8"), "worked example")
+        for name, wrong in (("id", 1), ("packDigest", "sha256:1"), ("runtimeDigest", None)):
+            for change in (lambda v: v.pop(name), lambda v: v.__setitem__(name, wrong)):
+                changed = copy.deepcopy(value)
+                change(changed)
+                with self.subTest(member=name, changed=changed.get(name, "absent")):
+                    with self.assertRaises(d.Refused) as caught:
+                        encoding.release_digest_bytes(changed)
+                    self.assertEqual("input-malformed", caught.exception.name)
+
+    def test_the_rfc_lists_the_runner_members_the_vector_carries(self) -> None:
+        directory = ROOT / "conformance" / "dialect" / "workflow-format-4"
+        release = load(directory / "stage-4.0.0.runner-release.json")
+        runner = {"id", "inputMapping", "packDigest", "runtimeDigest", "schemaVersion", "pack", "packId",
+                  "packVersion", "title", "createdAt", "config", "lock", "validation", "sample", "preview", "tests",
+                  "dialect", "inputProfiles", "mappingWarnings", "testEvidence", "suppliedReviewedSet"}
+        self.assertEqual(runner, set(release))
+        for path in (RFC, ROOT / "spec" / "workflow.md"):
+            section = " ".join(path.read_text(encoding="utf-8").split("For instance, not as a pin,", 1)[1]
+                               .split("The release digest is", 1)[0].split())
+            self.assertEqual(runner - {"id", "inputMapping", "packDigest", "runtimeDigest"},
+                             set(re.findall(r"`([A-Za-z]+)`", section)) - {"Release"}, path.name)
 
     def test_a_release_outside_the_canon_domain_is_refused(self) -> None:
         (line, _), _ = worked_examples()
@@ -144,10 +170,10 @@ class StagedStageVectorTests(unittest.TestCase):
         from tools import workflow_reader as reader
         manifest = load(self.DIRECTORY / "manifest.json")
         cases = manifest["cases"]
-        self.assertEqual(["4.0.0", "4.1.0"], [case["formatVersion"] for case in cases])
+        self.assertEqual(["4.0.0", "4.1.0", "4.0.0"], [case["formatVersion"] for case in cases])
         self.assertEqual(load(STAGED)["$id"], manifest["schema"])
-        self.assertEqual(sorted([f for c in cases for f in (c["workflow"], c["release"])] + ["README.md", "manifest.json"]),
-                         sorted(path.name for path in self.DIRECTORY.iterdir()))
+        self.assertEqual({f for c in cases for f in (c["workflow"], c["release"])} | {"README.md", "manifest.json"},
+                         {path.name for path in self.DIRECTORY.iterdir()})
         staged = jsonschema.Draft202012Validator(load(STAGED), format_checker=jsonschema.FormatChecker())
         published = jsonschema.Draft202012Validator(load(PUBLISHED), format_checker=jsonschema.FormatChecker())
         for case in cases:

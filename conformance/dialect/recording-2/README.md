@@ -12,7 +12,9 @@ a paged source, byte for byte the one of
 [`format-4.1/paged-three-pages-no-next/`](../format-4.1/paged-three-pages-no-next/). Each other file
 is one of those two changed in one rule that version 2 adds, and is invalid against it. The manifest
 gives each file's base, the rule, and the change as JSON Patch operations (RFC 6902), so a reader of
-the manifest can rebuild every file from its base.
+the manifest can rebuild every file from its base. One rule can take more than one schema keyword:
+`version-in-place-of-format` breaks both `required` (no `formatVersion`) and
+`additionalProperties` (a `version` member), since the rule is that one replaces the other.
 
 The Python reader ([`tools/dialect_verify.py`](../../../tools/dialect_verify.py)) is given each
 file as the preparation, with the base vector's other files. It reads each valid one and answers

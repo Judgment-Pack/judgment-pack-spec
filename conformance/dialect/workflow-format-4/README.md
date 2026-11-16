@@ -13,6 +13,13 @@ gives each stage's dialect digest, SHA-256 of the dialect's `canon` bytes, and i
 SHA-256 of the whole release's `canon` bytes (RFC 0020 section 1, as proposed). Both were computed
 with a general-purpose JSON serializer and SHA-256, not by the reader under test.
 
+A third case, `stage-4.0.0-runner-members`, shares the format `4.0.0` stage and dialect. Its release
+`stage-4.0.0.runner-release.json` has the four members of the other releases and every other member
+judgment-pack-runner's `Release` declares, 21 in all (RFC 0020 section 1 lists them), so its digest
+covers members such as `createdAt`, `preview`, `validation` and `sample`. Their values are
+hand-written placeholders in the Runner's shapes, not a Runner's bytes, and the encoding turns on
+none of them.
+
 The Python reader's `release_digest_bytes` (`tools/workflow_reader_encoding.py`) gives both release
 digests, and the pinned Runner encoding would give others, since it drops the case's `rule` and the
 source's `paging`. The workflow reader still refuses each stage `version-unread`, as a `0.5.x` reader
