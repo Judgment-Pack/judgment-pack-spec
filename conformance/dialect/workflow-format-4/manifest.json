@@ -45,6 +45,21 @@
         "publishedSchema": "invalid",
         "workflowReader": "version-unread"
       }
+    },
+    {
+      "name": "stage-4.0.0-terminal-selection",
+      "formatVersion": "4.0.0",
+      "dialect": "format-4/case-rule-no-sources/dialect.json",
+      "workflow": "stage-4.0.0-terminal-selection.workflow.json",
+      "release": "stage-4.0.0.release.json",
+      "dialectDigest": "sha256:f00efeb40b7ce2a27088d98f8932f33bc9ccc7f7caba39dd50d2d4445af28a85",
+      "releaseDigest": "sha256:127c106bc6171575a90f7802e7ed1ff16054e708eaeca1feec893a2cbaf0fc83",
+      "expected": {
+        "stagedSchema": "valid",
+        "publishedSchema": "invalid",
+        "workflowReader": "input-malformed",
+        "rule": "selection belongs to producing stages only"
+      }
     }
   ]
 }

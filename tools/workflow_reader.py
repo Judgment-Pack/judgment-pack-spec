@@ -258,8 +258,7 @@ class Reader:
             ident(s['id']); require(s['id'] not in self.stage_order,'repeated stage')
             self.stage_order.append(s['id'])
         self.definitions = {s['id']:s for s in stages}
-        self.children = {sid:[s['id'] for s in stages if s['input'].get('fromStage') == sid] for sid in self.stage_order}
-        for s in stages: require(('selection' in s) == bool(self.children[s['id']]), 'selection belongs to producing stages only')
+        self.children = self.consumers_form(stages)
         require(self.workflow['result'] in self.children and not self.children[self.workflow['result']], 'result must be terminal')
         closed(self.execution, {'executionVersion','workflowDigest','execution','rootCaseDigest','frozen','instances','outputSets','selections','admissionProofDigest'})
         ident(self.execution['execution'])
@@ -303,6 +302,12 @@ class Reader:
         array(values,0,self.limits['maxRecords'])
         for v in values: digest(v)
         require(len(set(values))==len(values),'duplicate digest')
+
+    def consumers_form(self,stages):
+        # §3: selection is present exactly on a stage another stage consumes, so never on a terminal stage.
+        children={sid:[s['id'] for s in stages if s['input'].get('fromStage') == sid] for sid in self.stage_order}
+        for s in stages: require(('selection' in s) == bool(children[s['id']]), 'selection belongs to producing stages only')
+        return children
 
     def stage_form(self,s,index,skip_ref=False):
         closed(s,{'id','dialect','pack','input','execution','caseBindings','outputs','relation'},{'selection'})
