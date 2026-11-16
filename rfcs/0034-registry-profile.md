@@ -222,6 +222,19 @@ one meaning in RE2, ECMAScript (with the `u` flag) and Python's `re`.
 **Excluded constructs:** back-references, look-around, named groups, flags, `\w`, `\s`, `\b`,
 Unicode property classes, possessive and lazy quantifiers.
 
+**One meaning, fixed here.** The three engines do not agree on every allowed construct by default,
+so the companion fixes the meaning, and a reader translates for its engine:
+- `.` matches any code point except U+000A, U+000D, U+2028 and U+2029 (ECMAScript's meaning;
+  RE2 and Python exclude only U+000A).
+- `$` matches only at the end of the string. Python's `$` also matches before a final line feed,
+  so a Python reader uses `\Z`.
+- `\d` is `[0-9]`. Python's `\d` on strings is every Unicode digit.
+- `\-` is allowed only inside a bracket class, where ECMAScript's `u` mode allows it.
+- Inside a class, `[` must be escaped (RE2 reads `[:` as a POSIX class), a class may not be empty
+  or begin with `]`, and `--`, `&&`, `~~` and `||` are refused (Python reserves them).
+- `{` and `}` appear only as a quantifier `{n}`, `{n,}` or `{n,m}`, or escaped. RE2 reads a stray
+  `{` as a literal, and ECMAScript's `u` mode refuses it.
+
 **Matching semantics:**
 - A pattern matches if it matches anywhere in the string (JSON Schema semantics), so anchoring is
   the author's.
