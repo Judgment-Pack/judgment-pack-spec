@@ -1,12 +1,12 @@
 # Evaluation corpus
 
 This directory is the evaluation corpus for Judgment Pack Core
-[`0.5.0`](../../spec/judgment-pack-core.md). It is the corpus an implementation must pass before
+[`0.6.0`](../../spec/judgment-pack-core.md). It is the corpus an implementation must pass before
 it may claim evaluator conformance (§3.4), and it is normative for that class only (§1.1). It is not a
 validation corpus: the document-conformance cases stay in [`../`](../README.md), and nothing here
 changes whether a document is carrier, structurally, or semantically conforming.
 
-This is a **seed** corpus. It is version-pinned to `0.5.0`, it is not exhaustive, and it grows
+This is a **seed** corpus. It is version-pinned to `0.6.0`, it is not exhaustive, and it grows
 by RFC. Passing it is necessary for an evaluator-conformance claim; it is not evidence that an
 implementation is correct on inputs the corpus does not contain.
 
@@ -81,10 +81,12 @@ claim.
 
 ## What is here now
 
-`0.5.0` holds 103 rows over 41 pack fixtures: 20 rows carried from Core `0.3.0` over 4 packs, and 83
+`0.6.0` holds 103 rows over 41 pack fixtures: 20 rows carried from Core `0.3.0` over 4 packs, and 83
 rows added with [RFC 0031](../../rfcs/0031-annotations-and-value-sets.md) over 37 packs. 93 rows
 expect a disposition and 10 expect an error class. 29 pairs group 67 of the rows, and 17 of the 41
 packs are their own evaluation form. The `origin` field of each case says where it came from.
+They are `0.5.0`'s rows with only the selector of each pack changed: Core `0.6.0` changes no
+rule, and no expectation moved (Core §11).
 
 ### Carried from `0.3.0`
 
@@ -169,7 +171,7 @@ of the text's authors. The repository's test evaluator,
 [`tools/core_050_eval.py`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/tools/core_050_eval.py),
 a test tool that makes no conformance claim, runs all 103 rows. The reference runtime ran the rows
 as they were staged before the release, under the draft selector `0.4.0-draft`, and has not yet run
-them under `0.5.0` (RFC 0031, Acceptance).
+them under `0.5.0` or `0.6.0` (RFC 0031, Acceptance).
 
 ### Pairs, and packs that are their own evaluation form
 

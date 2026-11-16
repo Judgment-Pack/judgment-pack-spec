@@ -1,22 +1,28 @@
-# Judgment Pack Core `0.5.0`
+# Judgment Pack Core `0.6.0`
 
 ## Status
 
 This document is a draft. It may change incompatibly and MUST NOT be represented as an
 industry standard or as suitable, by conformance alone, for consequential decisions.
 
-`0.5.0` defines four conformance classes: carrier, structural, and semantic document
+`0.6.0` defines four conformance classes: carrier, structural, and semantic document
 conformance, and evaluator conformance (§3.4). Sections 7 and 8 are normative for an implementation
 that claims the evaluator class and informative for every other consumer; a document-conformance
-claim does not depend on them. This release adds annotations, a specification-defined extension
-that labels the pack, its outcomes, its rules and the entries of a value set (§§9.1–9.2); declared
-value sets, which an `in` condition may reference (§§6.9 and 7.4); and the evaluation form, under
-which neither annotations nor references change a result (§8.5). It also refuses a line terminator
-in a local identifier, an extension name, a pack version and a decimal operand, whatever a
-regular-expression engine's end anchor admits (§§2.2, 4, 5 and 9). Migration from `0.3.0` changes
-only the selector for a pack that already meets those rules and §9.1's reading of an `extensions`
-object (§11). Re-declaration opts the pack into this release's exact evaluator semantics and corpus
-and confers no conformance on any implementation (§11).
+claim does not depend on them.
+
+Core's rules are those of `0.5.0`, unchanged: no carrier, structural, semantic or evaluation rule
+differs, and a `0.5.0` pack whose selector alone is changed keeps every verdict and every disposition
+(§11). The selector moves because `0.6.0` releases the companion texts' dialect formats `4.0.0` and
+`4.1.0` and the workflow stage that names them, and a release tag `vX.Y.0` carries `specVersion`
+`X.Y.0` (VERSIONING.md). `0.5.0` added annotations, a specification-defined extension that labels
+the pack, its outcomes, its rules and the entries of a value set (§§9.1–9.2); declared value sets,
+which an `in` condition may reference (§§6.9 and 7.4); and the evaluation form, under which neither
+annotations nor references change a result (§8.5). It also refused a line terminator in a local
+identifier, an extension name, a pack version and a decimal operand, whatever a regular-expression
+engine's end anchor admits (§§2.2, 4, 5 and 9). Migration from `0.3.0` changes only the selector for
+a pack that already meets those rules and §9.1's reading of an `extensions` object (§11).
+Re-declaration opts the pack into this release's exact evaluator semantics and corpus and confers no
+conformance on any implementation (§11).
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT**, and **MAY** are to be
 interpreted as described by BCP 14 when, and only when, they appear in all capitals. Normative
@@ -341,7 +347,7 @@ disposition. Every other bullet above applies to the evaluator class unchanged.
 | Member                 | Required | Meaning                                                 |
 | ---------------------- | -------: | ------------------------------------------------------- |
 | `profile`             |       no | Ceiling profile: `base` (default) or `extended` (§4.1) |
-| `specVersion`          |      yes | Exact value `0.5.0`                               |
+| `specVersion`          |      yes | Exact value `0.6.0`                               |
 | `id`                   |      yes | Stable absolute URI identifying the pack series         |
 | `version`              |      yes | Three-component `MAJOR.MINOR.PATCH` revision string     |
 | `title`                |      yes | Non-empty human-readable title                          |
@@ -1157,10 +1163,10 @@ data, not an `extensions` object. So "every name in `metadata.requiredExtensions
 key in at least one `extensions` object" counts only those objects: a required name that appears only
 inside an operand or an entry value is missing, and the document is not semantically conforming.
 
-This reading is a change that takes effect under `0.5.0`; it does not change Core `0.3.0`. Core
+This reading is a change that takes effect under `0.5.0`, and `0.6.0` keeps it; it does not change Core `0.3.0`. Core
 `0.3.0` §9 does not say whether a member named `extensions` inside data is an `extensions` object, a
 known open point of that text. The repository's `0.3.0` checker counts such a member anywhere in the
-document, and it is not changed. So one `0.3.0` shape is refused under `0.5.0` (§11).
+document, and it is not changed. So one `0.3.0` shape is refused under `0.5.0` and `0.6.0` (§11).
 
 This specification defines one such extension, `org.judgmentpack.annotations` (§9.2).
 [RFC 0016](../rfcs/0016-outcome-values.md), a Draft, would add its own name under this paragraph.
@@ -1303,7 +1309,22 @@ reader, writer, and semantic compatibility separately and supply machine-readabl
 
 A published pack version SHOULD be immutable. Changed content SHOULD receive a new version.
 
-Compatibility from `0.3.0` is explicit:
+Compatibility from `0.5.0` is explicit:
+
+- **Reader and writer:** a `0.5.0` reader refuses a pack declaring `0.6.0`, and a `0.6.0` reader
+  refuses a pack declaring `0.5.0`, by the exact selector (§4); neither acquires support by ignoring
+  or replacing it. A reader implementing both dispatches on the complete selector.
+- **Semantic:** no rule of §§2–10 changes. A `0.5.0` pack whose `specVersion` alone is changed to
+  `0.6.0` has the same carrier, structural and semantic verdict, the same diagnostics and, for every
+  facts and evidence input, the same disposition or error class, byte for byte under §8.3. Every row
+  of the `0.5.0` corpora keeps its expectation, with only the selector of its pack changed.
+- **Migrating up and down:** change only `specVersion`. That changes the pack's bytes and digest, so
+  a pinned pack SHOULD receive a new `version`; nothing else is required.
+- **Profiles:** no new profile, capability, extension or diagnostic code.
+- **Released artifacts:** the `0.5.0` schema stays published at the identifier it was published
+  under, and its text and corpora stay at the `v0.5.0` tag, unchanged.
+
+Compatibility from `0.3.0` to `0.5.0`, which `0.6.0` keeps, is explicit:
 
 - **Reader and writer:** a `0.3.0` reader refuses a pack declaring `0.5.0`, by the exact selector,
   and does not acquire support by ignoring or replacing it. The `0.3.0` schema also refuses each new
@@ -1330,7 +1351,8 @@ The working selector `0.4.0-draft`, under which this text was staged, was never 
 `specVersion` `0.4.0` exists: release tag `v0.4.0` carries `0.3.0` unchanged, so this text is released
 as `0.5.0` under the versioning rule (VERSIONING.md). A `0.5.0` reader refuses a pack declaring
 `0.4.0-draft` by the exact selector. A pack written to it moves up by changing its `specVersion` to
-`0.5.0`, which changes its bytes and digest, and must then satisfy these rules.
+`0.5.0`, which changes its bytes and digest, and must then satisfy these rules; it reaches `0.6.0` by
+changing the selector once more.
 
 Compatibility from `0.2.0-draft` to `0.3.0`, unchanged here, is explicit rather than inferred from a
 shared `0.x` prefix:
@@ -1355,9 +1377,9 @@ shared `0.x` prefix:
   evaluation corpus, including the selected escalation behavior. It is not semantically inert and
   creates, transfers or strengthens no implementation-conformance claim.
 
-An unedited `0.2.0-draft` or `0.3.0` pack is not structurally conforming to `0.5.0` because its
-selector is exact (§4). The `0.1.0-draft`, `0.2.0-draft` and `0.3.0` schemas remain published for
-documents retaining those selectors, with historical rules and identities preserved.
+An unedited `0.2.0-draft`, `0.3.0` or `0.5.0` pack is not structurally conforming to `0.6.0` because
+its selector is exact (§4). The `0.1.0-draft`, `0.2.0-draft`, `0.3.0` and `0.5.0` schemas remain
+published for documents retaining those selectors, with historical rules and identities preserved.
 
 An evaluator-conformance claim (§3.4) attaches to one exact `specVersion` and to the evaluation
 corpus published with it. It is not inherited by a later or an earlier version, and re-declaring a

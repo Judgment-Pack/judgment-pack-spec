@@ -154,7 +154,7 @@ class SecondDialectReaderTest(unittest.TestCase):
                 self.assertEqual(expected, code)
 
     def test_the_typescript_reader_does_not_read_format_4_yet(self) -> None:
-        # Format 4.0.0 (spec/dialect.md §2.2) is proposed and read by the first reader alone: the second
+        # Format 4.0.0 (spec/dialect.md §2.2) is read by the first reader alone: the second
         # defines the selector and refuses a document of it `version-unread` in phase 4, before any form,
         # as the staged manifest gives a reader that does not read the format.
         node = self.node()

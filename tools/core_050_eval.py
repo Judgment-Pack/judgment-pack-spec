@@ -2,8 +2,9 @@
 
 It was written, before the release, from three texts and nothing else: Core `0.3.0`, the staged
 delta of the working selector `0.4.0-draft` and RFC 0031 (rfcs/0031-annotations-and-value-sets.md).
-Those texts are Core `0.5.0` now (spec/judgment-pack-core.md), and the section numbers below are
-its. No other implementation was read, run or copied. Its authoring vendor is the texts' own, so it
+Those texts are Core `0.5.0`, whose rules Core `0.6.0` keeps unchanged (spec/judgment-pack-core.md,
+§11), and the section numbers below are its. It reads a pack declaring either selector, each held to
+its own published schema, and refuses every other. No other implementation was read, run or copied. Its authoring vendor is the texts' own, so it
 is a second reading of the text, not a different vendor's.
 
 What it is not: a product, a conformance claim, or evidence that an expectation is right.
@@ -52,8 +53,13 @@ from pathlib import Path
 from typing import Any, Iterator
 
 ROOT = Path(__file__).resolve().parents[1]
-SELECTOR = "0.5.0"
-SCHEMA_PATH = ROOT / "schema" / "judgment-pack-core.schema.json"
+# Core 0.6.0 changes no rule of 0.5.0 (Core §11), so both are read, dispatching on the complete
+# selector. Each is held to the schema published for it, which differs from the other only in its
+# `$id`, its description and the selector constant; any other selector is refused by the current one.
+SCHEMAS = {"0.5.0": ROOT / "schema" / "judgment-pack-core-0.5.0.schema.json",
+           "0.6.0": ROOT / "schema" / "judgment-pack-core.schema.json"}
+SELECTOR = "0.6.0"
+SCHEMA_PATH = SCHEMAS[SELECTOR]
 EVALUATION = ROOT / "conformance" / "evaluation"
 ANNOTATIONS = "org.judgmentpack.annotations"
 
@@ -250,22 +256,29 @@ def pointer(parts: list[Any]) -> str:
 _SCHEMA_CACHE: dict[str, Any] = {}
 
 
-def _schema() -> tuple[Any, dict[str, Any]]:
-    if "validator" not in _SCHEMA_CACHE:
+def _schema(selector: Any = SELECTOR) -> tuple[Any, dict[str, Any]]:
+    """The validator and schema of a pack's selector: its own for 0.5.0 and 0.6.0, otherwise the
+    current schema, whose selector constant refuses the pack."""
+    if not isinstance(selector, str) or selector not in SCHEMAS:
+        selector = SELECTOR
+    if selector != SELECTOR:
+        _schema()
+    if ("validator", selector) not in _SCHEMA_CACHE:
         from jsonschema import Draft202012Validator, FormatChecker
 
-        schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+        schema = json.loads(SCHEMAS[selector].read_text(encoding="utf-8"))
         checker = FormatChecker()
         # Core §3.2: format keywords are assertions. A checker without them checks less than it
         # says, so refuse to run rather than admit what it cannot check.
         missing = {"uri", "date", "date-time"} - set(checker.checkers)
         if missing:
             raise RuntimeError(f"format assertions unavailable ({sorted(missing)}); install requirements-dev.txt")
-        _SCHEMA_CACHE["validator"] = Draft202012Validator(schema, format_checker=checker)
-        _SCHEMA_CACHE["schema"] = schema
-        items = schema["$defs"]["metadata"]["properties"]["requiredExtensions"]["items"]
-        _SCHEMA_CACHE["requirable"] = Draft202012Validator(items)
-    return _SCHEMA_CACHE["validator"], _SCHEMA_CACHE["schema"]
+        _SCHEMA_CACHE[("validator", selector)] = Draft202012Validator(schema, format_checker=checker)
+        _SCHEMA_CACHE[("schema", selector)] = schema
+        if selector == SELECTOR:
+            items = schema["$defs"]["metadata"]["properties"]["requiredExtensions"]["items"]
+            _SCHEMA_CACHE["requirable"] = Draft202012Validator(items)
+    return _SCHEMA_CACHE[("validator", selector)], _SCHEMA_CACHE[("schema", selector)]
 
 
 def requirable(name: Any) -> bool:
@@ -369,7 +382,7 @@ def semantic_findings(pack: dict[str, Any]) -> list[tuple[str, str]]:
                     "JPS-SEMANTIC-UNRESOLVED-EVIDENCE")
         elif node["op"] == "fact" and "valueSet" in node:
             check(node["valueSet"], "valueSets", path + ["valueSet"], "JPS-SEMANTIC-UNRESOLVED-VALUE-SET")
-    _, schema = _schema()
+    _, schema = _schema(pack.get("specVersion"))
     present = {name for extensions in extension_objects(pack, schema) for name in extensions}
     for i, name in enumerate(pack.get("metadata", {}).get("requiredExtensions", [])):
         if name not in present:
@@ -397,7 +410,7 @@ def admit_pack(text: str | bytes) -> Admission:
     # Core §4.1: profile negotiation comes after only the parsing needed to find the declaration.
     if isinstance(pack, dict) and pack.get("profile") == "extended":
         return Admission(pack=pack, layer="profile", detail=PROFILE_UNSUPPORTED, profile="extended")
-    validator, _ = _schema()
+    validator, _ = _schema(pack.get("specVersion") if isinstance(pack, dict) else None)
     try:
         errors = [error.message for error in validator.iter_errors(_schema_value(pack))]
     except RecursionError:

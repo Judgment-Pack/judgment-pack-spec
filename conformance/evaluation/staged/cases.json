@@ -1,6 +1,6 @@
 {
   "status": "staged",
-  "stagedAfter": "0.5.0",
+  "stagedAfter": "0.6.0",
   "caseSchema": "../manifest.schema.json#/$defs/case",
   "cases": [
     {

@@ -5,7 +5,7 @@
   class; fixtures recorded from a two-stage run)
 - Created: 2026-10-15
 - Amended: 2026-10-23 (complete contributor attribution, issue #251; RFC 0028), 2026-11-15
-  (dialect formats `4.0.0` and `4.1.0` in a stage, staged for `0.6.0`, issue #326, proposed)
+  (dialect formats `4.0.0` and `4.1.0` in a stage, issue #326; accepted for `0.6.0` on 2026-11-16)
 - Issues: [#160](https://github.com/Judgment-Pack/judgment-pack-spec/issues/160),
   [#228](https://github.com/Judgment-Pack/judgment-pack-spec/issues/228),
   [#326](https://github.com/Judgment-Pack/judgment-pack-spec/issues/326)
@@ -79,16 +79,17 @@ forcing-exception contributor outside Core; summary version 2 counts typed membe
 version-2 drift subtracts those counts. Historical version-1 bytes remain representative or
 unattributed. This Draft amendment targets Spec `0.5.0` and claims no release or executor support.
 
-## Amendment proposal of 2026-11-15: dialect formats 4.0.0 and 4.1.0 in a stage
+## Amendment of 2026-11-15: dialect formats 4.0.0 and 4.1.0 in a stage
 
 [Issue #326](https://github.com/Judgment-Pack/judgment-pack-spec/issues/326) asks how a stage may
-name a dialect of the proposed formats `4.0.0` (RFC 0018, the amendment of 2026-11-12) and `4.1.0`
-([RFC 0033](0033-paged-operation-source.md)). This proposal answers its first decision; RFC 0018's
-amendment of the same date answers the other two. It is staged for `specVersion` `0.6.0` and changes
-nothing of `0.5.x`: `schema/workflow-1.schema.json`, in the `0.5.0` normative record, is unchanged,
-and under `0.5.x` a stage naming either format is still refused `version-unread` (§3). The RFC stays
-Draft. Each decision is taken at the recommended answer unless the maintainer answers otherwise
-on #326.
+name a dialect of formats `4.0.0` (RFC 0018, the amendment of 2026-11-12) and `4.1.0`
+([RFC 0033](0033-paged-operation-source.md)). This amendment answers its first decision; RFC 0018's
+amendment of the same date answers the other two. The maintainer accepted it, at the recommended
+answer, for `specVersion` `0.6.0` on 2026-11-16, on the reviews recorded on pull requests 329, 331
+and 332, by a model of the drafting vendor (same vendor, not a cross-vendor claim; the maintainer
+waived the review by another vendor). It changes nothing of `0.5.x`: the `0.5.0` normative record's
+workflow schema, preserved as `schema/workflow-1-0.5.0.schema.json`, is unchanged, and under `0.5.x`
+a stage naming either format is still refused `version-unread` (§3). The RFC stays Draft.
 
 **The problem.** §1 defines the release digest by the reference Runner's encoding at
 `66e264e`, a typed decoding of the retained release followed by an encoding. That decoding keeps only
@@ -119,8 +120,8 @@ recorded job on either format. A digest of every member needs no list of members
 second reader computes it with the `canon` form it already has.
 
 **Worked examples.** The two releases below are written for the encoding alone: each `inputMapping`
-holds only the members the encoding turns on, and is not a complete dialect; the staged vectors
-carry complete ones. Each line is already in `canon` form, so its bytes are the digested bytes.
+holds only the members the encoding turns on, and is not a complete dialect; the vectors of
+`conformance/dialect/workflow-format-4/` carry complete ones. Each line is already in `canon` form, so its bytes are the digested bytes.
 
 Format `4.0.0`, a case rule:
 
@@ -145,22 +146,21 @@ gives other digests, which is the problem above. The Python reader's
 `tools/workflow_reader_encoding.py` computes both digests (`release_digest_bytes`), and a test holds
 them to this text.
 
-**The schema, staged.** `schema/workflow-1-0.6.0.schema.json`, `$id`
-`https://judgmentpack.org/schema/0.6.0/workflow-1.schema.json`, is `schema/workflow-1.schema.json`
-with that `$id` and with `"4.0.0"` and `"4.1.0"` added to a named dialect reference's
-`formatVersion`, and differs in nothing else. No release carries it and the site does not serve it
-until `0.6.0` is released. §3 names the two formats as staged.
+**The schema.** `schema/workflow-1.schema.json` of `0.6.0`, `$id`
+`https://judgmentpack.org/schema/0.6.0/workflow-1.schema.json`, is `0.5.0`'s with that `$id` and
+with `"4.0.0"` and `"4.1.0"` added to a named dialect reference's `formatVersion`, and differs in
+nothing else. It was staged beside `0.5.0`'s and moved in place when `0.6.0` opened, and release
+`v0.6.0` carries it. §3 names the two formats since `0.6.0`.
 
-**Staged vectors.** `conformance/dialect/workflow-format-4/` holds a workflow stage of each format,
-its dialect the staged format vectors' own, with the dialect digest and the release digest written
-by hand: each workflow document is valid against the staged schema and not against the published
-one, `release_digest_bytes` gives each release digest, and the workflow reader refuses each stage
-`version-unread`. A third case gives the format `4.0.0` stage a release with every member §1 lists
+**Vectors.** `conformance/dialect/workflow-format-4/` holds a workflow stage of each format, its
+dialect the format vectors' own, with the dialect digest and the release digest written by hand:
+each workflow document is valid against the `0.6.0` schema and not against `0.5.0`'s,
+`release_digest_bytes` gives each release digest, and the workflow reader admits each stage. A third case gives the format `4.0.0` stage a release with every member §1 lists
 for the Runner, 21 in all, with hand-written values. They are in no corpus and no claim.
 
-**What stays open.** A stage of either format is admitted only once that format is accepted. The
-workflow reader (`tools/workflow_reader.py`) refuses both `version-unread`, as `0.5.x` does, until
-`0.6.0` opens. No workflow recording holds either format.
+**What stays open.** No workflow recording holds either format. The workflow reader
+(`tools/workflow_reader.py`) reads a stage of either since `0.6.0`, and refuses a stage of any other
+format it does not define `version-unread`, as `0.5.x` refuses these two.
 
 ## Summary
 
@@ -321,7 +321,7 @@ encoding references at that pin are `internal/runner/model.go` (`Release`),
 It is not a file-byte digest.
 The Runner's `docs/MAPPING-V2.md` at `66e264e`, "Dialect version 3", documents the version-3
 encoding; "Release checks, runtime and offline verification" documents the run export (§7).
-Staged for `specVersion` `0.6.0` (issue #326), a stage whose dialect is of format `4.0.0` or
+Since `specVersion` `0.6.0` (issue #326), a stage whose dialect is of format `4.0.0` or
 `4.1.0` takes no Runner encoding; the stage's dialect reference, not the release, selects this rule.
 Its retained release is an object with at least `id`, a string; `packDigest` and `runtimeDigest`,
 digests; and `inputMapping`, an object, the bound dialect (§7). It is open, the one exception to
@@ -400,8 +400,8 @@ the conditional `selection` and `sample` below. `dialect` selects exactly one of
 - `{version, digest}` for an integer-format dialect, where `version` is integer `2` or `3`;
 - `{formatVersion, id, version, digest}` for a named dialect, where `formatVersion` is exactly
   `"2.0.0"` or `"3.0.0"`, and `id` and string artifact `version` have dialect §2.1's forms.
-  Staged for `specVersion` `0.6.0`, `formatVersion` may also be `"4.0.0"` or `"4.1.0"`, once the
-  dialect admits that format, with §1's release digest; under `0.5.x` both are unknown values.
+  Since `specVersion` `0.6.0`, `formatVersion` may also be `"4.0.0"` or `"4.1.0"`, with §1's
+  release digest; under `0.5.x` both are unknown values.
 
 For a named reference, the consumer MUST check the supplied published document's `formatVersion`,
 `id`, artifact `version` and canonical `digest`, all exactly. The format selector is not an
@@ -711,7 +711,7 @@ integer version 3 omits those legacy members. Named formats use dialect §2.1's 
 identity-bearing form; do not insert legacy members, remove identity, or substitute the integer
 family before digesting. The release form and encoding are pinned by §1, including its named
 `dialect` identity when present and research source members. Decode and encode using that exact
-reference; do not normalize the forms alike or silently use a newer installed writer. Staged for
+reference; do not normalize the forms alike or silently use a newer installed writer. Since
 `specVersion` `0.6.0`, a release of a stage of format `4.0.0` or `4.1.0` is the exception: it is
 neither decoded nor encoded, and its digest is §1's, of the whole retained release.
 
@@ -1187,10 +1187,10 @@ remain unchanged. [RFC 0028](0028-complete-workflow-contributors.md) records why
 migration can be inferred from the singular historical field and why execution version 2 remains
 reserved for the separate Draft RFC 0024. This targets unpublished Spec `0.5.0`.
 
-The 2026-11-15 proposal changes no form of `0.5.x`: `schema/workflow-1.schema.json` and every
+The 2026-11-15 amendment changes no form of `0.5.x`: `schema/workflow-1.schema.json` and every
 release digest of formats `2.0.0` and `3.0.0` and integer versions `2` and `3` are unchanged, and a
 reader of `0.5.x` keeps refusing a stage of format `4.0.0` or `4.1.0` `version-unread`, rather than
-reading part of it. The staged `0.6.0` schema admits the two selectors and nothing else.
+reading part of it. The `0.6.0` schema admits the two selectors and nothing else beyond `0.5.0`'s.
 
 Core, the dialect, the graph and the Runner's existing API are unchanged. A standalone pack or
 dialect keeps its existing meaning. This RFC defines documents and records, not new endpoints,

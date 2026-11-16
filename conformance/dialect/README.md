@@ -4,8 +4,9 @@ This directory holds 47 vectors for the dialect, written for the preparation-ver
 the companion document [`spec/dialect.md`](../../spec/dialect.md) defines, recorded under Core
 `0.2.0-draft`; and, apart from them, the [Core `0.3.0` recording set](#the-core-030-recording-set),
 which holds 46 recordings made under Core `0.3.0`. Its design record,
-[RFC 0018](../../rfcs/0018-dialect.md), was accepted on 2026-10-15, and the vectors are **staged**
-until the next `specVersion` opens. They are in no corpus.
+[RFC 0018](../../rfcs/0018-dialect.md), was accepted on 2026-10-15, and the vectors are **staged**:
+`specVersion` `0.6.0` opened and left them here, and a later one may move them into a corpus. They
+are in no corpus.
 
 This directory is where they wait — reviewed, held to the same checks as a corpus, and runnable by
 hand — as the [checkpoint witness vectors](../witness/README.md) and the
@@ -14,7 +15,7 @@ hand — as the [checkpoint witness vectors](../witness/README.md) and the
 - **Not part of any corpus.** The companion document's §14 holds a preparation verifier to the
   dialect vectors published with the specification version its claim names. No version publishes
   these, so no claim may cite them, and no conformance claim of the class is available until one
-  does. Nothing here changes Core `0.5.0`, its schema, its four classes, or either of its
+  does. Nothing here changes Core `0.6.0`, its schema, its four classes, or either of its
   corpora.
 - **Not published with the specification, and in no release bundle.** The site's build skips this
   directory, as it skips the other staged directories, and a test holds that nothing under it is
@@ -151,20 +152,20 @@ and decoded retained bytes in lineage, and its changed-bytes twin gives `prepara
 Both readers consume these same files; paired reader tests add the empty, missing and one-over-bound
 mutations. No model or web request was made to write any of them.
 
-[`format-4/`](format-4/README.md) holds the hand-written vectors of the proposed dialect format
-`4.0.0` (the companion's §2.2): two end-to-end vectors, a case rule with no source and three
-sources read by rules of version `2.0.0`, and one row for each new form and refusal. They are not
-Runner recordings, no preparer writes the format, and only the first reader reads it; the second
-refuses it `version-unread`.
+[`format-4/`](format-4/README.md) holds the hand-written vectors of dialect format `4.0.0` (the
+companion's §2.2), of `specVersion` `0.6.0`: two end-to-end vectors, a case rule with no source and
+three sources read by rules of version `2.0.0`, and one row for each new form and refusal. They are
+not Runner recordings, and only the first reader reads the format; the second refuses it
+`version-unread`.
 
-[`format-4.1/`](format-4.1/README.md) holds the hand-written vectors of the proposed dialect format
-`4.1.0`, a paged `operation` source ([RFC 0033](../../rfcs/0033-paged-operation-source.md), in
-Review): one for each row of the RFC's Conformance table. The companion is unchanged; only the first
-reader reads the format, the second refuses it `version-unread`, and the preserved `v0.3.0` reader
-refuses it `input-malformed`.
+[`format-4.1/`](format-4.1/README.md) holds the hand-written vectors of dialect format `4.1.0`, a
+paged `operation` source (the companion's §2.3, [RFC 0033](../../rfcs/0033-paged-operation-source.md)),
+of `specVersion` `0.6.0`: one for each row of the RFC's Conformance table. Only the first reader
+reads the format, the second refuses it `version-unread`, and the preserved `v0.3.0` reader refuses
+it `input-malformed`.
 
 [`recording-2/`](recording-2/README.md) and [`workflow-format-4/`](workflow-format-4/README.md) are
-staged for `0.6.0` (issue #326): preparations valid and invalid against version 2 of the
+of `specVersion` `0.6.0` (issue #326), hand-written and in no corpus: preparations valid and invalid against version 2 of the
 dialect-recording schemas, one for each rule it adds, and a workflow stage of each of formats `4.0.0`
 and `4.1.0` with its dialect and release digests.
 
