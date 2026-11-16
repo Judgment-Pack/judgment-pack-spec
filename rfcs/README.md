@@ -84,6 +84,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0034](0034-registry-profile.md) | The registry profile — declared entry kinds and environment overlays | Draft | Specification (a proposed companion beside Core, `spec/registry.md`, with its own format selectors and release route; Core unchanged) |
 | [0035](0035-registry-references.md) | Registry references — entries and pinned secrets | Draft | Specification (part of the proposed registry companion of RFC 0034) |
 | [0036](0036-registry-emitter-contract.md) | The registry emitter contract and its conformance harness | Draft | Specification (part of the proposed registry companion of RFC 0034) |
+| [0037](0037-generated-facts-contracts.md) | Generated facts contracts: registry entries as pack facts, and typed facts builders | Draft | Specification (part of the proposed registry companion of RFC 0034) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -190,5 +191,8 @@ unchanged.
   - [RFC 0036](0036-registry-emitter-contract.md) defines emitters as pure functions from a request
     to a file set. The host does every write and the `--check` comparison, and a conformance
     harness lets any repository check its own emitters.
-  - RFCs 0037 and 0038 are to follow.
+  - [RFC 0037](0037-generated-facts-contracts.md) turns registry entries into pack facts for the
+    outcome gate, generates a facts contract from each kind, and feeds typed Go and TypeScript
+    facts builders.
+  - RFC 0038 is to follow.
 - It is a Draft, normative for nothing, and Core is unchanged.

@@ -905,6 +905,16 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0037-generated-facts-contracts.md",
+        PurePosixPath("rfcs/0037-generated-facts-contracts/index.html"),
+        "RFC 0037: Generated facts contracts",
+        "Draft: registry entries as pack facts for the outcome gate, a facts contract generated "
+        "from a kind, and typed Go and TypeScript facts builders.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.5.2.md",
         PurePosixPath("project/releases/0.5.2/index.html"),
         "0.5.2 release notes",

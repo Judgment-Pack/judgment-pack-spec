@@ -538,12 +538,11 @@ which is RFC 0000's bar. A TypeScript reader (the dialect has one) is a possible
 ## Unresolved questions
 
 1. **Review regime.** RFC 0000 and GOVERNANCE.md require a recorded adversarial review by a model
-   from a different vendor for a pull request that creates an RFC. This line's review so far is
-   by a model of the same vendor as the drafting model. RFC 0032 was accepted at draft maturity
-   on a same-vendor review with the different-vendor review waived. Whether this RFC follows that
-   precedent or obtains a second-vendor review before it leaves Draft is the maintainer's to
-   decide, and must not be hidden by acceptance, all the more because it is intended for stable
-   maturity.
+   from a different vendor for a pull request that creates an RFC. On 2026-11-16 the maintainer
+   decided to waive it for the registry RFCs (0034 to 0038), as was done for RFCs 0031 and 0032.
+   Each RFC gets one clean-room review by a model of the same vendor as the drafting model,
+   recorded as "same vendor, not a cross-vendor claim". The waiver stays visible here because the
+   companion is intended for stable maturity.
 2. **Pattern ambiguity.** Linear-time matching makes catastrophic backtracking impossible in a
    conformant reader. Should patterns that backtracking engines handle catastrophically also be
    refused, to protect non-conformant consumers that reuse the kind's patterns, or is the
