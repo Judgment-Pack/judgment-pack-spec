@@ -37,6 +37,10 @@ here.
 
 ### Changed
 
+- `spec/dialect.md` §2.2.6 and its copy in RFC 0018 (#335): `unsignedParameters` is no longer listed among the ways a format
+  `4.0.0` preparation differs. It is a member of the reading (§11), not of the preparation, and the
+  case's entry is now stated as a difference of the reading. Text only: no reader, vector, schema or
+  digest changes.
 - RFC 0033 section 4 (#326): a paged receipt whose `prevSignature` breaks gateway section 1.2
   within the receipt is `acquisition-invalid` (check 1). That covers a signature at `callIndex` 0
   and `null` at a later one. Before, step 4 answered `acquisition-sessions`. The Python reader

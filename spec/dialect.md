@@ -584,12 +584,15 @@ A preparation of a dialect of format `4.0.0` has `formatVersion`, the string `"4
 - **The parameters used.** Each outcome's `parameters` (§9.2) gives every parameter of its scope its
   value as written, every element of a list included, so the preparation's digest commits each value
   a rule compared, and a recomputation from another value differs (§11, finding 5).
-- **`unsignedParameters`** (§11) has, before any source's, an entry for the case when its rule has a
-  target and names a parameter, `{"source": "case", "parameters": L, "targets": T}`, `L` each such
-  parameter as `{"name", "kind"}`, ordered by name, of kind `case`, or `runAt` for `runAt`, and `T`
-  the number of the rule's targets. In format `4.0.0` the parameters a rule names are also
-  `aheadWithin`'s `asOf` and `maxAhead`, `compareParam`'s and `inParam`'s `param`, and each `param`
-  operand of a derived value the rule declares, whether or not a clause reads that value.
+
+The reading of such a preparation differs too. `unsignedParameters` belongs to the reading (§11),
+not to the preparation, which has no member for it. In format `4.0.0` it has, before any source's,
+an entry for the case when its rule has a target and names a parameter, `{"source": "case",
+"parameters": L, "targets": T}`, `L` each such parameter as `{"name", "kind"}`, ordered by name, of
+kind `case`, or `runAt` for `runAt`, and `T` the number of the rule's targets. In format `4.0.0` the
+parameters a rule names are also `aheadWithin`'s `asOf` and `maxAhead`, `compareParam`'s and
+`inParam`'s `param`, and each `param` operand of a derived value the rule declares, whether or not a
+clause reads that value.
 
 ### 2.2.7 Bounds and refusals
 
