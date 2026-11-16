@@ -43,7 +43,7 @@ jobs:
             n=$((n + 1))
             # A commit an app made (its author a `[bot]` account) is exempt, as the DCO app held it.
             case "$name" in *'[bot]') echo "bot  $sha  $name"; continue;; esac
-            if printf '%s' "$msg" | base64 -d | tr -d '\r' | grep -qxF "Signed-off-by: $name <$email>"; then
+            if printf '%s' "$msg" | base64 -d | tr -d '\r' | grep -xF "Signed-off-by: $name <$email>" >/dev/null; then
               echo "ok   $sha  $name <$email>"
             else
               echo "::error::commit $sha is not signed off by its author: a line 'Signed-off-by: $name <$email>' is missing"
