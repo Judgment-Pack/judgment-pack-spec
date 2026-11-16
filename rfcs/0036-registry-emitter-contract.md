@@ -107,7 +107,8 @@ required.
 - **`id`**: an absolute URI. **`version`**: strict SemVer 2.0.0 with no build metadata.
 - **`owner`**: as a kind's `owner` (RFC 0034 §2). **`description`** (optional): informative.
 - **`reads`**: the kinds the emitter reads, by kind name, kind id and a SemVer range over kind
-  versions. The range syntax is `^x.y.z`, `~x.y.z`, `=x.y.z`, or a space-separated pair `>=a <b`.
+  versions. The range syntax is `^x.y.z`, `~x.y.z`, `=x.y.z`, or a space-separated pair of a
+  `>=` lower bound and a `<` upper bound, each followed by a version, as in `>=1.2.0 <2.0.0`.
   A range means what it does because kind versions follow RFC 0034 §2.4. A manifest that must not
   take even a widening change pins one version with `=x.y.z`.
 - **`input`** (optional, default `"resolved"`): `"resolved"`, for resolved registries, or
@@ -463,7 +464,8 @@ reviewer that did not write the records, over all five. It is recorded on
 maintainer's disposition of each finding (seven HIGH, nine MEDIUM and two LOW, each fixed in that
 pull request), and copied verbatim to [`rfcs/reviews/0034-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0034-round-1.md).
 
-The changes made after that round are not covered by it: nothing in this record, and the Status lines, notices,
+The changes made after that round are not covered by it: the range-syntax wording in §1 (the same
+syntax, reworded so that the site renders the whole record), and the Status lines, notices,
 this section and the index rows that record the acceptance.
 
 **What this leaves unestablished.**
