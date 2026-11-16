@@ -145,7 +145,14 @@ steps, in order. Each refusal names its document (§7.3). Admission is validatio
 No number is negative zero, in any form (`-0`, `-0.0`, `-0e0`), because its canonical form would be
 `0`. Every other zero is admitted.
 
-*Open: values follow the runtime's `v0.47.0` bounds.* How a literal with trailing zeros after the point is admitted and canonicalized, and any further admission bound, are fixed there.
+**Admitted form.** Admission replaces each number by its canonical form, and every later step
+reads that form, never the literal as written. An integer literal is its own canonical form. Any
+other literal is written as JCS writes the double it equals: `20.000` becomes `20`, `1.50` becomes
+`1.5` and `1e2` becomes `100`. So trailing zeros after the point, and an exponent, never outlive
+admission, and an admitted number is at most 25 bytes. The rule adds no bound beyond the number
+rule above. A reader may refuse early a literal with more than 17 significant digits, or whose
+leading digit's exponent is outside −324 to 308, because no such literal meets it; it is
+`REG-DOC-NUMBER` (step 3).
 
 A number is compared, and is canonical, by its value: `1.50` and `1.5` are the same number, and
 both are written `1.5` in JCS.
@@ -302,7 +309,14 @@ and `not`, with `propertyNames` counting as one. The 4 097th is `REG-KIND-SCHEMA
 `/schema`, and no later subschema is read. A composition of more than 16 branches is
 `REG-KIND-SCHEMA-LIMIT` at the keyword, and its branches are not read.
 
-*Open: values follow the runtime's `v0.47.0` bounds.* A bound on a kind's expanded subschema size, counting each `$ref` and `allOf` expansion once, is added there.
+**Expanded size.** A schema's expanded size is also at most 4 096. It counts the subschemas that
+validation can visit at one position: the root schema and its subschemas as the size limit counts
+them, except that each `$ref` also counts the expanded size of the definition it names, every time
+it is reached. A definition that no `$ref` reaches is not counted here, since the size limit
+already holds it. So a chain of definitions that each name the next one sixteen times is refused,
+even though it is small as written. A reader computes each definition's expanded size once, and
+may stop counting past 4 096. A schema over the bound is `REG-KIND-SCHEMA-LIMIT` at `/schema`.
+The check runs only when the schema has no other error.
 
 ### 3.4 The pattern subset
 
@@ -345,14 +359,32 @@ A pattern that ends with `\` is refused.
 automaton. A backtracking engine is not conformant on adversarial input. A pattern within the subset
 that a reader's engine cannot compile within its own limits is not pinned by this version (§17).
 
-*Open: values follow the runtime's `v0.47.0` bounds.* Bounds on the compiled size of each pattern, and of all a kind's patterns, are added there.
+**Program size.** A pattern's size is counted on the pattern as written, by these rules:
+
+- each literal code point, escape, `.`, class, `^` and `$` counts 1;
+- a group counts 2 plus its content;
+- `*` counts 2 plus its atom, and `+` and `?` count 1 plus their atom;
+- `{n}` counts n times its atom; `{n,}` counts 1 plus n times its atom (`{0,}` counts as `*`);
+  `{n,m}` counts m times its atom plus m − n;
+- a sequence counts the sum of its parts, and an alternation of k alternatives counts the sum of
+  its alternatives plus k − 1;
+- every construct counts at least 1, an empty alternative and `x{0}` included.
+
+A pattern of size over 4 096 is `REG-KIND-PATTERN-LIMIT` at its pointer. A kind's patterns are
+also held together to 65 536. They are counted with `entryId.pattern` first and then the
+schema's patterns in reading order (§3.3), and the pattern that
+would take the total past 65 536 is `REG-KIND-PATTERN-LIMIT` at its pointer. A refused pattern
+is not counted, so each later pattern is judged against the patterns admitted before it. The
+size bounds what a linear-time matcher builds: `{n,m}` makes m copies of its atom, so without a
+bound one pattern of 256 code points could compile to a quarter of a million instructions.
 
 ### 3.5 Pointer patterns
 
 A pointer pattern is an RFC 6901 pointer whose reference tokens may be `*`, which matches any member
 name or any array index at that position. A literal member named `*` is written `~2`, an escape this
 companion adds; `~0` and `~1` keep their RFC 6901 meanings, and every other `~` escape is refused. A
-pattern begins with `/` (`""` is refused) and is at most 512 bytes. A pattern outside these rules is
+pattern begins with `/` (`""` is refused) and is at most 512 bytes of UTF-8, counted as written,
+escapes included. A pattern outside these rules is
 `REG-KIND-POINTER-FORM`.
 
 A pattern **matches** a concrete pointer of the same number of tokens when each token is `*` or
@@ -548,7 +580,7 @@ there.
 entry-ref = "entry:" kind "/" entry-id [ "#" pointer ]
 kind      = <a kind name, §3.1>
 entry-id  = 1*128( %x21-7E except "/" and "#" )
-pointer   = <an RFC 6901 JSON Pointer of at most 512 characters, possibly "">
+pointer   = <an RFC 6901 JSON Pointer of at most 512 code points, as written, possibly "">
 ```
 
 In each environment in which the referring entry is checked (step 7), the first of these that
@@ -650,7 +682,8 @@ when validation finds no error.
 1. **Admission** (§2.2), of the registry and of each kind declaration supplied. A declaration that
    is refused is not a declaration for any later step. A registry that is refused ends validation.
    Two supplied declarations whose JCS bytes are equal are one declaration: it is read once, and
-   its diagnostics name the copy whose `kindDocument` is least in code-point order.
+   its diagnostics name the copy whose `kindDocument`, the digest of its bytes as supplied (§2.3),
+   is least in code-point order.
 2. **Kind declarations** (§3): each one's members, its schema (§§3.2 and 3.3), its patterns (§3.4)
    and its pointer patterns (§3.5).
 3. **Registry shape** (§4), and the form and sharing of `secretScopes` (§6.4). A diagnostic §4 or
@@ -727,6 +760,16 @@ document `value`:
 
 A keyword that does not apply to the value's type (`maxLength` on a number, say) holds.
 
+**Work bound.** The bounds of §3.3, §3.4 and §7.1 keep each check finite, but a registry of many
+large values can still make value validation costly. A reader MAY stop value validation once its
+work over the registry passes a bound of its own. It then reports `REG-BOUND-VALIDATION-WORK`, an
+error, at the value it stopped at, and checks no later value against its schema. The reference
+runtime counts in units of about one schema node visited, and stops past 67 108 864 (2^26). A
+value equal to one it has already checked against the same kind costs only its lookup, one
+unit per 16 bytes of its canonical form. Every other step still
+runs. A registry that passes one reader's bound and not another's is not pinned by this version
+(§17). A conformance row stays well within the reference runtime's bound.
+
 ### 7.3 Locations
 
 A diagnostic's `location` is an object of these members, in this order of comparison:
@@ -782,7 +825,9 @@ validation found more, the report lists those 1 000 and then one more, the warni
 out of order. `valid` is decided on every diagnostic found, whether listed or not, so a truncated
 report may list no error and still say `false`.
 
-*Open: values follow the runtime's `v0.47.0` bounds*, including the pack check report's bound (§10.5).
+The same bound holds wherever a facts contract is read (§10). Its diagnostics are capped at
+1 000 in this order, and the `REG-REPORT-TRUNCATED` that follows them is at
+`{"document": "contract", "pointer": ""}`.
 
 **No values.** A diagnostic carries no value from any document: no member value, no reference, and
 no pattern text. A reader MUST NOT add one in any member of a diagnostic, and the message is never
@@ -844,9 +889,10 @@ subset is refused with a report, and nothing is written.
 
 - **one document**, with no directive (`REG-YAML-DIRECTIVE`); no file, or more than one document,
   is `REG-YAML-DOCUMENTS`;
-- **UTF-8** with no byte-order mark, holding only characters YAML allows (`REG-YAML-ENCODING`);
-  *open: whether U+0085, U+2028 and U+2029 are refused follows the reference runtime's `v0.47.0`
-  bounds;*
+- **UTF-8** with no byte-order mark, holding only characters YAML allows, and none of U+0085,
+  U+2028 and U+2029 as characters (`REG-YAML-ENCODING`). YAML 1.1 reads those three as line
+  breaks and YAML 1.2 does not, so a file that holds one would be read two ways. Written as the
+  escapes `\N`, `\L` and `\P` in a double-quoted scalar, they have one reading and are admitted;
 - **no tags** (`REG-YAML-TAG`), **no anchors or aliases** (`REG-YAML-ANCHOR`), **no merge key**
   `<<` (`REG-YAML-MERGE`);
 - **no empty node** (`REG-YAML-EMPTY`): write `null` or `""`;
@@ -1007,7 +1053,9 @@ The report is `{"factsCheckFormatVersion": "1.0.0", "contract": {"digest"}, "pac
 "diagnostics": […]}`, with the pack's digest that of its bytes as supplied, and the advisories in
 visit order. A check over its work bound (4 194 304) or a path deeper than 128 is
 `FACTS-CHECK-LIMIT`, an error, at the condition it stopped at, and no later condition is checked.
-*Open: the report's diagnostic bound follows the reference runtime's `v0.47.0` bounds.*
+The report needs no cap of its own: it has at most one advisory per fact condition, and the
+pack's own bounds and the work bound limit the conditions. The contract's diagnostics, when it
+is refused, are capped as §7.4 caps them.
 
 ### 10.6 Typed facts builders
 
@@ -1124,8 +1172,9 @@ source are the dialect's ([`dialect.md`](dialect.md) §4.5).
 | `REG-KIND-SCHEMA-KEYWORD` | error | §3.2 | a schema uses a keyword outside the subset |
 | `REG-KIND-SCHEMA-FORM` | error | §3.2 | a keyword's value is not of its form |
 | `REG-KIND-SCHEMA-REF` | error | §3.3 | a reference is malformed, names no definition, or starts a cycle |
-| `REG-KIND-SCHEMA-LIMIT` | error | §3.3 | a schema has more than 4096 subschemas, an enum more than 1024 values, or a composition more than 16 branches |
+| `REG-KIND-SCHEMA-LIMIT` | error | §3.3 | a schema has more than 4096 subschemas as written or expanded, an enum more than 1024 values, or a composition more than 16 branches |
 | `REG-KIND-PATTERN` | error | §3.4 | a pattern is outside the pattern subset |
+| `REG-KIND-PATTERN-LIMIT` | error | §3.4 | a pattern's size is over 4096, or would take the kind's patterns past 65536 |
 | `REG-KIND-POINTER-FORM` | error | §3.5 | a pointer pattern is malformed |
 | `REG-KIND-POINTER-UNREACHABLE` | error | §3.5 | a pointer pattern matches no position the schema allows |
 | `REG-KIND-POINTER-CONFLICT` | error | §3.5 | a secret pattern and a reference pattern can match one position |
@@ -1169,6 +1218,7 @@ source are the dialect's ([`dialect.md`](dialect.md) §4.5).
 | `REG-VALUE-DEPRECATED` | warning | §7.2 | a value is at a position marked deprecated |
 | `REG-BOUND-ENTRIES` | error | §7.1 | a kind has more entries than its maxEntries |
 | `REG-BOUND-ENTRY-BYTES` | error | §7.1 | a resolved value is larger than its kind's maxEntryBytes |
+| `REG-BOUND-VALIDATION-WORK` | error | §7.2 | value validation passed the reader's work bound, and later values were not checked |
 | `REG-REPORT-TRUNCATED` | warning | §7.4 | the report holds its first 1000 diagnostics and more were found |
 | `REF-ENTRY-FORM` | error | §6.2 | a value at a reference position is not an entry reference |
 | `REF-ENTRY-KIND` | error | §6.2 | a reference names a kind its position does not allow |
@@ -1279,7 +1329,8 @@ readers agreeing on every row of a class.
 - the `kind` location member on every step-2 diagnostic of a declaration whose `kind` is well
   formed (§7.3);
 - the cycle check covers every `$ref` that names a definition, whatever else the schema has (§3.3);
-- an entry reference's `#pointer` is at most 512 characters (§6.2), as RFC 0035 says;
+- an entry reference's `#pointer` is at most 512 code points (§6.2), as RFC 0035 says, while a
+  pointer pattern is at most 512 bytes (§3.5);
 - the `id` of a kind and a registry is an RFC 3986 absolute URI (§3.1);
 - equal declarations are located at the least `kindDocument` (§7.1);
 - the diagnostic codes RFCs 0034 to 0037 did not name are adopted as §12 lists them;
@@ -1292,10 +1343,9 @@ readers agreeing on every row of a class.
 - **Reference widening.** A contract's `/references/<p>/value` is the union of every target kind's
   shapes (§10.4). Whether it should be narrowed to the kinds a position allows, per target, is not
   decided; this version writes the widening.
-- **Bounds.** *Open: values follow the reference runtime's `v0.47.0` bounds* for a kind's expanded
-  subschema size (§3.3), compiled pattern size per pattern and per kind (§3.4), number admission
-  with trailing fraction zeros (§2.2), the check report's bound (§10.5), and the report bound's
-  interplay with them (§7.4).
+- **Reader bounds.** A reader's own limits are not pinned: a pattern within the subset that its
+  engine cannot compile (§3.4), and value validation past its work bound (§7.2). A conformance
+  row stays well within the reference runtime's limits.
 - **Importer stops.** Which refusals stop an import, beyond those §9 names, is fixed by the first
   import rows.
 - **Emitter host refusals.** A malformed manifest, overlapping `owns`, options that fail their
