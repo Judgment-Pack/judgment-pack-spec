@@ -82,6 +82,11 @@ stable feature requires two independent implementations and conformance cases.
 | [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets | Accepted | Specification (Core amendment released in Core `0.5.0`, staged as `0.4.0-draft`; accepted on a same-vendor review, the different-vendor review waived) |
 | [0032](0032-outcome-severity.md) | Outcome severity, one well-known annotation key | Accepted | Specification (a companion beside Core, [the annotation vocabulary](../spec/annotation-vocabulary.md) `1.0.0`, status `proposed`, released in `v0.5.2`; Core `0.5.0` unchanged; its rows staged; accepted on a same-vendor review, the different-vendor review waived) |
 | [0033](0033-paged-operation-source.md) | A paged operation source | Accepted | Specification (an amendment of the dialect companion, named format `4.1.0`, landed as [`spec/dialect.md`](../spec/dialect.md) §2.3 for `specVersion` `0.6.0`; accepted on same-vendor reviews, the different-vendor review waived) |
+| [0034](0034-registry-profile.md) | The registry profile — declared entry kinds and environment overlays | Accepted | Specification (a proposed companion beside Core, `spec/registry.md`, with its own format selectors and release route; Core unchanged; accepted on a same-vendor review, the different-vendor review waived) |
+| [0035](0035-registry-references.md) | Registry references — entries and pinned secrets | Accepted | Specification (part of the proposed registry companion of RFC 0034; accepted on a same-vendor review, the different-vendor review waived) |
+| [0036](0036-registry-emitter-contract.md) | The registry emitter contract and its conformance harness | Accepted | Specification (part of the proposed registry companion of RFC 0034; accepted on a same-vendor review, the different-vendor review waived) |
+| [0037](0037-generated-facts-contracts.md) | Generated facts contracts: registry entries as pack facts, and typed facts builders | Accepted | Specification (part of the proposed registry companion of RFC 0034; accepted on a same-vendor review, the different-vendor review waived) |
+| [0038](0038-terraform-file-source.md) | A file-sourced dialect source: Terraform plan and state JSON | Accepted | Specification (dialect companion; accepted on a same-vendor review, the different-vendor review waived) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -180,3 +185,26 @@ in call order into one value read. It is a named dialect format `4.1.0`, of form
 family. It is accepted at draft maturity, on same-vendor reviews with the different-vendor review
 waived, and lands as `spec/dialect.md` §2.3 for `specVersion` `0.6.0`; its vectors are hand-written,
 in no corpus, and the first of the two readers reads it.
+
+[RFC 0034](0034-registry-profile.md) proposes a registry companion beside Core.
+- It covers a canonical JSON registry of entries of kinds the adopter declares, each kind with a
+  closed JSON Schema subset, bounds, an owner, and the members that may vary by environment, hold
+  secret references or reference other entries; per-environment overlays; a fixed validation
+  order with a value-free report; resolution to one document per environment; and a strict YAML
+  subset for authoring.
+- JPS defines no domain kinds.
+- It is the first of five registry records.
+  - [RFC 0035](0035-registry-references.md) defines entry references and secret references pinned
+    to a version, with each environment's secrets drawn from its own projects.
+  - [RFC 0036](0036-registry-emitter-contract.md) defines emitters as pure functions from a request
+    to a file set. The host does every write and the `--check` comparison, and a conformance
+    harness lets any repository check its own emitters.
+  - [RFC 0037](0037-generated-facts-contracts.md) turns registry entries into pack facts for the
+    outcome gate, generates a facts contract from each kind, and feeds typed Go and TypeScript
+    facts builders.
+  - [RFC 0038](0038-terraform-file-source.md) adds a dialect source kind that reads Terraform plan
+    and state JSON files only, records their sha256, drops every sensitive value, and refuses a
+    file without sensitivity markers or of an unlisted format version.
+- All five were accepted on 2026-11-16 on one same-vendor review, the different-vendor review
+  waived. They stay normative for nothing until the companion text is released, and Core is
+  unchanged.

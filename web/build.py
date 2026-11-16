@@ -885,6 +885,56 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0034-registry-profile.md",
+        PurePosixPath("rfcs/0034-registry-profile/index.html"),
+        "RFC 0034: The registry profile",
+        "Draft: a registry companion beside Core, with entry kinds the adopter declares, "
+        "environment overlays, a fixed validation order and a strict YAML subset for authoring.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0035-registry-references.md",
+        PurePosixPath("rfcs/0035-registry-references/index.html"),
+        "RFC 0035: Registry references",
+        "Draft: entry references and secret references pinned to a version, with each "
+        "environment's secrets drawn from its own projects.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0036-registry-emitter-contract.md",
+        PurePosixPath("rfcs/0036-registry-emitter-contract/index.html"),
+        "RFC 0036: The registry emitter contract",
+        "Draft: emitters as pure functions from a request to a file set, a host that does every "
+        "write and check, and a conformance harness any repository can run.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0037-generated-facts-contracts.md",
+        PurePosixPath("rfcs/0037-generated-facts-contracts/index.html"),
+        "RFC 0037: Generated facts contracts",
+        "Draft: registry entries as pack facts for the outcome gate, a facts contract generated "
+        "from a kind, and typed Go and TypeScript facts builders.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0038-terraform-file-source.md",
+        PurePosixPath("rfcs/0038-terraform-file-source/index.html"),
+        "RFC 0038: A Terraform plan and state file source",
+        "Draft: a dialect source that reads Terraform plan and state JSON files only, records "
+        "their digest and drops every sensitive value.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.5.2.md",
         PurePosixPath("project/releases/0.5.2/index.html"),
         "0.5.2 release notes",
