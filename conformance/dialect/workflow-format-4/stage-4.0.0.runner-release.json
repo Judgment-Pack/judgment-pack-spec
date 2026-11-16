@@ -1,0 +1,213 @@
+{
+  "schemaVersion": "1",
+  "id": "release-sign-ins",
+  "pack": "{\"specVersion\": \"0.5.0\", \"id\": \"https://example.invalid/packs/sign-ins\", \"version\": \"0.1.0\", \"title\": \"Sign-in review\"}",
+  "packDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "packId": "https://example.invalid/packs/sign-ins",
+  "packVersion": "0.1.0",
+  "title": "Sign-in review",
+  "runtimeDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "createdAt": "2026-11-15T12:00:00.123456789Z",
+  "config": "{\"configVersion\":\"3\",\"packs\":{\"target\":{\"path\":\"pack.json\"}},\"audit\":{\"dir\":\"audit\"}}",
+  "lock": "{\n  \"lockVersion\": \"1\"\n}\n",
+  "validation": {
+    "outputVersion": "2",
+    "command": "spec validate",
+    "status": "valid",
+    "specVersion": "0.5.0",
+    "diagnostics": [],
+    "diagnosticsTruncated": false
+  },
+  "sample": {
+    "facts": {
+      "request": {
+        "id": "request-1"
+      },
+      "settings": {
+        "maxSpeed": 900,
+        "allowedRanges": []
+      }
+    }
+  },
+  "preview": {
+    "outputVersion": "2",
+    "command": "experimental evaluate",
+    "status": "evaluated",
+    "rehearsal": true,
+    "packId": "https://example.invalid/packs/sign-ins",
+    "packVersion": "0.1.0",
+    "disposition": {
+      "handoff": {
+        "state": "none"
+      },
+      "kind": "outcome",
+      "outcomeId": "allow",
+      "reasons": []
+    }
+  },
+  "tests": "passed",
+  "testEvidence": {
+    "status": "passed",
+    "matrix": "{\"cases\":[]}",
+    "matrixDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "packDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "runtimeDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "checkedAt": "2026-11-15T12:00:00Z"
+  },
+  "dialect": {
+    "id": "urn:judgmentpack:dialect:sign-in-review",
+    "version": "0.1.0",
+    "digest": "sha256:f00efeb40b7ce2a27088d98f8932f33bc9ccc7f7caba39dd50d2d4445af28a85"
+  },
+  "inputProfiles": [
+    {
+      "id": "sign-ins",
+      "publicKey": "5555555555555555555555555555555555555555555555555555555555555555",
+      "class": "record",
+      "source": "intake/sign-ins",
+      "authority": "test",
+      "shape": "mcp",
+      "adapter": {
+        "name": "adapter-mcp",
+        "version": "stand-in",
+        "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+      },
+      "endpoint": "stdio:sign-ins",
+      "tools": [
+        "lookup"
+      ]
+    }
+  ],
+  "mappingWarnings": [
+    "Fact coverage is a static over-approximation, not proof of runtime reads or of an unknown result."
+  ],
+  "inputMapping": {
+    "formatVersion": "4.0.0",
+    "id": "urn:judgmentpack:dialect:sign-in-review",
+    "version": "0.1.0",
+    "case": {
+      "parameters": {
+        "allowedRanges": {
+          "pointer": "/settings/allowedRanges",
+          "type": "address-range-list"
+        },
+        "maxSpeed": {
+          "pointer": "/settings/maxSpeed",
+          "type": "integer"
+        }
+      },
+      "facts": [
+        {
+          "target": "/request/id",
+          "source": "/request/id"
+        }
+      ],
+      "evidence": [],
+      "rule": {
+        "ruleVersion": "2.0.0",
+        "parameters": {
+          "allowedRanges": "address-range-list",
+          "maxSpeed": "integer"
+        },
+        "derived": [
+          {
+            "name": "elapsed",
+            "builtin": "duration",
+            "from": {
+              "field": "/previous/at"
+            },
+            "to": {
+              "field": "/current/at"
+            }
+          },
+          {
+            "name": "apart",
+            "builtin": "distance",
+            "from": {
+              "latitude": {
+                "field": "/previous/latitude"
+              },
+              "longitude": {
+                "field": "/previous/longitude"
+              }
+            },
+            "to": {
+              "latitude": {
+                "field": "/current/latitude"
+              },
+              "longitude": {
+                "field": "/current/longitude"
+              }
+            }
+          },
+          {
+            "name": "pace",
+            "builtin": "speed",
+            "distance": "apart",
+            "duration": "elapsed"
+          }
+        ],
+        "clauses": [
+          {
+            "when": {
+              "op": "all",
+              "of": [
+                {
+                  "op": "inParam",
+                  "field": "/current/address",
+                  "param": "allowedRanges"
+                },
+                {
+                  "op": "compareParam",
+                  "derived": "pace",
+                  "relation": "less-than-or-equal",
+                  "param": "maxSpeed"
+                }
+              ]
+            },
+            "claim": {
+              "facts": [
+                {
+                  "pointer": "/signIn/plausible",
+                  "value": true
+                },
+                {
+                  "pointer": "/signIn/distanceMm",
+                  "derived": "apart"
+                },
+                {
+                  "pointer": "/signIn/speedMmPerS",
+                  "derived": "pace"
+                }
+              ],
+              "evidence": {},
+              "acquisitionStatus": "resolved"
+            },
+            "reason": "plausible"
+          },
+          {
+            "when": {
+              "op": "always"
+            },
+            "claim": {
+              "facts": [
+                {
+                  "pointer": "/signIn/plausible",
+                  "value": false
+                }
+              ],
+              "evidence": {},
+              "acquisitionStatus": "resolved"
+            },
+            "reason": "implausible"
+          }
+        ]
+      }
+    }
+  },
+  "suppliedReviewedSet": {
+    "id": "sign-ins-reviewed",
+    "lock": "{\"lockVersion\":\"1\"}",
+    "lockDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+  }
+}

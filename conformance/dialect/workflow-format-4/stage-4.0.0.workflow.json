@@ -1,0 +1,46 @@
+{
+  "workflowVersion": 1,
+  "stages": [
+    {
+      "id": "sign-ins",
+      "dialect": {
+        "formatVersion": "4.0.0",
+        "id": "urn:judgmentpack:dialect:sign-in-review",
+        "version": "0.1.0",
+        "digest": "sha256:f00efeb40b7ce2a27088d98f8932f33bc9ccc7f7caba39dd50d2d4445af28a85"
+      },
+      "pack": {
+        "id": "https://example.invalid/packs/sign-ins",
+        "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "input": {
+        "root": true
+      },
+      "execution": "once",
+      "caseBindings": [],
+      "outputs": {
+        "pointer": "/sign-ins",
+        "cardinality": "many"
+      },
+      "relation": {
+        "label": "discovered-for",
+        "direction": "output-to-parent"
+      },
+      "selection": {
+        "mode": "reviewer"
+      },
+      "sample": {
+        "mode": "sample",
+        "maxSize": 1
+      }
+    }
+  ],
+  "result": "sign-ins",
+  "limits": {
+    "maxStages": 1,
+    "maxRecords": 16,
+    "maxInstances": 8,
+    "maxAttempts": 2,
+    "maxBytes": 1048576
+  }
+}

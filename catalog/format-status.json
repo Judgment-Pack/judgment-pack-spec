@@ -17,7 +17,7 @@
       "lastReleased": null
     },
     "dialect-recording": {
-      "draftVersion": "1",
+      "draftVersion": "2",
       "baseline": null,
       "lastReleased": null
     },
@@ -42,7 +42,7 @@
       "lastReleased": "v0.3.0"
     },
     "workflow": {
-      "draftVersion": "0.5.0",
+      "draftVersion": "0.6.0",
       "baseline": "v0.5.2",
       "lastReleased": "v0.5.2"
     },

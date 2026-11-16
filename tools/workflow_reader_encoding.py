@@ -162,3 +162,35 @@ def retained_bytes(value):
 
 def release_bytes(value):
     return retained_bytes(project('release',value))
+
+
+# RFC 0020 section 1, staged for specVersion 0.6.0 (issue #326): a release whose inputMapping is of
+# dialect format 4.0.0 or 4.1.0 is digested by the RFC's own text, not by the pinned Runner encoding
+# above, whose typed decoding drops members it does not declare (the case's `rule`, a source's
+# `paging`). The workflow reader still refuses such a stage `version-unread` (stage_form), as 0.5.x does.
+NAMED_FORMATS_4 = ('4.0.0', '4.1.0')
+
+
+def release_form_4(value):
+    """RFC 0020 section 1's open form of a format 4.x release: `id`, a string; `packDigest` and
+    `runtimeDigest`, digests; `inputMapping`, an object. Any other member is admitted as retained."""
+    if not isinstance(value.get('id'), str): raise d.malformed('a format 4.x release needs a string id')
+    for name in ('packDigest', 'runtimeDigest'):
+        if not d.is_digest(value.get(name)): raise d.malformed('a format 4.x release needs a digest ' + name)
+    if not isinstance(value.get('inputMapping'), dict): raise d.malformed('a format 4.x release needs an inputMapping object')
+
+
+def release_digest_bytes(value):
+    """The bytes a release digest is taken of: for a format 4.x release, the `canon` bytes of the whole
+    retained object, every member as retained and none defaulted; otherwise the pinned encoding's."""
+    if not isinstance(value, dict): raise d.malformed('release must be an object')
+    # RFC 0020 selects the rule by the stage's dialect; the reader holds the release's inputMapping
+    # equal to that dialect (stage-binding-mismatch otherwise, workflow_reader.py), so the two agree.
+    mapping = value.get('inputMapping')
+    if isinstance(mapping, dict) and mapping.get('formatVersion') in NAMED_FORMATS_4:
+        release_form_4(value)
+        try:
+            return d.canon(value)
+        except d.OutsideDomain:
+            raise d.malformed('a format 4.x release outside the canon domain has no release digest') from None
+    return release_bytes(value)

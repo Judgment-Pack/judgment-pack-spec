@@ -12,6 +12,10 @@ import unittest
 
 from tools import record_shapes as shapes
 
+# The families whose draft version a staged schema has moved past their last release: the workflow
+# schema staged under specVersion 0.6.0 (#326).
+DRAFT = {"workflow": "0.6.0"}
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -269,19 +273,19 @@ class Inventory(Fixture):
     def test_a_new_schema_file_appears_in_the_inventory_without_hand_edits(self):
         # A version above every catalogued workflow shape, so the family's draft version moves.
         write_json(self.root / "schema" / "workflow-2.schema.json",
-                   {"$id": shapes.NAMESPACE + "0.6.0/workflow-2.schema.json", "type": "object"})
+                   {"$id": shapes.NAMESPACE + "0.7.0/workflow-2.schema.json", "type": "object"})
         write_json(self.root / "schema" / "example" / "1" / "record.schema.json",
                    {"$id": shapes.NAMESPACE + "example/1/record.schema.json", "type": "object"})
         catalog = shapes.build_catalog(self.root)
         self.assertIn("schema/workflow-2.schema.json", catalog["families"]["workflow"])
         self.assertEqual(["schema/example/1/record.schema.json"], catalog["families"]["example"])
-        self.assertEqual("0.6.0", self.entry(catalog, "schema/workflow-2.schema.json")["version"])
+        self.assertEqual("0.7.0", self.entry(catalog, "schema/workflow-2.schema.json")["version"])
         # Found is not accepted: the new shapes still need their change records and status.
         self.regenerate()
         faults = "\n".join(shapes.check(self.root))
         self.assertIn("schema/workflow-2.schema.json (family workflow) at sha256:", faults)
         self.assertIn("no record for the family example", faults)
-        self.assertIn('"draftVersion": "0.6.0"', [line for line in faults.splitlines() if "workflow is" in line][0])
+        self.assertIn('"draftVersion": "0.7.0"', [line for line in faults.splitlines() if "workflow is" in line][0])
 
     def test_a_schema_in_a_specification_directory_outside_the_namespace_is_refused(self):
         write_json(self.root / "conformance" / "new" / "thing.schema.json",
@@ -314,11 +318,13 @@ class FormatStatus(Fixture):
         # 0.5.0 unchanged, made v0.5.1 both and then v0.5.2 both now. v0.4.0, which carries 0.3.0
         # unchanged, is neither.
         # The Policy companion's only release is policy-v1.0.0-draft.1; the leaf shipped in rc.2 and
-        # the final; the contributors shape under 0.4.0 is staged and unreleased.
+        # the final; the contributors shape under 0.4.0 is staged and unreleased. The workflow schema
+        # staged under 0.6.0 (#326) moves that family's draft version, and not its release.
         for family in ("judgment-pack-core", "conformance/manifest", "conformance/evaluation/manifest",
                        "workflow"):
             self.assertEqual(derived[family],
-                             {"draftVersion": "0.5.0", "baseline": "v0.5.2", "lastReleased": "v0.5.2"})
+                             {"draftVersion": DRAFT.get(family, "0.5.0"), "baseline": "v0.5.2",
+                              "lastReleased": "v0.5.2"})
         self.assertEqual(derived["policy"], {"draftVersion": "1.0.0", "baseline": "policy-v1.0.0-draft.1",
                                              "lastReleased": "policy-v1.0.0-draft.1"})
         self.assertEqual(derived["retained-column"],
@@ -409,8 +415,8 @@ class FormatStatus(Fixture):
         before = shapes.derive_status(self.root, shapes.build_catalog(self.root))
         for family in four:
             with self.subTest(family=family):
-                self.assertEqual({"draftVersion": "0.5.0", "baseline": "v0.5.0", "lastReleased": "v0.5.0"},
-                                 before[family])
+                self.assertEqual({"draftVersion": DRAFT.get(family, "0.5.0"), "baseline": "v0.5.0",
+                                  "lastReleased": "v0.5.0"}, before[family])
         # Each patch tag in turn: it carries 0.5.0, the specVersion its numbers give, so it is no
         # candidate, and it moves the four families' baseline and last release to itself; v0.4.0,
         # whose mapping names 0.3.0, stays the recorded exception that establishes no baseline.
@@ -426,8 +432,8 @@ class FormatStatus(Fixture):
                 after = shapes.derive_status(self.root, catalog)
                 self.assertEqual(four, {family for family in after if after[family] != before[family]})
                 for family in four:
-                    self.assertEqual({"draftVersion": "0.5.0", "baseline": tag, "lastReleased": tag},
-                                     after[family])
+                    self.assertEqual({"draftVersion": DRAFT.get(family, "0.5.0"), "baseline": tag,
+                                      "lastReleased": tag}, after[family])
                 before = after
 
     def test_a_patch_tag_of_a_spec_version_no_release_carries_is_refused(self):

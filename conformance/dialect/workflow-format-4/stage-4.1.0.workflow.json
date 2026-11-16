@@ -1,0 +1,46 @@
+{
+  "workflowVersion": 1,
+  "stages": [
+    {
+      "id": "changes",
+      "dialect": {
+        "formatVersion": "4.1.0",
+        "id": "urn:judgmentpack:dialect:paged-vectors",
+        "version": "0.1.0",
+        "digest": "sha256:28d5293ddd93ceb67643ba02883dcf2deb98dc5abf1d0117f7a7a8402fdcf635"
+      },
+      "pack": {
+        "id": "https://example.invalid/packs/changes",
+        "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "input": {
+        "root": true
+      },
+      "execution": "once",
+      "caseBindings": [],
+      "outputs": {
+        "pointer": "/changes",
+        "cardinality": "many"
+      },
+      "relation": {
+        "label": "discovered-for",
+        "direction": "output-to-parent"
+      },
+      "selection": {
+        "mode": "reviewer"
+      },
+      "sample": {
+        "mode": "sample",
+        "maxSize": 1
+      }
+    }
+  ],
+  "result": "changes",
+  "limits": {
+    "maxStages": 1,
+    "maxRecords": 16,
+    "maxInstances": 8,
+    "maxAttempts": 2,
+    "maxBytes": 1048576
+  }
+}

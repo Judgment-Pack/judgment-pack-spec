@@ -1,0 +1,11 @@
+{
+  "reason": "Staged for specVersion 0.6.0 (#326): the workflow schema at 0.6.0, which admits dialect formats 4.0.0 and 4.1.0 in a named dialect reference and differs from the 0.5.0 schema in nothing else. The 0.5.0 schema is unchanged.",
+  "changes": [
+    {
+      "path": "schema/workflow-1-0.6.0.schema.json",
+      "family": "workflow",
+      "from": null,
+      "to": "sha256:53d31516f20baada679708b167f1bf9a1ddce1ad027bd9100c0c1145194e687e"
+    }
+  ]
+}

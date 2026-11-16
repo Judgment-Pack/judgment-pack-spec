@@ -2302,6 +2302,46 @@
    }
   },
   {
+   "name": "paged-prev-signature-at-call-0",
+   "row": "prev-signature-at-call-0",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "020329fd4bddcf2ffab952862d0649934aa77dc9de989d7195cadd99e2ce522b",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-invalid"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
+   "name": "paged-prev-signature-null-after-0",
+   "row": "prev-signature-null-after-0",
+   "kind": "negative",
+   "files": {
+    "dialect.json": "9bc8cd1c1599fa88898087cf5e0afc5d507f1f3e68b9b4dd937279ca74526955",
+    "case.json": "980fd3eae5d3b7b66180edfff9553da1509d874ab2f29a2954c4d30f176fe830",
+    "sources.json": "6dd55f0dc7be1bd7e4bd14f7859f1adedbe86cf33ebbafef4e5b40bcbaae4d3b",
+    "profiles.json": "60fb6a210a0e7ca6a2f0eb2d0c0cb90022d996d23da3ce3aa99f3e57ab40a54d",
+    "preparation.json": "959d95d2bf85d1b34ad122e8065e831e1d88b34d2162e27c5433e900f8fe2d51"
+   },
+   "expected": {
+    "result": "finding",
+    "finding": "acquisition-invalid"
+   },
+   "expectedReportOfAReaderThatDoesNotReadTheFormat": {
+    "refusal": "version-unread",
+    "result": "refusal"
+   }
+  },
+  {
    "name": "paged-stale-last-page",
    "row": "stale-last-page",
    "kind": "negative",

@@ -2550,6 +2550,9 @@ UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/workflow"),
     PurePosixPath("conformance/policy"),
     PurePosixPath("schema/policy"),
+    # Staged for specVersion 0.6.0 (issue #326), served once 0.6.0 is released (.gitattributes).
+    PurePosixPath("schema/workflow-1-0.6.0.schema.json"),
+    PurePosixPath("schema/dialect-recording/2"),
 )
 
 

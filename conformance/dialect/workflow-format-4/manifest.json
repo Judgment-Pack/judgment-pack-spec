@@ -1,0 +1,50 @@
+{
+  "status": "staged",
+  "specVersion": "0.6.0",
+  "issue": 326,
+  "schema": "https://judgmentpack.org/schema/0.6.0/workflow-1.schema.json",
+  "cases": [
+    {
+      "name": "stage-4.0.0",
+      "formatVersion": "4.0.0",
+      "dialect": "format-4/case-rule-no-sources/dialect.json",
+      "workflow": "stage-4.0.0.workflow.json",
+      "release": "stage-4.0.0.release.json",
+      "dialectDigest": "sha256:f00efeb40b7ce2a27088d98f8932f33bc9ccc7f7caba39dd50d2d4445af28a85",
+      "releaseDigest": "sha256:127c106bc6171575a90f7802e7ed1ff16054e708eaeca1feec893a2cbaf0fc83",
+      "expected": {
+        "stagedSchema": "valid",
+        "publishedSchema": "invalid",
+        "workflowReader": "version-unread"
+      }
+    },
+    {
+      "name": "stage-4.1.0",
+      "formatVersion": "4.1.0",
+      "dialect": "format-4.1/paged-three-pages-no-next/dialect.json",
+      "workflow": "stage-4.1.0.workflow.json",
+      "release": "stage-4.1.0.release.json",
+      "dialectDigest": "sha256:28d5293ddd93ceb67643ba02883dcf2deb98dc5abf1d0117f7a7a8402fdcf635",
+      "releaseDigest": "sha256:05efd152ae820e4d5de259388db1fcbe3d05172300c8e7afa91f5afe684af563",
+      "expected": {
+        "stagedSchema": "valid",
+        "publishedSchema": "invalid",
+        "workflowReader": "version-unread"
+      }
+    },
+    {
+      "name": "stage-4.0.0-runner-members",
+      "formatVersion": "4.0.0",
+      "dialect": "format-4/case-rule-no-sources/dialect.json",
+      "workflow": "stage-4.0.0.workflow.json",
+      "release": "stage-4.0.0.runner-release.json",
+      "dialectDigest": "sha256:f00efeb40b7ce2a27088d98f8932f33bc9ccc7f7caba39dd50d2d4445af28a85",
+      "releaseDigest": "sha256:b54ba834d013b369b2c1c51dc4a33372c8ab7bb36b9f28172d4611c52009c7f8",
+      "expected": {
+        "stagedSchema": "valid",
+        "publishedSchema": "invalid",
+        "workflowReader": "version-unread"
+      }
+    }
+  ]
+}

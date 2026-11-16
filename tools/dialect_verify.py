@@ -3523,9 +3523,11 @@ def check_acquisition(
         is_digest(receipt.get("resultDigest")),
         served is not None,
         isinstance(acquisition, dict),
-        # RFC 0033 section 4, step 2: a page's chain is read (step 4), so check 1 holds it to its form
-        not page or ("prevSignature" in receipt
-                     and (receipt["prevSignature"] is None or is_hex(receipt["prevSignature"], 128))),
+        # RFC 0033 section 4, step 2: a page's chain is read (step 4), so check 1 holds it to its form and
+        # to gateway section 1.2 within the receipt: null exactly at its own callIndex 0 (issue #326)
+        not page or ("prevSignature" in receipt and is_integer(receipt.get("callIndex"))
+                     and (receipt["prevSignature"] is None if integer_of(receipt["callIndex"]) == 0
+                          else is_hex(receipt["prevSignature"], 128))),
     )
     if not all(forms):
         raise invalid("a receipt member not of its form")

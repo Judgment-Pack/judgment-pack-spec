@@ -163,6 +163,11 @@ Review): one for each row of the RFC's Conformance table. The companion is uncha
 reader reads the format, the second refuses it `version-unread`, and the preserved `v0.3.0` reader
 refuses it `input-malformed`.
 
+[`recording-2/`](recording-2/README.md) and [`workflow-format-4/`](workflow-format-4/README.md) are
+staged for `0.6.0` (issue #326): preparations valid and invalid against version 2 of the
+dialect-recording schemas, one for each rule it adds, and a workflow stage of each of formats `4.0.0`
+and `4.1.0` with its dialect and release digests.
+
 ## What a vector holds, and the answer a verifier gives
 
 Each vector is a directory. Of its files, a preparation verifier reads:
