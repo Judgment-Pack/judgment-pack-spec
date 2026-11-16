@@ -701,6 +701,92 @@ class FormatFourStageTests(unittest.TestCase):
         e=replace_frozen_stage(Example(profiles=[web]),'root',unfit)
         self.assertEqual('stage-binding-mismatch',self.read(e,2).report['finding'])
 
+    def paged_stage(self, vector='paged-three-pages-no-next'):
+        """A root stage of a 4.1.0 vector's dialect, its own profile trusted, plus the vector's case and
+        retained acquisitions and the instant the vectors are read at."""
+        directory=ROOT/'conformance/dialect/format-4.1'/vector
+        dialect=json.loads((directory/'dialect.json').read_bytes())
+        wanted={s['profileDigest'] for s in dialect['sources']}
+        used=[p for p in json.loads((directory/'profiles.json').read_bytes()) if hashvalue(p) in wanted]
+        case=d.read_document((directory/'case.json').read_bytes(),'case')
+        acquisitions=d.read_document((directory/'sources.json').read_bytes(),'sources')
+        at=json.loads((ROOT/'conformance/dialect/format-4.1/manifest.json').read_bytes())['verifiedAt']
+        return dialect,used,case,acquisitions,at
+
+    def test_an_evaluated_paged_stage_reads_complete(self):
+        # RFC 0033 section 4: the run's kept paged source has the pages form, never the response form.
+        dialect,used,case,acquisitions,at=self.paged_stage()
+        pointer='/changes/items'
+        e=Example(case=case,profiles=used); e.workflow['stages'][0]['outputs']['pointer']=pointer
+        e=replace_frozen_stage(e,'root',dialect)
+        instance=e.instances[0]
+        start=dict(instance=instance['id'],number=1,retry=None)
+        epoch=dict(number=len(e.epochs)+1,previousProofDigest=hashvalue(e.proof),kind='group',reservation=1,
+                   starts=[start],deferred=[],cancelled=[],results=[])
+        attempt=dict(number=1,state='interrupted',failure=None,preparationDigest=None,auditDigest=None,runDigest=None,
+                     evaluationErrorDigest=None,retry=None)
+        instance['attempts'].append(attempt); e.epochs.append(epoch)
+        computation=d.recompute(d.parse_dialect(decoded(e.mapping)),case,acquisitions,d.parse_profiles(decoded(used)),at)
+        preparation=computation.preparation; pb=d.preparation_bytes(preparation); pd=d.digest_of(pb)
+        disposition={'kind':'outcome','outcomeId':'ok','reasons':[],'handoff':{'state':'none'}}
+        inputs=dict(facts=computation.facts,evidence=computation.evidence)
+        audit=(b'{"inputs":'+d.canon(inputs)+b',"disposition":'+d.canon(disposition)+b',"binding":'+d.binding_of(pd)
+               +b',"cites":'+d.canon(preparation['cites'])+b'}')
+        run=dict(schemaVersion='1',id='run',jobId='job',releaseId='r',revision=1,state='completed',createdAt=at,requestedBy='operator',attempt=1,
+                 input=dict(source={'mapping':e.mapping,'case':case,'sources':acquisitions},preparation=preparation,**inputs),
+                 result={'disposition':disposition},audit=d.read_document(audit,'audit'),auditBytes=base64.b64encode(audit).decode())
+        rb=d.preparation_bytes(dict(version=3,releaseDigest=e.frozen[0]['releaseDigest'],release=e.release,run=run))
+        path='instances/root-instance/attempts/1/'
+        e.files.update({path+'run.json':rb,path+'sources.json':d.preparation_bytes(acquisitions),path+'preparation.json':pb,
+                        path+'preparation.sha256':(pd+'\n').encode(),path+'verified-at.txt':(at+'\n').encode(),path+'audit.json':audit})
+        observation=dict(instance=instance['id'],number=1,state='evaluated',failure=None,runDigest=d.digest_of(rb),preparationDigest=pd,
+                         auditDigest=d.digest_of(audit),evaluationErrorDigest=None,auditSignaturesDigest=None)
+        for k in ('runDigest','preparationDigest','auditDigest'): attempt[k]=observation[k]
+        payloads=d.resolve(computation.facts,pointer); records=[]
+        self.assertEqual(5,len(payloads))
+        for index,payload in enumerate(payloads):
+            full=pointer+'/'+str(index); classes=set(); generated=False
+            for entry in preparation['lineage']:
+                if entry['kind']=='fact' and (full==entry['target'] or full.startswith(entry['target']+'/') or entry['target'].startswith(full+'/')):
+                    classes.add(entry['class']); generated|=bool(entry['generatedInfluence'])
+            f=e.frozen[0]
+            lineage=dict(workflowDigest=e.wd,execution='exec',stage='root',instance='root-instance',
+                         publishedDialectDigest=f['publishedDialectDigest'],bindingDocumentDigest=None,boundDialectDigest=f['boundDialectDigest'],
+                         packDigest=f['packDigest'],releaseDigest=f['releaseDigest'],preparationDigest=pd,auditDigest=d.digest_of(audit),
+                         outputPointer=pointer,index=index,rootCaseDigest=e.rd,caseDigest=e.rd,parentRecord=None,selectionDigest=None,
+                         relation=e.workflow['stages'][0]['relation'],influence={'classes':sorted(classes),'generatedInfluence':generated})
+            record=dict(outputRecordVersion=1,payloadDigest=d.digest_of(d.preparation_bytes(payload)),lineage=lineage)
+            e.files[f'outputs/root/root-instance/{index}/payload.json']=d.preparation_bytes(payload)
+            e.files[f'outputs/root/root-instance/{index}/record.json']=d.canon(record); records.append(hashvalue(record))
+        e.output_sets[0]['records']=records
+        attempt['state']=instance['state']='completed'
+        epoch['results'].append(observation)
+        report=self.read(e.finish()).report
+        self.assertEqual(('complete','agree',5),(report['completion'],report['preparations'],report['counts']['outputs']))
+
+    def test_a_failed_attempt_keeps_its_paged_source_in_the_pages_form(self):
+        # every page the loop calls for is kept, so the inputs prepare: no terminal failure, never input-malformed
+        dialect,used,case,acquisitions,at=self.paged_stage()
+        e=replace_frozen_stage(Example(case=case,profiles=used),'root',dialect).failed(acquisitions=acquisitions,at=at)
+        self.assertEqual('inventory-mismatch',self.read(e,2).report['finding'])
+
+    def test_paged_pages_stopping_before_the_loop_ends_are_terminal(self):
+        # RFC 0033 section 5: the walk asks for the page after the last one kept; recorded preparation-failed,
+        # as a retained research response without its result is
+        def drop_last(acquisitions):
+            for member in acquisitions.values(): member['pages'].pop()
+        for vector,change in (('paged-page-missing',None),('paged-three-pages-no-next',drop_last)):
+            with self.subTest(vector=vector,dropped=change is not None):
+                dialect,used,case,acquisitions,at=self.paged_stage(vector)
+                if change: change(acquisitions)
+                with self.assertRaises(d.Finding) as raised:
+                    d.recompute(d.parse_dialect(decoded(dialect)),case,acquisitions,d.parse_profiles(decoded(used)),at)
+                self.assertEqual('acquisition-missing',raised.exception.name)
+                e=replace_frozen_stage(Example(case=case,profiles=used),'root',dialect).failed(acquisitions=acquisitions,at=at)
+                self.assertEqual('partial',self.read(e).report['completion'])
+                e=replace_frozen_stage(Example(case=case,profiles=used),'root',dialect).failed('admission-refused',acquisitions=acquisitions,at=at)
+                self.assertEqual('inventory-mismatch',self.read(e,2).report['finding'])
+
     def test_the_stage_reference_not_the_release_selects_the_rule(self):
         three=copy.deepcopy(FOUR); three['formatVersion']='3.0.0'; three['case'].pop('rule')
         for stage,claimed in ((three,FOUR),(FOUR,three)):

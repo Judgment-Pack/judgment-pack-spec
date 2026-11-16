@@ -265,7 +265,11 @@ def check(reader):
                 capture(lambda mapping=mapping,acquired=acquired:d.count_bounds(mapping,acquired,trusted))
                 if parsed is not None:
                     research={source.name:source.research for source in parsed.sources if source.research is not None}
-                    for key,member in obj(acquired).items(): capture(lambda key=key,member=member:d.check_acquisition_form(key,member,research.get(key)))
+                    # A paged source's member has the pages form (RFC 0033 section 4), as the dialect reader routes it.
+                    paged={source.name for source in parsed.sources if source.paging is not None}
+                    for key,member in obj(acquired).items():
+                        if key in paged: capture(lambda key=key,member=member:d.check_pages_form(key,member))
+                        else: capture(lambda key=key,member=member:d.check_acquisition_form(key,member,research.get(key)))
         elif name=='audit.json':
             disposition=obj(obj(value).get('disposition'))
             count(disposition.get('reasons'),6,'Core reasons')

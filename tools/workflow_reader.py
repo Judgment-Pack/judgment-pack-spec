@@ -1077,12 +1077,18 @@ class Reader:
             elif error.name in terminal: derived='preparation-failed'
             elif error.name=='acquisition-missing':
                 # The reused verifier exposes findings as names plus detail strings.
-                # Recognize its two explicit missing forms; never infer terminal
+                # Recognize its three explicit missing forms; never infer terminal
                 # failure from an arbitrary exception or an absent planned source.
                 pending={f'acquisition-missing: {source.name}' for source in stage.parsed.sources if source.name not in acquisitions}
                 missing_response=set()
                 for source in stage.parsed.sources:
-                    if source.research is None or source.name not in acquisitions: continue
+                    if source.name not in acquisitions: continue
+                    if source.paging is not None:
+                        # RFC 0033 section 5: a kept paged member whose pages stop before the loop ends;
+                        # the walk asks for the page after the last one kept.
+                        missing_response.add(f"acquisition-missing: {source.name} page {len(acquisitions[source.name]['pages'])}")
+                        continue
+                    if source.research is None: continue
                     responses=acquisitions[source.name]['response']['result']['responses']
                     for index,response in enumerate(responses):
                         if 'result' not in response:
