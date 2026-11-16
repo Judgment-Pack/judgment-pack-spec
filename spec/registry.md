@@ -117,15 +117,20 @@ steps, in order. Each refusal names its document (§7.3). Admission is validatio
    Depth counts containers: the root object is at depth 1, and each object or array inside a
    container is one deeper than it.
 
-2. **Parse.** The bytes are read as one JSON value (RFC 8259), and the first of these failures in
-   the order of the text refuses the document, with no later step:
-   - bytes that are not UTF-8, a byte-order mark, a syntax error, or anything after the value but
-     whitespace: `REG-DOC-JSON` at `""`;
-   - an object or array at depth 33: `REG-DOC-DEPTH` at its pointer;
-   - a member whose name an earlier member of the same object has: `REG-DOC-DUPLICATE` at the
-     pointer of the later member;
-   - a string whose escapes encode a lone surrogate: `REG-DOC-STRING` at `""`. In text that is
-     otherwise not JSON, the failure is `REG-DOC-JSON`.
+2. **Parse.** The bytes are read as one JSON value (RFC 8259). One failure refuses the document,
+   with no later step, and it is chosen in this order:
+   1. bytes that are not UTF-8, anywhere in the input: `REG-DOC-JSON` at `""`;
+   2. otherwise, reading the value from its first byte, whichever of these is reached first:
+      a syntax error, a byte-order mark included (`REG-DOC-JSON` at `""`); an object or array
+      that opens at depth 33 (`REG-DOC-DEPTH` at its pointer); or a member name that an earlier
+      member of the same object has, compared as decoded, reached at the name and before its
+      value is read (`REG-DOC-DUPLICATE` at the later member's pointer);
+   3. otherwise, anything after the value but whitespace: `REG-DOC-JSON` at `""`;
+   4. otherwise, a string whose escapes encode a lone surrogate: `REG-DOC-STRING` at `""`.
+
+   So `{"a":1,"a":2,"b":}` is `REG-DOC-DUPLICATE`; `{"a":1,"a":2}` followed by the byte FF is
+   `REG-DOC-JSON`; and a lone surrogate escape before a repeated member name is
+   `REG-DOC-DUPLICATE`.
 
 3. **Numbers.** Every number outside the number rule below is `REG-DOC-NUMBER` at its pointer. All
    of them are reported, and a document with one is refused.
@@ -340,11 +345,12 @@ A pattern is at most 256 code points. It is a sequence of these, and nothing els
 - **quantifiers** `*`, `+`, `?`, `{n}`, `{n,}` and `{n,m}`, each after an atom (a literal, an
   escape, `.`, a class or a group) and never after another quantifier, so lazy and possessive forms
   are refused. `n` and `m` are 1 to 4 digits with no leading zero (or `0`), and `n ≤ m ≤ 1000`. A `{`
-  that does not begin a quantifier, and a `}` or `]` that ends nothing, are refused. Along any
+  that does not begin a quantifier, and a `}` or `]` that ends nothing, are refused. Along every
   chain of quantifiers nested through groups, the product of their counts is at most 1 000:
-  `{n,m}` counts m, `{n}` and `{n,}` count n, and `*`, `+`, `?` and a count of 0 count 1, except
-  that `{0}` and `{0,0}` end the chain below them. So `(a{32}){32}` is refused, and
-  `(a{10}){100}` is admitted;
+  `{n,m}` counts m, `{n}` and `{n,}` count n, and `*`, `+`, `?` and a count of 0 count 1. A chain
+  may start at any quantifier. `{0}` and `{0,0}` only stop a chain that reaches them from above:
+  the chains that start below them are still checked. So `(a{32}){32}` and `((a{2}){501}){0}`
+  are refused, and `(a{10}){100}` and `((a{2}){500}){0}` are admitted;
 - **bracket classes** `[ … ]`, with an optional leading `^`, holding literal code points, the escapes
   above, `\-`, and ranges `a-b` whose ends are a literal or an escaped code point and whose first
   end is not greater than its second. A class is not empty (`[]` and `[^]` are refused), holds no
@@ -375,7 +381,9 @@ that a reader's engine cannot compile within its own limits is not pinned by thi
   its alternatives plus k − 1;
 - every construct counts at least 1, an empty alternative and `x{0}` included.
 
-A pattern of size over 4 096 is `REG-KIND-PATTERN-LIMIT` at its pointer. A kind's patterns are
+Size is counted only for a pattern within the subset, and a pattern has one code: one outside
+the subset is `REG-KIND-PATTERN` alone, whatever its size. A pattern of size over 4 096 is
+`REG-KIND-PATTERN-LIMIT` at its pointer. A kind's patterns are
 also held together to 65 536. They are counted with `entryId.pattern` first and then the
 schema's patterns in reading order (§3.3); the default `entryId` pattern, when `entryId` is absent,
 is not counted. The pattern that
@@ -769,7 +777,7 @@ A keyword that does not apply to the value's type (`maxLength` on a number, say)
 **Work bound.** The bounds of §3.3, §3.4 and §7.1 keep each check finite, but a registry of many
 large values can still make value validation costly. A reader MAY stop value validation once its
 work over the registry passes a bound of its own. It then reports `REG-BOUND-VALIDATION-WORK`, an
-error, at the value it stopped at, and checks neither that value nor any it reaches later against
+error, at the value it stopped at (pointer `""` in document `value`), and checks neither that value nor any it reaches later against
 its schema. The reference
 runtime counts in units of about one schema node visited, and stops past 67 108 864 (2^26). Every
 value costs one unit per 16 bytes of its canonical form. A value equal to one already checked
@@ -1298,7 +1306,8 @@ with a README that says how each row is compared. Every input is synthetic. Wher
 text differ, this text governs. The rows exercise admission, kind declarations, the registry's
 shape, pins, entries, overlays, both kinds of reference, bounds and warnings, resolution in two
 environments, facts batches, two generated contracts and two pack checks. They do not yet exercise
-YAML import, the report bound, the facts and contract limits, contract reading, authored contracts,
+`REG-ENTRY-ID`, `REG-ENTRY-DUPLICATE` and `REG-ENTRY-ENVIRONMENT`; value validation (§7.2) beyond
+`REG-VALUE-RANGE` and `REG-VALUE-DEPRECATED`; YAML import, the report bound, the facts and contract limits, contract reading, authored contracts,
 wildcard reference patterns, emitters, the harness or builders, and the boundary and adversarial
 sets RFC 0034 lists.
 
@@ -1351,6 +1360,10 @@ readers agreeing on every row of a class.
 - **Reference widening.** A contract's `/references/<p>/value` is the union of every target kind's
   shapes (§10.4). Whether it should be narrowed to the kinds a position allows, per target, is not
   decided; this version writes the widening.
+- **Pattern size, as written.** §3.4 counts a pattern's size on the pattern as written. The
+  reference runtime `v0.47.0` counts it on its engine's parse, which factors alternations and
+  merges classes, and so admits `(ab|ac){1000}`, which is 5 000 as written. The text governs, and
+  the row `pattern-bounds` expects the refusal. The runtime follows in a later release.
 - **Reader bounds.** A reader's own limits are not pinned: a pattern within the subset that its
   engine cannot compile (§3.4), and value validation past its work bound (§7.2). A conformance
   row stays well within the reference runtime's limits.

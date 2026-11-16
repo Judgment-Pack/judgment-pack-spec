@@ -78,6 +78,16 @@
       "expected": "vectors/kind-declarations/report.json"
     },
     {
+      "id": "pattern-bounds",
+      "section": "§3.4",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "Pattern size counted as written: 4 096 is admitted and 4 097 is REG-KIND-PATTERN-LIMIT; (ab|ac){1000} is 5 000 as written, so it is refused even where an engine factors it smaller; a nested product of 1 002 is REG-KIND-PATTERN although {0} stops the chain above it, and a product of 1 000 under {0} is admitted. The reference runtime v0.47.0 admits (ab|ac){1000} (§17).",
+      "registry": "vectors/pattern-bounds/registry.json",
+      "kinds": ["vectors/pattern-bounds/kinds/patterned.json"],
+      "expected": "vectors/pattern-bounds/report.json"
+    },
+    {
       "id": "kind-pins",
       "section": "§7.1",
       "operation": "validate",

@@ -11,9 +11,11 @@ cite them. Every input is synthetic: the ids, owners, projects and values are ma
 They are not recordings. Every expectation was written by hand from the companion text, and a
 reader is held to them, never the other way round. The reference runtime (Go) is the one reader
 that has been run against them; no second, independently written reader exists in this repository
-yet. One row differs from what the reference runtime reports today, and the companion text governs:
+yet. Two rows differ from what the reference runtime reports today, and the companion text governs:
 `kind-declarations` expects the `kind` member on a kind declaration's member diagnostic that the
-runtime reports without it (§7.3).
+runtime reports without it (§7.3); and `pattern-bounds` expects `(ab|ac){1000}` refused at 5 000 as
+written, which the runtime `v0.47.0` admits because it counts size on its engine's factored parse
+(§3.4, §17).
 
 Core's corpora are unchanged. Nothing here is named by `conformance/manifest.json` or
 `conformance/evaluation/manifest.json`, and nothing here is a schema file.
