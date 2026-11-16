@@ -1,0 +1,18 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/broken-schema",
+  "version": "1.0.0",
+  "kind": "broken-schema",
+  "owner": "platform-data",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "a": { "type": "string", "format": "email" },
+      "b": { "oneOf": [{ "type": "string" }] },
+      "c": { "type": "string", "pattern": "(x)\\1" },
+      "e": { "type": "array", "items": [{ "type": "string" }] },
+      "f": { "anyOf": [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] },
+      "g": { "anyOf": [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }
+    }
+  }
+}

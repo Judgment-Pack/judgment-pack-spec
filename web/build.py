@@ -408,6 +408,17 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "spec/registry.md",
+        PurePosixPath("spec/registry/index.html"),
+        "The registry",
+        "A companion document of the specification: kind declarations, registries, overlays and "
+        "references, their validation and resolution per environment, facts contracts and the "
+        "emitter contract. Format 1.0.0, proposed, released on its own scoped tag.",
+        "spec",
+        "Normative for the registry classes once a registry tag releases it; format 1.0.0 proposed",
+        source_ref="main",
+    ),
+    Page(
         "spec/policy.md",
         PurePosixPath("spec/policy/index.html"),
         "Policy content and governing adoption",
@@ -1927,7 +1938,8 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
     # Review and proposal files stay source-only until their own adoption or release.
     # Schema resources also resolve directly at their exact, format-versioned $id URLs.
     for directory in ("conformance/policy", "schema/policy", "rfcs/workflow-contributors",
-                      "rfcs/retained-column-conversion", "conformance/annotation-vocabulary"):
+                      "rfcs/retained-column-conversion", "conformance/annotation-vocabulary",
+                      "conformance/registry"):
         for path in (ROOT / directory).rglob("*"):
             source = path.relative_to(ROOT).as_posix()
             if path.is_file():
@@ -2603,12 +2615,15 @@ def build_license(output_root: Path) -> None:
 # vectors are staged since RFC 0018's acceptance too (conformance/dialect/README.md), and the
 # companion document they belong to, spec/dialect.md, is published. The annotation vocabulary's
 # rows are staged as well, since RFC 0032's acceptance (conformance/annotation-vocabulary/README.md),
-# and the companion document they belong to, spec/annotation-vocabulary.md, is published.
+# and the companion document they belong to, spec/annotation-vocabulary.md, is published. The
+# registry's rows are staged too (conformance/registry/README.md), and its companion document,
+# spec/registry.md, is published.
 UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/evaluation/staged"),
     PurePosixPath("conformance/witness"),
     PurePosixPath("conformance/dialect"),
     PurePosixPath("conformance/annotation-vocabulary"),
+    PurePosixPath("conformance/registry"),
     PurePosixPath("conformance/workflow"),
     PurePosixPath("conformance/policy"),
     PurePosixPath("schema/policy"),
@@ -2746,6 +2761,7 @@ conformance.
 - [The checkpoint witness statement]({guide_url(PurePosixPath("spec/checkpoint-witness/index.html"))}): a companion document, normative only for the witness-statement reader class; its vectors are staged until the next specVersion
 - [The dialect]({guide_url(PurePosixPath("spec/dialect/index.html"))}): a companion document, normative only for the preparation-verifier reader class; its vectors are staged until the next specVersion
 - [The annotation vocabulary]({guide_url(PurePosixPath("spec/annotation-vocabulary/index.html"))}): a companion document, normative only for the vocabulary-checker class; version 1.0.0 is proposed, and its rows are staged
+- [The registry]({guide_url(PurePosixPath("spec/registry/index.html"))}): a companion document, normative for nothing until a registry tag releases it; format 1.0.0 is proposed, and its rows are staged
 - [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
 
 ## Explanations and direct answers

@@ -1,0 +1,21 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "registry": { "digest": "sha256:0de5d625544c3505a4bff2f659f9c00fd6818f6efc8740328363bde3a1c4d25c" },
+  "diagnostics": [
+    { "code": "REG-BOUND-ENTRIES", "severity": "error",
+      "location": { "document": "registry", "kind": "note", "pointer": "/kinds/2" } },
+    { "code": "REF-SECRET-UNSCOPED", "severity": "warning",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "api" }, "environment": "dev", "pointer": "/password" } },
+    { "code": "REF-SECRET-UNSCOPED", "severity": "warning",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "api" }, "environment": "prod", "pointer": "/password" } },
+    { "code": "REG-BOUND-ENTRY-BYTES", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "note", "id": "b" }, "environment": "dev", "pointer": "" } },
+    { "code": "REG-BOUND-ENTRY-BYTES", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "note", "id": "b" }, "environment": "prod", "pointer": "" } },
+    { "code": "REG-VALUE-DEPRECATED", "severity": "warning",
+      "location": { "document": "value", "entry": { "kind": "note", "id": "c" }, "environment": "dev", "pointer": "/legacyTag" } },
+    { "code": "REG-VALUE-DEPRECATED", "severity": "warning",
+      "location": { "document": "value", "entry": { "kind": "note", "id": "c" }, "environment": "prod", "pointer": "/legacyTag" } }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/services",
+  "version": "2.0.0",
+  "environments": ["dev", "prod"],
+  "owners": ["team-edge"],
+  "kinds": [
+    { "kind": "account", "id": "https://example.invalid/kinds/account", "version": "1.0.0", "digest": "sha256:62a87a4151f067d4ba8d8e9a014b8f6b4184c0641125e478a8373bb79e9f5b64" },
+    { "kind": "bag", "id": "https://example.invalid/kinds/bag", "version": "1.0.0", "digest": "sha256:b6033e3dc70b790322874701f2ec705202166e03675f86bae90b466585b03e35" },
+    { "kind": "service", "id": "https://example.invalid/kinds/service", "version": "3.1.0", "digest": "sha256:1e1f4d9ec0ce10da6cd2bc556e9af03ddfce1dfb10ccb997df7c6afa80c4c1b5" }
+  ],
+  "entries": [
+    { "kind": "account", "id": "core", "owner": "team-edge", "value": { "team": "core" } },
+    { "kind": "bag", "id": "one", "owner": "team-edge", "value": { "settings": { "a": { "b": 1 } }, "anything": [1, "x"] } },
+    { "kind": "service", "id": "api", "owner": "team-edge",
+      "value": { "name": "api", "tier": "gold", "port": 8443, "tags": ["edge"],
+                 "token": "secret:gcp-sm:projects/example-edge-dev/secrets/api-token/versions/4",
+                 "account": "entry:account/core" } }
+  ],
+  "overlays": [
+    { "environment": "prod",
+      "patches": [
+        { "kind": "service", "id": "api",
+          "set": { "/token": "secret:gcp-sm:projects/example-edge-prod/secrets/api-token/versions/9" } }
+      ] }
+  ],
+  "secretScopes": {
+    "dev": { "gcp-sm": ["example-edge-dev"] },
+    "prod": { "gcp-sm": ["example-edge-prod"] }
+  }
+}

@@ -29,6 +29,12 @@ spec/workflow.md export-ignore
 conformance/annotation-vocabulary export-ignore
 conformance/annotation-vocabulary/** export-ignore
 
+# The registry's rows and code list are staged, hand-written and in no corpus
+# (conformance/registry/README.md), so no bundle carries them. The companion document they belong to,
+# spec/registry.md, is published.
+conformance/registry export-ignore
+conformance/registry/** export-ignore
+
 # Independently packaged Policy fixture/schema bytes must never undergo text conversion.
 schema/policy/** -text
 conformance/policy/** -text

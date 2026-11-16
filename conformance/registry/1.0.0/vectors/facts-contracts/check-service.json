@@ -1,0 +1,59 @@
+{
+  "factsCheckFormatVersion": "1.0.0",
+  "contract": {
+    "digest": "sha256:266a71c807c0f8ff96df678f85c50e7f11ad1055ef1087afd928c9959b1da09f"
+  },
+  "pack": {
+    "digest": "sha256:6f2aabace4351fc1debd79c468ea913462bd71d7d2ce9f7968afe0506dc9b8a9"
+  },
+  "diagnostics": [
+    {
+      "code": "FACTS-VALUE-UNREACHABLE",
+      "severity": "warning",
+      "location": {
+        "document": "pack",
+        "pointer": "/applicability/conditions/1"
+      }
+    },
+    {
+      "code": "FACTS-VALUE-UNREACHABLE",
+      "severity": "warning",
+      "location": {
+        "document": "pack",
+        "pointer": "/exceptions/1/when"
+      }
+    },
+    {
+      "code": "FACTS-TYPE-ORDERED",
+      "severity": "warning",
+      "location": {
+        "document": "pack",
+        "pointer": "/rules/1/when"
+      }
+    },
+    {
+      "code": "FACTS-POINTER-UNKNOWN",
+      "severity": "warning",
+      "location": {
+        "document": "pack",
+        "pointer": "/rules/2/when"
+      }
+    },
+    {
+      "code": "FACTS-VALUE-UNREACHABLE",
+      "severity": "warning",
+      "location": {
+        "document": "pack",
+        "pointer": "/rules/3/when/condition"
+      }
+    },
+    {
+      "code": "FACTS-VALUE-UNREACHABLE",
+      "severity": "warning",
+      "location": {
+        "document": "pack",
+        "pointer": "/rules/4/when"
+      }
+    }
+  ]
+}

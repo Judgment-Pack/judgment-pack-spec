@@ -1,0 +1,9 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/legacy",
+  "version": "2.0.0",
+  "kind": "legacy",
+  "owner": "platform-data",
+  "deprecated": true,
+  "schema": { "type": "object" }
+}

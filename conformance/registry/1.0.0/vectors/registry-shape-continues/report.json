@@ -1,0 +1,15 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "registry": { "digest": "sha256:94911001adcb56ff2cac2d52d50da4b2242f5baeef6a126248be432fa5a80cb8" },
+  "diagnostics": [
+    { "code": "REG-REGISTRY-MISSING-MEMBER", "severity": "error",
+      "location": { "document": "registry", "pointer": "/entries/1/owner" } },
+    { "code": "REG-REGISTRY-ORDER", "severity": "error",
+      "location": { "document": "registry", "pointer": "/entries/2" } },
+    { "code": "REG-VALUE-RANGE", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "zeta" }, "environment": "dev", "pointer": "/connectionLimit" } },
+    { "code": "REG-VALUE-RANGE", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "zeta" }, "environment": "prod", "pointer": "/connectionLimit" } }
+  ]
+}

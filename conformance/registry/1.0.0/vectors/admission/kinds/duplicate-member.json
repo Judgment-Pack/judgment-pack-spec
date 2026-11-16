@@ -1,0 +1,9 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/twice",
+  "version": "1.0.0",
+  "kind": "twice",
+  "kind": "twice",
+  "owner": "platform-data",
+  "schema": {}
+}

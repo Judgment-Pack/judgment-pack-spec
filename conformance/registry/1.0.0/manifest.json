@@ -1,0 +1,217 @@
+{
+  "companion": "registry",
+  "formatVersion": "1.0.0",
+  "status": "proposed",
+  "label": "Registry companion 1.0.0, proposed: hand-written synthetic vectors, staged in no corpus",
+  "codes": "codes.json",
+  "vectors": [
+    {
+      "id": "valid-two-environments",
+      "section": "§7",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "A valid registry: two kinds, a reference cycle, an entry limited to one environment, a reference with a pointer, and a production overlay on a scalar, a secret and an array element.",
+      "registry": "vectors/valid-two-environments/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json"],
+      "expected": "vectors/valid-two-environments/report.json"
+    },
+    {
+      "id": "resolve-dev",
+      "section": "§8",
+      "operation": "resolve",
+      "class": "registry-reader",
+      "description": "The development environment's resolved document: no overlay applies, and every entry that applies in it is listed.",
+      "registry": "vectors/valid-two-environments/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json"],
+      "environment": "dev",
+      "expected": "vectors/valid-two-environments/resolved-dev.json"
+    },
+    {
+      "id": "resolve-prod",
+      "section": "§8",
+      "operation": "resolve",
+      "class": "registry-reader",
+      "description": "The production environment's resolved document: the overlay's pointers are replaced, and the entry limited to development is omitted.",
+      "registry": "vectors/valid-two-environments/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json"],
+      "environment": "prod",
+      "expected": "vectors/valid-two-environments/resolved-prod.json"
+    },
+    {
+      "id": "checks-run-on-what-passed",
+      "section": "§7.1",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "An entry that fails step 5 is not checked by steps 6 and 7, and an entry whose production patch fails step 6 is checked by step 7 in development only.",
+      "registry": "vectors/checks-run-on-what-passed/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json"],
+      "expected": "vectors/checks-run-on-what-passed/report.json"
+    },
+    {
+      "id": "entry-references",
+      "section": "§6.2",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "Each entry-reference code, per environment: a target absent in one environment, a missing target, a malformed reference, a pointer that addresses nothing, a pointer that addresses a value only an overlay sets, and a kind the position does not allow. A cycle and a pointer that addresses a value are valid.",
+      "registry": "vectors/entry-references/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json"],
+      "expected": "vectors/entry-references/report.json"
+    },
+    {
+      "id": "secret-references",
+      "section": "§6.3",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "The secret-reference precedence: form, store and pin, a scope miss and a shared project, with a reference at its length bounds that is valid.",
+      "registry": "vectors/secret-references/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json"],
+      "expected": "vectors/secret-references/report.json"
+    },
+    {
+      "id": "kind-declarations",
+      "section": "§3",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "Step 2: excluded keywords, a back-reference, an array form of items, 17 and 16 branches, a recursive definition, an unknown member, an unreachable, a malformed and a repeated pointer pattern, and a secret pattern that is also a reference pattern. Entries of an invalid kind are not checked.",
+      "registry": "vectors/kind-declarations/registry.json",
+      "kinds": ["vectors/kind-declarations/kinds/broken-schema.json", "vectors/kind-declarations/kinds/cyclic.json", "vectors/kind-declarations/kinds/grant.json"],
+      "expected": "vectors/kind-declarations/report.json"
+    },
+    {
+      "id": "kind-pins",
+      "section": "§7.1",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "Step 4: a repeated kind name, a pin whose digest names a declaration of another version, a pin no supplied declaration matches, a deprecated kind and an unpinned declaration; and an entry of a kind the registry does not pin.",
+      "registry": "vectors/kind-pins/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json", "kinds/legacy.json", "kinds/extra.json"],
+      "expected": "vectors/kind-pins/report.json"
+    },
+    {
+      "id": "overlays",
+      "section": "§5",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "Each overlay code. A key that is not a pointer, or that no overlayable pattern matches, is located at its set member.",
+      "registry": "vectors/overlays/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json"],
+      "expected": "vectors/overlays/report.json"
+    },
+    {
+      "id": "bounds-and-warnings",
+      "section": "§7.1",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "Step 8: more entries than maxEntries, and a resolved value one byte past maxEntryBytes beside one at it; the warnings for a deprecated member and for a secret reference in a registry without scopes.",
+      "registry": "vectors/bounds-and-warnings/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json", "kinds/note.json"],
+      "expected": "vectors/bounds-and-warnings/report.json"
+    },
+    {
+      "id": "registry-shape-stops",
+      "section": "§7.1",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "A registry-level member error stops validation after step 3: the report names no registry digest, and nothing in the entries is checked.",
+      "registry": "vectors/registry-shape-stops/registry.json",
+      "kinds": ["kinds/database.json"],
+      "expected": "vectors/registry-shape-stops/report.json"
+    },
+    {
+      "id": "registry-shape-continues",
+      "section": "§7.1",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "A malformed entry is dropped and an order error is reported, and validation goes on to step 7 for the entries that remain.",
+      "registry": "vectors/registry-shape-continues/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json"],
+      "expected": "vectors/registry-shape-continues/report.json"
+    },
+    {
+      "id": "admission",
+      "section": "§2",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "Step 1: an integer one past 2^53 - 1 beside one at it, negative zero, and a decimal that does not round-trip beside one that does; a duplicate member and a later selector in two kind declarations. Step 2 still runs on the declarations step 1 admitted.",
+      "registry": "vectors/admission/registry.json",
+      "kinds": ["kinds/database.json", "vectors/admission/kinds/duplicate-member.json", "vectors/admission/kinds/excluded-keyword.json", "vectors/admission/kinds/later-selector.json"],
+      "expected": "vectors/admission/report.json"
+    },
+    {
+      "id": "facts-dev",
+      "section": "§10.1",
+      "operation": "facts",
+      "class": "facts-writer",
+      "description": "The batch for one kind in development: a decimal in normal form, a secret mapped to its store and scope, and references keyed by the referring pointer, one with a pointer into its target.",
+      "registry": "vectors/valid-two-environments/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json"],
+      "kind": "db-role",
+      "environment": "dev",
+      "expected": "vectors/valid-two-environments/facts-db-role-dev.jsonl"
+    },
+    {
+      "id": "facts-prod",
+      "section": "§10.1",
+      "operation": "facts",
+      "class": "facts-writer",
+      "description": "The same kind's batch in production, from overlaid values.",
+      "registry": "vectors/valid-two-environments/registry.json",
+      "kinds": ["kinds/database.json", "kinds/db-role.json"],
+      "kind": "db-role",
+      "environment": "prod",
+      "expected": "vectors/valid-two-environments/facts-db-role-prod.jsonl"
+    },
+    {
+      "id": "facts-contracts-valid",
+      "section": "§7",
+      "operation": "validate",
+      "class": "registry-reader",
+      "description": "The registry the contract rows read is valid: a secret position that differs by environment is overlaid, and each environment's secret comes from its own project.",
+      "registry": "vectors/facts-contracts/registry.json",
+      "kinds": ["kinds/account.json", "kinds/bag.json", "kinds/service.json"],
+      "expected": "vectors/facts-contracts/report.json"
+    },
+    {
+      "id": "contract-closed",
+      "section": "§10.4",
+      "operation": "contract",
+      "class": "facts-writer",
+      "description": "A closed kind's contract: required and optional members, an enumeration, an integer as a decimal, an array of strings, a secret, and a literal reference pattern whose target is closed.",
+      "registry": "vectors/facts-contracts/registry.json",
+      "kinds": ["kinds/account.json", "kinds/bag.json", "kinds/service.json"],
+      "kind": "service",
+      "expected": "vectors/facts-contracts/contract-service.json"
+    },
+    {
+      "id": "contract-open",
+      "section": "§10.4",
+      "operation": "contract",
+      "class": "facts-writer",
+      "description": "A kind with open positions: each is listed once per type, and again once per type one token below, and nothing deeper.",
+      "registry": "vectors/facts-contracts/registry.json",
+      "kinds": ["kinds/account.json", "kinds/bag.json", "kinds/service.json"],
+      "kind": "bag",
+      "expected": "vectors/facts-contracts/contract-bag.json"
+    },
+    {
+      "id": "check-closed",
+      "section": "§10.5",
+      "operation": "check",
+      "class": null,
+      "description": "Each advisory against the closed contract, and conditions that draw none, in applicability, an exception and rules, through all and not. Informative: the pack check is outside every conformance class of this version, and this row binds no claim.",
+      "contract": "vectors/facts-contracts/contract-service.json",
+      "pack": "vectors/facts-contracts/pack-service.json",
+      "expected": "vectors/facts-contracts/check-service.json"
+    },
+    {
+      "id": "check-open",
+      "section": "§10.5",
+      "operation": "check",
+      "class": null,
+      "description": "Against the open contract: a pointer below an open position is listed, and a member the kind does not declare is not. Informative: the pack check is outside every conformance class of this version, and this row binds no claim.",
+      "contract": "vectors/facts-contracts/contract-bag.json",
+      "pack": "vectors/facts-contracts/pack-bag.json",
+      "expected": "vectors/facts-contracts/check-bag.json"
+    }
+  ]
+}

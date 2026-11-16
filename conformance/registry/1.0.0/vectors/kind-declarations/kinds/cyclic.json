@@ -1,0 +1,13 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/cyclic",
+  "version": "1.0.0",
+  "kind": "cyclic",
+  "owner": "platform-data",
+  "schema": {
+    "$defs": {
+      "node": { "type": "object", "properties": { "next": { "$ref": "#/$defs/node" } } }
+    },
+    "$ref": "#/$defs/node"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/note",
+  "version": "1.0.0",
+  "kind": "note",
+  "owner": "platform-data",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "text": { "type": "string" },
+      "legacyTag": { "type": "string", "deprecated": true }
+    }
+  },
+  "bounds": { "maxEntries": 2, "maxEntryBytes": 40 }
+}

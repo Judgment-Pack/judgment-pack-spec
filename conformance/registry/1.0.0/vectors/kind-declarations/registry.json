@@ -1,0 +1,15 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/kinds",
+  "version": "1.0.0",
+  "environments": ["dev"],
+  "owners": ["platform-data"],
+  "kinds": [
+    { "kind": "broken-schema", "id": "https://example.invalid/kinds/broken-schema", "version": "1.0.0", "digest": "sha256:6da6fcff56d7d958b53f84f4d103405ea7a8956115ae3e6d444bb2a90064e097" },
+    { "kind": "cyclic", "id": "https://example.invalid/kinds/cyclic", "version": "1.0.0", "digest": "sha256:fcb3973f95eff6d55c856296ddc2e91e797c0f2acdd4d8761e309b639e94071f" },
+    { "kind": "grant", "id": "https://example.invalid/kinds/grant", "version": "1.0.0", "digest": "sha256:1e4b687bf5996afbedc2b41b8e68706630b7ef6f469f1d05f3710ec7e733c820" }
+  ],
+  "entries": [
+    { "kind": "grant", "id": "billing-readers", "owner": "platform-data", "value": { "unchecked": true } }
+  ]
+}

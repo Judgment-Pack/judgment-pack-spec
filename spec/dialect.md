@@ -1038,6 +1038,7 @@ The kinds (the class a binding takes follows §5.1):
 | `sql` | 3, proposed | the profile's | a statement on a connection, with its bound parameters (§4.3) | none |
 | `web` | 3, proposed | `record` (§5.1) | a public page by URL through the gateway (§4.3) | none |
 | `research` | 3, proposed | `generated` | a recipe (§4.3), also unbound (§4.4) | none |
+| `terraform-file` | proposed, version open | `asserted` | a Terraform plan or state, as `terraform show -json` writes it, read without its sensitive values (§4.5) | none |
 
 A version-2 document that names a kind of version 3, or has an unbound source (§4.4), is refused.
 **A kind without vectors is defined, and not claimable**: a verifier's claim names the kinds it
@@ -1432,6 +1433,76 @@ one assignment changes the bound digest. Replay uses the profiles then bound and
 bytes, never a live connection or a new model answer; it establishes no answer's correctness
 (§13). The reference Runner prepares `research` since its pull request 97; twenty-six research
 vectors are staged.
+
+### 4.5 `terraform-file`, proposed
+
+This kind is the text that [RFC 0038](../rfcs/0038-terraform-file-source.md) proposes, placed here
+because the dialect's source kinds are defined in this section. It is proposed: whether it joins
+version 3 or opens the next version is open (RFC 0038, Unresolved question 1), no reader implements
+it, and no vector holds one, so it is defined, and not claimable (§4).
+
+A `terraform-file` source has, besides the members of §4, exactly `document` (`plan` or `state`:
+which output of `terraform show -json` the file is), `select` (below) and `maxBytes` (optional, an
+integer from 1 to 268435456, default 67108864). Its class is `asserted`: the caller supplies the
+file, and binds its path at evaluation time; the dialect names no path.
+
+**Reading.** A reader takes these steps in order. The first failure refuses the acquisition with its
+code, and later steps do not run. A diagnostic carries its code, the file's sha256 and its size, and
+nothing else: no value, member name, pointer or position.
+
+1. The sha256 of the whole file and its length are recorded. A file longer than `maxBytes` is
+   `TF-SIZE`, unparsed.
+2. The bytes are UTF-8 with no byte-order mark and no lone surrogate escape, one JSON value with only
+   white space after it, nested at most 128 deep (the top-level value at depth 1), with no duplicate
+   member name; otherwise `TF-JSON`. Numbers are kept as their decimal text.
+3. The top-level value is an object whose `format_version` is a string in the accepted table for
+   `document`; otherwise `TF-FORMAT`.
+4. A `plan` has `planned_values`, an object, and `resource_changes`, when present, an array (absent
+   reads as empty). A `state` has neither `planned_values` nor `resource_changes`, and `values`, when
+   present, is an object (absent reads as no resources). Otherwise `TF-DOCUMENT`.
+5. The read section is `resource_changes` for a `plan`, and every resource under
+   `values.root_module` and its `child_modules`, recursively, for a `state`. Every resource in it,
+   selected or not, carries its sensitivity mirror (`change.before_sensitive` and
+   `change.after_sensitive`, or `sensitive_values`): `true`, `false`, or an object or array of the
+   value's shape. A missing mirror, or one of another type, is `TF-SENSITIVITY`.
+6. In each value of the read section, every position whose mirror is `true` is removed with all it
+   holds: an object member is removed; an array element is never removed alone, and the array that
+   holds it is removed instead, up to the nearest object member. A mirror position absent from the
+   value is ignored. Nothing replaces a removed value. `removedSensitive` counts the object members
+   removed, and `after_unknown` pointers at or below a removed position are dropped.
+7. Selection, then the acquired value.
+
+A reader never reads `configuration`, `variables`, `relevant_attributes`, `checks`, `prior_state`,
+`planned_values` (beyond step 4), `output_changes` or `outputs`.
+
+**Accepted formats.** The companion keeps a table of accepted `format_version` values per `document`,
+with its own release number; each row is backed by vectors made with the Terraform release that
+writes it. A version not in a reader's claimed table, including a newer minor of a listed major, is
+`TF-FORMAT`. The table grows by a patch release and never shrinks within a dialect version. The
+first table is open (RFC 0038, Unresolved question 2).
+
+**Selection.** `select` has `types`, a non-empty array of at most 64 distinct resource type names;
+`mode`, `managed` (default) or `data`; `address`, optional, a pattern of at most 512 characters that
+matches the whole address, in which `*` matches any run of characters other than `.`, `[` and `]`
+and every other character matches itself; `actions`, optional and `plan` only, of `create`,
+`update`, `delete`, `read` and `no-op`, keeping changes whose `change.actions` include one; and `max`,
+an integer from 1 to 10000 (default 1000), past which the acquisition is `TF-SELECT-BOUND`. `actions`
+on a `state`, or a malformed `select`, makes the dialect invalid (§11). Child-module resources are
+included with their full address; selecting nothing gives an empty array.
+
+**The acquired value** is an array sorted by `address` in code-point order, one object per selected
+resource: for a `state`, `{"address", "type", "name", "mode", "providerName", "index"?, "values"}`;
+for a `plan`, the same with `actions`, `before`, `after` and `afterUnknown` (the sorted pointers, in
+`after`, of values known only after apply) in place of `values`. Numbers become decimal strings in
+the registry companion's normal form ([`spec/registry.md`](../spec/registry.md) §10.1), with `0` for
+every zero; one whose normal form would be longer than 64 characters is `TF-NUMBER`. The reads of §6
+then turn the value into facts. The acquisition record is `{"kind": "terraform-file", "document",
+"formatVersion", "formatTable", "sha256", "bytes", "removedSensitive", "selected"}`, with no path.
+
+A reference runtime may also write the acquired value as an evaluation batch, one line per selected
+resource with id `<address>` and facts `{"terraform": {"document", "formatVersion", "sha256"},
+"resource": …}`; that batch is a product format, not a dialect member. How a refusal of steps 1 to 7
+maps to a source outcome (§9.2) is not stated by RFC 0038, and is open.
 
 ## 5. Input profiles and acquisitions
 

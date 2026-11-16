@@ -1,0 +1,20 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/grant",
+  "version": "1.0.0",
+  "kind": "grant",
+  "owner": "platform-data",
+  "label": "a member the format does not define",
+  "schema": {
+    "type": "object",
+    "required": ["role"],
+    "additionalProperties": false,
+    "properties": {
+      "role": { "type": "string" },
+      "members": { "type": "array", "items": { "type": "string" } }
+    }
+  },
+  "secrets": ["/role"],
+  "references": [{ "pointer": "/role", "kinds": ["db-role"] }],
+  "overlayable": ["/missing", "members/0", "/members/*", "/members/*"]
+}

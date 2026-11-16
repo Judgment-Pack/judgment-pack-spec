@@ -1,0 +1,37 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/references",
+  "version": "1.0.0",
+  "environments": ["dev", "prod"],
+  "owners": ["team-billing"],
+  "kinds": [
+    { "kind": "database", "id": "https://example.invalid/kinds/database", "version": "1.0.0", "digest": "sha256:80f28e5450bc53cfeb1ffdf63237a48b834ba5cb80ff4daec2fb277c809247a7" },
+    { "kind": "db-role", "id": "https://example.invalid/kinds/db-role", "version": "1.2.0", "digest": "sha256:64e30653b5b2743af0fb78d555d186ea9a57551aa1c800c8f972f824ef7da020" }
+  ],
+  "entries": [
+    { "kind": "database", "id": "archive", "owner": "team-billing", "environments": ["dev"],
+      "value": { "engine": "mysql" } },
+    { "kind": "database", "id": "billing", "owner": "team-billing",
+      "value": { "engine": "postgres", "admin": "entry:db-role/billing-api" } },
+    { "kind": "db-role", "id": "archive-reader", "owner": "team-billing",
+      "value": { "database": "entry:database/archive", "privileges": ["read"] } },
+    { "kind": "db-role", "id": "billing-api", "owner": "team-billing",
+      "value": { "database": "entry:database/billing", "privileges": ["read"] } },
+    { "kind": "db-role", "id": "ghost", "owner": "team-billing",
+      "value": { "database": "entry:database/nowhere", "privileges": ["read"] } },
+    { "kind": "db-role", "id": "malformed", "owner": "team-billing",
+      "value": { "database": "database/billing", "privileges": ["read"] } },
+    { "kind": "db-role", "id": "pointer-hit", "owner": "team-billing",
+      "value": { "database": "entry:database/billing#/engine", "privileges": ["read"] } },
+    { "kind": "db-role", "id": "pointer-miss", "owner": "team-billing",
+      "value": { "database": "entry:database/billing#/port", "privileges": ["read"] } },
+    { "kind": "db-role", "id": "sized", "owner": "team-billing",
+      "value": { "database": "entry:database/billing#/storageGb", "privileges": ["read"] } },
+    { "kind": "db-role", "id": "wrong-kind", "owner": "team-billing",
+      "value": { "database": "entry:db-role/billing-api", "privileges": ["read"] } }
+  ],
+  "overlays": [
+    { "environment": "prod",
+      "patches": [ { "kind": "database", "id": "billing", "set": { "/storageGb": 100 } } ] }
+  ]
+}

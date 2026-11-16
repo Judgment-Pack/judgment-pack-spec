@@ -1,0 +1,35 @@
+{
+  "factsCheckFormatVersion": "1.0.0",
+  "contract": {
+    "digest": "sha256:08dd198f40da527725801125494c77f7373c7c992c4aaa8f3ce165f57862d10a"
+  },
+  "pack": {
+    "digest": "sha256:a0241aed8edc0d87913b524634ab717e47998da330f77cdada9898cdedb1f28a"
+  },
+  "diagnostics": [
+    {
+      "code": "FACTS-POINTER-UNKNOWN",
+      "severity": "warning",
+      "location": {
+        "document": "pack",
+        "pointer": "/rules/2/when"
+      }
+    },
+    {
+      "code": "FACTS-TYPE-ORDERED",
+      "severity": "warning",
+      "location": {
+        "document": "pack",
+        "pointer": "/rules/4/when"
+      }
+    },
+    {
+      "code": "FACTS-VALUE-UNREACHABLE",
+      "severity": "warning",
+      "location": {
+        "document": "pack",
+        "pointer": "/rules/5/when"
+      }
+    }
+  ]
+}

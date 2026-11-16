@@ -1,0 +1,13 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/account",
+  "version": "1.0.0",
+  "kind": "account",
+  "owner": "platform-identity",
+  "schema": {
+    "type": "object",
+    "required": ["team"],
+    "additionalProperties": false,
+    "properties": { "team": { "type": "string" } }
+  }
+}

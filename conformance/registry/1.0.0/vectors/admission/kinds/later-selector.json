@@ -1,0 +1,8 @@
+{
+  "kindFormatVersion": "1.1.0",
+  "id": "https://example.invalid/kinds/later",
+  "version": "1.0.0",
+  "kind": "later",
+  "owner": "platform-data",
+  "schema": {}
+}

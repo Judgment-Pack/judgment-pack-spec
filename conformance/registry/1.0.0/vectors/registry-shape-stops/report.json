@@ -1,0 +1,10 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "diagnostics": [
+    { "code": "REG-REGISTRY-UNKNOWN-MEMBER", "severity": "error",
+      "location": { "document": "registry", "pointer": "/comment" } },
+    { "code": "REG-REGISTRY-MISSING-MEMBER", "severity": "error",
+      "location": { "document": "registry", "pointer": "/owners" } }
+  ]
+}

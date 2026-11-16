@@ -1,0 +1,19 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "registry": { "digest": "sha256:66623e894d86d2761808c86c75ad2249a699d78d2812ab7c9cee4fcd9a30a1c6" },
+  "diagnostics": [
+    { "code": "REG-PIN-UNPINNED", "severity": "warning",
+      "location": { "document": "kind", "kindDocument": "sha256:9d8df51b2f9210679d37356aab9481fb1ccc23e859b762cf082a2c7005b99bf0", "kind": "extra", "pointer": "" } },
+    { "code": "REG-ENTRY-KIND", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "unpinned-kind", "id": "stray" }, "pointer": "/entries/3/kind" } },
+    { "code": "REG-REGISTRY-DUPLICATE", "severity": "error",
+      "location": { "document": "registry", "kind": "database", "pointer": "/kinds/1" } },
+    { "code": "REG-PIN-MISMATCH", "severity": "error",
+      "location": { "document": "registry", "kind": "db-role", "pointer": "/kinds/2" } },
+    { "code": "REG-PIN-MISSING", "severity": "error",
+      "location": { "document": "registry", "kind": "ghost", "pointer": "/kinds/3" } },
+    { "code": "REG-KIND-DEPRECATED", "severity": "warning",
+      "location": { "document": "registry", "kind": "legacy", "pointer": "/kinds/4" } }
+  ]
+}

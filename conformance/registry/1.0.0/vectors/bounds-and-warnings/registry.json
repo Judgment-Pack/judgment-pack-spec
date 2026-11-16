@@ -1,0 +1,21 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/bounds",
+  "version": "1.0.0",
+  "environments": ["dev", "prod"],
+  "owners": ["team-notes"],
+  "kinds": [
+    { "kind": "database", "id": "https://example.invalid/kinds/database", "version": "1.0.0", "digest": "sha256:80f28e5450bc53cfeb1ffdf63237a48b834ba5cb80ff4daec2fb277c809247a7" },
+    { "kind": "db-role", "id": "https://example.invalid/kinds/db-role", "version": "1.2.0", "digest": "sha256:64e30653b5b2743af0fb78d555d186ea9a57551aa1c800c8f972f824ef7da020" },
+    { "kind": "note", "id": "https://example.invalid/kinds/note", "version": "1.0.0", "digest": "sha256:04f87bb7c59db29358e778691071263afbf3be950a103f2968b03b952a996081" }
+  ],
+  "entries": [
+    { "kind": "database", "id": "billing", "owner": "team-notes", "value": { "engine": "postgres" } },
+    { "kind": "db-role", "id": "api", "owner": "team-notes",
+      "value": { "database": "entry:database/billing", "privileges": ["read"],
+                 "password": "secret:gcp-sm:projects/example-dev/secrets/db/versions/1" } },
+    { "kind": "note", "id": "a", "owner": "team-notes", "value": { "text": "twenty-nine characters, here!" } },
+    { "kind": "note", "id": "b", "owner": "team-notes", "value": { "text": "thirty characters, one past it" } },
+    { "kind": "note", "id": "c", "owner": "team-notes", "value": { "text": "x", "legacyTag": "old" } }
+  ]
+}

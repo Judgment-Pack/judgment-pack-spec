@@ -1,0 +1,17 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/admission",
+  "version": "1.0.0",
+  "environments": ["dev"],
+  "owners": ["team-billing"],
+  "kinds": [
+    { "kind": "database", "id": "https://example.invalid/kinds/database", "version": "1.0.0", "digest": "sha256:80f28e5450bc53cfeb1ffdf63237a48b834ba5cb80ff4daec2fb277c809247a7" }
+  ],
+  "entries": [
+    { "kind": "database", "id": "a", "owner": "team-billing", "value": { "engine": "postgres", "storageGb": -0 } },
+    { "kind": "database", "id": "b", "owner": "team-billing", "value": { "engine": "postgres", "storageGb": 9007199254740991 } },
+    { "kind": "database", "id": "c", "owner": "team-billing", "value": { "engine": "postgres", "storageGb": 9007199254740992 } },
+    { "kind": "database", "id": "d", "owner": "team-billing", "value": { "engine": "postgres", "storageGb": 0.10000000000000001 } },
+    { "kind": "database", "id": "e", "owner": "team-billing", "value": { "engine": "postgres", "storageGb": 0.1 } }
+  ]
+}
