@@ -17,7 +17,7 @@
 > regime ([RFC 0009](0009-interim-review-regime.md)), at draft maturity, for `specVersion` `0.6.0`,
 > on issue [#328](https://github.com/Judgment-Pack/judgment-pack-spec/issues/328), with the decision
 > of issue [#326](https://github.com/Judgment-Pack/judgment-pack-spec/issues/326) taken at section
-> 4's recommended option. The reviews are those recorded on pull requests 329, 331 and 332, by a
+> 4's recommended option. The reviews are those recorded on pull requests 329, 330, 331 and 332, by a
 > model of the drafting vendor: same-vendor reviews, not a cross-vendor claim. The maintainer
 > waived the review by another vendor for this work.
 >

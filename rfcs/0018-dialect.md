@@ -1249,7 +1249,7 @@ The maintainer adopted the amendments of 2026-11-12, 2026-11-13 and 2026-11-15 f
 `0.6.0`, on issues [#326](https://github.com/Judgment-Pack/judgment-pack-spec/issues/326) and
 [#328](https://github.com/Judgment-Pack/judgment-pack-spec/issues/328), and accepted
 [RFC 0033](0033-paged-operation-source.md), whose format `4.1.0` lands here. The reviews are those
-recorded on pull requests 329, 331 and 332, by a model of the drafting vendor: same-vendor reviews,
+recorded on pull requests 329, 330, 331 and 332, by a model of the drafting vendor: same-vendor reviews,
 not a cross-vendor claim. The maintainer waived the review by another vendor for this work.
 
 **What changes.** The Specification and companion are amended equally. §2.2 states format `4.0.0`
