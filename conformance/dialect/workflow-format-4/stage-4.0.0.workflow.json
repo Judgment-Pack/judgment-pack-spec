@@ -26,9 +26,6 @@
         "label": "discovered-for",
         "direction": "output-to-parent"
       },
-      "selection": {
-        "mode": "reviewer"
-      },
       "sample": {
         "mode": "sample",
         "maxSize": 1

@@ -170,7 +170,7 @@ class StagedStageVectorTests(unittest.TestCase):
         from tools import workflow_reader as reader
         manifest = load(self.DIRECTORY / "manifest.json")
         cases = manifest["cases"]
-        self.assertEqual(["4.0.0", "4.1.0", "4.0.0"], [case["formatVersion"] for case in cases])
+        self.assertEqual(["4.0.0", "4.1.0", "4.0.0", "4.0.0"], [case["formatVersion"] for case in cases])
         self.assertEqual(load(STAGED)["$id"], manifest["schema"])
         self.assertEqual({f for c in cases for f in (c["workflow"], c["release"])} | {"README.md", "manifest.json"},
                          {path.name for path in self.DIRECTORY.iterdir()})
@@ -196,11 +196,23 @@ class StagedStageVectorTests(unittest.TestCase):
                 self.assertNotEqual(case["releaseDigest"],
                                     "sha256:" + hashlib.sha256(encoding.release_bytes(value)).hexdigest())
                 # the workflow reader stays a 0.5.x reader of the selector until the format is accepted
-                self.assertEqual("version-unread", case["expected"]["workflowReader"])
                 form = {name: member for name, member in stage.items() if name != "sample"}
                 with self.assertRaises(reader.Problem) as caught:
                     reader.Reader.stage_form(object.__new__(reader.Reader), form, 0)
                 self.assertEqual(("refusal", "version-unread"), (caught.exception.result, caught.exception.code))
+                # selection is present exactly on a consumed stage; the one stage here is terminal
+                probe = object.__new__(reader.Reader)
+                probe.stage_order = [stage["id"]]
+                if case["expected"]["workflowReader"] == "version-unread":
+                    self.assertNotIn("selection", stage)
+                    self.assertEqual({stage["id"]: []}, probe.consumers_form(workflow["stages"]))
+                else:
+                    self.assertEqual("input-malformed", case["expected"]["workflowReader"])
+                    self.assertIn("selection", stage)
+                    with self.assertRaises(reader.Problem) as caught:
+                        probe.consumers_form(workflow["stages"])
+                    self.assertEqual(("refusal", "input-malformed", case["expected"]["rule"]),
+                                     (caught.exception.result, caught.exception.code, caught.exception.detail))
 
 
 if __name__ == "__main__":

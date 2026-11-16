@@ -37,6 +37,10 @@ here.
 
 ### Changed
 
+- The staged vectors in `conformance/dialect/workflow-format-4/` (#337): neither one-stage workflow
+  carries `selection` any more, since its one stage is terminal and `spec/workflow.md` §3 forbids
+  `selection` there. A new case adds it back, and the workflow reader refuses it `input-malformed`.
+  The workflow bytes are in no digest, so no dialect or release digest changes.
 - `spec/dialect.md` §2.2.6 and its copy in RFC 0018 (#335): `unsignedParameters` is no longer listed among the ways a format
   `4.0.0` preparation differs. It is a member of the reading (§11), not of the preparation, and the
   case's entry is now stated as a difference of the reading. Text only: no reader, vector, schema or
