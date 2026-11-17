@@ -160,10 +160,11 @@ backed by vectors made with the Terraform release that writes it. The first tabl
 versions the reference vectors are recorded with. A version not in the table, including a newer
 minor of a listed major, is refused (`TF-FORMAT`).
 
-*Amended 2026-11-17.* The vectors are not made with a Terraform release: each row is backed by
-vectors written by hand to the shape its `format_version` documents, with no Terraform run and no
-recorded output. The first table is the one Unresolved question 2 records. The specification is
-`spec/dialect.md` §4.5, Accepted formats.
+*Amended 2026-11-17.* The vectors are not made with a Terraform release: each accepted
+`format_version` of each `document` is backed by its own set of vectors, written by hand to the
+shape that Terraform's documentation of its JSON output format gives for that version, with no
+Terraform run and no recorded output. The first table is the one Unresolved question 2 records.
+The specification is `spec/dialect.md` §4.5, Accepted formats.
 
 The table grows by a patch release of the companion, with vectors, and never shrinks within a
 dialect version. Because two readers of one dialect version can then hold tables of different

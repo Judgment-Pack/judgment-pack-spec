@@ -1235,7 +1235,8 @@ of another size or kind, or beside any other entry is not of this layout, nor is
 holds no regular file and no marker; a missing `expected/` is never read as empty. `--update` writes
 `expected/` from a run, or the marker alone for a run that wrote no files. A vector not of this
 layout refuses the whole run, as do a `harness.json` not of its form or of a level the harness does
-not apply and a vectors directory that holds no vector: `EMIT-VECTOR`, in document `vector`.
+not apply, a vectors directory that holds no vector, and vectors past a bound on the vectors:
+`EMIT-VECTOR`, in document `vector`.
 
 Level `1.0` applies six checks to every vector:
 
@@ -1403,8 +1404,8 @@ batch reports, is this list's (§10.2).
 | `EMIT-WRITE` | error | §11.4 | a file could not be written or deleted, or a response path is held by a directory or an unowned file |
 | `EMIT-INTERRUPTED` | error | §11.4 | an interrupt or a termination signal stopped the run |
 | `EMIT-STRAY-WRITE` | error | §11.5 | the emitter created or changed a file itself |
-| `EMIT-VECTOR` | error | §11.5 | the vectors are not of the harness's layout |
-| `EMIT-HARNESS-BOUND` | error | §11.5 | a harness check could not be completed, past a bound or for want of a fresh HOME |
+| `EMIT-VECTOR` | error | §11.5 | the vectors are not of the harness's layout, or are past a bound on the vectors |
+| `EMIT-HARNESS-BOUND` | error | §11.5 | a harness check could not be completed, past a bound, for want of a fresh HOME, or for a link out of the repository in its copy |
 | `EMIT-DEPRECATED` | warning | §11.1 | the emitter's manifest is deprecated |
 | `EMIT-ENV-UNSET` | warning | §11.4 | a variable the manifest's env lists is not set in the host's environment |
 | `EMIT-REPORT-TRUNCATED` | warning | §11.4 | the host's report lists the first 1000 diagnostics of a list, and more were found |

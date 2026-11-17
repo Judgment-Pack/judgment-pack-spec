@@ -250,7 +250,8 @@ same digest. The one exception is a request's `query` under a profile whose adap
 `adapter-http`, which the Runner holds to the rules of a template alone and this document to string
 templates as well (§4.1). Version 3 (§4.3, §4.4) is read by the reference Runner since its pull
 request 83, released in `v0.12.0`: it prepares an `operation`, bound or unbound and bound at import,
-and a `selected-file`, and refuses each of the other four kinds by name.
+and a `selected-file`, and refuses by name each of the other four kinds that version 3 first
+listed; `terraform-file`, listed since, it does not know (§4.5).
 
 | Member | Form | Meaning |
 | --- | --- | --- |
@@ -1515,8 +1516,9 @@ A reader never reads `configuration`, `variables`, `relevant_attributes`, `check
 `planned_values` (beyond step 4), `output_changes` or `outputs`.
 
 **Accepted formats.** The companion keeps a table of accepted `format_version` values per `document`,
-with its own release number; each row is backed by vectors written by hand to the shape that
-`format_version` documents, with no Terraform run and no recorded output. A version not in a
+with its own release number; each accepted `format_version` of each `document` is backed by its
+own set of vectors, written by hand to the shape that Terraform's documentation of its JSON output
+format gives for that version, with no Terraform run and no recorded output. A version not in a
 reader's claimed table, including a newer minor of a listed major, is `TF-FORMAT`. The table grows
 by a patch release and never shrinks within a dialect version. The first table (RFC 0038,
 Unresolved question 2, resolved) is the one the reference runtime's reader holds as `proposed-1`:

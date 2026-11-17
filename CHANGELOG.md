@@ -81,8 +81,8 @@ here.
   vector that gives its request whole skips both checks, and the marker `expected/~empty` records
   a run that writes no files. A vector not of the layout, such as one that holds another file,
   refuses the whole run. Two staged emitter-host rows, operation `request`, and six emitter-harness
-  rows, operations `references` and `layout`, exercise them; the harness's own refusal codes stay
-  provisional (§17).
+  rows, operations `references` and `layout`, exercise them; the harness's own refusal codes were
+  provisional then and are the companion's now (§12).
 
 ## `0.6.0` — 2026-11-16
 
