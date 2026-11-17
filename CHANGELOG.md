@@ -25,8 +25,10 @@ here.
   removes the scalar (#347). A batch line's id is 1 to 256 bytes, and a resource outside that
   refuses the whole run, `FACTS-ID-LIMIT`, before any line is written (#351). A deposed object
   carries its key as `deposed`, its id is its address, ` deposed ` and the key, the value is
-  sorted by id, and two resources of one id are `TF-DOCUMENT` (#348); the reference runtime does
-  not carry the key yet. §4.5 lists the vectors each reading needs beside RFC 0038's. No released
+  sorted by id, and an empty key or two resources of one id are `TF-DOCUMENT` (#348); the
+  reference runtime does not carry the key yet. An `after_unknown` not of a mirror's form is
+  `TF-DOCUMENT`, and an `afterUnknown` pointer is cut at a position `after_sensitive` marks and
+  `after` lacks, as the reference reader does. §4.5 lists the vectors each reading needs beside RFC 0038's. No released
   text carries the kind, so nothing released changes.
 - **The registry companion's emitter host** (`spec/registry.md` §11, format `1.0.0`, proposed).
   §11 adopts the reference host's stricter readings (#349): an `owns` glob follows the path rules,

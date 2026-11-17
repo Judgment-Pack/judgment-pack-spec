@@ -1468,10 +1468,12 @@ nothing else: no value, member name, pointer or position. The one exception is a
    reads as empty). A `state` has neither `planned_values` nor `resource_changes`, and `values`, when
    present, is an object (absent reads as no resources). Otherwise `TF-DOCUMENT`. A resource of the
    read section (step 5) that is a deposed object, one an apply replaced but has not yet destroyed,
-   has a **deposed key**, `deposed` in a `plan` and `deposed_key` in a `state`, which is a string.
-   A resource's **id** is its `address`, or, with a deposed key, its `address`, a space, `deposed`,
-   a space and the key. A deposed key of another type, or two resources of the read section with
-   one id, is `TF-DOCUMENT`.
+   has a **deposed key**, `deposed` in a `plan` and `deposed_key` in a `state`, which is a
+   non-empty string. A resource's **id** is its `address`, or, with a deposed key, its `address`, a
+   space, `deposed`, a space and the key. A deposed key of another type, an empty one, or two
+   resources of the read section with one id, is `TF-DOCUMENT`. In a `plan`, a resource change's
+   `change.after_unknown`, when present, has a mirror's form: `true`, `false`, or an object or
+   array of mirrors. Any other `after_unknown`, null included, is `TF-DOCUMENT`.
 5. The read section is `resource_changes` for a `plan`, and every resource under
    `values.root_module` and its `child_modules`, recursively, for a `state`. Every resource in it,
    selected or not, carries its sensitivity mirror (`change.before_sensitive` and
@@ -1482,7 +1484,12 @@ nothing else: no value, member name, pointer or position. The one exception is a
    holds: an object member is removed; an array element is never removed alone, and the array that
    holds it is removed instead, up to the nearest object member. A mirror position absent from the
    value is ignored. Nothing replaces a removed value. `removedSensitive` counts the object members
-   removed, and `after_unknown` pointers at or below a removed position are dropped. Mirror and
+   removed, and `after_unknown` pointers at or below a removed position are dropped. Terraform
+   leaves a value unknown at plan time out of `after`, so `after_sensitive` is read along
+   `after_unknown` as well: a pointer that ends at, or passes through, a position that
+   `after_sensitive` marks `true` and `after` lacks is cut at that position, so no member name below
+   it is carried. The pointers cut at one position are one pointer, and none when `after_unknown`
+   marks nothing `true` at or below it. Mirror and
    value positions are matched as RFC 6901 tokens are, whatever their shapes: a mirror member names
    the value's member of that name, or, over an array, the element its name indexes (`0`, or a
    digit 1 to 9 and further digits, less than the array's length), and any other name names
