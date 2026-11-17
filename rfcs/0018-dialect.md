@@ -21,7 +21,7 @@
   formats 4.0.0 and 4.1.0, issue #326), 2026-11-16 (the three adopted for `specVersion` `0.6.0`, and
   format 4.1.0 of RFC 0033 landed as §2.3, issues #326 and #328; the `terraform-file` source kind,
   proposed, RFC 0038), 2026-11-17 (the `terraform-file` kind's readings: a stream's `TF-SIZE`,
-  issue #353)
+  issue #353; a bound on the acquired value, issue #346)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -1301,6 +1301,16 @@ RFC 0038's.
   a fixed reading that the input was a stream. *Why:* a stream that never ends would otherwise
   never be refused; the code stays one, so a caller sees one failure for an input too large,
   wherever it came from, and a digest identifies bytes the caller holds, which a stream's are not.
+
+- **A bound on the acquired value** (issue #346). The value can be longer than the file: normal
+  forms expand numbers, and `afterUnknown` pointers repeat member names once per unknown position
+  below them. It is held to `L`, the lesser of 268435456 and sixteen times the file's length, and
+  past it is `TF-VALUE-LIMIT`, after `TF-SELECT-BOUND` and `TF-NUMBER`: when its canonical form is
+  longer than `L`, or when one plan resource's pointers, each charged its length and eight bytes
+  more, pass what remains of `L` before that resource. *Why:* every reader then refuses the same
+  files, and a reader can refuse before it allocates; the charge of eight bytes is what the
+  reference runtime holds for each pointer it keeps, and a reader that charges less would accept
+  files the reference reader refuses.
 
 **What this amendment leaves open.** What RFC 0038 and the amendment of 2026-11-16 leave open: the
 version that admits the kind, how a refusal maps to a source outcome (§9.2), the first accepted
@@ -2656,8 +2666,15 @@ resource: for a `state`, `{"address", "type", "name", "mode", "providerName", "i
 for a `plan`, the same with `actions`, `before`, `after` and `afterUnknown` (the sorted pointers, in
 `after`, of values known only after apply) in place of `values`. Numbers become decimal strings in
 the registry companion's normal form ([`spec/registry.md`](../spec/registry.md) §10.1), with `0` for
-every zero; one whose normal form would be longer than 64 characters is `TF-NUMBER`. The reads of §6
-then turn the value into facts. The acquisition record is `{"kind": "terraform-file", "document",
+every zero; one whose normal form would be longer than 64 characters is `TF-NUMBER`. The value is
+then bounded by `L`, the lesser of 268435456 and sixteen times the file's length in bytes. It is
+`TF-VALUE-LIMIT`, after `TF-SELECT-BOUND` and `TF-NUMBER`, when its canonical form (RFC 8785) is
+longer than `L` bytes, or when the `afterUnknown` pointers of one selected `plan` resource, each
+charged the length in bytes of its RFC 6901 form and eight bytes more, total more than `L` less the
+length of the canonical form before that resource's object; so a reader can refuse before it holds
+the value or the pointers. Numbers in normal form grow at most about 13.4 times (an array of
+`1e63`) and strings do not grow, so pointers that repeat a long member name are what reach the
+multiple. The reads of §6 then turn the value into facts. The acquisition record is `{"kind": "terraform-file", "document",
 "formatVersion", "formatTable", "sha256", "bytes", "removedSensitive", "selected"}`, with no path.
 
 A reference runtime may also write the acquired value as an evaluation batch, one line per selected
@@ -2670,7 +2687,11 @@ each with one expected result:
 
 - a stream of `maxBytes` bytes (read, with its sha256 and size), and a stream of one byte more
   (`TF-SIZE`, with no sha256 and no size), beside the file row of `maxBytes` and one byte more,
-  which stays a file row.
+  which stays a file row;
+- a plan whose `afterUnknown` pointers repeat a long member name past sixteen times the file's
+  length (`TF-VALUE-LIMIT`); a plan whose pointers fit that bound as their canonical form but not
+  with eight bytes charged to each (`TF-VALUE-LIMIT`), beside one that fits both; and a file of
+  `1e63` numbers, whose value grows about 13.4 times (accepted).
 
 ### 5. Input profiles and acquisitions
 

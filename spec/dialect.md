@@ -1502,8 +1502,15 @@ resource: for a `state`, `{"address", "type", "name", "mode", "providerName", "i
 for a `plan`, the same with `actions`, `before`, `after` and `afterUnknown` (the sorted pointers, in
 `after`, of values known only after apply) in place of `values`. Numbers become decimal strings in
 the registry companion's normal form ([`spec/registry.md`](../spec/registry.md) §10.1), with `0` for
-every zero; one whose normal form would be longer than 64 characters is `TF-NUMBER`. The reads of §6
-then turn the value into facts. The acquisition record is `{"kind": "terraform-file", "document",
+every zero; one whose normal form would be longer than 64 characters is `TF-NUMBER`. The value is
+then bounded by `L`, the lesser of 268435456 and sixteen times the file's length in bytes. It is
+`TF-VALUE-LIMIT`, after `TF-SELECT-BOUND` and `TF-NUMBER`, when its canonical form (RFC 8785) is
+longer than `L` bytes, or when the `afterUnknown` pointers of one selected `plan` resource, each
+charged the length in bytes of its RFC 6901 form and eight bytes more, total more than `L` less the
+length of the canonical form before that resource's object; so a reader can refuse before it holds
+the value or the pointers. Numbers in normal form grow at most about 13.4 times (an array of
+`1e63`) and strings do not grow, so pointers that repeat a long member name are what reach the
+multiple. The reads of §6 then turn the value into facts. The acquisition record is `{"kind": "terraform-file", "document",
 "formatVersion", "formatTable", "sha256", "bytes", "removedSensitive", "selected"}`, with no path.
 
 A reference runtime may also write the acquired value as an evaluation batch, one line per selected
@@ -1516,7 +1523,11 @@ each with one expected result:
 
 - a stream of `maxBytes` bytes (read, with its sha256 and size), and a stream of one byte more
   (`TF-SIZE`, with no sha256 and no size), beside the file row of `maxBytes` and one byte more,
-  which stays a file row.
+  which stays a file row;
+- a plan whose `afterUnknown` pointers repeat a long member name past sixteen times the file's
+  length (`TF-VALUE-LIMIT`); a plan whose pointers fit that bound as their canonical form but not
+  with eight bytes charged to each (`TF-VALUE-LIMIT`), beside one that fits both; and a file of
+  `1e63` numbers, whose value grows about 13.4 times (accepted).
 
 ## 5. Input profiles and acquisitions
 

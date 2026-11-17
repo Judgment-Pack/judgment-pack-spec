@@ -18,7 +18,9 @@ here.
 
 - **The `terraform-file` kind's readings** (`spec/dialect.md` §4.5, proposed; RFC 0018's amendment
   of 2026-11-17). An input read as a stream is read to `maxBytes` and one byte more, and a longer
-  one is `TF-SIZE` with no sha256 and no size (#353). §4.5 lists the vectors each reading needs
+  one is `TF-SIZE` with no sha256 and no size (#353). The acquired value is held to the lesser of
+  268435456 bytes and sixteen times the file, each `afterUnknown` pointer charged eight bytes
+  more, and past it is `TF-VALUE-LIMIT` (#346). §4.5 lists the vectors each reading needs
   beside RFC 0038's. No released text carries the kind, so nothing released changes.
 
 ## `0.6.0` — 2026-11-16
