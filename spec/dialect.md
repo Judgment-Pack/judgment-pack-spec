@@ -64,7 +64,8 @@ attests a page (`pageItems`) is refused, whatever the shape (§5.2). The restric
 answer the accepted text gave: a signed acquisition of shape `mcp` whose receipt carried
 `pageItems` was read, and is `acquisition-invalid` now. The Runner has never prepared a paged
 acquisition, and no preparation over one exists. It specifies version 3 of the dialect document
-too, which adds four source kinds (§4.3) and the unbound source form (§4.4): the reference Runner
+too, which adds four source kinds (§4.3), the proposed `terraform-file` (§4.5) and the unbound
+source form (§4.4): the reference Runner
 reads version 3 since its pull request 83 (`v0.12.0`), and twenty-eight of the vectors hold it,
 while the four kinds are proposed: the Runner prepares `research` since its pull request 97, and
 twenty-six of the vectors hold it; no preparer writes the other three, and no vector holds them
@@ -249,7 +250,8 @@ same digest. The one exception is a request's `query` under a profile whose adap
 `adapter-http`, which the Runner holds to the rules of a template alone and this document to string
 templates as well (§4.1). Version 3 (§4.3, §4.4) is read by the reference Runner since its pull
 request 83, released in `v0.12.0`: it prepares an `operation`, bound or unbound and bound at import,
-and a `selected-file`, and refuses each of the other four kinds by name.
+and a `selected-file`, and refuses by name each of the other four kinds that version 3 first
+listed; `terraform-file`, listed since, it does not know (§4.5).
 
 | Member | Form | Meaning |
 | --- | --- | --- |
@@ -1038,7 +1040,7 @@ The kinds (the class a binding takes follows §5.1):
 | `sql` | 3, proposed | the profile's | a statement on a connection, with its bound parameters (§4.3) | none |
 | `web` | 3, proposed | `record` (§5.1) | a public page by URL through the gateway (§4.3) | none |
 | `research` | 3, proposed | `generated` | a recipe (§4.3), also unbound (§4.4) | none |
-| `terraform-file` | proposed, version open | `asserted` | a Terraform plan or state, as `terraform show -json` writes it, read without its sensitive values (§4.5) | none |
+| `terraform-file` | 3, proposed | `asserted` | a Terraform plan or state, as `terraform show -json` writes it, read without its sensitive values (§4.5) | none |
 
 A version-2 document that names a kind of version 3, or has an unbound source (§4.4), is refused.
 **A kind without vectors is defined, and not claimable**: a verifier's claim names the kinds it
@@ -1125,10 +1127,11 @@ one, and a version that admits it to a claim states the snapshot's form first.
 
 ### 4.3 Kinds proposed for version 3
 
-Version 3 is version 2 with four kinds more, and with the unbound source form (§4.4); a document
-of version 3 has `version` `3`, and so has its preparation (§9.1). The reference Runner reads
-version 3 since its pull request 83 (`v0.12.0`), and prepares its `operation` and `selected-file` as
-it prepares version 2's. Those four are proposed. The reference Runner prepares `research` since
+Version 3 is version 2 with five kinds more, the four below and `terraform-file` (§4.5), and with
+the unbound source form (§4.4); a document of version 3 has `version` `3`, and so has its
+preparation (§9.1). The reference Runner reads version 3 since its pull request 83 (`v0.12.0`), and
+prepares its `operation` and `selected-file` as it prepares version 2's. Those four are proposed,
+as `terraform-file` is. The reference Runner prepares `research` since
 its pull request 97, and twenty-six staged vectors hold it (§11); no preparer writes the other
 three, and no vector holds one. Both repository readers read `research`
 since judgment-pack-spec#181; neither repository reader reads `http`, `sql` or `web`: each holds
@@ -1437,11 +1440,19 @@ vectors are staged.
 ### 4.5 `terraform-file`, proposed
 
 This kind is the text that [RFC 0038](../rfcs/0038-terraform-file-source.md) proposes, placed here
-because the dialect's source kinds are defined in this section. It is proposed: whether it joins
-version 3 or opens the next version is open (RFC 0038, Unresolved question 1), no preparation reader
-implements it, and no vector holds one, so it is defined, and not claimable (§4). The reference
-runtime reads the file (`v0.48.0`), and where this section settles what RFC 0038 left open, it says
-what that reader does, except for deposed objects (step 4), which that reader does not yet carry.
+because the dialect's source kinds are defined in this section. It is a kind of version 3 (RFC 0038,
+Unresolved question 1, resolved), proposed as §4.3's kinds are: a document of version 2 that names
+it is refused (§4), no preparation reader implements it, and no vector holds one, so it is defined,
+and not claimable (§4). As a kind of version 3 it is also defined in the named formats that select
+version 3's forms, `3.0.0`, `4.0.0` and `4.1.0` (§2.1), by that inheritance: a document of one of
+them that names it was a document of an unknown kind under the text released with Core `0.6.0`,
+which a reader of that text still refuses, and is now one of a kind defined and not claimable.
+Nothing in those formats changes for a document that does not name it. Neither repository reader
+knows it yet: each refuses a source of the kind as one of a kind its version does not list
+(`input-malformed`), where this text holds it to its form and then refuses it as `kind-unread`
+(§11); no vector decides it. The reference runtime reads the file (`v0.48.0`), and where this
+section settles what RFC 0038 left open, it says what that reader does, except for deposed objects
+(step 4), which that reader does not yet carry.
 
 A `terraform-file` source has, besides the members of §4, exactly `document` (`plan` or `state`:
 which output of `terraform show -json` the file is), `select` (below) and `maxBytes` (optional, an
@@ -1505,10 +1516,19 @@ A reader never reads `configuration`, `variables`, `relevant_attributes`, `check
 `planned_values` (beyond step 4), `output_changes` or `outputs`.
 
 **Accepted formats.** The companion keeps a table of accepted `format_version` values per `document`,
-with its own release number; each row is backed by vectors made with the Terraform release that
-writes it. A version not in a reader's claimed table, including a newer minor of a listed major, is
-`TF-FORMAT`. The table grows by a patch release and never shrinks within a dialect version. The
-first table is open (RFC 0038, Unresolved question 2).
+with its own release number; each accepted `format_version` of each `document` is backed by its
+own set of vectors, written by hand to the shape that Terraform's documentation of its JSON output
+format gives for that version, with no Terraform run and no recorded output. A version not in a
+reader's claimed table, including a newer minor of a listed major, is `TF-FORMAT`. The table grows
+by a patch release and never shrinks within a dialect version. The first table (RFC 0038,
+Unresolved question 2, resolved) is the one the reference runtime's reader holds as `proposed-1`:
+
+| `document` | Accepted `format_version` |
+| --- | --- |
+| `plan` | `1.0`, `1.1` and `1.2` |
+| `state` | `1.0` |
+
+The first table's release number, which the acquisition record's `formatTable` carries, is open.
 
 **Selection.** `select` has `types`, a non-empty array of at most 64 distinct resource type names;
 `mode`, `managed` (default) or `data`; `address`, optional, a pattern of at most 512 characters that
@@ -1542,15 +1562,16 @@ resource with the resource's id (step 4) and facts `{"terraform": {"document", "
 "sha256"}, "resource": …}`; that batch is a product format, not a dialect member. Each line's id is
 1 to 256 bytes of UTF-8, the bound the reference runtime's batch evaluation holds an item's id to. A
 selected resource whose id is outside it refuses the whole run, before any line is written, with
-the batch tool's own code `FACTS-ID-LIMIT`, which is not a dialect code: every selected resource is
+`FACTS-ID-LIMIT`, the registry companion's code of a batch line's id bound
+([`spec/registry.md`](../spec/registry.md) §10.2) and not a dialect code: every selected resource is
 checked for it before any facts document is held to the registry companion's facts bound
 (`FACTS-DOCUMENT-LIMIT`, [`spec/registry.md`](../spec/registry.md) §10.1). Its diagnostic carries
 what a refusal of the reading carries, the code, the file's sha256 and its size, and never the id.
 How a refusal of steps 1 to 7 maps to a source outcome (§9.2) is not stated by RFC 0038, and is
 open.
 
-**Vectors.** The kind's vectors are those RFC 0038's Conformance section lists, with these besides,
-each with one expected result:
+**Vectors.** The kind's vectors, each written by hand as Accepted formats says, are those RFC 0038's
+Conformance section lists, with these besides, each with one expected result:
 
 - a stream of `maxBytes` bytes (accepted, with its sha256 and size), and a stream of one byte more
   (`TF-SIZE`, with no sha256 and no size), beside the file row of `maxBytes` and one byte more,
@@ -1559,8 +1580,8 @@ each with one expected result:
   length (`TF-VALUE-LIMIT`); a plan whose pointers fit that bound as their canonical form but not
   with eight bytes charged to each (`TF-VALUE-LIMIT`), beside one that fits both; and a file of
   `1e63` numbers, whose value grows about 13.4 times (accepted);
-- mirrors whose shape differs from the value, edited by hand from a recorded file, since Terraform
-  writes matching shapes: a mirror object over an array, marking an element by its index and
+- mirrors whose shape differs from the value, which Terraform does not write, since it writes the
+  mirror in the value's shape: a mirror object over an array, marking an element by its index and
   naming a member that is not an index; a mirror array over an object, marking the member `0`; a
   mirror object over a string, marking a position below it (removed); and an empty mirror object
   over a number (kept);
@@ -1569,9 +1590,9 @@ each with one expected result:
   bound (`FACTS-ID-LIMIT`, and no line);
 - deposed objects: a plan whose replacement left a deposed object to delete, and a state holding a
   deposed object beside its current one, each carried with `deposed` and sorted after the current
-  object; edited by hand, two resources of one id, and a deposed key that is a number (each
-  `TF-DOCUMENT`); and, for the batch, a deposed object whose id passes 256 bytes while its address
-  does not (`FACTS-ID-LIMIT`).
+  object; two resources of one id, and a deposed key that is a number, neither of which Terraform
+  writes (each `TF-DOCUMENT`); and, for the batch, a deposed object whose id passes 256 bytes
+  while its address does not (`FACTS-ID-LIMIT`).
 
 ## 5. Input profiles and acquisitions
 

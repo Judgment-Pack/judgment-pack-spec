@@ -16,6 +16,32 @@ here.
 
 ### Changed
 
+- **The registry companion's closed code list gains fourteen codes** (`spec/registry.md` §12 and
+  `conformance/registry/1.0.0/codes.json`, format `1.0.0`, proposed; the maintainer's ruling,
+  option A). The emitter host's and harness's own refusals and warnings, which the reference
+  runtime reported as provisional codes of its own, are listed under its names and severities and
+  named where §11 describes them: `EMIT-OWNS-OVERLAP` (§11.1); `EMIT-KIND-ID` and `EMIT-OPTIONS`
+  (§11.2); `EMIT-LINK`, `EMIT-PATH-UNREADABLE`, `EMIT-WRITE`, `EMIT-INTERRUPTED` and the warnings
+  `EMIT-ENV-UNSET`, `EMIT-REPORT-TRUNCATED` and `EMIT-STAGING-LEFTOVER` (§11.4); and `EMIT-VECTOR`,
+  `EMIT-HARNESS-BOUND` and the warning `EMIT-LINK-OMITTED` (§11.5). `FACTS-ID-LIMIT` joins the
+  other `FACTS-*-LIMIT` codes: §10.2 states a batch line's id bound, 1 to 256 bytes, which every
+  registry id meets, and a tool that writes lines of that shape from another source refuses the
+  whole run past it. §17's two open items on host and harness refusals are closed, and the earlier
+  entries below that left them open are superseded. No row changes.
+- **The `terraform-file` kind joins dialect version 3, with its first format table and vectors
+  written by hand** (`spec/dialect.md` §§4, 4.3 and 4.5, proposed; RFC 0018's amendment of
+  2026-11-17 on the kind's version, first table and vectors; the maintainer's rulings). The kind is
+  `3, proposed` in §4's table, as §4.3's kinds are, which resolves RFC 0038's Unresolved question 1;
+  neither repository reader knows it yet. The first accepted table is plan `1.0`, `1.1` and `1.2`
+  and state `1.0`, the reference reader's `proposed-1`, which resolves Unresolved question 2; the
+  table's release number stays open. Each row is backed by vectors written by hand to its
+  `format_version`'s documented shape, with no Terraform run and no recorded output, in place of
+  vectors made with the Terraform release that writes it; RFC 0038 §3 and its Conformance section
+  carry dated notes saying so. §4.5 names `FACTS-ID-LIMIT` the registry companion's code. No
+  released text carries the kind. By §2.1 the kind is now also defined in the named formats `3.0.0`,
+  `4.0.0` and `4.1.0`, released with Core `0.6.0`: a document of one of them that names it, an
+  unknown kind under the released text, is now one of a kind defined and not claimable, and nothing
+  changes for a document that does not name it.
 - **RFC 0038 §2 step 1 notes the stream reading** (#353). The RFC said the reader hashes the
   whole input; an amendment note there now points at `spec/dialect.md` §4.5, where a stream is read
   to `maxBytes` and one byte more and a longer one is `TF-SIZE` with no sha256 and no size. No
@@ -55,8 +81,8 @@ here.
   vector that gives its request whole skips both checks, and the marker `expected/~empty` records
   a run that writes no files. A vector not of the layout, such as one that holds another file,
   refuses the whole run. Two staged emitter-host rows, operation `request`, and six emitter-harness
-  rows, operations `references` and `layout`, exercise them; the harness's own refusal codes stay
-  provisional (§17).
+  rows, operations `references` and `layout`, exercise them; the harness's own refusal codes were
+  provisional then and are the companion's now (§12).
 
 ## `0.6.0` — 2026-11-16
 

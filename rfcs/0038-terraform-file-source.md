@@ -160,6 +160,12 @@ backed by vectors made with the Terraform release that writes it. The first tabl
 versions the reference vectors are recorded with. A version not in the table, including a newer
 minor of a listed major, is refused (`TF-FORMAT`).
 
+*Amended 2026-11-17.* The vectors are not made with a Terraform release: each accepted
+`format_version` of each `document` is backed by its own set of vectors, written by hand to the
+shape that Terraform's documentation of its JSON output format gives for that version, with no
+Terraform run and no recorded output. The first table is the one Unresolved question 2 records.
+The specification is `spec/dialect.md` §4.5, Accepted formats.
+
 The table grows by a patch release of the companion, with vectors, and never shrinks within a
 dialect version. Because two readers of one dialect version can then hold tables of different
 releases, **the table has its own release number**. A reader's claim names the table release it
@@ -250,6 +256,7 @@ exactly, so the same file gives the same facts either way.
 - One new kind. A reader that predates it refuses a dialect that names it, as for any unknown kind
   (dialect §4).
 - Whether the kind joins the proposed version 3 or opens the next version is Unresolved question 1.
+  *Amended 2026-11-17:* it joins version 3, as that question records.
 - Core, the record format and the gateway are unchanged.
 
 ## Security and privacy
@@ -299,6 +306,10 @@ real project or credential:
 Every vector asserts that no value marked sensitive appears in the acquired value, the facts, the
 lineage or any diagnostic.
 
+*Amended 2026-11-17.* No vector is recorded: each is written by hand to the shape its
+`format_version` documents, with no Terraform run and no recorded output, and none holds a real
+project or credential. The specification is `spec/dialect.md` §4.5, Accepted formats and Vectors.
+
 ## Implementation
 
 1. **The reference runtime:** the reader of §2 to §5, fuzzed on the JSON reader and the pattern
@@ -318,7 +329,8 @@ maintainer's disposition of each finding (seven HIGH, nine MEDIUM and two LOW, e
 pull request), and copied verbatim to [`rfcs/reviews/0034-round-1.md`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/rfcs/reviews/0034-round-1.md).
 
 The changes made after that round are not covered by it: nothing in this record, and the Status lines, notices,
-this section and the index rows that record the acceptance.
+this section and the index rows that record the acceptance. Nor are the dated notes of 2026-11-17,
+which bring this record in line with `spec/dialect.md` §4.5 and record the resolved questions.
 
 **What this leaves unestablished.**
 
@@ -331,9 +343,16 @@ this section and the index rows that record the acceptance.
 ## Unresolved questions
 
 1. **Version 3 or the next version.** Version 3 is proposed and partly read already. Adding a kind
-   to it is simpler, but changes a proposal that a reader has begun.
+   to it is simpler, but changes a proposal that a reader has begun. *Resolved 2026-11-17, by the
+   maintainer's ruling:* the kind joins version 3, which stays proposed, and is proposed in it as
+   the dialect's other kinds of version 3 are: defined, and not claimable until vectors hold it. The
+   specification is `spec/dialect.md` §4, its table of kinds, and §4.5.
 2. **The first accepted `format_version` table**: which Terraform releases the vectors are recorded
-   with.
+   with. *Resolved 2026-11-17, by the maintainer's ruling:* plan `1.0`, `1.1` and `1.2`, and state
+   `1.0`, the table the reference runtime's reader holds as `proposed-1`. No Terraform release
+   records the vectors: each is written by hand to its `format_version`'s documented shape (§3, as
+   amended). The table's own release number is not settled here. The specification is
+   `spec/dialect.md` §4.5, Accepted formats.
 3. **OpenTofu.** It writes the same JSON forms today. Whether `terraform-file` names both, or a
    sibling kind follows, depends on whether the formats diverge.
 4. **Outputs.** Plan and state outputs carry their own sensitivity markers, and some checks
