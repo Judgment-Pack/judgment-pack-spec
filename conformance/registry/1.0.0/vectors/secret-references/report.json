@@ -1,0 +1,27 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "registry": { "digest": "sha256:d83ecda7fffea5c99656d0229e1d4b3476892fa3fb22819a75be3895e947a1e3" },
+  "diagnostics": [
+    { "code": "REF-SECRET-SCOPE-SHARED", "severity": "error",
+      "location": { "document": "registry", "pointer": "/secretScopes/prod/gcp-sm/1" } },
+    { "code": "REF-SECRET-FORM", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "form-leading-zero" }, "environment": "dev", "pointer": "/password" } },
+    { "code": "REF-SECRET-FORM", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "form-literal" }, "environment": "dev", "pointer": "/password" } },
+    { "code": "REF-SECRET-FORM", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "form-ten-digits" }, "environment": "dev", "pointer": "/password" } },
+    { "code": "REF-SECRET-FORM", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "form-zero" }, "environment": "dev", "pointer": "/password" } },
+    { "code": "REF-SECRET-PIN", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "pin-alias" }, "environment": "dev", "pointer": "/password" } },
+    { "code": "REF-SECRET-PIN", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "pin-latest" }, "environment": "dev", "pointer": "/password" } },
+    { "code": "REF-SECRET-PIN", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "pin-project-number" }, "environment": "dev", "pointer": "/password" } },
+    { "code": "REF-SECRET-SCOPE", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "scope-miss" }, "environment": "dev", "pointer": "/password" } },
+    { "code": "REF-SECRET-STORE", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "store-unknown" }, "environment": "dev", "pointer": "/password" } }
+  ]
+}

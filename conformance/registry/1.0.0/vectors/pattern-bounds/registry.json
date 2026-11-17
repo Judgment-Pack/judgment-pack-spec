@@ -1,0 +1,27 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/patterns",
+  "version": "1.0.0",
+  "environments": [
+    "dev"
+  ],
+  "owners": [
+    "platform-data"
+  ],
+  "kinds": [
+    {
+      "kind": "patterned",
+      "id": "https://example.invalid/kinds/patterned",
+      "version": "1.0.0",
+      "digest": "sha256:292194a28d917f74e0f5982042044701364bca3ff278c588f0e6bbb037c6fe95"
+    }
+  ],
+  "entries": [
+    {
+      "kind": "patterned",
+      "id": "one",
+      "owner": "platform-data",
+      "value": {}
+    }
+  ]
+}

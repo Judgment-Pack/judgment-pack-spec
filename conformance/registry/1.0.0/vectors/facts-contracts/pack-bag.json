@@ -1,0 +1,152 @@
+{
+  "specVersion": "0.5.0",
+  "id": "https://example.invalid/packs/bag-check",
+  "version": "1.0.0",
+  "title": "Synthetic check pack",
+  "description": "A synthetic pack whose fact conditions exercise the facts-contract check.",
+  "decision": {
+    "intent": "Exercise the facts-contract check.",
+    "question": "Does the entry need review?"
+  },
+  "applicability": {
+    "op": "fact",
+    "path": "/entry/kind",
+    "operator": "equals",
+    "value": "bag"
+  },
+  "sources": [
+    {
+      "id": "synthetic",
+      "title": "Synthetic source",
+      "publisher": "Example",
+      "publishedAt": "2026-01-01",
+      "locator": {
+        "kind": "uri",
+        "value": "https://example.invalid/sources/synthetic"
+      },
+      "rights": "Synthetic content."
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "review",
+      "label": "Review",
+      "description": "A reviewer decides."
+    },
+    {
+      "id": "pass",
+      "label": "Pass",
+      "description": "No review is needed."
+    }
+  ],
+  "rules": [
+    {
+      "id": "below-open",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/anything/a/b",
+        "operator": "equals",
+        "value": "x"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "below-open-member",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/settings/a/b/c",
+        "operator": "equals",
+        "value": "x"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "undeclared-member",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/other",
+        "operator": "equals",
+        "value": "x"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "ordered-open",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/anything",
+        "operator": "less-than",
+        "value": "3"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "ordered-object",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/settings",
+        "operator": "less-than",
+        "value": "3"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "number-below-open",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/anything/0",
+        "operator": "equals",
+        "value": 1
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    }
+  ],
+  "exceptions": [],
+  "fallbackOutcome": "pass",
+  "escalation": {
+    "triggers": [
+      "unknown"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Reviewer"
+    },
+    "message": "Review the entry."
+  }
+}

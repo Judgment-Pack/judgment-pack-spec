@@ -1,0 +1,21 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/pins",
+  "version": "1.0.0",
+  "environments": ["dev"],
+  "owners": ["platform-data"],
+  "kinds": [
+    { "kind": "database", "id": "https://example.invalid/kinds/database", "version": "1.0.0", "digest": "sha256:80f28e5450bc53cfeb1ffdf63237a48b834ba5cb80ff4daec2fb277c809247a7" },
+    { "kind": "database", "id": "https://example.invalid/kinds/database", "version": "1.0.0", "digest": "sha256:80f28e5450bc53cfeb1ffdf63237a48b834ba5cb80ff4daec2fb277c809247a7" },
+    { "kind": "db-role", "id": "https://example.invalid/kinds/db-role", "version": "1.3.0", "digest": "sha256:64e30653b5b2743af0fb78d555d186ea9a57551aa1c800c8f972f824ef7da020" },
+    { "kind": "ghost", "id": "https://example.invalid/kinds/ghost", "version": "1.0.0",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "kind": "legacy", "id": "https://example.invalid/kinds/legacy", "version": "2.0.0", "digest": "sha256:e2a52b89a784b842c3e2ab2fd6be0ef56577ab7fe77036ad17ca6b74bffeafe0" }
+  ],
+  "entries": [
+    { "kind": "database", "id": "billing", "owner": "platform-data", "value": { "engine": "postgres" } },
+    { "kind": "db-role", "id": "api", "owner": "platform-data", "value": { "unchecked": true } },
+    { "kind": "legacy", "id": "old", "owner": "platform-data", "value": { "note": "kept" } },
+    { "kind": "unpinned-kind", "id": "stray", "owner": "platform-data", "value": {} }
+  ]
+}

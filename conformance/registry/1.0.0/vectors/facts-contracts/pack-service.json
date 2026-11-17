@@ -1,0 +1,228 @@
+{
+  "specVersion": "0.5.0",
+  "id": "https://example.invalid/packs/service-check",
+  "version": "1.0.0",
+  "title": "Synthetic check pack",
+  "description": "A synthetic pack whose fact conditions exercise the facts-contract check.",
+  "decision": {
+    "intent": "Exercise the facts-contract check.",
+    "question": "Does the entry need review?"
+  },
+  "applicability": {
+    "op": "all",
+    "conditions": [
+      {
+        "op": "fact",
+        "path": "/entry/kind",
+        "operator": "equals",
+        "value": "service"
+      },
+      {
+        "op": "fact",
+        "path": "/environment",
+        "operator": "in",
+        "value": [
+          "dev",
+          "staging"
+        ]
+      }
+    ]
+  },
+  "sources": [
+    {
+      "id": "synthetic",
+      "title": "Synthetic source",
+      "publisher": "Example",
+      "publishedAt": "2026-01-01",
+      "locator": {
+        "kind": "uri",
+        "value": "https://example.invalid/sources/synthetic"
+      },
+      "rights": "Synthetic content."
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "review",
+      "label": "Review",
+      "description": "A reviewer decides."
+    },
+    {
+      "id": "pass",
+      "label": "Pass",
+      "description": "No review is needed."
+    }
+  ],
+  "rules": [
+    {
+      "id": "high-port",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/port",
+        "operator": "greater-than",
+        "value": "1024"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "ordered-tier",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/tier",
+        "operator": "greater-than",
+        "value": "1"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "undeclared-member",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/owner",
+        "operator": "equals",
+        "value": "team-edge"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "secret-store",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "not",
+        "condition": {
+          "op": "fact",
+          "path": "/value/token/store",
+          "operator": "equals",
+          "value": "other-store"
+        }
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "number-operand",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/port",
+        "operator": "equals",
+        "value": 8443
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "referenced-team",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/references/~1account/value/team",
+        "operator": "equals",
+        "value": "core"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "first-tag",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/tags/0",
+        "operator": "equals",
+        "value": "edge"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    },
+    {
+      "id": "secret-scope",
+      "description": "A synthetic rule for a facts-contract check.",
+      "when": {
+        "op": "fact",
+        "path": "/value/token/scope",
+        "operator": "equals",
+        "value": "example-edge-prod"
+      },
+      "outcome": "review",
+      "onUnknown": "escalate",
+      "sourceRefs": [
+        "synthetic"
+      ],
+      "rationale": "A synthetic condition for the check rows."
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "gold-tier",
+      "description": "A synthetic exception.",
+      "when": {
+        "op": "fact",
+        "path": "/value/tier",
+        "operator": "equals",
+        "value": "gold"
+      },
+      "effect": "force-outcome",
+      "outcome": "review",
+      "onUnknown": "escalate"
+    },
+    {
+      "id": "bronze-tier",
+      "description": "A synthetic exception.",
+      "when": {
+        "op": "fact",
+        "path": "/value/tier",
+        "operator": "equals",
+        "value": "bronze"
+      },
+      "effect": "force-outcome",
+      "outcome": "review",
+      "onUnknown": "escalate"
+    }
+  ],
+  "fallbackOutcome": "pass",
+  "escalation": {
+    "triggers": [
+      "unknown"
+    ],
+    "target": {
+      "kind": "human-role",
+      "name": "Reviewer"
+    },
+    "message": "Review the entry."
+  }
+}

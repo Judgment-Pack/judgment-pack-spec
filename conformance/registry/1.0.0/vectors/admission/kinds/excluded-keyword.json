@@ -1,0 +1,8 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/labelled",
+  "version": "1.0.0",
+  "kind": "labelled",
+  "owner": "platform-data",
+  "schema": { "type": "string", "format": "uri" }
+}

@@ -1,0 +1,27 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "registry": { "digest": "sha256:3eff2f7f9fa5984fcf469aded2e5bcbb04f87b6394ae5c543432815f31af15e6" },
+  "diagnostics": [
+    { "code": "REF-ENTRY-ABSENT-IN-ENVIRONMENT", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "archive-reader" }, "environment": "prod", "pointer": "/database" } },
+    { "code": "REF-ENTRY-MISSING", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "ghost" }, "environment": "dev", "pointer": "/database" } },
+    { "code": "REF-ENTRY-MISSING", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "ghost" }, "environment": "prod", "pointer": "/database" } },
+    { "code": "REF-ENTRY-FORM", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "malformed" }, "environment": "dev", "pointer": "/database" } },
+    { "code": "REF-ENTRY-FORM", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "malformed" }, "environment": "prod", "pointer": "/database" } },
+    { "code": "REF-ENTRY-POINTER", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "pointer-miss" }, "environment": "dev", "pointer": "/database" } },
+    { "code": "REF-ENTRY-POINTER", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "pointer-miss" }, "environment": "prod", "pointer": "/database" } },
+    { "code": "REF-ENTRY-POINTER", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "sized" }, "environment": "dev", "pointer": "/database" } },
+    { "code": "REF-ENTRY-KIND", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "wrong-kind" }, "environment": "dev", "pointer": "/database" } },
+    { "code": "REF-ENTRY-KIND", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "wrong-kind" }, "environment": "prod", "pointer": "/database" } }
+  ]
+}

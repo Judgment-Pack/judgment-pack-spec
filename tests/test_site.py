@@ -28,6 +28,9 @@ WORKFLOW_VECTORS = "conformance/workflow"
 # serves nothing under this directory either (conformance/annotation-vocabulary/README.md). The
 # companion document they belong to is published.
 ANNOTATION_VOCABULARY_ROWS = "conformance/annotation-vocabulary"
+# The registry's hand-written rows are staged (conformance/registry/README.md), and its companion
+# document is published.
+REGISTRY_ROWS = "conformance/registry"
 # The staged draft Core specVersion 0.4.0-draft graduated to the released 0.5.0 in place; its staged
 # directories are retired, and nothing the site writes is named for the draft selector.
 RETIRED_DRAFT_DIRECTORIES = ("schema/staged", "conformance/staged", "examples/staged")
@@ -39,6 +42,7 @@ UNPUBLISHED_DIRECTORIES = (
     DIALECT_VECTORS,
     WORKFLOW_VECTORS,
     ANNOTATION_VOCABULARY_ROWS,
+    REGISTRY_ROWS,
     "conformance/policy",
     "schema/policy",
 )
@@ -304,6 +308,14 @@ class StaticSiteTests(unittest.TestCase):
         # Staged since RFC 0032's acceptance, and conformance/annotation-vocabulary/README.md says the
         # site does not serve them; held as the other staged directories are.
         self._assert_nothing_published_under(ANNOTATION_VOCABULARY_ROWS)
+
+    def test_registry_rows_are_not_published(self) -> None:
+        self._assert_nothing_published_under(REGISTRY_ROWS)
+
+    def test_registry_companion_document_is_published(self) -> None:
+        document = (self.output / "spec" / "registry" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("The registry", document)
+        self.assertIn("REG-REPORT-TRUNCATED", document)
 
     def test_annotation_vocabulary_companion_document_is_published(self) -> None:
         # RFC 0032 is accepted and its text landed: the companion document is a page of its own,
@@ -767,6 +779,7 @@ class StaticSiteTests(unittest.TestCase):
             "spec/checkpoint-witness/index.html": "spec/checkpoint-witness.md",
             "spec/dialect/index.html": "spec/dialect.md",
             "spec/annotation-vocabulary/index.html": "spec/annotation-vocabulary.md",
+            "spec/registry/index.html": "spec/registry.md",
             # Rendered from the immutable final notes; docs/releases/v0.3.0.md is only a pointer.
             "project/releases/0.3.0/index.html": "releases/v0.3.0.md",
             "project/releases/0.4.0/index.html": "releases/v0.4.0.md",

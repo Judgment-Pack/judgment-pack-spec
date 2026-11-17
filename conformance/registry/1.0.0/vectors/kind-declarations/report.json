@@ -1,0 +1,29 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "registry": { "digest": "sha256:598907b21586293aa05a01f23f4a9ce32e25082b4cce85f12a67d61982257be6" },
+  "diagnostics": [
+    { "code": "REG-KIND-UNKNOWN-MEMBER", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:8a61572872437fc922e608a63df6230626db5bfcddfebccff27bc10e1e50efaf", "kind": "grant", "pointer": "/label" } },
+    { "code": "REG-KIND-POINTER-UNREACHABLE", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:8a61572872437fc922e608a63df6230626db5bfcddfebccff27bc10e1e50efaf", "kind": "grant", "pointer": "/overlayable/0" } },
+    { "code": "REG-KIND-POINTER-FORM", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:8a61572872437fc922e608a63df6230626db5bfcddfebccff27bc10e1e50efaf", "kind": "grant", "pointer": "/overlayable/1" } },
+    { "code": "REG-KIND-FORM", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:8a61572872437fc922e608a63df6230626db5bfcddfebccff27bc10e1e50efaf", "kind": "grant", "pointer": "/overlayable/3" } },
+    { "code": "REG-KIND-POINTER-CONFLICT", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:8a61572872437fc922e608a63df6230626db5bfcddfebccff27bc10e1e50efaf", "kind": "grant", "pointer": "/secrets/0" } },
+    { "code": "REG-KIND-SCHEMA-KEYWORD", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:961c5ba012ffc952ccd45d7462488c997a3fc7cc3f054227f5bba3a1782c979b", "kind": "broken-schema", "pointer": "/schema/properties/a/format" } },
+    { "code": "REG-KIND-SCHEMA-KEYWORD", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:961c5ba012ffc952ccd45d7462488c997a3fc7cc3f054227f5bba3a1782c979b", "kind": "broken-schema", "pointer": "/schema/properties/b/oneOf" } },
+    { "code": "REG-KIND-PATTERN", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:961c5ba012ffc952ccd45d7462488c997a3fc7cc3f054227f5bba3a1782c979b", "kind": "broken-schema", "pointer": "/schema/properties/c/pattern" } },
+    { "code": "REG-KIND-SCHEMA-FORM", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:961c5ba012ffc952ccd45d7462488c997a3fc7cc3f054227f5bba3a1782c979b", "kind": "broken-schema", "pointer": "/schema/properties/e/items" } },
+    { "code": "REG-KIND-SCHEMA-LIMIT", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:961c5ba012ffc952ccd45d7462488c997a3fc7cc3f054227f5bba3a1782c979b", "kind": "broken-schema", "pointer": "/schema/properties/f/anyOf" } },
+    { "code": "REG-KIND-SCHEMA-REF", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:daebba0b02b99e8a5103fecbd783335b2c0814d689ef3923a392ffb3940e39aa", "kind": "cyclic", "pointer": "/schema/$defs/node/properties/next/$ref" } }
+  ]
+}

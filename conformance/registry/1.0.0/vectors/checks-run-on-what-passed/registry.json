@@ -1,0 +1,25 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/order",
+  "version": "1.0.0",
+  "environments": ["dev", "prod"],
+  "owners": ["team-billing"],
+  "kinds": [
+    { "kind": "database", "id": "https://example.invalid/kinds/database", "version": "1.0.0", "digest": "sha256:80f28e5450bc53cfeb1ffdf63237a48b834ba5cb80ff4daec2fb277c809247a7" },
+    { "kind": "db-role", "id": "https://example.invalid/kinds/db-role", "version": "1.2.0", "digest": "sha256:64e30653b5b2743af0fb78d555d186ea9a57551aa1c800c8f972f824ef7da020" }
+  ],
+  "entries": [
+    { "kind": "database", "id": "billing", "owner": "team-billing", "value": { "engine": "postgres" } },
+    { "kind": "db-role", "id": "api", "owner": "nobody",
+      "value": { "database": "entry:database/billing", "privileges": ["read"], "extra": true } },
+    { "kind": "db-role", "id": "worker", "owner": "team-billing",
+      "value": { "database": "entry:database/billing", "privileges": ["read"], "connectionLimit": 0 } }
+  ],
+  "overlays": [
+    { "environment": "prod",
+      "patches": [
+        { "kind": "db-role", "id": "api", "set": { "/connectionLimit": null } },
+        { "kind": "db-role", "id": "worker", "set": { "/database": "entry:database/billing" } }
+      ] }
+  ]
+}

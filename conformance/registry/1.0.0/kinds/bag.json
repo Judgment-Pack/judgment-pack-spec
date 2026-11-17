@@ -1,0 +1,15 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/bag",
+  "version": "1.0.0",
+  "kind": "bag",
+  "owner": "platform-identity",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "settings": { "type": "object" },
+      "anything": {}
+    }
+  }
+}

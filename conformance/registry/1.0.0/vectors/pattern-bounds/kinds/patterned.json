@@ -1,0 +1,32 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/patterned",
+  "version": "1.0.0",
+  "kind": "patterned",
+  "owner": "platform-data",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "at-bound": {
+        "type": "string",
+        "pattern": "a{1000}a{1000}a{1000}a{1000}a{96}"
+      },
+      "over-bound": {
+        "type": "string",
+        "pattern": "a{1000}a{1000}a{1000}a{1000}a{97}"
+      },
+      "as-written": {
+        "type": "string",
+        "pattern": "(ab|ac){1000}"
+      },
+      "nested-product": {
+        "type": "string",
+        "pattern": "((a{2}){501}){0}"
+      },
+      "stopped-chain": {
+        "type": "string",
+        "pattern": "((a{2}){500}){0}"
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/extra",
+  "version": "1.0.0",
+  "kind": "extra",
+  "owner": "platform-data",
+  "schema": { "type": "string" }
+}

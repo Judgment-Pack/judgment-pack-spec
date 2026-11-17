@@ -1,0 +1,29 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "registry": { "digest": "sha256:e2899498c92e1cba067975a50f35af1d82c4bca199a26870d110d796dc8383ad" },
+  "diagnostics": [
+    { "code": "REG-OVERLAY-ENVIRONMENT", "severity": "error",
+      "location": { "document": "registry", "pointer": "/overlays/0/environment" } },
+    { "code": "REG-REGISTRY-FORM", "severity": "error",
+      "location": { "document": "registry", "pointer": "/overlays/1/patches/4" } },
+    { "code": "REG-OVERLAY-DUPLICATE", "severity": "error",
+      "location": { "document": "registry", "pointer": "/overlays/2/environment" } },
+    { "code": "REG-OVERLAY-NOT-OVERLAYABLE", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "db-role", "id": "api" }, "pointer": "/overlays/1/patches/0/set" } },
+    { "code": "REG-OVERLAY-POINTER", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "db-role", "id": "api" }, "pointer": "/overlays/1/patches/0/set" } },
+    { "code": "REG-OVERLAY-NULL", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "db-role", "id": "api" }, "pointer": "/overlays/1/patches/0/set/~1password" } },
+    { "code": "REG-OVERLAY-TARGET", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "db-role", "id": "api" }, "pointer": "/overlays/1/patches/0/set/~1privileges~13" } },
+    { "code": "REG-OVERLAY-PATCH-DUPLICATE", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "db-role", "id": "api" }, "pointer": "/overlays/1/patches/1" } },
+    { "code": "REG-OVERLAY-PREFIX", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "db-role", "id": "api" }, "pointer": "/overlays/3/patches/0/set/~1privileges~10" } },
+    { "code": "REG-OVERLAY-ENTRY-ABSENT", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "db-role", "id": "backfill" }, "pointer": "/overlays/1/patches/2" } },
+    { "code": "REG-OVERLAY-ENTRY-MISSING", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "db-role", "id": "nobody" }, "pointer": "/overlays/1/patches/3" } }
+  ]
+}

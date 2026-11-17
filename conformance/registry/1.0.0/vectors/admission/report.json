@@ -1,0 +1,18 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "diagnostics": [
+    { "code": "REG-DOC-SELECTOR", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:9118367b40e3a89da29bcf51a3e7b77dfaf20f5b04e5bffbcac81e7e42a000f5", "pointer": "/kindFormatVersion" } },
+    { "code": "REG-DOC-DUPLICATE", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:e50d4e64f873c77aeeab548393a023c553b5a2372f8cb96463c5f2d17864c8d3", "pointer": "/kind" } },
+    { "code": "REG-KIND-SCHEMA-KEYWORD", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:ffa58e5e113569b62292422d1b6759b8cdbda413d2a48b4eccde816b2fde42f4", "kind": "labelled", "pointer": "/schema/format" } },
+    { "code": "REG-DOC-NUMBER", "severity": "error",
+      "location": { "document": "registry", "pointer": "/entries/0/value/storageGb" } },
+    { "code": "REG-DOC-NUMBER", "severity": "error",
+      "location": { "document": "registry", "pointer": "/entries/2/value/storageGb" } },
+    { "code": "REG-DOC-NUMBER", "severity": "error",
+      "location": { "document": "registry", "pointer": "/entries/3/value/storageGb" } }
+  ]
+}

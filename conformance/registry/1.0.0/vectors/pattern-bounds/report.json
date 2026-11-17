@@ -1,0 +1,13 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "registry": { "digest": "sha256:d93d40d601d75e15bee9c6d35ca88f043c52099ab2d518bc032c075b55c1e69e" },
+  "diagnostics": [
+    { "code": "REG-KIND-PATTERN-LIMIT", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:380bebfe66fe116a55a855f0becff35a503107da066fc70be0484f091d30a68e", "kind": "patterned", "pointer": "/schema/properties/as-written/pattern" } },
+    { "code": "REG-KIND-PATTERN", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:380bebfe66fe116a55a855f0becff35a503107da066fc70be0484f091d30a68e", "kind": "patterned", "pointer": "/schema/properties/nested-product/pattern" } },
+    { "code": "REG-KIND-PATTERN-LIMIT", "severity": "error",
+      "location": { "document": "kind", "kindDocument": "sha256:380bebfe66fe116a55a855f0becff35a503107da066fc70be0484f091d30a68e", "kind": "patterned", "pointer": "/schema/properties/over-bound/pattern" } }
+  ]
+}

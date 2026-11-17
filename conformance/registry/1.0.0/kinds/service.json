@@ -1,0 +1,23 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/service",
+  "version": "3.1.0",
+  "kind": "service",
+  "owner": "platform-identity",
+  "schema": {
+    "type": "object",
+    "required": ["name", "tier", "account"],
+    "additionalProperties": false,
+    "properties": {
+      "name": { "type": "string" },
+      "tier": { "enum": ["gold", "silver"] },
+      "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+      "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+      "token": { "type": "string" },
+      "account": { "type": "string" }
+    }
+  },
+  "secrets": ["/token"],
+  "references": [{ "pointer": "/account", "kinds": ["account"] }],
+  "overlayable": ["/token"]
+}

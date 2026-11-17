@@ -1,0 +1,13 @@
+{
+  "reportFormatVersion": "1.0.0",
+  "valid": false,
+  "registry": { "digest": "sha256:e28ddf0c72deff44ccc51f8ebd87c3069ef94eed81fb86c4c036dd592f92fb41" },
+  "diagnostics": [
+    { "code": "REG-ENTRY-OWNER", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "db-role", "id": "api" }, "pointer": "/entries/1/owner" } },
+    { "code": "REG-OVERLAY-NOT-OVERLAYABLE", "severity": "error",
+      "location": { "document": "registry", "entry": { "kind": "db-role", "id": "worker" }, "pointer": "/overlays/0/patches/1/set" } },
+    { "code": "REG-VALUE-RANGE", "severity": "error",
+      "location": { "document": "value", "entry": { "kind": "db-role", "id": "worker" }, "environment": "dev", "pointer": "/connectionLimit" } }
+  ]
+}
