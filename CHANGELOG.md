@@ -33,8 +33,9 @@ here.
   its first segment holds no `*`, and `**` matches as in gitignore; a response's three members are
   required; a path holds no `:`, no segment ending in `.` or a space, no Windows device name and no
   name git reads as `.git`; an emitter code is `x-` and lower-case words, at most 64 bytes; and
-  `EMIT-MANIFEST` is adopted, with the locations of it and of `EMIT-RESPONSE`. Five staged rows,
-  operations `manifest` and `response`, exercise them. Overlap, options, links and unreadable paths
+  `EMIT-MANIFEST` is adopted, with the locations of it and of `EMIT-RESPONSE`. Deleting owned
+  files, the host never enters a directory git reads as `.git` (§11.4). Five staged emitter-host
+  rows, operations `manifest` and `response`, exercise them. Overlap, options, links and unreadable paths
   stay open (§17).
 - **The registry companion's harness** (`spec/registry.md` §11.5, format `1.0.0`, proposed; #350).
   Kind filtering forms the request with a synthetic unread kind, restores every registry digest in
@@ -42,8 +43,10 @@ here.
   writes the digest into a file passes. A run passes the references check inside a complete
   occurrence of any secret-position string, so two whole references with a shared prefix pass. A
   vector that gives its request whole skips both checks, and the marker `expected/~empty` records
-  a run that writes no files. Eight staged rows, operations `request`, `references` and `layout`,
-  exercise them; the harness's own refusal codes stay provisional (§17).
+  a run that writes no files. A vector not of the layout, such as one that holds another file,
+  refuses the whole run. Two staged emitter-host rows, operation `request`, and six emitter-harness
+  rows, operations `references` and `layout`, exercise them; the harness's own refusal codes stay
+  provisional (§17).
 
 ## `0.6.0` — 2026-11-16
 

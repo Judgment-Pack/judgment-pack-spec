@@ -791,14 +791,14 @@ A diagnostic's `location` is an object of these members, in this order of compar
 
 | Member | Form | Present |
 | --- | --- | --- |
-| `document` | `registry`, `kind`, `value`, `yaml`, `facts`, `contract` or `pack`; for the emitter host's own diagnostics (§11), `manifest`, `response` or `repository`; and for the conformance harness's (§11.5), `vector` or `repository` | always |
+| `document` | `registry`, `kind`, `value`, `yaml`, `facts`, `contract` or `pack`; for the emitter host's own diagnostics (§11), also `manifest`, `options`, `request`, `response` or `repository`; and for the conformance harness's (§11.5), these and `vector` | always |
 | `kindDocument` | the digest of a kind declaration's bytes as supplied (§2.3) | on every diagnostic about a supplied kind declaration, except `REG-DOC-SIZE` for one that was not read whole |
 | `kind` | a kind name | on a pin's diagnostic of step 4 or 8, on `REG-PIN-UNPINNED`, on a facts contract's (§10), and on every diagnostic of step 2 for a declaration whose `kind` member is a kind name |
 | `entry` | `{"kind", "id"}` | on a diagnostic about one entry, when the entry's kind is a kind name and its id is of the entry-id grammar (§6.2) |
-| `environment` | an environment | on a diagnostic of one environment: of step 7, of step 8's sizes, and of the facts writer |
+| `environment` | an environment | on a diagnostic of one environment: of step 7, of step 8's sizes, of the facts writer, and of the emitter host or harness (§11) where it resolves the registry for one environment, forms the request of one environment (with `"each"`), or runs that request and reads its response |
 | `pointer` | a pointer into `document` | always; `""` for the whole document |
 | `line`, `column` | integers from 1, counting code points | in document `yaml` only, where `pointer` is always `""` |
-| `path` | a slash-separated relative path: in document `vector`, below the vectors directory; in document `repository`, below the repository root | in documents `vector` and `repository` only, naming the file or directory the host or harness read or would write |
+| `path` | a slash-separated relative path: in document `vector`, below the vectors directory; in document `repository`, below the repository root | in documents `vector` and `repository` only, naming the file or directory the host or harness read or would write; absent when the diagnostic is about the vectors directory or the repository as a whole |
 
 In document `value`, the pointer is into the entry's resolved value in `environment`. In document
 `kind`, it is into the declaration named by `kindDocument`. A `path` is never absolute, never a
@@ -1115,9 +1115,13 @@ a glob that owns the whole tree would let a response of one file delete every ot
 repository. In a glob, `*` matches any run of characters within one segment, a leading `.`
 included; `**` between two segments matches zero or more segments, so `a/**/b` matches `a/b`; and a
 trailing `**` matches one or more, so `gen/**` never matches a file named `gen`. A manifest that is
-not of this section's form is `EMIT-MANIFEST`, located in document `manifest` at the pointer of
-each member that is missing, not defined or not of its form, or at `""` when the document is not
-an object.
+not of this section's form is `EMIT-MANIFEST`, in document `manifest`. Bytes that are not
+admissible JSON (§2.2's steps 1 to 3, under the host's size bound) are one `EMIT-MANIFEST`, at the
+pointer of the first refusal those steps give in §7.4's order, and nothing more is read. A root
+that is not an object is one at `""`, and a root whose `emitterManifestVersion` is missing or not
+one the host supports is one at `/emitterManifestVersion`, with no other, as with
+`REG-DOC-SELECTOR`. Otherwise there is one at the pointer of each member that is missing, not
+defined or not of its form.
 
 ### 11.2 The request
 
@@ -1158,8 +1162,12 @@ checks read it: `.git` or `git~1` in any ASCII case, followed only by dots and s
 once the code points HFS+ ignores (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F and
 U+FEFF) are skipped. Emitter diagnostics have codes of `x-` and lower-case words of `a` to `z` and
 `0` to `9` joined by `-` (`^x-[a-z0-9]+(-[a-z0-9]+)*$`), at most 64 bytes, a location of §7.3's
-form and no value; an `error` among them fails the run. The grammar keeps a code short and plain,
-but cannot keep an emitter from spelling a value in one, and no host can tell that it has (§16).
+form and no value. That location uses only §7.3's registry documents (`registry`, `kind`,
+`value`, `yaml`, `facts`, `contract` and `pack`, never the host's or the harness's) and members
+other than `path`; any other is `EMIT-RESPONSE` at `/diagnostics/<i>/location`. An emitter
+diagnostic of severity `error` fails the run: it is reported, and is also `EMIT-RESPONSE` at
+`/diagnostics/<i>`, its own index, in document `response`. The grammar keeps a code short and
+plain, but cannot keep an emitter from spelling a value in one, and no host can tell that it has (§16).
 Bounds: a response of 64 MiB, 10 000 files, 16 MiB per file and 512 bytes per path.
 
 ### 11.4 The host
@@ -1184,9 +1192,11 @@ The harness runs an author's vectors at the level named by `vectors/harness.json
 `request.json` and `registry.json`, with `kinds/` and an optional `options.json` beside
 `registry.json` and neither beside `request.json`, from which the harness forms the request as the
 host does; and exactly one of `expected/`, holding the files the response must contain by their
-paths below it, and `expected-failure.json`. Since git keeps no empty directory, a run that writes
-no files is recorded by the marker `expected/~empty`: a zero-byte regular file alone at the root of
-`expected/`, read as no files, which no response path can name (§11.3). The marker anywhere else,
+paths below it, and `expected-failure.json`; and nothing else. Any other entry, a directory where
+a file belongs or a file where a directory belongs, and a symbolic link in place of any of them is
+not of this layout, nor is a symbolic link beside the vectors in the vectors directory. Since git
+keeps no empty directory, a run that writes no files is recorded by the marker `expected/~empty`:
+a zero-byte regular file alone at the root of `expected/`, read as no files, which no response path can name (§11.3). The marker anywhere else,
 of another size or kind, or beside any other entry is not of this layout, nor is an `expected/` that
 holds no regular file and no marker; a missing `expected/` is never read as empty. `--update` writes
 `expected/` from a run, or the marker alone for a run that wrote no files. A vector not of this
