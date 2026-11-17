@@ -2670,7 +2670,9 @@ nothing else: no value, member name, pointer or position. The one exception is a
    has a **deposed key**, `deposed` in a `plan` and `deposed_key` in a `state`, which is a
    non-empty string. A resource's **id** is its `address`, or, with a deposed key, its `address`, a
    space, `deposed`, a space and the key. A deposed key of another type, an empty one, or two
-   resources of the read section with one id, is `TF-DOCUMENT`. In a `plan`, a resource change's
+   resources of the read section with one id, is `TF-DOCUMENT`. In a `plan`, each item of
+   `resource_changes` is an object whose `change` is an object, with `actions` an array of
+   strings; any other item is `TF-DOCUMENT`. A resource change's
    `change.after_unknown`, when present, has a mirror's form: `true`, `false`, or an object or
    array of mirrors. Any other `after_unknown`, null included, is `TF-DOCUMENT`.
 5. The read section is `resource_changes` for a `plan`, and every resource under

@@ -792,6 +792,7 @@ A diagnostic's `location` is an object of these members, in this order of compar
 | Member | Form | Present |
 | --- | --- | --- |
 | `document` | `registry`, `kind`, `value`, `yaml`, `facts`, `contract` or `pack`; for the emitter host's own diagnostics (§11), also `manifest`, `options`, `request`, `response` or `repository`; and for the conformance harness's (§11.5), these and `vector` | always |
+| `manifest` | an integer from 1: the position of another manifest among those the host is given beside the one it runs | in document `manifest` only, when the pointer is into that other manifest (on `EMIT-OWNS-OVERLAP`'s diagnostic at the other manifest's glob); absent for the manifest being run |
 | `kindDocument` | the digest of a kind declaration's bytes as supplied (§2.3) | on every diagnostic about a supplied kind declaration, except `REG-DOC-SIZE` for one that was not read whole |
 | `kind` | a kind name | on a pin's diagnostic of step 4 or 8, on `REG-PIN-UNPINNED`, on a facts contract's (§10), and on every diagnostic of step 2 for a declaration whose `kind` member is a kind name |
 | `entry` | `{"kind", "id"}` | on a diagnostic about one entry, when the entry's kind is a kind name and its id is of the entry-id grammar (§6.2) |
@@ -799,6 +800,7 @@ A diagnostic's `location` is an object of these members, in this order of compar
 | `pointer` | a pointer into `document` | always; `""` for the whole document |
 | `line`, `column` | integers from 1, counting code points | in document `yaml` only, where `pointer` is always `""` |
 | `path` | a slash-separated relative path: in document `vector`, below the vectors directory; in document `repository`, below the repository root | in documents `vector` and `repository` only, naming the file or directory the host or harness read or would write; absent when the diagnostic is about the vectors directory or the repository as a whole |
+| `variable` | the name of an environment variable, never its value | on `EMIT-ENV-UNSET`, naming the variable the manifest's `env` lists that the host's environment does not set |
 
 In document `value`, the pointer is into the entry's resolved value in `environment`. In document
 `kind`, it is into the declaration named by `kindDocument`. A `path` is never absolute, never a

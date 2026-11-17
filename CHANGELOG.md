@@ -28,14 +28,17 @@ here.
   sorted by id, and an empty key or two resources of one id are `TF-DOCUMENT` (#348); the
   reference runtime does not carry the key yet. An `after_unknown` not of a mirror's form is
   `TF-DOCUMENT`, and an `afterUnknown` pointer is cut at a position `after_sensitive` marks and
-  `after` lacks, as the reference reader does. §4.5 lists the vectors each reading needs beside RFC 0038's. No released
+  `after` lacks, as the reference reader does. In a plan, each resource change's `change` is an
+  object with `actions` an array of strings, or `TF-DOCUMENT`. §4.5 lists the vectors each reading needs beside RFC 0038's. No released
   text carries the kind, so nothing released changes.
 - **The registry companion's emitter host** (`spec/registry.md` §11, format `1.0.0`, proposed).
   §11 adopts the reference host's stricter readings (#349): an `owns` glob follows the path rules,
   its first segment holds no `*`, and `**` matches as in gitignore; a response's three members are
   required; a path holds no `:`, no segment ending in `.` or a space, no Windows device name and no
   name git reads as `.git`; an emitter code is `x-` and lower-case words, at most 64 bytes; and
-  `EMIT-MANIFEST` is adopted, with the locations of it and of `EMIT-RESPONSE`. Deleting owned
+  `EMIT-MANIFEST` is adopted, with the locations of it and of `EMIT-RESPONSE`. §7.3's location
+  gains the host's members: `manifest`, the position of another manifest an `owns` overlap names,
+  and `variable`, the name (never the value) of an `env` variable the host's environment lacks. Deleting owned
   files, the host never enters a directory git reads as `.git` (§11.4). Five staged emitter-host
   rows, operations `manifest` and `response`, exercise them. Overlap, options, links and unreadable paths
   stay open (§17).
