@@ -948,6 +948,26 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "rfcs/0039-federated-registry.md",
+        PurePosixPath("rfcs/0039-federated-registry/index.html"),
+        "RFC 0039: A federated registry",
+        "Draft: one registry assembled from several repositories at full commit ids, an index of "
+        "what was read, and bounds a repository may only tighten.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
+        "rfcs/0040-registry-locks-and-signatures.md",
+        PurePosixPath("rfcs/0040-registry-locks-and-signatures/index.html"),
+        "RFC 0040: Registry locks and signatures",
+        "Draft: a canonical lock of a registry, its kinds, resolved forms and index, and a detached "
+        "Ed25519 signature over the lock checked against an expected key.",
+        "proposals",
+        "Draft proposal",
+        source_ref="main",
+    ),
+    Page(
         "releases/v0.5.2.md",
         PurePosixPath("project/releases/0.5.2/index.html"),
         "0.5.2 release notes",
