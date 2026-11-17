@@ -10,10 +10,11 @@ the emitters that turn resolved registries into files.
 
 This text is registry format `1.0.0`, status `proposed`. The version is this document's own: it is
 not a Core `specVersion`, and no pack declares it. The companion is released on its own scoped tag,
-`registry-v<major>.<minor>.<patch>`, beside Core and independent of `specVersion` (§13). No such
-tag exists yet. Until one releases this text, it is normative for nothing, and no conformance claim
-may cite it. Once a tag releases it, it is normative for the conformance classes of §15, and for
-nothing else. Publication beside a Core release, on the site or in a bundle, releases nothing.
+`registry-v<major>.<minor>.<patch>`, beside Core and independent of `specVersion`; its first
+release is `registry-v1.0.0` (§13). Until a tag releases this text, it is normative for nothing,
+and no conformance claim may cite it. Once a tag releases it, it is normative for the conformance
+classes of §15, and for nothing else. Publication beside a Core release, on the site or in a Core
+bundle, releases nothing.
 
 Its design records are [RFC 0034](../rfcs/0034-registry-profile.md) (the profile),
 [RFC 0035](../rfcs/0035-registry-references.md) (references),
@@ -28,17 +29,18 @@ Acceptance section says. That is a same-vendor review, not a cross-vendor claim.
 and a record differ, this text governs; §17 lists what this text settles that the records left
 open, and what it leaves open.
 
-Version `1.0.0` is proposed, and does not yet meet the stable bar its records set, for three
-reasons:
+Version `1.0.0` is proposed. Its first release makes it `released`, and not yet stable, the bar
+its records set:
 
-- **Its rows are staged.** Its machine-readable code list and its hand-written, synthetic rows are
-  staged under
+- **Its rows are published with its first release.** Its machine-readable code list and its
+  hand-written, synthetic rows under
   [`conformance/registry/1.0.0/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/registry/1.0.0)
-  (§14). They are not a conformance corpus: no bundle carries them, the site does not serve them,
-  and no claim may cite them.
-- **Its schemas are staged.** The closed schemas of its documents are staged under
-  [`schema/registry/1.0.0/`][schemas] (§14), proposed with this text. No bundle carries them, and
-  the site serves them neither as files nor at their `$id`; a first release publishes them (§13).
+  (§14) are in that release's own bundle, and its release record names each file's digest (§13).
+  No Core bundle carries them, and the site does not serve them. Until that release they are not a
+  conformance corpus, and no claim may cite them.
+- **Its schemas are published with its first release.** The closed schemas of its documents under
+  [`schema/registry/1.0.0/`][schemas] (§14) are in the same bundle, and from that release on the
+  site serves each at its `$id`, and not as a file. No Core bundle carries them.
 - **One reader exists.** The reference runtime (Go) implements §§2 to 10, and §11's host and
   harness since `v0.48.0`. No second, independently written reader, host or harness exists. The
   stable bar is two readers agreeing on every row (§15).
@@ -1431,6 +1433,17 @@ companion's route without its draft-only restriction ([VERSIONING.md](../VERSION
 release publishes this text, the closed schemas of its documents under `schema/registry/1.0.0/`,
 the code list and the rows.
 
+The first release is `registry-v1.0.0`, at status `released`: it is released, and not stable, and
+the stability promise below starts at the first stable release. Its bundle is its own, and no Core
+bundle carries the schemas, the code list or the rows. Its release record, `releases/<tag>.json`,
+names the format, the `$id` of each schema, and the SHA-256 of this text, of every schema, of the
+code list and of every row file, and the release builder holds the tagged tree to it. This text's
+status sentence, the code list and the rows' manifest say `proposed` until the commit that tag
+names, which says `released` in all three and takes the draft wording out of each schema's title
+and description; the builder refuses the tag otherwise. A schema keeps
+the bytes its first release publishes at its `$id`: a later release of format `1.0.0` names the
+same schemas with the same digests.
+
 **From the first stable release**, within major version 1:
 
 - no selector, member, diagnostic code, validation rule or harness check is removed or changes
@@ -1450,11 +1463,12 @@ document's bytes is a new `resolvedFormatVersion` (§2.1).
 
 ## 14. Machine-readable form and rows
 
-The code list and the rows are staged under
+The code list and the rows are under
 [`conformance/registry/1.0.0/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/registry/1.0.0),
-with a README that says how each row is compared. Every input is synthetic. Where a file and this
-text differ, this text governs. The rows exercise admission, kind declarations, the registry's
-shape, pins, entries, overlays, both kinds of reference, bounds and warnings, resolution in two
+with a README that says how each row is compared, and are published with the companion's first
+release (§13). Every input is synthetic. Where a file and this text differ, this text governs. The
+rows exercise admission, kind declarations, the registry's shape, pins, entries, overlays, both
+kinds of reference, bounds and warnings, resolution in two
 environments, facts batches, two generated contracts, two pack checks; the emitter host's manifest
 and response rules (whole-tree and unportable `owns` globs, response paths, `**`, `diagnostics`
 required and emitter codes) and its request, with a kind it does not read; and the harness's
@@ -1466,17 +1480,18 @@ reading, authored contracts, wildcard reference patterns, the facts-form request
 harness's other checks, its report and its own codes (the layout rows compare only that a run is
 refused), or builders, and the boundary and adversarial sets RFC 0034 lists.
 
-The schemas are staged under [`schema/registry/1.0.0/`][schemas]: one JSON Schema 2020-12 schema
-for each document of §2.1, which requires its selector at `"1.0.0"`, and `common.schema.json`, the
-definitions they share, which is the schema of no document. Each is closed wherever this text gives
-a document's members, and states the forms, bounds, patterns, codes and severities this text gives.
-A rule no schema can state, such as canonical form and order, a digest, a match between two
-documents, a bound in bytes, or the limits of §§3.3 and 3.4, is left to the reader, and a
-`$comment` names its section. A schema states only rules of this text, so a document it refuses is
-not of this text's form, and one it admits may still fail a rule it cannot state. The harness
-report's schema holds only its selector, since §11.5 names none of its other members. The facts
-document (§10.1) has none here: it is a facts document of Core. Every row document a reader admits
-or writes validates against its schema.
+The schemas are under [`schema/registry/1.0.0/`][schemas], published with the same release and
+served at their `$id` from then on (§13): one JSON Schema 2020-12 schema for each document of
+§2.1, which requires its selector at `"1.0.0"`, and `common.schema.json`, the definitions they
+share, which is the schema of no document. Each is closed wherever this text gives a document's
+members, and states the forms, bounds, patterns, codes and severities this text gives. A rule no
+schema can state, such as canonical form and order, a digest, a match between two documents, a
+bound in bytes, or the limits of §§3.3 and 3.4, is left to the reader, and a `$comment` names its
+section. A schema states only rules of this text, so a document it refuses is not of this text's
+form, and one it admits may still fail a rule it cannot state. The harness report's schema holds
+only its selector, since §11.5 names none of its other members. The facts document (§10.1) has
+none here: it is a facts document of Core. Every row document a reader admits or writes validates
+against its schema.
 
 [schemas]: https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/schema/registry/1.0.0
 
@@ -1490,9 +1505,10 @@ or writes validates against its schema.
 | Emitter host | §§11.1–11.4 | `class` `emitter-host` |
 | Emitter harness | §11.5 | `class` `emitter-harness` |
 
-A claim names its class, the exact release, and its complete rows; a class without rows is defined,
-and not claimable. The pack check (§10.5) is in no class. The stable bar is two independently written
-readers agreeing on every row of a class.
+A claim names its class, the exact release, and its complete rows, which that release's record
+identifies by the digest of their manifest and of every row file (§13); a class without rows is
+defined, and not claimable. The pack check (§10.5) is in no class. The stable bar is two
+independently written readers agreeing on every row of a class.
 
 ## 16. Security and privacy
 

@@ -256,7 +256,8 @@ class ReleaseWorkflowTests(unittest.TestCase):
         expected = {"v0.3.0": "evidence", "v1.10.0": "evidence", "v10.0.0": "evidence",
                     "v0.3.0-rc.1": "fresh", "v0.3.0-rc.10": "fresh", "v0.2.0-draft": "fresh",
                     "v1.0.0-0": "fresh", "v1.0.0+build": "fresh", "policy-v1.0.0": "fresh",
-                    "policy-v1.0.0-draft.1": "fresh", "v1.2": "fresh", "v01.0.0": "fresh",
+                    "policy-v1.0.0-draft.1": "fresh", "registry-v1.0.0": "fresh", "v1.2": "fresh",
+                    "v01.0.0": "fresh",
                     "v0.3.0.1": "fresh", "v0.3.0 ": "fresh", "v\u0660.\u0663.\u0660": "fresh",
                     "demo/deal-evidence-readiness/v0.2.0": "fresh"}
         with tempfile.TemporaryDirectory() as directory:

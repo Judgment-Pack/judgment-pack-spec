@@ -5,6 +5,7 @@ on:
     tags:
       - "v*"
       - "policy-v*"
+      - "registry-v*"
 
 permissions: {}
 
@@ -16,9 +17,9 @@ jobs:
   # The repository conformance evidence main already produced at this exact commit, or a refusal
   # (web/DEPLOYMENT.md, "Release evidence"; .github/ci-evidence.json). The repository suite is not
   # run again when the evidence is reused; a refusal fails the release, and the fresh route is the
-  # operator's choice. A tag the gate does not admit (a release candidate, a policy-v tag) reuses
-  # nothing: the release job runs the whole suite itself, as before. The tag, milestone, Policy,
-  # bundle, notes, draft and attestation steps of the release job stay fresh either way.
+  # operator's choice. A tag the gate does not admit (a release candidate, a policy-v or registry-v
+  # tag) reuses nothing: the release job runs the whole suite itself, as before. The tag, milestone,
+  # Policy, bundle, notes, draft and attestation steps of the release job stay fresh either way.
   evidence:
     name: CI evidence at the tag
     runs-on: ubuntu-latest
@@ -194,8 +195,8 @@ jobs:
           --output dist
 
       # A plain vMAJOR.MINOR.PATCH tag is drafted as a release the maintainer publishes. Every other
-      # tag (a release candidate, a policy-v tag), and any route value but evidence, is drafted as a
-      # pre-release.
+      # tag (a release candidate, a policy-v or registry-v tag), and any route value but evidence, is
+      # drafted as a pre-release.
       - name: Create draft release
         shell: bash
         run: |

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import importlib.util
 import json
 import hashlib
 import posixpath
@@ -1951,8 +1952,8 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
         if path.is_file():
             source = path.relative_to(ROOT).as_posix()
             routes[source] = GITHUB_BLOB_ROOT + "main/" + source
-    for source in CANONICAL_SCHEMA_SOURCES:
-        if "/policy/" in source or "/retained-column/" in source:
+    for source in (*CANONICAL_SCHEMA_SOURCES, *registry_schema_sources()):
+        if "/policy/" in source or "/retained-column/" in source or "/registry/" in source:
             schema_id = json.loads((ROOT / source).read_text("utf-8"))["$id"]
             routes[source] = PurePosixPath(urlsplit(schema_id).path.lstrip("/"))
     for path in sorted((ROOT / "conformance" / "evaluation" / "packs").glob("*.json")):
@@ -2616,9 +2617,10 @@ def build_license(output_root: Path) -> None:
 # companion document they belong to, spec/dialect.md, is published. The annotation vocabulary's
 # rows are staged as well, since RFC 0032's acceptance (conformance/annotation-vocabulary/README.md),
 # and the companion document they belong to, spec/annotation-vocabulary.md, is published. The
-# registry's rows are staged too (conformance/registry/README.md), and so are the schemas of its
-# documents (schema/registry/1.0.0/), proposed with the text and served neither as artifacts nor at
-# their $id; its companion document, spec/registry.md, is published.
+# registry's rows, code list and schemas are packaged on the companion's own scoped tag, as Policy's
+# are (conformance/registry/README.md): the site serves none of them as files, and serves each
+# schema at its $id from the companion's first release on (registry_schema_sources); its companion
+# document, spec/registry.md, is published.
 UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/evaluation/staged"),
     PurePosixPath("conformance/witness"),
@@ -2763,7 +2765,7 @@ conformance.
 - [The checkpoint witness statement]({guide_url(PurePosixPath("spec/checkpoint-witness/index.html"))}): a companion document, normative only for the witness-statement reader class; its vectors are staged until the next specVersion
 - [The dialect]({guide_url(PurePosixPath("spec/dialect/index.html"))}): a companion document, normative only for the preparation-verifier reader class; its vectors are staged until the next specVersion
 - [The annotation vocabulary]({guide_url(PurePosixPath("spec/annotation-vocabulary/index.html"))}): a companion document, normative only for the vocabulary-checker class; version 1.0.0 is proposed, and its rows are staged
-- [The registry]({guide_url(PurePosixPath("spec/registry/index.html"))}): a companion document, normative for nothing until a registry tag releases it; format 1.0.0 is proposed, and its rows are staged
+- [The registry]({guide_url(PurePosixPath("spec/registry/index.html"))}): a companion document, normative for nothing until a registry tag releases it; format 1.0.0 is proposed, and its first release, registry-v1.0.0, publishes its schemas, code list and rows
 - [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
 
 ## Explanations and direct answers
@@ -2840,6 +2842,48 @@ def build_not_found(output_root: Path) -> None:
     write_page(output_root, page_output, rendered)
 
 
+def release_builder():
+    """tools/build_release.py, whose registry release record the site's gate below reuses."""
+    spec = importlib.util.spec_from_file_location("jps_build_release", ROOT / "tools" / "build_release.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def registry_schema_sources(root: Path = ROOT) -> tuple[str, ...]:
+    """The registry's schemas, once the companion is released with exactly these schemas.
+
+    Like Policy's, they are packaged on their own scoped tag and served at their `$id`. The rows'
+    manifest says `proposed` until the commit a registry tag names (spec/registry.md section 13),
+    and that commit adds the tag's release record. A URL served once keeps its bytes, so the site
+    serves the schemas only when the manifest says `released` and a registry release record of
+    their format names these schemas with these bytes; otherwise it serves none. A site built
+    before that commit serves none, and so does one built after a schema changed with no record
+    for the change.
+    """
+    try:
+        rows = json.loads((root / "conformance/registry/1.0.0/manifest.json").read_text("utf-8"))
+    except (OSError, ValueError):
+        return ()
+    if not isinstance(rows, dict) or rows.get("status") != "released":
+        return ()
+    builder = release_builder()
+    for path in sorted((root / "releases").glob("registry-v*.json")):
+        tag = path.name[: -len(".json")]
+        if not builder.is_registry_tag(tag):
+            continue
+        try:
+            release = json.loads(path.read_text("utf-8"))
+            tree = builder.registry_record(builder.release_version(tag), tag, root)
+        except (OSError, ValueError, TypeError, AttributeError, KeyError):
+            return ()
+        if (isinstance(release, dict) and release.get("tag") == tag
+                and release.get("formatVersion") == tree["formatVersion"]
+                and builder.same_registry_schemas(release, tree)):
+            return tuple(f"{builder.REGISTRY_SCHEMA_ROOT}/{name}.schema.json" for name in sorted(tree["schemas"]))
+    return ()
+
+
 CANONICAL_SCHEMA_SOURCES = (
     "schema/retained-column/1/contract.schema.json",
     "schema/judgment-pack-core.schema.json",
@@ -2879,9 +2923,9 @@ CANONICAL_SCHEMA_SOURCES = (
 )
 
 
-def publish_canonical_schemas(output_root: Path) -> None:
+def publish_canonical_schemas(output_root: Path, sources: tuple[str, ...] = CANONICAL_SCHEMA_SOURCES) -> None:
     """Serve each schema at the path of its own ``$id`` so the identifier resolves."""
-    for source in CANONICAL_SCHEMA_SOURCES:
+    for source in sources:
         file = ROOT / source
         schema_id = json.loads(file.read_text(encoding="utf-8")).get("$id", "")
         path = urlsplit(schema_id).path.lstrip("/")
@@ -3736,6 +3780,9 @@ def build(output: Path, config: BuildConfig) -> None:
     copy_static(output)
     copy_artifacts(output)
     publish_canonical_schemas(output)
+    # The registry companion's schemas, served at their $id from its first release on
+    # (spec/registry.md section 13).
+    publish_canonical_schemas(output, registry_schema_sources())
     build_markdown_pages(output, routes)
     build_schema_page(output, routes)
     build_superseded_spec_notice(output)

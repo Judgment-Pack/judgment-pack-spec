@@ -1,4 +1,4 @@
-"""The registry companion `1.0.0`, status proposed (spec/registry.md), and its staged rows.
+"""The registry companion `1.0.0`, status proposed (spec/registry.md), and its rows.
 
 The rows under conformance/registry/1.0.0/ are hand-written and synthetic. These tests hold them to
 the parts of the companion that need no registry reader: the manifest names every file and only
@@ -621,6 +621,19 @@ class RegistryCompanionText(unittest.TestCase):
         rows = re.findall(r"^\| [^|]+ \| `([a-zA-Z]+Version)` \| `\"([0-9.]+)\"` \|", text, re.M)
         self.assertEqual(len(rows), 10)
         self.assertTrue(all(version == "1.0.0" for _, version in rows))
+
+    def test_the_text_the_code_list_and_the_manifest_say_one_status(self) -> None:
+        # They say `proposed` until the commit a registry tag names, which says `released` in all
+        # three; the release builder refuses the tag otherwise (§13).
+        text = SPEC.read_text(encoding="utf-8")
+        said = re.findall(r"^This text is registry format `1\.0\.0`, status `([a-z]+)`\.", text, re.M)
+        self.assertEqual(1, len(said))
+        for name in ("codes.json", "manifest.json"):
+            document = load(BASE / name)
+            with self.subTest(name=name):
+                self.assertEqual(("registry", "1.0.0"), (document["companion"], document["formatVersion"]))
+                self.assertEqual(said[0], document["status"])
+        self.assertIn(said[0], ("proposed", "released"))
 
     def test_bundled_companion_links_rows_by_url(self) -> None:
         text = SPEC.read_text(encoding="utf-8")

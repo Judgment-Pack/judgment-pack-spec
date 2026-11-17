@@ -2,7 +2,7 @@
   "companion": "registry",
   "formatVersion": "1.0.0",
   "status": "proposed",
-  "label": "Registry companion 1.0.0, proposed: hand-written synthetic vectors, staged in no corpus",
+  "label": "Registry companion 1.0.0, proposed: hand-written synthetic vectors, in no corpus until its first release",
   "codes": "codes.json",
   "vectors": [
     {

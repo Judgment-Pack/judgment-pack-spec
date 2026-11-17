@@ -1,12 +1,16 @@
-# Registry rows (staged, proposed)
+# Registry rows (proposed)
 
 Hand-written rows for the registry format `1.0.0`, status `proposed`
 ([`spec/registry.md`](../../spec/registry.md), the companion whose design records,
 [RFC 0034](../../rfcs/0034-registry-profile.md) to [RFC 0037](../../rfcs/0037-generated-facts-contracts.md),
-are accepted). They are staged: the companion is published and bundled, and the rows are not. They
-are not a conformance corpus: no bundle carries them, the site does not serve them, and no claim may
-cite them. Every input is synthetic: the ids, owners, projects and values are made up, under
-`example.invalid`.
+are accepted). They are published with the companion's first release, `registry-v1.0.0`, at
+status `released`, which is not stable (§13): that release's own bundle carries them with the text,
+the code list and the schemas, and its release record, `releases/registry-v1.0.0.json`, names the
+digest of every file here. No Core bundle carries them, and the site does not serve them. Until
+that release they are not a conformance corpus, and no claim may cite them. The `status` of
+`codes.json` and of `manifest.json` says `proposed`, as the text's does, until the commit the tag
+names, which says `released` in all three. Every input is synthetic: the ids, owners, projects and
+values are made up, under `example.invalid`.
 
 They are not recordings. Every expectation was written by hand from the companion text, and a
 reader is held to them, never the other way round. The reference runtime (Go) is the one reader
@@ -77,13 +81,18 @@ reference; every contract is in canonical order; every host refusal follows from
 response by a model of §11.1's owns globs and §11.3's paths, members and codes; every request
 follows from its inputs by §11.2, and `request-reads` and `request-unread-kind` are equal once their
 digests are restored; every `references` row follows from a model of check 5, and every `layout` row
-from a model of the layout; and `codes.json` equals the companion's table. It does not validate a
-registry: that is a reader's work, and the second reader that would hold the rows to the text from
-this repository does not exist yet (§14).
+from a model of the layout; `codes.json` equals the companion's table; and the text, `codes.json`
+and `manifest.json` say one status. It does not validate a registry: that is a reader's work, and
+the second reader that would hold the rows to the text from this repository does not exist yet
+(§14).
 
-`tests/test_registry_schemas.py` holds the rows to the staged schemas of `schema/registry/1.0.0/`:
+`tests/test_registry_schemas.py` holds the rows to the schemas of `schema/registry/1.0.0/`:
 every row document a reader admits or writes validates against the schema its selector names, a
 report once a message is added to each diagnostic, since the rows leave messages out (§7.4). A
 declaration counts as admitted when its row's report has no error in it, and a manifest, request or
 response when its row's refusals name none in it; no refused input is required to fail. No schema
 refuses a member of a host row that the row's refusals do not name.
+
+`tests/test_registry_release.py`, which no bundle carries, holds the release builder to §13: what a
+registry tag's record must name, the statuses and schema wording it requires, what its bundle
+carries and what a Core bundle leaves out.
