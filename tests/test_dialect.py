@@ -472,9 +472,10 @@ def terraform_file_cases() -> list[tuple[str, str, Any]]:
     add("document a number", malformed, {**plan, "document": 1})
     for value in (0, 268435457, "1", 1.5, None):
         add(f"maxBytes {value!r}", malformed, {**plan, "maxBytes": value})
-    # an integer is an integer literal (§2): a value equal to one, written with a fraction or an
-    # exponent, is not one. The first reader refuses such a dialect as outside the canon domain
-    # (§2) before any source's form, so these cases hold the answer, not the maxBytes check.
+    # an integer is an integer literal (dialect §1): a value equal to one, written with a fraction
+    # or an exponent, is not one. The first reader refuses such a dialect as outside the canonical
+    # forms (dialect §1) before any source's form, so these cases hold the answer, not the maxBytes
+    # check.
     add("maxBytes written 1.0", malformed, {**plan, "maxBytes": 1.0})
     add("maxBytes written 1e2", malformed, {**plan, "maxBytes": "<maxBytes 1e2>"}, raw={"<maxBytes 1e2>": "1e2"})
     add("select an array", malformed, {**plan, "select": [{"types": ["google_sql_user"]}]})

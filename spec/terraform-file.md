@@ -50,7 +50,7 @@ BCP 14 meanings only in capitals.
 - A **reader** reads a file under a declaration by the steps of §3, and gives either the acquired
   value (§6) with its acquisition record (§7), or a refusal with one code of §9.
 - An **integer** of a declaration written in JSON is an integer as the dialect defines one
-  ([`dialect.md`](dialect.md) §2): its literal has no fraction and no exponent, so `1.0` and `1e2`
+  ([`dialect.md`](dialect.md) §1): its literal has no fraction and no exponent, so `1.0` and `1e2`
   are not integers.
 - A **pointer** is an RFC 6901 JSON Pointer. A value's **canonical form** is its RFC 8785 form.
 - **Code-point order** compares two strings by their Unicode code points, first difference first.
