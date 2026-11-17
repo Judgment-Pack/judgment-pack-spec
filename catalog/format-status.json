@@ -38,8 +38,8 @@
     },
     "registry": {
       "draftVersion": "1.0.0",
-      "baseline": null,
-      "lastReleased": null
+      "baseline": "registry-v1.0.0",
+      "lastReleased": "registry-v1.0.0"
     },
     "retained-column": {
       "draftVersion": "1",

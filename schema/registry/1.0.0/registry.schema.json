@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://judgmentpack.org/schema/registry/1.0.0/registry.schema.json",
-  "title": "DRAFT Registry companion 1.0.0: registry",
-  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A registry (sections 4 to 6), closed at every level the text gives. A registry the schema refuses is not valid; one it admits may still be invalid.",
+  "title": "Registry companion 1.0.0: registry",
+  "description": "Released on registry-v1.0.0 with spec/registry.md, which governs where they differ. A registry (sections 4 to 6), closed at every level the text gives. A registry the schema refuses is not valid; one it admits may still be invalid.",
   "$comment": "The reader's to check: the canonical order of kinds and entries (section 4), that pins match the supplied declarations (section 7.1, step 4), that an entry's id meets its kind's entryId pattern, its owner is in owners and its environments are declared (step 5), every overlay rule of section 5 beyond the members' forms, that secretScopes has one member per environment and no project shared (section 6.4), the values against their kinds (section 7.2), the bounds (step 8) and the size bound of 8 MiB (section 2.2).",
   "type": "object",
   "additionalProperties": false,

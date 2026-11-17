@@ -1,6 +1,6 @@
 """The schemas of the registry companion's documents (schema/registry/1.0.0/).
 
-They are proposed with spec/registry.md, which governs where they differ. These tests hold them to
+They are released with spec/registry.md, which governs where they differ. These tests hold them to
 the text and to the rows: each is a JSON Schema 2020-12 schema under its `$id`; every row
 document a reader admits, or writes, validates against the schema its selector names; the code list
 the reports use is codes.json's, and every other enum, and each range form, is the text's list;
@@ -300,7 +300,7 @@ class RegistrySchemas(unittest.TestCase):
                 Draft202012Validator.check_schema(schema)
                 self.assertEqual("https://json-schema.org/draft/2020-12/schema", schema["$schema"])
                 self.assertEqual(NAMESPACE + name + ".schema.json", schema["$id"])
-                self.assertTrue(schema["title"].startswith("DRAFT Registry companion 1.0.0: "))
+                self.assertTrue(schema["title"].startswith("Registry companion 1.0.0: "))
                 self.assertIn("spec/registry.md, which governs", schema["description"])
 
     def test_each_document_schema_requires_its_selector_at_1_0_0(self) -> None:
@@ -759,8 +759,8 @@ class ClosedSchemas(unittest.TestCase):
             {"path": "a"}, {"path": "a", "text": "x\n", "base64": ""}, {"path": "a", "text": "x"},
             {"path": "a", "text": "x\r\n"}, {"path": "a", "text": "x\n", "mode": "0600"},
         ] + [{"path": "a", "base64": value} for value in (
-            "QR==", "QUJ=", "QQ", "QQ=", "Q===", "QUJD====", "QUJD\n", "QU\nJD", "QU JD", "-_8=", "QUJD=",
-            "=", "QUJ", 1)]
+            "QR==", "QUJ=", "QB==", "QUK=", "QQ", "QQ=", "Q===", "QUJD====", "QUJD\n", "QU\nJD", "QU JD",
+            "-_8=", "QUJD=", "=", "QUJ", 1)]
         for file in files:
             document = copy.deepcopy(base)
             document["files"][0] = file

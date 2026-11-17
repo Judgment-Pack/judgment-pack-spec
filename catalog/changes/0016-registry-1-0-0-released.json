@@ -1,0 +1,71 @@
+{
+  "reason": "Released with registry format 1.0.0 on registry-v1.0.0: each schema's title drops DRAFT and its description says released on registry-v1.0.0 with spec/registry.md rather than staged, proposed and served by no bundle and no site. No shape changes; the site serves each schema at its $id from this release on, and these are the bytes it serves.",
+  "changes": [
+    {
+      "path": "schema/registry/1.0.0/common.schema.json",
+      "family": "registry",
+      "from": "sha256:9aa6ddcaad01f21ca534b744a74bead1baf9ad3d0c5edcefb72e26ef4f0a24fc",
+      "to": "sha256:36b1ff3648d261d561d332a73844fbf7a96dfe3ffb5881375d2933b0aec38bf4"
+    },
+    {
+      "path": "schema/registry/1.0.0/emit-request.schema.json",
+      "family": "registry",
+      "from": "sha256:95c4a816410547b7f5b2422cdf2a9dca8f4eda4aec2b1fd9e2b87258a7a02254",
+      "to": "sha256:ce7ab696f7084df247711eec888f99addab4d91c0d74fb41ce7806ba44f5acf5"
+    },
+    {
+      "path": "schema/registry/1.0.0/emit-response.schema.json",
+      "family": "registry",
+      "from": "sha256:4171fca230f6a0688bc3086c0984906fb702863a5cdf80849089e2cff72d25ad",
+      "to": "sha256:fccb43f8b808319e2203e0ee8ebd3e7a84f0fd3b2657ceacd2b50ba8130d9944"
+    },
+    {
+      "path": "schema/registry/1.0.0/emitter-manifest.schema.json",
+      "family": "registry",
+      "from": "sha256:99ba0b4e75446d4225f28031da20a39b81c5bd69d62517d55149ef5d99cd29b5",
+      "to": "sha256:7dfd6a98e8614c7cc20c8514fcf8c6ec293ce4404933eb7162efc32893624cdb"
+    },
+    {
+      "path": "schema/registry/1.0.0/facts-contract.schema.json",
+      "family": "registry",
+      "from": "sha256:eeb66c405d0989e822246e2dad3004e4a049b508b2977572cea58bfc65645d20",
+      "to": "sha256:2d5178b13e9f6a0c68326b9b8f4f85a2460ddf45d0b0331ff274996da1572472"
+    },
+    {
+      "path": "schema/registry/1.0.0/harness-report.schema.json",
+      "family": "registry",
+      "from": "sha256:2de19fe82f3f8d06505fe7cbfecc3ddb55e05cddb897e700607c8585b1cc57e5",
+      "to": "sha256:dbcada39349dde0734e1f13468df2f66a6f59e23818ca12b6f9f686ffc9d1c84"
+    },
+    {
+      "path": "schema/registry/1.0.0/kind-declaration.schema.json",
+      "family": "registry",
+      "from": "sha256:499ce129b6775636b282e944983312390267608b84f1dcace5a804332eef9501",
+      "to": "sha256:00aef2c4d8f8a48139d0ecc6680f4ac0381fb29f8bc81347c8e6757be7f0b9e7"
+    },
+    {
+      "path": "schema/registry/1.0.0/pack-check-report.schema.json",
+      "family": "registry",
+      "from": "sha256:7e6d637fddae1861bf4ed845f183b5403bee2e12d625590563d03e0b169d60ce",
+      "to": "sha256:5055c67eb97273eadbe7773f38019ffd1ddd717805b061fe1578561f2944372a"
+    },
+    {
+      "path": "schema/registry/1.0.0/registry.schema.json",
+      "family": "registry",
+      "from": "sha256:711540af3e63ad3874acb825893d9c29a391afdc970461e12c75dfe6d998d601",
+      "to": "sha256:b786f3f736ffef8b0c01fb4ea2e74872d602c3bc9069698e1e1dda1f3ba42428"
+    },
+    {
+      "path": "schema/registry/1.0.0/resolved-registry.schema.json",
+      "family": "registry",
+      "from": "sha256:f7a4fc3e515b2d27c9036d7b83f25acbd7c9e9b85cb85aad30d218ffb5c9be3a",
+      "to": "sha256:e92e4d0ffa4f1d944345e877191d9b6c24d0ed3599089975265e7589d565e53a"
+    },
+    {
+      "path": "schema/registry/1.0.0/validation-report.schema.json",
+      "family": "registry",
+      "from": "sha256:cd60dd526a0b8d14d09309c88a5c8d796de46e3d176fc75135fc3e4b23e0e1a1",
+      "to": "sha256:ae6e44841f2d5801050d51c6bc413ab5b02e7ff71473129e1eda2331246f423b"
+    }
+  ]
+}

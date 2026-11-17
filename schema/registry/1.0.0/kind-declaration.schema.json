@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://judgmentpack.org/schema/registry/1.0.0/kind-declaration.schema.json",
-  "title": "DRAFT Registry companion 1.0.0: kind declaration",
-  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A kind declaration (section 3), closed: a member section 3.1 does not list is REG-KIND-UNKNOWN-MEMBER.",
+  "title": "Registry companion 1.0.0: kind declaration",
+  "description": "Released on registry-v1.0.0 with spec/registry.md, which governs where they differ. A kind declaration (section 3), closed: a member section 3.1 does not list is REG-KIND-UNKNOWN-MEMBER.",
   "$comment": "Section 3.1's rules on pointer patterns that no position of the schema can reach (REG-KIND-POINTER-UNREACHABLE) or that a secrets and a references pattern both match (REG-KIND-POINTER-CONFLICT), and section 2.2's bound of 256 KiB, are the reader's to check.",
   "type": "object",
   "additionalProperties": false,

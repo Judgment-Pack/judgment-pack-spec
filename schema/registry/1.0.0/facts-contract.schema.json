@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://judgmentpack.org/schema/registry/1.0.0/facts-contract.schema.json",
-  "title": "DRAFT Registry companion 1.0.0: facts contract",
-  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A facts contract (section 10.3), closed.",
+  "title": "Registry companion 1.0.0: facts contract",
+  "description": "Released on registry-v1.0.0 with spec/registry.md, which governs where they differ. A facts contract (section 10.3), closed.",
   "$comment": "The strict order of facts by pointer and then type, the bound of 8 MiB, and, for a generated contract, that its members follow from the kind and the registry (sections 10.3 and 10.4), are the reader's to check.",
   "type": "object",
   "additionalProperties": false,

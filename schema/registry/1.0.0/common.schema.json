@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json",
-  "title": "DRAFT Registry companion 1.0.0: common",
-  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. Shared definitions of the companion's documents; it is the schema of no document. A pattern ends with (?![\\s\\S]), which means the end of the string in ECMA-262 and in Python, where $ may match before a final line feed.",
+  "title": "Registry companion 1.0.0: common",
+  "description": "Released on registry-v1.0.0 with spec/registry.md, which governs where they differ. Shared definitions of the companion's documents; it is the schema of no document. A pattern ends with (?![\\s\\S]), which means the end of the string in ECMA-262 and in Python, where $ may match before a final line feed.",
   "$comment": "Every document is I-JSON under the number rule of spec/registry.md section 2.2 (no negative zero, integers within 2^53 - 1, decimals that read back as the same double), with no repeated member name and a nesting depth of at most 32, within its size bound. No schema states these; a reader checks them at admission.",
   "$defs": {
     "digest": {

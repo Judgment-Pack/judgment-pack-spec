@@ -1,4 +1,4 @@
-"""The registry companion `1.0.0`, status proposed (spec/registry.md), and its rows.
+"""The registry companion `1.0.0`, status released (spec/registry.md), and its rows.
 
 The rows under conformance/registry/1.0.0/ are hand-written and synthetic. These tests hold them to
 the parts of the companion that need no registry reader: the manifest names every file and only
