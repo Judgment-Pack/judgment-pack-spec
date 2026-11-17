@@ -1,16 +1,14 @@
-# Registry rows (proposed)
+# Registry rows
 
-Hand-written rows for the registry format `1.0.0`, status `proposed`
+Hand-written rows for the registry format `1.0.0`, status `released`
 ([`spec/registry.md`](../../spec/registry.md), the companion whose design records,
 [RFC 0034](../../rfcs/0034-registry-profile.md) to [RFC 0037](../../rfcs/0037-generated-facts-contracts.md),
-are accepted). They are published with the companion's first release, `registry-v1.0.0`, at
-status `released`, which is not stable (§13): that release's own bundle carries them with the text,
-the code list and the schemas, and its release record, `releases/registry-v1.0.0.json`, names the
-digest of every file here. No Core bundle carries them, and the site does not serve them. Until
-that release they are not a conformance corpus, and no claim may cite them. The `status` of
-`codes.json` and of `manifest.json` says `proposed`, as the text's does, until the commit the tag
-names, which says `released` in all three. Every input is synthetic: the ids, owners, projects and
-values are made up, under `example.invalid`.
+are accepted). They are published with the companion's first release, `registry-v1.0.0`, which is
+released and not stable (§13): that release's own bundle carries them with the text, the code list
+and the schemas, and its release record, `releases/registry-v1.0.0.json`, names the digest of every
+file here. No Core bundle carries them, and the site does not serve them. The `status` of
+`codes.json` and of `manifest.json` says `released`, as the text's does. Every input is synthetic:
+the ids, owners, projects and values are made up, under `example.invalid`.
 
 They are not recordings. Every expectation was written by hand from the companion text, and a
 reader is held to them, never the other way round. The reference runtime (Go) is the one reader

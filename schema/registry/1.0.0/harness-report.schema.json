@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://judgmentpack.org/schema/registry/1.0.0/harness-report.schema.json",
-  "title": "DRAFT Registry companion 1.0.0: harness report",
-  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A harness report (section 11.5).",
+  "title": "Registry companion 1.0.0: harness report",
+  "description": "Released on registry-v1.0.0 with spec/registry.md, which governs where they differ. A harness report (section 11.5).",
   "$comment": "Section 11.5 says the report names the level and has one row per vector and check, pass, fail, skip with its reason, or info, but names none of their members; the schema therefore holds the selector alone and is not closed.",
   "type": "object",
   "required": [

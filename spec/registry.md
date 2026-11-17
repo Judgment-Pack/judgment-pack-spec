@@ -8,13 +8,13 @@ resolution for one environment; the YAML subset they are authored in; the facts 
 facts contracts through which a pack judges registry entries; and the contract between a host and
 the emitters that turn resolved registries into files.
 
-This text is registry format `1.0.0`, status `proposed`. The version is this document's own: it is
+This text is registry format `1.0.0`, status `released`. The version is this document's own: it is
 not a Core `specVersion`, and no pack declares it. The companion is released on its own scoped tag,
 `registry-v<major>.<minor>.<patch>`, beside Core and independent of `specVersion`; its first
-release is `registry-v1.0.0` (§13). Until a tag releases this text, it is normative for nothing,
-and no conformance claim may cite it. Once a tag releases it, it is normative for the conformance
-classes of §15, and for nothing else. Publication beside a Core release, on the site or in a Core
-bundle, releases nothing.
+release is `registry-v1.0.0` (§13). A text no registry tag released is normative for nothing, and
+no conformance claim may cite it. This text, released on `registry-v1.0.0`, is normative for the
+conformance classes of §15, and for nothing else. Publication beside a Core release, on the site or
+in a Core bundle, releases nothing.
 
 Its design records are [RFC 0034](../rfcs/0034-registry-profile.md) (the profile),
 [RFC 0035](../rfcs/0035-registry-references.md) (references),
@@ -29,18 +29,16 @@ Acceptance section says. That is a same-vendor review, not a cross-vendor claim.
 and a record differ, this text governs; §17 lists what this text settles that the records left
 open, and what it leaves open.
 
-Version `1.0.0` is proposed. Its first release makes it `released`, and not yet stable, the bar
-its records set:
+Version `1.0.0` is released, on `registry-v1.0.0`, and not yet stable, the bar its records set:
 
-- **Its rows are published with its first release.** Its machine-readable code list and its
-  hand-written, synthetic rows under
+- **Its rows are published.** Its machine-readable code list and its hand-written, synthetic
+  rows under
   [`conformance/registry/1.0.0/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/registry/1.0.0)
   (§14) are in that release's own bundle, and its release record names each file's digest (§13).
-  No Core bundle carries them, and the site does not serve them. Until that release they are not a
-  conformance corpus, and no claim may cite them.
-- **Its schemas are published with its first release.** The closed schemas of its documents under
-  [`schema/registry/1.0.0/`][schemas] (§14) are in the same bundle, and from that release on the
-  site serves each at its `$id`, and not as a file. No Core bundle carries them.
+  No Core bundle carries them, and the site does not serve them.
+- **Its schemas are published.** The closed schemas of its documents under
+  [`schema/registry/1.0.0/`][schemas] (§14) are in the same bundle, and the site serves each at its
+  `$id`, and not as a file. No Core bundle carries them.
 - **One reader exists.** The reference runtime (Go) implements §§2 to 10, and §11's host and
   harness since `v0.48.0`. No second, independently written reader, host or harness exists. The
   stable bar is two readers agreeing on every row (§15).
@@ -1437,12 +1435,12 @@ The first release is `registry-v1.0.0`, at status `released`: it is released, an
 the stability promise below starts at the first stable release. Its bundle is its own, and no Core
 bundle carries the schemas, the code list or the rows. Its release record, `releases/<tag>.json`,
 names the format, the `$id` of each schema, and the SHA-256 of this text, of every schema, of the
-code list and of every row file, and the release builder holds the tagged tree to it. This text's
-status sentence, the code list and the rows' manifest say `proposed` until the commit that tag
-names, which says `released` in all three and takes the draft wording out of each schema's title
-and description; the builder refuses the tag otherwise. A schema keeps
-the bytes its first release publishes at its `$id`: a later release of format `1.0.0` names the
-same schemas with the same digests.
+code list and of every row file, and the release builder holds the tagged tree to it. The commit a
+registry tag names says `released` in this text's status sentence, in the code list and in the
+rows' manifest, and no schema's title, description or comment in it calls the format draft or
+unreleased; the builder refuses the tag otherwise. A schema keeps the bytes its first release
+publishes at its `$id`: a later release of format `1.0.0` names the same schemas with the same
+digests.
 
 **From the first stable release**, within major version 1:
 

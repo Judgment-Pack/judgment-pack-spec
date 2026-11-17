@@ -1,7 +1,7 @@
 {
   "companion": "registry",
   "formatVersion": "1.0.0",
-  "status": "proposed",
+  "status": "released",
   "codes": [
     {"code": "REG-DOC-SIZE", "severity": "error", "status": "active", "section": "§2.2", "meaning": "a document is over its size bound, or a resolved document is (step 8)"},
     {"code": "REG-DOC-JSON", "severity": "error", "status": "active", "section": "§2.2", "meaning": "the bytes are not one JSON value in UTF-8"},

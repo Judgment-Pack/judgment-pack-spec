@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://judgmentpack.org/schema/registry/1.0.0/emit-request.schema.json",
-  "title": "DRAFT Registry companion 1.0.0: emit request",
-  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. An emit request (section 11.2), closed, in its resolved form or its facts form.",
+  "title": "Registry companion 1.0.0: emit request",
+  "description": "Released on registry-v1.0.0 with spec/registry.md, which governs where they differ. An emit request (section 11.2), closed, in its resolved form or its facts form.",
   "$comment": "That options satisfy the manifest's options schema, that declarations and their pins agree and are sorted by kind, that resolved follows the manifest's environments, that factsContracts are sorted by id and version, and the bound of 64 MiB (section 11.2) are the host's and the emitter's to check.",
   "type": "object",
   "additionalProperties": false,

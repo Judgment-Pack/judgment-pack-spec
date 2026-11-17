@@ -7,28 +7,40 @@ here.
 
 ### Added
 
-- **The registry companion's documents have closed schemas, staged** (`schema/registry/1.0.0/`,
-  format `1.0.0`, proposed with `spec/registry.md`, which governs where they differ). There is one
-  JSON Schema 2020-12 schema for each of the ten documents of §2.1, and `common.schema.json` for
-  the definitions they share. Each requires its selector at `"1.0.0"`, is closed wherever the text
-  gives a document's members, and states the forms, bounds, patterns, §12's code list and each
-  code's severity; a rule no schema can state, such as canonical order or a digest, is left to the
-  reader, and a `$comment` names its section. The harness report's schema holds only its selector,
-  since §11.5 names no other member, and the facts document (§10.1), a facts document of Core, has
-  none. As with the rows, no bundle carries the schemas and the site does not serve them; a first
-  release publishes them (§13). `tests/test_registry_schemas.py` validates every row document a
-  reader admits or writes against its schema. The status of the companion and §14 say so, and no
-  row changes. Where the text was silent, it now states the reference runtime's reading, and the
-  schemas follow it: a refused registry ends validation after step 2, so the diagnostics of the
+- **The registry companion's first release, `registry-v1.0.0`** (registry format `1.0.0`, status
+  `released`, and not stable; release notes `releases/registry-v1.0.0.md`). The text's status
+  sentence, the code list and the rows' manifest say `released`, the rows' README and its heading
+  no longer say proposed, and no schema's title or description says draft, staged, proposed or not
+  released. Its release record, `releases/registry-v1.0.0.json`, names each schema's `$id` and the
+  SHA-256 of the text, the rows' README, every schema, the code list and every row file, and
+  `releases/registry-v1.0.0.milestone.json` links the release's milestone. From this release on
+  the site serves each registry schema at its `$id`. `catalog/format-status.json` records the
+  release as the registry family's baseline, and a change record names the schemas' new digests.
+  The stable bar is unchanged: two independently written readers agreeing on every row of a class
+  (§15), where one reader, the reference runtime, exists. Core, its bundles and its corpora are
+  unchanged.
+- **The registry companion's documents have closed schemas** (`schema/registry/1.0.0/`, format
+  `1.0.0`, released with `spec/registry.md`, which governs where they differ). There is one JSON
+  Schema 2020-12 schema for each of the ten documents of §2.1, and `common.schema.json` for the
+  definitions they share. Each requires its selector at `"1.0.0"`, is closed wherever the text gives
+  a document's members, and states the forms, bounds, patterns, §12's code list and each code's
+  severity; a rule no schema can state, such as canonical order or a digest, is left to the reader,
+  and a `$comment` names its section. The harness report's schema holds only its selector, since
+  §11.5 names no other member, and the facts document (§10.1), a facts document of Core, has none.
+  As with the rows, the companion's own release bundle carries the schemas and no Core bundle does,
+  and the site serves each at its `$id` (§13). `tests/test_registry_schemas.py` validates every row
+  document a reader admits or writes against its schema. The status of the companion and §14 say so,
+  and no row changes. Where the text was silent, it now states the reference runtime's reading, and
+  the schemas follow it: a refused registry ends validation after step 2, so the diagnostics of the
   declarations step 1 admitted are still reported (§7.1); a contract's `id` and `version` take a
   kind's forms, and `values` sit only on a string, decimal or boolean, or an array of one (§10.3);
-  the check report of a refused contract has neither digest (§10.5); in a manifest, `description`
-  is a string, `deprecated` a boolean and `requestVersions` SemVer, `owns` is non-empty, the items
-  of `requestVersions`, `owns` and `env` are distinct, no two `reads` name one kind, and
-  `command`'s program follows §11.3's path rules after an optional `./` (§11.1); an emitter
-  diagnostic has exactly `code`, `severity` and `location`, and `base64` is RFC 4648 §4's, padded,
-  with no bit set past the data (§11.3); and §11.5's kind-filtering check no longer names a
-  contract digest the facts form does not carry.
+  the check report of a refused contract has neither digest (§10.5); in a manifest, `description` is
+  a string, `deprecated` a boolean and `requestVersions` SemVer, `owns` is non-empty, the items of
+  `requestVersions`, `owns` and `env` are distinct, no two `reads` name one kind, and `command`'s
+  program follows §11.3's path rules after an optional `./` (§11.1); an emitter diagnostic has
+  exactly `code`, `severity` and `location`, and `base64` is RFC 4648 §4's, padded, with no bit set
+  past the data (§11.3); and §11.5's kind-filtering check no longer names a contract digest the
+  facts form does not carry.
 - RFC 0027 (#252), a Draft, proposes bounded optional pack-design advisories for compatible
   agreement, scoped coverage and reachability, exception effects and unknown blocking. A closed
   finite-domain report proposal binds exact pack/domain bytes, distinguishes proof from possibility
@@ -39,25 +51,23 @@ here.
 ### Changed
 
 - **The registry companion's rows, code list and schemas are no longer staged: they are published
-  with its first release** (`spec/registry.md` §§13 and 14, format `1.0.0`, proposed;
-  VERSIONING.md, "Independently versioned registry companion"). That release is the scoped tag
-  `registry-v1.0.0`, at status `released`, which is not stable; this change cuts no tag. As for
-  Policy, the release builder gives a `registry-v` tag a bundle of its own,
-  `judgment-pack-registry-<version>`, with the text, the schemas, the code list, the rows and their
-  README, the checks that hold the rows to the text and the records the text links, and leaves
-  `schema/registry/` and `conformance/registry/` out of every Core bundle by path rather than by
-  `export-ignore`, which no longer marks them; `-text` does, as their digests are pinned. The
-  builder refuses a `registry-v` tag unless its release record, `releases/<tag>.json`, equals the
-  one the tree gives (each schema's `$id`, and the SHA-256 of the text, the README, every schema,
-  the code list and every row file), unless the text's status sentence, `codes.json` and the rows'
-  manifest all say `released`, and unless no schema's title or description still says draft,
-  staged, proposed or not released. They say so until the commit the tag names. An earlier
-  record of the same format, in the worktree or at a tag, must name the same schemas with the same
-  bytes. The release and deploy workflows take `registry-v` tags, and the site serves each registry
-  schema at its `$id` once the rows' manifest says `released`, so a site built for a Core release
-  before then serves none; it serves no row or schema as a file. The record, the notes,
-  the milestone link and the status flip come with the tag. `tests/test_registry_release.py` holds
-  the route, and §15's claim names the rows by the record's digests.
+  with its first release** (`spec/registry.md` §§13 and 14, format `1.0.0`; VERSIONING.md,
+  "Independently versioned registry companion"). That release is the scoped tag `registry-v1.0.0`,
+  at status `released`, which is not stable. As for Policy, the release builder gives a `registry-v`
+  tag a bundle of its own, `judgment-pack-registry-<version>`, with the text, the schemas, the code
+  list, the rows and their README, the checks that hold the rows to the text and the records the
+  text links, and leaves `schema/registry/` and `conformance/registry/` out of every Core bundle by
+  path rather than by `export-ignore`, which no longer marks them; `-text` does, as their digests
+  are pinned. The builder refuses a `registry-v` tag unless its release record,
+  `releases/<tag>.json`, equals the one the tree gives (each schema's `$id`, and the SHA-256 of the
+  text, the README, every schema, the code list and every row file), unless the text's status
+  sentence, `codes.json` and the rows' manifest all say `released`, and unless no schema's title or
+  description still says draft, staged, proposed or not released. An earlier record of the same
+  format, in the worktree or at a tag, must name the same schemas with the same bytes. The release
+  and deploy workflows take `registry-v` tags, and the site serves each registry schema at its `$id`
+  once the rows' manifest says `released`, so a site built for a Core release before then serves
+  none; it serves no row or schema as a file. `tests/test_registry_release.py` holds the route, and
+  §15's claim names the rows by the record's digests.
 - **The registry companion's closed code list gains fourteen codes** (`spec/registry.md` §12 and
   `conformance/registry/1.0.0/codes.json`, format `1.0.0`, proposed; the maintainer's ruling,
   option A). The emitter host's and harness's own refusals and warnings, which the reference

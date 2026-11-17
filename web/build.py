@@ -414,9 +414,10 @@ PAGES = (
         "The registry",
         "A companion document of the specification: kind declarations, registries, overlays and "
         "references, their validation and resolution per environment, facts contracts and the "
-        "emitter contract. Format 1.0.0, proposed, released on its own scoped tag.",
+        "emitter contract. Format 1.0.0, released on its own scoped tag, registry-v1.0.0, and not "
+        "yet stable.",
         "spec",
-        "Normative for the registry classes once a registry tag releases it; format 1.0.0 proposed",
+        "Normative for the registry classes; format 1.0.0 released on registry-v1.0.0",
         source_ref="main",
     ),
     Page(
@@ -2765,7 +2766,7 @@ conformance.
 - [The checkpoint witness statement]({guide_url(PurePosixPath("spec/checkpoint-witness/index.html"))}): a companion document, normative only for the witness-statement reader class; its vectors are staged until the next specVersion
 - [The dialect]({guide_url(PurePosixPath("spec/dialect/index.html"))}): a companion document, normative only for the preparation-verifier reader class; its vectors are staged until the next specVersion
 - [The annotation vocabulary]({guide_url(PurePosixPath("spec/annotation-vocabulary/index.html"))}): a companion document, normative only for the vocabulary-checker class; version 1.0.0 is proposed, and its rows are staged
-- [The registry]({guide_url(PurePosixPath("spec/registry/index.html"))}): a companion document, normative for nothing until a registry tag releases it; format 1.0.0 is proposed, and its first release, registry-v1.0.0, publishes its schemas, code list and rows
+- [The registry]({guide_url(PurePosixPath("spec/registry/index.html"))}): a companion document, normative only for the registry classes; format 1.0.0 is released on registry-v1.0.0, not yet stable, with its schemas, code list and rows
 - [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
 
 ## Explanations and direct answers
