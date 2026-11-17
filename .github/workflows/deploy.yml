@@ -1,6 +1,6 @@
 name: Deploy site
 
-# Publication of an explicitly planned Core or Policy release deploys its immutable tag.
+# Publication of an explicitly planned Core, Policy or registry release deploys its immutable tag.
 # The production environment retains the repository's human approval boundary.
 on:
   release:
@@ -25,7 +25,7 @@ env:
 
 jobs:
   production:
-    if: startsWith(github.event.release.tag_name, 'v') || startsWith(github.event.release.tag_name, 'policy-v')
+    if: startsWith(github.event.release.tag_name, 'v') || startsWith(github.event.release.tag_name, 'policy-v') || startsWith(github.event.release.tag_name, 'registry-v')
     runs-on: ubuntu-latest
     environment: production
     steps:

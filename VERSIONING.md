@@ -260,6 +260,38 @@ It establishes supplied-document agreement only, with the scope/exclusions of
 [the companion](spec/policy.md). Stable maturity still requires the independent
 implementation evidence in the existing governance and RFC process.
 
+## Independently versioned registry companion
+
+The [registry companion](spec/registry.md) uses the scoped tag `registry-v<releaseVersion>`, where
+`releaseVersion` is strict three-component SemVer with no prerelease or build suffix. It is the
+Policy route without its draft-only restriction: a registry release has maturity `released`, which
+is not stable. Only the tag and a maintainer-published GitHub release together establish one. The
+first is `registry-v1.0.0`; preparing it publishes nothing.
+
+A registry release names, in its own JSON release record `releases/<tag>.json` beside its notes,
+the exact format `1.0.0`, the `$id` of every schema under `schema/registry/1.0.0/`, and the SHA-256
+of the companion text, of the rows' README and of every schema; the code list with its digest and
+its number of codes; and the rows' manifest with its digest, its number of rows and the digest of
+every file under `conformance/registry/1.0.0/`. The builder derives that record from the tagged
+tree and refuses the tag unless the committed record equals it, its maturity is `released`, the
+text's status sentence, the code list and the rows' manifest all say `released`, and no schema's
+title or description still calls it a draft, staged, proposed or unreleased. They say so until the
+commit the tag names, which changes all of them.
+
+The release's bundle, `judgment-pack-registry-<releaseVersion>`, carries the text, its schemas, its
+code list and rows with their README, the checks that hold the rows to the text, the design
+records and the dialect companion the text links, this document, the license and the record and
+notes. A Core bundle carries the text and none of the registry's schema or row directories, as it
+carries none of Policy's. The site serves each registry schema at its `$id` once the rows'
+manifest says `released`, and serves no registry schema or row as a file.
+
+A schema published at its `$id` keeps its bytes: the builder refuses a release whose record and an
+earlier record of the same format, in the worktree or at an earlier registry tag, name different
+schema identities or schema bytes. A conformance claim names its class, the exact registry release
+and its complete rows, which that release's record identifies ([the companion](spec/registry.md)
+§15). The first stable release needs the second reader §15 requires, and its own reviewed change to
+the builder.
+
 ## Proposed workflow attribution model for Spec 0.5.0
 
 [RFC 0028](rfcs/0028-complete-workflow-contributors.md) stages complete contributor attribution;

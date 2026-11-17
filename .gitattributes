@@ -29,15 +29,13 @@ spec/workflow.md export-ignore
 conformance/annotation-vocabulary export-ignore
 conformance/annotation-vocabulary/** export-ignore
 
-# The registry's rows and code list are staged, hand-written and in no corpus
-# (conformance/registry/README.md), so no bundle carries them. The companion document they belong to,
-# spec/registry.md, is published.
-conformance/registry export-ignore
-conformance/registry/** export-ignore
-# The schemas of the registry's documents are staged with the proposed companion, so no bundle carries
-# them either; a first release publishes them (spec/registry.md section 13).
-schema/registry export-ignore
-schema/registry/** export-ignore
+# The registry's rows, code list and schemas are packaged independently, as Policy's are: a
+# registry-v tag's own bundle carries them with the companion's first release, and no Core bundle
+# does, since tools/build_release.py leaves the registry directories out of a Core archive's paths
+# (spec/registry.md section 13, VERSIONING.md). Their digests are pinned, and a kind declaration's
+# digest is that of its bytes as supplied, so no checkout may convert a line ending in them.
+conformance/registry/** -text
+schema/registry/** -text
 
 # Independently packaged Policy fixture/schema bytes must never undergo text conversion.
 schema/policy/** -text

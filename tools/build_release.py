@@ -215,6 +215,160 @@ def is_policy_tag(tag: str) -> bool:
     return POLICY_TAG_PATTERN.fullmatch(tag) is not None
 
 
+# The registry companion's route is the Policy route without its draft-only restriction
+# (VERSIONING.md, "Independently versioned registry companion"): a plain three-component tag, a
+# release at maturity `released`, which is not stable. Its record names the rows and the code list
+# with their digests; every file under the format's schema and row directories is pinned, derived
+# from the tree rather than listed here.
+REGISTRY_FORMAT = "1.0.0"
+REGISTRY_MATURITY = "released"
+REGISTRY_ROOT = f"conformance/registry/{REGISTRY_FORMAT}"
+REGISTRY_SCHEMA_ROOT = f"schema/registry/{REGISTRY_FORMAT}"
+REGISTRY_TEXT = "spec/registry.md"
+REGISTRY_README = "conformance/registry/README.md"
+REGISTRY_SCHEMA_NAMESPACE = f"{SCHEMA_NAMESPACE}registry/{REGISTRY_FORMAT}/"
+REGISTRY_TAG_PATTERN = re.compile(
+    r"registry-v((?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))"
+)
+# The text says its status in this one sentence; the code list and the rows' manifest say it in
+# their `status` member. All three say `proposed` until the commit a registry tag names.
+REGISTRY_STATUS_SENTENCE = re.compile(
+    rf"^This text is registry format `{re.escape(REGISTRY_FORMAT)}`, status `([a-z]+)`\.",
+    re.MULTILINE,
+)
+# What a schema's title and description say while the format is proposed (schema/registry/1.0.0).
+REGISTRY_UNRELEASED_WORDING = re.compile(
+    r"\b(?:draft|staged|proposed|not released|no bundle|no site)\b", re.IGNORECASE
+)
+REGISTRY_RECORD_KEYS = {"companion", "releaseVersion", "tag", "maturity", "formatVersion", "schemas",
+                        "codes", "corpus", "formatDigests"}
+# The text, what it and the rows' README link to, the checks that hold the rows to the text, and
+# the license. Core's corpora and Policy's are not carried.
+REGISTRY_BUNDLE_PATHS = (
+    "LICENSE", "NOTICE", "VERSIONING.md", "requirements-dev.txt",
+    REGISTRY_TEXT, "spec/dialect.md", REGISTRY_SCHEMA_ROOT, REGISTRY_README, REGISTRY_ROOT,
+    "tests/test_registry_companion.py", "tests/test_registry_schemas.py",
+    "rfcs/0034-registry-profile.md", "rfcs/0035-registry-references.md",
+    "rfcs/0036-registry-emitter-contract.md", "rfcs/0037-generated-facts-contracts.md",
+    "rfcs/0038-terraform-file-source.md",
+)
+# Independently versioned companions whose schema and row directories no Core bundle carries.
+INDEPENDENT_DIRECTORIES = ("policy", "registry")
+
+
+def is_registry_tag(tag: str) -> bool:
+    return REGISTRY_TAG_PATTERN.fullmatch(tag) is not None
+
+
+def tree_digests(directory: str, root: Path = ROOT) -> dict[str, str]:
+    """The SHA-256 of every file under a directory of the tree, by its path."""
+    paths = sorted(path for path in (root / directory).rglob("*") if path.is_file())
+    return {path.relative_to(root).as_posix(): "sha256:" + sha256(path) for path in paths}
+
+
+def registry_record(version: str, tag: str, root: Path = ROOT) -> dict:
+    """The release record the tree gives a registry tag; its record must equal it."""
+    schemas = {}
+    for path in sorted((root / REGISTRY_SCHEMA_ROOT).glob("*.schema.json")):
+        identity = REGISTRY_SCHEMA_NAMESPACE + path.name
+        if json.loads(path.read_text("utf-8")).get("$id") != identity:
+            raise ValueError("registry schema $id differs from its immutable format identity")
+        schemas[path.name[:-len(".schema.json")]] = identity
+    if not schemas:
+        raise ValueError("registry release has no schema")
+    digests = tree_digests(REGISTRY_SCHEMA_ROOT, root)
+    for path in (REGISTRY_TEXT, REGISTRY_README):
+        digests[path] = "sha256:" + sha256(root / path)
+    rows_path, codes_path = f"{REGISTRY_ROOT}/manifest.json", f"{REGISTRY_ROOT}/codes.json"
+    rows = json.loads((root / rows_path).read_text("utf-8"))
+    codes = json.loads((root / codes_path).read_text("utf-8"))
+    vectors = rows.get("vectors") if isinstance(rows, dict) else None
+    listed = codes.get("codes") if isinstance(codes, dict) else None
+    if (not isinstance(vectors, list) or not vectors or not all(isinstance(row, dict) for row in vectors)
+            or len({row.get("id") for row in vectors}) != len(vectors)):
+        raise ValueError("registry rows' manifest has no rows, or two rows share an id")
+    if not isinstance(listed, list) or not listed:
+        raise ValueError("registry code list has no codes")
+    return {"companion": "registry", "releaseVersion": version, "tag": tag,
+            "maturity": REGISTRY_MATURITY, "formatVersion": REGISTRY_FORMAT, "schemas": schemas,
+            "codes": {"path": codes_path, "sha256": "sha256:" + sha256(root / codes_path),
+                      "codes": len(listed)},
+            "corpus": {"path": rows_path, "sha256": "sha256:" + sha256(root / rows_path),
+                       "rows": len(vectors), "files": tree_digests(REGISTRY_ROOT, root)},
+            "formatDigests": digests}
+
+
+def validate_registry_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
+    """Gate the independently versioned registry companion on its own release record."""
+    record_path = root / "releases" / f"{tag}.json"
+    if not record_path.is_file():
+        raise ValueError("registry release record is missing for the exact tag")
+    release = json.loads(record_path.read_text("utf-8"))
+    if not isinstance(release, dict) or set(release) != REGISTRY_RECORD_KEYS:
+        raise ValueError("registry release record has an invalid closed shape")
+    expected = registry_record(version, tag, root)
+    for keys, message in (
+            (("companion", "releaseVersion", "tag", "maturity", "formatVersion"),
+             "registry release identity, maturity or format does not match"),
+            (("schemas",), "registry release schema identities do not match the exact format"),
+            (("formatDigests",), "registry format bytes differ from the release record"),
+            (("corpus",), "registry corpus identity or count does not match"),
+            (("codes",), "registry code list identity or count does not match")):
+        if any(release[key] != expected[key] for key in keys):
+            raise ValueError(message)
+    for previous_path in (root / "releases").glob("registry-v*.json"):
+        if previous_path == record_path or previous_path.name.endswith(".milestone.json"):
+            continue
+        if not same_registry_schemas(json.loads(previous_path.read_text("utf-8")), release):
+            raise ValueError("registry exact format identity conflicts with an earlier release record")
+    rows = json.loads((root / release["corpus"]["path"]).read_text("utf-8"))
+    codes = json.loads((root / release["codes"]["path"]).read_text("utf-8"))
+    text = REGISTRY_STATUS_SENTENCE.findall((root / REGISTRY_TEXT).read_text("utf-8"))
+    if text != [REGISTRY_MATURITY] or any(
+            (document.get("companion"), document.get("formatVersion"), document.get("status"))
+            != ("registry", REGISTRY_FORMAT, REGISTRY_MATURITY) for document in (rows, codes)):
+        raise ValueError("a registry release requires the text, the code list and the rows' "
+                         f"manifest to say status {REGISTRY_MATURITY}")
+    # A schema's bytes are served at its $id from the release on and never change, so none may
+    # still call itself a draft, or unreleased, when the release publishes it.
+    for name in release["schemas"]:
+        schema = json.loads((root / REGISTRY_SCHEMA_ROOT / f"{name}.schema.json").read_text("utf-8"))
+        title, description = schema.get("title"), schema.get("description")
+        if (not isinstance(title, str) or not isinstance(description, str)
+                or REGISTRY_UNRELEASED_WORDING.search(title + "\n" + description)):
+            raise ValueError("a registry release requires each schema's title and description to "
+                             "drop the draft and unreleased wording")
+    if not (root / "releases" / f"{tag}.md").is_file():
+        raise ValueError("registry release notes are missing for the exact tag")
+
+
+def same_registry_schemas(previous: object, release: dict) -> bool:
+    """A schema published at its $id never changes: an earlier record of the same format must
+    name the same schema identities and the same schema bytes. A record that is not of this form
+    conflicts."""
+    if not isinstance(previous, dict) or not isinstance(previous.get("formatDigests"), dict):
+        return False
+    if previous.get("formatVersion") != release["formatVersion"]:
+        return True
+
+    def pinned(record: dict) -> dict:
+        return {path: digest for path, digest in record["formatDigests"].items()
+                if path.startswith(REGISTRY_SCHEMA_ROOT + "/")}
+
+    return previous.get("schemas") == release["schemas"] and pinned(previous) == pinned(release)
+
+
+def validate_registry_history(tag: str) -> None:
+    """Compare immutable tagged records, so editing old working files cannot repoint a schema."""
+    release = json.loads((ROOT / "releases" / f"{tag}.json").read_text("utf-8"))
+    for previous in git("tag", "--list", "registry-v*").splitlines():
+        if previous == tag or not is_registry_tag(previous):
+            continue
+        old = json.loads(git("show", f"refs/tags/{previous}:releases/{previous}.json"))
+        if not same_registry_schemas(old, release):
+            raise ValueError("registry exact format conflicts with immutable tagged release history")
+
+
 def validate_policy_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     """Gate only the independently versioned, draft Policy companion surface."""
     manifest_path = root / "releases" / f"{tag}.json"
@@ -293,13 +447,16 @@ def validate_policy_history(tag: str) -> None:
 def bundle_paths(tag: str, commit: str) -> tuple[str, ...]:
     if is_policy_tag(tag):
         return (*POLICY_BUNDLE_PATHS, f"releases/{tag}.md", f"releases/{tag}.json")
-    # Policy has its own release identity. Do not carry its separately versioned
-    # schemas/corpus in a Core archive or alter the frozen Core manifests.
+    if is_registry_tag(tag):
+        return (*REGISTRY_BUNDLE_PATHS, f"releases/{tag}.md", f"releases/{tag}.json")
+    # Policy and the registry have their own release identities. Do not carry their separately
+    # versioned schemas/corpora in a Core archive or alter the frozen Core manifests; the companion
+    # texts under spec/ stay in it.
     paths = []
     for path in BUNDLE_PATHS:
         if path in ("schema", "conformance"):
             children = git("ls-tree", "--name-only", f"{commit}:{path}").splitlines()
-            paths.extend(f"{path}/{child}" for child in children if child != "policy")
+            paths.extend(f"{path}/{child}" for child in children if child not in INDEPENDENT_DIRECTORIES)
         else:
             paths.append(path)
     if tag in CORE_RC_IDENTITIES:
@@ -334,11 +491,12 @@ def git(*arguments: str) -> str:
 
 
 def release_version(tag: str) -> str:
-    policy = POLICY_TAG_PATTERN.fullmatch(tag)
-    if policy:
-        return policy.group(1)
+    scoped = POLICY_TAG_PATTERN.fullmatch(tag) or REGISTRY_TAG_PATTERN.fullmatch(tag)
+    if scoped:
+        return scoped.group(1)
     if not tag.startswith("v") or not VERSION_PATTERN.fullmatch(tag[1:]):
-        raise ValueError("release tag must be exact v-SemVer or policy-vSemVer-draft.N")
+        raise ValueError("release tag must be exact v-SemVer, policy-vSemVer-draft.N or "
+                         "registry-vMAJOR.MINOR.PATCH")
     return tag[1:]
 
 
@@ -534,6 +692,8 @@ def validate(tag: str, commit: str) -> str:
     version = release_version(tag)
     if is_policy_tag(tag):
         validate_policy_artifacts(version, tag)
+    elif is_registry_tag(tag):
+        validate_registry_artifacts(version, tag)
     else:
         validate_artifacts(version, tag)
 
@@ -551,6 +711,8 @@ def validate(tag: str, commit: str) -> str:
         )
     if is_policy_tag(tag):
         validate_policy_history(tag)
+    if is_registry_tag(tag):
+        validate_registry_history(tag)
     if git("status", "--porcelain", "--untracked-files=no"):
         raise ValueError("tracked release worktree is dirty")
     return version
@@ -567,7 +729,8 @@ def sha256(path: Path) -> str:
 def build(tag: str, commit: str, output: Path) -> list[Path]:
     version = validate(tag, commit)
     output.mkdir(parents=True, exist_ok=True)
-    artifact = "judgment-pack-policy" if is_policy_tag(tag) else "judgment-pack-spec"
+    artifact = ("judgment-pack-policy" if is_policy_tag(tag)
+                else "judgment-pack-registry" if is_registry_tag(tag) else "judgment-pack-spec")
     prefix = f"{artifact}-{version}/"
     extra = ()
     identity = release_identity(tag)

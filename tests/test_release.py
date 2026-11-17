@@ -91,7 +91,8 @@ class ReleaseBuilderTests(unittest.TestCase):
                 self.assertEqual(carried, BUILD_RELEASE.carried_spec_version(version))
         for tag, patch in (("v0.5.1", True), ("v1.0.3", True), ("v0.5.0", False),
                            ("v0.4.0", False), ("v0.5.1-rc.1", False), ("v0.3.0-rc.2", False),
-                           ("policy-v1.0.0-draft.1", False)):
+                           ("policy-v1.0.0-draft.1", False), ("registry-v1.0.0", False),
+                           ("registry-v1.0.1", False)):
             with self.subTest(tag=tag):
                 self.assertIs(patch, BUILD_RELEASE.is_patch_release(tag))
 
@@ -943,7 +944,7 @@ class CoreCarriedReleaseTests(unittest.TestCase):
         self.assertNotIn(f"releases/{self.TAG}.json", patch)
         self.assertNotIn("releases/v0.5.1.json", patch)
         for tag in ("v0.3.0", "v0.3.0-rc.1", "v0.3.0-rc.2", "v0.5.0", "v0.2.0-draft",
-                    "policy-v1.0.0-draft.1"):
+                    "policy-v1.0.0-draft.1", "registry-v1.0.0"):
             with self.subTest(tag=tag):
                 paths = BUILD_RELEASE.bundle_paths(tag, "HEAD")
                 self.assertNotIn("catalog", paths)

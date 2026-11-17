@@ -1,7 +1,7 @@
-"""The staged schemas of the registry companion's documents (schema/registry/1.0.0/).
+"""The schemas of the registry companion's documents (schema/registry/1.0.0/).
 
 They are proposed with spec/registry.md, which governs where they differ. These tests hold them to
-the text and to the staged rows: each is a JSON Schema 2020-12 schema under its `$id`; every row
+the text and to the rows: each is a JSON Schema 2020-12 schema under its `$id`; every row
 document a reader admits, or writes, validates against the schema its selector names; the code list
 the reports use is codes.json's; each closed schema refuses an unlisted member, another selector
 and a missing required member; the forms the text states are refused when broken; and no schema
@@ -13,7 +13,6 @@ import copy
 import hashlib
 import json
 import re
-import subprocess
 import unittest
 from pathlib import Path
 
@@ -124,7 +123,7 @@ def refused_documents(expected: dict) -> set[str]:
 
 
 def admitted_row_documents() -> dict[str, set[str]]:
-    """Every staged JSON file that a row says a reader admits or writes, with the reason."""
+    """Every JSON file of the rows that a row says a reader admits or writes, with the reason."""
     found: dict[str, set[str]] = {}
 
     def add(relative: str, why: str) -> None:
@@ -562,19 +561,6 @@ class RegistrySchemasText(unittest.TestCase):
                       text)
         self.assertNotIn("](../schema/registry", text)
         self.assertNotIn("do not exist yet", text)
-
-    def test_no_bundle_carries_the_schemas(self) -> None:
-        # A bundle is what git archive writes, which honours export-ignore (tools/build_release.py).
-        staged = sorted(path.relative_to(ROOT).as_posix() for path in SCHEMAS.glob("*.schema.json"))
-        released = ["schema/judgment-pack-core.schema.json", "spec/registry.md"]
-        try:
-            completed = subprocess.run(["git", "check-attr", "export-ignore", "--", *staged, *released],
-                                       cwd=ROOT, check=True, capture_output=True, text=True)
-        except (OSError, subprocess.CalledProcessError) as error:
-            self.skipTest(f"git cannot read attributes here: {error}")
-        attributes = dict(line.rsplit(": export-ignore: ", 1) for line in completed.stdout.splitlines())
-        self.assertEqual({**{path: "set" for path in staged}, **{path: "unspecified" for path in released}},
-                         attributes)
 
 
 if __name__ == "__main__":

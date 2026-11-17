@@ -28,6 +28,26 @@ here.
 
 ### Changed
 
+- **The registry companion's rows, code list and schemas are no longer staged: they are published
+  with its first release** (`spec/registry.md` §§13 and 14, format `1.0.0`, proposed;
+  VERSIONING.md, "Independently versioned registry companion"). That release is the scoped tag
+  `registry-v1.0.0`, at status `released`, which is not stable; this change cuts no tag. As for
+  Policy, the release builder gives a `registry-v` tag a bundle of its own,
+  `judgment-pack-registry-<version>`, with the text, the schemas, the code list, the rows and their
+  README, the checks that hold the rows to the text and the records the text links, and leaves
+  `schema/registry/` and `conformance/registry/` out of every Core bundle by path rather than by
+  `export-ignore`, which no longer marks them; `-text` does, as their digests are pinned. The
+  builder refuses a `registry-v` tag unless its release record, `releases/<tag>.json`, equals the
+  one the tree gives (each schema's `$id`, and the SHA-256 of the text, the README, every schema,
+  the code list and every row file), unless the text's status sentence, `codes.json` and the rows'
+  manifest all say `released`, and unless no schema's title or description still says draft,
+  staged, proposed or not released. They say so until the commit the tag names. An earlier
+  record of the same format, in the worktree or at a tag, must name the same schemas with the same
+  bytes. The release and deploy workflows take `registry-v` tags, and the site serves each registry
+  schema at its `$id` once the rows' manifest says `released`, so a site built for a Core release
+  before then serves none; it serves no row or schema as a file. The record, the notes,
+  the milestone link and the status flip come with the tag. `tests/test_registry_release.py` holds
+  the route, and §15's claim names the rows by the record's digests.
 - **The registry companion's closed code list gains fourteen codes** (`spec/registry.md` §12 and
   `conformance/registry/1.0.0/codes.json`, format `1.0.0`, proposed; the maintainer's ruling,
   option A). The emitter host's and harness's own refusals and warnings, which the reference
