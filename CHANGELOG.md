@@ -36,6 +36,17 @@ here.
   dialect source; no reader of the file exists in this repository, so the reading's results are
   checked for form only. The companion's status, §9, §11 and §12 now say where the files are. No
   Core bundle carries them, the site serves none of them, and no release record is added.
+- RFC 0039, a Draft, proposes a federated registry as registry format `1.1.0`: a manifest of
+  sources (one standard repository, the rest service repositories), an assembly from bytes the
+  caller supplies at full commit ids into one ordinary `1.0.0` registry, and an index that records
+  each document's repository, commit, path, content digest and identity. Assembly fetches nothing.
+  A repository's bounds may only tighten the standard's, compared construct by construct, and a
+  construct with no decidable comparison is refused. Nothing is built.
+- RFC 0040, a Draft, proposes registry locks and lock signatures as registry format `1.1.0`: a
+  canonical lock of a registry, its kind declarations, each environment's resolved registry and an
+  assembled index, and a detached Ed25519 signature over the lock's digest, the reference runtime's
+  pack signature design under its own prefix, checked against an expected key before the lock is
+  read. Nothing is built.
 - **The registry companion's first release, `registry-v1.0.0`** (registry format `1.0.0`, status
   `released`, and not stable; release notes `releases/registry-v1.0.0.md`). The text's status
   sentence, the code list and the rows' manifest say `released`, the rows' README and its heading
