@@ -19,11 +19,12 @@ test("installed identity is the v0.3.0 distribution", async () => {
   try {
     const inventoryPath = "releases/v0.3.0.retained-column.json";
     const inventory = JSON.parse(readFileSync(join(repo, inventoryPath), "utf8"));
-    // Core 0.5.0 changed four leaf files in place, and the dialect format 4.0.0 amendment (#316) a fifth;
-    // their v0.3.0 bytes are preserved copies (tests/fixtures/historical-compatibility/README.md). Every
-    // other leaf file is unchanged since.
+    // Core 0.5.0 changed four leaf files in place, the dialect format 4.0.0 amendment (#316) a fifth and the
+    // terraform-file kind's form (#358) a sixth; their v0.3.0 bytes are preserved copies
+    // (tests/fixtures/historical-compatibility/README.md). Every other leaf file is unchanged since.
     const preserved = new Set(["spec/judgment-pack-core.md", "spec/dialect.md", "tools/dialect_verify.py",
-                               "tools/dialect-verify-ts/src/vector.ts", "tools/dialect-verify-ts/src/verify.ts"]);
+                               "tools/dialect-verify-ts/src/vector.ts", "tools/dialect-verify-ts/src/verify.ts",
+                               "tools/dialect-verify-ts/src/forms.ts"]);
     const source = (name: string) =>
       join(repo, preserved.has(name) ? `tests/fixtures/historical-compatibility/v0.3.0/${name}` : name);
     for (const name of [inventoryPath, ...Object.keys(inventory.files)]) {
