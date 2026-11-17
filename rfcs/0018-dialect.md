@@ -21,7 +21,7 @@
   formats 4.0.0 and 4.1.0, issue #326), 2026-11-16 (the three adopted for `specVersion` `0.6.0`, and
   format 4.1.0 of RFC 0033 landed as §2.3, issues #326 and #328; the `terraform-file` source kind,
   proposed, RFC 0038), 2026-11-17 (the `terraform-file` kind's readings: a stream's `TF-SIZE`,
-  issue #353; a bound on the acquired value, issue #346)
+  issue #353; a bound on the acquired value, issue #346; a mirror of another shape, issue #347)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -1311,6 +1311,16 @@ RFC 0038's.
   files, and a reader can refuse before it allocates; the charge of eight bytes is what the
   reference runtime holds for each pointer it keeps, and a reader that charges less would accept
   files the reference reader refuses.
+
+- **A mirror whose shape differs from the value** (issue #347). Terraform writes the mirror in the
+  value's shape, and a reader must still read other input. Positions are matched as RFC 6901 tokens
+  are: a mirror member over an array names the element its name indexes, a mirror array's element
+  `k` over an object names the member `k`, and any other token names nothing; a non-empty mirror
+  object or array over a string, number, boolean or null removes that value when it marks any
+  position `true`. Step 5 is restated to match: a mirror is any value of `true`, `false`, objects
+  and arrays, and one with a string, number or null in it is `TF-SENSITIVITY`. *Why:* the reading
+  removes at least as much as any narrower one, and fails closed where no reading of the shapes can
+  say what a mark covers.
 
 **What this amendment leaves open.** What RFC 0038 and the amendment of 2026-11-16 leave open: the
 version that admits the kind, how a refusal maps to a source outcome (§9.2), the first accepted
@@ -2634,13 +2644,21 @@ nothing else: no value, member name, pointer or position. The one exception is a
 5. The read section is `resource_changes` for a `plan`, and every resource under
    `values.root_module` and its `child_modules`, recursively, for a `state`. Every resource in it,
    selected or not, carries its sensitivity mirror (`change.before_sensitive` and
-   `change.after_sensitive`, or `sensitive_values`): `true`, `false`, or an object or array of the
-   value's shape. A missing mirror, or one of another type, is `TF-SENSITIVITY`.
+   `change.after_sensitive`, or `sensitive_values`): `true`, `false`, or an object or array of
+   mirrors, Terraform writing the value's shape (step 6 reads any other). A missing mirror, or one
+   with a string, number or null at any position, is `TF-SENSITIVITY`.
 6. In each value of the read section, every position whose mirror is `true` is removed with all it
    holds: an object member is removed; an array element is never removed alone, and the array that
    holds it is removed instead, up to the nearest object member. A mirror position absent from the
    value is ignored. Nothing replaces a removed value. `removedSensitive` counts the object members
-   removed, and `after_unknown` pointers at or below a removed position are dropped.
+   removed, and `after_unknown` pointers at or below a removed position are dropped. Mirror and
+   value positions are matched as RFC 6901 tokens are, whatever their shapes: a mirror member names
+   the value's member of that name, or, over an array, the element its name indexes (`0`, or a
+   digit 1 to 9 and further digits, less than the array's length), and any other name names
+   nothing; a mirror array's element `k` names an array's element `k`, or an object's member named
+   `k` in decimal. A mirror object or array that marks any position `true`, at any depth, over a
+   string, number, boolean or null, removes that value; an empty mirror object or array removes
+   nothing.
 7. Selection, then the acquired value.
 
 A reader never reads `configuration`, `variables`, `relevant_attributes`, `checks`, `prior_state`,
@@ -2691,7 +2709,12 @@ each with one expected result:
 - a plan whose `afterUnknown` pointers repeat a long member name past sixteen times the file's
   length (`TF-VALUE-LIMIT`); a plan whose pointers fit that bound as their canonical form but not
   with eight bytes charged to each (`TF-VALUE-LIMIT`), beside one that fits both; and a file of
-  `1e63` numbers, whose value grows about 13.4 times (accepted).
+  `1e63` numbers, whose value grows about 13.4 times (accepted);
+- mirrors whose shape differs from the value, edited by hand from a recorded file, since Terraform
+  writes matching shapes: a mirror object over an array, marking an element by its index and
+  naming a member that is not an index; a mirror array over an object, marking the member `0`; a
+  mirror object over a string, marking a position below it (removed); and an empty mirror object
+  over a number (kept).
 
 ### 5. Input profiles and acquisitions
 
