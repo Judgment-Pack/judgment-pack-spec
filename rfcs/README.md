@@ -86,7 +86,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0035](0035-registry-references.md) | Registry references — entries and pinned secrets | Accepted | Specification (part of the proposed registry companion of RFC 0034; accepted on a same-vendor review, the different-vendor review waived) |
 | [0036](0036-registry-emitter-contract.md) | The registry emitter contract and its conformance harness | Accepted | Specification (part of the proposed registry companion of RFC 0034; accepted on a same-vendor review, the different-vendor review waived) |
 | [0037](0037-generated-facts-contracts.md) | Generated facts contracts: registry entries as pack facts, and typed facts builders | Accepted | Specification (part of the proposed registry companion of RFC 0034; accepted on a same-vendor review, the different-vendor review waived) |
-| [0038](0038-terraform-file-source.md) | A file-sourced dialect source: Terraform plan and state JSON | Accepted | Specification (dialect companion; accepted on a same-vendor review, the different-vendor review waived) |
+| [0038](0038-terraform-file-source.md) | A file-sourced dialect source: Terraform plan and state JSON | Accepted | Specification (dialect companion, with the reading in its own companion, `spec/terraform-file.md`, proposed; accepted on a same-vendor review, the different-vendor review waived) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md

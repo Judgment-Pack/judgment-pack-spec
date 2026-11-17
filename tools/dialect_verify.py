@@ -22,14 +22,15 @@ set of members. Since the Runner's version-3 vectors were staged it reads dialec
 document of version 3 is read as one of version 2, written one way (§2: no `provider`, `facts` or
 `evidence`, and no member written empty that the Runner's encoding leaves out when empty), its
 preparation of version 3 (§9.1); a source of `http`, `sql` or `web` (§4.3), or of `terraform-file`
-(§4.5), is held to the form its kind names and then refused as `kind-unread`; and an unbound source (§4.4) is read with the binding document it is
-given, by making the bound dialect of the two and reading that as every dialect is read. Since the
-research-contract amendment (RFC 0018, round 8) it reads `research` as §§4.3, 4.4, 5.1, 5.2, 6.4, 9 and
-11 define it: the requested fields and capabilities, the research record's typed answers and their
-citations, the profiles a source is bound to, each retained response replayed under its own profile,
-and the reconciliation read; the Runner's twenty-six research vectors hold the kind. Its
-preparation reader uses the Python standard library alone; reading a complete recording uses the
-repository's JSON Schema dependency to validate its embedded Core pack.
+(§4.5), is held to the form its kind names and then refused as `kind-unread`; and an unbound source
+(§4.4) is read with the binding document it is given, by making the bound dialect of the two and
+reading that as every dialect is read. Since the research-contract amendment (RFC 0018, round 8) it
+reads `research` as §§4.3, 4.4, 5.1, 5.2, 6.4, 9 and 11 define it: the requested fields and
+capabilities, the research record's typed answers and their citations, the profiles a source is bound
+to, each retained response replayed under its own profile, and the reconciliation read; the Runner's
+twenty-six research vectors hold the kind. Its preparation reader uses the Python standard library
+alone; reading a complete recording uses the repository's JSON Schema dependency to validate its
+embedded Core pack.
 
     python tools/dialect_verify.py --dialect mapping.json --case case.json \\
         --acquisitions sources.json --profiles profiles.json --preparation preparation.json \\

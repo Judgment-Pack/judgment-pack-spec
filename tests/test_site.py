@@ -342,6 +342,27 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("The registry", document)
         self.assertIn("REG-REPORT-TRUNCATED", document)
 
+    def test_terraform_file_companion_document_is_published(self) -> None:
+        # The reading of a terraform-file source moved out of the dialect's §4.5 into a companion
+        # of its own: a page of its own, labelled as normative for nothing until its tag, which
+        # the dialect's page and RFC 0038's page link to rather than to the source.
+        document = (self.output / "spec" / "terraform-file" / "index.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            '<span class="artifact-label">Normative for nothing until a terraform-file tag releases '
+            "it; reading 1.0.0 proposed</span>",
+            document,
+        )
+        for code in ("TF-SIZE", "TF-SENSITIVITY", "TF-VALUE-LIMIT"):
+            self.assertIn(code, document)
+        dialect = (self.output / "spec" / "dialect" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="../terraform-file/"', dialect)
+        rfc = (self.output / "rfcs" / "0038-terraform-file-source" / "index.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('href="../../spec/terraform-file/"', rfc)
+
     def test_annotation_vocabulary_companion_document_is_published(self) -> None:
         # RFC 0032 is accepted and its text landed: the companion document is a page of its own,
         # labelled with its version and status, and the RFC's page links to that page, not to the
@@ -805,6 +826,7 @@ class StaticSiteTests(unittest.TestCase):
             "spec/dialect/index.html": "spec/dialect.md",
             "spec/annotation-vocabulary/index.html": "spec/annotation-vocabulary.md",
             "spec/registry/index.html": "spec/registry.md",
+            "spec/terraform-file/index.html": "spec/terraform-file.md",
             # Rendered from the immutable final notes; docs/releases/v0.3.0.md is only a pointer.
             "project/releases/0.3.0/index.html": "releases/v0.3.0.md",
             "project/releases/0.4.0/index.html": "releases/v0.4.0.md",

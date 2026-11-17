@@ -1,8 +1,8 @@
 # RFC 0038: A file-sourced dialect source — Terraform plan and state JSON
 
 - Status: Accepted
-- Type: Standards track, the dialect companion (`spec/dialect.md`), one new source kind. Core is
-  unchanged.
+- Type: Standards track, the dialect companion (`spec/dialect.md`), one new source kind, whose
+  reading is a companion of its own (`spec/terraform-file.md`). Core is unchanged.
 - Created: 2026-11-16
 - Accepted: 2026-11-16, by the maintainer, on the same-vendor review recorded on pull request 340,
   with the different-vendor review waived; see [Acceptance](#acceptance).
@@ -13,6 +13,12 @@
 > **Accepted** on 2026-11-16 ([Acceptance](#acceptance)). The text below is proposed for the dialect companion,
 > [`spec/dialect.md`](../spec/dialect.md), as a new source kind. Until that text is released,
 > this record is normative for nothing. Core is untouched.
+>
+> *Amended 2026-11-17.* The file's declaration and its reading (§§1 to 6) are now a companion of
+> their own, [`spec/terraform-file.md`](../spec/terraform-file.md), reading `1.0.0`, proposed, to be
+> released under its own selector, `terraform-file-v1.0.0`, as released and not yet stable. The
+> dialect companion's §4.5 names the kind, gives its class and cites that text. Until a tag
+> releases it, that text too is normative for nothing.
 >
 > **Review standing.** [RFC 0009](0009-interim-review-regime.md) asks for a recorded adversarial
 > review by a model from a different vendor. That review has not happened, and this record does not
@@ -101,7 +107,7 @@ file's bytes alone, so a vector states one expected code.
    It is read to at most `maxBytes` and one byte more. A longer stream is refused (`TF-SIZE`)
    unparsed, and its diagnostic carries no sha256 and no size, since its whole length is never
    read. A stream within `maxBytes` has its sha256 and size recorded as a file's are. The
-   specification is `spec/dialect.md` §4.5, reading step 1.
+   specification is `spec/terraform-file.md` §3, step 1.
 2. **Strict JSON** (`TF-JSON`). The bytes MUST be:
    - UTF-8 with no byte-order mark, and no lone surrogate escape;
    - one JSON value, with nothing after it but whitespace;
@@ -164,7 +170,7 @@ minor of a listed major, is refused (`TF-FORMAT`).
 `format_version` of each `document` is backed by its own set of vectors, written by hand to the
 shape that Terraform's documentation of its JSON output format gives for that version, with no
 Terraform run and no recorded output. The first table is the one Unresolved question 2 records.
-The specification is `spec/dialect.md` §4.5, Accepted formats.
+The specification is `spec/terraform-file.md` §4.
 
 The table grows by a patch release of the companion, with vectors, and never shrinks within a
 dialect version. Because two readers of one dialect version can then hold tables of different
@@ -308,7 +314,7 @@ lineage or any diagnostic.
 
 *Amended 2026-11-17.* No vector is recorded: each is written by hand to the shape its
 `format_version` documents, with no Terraform run and no recorded output, and none holds a real
-project or credential. The specification is `spec/dialect.md` §4.5, Accepted formats and Vectors.
+project or credential. The specification is `spec/terraform-file.md` §§4 and 12.
 
 ## Implementation
 
@@ -330,7 +336,8 @@ pull request), and copied verbatim to [`rfcs/reviews/0034-round-1.md`](https://g
 
 The changes made after that round are not covered by it: nothing in this record, and the Status lines, notices,
 this section and the index rows that record the acceptance. Nor are the dated notes of 2026-11-17,
-which bring this record in line with `spec/dialect.md` §4.5 and record the resolved questions.
+which bring this record in line with `spec/dialect.md` §4.5 and `spec/terraform-file.md`, and
+record the resolved and deferred questions.
 
 **What this leaves unestablished.**
 
@@ -338,7 +345,8 @@ which bring this record in line with `spec/dialect.md` §4.5 and record the reso
   not a cross-vendor claim.
 - **No companion text yet.** Acceptance settles the design. The normative text, its schemas and its
   vectors come in later pull requests, and the stable-maturity bar (two readers agreeing on every
-  vector) is met there, not here.
+  vector) is met there, not here. *Amended 2026-11-17:* the text is `spec/terraform-file.md`,
+  proposed; its machine-readable code list and format table, and its vectors, are not written yet.
 
 ## Unresolved questions
 
@@ -351,11 +359,17 @@ which bring this record in line with `spec/dialect.md` §4.5 and record the reso
    with. *Resolved 2026-11-17, by the maintainer's ruling:* plan `1.0`, `1.1` and `1.2`, and state
    `1.0`, the table the reference runtime's reader holds as `proposed-1`. No Terraform release
    records the vectors: each is written by hand to its `format_version`'s documented shape (§3, as
-   amended). The table's own release number is not settled here. The specification is
-   `spec/dialect.md` §4.5, Accepted formats.
+   amended). *Settled 2026-11-17, by the maintainer's ruling:* the first table's release number is
+   `1.0.0`, a semantic version in which each newly accepted row is a patch release, and the
+   acquisition record's `formatTable` carries it. The specification is `spec/terraform-file.md` §4.
 3. **OpenTofu.** It writes the same JSON forms today. Whether `terraform-file` names both, or a
    sibling kind follows, depends on whether the formats diverge.
 4. **Outputs.** Plan and state outputs carry their own sensitivity markers, and some checks
    (an exported endpoint, for example) want them. They are left out of the first version to keep
    one read section per document.
 5. **Review regime:** as in RFC 0034, question 1.
+6. **A refusal's source outcome.** How a refusal of §2's steps maps to a source outcome (dialect
+   §9.2) is not stated here. *Deferred 2026-11-17, by the maintainer's ruling:* a refusal's source
+   outcome is defined when dialect version 3 opens (`spec/terraform-file.md` §13). The proposal,
+   open: the outcome's claim has `acquisitionStatus` `unknown` and no facts, and its `reason` is
+   the code in lower case, for example `tf-sensitivity`.
