@@ -28,6 +28,17 @@ here.
   registry id meets, and a tool that writes lines of that shape from another source refuses the
   whole run past it. §17's two open items on host and harness refusals are closed, and the earlier
   entries below that left them open are superseded. No row changes.
+- **The `terraform-file` kind joins dialect version 3, with its first format table and vectors
+  written by hand** (`spec/dialect.md` §§4, 4.3 and 4.5, proposed; RFC 0018's amendment of
+  2026-11-17 on the kind's version, first table and vectors; the maintainer's rulings). The kind is
+  `3, proposed` in §4's table, as §4.3's kinds are, which resolves RFC 0038's Unresolved question 1;
+  neither repository reader knows it yet. The first accepted table is plan `1.0`, `1.1` and `1.2`
+  and state `1.0`, the reference reader's `proposed-1`, which resolves Unresolved question 2; the
+  table's release number stays open. Each row is backed by vectors written by hand to its
+  `format_version`'s documented shape, with no Terraform run and no recorded output, in place of
+  vectors made with the Terraform release that writes it; RFC 0038 §3 and its Conformance section
+  carry dated notes saying so. §4.5 names `FACTS-ID-LIMIT` the registry companion's code. No
+  released text carries the kind, so nothing released changes.
 - **RFC 0038 §2 step 1 notes the stream reading** (#353). The RFC said the reader hashes the
   whole input; an amendment note there now points at `spec/dialect.md` §4.5, where a stream is read
   to `maxBytes` and one byte more and a longer one is `TF-SIZE` with no sha256 and no size. No
