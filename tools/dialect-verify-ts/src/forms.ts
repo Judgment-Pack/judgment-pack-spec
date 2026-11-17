@@ -35,6 +35,14 @@ const VERSION_3_KINDS = new Map<string, { required: string[]; optional: string[]
   ["sql", { required: ["statement", "bindings"], optional: [] }],
   ["web", { required: ["url"], optional: [] }],
 ]);
+// §4.5: a `terraform-file` source's members beside §4's, those it requires and those it may give, and its
+// `select`'s; the kind is of version 3, held to its form and not read here.
+const TERRAFORM_FILE = "terraform-file";
+const TERRAFORM_MEMBERS = { required: ["document", "select"], optional: ["maxBytes"] };
+const TERRAFORM_SELECT = { required: ["types"], optional: ["mode", "address", "actions", "max"] };
+const TERRAFORM_DOCUMENTS = new Set(["plan", "state"]);
+const TERRAFORM_MODES = new Set(["managed", "data"]);
+const TERRAFORM_ACTIONS = new Set(["create", "update", "delete", "read", "no-op"]);
 // §4.3, §4.4: a `research` source's members beside §4's, and its three binding members, all or none.
 const RESEARCH_MEMBERS = ["maxAge", "question", "constraints", "model", "evidence", "capabilities"];
 const RESEARCH_OPTIONAL = ["fields", "results", "acquisitionSources"];
@@ -807,6 +815,11 @@ export function readDialect(d: JVal): Dialect {
       if (v === 2) malformed(`${what} names the version-3 kind ${kind} in a version-2 dialect`);
       const members = VERSION_3_KINDS.get(kind)!;
       exact(so, what, [...base, "profile", "profileDigest", "maxAge", ...members.required], ["parameters", ...members.optional]);
+    } else if (kind === TERRAFORM_FILE) {
+      // §4.5: asserted, its file bound by the caller: no profile, no maxAge and no request
+      if (v === 2) malformed(`${what} names the version-3 kind ${kind} in a version-2 dialect`);
+      exact(so, what, [...base, ...TERRAFORM_MEMBERS.required], ["parameters", ...TERRAFORM_MEMBERS.optional]);
+      readTerraformFile(so, what);
     } else if (kind === "research") {
       // §4.3, §4.4: published unbound, with none of the three binding members, or bound, with all three
       if (v === 2) malformed(`${what} names the version-3 kind ${kind} in a version-2 dialect`);
@@ -941,7 +954,8 @@ export function readDialect(d: JVal): Dialect {
  * §4.3: the members `http`, `sql` and `web` name, held to the forms the text gives them; the kind is then not read
  * (`kind-unread`). Where the text names a member without its form — `http`'s `path`, "a template that yields a
  * path", and `headers`, "the names of the headers"; a `sql` binding's `name` and `type` — this reader takes a string
- * template for a path and non-empty strings for names. (No vector decides this.) `research` is read (readResearch).
+ * template for a path and non-empty strings for names. (No vector decides this.) `research` is read (readResearch);
+ * `terraform-file` (§4.5) is held to its form by readTerraformFile, and not read either.
  */
 function readVersion3Kind(so: JObj, kind: string, scope: Scope, what: string): void {
   const stringTemplateOf = (v: JVal | undefined, w: string) => {
@@ -984,6 +998,36 @@ function readVersion3Kind(so: JObj, kind: string, scope: Scope, what: string): v
       if (scope.get((p.m.get("$param") as { v: string }).v) !== "string") malformed(`${what}.url names a parameter that is not a string`);
     }
   }
+}
+
+/**
+ * §4.5: a `terraform-file` source's own members, held to the forms the text gives them; the kind is then not read
+ * (`kind-unread`). `document` is `plan` or `state`; `maxBytes` an integer from 1 to 268435456; `select` has `types`, a
+ * non-empty array of at most 64 distinct resource type names, and may give `mode` (`managed` or `data`), `address` (a
+ * pattern of at most 512 characters), `actions` (`plan` only, an array of `create`, `update`, `delete`, `read` and
+ * `no-op`) and `max` (an integer from 1 to 10000). A malformed `select`, or `actions` on a `state`, is malformed (§4.5,
+ * §11). Where the text names a member without a form, a resource type name, this reader takes a non-empty string, the
+ * form a name has here. (No vector decides this.)
+ */
+function readTerraformFile(so: JObj, what: string): void {
+  const document = string(so.m.get("document"), `${what}.document`);
+  if (!TERRAFORM_DOCUMENTS.has(document)) malformed(`${what}.document is not plan or state`);
+  if (so.m.has("maxBytes")) integerIn(so.m.get("maxBytes"), 1, 268435456, `${what}.maxBytes`);
+  const w = `${what}.select`;
+  const select = exact(so.m.get("select"), w, TERRAFORM_SELECT.required, TERRAFORM_SELECT.optional);
+  const types = array(select.m.get("types"), `${w}.types`).map((x, k) => nonEmpty(x, `${w}.types[${k}]`));
+  if (types.length === 0 || types.length > 64) malformed(`${w}.types is empty or longer than 64`);
+  if (new Set(types).size !== types.length) malformed(`${w}.types is not distinct`);
+  if (select.m.has("mode") && !TERRAFORM_MODES.has(string(select.m.get("mode"), `${w}.mode`))) malformed(`${w}.mode is not managed or data`);
+  // characters are code points, as the address's pattern matches them
+  if (select.m.has("address") && [...string(select.m.get("address"), `${w}.address`)].length > 512) malformed(`${w}.address is longer than 512 characters`);
+  if (select.m.has("actions")) {
+    if (document !== "plan") malformed(`${w}.actions is given on a state`);
+    array(select.m.get("actions"), `${w}.actions`).forEach((x, k) => {
+      if (!TERRAFORM_ACTIONS.has(string(x, `${w}.actions[${k}]`))) malformed(`${w}.actions[${k}] is not a plan action`);
+    });
+  }
+  if (select.m.has("max")) integerIn(select.m.get("max"), 1, 10000, `${w}.max`);
 }
 
 // ---- phase 4: the research recipe (§4.3), its bound form (§4.4), and its reads (§4.3, §6.4) ----
