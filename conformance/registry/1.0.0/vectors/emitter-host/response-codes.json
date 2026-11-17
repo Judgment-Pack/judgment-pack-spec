@@ -1,0 +1,70 @@
+{
+  "emitResponseVersion": "1.0.0",
+  "files": [],
+  "diagnostics": [
+    {
+      "severity": "warning",
+      "code": "x-queue-unused",
+      "location": {
+        "document": "registry",
+        "pointer": ""
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "x-DB_unused",
+      "location": {
+        "document": "registry",
+        "pointer": ""
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "x-abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijab",
+      "location": {
+        "document": "registry",
+        "pointer": ""
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "x-abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabc",
+      "location": {
+        "document": "registry",
+        "pointer": ""
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "x--a",
+      "location": {
+        "document": "registry",
+        "pointer": ""
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "x-a-",
+      "location": {
+        "document": "registry",
+        "pointer": ""
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "x-",
+      "location": {
+        "document": "registry",
+        "pointer": ""
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "X-queue-unused",
+      "location": {
+        "document": "registry",
+        "pointer": ""
+      }
+    }
+  ]
+}

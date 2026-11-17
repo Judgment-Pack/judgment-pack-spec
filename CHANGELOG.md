@@ -28,6 +28,14 @@ here.
   sorted by id, and two resources of one id are `TF-DOCUMENT` (#348); the reference runtime does
   not carry the key yet. §4.5 lists the vectors each reading needs beside RFC 0038's. No released
   text carries the kind, so nothing released changes.
+- **The registry companion's emitter host** (`spec/registry.md` §11, format `1.0.0`, proposed).
+  §11 adopts the reference host's stricter readings (#349): an `owns` glob follows the path rules,
+  its first segment holds no `*`, and `**` matches as in gitignore; a response's three members are
+  required; a path holds no `:`, no segment ending in `.` or a space, no Windows device name and no
+  name git reads as `.git`; an emitter code is `x-` and lower-case words, at most 64 bytes; and
+  `EMIT-MANIFEST` is adopted, with the locations of it and of `EMIT-RESPONSE`. Five staged rows,
+  operations `manifest` and `response`, exercise them. Overlap, options, links and unreadable paths
+  stay open (§17).
 
 ## `0.6.0` — 2026-11-16
 

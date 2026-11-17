@@ -1,0 +1,24 @@
+{
+  "refusals": [
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/0"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/1"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/2"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/3"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/4"
+    }
+  ]
+}

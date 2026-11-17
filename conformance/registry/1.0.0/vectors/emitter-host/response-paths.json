@@ -1,0 +1,58 @@
+{
+  "emitResponseVersion": "1.0.0",
+  "files": [
+    {
+      "path": "a/b",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "a/c/b",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen/.gitkeep",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen/.g\u200cit/y",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen/GIT~1/y",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen/a:b",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen/aux.txt",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen/com0",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen/com\u00b9",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen/ok.txt",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen/x ",
+      "text": "synthetic\n"
+    },
+    {
+      "path": "gen/x.",
+      "text": "synthetic\n"
+    }
+  ],
+  "diagnostics": []
+}

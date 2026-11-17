@@ -1,0 +1,28 @@
+{
+  "refusals": [
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/diagnostics/1/code"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/diagnostics/3/code"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/diagnostics/4/code"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/diagnostics/5/code"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/diagnostics/6/code"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/diagnostics/7/code"
+    }
+  ]
+}

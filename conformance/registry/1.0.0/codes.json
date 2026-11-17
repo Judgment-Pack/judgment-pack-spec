@@ -96,6 +96,7 @@
     {"code": "FACTS-TYPE-ORDERED", "severity": "warning", "status": "active", "section": "§10.5", "meaning": "a pack orders a pointer that is not decimal"},
     {"code": "FACTS-VALUE-UNREACHABLE", "severity": "warning", "status": "active", "section": "§10.5", "meaning": "a pack compares a pointer with a value the contract does not admit"},
     {"code": "FACTS-CHECK-LIMIT", "severity": "error", "status": "active", "section": "§10.5", "meaning": "the pack check is over its work or depth bound"},
+    {"code": "EMIT-MANIFEST", "severity": "error", "status": "active", "section": "§11.1", "meaning": "the manifest is not of its form"},
     {"code": "EMIT-REQUEST-VERSION", "severity": "error", "status": "active", "section": "§11.2", "meaning": "the host writes no request version the manifest lists, or none that carries the registry"},
     {"code": "EMIT-KIND-RANGE", "severity": "error", "status": "active", "section": "§11.2", "meaning": "a pinned kind's version is outside the manifest's range"},
     {"code": "EMIT-REQUEST", "severity": "error", "status": "active", "section": "§11.2", "meaning": "the request is over its bound, or its pins and declarations do not match"},

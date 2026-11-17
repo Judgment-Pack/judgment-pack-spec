@@ -38,8 +38,8 @@ reasons:
   and no claim may cite them.
 - **Its schemas are not written.** The closed schemas of its documents, which a first release
   publishes under `schema/registry/1.0.0/`, do not exist yet.
-- **One reader exists.** The reference runtime (Go) implements §§2 to 10. No second,
-  independently written reader exists, and no implementation of §11's host or harness exists. The
+- **One reader exists.** The reference runtime (Go) implements §§2 to 10, and §11's host and
+  harness since `v0.48.0`. No second, independently written reader, host or harness exists. The
   stable bar is two readers agreeing on every row (§15).
 
 Core is unchanged by this document. A registry is not a pack, no Core document carries a registry
@@ -791,7 +791,7 @@ A diagnostic's `location` is an object of these members, in this order of compar
 
 | Member | Form | Present |
 | --- | --- | --- |
-| `document` | `registry`, `kind`, `value`, `yaml`, `facts`, `contract` or `pack` | always |
+| `document` | `registry`, `kind`, `value`, `yaml`, `facts`, `contract` or `pack`; and, for the emitter host's own diagnostics (§11), `manifest` or `response` | always |
 | `kindDocument` | the digest of a kind declaration's bytes as supplied (§2.3) | on every diagnostic about a supplied kind declaration, except `REG-DOC-SIZE` for one that was not read whole |
 | `kind` | a kind name | on a pin's diagnostic of step 4 or 8, on `REG-PIN-UNPINNED`, on a facts contract's (§10), and on every diagnostic of step 2 for a declaration whose `kind` member is a kind name |
 | `entry` | `{"kind", "id"}` | on a diagnostic about one entry, when the entry's kind is a kind name and its id is of the entry-id grammar (§6.2) |
@@ -1106,6 +1106,16 @@ literal characters naming every path the emitter writes; `env` (optional), varia
 `EMIT-DEPRECATED`. The `owns` of two manifests in one repository MUST NOT overlap, and neither
 `command` nor `owns` names a path outside the repository root.
 
+An `owns` glob follows the path rules of §11.3, with `*` allowed in a segment and `**` only as a
+whole segment, and its first segment holds no `*`: `**`, `**/*`, `*/**` and `*` are refused, since
+a glob that owns the whole tree would let a response of one file delete every other file of the
+repository. In a glob, `*` matches any run of characters within one segment, a leading `.`
+included; `**` between two segments matches zero or more segments, so `a/**/b` matches `a/b`; and a
+trailing `**` matches one or more, so `gen/**` never matches a file named `gen`. A manifest that is
+not of this section's form is `EMIT-MANIFEST`, located in document `manifest` at the pointer of
+each member that is missing, not defined or not of its form, or at `""` when the document is not
+an object.
+
 ### 11.2 The request
 
 The host resolves the registry per environment, removes every entry and pin of a kind the manifest
@@ -1128,15 +1138,26 @@ canonical bytes; the host refuses a larger one (`EMIT-REQUEST`) before any emitt
 ### 11.3 The response
 
 The emitter writes one `{"emitResponseVersion", "files", "diagnostics"}` on standard output and
-exits 0, with a response version whose major and minor do not exceed the request's. A non-zero exit
-or a time-out is `EMIT-PROCESS`, and output that is not one valid response `EMIT-RESPONSE`. Each
-file has a `path` and exactly one of `text` (UTF-8, ending in a line feed, with no carriage return)
-or `base64`, and an optional `mode`, `"0644"` (default) or `"0755"`. A path uses `/`, is relative,
-has no `.`, `..` or empty segment and no segment beginning with `~`, does not end with `/`, holds no
-NUL, backslash or control character, matches an `owns` glob, and is unique once case is folded;
-`files` is sorted by path. Emitter diagnostics have codes beginning with `x-`, a location of §7.3's
-form and no value; an `error` among them fails the run. Bounds: a response of 64 MiB, 10 000 files,
-16 MiB per file and 512 bytes per path.
+exits 0, with a response version whose major and minor do not exceed the request's. The three
+members are required, and `files` and `diagnostics` may be empty arrays. A non-zero exit or a
+time-out is `EMIT-PROCESS`, and output that is not one valid response `EMIT-RESPONSE`, located in
+document `response` at the pointer of each member that fails. Each file has a `path` and exactly
+one of `text` (UTF-8, ending in a line feed, with no carriage return) or `base64`, and an optional
+`mode`, `"0644"` (default) or `"0755"`. A path uses `/`, is relative, has no `.`, `..` or empty
+segment and no segment beginning with `~`, does not end with `/`, holds no NUL, backslash, `:` or
+control character, matches an `owns` glob, and is unique once case is folded; `files` is sorted by
+path. So that a path means one file on every system, no segment ends in `.` or a space, which
+Windows drops; none is a Windows device name, which is `CON`, `PRN`, `AUX`, `NUL`, `CONIN$`,
+`CONOUT$`, or `COM` or `LPT` followed by a digit 1 to 9 or by `¹`, `²` or `³`, compared in any case
+with the segment's part before its first `.`, trailing spaces removed (`nul.txt` is one, `COM0` is
+not); and none is a name git reads as `.git`, as git's own `is_ntfs_dotgit` and `is_hfs_dotgit`
+checks read it: `.git` or `git~1` in any ASCII case, followed only by dots and spaces, or `.git`
+once the code points HFS+ ignores (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F and
+U+FEFF) are skipped. Emitter diagnostics have codes of `x-` and lower-case words of `a` to `z` and
+`0` to `9` joined by `-` (`^x-[a-z0-9]+(-[a-z0-9]+)*$`), at most 64 bytes, a location of §7.3's
+form and no value; an `error` among them fails the run. The grammar keeps a code short and plain,
+but cannot keep an emitter from spelling a value in one, and no host can tell that it has (§16).
+Bounds: a response of 64 MiB, 10 000 files, 16 MiB per file and 512 bytes per path.
 
 ### 11.4 The host
 
@@ -1145,7 +1166,8 @@ environment of only `PATH`, `HOME` (a fresh empty directory), `LANG=C.UTF-8` and
 `env` names, never printing an `env` value; it reads at most 64 KiB of standard error, reports only
 its size unless asked to pass it through, and imposes a wall-clock limit (120 s by default). In write
 mode it validates the whole response first, writes each file through a temporary file and a rename,
-deletes owned files the response does not hold, refuses a symbolic link at or above an owned path,
+deletes owned files the response does not hold, never entering a directory git reads as `.git`
+(§11.3), refuses a symbolic link at or above an owned path,
 and reports what it wrote and deleted: exit 0 written, 2 not written. In check mode it writes
 nothing and compares byte for byte and mode for mode: exit 0 identical, 1 different (listing paths,
 never contents), 2 could not check. A command line that cannot be parsed exits 3. An emitter MUST
@@ -1275,6 +1297,7 @@ source are the dialect's ([`dialect.md`](dialect.md) §4.5).
 | `FACTS-TYPE-ORDERED` | warning | §10.5 | a pack orders a pointer that is not decimal |
 | `FACTS-VALUE-UNREACHABLE` | warning | §10.5 | a pack compares a pointer with a value the contract does not admit |
 | `FACTS-CHECK-LIMIT` | error | §10.5 | the pack check is over its work or depth bound |
+| `EMIT-MANIFEST` | error | §11.1 | the manifest is not of its form |
 | `EMIT-REQUEST-VERSION` | error | §11.2 | the host writes no request version the manifest lists, or none that carries the registry |
 | `EMIT-KIND-RANGE` | error | §11.2 | a pinned kind's version is outside the manifest's range |
 | `EMIT-REQUEST` | error | §11.2 | the request is over its bound, or its pins and declarations do not match |
@@ -1314,11 +1337,13 @@ The code list and the rows are staged under
 with a README that says how each row is compared. Every input is synthetic. Where a file and this
 text differ, this text governs. The rows exercise admission, kind declarations, the registry's
 shape, pins, entries, overlays, both kinds of reference, bounds and warnings, resolution in two
-environments, facts batches, two generated contracts and two pack checks. They do not yet exercise
+environments, facts batches, two generated contracts, two pack checks, and the emitter host's
+manifest and response rules: whole-tree and unportable `owns` globs, response paths, `**`,
+`diagnostics` required and emitter codes. They do not yet exercise
 `REG-ENTRY-ID`, `REG-ENTRY-DUPLICATE` and `REG-ENTRY-ENVIRONMENT`; value validation (§7.2) beyond
 `REG-VALUE-RANGE` and `REG-VALUE-DEPRECATED`; YAML import, the report bound, the facts and contract limits, contract reading, authored contracts,
-wildcard reference patterns, emitters, the harness or builders, and the boundary and adversarial
-sets RFC 0034 lists.
+wildcard reference patterns, the emitter host's request, process and write rules, the harness or
+builders, and the boundary and adversarial sets RFC 0034 lists.
 
 ## 15. Conformance classes
 
@@ -1327,7 +1352,7 @@ sets RFC 0034 lists.
 | Registry reader | §§2–8, §12 | `class` `registry-reader` |
 | Importer | §9 | none yet |
 | Facts writer | §§10.1–10.4 | `class` `facts-writer` |
-| Emitter host | §§11.1–11.4 | none yet |
+| Emitter host | §§11.1–11.4 | `class` `emitter-host` |
 | Emitter harness | §11.5 | none yet |
 
 A claim names its class, the exact release, and its complete rows; a class without rows is defined,
@@ -1346,7 +1371,8 @@ readers agreeing on every row of a class.
   response is bounded, and patterns match in linear time.
 - **Authority.** Owners are identifiers, not permissions: a valid registry authorizes nothing.
 - **Residual risk.** Pinning cannot stop a store administrator replacing a version, and an emitter
-  is code the repository chose to run; the host is not a sandbox.
+  is code the repository chose to run; the host is not a sandbox. An emitter's diagnostic code of
+  §11.3's form can still spell a value, such as a run of hexadecimal digits, and no host can tell.
 
 ## 17. What this text settles, and what is open
 
@@ -1366,7 +1392,15 @@ readers agreeing on every row of a class.
 - a resolved-form emit request carries the read kinds' `declarations`, bound to their pins by
   digest, as part of request `1.0.0` (§11.2); RFC 0036 §2 names only the pins, and an emitter
   opens no file, so the reference emitters of §11.6 could not otherwise see a schema or a secret
-  position.
+  position;
+- the emitter host's stricter readings, which the reference runtime's host (`v0.48.0`) applies and
+  RFC 0036 left open: an emitter code's grammar and 64-byte bound, with the limit of what they can
+  keep out stated (§§11.3, 16); a path or glob refuses `:`, a segment ending in `.` or a space, a
+  Windows device name and a name git reads as `.git`, and the host never walks into `.git`
+  (§§11.3, 11.4); an `owns` glob's first segment holds no `*`, and `**` matches zero or more
+  segments between two others and one or more at the end, as in gitignore (§11.1); `diagnostics` is
+  required (§11.3); and `EMIT-MANIFEST`, the reference runtime's code for a manifest not of its
+  form, is adopted, with the locations of it and of `EMIT-RESPONSE` (§§7.3, 11.1, 11.3).
 
 **Open:**
 
@@ -1382,9 +1416,15 @@ readers agreeing on every row of a class.
   row stays well within the reference runtime's limits.
 - **Importer stops.** Which refusals stop an import, beyond those §9 names, is fixed by the first
   import rows.
-- **Emitter host refusals.** A malformed manifest, overlapping `owns`, options that fail their
-  schema, a link at an owned path and an unreadable path have no code in RFC 0036; their codes come
-  with the first host's rows.
+- **Emitter host refusals.** Overlapping `owns`, options that fail their schema, a link at an owned
+  path and an unreadable path have no code here. The reference runtime reports them with
+  provisional codes of its own (`EMIT-OWNS-OVERLAP`, `EMIT-OPTIONS`, `EMIT-LINK` and
+  `EMIT-PATH-UNREADABLE`), which come into §12 with the rows that exercise them.
+- **Further host readings.** The reference host is stricter than §11.3 in ways this text does not
+  state yet: it resolves each emitter diagnostic's location against the request, so a location
+  names only what the request holds; it compares paths once case is folded and they are normalized
+  (NFD), and refuses a path that is a directory of another; and it reads `base64` only in its
+  canonical form. A host that follows the text alone accepts those responses.
 - **Pattern refusal.** Whether patterns that are catastrophic for backtracking engines should also be
   refused (RFC 0034, Unresolved question 2).
 - **Review regime.** The different-vendor review was waived for the records.

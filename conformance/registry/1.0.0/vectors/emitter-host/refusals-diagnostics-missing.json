@@ -1,0 +1,8 @@
+{
+  "refusals": [
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/diagnostics"
+    }
+  ]
+}

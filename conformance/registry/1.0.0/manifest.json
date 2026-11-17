@@ -222,6 +222,57 @@
       "contract": "vectors/facts-contracts/contract-bag.json",
       "pack": "vectors/facts-contracts/pack-bag.json",
       "expected": "vectors/facts-contracts/check-bag.json"
+    },
+    {
+      "id": "manifest-owns-tree",
+      "section": "§11.1",
+      "operation": "manifest",
+      "class": "emitter-host",
+      "description": "Owns globs whose first segment holds a *: **, **/*, */**, * and gen*/x are each refused at their pointer, and gen/** and docs/*.md are not.",
+      "manifest": "vectors/emitter-host/emitter-owns-tree.json",
+      "expected": "vectors/emitter-host/refusals-owns-tree.json"
+    },
+    {
+      "id": "manifest-owns-portable",
+      "section": "§11.1",
+      "operation": "manifest",
+      "class": "emitter-host",
+      "description": "Owns globs held to the path rules: a colon, a device name with an extension, LPT and a superscript two, a segment ending in a dot or a space, .git, the short name GiT~1 and .git with a zero width joiner are refused; lpt0 and .github are not.",
+      "manifest": "vectors/emitter-host/emitter-owns-portable.json",
+      "expected": "vectors/emitter-host/refusals-owns-portable.json"
+    },
+    {
+      "id": "response-paths",
+      "section": "§11.3",
+      "operation": "response",
+      "class": "emitter-host",
+      "description": "Response paths against gen/** and a/**/b: a/b and a/c/b are owned and gen is not; .git with a zero width non-joiner, GIT~1, a colon, aux.txt, COM and a superscript one, and segments ending in a space or a dot are refused; .gitkeep, com0 and ok.txt are not.",
+      "manifest": "vectors/emitter-host/emitter.json",
+      "request": "vectors/emitter-host/request.json",
+      "response": "vectors/emitter-host/response-paths.json",
+      "expected": "vectors/emitter-host/refusals-paths.json"
+    },
+    {
+      "id": "response-diagnostics-required",
+      "section": "§11.3",
+      "operation": "response",
+      "class": "emitter-host",
+      "description": "A response without diagnostics is refused at /diagnostics, though it holds no file and nothing to report.",
+      "manifest": "vectors/emitter-host/emitter.json",
+      "request": "vectors/emitter-host/request.json",
+      "response": "vectors/emitter-host/response-diagnostics-missing.json",
+      "expected": "vectors/emitter-host/refusals-diagnostics-missing.json"
+    },
+    {
+      "id": "response-codes",
+      "section": "§11.3",
+      "operation": "response",
+      "class": "emitter-host",
+      "description": "Emitter warning codes: x-queue-unused and a code of 64 bytes are read; an upper-case letter or underscore, 65 bytes, an empty word, a trailing hyphen, x- alone and X- are refused at their code.",
+      "manifest": "vectors/emitter-host/emitter.json",
+      "request": "vectors/emitter-host/request.json",
+      "response": "vectors/emitter-host/response-codes.json",
+      "expected": "vectors/emitter-host/refusals-codes.json"
     }
   ]
 }
