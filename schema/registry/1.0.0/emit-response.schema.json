@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.0.0/emit-response.schema.json",
+  "title": "DRAFT Registry companion 1.0.0: emit response",
+  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. An emit response (section 11.3), closed.",
+  "$comment": "That files are sorted by path, unique once case is folded and matched by an owns glob, the bounds of 64 MiB per response and 16 MiB per file, and the base64 encoding (section 11.3) are the host's to check.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "emitResponseVersion",
+    "files",
+    "diagnostics"
+  ],
+  "properties": {
+    "emitResponseVersion": {
+      "const": "1.0.0"
+    },
+    "files": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/file"
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/diagnostic"
+      }
+    }
+  },
+  "$defs": {
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/relativePath"
+        },
+        "text": {
+          "description": "UTF-8 text that ends in a line feed and holds no carriage return.",
+          "type": "string",
+          "pattern": "^[^\\r]*\\n(?![\\s\\S])"
+        },
+        "base64": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "0644",
+            "0755"
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "text"
+          ]
+        },
+        {
+          "required": [
+            "base64"
+          ]
+        }
+      ]
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "location"
+      ],
+      "properties": {
+        "code": {
+          "description": "x- and lower-case words joined by '-', at most 64 bytes.",
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^x-[a-z0-9]+(-[a-z0-9]+)*(?![\\s\\S])"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning"
+          ]
+        },
+        "location": {
+          "allOf": [
+            {
+              "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/location"
+            }
+          ],
+          "properties": {
+            "document": {
+              "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/registryDocument"
+            },
+            "path": false
+          }
+        }
+      }
+    }
+  }
+}

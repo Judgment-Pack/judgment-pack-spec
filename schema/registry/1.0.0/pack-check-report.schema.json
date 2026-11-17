@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.0.0/pack-check-report.schema.json",
+  "title": "DRAFT Registry companion 1.0.0: pack check report",
+  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A pack check report (section 10.5), closed.",
+  "$comment": "The visit order of the advisories, at most one per fact condition, and the cap of a refused contract's diagnostics (sections 7.4 and 10.5) are the reader's to check.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "factsCheckFormatVersion",
+    "contract",
+    "pack",
+    "diagnostics"
+  ],
+  "properties": {
+    "factsCheckFormatVersion": {
+      "const": "1.0.0"
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "digest"
+      ],
+      "properties": {
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "pack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "digest"
+      ],
+      "properties": {
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/diagnostic"
+      }
+    }
+  }
+}

@@ -7,6 +7,18 @@ here.
 
 ### Added
 
+- **The registry companion's documents have closed schemas, staged** (`schema/registry/1.0.0/`,
+  format `1.0.0`, proposed with `spec/registry.md`, which governs where they differ). There is one
+  JSON Schema 2020-12 schema for each of the ten documents of §2.1, and `common.schema.json` for
+  the definitions they share. Each requires its selector at `"1.0.0"`, is closed wherever the text
+  gives a document's members, and states the forms, bounds, patterns, §12's code list and each
+  code's severity; a rule no schema can state, such as canonical order or a digest, is left to the
+  reader, and a `$comment` names its section. The harness report's schema holds only its selector,
+  since §11.5 names no other member, and the facts document (§10.1), a facts document of Core, has
+  none. As with the rows, no bundle carries the schemas and the site does not serve them; a first
+  release publishes them (§13). `tests/test_registry_schemas.py` validates every row document a
+  reader admits or writes against its schema. The status of the companion and §14 say so, and no
+  row changes.
 - RFC 0027 (#252), a Draft, proposes bounded optional pack-design advisories for compatible
   agreement, scoped coverage and reachability, exception effects and unknown blocking. A closed
   finite-domain report proposal binds exact pack/domain bytes, distinguishes proof from possibility

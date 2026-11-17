@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.0.0/registry.schema.json",
+  "title": "DRAFT Registry companion 1.0.0: registry",
+  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A registry (sections 4 to 6), closed at every level the text gives. A registry the schema refuses is not valid; one it admits may still be invalid.",
+  "$comment": "The reader's to check: the canonical order of kinds and entries (section 4), that pins match the supplied declarations (section 7.1, step 4), that an entry's id meets its kind's entryId pattern, its owner is in owners and its environments are declared (step 5), every overlay rule of section 5 beyond the members' forms, that secretScopes has one member per environment and no project shared (section 6.4), the values against their kinds (section 7.2), the bounds (step 8) and the size bound of 8 MiB (section 2.2).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "registryFormatVersion",
+    "id",
+    "version",
+    "environments",
+    "owners",
+    "kinds",
+    "entries"
+  ],
+  "properties": {
+    "registryFormatVersion": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/absoluteUri"
+    },
+    "version": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/version"
+    },
+    "environments": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/environment"
+      }
+    },
+    "owners": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/owner"
+      }
+    },
+    "kinds": {
+      "type": "array",
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/pin"
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    },
+    "overlays": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/overlay"
+      }
+    },
+    "secretScopes": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/environment"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gcp-sm": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/projectId"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id",
+        "owner",
+        "value"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/kindName"
+        },
+        "id": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/entryId"
+        },
+        "owner": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/owner"
+        },
+        "environments": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/environment"
+          }
+        },
+        "value": true
+      }
+    },
+    "overlay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment",
+        "patches"
+      ],
+      "properties": {
+        "environment": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/environment"
+        },
+        "patches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/patch"
+          }
+        }
+      }
+    },
+    "patch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id",
+        "set"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/kindName"
+        },
+        "id": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/entryId"
+        },
+        "set": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/pointer"
+          },
+          "additionalProperties": {
+            "not": {
+              "type": "null"
+            }
+          }
+        }
+      }
+    }
+  }
+}

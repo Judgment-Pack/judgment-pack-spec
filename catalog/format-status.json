@@ -36,6 +36,11 @@
       "baseline": null,
       "lastReleased": null
     },
+    "registry": {
+      "draftVersion": "1.0.0",
+      "baseline": null,
+      "lastReleased": null
+    },
     "retained-column": {
       "draftVersion": "1",
       "baseline": "v0.3.0",

@@ -34,6 +34,10 @@ conformance/annotation-vocabulary/** export-ignore
 # spec/registry.md, is published.
 conformance/registry export-ignore
 conformance/registry/** export-ignore
+# The schemas of the registry's documents are staged with the proposed companion, so no bundle carries
+# them either; a first release publishes them (spec/registry.md section 13).
+schema/registry export-ignore
+schema/registry/** export-ignore
 
 # Independently packaged Policy fixture/schema bytes must never undergo text conversion.
 schema/policy/** -text

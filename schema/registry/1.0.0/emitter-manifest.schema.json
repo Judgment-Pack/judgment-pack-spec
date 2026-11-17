@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.0.0/emitter-manifest.schema.json",
+  "title": "DRAFT Registry companion 1.0.0: emitter manifest",
+  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. An emitter manifest (section 11.1), closed.",
+  "$comment": "That the owns globs of two manifests do not overlap, that neither command nor owns names a path outside the repository root (the schema refuses only a program that begins with '/' or a '..' segment), and the host's size bound (section 11.1) are the host's to check. Section 11.1 gives no form for description or deprecated, so the schema holds none.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "emitterManifestVersion",
+    "id",
+    "version",
+    "owner",
+    "reads",
+    "requestVersions",
+    "command",
+    "owns"
+  ],
+  "properties": {
+    "emitterManifestVersion": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/absoluteUri"
+    },
+    "version": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/version"
+    },
+    "owner": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/owner"
+    },
+    "description": true,
+    "reads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "versions"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/kindName"
+          },
+          "id": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/absoluteUri"
+          },
+          "versions": {
+            "description": "^x.y.z, ~x.y.z, =x.y.z or >=x.y.z <x.y.z.",
+            "type": "string",
+            "pattern": "^([\\^~=](0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)|>=(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*) <(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*))(?![\\s\\S])"
+          }
+        }
+      }
+    },
+    "input": {
+      "enum": [
+        "resolved",
+        "factsContracts"
+      ]
+    },
+    "requestVersions": {
+      "$comment": "Section 11.1 calls each a request selector and gives it no other form.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "environments": {
+      "enum": [
+        "each",
+        "all"
+      ]
+    },
+    "options": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schema"
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "prefixItems": [
+        {
+          "description": "A program name with no '/', or a relative path in the repository.",
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "pattern": "^(/|\\.\\.(/|(?![\\s\\S])))"
+          }
+        }
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "owns": {
+      "type": "array",
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/ownsGlob"
+      }
+    },
+    "env": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/environmentVariable"
+          }
+        ],
+        "not": {
+          "enum": [
+            "PATH",
+            "HOME",
+            "LANG",
+            "TZ",
+            "SOURCE_DATE_EPOCH"
+          ]
+        }
+      }
+    },
+    "deprecated": true
+  },
+  "if": {
+    "required": [
+      "input"
+    ],
+    "properties": {
+      "input": {
+        "const": "factsContracts"
+      }
+    }
+  },
+  "then": {
+    "not": {
+      "required": [
+        "environments"
+      ]
+    }
+  },
+  "else": {
+    "required": [
+      "environments"
+    ]
+  }
+}

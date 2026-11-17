@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.0.0/kind-declaration.schema.json",
+  "title": "DRAFT Registry companion 1.0.0: kind declaration",
+  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A kind declaration (section 3), closed: a member section 3.1 does not list is REG-KIND-UNKNOWN-MEMBER.",
+  "$comment": "Section 3.1's rules on pointer patterns that no position of the schema can reach (REG-KIND-POINTER-UNREACHABLE) or that a secrets and a references pattern both match (REG-KIND-POINTER-CONFLICT), and section 2.2's bound of 256 KiB, are the reader's to check.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kindFormatVersion",
+    "id",
+    "version",
+    "kind",
+    "owner",
+    "schema"
+  ],
+  "properties": {
+    "kindFormatVersion": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/absoluteUri"
+    },
+    "version": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/version"
+    },
+    "kind": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/kindName"
+    },
+    "owner": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/owner"
+    },
+    "description": {
+      "type": "string"
+    },
+    "entryId": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pattern"
+      ],
+      "properties": {
+        "pattern": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/pattern"
+        }
+      }
+    },
+    "schema": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schema"
+    },
+    "secrets": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/pointerPattern"
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pointer",
+          "kinds"
+        ],
+        "properties": {
+          "pointer": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/pointerPattern"
+          },
+          "kinds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/kindName"
+            }
+          }
+        }
+      }
+    },
+    "overlayable": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/pointerPattern"
+      }
+    },
+    "bounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxEntries": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "maxEntryBytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8388608
+        }
+      }
+    },
+    "deprecated": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,390 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.0.0/facts-contract.schema.json",
+  "title": "DRAFT Registry companion 1.0.0: facts contract",
+  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A facts contract (section 10.3), closed.",
+  "$comment": "The strict order of facts by pointer and then type, the bound of 8 MiB, and, for a generated contract, that its members follow from the kind and the registry (sections 10.3 and 10.4), are the reader's to check. Section 10.3 gives no form for id and version, so they are strings here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "factsContractVersion",
+    "id",
+    "version",
+    "source",
+    "facts"
+  ],
+  "properties": {
+    "factsContractVersion": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "source": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "authored"
+          ],
+          "properties": {
+            "authored": {
+              "const": true
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "version",
+                "digest"
+              ],
+              "properties": {
+                "id": {
+                  "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/absoluteUri"
+                },
+                "version": {
+                  "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/version"
+                },
+                "digest": {
+                  "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "facts": {
+      "type": "array",
+      "maxItems": 65536,
+      "items": {
+        "$ref": "#/$defs/fact"
+      }
+    }
+  },
+  "$defs": {
+    "decimal": {
+      "description": "Core section 2.2's decimal grammar.",
+      "type": "string",
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?(?![\\s\\S])"
+    },
+    "factType": {
+      "enum": [
+        "string",
+        "decimal",
+        "boolean",
+        "null",
+        "array",
+        "object"
+      ]
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pointer",
+        "type",
+        "present"
+      ],
+      "properties": {
+        "pointer": {
+          "description": "Section 10.3: a pointer that begins with '/', of at most 35 tokens, with * and the escapes of section 3.5.",
+          "type": "string",
+          "pattern": "^(/([^/~]|~[012])*){1,35}(?![\\s\\S])"
+        },
+        "type": {
+          "$ref": "#/$defs/factType"
+        },
+        "present": {
+          "enum": [
+            "always",
+            "optional"
+          ]
+        },
+        "items": {
+          "$ref": "#/$defs/factType"
+        },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "secretReference": {
+          "const": true
+        }
+      },
+      "dependentSchemas": {
+        "items": {
+          "properties": {
+            "type": {
+              "const": "array"
+            }
+          }
+        },
+        "secretReference": {
+          "properties": {
+            "type": {
+              "const": "object"
+            }
+          }
+        },
+        "values": {
+          "properties": {
+            "type": {
+              "not": {
+                "enum": [
+                  "null",
+                  "object"
+                ]
+              }
+            }
+          },
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "array"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "items"
+            ]
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "values": {
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "decimal"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "values": {
+                "items": {
+                  "$ref": "#/$defs/decimal"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "boolean"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "values": {
+                "items": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type",
+              "items"
+            ],
+            "properties": {
+              "type": {
+                "const": "array"
+              },
+              "items": {
+                "const": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "values": {
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type",
+              "items"
+            ],
+            "properties": {
+              "type": {
+                "const": "array"
+              },
+              "items": {
+                "const": "decimal"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "values": {
+                "items": {
+                  "$ref": "#/$defs/decimal"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type",
+              "items"
+            ],
+            "properties": {
+              "type": {
+                "const": "array"
+              },
+              "items": {
+                "const": "boolean"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "values": {
+                "items": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type",
+              "items"
+            ],
+            "properties": {
+              "type": {
+                "const": "array"
+              },
+              "items": {
+                "const": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "values": {
+                "items": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type",
+              "items"
+            ],
+            "properties": {
+              "type": {
+                "const": "array"
+              },
+              "items": {
+                "const": "array"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "values": {
+                "items": {
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type",
+              "items"
+            ],
+            "properties": {
+              "type": {
+                "const": "array"
+              },
+              "items": {
+                "const": "object"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "values": {
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

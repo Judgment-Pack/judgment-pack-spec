@@ -36,8 +36,10 @@ reasons:
   [`conformance/registry/1.0.0/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/registry/1.0.0)
   (§14). They are not a conformance corpus: no bundle carries them, the site does not serve them,
   and no claim may cite them.
-- **Its schemas are not written.** The closed schemas of its documents, which a first release
-  publishes under `schema/registry/1.0.0/`, do not exist yet.
+- **Its schemas are staged.** The closed schemas of its documents are staged under
+  [`schema/registry/1.0.0/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/schema/registry/1.0.0)
+  (§14), proposed with this text. No bundle carries them, and the site serves them neither as files
+  nor at their `$id`; a first release publishes them (§13).
 - **One reader exists.** The reference runtime (Go) implements §§2 to 10, and §11's host and
   harness since `v0.48.0`. No second, independently written reader, host or harness exists. The
   stable bar is two readers agreeing on every row (§15).
@@ -1453,6 +1455,19 @@ reading, authored contracts, wildcard reference patterns, the facts-form request
 `owns`, a pin's kind id and the options schema, the emitter host's process and write rules, the
 harness's other checks, its report and its own codes (the layout rows compare only that a run is
 refused), or builders, and the boundary and adversarial sets RFC 0034 lists.
+
+The schemas are staged under
+[`schema/registry/1.0.0/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/schema/registry/1.0.0):
+one JSON Schema 2020-12 schema for each document of §2.1, which requires its selector at `"1.0.0"`,
+and `common.schema.json`, the definitions they share, which is the schema of no document. Each is
+closed wherever this text gives a document's members, and states the forms, bounds, patterns, codes
+and severities this text gives. A rule no schema can state, such as canonical form and order, a
+digest, a match between two documents, a bound in bytes, or the limits of §§3.3 and 3.4, is left to
+the reader, and a `$comment` names its section. A schema states only rules of this text, so a
+document it refuses is not of this text's form, and one it admits may still fail a rule it cannot
+state. The harness report's schema holds only its selector, since §11.5 names none of its other
+members. The facts document (§10.1) has none here: it is a facts document of Core. Every row
+document a reader admits or writes validates against its schema.
 
 ## 15. Conformance classes
 
