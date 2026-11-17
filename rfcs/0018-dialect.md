@@ -22,7 +22,7 @@
   format 4.1.0 of RFC 0033 landed as §2.3, issues #326 and #328; the `terraform-file` source kind,
   proposed, RFC 0038), 2026-11-17 (the `terraform-file` kind's readings: a stream's `TF-SIZE`,
   issue #353; a bound on the acquired value, issue #346; a mirror of another shape, issue #347;
-  the batch id bound, issue #351)
+  the batch id bound, issue #351; deposed objects, issue #348)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -1292,9 +1292,9 @@ a version admits it, the kind is defined and not claimable (§4).
 
 This amendment settles readings of §4.5 that RFC 0038 left open, before any specification version
 carries the kind. The Specification and companion are amended equally, in §4.5 only; Core is
-unchanged, and so is every file of the `0.6.0` normative record. Each reading is what the reference
-runtime's reader does (`v0.48.0`), and §4.5 gains a list of the vectors each reading needs beside
-RFC 0038's.
+unchanged, and so is every file of the `0.6.0` normative record. Each reading but the last is what
+the reference runtime's reader does (`v0.48.0`); the last, deposed objects, is a choice the reader
+does not yet follow. §4.5 gains a list of the vectors each reading needs beside RFC 0038's.
 
 - **A stream's `TF-SIZE`** (issue #353). A file is still read to its end, and its `TF-SIZE` carries
   the whole file's sha256 and size. An input read as a stream, such as standard input, is read to
@@ -1331,6 +1331,21 @@ RFC 0038's.
   tool writes is one that evaluation reads; refusing the run, rather than leaving a line out, keeps
   a gate from passing a plan whose riskiest resource it never judged. The code is the batch tool's,
   not the dialect's, as the batch is a product format.
+
+- **Deposed objects** (issue #348). A deposed object, one an apply replaced but has not yet
+  destroyed, shares its resource's address, and RFC 0038 neither carried its deposed key nor said
+  how the two are told apart. This is a design choice, not the reference runtime's reading, which
+  carries no key. A resource's deposed key (`deposed` in a plan, `deposed_key` in a state) is a
+  string when present, and its **id** is its address, or its address, ` deposed ` and the key. Two
+  resources of the read section with one id are `TF-DOCUMENT`; the acquired object carries the key
+  as `deposed`; the value is sorted by id; and a batch line's id is the resource's id, under the
+  256-byte bound. *Why:* the smallest change that keeps every batch id unique and bounded. Dropping
+  deposed objects would let a gate pass a plan without judging a destroy; folding the key into
+  `address` would change what `select.address` and packs read; ids by position change when the
+  file does; refusing every deposed object refuses real output; and a check in the batch alone
+  would leave the dialect's value with two objects it cannot order. Terraform writes the current
+  object and its deposed ones under one address with distinct keys, so its own output never has
+  two resources of one id.
 
 **What this amendment leaves open.** What RFC 0038 and the amendment of 2026-11-16 leave open: the
 version that admits the kind, how a refusal maps to a source outcome (§9.2), the first accepted
@@ -2625,7 +2640,7 @@ because the dialect's source kinds are defined in this section. It is proposed: 
 version 3 or opens the next version is open (RFC 0038, Unresolved question 1), no preparation reader
 implements it, and no vector holds one, so it is defined, and not claimable (§4). The reference
 runtime reads the file (`v0.48.0`), and where this section settles what RFC 0038 left open, it says
-what that reader does.
+what that reader does, except for deposed objects (step 4), which that reader does not yet carry.
 
 A `terraform-file` source has, besides the members of §4, exactly `document` (`plan` or `state`:
 which output of `terraform show -json` the file is), `select` (below) and `maxBytes` (optional, an
@@ -2650,7 +2665,12 @@ nothing else: no value, member name, pointer or position. The one exception is a
    `document`; otherwise `TF-FORMAT`.
 4. A `plan` has `planned_values`, an object, and `resource_changes`, when present, an array (absent
    reads as empty). A `state` has neither `planned_values` nor `resource_changes`, and `values`, when
-   present, is an object (absent reads as no resources). Otherwise `TF-DOCUMENT`.
+   present, is an object (absent reads as no resources). Otherwise `TF-DOCUMENT`. A resource of the
+   read section (step 5) that is a deposed object, one an apply replaced but has not yet destroyed,
+   has a **deposed key**, `deposed` in a `plan` and `deposed_key` in a `state`, which is a string.
+   A resource's **id** is its `address`, or, with a deposed key, its `address`, a space, `deposed`,
+   a space and the key. A deposed key of another type, or two resources of the read section with
+   one id, is `TF-DOCUMENT`.
 5. The read section is `resource_changes` for a `plan`, and every resource under
    `values.root_module` and its `child_modules`, recursively, for a `state`. Every resource in it,
    selected or not, carries its sensitivity mirror (`change.before_sensitive` and
@@ -2689,11 +2709,12 @@ an integer from 1 to 10000 (default 1000), past which the acquisition is `TF-SEL
 on a `state`, or a malformed `select`, makes the dialect invalid (§11). Child-module resources are
 included with their full address; selecting nothing gives an empty array.
 
-**The acquired value** is an array sorted by `address` in code-point order, one object per selected
-resource: for a `state`, `{"address", "type", "name", "mode", "providerName", "index"?, "values"}`;
-for a `plan`, the same with `actions`, `before`, `after` and `afterUnknown` (the sorted pointers, in
-`after`, of values known only after apply) in place of `values`. Numbers become decimal strings in
-the registry companion's normal form ([`spec/registry.md`](../spec/registry.md) §10.1), with `0` for
+**The acquired value** is an array sorted by id in code-point order, one object per selected
+resource: for a `state`, `{"address", "type", "name", "mode", "providerName", "index"?, "deposed"?,
+"values"}`, with `deposed` the deposed key, present only for a deposed object; for a `plan`, the
+same with `actions`, `before`, `after` and `afterUnknown` (the sorted pointers, in `after`, of
+values known only after apply) in place of `values`. Numbers become decimal strings in the
+registry companion's normal form ([`spec/registry.md`](../spec/registry.md) §10.1), with `0` for
 every zero; one whose normal form would be longer than 64 characters is `TF-NUMBER`. The value is
 then bounded by `L`, the lesser of 268435456 and sixteen times the file's length in bytes. It is
 `TF-VALUE-LIMIT`, after `TF-SELECT-BOUND` and `TF-NUMBER`, when its canonical form (RFC 8785) is
@@ -2706,9 +2727,9 @@ multiple. The reads of §6 then turn the value into facts. The acquisition recor
 "formatVersion", "formatTable", "sha256", "bytes", "removedSensitive", "selected"}`, with no path.
 
 A reference runtime may also write the acquired value as an evaluation batch, one line per selected
-resource with id `<address>` and facts `{"terraform": {"document", "formatVersion", "sha256"},
-"resource": …}`; that batch is a product format, not a dialect member. Each line's id is 1 to 256
-bytes of UTF-8, the bound the reference runtime's batch evaluation holds an item's id to. A
+resource with the resource's id (step 4) and facts `{"terraform": {"document", "formatVersion",
+"sha256"}, "resource": …}`; that batch is a product format, not a dialect member. Each line's id is
+1 to 256 bytes of UTF-8, the bound the reference runtime's batch evaluation holds an item's id to. A
 selected resource whose id is outside it refuses the whole run, before any line is written, with
 the batch tool's own code `FACTS-ID-LIMIT`, which is not a dialect code: every selected resource is
 checked for it before any facts document is held to the registry companion's facts bound
@@ -2734,7 +2755,12 @@ each with one expected result:
   over a number (kept);
 - for the reference runtime's batch, a selected resource whose address is 256 bytes (one line,
   with that id), and one of 257 bytes beside a resource whose facts document is over the facts
-  bound (`FACTS-ID-LIMIT`, and no line).
+  bound (`FACTS-ID-LIMIT`, and no line);
+- deposed objects: a plan whose replacement left a deposed object to delete, and a state holding a
+  deposed object beside its current one, each carried with `deposed` and sorted after the current
+  object; edited by hand, two resources of one id, and a deposed key that is a number (each
+  `TF-DOCUMENT`); and, for the batch, a deposed object whose id passes 256 bytes while its address
+  does not (`FACTS-ID-LIMIT`).
 
 ### 5. Input profiles and acquisitions
 

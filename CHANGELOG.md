@@ -23,9 +23,11 @@ here.
   more, and past it is `TF-VALUE-LIMIT` (#346). A sensitivity mirror of another shape than its
   value is matched as JSON Pointer tokens are, and one that marks a position below a scalar
   removes the scalar (#347). A batch line's id is 1 to 256 bytes, and a resource outside that
-  refuses the whole run, `FACTS-ID-LIMIT`, before any line is written (#351). §4.5 lists the
-  vectors each reading needs beside RFC 0038's. No released text carries the kind, so nothing
-  released changes.
+  refuses the whole run, `FACTS-ID-LIMIT`, before any line is written (#351). A deposed object
+  carries its key as `deposed`, its id is its address, ` deposed ` and the key, the value is
+  sorted by id, and two resources of one id are `TF-DOCUMENT` (#348); the reference runtime does
+  not carry the key yet. §4.5 lists the vectors each reading needs beside RFC 0038's. No released
+  text carries the kind, so nothing released changes.
 
 ## `0.6.0` — 2026-11-16
 
