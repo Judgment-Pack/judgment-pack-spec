@@ -194,15 +194,18 @@ jobs:
           --commit "${GITHUB_SHA}"
           --output dist
 
-      # A plain vMAJOR.MINOR.PATCH tag is drafted as a release the maintainer publishes. Every other
-      # tag (a release candidate, a policy-v or registry-v tag), and any route value but evidence, is
-      # drafted as a pre-release.
+      # A plain vMAJOR.MINOR.PATCH tag is drafted as a release the maintainer publishes. A plain
+      # registry-vMAJOR.MINOR.PATCH tag is drafted as a full release that is never marked latest, so
+      # Core's latest release stays the latest. Every other tag (a release candidate, a policy-v tag,
+      # a registry-v tag with a suffix), and any other route value for a v tag, is a pre-release.
       - name: Create draft release
         shell: bash
         run: |
           prerelease=(--prerelease)
           if [[ "${RELEASE_ROUTE}" == "evidence" ]]; then
             prerelease=()
+          elif [[ "${GITHUB_REF_NAME}" =~ ^registry-v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            prerelease=(--latest=false)
           fi
           gh release create "${GITHUB_REF_NAME}" \
             dist/* \

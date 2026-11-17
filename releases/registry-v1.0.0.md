@@ -4,7 +4,7 @@
 ([`spec/registry.md`](../spec/registry.md)): registry format `1.0.0`, at status `released`. It is
 tagged on the companion's own scoped route, beside Core and independent of `specVersion`, as the
 Policy companion's releases are ([VERSIONING.md](../VERSIONING.md)). Tagged on
-<!-- PLACEHOLDER(tag-date) -->.
+2026-11-17.
 
 - **Released, and not stable.** The text is normative for the conformance classes of its §15, and
   for nothing else. The stability promise of its §13 starts at the first stable release, and the bar

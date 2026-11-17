@@ -371,6 +371,37 @@ class ReleaseWorkflowTests(unittest.TestCase):
                 with self.subTest(route=value):
                     self.assertIn("--prerelease", drafted(value))
 
+    def test_a_plain_registry_tag_is_drafted_as_a_full_release_that_is_not_latest(self):
+        # A plain registry-vMAJOR.MINOR.PATCH tag takes the fresh route, and is drafted as a full
+        # release with --latest=false; any other registry-v or policy-v tag stays a pre-release.
+        draft = script_of(step_named(self.jobs["release"], DRAFT_STEP))
+        with tempfile.TemporaryDirectory() as directory:
+            stub = Path(directory) / "bin"
+            stub.mkdir()
+            (stub / "gh").write_text('#!/bin/bash\nprintf "%s\\n" "$@" > "${GH_ARGUMENTS}"\n')
+            (stub / "gh").chmod(0o755)
+            (stub / "bash").symlink_to(shutil.which("bash"))
+            arguments = Path(directory) / "arguments"
+
+            def drafted(tag, route_value="fresh"):
+                arguments.unlink(missing_ok=True)
+                run_step(draft, {"PATH": str(stub), "RELEASE_ROUTE": route_value, "GH_ARGUMENTS": str(arguments),
+                                 "GITHUB_REF_NAME": tag}, directory)
+                return arguments.read_text().splitlines()
+
+            for tag in ("registry-v1.0.0", "registry-v1.10.2", "registry-v0.1.0"):
+                with self.subTest(tag=tag):
+                    called = drafted(tag)
+                    self.assertIn("--draft", called)
+                    self.assertIn("--latest=false", called)
+                    self.assertNotIn("--prerelease", called)
+            for tag in ("registry-v1.0.0-rc.1", "registry-v01.0.0", "registry-v1.0", "registry-v1.0.0x",
+                        "policy-v1.0.0", "policy-v1.0.0-draft.1", "xregistry-v1.0.0"):
+                with self.subTest(tag=tag):
+                    called = drafted(tag)
+                    self.assertIn("--prerelease", called)
+                    self.assertNotIn("--latest=false", called)
+
     def test_the_evidence_job_sets_up_its_runner_as_main_ci_does(self):
         evidence = self.jobs["evidence"]
         [ci] = self.conformance.values()
