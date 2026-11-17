@@ -1,0 +1,44 @@
+{
+  "references": [
+    {
+      "entry": {
+        "id": "billing",
+        "kind": "queue"
+      },
+      "file": "gen/cut.txt",
+      "pointer": "/password"
+    },
+    {
+      "entry": {
+        "id": "orders",
+        "kind": "queue"
+      },
+      "file": "gen/cut.txt",
+      "pointer": "/password"
+    },
+    {
+      "entry": {
+        "id": "orders",
+        "kind": "queue"
+      },
+      "file": "gen/name.txt",
+      "pointer": "/password"
+    },
+    {
+      "entry": {
+        "id": "billing",
+        "kind": "queue"
+      },
+      "file": "gen/rewritten.txt",
+      "pointer": "/password"
+    },
+    {
+      "entry": {
+        "id": "orders",
+        "kind": "queue"
+      },
+      "file": "gen/rewritten.txt",
+      "pointer": "/password"
+    }
+  ]
+}

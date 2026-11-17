@@ -1,0 +1,21 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/queues",
+  "version": "1.0.0",
+  "environments": ["dev"],
+  "owners": ["platform-data"],
+  "kinds": [
+    { "kind": "note", "id": "https://example.invalid/kinds/note", "version": "1.0.0", "digest": "sha256:04f87bb7c59db29358e778691071263afbf3be950a103f2968b03b952a996081" },
+    { "kind": "queue", "id": "https://example.invalid/kinds/queue", "version": "1.2.0", "digest": "sha256:af125ceb6a64095a65c20c4579978093ba125fdd2442a3719bdda4db18b6a88b" }
+  ],
+  "entries": [
+    { "kind": "note", "id": "unread", "owner": "platform-data", "value": { "text": "not read" } },
+    { "kind": "queue", "id": "billing", "owner": "platform-data",
+      "value": { "name": "billing", "password": "secret:gcp-sm:projects/example-dev/secrets/billing-queue/versions/1" } },
+    { "kind": "queue", "id": "orders", "owner": "platform-data",
+      "value": { "name": "orders", "password": "secret:gcp-sm:projects/example-dev/secrets/orders-queue/versions/3" } }
+  ],
+  "secretScopes": {
+    "dev": { "gcp-sm": ["example-dev"] }
+  }
+}

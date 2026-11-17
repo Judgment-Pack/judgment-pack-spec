@@ -1176,17 +1176,46 @@ locale, time zone, map order or network.
 
 ### 11.5 The harness
 
-The harness runs an author's vectors (`request.json`, or `registry.json` with `kinds/` and an
-optional `options.json`; and `expected/` or `expected-failure.json`) at the level named by
-`vectors/harness.json` (`{"harnessLevel": "1.0"}`, the default). Level `1.0` applies six checks to
-every vector: golden equality; determinism over three runs with a different `HOME`, `TZ`, `LANG`
-and `SOURCE_DATE_EPOCH`; every path rule and bound of §11.3, with hostile responses substituted;
-kind filtering, with a synthetic undeclared kind added; references, failing a file that holds a run
-of at least 32 characters of a secret reference (or all of a shorter one) outside a complete
-occurrence of it; and no stray writes (`EMIT-STRAY-WRITE`). A check that can fail a vector is added
-only at a new level. The report (`harnessReportVersion` `"1.0.0"`) names the level and has one row
-per vector and check: pass, fail, skip with its reason, or info. The harness exits 0 when nothing
-fails, 1 when a check fails, and 2 when it could not run.
+The harness runs an author's vectors at the level named by `vectors/harness.json`
+(`{"harnessLevel": "1.0"}`, the default). A vector is a directory holding exactly one of
+`request.json` and `registry.json`, with `kinds/` and an optional `options.json` beside
+`registry.json` and neither beside `request.json`, from which the harness forms the request as the
+host does; and exactly one of `expected/`, holding the files the response must contain by their
+paths below it, and `expected-failure.json`. Since git keeps no empty directory, a run that writes
+no files is recorded by the marker `expected/~empty`: a zero-byte regular file alone at the root of
+`expected/`, read as no files, which no response path can name (§11.3). The marker anywhere else,
+of another size or kind, or beside any other entry is not of this layout, nor is an `expected/` that
+holds no regular file and no marker; a missing `expected/` is never read as empty. `--update` writes
+`expected/` from a run, or the marker alone for a run that wrote no files. A vector not of this
+layout refuses the whole run.
+
+Level `1.0` applies six checks to every vector:
+
+1. golden equality;
+2. determinism over three runs with a different `HOME`, `TZ`, `LANG` and `SOURCE_DATE_EPOCH`;
+3. every path rule and bound of §11.3, with crafted responses substituted for the emitter's;
+4. kind filtering: the harness forms the request again from the registry with an entry of a
+   synthetic kind the manifest does not read, and that kind's declaration and pin, added; sets
+   every registry digest in it to the original request's at the same place (each resolved
+   document's `registry.digest`, and in the facts form each contract's `source.registry.digest`),
+   since the entry changes the registry's digest and an emitter may write that digest into a file
+   it generates; requires the result to be the original request's bytes; and only then runs the
+   emitter on it and requires the response unchanged;
+5. references: for each string R at a secret position of the request (in every environment it
+   holds) and each file, as text or its bytes read as Latin-1, the file fails when it holds a run of
+   at least 32 consecutive characters of R (all of R, if R is shorter) that lies inside no complete
+   occurrence of any string at a secret position of the request. Two whole references that share a
+   prefix pass; a reference cut short, or rewritten around its name and version, fails. A failure
+   names the file, the entry and the pointer of R's first position and, for `"each"`, the
+   environment, never R;
+6. no stray writes (`EMIT-STRAY-WRITE`).
+
+A vector that gives its request whole skips checks 4 and 5, having no registry to add a kind to or
+to find secret positions by; a facts-form request skips check 5, since it holds no secret position;
+a request refused before the emitter runs skips both, and a run that fails skips check 5. A check
+that can fail a vector is added only at a new level. The report (`harnessReportVersion` `"1.0.0"`)
+names the level and has one row per vector and check: pass, fail, skip with its reason, or info. The
+harness exits 0 when nothing fails, 1 when a check fails, and 2 when it could not run.
 
 ### 11.6 Reference emitters
 
@@ -1337,13 +1366,15 @@ The code list and the rows are staged under
 with a README that says how each row is compared. Every input is synthetic. Where a file and this
 text differ, this text governs. The rows exercise admission, kind declarations, the registry's
 shape, pins, entries, overlays, both kinds of reference, bounds and warnings, resolution in two
-environments, facts batches, two generated contracts, two pack checks, and the emitter host's
-manifest and response rules: whole-tree and unportable `owns` globs, response paths, `**`,
-`diagnostics` required and emitter codes. They do not yet exercise
-`REG-ENTRY-ID`, `REG-ENTRY-DUPLICATE` and `REG-ENTRY-ENVIRONMENT`; value validation (§7.2) beyond
-`REG-VALUE-RANGE` and `REG-VALUE-DEPRECATED`; YAML import, the report bound, the facts and contract limits, contract reading, authored contracts,
-wildcard reference patterns, the emitter host's request, process and write rules, the harness or
-builders, and the boundary and adversarial sets RFC 0034 lists.
+environments, facts batches, two generated contracts, two pack checks; the emitter host's manifest
+and response rules (whole-tree and unportable `owns` globs, response paths, `**`, `diagnostics`
+required and emitter codes) and its request, with a kind it does not read; and the harness's
+references check and the `expected/` marker. They do not yet exercise `REG-ENTRY-ID`,
+`REG-ENTRY-DUPLICATE` and `REG-ENTRY-ENVIRONMENT`; value validation (§7.2) beyond `REG-VALUE-RANGE`
+and `REG-VALUE-DEPRECATED`; YAML import, the report bound, the facts and contract limits, contract
+reading, authored contracts, wildcard reference patterns, the facts-form request, the emitter host's
+process and write rules, the harness's other checks and its report, or builders, and the boundary
+and adversarial sets RFC 0034 lists.
 
 ## 15. Conformance classes
 
@@ -1353,7 +1384,7 @@ builders, and the boundary and adversarial sets RFC 0034 lists.
 | Importer | §9 | none yet |
 | Facts writer | §§10.1–10.4 | `class` `facts-writer` |
 | Emitter host | §§11.1–11.4 | `class` `emitter-host` |
-| Emitter harness | §11.5 | none yet |
+| Emitter harness | §11.5 | `class` `emitter-harness` |
 
 A claim names its class, the exact release, and its complete rows; a class without rows is defined,
 and not claimable. The pack check (§10.5) is in no class. The stable bar is two independently written
@@ -1400,7 +1431,19 @@ readers agreeing on every row of a class.
   (§§11.3, 11.4); an `owns` glob's first segment holds no `*`, and `**` matches zero or more
   segments between two others and one or more at the end, as in gitignore (§11.1); `diagnostics` is
   required (§11.3); and `EMIT-MANIFEST`, the reference runtime's code for a manifest not of its
-  form, is adopted, with the locations of it and of `EMIT-RESPONSE` (§§7.3, 11.1, 11.3).
+  form, is adopted, with the locations of it and of `EMIT-RESPONSE` (§§7.3, 11.1, 11.3);
+- the harness's kind-filtering check compares requests, with every registry digest restored, before
+  it compares responses (§11.5): RFC 0036 §5 compares responses alone, and the synthetic entry
+  changes the registry's digest, which an emitter may write into a file, so an emitter that does
+  would fail;
+- a run passes the references check when it lies inside a complete occurrence of any string at a
+  secret position, not only of its own (§11.5): RFC 0036 §5's "of R" fails two whole references of
+  one project, which share a prefix of more than 32 characters;
+- a vector that gives its request whole skips the references check as well as kind filtering, as
+  the reference harness does (§11.5);
+- the vector layout and its marker `expected/~empty` of a run that writes no files (§11.5), which
+  the reference harness (`v0.48.0`) reads; RFC 0036 §5 names the files and gives no marker, and git
+  keeps no empty `expected/`.
 
 **Open:**
 
@@ -1420,6 +1463,11 @@ readers agreeing on every row of a class.
   path and an unreadable path have no code here. The reference runtime reports them with
   provisional codes of its own (`EMIT-OWNS-OVERLAP`, `EMIT-OPTIONS`, `EMIT-LINK` and
   `EMIT-PATH-UNREADABLE`), which come into §12 with the rows that exercise them.
+- **Harness refusals.** A vector set not of §11.5's layout, a harness bound reached, and an
+  unreadable vector file have no code here. The reference harness reports them with provisional
+  codes of its own (`EMIT-VECTOR`, `EMIT-HARNESS-BOUND` and `EMIT-PATH-UNREADABLE`), located in a
+  document `vector` by a path below the vectors, which §7.3's location has no member for; the
+  layout rows compare only that the run is refused.
 - **Further host readings.** The reference host is stricter than §11.3 in ways this text does not
   state yet: it resolves each emitter diagnostic's location against the request, so a location
   names only what the request holds; it compares paths once case is folded and they are normalized
