@@ -425,16 +425,23 @@ def terraform_file_cases() -> list[tuple[str, str, Any]]:
     astral = "\U0001d4b3"  # one code point, two UTF-16 code units
     cases: list[tuple[str, str, Any]] = []
 
-    def build(sources: list[dict[str, Any]], version: int) -> Inputs:
+    def build(sources: list[dict[str, Any]], version: int, raw: dict[str, str]) -> Inputs:
         inputs = Inputs("version-3-bound", REQUIRES_BINDING["version-3-bound"])
         document = json.loads(inputs.dialect)
         document["version"] = version
         document["sources"].extend(sources)
-        inputs.dialect = json.dumps(document).encode("utf-8")
+        text = json.dumps(document)
+        # a number literal json.dumps cannot write, such as `1e2`, stands in the document as a
+        # quoted placeholder until here
+        for placeholder, literal in raw.items():
+            assert text.count(json.dumps(placeholder)) == 1, placeholder
+            text = text.replace(json.dumps(placeholder), literal)
+        inputs.dialect = text.encode("utf-8")
         return inputs
 
-    def add(name: str, expected: str, *sources: dict[str, Any], version: int = 3) -> None:
-        cases.append((f"terraform-file: {name}", expected, lambda: build(copy.deepcopy(list(sources)), version)))
+    def add(name: str, expected: str, *sources: dict[str, Any], version: int = 3, raw: dict[str, str] | None = None) -> None:
+        cases.append((f"terraform-file: {name}", expected,
+                      lambda: build(copy.deepcopy(list(sources)), version, dict(raw or {}))))
 
     def select(base: dict[str, Any], **members: Any) -> dict[str, Any]:
         return {**base, "select": {**base["select"], **members}}
@@ -465,6 +472,12 @@ def terraform_file_cases() -> list[tuple[str, str, Any]]:
     add("document a number", malformed, {**plan, "document": 1})
     for value in (0, 268435457, "1", 1.5, None):
         add(f"maxBytes {value!r}", malformed, {**plan, "maxBytes": value})
+    # an integer is an integer literal (dialect §1): a value equal to one, written with a fraction
+    # or an exponent, is not one. The first reader refuses such a dialect as outside the canonical
+    # forms (dialect §1) before any source's form, so these cases hold the answer, not the maxBytes
+    # check.
+    add("maxBytes written 1.0", malformed, {**plan, "maxBytes": 1.0})
+    add("maxBytes written 1e2", malformed, {**plan, "maxBytes": "<maxBytes 1e2>"}, raw={"<maxBytes 1e2>": "1e2"})
     add("select an array", malformed, {**plan, "select": [{"types": ["google_sql_user"]}]})
     add("select without types", malformed, {**plan, "select": {"mode": "managed"}})
     add("select with a member more", malformed, select(plan, kinds=["google_sql_user"]))
@@ -475,11 +488,13 @@ def terraform_file_cases() -> list[tuple[str, str, Any]]:
     add("a type a number", malformed, select(plan, types=[7]))
     add("types a string", malformed, select(plan, types="google_sql_user"))
     add("mode resource", malformed, select(plan, mode="resource"))
+    add("mode a number", malformed, select(plan, mode=7))
     add("an address of 513 characters", malformed, select(plan, address=astral * 513))
     add("an address a number", malformed, select(plan, address=7))
     add("actions on a state", malformed, select(state, actions=["delete"]))
     add("an action destroy", malformed, select(plan, actions=["destroy"]))
     add("actions a string", malformed, select(plan, actions="delete"))
+    add("an action a number", malformed, select(plan, actions=[7]))
     for value in (0, 10001, "1000"):
         add(f"max {value!r}", malformed, select(plan, max=value))
     # in a document of version 2, which does not list the kind, it is refused as a kind of version 3

@@ -7,6 +7,21 @@ here.
 
 ### Added
 
+- **The `terraform-file` reading is a companion of its own** (`spec/terraform-file.md`, reading
+  `1.0.0`, proposed; RFC 0018's and RFC 0038's amendments of 2026-11-17; #365). The reading of a
+  `terraform-file` source's file, which `spec/dialect.md` §4.5 carried, moves to the new text,
+  unchanged but for the maintainer's rulings: it is released under its own selector, the scoped
+  tag `terraform-file-v<major>.<minor>.<patch>`, first `terraform-file-v1.0.0`, as released and not
+  yet stable, without waiting for the next `specVersion`, and dialect version 3 and a later Core
+  cite it rather than carry it. The first format table's release is `1.0.0`, each newly accepted row
+  a patch release, and the acquisition record's `formatTable` carries it, which settles the rest of
+  RFC 0038's Unresolved question 2. A refusal's source outcome is defined when dialect version 3
+  opens; RFC 0038's new Unresolved question 6 records the proposal. The text adds a table of its
+  eight codes, a reader conformance class and the claim rule of RFC 0038's Conformance section; its
+  machine-readable code list, format table and vectors come later. §4.5 now names the kind, its
+  members and class, and cites the companion; RFC 0018's Specification section follows. The site
+  publishes the text at `spec/terraform-file/`. No release record is added, and nothing released
+  changes.
 - RFC 0039, a Draft, proposes a federated registry as registry format `1.1.0`: a manifest of
   sources (one standard repository, the rest service repositories), an assembly from bytes the
   caller supplies at full commit ids into one ordinary `1.0.0` registry, and an index that records

@@ -421,6 +421,18 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "spec/terraform-file.md",
+        PurePosixPath("spec/terraform-file/index.html"),
+        "The terraform-file reading",
+        "A companion document of the specification: how a reader reads a Terraform plan or state "
+        "JSON file a dialect source names, from its bytes to the value acquired, with the accepted "
+        "formats, the acquisition record and the closed list of refusal codes. Reading 1.0.0, "
+        "proposed, to be released on its own scoped tag, terraform-file-v1.0.0.",
+        "spec",
+        "Normative for nothing until a terraform-file tag releases it; reading 1.0.0 proposed",
+        source_ref="main",
+    ),
+    Page(
         "spec/policy.md",
         PurePosixPath("spec/policy/index.html"),
         "Policy content and governing adoption",
@@ -2787,6 +2799,7 @@ conformance.
 - [The dialect]({guide_url(PurePosixPath("spec/dialect/index.html"))}): a companion document, normative only for the preparation-verifier reader class; its vectors are staged until the next specVersion
 - [The annotation vocabulary]({guide_url(PurePosixPath("spec/annotation-vocabulary/index.html"))}): a companion document, normative only for the vocabulary-checker class; version 1.0.0 is proposed, and its rows are staged
 - [The registry]({guide_url(PurePosixPath("spec/registry/index.html"))}): a companion document, normative only for the registry classes; format 1.0.0 is released on registry-v1.0.0, not yet stable, with its schemas, code list and rows
+- [The terraform-file reading]({guide_url(PurePosixPath("spec/terraform-file/index.html"))}): a companion document, the reading of a Terraform plan or state file that the dialect's `terraform-file` kind cites; reading 1.0.0 is proposed, normative for nothing until terraform-file-v1.0.0, and its vectors are not written yet
 - [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
 
 ## Explanations and direct answers
