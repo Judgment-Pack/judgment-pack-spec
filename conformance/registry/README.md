@@ -80,3 +80,10 @@ digests are restored; every `references` row follows from a model of check 5, an
 from a model of the layout; and `codes.json` equals the companion's table. It does not validate a
 registry: that is a reader's work, and the second reader that would hold the rows to the text from
 this repository does not exist yet (§14).
+
+`tests/test_registry_schemas.py` holds the rows to the staged schemas of `schema/registry/1.0.0/`:
+every row document a reader admits or writes validates against the schema its selector names, a
+report once a message is added to each diagnostic, since the rows leave messages out (§7.4). A
+declaration counts as admitted when its row's report has no error in it, and a manifest, request or
+response when its row's refusals name none in it; no refused input is required to fail. No schema
+refuses a member of a host row that the row's refusals do not name.

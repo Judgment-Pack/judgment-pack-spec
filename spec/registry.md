@@ -36,8 +36,9 @@ reasons:
   [`conformance/registry/1.0.0/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/registry/1.0.0)
   (§14). They are not a conformance corpus: no bundle carries them, the site does not serve them,
   and no claim may cite them.
-- **Its schemas are not written.** The closed schemas of its documents, which a first release
-  publishes under `schema/registry/1.0.0/`, do not exist yet.
+- **Its schemas are staged.** The closed schemas of its documents are staged under
+  [`schema/registry/1.0.0/`][schemas] (§14), proposed with this text. No bundle carries them, and
+  the site serves them neither as files nor at their `$id`; a first release publishes them (§13).
 - **One reader exists.** The reference runtime (Go) implements §§2 to 10, and §11's host and
   harness since `v0.48.0`. No second, independently written reader, host or harness exists. The
   stable bar is two readers agreeing on every row (§15).
@@ -694,7 +695,8 @@ it, and reports every applicable diagnostic of its own, not only the first. A re
 when validation finds no error.
 
 1. **Admission** (§2.2), of the registry and of each kind declaration supplied. A declaration that
-   is refused is not a declaration for any later step. A registry that is refused ends validation.
+   is refused is not a declaration for any later step. A registry that is refused ends validation
+   after step 2, so that the diagnostics of the declarations step 1 admitted are still reported.
    Two supplied declarations whose JCS bytes are equal are one declaration: it is read once, and
    its diagnostics name the copy whose `kindDocument`, the digest of its bytes as supplied (§2.3),
    is least in code-point order.
@@ -1011,7 +1013,8 @@ judging it.
 }
 ```
 
-A contract has exactly these members. `source` is `{"authored": true}` for a contract written by
+A contract has exactly these members. `id` is an absolute URI and `version` is SemVer with no
+build metadata, as a kind's are (§3.1). `source` is `{"authored": true}` for a contract written by
 hand, or `{"kind": {"id", "version", "digest"}}` for one generated from a kind. `facts` lists every
 position a facts document under the contract may hold a value at, each an object of:
 
@@ -1021,8 +1024,9 @@ position a facts document under the contract may hold a value at, each an object
   or `object`;
 - `present`: `always` (whenever the parent is present) or `optional`;
 - `items` (on an `array` only): the element type;
-- `values` (optional): a non-empty list of distinct values of the type (of `items` for an array),
-  not on `null`, `object`, or an array without `items`;
+- `values` (optional): a non-empty list of distinct values of the type, only on a `string`,
+  `decimal` or `boolean`, or on an `array` whose `items` is one of them, the values then of
+  `items`;
 - `secretReference` (optional): `true`, on the `object` that stands for a secret reference.
 
 `facts` is sorted strictly by `pointer` and then `type`, each in code-point order. A contract is
@@ -1082,11 +1086,13 @@ one advisory, a warning at `{"document": "pack", "pointer": <the condition's poi
 
 The report is `{"factsCheckFormatVersion": "1.0.0", "contract": {"digest"}, "pack": {"digest"},
 "diagnostics": […]}`, with the pack's digest that of its bytes as supplied, and the advisories in
-visit order. A check over its work bound (4 194 304) or a path deeper than 128 is
-`FACTS-CHECK-LIMIT`, an error, at the condition it stopped at, and no later condition is checked.
-The report needs no cap of its own: it has at most one advisory per fact condition, and the
-pack's own bounds and the work bound limit the conditions. The contract's diagnostics, when it
-is refused, are capped as §7.4 caps them.
+visit order. A contract that is refused is not checked against: its report is
+`factsCheckFormatVersion` and the contract's diagnostics alone, with neither `contract` nor
+`pack`. A check over its work bound (4 194 304) or a path deeper than 128 is `FACTS-CHECK-LIMIT`,
+an error, at the condition it stopped at, and no later condition is checked. The report needs no
+cap of its own: it has at most one advisory per fact condition, and the pack's own bounds and the
+work bound limit the conditions. The contract's diagnostics, when it is refused, are capped as
+§7.4 caps them.
 
 ### 10.6 Typed facts builders
 
@@ -1107,20 +1113,24 @@ This section is the normative text of the emitter contract of
 ### 11.1 The manifest
 
 An emitter manifest has exactly: `emitterManifestVersion`; `id` (absolute URI); `version` (SemVer, no
-build metadata); `owner` (§3.1); `description` (optional); `reads`, each `{"kind", "id",
-"versions"}`, with `versions` one of `^x.y.z`, `~x.y.z`, `=x.y.z` or `>=x.y.z <x.y.z`; `input`
-(optional, `"resolved"`, the default, or `"factsContracts"`); `requestVersions`, a non-empty array
-of request selectors; `environments`, `"each"` or `"all"`, required with `"resolved"` and absent
-with `"factsContracts"`; `options` (optional), a schema in §3.2's subset, default
-`{"type": "object", "additionalProperties": false}`; `command`, an argv whose first item is a
-program name with no `/` or a relative path in the repository; `owns`, globs of `*`, `**` and
-literal characters naming every path the emitter writes; `env` (optional), variable names matching
-`^[A-Z_][A-Z0-9_]{0,63}$` other than `PATH`, `HOME`, `LANG`, `TZ` and `SOURCE_DATE_EPOCH`; and
-`deprecated` (optional), under which the host and harness run it with the warning
-`EMIT-DEPRECATED`. The `owns` of two manifests in one repository MUST NOT overlap, and neither
-`command` nor `owns` names a path outside the repository root. A host given the repository's other
-manifests beside the one it runs refuses an overlap, a glob of each that one path can match, with
-`EMIT-OWNS-OVERLAP` at both globs, the other manifest's named by §7.3's `manifest`.
+build metadata); `owner` (§3.1); `description` (optional, a string); `reads`, each `{"kind", "id",
+"versions"}`, no two of one kind, with `versions` one of `^x.y.z`, `~x.y.z`, `=x.y.z` or
+`>=x.y.z <x.y.z`; `input` (optional, `"resolved"`, the default, or `"factsContracts"`);
+`requestVersions`, a non-empty array of distinct request selectors, each SemVer with no build
+metadata; `environments`, `"each"` or `"all"`, required with `"resolved"` and absent with
+`"factsContracts"`; `options` (optional), a schema in §3.2's subset, default
+`{"type": "object", "additionalProperties": false}`; `command`, an argv whose first item, the
+program, follows §11.3's path rules after an optional leading `./`, so that it is a program name
+with no `/` or a relative path in the repository, and none of whose items begins with `/`, has a
+`..` segment or holds NUL; `owns`, a non-empty array of distinct globs of `*`, `**` and literal
+characters naming every path the emitter writes; `env` (optional), distinct variable names
+matching `^[A-Z_][A-Z0-9_]{0,63}$` other than `PATH`, `HOME`, `LANG`, `TZ` and
+`SOURCE_DATE_EPOCH`; and `deprecated` (optional, a boolean), under which, when `true`, the host
+and harness run it with the warning `EMIT-DEPRECATED`. The `owns` of two manifests in one
+repository MUST NOT overlap, and neither `command` nor `owns` names a path outside the repository
+root. A host given the repository's other manifests beside the one it runs refuses an overlap, a
+glob of each that one path can match, with `EMIT-OWNS-OVERLAP` at both globs, the other manifest's
+named by §7.3's `manifest`.
 
 An `owns` glob follows the path rules of §11.3, with `*` allowed in a segment and `**` only as a
 whole segment, and its first segment holds no `*`: `**`, `**/*`, `*/**` and `*` are refused, since
@@ -1165,25 +1175,28 @@ exits 0, with a response version whose major and minor do not exceed the request
 members are required, and `files` and `diagnostics` may be empty arrays. A non-zero exit or a
 time-out is `EMIT-PROCESS`, and output that is not one valid response `EMIT-RESPONSE`, located in
 document `response` at the pointer of each member that fails. Each file has a `path` and exactly
-one of `text` (UTF-8, ending in a line feed, with no carriage return) or `base64`, and an optional
-`mode`, `"0644"` (default) or `"0755"`. A path uses `/`, is relative, has no `.`, `..` or empty
-segment and no segment beginning with `~`, does not end with `/`, holds no NUL, backslash, `:` or
-control character, matches an `owns` glob, and is unique once case is folded; `files` is sorted by
-path. So that a path means one file on every system, no segment ends in `.` or a space, which
-Windows drops; none is a Windows device name, which is `CON`, `PRN`, `AUX`, `NUL`, `CONIN$`,
-`CONOUT$`, or `COM` or `LPT` followed by a digit 1 to 9 or by `¹`, `²` or `³`, compared in any case
-with the segment's part before its first `.`, trailing spaces removed (`nul.txt` is one, `COM0` is
-not); and none is a name git reads as `.git`, as git's own `is_ntfs_dotgit` and `is_hfs_dotgit`
-checks read it: `.git` or `git~1` in any ASCII case, followed only by dots and spaces, or `.git`
-once the code points HFS+ ignores (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F and
-U+FEFF) are skipped. Emitter diagnostics have codes of `x-` and lower-case words of `a` to `z` and
-`0` to `9` joined by `-` (`^x-[a-z0-9]+(-[a-z0-9]+)*$`), at most 64 bytes, a location of §7.3's
-form and no value. That location uses only §7.3's registry documents (`registry`, `kind`,
-`value`, `yaml`, `facts`, `contract` and `pack`, never the host's or the harness's) and members
-other than `path`; any other is `EMIT-RESPONSE` at `/diagnostics/<i>/location`. An emitter
-diagnostic of severity `error` fails the run: it is reported, and is also `EMIT-RESPONSE` at
-`/diagnostics/<i>`, its own index, in document `response`. The grammar keeps a code short and
-plain, but cannot keep an emitter from spelling a value in one, and no host can tell that it has (§16).
+one of `text` (UTF-8, ending in a line feed, with no carriage return) or `base64` (RFC 4648 §4: the
+standard alphabet, padded, with no line break or other character, and no bit set past the data),
+and an optional `mode`, `"0644"` (default) or `"0755"`. A path uses `/`, is relative, has no `.`,
+`..` or empty segment and no segment beginning with `~`, does not end with `/`, holds no NUL,
+backslash, `:` or control character, matches an `owns` glob, and is unique once case is folded;
+`files` is sorted by path. So that a path means one file on every system, no segment ends in `.`
+or a space, which Windows drops; none is a Windows device name, which is `CON`, `PRN`, `AUX`,
+`NUL`, `CONIN$`, `CONOUT$`, or `COM` or `LPT` followed by a digit 1 to 9 or by `¹`, `²` or `³`,
+compared in any case with the segment's part before its first `.`, trailing spaces removed
+(`nul.txt` is one, `COM0` is not); and none is a name git reads as `.git`, as git's own
+`is_ntfs_dotgit` and `is_hfs_dotgit` checks read it: `.git` or `git~1` in any ASCII case, followed
+only by dots and spaces, or `.git` once the code points HFS+ ignores (U+200C to U+200F, U+202A to
+U+202E, U+206A to U+206F and U+FEFF) are skipped. An emitter diagnostic has exactly `code`,
+`severity` (`error` or `warning`) and `location`. Its code is `x-` and lower-case words of `a` to
+`z` and `0` to `9` joined by `-` (`^x-[a-z0-9]+(-[a-z0-9]+)*$`), at most 64 bytes; its location is
+of §7.3's form; and it carries no value. That location uses only §7.3's registry documents
+(`registry`, `kind`, `value`, `yaml`, `facts`, `contract` and `pack`, never the host's or the
+harness's) and members other than `path`; any other is `EMIT-RESPONSE` at
+`/diagnostics/<i>/location`. An emitter diagnostic of severity `error` fails the run: it is
+reported, and is also `EMIT-RESPONSE` at `/diagnostics/<i>`, its own index, in document `response`.
+The grammar keeps a code short and plain, but cannot keep an emitter from spelling a value in one,
+and no host can tell that it has (§16).
 Bounds: a response of 64 MiB, 10 000 files, 16 MiB per file and 512 bytes per path.
 
 ### 11.4 The host
@@ -1246,10 +1259,9 @@ Level `1.0` applies six checks to every vector:
 4. kind filtering: the harness forms the request again from the registry with an entry of a
    synthetic kind the manifest does not read, and that kind's declaration and pin, added; sets
    every registry digest in it to the original request's at the same place (each resolved
-   document's `registry.digest`, and in the facts form each contract's `source.registry.digest`),
-   since the entry changes the registry's digest and an emitter may write that digest into a file
-   it generates; requires the result to be the original request's bytes; and only then runs the
-   emitter on it and requires the response unchanged;
+   document's `registry.digest`), since the entry changes the registry's digest and an emitter
+   may write that digest into a file it generates; requires the result to be the original
+   request's bytes; and only then runs the emitter on it and requires the response unchanged;
 5. references: for each string R at a secret position of the request (in every environment it
    holds) and each file, as text or its bytes read as Latin-1, the file fails when it holds a run of
    at least 32 consecutive characters of R (all of R, if R is shorter) that lies inside no complete
@@ -1454,6 +1466,20 @@ reading, authored contracts, wildcard reference patterns, the facts-form request
 harness's other checks, its report and its own codes (the layout rows compare only that a run is
 refused), or builders, and the boundary and adversarial sets RFC 0034 lists.
 
+The schemas are staged under [`schema/registry/1.0.0/`][schemas]: one JSON Schema 2020-12 schema
+for each document of §2.1, which requires its selector at `"1.0.0"`, and `common.schema.json`, the
+definitions they share, which is the schema of no document. Each is closed wherever this text gives
+a document's members, and states the forms, bounds, patterns, codes and severities this text gives.
+A rule no schema can state, such as canonical form and order, a digest, a match between two
+documents, a bound in bytes, or the limits of §§3.3 and 3.4, is left to the reader, and a
+`$comment` names its section. A schema states only rules of this text, so a document it refuses is
+not of this text's form, and one it admits may still fail a rule it cannot state. The harness
+report's schema holds only its selector, since §11.5 names none of its other members. The facts
+document (§10.1) has none here: it is a facts document of Core. Every row document a reader admits
+or writes validates against its schema.
+
+[schemas]: https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/schema/registry/1.0.0
+
 ## 15. Conformance classes
 
 | Class | Sections | Rows |
@@ -1547,9 +1573,9 @@ readers agreeing on every row of a class.
   import rows.
 - **Further host readings.** The reference host is stricter than §11.3 in ways this text does not
   state yet: it resolves each emitter diagnostic's location against the request, so a location
-  names only what the request holds; it compares paths once case is folded and they are normalized
-  (NFD), and refuses a path that is a directory of another; and it reads `base64` only in its
-  canonical form. A host that follows the text alone accepts those responses.
+  names only what the request holds; and it compares paths once case is folded and they are
+  normalized (NFD), and refuses a path that is a directory of another. A host that follows the
+  text alone accepts those responses.
 - **Pattern refusal.** Whether patterns that are catastrophic for backtracking engines should also be
   refused (RFC 0034, Unresolved question 2).
 - **Review regime.** The different-vendor review was waived for the records.

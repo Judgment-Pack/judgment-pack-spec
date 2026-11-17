@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.0.0/resolved-registry.schema.json",
+  "title": "DRAFT Registry companion 1.0.0: resolved registry",
+  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A valid registry resolved for one environment (section 8), closed.",
+  "$comment": "That kinds and entries are the registry's, in its order, and that the document is written as its JCS bytes within 8 MiB (sections 2.2, 2.3 and 8), are the reader's to check.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resolvedFormatVersion",
+    "registry",
+    "environment",
+    "kinds",
+    "entries"
+  ],
+  "properties": {
+    "resolvedFormatVersion": {
+      "const": "1.0.0"
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "digest"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/absoluteUri"
+        },
+        "version": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/version"
+        },
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "environment": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/environment"
+    },
+    "kinds": {
+      "type": "array",
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/pin"
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "owner",
+          "value"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/kindName"
+          },
+          "id": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/entryId"
+          },
+          "owner": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/owner"
+          },
+          "value": true
+        }
+      }
+    }
+  }
+}

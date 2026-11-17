@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.0.0/validation-report.schema.json",
+  "title": "DRAFT Registry companion 1.0.0: validation report",
+  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A validation report (section 7.4), closed.",
+  "$comment": "The order of the diagnostics, that they are distinct, that a 1001st is REG-REPORT-TRUNCATED at the registry, that registry is present exactly when step 3 passed, and that valid is false when an error was found but not listed (section 7.4), are the reader's to check. A report that lists an error says valid false, which the schema holds.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reportFormatVersion",
+    "valid",
+    "diagnostics"
+  ],
+  "properties": {
+    "reportFormatVersion": {
+      "const": "1.0.0"
+    },
+    "valid": {
+      "type": "boolean"
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "digest"
+      ],
+      "properties": {
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "maxItems": 1001,
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/diagnostic"
+      }
+    }
+  },
+  "if": {
+    "required": [
+      "valid"
+    ],
+    "properties": {
+      "valid": {
+        "const": true
+      }
+    }
+  },
+  "then": {
+    "properties": {
+      "diagnostics": {
+        "items": {
+          "properties": {
+            "severity": {
+              "const": "warning"
+            }
+          }
+        }
+      }
+    }
+  }
+}

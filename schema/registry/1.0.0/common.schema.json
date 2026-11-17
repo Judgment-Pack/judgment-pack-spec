@@ -1,0 +1,693 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json",
+  "title": "DRAFT Registry companion 1.0.0: common",
+  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. Shared definitions of the companion's documents; it is the schema of no document. A pattern ends with (?![\\s\\S]), which means the end of the string in ECMA-262 and in Python, where $ may match before a final line feed.",
+  "$comment": "Every document is I-JSON under the number rule of spec/registry.md section 2.2 (no negative zero, integers within 2^53 - 1, decimals that read back as the same double), with no repeated member name and a nesting depth of at most 32, within its size bound. No schema states these; a reader checks them at admission.",
+  "$defs": {
+    "digest": {
+      "description": "Section 2.3: sha256: and 64 lowercase hexadecimal digits.",
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "version": {
+      "description": "SemVer 2.0.0 with no build metadata (sections 3.1 and 4).",
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(?![\\s\\S])"
+    },
+    "absoluteUri": {
+      "description": "Section 3.1: an RFC 3986 absolute-URI (a scheme and no fragment) of at most 2048 characters, with no white space.",
+      "$comment": "The pattern holds the scheme and the characters RFC 3986 allows, with no '#'; the rest of RFC 3986's grammar (authority, IP literals, where '?' and '[' may stand) is the reader's to check.",
+      "type": "string",
+      "maxLength": 2048,
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:([A-Za-z0-9._~:/?@!$&'()*+,;=\\[\\]-]|%[0-9A-Fa-f]{2})*(?![\\s\\S])"
+    },
+    "kindName": {
+      "description": "Section 3.1: the local name entries use.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,62}(?![\\s\\S])"
+    },
+    "owner": {
+      "description": "Section 3.1: an opaque identity of 1 to 128 characters.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._@/-]{1,128}(?![\\s\\S])"
+    },
+    "environment": {
+      "description": "Section 4: an environment name.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,31}(?![\\s\\S])"
+    },
+    "entryId": {
+      "description": "Section 6.2's entry-id grammar: 1 to 128 of %x21-7E except '/' and '#'.",
+      "$comment": "A kind's entryId pattern (section 3.1) narrows it further; no schema states that.",
+      "type": "string",
+      "pattern": "^[!\"$-.0-~]{1,128}(?![\\s\\S])"
+    },
+    "projectId": {
+      "description": "Section 6.3: a project id.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9](?![\\s\\S])"
+    },
+    "pointer": {
+      "description": "An RFC 6901 JSON Pointer, possibly empty; ~0 and ~1 are its only escapes.",
+      "type": "string",
+      "pattern": "^(/([^/~]|~[01])*)*(?![\\s\\S])"
+    },
+    "pointerPattern": {
+      "description": "Section 3.5: a pointer whose tokens may be *, with ~2 for a literal *, that begins with '/'.",
+      "$comment": "Section 3.5 bounds a pattern at 512 bytes of UTF-8; maxLength counts code points, so it is the weaker bound, and the byte count is the reader's.",
+      "type": "string",
+      "maxLength": 512,
+      "pattern": "^(/([^/~]|~[012])*)+(?![\\s\\S])"
+    },
+    "pattern": {
+      "description": "Section 3.4: a pattern of at most 256 code points.",
+      "$comment": "Membership in the pattern subset, and the program-size limits of section 3.4, are the reader's to check.",
+      "type": "string",
+      "maxLength": 256
+    },
+    "count": {
+      "description": "Section 3.2: a non-negative integer of at most 2^53 - 1.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "typeName": {
+      "enum": [
+        "null",
+        "boolean",
+        "object",
+        "array",
+        "number",
+        "integer",
+        "string"
+      ]
+    },
+    "schemaKeywords": {
+      "description": "Section 3.2: the keywords of the schema subset and their forms.",
+      "properties": {
+        "type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/typeName"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/typeName"
+              }
+            }
+          ]
+        },
+        "enum": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024
+        },
+        "const": true,
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/subschema"
+          }
+        },
+        "required": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": {
+          "$ref": "#/$defs/subschema"
+        },
+        "minProperties": {
+          "$ref": "#/$defs/count"
+        },
+        "maxProperties": {
+          "$ref": "#/$defs/count"
+        },
+        "propertyNames": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pattern": {
+              "$ref": "#/$defs/pattern"
+            },
+            "maxLength": {
+              "$ref": "#/$defs/count"
+            }
+          }
+        },
+        "items": {
+          "$ref": "#/$defs/subschema"
+        },
+        "minItems": {
+          "$ref": "#/$defs/count"
+        },
+        "maxItems": {
+          "$ref": "#/$defs/count"
+        },
+        "uniqueItems": {
+          "type": "boolean"
+        },
+        "minLength": {
+          "$ref": "#/$defs/count"
+        },
+        "maxLength": {
+          "$ref": "#/$defs/count"
+        },
+        "pattern": {
+          "$ref": "#/$defs/pattern"
+        },
+        "minimum": {
+          "type": "number"
+        },
+        "maximum": {
+          "type": "number"
+        },
+        "exclusiveMinimum": {
+          "type": "number"
+        },
+        "exclusiveMaximum": {
+          "type": "number"
+        },
+        "anyOf": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/subschema"
+          }
+        },
+        "allOf": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/subschema"
+          }
+        },
+        "not": {
+          "$ref": "#/$defs/subschema"
+        },
+        "$ref": {
+          "type": "string",
+          "pattern": "^#/\\$defs/([^/~]|~[01])+(?![\\s\\S])"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "default": true,
+        "deprecated": {
+          "type": "boolean"
+        },
+        "examples": {
+          "type": "array"
+        }
+      }
+    },
+    "subschema": {
+      "description": "Section 3.2: a subschema, an object of the subset's keywords or a boolean, with no $defs.",
+      "type": [
+        "object",
+        "boolean"
+      ],
+      "$ref": "#/$defs/schemaKeywords",
+      "unevaluatedProperties": false
+    },
+    "schema": {
+      "description": "Section 3.2: a schema in the subset, with $defs at its root only.",
+      "$comment": "Sections 3.3 and 3.4 are the reader's to check: that each $ref names a definition, that no definitions form a cycle, the limits of 4096 subschemas as written and as expanded, and the pattern subset.",
+      "type": [
+        "object",
+        "boolean"
+      ],
+      "$ref": "#/$defs/schemaKeywords",
+      "properties": {
+        "$defs": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/subschema"
+          }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "pin": {
+      "description": "Section 4: a pin of a kind declaration.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id",
+        "version",
+        "digest"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/kindName"
+        },
+        "id": {
+          "$ref": "#/$defs/absoluteUri"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "relativePath": {
+      "description": "Section 11.3's path rules: '/'-separated, relative, no '.', '..' or empty segment, no segment that begins with '~' or ends in '.' or a space, no NUL, backslash, ':' or control character, no Windows device name and no name git reads as .git.",
+      "$comment": "A segment that is '.' or '..' ends in '.', so the second rule refuses it. That a path matches an owns glob, is unique once case is folded and is in order (section 11.3) is the host's to check, as is the bound of 512 bytes, of which maxLength, counting code points, is the weaker form.",
+      "type": "string",
+      "maxLength": 512,
+      "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f/\\\\:]+(/[^\\x00-\\x1f\\x7f-\\x9f/\\\\:]+)*(?![\\s\\S])",
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "(^|/)~"
+          },
+          {
+            "pattern": "(^|/)[^/]*[. ](/|(?![\\s\\S]))"
+          },
+          {
+            "pattern": "(^|/)([Cc][Oo][Nn]([Ii][Nn]\\$|[Oo][Uu][Tt]\\$)?|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|([Cc][Oo][Mm]|[Ll][Pp][Tt])[1-9\u00b9\u00b2\u00b3]) *(\\.|/|(?![\\s\\S]))"
+          },
+          {
+            "pattern": "(^|/)(\\.[Gg][Ii][Tt]|[Gg][Ii][Tt]~1)[. ]*(/|(?![\\s\\S]))"
+          },
+          {
+            "pattern": "(^|/)[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*\\.[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Gg][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Ii][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Tt][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*(/|(?![\\s\\S]))"
+          }
+        ]
+      }
+    },
+    "ownsGlob": {
+      "description": "Section 11.1: an owns glob follows the path rules of section 11.3, with * in a segment, ** only as a whole segment, and no * in its first segment.",
+      "type": "string",
+      "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f/\\\\:]+(/[^\\x00-\\x1f\\x7f-\\x9f/\\\\:]+)*(?![\\s\\S])",
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "(^|/)~"
+          },
+          {
+            "pattern": "(^|/)[^/]*[. ](/|(?![\\s\\S]))"
+          },
+          {
+            "pattern": "(^|/)([Cc][Oo][Nn]([Ii][Nn]\\$|[Oo][Uu][Tt]\\$)?|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|([Cc][Oo][Mm]|[Ll][Pp][Tt])[1-9\u00b9\u00b2\u00b3]) *(\\.|/|(?![\\s\\S]))"
+          },
+          {
+            "pattern": "(^|/)(\\.[Gg][Ii][Tt]|[Gg][Ii][Tt]~1)[. ]*(/|(?![\\s\\S]))"
+          },
+          {
+            "pattern": "(^|/)[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*\\.[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Gg][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Ii][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Tt][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*(/|(?![\\s\\S]))"
+          },
+          {
+            "pattern": "^[^/]*\\*"
+          },
+          {
+            "pattern": "[^/]\\*\\*|\\*\\*[^/]"
+          }
+        ]
+      }
+    },
+    "program": {
+      "description": "Section 11.1: a command's program, a path of section 11.3's rules after an optional leading './': a name with no '/', looked up on PATH, or a relative path in the repository.",
+      "type": "string",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/relativePath"
+        },
+        {
+          "maxLength": 514,
+          "pattern": "^\\./[^\\x00-\\x1f\\x7f-\\x9f/\\\\:]+(/[^\\x00-\\x1f\\x7f-\\x9f/\\\\:]+)*(?![\\s\\S])",
+          "not": {
+            "anyOf": [
+              {
+                "pattern": "/~"
+              },
+              {
+                "pattern": "/[^/]*[. ](/|(?![\\s\\S]))"
+              },
+              {
+                "pattern": "/([Cc][Oo][Nn]([Ii][Nn]\\$|[Oo][Uu][Tt]\\$)?|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|([Cc][Oo][Mm]|[Ll][Pp][Tt])[1-9\u00b9\u00b2\u00b3]) *(\\.|/|(?![\\s\\S]))"
+              },
+              {
+                "pattern": "/(\\.[Gg][Ii][Tt]|[Gg][Ii][Tt]~1)[. ]*(/|(?![\\s\\S]))"
+              },
+              {
+                "pattern": "/[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*\\.[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Gg][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Ii][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Tt][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*(/|(?![\\s\\S]))"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "argument": {
+      "description": "Section 11.1: an item of a command, which begins with no '/', has no '..' segment and holds no NUL.",
+      "type": "string",
+      "not": {
+        "pattern": "^/|(^|/)\\.\\.(/|(?![\\s\\S]))|\\x00"
+      }
+    },
+    "environmentVariable": {
+      "description": "Section 11.1: an environment variable's name.",
+      "type": "string",
+      "pattern": "^[A-Z_][A-Z0-9_]{0,63}(?![\\s\\S])"
+    },
+    "locationDocument": {
+      "enum": [
+        "registry",
+        "kind",
+        "value",
+        "yaml",
+        "facts",
+        "contract",
+        "pack",
+        "manifest",
+        "options",
+        "request",
+        "response",
+        "repository",
+        "vector"
+      ]
+    },
+    "registryDocument": {
+      "enum": [
+        "registry",
+        "kind",
+        "value",
+        "yaml",
+        "facts",
+        "contract",
+        "pack"
+      ]
+    },
+    "location": {
+      "description": "Section 7.3: a diagnostic's location.",
+      "$comment": "Which members a given diagnostic carries (kindDocument, kind, entry, environment, variable) depends on its code and step (section 7.3), and is the reader's to check.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document",
+        "pointer"
+      ],
+      "properties": {
+        "document": {
+          "$ref": "#/$defs/locationDocument"
+        },
+        "manifest": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "kindDocument": {
+          "$ref": "#/$defs/digest"
+        },
+        "kind": {
+          "$ref": "#/$defs/kindName"
+        },
+        "entry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "id"
+          ],
+          "properties": {
+            "kind": {
+              "$ref": "#/$defs/kindName"
+            },
+            "id": {
+              "$ref": "#/$defs/entryId"
+            }
+          }
+        },
+        "environment": {
+          "$ref": "#/$defs/environment"
+        },
+        "pointer": {
+          "$ref": "#/$defs/pointer"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "pattern": "^/"
+          }
+        },
+        "variable": {
+          "$ref": "#/$defs/environmentVariable"
+        }
+      },
+      "dependentSchemas": {
+        "manifest": {
+          "properties": {
+            "document": {
+              "const": "manifest"
+            }
+          }
+        },
+        "line": {
+          "properties": {
+            "document": {
+              "const": "yaml"
+            },
+            "pointer": {
+              "const": ""
+            }
+          }
+        },
+        "column": {
+          "properties": {
+            "document": {
+              "const": "yaml"
+            },
+            "pointer": {
+              "const": ""
+            }
+          }
+        },
+        "path": {
+          "properties": {
+            "document": {
+              "enum": [
+                "vector",
+                "repository"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "code": {
+      "description": "Section 12's closed list of diagnostic codes.",
+      "enum": [
+        "REG-DOC-SIZE",
+        "REG-DOC-JSON",
+        "REG-DOC-DEPTH",
+        "REG-DOC-DUPLICATE",
+        "REG-DOC-STRING",
+        "REG-DOC-NUMBER",
+        "REG-DOC-SELECTOR",
+        "REG-KIND-UNKNOWN-MEMBER",
+        "REG-KIND-MISSING-MEMBER",
+        "REG-KIND-FORM",
+        "REG-KIND-DEPRECATED",
+        "REG-KIND-SCHEMA-KEYWORD",
+        "REG-KIND-SCHEMA-FORM",
+        "REG-KIND-SCHEMA-REF",
+        "REG-KIND-SCHEMA-LIMIT",
+        "REG-KIND-PATTERN",
+        "REG-KIND-PATTERN-LIMIT",
+        "REG-KIND-POINTER-FORM",
+        "REG-KIND-POINTER-UNREACHABLE",
+        "REG-KIND-POINTER-CONFLICT",
+        "REG-REGISTRY-UNKNOWN-MEMBER",
+        "REG-REGISTRY-MISSING-MEMBER",
+        "REG-REGISTRY-FORM",
+        "REG-REGISTRY-DUPLICATE",
+        "REG-REGISTRY-ORDER",
+        "REG-PIN-MISSING",
+        "REG-PIN-MISMATCH",
+        "REG-PIN-UNPINNED",
+        "REG-ENTRY-KIND",
+        "REG-ENTRY-ID",
+        "REG-ENTRY-DUPLICATE",
+        "REG-ENTRY-OWNER",
+        "REG-ENTRY-ENVIRONMENT",
+        "REG-OVERLAY-ENVIRONMENT",
+        "REG-OVERLAY-DUPLICATE",
+        "REG-OVERLAY-PATCH-DUPLICATE",
+        "REG-OVERLAY-ENTRY-MISSING",
+        "REG-OVERLAY-ENTRY-ABSENT",
+        "REG-OVERLAY-POINTER",
+        "REG-OVERLAY-NOT-OVERLAYABLE",
+        "REG-OVERLAY-TARGET",
+        "REG-OVERLAY-NULL",
+        "REG-OVERLAY-PREFIX",
+        "REG-VALUE-TYPE",
+        "REG-VALUE-ENUM",
+        "REG-VALUE-CONST",
+        "REG-VALUE-REQUIRED",
+        "REG-VALUE-ADDITIONAL",
+        "REG-VALUE-PROPERTY-COUNT",
+        "REG-VALUE-PROPERTY-NAME",
+        "REG-VALUE-ITEM-COUNT",
+        "REG-VALUE-UNIQUE",
+        "REG-VALUE-LENGTH",
+        "REG-VALUE-PATTERN",
+        "REG-VALUE-RANGE",
+        "REG-VALUE-ANY-OF",
+        "REG-VALUE-NOT",
+        "REG-VALUE-DEPRECATED",
+        "REG-BOUND-ENTRIES",
+        "REG-BOUND-ENTRY-BYTES",
+        "REG-BOUND-VALIDATION-WORK",
+        "REG-REPORT-TRUNCATED",
+        "REF-ENTRY-FORM",
+        "REF-ENTRY-KIND",
+        "REF-ENTRY-MISSING",
+        "REF-ENTRY-ABSENT-IN-ENVIRONMENT",
+        "REF-ENTRY-POINTER",
+        "REF-SECRET-FORM",
+        "REF-SECRET-STORE",
+        "REF-SECRET-PIN",
+        "REF-SECRET-SCOPE-FORM",
+        "REF-SECRET-SCOPE",
+        "REF-SECRET-SCOPE-SHARED",
+        "REF-SECRET-UNSCOPED",
+        "REG-YAML-ENCODING",
+        "REG-YAML-DOCUMENTS",
+        "REG-YAML-DIRECTIVE",
+        "REG-YAML-TAG",
+        "REG-YAML-ANCHOR",
+        "REG-YAML-MERGE",
+        "REG-YAML-SCALAR",
+        "REG-YAML-EMPTY",
+        "REG-YAML-KEY",
+        "REG-YAML-SYNTAX",
+        "REG-YAML-TRUNCATED",
+        "FACTS-DOCUMENT-LIMIT",
+        "FACTS-ID-LIMIT",
+        "FACTS-CONTRACT-FORM",
+        "FACTS-CONTRACT-ORDER",
+        "FACTS-CONTRACT-LIMIT",
+        "FACTS-POINTER-UNKNOWN",
+        "FACTS-TYPE-ORDERED",
+        "FACTS-VALUE-UNREACHABLE",
+        "FACTS-CHECK-LIMIT",
+        "EMIT-MANIFEST",
+        "EMIT-OWNS-OVERLAP",
+        "EMIT-REQUEST-VERSION",
+        "EMIT-KIND-RANGE",
+        "EMIT-KIND-ID",
+        "EMIT-OPTIONS",
+        "EMIT-REQUEST",
+        "EMIT-PROCESS",
+        "EMIT-RESPONSE",
+        "EMIT-LINK",
+        "EMIT-PATH-UNREADABLE",
+        "EMIT-WRITE",
+        "EMIT-INTERRUPTED",
+        "EMIT-STRAY-WRITE",
+        "EMIT-VECTOR",
+        "EMIT-HARNESS-BOUND",
+        "EMIT-DEPRECATED",
+        "EMIT-ENV-UNSET",
+        "EMIT-REPORT-TRUNCATED",
+        "EMIT-STAGING-LEFTOVER",
+        "EMIT-LINK-OMITTED"
+      ]
+    },
+    "warningCode": {
+      "description": "The codes of section 12 whose severity is warning.",
+      "enum": [
+        "REG-KIND-DEPRECATED",
+        "REG-PIN-UNPINNED",
+        "REG-VALUE-DEPRECATED",
+        "REG-REPORT-TRUNCATED",
+        "REF-SECRET-UNSCOPED",
+        "FACTS-POINTER-UNKNOWN",
+        "FACTS-TYPE-ORDERED",
+        "FACTS-VALUE-UNREACHABLE",
+        "EMIT-DEPRECATED",
+        "EMIT-ENV-UNSET",
+        "EMIT-REPORT-TRUNCATED",
+        "EMIT-STAGING-LEFTOVER",
+        "EMIT-LINK-OMITTED"
+      ]
+    },
+    "diagnostic": {
+      "description": "Section 7.4: a diagnostic, its severity the code's.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "location",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/code"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning"
+          ]
+        },
+        "location": {
+          "$ref": "#/$defs/location"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "if": {
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "$ref": "#/$defs/warningCode"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "severity": {
+            "const": "warning"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "severity": {
+            "const": "error"
+          }
+        }
+      }
+    }
+  }
+}

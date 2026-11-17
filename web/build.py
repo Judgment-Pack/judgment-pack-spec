@@ -1939,7 +1939,7 @@ def build_routes(manifest: dict) -> dict[str, PurePosixPath | str]:
     # Schema resources also resolve directly at their exact, format-versioned $id URLs.
     for directory in ("conformance/policy", "schema/policy", "rfcs/workflow-contributors",
                       "rfcs/retained-column-conversion", "conformance/annotation-vocabulary",
-                      "conformance/registry"):
+                      "conformance/registry", "schema/registry"):
         for path in (ROOT / directory).rglob("*"):
             source = path.relative_to(ROOT).as_posix()
             if path.is_file():
@@ -2616,14 +2616,16 @@ def build_license(output_root: Path) -> None:
 # companion document they belong to, spec/dialect.md, is published. The annotation vocabulary's
 # rows are staged as well, since RFC 0032's acceptance (conformance/annotation-vocabulary/README.md),
 # and the companion document they belong to, spec/annotation-vocabulary.md, is published. The
-# registry's rows are staged too (conformance/registry/README.md), and its companion document,
-# spec/registry.md, is published.
+# registry's rows are staged too (conformance/registry/README.md), and so are the schemas of its
+# documents (schema/registry/1.0.0/), proposed with the text and served neither as artifacts nor at
+# their $id; its companion document, spec/registry.md, is published.
 UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/evaluation/staged"),
     PurePosixPath("conformance/witness"),
     PurePosixPath("conformance/dialect"),
     PurePosixPath("conformance/annotation-vocabulary"),
     PurePosixPath("conformance/registry"),
+    PurePosixPath("schema/registry"),
     PurePosixPath("conformance/workflow"),
     PurePosixPath("conformance/policy"),
     PurePosixPath("schema/policy"),

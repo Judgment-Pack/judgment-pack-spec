@@ -28,9 +28,10 @@ WORKFLOW_VECTORS = "conformance/workflow"
 # serves nothing under this directory either (conformance/annotation-vocabulary/README.md). The
 # companion document they belong to is published.
 ANNOTATION_VOCABULARY_ROWS = "conformance/annotation-vocabulary"
-# The registry's hand-written rows are staged (conformance/registry/README.md), and its companion
-# document is published.
+# The registry's hand-written rows are staged (conformance/registry/README.md), and so are the schemas
+# of its documents, proposed with the text; its companion document is published.
 REGISTRY_ROWS = "conformance/registry"
+REGISTRY_SCHEMAS = "schema/registry"
 # The staged draft Core specVersion 0.4.0-draft graduated to the released 0.5.0 in place; its staged
 # directories are retired, and nothing the site writes is named for the draft selector.
 RETIRED_DRAFT_DIRECTORIES = ("schema/staged", "conformance/staged", "examples/staged")
@@ -43,6 +44,7 @@ UNPUBLISHED_DIRECTORIES = (
     WORKFLOW_VECTORS,
     ANNOTATION_VOCABULARY_ROWS,
     REGISTRY_ROWS,
+    REGISTRY_SCHEMAS,
     "conformance/policy",
     "schema/policy",
 )
@@ -311,6 +313,15 @@ class StaticSiteTests(unittest.TestCase):
 
     def test_registry_rows_are_not_published(self) -> None:
         self._assert_nothing_published_under(REGISTRY_ROWS)
+
+    def test_registry_schemas_are_not_published(self) -> None:
+        # Staged with the proposed companion: served neither as artifacts nor at their $id, which a
+        # first release publishes (spec/registry.md section 13).
+        self._assert_nothing_published_under(REGISTRY_SCHEMAS)
+        for source in sorted((ROOT / REGISTRY_SCHEMAS).rglob("*.schema.json")):
+            schema_id = json.loads(source.read_text(encoding="utf-8"))["$id"]
+            with self.subTest(schema=source.name):
+                self.assertFalse((self.output / urlsplit(schema_id).path.lstrip("/")).exists())
 
     def test_registry_companion_document_is_published(self) -> None:
         document = (self.output / "spec" / "registry" / "index.html").read_text(encoding="utf-8")

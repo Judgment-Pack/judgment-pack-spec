@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.0.0/pack-check-report.schema.json",
+  "title": "DRAFT Registry companion 1.0.0: pack check report",
+  "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A pack check report (section 10.5), closed.",
+  "$comment": "The visit order of the advisories, at most one per fact condition, and the order and cap of a refused contract's diagnostics (sections 7.4 and 10.5) are the reader's to check.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "factsCheckFormatVersion",
+    "diagnostics"
+  ],
+  "properties": {
+    "factsCheckFormatVersion": {
+      "const": "1.0.0"
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "digest"
+      ],
+      "properties": {
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "pack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "digest"
+      ],
+      "properties": {
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/diagnostic"
+      }
+    }
+  },
+  "dependentRequired": {
+    "contract": [
+      "pack"
+    ],
+    "pack": [
+      "contract"
+    ]
+  },
+  "if": {
+    "required": [
+      "contract"
+    ]
+  },
+  "then": {
+    "properties": {
+      "diagnostics": {
+        "items": {
+          "properties": {
+            "location": {
+              "properties": {
+                "document": {
+                  "const": "pack"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "else": {
+    "properties": {
+      "diagnostics": {
+        "description": "Section 10.5: a refused contract's diagnostics alone, capped as section 7.4 caps them.",
+        "minItems": 1,
+        "maxItems": 1001,
+        "items": {
+          "properties": {
+            "location": {
+              "properties": {
+                "document": {
+                  "const": "contract"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

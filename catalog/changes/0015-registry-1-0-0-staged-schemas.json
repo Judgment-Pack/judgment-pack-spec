@@ -1,0 +1,71 @@
+{
+  "reason": "Staged with the proposed registry companion (spec/registry.md, format 1.0.0): the closed schemas of its ten documents and the definitions they share. No bundle carries them and the site does not serve them; no format's normative status changes.",
+  "changes": [
+    {
+      "path": "schema/registry/1.0.0/common.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:9aa6ddcaad01f21ca534b744a74bead1baf9ad3d0c5edcefb72e26ef4f0a24fc"
+    },
+    {
+      "path": "schema/registry/1.0.0/emit-request.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:95c4a816410547b7f5b2422cdf2a9dca8f4eda4aec2b1fd9e2b87258a7a02254"
+    },
+    {
+      "path": "schema/registry/1.0.0/emit-response.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:4171fca230f6a0688bc3086c0984906fb702863a5cdf80849089e2cff72d25ad"
+    },
+    {
+      "path": "schema/registry/1.0.0/emitter-manifest.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:99ba0b4e75446d4225f28031da20a39b81c5bd69d62517d55149ef5d99cd29b5"
+    },
+    {
+      "path": "schema/registry/1.0.0/facts-contract.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:eeb66c405d0989e822246e2dad3004e4a049b508b2977572cea58bfc65645d20"
+    },
+    {
+      "path": "schema/registry/1.0.0/harness-report.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:2de19fe82f3f8d06505fe7cbfecc3ddb55e05cddb897e700607c8585b1cc57e5"
+    },
+    {
+      "path": "schema/registry/1.0.0/kind-declaration.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:499ce129b6775636b282e944983312390267608b84f1dcace5a804332eef9501"
+    },
+    {
+      "path": "schema/registry/1.0.0/pack-check-report.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:7e6d637fddae1861bf4ed845f183b5403bee2e12d625590563d03e0b169d60ce"
+    },
+    {
+      "path": "schema/registry/1.0.0/registry.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:711540af3e63ad3874acb825893d9c29a391afdc970461e12c75dfe6d998d601"
+    },
+    {
+      "path": "schema/registry/1.0.0/resolved-registry.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:f7a4fc3e515b2d27c9036d7b83f25acbd7c9e9b85cb85aad30d218ffb5c9be3a"
+    },
+    {
+      "path": "schema/registry/1.0.0/validation-report.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:cd60dd526a0b8d14d09309c88a5c8d796de46e3d176fc75135fc3e4b23e0e1a1"
+    }
+  ]
+}
