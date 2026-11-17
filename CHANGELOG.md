@@ -46,11 +46,13 @@ here.
   proposed; #358). Each checked such a source as one of a kind its version does not list
   (`input-malformed`). Each now holds it to §4.5's members, `document`, `select` and `maxBytes`, and
   `select`'s `types`, `mode`, `address`, `actions` and `max`, and then refuses it as `kind-unread`,
-  as it does `http`, `sql` and `web`; a document of version 2 that names it stays `input-malformed`.
-  Hand-written cases hold the two readers' reports equal. §4.5 now says so; RFC 0018's
-  Specification section follows. The TypeScript reader's `forms.ts`, a file of the `v0.3.0`
-  retained column, keeps its `v0.3.0` bytes under the historical-compatibility fixtures, as
-  `verify.ts` does. No released text carries the kind, so nothing released changes.
+  as it does `http`, `sql` and `web`, in a document of version 3; a document of version 2 that names
+  it stays `input-malformed`. In formats `4.0.0` and `4.1.0` the Python reader does the same, and
+  the TypeScript reader, which reads neither, refuses the document `version-unread` first.
+  Hand-written cases hold the two readers' reports equal, and each reader's answer in those two
+  formats. §4.5 now says so; RFC 0018's Specification section follows. The TypeScript reader's
+  `forms.ts`, a file of the `v0.3.0` retained column, keeps its `v0.3.0` bytes under the
+  historical-compatibility fixtures, as `verify.ts` does. No released text carries the kind, so nothing released changes.
 - **RFC 0038 §2 step 1 notes the stream reading** (#353). The RFC said the reader hashes the
   whole input; an amendment note there now points at `spec/dialect.md` §4.5, where a stream is read
   to `maxBytes` and one byte more and a longer one is `TF-SIZE` with no sha256 and no size. No

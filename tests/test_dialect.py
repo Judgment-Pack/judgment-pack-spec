@@ -415,7 +415,8 @@ def terraform_file_cases() -> list[tuple[str, str, Any]]:
     not list the kind, `input-malformed`. Each source is synthetic and added to the `version-3-bound` vector's
     dialect, which is read as version 2 too (test_version_3_leaves_an_optional_member_out_when_it_is_empty); a
     local `selected-file` in its place, of version 2 and not read, shows that the version-2 document is read as far
-    as the kinds. In `(name, expected answer, build)` form, as research_cases() gives it."""
+    as the kinds. In `(name, expected answer, build)` form, as research_cases() gives it. The named formats that
+    select version 3's forms are in terraform_file_format_cases()."""
     unread, malformed = "refusal:kind-unread", "refusal:input-malformed"
     read = {"copy": {"facts": [], "evidence": []}}
     plan = {"name": "plan", "kind": "terraform-file", "read": read, "document": "plan", "select": {"types": ["google_sql_user"]}}
@@ -424,16 +425,16 @@ def terraform_file_cases() -> list[tuple[str, str, Any]]:
     astral = "\U0001d4b3"  # one code point, two UTF-16 code units
     cases: list[tuple[str, str, Any]] = []
 
-    def build(source: dict[str, Any], version: int) -> Inputs:
+    def build(sources: list[dict[str, Any]], version: int) -> Inputs:
         inputs = Inputs("version-3-bound", REQUIRES_BINDING["version-3-bound"])
         document = json.loads(inputs.dialect)
         document["version"] = version
-        document["sources"].append(source)
+        document["sources"].extend(sources)
         inputs.dialect = json.dumps(document).encode("utf-8")
         return inputs
 
-    def add(name: str, expected: str, source: dict[str, Any], version: int = 3) -> None:
-        cases.append((f"terraform-file: {name}", expected, lambda: build(copy.deepcopy(source), version)))
+    def add(name: str, expected: str, *sources: dict[str, Any], version: int = 3) -> None:
+        cases.append((f"terraform-file: {name}", expected, lambda: build(copy.deepcopy(list(sources)), version)))
 
     def select(base: dict[str, Any], **members: Any) -> dict[str, Any]:
         return {**base, "select": {**base["select"], **members}}
@@ -485,6 +486,30 @@ def terraform_file_cases() -> list[tuple[str, str, Any]]:
     add("a version-2 document naming a local selected-file in its place", unread, local, version=2)
     add("a version-2 document naming the kind", malformed, plan, version=2)
     add("a version-2 document naming the kind, a state", malformed, state, version=2)
+    # every form comes before the kind: a well-formed source of the kind beside a malformed one (a local file
+    # with a maxAge, §4.2) is refused as malformed, not as unread
+    add("well formed, beside a malformed source after it", malformed, plan, {**local, "maxAge": 300})
+    return cases
+
+
+def terraform_file_format_cases() -> list[tuple[str, str, str, Any]]:
+    """spec/dialect.md §4.5, §2.1: a well-formed `terraform-file` source in a document of the named formats `4.0.0`
+    and `4.1.0`, which select version 3's forms, added to a staged vector of each format. The first reader reads
+    both formats, and refuses the source `kind-unread`; the second reads neither, and refuses the document
+    `version-unread` in phase 4, before any source's form (§2.2.7, §2.3.11). As `(name, the first reader's
+    answer, the second's, build)`."""
+    source = {"name": "plan", "kind": "terraform-file", "read": {"copy": {"facts": [], "evidence": []}},
+              "document": "plan", "select": {"types": ["google_sql_user"]}}
+    cases: list[tuple[str, str, str, Any]] = []
+    for selector, vector in (("4.0.0", DIALECT / "format-4" / "source-rule"), ("4.1.0", DIALECT / "format-4.1" / "paged-beside-unpaged")):
+        def build(vector: Path = vector, selector: str = selector) -> HandInputs:
+            document = json.loads((vector / "dialect.json").read_bytes())
+            assert document["formatVersion"] == selector
+            document["sources"].append(copy.deepcopy(source))
+            return HandInputs(json.dumps(document).encode("utf-8"), (vector / "case.json").read_bytes(),
+                              (vector / "sources.json").read_bytes(), (vector / "profiles.json").read_bytes(),
+                              (vector / "preparation.json").read_bytes(), None, False)
+        cases.append((f"terraform-file: a document of format {selector}", "refusal:kind-unread", "refusal:version-unread", build))
     return cases
 
 
@@ -1720,7 +1745,9 @@ class DialectVectorTests(RecordingSet, unittest.TestCase):
     def test_a_terraform_file_source_is_held_to_its_form_and_not_read(self) -> None:
         # §4.5: a kind of version 3, held to its form and then `kind-unread`; tests/test_dialect_ts.py gives the
         # second reader the same cases and holds the two reports equal.
-        for name, expected, build in terraform_file_cases():
+        cases = [(name, expected, build) for name, expected, build in terraform_file_cases()]
+        cases += [(name, expected, build) for name, expected, _, build in terraform_file_format_cases()]
+        for name, expected, build in cases:
             with self.subTest(case=name):
                 result = READER.report(build().verify().answer)
                 self.assertEqual(expected, f"{result['result']}:{result[result['result']]}", result)

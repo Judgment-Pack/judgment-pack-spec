@@ -1447,11 +1447,14 @@ and not claimable (§4). As a kind of version 3 it is also defined in the named 
 version 3's forms, `3.0.0`, `4.0.0` and `4.1.0` (§2.1), by that inheritance: a document of one of
 them that names it was a document of an unknown kind under the text released with Core `0.6.0`,
 which a reader of that text still refuses, and is now one of a kind defined and not claimable.
-Nothing in those formats changes for a document that does not name it. Both repository readers
-hold a source of the kind to its form and then refuse it as `kind-unread` (§11), and refuse a
-document of version 2 that names it as `input-malformed` (§4); no vector decides it. The reference
-runtime reads the file (`v0.48.0`), and where this section settles what RFC 0038 left open, it says
-what that reader does, except for deposed objects (step 4), which that reader does not yet carry.
+Nothing in those formats changes for a document that does not name it. In a document of version 3,
+both repository readers hold a source of the kind to its form and then refuse it as `kind-unread`
+(§11), and each refuses a document of version 2 that names it as `input-malformed` (§4). In a
+document of format `4.0.0` or `4.1.0`, the Python reader does the same, and the TypeScript reader,
+which reads neither format, refuses the document `version-unread` before any source's form (§2.2.7,
+§2.3.11). No vector decides it. The reference runtime reads the file (`v0.48.0`), and where this
+section settles what RFC 0038 left open, it says what that reader does, except for deposed objects
+(step 4), which that reader does not yet carry.
 
 A `terraform-file` source has, besides the members of §4, exactly `document` (`plan` or `state`:
 which output of `terraform show -json` the file is), `select` (below) and `maxBytes` (optional, an

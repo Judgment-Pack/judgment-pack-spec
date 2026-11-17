@@ -156,11 +156,18 @@ class SecondDialectReaderTest(unittest.TestCase):
     def test_both_readers_hold_a_terraform_file_source_alike(self) -> None:
         # spec/dialect.md §4.5: a `terraform-file` source, of version 3, held to its form and then refused
         # `kind-unread` by both readers; malformed, or in a version-2 document, `input-malformed`. The cases are
-        # tests/test_dialect.py's terraform_file_cases(); the reports must be equal byte for byte.
+        # tests/test_dialect.py's terraform_file_cases(), whose reports must be equal byte for byte, and its
+        # terraform_file_format_cases(), where each reader's answer is held on its own.
         node = self.node()
         first = first_reader_tests()
         batch, names = [], []
-        for name, expected, build in first.terraform_file_cases():
+        # Each case with each reader's answer: the same for every case but the named formats 4.0.0 and 4.1.0,
+        # which the first reader reads (`kind-unread`) and the second does not (`version-unread`, before any form).
+        cases = [(name, expected, expected, build) for name, expected, build in first.terraform_file_cases()]
+        formats = first.terraform_file_format_cases()
+        self.assertEqual(2, len(formats))
+        cases += formats
+        for name, expected, expected_second, build in cases:
             inputs = build()
             report = first.READER.preparation_bytes(first.READER.report(inputs.verify().answer)).decode("utf-8")
             encoded = {
@@ -168,7 +175,7 @@ class SecondDialectReaderTest(unittest.TestCase):
                 for member in ("dialect", "case", "acquisitions", "profiles", "preparation", "record", "binding")
             }
             batch.append({**encoded, "requireBinding": inputs.require_binding})
-            names.append((name, expected, report))
+            names.append((name, expected, expected_second, report))
         run = subprocess.run(
             [node, "--disable-wasm-trap-handler", "--no-warnings", "--input-type=module", "--eval", BATCH % json.dumps(str(READER))],
             input=json.dumps(batch).encode("utf-8"),
@@ -178,11 +185,14 @@ class SecondDialectReaderTest(unittest.TestCase):
         self.assertEqual(run.returncode, 0, run.stderr.decode("utf-8", "replace")[-4000:])
         reports = json.loads(run.stdout)
         self.assertEqual(len(names), len(reports))
-        self.assertEqual([], [f"{name}: first {mine}, second {theirs}" for (name, _, mine), theirs in zip(names, reports) if theirs != mine])
-        for name, expected, report in names:
-            result = json.loads(report)
+        code = lambda report: (lambda r: f"{r['result']}:{r[r['result']]}")(json.loads(report))  # noqa: E731
+        # equal byte for byte wherever the two answers are one
+        self.assertEqual([], [f"{name}: first {mine}, second {theirs}" for (name, one, two, mine), theirs in zip(names, reports)
+                              if one == two and theirs != mine])
+        for (name, expected, expected_second, report), second in zip(names, reports):
             with self.subTest(case=name):
-                self.assertEqual(expected, f"{result['result']}:{result[result['result']]}")
+                self.assertEqual(expected, code(report))
+                self.assertEqual(expected_second, code(second))
 
     def test_the_typescript_reader_does_not_read_format_4_yet(self) -> None:
         # Format 4.0.0 (spec/dialect.md §2.2) is read by the first reader alone: the second
