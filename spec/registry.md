@@ -791,16 +791,19 @@ A diagnostic's `location` is an object of these members, in this order of compar
 
 | Member | Form | Present |
 | --- | --- | --- |
-| `document` | `registry`, `kind`, `value`, `yaml`, `facts`, `contract` or `pack`; and, for the emitter host's own diagnostics (§11), `manifest` or `response` | always |
+| `document` | `registry`, `kind`, `value`, `yaml`, `facts`, `contract` or `pack`; for the emitter host's own diagnostics (§11), `manifest`, `response` or `repository`; and for the conformance harness's (§11.5), `vector` or `repository` | always |
 | `kindDocument` | the digest of a kind declaration's bytes as supplied (§2.3) | on every diagnostic about a supplied kind declaration, except `REG-DOC-SIZE` for one that was not read whole |
 | `kind` | a kind name | on a pin's diagnostic of step 4 or 8, on `REG-PIN-UNPINNED`, on a facts contract's (§10), and on every diagnostic of step 2 for a declaration whose `kind` member is a kind name |
 | `entry` | `{"kind", "id"}` | on a diagnostic about one entry, when the entry's kind is a kind name and its id is of the entry-id grammar (§6.2) |
 | `environment` | an environment | on a diagnostic of one environment: of step 7, of step 8's sizes, and of the facts writer |
 | `pointer` | a pointer into `document` | always; `""` for the whole document |
 | `line`, `column` | integers from 1, counting code points | in document `yaml` only, where `pointer` is always `""` |
+| `path` | a slash-separated relative path: in document `vector`, below the vectors directory; in document `repository`, below the repository root | in documents `vector` and `repository` only, naming the file or directory the host or harness read or would write |
 
 In document `value`, the pointer is into the entry's resolved value in `environment`. In document
-`kind`, it is into the declaration named by `kindDocument`.
+`kind`, it is into the declaration named by `kindDocument`. A `path` is never absolute, never a
+path on the host outside the vectors directory or the repository, and never carries a value; its
+pointer is into the file it names when that file is a JSON document, and `""` otherwise.
 
 A location never holds a value from a document beyond these identifiers: a pointer is built from
 member names and indices of the document, and the identifiers are the document's own names for its
@@ -1462,12 +1465,15 @@ readers agreeing on every row of a class.
 - **Emitter host refusals.** Overlapping `owns`, options that fail their schema, a link at an owned
   path and an unreadable path have no code here. The reference runtime reports them with
   provisional codes of its own (`EMIT-OWNS-OVERLAP`, `EMIT-OPTIONS`, `EMIT-LINK` and
-  `EMIT-PATH-UNREADABLE`), which come into §12 with the rows that exercise them.
+  `EMIT-PATH-UNREADABLE`, the last shared with the harness), which come into §12 with the rows
+  that exercise them.
 - **Harness refusals.** A vector set not of §11.5's layout, a harness bound reached, and an
   unreadable vector file have no code here. The reference harness reports them with provisional
-  codes of its own (`EMIT-VECTOR`, `EMIT-HARNESS-BOUND` and `EMIT-PATH-UNREADABLE`), located in a
-  document `vector` by a path below the vectors, which §7.3's location has no member for; the
-  layout rows compare only that the run is refused.
+  codes of its own (`EMIT-VECTOR`, `EMIT-HARNESS-BOUND` and `EMIT-PATH-UNREADABLE`, the last
+  shared with the host), each located by §7.3's `path`: `EMIT-VECTOR` in document `vector`;
+  `EMIT-HARNESS-BOUND` and `EMIT-PATH-UNREADABLE` in document `vector` for a vector's own files
+  and in document `repository` for the repository copy. They stay provisional until this
+  companion's 1.0.0 is final; the layout rows compare only that the run is refused.
 - **Further host readings.** The reference host is stricter than §11.3 in ways this text does not
   state yet: it resolves each emitter diagnostic's location against the request, so a location
   names only what the request holds; it compares paths once case is folded and they are normalized

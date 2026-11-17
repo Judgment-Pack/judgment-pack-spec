@@ -1521,7 +1521,8 @@ then bounded by `L`, the lesser of 268435456 and sixteen times the file's length
 `TF-VALUE-LIMIT`, after `TF-SELECT-BOUND` and `TF-NUMBER`, when its canonical form (RFC 8785) is
 longer than `L` bytes, or when the `afterUnknown` pointers of one selected `plan` resource, each
 charged the length in bytes of its RFC 6901 form and eight bytes more, total more than `L` less the
-length of the canonical form before that resource's object; so a reader can refuse before it holds
+bytes of the canonical form that come before that resource's object (the array's opening `[`,
+the objects of the resources before it, and the comma after each of them); so a reader can refuse before it holds
 the value or the pointers. Numbers in normal form grow at most about 13.4 times (an array of
 `1e63`) and strings do not grow, so pointers that repeat a long member name are what reach the
 multiple. The reads of §6 then turn the value into facts. The acquisition record is `{"kind": "terraform-file", "document",
