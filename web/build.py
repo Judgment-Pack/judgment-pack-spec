@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import importlib.util
 import json
 import hashlib
 import posixpath
@@ -2841,13 +2842,24 @@ def build_not_found(output_root: Path) -> None:
     write_page(output_root, page_output, rendered)
 
 
-def registry_schema_sources(root: Path = ROOT) -> tuple[str, ...]:
-    """The registry's schemas, once its rows' manifest says the companion is released.
+def release_builder():
+    """tools/build_release.py, whose registry release record the site's gate below reuses."""
+    spec = importlib.util.spec_from_file_location("jps_build_release", ROOT / "tools" / "build_release.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
-    Like Policy's, they are packaged on their own scoped tag and served at their `$id`. The status
-    is `proposed` until the commit a registry tag names (spec/registry.md section 13), so a site
-    built from an earlier commit, for a Core release, serves no registry schema: a URL served once
-    keeps its bytes, and the schemas may still change before that release.
+
+def registry_schema_sources(root: Path = ROOT) -> tuple[str, ...]:
+    """The registry's schemas, once the companion is released with exactly these schemas.
+
+    Like Policy's, they are packaged on their own scoped tag and served at their `$id`. The rows'
+    manifest says `proposed` until the commit a registry tag names (spec/registry.md section 13),
+    and that commit adds the tag's release record. A URL served once keeps its bytes, so the site
+    serves the schemas only when the manifest says `released` and a registry release record of
+    their format names these schemas with these bytes; otherwise it serves none. A site built
+    before that commit serves none, and so does one built after a schema changed with no record
+    for the change.
     """
     try:
         rows = json.loads((root / "conformance/registry/1.0.0/manifest.json").read_text("utf-8"))
@@ -2855,8 +2867,21 @@ def registry_schema_sources(root: Path = ROOT) -> tuple[str, ...]:
         return ()
     if not isinstance(rows, dict) or rows.get("status") != "released":
         return ()
-    return tuple(path.relative_to(root).as_posix()
-                 for path in sorted((root / "schema/registry/1.0.0").glob("*.schema.json")))
+    builder = release_builder()
+    for path in sorted((root / "releases").glob("registry-v*.json")):
+        tag = path.name[: -len(".json")]
+        if not builder.is_registry_tag(tag):
+            continue
+        try:
+            release = json.loads(path.read_text("utf-8"))
+            tree = builder.registry_record(builder.release_version(tag), tag, root)
+        except (OSError, ValueError, TypeError, AttributeError, KeyError):
+            return ()
+        if (isinstance(release, dict) and release.get("tag") == tag
+                and release.get("formatVersion") == tree["formatVersion"]
+                and builder.same_registry_schemas(release, tree)):
+            return tuple(f"{builder.REGISTRY_SCHEMA_ROOT}/{name}.schema.json" for name in sorted(tree["schemas"]))
+    return ()
 
 
 CANONICAL_SCHEMA_SOURCES = (

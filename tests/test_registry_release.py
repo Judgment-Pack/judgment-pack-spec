@@ -47,6 +47,12 @@ HEADER_STATUS = re.compile(r'^(  "status": ")([a-z]+)(",)$', re.M)
 SCHEMA_TITLE = re.compile(r'"title": "DRAFT (Registry companion 1\.0\.0: [a-z -]+)"')
 SCHEMA_STATUS = ("Staged and proposed with spec/registry.md, which governs where they differ; not "
                  "released, and served by no bundle and no site. ")
+# The other statements of the status the tag commit rewrites: the text's lead, the README's heading
+# and status, and the rows' manifest label.
+LEAD = re.compile(r"`1\.0\.0`(\s+)is(\s+)proposed\b")
+README_HEADING = re.compile(r"^(# .*?)\s*\((?:staged, )?proposed\)$", re.M)
+README_STATUS = re.compile(r"`1\.0\.0`,(\s+)status(\s+)`proposed`")
+LABEL = re.compile(r'^(  "label": )("[^"\n]*")(,)$', re.M)
 
 
 def digest(path: Path) -> str:
@@ -101,11 +107,21 @@ def say_released(root: Path) -> None:
     """What the commit a tag names changes: the three statuses and each schema's wording. A tree
     that already says so is left as it is."""
     set_status(root, "released")
+    rewrite(root / TEXT, LEAD, r"`1.0.0`\1is\2released")
+    rewrite(root / README, README_HEADING, r"\1")
+    rewrite(root / README, README_STATUS, r"`1.0.0`,\1status\2`released`")
+    rewrite(root / MANIFEST, LABEL, lambda match: match.group(1) + json.dumps(
+        json.loads(match.group(2)).replace(", proposed:", ", released:")
+        .replace(", in no corpus until its first release", "")) + match.group(3))
     for path in sorted((root / SCHEMAS).glob("*.schema.json")):
         text = path.read_text("utf-8")
         text = SCHEMA_TITLE.sub(r'"title": "\1"', text).replace(
             SCHEMA_STATUS, "Released with spec/registry.md, which governs where they differ. ", 1)
         path.write_bytes(text.encode("utf-8"))
+
+
+def rewrite(path: Path, pattern: re.Pattern, replacement) -> None:
+    path.write_bytes(pattern.sub(replacement, path.read_text("utf-8")).encode("utf-8"))
 
 
 def edit_schema(root: Path, name: str, change) -> None:
@@ -251,20 +267,49 @@ class RegistryReleaseTests(unittest.TestCase):
                 ("proposed", "common",
                  lambda schema: schema.update(description=schema["description"] + " Proposed.")),
                 ("no title", "registry", lambda schema: schema.pop("title")),
-                ("nested", "registry", nested)):
+                ("nested", "registry", nested),
+                ("comment", "registry", lambda schema: schema.update({"$comment": "Unreleased."})),
+                ("nested comment", "common", lambda schema: schema.setdefault("$defs", {}).update(
+                    commented={"$comment": "Not yet released."})),
+                ("pre-release", "registry", lambda schema: schema.update(title=schema["title"] + " (pre-release)")),
+                ("no corpus", "common",
+                 lambda schema: schema.update(description=schema["description"] + " In no corpus."))):
             with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
                 root = self.released_tree(temporary)
                 edit_schema(root, name, change)
                 write_record(root)
                 with self.assertRaisesRegex(ValueError, "draft and unreleased wording"):
                     BUILDER.validate_registry_artifacts(VERSION, TAG, root)
-        # A property named `description` is a name, not an annotation.
+        # A property named `description` is a name, not an annotation, and a JSON Schema draft's
+        # name, or a release that is, are not the draft wording.
         with tempfile.TemporaryDirectory() as temporary:
             root = self.released_tree(temporary)
             edit_schema(root, "registry", lambda schema: schema.setdefault("$defs", {}).update(
-                named={"properties": {"description": {"type": "string"}}}))
+                named={"properties": {"description": {"type": "string"}},
+                       "$comment": "A JSON Schema draft 2020-12 (draft-2020-12) schema, released."}))
             write_record(root)
             BUILDER.validate_registry_artifacts(VERSION, TAG, root)
+
+    def test_no_statement_may_still_call_the_format_proposed(self):
+        def append(name, addition):
+            return lambda root: (root / name).write_text((root / name).read_text("utf-8") + addition)
+
+        def heading(root):
+            lines = (root / README).read_text("utf-8").split("\n", 1)
+            (root / README).write_text(lines[0] + " (proposed)\n" + lines[1])
+
+        for label, change in (
+                ("the text's lead", append(TEXT, "\nVersion `1.0.0` is\nproposed.\n")),
+                ("the README's status", append(README, "\nRows of the format `1.0.0`, status\n`proposed`.\n")),
+                ("the README's heading", heading),
+                ("the label", lambda root: rewrite(root / MANIFEST, LABEL, r'\1"Registry rows, staged"\3')),
+                ("a label not a string", lambda root: rewrite(root / MANIFEST, LABEL, r"\g<1>1\g<3>"))):
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                root = self.released_tree(temporary)
+                change(root)
+                write_record(root)
+                with self.assertRaisesRegex(ValueError, "call the format proposed"):
+                    BUILDER.validate_registry_artifacts(VERSION, TAG, root)
 
     def test_notes_are_required(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -340,23 +385,24 @@ class RegistryReleaseTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "not checked out"):
                 BUILDER.validate(TAG, commit)
 
-    def test_the_bundle_carries_the_companion_and_a_core_bundle_does_not(self):
+    def candidate_tree(self, temporary: str) -> str:
         # Capture the uncommitted candidate in a temporary index and tree, with synthetic notes
         # and record where the tree has none yet; create no commit or tag.
+        env = dict(os.environ, GIT_INDEX_FILE=str(Path(temporary) / "index"))
+        subprocess.run(["git", "read-tree", "HEAD"], cwd=ROOT, env=env, check=True)
+        subprocess.run(["git", "add", "-A"], cwd=ROOT, env=env, check=True)
+        for name, content in ((f"releases/{TAG}.md", "Synthetic notes.\n"), (f"releases/{TAG}.json", "{}\n")):
+            if (ROOT / name).exists():
+                continue
+            blob = subprocess.run(["git", "hash-object", "-w", "--stdin"], cwd=ROOT, input=content,
+                                  capture_output=True, text=True, check=True).stdout.strip()
+            subprocess.run(["git", "update-index", "--add", "--cacheinfo", f"100644,{blob},{name}"],
+                           cwd=ROOT, env=env, check=True)
+        return subprocess.check_output(["git", "write-tree"], cwd=ROOT, env=env, text=True).strip()
+
+    def test_the_bundle_carries_the_companion_and_its_checks_pass_in_it(self):
         with tempfile.TemporaryDirectory() as temporary:
-            index = Path(temporary) / "index"
-            env = dict(os.environ, GIT_INDEX_FILE=str(index))
-            subprocess.run(["git", "read-tree", "HEAD"], cwd=ROOT, env=env, check=True)
-            subprocess.run(["git", "add", "-A"], cwd=ROOT, env=env, check=True)
-            for name, content in ((f"releases/{TAG}.md", "Synthetic notes.\n"),
-                                  (f"releases/{TAG}.json", "{}\n")):
-                if (ROOT / name).exists():
-                    continue
-                blob = subprocess.run(["git", "hash-object", "-w", "--stdin"], cwd=ROOT, input=content,
-                                      capture_output=True, text=True, check=True).stdout.strip()
-                subprocess.run(["git", "update-index", "--add", "--cacheinfo", f"100644,{blob},{name}"],
-                               cwd=ROOT, env=env, check=True)
-            tree = subprocess.check_output(["git", "write-tree"], cwd=ROOT, env=env, text=True).strip()
+            tree = self.candidate_tree(temporary)
             output = Path(temporary) / "dist"
             with patch.object(BUILDER, "validate", return_value=VERSION):
                 artifacts = BUILDER.build(TAG, tree, output)
@@ -391,17 +437,24 @@ class RegistryReleaseTests(unittest.TestCase):
                     if target and not re.match(r"[a-z]+:", target):
                         with self.subTest(name=name, link=link):
                             self.assertTrue((packaged / name).parent.joinpath(target).resolve().exists())
-            # The checks that hold the rows to the text pass inside the bundle alone.
+            # The checks that hold the rows to the text pass inside the bundle alone. They are
+            # found from the bundle's tests directory, not imported as a `tests` package, which an
+            # installed distribution of that name would shadow.
             checked = subprocess.run(
-                [sys.executable, "-m", "unittest", "-q", "tests.test_registry_companion",
-                 "tests.test_registry_schemas"],
+                [sys.executable, "-m", "unittest", "discover", "-v", "-s", "tests", "-p", "test_registry_[cs]*.py"],
                 cwd=packaged, capture_output=True, text=True, timeout=600)
             self.assertEqual(0, checked.returncode, checked.stderr[-2000:])
             self.assertRegex(checked.stderr, r"Ran [1-9][0-9]* tests")
             self.assertNotIn("skipped", checked.stderr)
+            for module in ("test_registry_companion.", "test_registry_schemas."):
+                self.assertIn(module, checked.stderr)
             checksums = artifacts[2].read_text().splitlines()
             for artifact, line in zip(artifacts[:2], checksums):
                 self.assertEqual(line, BUILDER.sha256(artifact) + "  " + artifact.name)
+
+    def test_a_core_bundle_carries_the_text_and_none_of_the_registry_directories(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            tree = self.candidate_tree(temporary)
             core_paths = BUILDER.bundle_paths("v0.2.0-draft", tree)
             core_archive = subprocess.check_output(["git", "archive", "--format=tar", tree, *core_paths], cwd=ROOT)
             with tarfile.open(fileobj=io.BytesIO(core_archive)) as archive:

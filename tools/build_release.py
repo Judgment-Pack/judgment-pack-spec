@@ -236,9 +236,18 @@ REGISTRY_STATUS_SENTENCE = re.compile(
     rf"^This text is registry format `{re.escape(REGISTRY_FORMAT)}`, status `([a-z]+)`\.",
     re.MULTILINE,
 )
-# What a schema's title and description say while the format is proposed (schema/registry/1.0.0).
+# What the companion's files say of it while the format is proposed: a schema's titles,
+# descriptions and comments, the rows' README heading and the rows' manifest label. A JSON Schema
+# draft's name ("draft 2020-12") is not a draft.
 REGISTRY_UNRELEASED_WORDING = re.compile(
-    r"\b(?:draft|staged|proposed|not released|no bundle|no site)\b", re.IGNORECASE
+    r"\b(?:draft(?![- ]?[0-9])|staged|proposed|unreleased|not(?: yet)? released|pre-?release"
+    r"|no bundle|no site|no corpus)\b",
+    re.IGNORECASE,
+)
+# The text's and the README's statements of the format's status, read with whitespace collapsed:
+# "status `proposed`" and "Version `1.0.0` is proposed".
+REGISTRY_PROPOSED_STATEMENT = re.compile(
+    rf"`{re.escape(REGISTRY_FORMAT)}`(?:, status `proposed`| is proposed)", re.IGNORECASE
 )
 REGISTRY_RECORD_KEYS = {"companion", "releaseVersion", "tag", "maturity", "formatVersion", "schemas",
                         "codes", "corpus", "formatDigests"}
@@ -329,26 +338,35 @@ def validate_registry_artifacts(version: str, tag: str, root: Path = ROOT) -> No
             != ("registry", REGISTRY_FORMAT, REGISTRY_MATURITY) for document in (rows, codes)):
         raise ValueError("a registry release requires the text, the code list and the rows' "
                          f"manifest to say status {REGISTRY_MATURITY}")
+    readme = (root / REGISTRY_README).read_text("utf-8")
+    label = rows.get("label", "")
+    if (any(REGISTRY_PROPOSED_STATEMENT.search(" ".join(document.split()))
+            for document in ((root / REGISTRY_TEXT).read_text("utf-8"), readme))
+            or any(REGISTRY_UNRELEASED_WORDING.search(heading)
+                   for heading in re.findall(r"^# .*$", readme, re.MULTILINE))
+            or not isinstance(label, str) or REGISTRY_UNRELEASED_WORDING.search(label)):
+        raise ValueError("a registry release requires the text and the rows' README not to call "
+                         "the format proposed, nor the README's heading or the manifest's label")
     # A schema's bytes are served at its $id from the release on and never change, so none may
-    # still call itself a draft, or unreleased, when the release publishes it: not its own title
-    # and description, which it must have, nor any nested one.
+    # still call itself a draft, or unreleased, when the release publishes it: not in its own title
+    # and description, which it must have, nor in any nested one or any comment.
     for name in release["schemas"]:
         schema = json.loads((root / REGISTRY_SCHEMA_ROOT / f"{name}.schema.json").read_text("utf-8"))
         if (not isinstance(schema, dict) or not isinstance(schema.get("title"), str)
                 or not isinstance(schema.get("description"), str)
                 or any(REGISTRY_UNRELEASED_WORDING.search(said) for said in schema_annotations(schema))):
-            raise ValueError("a registry release requires each schema's titles and descriptions to "
-                             "drop the draft and unreleased wording")
+            raise ValueError("a registry release requires each schema's titles, descriptions and "
+                             "comments to drop the draft and unreleased wording")
     if not (root / "releases" / f"{tag}.md").is_file():
         raise ValueError("registry release notes are missing for the exact tag")
 
 
 def schema_annotations(value: object):
-    """Every string a schema gives as a `title` or `description`, at any depth. A property named
-    `title` or `description` maps to a schema, not a string, and is walked into."""
+    """Every string a schema gives as a `title`, `description` or `$comment`, at any depth. A
+    property of one of those names maps to a schema, not a string, and is walked into."""
     if isinstance(value, dict):
         for key, item in value.items():
-            if key in ("title", "description") and isinstance(item, str):
+            if key in ("title", "description", "$comment") and isinstance(item, str):
                 yield item
             else:
                 yield from schema_annotations(item)
