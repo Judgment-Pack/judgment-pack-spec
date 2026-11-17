@@ -3,7 +3,7 @@
   "$id": "https://judgmentpack.org/schema/registry/1.0.0/emitter-manifest.schema.json",
   "title": "DRAFT Registry companion 1.0.0: emitter manifest",
   "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. An emitter manifest (section 11.1), closed.",
-  "$comment": "That the owns globs of two manifests do not overlap, that neither command nor owns names a path outside the repository root (the schema refuses only a program that begins with '/' or a '..' segment), and the host's size bound (section 11.1) are the host's to check. Section 11.1 gives no form for description or deprecated, so the schema holds none.",
+  "$comment": "That the owns globs of two manifests do not overlap, that no two reads name one kind (uniqueItems is the weaker form), that a range's lower release is below its upper, and the host's size bound (section 11.1) are the host's to check. The path rules keep command and owns inside the repository root.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -29,9 +29,12 @@
     "owner": {
       "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/owner"
     },
-    "description": true,
+    "description": {
+      "type": "string"
+    },
     "reads": {
       "type": "array",
+      "uniqueItems": true,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -62,11 +65,11 @@
       ]
     },
     "requestVersions": {
-      "$comment": "Section 11.1 calls each a request selector and gives it no other form.",
       "type": "array",
       "minItems": 1,
+      "uniqueItems": true,
       "items": {
-        "type": "string"
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/version"
       }
     },
     "environments": {
@@ -83,26 +86,24 @@
       "minItems": 1,
       "prefixItems": [
         {
-          "description": "A program name with no '/', or a relative path in the repository.",
-          "type": "string",
-          "minLength": 1,
-          "not": {
-            "pattern": "^(/|\\.\\.(/|(?![\\s\\S])))"
-          }
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/program"
         }
       ],
       "items": {
-        "type": "string"
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/argument"
       }
     },
     "owns": {
       "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
       "items": {
         "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/ownsGlob"
       }
     },
     "env": {
       "type": "array",
+      "uniqueItems": true,
       "items": {
         "allOf": [
           {
@@ -120,7 +121,9 @@
         }
       }
     },
-    "deprecated": true
+    "deprecated": {
+      "type": "boolean"
+    }
   },
   "if": {
     "required": [

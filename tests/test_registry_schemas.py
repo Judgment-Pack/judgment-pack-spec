@@ -3,8 +3,9 @@
 They are proposed with spec/registry.md, which governs where they differ. These tests hold them to
 the text and to the staged rows: each is a JSON Schema 2020-12 schema under its `$id`; every row
 document a reader admits, or writes, validates against the schema its selector names; the code list
-the reports use is codes.json's; each closed schema refuses an unlisted member, another selector
-and a missing required member; the forms the text states are refused when broken; and no schema
+the reports use is codes.json's, and every other enum, and each range form, is the text's list;
+each schema refuses another selector and a missing required member, and every object a schema
+closes refuses an unlisted member; the forms the text states are refused when broken; and no schema
 refuses a member that a row's expected refusals admit.
 """
 from __future__ import annotations
@@ -97,12 +98,13 @@ def errors(report) -> list[dict]:
 
 
 def admitted_kinds(row: dict, report: dict) -> list[str]:
-    """The declarations of a validate row that steps 1 and 2 found nothing in (sections 2.2, 3, 7.1)."""
+    """The declarations of a validate row that steps 1 and 2 found nothing in (sections 2.2, 3, 7.1).
+
+    A refused registry ends validation after step 2 (section 7.1), so a report names every
+    declaration that steps 1 and 2 refuse whether or not the registry was admitted.
+    """
     refused = [d for d in errors(report) if d["location"]["document"] == "kind"]
     if any("kindDocument" not in d["location"] for d in refused):
-        return []
-    if any(d["location"]["document"] == "registry" and d["code"].startswith("REG-DOC-")
-           and "environment" not in d["location"] for d in errors(report)):
         return []
     named = {d["location"]["kindDocument"] for d in refused}
     contents = {kind: read(kind) for kind in row["kinds"]}
@@ -167,6 +169,130 @@ def pointer(error) -> str:
     return path
 
 
+def folded(text: str) -> str:
+    return re.sub(r"\s+", " ", text)
+
+
+def backticked(text: str) -> list[str]:
+    """The code spans of a passage, each without the quotes of a JSON string."""
+    return [token.removeprefix('"').removesuffix('"') for token in re.findall(r"`([^`]+)`", text)]
+
+
+def walk(value, location=""):
+    """Each (location, object) of a schema, the location a JSON Pointer into it."""
+    yield location, value
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield from walk(item, location + "/" + key)
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            yield from walk(item, location + "/" + str(index))
+
+
+def enums() -> dict[tuple[str, str], list]:
+    """Every enum of every schema but the code lists, which codes.json holds."""
+    found = {}
+    for name, schema in SCHEMA_DOCUMENTS.items():
+        for location, value in walk(schema):
+            if isinstance(value, dict) and isinstance(value.get("enum"), list):
+                if (name, location) not in (("common", "/$defs/code"), ("common", "/$defs/warningCode")):
+                    found[(name, location)] = value["enum"]
+    return found
+
+
+# Each enum of the schemas, and the passage of spec/registry.md (white space folded) whose code
+# spans list its values; the passage is the regular expression's one group.
+TEXT_LISTS = {
+    ("common", "/$defs/typeName"): r"\| `type` \| a type name, or a non-empty array of distinct type "
+                                   r"names, from (.*?) \|",
+    ("common", "/$defs/locationDocument"): r"\| `document` \| (.*?) \| always \|",
+    ("common", "/$defs/registryDocument"): r"That location uses only \u00a77\.3's registry documents "
+                                           r"\((.*?), never the host's",
+    ("common", "/$defs/location/dependentSchemas/path/properties/document"):
+        r"\| `path` \| [^|]*\| in documents (.*?) only,",
+    ("common", "/$defs/diagnostic/properties/severity"): r"from \u00a712's closed list; `severity`, (.*?), "
+                                                         r"the code's;",
+    ("emit-response", "/$defs/file/properties/mode"): r"and an optional `mode`, (.*?)\. A path",
+    ("emit-response", "/$defs/diagnostic/properties/severity"):
+        r"An emitter diagnostic has exactly `code`, `severity` \((.*?)\) and `location`",
+    ("emitter-manifest", "/properties/input"): r"`input` \(optional, (.*?)\);",
+    ("emitter-manifest", "/properties/environments"): r"`environments`, (.*?), required with",
+    ("emitter-manifest", "/properties/env/items/not"): r"other than (`PATH`[^;]*?`SOURCE_DATE_EPOCH`);",
+    ("facts-contract", "/$defs/factType"): r"- `type`: (.*?); - `present`",
+    ("facts-contract", "/$defs/fact/properties/present"): r"- `present`: (.*?); - `items`",
+    ("facts-contract", "/$defs/fact/dependentSchemas/values/properties/type"):
+        r"distinct values of the type, only on (a `string`, `decimal` or `boolean`, or on an `array`) "
+        r"whose `items`",
+    ("facts-contract", "/$defs/fact/dependentSchemas/values/then/properties/items"):
+        r"distinct values of the type, only on a (`string`, `decimal` or `boolean`), or on an",
+}
+
+SAMPLES = {
+    "kind-declaration": "kinds/db-role.json",
+    "registry": "vectors/valid-two-environments/registry.json",
+    "resolved-registry": "vectors/valid-two-environments/resolved-prod.json",
+    "validation-report": "vectors/bounds-and-warnings/report.json",
+    "facts-contract": "vectors/facts-contracts/contract-service.json",
+    "pack-check-report": "vectors/facts-contracts/check-service.json",
+    "emitter-manifest": "vectors/emitter-host/emitter.json",
+    "emit-request": "vectors/emitter-host/request.json",
+    "emit-response": "vectors/emitter-harness/response-references.json",
+}
+WARNING = {"code": "x-a", "severity": "warning", "location": {"document": "registry", "pointer": ""}}
+
+# Each closed object of the schemas: the schema whose sample holds one, the changes that make the
+# sample hold one when it does not, and the path to it. The location is where the object is closed.
+CLOSED = {
+    ("common", "/$defs/schemaKeywords/properties/propertyNames"):
+        ("kind-declaration", {"schema": {"type": "object", "propertyNames": {"maxLength": 8}}},
+         ["schema", "propertyNames"]),
+    ("common", "/$defs/subschema"): ("kind-declaration", {}, ["schema", "properties", "database"]),
+    ("common", "/$defs/schema"): ("kind-declaration", {}, ["schema"]),
+    ("common", "/$defs/pin"): ("registry", {}, ["kinds", 0]),
+    ("common", "/$defs/location"): ("validation-report", {}, ["diagnostics", 0, "location"]),
+    ("common", "/$defs/location/properties/entry"): ("validation-report", {}, "entry"),
+    ("common", "/$defs/diagnostic"): ("validation-report", {}, ["diagnostics", 0]),
+    ("emit-request", ""): ("emit-request", {}, []),
+    ("emit-request", "/properties/emitter"): ("emit-request", {}, ["emitter"]),
+    ("emit-response", ""): ("emit-response", {}, []),
+    ("emit-response", "/$defs/file"): ("emit-response", {}, ["files", 0]),
+    ("emit-response", "/$defs/diagnostic"): ("emit-response", {"diagnostics": [WARNING]},
+                                             ["diagnostics", 0]),
+    ("emitter-manifest", ""): ("emitter-manifest", {}, []),
+    ("emitter-manifest", "/properties/reads/items"): ("emitter-manifest", {}, ["reads", 0]),
+    ("facts-contract", ""): ("facts-contract", {}, []),
+    ("facts-contract", "/properties/source/oneOf/0"): ("facts-contract", {"source": {"authored": True}},
+                                                       ["source"]),
+    ("facts-contract", "/properties/source/oneOf/1"): ("facts-contract", {}, ["source"]),
+    ("facts-contract", "/properties/source/oneOf/1/properties/kind"): ("facts-contract", {},
+                                                                       ["source", "kind"]),
+    ("facts-contract", "/$defs/fact"): ("facts-contract", {}, ["facts", 0]),
+    ("kind-declaration", ""): ("kind-declaration", {}, []),
+    ("kind-declaration", "/properties/entryId"): ("kind-declaration", {}, ["entryId"]),
+    ("kind-declaration", "/properties/references/items"): ("kind-declaration", {}, ["references", 0]),
+    ("kind-declaration", "/properties/bounds"): ("kind-declaration", {}, ["bounds"]),
+    ("pack-check-report", ""): ("pack-check-report", {}, []),
+    ("pack-check-report", "/properties/contract"): ("pack-check-report", {}, ["contract"]),
+    ("pack-check-report", "/properties/pack"): ("pack-check-report", {}, ["pack"]),
+    ("registry", ""): ("registry", {}, []),
+    ("registry", "/properties/secretScopes/additionalProperties"): ("registry", {}, ["secretScopes", "dev"]),
+    ("registry", "/$defs/entry"): ("registry", {}, ["entries", 0]),
+    ("registry", "/$defs/overlay"): ("registry", {}, ["overlays", 0]),
+    ("registry", "/$defs/patch"): ("registry", {}, ["overlays", 0, "patches", 0]),
+    ("resolved-registry", ""): ("resolved-registry", {}, []),
+    ("resolved-registry", "/properties/registry"): ("resolved-registry", {}, ["registry"]),
+    ("resolved-registry", "/properties/entries/items"): ("resolved-registry", {}, ["entries", 0]),
+    ("validation-report", ""): ("validation-report", {}, []),
+    ("validation-report", "/properties/registry"): ("validation-report", {}, ["registry"]),
+}
+
+
+def sample(name: str):
+    if name == "harness-report":
+        return {"harnessReportVersion": "1.0.0"}
+    return with_messages(read(SAMPLES[name]))
+
+
 class RegistrySchemas(unittest.TestCase):
     def test_each_schema_is_a_2020_12_schema_under_its_id(self) -> None:
         self.assertEqual({"common", *SELECTORS.values()}, set(SCHEMA_DOCUMENTS))
@@ -222,6 +348,46 @@ class RegistrySchemas(unittest.TestCase):
                 self.assertFalse(diagnostic.is_valid({"code": entry["code"], "severity": other,
                                                       "location": location, "message": MESSAGE}))
 
+    def test_every_enum_is_the_texts_list(self) -> None:
+        # As the code lists are codes.json's, each other enum is the list the text gives.
+        text = folded(SPEC.read_text(encoding="utf-8"))
+        found = enums()
+        self.assertEqual(set(TEXT_LISTS), set(found))
+        for key, passage in TEXT_LISTS.items():
+            with self.subTest(schema=key[0], location=key[1]):
+                matches = re.findall(passage, text)
+                self.assertEqual(1, len(matches), "the passage is not in the text once")
+                self.assertEqual(sorted(backticked(matches[0])), sorted(found[key]))
+
+    def test_every_range_form_of_the_text_is_admitted(self) -> None:
+        text = folded(SPEC.read_text(encoding="utf-8"))
+        forms = backticked(re.search(r"with `versions` one of (.*?); `input`", text).group(1))
+        self.assertEqual(4, len(forms))
+        reads = SCHEMA_DOCUMENTS["emitter-manifest"]["properties"]["reads"]["items"]["properties"]
+        check = Draft202012Validator(reads["versions"], registry=REGISTRY)
+        for form in forms:
+            for lower, upper in (("1.2.3", "2.0.0"), ("0.0.0", "10.20.30")):
+                admitted = form.replace("x.y.z", lower, 1).replace("x.y.z", upper, 1)
+                with self.subTest(form=form, versions=admitted):
+                    self.assertTrue(check.is_valid(admitted))
+        for refused in ("1.2.3", ">1.2.3", "<2.0.0", "<=2.0.0", ">=1.2.3", "^1.2", "~>1.2.3", "^01.2.3",
+                        "=1.2.3-rc.1", "^1.2.3+b", ">=1.2.3  <2.0.0", ">=1.2.3 <=2.0.0", "^1.2.3 ",
+                        "1.2.3 - 2.0.0", "*", "^1.2.3\n"):
+            with self.subTest(versions=refused):
+                self.assertFalse(check.is_valid(refused))
+
+    def test_a_refused_registry_still_reports_its_declarations(self) -> None:
+        # Section 7.1: a refused registry ends validation after step 2. The admission row's registry
+        # is refused, and its report still names the declaration step 2 refuses, so the one it
+        # names nothing in is admitted and validated against its schema.
+        row = next(row for row in MANIFEST["vectors"] if row["id"] == "admission")
+        report = read(row["expected"])
+        self.assertFalse(report["valid"])
+        self.assertIn("REG-KIND-SCHEMA-KEYWORD", [d["code"] for d in report["diagnostics"]])
+        self.assertEqual(["kinds/database.json"], admitted_kinds(row, report))
+        self.assertIn("admission: no diagnostic of steps 1 and 2",
+                      admitted_row_documents()["kinds/database.json"])
+
     def test_every_row_document_a_reader_admits_validates(self) -> None:
         found = admitted_row_documents()
         exercised = set()
@@ -255,22 +421,8 @@ class RegistrySchemas(unittest.TestCase):
 
 
 class ClosedSchemas(unittest.TestCase):
-    SAMPLES = {
-        "kind-declaration": "kinds/db-role.json",
-        "registry": "vectors/valid-two-environments/registry.json",
-        "resolved-registry": "vectors/valid-two-environments/resolved-prod.json",
-        "validation-report": "vectors/bounds-and-warnings/report.json",
-        "facts-contract": "vectors/facts-contracts/contract-service.json",
-        "pack-check-report": "vectors/facts-contracts/check-service.json",
-        "emitter-manifest": "vectors/emitter-host/emitter.json",
-        "emit-request": "vectors/emitter-host/request.json",
-        "emit-response": "vectors/emitter-harness/response-references.json",
-    }
-
     def sample(self, name: str):
-        if name == "harness-report":
-            return {"harnessReportVersion": "1.0.0"}
-        return with_messages(read(self.SAMPLES[name]))
+        return sample(name)
 
     def assertRefused(self, name: str, document) -> None:  # noqa: N802
         self.assertFalse(validator(name).is_valid(document))
@@ -303,28 +455,38 @@ class ClosedSchemas(unittest.TestCase):
                 with self.subTest(schema=name, member=member):
                     self.assertRefused(name, document)
 
-    def test_nested_objects_are_closed(self) -> None:
-        cases = [
-            ("registry", ["kinds", 0]), ("registry", ["entries", 0]),
-            ("resolved-registry", ["registry"]), ("resolved-registry", ["entries", 0]),
-            ("resolved-registry", ["kinds", 0]),
-            ("validation-report", ["diagnostics", 0]), ("validation-report", ["diagnostics", 0, "location"]),
-            ("facts-contract", ["source"]), ("facts-contract", ["source", "kind"]),
-            ("facts-contract", ["facts", 0]),
-            ("pack-check-report", ["contract"]), ("pack-check-report", ["pack"]),
-            ("emitter-manifest", ["reads", 0]),
-            ("emit-request", ["emitter"]), ("emit-request", ["declarations", 0]),
-            ("emit-request", ["resolved", 0]),
-            ("emit-response", ["files", 0]),
-        ]
-        for name, path in cases:
-            document = self.sample(name)
+    def test_every_closed_object_is_held_closed(self) -> None:
+        # Each object a schema closes is listed, and a sample that holds one valid is refused once
+        # the object gains an unlisted member.
+        found = {(name, location) for name, schema in SCHEMA_DOCUMENTS.items()
+                 for location, value in walk(schema)
+                 if isinstance(value, dict) and False in (value.get("additionalProperties"),
+                                                          value.get("unevaluatedProperties"))}
+        self.assertEqual(set(CLOSED), found)
+        for (name, location), (document_schema, changes, path) in CLOSED.items():
+            document = self.sample(document_schema)
+            document.update(copy.deepcopy(changes))
+            if path == "entry":
+                index = next(i for i, d in enumerate(document["diagnostics"]) if "entry" in d["location"])
+                path = ["diagnostics", index, "location", "entry"]
+            with self.subTest(schema=name, location=location, path=path):
+                self.assertTrue(validator(document_schema).is_valid(document))
+                target = document
+                for part in path:
+                    target = target[part]
+                target["unlisted"] = True
+                self.assertRefused(document_schema, document)
+
+    def test_nested_documents_are_closed(self) -> None:
+        # A request holds declarations and resolved registries, each closed by its own schema.
+        for path in (["declarations", 0], ["resolved", 0], ["resolved", 0, "kinds", 0]):
+            document = self.sample("emit-request")
             target = document
             for part in path:
                 target = target[part]
             target["unlisted"] = True
-            with self.subTest(schema=name, path=path):
-                self.assertRefused(name, document)
+            with self.subTest(path=path):
+                self.assertRefused("emit-request", document)
 
     def test_kind_declaration_forms(self) -> None:
         base = self.sample("kind-declaration")
@@ -438,6 +600,10 @@ class ClosedSchemas(unittest.TestCase):
             {"pointer": "/a", "type": "object", "present": "always", "values": [{}]},
             {"pointer": "/a", "type": "null", "present": "always", "values": [None]},
             {"pointer": "/a", "type": "array", "present": "always", "values": [["x"]]},
+            {"pointer": "/a", "type": "array", "present": "always", "values": ["x"]},
+            {"pointer": "/a", "type": "array", "items": "null", "present": "always", "values": [None]},
+            {"pointer": "/a", "type": "array", "items": "object", "present": "always", "values": [{}]},
+            {"pointer": "/a", "type": "array", "items": "array", "present": "always", "values": [[]]},
             {"pointer": "/a", "type": "string", "present": "always", "values": []},
             {"pointer": "/a", "type": "string", "present": "always", "values": ["x", "x"]},
             {"pointer": "/a", "type": "string", "present": "always", "values": [1]},
@@ -458,11 +624,51 @@ class ClosedSchemas(unittest.TestCase):
             document["source"] = source
             with self.subTest(source=source):
                 self.assertRefused("facts-contract", document)
+        for member, value in (("id", "relative/contract"), ("id", "https://example.invalid/c#f"),
+                              ("id", 1), ("version", "1.0"), ("version", "1.0.0+build"), ("version", 1)):
+            document = copy.deepcopy(base)
+            document[member] = value
+            with self.subTest(member=member, value=value):
+                self.assertRefused("facts-contract", document)
         document = copy.deepcopy(base)
         document["source"] = {"authored": True}
         document["facts"] = [{"pointer": "/a/*/~2", "type": "array", "items": "decimal", "present": "optional",
                               "values": ["-1.5", "0"]}]
         self.assertTrue(validator("facts-contract").is_valid(document))
+        for fact in ({"type": "string", "values": ["x"]}, {"type": "boolean", "values": [True, False]},
+                     {"type": "array", "items": "string", "values": ["x"]},
+                     {"type": "array", "items": "boolean", "values": [True]}):
+            document["facts"] = [{"pointer": "/a", "present": "always", **fact}]
+            with self.subTest(fact=fact):
+                self.assertTrue(validator("facts-contract").is_valid(document))
+
+    def test_pack_check_report_forms(self) -> None:
+        # Section 10.5: a refused contract's report has its diagnostics alone, and an admitted
+        # contract's has both digests and the pack's advisories.
+        base = self.sample("pack-check-report")
+        refused = {"code": "FACTS-CONTRACT-FORM", "severity": "error", "message": MESSAGE,
+                   "location": {"document": "contract", "pointer": ""}}
+        document = copy.deepcopy(base)
+        del document["contract"], document["pack"]
+        document["diagnostics"] = [refused]
+        self.assertTrue(validator("pack-check-report").is_valid(document))
+        document["diagnostics"] = [refused] * 1001
+        self.assertTrue(validator("pack-check-report").is_valid(document))
+        for diagnostics in ([], [refused] * 1002, base["diagnostics"]):
+            document["diagnostics"] = diagnostics
+            with self.subTest(diagnostics=len(diagnostics)):
+                self.assertRefused("pack-check-report", document)
+        for member in ("contract", "pack"):
+            document = copy.deepcopy(base)
+            del document[member]
+            with self.subTest(without=member):
+                self.assertRefused("pack-check-report", document)
+            document["diagnostics"] = [refused]
+            with self.subTest(without=member, diagnostics="the contract's"):
+                self.assertRefused("pack-check-report", document)
+        document = copy.deepcopy(base)
+        document["diagnostics"].append(refused)
+        self.assertRefused("pack-check-report", document)
 
     def test_manifest_forms(self) -> None:
         base = self.sample("emitter-manifest")
@@ -473,6 +679,17 @@ class ClosedSchemas(unittest.TestCase):
                         "versions": ">=1.0.0 <2.0.0-rc.1"}]),
             ("input", "registry"), ("requestVersions", []), ("environments", "some"),
             ("command", []), ("command", ["/usr/bin/emit"]), ("command", ["../emit"]), ("command", [""]),
+            ("command", ["a:b"]), ("command", ["~x"]), ("command", ["a/./b"]), ("command", ["con"]),
+            ("command", ["Aux.sh"]), ("command", ["."]), ("command", [".."]), ("command", ["./"]),
+            ("command", ["./."]), ("command", ["././gen"]), ("command", ["./../gen"]), ("command", ["gen/"]),
+            ("command", ["a//b"]), ("command", ["gen."]), ("command", [".git/hooks/x"]),
+            ("command", ["./.git/x"]), ("command", ["./~x"]), ("command", ["./con"]), ("command", ["a\\b"]),
+            ("command", ["gen", "/abs"]), ("command", ["gen", "../x"]), ("command", ["gen", "a/../b"]),
+            ("command", ["gen", "a/.."]), ("command", ["gen", "a\x00"]), ("command", ["gen", 1]),
+            ("description", 1), ("deprecated", "yes"), ("deprecated", 1),
+            ("requestVersions", ["1.0.0", "1.0.0"]), ("requestVersions", ["1.0"]),
+            ("requestVersions", ["1.0.0+build"]), ("requestVersions", [1]),
+            ("owns", []), ("owns", ["gen/**", "gen/**"]), ("env", ["EXAMPLE", "EXAMPLE"]),
             ("owns", ["**"]), ("owns", ["*/gen"]), ("owns", ["gen/a**"]), ("owns", ["gen/***"]),
             ("owns", ["gen/"]), ("owns", ["gen/../x"]), ("owns", ["/gen"]),
             ("env", ["PATH"]), ("env", ["SOURCE_DATE_EPOCH"]), ("env", ["lower"]), ("env", ["A" * 65]),
@@ -483,6 +700,19 @@ class ClosedSchemas(unittest.TestCase):
             document[member] = value
             with self.subTest(member=member, value=value):
                 self.assertRefused("emitter-manifest", document)
+        twice = copy.deepcopy(base)
+        twice["reads"] = [base["reads"][0], base["reads"][0]]
+        self.assertRefused("emitter-manifest", twice)
+        admitted = [
+            ("command", ["./gen"]), ("command", ["bin/gen", "--flag", "a/b", "-", "..x", "./x", ""]),
+            ("command", ["./bin/gen.py"]), ("command", ["COM0"]), ("description", "An emitter."),
+            ("deprecated", True), ("deprecated", False), ("requestVersions", ["1.0.0", "1.1.0-rc.1"]),
+        ]
+        for member, value in admitted:
+            document = copy.deepcopy(base)
+            document[member] = value
+            with self.subTest(member=member, value=value):
+                self.assertTrue(validator("emitter-manifest").is_valid(document))
         facts = copy.deepcopy(base)
         facts["input"] = "factsContracts"
         self.assertRefused("emitter-manifest", facts)
@@ -529,7 +759,9 @@ class ClosedSchemas(unittest.TestCase):
         files = [
             {"path": "a"}, {"path": "a", "text": "x\n", "base64": ""}, {"path": "a", "text": "x"},
             {"path": "a", "text": "x\r\n"}, {"path": "a", "text": "x\n", "mode": "0600"},
-        ]
+        ] + [{"path": "a", "base64": value} for value in (
+            "QR==", "QUJ=", "QQ", "QQ=", "Q===", "QUJD====", "QUJD\n", "QU\nJD", "QU JD", "-_8=", "QUJD=",
+            "=", "QUJ", 1)]
         for file in files:
             document = copy.deepcopy(base)
             document["files"][0] = file
@@ -550,6 +782,14 @@ class ClosedSchemas(unittest.TestCase):
             document["diagnostics"] = [diagnostic]
             with self.subTest(diagnostic=diagnostic):
                 self.assertRefused("emit-response", document)
+        for value in ("", "QQ==", "QUI=", "QUJD", "+/+/", "AA==", "AAA=", "QUJDRA=="):
+            document = copy.deepcopy(base)
+            document["files"][0] = {"path": "a", "base64": value}
+            with self.subTest(base64=value):
+                self.assertTrue(validator("emit-response").is_valid(document))
+        document = copy.deepcopy(base)
+        document["diagnostics"] = [{**WARNING, "value": 1}]
+        self.assertRefused("emit-response", document)
         document = copy.deepcopy(base)
         document["files"] = [{"path": f"gen/{i}", "base64": ""} for i in range(10001)]
         self.assertRefused("emit-response", document)

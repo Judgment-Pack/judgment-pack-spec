@@ -18,7 +18,17 @@ here.
   none. As with the rows, no bundle carries the schemas and the site does not serve them; a first
   release publishes them (§13). `tests/test_registry_schemas.py` validates every row document a
   reader admits or writes against its schema. The status of the companion and §14 say so, and no
-  row changes.
+  row changes. Where the text was silent, it now states the reference runtime's reading, and the
+  schemas follow it: a refused registry ends validation after step 2, so the diagnostics of the
+  declarations step 1 admitted are still reported (§7.1); a contract's `id` and `version` take a
+  kind's forms, and `values` sit only on a string, decimal or boolean, or an array of one (§10.3);
+  the check report of a refused contract has neither digest (§10.5); in a manifest, `description`
+  is a string, `deprecated` a boolean and `requestVersions` SemVer, `owns` is non-empty, the items
+  of `requestVersions`, `owns` and `env` are distinct, no two `reads` name one kind, and
+  `command`'s program follows §11.3's path rules after an optional `./` (§11.1); an emitter
+  diagnostic has exactly `code`, `severity` and `location`, and `base64` is RFC 4648 §4's, padded,
+  with no bit set past the data (§11.3); and §11.5's kind-filtering check no longer names a
+  contract digest the facts form does not carry.
 - RFC 0027 (#252), a Draft, proposes bounded optional pack-design advisories for compatible
   agreement, scoped coverage and reachability, exception effects and unknown blocking. A closed
   finite-domain report proposal binds exact pack/domain bytes, distinguishes proof from possibility

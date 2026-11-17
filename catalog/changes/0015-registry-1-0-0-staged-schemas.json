@@ -5,7 +5,7 @@
       "path": "schema/registry/1.0.0/common.schema.json",
       "family": "registry",
       "from": null,
-      "to": "sha256:b0f35a2fe1224ba93e927a3902e974a00dea1e6b2c00688f8100383280cfa317"
+      "to": "sha256:9aa6ddcaad01f21ca534b744a74bead1baf9ad3d0c5edcefb72e26ef4f0a24fc"
     },
     {
       "path": "schema/registry/1.0.0/emit-request.schema.json",
@@ -17,19 +17,19 @@
       "path": "schema/registry/1.0.0/emit-response.schema.json",
       "family": "registry",
       "from": null,
-      "to": "sha256:4696f73a2626bf17df5f116e1626c3102b43132bff50b00e1b380ceb2d13d655"
+      "to": "sha256:4171fca230f6a0688bc3086c0984906fb702863a5cdf80849089e2cff72d25ad"
     },
     {
       "path": "schema/registry/1.0.0/emitter-manifest.schema.json",
       "family": "registry",
       "from": null,
-      "to": "sha256:69e4b39da65841b9a8ce5e87a7230bb9892827137881ceb439ec80a3cd70ca58"
+      "to": "sha256:99ba0b4e75446d4225f28031da20a39b81c5bd69d62517d55149ef5d99cd29b5"
     },
     {
       "path": "schema/registry/1.0.0/facts-contract.schema.json",
       "family": "registry",
       "from": null,
-      "to": "sha256:8a200d230338cc703620bee692711883185aa7e06eaece69eba215e1837f9f53"
+      "to": "sha256:eeb66c405d0989e822246e2dad3004e4a049b508b2977572cea58bfc65645d20"
     },
     {
       "path": "schema/registry/1.0.0/harness-report.schema.json",
@@ -47,7 +47,7 @@
       "path": "schema/registry/1.0.0/pack-check-report.schema.json",
       "family": "registry",
       "from": null,
-      "to": "sha256:84188f42f9d14e6ad08c13680cb7ee0be6313a3b57c93ca8d7e5099a60c454b1"
+      "to": "sha256:7e6d637fddae1861bf4ed845f183b5403bee2e12d625590563d03e0b169d60ce"
     },
     {
       "path": "schema/registry/1.0.0/registry.schema.json",
