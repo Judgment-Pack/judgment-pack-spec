@@ -1108,14 +1108,18 @@ literal characters naming every path the emitter writes; `env` (optional), varia
 
 The host resolves the registry per environment, removes every entry and pin of a kind the manifest
 does not read, refuses a pinned version outside its range (`EMIT-KIND-RANGE`), validates `options`,
-and writes `{"emitRequestVersion", "emitter": {"id", "version"}, "options", "resolved": […]}` as JCS,
-with one resolved registry for `"each"` and every environment in order for `"all"`. With
-`"factsContracts"` the request holds `factsContracts` (generated contracts of the kinds read, and the
-authored ones named, sorted by `id` then `version`) in place of `resolved`. The host writes the
-highest request version it supports that the manifest lists, or refuses the run
-(`EMIT-REQUEST-VERSION`), as it does when the registry needs a later resolved format than a listed
-request version carries. Request `1.0.0` carries `resolvedFormatVersion` and `factsContractVersion`
-`1.0.0`.
+and writes `{"emitRequestVersion", "emitter": {"id", "version"}, "options", "declarations": […],
+"resolved": […]}` as JCS, with one resolved registry for `"each"` and every environment in order
+for `"all"`. `declarations` holds the declaration of each kind whose pins remain, exactly as
+admitted, in its JCS form, sorted by `kind`. A declaration's SHA-256 is its pin's `digest` (§2.3,
+§4): an emitter checks each pin against its declaration and MUST refuse the run when a declaration
+is missing or does not match. The `resolved` documents are unchanged, §8's format as `registry
+resolve` writes it. With `"factsContracts"` the request holds `factsContracts` (generated contracts
+of the kinds read, and the authored ones named, sorted by `id` then `version`) in place of
+`declarations` and `resolved`. The host writes the highest request version it supports that the
+manifest lists, or refuses the run (`EMIT-REQUEST-VERSION`), as it does when the registry needs a
+later resolved format than a listed request version carries. Request `1.0.0` carries
+`resolvedFormatVersion` and `factsContractVersion` `1.0.0`.
 
 ### 11.3 The response
 
@@ -1354,6 +1358,10 @@ readers agreeing on every row of a class.
 - an open position is listed at `p` and `p/*`, and a pointer below `p/*` is listed (§10.4);
 - `factsCheckFormatVersion` is the check report's own selector, and the facts document has none
   (§2.1).
+- a resolved-form emit request carries the read kinds' `declarations`, bound to their pins by
+  digest, as part of request `1.0.0` (§11.2); RFC 0036 §2 names only the pins, and an emitter
+  opens no file, so the reference emitters of §11.6 could not otherwise see a schema or a secret
+  position.
 
 **Open:**
 
