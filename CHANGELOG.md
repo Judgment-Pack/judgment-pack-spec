@@ -34,8 +34,11 @@ here.
   gives. `tests/test_terraform_file_vectors.py` holds the two lists to the text's tables and every
   expected result to its form, and reads each declaration with the first reader, directly and as a
   dialect source; no reader of the file exists in this repository, so the reading's results are
-  checked for form only. The companion's status, §9, §11 and §12 now say where the files are. No
-  Core bundle carries them, the site serves none of them, and no release record is added.
+  checked for form only. The companion's status, §9, §11 and §12 now say where the files are, and
+  §§1 and 6 state three readings the vectors pin, so that none lives in a vector alone: a sha256 is
+  64 lower-case hexadecimal digits with no prefix, `afterUnknown` is sorted in code-point order of
+  its RFC 6901 strings, and a `values`, `before` or `after` removed whole is absent. No Core bundle
+  carries them, the site serves none of them, and no release record is added.
 - RFC 0039, a Draft, proposes a federated registry as registry format `1.1.0`: a manifest of
   sources (one standard repository, the rest service repositories), an assembly from bytes the
   caller supplies at full commit ids into one ordinary `1.0.0` registry, and an index that records

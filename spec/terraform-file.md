@@ -54,6 +54,8 @@ BCP 14 meanings only in capitals.
   are not integers.
 - A **pointer** is an RFC 6901 JSON Pointer. A value's **canonical form** is its RFC 8785 form.
 - **Code-point order** compares two strings by their Unicode code points, first difference first.
+- A file's **sha256** is the SHA-256 digest of all its bytes, written as 64 lower-case hexadecimal
+  digits with no prefix.
 
 ## 2. The declaration
 
@@ -159,7 +161,10 @@ The acquired value is an array sorted by id (§3, step 4) in code-point order, o
 selected resource: for a `state`, `{"address", "type", "name", "mode", "providerName", "index"?,
 "deposed"?, "values"}`, with `deposed` the deposed key, present only for a deposed object; for a
 `plan`, the same with `actions`, `before`, `after` and `afterUnknown` (the sorted pointers, in
-`after`, of values known only after apply) in place of `values`. Numbers become decimal strings in
+`after`, of values known only after apply) in place of `values`. Each pointer of `afterUnknown` is
+the string of its RFC 6901 form, `~0` and `~1` escapes included, and the pointers are sorted in
+code-point order of those strings. A `values`, `before` or `after` that step 6 of §3 removes
+whole is absent from the resource's object. Numbers become decimal strings in
 the registry companion's normal form ([`spec/registry.md`](registry.md) §10.1), with `0` for every
 zero; one whose normal form would be longer than 64 characters is `TF-NUMBER`. The value is then
 bounded by `L`, the lesser of 268435456 and sixteen times the file's length in bytes. It is
