@@ -16,6 +16,11 @@ here.
 
 ### Changed
 
+- **RFC 0038 §2 step 1 notes the stream reading** (#353). The RFC said the reader hashes the
+  whole input; an amendment note there now points at `spec/dialect.md` §4.5, where a stream is read
+  to `maxBytes` and one byte more and a longer one is `TF-SIZE` with no sha256 and no size. No
+  normative text changes.
+
 - **The `terraform-file` kind's readings** (`spec/dialect.md` §4.5, proposed; RFC 0018's amendment
   of 2026-11-17). An input read as a stream is read to `maxBytes` and one byte more, and a longer
   one is `TF-SIZE` with no sha256 and no size (#353). The acquired value is held to the lesser of

@@ -96,6 +96,12 @@ file's bytes alone, so a vector states one expected code.
 1. **Size.** The reader computes the sha256 of the **whole** file as supplied, and its length in
    bytes. A file longer than `maxBytes` is refused (`TF-SIZE`) without being parsed. The hash and
    size are recorded whatever happens next.
+
+   *Amended 2026-11-17.* An input read as a stream, such as standard input, is not hashed whole.
+   It is read to at most `maxBytes` and one byte more. A longer stream is refused (`TF-SIZE`)
+   unparsed, and its diagnostic carries no sha256 and no size, since its whole length is never
+   read. A stream within `maxBytes` has its sha256 and size recorded as a file's are. The
+   specification is `spec/dialect.md` §4.5, reading step 1.
 2. **Strict JSON** (`TF-JSON`). The bytes MUST be:
    - UTF-8 with no byte-order mark, and no lone surrogate escape;
    - one JSON value, with nothing after it but whitespace;
