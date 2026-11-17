@@ -990,6 +990,15 @@ entry order: the JCS bytes of `{"facts": <facts document>, "id": "<kind>/<entry-
 feed. Over every environment, the lines of each environment follow in the registry's order, with ids
 `<environment>:<kind>/<entry-id>`. An invalid registry writes no line.
 
+A line's id is 1 to 256 bytes of UTF-8, the bound the reference runtime's batch evaluation holds an
+item's id to. Every id of this section is within it: `<environment>:<kind>/<entry-id>` is at most
+225 bytes, its names being bounded at 32, 63 and 128 (§4, §3.1, §6.2). A tool that writes lines of
+this shape from another source, such as the reference runtime's batch of the dialect's
+`terraform-file` source ([`dialect.md`](dialect.md) §4.5), checks every selected item's id before it
+writes any line, and one outside the bound refuses the whole run with `FACTS-ID-LIMIT`, which never
+carries the id. No line is written: a batch that left the item out would let a gate pass without
+judging it.
+
 ### 10.3 The facts contract
 
 ```json
@@ -1109,7 +1118,9 @@ literal characters naming every path the emitter writes; `env` (optional), varia
 `^[A-Z_][A-Z0-9_]{0,63}$` other than `PATH`, `HOME`, `LANG`, `TZ` and `SOURCE_DATE_EPOCH`; and
 `deprecated` (optional), under which the host and harness run it with the warning
 `EMIT-DEPRECATED`. The `owns` of two manifests in one repository MUST NOT overlap, and neither
-`command` nor `owns` names a path outside the repository root.
+`command` nor `owns` names a path outside the repository root. A host given the repository's other
+manifests beside the one it runs refuses an overlap, a glob of each that one path can match, with
+`EMIT-OWNS-OVERLAP` at both globs, the other manifest's named by §7.3's `manifest`.
 
 An `owns` glob follows the path rules of §11.3, with `*` allowed in a segment and `**` only as a
 whole segment, and its first segment holds no `*`: `**`, `**/*`, `*/**` and `*` are refused, since
@@ -1128,8 +1139,11 @@ defined or not of its form.
 ### 11.2 The request
 
 The host resolves the registry per environment, removes every entry and pin of a kind the manifest
-does not read, refuses a pinned version outside its range (`EMIT-KIND-RANGE`), validates `options`,
-and writes `{"emitRequestVersion", "emitter": {"id", "version"}, "options", "declarations": […],
+does not read, refuses a pin of a kind it reads whose kind `id` is not the one the manifest reads
+under that name (`EMIT-KIND-ID`) or whose version is outside its range (`EMIT-KIND-RANGE`), each at
+the pin, validates `options` against the manifest's `options` schema, refusing options that are not
+admissible JSON or fail it (`EMIT-OPTIONS`, in document `options`), and writes
+`{"emitRequestVersion", "emitter": {"id", "version"}, "options", "declarations": […],
 "resolved": […]}` as JCS, with one resolved registry for `"each"` and every environment in order
 for `"all"`. `declarations` holds the declaration of each kind whose pins remain, exactly as
 admitted, in its JCS form, sorted by `kind`. A declaration's SHA-256 is its pin's `digest` (§2.3,
@@ -1176,16 +1190,34 @@ Bounds: a response of 64 MiB, 10 000 files, 16 MiB per file and 512 bytes per pa
 
 The host runs `command` from the repository root with the request on standard input and an
 environment of only `PATH`, `HOME` (a fresh empty directory), `LANG=C.UTF-8` and the manifest's
-`env` names, never printing an `env` value; it reads at most 64 KiB of standard error, reports only
-its size unless asked to pass it through, and imposes a wall-clock limit (120 s by default). In write
-mode it validates the whole response first, writes each file through a temporary file and a rename,
-deletes owned files the response does not hold, never entering a directory git reads as `.git`
-(§11.3), refuses a symbolic link at or above an owned path,
+`env` names, never printing an `env` value; a name the host's own environment does not set is not
+passed, with the warning `EMIT-ENV-UNSET` (§7.3's `variable`). It reads at most 64 KiB of standard
+error, reports only its size unless asked to pass it through, and imposes a wall-clock limit (120 s
+by default). In write mode it validates the whole response first, writes each file through a
+temporary file and a rename, deletes owned files the response does not hold, never entering a
+directory git reads as `.git` (§11.3), refuses a symbolic link, or another reparse point such as a
+junction, at or above an owned path or a response path (`EMIT-LINK`),
 and reports what it wrote and deleted: exit 0 written, 2 not written. In check mode it writes
 nothing and compares byte for byte and mode for mode: exit 0 identical, 1 different (listing paths,
 never contents), 2 could not check. A command line that cannot be parsed exits 3. An emitter MUST
 give the same response bytes for the same request bytes: no clock, host name, absolute path,
 locale, time zone, map order or network.
+
+The host's other refusals and warnings are in document `repository` at the path, unless named
+otherwise:
+
+- `EMIT-PATH-UNREADABLE`: an input it cannot read, in that input's document; or an owned path that
+  is not a regular file or a directory, or that it cannot list or read;
+- `EMIT-WRITE`: a file it cannot write or delete; or a response path that a directory holds, or
+  whose directory is a file no `owns` glob matches, which it refuses before anything is staged or
+  deleted;
+- `EMIT-INTERRUPTED`: an interrupt or a termination signal stopped the run, in document `manifest`
+  at `/command`, and not `EMIT-PROCESS` for an emitter it ended; a write already begun is finished,
+  and none starts after the signal;
+- `EMIT-STAGING-LEFTOVER`, a warning: a temporary file of the host's that an earlier run left in a
+  directory it writes to, which no `owns` glob matches, and which it therefore does not delete;
+- `EMIT-REPORT-TRUNCATED`, a warning in document `response`: its report lists the first 1 000
+  diagnostics of a list, the emitter's or its own, and more were found.
 
 ### 11.5 The harness
 
@@ -1202,7 +1234,8 @@ a zero-byte regular file alone at the root of `expected/`, read as no files, whi
 of another size or kind, or beside any other entry is not of this layout, nor is an `expected/` that
 holds no regular file and no marker; a missing `expected/` is never read as empty. `--update` writes
 `expected/` from a run, or the marker alone for a run that wrote no files. A vector not of this
-layout refuses the whole run.
+layout refuses the whole run, as do a `harness.json` not of its form or of a level the harness does
+not apply and a vectors directory that holds no vector: `EMIT-VECTOR`, in document `vector`.
 
 Level `1.0` applies six checks to every vector:
 
@@ -1232,6 +1265,19 @@ that can fail a vector is added only at a new level. The report (`harnessReportV
 names the level and has one row per vector and check: pass, fail, skip with its reason, or info. The
 harness exits 0 when nothing fails, 1 when a check fails, and 2 when it could not run.
 
+A harness that runs the emitter in a copy of the repository, to find stray writes, refuses a link
+that leads out of the repository (`EMIT-HARNESS-BOUND`), except one that git does not track and that
+no owned path and no path to the vectors could name: it leaves that one out of the copy, with the
+warning `EMIT-LINK-OMITTED` at the link's path.
+
+Besides `EMIT-VECTOR`, the harness could not run on `EMIT-HARNESS-BOUND`, a check it could not
+complete: past a bound of its own, such as on the repository copy, the registry with the synthetic
+kind or the references scan, or for want of a fresh `HOME` for a determinism run; on `EMIT-PATH-UNREADABLE`, a file it could not read; and on
+`EMIT-INTERRUPTED`, as the host's (§11.4), at the vector. `EMIT-HARNESS-BOUND` and
+`EMIT-PATH-UNREADABLE` are located by §7.3's `path`, in document `vector` for a vector's own files
+and in document `repository` for the repository copy. An `--update` that cannot write `expected/`
+is `EMIT-WRITE` at the vector.
+
 ### 11.6 Reference emitters
 
 The specification's reference emitters (a Go typed loader and TypeScript constants, and the
@@ -1244,7 +1290,8 @@ The list is closed: a reader reports only these codes, each with its severity. T
 list is
 [`codes.json`](https://github.com/Judgment-Pack/judgment-pack-spec/blob/main/conformance/registry/1.0.0/codes.json),
 and every code's status in `1.0.0` is `active`. The `TF-` codes of the dialect's `terraform-file`
-source are the dialect's ([`dialect.md`](dialect.md) §4.5).
+source are the dialect's ([`dialect.md`](dialect.md) §4.5); `FACTS-ID-LIMIT`, which that source's
+batch reports, is this list's (§10.2).
 
 | Code | Severity | § | Raised when |
 | --- | --- | --- | --- |
@@ -1334,6 +1381,7 @@ source are the dialect's ([`dialect.md`](dialect.md) §4.5).
 | `REG-YAML-SYNTAX` | error | §9 | the file is not YAML |
 | `REG-YAML-TRUNCATED` | error | §9 | the import stopped after 1000 refusals |
 | `FACTS-DOCUMENT-LIMIT` | error | §10.1 | an entry's facts document is over a facts bound |
+| `FACTS-ID-LIMIT` | error | §10.2 | a selected item's batch line id is not 1 to 256 bytes |
 | `FACTS-CONTRACT-FORM` | error | §10.3 | a contract is not of its form |
 | `FACTS-CONTRACT-ORDER` | error | §10.3 | a contract's facts are not in order |
 | `FACTS-CONTRACT-LIMIT` | error | §10.3 | a contract is over a contract bound, or its generation is |
@@ -1342,13 +1390,26 @@ source are the dialect's ([`dialect.md`](dialect.md) §4.5).
 | `FACTS-VALUE-UNREACHABLE` | warning | §10.5 | a pack compares a pointer with a value the contract does not admit |
 | `FACTS-CHECK-LIMIT` | error | §10.5 | the pack check is over its work or depth bound |
 | `EMIT-MANIFEST` | error | §11.1 | the manifest is not of its form |
+| `EMIT-OWNS-OVERLAP` | error | §11.1 | an owns glob and one of another manifest can match one path |
 | `EMIT-REQUEST-VERSION` | error | §11.2 | the host writes no request version the manifest lists, or none that carries the registry |
 | `EMIT-KIND-RANGE` | error | §11.2 | a pinned kind's version is outside the manifest's range |
+| `EMIT-KIND-ID` | error | §11.2 | a pinned kind of a name the manifest reads has another kind id |
+| `EMIT-OPTIONS` | error | §11.2 | the options are not admissible JSON, or fail the manifest's options schema |
 | `EMIT-REQUEST` | error | §11.2 | the request is over its bound, or its pins and declarations do not match |
 | `EMIT-PROCESS` | error | §11.3 | the emitter exited non-zero, or did not finish in time |
 | `EMIT-RESPONSE` | error | §11.3 | the emitter's output is not one valid response |
+| `EMIT-LINK` | error | §11.4 | a symbolic link or other reparse point is at or above an owned path |
+| `EMIT-PATH-UNREADABLE` | error | §11.4 | an input, or an owned path, could not be read |
+| `EMIT-WRITE` | error | §11.4 | a file could not be written or deleted, or a response path is held by a directory or an unowned file |
+| `EMIT-INTERRUPTED` | error | §11.4 | an interrupt or a termination signal stopped the run |
 | `EMIT-STRAY-WRITE` | error | §11.5 | the emitter created or changed a file itself |
+| `EMIT-VECTOR` | error | §11.5 | the vectors are not of the harness's layout |
+| `EMIT-HARNESS-BOUND` | error | §11.5 | a harness check could not be completed, past a bound or for want of a fresh HOME |
 | `EMIT-DEPRECATED` | warning | §11.1 | the emitter's manifest is deprecated |
+| `EMIT-ENV-UNSET` | warning | §11.4 | a variable the manifest's env lists is not set in the host's environment |
+| `EMIT-REPORT-TRUNCATED` | warning | §11.4 | the host's report lists the first 1000 diagnostics of a list, and more were found |
+| `EMIT-STAGING-LEFTOVER` | warning | §11.4 | an unowned temporary file of an earlier run is in a directory the host writes to |
+| `EMIT-LINK-OMITTED` | warning | §11.5 | a link that leads out of the repository was left out of the harness's copy |
 
 ## 13. Versioning and stability
 
@@ -1387,9 +1448,10 @@ required and emitter codes) and its request, with a kind it does not read; and t
 references check and the `expected/` marker. They do not yet exercise `REG-ENTRY-ID`,
 `REG-ENTRY-DUPLICATE` and `REG-ENTRY-ENVIRONMENT`; value validation (§7.2) beyond `REG-VALUE-RANGE`
 and `REG-VALUE-DEPRECATED`; YAML import, the report bound, the facts and contract limits, contract
-reading, authored contracts, wildcard reference patterns, the facts-form request, the emitter host's
-process and write rules, the harness's other checks and its report, or builders, and the boundary
-and adversarial sets RFC 0034 lists.
+reading, authored contracts, wildcard reference patterns, the facts-form request, overlapping
+`owns`, a pin's kind id and the options schema, the emitter host's process and write rules, the
+harness's other checks, its report and its own codes (the layout rows compare only that a run is
+refused), or builders, and the boundary and adversarial sets RFC 0034 lists.
 
 ## 15. Conformance classes
 
@@ -1447,6 +1509,14 @@ readers agreeing on every row of a class.
   segments between two others and one or more at the end, as in gitignore (§11.1); `diagnostics` is
   required (§11.3); and `EMIT-MANIFEST`, the reference runtime's code for a manifest not of its
   form, is adopted, with the locations of it and of `EMIT-RESPONSE` (§§7.3, 11.1, 11.3);
+- the codes of the emitter host's and harness's own refusals and warnings, which RFC 0036 left
+  without a code and the reference runtime (`v0.50.0`) reports as provisional codes of its own, are
+  adopted under those names and severities: `EMIT-OWNS-OVERLAP` (§11.1); `EMIT-KIND-ID` and
+  `EMIT-OPTIONS` (§11.2); `EMIT-LINK`, `EMIT-PATH-UNREADABLE`, `EMIT-WRITE`, `EMIT-INTERRUPTED` and
+  the warnings `EMIT-ENV-UNSET`, `EMIT-REPORT-TRUNCATED` and `EMIT-STAGING-LEFTOVER` (§11.4); and
+  `EMIT-VECTOR`, `EMIT-HARNESS-BOUND` and the warning `EMIT-LINK-OMITTED` (§11.5). So is
+  `FACTS-ID-LIMIT`, the code of a batch line's id bound, which the reference runtime's batch of the
+  dialect's `terraform-file` source reports (§10.2);
 - the harness's kind-filtering check compares requests, with every registry digest restored, before
   it compares responses (§11.5): RFC 0036 §5 compares responses alone, and the synthetic entry
   changes the registry's digest, which an emitter may write into a file, so an emitter that does
@@ -1474,18 +1544,6 @@ readers agreeing on every row of a class.
   row stays well within the reference runtime's limits.
 - **Importer stops.** Which refusals stop an import, beyond those §9 names, is fixed by the first
   import rows.
-- **Emitter host refusals.** Overlapping `owns`, options that fail their schema, a link at an owned
-  path and an unreadable path have no code here. The reference runtime reports them with
-  provisional codes of its own (`EMIT-OWNS-OVERLAP`, `EMIT-OPTIONS`, `EMIT-LINK` and
-  `EMIT-PATH-UNREADABLE`, the last shared with the harness), which come into §12 with the rows
-  that exercise them.
-- **Harness refusals.** A vector set not of §11.5's layout, a harness bound reached, and an
-  unreadable vector file have no code here. The reference harness reports them with provisional
-  codes of its own (`EMIT-VECTOR`, `EMIT-HARNESS-BOUND` and `EMIT-PATH-UNREADABLE`, the last
-  shared with the host), each located by §7.3's `path`: `EMIT-VECTOR` in document `vector`;
-  `EMIT-HARNESS-BOUND` and `EMIT-PATH-UNREADABLE` in document `vector` for a vector's own files
-  and in document `repository` for the repository copy. They stay provisional until this
-  companion's 1.0.0 is final; the layout rows compare only that the run is refused.
 - **Further host readings.** The reference host is stricter than §11.3 in ways this text does not
   state yet: it resolves each emitter diagnostic's location against the request, so a location
   names only what the request holds; it compares paths once case is folded and they are normalized

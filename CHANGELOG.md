@@ -16,6 +16,18 @@ here.
 
 ### Changed
 
+- **The registry companion's closed code list gains fourteen codes** (`spec/registry.md` §12 and
+  `conformance/registry/1.0.0/codes.json`, format `1.0.0`, proposed; the maintainer's ruling,
+  option A). The emitter host's and harness's own refusals and warnings, which the reference
+  runtime reported as provisional codes of its own, are listed under its names and severities and
+  named where §11 describes them: `EMIT-OWNS-OVERLAP` (§11.1); `EMIT-KIND-ID` and `EMIT-OPTIONS`
+  (§11.2); `EMIT-LINK`, `EMIT-PATH-UNREADABLE`, `EMIT-WRITE`, `EMIT-INTERRUPTED` and the warnings
+  `EMIT-ENV-UNSET`, `EMIT-REPORT-TRUNCATED` and `EMIT-STAGING-LEFTOVER` (§11.4); and `EMIT-VECTOR`,
+  `EMIT-HARNESS-BOUND` and the warning `EMIT-LINK-OMITTED` (§11.5). `FACTS-ID-LIMIT` joins the
+  other `FACTS-*-LIMIT` codes: §10.2 states a batch line's id bound, 1 to 256 bytes, which every
+  registry id meets, and a tool that writes lines of that shape from another source refuses the
+  whole run past it. §17's two open items on host and harness refusals are closed, and the earlier
+  entries below that left them open are superseded. No row changes.
 - **RFC 0038 §2 step 1 notes the stream reading** (#353). The RFC said the reader hashes the
   whole input; an amendment note there now points at `spec/dialect.md` §4.5, where a stream is read
   to `maxBytes` and one byte more and a longer one is `TF-SIZE` with no sha256 and no size. No
