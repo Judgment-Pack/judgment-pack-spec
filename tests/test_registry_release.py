@@ -2,9 +2,9 @@
 
 A `registry-vMAJOR.MINOR.PATCH` tag is gated on its own release record, which the builder derives
 from the tagged tree, and packaged in its own bundle, as Policy's tags are. These tests hold the
-builder to that: the exact tag grammar; the refusal of the tree as it stands, before the commit a
-tag names; a candidate tree, with its statuses said `released` and its record written here from
-the bytes, which passes, and each mismatch, unlisted file, status, schema wording, missing note and
+builder to that: the exact tag grammar; the tree as it stands, refused before the commit a tag
+names and passing from it on; a candidate tree, with its statuses said `released` (whichever they
+say now) and its record written here from the bytes, which passes, and each mismatch, unlisted file, status, schema wording, missing note and
 earlier record that refuses; the tagged history; the routing; what the bundle carries and what a
 Core bundle leaves out; and the attributes that keep the bytes as committed.
 """
@@ -40,7 +40,10 @@ SCHEMAS = "schema/registry/1.0.0"
 ROWS = "conformance/registry/1.0.0"
 MANIFEST = f"{ROWS}/manifest.json"
 CODES = f"{ROWS}/codes.json"
-PROPOSED_SENTENCE = "This text is registry format `1.0.0`, status `proposed`."
+# The status each of the three says; one match each, whichever word it is.
+STATUS_SENTENCE = re.compile(r"^(This text is registry format `1\.0\.0`, status `)([a-z]+)(`\.)", re.M)
+HEADER_STATUS = re.compile(r'^(  "status": ")([a-z]+)(",)$', re.M)
+# The draft wording before the commit a tag names; that commit rewrites it, so either may be found.
 SCHEMA_TITLE = re.compile(r'"title": "DRAFT (Registry companion 1\.0\.0: [a-z -]+)"')
 SCHEMA_STATUS = ("Staged and proposed with spec/registry.md, which governs where they differ; not "
                  "released, and served by no bundle and no site. ")
@@ -84,18 +87,32 @@ def write_record(root: Path, release: dict | None = None) -> Path:
     return path
 
 
+def set_status(root: Path, word: str, names: tuple[str, ...] = (TEXT, MANIFEST, CODES)) -> None:
+    for name in names:
+        path = root / name
+        pattern = STATUS_SENTENCE if name == TEXT else HEADER_STATUS
+        text, count = pattern.subn(rf"\g<1>{word}\g<3>", path.read_text("utf-8"))
+        if count != 1:
+            raise AssertionError(f"{path}: {count} status statements")
+        path.write_bytes(text.encode("utf-8"))
+
+
 def say_released(root: Path) -> None:
-    """What the commit a tag names changes: the three statuses and each schema's wording."""
-    replace_once(root / TEXT, PROPOSED_SENTENCE, PROPOSED_SENTENCE.replace("proposed", "released"))
-    for name in (MANIFEST, CODES):
-        replace_once(root / name, '\n  "status": "proposed",\n', '\n  "status": "released",\n')
+    """What the commit a tag names changes: the three statuses and each schema's wording. A tree
+    that already says so is left as it is."""
+    set_status(root, "released")
     for path in sorted((root / SCHEMAS).glob("*.schema.json")):
         text = path.read_text("utf-8")
-        if len(SCHEMA_TITLE.findall(text)) != 1:
-            raise AssertionError(f"{path}: no draft title")
         text = SCHEMA_TITLE.sub(r'"title": "\1"', text).replace(
             SCHEMA_STATUS, "Released with spec/registry.md, which governs where they differ. ", 1)
         path.write_bytes(text.encode("utf-8"))
+
+
+def edit_schema(root: Path, name: str, change) -> None:
+    path = root / SCHEMAS / f"{name}.schema.json"
+    schema = json.loads(path.read_text("utf-8"))
+    change(schema)
+    path.write_text(json.dumps(schema, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 class RegistryReleaseTests(unittest.TestCase):
@@ -129,11 +146,25 @@ class RegistryReleaseTests(unittest.TestCase):
             with self.subTest(tag=tag), self.assertRaises(ValueError):
                 BUILDER.release_version(tag)
 
-    def test_the_tree_as_it_stands_cannot_release(self):
-        with self.assertRaisesRegex(ValueError, "release record is missing"):
-            BUILDER.validate_registry_artifacts(VERSION, TAG)
+    def test_the_tree_as_it_stands_is_refused_before_the_tag_commit_and_passes_from_it(self):
+        status = json.loads((ROOT / MANIFEST).read_text("utf-8"))["status"]
+        self.assertIn(status, ("proposed", "released"))
+        if status == "proposed":
+            with self.assertRaisesRegex(ValueError, "release record is missing|say status released"):
+                BUILDER.validate_registry_artifacts(VERSION, TAG)
+        else:
+            # From the commit a tag names on, the tree is the latest registry release's record.
+            records = sorted((path.name[:-len(".json")] for path in (ROOT / "releases").glob("registry-v*.json")
+                              if not path.name.endswith(".milestone.json")),
+                             key=lambda tag: tuple(int(n) for n in BUILDER.release_version(tag).split(".")))
+            self.assertTrue(records)
+            BUILDER.validate_registry_artifacts(BUILDER.release_version(records[-1]), records[-1])
+
+    def test_a_tree_that_says_proposed_cannot_release(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.copied_tree(temporary)
+            say_released(root)
+            set_status(root, "proposed")
             (root / "releases" / f"{TAG}.md").write_text("Synthetic notes.\n")
             write_record(root)
             with self.assertRaisesRegex(ValueError, "say status released"):
@@ -201,27 +232,39 @@ class RegistryReleaseTests(unittest.TestCase):
                 BUILDER.validate_registry_artifacts(VERSION, TAG, root)
 
     def test_every_status_must_say_released(self):
-        for name, old, new in ((TEXT, "status `released`.", "status `proposed`."),
-                               (MANIFEST, '\n  "status": "released",', '\n  "status": "proposed",'),
-                               (CODES, '\n  "status": "released",', '\n  "status": "proposed",')):
+        for name in (TEXT, MANIFEST, CODES):
             with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
                 root = self.released_tree(temporary)
-                replace_once(root / name, old, new)
+                set_status(root, "proposed", (name,))
                 write_record(root)
                 with self.assertRaisesRegex(ValueError, "say status released"):
                     BUILDER.validate_registry_artifacts(VERSION, TAG, root)
 
     def test_no_schema_may_still_call_itself_unreleased(self):
-        for old, new in (('"title": "Registry companion 1.0.0: registry"',
-                          '"title": "DRAFT Registry companion 1.0.0: registry"'),
-                         ("Released with spec/registry.md", "Staged with spec/registry.md"),
-                         ("Released with spec/registry.md", "Proposed with spec/registry.md")):
-            with self.subTest(new=new), tempfile.TemporaryDirectory() as temporary:
+        def nested(schema):
+            schema.setdefault("$defs", {})["annotated"] = {"type": "string", "description": "Not released."}
+
+        for label, name, change in (
+                ("title", "registry", lambda schema: schema.update(title="DRAFT " + schema["title"])),
+                ("description", "registry",
+                 lambda schema: schema.update(description="Staged. " + schema["description"])),
+                ("proposed", "common",
+                 lambda schema: schema.update(description=schema["description"] + " Proposed.")),
+                ("no title", "registry", lambda schema: schema.pop("title")),
+                ("nested", "registry", nested)):
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
                 root = self.released_tree(temporary)
-                replace_once(root / SCHEMAS / "registry.schema.json", old, new)
+                edit_schema(root, name, change)
                 write_record(root)
                 with self.assertRaisesRegex(ValueError, "draft and unreleased wording"):
                     BUILDER.validate_registry_artifacts(VERSION, TAG, root)
+        # A property named `description` is a name, not an annotation.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.released_tree(temporary)
+            edit_schema(root, "registry", lambda schema: schema.setdefault("$defs", {}).update(
+                named={"properties": {"description": {"type": "string"}}}))
+            write_record(root)
+            BUILDER.validate_registry_artifacts(VERSION, TAG, root)
 
     def test_notes_are_required(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -298,8 +341,8 @@ class RegistryReleaseTests(unittest.TestCase):
                 BUILDER.validate(TAG, commit)
 
     def test_the_bundle_carries_the_companion_and_a_core_bundle_does_not(self):
-        # Capture the uncommitted candidate, with synthetic notes and record, in a temporary
-        # index and tree; create no commit or tag.
+        # Capture the uncommitted candidate in a temporary index and tree, with synthetic notes
+        # and record where the tree has none yet; create no commit or tag.
         with tempfile.TemporaryDirectory() as temporary:
             index = Path(temporary) / "index"
             env = dict(os.environ, GIT_INDEX_FILE=str(index))
@@ -307,6 +350,8 @@ class RegistryReleaseTests(unittest.TestCase):
             subprocess.run(["git", "add", "-A"], cwd=ROOT, env=env, check=True)
             for name, content in ((f"releases/{TAG}.md", "Synthetic notes.\n"),
                                   (f"releases/{TAG}.json", "{}\n")):
+                if (ROOT / name).exists():
+                    continue
                 blob = subprocess.run(["git", "hash-object", "-w", "--stdin"], cwd=ROOT, input=content,
                                       capture_output=True, text=True, check=True).stdout.strip()
                 subprocess.run(["git", "update-index", "--add", "--cacheinfo", f"100644,{blob},{name}"],

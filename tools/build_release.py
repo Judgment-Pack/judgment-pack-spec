@@ -330,16 +330,31 @@ def validate_registry_artifacts(version: str, tag: str, root: Path = ROOT) -> No
         raise ValueError("a registry release requires the text, the code list and the rows' "
                          f"manifest to say status {REGISTRY_MATURITY}")
     # A schema's bytes are served at its $id from the release on and never change, so none may
-    # still call itself a draft, or unreleased, when the release publishes it.
+    # still call itself a draft, or unreleased, when the release publishes it: not its own title
+    # and description, which it must have, nor any nested one.
     for name in release["schemas"]:
         schema = json.loads((root / REGISTRY_SCHEMA_ROOT / f"{name}.schema.json").read_text("utf-8"))
-        title, description = schema.get("title"), schema.get("description")
-        if (not isinstance(title, str) or not isinstance(description, str)
-                or REGISTRY_UNRELEASED_WORDING.search(title + "\n" + description)):
-            raise ValueError("a registry release requires each schema's title and description to "
+        if (not isinstance(schema, dict) or not isinstance(schema.get("title"), str)
+                or not isinstance(schema.get("description"), str)
+                or any(REGISTRY_UNRELEASED_WORDING.search(said) for said in schema_annotations(schema))):
+            raise ValueError("a registry release requires each schema's titles and descriptions to "
                              "drop the draft and unreleased wording")
     if not (root / "releases" / f"{tag}.md").is_file():
         raise ValueError("registry release notes are missing for the exact tag")
+
+
+def schema_annotations(value: object):
+    """Every string a schema gives as a `title` or `description`, at any depth. A property named
+    `title` or `description` maps to a schema, not a string, and is walked into."""
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key in ("title", "description") and isinstance(item, str):
+                yield item
+            else:
+                yield from schema_annotations(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from schema_annotations(item)
 
 
 def same_registry_schemas(previous: object, release: dict) -> bool:
