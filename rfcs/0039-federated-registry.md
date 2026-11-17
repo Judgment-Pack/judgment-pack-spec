@@ -83,8 +83,10 @@ when, they appear in capitals. Section numbers prefixed § are those of `spec/re
 
 Each is admitted by §2.2 with its own bound, and each one a reader writes is its JCS bytes (§2.3).
 The assembly report is §7.4's report under a new minor selector, adding the location `document`
-values `federation`, `index` and `bounds`, the location member `source` (a source's name), and the
-`FED-` codes of §6. A reader that only validates still writes `"1.0.0"` (§13).
+values `federation`, `index` and `bounds`, the location member `source` (§6), and the `FED-` codes
+of §6. In §7.4's order, `source` sorts directly after `document`, an absent `source` as `""`, and it
+is part of equality: one code at one pointer in two sources is two diagnostics, each reported. A
+reader that only validates still writes `"1.0.0"` (§13).
 
 ### 2. The federation manifest
 
@@ -110,7 +112,7 @@ values `federation`, `index` and `bounds`, the location member `source` (a sourc
 | `sources` | 1 to 256 sources, sorted by `name` in code-point order |
 | `sources[].name` | `^[a-z][a-z0-9-]{0,62}$`, distinct |
 | `sources[].role` | `standard` for exactly one source, `repository` for every other |
-| `sources[].repository` | the repository's identity: an absolute URI (RFC 3986) of at most 2048 characters with **no userinfo, no query and no fragment**, compared as an exact string. It is an identity, not a location: nothing resolves it |
+| `sources[].repository` | the repository's identity: an absolute URI (RFC 3986) of at most 2048 characters with **no userinfo, no query and no fragment**, compared as exact code points, with no case folding, percent-decoding or Unicode normalization. It is an identity, not a location: nothing resolves it |
 | `sources[].registry` | a path; required for a `repository` source, optional for the standard |
 | `sources[].bounds` | a path, optional |
 | `sources[].kinds` | 0 to 64 distinct paths of kind declarations |
@@ -119,8 +121,11 @@ A **path** names a file below the repository's root. It has the form §11.3 give
 (relative, `/`-separated, no `.`, `..` or empty segment, no `\` or `:`, nothing Windows or git
 reads as another name), without §11.3's `owns` condition, and is at most 512 bytes. A path ending in
 `.yaml` or `.yml` is imported (§9) before admission, and any other path is read as JSON. A manifest
-holds at most 4 096 paths in all, and no source names one path twice. The manifest names no
-commit: it says what to assemble, and the index (§4) records at which commits it was assembled.
+holds at most 4 096 paths in all. Within a source no two paths are equal once case is folded
+(§11.3); paths are otherwise compared, and recorded, as exact code points, with no Unicode
+normalization. Two sources MAY name one repository identity (one repository holding several
+services), and are then given one commit (`FED-COMMIT`). The manifest names no commit: it says what
+to assemble, and the index (§4) records at which commits it was assembled.
 
 ### 3. Assembly
 
@@ -150,24 +155,29 @@ ends the assembly after that step.
    pins name, from whichever source supplies them. It has the diagnostics a `1.0.0` reader reports
    for it, except that `REF-ENTRY-MISSING`, `REF-ENTRY-ABSENT-IN-ENVIRONMENT` and
    `REF-ENTRY-POINTER`, for a reference whose target another source holds, are deferred to step 6.
-   Assembly never makes valid what a source alone refuses, other references aside. Where the
-   standard declares `secretScopes`, a repository's lists only projects the standard lists for the
-   same environment and store (`FED-SCOPE-WIDENS`).
+   Assembly never makes valid what a source alone refuses, other references aside. Each source's
+   secret references are thus checked against its own `secretScopes` only. Where the standard
+   declares them, a repository's list only projects the standard's list for the same environment and
+   store (`FED-SCOPE-WIDENS`).
 6. **The assembled registry.** The registry document of format `1.0.0` that holds:
-   - `id` and `version` from the manifest, and its `environments`;
+   - `id` and `version` from the manifest, and its `environments`. The `version` does not change
+     when only a source's commit does, so it orders no two assemblies of one manifest version;
+     the index digest tells them apart (RFC 0040, Unresolved question 2);
    - `owners`: the union of the sources' owners, in code-point order;
    - `kinds`: the union of the sources' pins, one per kind name, in §4's order;
    - `entries`: every source's entries, in §4's canonical order;
    - `overlays`: one per environment that any source patches, in the order of `environments`, its
      patches in source order and then in each source's order;
-   - `secretScopes`: the union, per environment and store, of the sources' scopes, each list in
-     code-point order, present when any source declares scopes.
+   - `secretScopes`: the standard's, present when it declares them. A repository's own scopes
+     were applied in step 5, so no source's listing admits another source's reference; without the
+     standard's, a `1.0.0` reader sees the assembly's references unscoped (`REF-SECRET-UNSCOPED`).
 
    It is validated by §7 unchanged. A diagnostic about an entry, a patch or a pin is located in the
    source that holds it: `source` names that source, and `pointer` is into its registry document.
    Two sources holding one `(kind, id)` are thus `REG-ENTRY-DUPLICATE`, at the later in source
-   order, and a project used for `dev` in one repository and `prod` in another is
-   `REF-SECRET-SCOPE-SHARED` (§6.4).
+   order. The sources' own scopes are also read together as §6.4's sharing rule reads one list: a
+   project listed for `dev` in one source and `prod` in another is `REF-SECRET-SCOPE-SHARED` at the
+   later listing in source order.
 7. **Bounds** (§5): the form of every bounds document, the comparison of each repository's bounds
    with the standard's, and the check of values against both.
 8. **Output.** For an assembly with no error, the reader writes the assembled registry and the
@@ -235,12 +245,14 @@ A repository's bounds for the same kind might set `"maximum": 50` at `/connectio
 
 - `kinds` is sorted by `kind`, and each kind name appears once. `fields` is sorted by `pointer`,
   and each pointer appears once (`FED-BOUND-FORM`).
-- A bounded kind is a kind the assembled registry pins (`FED-BOUND-KIND`): a bound for a misspelt
-  kind would bound nothing and look like a limit. The standard bounds only governed kinds (§3,
-  step 4).
-- `pointer` is a pointer pattern (§3.5), or `""` for the whole value. It MUST be reachable in the
-  pinned declaration's schema by §3.5's rule (`FED-BOUND-POINTER-UNREACHABLE`), for the same reason.
-- `maxEntries` bounds the number of entries of the kind that **one source** holds.
+- A bounded kind is governed (§3, step 4) or pinned by the assembled registry, or it is
+  `FED-BOUND-KIND`: a bound for a misspelt kind would bound nothing and look like a limit. The
+  standard bounds only governed kinds, so its bounds hold for an assembly that pins none of them.
+- `pointer` is a pointer pattern (§3.5), or `""` for the whole value. It MUST be reachable, by
+  §3.5's rule, in the schema of the declaration that governs or is pinned for the kind
+  (`FED-BOUND-POINTER-UNREACHABLE`), for the same reason.
+- `maxEntries` bounds the number of entries of the kind that **one source** holds. Nothing caps a
+  kind across the assembly (Unresolved question 10).
 - `bound` holds only the constraints of §5.2.
 
 #### 5.2 What "tighter" means, construct by construct
@@ -329,7 +341,7 @@ All are errors. None is raised by a `1.0.0` reader, and none changes a `1.0.0` c
 | `FED-KIND-CONFLICT` | two sources pin one kind name to different declarations |
 | `FED-SCOPE-WIDENS` | a repository's secret scopes list a project the standard's do not |
 | `FED-BOUND-FORM` | a bounds document is not of its form |
-| `FED-BOUND-KIND` | a bounded kind is not pinned by the assembled registry, or a standard bound names a kind it does not govern |
+| `FED-BOUND-KIND` | a bounded kind is neither governed nor pinned by the assembled registry, or a standard bound names a kind it does not govern |
 | `FED-BOUND-POINTER-UNREACHABLE` | a field's pointer reaches no position of the kind's schema |
 | `FED-BOUND-NOT-COMPARABLE` | a bound holds a keyword of §5.3 |
 | `FED-BOUND-OVERLAP` | a repository field's pointer overlaps a standard field's without being equal to it |
@@ -338,7 +350,9 @@ All are errors. None is raised by a `1.0.0` reader, and none changes a `1.0.0` c
 | `FED-VALUE-BOUND` | a resolved value fails a bound |
 | `FED-INDEX-MISMATCH` | an index check finds a difference (§4) |
 
-Locations follow §7.3, with `source` added, and carry no value: a `FED-` diagnostic names
+Locations follow §7.3, with `source` added: the name of the source whose document the diagnostic
+is about (on `FED-VALUE-BOUND`, the source whose bound the value fails), absent on a diagnostic of
+the manifest or of the assembly as a whole. They carry no value: a `FED-` diagnostic names
 pointers, sources and paths, never a repository's content.
 
 ## Alternatives
@@ -390,7 +404,7 @@ pointers, sources and paths, never a repository's content.
   goes no further than its sources; a digest of a very small document can be confirmed by guessing.
 - **Tightening is checked, and not relied on.** Values meet the standard's bounds whatever the
   comparison says (§5.4). A repository cannot loosen a governed kind by redeclaring it
-  (`FED-KIND-NOT-STANDARD`), widen secret scopes (`FED-SCOPE-WIDENS`), or make a bound vanish by a
+  (`FED-KIND-NOT-STANDARD`), widen or borrow secret scopes (§3, step 5), or make a bound vanish by a
   misspelt kind or pointer (`FED-BOUND-KIND`, `FED-BOUND-POINTER-UNREACHABLE`).
 - **Refusal, not a pass.** An incomparable construct is refused (§5.3), and a missing path is
   refused, never fetched or skipped.
@@ -409,7 +423,8 @@ Rows would be hand-written and synthetic, under `conformance/registry/1.1.0/`, f
   adding a field and a pattern, and an index check that passes.
 - **Negative.** One row per `FED-` code, among them a commit of 39 digits, in upper case, or a
   branch name; a repository with userinfo or a query; a duplicate entry across sources; a patch of
-  another source's entry (`REG-OVERLAY-ENTRY-MISSING`, in its source); a cross-source scope share.
+  another source's entry (`REG-OVERLAY-ENTRY-MISSING`, in its source); a cross-source scope share;
+  one repository identity at two commits; one code at one pointer in two sources, reported twice.
 - **The comparison table.** Each row of §5.2 tighter, equal and looser; exclusive against inclusive
   at one value; `integer` inside `number`, not the reverse; a `const` in the standard's `enum`; an
   `enum` value the standard's `maxLength` refuses; a cancelled widening, still reported.
@@ -418,7 +433,11 @@ Rows would be hand-written and synthetic, under `conformance/registry/1.1.0/`, f
   an assembled registry at and over their bounds.
 - **Adversarial.** A repository's redeclaration of a governed kind with a wider `enum` (and the same
   declaration byte for byte, admitted); a path with `..`, `\` or a leading `/`; a widening bound
-  with a value inside it, which is both `FED-BOUND-WIDENS` and `FED-VALUE-BOUND`.
+  with a value inside it, which is both `FED-BOUND-WIDENS` and `FED-VALUE-BOUND`; with no standard
+  scopes, a secret reference naming a project only another repository lists (`REF-SECRET-SCOPE` in
+  step 5, or `REF-SECRET-UNSCOPED` when its source declares none, never scoped); a standard bound on
+  a governed kind the assembly does not pin (admitted); a repository identity in another case (a
+  second identity).
 
 ## Implementation
 
@@ -448,3 +467,5 @@ Rows would be hand-written and synthetic, under `conformance/registry/1.1.0/`, f
 8. **Assemblies of assemblies.** Should an assembled registry be usable as a source of another
    assembly (RFC 0034, Unresolved question 4)?
 9. **Review regime:** as in RFC 0034, question 1.
+10. **Assembly-wide caps.** `maxEntries` bounds one source. Should a bound also cap a kind's entries
+    across the assembly, and how would a repository's narrower cap compare with it?

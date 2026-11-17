@@ -34,8 +34,9 @@ for registries, modelled on what the reference runtime already does for packs:
   makes an amendment visible in a diff.
 - A **lock signature** is a detached Ed25519 signature over a context-prefixed message that names
   the lock's digest. It is the runtime's pack signature design applied to a lock, under its own
-  prefix and member name. A verifier is given the key it expects, checks the signature before it
-  reads the lock, and never takes a key from the document.
+  prefix and member name. A verifier is given the key, the registry id and, for coverage, the
+  environment it expects, checks the signature before it reads the lock, and never takes any of
+  them from a document.
 
 No cryptography is new. The key and signature rules are those the checkpoint witness companion
 already states, and the document's shape is the pack signature's.
@@ -114,8 +115,10 @@ A lock has these members, and no other:
   check requires them equal, so they are no second source of truth.
 - **`resolved`**: one item per environment of the registry, in the order of its `environments`,
   each the digest of the resolved registry (§8) of that environment.
-- **`index`**: present exactly when the registry is an assembled registry: the digest of its
-  assembled index (RFC 0039 §4).
+- **`index`**: the digest of the assembled index (RFC 0039 §4). A writer given an assembly MUST
+  write it. An assembled registry is an ordinary `1.0.0` document, so a lock written from the
+  registry alone cannot hold it, and a lock without `index` claims no provenance. A verifier that
+  needs provenance requires it out of band (§4, Expected inputs).
 
 **What is locked.** Through these digests, a lock pins:
 
@@ -152,11 +155,18 @@ re-formatted lock is an edited lock.
 
 ### 4. Checking a lock
 
+**Expected inputs.** Every check, coverage and verification is also given, out of band and every
+time, under the rule §7 states for the expected key: the **registry `id`** it expects, and whether
+it **requires an index**; coverage is also given the **environment** it serves. None has a default,
+and none is taken from a lock, a registry or a signature document. One missing, or a registry id
+that is not an absolute URI, is `LOCK-EXPECTED`, before anything is read.
+
 A check is given a lock, the registry, the kind declarations, and the index when the lock names
 one. Its steps:
 
 1. **The lock.** Admission (§2.2), its form (`LOCK-FORM`), and its canonical bytes
-   (`LOCK-NOT-CANONICAL`).
+   (`LOCK-NOT-CANONICAL`). Its `registry.id` is the expected id (`LOCK-UNEXPECTED-REGISTRY`), and
+   it names an index when one is required (`LOCK-INDEX-REQUIRED`).
 2. **The registry.** It is validated by §7 with the declarations given. An error is
    `LOCK-REGISTRY-INVALID`, reported beside the validation's own diagnostics.
 3. **Registry.** The lock's `id`, `version` and digest are the registry's (`LOCK-REGISTRY-MISMATCH`
@@ -180,11 +190,14 @@ The check does not re-run the assembly. RFC 0039's index check does that, agains
 their commits, and a verifier that wants provenance runs both.
 
 **Coverage.** A consumer holding one environment's resolved registry and a lock (a start-up loader,
-an emitter host, a deployment step) asks whether the lock covers it. It is covered when its digest
-is the lock's `resolved` digest for its `environment`, and its `registry.digest` is the lock's
-registry digest; otherwise it is `LOCK-NOT-COVERED`. This is the runtime's `packs covers` question
-asked of a registry. Coverage establishes byte identity with what the lock names, and it re-derives
-nothing. A consumer that relies on it relies on whoever checked or signed the lock.
+an emitter host, a deployment step) asks whether the lock covers it, for the registry id and
+environment it expects. The lock is first held to step 1. The resolved registry is covered exactly
+when its `environment` is the expected environment, its `registry.digest` is the lock's registry
+digest, and its digest is the lock's `resolved` digest for the expected environment; otherwise it
+is `LOCK-NOT-COVERED`. A `dev` resolved registry handed to a `prod` loader is thus not covered,
+although the lock names it. This is the runtime's `packs covers` question asked of a registry.
+Coverage establishes byte identity with what the lock names, and it re-derives nothing. A consumer
+that relies on it relies on whoever checked or signed the lock.
 
 ### 5. The signature document
 
@@ -216,13 +229,13 @@ The signature is Ed25519 (RFC 8032, pure, with no context string) over these ASC
 judgment-pack-registry/lock-signature/1:{"lockDigest":"sha256:<64 hex>","lockSignatureVersion":"1.1.0"}
 ```
 
-The part after the prefix is the JCS of those two members. The prefix is not a prefix of any
-prefix the project's signers use today, and none of them is a prefix of it. Those are the
-runtime's `judgment-pack-runtime/pack-signature/1:`, `…/record-signature/1:` and
-`…/key-rotation/1:`, and the gateway's receipt, report and witness prefixes under
-`judgment-pack-gateway/`. So no signature of another kind is a lock signature, even under one key,
-and the reverse holds too. The message names the digest, not the bytes: it is small and of
-one shape, and the digest binds the bytes.
+The part after the prefix is the JCS of those two members. Every signing prefix of the project is
+a namespace with no `/` in it (`judgment-pack`, `judgment-pack-runtime`, `judgment-pack-gateway`),
+then `/`, a name, a version and `:`. No other prefix starts `judgment-pack-registry/`, and a later
+one in this namespace MUST have another name or version. Two prefixes of different namespaces are
+neither a prefix of the other, and every message begins with its own prefix, so no signature of
+another kind is a lock signature, even under one key, and the reverse holds too. The message names
+the digest, not the bytes: it is small and of one shape, and the digest binds the bytes.
 
 ### 7. Keys, signing and verification
 
@@ -253,11 +266,13 @@ one shape, and the digest binds the bytes.
   with, it refuses, before signing anything, a seed whose public key is another.
 - Signing writes a new signature document, and never replaces one.
 
-**Verifying.** The verifier is given the lock's bytes, the signature document's bytes and the
-expected key. The order is the pack signature's:
+**Verifying.** The verifier is given the lock's bytes, the signature document's bytes, the
+expected key and the expected inputs of §4 (registry id, and whether an index is required). A
+signature binds only a lock's digest: without the expected registry id, another registry's lock
+signed by the same key would verify. The order is the pack signature's:
 
-1. no expected key, or one the trust rule refuses: `LOCK-SIG-EXPECTED-KEY`, before anything is
-   read;
+1. no expected key, or one the trust rule refuses: `LOCK-SIG-EXPECTED-KEY`, and an expected input
+   missing: `LOCK-EXPECTED`, each before anything is read;
 2. the document, read strictly, with one code per failure:
    - over 4 096 bytes, not one JSON object in UTF-8, a member given twice, or a backslash:
      `LOCK-SIG-DOCUMENT`;
@@ -276,9 +291,10 @@ expected key. The order is the pack signature's:
 Steps 3 and 4 come before step 5, so the reader learns the plainer reason.
 
 **After a verdict.** The lock's bytes are not parsed until the signature is accepted. Then the lock
-is checked (§4), and the report gives both results: the signature accepted, with its key and key
-identifier, and the lock's result. An accepted signature over a lock that does not check is a
-refusal of the lock, not a pass.
+is held to §4's step 1, which includes the expected registry id and the index requirement, and to
+the rest of §4 when the documents are given, or to coverage when a resolved registry is. The report
+gives both results: the signature accepted, with its key and key identifier, and the lock's result.
+An accepted signature over a lock that fails any of these is a refusal of the lock, not a pass.
 
 ### 8. Diagnostic codes
 
@@ -287,8 +303,11 @@ gives, so that one implementation can serve both.
 
 | Code | Raised when | Pack signature code |
 | --- | --- | --- |
+| `LOCK-EXPECTED` | an expected registry id, index requirement or environment (coverage) is missing, or the id is not an absolute URI | — |
 | `LOCK-FORM` | the lock is not of its form | — |
 | `LOCK-NOT-CANONICAL` | the lock's bytes are not its JCS bytes | — |
+| `LOCK-UNEXPECTED-REGISTRY` | the lock's `registry.id` is not the expected registry id | — |
+| `LOCK-INDEX-REQUIRED` | an index is required and the lock names none | — |
 | `LOCK-REGISTRY-INVALID` | the registry, or the assembly, has an error | `-PACK-NOT-VALID` (signing) |
 | `LOCK-REGISTRY-MISMATCH` | the registry is not the one the lock names | — |
 | `LOCK-KINDS-MISMATCH` | the lock's kinds are not the registry's pins | — |
@@ -296,7 +315,7 @@ gives, so that one implementation can serve both.
 | `LOCK-INDEX-MISSING` | the lock names an index and none was given | — |
 | `LOCK-INDEX-MISMATCH` | the index is not the one the lock names, or names another registry | — |
 | `LOCK-INDEX-UNLOCKED` | an index was given for a lock that names none | — |
-| `LOCK-NOT-COVERED` | a resolved registry is not the one the lock names for its environment | `document-drift` (`packs covers`) |
+| `LOCK-NOT-COVERED` | a resolved registry is not of the expected environment, or not the one the lock names for it | `document-drift` (`packs covers`) |
 | `LOCK-SIG-EXPECTED-KEY` | no expected key, or one a verifier may not trust | `-EXPECTED-KEY` |
 | `LOCK-SIG-DOCUMENT` | the document is over its bound, not one JSON object, repeats a member or holds a backslash | `-TOO-LARGE`, `-MALFORMED`, `-DUPLICATE-MEMBER` |
 | `LOCK-SIG-VERSION` | `lockSignatureVersion` is not `"1.1.0"` | `-VERSION` |
@@ -365,8 +384,15 @@ accepted signature, and no document content.
 - **A signature says who, not whether right.** See §9. It is evidence of an act by a key holder,
   not of a review.
 - **No time, so replay and rollback are open.** An older signed lock, with its older registry, still
-  verifies. A verifier that must refuse a rollback compares the registry's `version` with one it has
-  already seen, or consults a log of its own. The companion defines neither (Unresolved question 2).
+  verifies. For a single registry whose writers bump `version` on every change, a verifier can
+  compare it with one it has seen. That does not reach assemblies: an assembly's `version` is its
+  manifest's, unchanged when only a source's commit changes, so an older assembly under one manifest
+  version is not refused. This draft does not address that rollback (Unresolved question 2).
+- **Expected registry and environment.** A key that signs several registries' locks makes each
+  verify, and a lock names every environment's resolved registry. So the registry id and the
+  environment are named by the verifier, never read from a document (§4), as the key is: another
+  registry's lock is `LOCK-UNEXPECTED-REGISTRY`, and a `dev` resolved registry is not covered for
+  `prod`. Provenance is likewise required by the verifier, since a lock may omit it (§2).
 - **Keys.** The expected key is mandatory, and a key the trust rule refuses is refused before
   anything is read. That includes keys of small order, under which anyone can forge. A compromised
   key cannot be revoked in this format: a verifier stops expecting it.
@@ -393,14 +419,16 @@ that any reader can reproduce them, and a second published seed for wrong-key ro
   environment's resolved registry; an accepted signature over a lock with and without its final
   line feed.
 - **Negative.** One row per code of §8. These include kinds reordered, an environment missing from
-  `resolved`, a lock naming an index checked without one, and an index given for a lock that names
-  none.
+  `resolved`, a lock naming an index checked without one, an index given for a lock that names
+  none, a lock with no index where one is required, and each expected input missing.
 - **Boundary.** A signature document of 4 096 bytes and one of 4 097; a lock at 1 MiB and one over
   it; a lock followed by two line feeds (`LOCK-SIG-DIGEST-MISMATCH`).
 - **Adversarial.**
   - A pack signature's message, made under the expected key, presented as a lock signature
     (`LOCK-SIG-INVALID`).
   - Another lock's signature moved beside this lock.
+  - Another registry's lock, signed by the expected key (`LOCK-UNEXPECTED-REGISTRY`).
+  - The `dev` resolved registry offered for `prod` (`LOCK-NOT-COVERED`).
   - A document naming a key other than the expected one, whose signature holds under its own key.
   - An expected key that is all zeros, of small order, or not canonical.
   - A signature with `S` at or above L, and one that holds only under the cofactored check.
@@ -423,8 +451,9 @@ that any reader can reproduce them, and a second published seed for wrong-key ro
 
 1. **Several signatures.** A standard's owner and a service's owner may both need to sign. Is the
    rule that combines them (all of a set, k of n) the verifier's policy, or a document of its own?
-2. **Time and rollback.** Should a lock, or its signature, carry a time or a sequence, and would
-   that make a clock or a log part of verification?
+2. **Time and rollback.** Should a lock carry a monotonic serial, or its signature a time, so that a
+   verifier can refuse an older assembly under one manifest version? Either makes a writer read the
+   previous lock or a clock, and a verifier keep state or a log.
 3. **File names.** Should the companion name a sibling convention (`<registry>.lock.json`,
    `<lock>.sig.json`), as the runtime does for packs, so that independent tools find each other's
    files?
