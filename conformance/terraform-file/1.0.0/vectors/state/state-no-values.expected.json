@@ -1,0 +1,13 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "state",
+    "formatVersion": "1.0",
+    "formatTable": "1.0.0",
+    "sha256": "cd1456f8b14594e27729f23b796dac2df8ce3b3d5a57256fc4efe22babebed7d",
+    "bytes": 30,
+    "removedSensitive": 0,
+    "selected": 0
+  },
+  "value": []
+}

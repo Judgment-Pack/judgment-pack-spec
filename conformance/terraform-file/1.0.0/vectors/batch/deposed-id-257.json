@@ -1,0 +1,37 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "1.9.8",
+  "values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_sql_database_instance.main[\"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\"]",
+          "mode": "managed",
+          "type": "google_sql_database_instance",
+          "name": "main",
+          "index": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "name": "main"
+          },
+          "sensitive_values": {}
+        },
+        {
+          "address": "google_sql_database_instance.main[\"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\"]",
+          "mode": "managed",
+          "type": "google_sql_database_instance",
+          "name": "main",
+          "index": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "name": "main"
+          },
+          "sensitive_values": {},
+          "deposed_key": "a1b2c3d4"
+        }
+      ]
+    }
+  }
+}

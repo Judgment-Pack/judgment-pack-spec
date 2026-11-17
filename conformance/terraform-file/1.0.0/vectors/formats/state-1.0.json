@@ -1,0 +1,32 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "1.9.8",
+  "values": {
+    "outputs": {
+      "bucket_url": {
+        "value": "gs://example-project-logs",
+        "type": "string",
+        "sensitive": false
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_storage_bucket.logs",
+          "mode": "managed",
+          "type": "google_storage_bucket",
+          "name": "logs",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "force_destroy": false,
+            "id": "example-project-logs",
+            "location": "EU",
+            "name": "example-project-logs"
+          },
+          "sensitive_values": {}
+        }
+      ]
+    }
+  }
+}

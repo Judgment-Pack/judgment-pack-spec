@@ -1,0 +1,13 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "plan",
+    "formatVersion": "1.2",
+    "formatTable": "1.0.0",
+    "sha256": "08fc685aca4d6ad3e5795334143a09dfa99dec02ce74d1562369ca8dc27c2945",
+    "bytes": 1625,
+    "removedSensitive": 1,
+    "selected": 0
+  },
+  "value": []
+}

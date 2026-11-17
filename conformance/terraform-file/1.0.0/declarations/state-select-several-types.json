@@ -1,0 +1,1 @@
+{"document": "state", "select": {"types": ["google_storage_bucket", "google_compute_network", "google_sql_user"]}}

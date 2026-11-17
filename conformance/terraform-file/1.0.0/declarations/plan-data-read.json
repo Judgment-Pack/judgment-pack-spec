@@ -1,0 +1,1 @@
+{"document": "plan", "select": {"types": ["google_project"], "mode": "data", "actions": ["read"]}}

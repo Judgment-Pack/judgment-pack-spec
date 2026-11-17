@@ -1,0 +1,25 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "plan",
+    "formatVersion": "1.2",
+    "formatTable": "1.0.0",
+    "sha256": "e6a6f986b1f652d0ac4762eb93508d10c66557e8669e605b3a5866586ef33eff",
+    "bytes": 1580,
+    "removedSensitive": 2,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "google_sql_user.root",
+      "type": "google_sql_user",
+      "name": "root",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "actions": [
+        "update"
+      ],
+      "afterUnknown": []
+    }
+  ]
+}

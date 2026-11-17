@@ -30,9 +30,9 @@ this document, and so is every form of the dialect.
 
 Version `1.0.0` is proposed. Its first release makes it `released`, and not yet stable:
 
-- **Its vectors are not written yet.** The machine-readable code list and format table, and the
-  hand-written vectors, are to be under `conformance/terraform-file/1.0.0/` (§§11, 12). Until a
-  release publishes them they are not a conformance corpus, and no claim may cite them.
+- **Its vectors are proposed with it.** The machine-readable code list and format table, and the
+  hand-written vectors, are under `conformance/terraform-file/1.0.0/` (§§11, 12). Until a release
+  publishes them they are not a conformance corpus, and no claim may cite them.
 - **One reader exists.** The reference runtime reads the file (`v0.48.0`), and where this text
   settles what RFC 0038 left open, it says what that reader does, except for deposed objects (§3,
   step 4), which that reader does not yet carry. No second, independently written reader exists.
@@ -196,7 +196,7 @@ the id.
 
 The list is closed: a refusal of the reading carries exactly one of these eight codes, the code of
 the step that refused it (§3), which states the rule; a row only names it. Each code's severity is
-`error`, and each code's status in `1.0.0` is `active`. The machine-readable list is to be
+`error`, and each code's status in `1.0.0` is `active`. The machine-readable list is
 `conformance/terraform-file/1.0.0/codes.json` (§11); where the two differ, this text governs.
 `FACTS-ID-LIMIT` and `FACTS-DOCUMENT-LIMIT`, which the batch reports (§8), are the registry
 companion's codes ([`spec/registry.md`](registry.md) §12), and not this list's.
@@ -225,17 +225,17 @@ Dialect version 3, which is proposed, and later Core releases cite this text rat
 
 ## 11. Machine-readable form and vectors
 
-None is written yet. They are to be under `conformance/terraform-file/1.0.0/`: the code list of §9
-as `codes.json`, with each code's severity, status and step; the accepted table of §4 as
-`formats.json`, with its release; and the vectors of §12, with a manifest that names, for each
-vector, the table release that added its row. Every input is synthetic. Where a file and this text
-differ, this text governs.
+The machine-readable form and the vectors are under `conformance/terraform-file/1.0.0/`, proposed
+with this text: the code list of §9 as `codes.json`, with each code's severity, status and step; the
+accepted table of §4 as `formats.json`, with its release; and the vectors of §12, with a manifest
+that names, for each vector, the table release that added its row. Every input is synthetic. Where a
+file and this text differ, this text governs.
 
 ## 12. Conformance
 
 | Class | Sections | Vectors |
 | --- | --- | --- |
-| Reader | §§2–7 and §9, and §8 for a reader that writes the batch | none yet |
+| Reader | §§2–7 and §9, and §8 for a reader that writes the batch | `conformance/terraform-file/1.0.0/`, proposed |
 
 A claim names the exact release, the table release it implements, and its complete vectors. A
 reader is held only to the vectors of the table releases it claims: a file whose `format_version` is

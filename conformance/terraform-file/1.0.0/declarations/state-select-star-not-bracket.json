@@ -1,0 +1,1 @@
+{"document": "state", "select": {"types": ["google_compute_instance"], "address": "google_compute_instance.*"}}

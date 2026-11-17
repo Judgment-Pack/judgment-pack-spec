@@ -1,0 +1,37 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "state",
+    "formatVersion": "1.0",
+    "formatTable": "1.0.0",
+    "sha256": "f16662ca563665ea818029457620dfcf109a4075c1b44f1c234d3749e4caa20e",
+    "bytes": 4235,
+    "removedSensitive": 1,
+    "selected": 2
+  },
+  "value": [
+    {
+      "address": "module.network.google_compute_network.main",
+      "type": "google_compute_network",
+      "name": "main",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "values": {
+        "auto_create_subnetworks": false,
+        "name": "main"
+      }
+    },
+    {
+      "address": "module.network.module.subnets.google_compute_subnetwork.private[\"a\"]",
+      "type": "google_compute_subnetwork",
+      "name": "private",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "index": "a",
+      "values": {
+        "ip_cidr_range": "10.0.0.0/24",
+        "name": "private-a"
+      }
+    }
+  ]
+}

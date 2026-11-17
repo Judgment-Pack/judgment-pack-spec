@@ -1,0 +1,74 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "plan",
+    "formatVersion": "1.2",
+    "formatTable": "1.0.0",
+    "sha256": "3f7e54760bcf64ca8fdeede7208664da8e457398c7659630c121e04f638c0637",
+    "bytes": 3486,
+    "removedSensitive": 0,
+    "selected": 3
+  },
+  "value": [
+    {
+      "address": "google_sql_database_instance.main",
+      "type": "google_sql_database_instance",
+      "name": "main",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "actions": [
+        "no-op"
+      ],
+      "before": {
+        "database_version": "POSTGRES_15",
+        "name": "main",
+        "region": "europe-west1"
+      },
+      "after": {
+        "database_version": "POSTGRES_15",
+        "name": "main",
+        "region": "europe-west1"
+      },
+      "afterUnknown": []
+    },
+    {
+      "address": "google_sql_database_instance.main",
+      "type": "google_sql_database_instance",
+      "name": "main",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "deposed": "a1b2c3d4",
+      "actions": [
+        "delete"
+      ],
+      "before": {
+        "database_version": "POSTGRES_14",
+        "name": "main",
+        "region": "europe-west1"
+      },
+      "after": null,
+      "afterUnknown": []
+    },
+    {
+      "address": "google_sql_database_instance.main2",
+      "type": "google_sql_database_instance",
+      "name": "main2",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "actions": [
+        "no-op"
+      ],
+      "before": {
+        "database_version": "POSTGRES_15",
+        "name": "main2",
+        "region": "europe-west1"
+      },
+      "after": {
+        "database_version": "POSTGRES_15",
+        "name": "main2",
+        "region": "europe-west1"
+      },
+      "afterUnknown": []
+    }
+  ]
+}

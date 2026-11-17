@@ -1,0 +1,78 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "plan",
+    "formatVersion": "1.2",
+    "formatTable": "1.0.0",
+    "sha256": "9019dee8293cce188cb8c4fa7c0752783415df3e6ac7d332536c196e0f4f7927",
+    "bytes": 11805,
+    "removedSensitive": 2,
+    "selected": 3
+  },
+  "value": [
+    {
+      "address": "google_compute_instance.web[1]",
+      "type": "google_compute_instance",
+      "name": "web",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "index": "1",
+      "actions": [
+        "update"
+      ],
+      "before": {
+        "id": "projects/example-project/zones/europe-west1-b/instances/web-1",
+        "machine_type": "e2-small",
+        "name": "web-1",
+        "zone": "europe-west1-b"
+      },
+      "after": {
+        "id": "projects/example-project/zones/europe-west1-b/instances/web-1",
+        "machine_type": "e2-medium",
+        "name": "web-1",
+        "zone": "europe-west1-b"
+      },
+      "afterUnknown": []
+    },
+    {
+      "address": "google_sql_user.app",
+      "type": "google_sql_user",
+      "name": "app",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "actions": [
+        "no-op"
+      ],
+      "before": {
+        "instance": "main",
+        "name": "app"
+      },
+      "after": {
+        "instance": "main",
+        "name": "app"
+      },
+      "afterUnknown": []
+    },
+    {
+      "address": "google_storage_bucket.logs",
+      "type": "google_storage_bucket",
+      "name": "logs",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "actions": [
+        "no-op"
+      ],
+      "before": {
+        "id": "example-project-logs",
+        "location": "EU",
+        "name": "example-project-logs"
+      },
+      "after": {
+        "id": "example-project-logs",
+        "location": "EU",
+        "name": "example-project-logs"
+      },
+      "afterUnknown": []
+    }
+  ]
+}

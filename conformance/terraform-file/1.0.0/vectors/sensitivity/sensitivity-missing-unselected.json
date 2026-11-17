@@ -1,0 +1,107 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.9.8",
+  "variables": {
+    "project": {
+      "value": "example-project"
+    }
+  },
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_firewall.allow",
+          "mode": "managed",
+          "type": "google_compute_firewall",
+          "name": "allow",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "name": "allow-ssh",
+            "source_ranges": [
+              "10.0.0.0/16"
+            ]
+          },
+          "sensitive_values": {}
+        },
+        {
+          "address": "google_sql_user.app",
+          "mode": "managed",
+          "type": "google_sql_user",
+          "name": "app",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "instance": "main",
+            "name": "app"
+          },
+          "sensitive_values": {}
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "google_compute_firewall.allow",
+      "mode": "managed",
+      "type": "google_compute_firewall",
+      "name": "allow",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "name": "allow-ssh",
+          "source_ranges": [
+            "10.0.0.0/8"
+          ]
+        },
+        "after": {
+          "name": "allow-ssh",
+          "source_ranges": [
+            "10.0.0.0/16"
+          ]
+        },
+        "after_unknown": {},
+        "after_sensitive": {}
+      }
+    },
+    {
+      "address": "google_sql_user.app",
+      "mode": "managed",
+      "type": "google_sql_user",
+      "name": "app",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "instance": "main",
+          "name": "app"
+        },
+        "after_unknown": {
+          "id": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {}
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "google": {
+        "name": "google",
+        "full_name": "registry.terraform.io/hashicorp/google"
+      }
+    },
+    "root_module": {}
+  },
+  "relevant_attributes": [],
+  "timestamp": "2026-01-01T00:00:00Z",
+  "applyable": true,
+  "complete": true,
+  "errored": false
+}

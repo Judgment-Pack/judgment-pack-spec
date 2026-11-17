@@ -22,6 +22,20 @@ here.
   members and class, and cites the companion; RFC 0018's Specification section follows. The site
   publishes the text at `spec/terraform-file/`. No release record is added, and nothing released
   changes.
+- **The `terraform-file` reading's code list, format table and vectors**
+  (`conformance/terraform-file/1.0.0/`, proposed with reading `1.0.0`; `spec/terraform-file.md`
+  §§4, 9, 11 and 12). `codes.json` lists §9's eight codes, each `error` and `active`, with the step
+  that raises it and when; `formats.json` is §4's first table, release `1.0.0`: `plan` `1.0`, `1.1`
+  and `1.2`, and `state` `1.0`. 184 hand-written, synthetic vectors, each with a source declaration
+  and one expected result and each naming table release `1.0.0`, cover RFC 0038's Conformance list
+  and §12's additions, every format row, and declarations of §2's forms, among them a `maxBytes`
+  written `1.0` or `1e2` and a `mode` or an `actions` element that is a number, each malformed with
+  no file read. Their one large input is written from a committed template by a rule the manifest
+  gives. `tests/test_terraform_file_vectors.py` holds the two lists to the text's tables and every
+  expected result to its form, and reads each declaration with the first reader, directly and as a
+  dialect source; no reader of the file exists in this repository, so the reading's results are
+  checked for form only. The companion's status, §9, §11 and §12 now say where the files are. No
+  Core bundle carries them, the site serves none of them, and no release record is added.
 - **The registry companion's first release, `registry-v1.0.0`** (registry format `1.0.0`, status
   `released`, and not stable; release notes `releases/registry-v1.0.0.md`). The text's status
   sentence, the code list and the rows' manifest say `released`, the rows' README and its heading

@@ -1,0 +1,33 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "state",
+    "formatVersion": "1.0",
+    "formatTable": "1.0.0",
+    "sha256": "b6a002d3402ac44c3975694ce7a19e0d0c300394d4e54a0f6b9779f00d696b1b",
+    "bytes": 857,
+    "removedSensitive": 1,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "google_compute_instance.web",
+      "type": "google_compute_instance",
+      "name": "web",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "values": {
+        "disks": [
+          {
+            "key": "plain-key-1",
+            "name": "boot"
+          },
+          {
+            "name": "data"
+          }
+        ],
+        "name": "web"
+      }
+    }
+  ]
+}

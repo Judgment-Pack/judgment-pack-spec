@@ -1,0 +1,52 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "state",
+    "formatVersion": "1.0",
+    "formatTable": "1.0.0",
+    "sha256": "8cfe2dcb7c1cd198a82eacf88eae72ee4c3849f2ab2cca318705378b096bd09d",
+    "bytes": 1602,
+    "removedSensitive": 0,
+    "selected": 3
+  },
+  "value": [
+    {
+      "address": "google_sql_database_instance.main",
+      "type": "google_sql_database_instance",
+      "name": "main",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "values": {
+        "database_version": "POSTGRES_15",
+        "name": "main",
+        "region": "europe-west1"
+      }
+    },
+    {
+      "address": "google_sql_database_instance.main",
+      "type": "google_sql_database_instance",
+      "name": "main",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "deposed": "0b0b0b0b",
+      "values": {
+        "database_version": "POSTGRES_13",
+        "name": "main",
+        "region": "europe-west1"
+      }
+    },
+    {
+      "address": "google_sql_database_instance.main",
+      "type": "google_sql_database_instance",
+      "name": "main",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "deposed": "a1b2c3d4",
+      "values": {
+        "database_version": "POSTGRES_14",
+        "name": "main",
+        "region": "europe-west1"
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.9.8",
+  "variables": {
+    "project": {
+      "value": "example-project"
+    }
+  },
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_storage_bucket.logs",
+          "mode": "managed",
+          "type": "google_storage_bucket",
+          "name": "logs",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "id": "example-project-logs",
+            "location": "EÿU",
+            "name": "example-project-logs"
+          },
+          "sensitive_values": {}
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "google_storage_bucket.logs",
+      "mode": "managed",
+      "type": "google_storage_bucket",
+      "name": "logs",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "no-op"
+        ],
+        "before": {
+          "id": "example-project-logs",
+          "location": "EU",
+          "name": "example-project-logs"
+        },
+        "after": {
+          "id": "example-project-logs",
+          "location": "EU",
+          "name": "example-project-logs"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "google": {
+        "name": "google",
+        "full_name": "registry.terraform.io/hashicorp/google"
+      }
+    },
+    "root_module": {}
+  },
+  "relevant_attributes": [],
+  "timestamp": "2026-01-01T00:00:00Z",
+  "applyable": true,
+  "complete": true,
+  "errored": false
+}

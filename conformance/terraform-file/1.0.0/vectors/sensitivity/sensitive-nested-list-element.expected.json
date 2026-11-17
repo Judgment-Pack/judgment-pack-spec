@@ -1,0 +1,29 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "state",
+    "formatVersion": "1.0",
+    "formatTable": "1.0.0",
+    "sha256": "b792f7e80563ad65ea9b745a0d21eea7dc90467635bdb1c874853af186830c63",
+    "bytes": 1115,
+    "removedSensitive": 1,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "google_compute_instance.web",
+      "type": "google_compute_instance",
+      "name": "web",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "values": {
+        "kept_matrix": [
+          [
+            "e"
+          ]
+        ],
+        "name": "web"
+      }
+    }
+  ]
+}

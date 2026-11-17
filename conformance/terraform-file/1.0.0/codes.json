@@ -1,0 +1,15 @@
+{
+  "companion": "terraform-file",
+  "reading": "1.0.0",
+  "status": "proposed",
+  "codes": [
+    {"code": "TF-SIZE", "severity": "error", "status": "active", "step": "1", "meaning": "the file, or an input read as a stream, is longer than maxBytes"},
+    {"code": "TF-JSON", "severity": "error", "status": "active", "step": "2", "meaning": "the bytes are not one JSON value in UTF-8 with no byte-order mark, no lone surrogate escape, only white space after it, nesting at most 128 deep and no duplicate member name"},
+    {"code": "TF-FORMAT", "severity": "error", "status": "active", "step": "3", "meaning": "the top-level value is not an object whose format_version is a string in the accepted table for document"},
+    {"code": "TF-DOCUMENT", "severity": "error", "status": "active", "step": "4", "meaning": "the file is not of its document's shape, a resource change, its after_unknown or a deposed key is not of its form, or two resources of the read section have one id"},
+    {"code": "TF-SENSITIVITY", "severity": "error", "status": "active", "step": "5", "meaning": "a resource of the read section has no sensitivity mirror, or one with a string, number or null at any position"},
+    {"code": "TF-SELECT-BOUND", "severity": "error", "status": "active", "step": "7 (§5)", "meaning": "more resources are selected than max"},
+    {"code": "TF-NUMBER", "severity": "error", "status": "active", "step": "7 (§6)", "meaning": "a number of the acquired value has a normal form longer than 64 characters"},
+    {"code": "TF-VALUE-LIMIT", "severity": "error", "status": "active", "step": "7 (§6)", "meaning": "the acquired value's canonical form, or one selected plan resource's afterUnknown pointers as charged, are over L"}
+  ]
+}

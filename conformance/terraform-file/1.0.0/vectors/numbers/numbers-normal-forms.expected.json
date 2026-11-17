@@ -1,0 +1,50 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "state",
+    "formatVersion": "1.0",
+    "formatTable": "1.0.0",
+    "sha256": "ad720e2643caf3087a0d9107b6ecc4e609ec36e7b0a8b1e1552f1d9a0909ba45",
+    "bytes": 1182,
+    "removedSensitive": 0,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "google_compute_instance.web",
+      "type": "google_compute_instance",
+      "name": "web",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "values": {
+        "weights": {
+          "a": "0",
+          "b": "0",
+          "c": "0",
+          "d": "1",
+          "e": "100",
+          "f": "100",
+          "g": "1.5",
+          "h": "0.0000001",
+          "i": "-12.34",
+          "j": "123456789012345678901234567890",
+          "k": "0",
+          "l": "0.5",
+          "m": "-0.25",
+          "n": "25",
+          "o": "1.2",
+          "p": "1",
+          "q": "0",
+          "r": "1000",
+          "s": "0.012",
+          "t": "9007199254740993",
+          "u": "1.23456789012345678901",
+          "v": [
+            "1",
+            "-0.1"
+          ]
+        }
+      }
+    }
+  ]
+}

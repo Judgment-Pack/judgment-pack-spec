@@ -1,0 +1,49 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "1.9.8",
+  "values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_sql_database_instance.main",
+          "mode": "managed",
+          "type": "google_sql_database_instance",
+          "name": "main",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "database_version": "POSTGRES_15",
+            "name": "main",
+            "region": "europe-west1",
+            "settings": [
+              {
+                "backup_configuration": [
+                  {
+                    "enabled": true
+                  }
+                ],
+                "database_flags": [
+                  {
+                    "name": "log_connections",
+                    "value": "secret-flag-1"
+                  }
+                ],
+                "tier": "db-f1-micro"
+              }
+            ]
+          },
+          "sensitive_values": {
+            "settings": [
+              {
+                "backup_configuration": [
+                  {}
+                ],
+                "database_flags": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
