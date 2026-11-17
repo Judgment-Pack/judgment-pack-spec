@@ -98,6 +98,7 @@
     {"code": "FACTS-CHECK-LIMIT", "severity": "error", "status": "active", "section": "§10.5", "meaning": "the pack check is over its work or depth bound"},
     {"code": "EMIT-REQUEST-VERSION", "severity": "error", "status": "active", "section": "§11.2", "meaning": "the host writes no request version the manifest lists, or none that carries the registry"},
     {"code": "EMIT-KIND-RANGE", "severity": "error", "status": "active", "section": "§11.2", "meaning": "a pinned kind's version is outside the manifest's range"},
+    {"code": "EMIT-REQUEST", "severity": "error", "status": "active", "section": "§11.2", "meaning": "the request is over its bound, or its pins and declarations do not match"},
     {"code": "EMIT-PROCESS", "severity": "error", "status": "active", "section": "§11.3", "meaning": "the emitter exited non-zero, or did not finish in time"},
     {"code": "EMIT-RESPONSE", "severity": "error", "status": "active", "section": "§11.3", "meaning": "the emitter's output is not one valid response"},
     {"code": "EMIT-STRAY-WRITE", "severity": "error", "status": "active", "section": "§11.5", "meaning": "the emitter created or changed a file itself"},

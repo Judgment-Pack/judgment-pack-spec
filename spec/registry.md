@@ -887,8 +887,9 @@ A registry that is not valid is not resolved. A reader MUST NOT write a resolved
 **What resolution does not do.** It applies no default. It replaces no reference with what it refers
 to, and fetches no secret.
 
-The resolved registry is the only input an emitter reads (§11). Its `registry.digest` binds it to
-the exact registry it came from.
+The resolved registries and their kinds' declarations (§11.2) are the only input an emitter reads
+from a registry. A resolved registry's `registry.digest` binds it to the exact registry it came
+from.
 
 ## 9. YAML import
 
@@ -1085,8 +1086,9 @@ by the harness (§11.5), not by a reader.
 
 ## 11. Emitters
 
-This section restates [RFC 0036](../rfcs/0036-registry-emitter-contract.md) §§1–7 as normative
-text. No host or harness implements it yet, and no row exercises it.
+This section is the normative text of the emitter contract of
+[RFC 0036](../rfcs/0036-registry-emitter-contract.md) §§1–7, and settles what the RFC left open
+(§17).
 
 ### 11.1 The manifest
 
@@ -1112,14 +1114,16 @@ and writes `{"emitRequestVersion", "emitter": {"id", "version"}, "options", "dec
 "resolved": […]}` as JCS, with one resolved registry for `"each"` and every environment in order
 for `"all"`. `declarations` holds the declaration of each kind whose pins remain, exactly as
 admitted, in its JCS form, sorted by `kind`. A declaration's SHA-256 is its pin's `digest` (§2.3,
-§4): an emitter checks each pin against its declaration and MUST refuse the run when a declaration
-is missing or does not match. The `resolved` documents are unchanged, §8's format as `registry
+§4): an emitter checks each pin against its declaration and MUST refuse the run, by exiting
+non-zero or with an `error` diagnostic, when a declaration is missing or does not match, or when a
+declaration has no pin. The `resolved` documents are unchanged, §8's format as `registry
 resolve` writes it. With `"factsContracts"` the request holds `factsContracts` (generated contracts
 of the kinds read, and the authored ones named, sorted by `id` then `version`) in place of
 `declarations` and `resolved`. The host writes the highest request version it supports that the
 manifest lists, or refuses the run (`EMIT-REQUEST-VERSION`), as it does when the registry needs a
-later resolved format than a listed request version carries. Request `1.0.0` carries
-`resolvedFormatVersion` and `factsContractVersion` `1.0.0`.
+later resolved format than a listed request version carries. A request is at most 64 MiB of
+canonical bytes; the host refuses a larger one (`EMIT-REQUEST`) before any emitter runs. Request
+`1.0.0` carries `resolvedFormatVersion` and `factsContractVersion` `1.0.0`.
 
 ### 11.3 The response
 
@@ -1273,6 +1277,7 @@ source are the dialect's ([`dialect.md`](dialect.md) §4.5).
 | `FACTS-CHECK-LIMIT` | error | §10.5 | the pack check is over its work or depth bound |
 | `EMIT-REQUEST-VERSION` | error | §11.2 | the host writes no request version the manifest lists, or none that carries the registry |
 | `EMIT-KIND-RANGE` | error | §11.2 | a pinned kind's version is outside the manifest's range |
+| `EMIT-REQUEST` | error | §11.2 | the request is over its bound, or its pins and declarations do not match |
 | `EMIT-PROCESS` | error | §11.3 | the emitter exited non-zero, or did not finish in time |
 | `EMIT-RESPONSE` | error | §11.3 | the emitter's output is not one valid response |
 | `EMIT-STRAY-WRITE` | error | §11.5 | the emitter created or changed a file itself |
