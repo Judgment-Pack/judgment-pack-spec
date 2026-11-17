@@ -38,8 +38,8 @@ reasons:
   and no claim may cite them.
 - **Its schemas are not written.** The closed schemas of its documents, which a first release
   publishes under `schema/registry/1.0.0/`, do not exist yet.
-- **One reader exists.** The reference runtime (Go) implements §§2 to 10. No second,
-  independently written reader exists, and no implementation of §11's host or harness exists. The
+- **One reader exists.** The reference runtime (Go) implements §§2 to 10, and §11's host and
+  harness since `v0.48.0`. No second, independently written reader, host or harness exists. The
   stable bar is two readers agreeing on every row (§15).
 
 Core is unchanged by this document. A registry is not a pack, no Core document carries a registry
@@ -791,16 +791,21 @@ A diagnostic's `location` is an object of these members, in this order of compar
 
 | Member | Form | Present |
 | --- | --- | --- |
-| `document` | `registry`, `kind`, `value`, `yaml`, `facts`, `contract` or `pack` | always |
+| `document` | `registry`, `kind`, `value`, `yaml`, `facts`, `contract` or `pack`; for the emitter host's own diagnostics (§11), also `manifest`, `options`, `request`, `response` or `repository`; and for the conformance harness's (§11.5), these and `vector` | always |
+| `manifest` | an integer from 1: the position of another manifest among those the host is given beside the one it runs | in document `manifest` only, when the pointer is into that other manifest (on `EMIT-OWNS-OVERLAP`'s diagnostic at the other manifest's glob); absent for the manifest being run |
 | `kindDocument` | the digest of a kind declaration's bytes as supplied (§2.3) | on every diagnostic about a supplied kind declaration, except `REG-DOC-SIZE` for one that was not read whole |
 | `kind` | a kind name | on a pin's diagnostic of step 4 or 8, on `REG-PIN-UNPINNED`, on a facts contract's (§10), and on every diagnostic of step 2 for a declaration whose `kind` member is a kind name |
 | `entry` | `{"kind", "id"}` | on a diagnostic about one entry, when the entry's kind is a kind name and its id is of the entry-id grammar (§6.2) |
-| `environment` | an environment | on a diagnostic of one environment: of step 7, of step 8's sizes, and of the facts writer |
+| `environment` | an environment | on a diagnostic of one environment: of step 7, of step 8's sizes, of the facts writer, and of the emitter host or harness (§11) where it resolves the registry for one environment, forms the request of one environment (with `"each"`), or runs that request and reads its response |
 | `pointer` | a pointer into `document` | always; `""` for the whole document |
 | `line`, `column` | integers from 1, counting code points | in document `yaml` only, where `pointer` is always `""` |
+| `path` | a slash-separated relative path: in document `vector`, below the vectors directory; in document `repository`, below the repository root | in documents `vector` and `repository` only, naming the file or directory the host or harness read or would write; absent when the diagnostic is about the vectors directory or the repository as a whole |
+| `variable` | the name of an environment variable, never its value | on `EMIT-ENV-UNSET`, naming the variable the manifest's `env` lists that the host's environment does not set |
 
 In document `value`, the pointer is into the entry's resolved value in `environment`. In document
-`kind`, it is into the declaration named by `kindDocument`.
+`kind`, it is into the declaration named by `kindDocument`. A `path` is never absolute, never a
+path on the host outside the vectors directory or the repository, and never carries a value; its
+pointer is into the file it names when that file is a JSON document, and `""` otherwise.
 
 A location never holds a value from a document beyond these identifiers: a pointer is built from
 member names and indices of the document, and the identifiers are the document's own names for its
@@ -1106,6 +1111,20 @@ literal characters naming every path the emitter writes; `env` (optional), varia
 `EMIT-DEPRECATED`. The `owns` of two manifests in one repository MUST NOT overlap, and neither
 `command` nor `owns` names a path outside the repository root.
 
+An `owns` glob follows the path rules of §11.3, with `*` allowed in a segment and `**` only as a
+whole segment, and its first segment holds no `*`: `**`, `**/*`, `*/**` and `*` are refused, since
+a glob that owns the whole tree would let a response of one file delete every other file of the
+repository. In a glob, `*` matches any run of characters within one segment, a leading `.`
+included; `**` between two segments matches zero or more segments, so `a/**/b` matches `a/b`; and a
+trailing `**` matches one or more, so `gen/**` never matches a file named `gen`. A manifest that is
+not of this section's form is `EMIT-MANIFEST`, in document `manifest`. Bytes that are not
+admissible JSON (§2.2's steps 1 to 3, under the host's size bound) are one `EMIT-MANIFEST`, at the
+pointer of the first refusal those steps give in §7.4's order, and nothing more is read. A root
+that is not an object is one at `""`, and a root whose `emitterManifestVersion` is missing or not
+one the host supports is one at `/emitterManifestVersion`, with no other, as with
+`REG-DOC-SELECTOR`. Otherwise there is one at the pointer of each member that is missing, not
+defined or not of its form.
+
 ### 11.2 The request
 
 The host resolves the registry per environment, removes every entry and pin of a kind the manifest
@@ -1128,15 +1147,30 @@ canonical bytes; the host refuses a larger one (`EMIT-REQUEST`) before any emitt
 ### 11.3 The response
 
 The emitter writes one `{"emitResponseVersion", "files", "diagnostics"}` on standard output and
-exits 0, with a response version whose major and minor do not exceed the request's. A non-zero exit
-or a time-out is `EMIT-PROCESS`, and output that is not one valid response `EMIT-RESPONSE`. Each
-file has a `path` and exactly one of `text` (UTF-8, ending in a line feed, with no carriage return)
-or `base64`, and an optional `mode`, `"0644"` (default) or `"0755"`. A path uses `/`, is relative,
-has no `.`, `..` or empty segment and no segment beginning with `~`, does not end with `/`, holds no
-NUL, backslash or control character, matches an `owns` glob, and is unique once case is folded;
-`files` is sorted by path. Emitter diagnostics have codes beginning with `x-`, a location of §7.3's
-form and no value; an `error` among them fails the run. Bounds: a response of 64 MiB, 10 000 files,
-16 MiB per file and 512 bytes per path.
+exits 0, with a response version whose major and minor do not exceed the request's. The three
+members are required, and `files` and `diagnostics` may be empty arrays. A non-zero exit or a
+time-out is `EMIT-PROCESS`, and output that is not one valid response `EMIT-RESPONSE`, located in
+document `response` at the pointer of each member that fails. Each file has a `path` and exactly
+one of `text` (UTF-8, ending in a line feed, with no carriage return) or `base64`, and an optional
+`mode`, `"0644"` (default) or `"0755"`. A path uses `/`, is relative, has no `.`, `..` or empty
+segment and no segment beginning with `~`, does not end with `/`, holds no NUL, backslash, `:` or
+control character, matches an `owns` glob, and is unique once case is folded; `files` is sorted by
+path. So that a path means one file on every system, no segment ends in `.` or a space, which
+Windows drops; none is a Windows device name, which is `CON`, `PRN`, `AUX`, `NUL`, `CONIN$`,
+`CONOUT$`, or `COM` or `LPT` followed by a digit 1 to 9 or by `¹`, `²` or `³`, compared in any case
+with the segment's part before its first `.`, trailing spaces removed (`nul.txt` is one, `COM0` is
+not); and none is a name git reads as `.git`, as git's own `is_ntfs_dotgit` and `is_hfs_dotgit`
+checks read it: `.git` or `git~1` in any ASCII case, followed only by dots and spaces, or `.git`
+once the code points HFS+ ignores (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F and
+U+FEFF) are skipped. Emitter diagnostics have codes of `x-` and lower-case words of `a` to `z` and
+`0` to `9` joined by `-` (`^x-[a-z0-9]+(-[a-z0-9]+)*$`), at most 64 bytes, a location of §7.3's
+form and no value. That location uses only §7.3's registry documents (`registry`, `kind`,
+`value`, `yaml`, `facts`, `contract` and `pack`, never the host's or the harness's) and members
+other than `path`; any other is `EMIT-RESPONSE` at `/diagnostics/<i>/location`. An emitter
+diagnostic of severity `error` fails the run: it is reported, and is also `EMIT-RESPONSE` at
+`/diagnostics/<i>`, its own index, in document `response`. The grammar keeps a code short and
+plain, but cannot keep an emitter from spelling a value in one, and no host can tell that it has (§16).
+Bounds: a response of 64 MiB, 10 000 files, 16 MiB per file and 512 bytes per path.
 
 ### 11.4 The host
 
@@ -1145,7 +1179,8 @@ environment of only `PATH`, `HOME` (a fresh empty directory), `LANG=C.UTF-8` and
 `env` names, never printing an `env` value; it reads at most 64 KiB of standard error, reports only
 its size unless asked to pass it through, and imposes a wall-clock limit (120 s by default). In write
 mode it validates the whole response first, writes each file through a temporary file and a rename,
-deletes owned files the response does not hold, refuses a symbolic link at or above an owned path,
+deletes owned files the response does not hold, never entering a directory git reads as `.git`
+(§11.3), refuses a symbolic link at or above an owned path,
 and reports what it wrote and deleted: exit 0 written, 2 not written. In check mode it writes
 nothing and compares byte for byte and mode for mode: exit 0 identical, 1 different (listing paths,
 never contents), 2 could not check. A command line that cannot be parsed exits 3. An emitter MUST
@@ -1154,17 +1189,48 @@ locale, time zone, map order or network.
 
 ### 11.5 The harness
 
-The harness runs an author's vectors (`request.json`, or `registry.json` with `kinds/` and an
-optional `options.json`; and `expected/` or `expected-failure.json`) at the level named by
-`vectors/harness.json` (`{"harnessLevel": "1.0"}`, the default). Level `1.0` applies six checks to
-every vector: golden equality; determinism over three runs with a different `HOME`, `TZ`, `LANG`
-and `SOURCE_DATE_EPOCH`; every path rule and bound of §11.3, with hostile responses substituted;
-kind filtering, with a synthetic undeclared kind added; references, failing a file that holds a run
-of at least 32 characters of a secret reference (or all of a shorter one) outside a complete
-occurrence of it; and no stray writes (`EMIT-STRAY-WRITE`). A check that can fail a vector is added
-only at a new level. The report (`harnessReportVersion` `"1.0.0"`) names the level and has one row
-per vector and check: pass, fail, skip with its reason, or info. The harness exits 0 when nothing
-fails, 1 when a check fails, and 2 when it could not run.
+The harness runs an author's vectors at the level named by `vectors/harness.json`
+(`{"harnessLevel": "1.0"}`, the default). A vector is a directory holding exactly one of
+`request.json` and `registry.json`, with `kinds/` and an optional `options.json` beside
+`registry.json` and neither beside `request.json`, from which the harness forms the request as the
+host does; and exactly one of `expected/`, holding the files the response must contain by their
+paths below it, and `expected-failure.json`; and nothing else. Any other entry, a directory where
+a file belongs or a file where a directory belongs, and a symbolic link in place of any of them is
+not of this layout, nor is a symbolic link beside the vectors in the vectors directory. Since git
+keeps no empty directory, a run that writes no files is recorded by the marker `expected/~empty`:
+a zero-byte regular file alone at the root of `expected/`, read as no files, which no response path can name (§11.3). The marker anywhere else,
+of another size or kind, or beside any other entry is not of this layout, nor is an `expected/` that
+holds no regular file and no marker; a missing `expected/` is never read as empty. `--update` writes
+`expected/` from a run, or the marker alone for a run that wrote no files. A vector not of this
+layout refuses the whole run.
+
+Level `1.0` applies six checks to every vector:
+
+1. golden equality;
+2. determinism over three runs with a different `HOME`, `TZ`, `LANG` and `SOURCE_DATE_EPOCH`;
+3. every path rule and bound of §11.3, with crafted responses substituted for the emitter's;
+4. kind filtering: the harness forms the request again from the registry with an entry of a
+   synthetic kind the manifest does not read, and that kind's declaration and pin, added; sets
+   every registry digest in it to the original request's at the same place (each resolved
+   document's `registry.digest`, and in the facts form each contract's `source.registry.digest`),
+   since the entry changes the registry's digest and an emitter may write that digest into a file
+   it generates; requires the result to be the original request's bytes; and only then runs the
+   emitter on it and requires the response unchanged;
+5. references: for each string R at a secret position of the request (in every environment it
+   holds) and each file, as text or its bytes read as Latin-1, the file fails when it holds a run of
+   at least 32 consecutive characters of R (all of R, if R is shorter) that lies inside no complete
+   occurrence of any string at a secret position of the request. Two whole references that share a
+   prefix pass; a reference cut short, or rewritten around its name and version, fails. A failure
+   names the file, the entry and the pointer of R's first position and, for `"each"`, the
+   environment, never R;
+6. no stray writes (`EMIT-STRAY-WRITE`).
+
+A vector that gives its request whole skips checks 4 and 5, having no registry to add a kind to or
+to find secret positions by; a facts-form request skips check 5, since it holds no secret position;
+a request refused before the emitter runs skips both, and a run that fails skips check 5. A check
+that can fail a vector is added only at a new level. The report (`harnessReportVersion` `"1.0.0"`)
+names the level and has one row per vector and check: pass, fail, skip with its reason, or info. The
+harness exits 0 when nothing fails, 1 when a check fails, and 2 when it could not run.
 
 ### 11.6 Reference emitters
 
@@ -1275,6 +1341,7 @@ source are the dialect's ([`dialect.md`](dialect.md) §4.5).
 | `FACTS-TYPE-ORDERED` | warning | §10.5 | a pack orders a pointer that is not decimal |
 | `FACTS-VALUE-UNREACHABLE` | warning | §10.5 | a pack compares a pointer with a value the contract does not admit |
 | `FACTS-CHECK-LIMIT` | error | §10.5 | the pack check is over its work or depth bound |
+| `EMIT-MANIFEST` | error | §11.1 | the manifest is not of its form |
 | `EMIT-REQUEST-VERSION` | error | §11.2 | the host writes no request version the manifest lists, or none that carries the registry |
 | `EMIT-KIND-RANGE` | error | §11.2 | a pinned kind's version is outside the manifest's range |
 | `EMIT-REQUEST` | error | §11.2 | the request is over its bound, or its pins and declarations do not match |
@@ -1314,11 +1381,15 @@ The code list and the rows are staged under
 with a README that says how each row is compared. Every input is synthetic. Where a file and this
 text differ, this text governs. The rows exercise admission, kind declarations, the registry's
 shape, pins, entries, overlays, both kinds of reference, bounds and warnings, resolution in two
-environments, facts batches, two generated contracts and two pack checks. They do not yet exercise
-`REG-ENTRY-ID`, `REG-ENTRY-DUPLICATE` and `REG-ENTRY-ENVIRONMENT`; value validation (§7.2) beyond
-`REG-VALUE-RANGE` and `REG-VALUE-DEPRECATED`; YAML import, the report bound, the facts and contract limits, contract reading, authored contracts,
-wildcard reference patterns, emitters, the harness or builders, and the boundary and adversarial
-sets RFC 0034 lists.
+environments, facts batches, two generated contracts, two pack checks; the emitter host's manifest
+and response rules (whole-tree and unportable `owns` globs, response paths, `**`, `diagnostics`
+required and emitter codes) and its request, with a kind it does not read; and the harness's
+references check and the `expected/` marker. They do not yet exercise `REG-ENTRY-ID`,
+`REG-ENTRY-DUPLICATE` and `REG-ENTRY-ENVIRONMENT`; value validation (§7.2) beyond `REG-VALUE-RANGE`
+and `REG-VALUE-DEPRECATED`; YAML import, the report bound, the facts and contract limits, contract
+reading, authored contracts, wildcard reference patterns, the facts-form request, the emitter host's
+process and write rules, the harness's other checks and its report, or builders, and the boundary
+and adversarial sets RFC 0034 lists.
 
 ## 15. Conformance classes
 
@@ -1327,8 +1398,8 @@ sets RFC 0034 lists.
 | Registry reader | §§2–8, §12 | `class` `registry-reader` |
 | Importer | §9 | none yet |
 | Facts writer | §§10.1–10.4 | `class` `facts-writer` |
-| Emitter host | §§11.1–11.4 | none yet |
-| Emitter harness | §11.5 | none yet |
+| Emitter host | §§11.1–11.4 | `class` `emitter-host` |
+| Emitter harness | §11.5 | `class` `emitter-harness` |
 
 A claim names its class, the exact release, and its complete rows; a class without rows is defined,
 and not claimable. The pack check (§10.5) is in no class. The stable bar is two independently written
@@ -1346,7 +1417,8 @@ readers agreeing on every row of a class.
   response is bounded, and patterns match in linear time.
 - **Authority.** Owners are identifiers, not permissions: a valid registry authorizes nothing.
 - **Residual risk.** Pinning cannot stop a store administrator replacing a version, and an emitter
-  is code the repository chose to run; the host is not a sandbox.
+  is code the repository chose to run; the host is not a sandbox. An emitter's diagnostic code of
+  §11.3's form can still spell a value, such as a run of hexadecimal digits, and no host can tell.
 
 ## 17. What this text settles, and what is open
 
@@ -1366,7 +1438,27 @@ readers agreeing on every row of a class.
 - a resolved-form emit request carries the read kinds' `declarations`, bound to their pins by
   digest, as part of request `1.0.0` (§11.2); RFC 0036 §2 names only the pins, and an emitter
   opens no file, so the reference emitters of §11.6 could not otherwise see a schema or a secret
-  position.
+  position;
+- the emitter host's stricter readings, which the reference runtime's host (`v0.48.0`) applies and
+  RFC 0036 left open: an emitter code's grammar and 64-byte bound, with the limit of what they can
+  keep out stated (§§11.3, 16); a path or glob refuses `:`, a segment ending in `.` or a space, a
+  Windows device name and a name git reads as `.git`, and the host never walks into `.git`
+  (§§11.3, 11.4); an `owns` glob's first segment holds no `*`, and `**` matches zero or more
+  segments between two others and one or more at the end, as in gitignore (§11.1); `diagnostics` is
+  required (§11.3); and `EMIT-MANIFEST`, the reference runtime's code for a manifest not of its
+  form, is adopted, with the locations of it and of `EMIT-RESPONSE` (§§7.3, 11.1, 11.3);
+- the harness's kind-filtering check compares requests, with every registry digest restored, before
+  it compares responses (§11.5): RFC 0036 §5 compares responses alone, and the synthetic entry
+  changes the registry's digest, which an emitter may write into a file, so an emitter that does
+  would fail;
+- a run passes the references check when it lies inside a complete occurrence of any string at a
+  secret position, not only of its own (§11.5): RFC 0036 §5's "of R" fails two whole references of
+  one project, which share a prefix of more than 32 characters;
+- a vector that gives its request whole skips the references check as well as kind filtering, as
+  the reference harness does (§11.5);
+- the vector layout and its marker `expected/~empty` of a run that writes no files (§11.5), which
+  the reference harness (`v0.48.0`) reads; RFC 0036 §5 names the files and gives no marker, and git
+  keeps no empty `expected/`.
 
 **Open:**
 
@@ -1382,9 +1474,23 @@ readers agreeing on every row of a class.
   row stays well within the reference runtime's limits.
 - **Importer stops.** Which refusals stop an import, beyond those §9 names, is fixed by the first
   import rows.
-- **Emitter host refusals.** A malformed manifest, overlapping `owns`, options that fail their
-  schema, a link at an owned path and an unreadable path have no code in RFC 0036; their codes come
-  with the first host's rows.
+- **Emitter host refusals.** Overlapping `owns`, options that fail their schema, a link at an owned
+  path and an unreadable path have no code here. The reference runtime reports them with
+  provisional codes of its own (`EMIT-OWNS-OVERLAP`, `EMIT-OPTIONS`, `EMIT-LINK` and
+  `EMIT-PATH-UNREADABLE`, the last shared with the harness), which come into §12 with the rows
+  that exercise them.
+- **Harness refusals.** A vector set not of §11.5's layout, a harness bound reached, and an
+  unreadable vector file have no code here. The reference harness reports them with provisional
+  codes of its own (`EMIT-VECTOR`, `EMIT-HARNESS-BOUND` and `EMIT-PATH-UNREADABLE`, the last
+  shared with the host), each located by §7.3's `path`: `EMIT-VECTOR` in document `vector`;
+  `EMIT-HARNESS-BOUND` and `EMIT-PATH-UNREADABLE` in document `vector` for a vector's own files
+  and in document `repository` for the repository copy. They stay provisional until this
+  companion's 1.0.0 is final; the layout rows compare only that the run is refused.
+- **Further host readings.** The reference host is stricter than §11.3 in ways this text does not
+  state yet: it resolves each emitter diagnostic's location against the request, so a location
+  names only what the request holds; it compares paths once case is folded and they are normalized
+  (NFD), and refuses a path that is a directory of another; and it reads `base64` only in its
+  canonical form. A host that follows the text alone accepts those responses.
 - **Pattern refusal.** Whether patterns that are catastrophic for backtracking engines should also be
   refused (RFC 0034, Unresolved question 2).
 - **Review regime.** The different-vendor review was waived for the records.

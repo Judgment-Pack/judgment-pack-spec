@@ -1,0 +1,17 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/queue",
+  "version": "1.2.0",
+  "kind": "queue",
+  "owner": "platform-data",
+  "schema": {
+    "type": "object",
+    "required": ["name", "password"],
+    "additionalProperties": false,
+    "properties": {
+      "name": { "type": "string" },
+      "password": { "type": "string" }
+    }
+  },
+  "secrets": ["/password"]
+}

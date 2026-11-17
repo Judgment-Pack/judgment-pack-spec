@@ -14,6 +14,45 @@ here.
   positive/adversarial cases. It was proposed for specification `0.6.0` and is not released in it;
   it changes no Core resolution or released conformance claim.
 
+### Changed
+
+- **The `terraform-file` kind's readings** (`spec/dialect.md` §4.5, proposed; RFC 0018's amendment
+  of 2026-11-17). An input read as a stream is read to `maxBytes` and one byte more, and a longer
+  one is `TF-SIZE` with no sha256 and no size (#353). The acquired value is held to the lesser of
+  268435456 bytes and sixteen times the file, each `afterUnknown` pointer charged eight bytes
+  more, and past it is `TF-VALUE-LIMIT` (#346). A sensitivity mirror of another shape than its
+  value is matched as JSON Pointer tokens are, and one that marks a position below a scalar
+  removes the scalar (#347). A batch line's id is 1 to 256 bytes, and a resource outside that
+  refuses the whole run, `FACTS-ID-LIMIT`, before any line is written (#351). A deposed object
+  carries its key as `deposed`, its id is its address, ` deposed ` and the key, the value is
+  sorted by id, and an empty key or two resources of one id are `TF-DOCUMENT` (#348); the
+  reference runtime does not carry the key yet. An `after_unknown` not of a mirror's form is
+  `TF-DOCUMENT`, and an `afterUnknown` pointer is cut at a position `after_sensitive` marks and
+  `after` lacks, as the reference reader does. In a plan, each resource change's `change` is an
+  object with `actions` an array of strings, or `TF-DOCUMENT`. §4.5 lists the vectors each reading needs beside RFC 0038's. No released
+  text carries the kind, so nothing released changes.
+- **The registry companion's emitter host** (`spec/registry.md` §11, format `1.0.0`, proposed).
+  §11 adopts the reference host's stricter readings (#349): an `owns` glob follows the path rules,
+  its first segment holds no `*`, and `**` matches as in gitignore; a response's three members are
+  required; a path holds no `:`, no segment ending in `.` or a space, no Windows device name and no
+  name git reads as `.git`; an emitter code is `x-` and lower-case words, at most 64 bytes; and
+  `EMIT-MANIFEST` is adopted, with the locations of it and of `EMIT-RESPONSE`. §7.3's location
+  gains the host's members: `manifest`, the position of another manifest an `owns` overlap names,
+  and `variable`, the name (never the value) of an `env` variable the host's environment lacks. Deleting owned
+  files, the host never enters a directory git reads as `.git` (§11.4). Five staged emitter-host
+  rows, operations `manifest` and `response`, exercise them. Overlap, options, links and unreadable paths
+  stay open (§17).
+- **The registry companion's harness** (`spec/registry.md` §11.5, format `1.0.0`, proposed; #350).
+  Kind filtering forms the request with a synthetic unread kind, restores every registry digest in
+  it, requires the original request's bytes, and only then compares responses, so an emitter that
+  writes the digest into a file passes. A run passes the references check inside a complete
+  occurrence of any secret-position string, so two whole references with a shared prefix pass. A
+  vector that gives its request whole skips both checks, and the marker `expected/~empty` records
+  a run that writes no files. A vector not of the layout, such as one that holds another file,
+  refuses the whole run. Two staged emitter-host rows, operation `request`, and six emitter-harness
+  rows, operations `references` and `layout`, exercise them; the harness's own refusal codes stay
+  provisional (§17).
+
 ## `0.6.0` — 2026-11-16
 
 Core `specVersion` `0.6.0`, tagged `v0.6.0`, releases the dialect formats `4.0.0` and `4.1.0` and a

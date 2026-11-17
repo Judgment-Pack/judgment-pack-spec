@@ -1,0 +1,22 @@
+{
+  "diagnostics": [],
+  "emitResponseVersion": "1.0.0",
+  "files": [
+    {
+      "path": "gen/cut.txt",
+      "text": "orders: secret:gcp-sm:projects/example-dev/secrets/orders-queue\n"
+    },
+    {
+      "path": "gen/name.txt",
+      "text": "orders: projects/example-dev/secrets/orders-queue/versions/3\n"
+    },
+    {
+      "path": "gen/rewritten.txt",
+      "text": "orders: secret:gcp-sm:projects/example-dev/secrets/orders-queue-v2/versions/9\n"
+    },
+    {
+      "path": "gen/whole.txt",
+      "text": "orders: secret:gcp-sm:projects/example-dev/secrets/orders-queue/versions/3\nbilling: secret:gcp-sm:projects/example-dev/secrets/billing-queue/versions/1\n"
+    }
+  ]
+}

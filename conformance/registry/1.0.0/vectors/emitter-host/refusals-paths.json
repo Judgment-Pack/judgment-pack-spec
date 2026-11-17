@@ -1,0 +1,36 @@
+{
+  "refusals": [
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/files/11/path"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/files/12/path"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/files/2/path"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/files/4/path"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/files/5/path"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/files/6/path"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/files/7/path"
+    },
+    {
+      "code": "EMIT-RESPONSE",
+      "pointer": "/files/9/path"
+    }
+  ]
+}

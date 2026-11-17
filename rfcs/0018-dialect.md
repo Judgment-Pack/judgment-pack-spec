@@ -20,7 +20,9 @@
   once, and a workflow stage's admission of the format, issue #324), 2026-11-15 (recordings of
   formats 4.0.0 and 4.1.0, issue #326), 2026-11-16 (the three adopted for `specVersion` `0.6.0`, and
   format 4.1.0 of RFC 0033 landed as §2.3, issues #326 and #328; the `terraform-file` source kind,
-  proposed, RFC 0038)
+  proposed, RFC 0038), 2026-11-17 (the `terraform-file` kind's readings: a stream's `TF-SIZE`,
+  issue #353; a bound on the acquired value, issue #346; a mirror of another shape, issue #347;
+  the batch id bound, issue #351; deposed objects, issue #348)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -1285,6 +1287,70 @@ second text of the kind elsewhere could come to differ.
 **What this amendment leaves open.** The version that admits the kind; how a refusal of §4.5's
 steps maps to a source outcome (§9.2), which RFC 0038 does not state; a reader, and vectors. Until
 a version admits it, the kind is defined and not claimable (§4).
+
+## Amendment of 2026-11-17: the `terraform-file` kind's readings
+
+This amendment settles readings of §4.5 that RFC 0038 left open, before any specification version
+carries the kind. The Specification and companion are amended equally, in §4.5 only; Core is
+unchanged, and so is every file of the `0.6.0` normative record. Each reading but the last is what
+the reference runtime's reader does (`v0.48.0`); the last, deposed objects, is a choice the reader
+does not yet follow. §4.5 gains a list of the vectors each reading needs beside RFC 0038's.
+
+- **A stream's `TF-SIZE`** (issue #353). A file is still read to its end, and its `TF-SIZE` carries
+  the whole file's sha256 and size. An input read as a stream, such as standard input, is read to
+  at most `maxBytes` and one byte more, and a longer one is `TF-SIZE` with neither member and with
+  a fixed reading that the input was a stream. *Why:* a stream that never ends would otherwise
+  never be refused; the code stays one, so a caller sees one failure for an input too large,
+  wherever it came from, and a digest identifies bytes the caller holds, which a stream's are not.
+
+- **A bound on the acquired value** (issue #346). The value can be longer than the file: normal
+  forms expand numbers, and `afterUnknown` pointers repeat member names once per unknown position
+  below them. It is held to `L`, the lesser of 268435456 and sixteen times the file's length, and
+  past it is `TF-VALUE-LIMIT`, after `TF-SELECT-BOUND` and `TF-NUMBER`: when its canonical form is
+  longer than `L`, or when one plan resource's pointers, each charged its length and eight bytes
+  more, pass what remains of `L` before that resource. *Why:* every reader then refuses the same
+  files, and a reader can refuse before it allocates; the charge of eight bytes is what the
+  reference runtime holds for each pointer it keeps, and a reader that charges less would accept
+  files the reference reader refuses.
+
+- **A mirror whose shape differs from the value** (issue #347). Terraform writes the mirror in the
+  value's shape, and a reader must still read other input. Positions are matched as RFC 6901 tokens
+  are: a mirror member over an array names the element its name indexes, a mirror array's element
+  `k` over an object names the member `k`, and any other token names nothing; a non-empty mirror
+  object or array over a string, number, boolean or null removes that value when it marks any
+  position `true`. Step 5 is restated to match: a mirror is any value of `true`, `false`, objects
+  and arrays, and one with a string, number or null in it is `TF-SENSITIVITY`. *Why:* the reading
+  removes at least as much as any narrower one, and fails closed where no reading of the shapes can
+  say what a mark covers.
+
+- **The batch id bound** (issue #351). RFC 0038 §6 gives each batch line the id `<address>`, and
+  neither text bounded it, while the reference runtime's batch evaluation refuses an item id over
+  256 bytes. §4.5 now says a line's id is 1 to 256 bytes of UTF-8, and a selected resource outside
+  that refuses the whole run before any line is written, with the batch tool's code
+  `FACTS-ID-LIMIT`, checked over every selected resource before the facts bound. *Why:* a batch the
+  tool writes is one that evaluation reads; refusing the run, rather than leaving a line out, keeps
+  a gate from passing a plan whose riskiest resource it never judged. The code is the batch tool's,
+  not the dialect's, as the batch is a product format.
+
+- **Deposed objects** (issue #348). A deposed object, one an apply replaced but has not yet
+  destroyed, shares its resource's address, and RFC 0038 neither carried its deposed key nor said
+  how the two are told apart. This is a design choice, not the reference runtime's reading, which
+  carries no key. A resource's deposed key (`deposed` in a plan, `deposed_key` in a state) is a
+  string when present, and its **id** is its address, or its address, ` deposed ` and the key. Two
+  resources of the read section with one id are `TF-DOCUMENT`; the acquired object carries the key
+  as `deposed`; the value is sorted by id; and a batch line's id is the resource's id, under the
+  256-byte bound. *Why:* the smallest change that keeps every batch id unique and bounded. Dropping
+  deposed objects would let a gate pass a plan without judging a destroy; folding the key into
+  `address` would change what `select.address` and packs read; ids by position change when the
+  file does; refusing every deposed object refuses real output; and a check in the batch alone
+  would leave the dialect's value with two objects it cannot order. Terraform writes the current
+  object and its deposed ones under one address with distinct keys, so its own output never has
+  two resources of one id.
+
+**What this amendment leaves open.** What RFC 0038 and the amendment of 2026-11-16 leave open: the
+version that admits the kind, how a refusal maps to a source outcome (§9.2), the first accepted
+format table, and the vectors themselves, which are recorded from Terraform and none of which is
+written yet.
 
 ## Specification
 
@@ -2571,8 +2637,10 @@ vectors are staged.
 
 This kind is the text that [RFC 0038](../rfcs/0038-terraform-file-source.md) proposes, placed here
 because the dialect's source kinds are defined in this section. It is proposed: whether it joins
-version 3 or opens the next version is open (RFC 0038, Unresolved question 1), no reader implements
-it, and no vector holds one, so it is defined, and not claimable (§4).
+version 3 or opens the next version is open (RFC 0038, Unresolved question 1), no preparation reader
+implements it, and no vector holds one, so it is defined, and not claimable (§4). The reference
+runtime reads the file (`v0.48.0`), and where this section settles what RFC 0038 left open, it says
+what that reader does, except for deposed objects (step 4), which that reader does not yet carry.
 
 A `terraform-file` source has, besides the members of §4, exactly `document` (`plan` or `state`:
 which output of `terraform show -json` the file is), `select` (below) and `maxBytes` (optional, an
@@ -2581,10 +2649,15 @@ file, and binds its path at evaluation time; the dialect names no path.
 
 **Reading.** A reader takes these steps in order. The first failure refuses the acquisition with its
 code, and later steps do not run. A diagnostic carries its code, the file's sha256 and its size, and
-nothing else: no value, member name, pointer or position.
+nothing else: no value, member name, pointer or position. The one exception is a stream's `TF-SIZE`
+(step 1), which carries neither the sha256 nor the size.
 
 1. The sha256 of the whole file and its length are recorded. A file longer than `maxBytes` is
-   `TF-SIZE`, unparsed.
+   `TF-SIZE`, unparsed. An input read as a stream, such as standard input, is read to at most
+   `maxBytes` and one byte more: a longer stream is `TF-SIZE`, unparsed, and its diagnostic carries
+   the code and a fixed reading that the input was a stream, with no sha256 and no size, since its
+   whole length is never read. A stream within `maxBytes` has its sha256 and length recorded as a
+   file's are.
 2. The bytes are UTF-8 with no byte-order mark and no lone surrogate escape, one JSON value with only
    white space after it, nested at most 128 deep (the top-level value at depth 1), with no duplicate
    member name; otherwise `TF-JSON`. Numbers are kept as their decimal text.
@@ -2592,17 +2665,39 @@ nothing else: no value, member name, pointer or position.
    `document`; otherwise `TF-FORMAT`.
 4. A `plan` has `planned_values`, an object, and `resource_changes`, when present, an array (absent
    reads as empty). A `state` has neither `planned_values` nor `resource_changes`, and `values`, when
-   present, is an object (absent reads as no resources). Otherwise `TF-DOCUMENT`.
+   present, is an object (absent reads as no resources). Otherwise `TF-DOCUMENT`. A resource of the
+   read section (step 5) that is a deposed object, one an apply replaced but has not yet destroyed,
+   has a **deposed key**, `deposed` in a `plan` and `deposed_key` in a `state`, which is a
+   non-empty string. A resource's **id** is its `address`, or, with a deposed key, its `address`, a
+   space, `deposed`, a space and the key. A deposed key of another type, an empty one, or two
+   resources of the read section with one id, is `TF-DOCUMENT`. In a `plan`, each item of
+   `resource_changes` is an object whose `change` is an object, with `actions` an array of
+   strings; any other item is `TF-DOCUMENT`. A resource change's
+   `change.after_unknown`, when present, has a mirror's form: `true`, `false`, or an object or
+   array of mirrors. Any other `after_unknown`, null included, is `TF-DOCUMENT`.
 5. The read section is `resource_changes` for a `plan`, and every resource under
    `values.root_module` and its `child_modules`, recursively, for a `state`. Every resource in it,
    selected or not, carries its sensitivity mirror (`change.before_sensitive` and
-   `change.after_sensitive`, or `sensitive_values`): `true`, `false`, or an object or array of the
-   value's shape. A missing mirror, or one of another type, is `TF-SENSITIVITY`.
+   `change.after_sensitive`, or `sensitive_values`): `true`, `false`, or an object or array of
+   mirrors, Terraform writing the value's shape (step 6 reads any other). A missing mirror, or one
+   with a string, number or null at any position, is `TF-SENSITIVITY`.
 6. In each value of the read section, every position whose mirror is `true` is removed with all it
    holds: an object member is removed; an array element is never removed alone, and the array that
    holds it is removed instead, up to the nearest object member. A mirror position absent from the
    value is ignored. Nothing replaces a removed value. `removedSensitive` counts the object members
-   removed, and `after_unknown` pointers at or below a removed position are dropped.
+   removed, and `after_unknown` pointers at or below a removed position are dropped. Terraform
+   leaves a value unknown at plan time out of `after`, so `after_sensitive` is read along
+   `after_unknown` as well: a pointer that ends at, or passes through, a position that
+   `after_sensitive` marks `true` and `after` lacks is cut at that position, so no member name below
+   it is carried. The pointers cut at one position are one pointer, and none when `after_unknown`
+   marks nothing `true` at or below it. Mirror and
+   value positions are matched as RFC 6901 tokens are, whatever their shapes: a mirror member names
+   the value's member of that name, or, over an array, the element its name indexes (`0`, or a
+   digit 1 to 9 and further digits, less than the array's length), and any other name names
+   nothing; a mirror array's element `k` names an array's element `k`, or an object's member named
+   `k` in decimal. A mirror object or array that marks any position `true`, at any depth, over a
+   string, number, boolean or null, removes that value; an empty mirror object or array removes
+   nothing.
 7. Selection, then the acquired value.
 
 A reader never reads `configuration`, `variables`, `relevant_attributes`, `checks`, `prior_state`,
@@ -2623,19 +2718,59 @@ an integer from 1 to 10000 (default 1000), past which the acquisition is `TF-SEL
 on a `state`, or a malformed `select`, makes the dialect invalid (§11). Child-module resources are
 included with their full address; selecting nothing gives an empty array.
 
-**The acquired value** is an array sorted by `address` in code-point order, one object per selected
-resource: for a `state`, `{"address", "type", "name", "mode", "providerName", "index"?, "values"}`;
-for a `plan`, the same with `actions`, `before`, `after` and `afterUnknown` (the sorted pointers, in
-`after`, of values known only after apply) in place of `values`. Numbers become decimal strings in
-the registry companion's normal form ([`spec/registry.md`](../spec/registry.md) §10.1), with `0` for
-every zero; one whose normal form would be longer than 64 characters is `TF-NUMBER`. The reads of §6
-then turn the value into facts. The acquisition record is `{"kind": "terraform-file", "document",
+**The acquired value** is an array sorted by id in code-point order, one object per selected
+resource: for a `state`, `{"address", "type", "name", "mode", "providerName", "index"?, "deposed"?,
+"values"}`, with `deposed` the deposed key, present only for a deposed object; for a `plan`, the
+same with `actions`, `before`, `after` and `afterUnknown` (the sorted pointers, in `after`, of
+values known only after apply) in place of `values`. Numbers become decimal strings in the
+registry companion's normal form ([`spec/registry.md`](../spec/registry.md) §10.1), with `0` for
+every zero; one whose normal form would be longer than 64 characters is `TF-NUMBER`. The value is
+then bounded by `L`, the lesser of 268435456 and sixteen times the file's length in bytes. It is
+`TF-VALUE-LIMIT`, after `TF-SELECT-BOUND` and `TF-NUMBER`, when its canonical form (RFC 8785) is
+longer than `L` bytes, or when the `afterUnknown` pointers of one selected `plan` resource, each
+charged the length in bytes of its RFC 6901 form and eight bytes more, total more than `L` less the
+bytes of the canonical form that come before that resource's object (the array's opening `[`,
+the objects of the resources before it, and the comma after each of them); so a reader can refuse before it holds
+the value or the pointers. Numbers in normal form grow at most about 13.4 times (an array of
+`1e63`) and strings do not grow, so pointers that repeat a long member name are what reach the
+multiple. The reads of §6 then turn the value into facts. The acquisition record is `{"kind": "terraform-file", "document",
 "formatVersion", "formatTable", "sha256", "bytes", "removedSensitive", "selected"}`, with no path.
 
 A reference runtime may also write the acquired value as an evaluation batch, one line per selected
-resource with id `<address>` and facts `{"terraform": {"document", "formatVersion", "sha256"},
-"resource": …}`; that batch is a product format, not a dialect member. How a refusal of steps 1 to 7
-maps to a source outcome (§9.2) is not stated by RFC 0038, and is open.
+resource with the resource's id (step 4) and facts `{"terraform": {"document", "formatVersion",
+"sha256"}, "resource": …}`; that batch is a product format, not a dialect member. Each line's id is
+1 to 256 bytes of UTF-8, the bound the reference runtime's batch evaluation holds an item's id to. A
+selected resource whose id is outside it refuses the whole run, before any line is written, with
+the batch tool's own code `FACTS-ID-LIMIT`, which is not a dialect code: every selected resource is
+checked for it before any facts document is held to the registry companion's facts bound
+(`FACTS-DOCUMENT-LIMIT`, [`spec/registry.md`](../spec/registry.md) §10.1). Its diagnostic carries
+what a refusal of the reading carries, the code, the file's sha256 and its size, and never the id.
+How a refusal of steps 1 to 7 maps to a source outcome (§9.2) is not stated by RFC 0038, and is
+open.
+
+**Vectors.** The kind's vectors are those RFC 0038's Conformance section lists, with these besides,
+each with one expected result:
+
+- a stream of `maxBytes` bytes (accepted, with its sha256 and size), and a stream of one byte more
+  (`TF-SIZE`, with no sha256 and no size), beside the file row of `maxBytes` and one byte more,
+  which stays a file row;
+- a plan whose `afterUnknown` pointers repeat a long member name past sixteen times the file's
+  length (`TF-VALUE-LIMIT`); a plan whose pointers fit that bound as their canonical form but not
+  with eight bytes charged to each (`TF-VALUE-LIMIT`), beside one that fits both; and a file of
+  `1e63` numbers, whose value grows about 13.4 times (accepted);
+- mirrors whose shape differs from the value, edited by hand from a recorded file, since Terraform
+  writes matching shapes: a mirror object over an array, marking an element by its index and
+  naming a member that is not an index; a mirror array over an object, marking the member `0`; a
+  mirror object over a string, marking a position below it (removed); and an empty mirror object
+  over a number (kept);
+- for the reference runtime's batch, a selected resource whose address is 256 bytes (one line,
+  with that id), and one of 257 bytes beside a resource whose facts document is over the facts
+  bound (`FACTS-ID-LIMIT`, and no line);
+- deposed objects: a plan whose replacement left a deposed object to delete, and a state holding a
+  deposed object beside its current one, each carried with `deposed` and sorted after the current
+  object; edited by hand, two resources of one id, and a deposed key that is a number (each
+  `TF-DOCUMENT`); and, for the batch, a deposed object whose id passes 256 bytes while its address
+  does not (`FACTS-ID-LIMIT`).
 
 ### 5. Input profiles and acquisitions
 

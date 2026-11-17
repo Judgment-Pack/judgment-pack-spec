@@ -1,0 +1,36 @@
+{
+  "refusals": [
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/0"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/1"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/2"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/4"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/5"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/6"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/7"
+    },
+    {
+      "code": "EMIT-MANIFEST",
+      "pointer": "/owns/8"
+    }
+  ]
+}

@@ -5,8 +5,11 @@ the parts of the companion that need no registry reader: the manifest names ever
 files; every input is I-JSON within its bound; pins and digests follow §2.3; resolved documents and
 facts lines follow from their inputs by §8 and §10.1; reports are in §7.4's order, name only listed
 codes with their severities, and carry no value; contracts are canonical and in §10.3's order; and
-codes.json equals the companion's §12 table. Validation itself is a reader's work: no second reader
-exists in this repository yet (spec/registry.md §14).
+codes.json equals the companion's §12 table. The emitter host's rows are held to a model of the
+§11 rules they exercise: owns globs, response paths, the members of a response and emitter codes;
+requests, the kind-filtering check's restored digest, the references check and the vector layout.
+Validation itself is a reader's work: no second reader exists in this repository yet
+(spec/registry.md §14).
 """
 from __future__ import annotations
 
@@ -14,6 +17,7 @@ import copy
 import hashlib
 import json
 import re
+import unicodedata
 import unittest
 from decimal import Decimal
 from pathlib import Path
@@ -242,14 +246,198 @@ def input_strings(row) -> set[str]:
     return {s for s in found if len(s) >= 6 or s.startswith(("entry:", "secret:"))}
 
 
+# A model of §11's path, glob and code rules, as far as the emitter host's rows exercise them. It is
+# not a host: it reads no request, runs nothing, and checks no bound but a path's length.
+DEVICE_NAMES = {"con", "prn", "aux", "nul", "conin$", "conout$"}
+HFS_IGNORED = {*range(0x200C, 0x2010), *range(0x202A, 0x202F), *range(0x206A, 0x2070), 0xFEFF}
+EMITTER_CODE = re.compile(r"x-[a-z0-9]+(-[a-z0-9]+)*")
+RESPONSE_MEMBERS = ("emitResponseVersion", "files", "diagnostics")
+MANIFEST_REQUIRED = ("emitterManifestVersion", "id", "version", "owner", "reads", "requestVersions",
+                     "command", "owns")
+
+
+def ascii_lower(text: str) -> str:
+    return "".join(chr(ord(c) + 32) if "A" <= c <= "Z" else c for c in text)
+
+
+def git_name(segment: str) -> bool:
+    """git's is_ntfs_dotgit and is_hfs_dotgit, for one segment (§11.3)."""
+    rest = None
+    if segment[:1] == "." and ascii_lower(segment[1:4]) == "git":
+        rest = segment[4:]
+    elif ascii_lower(segment[:3]) == "git" and segment[3:5] == "~1":
+        rest = segment[5:]
+    if rest is not None and all(c in ". " for c in rest):
+        return True
+    skipped = "".join(c for c in segment if ord(c) not in HFS_IGNORED)
+    return skipped[:1] == "." and ascii_lower(skipped[1:]) == "git" and skipped[1:].isascii()
+
+
+def device_name(segment: str) -> bool:
+    base = segment.split(".", 1)[0].rstrip(" ").lower()
+    if base in DEVICE_NAMES:
+        return True
+    return base[:3] in ("com", "lpt") and base[3:] in ("1", "2", "3", "4", "5", "6", "7", "8", "9",
+                                                      "\u00b9", "\u00b2", "\u00b3")
+
+
+def path_form(path: str, glob: bool = False) -> bool:
+    if not path or len(path.encode("utf-8")) > 512:
+        return False
+    if any(c in "\0\\:" or unicodedata.category(c) == "Cc" for c in path):
+        return False
+    for segment in path.split("/"):
+        if segment in ("", ".", "..") or segment.startswith("~") or segment.endswith((".", " ")):
+            return False
+        if git_name(segment) or device_name(segment) or (glob and "**" in segment and segment != "**"):
+            return False
+    return True
+
+
+def glob_admitted(glob: str) -> bool:
+    return path_form(glob, glob=True) and "*" not in glob.split("/", 1)[0]
+
+
+def glob_matches(glob: str, path: str) -> bool:
+    segments = glob.split("/")
+    if segments[-1] == "**":
+        segments[-1:] = ["*", "**"]
+
+    def segment(pattern: str, name: str) -> bool:
+        return re.fullmatch("[^/]*".join(re.escape(part) for part in pattern.split("*")), name, re.S) is not None
+
+    def match(pattern: list[str], names: list[str]) -> bool:
+        if not pattern:
+            return not names
+        if pattern[0] == "**":
+            return any(match(pattern[1:], names[k:]) for k in range(len(names) + 1))
+        return bool(names) and segment(pattern[0], names[0]) and match(pattern[1:], names[1:])
+
+    return match(segments, path.split("/"))
+
+
+def manifest_refusals(manifest) -> set[str]:
+    found = {"/" + name for name in MANIFEST_REQUIRED if name not in manifest}
+    found.update(f"/owns/{i}" for i, glob in enumerate(manifest.get("owns", [])) if not glob_admitted(glob))
+    return found
+
+
+def response_refusals(manifest, response) -> set[str]:
+    found = {"/" + name for name in response if name not in RESPONSE_MEMBERS}
+    found.update("/" + name for name in RESPONSE_MEMBERS if name not in response)
+    previous = None
+    for i, file in enumerate(response.get("files", [])):
+        path = file["path"]
+        if not path_form(path) or not any(glob_matches(glob, path) for glob in manifest["owns"]):
+            found.add(f"/files/{i}/path")
+            continue
+        if previous is not None and path <= previous:
+            found.add(f"/files/{i}/path")
+        previous = path
+    for i, diagnostic in enumerate(response.get("diagnostics", [])):
+        code = diagnostic["code"]
+        if len(code.encode("utf-8")) > 64 or not EMITTER_CODE.fullmatch(code):
+            found.add(f"/diagnostics/{i}/code")
+    return found
+
+
+def emit_request(row) -> str:
+    """The request (§11.2) the host writes for a row's manifest, registry and kinds, environments "all"."""
+    manifest = load(BASE / row["manifest"])
+    registry = load(BASE / row["registry"])
+    reads = {r["kind"] for r in manifest["reads"]}
+    identity = {"digest": digest(jcs(registry).encode()), "id": registry["id"], "version": registry["version"]}
+    pins = [pin for pin in registry["kinds"] if pin["kind"] in reads]
+    resolved = [{"entries": [e for e in resolve(registry, environment) if e["kind"] in reads],
+                 "environment": environment, "kinds": pins, "registry": identity,
+                 "resolvedFormatVersion": "1.0.0"}
+                for environment in registry["environments"]]
+    kinds = kinds_of(row)
+    declarations = [kinds[pin["kind"]] for pin in sorted(pins, key=lambda pin: pin["kind"].encode())]
+    return jcs({"declarations": declarations, "emitRequestVersion": "1.0.0",
+                "emitter": {"id": manifest["id"], "version": manifest["version"]}, "options": {},
+                "resolved": resolved})
+
+
+def restored(request: str, original: str) -> str:
+    """Check 4's restoration (§11.5): each registry digest set to the original request's."""
+    changed, before = json.loads(request), json.loads(original)
+    for a, b in zip(changed.get("resolved", []), before.get("resolved", [])):
+        a["registry"]["digest"] = b["registry"]["digest"]
+    for a, b in zip(changed.get("factsContracts", []), before.get("factsContracts", [])):
+        if "registry" in a["source"] and "registry" in b["source"]:
+            a["source"]["registry"]["digest"] = b["source"]["registry"]["digest"]
+    return jcs(changed)
+
+
+def failing_references(row) -> set[tuple]:
+    """Check 5 (§11.5): (file, entry kind, entry id, pointer) of each string a file holds a run of."""
+    request = json.loads(emit_request(row))
+    kinds = kinds_of(row)
+    first = {}
+    for document in request["resolved"]:
+        for entry in document["entries"]:
+            for pattern in kinds[entry["kind"]].get("secrets", []):
+                for path, text in positions(entry["value"], tokens(pattern)):
+                    first.setdefault(text, (entry["kind"], entry["id"], "".join("/" + escape(t) for t in path)))
+    strings = [s for s in first if len(s) >= 32]
+    found = set()
+    for file in load(BASE / row["response"])["files"]:
+        data = file["text"]
+        covers = [(i, i + len(s)) for s in strings for i in range(len(data)) if data.startswith(s, i)]
+        for s in strings:
+            for end in range(32, len(data) + 1):
+                length = max((n for n in range(32, min(end, len(s)) + 1) if data[end - n:end] in s), default=0)
+                if length and not any(a <= end - length and end <= b for a, b in covers):
+                    found.add((file["path"],) + first[s])
+                    break
+    return found
+
+
+def vector_layout(vector: Path) -> dict:
+    """§11.5's vector layout, as far as the layout rows exercise it: the files expected/ gives, or a refusal."""
+    refused = {"refused": True}
+    members = {"request.json": False, "registry.json": False, "kinds": True, "options.json": False,
+               "expected": True, "expected-failure.json": False}
+    present = set()
+    for entry in vector.iterdir():
+        if entry.name not in members or entry.is_symlink() or entry.is_dir() != members[entry.name]:
+            return refused
+        present.add(entry.name)
+    if (("request.json" in present) == ("registry.json" in present)
+            or "request.json" in present and present & {"kinds", "options.json"}
+            or "registry.json" in present and "kinds" not in present
+            or len(present & {"expected", "expected-failure.json"}) != 1):
+        return refused
+    marker, beside, files = False, False, []
+    for entry in sorted((vector / "expected").rglob("*")):
+        relative = entry.relative_to(vector / "expected").as_posix()
+        if entry.name == "~empty":
+            if relative != "~empty" or entry.is_symlink() or not entry.is_file() or entry.stat().st_size:
+                return refused
+            marker = True
+            continue
+        beside = True
+        if entry.is_symlink() or not (entry.is_file() or entry.is_dir()):
+            return refused
+        if entry.is_file():
+            files.append(relative)
+    if marker and beside or not marker and not files:
+        return refused
+    return {"files": sorted(files, key=str.encode)}
+
+
 class RegistryRows(unittest.TestCase):
     def test_manifest_names_every_file_and_only_files(self) -> None:
         named = {"manifest.json", "codes.json"}
         for row in MANIFEST["vectors"]:
-            for member in ("registry", "contract", "pack", "expected"):
+            for member in ("registry", "contract", "pack", "manifest", "request", "response", "expected"):
                 if member in row:
                     named.add(row[member])
             named.update(row.get("kinds", []))
+            if "vector" in row:
+                below = (BASE / row["vector"]).rglob("*")
+                named.update(p.relative_to(BASE).as_posix() for p in below if p.is_file())
         on_disk = {p.relative_to(BASE).as_posix() for p in BASE.rglob("*") if p.is_file()}
         self.assertEqual(named, on_disk)
         self.assertEqual(len({row["id"] for row in MANIFEST["vectors"]}), len(MANIFEST["vectors"]))
@@ -348,6 +536,77 @@ class RegistryRows(unittest.TestCase):
                 self.assertEqual(report["pack"]["digest"], digest((BASE / row["pack"]).read_bytes()))
                 for d in report["diagnostics"]:
                     self.assertEqual(d["severity"], CODES[d["code"]]["severity"])
+
+    def test_host_refusals_follow_section_11(self) -> None:
+        for row in MANIFEST["vectors"]:
+            if row["operation"] not in ("manifest", "response"):
+                continue
+            with self.subTest(row=row["id"]):
+                self.assertEqual(row["class"], "emitter-host")
+                refusals = load(BASE / row["expected"])["refusals"]
+                keys = [(r["pointer"].encode(), r["code"]) for r in refusals]
+                self.assertEqual(keys, sorted(set(keys)))
+                manifest = load(BASE / row["manifest"])
+                if row["operation"] == "manifest":
+                    self.assertEqual({r["code"] for r in refusals}, {"EMIT-MANIFEST"})
+                    self.assertEqual({r["pointer"] for r in refusals}, manifest_refusals(manifest))
+                    continue
+                self.assertEqual(manifest_refusals(manifest), set())
+                request = BASE / row["request"]
+                self.assertEqual(request.read_bytes().decode("utf-8"), jcs(load(request)))
+                self.assertEqual({r["code"] for r in refusals}, {"EMIT-RESPONSE"})
+                self.assertEqual({r["pointer"] for r in refusals},
+                                 response_refusals(manifest, load(BASE / row["response"])))
+
+    def test_requests_follow_section_11_2(self) -> None:
+        rows = [row for row in MANIFEST["vectors"] if row["operation"] == "request"]
+        self.assertTrue(rows)
+        by_registry = {}
+        for row in rows:
+            with self.subTest(row=row["id"]):
+                self.assertEqual(row["class"], "emitter-host")
+                expected = (BASE / row["expected"]).read_bytes().decode("utf-8")
+                self.assertEqual(expected, emit_request(row))
+                registry = load(BASE / row["registry"])
+                reads = {r["kind"] for r in load(BASE / row["manifest"])["reads"]}
+                registry["kinds"] = [pin for pin in registry["kinds"] if pin["kind"] in reads]
+                registry["entries"] = [e for e in registry["entries"] if e["kind"] in reads]
+                by_registry.setdefault((row["manifest"], jcs(registry)), []).append(expected)
+        # Check 4 (§11.5): requests whose registries differ only in kinds the manifest does not read
+        # are the same bytes once each registry digest is restored, and differ before.
+        groups = [g for g in by_registry.values() if len(g) > 1]
+        self.assertTrue(groups)
+        for group in groups:
+            for request in group[1:]:
+                self.assertNotEqual(request, group[0])
+                self.assertEqual(restored(request, group[0]), group[0])
+
+    def test_references_follow_section_11_5(self) -> None:
+        for row in MANIFEST["vectors"]:
+            if row["operation"] != "references":
+                continue
+            with self.subTest(row=row["id"]):
+                self.assertEqual(row["class"], "emitter-harness")
+                manifest = load(BASE / row["manifest"])
+                self.assertEqual(response_refusals(manifest, load(BASE / row["response"])), set())
+                references = load(BASE / row["expected"])["references"]
+                keys = [(r["file"].encode(), r["entry"]["kind"].encode(), r["entry"]["id"].encode(),
+                         r["pointer"].encode()) for r in references]
+                self.assertEqual(keys, sorted(set(keys)))
+                self.assertTrue(all("environment" not in r for r in references))
+                self.assertEqual({(r["file"], r["entry"]["kind"], r["entry"]["id"], r["pointer"])
+                                  for r in references}, failing_references(row))
+
+    def test_vector_layouts_follow_section_11_5(self) -> None:
+        rows = [row for row in MANIFEST["vectors"] if row["operation"] == "layout"]
+        self.assertTrue(rows)
+        for row in rows:
+            with self.subTest(row=row["id"]):
+                self.assertEqual(row["class"], "emitter-harness")
+                vector = BASE / row["vector"]
+                request = (vector / "request.json").read_bytes().decode("utf-8")
+                self.assertEqual(request, jcs(load(vector / "request.json")))
+                self.assertEqual(load(BASE / row["expected"]), vector_layout(vector))
 
 
 class RegistryCompanionText(unittest.TestCase):

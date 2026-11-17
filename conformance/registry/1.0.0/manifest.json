@@ -222,6 +222,136 @@
       "contract": "vectors/facts-contracts/contract-bag.json",
       "pack": "vectors/facts-contracts/pack-bag.json",
       "expected": "vectors/facts-contracts/check-bag.json"
+    },
+    {
+      "id": "manifest-owns-tree",
+      "section": "§11.1",
+      "operation": "manifest",
+      "class": "emitter-host",
+      "description": "Owns globs whose first segment holds a *: **, **/*, */**, * and gen*/x are each refused at their pointer, and gen/** and docs/*.md are not.",
+      "manifest": "vectors/emitter-host/emitter-owns-tree.json",
+      "expected": "vectors/emitter-host/refusals-owns-tree.json"
+    },
+    {
+      "id": "manifest-owns-portable",
+      "section": "§11.1",
+      "operation": "manifest",
+      "class": "emitter-host",
+      "description": "Owns globs held to the path rules: a colon, a device name with an extension, LPT and a superscript two, a segment ending in a dot or a space, .git, the short name GiT~1 and .git with a zero width joiner are refused; lpt0 and .github are not.",
+      "manifest": "vectors/emitter-host/emitter-owns-portable.json",
+      "expected": "vectors/emitter-host/refusals-owns-portable.json"
+    },
+    {
+      "id": "response-paths",
+      "section": "§11.3",
+      "operation": "response",
+      "class": "emitter-host",
+      "description": "Response paths against gen/** and a/**/b: a/b and a/c/b are owned and gen is not; .git with a zero width non-joiner, GIT~1, a colon, aux.txt, COM and a superscript one, and segments ending in a space or a dot are refused; .gitkeep, com0 and ok.txt are not.",
+      "manifest": "vectors/emitter-host/emitter.json",
+      "request": "vectors/emitter-host/request.json",
+      "response": "vectors/emitter-host/response-paths.json",
+      "expected": "vectors/emitter-host/refusals-paths.json"
+    },
+    {
+      "id": "response-diagnostics-required",
+      "section": "§11.3",
+      "operation": "response",
+      "class": "emitter-host",
+      "description": "A response without diagnostics is refused at /diagnostics, though it holds no file and nothing to report.",
+      "manifest": "vectors/emitter-host/emitter.json",
+      "request": "vectors/emitter-host/request.json",
+      "response": "vectors/emitter-host/response-diagnostics-missing.json",
+      "expected": "vectors/emitter-host/refusals-diagnostics-missing.json"
+    },
+    {
+      "id": "response-codes",
+      "section": "§11.3",
+      "operation": "response",
+      "class": "emitter-host",
+      "description": "Emitter warning codes: x-queue-unused and a code of 64 bytes are read; an upper-case letter or underscore, 65 bytes, an empty word, a trailing hyphen, x- alone and X- are refused at their code.",
+      "manifest": "vectors/emitter-host/emitter.json",
+      "request": "vectors/emitter-host/request.json",
+      "response": "vectors/emitter-host/response-codes.json",
+      "expected": "vectors/emitter-host/refusals-codes.json"
+    },
+    {
+      "id": "request-reads",
+      "section": "§11.2",
+      "operation": "request",
+      "class": "emitter-host",
+      "description": "The request for a registry of one kind the manifest reads, in every environment: its declaration, its pin, both entries with their references as written, and the registry's digest.",
+      "manifest": "vectors/emitter-host/emitter.json",
+      "registry": "vectors/emitter-host/registry.json",
+      "kinds": ["kinds/queue.json"],
+      "expected": "vectors/emitter-host/request.json"
+    },
+    {
+      "id": "request-unread-kind",
+      "section": "§11.2",
+      "operation": "request",
+      "class": "emitter-host",
+      "description": "The same registry with a pin, a declaration and an entry of a kind the manifest does not read: the request holds none of them, and differs from request-reads only in the registry's digest, which the harness's kind-filtering check restores (§11.5).",
+      "manifest": "vectors/emitter-host/emitter.json",
+      "registry": "vectors/emitter-host/registry-unread.json",
+      "kinds": ["kinds/note.json", "kinds/queue.json"],
+      "expected": "vectors/emitter-host/request-unread.json"
+    },
+    {
+      "id": "references-shared-prefix",
+      "section": "§11.5",
+      "operation": "references",
+      "class": "emitter-harness",
+      "description": "Two whole references of one project in one file pass, though they share a prefix of more than 32 characters; a reference cut before its version, one without its store, and one rewritten around its name and version fail, each for every reference it holds a run of.",
+      "manifest": "vectors/emitter-host/emitter.json",
+      "registry": "vectors/emitter-host/registry.json",
+      "kinds": ["kinds/queue.json"],
+      "response": "vectors/emitter-harness/response-references.json",
+      "expected": "vectors/emitter-harness/references.json"
+    },
+    {
+      "id": "layout-empty-marker",
+      "section": "§11.5",
+      "operation": "layout",
+      "class": "emitter-harness",
+      "description": "The marker expected/~empty, a zero-byte regular file alone at the root of expected/, is read as no files.",
+      "vector": "vectors/emitter-harness/empty-marker",
+      "expected": "vectors/emitter-harness/layout-no-files.json"
+    },
+    {
+      "id": "layout-marker-not-empty",
+      "section": "§11.5",
+      "operation": "layout",
+      "class": "emitter-harness",
+      "description": "A marker that is not zero bytes refuses the run.",
+      "vector": "vectors/emitter-harness/marker-not-empty",
+      "expected": "vectors/emitter-harness/layout-refused.json"
+    },
+    {
+      "id": "layout-marker-beside-file",
+      "section": "§11.5",
+      "operation": "layout",
+      "class": "emitter-harness",
+      "description": "A marker beside another file of expected/ refuses the run.",
+      "vector": "vectors/emitter-harness/marker-beside-file",
+      "expected": "vectors/emitter-harness/layout-refused.json"
+    },
+    {
+      "id": "layout-marker-in-subdirectory",
+      "section": "§11.5",
+      "operation": "layout",
+      "class": "emitter-harness",
+      "description": "A marker below the root of expected/ refuses the run.",
+      "vector": "vectors/emitter-harness/marker-in-subdirectory",
+      "expected": "vectors/emitter-harness/layout-refused.json"
+    },
+    {
+      "id": "layout-expected-missing",
+      "section": "§11.5",
+      "operation": "layout",
+      "class": "emitter-harness",
+      "description": "A vector with neither expected/ nor expected-failure.json refuses the run: a missing expected/ is never read as empty.",
+      "vector": "vectors/emitter-harness/expected-missing",
+      "expected": "vectors/emitter-harness/layout-refused.json"
     }
   ]
 }
