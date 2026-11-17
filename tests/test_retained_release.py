@@ -23,7 +23,8 @@ FINAL_INVENTORY='releases/v0.3.0.retained-column.json'
 FINAL_FIXTURE_FILES=('releases/v0.3.0.md','releases/v0.3.0.milestone.json','rfcs/0029-retained-column-conversions.md',
                      'schema/judgment-pack-core.schema.json','conformance/manifest.json','conformance/evaluation/manifest.json')
 # Core 0.5.0 changed, in place, the three Core pins and four files of the v0.3.0 leaf, and the dialect
-# format 4.0.0 amendment (#316) a fifth, the TypeScript reader's verify.ts. A fixture that
+# format 4.0.0 amendment (#316) a fifth, the TypeScript reader's verify.ts, and the terraform-file kind's
+# form (#358) a sixth, its forms.ts. A fixture that
 # stands for a v0.3.0 tree takes those files' v0.3.0 bytes from the preserved copies
 # (tests/fixtures/historical-compatibility/README.md); every other file it copies is unchanged since.
 HISTORICAL='tests/fixtures/historical-compatibility/'
@@ -33,7 +34,7 @@ V0_3_0_SOURCES={
     'conformance/evaluation/manifest.json':HISTORICAL+'0.3.0-evaluation-manifest.json',
     **{name:HISTORICAL+'v0.3.0/'+name for name in
        ('spec/judgment-pack-core.md','spec/dialect.md','tools/dialect_verify.py','tools/dialect-verify-ts/src/vector.ts',
-        'tools/dialect-verify-ts/src/verify.ts')},
+        'tools/dialect-verify-ts/src/verify.ts','tools/dialect-verify-ts/src/forms.ts')},
 }
 
 

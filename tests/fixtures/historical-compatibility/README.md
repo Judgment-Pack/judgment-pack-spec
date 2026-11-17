@@ -3,8 +3,9 @@
 The seven manifest files are exact published source bytes, not captured implementation output.
 The files under `v0.3.0/` are the exact bytes, at the `v0.3.0` tag, of the files of the
 `v0.3.0` retained column (`releases/v0.3.0.retained-column.json`) changed in place since: four by
-Core `0.5.0`, and `tools/dialect-verify-ts/src/verify.ts` by the proposed dialect format `4.0.0`
-(RFC 0018's amendment of 2026-11-12); tests that rebuild a `v0.3.0` tree read them instead of the
+Core `0.5.0`, `tools/dialect-verify-ts/src/verify.ts` by the proposed dialect format `4.0.0`
+(RFC 0018's amendment of 2026-11-12), and `tools/dialect-verify-ts/src/forms.ts` by the proposed
+`terraform-file` kind's form (#358); tests that rebuild a `v0.3.0` tree read them instead of the
 live files.
 The file under `v0.5.0/` is the exact bytes, at the `v0.5.0` tag, of the Core text Core `0.6.0`
 changed in place, with the `0.5.0` schemas under `schema/` and the two `0.5.0-*-manifest.json` files.
@@ -33,6 +34,7 @@ these trusted resources and source identities independently of the mutable curre
 - `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect_verify.py`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect_verify.py`, Git blob `3dc1ac99c26a725f86103b1bcf1ff512c76ecee0`, preserved SHA-256 `fe3b773ce30ad8c395fe85500714a12d6cc4262ccc6bca05c44f7b3b40a60b60`.
 - `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/vector.ts`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect-verify-ts/src/vector.ts`, Git blob `5c00c3a9961fc00dfc61c23c1fa0ce9925110dff`, preserved SHA-256 `289b68479edf607df1480e46b0e6a6ee04091feb5dd56ddee696fbb2a337a1cb`.
 - `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/verify.ts`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect-verify-ts/src/verify.ts`, Git blob `219a598513e2172e856742764c012bfbcf888c94`, preserved SHA-256 `5ae002b07b0f9d3755c9d00bc828420e27b9927948402d8e4b266540c4f5cc1b`.
+- `tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/forms.ts`: source `27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc:tools/dialect-verify-ts/src/forms.ts`, Git blob `f9fc9961f8fc2bb7164dce2fe2b70dd57e7371a0`, preserved SHA-256 `bc4f81670ea5c8710072ee3ec7f5fe8951f2155c430da3e00755b39777054326`.
 - `schema/judgment-pack-core-0.5.0.schema.json`: source `171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae:schema/judgment-pack-core.schema.json`, Git blob `54a40ef012054c71b648311820863de36f8e2553`, preserved SHA-256 `fb182fd0ab7fc303618ce9a63834616527a68b63b165e7ed3e76f48f29978da0`.
 - `schema/conformance-manifest-0.5.0.schema.json`: source `171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae:conformance/manifest.schema.json`, Git blob `16219e4130fed9aa8b21c24ae20f2fabb8802ae9`, preserved SHA-256 `d835195ecf4c0f214d78d106256f9b61fa006d4888a1b7c115c65b837d0496ed`.
 - `schema/conformance-evaluation-manifest-0.5.0.schema.json`: source `171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae:conformance/evaluation/manifest.schema.json`, Git blob `3ac390191045ecc2beb4a2d600ed78065f3dc5bb`, preserved SHA-256 `7bc20cd13d074c56d151f90bd72ed8bed8d3bbd1481fcfe9218987652aafa1e8`.

@@ -153,6 +153,37 @@ class SecondDialectReaderTest(unittest.TestCase):
             with self.subTest(case=name):
                 self.assertEqual(expected, code)
 
+    def test_both_readers_hold_a_terraform_file_source_alike(self) -> None:
+        # spec/dialect.md §4.5: a `terraform-file` source, of version 3, held to its form and then refused
+        # `kind-unread` by both readers; malformed, or in a version-2 document, `input-malformed`. The cases are
+        # tests/test_dialect.py's terraform_file_cases(); the reports must be equal byte for byte.
+        node = self.node()
+        first = first_reader_tests()
+        batch, names = [], []
+        for name, expected, build in first.terraform_file_cases():
+            inputs = build()
+            report = first.READER.preparation_bytes(first.READER.report(inputs.verify().answer)).decode("utf-8")
+            encoded = {
+                member: None if getattr(inputs, member) is None else base64.b64encode(getattr(inputs, member)).decode("ascii")
+                for member in ("dialect", "case", "acquisitions", "profiles", "preparation", "record", "binding")
+            }
+            batch.append({**encoded, "requireBinding": inputs.require_binding})
+            names.append((name, expected, report))
+        run = subprocess.run(
+            [node, "--disable-wasm-trap-handler", "--no-warnings", "--input-type=module", "--eval", BATCH % json.dumps(str(READER))],
+            input=json.dumps(batch).encode("utf-8"),
+            capture_output=True,
+            timeout=600,
+        )
+        self.assertEqual(run.returncode, 0, run.stderr.decode("utf-8", "replace")[-4000:])
+        reports = json.loads(run.stdout)
+        self.assertEqual(len(names), len(reports))
+        self.assertEqual([], [f"{name}: first {mine}, second {theirs}" for (name, _, mine), theirs in zip(names, reports) if theirs != mine])
+        for name, expected, report in names:
+            result = json.loads(report)
+            with self.subTest(case=name):
+                self.assertEqual(expected, f"{result['result']}:{result[result['result']]}")
+
     def test_the_typescript_reader_does_not_read_format_4_yet(self) -> None:
         # Format 4.0.0 (spec/dialect.md §2.2) is read by the first reader alone: the second
         # defines the selector and refuses a document of it `version-unread` in phase 4, before any form,

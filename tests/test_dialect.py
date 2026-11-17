@@ -409,6 +409,85 @@ def acquired_source_cases() -> list[tuple[str, str, Any]]:
     ]
 
 
+def terraform_file_cases() -> list[tuple[str, str, Any]]:
+    """spec/dialect.md §4.5: a `terraform-file` source, a kind of version 3 that neither reader reads, held to its
+    form and then refused `kind-unread`; malformed, `input-malformed`; and in a document of version 2, which does
+    not list the kind, `input-malformed`. Each source is synthetic and added to the `version-3-bound` vector's
+    dialect, which is read as version 2 too (test_version_3_leaves_an_optional_member_out_when_it_is_empty); a
+    local `selected-file` in its place, of version 2 and not read, shows that the version-2 document is read as far
+    as the kinds. In `(name, expected answer, build)` form, as research_cases() gives it."""
+    unread, malformed = "refusal:kind-unread", "refusal:input-malformed"
+    read = {"copy": {"facts": [], "evidence": []}}
+    plan = {"name": "plan", "kind": "terraform-file", "read": read, "document": "plan", "select": {"types": ["google_sql_user"]}}
+    state = {**plan, "name": "state", "document": "state"}
+    local = {"name": "upload", "kind": "selected-file", "provider": "local-file", "read": read}
+    astral = "\U0001d4b3"  # one code point, two UTF-16 code units
+    cases: list[tuple[str, str, Any]] = []
+
+    def build(source: dict[str, Any], version: int) -> Inputs:
+        inputs = Inputs("version-3-bound", REQUIRES_BINDING["version-3-bound"])
+        document = json.loads(inputs.dialect)
+        document["version"] = version
+        document["sources"].append(source)
+        inputs.dialect = json.dumps(document).encode("utf-8")
+        return inputs
+
+    def add(name: str, expected: str, source: dict[str, Any], version: int = 3) -> None:
+        cases.append((f"terraform-file: {name}", expected, lambda: build(copy.deepcopy(source), version)))
+
+    def select(base: dict[str, Any], **members: Any) -> dict[str, Any]:
+        return {**base, "select": {**base["select"], **members}}
+
+    def without(base: dict[str, Any], member: str) -> dict[str, Any]:
+        return {k: v for k, v in base.items() if k != member}
+
+    # well formed: refused as a kind this reader does not read, after every form
+    add("a plan, select types alone", unread, plan)
+    add("a state, select types alone", unread, state)
+    add("a plan, every member given", unread, {
+        **select(plan, mode="managed", address="module.app.google_sql_user.*", actions=["create", "update", "delete", "read", "no-op"], max=1000),
+        "maxBytes": 67108864,
+    })
+    add("a state, mode data, address and max", unread, select(state, mode="data", address="data.google_project.*", max=10000))
+    add("maxBytes 1", unread, {**plan, "maxBytes": 1})
+    add("maxBytes 268435456", unread, {**plan, "maxBytes": 268435456})
+    add("max 1", unread, select(plan, max=1))
+    add("64 distinct types", unread, select(plan, types=[f"type_{n}" for n in range(64)]))
+    add("an address of 512 characters, each one code point of two UTF-16 units", unread, select(plan, address=astral * 512))
+    # malformed: a member missing, a member more, or a member not of its form
+    add("no document", malformed, without(plan, "document"))
+    add("no select", malformed, without(plan, "select"))
+    add("no read", malformed, without(plan, "read"))
+    for member, value in (("profile", "intake"), ("profileDigest", "sha256:" + "0" * 64), ("maxAge", 300), ("arguments", {}), ("path", "plan.json"), ("provider", "local-file")):
+        add(f"a member more, {member}", malformed, {**plan, member: value})
+    add("document apply", malformed, {**plan, "document": "apply"})
+    add("document a number", malformed, {**plan, "document": 1})
+    for value in (0, 268435457, "1", 1.5, None):
+        add(f"maxBytes {value!r}", malformed, {**plan, "maxBytes": value})
+    add("select an array", malformed, {**plan, "select": [{"types": ["google_sql_user"]}]})
+    add("select without types", malformed, {**plan, "select": {"mode": "managed"}})
+    add("select with a member more", malformed, select(plan, kinds=["google_sql_user"]))
+    add("types empty", malformed, select(plan, types=[]))
+    add("65 types", malformed, select(plan, types=[f"type_{n}" for n in range(65)]))
+    add("types not distinct", malformed, select(plan, types=["google_sql_user", "google_sql_user"]))
+    add("a type the empty string", malformed, select(plan, types=[""]))
+    add("a type a number", malformed, select(plan, types=[7]))
+    add("types a string", malformed, select(plan, types="google_sql_user"))
+    add("mode resource", malformed, select(plan, mode="resource"))
+    add("an address of 513 characters", malformed, select(plan, address=astral * 513))
+    add("an address a number", malformed, select(plan, address=7))
+    add("actions on a state", malformed, select(state, actions=["delete"]))
+    add("an action destroy", malformed, select(plan, actions=["destroy"]))
+    add("actions a string", malformed, select(plan, actions="delete"))
+    for value in (0, 10001, "1000"):
+        add(f"max {value!r}", malformed, select(plan, max=value))
+    # in a document of version 2, which does not list the kind, it is refused as a kind of version 3
+    add("a version-2 document naming a local selected-file in its place", unread, local, version=2)
+    add("a version-2 document naming the kind", malformed, plan, version=2)
+    add("a version-2 document naming the kind, a state", malformed, state, version=2)
+    return cases
+
+
 # Round 9 of RFC 0018 (issue #182 item 4; spec/dialect.md §5.2, check 1, and §11, finding 3): a receipt's
 # `servedAt` or `acquisition.observedAt` that is not a string with an instant, a `callIndex` that is not an
 # integer at least zero, or a `sessionId` that is not a string, is malformed, `acquisition-invalid`, before the
@@ -1637,6 +1716,14 @@ class DialectVectorTests(RecordingSet, unittest.TestCase):
         self.assertEqual("kind-unread", inputs.verify().answer.get("refused"))
         inputs.binding = None
         self.assertEqual("input-malformed", inputs.verify().answer.get("refused"))
+
+    def test_a_terraform_file_source_is_held_to_its_form_and_not_read(self) -> None:
+        # §4.5: a kind of version 3, held to its form and then `kind-unread`; tests/test_dialect_ts.py gives the
+        # second reader the same cases and holds the two reports equal.
+        for name, expected, build in terraform_file_cases():
+            with self.subTest(case=name):
+                result = READER.report(build().verify().answer)
+                self.assertEqual(expected, f"{result['result']}:{result[result['result']]}", result)
 
     def test_version_3_carries_no_member_of_version_2_alone(self) -> None:
         # §2: `provider`, `facts` and `evidence` are members of version 2 alone; a document of version 3 that
