@@ -3,7 +3,7 @@
   "$id": "https://judgmentpack.org/schema/registry/1.0.0/facts-contract.schema.json",
   "title": "DRAFT Registry companion 1.0.0: facts contract",
   "description": "Staged and proposed with spec/registry.md, which governs where they differ; not released, and served by no bundle and no site. A facts contract (section 10.3), closed.",
-  "$comment": "The strict order of facts by pointer and then type, the bound of 8 MiB, and, for a generated contract, that its members follow from the kind and the registry (sections 10.3 and 10.4), are the reader's to check. Section 10.3 gives no form for id and version, so they are strings here.",
+  "$comment": "The strict order of facts by pointer and then type, the bound of 8 MiB, and, for a generated contract, that its members follow from the kind and the registry (sections 10.3 and 10.4), are the reader's to check.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -18,10 +18,10 @@
       "const": "1.0.0"
     },
     "id": {
-      "type": "string"
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/absoluteUri"
     },
     "version": {
-      "type": "string"
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/version"
     },
     "source": {
       "oneOf": [
@@ -143,14 +143,15 @@
           }
         },
         "values": {
+          "description": "Section 10.3: values only on a string, decimal or boolean, or on an array whose items is one of them.",
           "properties": {
             "type": {
-              "not": {
-                "enum": [
-                  "null",
-                  "object"
-                ]
-              }
+              "enum": [
+                "string",
+                "decimal",
+                "boolean",
+                "array"
+              ]
             }
           },
           "if": {
@@ -166,7 +167,16 @@
           "then": {
             "required": [
               "items"
-            ]
+            ],
+            "properties": {
+              "items": {
+                "enum": [
+                  "string",
+                  "decimal",
+                  "boolean"
+                ]
+              }
+            }
           }
         }
       },
@@ -304,81 +314,6 @@
               "values": {
                 "items": {
                   "type": "boolean"
-                }
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "required": [
-              "type",
-              "items"
-            ],
-            "properties": {
-              "type": {
-                "const": "array"
-              },
-              "items": {
-                "const": "null"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "values": {
-                "items": {
-                  "type": "null"
-                }
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "required": [
-              "type",
-              "items"
-            ],
-            "properties": {
-              "type": {
-                "const": "array"
-              },
-              "items": {
-                "const": "array"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "values": {
-                "items": {
-                  "type": "array"
-                }
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "required": [
-              "type",
-              "items"
-            ],
-            "properties": {
-              "type": {
-                "const": "array"
-              },
-              "items": {
-                "const": "object"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "values": {
-                "items": {
-                  "type": "object"
                 }
               }
             }

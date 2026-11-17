@@ -21,8 +21,8 @@ the gateway source takes, held to being an object, the template rules and its co
 set of members. Since the Runner's version-3 vectors were staged it reads dialect versions 2 and 3. A
 document of version 3 is read as one of version 2, written one way (§2: no `provider`, `facts` or
 `evidence`, and no member written empty that the Runner's encoding leaves out when empty), its
-preparation of version 3 (§9.1); a source of `http`, `sql` or `web` is held to the form its kind names
-and then refused as `kind-unread`; and an unbound source (§4.4) is read with the binding document it is
+preparation of version 3 (§9.1); a source of `http`, `sql` or `web` (§4.3), or of `terraform-file`
+(§4.5), is held to the form its kind names and then refused as `kind-unread`; and an unbound source (§4.4) is read with the binding document it is
 given, by making the bound dialect of the two and reading that as every dialect is read. Since the
 research-contract amendment (RFC 0018, round 8) it reads `research` as §§4.3, 4.4, 5.1, 5.2, 6.4, 9 and
 11 define it: the requested fields and capabilities, the research record's typed answers and their
@@ -320,6 +320,14 @@ VERSION_3_KINDS = {
     "sql": ({"statement", "bindings"}, set()),
     "web": ({"url"}, set()),
 }
+# §4.5: a `terraform-file` source's members beside §4's, those it requires and those it may give, and its
+# `select`'s; the kind is of version 3, held to its form and not read here.
+TERRAFORM_FILE = "terraform-file"
+TERRAFORM_MEMBERS = ({"document", "select"}, {"maxBytes"})
+TERRAFORM_SELECT = ({"types"}, {"mode", "address", "actions", "max"})
+TERRAFORM_DOCUMENTS = ("plan", "state")
+TERRAFORM_MODES = ("managed", "data")
+TERRAFORM_ACTIONS = ("create", "update", "delete", "read", "no-op")
 # §4.3: a `research` source's members beside §4's, and its binding members (§4.4), all three or none.
 RESEARCH_MEMBERS = {"maxAge", "question", "constraints", "model", "evidence", "capabilities"}
 RESEARCH_OPTIONAL = {"fields", "results", "acquisitionSources"}
@@ -1610,7 +1618,7 @@ def parse_dialect(document: Any) -> Dialect:
         kind = raw.get("kind")
         if not isinstance(kind, str):
             raise malformed(f"{what}: a kind that is not a string")
-        if (kind in VERSION_3_KINDS or kind == "research") and version == 2:
+        if (kind in VERSION_3_KINDS or kind in ("research", TERRAFORM_FILE)) and version == 2:
             raise malformed(f"{what}: a kind of version 3 in a version-2 document")
         # Every kind's form is checked, its common members (§4) and its own, before a kind this
         # reader does not read is refused (§11): `kind-unread` comes after every form.
@@ -1667,6 +1675,13 @@ def parse_dialect(document: Any) -> Dialect:
                 what,
             )
             acquired = True
+            unread.append(kind)
+        elif kind == TERRAFORM_FILE:
+            # §4.5: asserted, its file bound by the caller: no profile, no maxAge and no request.
+            required, optional = TERRAFORM_MEMBERS
+            closed(raw, {"name", "kind", "read"} | required, {"parameters"} | optional, what)
+            check_terraform_file(raw, what)
+            acquired = False
             unread.append(kind)
         elif kind == "research":
             # §4.3, §4.4: published unbound, with none of the three binding members, or bound, with all
@@ -1805,7 +1820,8 @@ def check_version_3_kind(raw: dict[str, Any], kind: str, scope: dict[str, str], 
     text names a member without a form — `http`'s `path` "a template that yields a path" and its
     `headers` "the names of the headers", and a `sql` binding's `name` and `type` — this reader takes
     the form a name or a path has: a string template for a path, and non-empty strings for names. (No
-    vector decides this.) A `research` source is read (`check_research`)."""
+    vector decides this.) A `research` source is read (`check_research`); a `terraform-file` source (§4.5) is
+    held to its form by `check_terraform_file`, and not read either."""
 
     def string_template(value: Any, member: str) -> None:
         check_template(value, scope, f"{what} {member}")
@@ -1852,6 +1868,43 @@ def check_version_3_kind(raw: dict[str, Any], kind: str, scope: dict[str, str], 
             check_template(url, scope, f"{what} url")
             if scope.get(url["$param"]) != "string":
                 raise malformed(f"{what}: url names a parameter that is not a string")
+
+
+def check_terraform_file(raw: dict[str, Any], what: str) -> None:
+    """§4.5: a `terraform-file` source's own members, held to the forms the text gives them; the kind is then
+    not read (`kind-unread`). `document` is `plan` or `state`; `maxBytes` an integer from 1 to 268435456;
+    `select` has `types`, a non-empty array of at most 64 distinct resource type names, and may give `mode`
+    (`managed` or `data`), `address` (a pattern of at most 512 characters), `actions` (`plan` only, an array
+    of `create`, `update`, `delete`, `read` and `no-op`) and `max` (an integer from 1 to 10000). A malformed
+    `select`, or `actions` on a `state`, is malformed (§4.5, §11). Where the text names a member without a
+    form, a resource type name, this reader takes a non-empty string, the form a name has here. (No vector
+    decides this.)"""
+    if raw["document"] not in TERRAFORM_DOCUMENTS:
+        raise malformed(f"{what}: a document other than plan and state")
+    if "maxBytes" in raw and not (is_integer(raw["maxBytes"]) and 1 <= integer_of(raw["maxBytes"]) <= 268435456):
+        raise malformed(f"{what}: maxBytes is not an integer from 1 to 268435456")
+    required, optional = TERRAFORM_SELECT
+    select = closed(raw["select"], required, optional, f"{what} select")
+    types = select["types"]
+    if (
+        not isinstance(types, list)
+        or not 1 <= len(types) <= 64
+        or not all(isinstance(t, str) and t for t in types)
+        or len(set(types)) != len(types)
+    ):
+        raise malformed(f"{what}: select types is not a non-empty array of at most 64 distinct names")
+    if "mode" in select and select["mode"] not in TERRAFORM_MODES:
+        raise malformed(f"{what}: select mode is not managed or data")
+    if "address" in select and not (isinstance(select["address"], str) and len(select["address"]) <= 512):
+        raise malformed(f"{what}: select address is not a pattern of at most 512 characters")
+    if "actions" in select:
+        actions = select["actions"]
+        if raw["document"] != "plan":
+            raise malformed(f"{what}: select actions on a state")
+        if not isinstance(actions, list) or not all(isinstance(a, str) and a in TERRAFORM_ACTIONS for a in actions):
+            raise malformed(f"{what}: select actions is not an array of plan actions")
+    if "max" in select and not (is_integer(select["max"]) and 1 <= integer_of(select["max"]) <= 10000):
+        raise malformed(f"{what}: select max is not an integer from 1 to 10000")
 
 
 # ---------------------------------------------------------------------------------------------

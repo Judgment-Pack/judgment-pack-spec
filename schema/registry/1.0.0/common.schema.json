@@ -276,7 +276,7 @@
             "pattern": "(^|/)~"
           },
           {
-            "pattern": "[. ](/|(?![\\s\\S]))"
+            "pattern": "(^|/)[^/]*[. ](/|(?![\\s\\S]))"
           },
           {
             "pattern": "(^|/)([Cc][Oo][Nn]([Ii][Nn]\\$|[Oo][Uu][Tt]\\$)?|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|([Cc][Oo][Mm]|[Ll][Pp][Tt])[1-9\u00b9\u00b2\u00b3]) *(\\.|/|(?![\\s\\S]))"
@@ -300,7 +300,7 @@
             "pattern": "(^|/)~"
           },
           {
-            "pattern": "[. ](/|(?![\\s\\S]))"
+            "pattern": "(^|/)[^/]*[. ](/|(?![\\s\\S]))"
           },
           {
             "pattern": "(^|/)([Cc][Oo][Nn]([Ii][Nn]\\$|[Oo][Uu][Tt]\\$)?|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|([Cc][Oo][Mm]|[Ll][Pp][Tt])[1-9\u00b9\u00b2\u00b3]) *(\\.|/|(?![\\s\\S]))"
@@ -318,6 +318,45 @@
             "pattern": "[^/]\\*\\*|\\*\\*[^/]"
           }
         ]
+      }
+    },
+    "program": {
+      "description": "Section 11.1: a command's program, a path of section 11.3's rules after an optional leading './': a name with no '/', looked up on PATH, or a relative path in the repository.",
+      "type": "string",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/relativePath"
+        },
+        {
+          "maxLength": 514,
+          "pattern": "^\\./[^\\x00-\\x1f\\x7f-\\x9f/\\\\:]+(/[^\\x00-\\x1f\\x7f-\\x9f/\\\\:]+)*(?![\\s\\S])",
+          "not": {
+            "anyOf": [
+              {
+                "pattern": "/~"
+              },
+              {
+                "pattern": "/[^/]*[. ](/|(?![\\s\\S]))"
+              },
+              {
+                "pattern": "/([Cc][Oo][Nn]([Ii][Nn]\\$|[Oo][Uu][Tt]\\$)?|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|([Cc][Oo][Mm]|[Ll][Pp][Tt])[1-9\u00b9\u00b2\u00b3]) *(\\.|/|(?![\\s\\S]))"
+              },
+              {
+                "pattern": "/(\\.[Gg][Ii][Tt]|[Gg][Ii][Tt]~1)[. ]*(/|(?![\\s\\S]))"
+              },
+              {
+                "pattern": "/[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*\\.[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Gg][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Ii][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*[Tt][\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]*(/|(?![\\s\\S]))"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "argument": {
+      "description": "Section 11.1: an item of a command, which begins with no '/', has no '..' segment and holds no NUL.",
+      "type": "string",
+      "not": {
+        "pattern": "^/|(^|/)\\.\\.(/|(?![\\s\\S]))|\\x00"
       }
     },
     "environmentVariable": {

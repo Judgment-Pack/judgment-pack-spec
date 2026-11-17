@@ -18,7 +18,17 @@ here.
   none. As with the rows, no bundle carries the schemas and the site does not serve them; a first
   release publishes them (§13). `tests/test_registry_schemas.py` validates every row document a
   reader admits or writes against its schema. The status of the companion and §14 say so, and no
-  row changes.
+  row changes. Where the text was silent, it now states the reference runtime's reading, and the
+  schemas follow it: a refused registry ends validation after step 2, so the diagnostics of the
+  declarations step 1 admitted are still reported (§7.1); a contract's `id` and `version` take a
+  kind's forms, and `values` sit only on a string, decimal or boolean, or an array of one (§10.3);
+  the check report of a refused contract has neither digest (§10.5); in a manifest, `description`
+  is a string, `deprecated` a boolean and `requestVersions` SemVer, `owns` is non-empty, the items
+  of `requestVersions`, `owns` and `env` are distinct, no two `reads` name one kind, and
+  `command`'s program follows §11.3's path rules after an optional `./` (§11.1); an emitter
+  diagnostic has exactly `code`, `severity` and `location`, and `base64` is RFC 4648 §4's, padded,
+  with no bit set past the data (§11.3); and §11.5's kind-filtering check no longer names a
+  contract digest the facts form does not carry.
 - RFC 0027 (#252), a Draft, proposes bounded optional pack-design advisories for compatible
   agreement, scoped coverage and reachability, exception effects and unknown blocking. A closed
   finite-domain report proposal binds exact pack/domain bytes, distinguishes proof from possibility
@@ -74,6 +84,17 @@ here.
   `4.0.0` and `4.1.0`, released with Core `0.6.0`: a document of one of them that names it, an
   unknown kind under the released text, is now one of a kind defined and not claimable, and nothing
   changes for a document that does not name it.
+- **Both repository readers hold a `terraform-file` source to its form** (`spec/dialect.md` §4.5,
+  proposed; #358). Each checked such a source as one of a kind its version does not list
+  (`input-malformed`). Each now holds it to §4.5's members, `document`, `select` and `maxBytes`, and
+  `select`'s `types`, `mode`, `address`, `actions` and `max`, and then refuses it as `kind-unread`,
+  as it does `http`, `sql` and `web`, in a document of version 3; a document of version 2 that names
+  it stays `input-malformed`. In formats `4.0.0` and `4.1.0` the Python reader does the same, and
+  the TypeScript reader, which reads neither, refuses the document `version-unread` first.
+  Hand-written cases hold the two readers' reports equal, and each reader's answer in those two
+  formats. §4.5 now says so; RFC 0018's Specification section follows. The TypeScript reader's
+  `forms.ts`, a file of the `v0.3.0` retained column, keeps its `v0.3.0` bytes under the
+  historical-compatibility fixtures, as `verify.ts` does. No released text carries the kind, so nothing released changes.
 - **RFC 0038 §2 step 1 notes the stream reading** (#353). The RFC said the reader hashes the
   whole input; an amendment note there now points at `spec/dialect.md` §4.5, where a stream is read
   to `maxBytes` and one byte more and a longer one is `TF-SIZE` with no sha256 and no size. No

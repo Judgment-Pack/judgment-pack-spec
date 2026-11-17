@@ -26,7 +26,8 @@ FIXTURES = ROOT / "tests/fixtures/historical-compatibility"
 # 0.1 differs only by its previously published $id substitution; no Git history is required in CI.
 # The v0.3.0 rows are the files Core 0.5.0 changed in place: the three schemas, the two manifests and
 # the four files of the v0.3.0 retained-column leaf that changed (releases/v0.3.0.retained-column.json);
-# and the fifth leaf file, verify.ts, that the dialect format 4.0.0 amendment (#316) changed.
+# and the fifth leaf file, verify.ts, that the dialect format 4.0.0 amendment (#316) changed, and the
+# sixth, forms.ts, that the terraform-file kind's form (#358) changed.
 # The v0.5.0 rows are the files Core 0.6.0 changed in place: the four schemas, the two manifests and
 # the Core text.
 ANCHORS = [{'tag': 'v0.1.0-draft',
@@ -169,6 +170,12 @@ ANCHORS = [{'tag': 'v0.1.0-draft',
   'blob': '219a598513e2172e856742764c012bfbcf888c94',
   'target': 'tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/verify.ts',
   'targetSha256': '5ae002b07b0f9d3755c9d00bc828420e27b9927948402d8e4b266540c4f5cc1b'},
+ {'tag': 'v0.3.0',
+  'commit': '27cb29bf13e4a2d58d69fe19c7ebfeb762b014fc',
+  'source': 'tools/dialect-verify-ts/src/forms.ts',
+  'blob': 'f9fc9961f8fc2bb7164dce2fe2b70dd57e7371a0',
+  'target': 'tests/fixtures/historical-compatibility/v0.3.0/tools/dialect-verify-ts/src/forms.ts',
+  'targetSha256': 'bc4f81670ea5c8710072ee3ec7f5fe8951f2155c430da3e00755b39777054326'},
  {'tag': 'v0.5.0',
   'commit': '171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae',
   'source': 'schema/judgment-pack-core.schema.json',
