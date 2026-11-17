@@ -14,6 +14,13 @@ here.
   positive/adversarial cases. It was proposed for specification `0.6.0` and is not released in it;
   it changes no Core resolution or released conformance claim.
 
+### Changed
+
+- **The `terraform-file` kind's readings** (`spec/dialect.md` §4.5, proposed; RFC 0018's amendment
+  of 2026-11-17). An input read as a stream is read to `maxBytes` and one byte more, and a longer
+  one is `TF-SIZE` with no sha256 and no size (#353). §4.5 lists the vectors each reading needs
+  beside RFC 0038's. No released text carries the kind, so nothing released changes.
+
 ## `0.6.0` — 2026-11-16
 
 Core `specVersion` `0.6.0`, tagged `v0.6.0`, releases the dialect formats `4.0.0` and `4.1.0` and a

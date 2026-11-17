@@ -1438,8 +1438,10 @@ vectors are staged.
 
 This kind is the text that [RFC 0038](../rfcs/0038-terraform-file-source.md) proposes, placed here
 because the dialect's source kinds are defined in this section. It is proposed: whether it joins
-version 3 or opens the next version is open (RFC 0038, Unresolved question 1), no reader implements
-it, and no vector holds one, so it is defined, and not claimable (§4).
+version 3 or opens the next version is open (RFC 0038, Unresolved question 1), no preparation reader
+implements it, and no vector holds one, so it is defined, and not claimable (§4). The reference
+runtime reads the file (`v0.48.0`), and where this section settles what RFC 0038 left open, it says
+what that reader does.
 
 A `terraform-file` source has, besides the members of §4, exactly `document` (`plan` or `state`:
 which output of `terraform show -json` the file is), `select` (below) and `maxBytes` (optional, an
@@ -1448,10 +1450,15 @@ file, and binds its path at evaluation time; the dialect names no path.
 
 **Reading.** A reader takes these steps in order. The first failure refuses the acquisition with its
 code, and later steps do not run. A diagnostic carries its code, the file's sha256 and its size, and
-nothing else: no value, member name, pointer or position.
+nothing else: no value, member name, pointer or position. The one exception is a stream's `TF-SIZE`
+(step 1), which carries neither the sha256 nor the size.
 
 1. The sha256 of the whole file and its length are recorded. A file longer than `maxBytes` is
-   `TF-SIZE`, unparsed.
+   `TF-SIZE`, unparsed. An input read as a stream, such as standard input, is read to at most
+   `maxBytes` and one byte more: a longer stream is `TF-SIZE`, unparsed, and its diagnostic carries
+   the code and a fixed reading that the input was a stream, with no sha256 and no size, since its
+   whole length is never read. A stream within `maxBytes` has its sha256 and length recorded as a
+   file's are.
 2. The bytes are UTF-8 with no byte-order mark and no lone surrogate escape, one JSON value with only
    white space after it, nested at most 128 deep (the top-level value at depth 1), with no duplicate
    member name; otherwise `TF-JSON`. Numbers are kept as their decimal text.
@@ -1503,6 +1510,13 @@ A reference runtime may also write the acquired value as an evaluation batch, on
 resource with id `<address>` and facts `{"terraform": {"document", "formatVersion", "sha256"},
 "resource": …}`; that batch is a product format, not a dialect member. How a refusal of steps 1 to 7
 maps to a source outcome (§9.2) is not stated by RFC 0038, and is open.
+
+**Vectors.** The kind's vectors are those RFC 0038's Conformance section lists, with these besides,
+each with one expected result:
+
+- a stream of `maxBytes` bytes (read, with its sha256 and size), and a stream of one byte more
+  (`TF-SIZE`, with no sha256 and no size), beside the file row of `maxBytes` and one byte more,
+  which stays a file row.
 
 ## 5. Input profiles and acquisitions
 
