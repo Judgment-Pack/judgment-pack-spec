@@ -1523,13 +1523,20 @@ multiple. The reads of §6 then turn the value into facts. The acquisition recor
 
 A reference runtime may also write the acquired value as an evaluation batch, one line per selected
 resource with id `<address>` and facts `{"terraform": {"document", "formatVersion", "sha256"},
-"resource": …}`; that batch is a product format, not a dialect member. How a refusal of steps 1 to 7
-maps to a source outcome (§9.2) is not stated by RFC 0038, and is open.
+"resource": …}`; that batch is a product format, not a dialect member. Each line's id is 1 to 256
+bytes of UTF-8, the bound the reference runtime's batch evaluation holds an item's id to. A
+selected resource whose id is outside it refuses the whole run, before any line is written, with
+the batch tool's own code `FACTS-ID-LIMIT`, which is not a dialect code: every selected resource is
+checked for it before any facts document is held to the registry companion's facts bound
+(`FACTS-DOCUMENT-LIMIT`, [`spec/registry.md`](../spec/registry.md) §10.1). Its diagnostic carries
+what a refusal of the reading carries, the code, the file's sha256 and its size, and never the id.
+How a refusal of steps 1 to 7 maps to a source outcome (§9.2) is not stated by RFC 0038, and is
+open.
 
 **Vectors.** The kind's vectors are those RFC 0038's Conformance section lists, with these besides,
 each with one expected result:
 
-- a stream of `maxBytes` bytes (read, with its sha256 and size), and a stream of one byte more
+- a stream of `maxBytes` bytes (accepted, with its sha256 and size), and a stream of one byte more
   (`TF-SIZE`, with no sha256 and no size), beside the file row of `maxBytes` and one byte more,
   which stays a file row;
 - a plan whose `afterUnknown` pointers repeat a long member name past sixteen times the file's
@@ -1540,7 +1547,10 @@ each with one expected result:
   writes matching shapes: a mirror object over an array, marking an element by its index and
   naming a member that is not an index; a mirror array over an object, marking the member `0`; a
   mirror object over a string, marking a position below it (removed); and an empty mirror object
-  over a number (kept).
+  over a number (kept);
+- for the reference runtime's batch, a selected resource whose address is 256 bytes (one line,
+  with that id), and one of 257 bytes beside a resource whose facts document is over the facts
+  bound (`FACTS-ID-LIMIT`, and no line).
 
 ## 5. Input profiles and acquisitions
 

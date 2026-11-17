@@ -22,8 +22,10 @@ here.
   268435456 bytes and sixteen times the file, each `afterUnknown` pointer charged eight bytes
   more, and past it is `TF-VALUE-LIMIT` (#346). A sensitivity mirror of another shape than its
   value is matched as JSON Pointer tokens are, and one that marks a position below a scalar
-  removes the scalar (#347). §4.5 lists the vectors each reading needs
-  beside RFC 0038's. No released text carries the kind, so nothing released changes.
+  removes the scalar (#347). A batch line's id is 1 to 256 bytes, and a resource outside that
+  refuses the whole run, `FACTS-ID-LIMIT`, before any line is written (#351). §4.5 lists the
+  vectors each reading needs beside RFC 0038's. No released text carries the kind, so nothing
+  released changes.
 
 ## `0.6.0` — 2026-11-16
 

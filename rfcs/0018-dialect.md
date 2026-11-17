@@ -21,7 +21,8 @@
   formats 4.0.0 and 4.1.0, issue #326), 2026-11-16 (the three adopted for `specVersion` `0.6.0`, and
   format 4.1.0 of RFC 0033 landed as §2.3, issues #326 and #328; the `terraform-file` source kind,
   proposed, RFC 0038), 2026-11-17 (the `terraform-file` kind's readings: a stream's `TF-SIZE`,
-  issue #353; a bound on the acquired value, issue #346; a mirror of another shape, issue #347)
+  issue #353; a bound on the acquired value, issue #346; a mirror of another shape, issue #347;
+  the batch id bound, issue #351)
 - Issue: [#141](https://github.com/Judgment-Pack/judgment-pack-spec/issues/141); the direction it
   serves is [#142](https://github.com/Judgment-Pack/judgment-pack-spec/issues/142)
 
@@ -1321,6 +1322,15 @@ RFC 0038's.
   and arrays, and one with a string, number or null in it is `TF-SENSITIVITY`. *Why:* the reading
   removes at least as much as any narrower one, and fails closed where no reading of the shapes can
   say what a mark covers.
+
+- **The batch id bound** (issue #351). RFC 0038 §6 gives each batch line the id `<address>`, and
+  neither text bounded it, while the reference runtime's batch evaluation refuses an item id over
+  256 bytes. §4.5 now says a line's id is 1 to 256 bytes of UTF-8, and a selected resource outside
+  that refuses the whole run before any line is written, with the batch tool's code
+  `FACTS-ID-LIMIT`, checked over every selected resource before the facts bound. *Why:* a batch the
+  tool writes is one that evaluation reads; refusing the run, rather than leaving a line out, keeps
+  a gate from passing a plan whose riskiest resource it never judged. The code is the batch tool's,
+  not the dialect's, as the batch is a product format.
 
 **What this amendment leaves open.** What RFC 0038 and the amendment of 2026-11-16 leave open: the
 version that admits the kind, how a refusal maps to a source outcome (§9.2), the first accepted
@@ -2697,13 +2707,20 @@ multiple. The reads of §6 then turn the value into facts. The acquisition recor
 
 A reference runtime may also write the acquired value as an evaluation batch, one line per selected
 resource with id `<address>` and facts `{"terraform": {"document", "formatVersion", "sha256"},
-"resource": …}`; that batch is a product format, not a dialect member. How a refusal of steps 1 to 7
-maps to a source outcome (§9.2) is not stated by RFC 0038, and is open.
+"resource": …}`; that batch is a product format, not a dialect member. Each line's id is 1 to 256
+bytes of UTF-8, the bound the reference runtime's batch evaluation holds an item's id to. A
+selected resource whose id is outside it refuses the whole run, before any line is written, with
+the batch tool's own code `FACTS-ID-LIMIT`, which is not a dialect code: every selected resource is
+checked for it before any facts document is held to the registry companion's facts bound
+(`FACTS-DOCUMENT-LIMIT`, [`spec/registry.md`](../spec/registry.md) §10.1). Its diagnostic carries
+what a refusal of the reading carries, the code, the file's sha256 and its size, and never the id.
+How a refusal of steps 1 to 7 maps to a source outcome (§9.2) is not stated by RFC 0038, and is
+open.
 
 **Vectors.** The kind's vectors are those RFC 0038's Conformance section lists, with these besides,
 each with one expected result:
 
-- a stream of `maxBytes` bytes (read, with its sha256 and size), and a stream of one byte more
+- a stream of `maxBytes` bytes (accepted, with its sha256 and size), and a stream of one byte more
   (`TF-SIZE`, with no sha256 and no size), beside the file row of `maxBytes` and one byte more,
   which stays a file row;
 - a plan whose `afterUnknown` pointers repeat a long member name past sixteen times the file's
@@ -2714,7 +2731,10 @@ each with one expected result:
   writes matching shapes: a mirror object over an array, marking an element by its index and
   naming a member that is not an index; a mirror array over an object, marking the member `0`; a
   mirror object over a string, marking a position below it (removed); and an empty mirror object
-  over a number (kept).
+  over a number (kept);
+- for the reference runtime's batch, a selected resource whose address is 256 bytes (one line,
+  with that id), and one of 257 bytes beside a resource whose facts document is over the facts
+  bound (`FACTS-ID-LIMIT`, and no line).
 
 ### 5. Input profiles and acquisitions
 
