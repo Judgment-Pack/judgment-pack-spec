@@ -38,7 +38,10 @@ here.
   `format_version`'s documented shape, with no Terraform run and no recorded output, in place of
   vectors made with the Terraform release that writes it; RFC 0038 §3 and its Conformance section
   carry dated notes saying so. §4.5 names `FACTS-ID-LIMIT` the registry companion's code. No
-  released text carries the kind, so nothing released changes.
+  released text carries the kind. By §2.1 the kind is now also defined in the named formats `3.0.0`,
+  `4.0.0` and `4.1.0`, released with Core `0.6.0`: a document of one of them that names it, an
+  unknown kind under the released text, is now one of a kind defined and not claimable, and nothing
+  changes for a document that does not name it.
 - **RFC 0038 §2 step 1 notes the stream reading** (#353). The RFC said the reader hashes the
   whole input; an amendment note there now points at `spec/dialect.md` §4.5, where a stream is read
   to `maxBytes` and one byte more and a longer one is `TF-SIZE` with no sha256 and no size. No
