@@ -1,0 +1,32 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "plan",
+    "formatVersion": "1.2",
+    "formatTable": "1.0.0",
+    "sha256": "9019dee8293cce188cb8c4fa7c0752783415df3e6ac7d332536c196e0f4f7927",
+    "bytes": 11805,
+    "removedSensitive": 2,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "data.google_project.current",
+      "type": "google_project",
+      "name": "current",
+      "mode": "data",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "actions": [
+        "read"
+      ],
+      "before": null,
+      "after": {
+        "project_id": "example-project"
+      },
+      "afterUnknown": [
+        "/name",
+        "/number"
+      ]
+    }
+  ]
+}

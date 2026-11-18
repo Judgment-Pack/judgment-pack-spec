@@ -37,6 +37,13 @@ conformance/annotation-vocabulary/** export-ignore
 conformance/registry/** -text
 schema/registry/** -text
 
+# The terraform-file reading's code list, format table and vectors are proposed with the companion
+# (conformance/terraform-file/README.md): until a terraform-file tag releases them they are in no
+# corpus, and no Core bundle carries them. Each expected result pins its input's SHA-256, so no
+# checkout may convert a line ending in them.
+conformance/terraform-file export-ignore
+conformance/terraform-file/** export-ignore -text
+
 # Independently packaged Policy fixture/schema bytes must never undergo text conversion.
 schema/policy/** -text
 conformance/policy/** -text
@@ -44,6 +51,8 @@ conformance/policy/** -text
 # Whitespace is the content of these files: a test case about trailing whitespace, and review records
 # that quote lines as they were written. git diff --check (dev.json) skips them.
 conformance/carrier/trailing-whitespace.json -whitespace
+conformance/terraform-file/1.0.0/vectors/json/trailing-whitespace.json -whitespace
+conformance/terraform-file/1.0.0/vectors/json/white-space-only.json -whitespace
 rfcs/reviews/*.md -whitespace
 
 # New selected leaf resources retain exact bytes; historical staged namespaces keep their rules.

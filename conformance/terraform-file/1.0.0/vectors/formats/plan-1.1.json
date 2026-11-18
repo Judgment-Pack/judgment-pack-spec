@@ -1,0 +1,123 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.10",
+  "variables": {
+    "project": {
+      "value": "example-project"
+    }
+  },
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_instance.web",
+          "mode": "managed",
+          "type": "google_compute_instance",
+          "name": "web",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "id": "projects/example-project/zones/europe-west1-b/instances/web",
+            "labels": {
+              "env": "dev"
+            },
+            "machine_type": "e2-medium",
+            "name": "web",
+            "zone": "europe-west1-b"
+          },
+          "sensitive_values": {
+            "labels": {}
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "google_compute_instance.web",
+      "mode": "managed",
+      "type": "google_compute_instance",
+      "name": "web",
+      "provider_name": "registry.terraform.io/hashicorp/google",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "id": "projects/example-project/zones/europe-west1-b/instances/web",
+          "labels": {
+            "env": "dev"
+          },
+          "machine_type": "e2-small",
+          "name": "web",
+          "zone": "europe-west1-b"
+        },
+        "after": {
+          "id": "projects/example-project/zones/europe-west1-b/instances/web",
+          "labels": {
+            "env": "dev"
+          },
+          "machine_type": "e2-medium",
+          "name": "web",
+          "zone": "europe-west1-b"
+        },
+        "after_unknown": {
+          "labels": {}
+        },
+        "before_sensitive": {
+          "labels": {}
+        },
+        "after_sensitive": {
+          "labels": {}
+        }
+      }
+    }
+  ],
+  "prior_state": {
+    "format_version": "1.0",
+    "terraform_version": "1.3.10",
+    "values": {
+      "root_module": {
+        "resources": [
+          {
+            "address": "google_compute_instance.web",
+            "mode": "managed",
+            "type": "google_compute_instance",
+            "name": "web",
+            "provider_name": "registry.terraform.io/hashicorp/google",
+            "schema_version": 0,
+            "values": {
+              "id": "projects/example-project/zones/europe-west1-b/instances/web",
+              "labels": {
+                "env": "dev"
+              },
+              "machine_type": "e2-small",
+              "name": "web",
+              "zone": "europe-west1-b"
+            },
+            "sensitive_values": {
+              "labels": {}
+            }
+          }
+        ]
+      }
+    }
+  },
+  "configuration": {
+    "provider_config": {
+      "google": {
+        "name": "google",
+        "full_name": "registry.terraform.io/hashicorp/google"
+      }
+    },
+    "root_module": {}
+  },
+  "relevant_attributes": [
+    {
+      "resource": "google_compute_instance.web",
+      "attribute": [
+        "machine_type"
+      ]
+    }
+  ]
+}

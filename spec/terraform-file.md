@@ -30,9 +30,9 @@ this document, and so is every form of the dialect.
 
 Version `1.0.0` is proposed. Its first release makes it `released`, and not yet stable:
 
-- **Its vectors are not written yet.** The machine-readable code list and format table, and the
-  hand-written vectors, are to be under `conformance/terraform-file/1.0.0/` (§§11, 12). Until a
-  release publishes them they are not a conformance corpus, and no claim may cite them.
+- **Its vectors are proposed with it.** The machine-readable code list and format table, and the
+  hand-written vectors, are under `conformance/terraform-file/1.0.0/` (§§11, 12). Until a release
+  publishes them they are not a conformance corpus, and no claim may cite them.
 - **One reader exists.** The reference runtime reads the file (`v0.48.0`), and where this text
   settles what RFC 0038 left open, it says what that reader does, except for deposed objects (§3,
   step 4), which that reader does not yet carry. No second, independently written reader exists.
@@ -54,6 +54,8 @@ BCP 14 meanings only in capitals.
   are not integers.
 - A **pointer** is an RFC 6901 JSON Pointer. A value's **canonical form** is its RFC 8785 form.
 - **Code-point order** compares two strings by their Unicode code points, first difference first.
+- A file's **sha256** is the SHA-256 digest of all its bytes, written as 64 lower-case hexadecimal
+  digits with no prefix.
 
 ## 2. The declaration
 
@@ -105,7 +107,10 @@ nothing else: no value, member name, pointer or position. The one exception is a
    holds: an object member is removed; an array element is never removed alone, and the array that
    holds it is removed instead, up to the nearest object member. A mirror position absent from the
    value is ignored. Nothing replaces a removed value. `removedSensitive` counts the object members
-   removed, and `after_unknown` pointers at or below a removed position are dropped. Terraform
+   removed, and a `values`, `before` or `after` removed whole counts one, as an object member of
+   its resource would. A removal counts one however much it holds: an object member inside a
+   removed value, or inside an array removed up to the nearest object member, is not counted apart
+   from it. `after_unknown` pointers at or below a removed position are dropped. Terraform
    leaves a value unknown at plan time out of `after`, so `after_sensitive` is read along
    `after_unknown` as well: a pointer that ends at, or passes through, a position that
    `after_sensitive` marks `true` and `after` lacks is cut at that position, so no member name below
@@ -157,9 +162,12 @@ array.
 
 The acquired value is an array sorted by id (§3, step 4) in code-point order, one object per
 selected resource: for a `state`, `{"address", "type", "name", "mode", "providerName", "index"?,
-"deposed"?, "values"}`, with `deposed` the deposed key, present only for a deposed object; for a
-`plan`, the same with `actions`, `before`, `after` and `afterUnknown` (the sorted pointers, in
-`after`, of values known only after apply) in place of `values`. Numbers become decimal strings in
+"deposed"?, "values"?}`, with `deposed` the deposed key, present only for a deposed object; for a
+`plan`, the same with `"actions"`, `"before"?`, `"after"?` and `"afterUnknown"` (the sorted
+pointers, in `after`, of values known only after apply) in place of `"values"?`. Each pointer of
+`afterUnknown` is the string of its RFC 6901 form, `~0` and `~1` escapes included, and the pointers
+are sorted in code-point order of those strings. A `values`, `before` or `after` that step 6 of §3
+removes whole is absent from the resource's object. Numbers become decimal strings in
 the registry companion's normal form ([`spec/registry.md`](registry.md) §10.1), with `0` for every
 zero; one whose normal form would be longer than 64 characters is `TF-NUMBER`. The value is then
 bounded by `L`, the lesser of 268435456 and sixteen times the file's length in bytes. It is
@@ -196,7 +204,7 @@ the id.
 
 The list is closed: a refusal of the reading carries exactly one of these eight codes, the code of
 the step that refused it (§3), which states the rule; a row only names it. Each code's severity is
-`error`, and each code's status in `1.0.0` is `active`. The machine-readable list is to be
+`error`, and each code's status in `1.0.0` is `active`. The machine-readable list is
 `conformance/terraform-file/1.0.0/codes.json` (§11); where the two differ, this text governs.
 `FACTS-ID-LIMIT` and `FACTS-DOCUMENT-LIMIT`, which the batch reports (§8), are the registry
 companion's codes ([`spec/registry.md`](registry.md) §12), and not this list's.
@@ -225,17 +233,17 @@ Dialect version 3, which is proposed, and later Core releases cite this text rat
 
 ## 11. Machine-readable form and vectors
 
-None is written yet. They are to be under `conformance/terraform-file/1.0.0/`: the code list of §9
-as `codes.json`, with each code's severity, status and step; the accepted table of §4 as
-`formats.json`, with its release; and the vectors of §12, with a manifest that names, for each
-vector, the table release that added its row. Every input is synthetic. Where a file and this text
-differ, this text governs.
+The machine-readable form and the vectors are under `conformance/terraform-file/1.0.0/`, proposed
+with this text: the code list of §9 as `codes.json`, with each code's severity, status and step; the
+accepted table of §4 as `formats.json`, with its release; and the vectors of §12, with a manifest
+that names, for each vector, the table release that added its row. Every input is synthetic. Where a
+file and this text differ, this text governs.
 
 ## 12. Conformance
 
 | Class | Sections | Vectors |
 | --- | --- | --- |
-| Reader | §§2–7 and §9, and §8 for a reader that writes the batch | none yet |
+| Reader | §§2–7 and §9, and §8 for a reader that writes the batch | `conformance/terraform-file/1.0.0/`, proposed |
 
 A claim names the exact release, the table release it implements, and its complete vectors. A
 reader is held only to the vectors of the table releases it claims: a file whose `format_version` is
@@ -266,6 +274,9 @@ lists, with these besides, each with one expected result:
   object; two resources of one id, and a deposed key that is a number, neither of which Terraform
   writes (each `TF-DOCUMENT`); and, for the batch, a deposed object whose id passes 256 bytes
   while its address does not (`FACTS-ID-LIMIT`).
+
+The default `max` of §5, 1000, has no vector: its pair would hold a thousand selected resources and
+their value, so the vectors hold `max` only as a declaration gives it.
 
 ## 13. What is open
 

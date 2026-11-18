@@ -1447,7 +1447,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             if not (path.name.endswith(".schema.json") or path.name in ("manifest.json", "cases.json"))
             and path.relative_to(CONFORMANCE).parts[0]
             not in ("evaluation", "witness", "dialect", "policy", "workflow", "retained-column", "staged",
-                    "annotation-vocabulary", "registry")
+                    "annotation-vocabulary", "registry", "terraform-file")
         }
 
         for path in sorted(listed - on_disk):
@@ -1465,7 +1465,7 @@ class RepositoryConformanceTests(unittest.TestCase):
             named.parent.mkdir()
             named.write_text("{}")
             for namespace in ("evaluation", "witness", "dialect", "policy", "workflow", "retained-column", "staged",
-                              "annotation-vocabulary", "registry"):
+                              "annotation-vocabulary", "registry", "terraform-file"):
                 owned = root / namespace / "owned.json"
                 owned.parent.mkdir()
                 owned.write_text("{}")

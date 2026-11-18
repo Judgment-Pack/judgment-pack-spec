@@ -1,0 +1,36 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "state",
+    "formatVersion": "1.0",
+    "formatTable": "1.0.0",
+    "sha256": "67328699c418489a63922c306e6dd7603795661cfd53ae3bf564661008da9474",
+    "bytes": 1239,
+    "removedSensitive": 1,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "google_sql_database_instance.main",
+      "type": "google_sql_database_instance",
+      "name": "main",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "values": {
+        "database_version": "POSTGRES_15",
+        "name": "main",
+        "region": "europe-west1",
+        "settings": [
+          {
+            "backup_configuration": [
+              {
+                "enabled": true
+              }
+            ],
+            "tier": "db-f1-micro"
+          }
+        ]
+      }
+    }
+  ]
+}

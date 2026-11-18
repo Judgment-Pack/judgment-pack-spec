@@ -1,0 +1,33 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "plan",
+    "formatVersion": "1.2",
+    "formatTable": "1.0.0",
+    "sha256": "8e0f707bb3e06a5d82011581265cfd3c8c16b7cb671d473124b971a9e0d9f602",
+    "bytes": 1672,
+    "removedSensitive": 1,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "google_sql_user.app",
+      "type": "google_sql_user",
+      "name": "app",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "actions": [
+        "create"
+      ],
+      "before": null,
+      "after": {
+        "instance": "main",
+        "name": "app",
+        "project": "example-project"
+      },
+      "afterUnknown": [
+        "/id"
+      ]
+    }
+  ]
+}

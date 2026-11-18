@@ -22,6 +22,27 @@ here.
   members and class, and cites the companion; RFC 0018's Specification section follows. The site
   publishes the text at `spec/terraform-file/`. No release record is added, and nothing released
   changes.
+- **The `terraform-file` reading's code list, format table and vectors**
+  (`conformance/terraform-file/1.0.0/`, proposed with reading `1.0.0`; `spec/terraform-file.md`
+  §§4, 9, 11 and 12). `codes.json` lists §9's eight codes, each `error` and `active`, with the step
+  that raises it and when; `formats.json` is §4's first table, release `1.0.0`: `plan` `1.0`, `1.1`
+  and `1.2`, and `state` `1.0`. 188 hand-written, synthetic vectors, each with a source declaration
+  and one expected result and each naming table release `1.0.0`, cover RFC 0038's Conformance list
+  and §12's additions, every format row, the default `maxBytes` and one byte more, and declarations
+  of §2's forms, among them a `maxBytes` written `1.0` or `1e2` and a `mode` or an `actions`
+  element that is a number, each malformed with no file read. Their three large inputs are written
+  from committed templates by a rule the manifest gives. `tests/test_terraform_file_vectors.py`
+  holds the two lists to the text's tables, the manifest to a closed list of groups and every
+  expected result to one known shape and its form, and reads each declaration with the first
+  reader, directly and as a dialect source; no reader of the file exists in this repository, so the
+  reading's results are checked for form only. The companion's status, §9, §11 and §12 now say
+  where the files are, and §12 that the default `max` has no vector. The text now states the
+  readings the vectors pin, so that none lives in a vector alone: a sha256 is 64 lower-case
+  hexadecimal digits with no prefix (§1); `afterUnknown` is sorted in code-point order of its RFC
+  6901 strings, and a `values`, `before` or `after` removed whole is absent, each marked optional
+  (§6); and such a removal counts one in `removedSensitive`, which counts nothing removed inside a
+  removed value or an array removed up to its object member (§3, step 6). No Core bundle carries
+  them, the site serves none of them, and no release record is added.
 - RFC 0039, a Draft, proposes a federated registry as registry format `1.1.0`: a manifest of
   sources (one standard repository, the rest service repositories), an assembly from bytes the
   caller supplies at full commit ids into one ordinary `1.0.0` registry, and an index that records

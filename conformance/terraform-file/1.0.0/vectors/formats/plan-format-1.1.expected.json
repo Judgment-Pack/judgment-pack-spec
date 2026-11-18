@@ -1,0 +1,43 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "plan",
+    "formatVersion": "1.1",
+    "formatTable": "1.0.0",
+    "sha256": "3dbca415b59c8c4e9223555ec5abdcfde3d438e204dcecd69d1a30f999823302",
+    "bytes": 3071,
+    "removedSensitive": 0,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "google_compute_instance.web",
+      "type": "google_compute_instance",
+      "name": "web",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "actions": [
+        "update"
+      ],
+      "before": {
+        "id": "projects/example-project/zones/europe-west1-b/instances/web",
+        "labels": {
+          "env": "dev"
+        },
+        "machine_type": "e2-small",
+        "name": "web",
+        "zone": "europe-west1-b"
+      },
+      "after": {
+        "id": "projects/example-project/zones/europe-west1-b/instances/web",
+        "labels": {
+          "env": "dev"
+        },
+        "machine_type": "e2-medium",
+        "name": "web",
+        "zone": "europe-west1-b"
+      },
+      "afterUnknown": []
+    }
+  ]
+}

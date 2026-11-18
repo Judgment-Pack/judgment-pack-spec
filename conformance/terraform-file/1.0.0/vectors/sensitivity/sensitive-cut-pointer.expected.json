@@ -1,0 +1,37 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "plan",
+    "formatVersion": "1.2",
+    "formatTable": "1.0.0",
+    "sha256": "a8bf68e603080ae2a2626924cae86c059e8acbb89e57f9e642c0c8c8a4e85cd1",
+    "bytes": 2283,
+    "removedSensitive": 0,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "google_sql_database_instance.replica",
+      "type": "google_sql_database_instance",
+      "name": "replica",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "actions": [
+        "create"
+      ],
+      "before": null,
+      "after": {
+        "name": "replica",
+        "settings": {
+          "name": "replica-settings"
+        }
+      },
+      "afterUnknown": [
+        "/connection",
+        "/id",
+        "/settings/auth",
+        "/token"
+      ]
+    }
+  ]
+}

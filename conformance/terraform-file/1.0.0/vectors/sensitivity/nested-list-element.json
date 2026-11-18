@@ -1,0 +1,53 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "1.9.8",
+  "values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_instance.web",
+          "mode": "managed",
+          "type": "google_compute_instance",
+          "name": "web",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "kept_matrix": [
+              [
+                "e"
+              ]
+            ],
+            "metadata_matrix": [
+              [
+                "a",
+                "b"
+              ],
+              [
+                "c",
+                "secret-cell-1"
+              ]
+            ],
+            "name": "web"
+          },
+          "sensitive_values": {
+            "kept_matrix": [
+              [
+                false
+              ]
+            ],
+            "metadata_matrix": [
+              [
+                false,
+                false
+              ],
+              [
+                false,
+                true
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

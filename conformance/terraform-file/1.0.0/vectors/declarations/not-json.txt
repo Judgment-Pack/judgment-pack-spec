@@ -1,0 +1,1 @@
+This file is not JSON: a reader that read it under one of these declarations would refuse it TF-JSON.

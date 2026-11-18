@@ -1,0 +1,62 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "plan",
+    "formatVersion": "1.2",
+    "formatTable": "1.0.0",
+    "sha256": "1bd57de485c9b7d3a0c5ca970499a32a63d1501141b2e570278af316339e9b88",
+    "bytes": 3895,
+    "removedSensitive": 0,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "google_compute_instance.web",
+      "type": "google_compute_instance",
+      "name": "web",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "actions": [
+        "create"
+      ],
+      "before": null,
+      "after": {
+        "boot_disk": [
+          {
+            "auto_delete": true,
+            "initialize_params": [
+              {
+                "image": "debian-cloud/debian-12"
+              }
+            ]
+          }
+        ],
+        "labels": {
+          "app/tier": "web",
+          "team~ops": "web"
+        },
+        "name": "web",
+        "network_interface": [
+          {
+            "access_config": [
+              {
+                "network_tier": "PREMIUM"
+              }
+            ],
+            "network": "default"
+          }
+        ]
+      },
+      "afterUnknown": [
+        "/boot_disk/0/initialize_params/0/size",
+        "/boot_disk/0/source",
+        "/id",
+        "/metadata/a0",
+        "/metadata/a~1b",
+        "/metadata/m~0n",
+        "/network_interface/0/access_config/0/nat_ip",
+        "/network_interface/0/network_ip"
+      ]
+    }
+  ]
+}

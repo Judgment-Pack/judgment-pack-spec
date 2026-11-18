@@ -1,0 +1,47 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "state",
+    "formatVersion": "1.0",
+    "formatTable": "1.0.0",
+    "sha256": "947c41e7c15dbc4b490df5764025946e805bc77d1d536bf67e279185908bf50a",
+    "bytes": 1340,
+    "removedSensitive": 0,
+    "selected": 3
+  },
+  "value": [
+    {
+      "address": "google_storage_bucket.logs[\"z\"]",
+      "type": "google_storage_bucket",
+      "name": "logs",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "index": "z",
+      "values": {
+        "name": "logs-0"
+      }
+    },
+    {
+      "address": "google_storage_bucket.logs[\"｡\"]",
+      "type": "google_storage_bucket",
+      "name": "logs",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "index": "｡",
+      "values": {
+        "name": "logs-1"
+      }
+    },
+    {
+      "address": "google_storage_bucket.logs[\"😀\"]",
+      "type": "google_storage_bucket",
+      "name": "logs",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "index": "😀",
+      "values": {
+        "name": "logs-2"
+      }
+    }
+  ]
+}

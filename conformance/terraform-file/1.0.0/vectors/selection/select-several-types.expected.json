@@ -1,0 +1,60 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "state",
+    "formatVersion": "1.0",
+    "formatTable": "1.0.0",
+    "sha256": "f16662ca563665ea818029457620dfcf109a4075c1b44f1c234d3749e4caa20e",
+    "bytes": 4235,
+    "removedSensitive": 1,
+    "selected": 4
+  },
+  "value": [
+    {
+      "address": "google_sql_user.app",
+      "type": "google_sql_user",
+      "name": "app",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "values": {
+        "instance": "main",
+        "name": "app"
+      }
+    },
+    {
+      "address": "google_storage_bucket.logs[\"eu\"]",
+      "type": "google_storage_bucket",
+      "name": "logs",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "index": "eu",
+      "values": {
+        "location": "EU",
+        "name": "example-project-logs-eu"
+      }
+    },
+    {
+      "address": "google_storage_bucket.logs[\"us\"]",
+      "type": "google_storage_bucket",
+      "name": "logs",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "index": "us",
+      "values": {
+        "location": "US",
+        "name": "example-project-logs-us"
+      }
+    },
+    {
+      "address": "module.network.google_compute_network.main",
+      "type": "google_compute_network",
+      "name": "main",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "values": {
+        "auto_create_subnetworks": false,
+        "name": "main"
+      }
+    }
+  ]
+}

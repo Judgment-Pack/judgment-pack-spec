@@ -35,6 +35,11 @@ ANNOTATION_VOCABULARY_ROWS = "conformance/annotation-vocabulary"
 # document is published.
 REGISTRY_ROWS = "conformance/registry"
 REGISTRY_SCHEMAS = "schema/registry"
+# The terraform-file reading's code list, format table and hand-written vectors are proposed with
+# the companion, in no corpus until a terraform-file tag releases them
+# (conformance/terraform-file/README.md): the site serves none of them. Its companion document is
+# published.
+TERRAFORM_FILE_VECTORS = "conformance/terraform-file"
 # The staged draft Core specVersion 0.4.0-draft graduated to the released 0.5.0 in place; its staged
 # directories are retired, and nothing the site writes is named for the draft selector.
 RETIRED_DRAFT_DIRECTORIES = ("schema/staged", "conformance/staged", "examples/staged")
@@ -48,6 +53,7 @@ UNPUBLISHED_DIRECTORIES = (
     ANNOTATION_VOCABULARY_ROWS,
     REGISTRY_ROWS,
     REGISTRY_SCHEMAS,
+    TERRAFORM_FILE_VECTORS,
     "conformance/policy",
     "schema/policy",
 )
@@ -316,6 +322,9 @@ class StaticSiteTests(unittest.TestCase):
 
     def test_registry_rows_are_not_published(self) -> None:
         self._assert_nothing_published_under(REGISTRY_ROWS)
+
+    def test_terraform_file_vectors_are_not_published(self) -> None:
+        self._assert_nothing_published_under(TERRAFORM_FILE_VECTORS)
 
     def test_registry_schemas_are_served_at_their_id_only_once_released(self) -> None:
         # Packaged on the companion's own tag and never served as files. Each is served at its

@@ -1,0 +1,138 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "1.9.8",
+  "values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_instance.web[0]",
+          "mode": "managed",
+          "type": "google_compute_instance",
+          "name": "web",
+          "index": 0,
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "machine_type": "e2-small",
+            "zone": "europe-west1-b",
+            "name": "web-0"
+          },
+          "sensitive_values": {}
+        },
+        {
+          "address": "google_compute_instance.web[1]",
+          "mode": "managed",
+          "type": "google_compute_instance",
+          "name": "web",
+          "index": 1,
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "machine_type": "e2-small",
+            "zone": "europe-west1-b",
+            "name": "web-1"
+          },
+          "sensitive_values": {}
+        },
+        {
+          "address": "google_storage_bucket.logs[\"eu\"]",
+          "mode": "managed",
+          "type": "google_storage_bucket",
+          "name": "logs",
+          "index": "eu",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "location": "EU",
+            "name": "example-project-logs-eu"
+          },
+          "sensitive_values": {}
+        },
+        {
+          "address": "google_storage_bucket.logs[\"us\"]",
+          "mode": "managed",
+          "type": "google_storage_bucket",
+          "name": "logs",
+          "index": "us",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "location": "US",
+            "name": "example-project-logs-us"
+          },
+          "sensitive_values": {}
+        },
+        {
+          "address": "google_sql_user.app",
+          "mode": "managed",
+          "type": "google_sql_user",
+          "name": "app",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "instance": "main",
+            "name": "app",
+            "password": "secret-password-8"
+          },
+          "sensitive_values": {
+            "password": true
+          }
+        },
+        {
+          "address": "data.google_project.current",
+          "mode": "data",
+          "type": "google_project",
+          "name": "current",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "number": "123456789012",
+            "project_id": "example-project"
+          },
+          "sensitive_values": {}
+        }
+      ],
+      "child_modules": [
+        {
+          "address": "module.network",
+          "resources": [
+            {
+              "address": "module.network.google_compute_network.main",
+              "mode": "managed",
+              "type": "google_compute_network",
+              "name": "main",
+              "provider_name": "registry.terraform.io/hashicorp/google",
+              "schema_version": 0,
+              "values": {
+                "auto_create_subnetworks": false,
+                "name": "main"
+              },
+              "sensitive_values": {}
+            }
+          ],
+          "child_modules": [
+            {
+              "address": "module.network.module.subnets",
+              "resources": [
+                {
+                  "address": "module.network.module.subnets.google_compute_subnetwork.private[\"a\"]",
+                  "mode": "managed",
+                  "type": "google_compute_subnetwork",
+                  "name": "private",
+                  "index": "a",
+                  "provider_name": "registry.terraform.io/hashicorp/google",
+                  "schema_version": 0,
+                  "values": {
+                    "ip_cidr_range": "10.0.0.0/24",
+                    "name": "private-a"
+                  },
+                  "sensitive_values": {}
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"document": "state", "select": {"types": ["google_storage_bucket"], "address": "google_storage_bucket.logs[*]"}}

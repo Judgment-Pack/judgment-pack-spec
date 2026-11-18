@@ -1,0 +1,1 @@
+{"document": "state", "select": {"types": ["google_compute_network", "google_compute_subnetwork"], "address": "module.*.google_compute_network.main"}}
