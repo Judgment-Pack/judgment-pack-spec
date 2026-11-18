@@ -87,8 +87,8 @@ stable feature requires two independent implementations and conformance cases.
 | [0036](0036-registry-emitter-contract.md) | The registry emitter contract and its conformance harness | Accepted | Specification (part of the proposed registry companion of RFC 0034; accepted on a same-vendor review, the different-vendor review waived) |
 | [0037](0037-generated-facts-contracts.md) | Generated facts contracts: registry entries as pack facts, and typed facts builders | Accepted | Specification (part of the proposed registry companion of RFC 0034; accepted on a same-vendor review, the different-vendor review waived) |
 | [0038](0038-terraform-file-source.md) | A file-sourced dialect source: Terraform plan and state JSON | Accepted | Specification (dialect companion, with the reading in its own companion, `spec/terraform-file.md`, proposed; accepted on a same-vendor review, the different-vendor review waived) |
-| [0039](0039-federated-registry.md) | A federated registry — assembled indexes with commit provenance, and tighten-only bounds | Draft | Specification (a proposed addition to the registry companion as format 1.1.0; format 1.0.0 unchanged) |
-| [0040](0040-registry-locks-and-signatures.md) | Registry locks and signatures — pinning what a registry depends on, and signing the pin | Draft | Specification (a proposed addition to the registry companion as format 1.1.0; format 1.0.0 unchanged) |
+| [0039](0039-federated-registry.md) | A federated registry — assembled indexes with commit provenance, and tighten-only bounds | Accepted | Specification (an addition to the registry companion as format 1.1.0; format 1.0.0 unchanged; accepted on a same-vendor review, the different-vendor review waived) |
+| [0040](0040-registry-locks-and-signatures.md) | Registry locks and signatures — pinning what a registry depends on, and signing the pin | Accepted | Specification (an addition to the registry companion as format 1.1.0; format 1.0.0 unchanged; accepted on a same-vendor review, the different-vendor review waived) |
 
 [0018]: 0018-dialect.md
 [0019]: 0019-exchange.md
@@ -211,8 +211,8 @@ in no corpus, and the first of the two readers reads it.
   waived. They stay normative for nothing until the companion text is released, and Core is
   unchanged.
 
-Two Drafts propose additions to the released registry companion as format `1.1.0`, with format
-`1.0.0` unchanged; no schema, row or reader exists for either.
+Two records add to the registry companion as format `1.1.0`, with format `1.0.0` unchanged. Both
+were accepted on 2026-11-18 on one same-vendor review, the different-vendor review waived.
 - [RFC 0039](0039-federated-registry.md) assembles one `1.0.0` registry from a standard repository
   and service repositories, from bytes the caller supplies at full commit ids, and writes an index
   of each document's repository, commit, path and digests. A repository's bounds may only tighten
@@ -229,5 +229,5 @@ Two Drafts propose additions to the released registry companion as format `1.1.0
 
 Both were amended on 2026-11-17 by the maintainer's rulings on eight of their Unresolved questions,
 and on 2026-11-18 the remaining questions were decided as proposed. The proposed companion text,
-[`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), states both as format `1.1.0` would; it is
-normative for nothing until a `registry-v1.1.0` tag releases it.
+[`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), states both as format `1.1.0`; it is
+normative from the `registry-v1.1.0` tag, which releases it.

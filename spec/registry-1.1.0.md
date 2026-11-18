@@ -19,8 +19,8 @@ each with its own section numbers. `registry.md` alone remains the `1.0.0` text,
 
 Its design records are [RFC 0039](../rfcs/0039-federated-registry.md) (assembly, the index and
 bounds) and [RFC 0040](../rfcs/0040-registry-locks-and-signatures.md) (locks and signatures). Both
-are Drafts. Every question either record left open is decided here, as §17 lists. Where this text
-and a record differ, this text governs.
+were accepted on 2026-11-18. Every question either record left open is decided here, as §17
+lists. Where this text and a record differ, this text governs.
 
 This text is kept as its own companion file with its own section numbers, so every code meaning
 and schema citation stays as accepted. The closed schemas of its documents, its code list and its
@@ -44,6 +44,8 @@ Changes after acceptance:
   own section numbers, rather than one merged document; no rule, code, order or bound changes.
 - Status, §§14, 15 and 17: the schemas, the code list and the rows, published since, are no
   longer described as unpublished.
+- Status: the design records, RFCs 0039 and 0040, are accepted rather than Drafts; no rule, code,
+  order or bound changes.
 
 ## 1. Conventions
 

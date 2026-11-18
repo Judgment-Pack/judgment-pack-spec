@@ -1,7 +1,7 @@
 # RFC 0039: A federated registry — assembled indexes with commit provenance, and tighten-only bounds
 
-- Status: Draft
-- Type: Standards track, a proposed addition to the registry companion
+- Status: Accepted
+- Type: Standards track, an addition to the registry companion
   ([`spec/registry.md`](../spec/registry.md)) as registry format `1.1.0`; format `1.0.0` and every
   document it defines are unchanged
 - Created: 2026-11-17
@@ -10,19 +10,23 @@
   per-environment bounds (§5) and no assembly as a source (§3); each remaining question carries a
   proposed resolution; 2026-11-18, deciding the remaining questions as proposed (Settled questions),
   with the proposed companion text [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md)
+- Accepted: 2026-11-18, by the maintainer, together with RFC 0040, on the same-vendor review whose
+  fixes are recorded on pull request 375, with the different-vendor review waived; see
+  [Acceptance](#acceptance).
 - Related: [RFC 0034](0034-registry-profile.md) (the registry profile, and its Unresolved question
   4, cross-registry references); [RFC 0035](0035-registry-references.md) (references);
   [RFC 0040](0040-registry-locks-and-signatures.md) (locks and signatures, which pin an assembled
   index)
 
-> **Draft.** This record is normative for nothing. Nothing is built: no schema, no row, no reader.
-> The Specification below is the sketch; the proposed companion text,
-> [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), states it as format `1.1.0` would, and
-> governs where the two differ.
+> **Accepted** on 2026-11-18 ([Acceptance](#acceptance)). The Specification below is the sketch;
+> the companion text, [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), states it as format
+> `1.1.0` and governs where the two differ. That text is normative from the `registry-v1.1.0` tag;
+> this record is normative for nothing.
 >
-> **Review standing.** [RFC 0009](0009-interim-review-regime.md) asks for a recorded adversarial
-> review by a model from a different vendor on the pull request that creates an RFC. None is
-> recorded for this draft, and this record does not claim one.
+> **Review standing.** Reviewed in one round (same vendor, not a cross-vendor claim); the
+> different-vendor review was waived by the maintainer. [RFC 0009](0009-interim-review-regime.md)
+> asks for a recorded adversarial review by a model from a different vendor; that review has not
+> happened, and this record does not claim it.
 
 ## Summary
 
@@ -531,6 +535,29 @@ Rows would be hand-written and synthetic, under `conformance/registry/1.1.0/`, f
 - **Hosts** (CI systems, deployment tools) fetch each source at a commit with their own credentials
   and hand over the bytes; that is theirs, outside this text.
 - **This repository** would hold the text, the `1.1.0` schemas, the code list and the rows.
+
+## Acceptance
+
+On 2026-11-18 the maintainer accepted RFCs 0039 and 0040 together. Reviewed in one round (same
+vendor, not a cross-vendor claim); the different-vendor review was waived by the maintainer. The
+waiver is Settled question 6.
+
+**What acceptance rests on.** One review round by a model from the drafting vendor, read-only,
+over both records, as amended by the maintainer's rulings of 2026-11-17. Its findings (one HIGH,
+three MEDIUM and several LOW) and the fix for each are recorded on
+[pull request 375](https://github.com/Judgment-Pack/judgment-pack-spec/pull/375).
+
+The changes made after that round are not covered by it: the decisions of 2026-11-18 (Settled
+questions), the companion text and its changes after acceptance, and the Status lines, notices,
+this section and the index rows that record the acceptance.
+
+**What this leaves unestablished.**
+
+- **No different-vendor review.** RFC 0009's review has not happened. This is a same-vendor review,
+  not a cross-vendor claim.
+- **Not stable.** Format `1.1.0` is released, not stable. The stable bar of §15 of the companion
+  text, a second, independently written reader agreeing on every row of a class, is met there,
+  not here.
 
 ## Settled questions
 

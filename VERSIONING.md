@@ -265,25 +265,37 @@ implementation evidence in the existing governance and RFC process.
 The [registry companion](spec/registry.md) uses the scoped tag `registry-v<releaseVersion>`, where
 `releaseVersion` is strict three-component SemVer with no prerelease or build suffix. It is the
 Policy route without its draft-only restriction: a registry release has maturity `released`, which
-is not stable. Only the tag and a maintainer-published GitHub release together establish one. The
-first is `registry-v1.0.0`; preparing it publishes nothing.
+is not stable. Only the tag and a maintainer-published GitHub release together establish one. A
+tag releases the format its major and minor numbers name: `registry-v1.0.x` format `1.0.0`, whose
+text is `spec/registry.md`, and `registry-v1.1.x` format `1.1.0`, whose texts are `spec/registry.md`
+and `spec/registry-1.1.0.md`, two files of one companion. A tag whose numbers name no such format
+is refused. The first release is `registry-v1.0.0`; `registry-v1.1.0` releases format `1.1.0`.
+Preparing either publishes nothing.
 
 A registry release names, in its own JSON release record `releases/<tag>.json` beside its notes,
-the exact format `1.0.0`, the `$id` of every schema under `schema/registry/1.0.0/`, and the SHA-256
-of the companion text, of the rows' README and of every schema; the code list with its digest and
-its number of codes; and the rows' manifest with its digest, its number of rows and the digest of
-every file under `conformance/registry/1.0.0/`. The builder derives that record from the tagged
-tree and refuses the tag unless the committed record equals it, its maturity is `released`, the
-text's status sentence, the code list and the rows' manifest all say `released`, and no schema's
-title or description still calls it a draft, staged, proposed or unreleased. They say so until the
-commit the tag names, which changes all of them.
+its exact format, the `$id` of every schema under `schema/registry/<format>/`, and the SHA-256 of
+each of the format's texts, of its rows' README and of every schema; its code list with its digest
+and its number of codes; and its rows' manifest with its digest, its number of rows and the digest
+of every file under `conformance/registry/<format>/`. For `registry-v1.0.0` that is
+`schema/registry/1.0.0/`, `conformance/registry/README.md` and `conformance/registry/1.0.0/`; for
+`registry-v1.1.0` it is `schema/registry/1.1.0/`, `conformance/registry/1.1.0/README.md` and
+`conformance/registry/1.1.0/`, and its record names neither format `1.0.0`'s schemas nor its rows.
+The builder derives that record from the tagged tree and refuses the tag unless the committed
+record equals it, its maturity is `released`, the format's status sentence occurs once across its
+texts and says `released`, its code list and its rows' manifest say `released`, no text, rows'
+README, README heading or manifest label still calls the format proposed, and no schema's title or
+description still calls it a draft, staged, proposed or unreleased. They say so until the commit
+the tag names, which changes all of them. Each format's record is held to its own tag's tree:
+`registry-v1.0.0` builds from its tag exactly as before, with the same bundle and record bytes.
 
-The release's bundle, `judgment-pack-registry-<releaseVersion>`, carries the text, its schemas, its
-code list and rows with their README, the checks that hold the rows to the text, the design
-records and the dialect companion the text links, this document, the license and the record and
-notes. A Core bundle carries the text and none of the registry's schema or row directories, as it
-carries none of Policy's. The site serves each registry schema at its `$id` once the rows'
-manifest says `released`, and serves no registry schema or row as a file.
+A release's bundle, `judgment-pack-registry-<releaseVersion>`, carries the format's texts, its
+schemas, its code list and rows with their README, the checks that hold the rows to the texts, the
+design records and the companions the texts link, this document, the license and the record and
+notes. Format `1.1.0`'s bundle also carries format `1.0.0`'s schemas, rows and checks, which its
+own build on, and the second reader its rows' README names. A Core bundle carries the text and
+none of the registry's schema or row directories, as it carries none of Policy's. The site serves each format's schemas at their `$id` once that format's
+rows' manifest says `released` and its own release record names those bytes, and serves no
+registry schema or row as a file.
 
 A schema published at its `$id` keeps its bytes: the builder refuses a release whose record and an
 earlier record of the same format, in the worktree or at an earlier registry tag, name different

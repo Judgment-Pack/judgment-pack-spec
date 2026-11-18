@@ -1,7 +1,7 @@
 # RFC 0040: Registry locks and signatures — pinning what a registry depends on, and signing the pin
 
-- Status: Draft
-- Type: Standards track, a proposed addition to the registry companion
+- Status: Accepted
+- Type: Standards track, an addition to the registry companion
   ([`spec/registry.md`](../spec/registry.md)) as registry format `1.1.0`; format `1.0.0` and every
   document it defines are unchanged
 - Created: 2026-11-17
@@ -10,6 +10,9 @@
   and 7), emitters in the lock (§§2 to 4) and one lock per assembly (§2); each remaining question
   carries a proposed resolution; 2026-11-18, deciding the remaining questions as proposed (Settled
   questions), with the proposed companion text [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md)
+- Accepted: 2026-11-18, by the maintainer, together with RFC 0039, on the same-vendor review whose
+  fixes are recorded on pull request 375, with the different-vendor review waived; see
+  [Acceptance](#acceptance).
 - Related: [RFC 0034](0034-registry-profile.md) (the registry profile);
   [RFC 0039](0039-federated-registry.md) (the assembled index a lock may pin); the key and
   signature rules of the checkpoint witness companion
@@ -19,14 +22,15 @@
   [#323](https://github.com/Judgment-Pack/judgment-pack-spec/issues/323) (pack identity under
   re-serialization)
 
-> **Draft.** This record is normative for nothing. Nothing is built: no schema, no row, no reader.
-> The Specification below is the sketch; the proposed companion text,
-> [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), states it as format `1.1.0` would, and
-> governs where the two differ.
+> **Accepted** on 2026-11-18 ([Acceptance](#acceptance)). The Specification below is the sketch;
+> the companion text, [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), states it as format
+> `1.1.0` and governs where the two differ. That text is normative from the `registry-v1.1.0` tag;
+> this record is normative for nothing.
 >
-> **Review standing.** [RFC 0009](0009-interim-review-regime.md) asks for a recorded adversarial
-> review by a model from a different vendor on the pull request that creates an RFC. None is
-> recorded for this draft, and this record does not claim one.
+> **Review standing.** Reviewed in one round (same vendor, not a cross-vendor claim); the
+> different-vendor review was waived by the maintainer. [RFC 0009](0009-interim-review-regime.md)
+> asks for a recorded adversarial review by a model from a different vendor; that review has not
+> happened, and this record does not claim it.
 
 ## Summary
 
@@ -704,6 +708,29 @@ A verifier's record is part of a row's input and of its expected output.
   makes and checks Ed25519 signatures for the dialect vectors.
 - **Hosts** hold the keys, distribute the expected ones, keep the records and decide where the
   signature documents travel. That is theirs, outside this text.
+
+## Acceptance
+
+On 2026-11-18 the maintainer accepted RFCs 0039 and 0040 together. Reviewed in one round (same
+vendor, not a cross-vendor claim); the different-vendor review was waived by the maintainer. The
+waiver is Settled question 5.
+
+**What acceptance rests on.** One review round by a model from the drafting vendor, read-only,
+over both records, as amended by the maintainer's rulings of 2026-11-17. Its findings (one HIGH,
+three MEDIUM and several LOW) and the fix for each are recorded on
+[pull request 375](https://github.com/Judgment-Pack/judgment-pack-spec/pull/375).
+
+The changes made after that round are not covered by it: the decisions of 2026-11-18 (Settled
+questions), the companion text and its changes after acceptance, and the Status lines, notices,
+this section and the index rows that record the acceptance.
+
+**What this leaves unestablished.**
+
+- **No different-vendor review.** RFC 0009's review has not happened. This is a same-vendor review,
+  not a cross-vendor claim.
+- **Not stable.** Format `1.1.0` is released, not stable. The stable bar of §15 of the companion
+  text, a second, independently written reader agreeing on every row of a class, is met there,
+  not here.
 
 ## Settled questions
 
