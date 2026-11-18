@@ -1,0 +1,51 @@
+{
+  "federationFormatVersion": "1.1.0",
+  "registry": {
+    "id": "https://example.invalid/registries/assembled",
+    "version": "7.0.0"
+  },
+  "environments": [
+    "dev",
+    "prod"
+  ],
+  "sources": [
+    {
+      "name": "scopes-1-dev",
+      "role": "repository",
+      "repository": "https://example.invalid/scm/billing",
+      "environments": [
+        "dev"
+      ],
+      "registry": "dev-first/registry.json"
+    },
+    {
+      "name": "scopes-2-prod",
+      "role": "repository",
+      "repository": "https://example.invalid/scm/billing",
+      "environments": [
+        "prod"
+      ],
+      "registry": "prod/registry.json"
+    },
+    {
+      "name": "scopes-3-dev",
+      "role": "repository",
+      "repository": "https://example.invalid/scm/billing",
+      "environments": [
+        "dev"
+      ],
+      "registry": "dev-again/registry.json"
+    },
+    {
+      "name": "standard",
+      "role": "standard",
+      "repository": "https://example.invalid/scm/platform",
+      "registry": "registry.json",
+      "bounds": "bounds.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ]
+    }
+  ]
+}

@@ -905,6 +905,55 @@ assemble("assemble-scope-widens", "§4",
                       standard=with_path(SC, STD_FILES, {"registry.json": STD_REG_SCOPES})),
          report(False, [diag("FED-SCOPE-WIDENS", "registry", "/secretScopes/dev/gcp-sm/1", "billing")], REG_S))
 
+# A project listed for dev, for prod and for dev again, by three sources in this order (section 4 step 6,
+# registry section 6.4): the sources' scopes are read together as one list, in source order, and a
+# listing is shared when the project is listed for an environment read earlier. Sources are read in the
+# manifest's order, which is by name. The third listing is for
+# dev, as the first was, but the second, for prod, is read earlier than it: it is reported too.
+SHARED_PROJECT = "example-shared"
+SHARED_SCOPES = {env: {"gcp-sm": [SHARED_PROJECT]} for env in ("dev", "prod")}
+
+
+def shared_role(identity):
+    return {"kind": "db-role", "id": identity, "owner": "team-billing",
+            "value": {"database": "entry:database/billing", "privileges": ["read"]}}
+
+
+SHARED_ROLES = {"dev-first": shared_role("billing-reports"), "prod": shared_role("billing-payouts"),
+                "dev-again": shared_role("billing-audit")}
+
+
+def shared_registry(slug, role, environment):
+    return pretty(f"sources/billing/scopes-{slug}.json", registry(
+        f"https://example.invalid/registries/billing-{slug}", "1.0.0", [environment], ["team-billing"],
+        [pin(DB_ROLE)], [role], scopes={environment: SHARED_SCOPES[environment]}))
+
+
+SHARED_FILES = {"dev-first": shared_registry("dev-first", SHARED_ROLES["dev-first"], "dev"),
+                "prod": shared_registry("prod", SHARED_ROLES["prod"], "prod"),
+                "dev-again": shared_registry("dev-again", SHARED_ROLES["dev-again"], "dev")}
+SHARED_NAMES = {"dev-first": "scopes-1-dev", "prod": "scopes-2-prod", "dev-again": "scopes-3-dev"}
+SHARED_ENVIRONMENTS = {"dev-first": "dev", "prod": "prod", "dev-again": "dev"}
+FED_SHARED = pretty("federation/scopes-three-sources.json", manifest(ASSEMBLED_ID, "7.0.0", [
+    source(SHARED_NAMES[slug], "repository", BILLING_REPO, f"{slug}/registry.json",
+           environments=[SHARED_ENVIRONMENTS[slug]]) for slug in SHARED_FILES] + [STD_SOURCE]))
+SRC_SHARED = dict(sorted({**{SHARED_NAMES[slug]: with_path(BC, {f"{slug}/registry.json": SHARED_FILES[slug]}, {})
+                             for slug in SHARED_FILES},
+                          "standard": with_path(SC, STD_FILES, {"registry.json": STD_REG_SUBSET})}.items()))
+REG_SHARED = assembled([STD_DATABASE_PLAIN] + [served(SHARED_ROLES[slug], [SHARED_ENVIRONMENTS[slug]])
+                                               for slug in ("dev-again", "prod", "dev-first")], overlays=None)
+assemble("assemble-scope-shared-every-earlier-listing", "§4",
+         "Three sources list one project in their secretScopes: the first for dev, the second for prod, the third "
+         "for dev again, and the standard declares no scopes. Each source alone is valid. Read together in source "
+         "order, the second listing is for an environment read earlier than it, dev, and the third is for an "
+         "environment read earlier than it, prod: both are REF-SECRET-SCOPE-SHARED, each in the source that holds "
+         "the later listing, though the third names the environment the first did. reading: a listing is shared "
+         "when any earlier listing of the project is for another environment, not only the first.",
+         FED_SHARED, SRC_SHARED,
+         report(False, [diag("REF-SECRET-SCOPE-SHARED", "registry", "/secretScopes/prod/gcp-sm/0", "scopes-2-prod"),
+                        diag("REF-SECRET-SCOPE-SHARED", "registry", "/secretScopes/dev/gcp-sm/0", "scopes-3-dev")],
+                REG_SHARED))
+
 
 def billing_bounds_row(identity, section, description, bounds_path, diagnostics, schema_refuses=False,
                        sources=None, federation=FED_A, registry_document=REG_A):

@@ -1865,6 +1865,48 @@
       "expected": "vectors/assemble-scope-widens/report.json"
     },
     {
+      "id": "assemble-scope-shared-every-earlier-listing",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Three sources list one project in their secretScopes: the first for dev, the second for prod, the third for dev again, and the standard declares no scopes. Each source alone is valid. Read together in source order, the second listing is for an environment read earlier than it, dev, and the third is for an environment read earlier than it, prod: both are REF-SECRET-SCOPE-SHARED, each in the source that holds the later listing, though the third names the environment the first did. reading: a listing is shared when any earlier listing of the project is for another environment, not only the first.",
+      "federation": "federation/scopes-three-sources.json",
+      "sources": {
+        "scopes-1-dev": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "dev-first/registry.json": "sources/billing/scopes-dev-first.json"
+          }
+        },
+        "scopes-2-prod": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "prod/registry.json": "sources/billing/scopes-prod.json"
+          }
+        },
+        "scopes-3-dev": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "dev-again/registry.json": "sources/billing/scopes-dev-again.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry-subset.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-scope-shared-every-earlier-listing/report.json"
+    },
+    {
       "id": "assemble-bound-form",
       "section": "§§6.1, 6.3",
       "operation": "assemble",

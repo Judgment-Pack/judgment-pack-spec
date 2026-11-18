@@ -1847,14 +1847,14 @@ class Validation:
                     seen.append(p)
         if bad:
             return False
-        listed: dict[str, str] = {}
+        listed: dict[str, set[str]] = {}
         for env in sorted(scopes):
             for store in scopes[env]:
                 for i, p in enumerate(scopes[env][store]):
-                    if p in listed and listed[p] != env:
+                    # §6.4: shared when listed for an environment read earlier, whichever listing that was.
+                    if listed.get(p, set()) - {env}:
                         self._reg("REF-SECRET-SCOPE-SHARED", pointer("secretScopes", env, store, i))
-                    else:
-                        listed.setdefault(p, env)
+                    listed.setdefault(p, set()).add(env)
         return True
 
     def _pins(self, v: dict) -> None:
@@ -3145,7 +3145,7 @@ class Assembly:
                 name, _ = entry_map[i]
                 self.diags.append(diag("FED-ENVIRONMENT-GAP", "value", pointer(*at), source=name,
                                        entry=entry_name(assembled["entries"][i]), environment=env))
-        listed: dict[str, str] = {}
+        listed: dict[str, set[str]] = {}
         for src in self.sources:
             scopes = src.registry.get("secretScopes") if src.registry else None
             if not isinstance(scopes, dict):
@@ -3153,10 +3153,11 @@ class Assembly:
             for env in sorted(scopes):
                 for store in scopes[env]:
                     for i, p in enumerate(scopes[env][store]):
-                        if p in listed and listed[p] != env:
+                        # §4 step 6: shared when listed for an environment read earlier, whichever listing that was.
+                        if listed.get(p, set()) - {env}:
                             self.diags.append(diag("REF-SECRET-SCOPE-SHARED", "registry",
                                                    pointer("secretScopes", env, store, i), source=src.name))
-                        listed.setdefault(p, env)
+                        listed.setdefault(p, set()).add(env)
 
     # Step 7 ---------------------------------------------------------------------------------------
 

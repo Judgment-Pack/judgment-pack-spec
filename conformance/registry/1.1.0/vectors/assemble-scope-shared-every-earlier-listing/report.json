@@ -1,0 +1,9 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "registry": {"digest": "sha256:33169615184b20ff755c4e9b465ee61775fdf812c27e3f31085b0b2ec0e7871a"},
+  "diagnostics": [
+    {"code": "REF-SECRET-SCOPE-SHARED", "severity": "error", "location": {"document": "registry", "source": "scopes-2-prod", "pointer": "/secretScopes/prod/gcp-sm/0"}},
+    {"code": "REF-SECRET-SCOPE-SHARED", "severity": "error", "location": {"document": "registry", "source": "scopes-3-dev", "pointer": "/secretScopes/dev/gcp-sm/0"}}
+  ]
+}
