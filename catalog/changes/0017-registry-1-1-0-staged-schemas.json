@@ -1,0 +1,59 @@
+{
+  "reason": "Staged with the proposed registry format 1.1.0 (spec/registry-1.1.0.md): the closed schemas of its documents and the definitions they share. No bundle carries them and the site does not serve them; format 1.0.0 and every released format are unchanged.",
+  "changes": [
+    {
+      "path": "schema/registry/1.1.0/assembled-index.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:f41aa6d70666292c4549e08579f5756db4a64189998523bffbe03279bde50f7c"
+    },
+    {
+      "path": "schema/registry/1.1.0/bounds.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:6548752130b84e817ab8894a407d702d7cca9d81f682517f5dedea202440d34f"
+    },
+    {
+      "path": "schema/registry/1.1.0/common.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:5938be74f468f5f749063a876ff3bb47d62d1fa2a14a975bcb6a1388acc4600e"
+    },
+    {
+      "path": "schema/registry/1.1.0/federation-manifest.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:689f68c03397a15bb256602fd554f94cf3ed6b0eca6c8f9ce33df2243309161b"
+    },
+    {
+      "path": "schema/registry/1.1.0/lock-signature.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:bd6a75e90ac414548762a6275767fb237ff497f9618cae75a920b0520618c120"
+    },
+    {
+      "path": "schema/registry/1.1.0/lock.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:a8b6516f5d5e110042f110c3ab35b5a675ea1e5a7ee97b824caff60db16b1c71"
+    },
+    {
+      "path": "schema/registry/1.1.0/source-signature.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:a99487e85d319e1ae6bb7fec3e03671f1116e8113af0474812f499496d934920"
+    },
+    {
+      "path": "schema/registry/1.1.0/source-statement.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:6f03e597e876d696cdeed64ac268964b3f732d3f814a392a9ff58c80056e6581"
+    },
+    {
+      "path": "schema/registry/1.1.0/validation-report.schema.json",
+      "family": "registry",
+      "from": null,
+      "to": "sha256:81aabfc64bacae06f0c2d80ea0d92f6772e0145021302ab824e416ce92b926b7"
+    }
+  ]
+}
