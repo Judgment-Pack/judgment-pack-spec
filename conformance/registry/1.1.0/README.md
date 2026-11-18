@@ -1,12 +1,14 @@
-# Registry rows, format 1.1.0 (proposed)
+# Registry rows, format 1.1.0
 
-Hand-written rows for registry format `1.1.0`, status `proposed`
+Hand-written rows for registry format `1.1.0`, status `released`
 ([`spec/registry-1.1.0.md`](../../../spec/registry-1.1.0.md): assembly, the assembled index,
-bounds, locks and their signatures). They are staged beside the text and released with it, or
-not at all: no bundle carries them, the site serves none of them, and no conformance claim may cite
-them until a `registry-v1.1.0` tag releases the text (its §13). The `status` of `codes.json` and of
-`manifest.json` says `proposed`, as the text's does. Where a row and the text differ, the text
-governs. The rows of format `1.0.0`, in [`../1.0.0/`](../1.0.0/), are unchanged.
+bounds, locks and their signatures). They are published with the text's release,
+`registry-v1.1.0`, which is released and not stable (registry §13): that release's own bundle
+carries them with the text, the code list and the schemas, and its release record,
+`releases/registry-v1.1.0.json`, names the digest of every file here. No Core bundle carries them,
+and the site does not serve them. The `status` of `codes.json` and of `manifest.json` says
+`released`, as the text's does. Where a row and the text differ, the text governs. The rows of
+format `1.0.0`, in [`../1.0.0/`](../1.0.0/), are unchanged.
 
 Every input is synthetic: the ids, repositories, owners, projects and values are made up, under
 `example.invalid`. Every signature is made with a published seed of RFC 8032 §7.1: TEST 1 is the

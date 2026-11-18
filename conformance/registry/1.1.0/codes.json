@@ -1,7 +1,7 @@
 {
   "companion": "registry",
   "formatVersion": "1.1.0",
-  "status": "proposed",
+  "status": "released",
   "codes": [
     {"code": "FED-MANIFEST", "severity": "error", "status": "active", "section": "§3", "meaning": "the manifest is not of its form"},
     {"code": "FED-COMMIT", "severity": "error", "status": "active", "section": "§4", "meaning": "a commit is not 40 or 64 lowercase hexadecimal digits, or two sources of one repository identity are given different commits"},

@@ -43,6 +43,13 @@ Version `1.0.0` is released, on `registry-v1.0.0`, and not yet stable, the bar i
   harness since `v0.48.0`. No second, independently written reader, host or harness exists. The
   stable bar is two readers agreeing on every row (§15).
 
+Format `1.1.0`, released on `registry-v1.1.0` and not yet stable, adds assembly from several
+repositories, the assembled index, bounds, locks and signatures. Its text is
+[`registry-1.1.0.md`](registry-1.1.0.md), a second file of this companion with its own section
+numbers: format `1.1.0` is this text (§§1 to 17, whose rules are unchanged; §§13 to 15 and 17 add
+only pointers to that file) together with that file, and nothing in that file changes a rule of
+this one (§13).
+
 Core is unchanged by this document. A registry is not a pack, no Core document carries a registry
 selector, and every pack Core accepts it still accepts, with the same results. A facts document of
 §10 is an ordinary facts document to Core.
@@ -1459,6 +1466,13 @@ refuses, rather than misreads, one that does. Consumers of resolved registries d
 selectors they accept, and a producer writes one of them or refuses. A change to the facts
 document's bytes is a new `resolvedFormatVersion` (§2.1).
 
+**Format `1.1.0`.** Format `1.1.0` is this text together with
+[`registry-1.1.0.md`](registry-1.1.0.md), two files of one companion, each with its own section
+numbers; "registry §n" in that file names a section of this text. It is released, by this route,
+only on a `registry-v1.1.0` tag, and that file's §13 states what it adds and what it keeps: every
+document of §2.1 keeps its selector `"1.0.0"`, and nothing of format `1.0.0` is removed or changes
+meaning.
+
 ## 14. Machine-readable form and rows
 
 The code list and the rows are under
@@ -1491,6 +1505,9 @@ only its selector, since §11.5 names none of its other members. The facts docum
 none here: it is a facts document of Core. Every row document a reader admits or writes validates
 against its schema.
 
+Format `1.1.0`'s code list, rows and schemas are under `conformance/registry/1.1.0/` and
+`schema/registry/1.1.0/`, as [`registry-1.1.0.md`](registry-1.1.0.md) §14 says.
+
 [schemas]: https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/schema/registry/1.0.0
 
 ## 15. Conformance classes
@@ -1507,6 +1524,9 @@ A claim names its class, the exact release, and its complete rows, which that re
 identifies by the digest of their manifest and of every row file (§13); a class without rows is
 defined, and not claimable. The pack check (§10.5) is in no class. The stable bar is two
 independently written readers agreeing on every row of a class.
+
+Format `1.1.0` adds five classes, the assembler, the index checker, the lock writer, the lock
+checker and the lock signature verifier, which [`registry-1.1.0.md`](registry-1.1.0.md) §15 defines.
 
 ## 16. Security and privacy
 
@@ -1569,7 +1589,10 @@ independently written readers agreeing on every row of a class.
   the reference harness does (§11.5);
 - the vector layout and its marker `expected/~empty` of a run that writes no files (§11.5), which
   the reference harness (`v0.48.0`) reads; RFC 0036 §5 names the files and gives no marker, and git
-  keeps no empty `expected/`.
+  keeps no empty `expected/`;
+- format `1.1.0` is this text together with [`registry-1.1.0.md`](registry-1.1.0.md), two files of
+  one companion, each with its own section numbers (§13), so that every code meaning and schema
+  citation of that file stays as its review accepted it.
 
 **Open:**
 

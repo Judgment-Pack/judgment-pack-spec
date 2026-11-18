@@ -120,6 +120,22 @@ here.
   a cross-vendor claim). The RFCs' questions sections become Settled questions, and both stay Drafts. It is
   normative for nothing until `registry-v1.1.0`, and format `1.0.0` and `spec/registry.md` are
   unchanged. No schema, code list, row or reader exists.
+- **The registry companion's format `1.1.0`, released as `registry-v1.1.0`** (status `released`,
+  and not stable; release notes `releases/registry-v1.1.0.md`). Format `1.1.0` is `spec/registry.md`
+  (its §§1 to 17, whose rules are unchanged; §§13 to 15 and 17 add only pointers to the second
+  file) together with `spec/registry-1.1.0.md`, two files of one companion,
+  each with its own section numbers. Both texts' status sentences, the code list and the rows'
+  manifest say `released`, the rows' README and the second reader no longer say proposed, and no
+  schema's title or description says draft, staged, proposed or not released. Its release record,
+  `releases/registry-v1.1.0.json`, names each schema's `$id` and the SHA-256 of both texts, the
+  rows' README, format `1.0.0`'s rows' README, every schema, the code list and every row file;
+  format `1.0.0`'s schemas, code list and rows, which the bundle carries, must be the bytes the
+  record of `registry-v1.0.0` pins. The release builder knows both
+  formats: a `registry-v1.1.0` tag releases format `1.1.0`, and a `registry-v1.0.0` tag still gives
+  the bytes it gave. The site serves each format's schemas at their `$id` once that format is
+  released, and a change record names the nine schemas' new digests. The stable bar is unchanged:
+  two independently written readers agreeing on every row of a class (§15). Format `1.0.0`, Core,
+  its bundles and its corpora are unchanged.
 - **The registry companion's first release, `registry-v1.0.0`** (registry format `1.0.0`, status
   `released`, and not stable; release notes `releases/registry-v1.0.0.md`). The text's status
   sentence, the code list and the rows' manifest say `released`, the rows' README and its heading

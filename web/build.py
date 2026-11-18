@@ -2902,28 +2902,28 @@ def release_builder():
 
 
 def registry_schema_sources(root: Path = ROOT) -> tuple[str, ...]:
-    """The registry's schemas, once the companion is released with exactly these schemas.
+    """The registry's schemas, of each format released with exactly these schemas.
 
-    Like Policy's, they are packaged on their own scoped tag and served at their `$id`. The rows'
-    manifest says `proposed` until the commit a registry tag names (spec/registry.md section 13),
-    and that commit adds the tag's release record. A URL served once keeps its bytes, so the site
-    serves the schemas only when the manifest says `released` and a registry release record of
-    their format names these schemas with these bytes; otherwise it serves none. A site built
-    before that commit serves none, and so does one built after a schema changed with no record
-    for the change.
+    Like Policy's, they are packaged on their own scoped tag and served at their `$id`. A format's
+    rows' manifest says `proposed` until the commit a registry tag of that format names
+    (spec/registry.md section 13), and that commit adds the tag's release record. A URL served once
+    keeps its bytes, so the site serves a format's schemas only when its manifest says `released`
+    and a registry release record of that format names these schemas with these bytes; otherwise it
+    serves none of that format. A site built before that commit serves none of the format, and so
+    does one built after a schema changed with no record for the change. A record that cannot be
+    read, or that names a format the release builder does not know, serves none at all.
     """
-    try:
-        rows = json.loads((root / "conformance/registry/1.0.0/manifest.json").read_text("utf-8"))
-    except (OSError, ValueError):
-        return ()
-    if not isinstance(rows, dict) or rows.get("status") != "released":
-        return ()
     builder = release_builder()
+    served: dict[str, tuple[str, ...]] = {}
     for path in sorted((root / "releases").glob("registry-v*.json")):
         tag = path.name[: -len(".json")]
         if not builder.is_registry_tag(tag):
             continue
         try:
+            form = builder.registry_format(builder.release_version(tag))
+            rows = json.loads((root / form.root / "manifest.json").read_text("utf-8"))
+            if not isinstance(rows, dict) or rows.get("status") != "released":
+                continue
             release = json.loads(path.read_text("utf-8"))
             tree = builder.registry_record(builder.release_version(tag), tag, root)
         except (OSError, ValueError, TypeError, AttributeError, KeyError):
@@ -2931,8 +2931,10 @@ def registry_schema_sources(root: Path = ROOT) -> tuple[str, ...]:
         if (isinstance(release, dict) and release.get("tag") == tag
                 and release.get("formatVersion") == tree["formatVersion"]
                 and builder.same_registry_schemas(release, tree)):
-            return tuple(f"{builder.REGISTRY_SCHEMA_ROOT}/{name}.schema.json" for name in sorted(tree["schemas"]))
-    return ()
+            served[form.version] = tuple(f"{form.schema_root}/{name}.schema.json"
+                                         for name in sorted(tree["schemas"]))
+    order = sorted(served, key=lambda version: tuple(int(number) for number in version.split(".")))
+    return tuple(source for version in order for source in served[version])
 
 
 CANONICAL_SCHEMA_SOURCES = (

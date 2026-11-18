@@ -1,4 +1,4 @@
-"""A second reader of the registry companion, format 1.1.0, status proposed (spec/registry-1.1.0.md).
+"""A second reader of the registry companion, format 1.1.0, status released (spec/registry-1.1.0.md).
 
 It was written from the text alone: spec/registry-1.1.0.md, the format 1.0.0 text it builds on
 (spec/registry.md: admission, canonical form, kind declarations, the schema and pattern subsets,

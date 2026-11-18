@@ -1,6 +1,6 @@
-"""The rows and schemas of registry format 1.1.0, proposed (conformance/registry/1.1.0/, schema/registry/1.1.0/).
+"""The rows and schemas of registry format 1.1.0, released (conformance/registry/1.1.0/, schema/registry/1.1.0/).
 
-They are staged with spec/registry-1.1.0.md, which governs where they differ. These tests hold them to
+They are released with spec/registry-1.1.0.md, which governs where they differ. These tests hold them to
 the parts of the text that need no reader: every schema is a JSON Schema 2020-12 schema under its
 `$id`; every row document is admitted or refused by the schema its selector names, as its row says;
 codes.json is the text's section 12, and the rows use every code of it and no code of neither format;
@@ -38,8 +38,7 @@ MANIFEST = json.loads((BASE / "manifest.json").read_text(encoding="utf-8"))
 CODES_DOCUMENT = json.loads((BASE / "codes.json").read_text(encoding="utf-8"))
 CODES = {item["code"]: item for item in CODES_DOCUMENT["codes"]}
 OLD_CODES = {item["code"]: item for item in json.loads((OLD / "codes.json").read_text(encoding="utf-8"))["codes"]}
-STAGED = ("Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, "
-          "and served by no bundle and no site. ")
+RELEASED = "Released on registry-v1.1.0 with spec/registry-1.1.0.md, which governs where they differ. "
 
 # Section 2: each document's selector, the value it takes, and the schema that holds it.
 SELECTORS = {
@@ -267,8 +266,8 @@ class Schemas(unittest.TestCase):
                 Draft202012Validator.check_schema(schema)
                 self.assertEqual("https://json-schema.org/draft/2020-12/schema", schema["$schema"])
                 self.assertEqual(NAMESPACE + name, schema["$id"])
-                self.assertTrue(schema["title"].startswith("DRAFT Registry companion 1.1.0: "))
-                self.assertTrue(schema["description"].startswith(STAGED))
+                self.assertTrue(schema["title"].startswith("Registry companion 1.1.0: "))
+                self.assertTrue(schema["description"].startswith(RELEASED))
 
     def test_schemas_close_every_object_they_define(self) -> None:
         def walk(node, where):
@@ -356,9 +355,9 @@ class Codes(unittest.TestCase):
         self.assertFalse(set(CODES) & set(OLD_CODES))
 
     def test_the_text_codes_json_and_the_manifest_say_one_status(self) -> None:
-        self.assertIn("This text is registry format `1.1.0`, status `proposed`.", SPEC.read_text(encoding="utf-8"))
+        self.assertIn("This text is registry format `1.1.0`, status `released`.", SPEC.read_text(encoding="utf-8"))
         for value in (CODES_DOCUMENT, MANIFEST):
-            self.assertEqual(("registry", "1.1.0", "proposed"),
+            self.assertEqual(("registry", "1.1.0", "released"),
                              (value["companion"], value["formatVersion"], value["status"]))
 
     def test_every_code_is_used_and_every_used_code_is_listed(self) -> None:

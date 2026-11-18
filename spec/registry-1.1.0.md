@@ -9,21 +9,25 @@ assembled index that records which commit of each was read, bounds that a reposi
 tighten, a lock that pins a registry and what it depends on, and the signatures that vouch for a
 lock and for each repository's part of it.
 
-This text is registry format `1.1.0`, status `proposed`. It is normative for nothing, and no
-conformance claim may cite it. It becomes normative only when a registry tag releases it,
-`registry-v1.1.0`, by the companion's route (registry §13). At that release format `1.1.0` is
-`registry.md` (its §§1 to 17, unchanged) together with this text: two files of one companion,
-each with its own section numbers. Until then `registry.md` is the released `1.0.0` text, and
-nothing here changes it.
+This text is registry format `1.1.0`, status `released`. A text no registry tag released is
+normative for nothing, and no conformance claim may cite it. This text, released on
+`registry-v1.1.0` by the companion's route (registry §13), is normative for the conformance classes
+of §15, and for nothing else. At that release format `1.1.0` is
+`registry.md` (its §§1 to 17, whose rules are unchanged; its §§13 to 15 and 17 add only pointers
+to this text) together with this text: two files of one companion, each with its own section
+numbers. `registry.md` alone remains the `1.0.0` text, released on
+`registry-v1.0.0`, and nothing here changes it.
 
 Its design records are [RFC 0039](../rfcs/0039-federated-registry.md) (assembly, the index and
 bounds) and [RFC 0040](../rfcs/0040-registry-locks-and-signatures.md) (locks and signatures). Both
-are Drafts. Every question either record left open is decided here, as §17 lists. Where this text
-and a record differ, this text governs.
+were accepted on 2026-11-18. Every question either record left open is decided here, as §17
+lists. Where this text and a record differ, this text governs.
 
 This text is kept as its own companion file with its own section numbers, so every code meaning
 and schema citation stays as accepted. The closed schemas of its documents, its code list and its
-rows are published with it, at status `proposed` (§14).
+rows are published with it, at status `released` (§14). Version `1.1.0` is released, on
+`registry-v1.1.0`, and not yet stable: the stable bar is two independently written readers
+agreeing on every row of a class (§15).
 
 Changes after acceptance:
 
@@ -41,6 +45,10 @@ Changes after acceptance:
   own section numbers, rather than one merged document; no rule, code, order or bound changes.
 - Status, §§14, 15 and 17: the schemas, the code list and the rows, published since, are no
   longer described as unpublished.
+- Status: the design records, RFCs 0039 and 0040, are accepted rather than Drafts; no rule, code,
+  order or bound changes.
+- Status: `registry.md`'s §§1 to 17 are described as keeping their rules, with pointers to this
+  text added in §§13 to 15 and 17, rather than as unchanged.
 
 ## 1. Conventions
 
@@ -966,7 +974,7 @@ each signature, and no document content.
 The code list of §12 with each code's severity and status, the closed schemas of the documents of
 §2, and hand-written, synthetic rows for each class of §15 are under `conformance/registry/1.1.0/`
 and `schema/registry/1.1.0/`, as registry §14 has them for `1.0.0`. They are published with this
-text, at status `proposed`, and the release that publishes this text publishes them. Signing rows use RFC 8032 §7.1 TEST 1's
+text, at status `released`, by the release that publishes this text, `registry-v1.1.0`. Signing rows use RFC 8032 §7.1 TEST 1's
 published seed, and further published seeds for the repository and wrong-key rows, so that any
 reader can reproduce them; no private key of anyone's is recorded. A verifier's record is part of a
 row's input and of its expected output.

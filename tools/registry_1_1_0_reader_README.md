@@ -1,7 +1,7 @@
 # Registry 1.1.0 second reader
 
-`registry_1_1_0_reader.py` reads registry companion format `1.1.0`, status `proposed`
-([`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md)). It assembles, checks an index, writes,
+`registry_1_1_0_reader.py` reads registry companion format `1.1.0`, status `released`
+([`spec/registry.md`](../spec/registry.md) with [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md)). It assembles, checks an index, writes,
 checks and covers a lock, and verifies a lock with its signatures, and it gives each row under
 [`conformance/registry/1.1.0/`](../conformance/registry/1.1.0/) its result.
 [`tests/test_registry_1_1_0_reader.py`](../tests/test_registry_1_1_0_reader.py) runs every row
