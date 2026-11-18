@@ -12,7 +12,12 @@ further), a nesting depth of 128 while parsing, the 64-character number bound wi
 number out, `max` before any value is formed, and the value bound `L` before the `afterUnknown`
 pointers of a resource are written.
 
-Where the text does not say a form, the reader takes the one named in a comment marked READING.
+It is a test reader: its memory grows with `maxBytes`, since it holds the parsed file, and it is not
+for production files.
+
+Where the text does not say a form, the reader takes the one named in a comment marked READING. The
+text has since settled the readings this reader took on the resource members, the module shape, the
+type names, `actions` and the batch's facts bound (§3 step 4, §5, §8), and each now cites it.
 
     declaration = read_declaration(declaration_bytes)    # raises Malformed
     result = read(file_bytes, declaration)               # Acquired or Refused
@@ -309,14 +314,14 @@ def check_declaration(value: Any) -> Declaration:
         raise Malformed("document")
     max_bytes = _integer(value["maxBytes"], 1, MAX_BYTES_LIMIT) if "maxBytes" in value else MAX_BYTES_DEFAULT
     select = value["select"]
-    # READING: §5 lists `select`'s members; a member it does not list makes `select` malformed.
+    # READING: §5 lists `select`'s members; a member it does not list makes `select` malformed (a vector
+    # holds this).
     if not isinstance(select, dict) or not {"types"} <= set(select) <= {"types", "mode", "address", "actions", "max"}:
         raise Malformed("select")
     types = select["types"]
-    # READING: a resource type name is a string; §5 does not say whether the empty string is one, and this
-    # reader takes it as one.
-    if not (isinstance(types, list) and 1 <= len(types) <= TYPES_LIMIT and all(isinstance(t, str) for t in types)
-            and len(set(types)) == len(types)):
+    # §5: a non-empty array of at most 64 distinct names, each a non-empty string.
+    if not (isinstance(types, list) and 1 <= len(types) <= TYPES_LIMIT
+            and all(isinstance(t, str) and t for t in types) and len(set(types)) == len(types)):
         raise Malformed("types")
     mode = select.get("mode", "managed")
     if not isinstance(mode, str) or mode not in ("managed", "data"):
@@ -328,7 +333,7 @@ def check_declaration(value: Any) -> Declaration:
     if "actions" in select:
         if document != "plan":
             raise Malformed("actions on a state")
-        # READING: `actions` is an array whose items are each one of the five names.
+        # §5: an array of names from the five, possibly empty (it then keeps no change), read as a set.
         listed = select["actions"]
         if not (isinstance(listed, list) and all(isinstance(a, str) and a in ACTIONS for a in listed)):
             raise Malformed("actions")
@@ -649,7 +654,7 @@ def address_matches(pattern: str, address: str) -> bool:
     """`*` matches any run of characters other than `.`, `[` and `]`, and every other character matches
     itself; the pattern matches the whole address. A set of pattern positions is advanced one character
     at a time, so no input backtracks.
-    READING: a run may be empty."""
+    READING: a run may be empty (a vector holds this)."""
     stars = 0
     literal: dict[str, int] = {}
     for i, c in enumerate(pattern):
@@ -705,17 +710,19 @@ def _deposed_key(item: dict[str, Any], member: str) -> str | None:
 
 
 def _identity(item: dict[str, Any]) -> None:
-    # READING: a resource carries `address`, `type`, `name`, `mode` and `provider_name` as strings, the
-    # members its object of §6 is made from; a resource without them is not of its document's shape.
+    # §3 step 4: `address`, `type`, `name`, `mode` and `provider_name` are strings, which may be empty and
+    # are not checked against one another; `index`, when present, is a string or a number.
     for member, _ in _IDENTITY:
         if not isinstance(item.get(member), str):
             raise _Refusal("TF-DOCUMENT")
+    if "index" in item and not isinstance(item["index"], (str, Number)):
+        raise _Refusal("TF-DOCUMENT")
 
 
 def _state_resources(values: Any) -> list[dict[str, Any]]:
     """Every resource under `values.root_module` and its `child_modules`, recursively.
-    READING: a module, when present, is an object; its `resources` and `child_modules`, when present,
-    are arrays of objects; anything else is not of a state's shape."""
+    §3 step 4: a module, when present, is an object, which needs no `address`; its `resources`, when
+    present, is an array of objects, and its `child_modules`, when present, an array of modules."""
     found: list[dict[str, Any]] = []
     if "root_module" not in values:
         return found
@@ -997,8 +1004,8 @@ def batch(data: bytes, declaration: Declaration) -> bytes | Refused:
     """§8: one line per selected resource, the JCS bytes of {"facts", "id"} and a line feed (registry
     §10.2). Every selected resource's id is checked for 1 to 256 bytes of UTF-8 before any facts document
     is held to the facts bound, and either refusal refuses the whole run before any line is written.
-    READING: a facts document over the bound refuses the run with FACTS-DOCUMENT-LIMIT, carrying what
-    FACTS-ID-LIMIT carries."""
+    A facts document over the bound refuses the run with FACTS-DOCUMENT-LIMIT, carrying what FACTS-ID-LIMIT
+    carries."""
     result = read(data, declaration)
     if isinstance(result, Refused):
         return result

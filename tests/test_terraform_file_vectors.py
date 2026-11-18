@@ -29,8 +29,9 @@ SPEC = ROOT / "spec" / "terraform-file.md"
 CODE = re.compile(r"TF-[A-Z]+(?:-[A-Z]+)*")
 REFUSALS = {"TF-SIZE", "TF-JSON", "TF-FORMAT", "TF-DOCUMENT", "TF-SENSITIVITY", "TF-SELECT-BOUND", "TF-NUMBER",
             "TF-VALUE-LIMIT"}
-# §8: the batch's own refusal, the registry companion's code, and not one of §9's.
-BATCH_CODES = {"FACTS-ID-LIMIT"}
+# §8: the batch's own refusals, the registry companion's codes, and not §9's: an id outside its bound, then a
+# facts document over the facts bound.
+BATCH_CODES = {"FACTS-ID-LIMIT", "FACTS-DOCUMENT-LIMIT"}
 DEFAULT_MAX_BYTES = 67108864
 ROW_MEMBERS = {"id", "group", "section", "operation", "class", "formatTable", "description", "declaration",
                "expected"}

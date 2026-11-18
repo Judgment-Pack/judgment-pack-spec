@@ -51,8 +51,20 @@ here.
   before it writes what they bound. `tests/test_terraform_file_vectors.py` now runs every one of the
   188 vectors through it, and it gives each one's expected result exactly, so the reading's
   results are no longer checked for form only. The companion's status says a second reader is in
-  the repository and agrees on every vector; it is a same-vendor reader, not a cross-vendor claim.
-  The reading stays `proposed`, and nothing about its stability changes.
+  the repository and agrees on every vector; it is a same-vendor reader, not a cross-vendor claim,
+  and a test reader, whose memory grows with `maxBytes`, not one for production files. The reading
+  stays `proposed`, and nothing about its stability changes.
+- **The `terraform-file` reading settles five forms its text left open** (`spec/terraform-file.md`
+  §3 step 4, §§5 and 8; #369), each as the reference runtime's reader already reads it, and each
+  with vectors that decide it: 19 more, 207 in all. A resource's `address`, `type`, `name`, `mode`
+  and `provider_name` are strings, which may be empty, and its `index`, when present, a string or a
+  number; `mode` is not restricted when read, so a resource of another mode is read and never
+  selected. In a state, `values.root_module` and each child module, when present, is an object that
+  needs no `address`, whose `resources` and `child_modules`, when present, are arrays. A type name
+  of `select` is a non-empty string. `actions` may repeat a name, read as a set, and an empty
+  `actions` selects nothing. In the batch, every selected resource's id is checked, an empty one
+  among those refused, before any facts document is held to the facts bound, and either refusal,
+  `FACTS-ID-LIMIT` or `FACTS-DOCUMENT-LIMIT`, refuses the whole run before any line is written.
 - RFC 0039, a Draft, proposes a federated registry as registry format `1.1.0`: a manifest of
   sources (one standard repository, the rest service repositories), an assembly from bytes the
   caller supplies at full commit ids into one ordinary `1.0.0` registry, and an index that records

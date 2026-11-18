@@ -22,7 +22,8 @@ only, reads bytes only, and runs no program. `tests/test_terraform_file_vectors.
 vector through it, and each must give its expected result exactly: a refusal's code and members, an
 accepted read's record and value, the value's canonical bytes, and a batch's bytes. It gives every
 one. It was written by a model from the drafting vendor: a same-vendor reader, not a cross-vendor
-claim.
+claim. It is a test reader: its memory grows with `maxBytes`, since it holds the parsed file, and it
+is not for production files.
 
 The same tests hold `codes.json` to the text's §9 table and `formats.json` to its §4 table, the
 manifest to the files, and each expected result to its form: an acquisition record of its own
@@ -103,18 +104,18 @@ A value nested deeper than sixteen is written on one line, as its input is.
 | Group | Vectors | What they hold |
 | --- | --- | --- |
 | `formats` | 14 | every row of the table, and versions outside it (§3 step 3, §4) |
-| `plans` | 8 | changes, actions, unknown values and plans with nothing to change (§§5, 6) |
-| `state` | 6 | the state's shape and the members it is not to have (§3 step 4) |
-| `document` | 13 | plans not of their shape, changes and `after_unknown` not of their form (§3 step 4) |
+| `plans` | 10 | changes, actions (a repeated name among them), unknown values and plans with nothing to change (§3 step 4, §§5, 6) |
+| `state` | 15 | the state's shape, its modules and resources, and the members it is not to have (§3 step 4) |
+| `document` | 16 | plans not of their shape, and resources, changes and `after_unknown` not of their form (§3 step 4) |
 | `sensitivity` | 19 | missing and malformed mirrors, and removal over the whole read section (§3 steps 5, 6) |
 | `mirrors` | 8 | mirrors whose shape differs from the value (§3 step 6, §12) |
 | `diagnostics` | 2 | a refusal carries no name read from the file (§3) |
 | `json` | 17 | the strict JSON of §3 step 2: depth, BOM, surrogates, duplicates, trailing bytes |
 | `size` | 9 | files and streams of `maxBytes` and one byte more, the default `maxBytes` among them (§3 step 1, §12) |
-| `selection` | 16 | types, mode, the address pattern and `max` (§5) |
+| `selection` | 17 | types, mode (a mode neither `managed` nor `data` among them), the address pattern and `max` (§5) |
 | `numbers` | 9 | normal forms, the 64-character bound and the `1e63` growth (§6) |
 | `value-limit` | 5 | the value bound `L` and the charge on `afterUnknown` pointers, one exactly at it (§6, §12) |
 | `deposed` | 8 | deposed objects in a plan and a state, and keys not of their form (§3 step 4, §12) |
-| `batch` | 8 | lines, the 256-byte id bound, and refusals before any line (§8, §12) |
-| `declarations` | 39 | §2's members held to their forms, integer literals among them (§§2, 5) |
+| `batch` | 11 | lines, the id bound, the facts bound, and refusals before any line (§8, §12) |
+| `declarations` | 40 | §2's members held to their forms, integer literals among them (§§2, 5) |
 | `order` | 7 | which step refuses first, and code-point order of ids (§3, §6) |

@@ -1,0 +1,27 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "1.9.8",
+  "values": {
+    "root_module": {
+      "child_modules": [
+        {
+          "resources": [
+            {
+              "address": "module.logs.google_storage_bucket.archive",
+              "mode": "managed",
+              "type": "google_storage_bucket",
+              "name": "archive",
+              "provider_name": "registry.terraform.io/hashicorp/google",
+              "schema_version": 0,
+              "values": {
+                "location": "EU",
+                "name": "example-project-archive"
+              },
+              "sensitive_values": {}
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
