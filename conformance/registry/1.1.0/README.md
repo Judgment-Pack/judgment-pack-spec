@@ -14,8 +14,10 @@ standard owner's key and a single registry's signer, TEST 2 the repository's, an
 expected set names. No other private key or seed exists here, so any reader can make every
 signature again.
 
-They are not recordings. Every expectation was written by hand from the text. No reader of format
-`1.1.0` exists yet, so none has been run against them. [`tools/registry_1_1_0_rows.py`](../../../tools/registry_1_1_0_rows.py)
+They are not recordings. Every expectation was written by hand from the text, before any reader of
+format `1.1.0` existed. [`tools/registry_1_1_0_reader.py`](../../../tools/registry_1_1_0_reader.py),
+a second reader written from the text afterwards, gives every row its expected result
+([`tests/test_registry_1_1_0_reader.py`](../../../tests/test_registry_1_1_0_reader.py)). [`tools/registry_1_1_0_rows.py`](../../../tools/registry_1_1_0_rows.py)
 holds the rows as data and writes this directory, `README.md` and `codes.json` aside. It only lays
 the data out and computes what is mechanical: digests, resolved digests, source statements and
 signatures. An edit to the rows is an edit to that file, run again.
