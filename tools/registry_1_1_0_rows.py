@@ -805,19 +805,41 @@ assemble("assemble-path-missing", "§4",
          report(False, [diag("FED-SOURCE-MISSING", "federation", "/sources/0/bounds")]))
 
 known_many = []
+known_locks = []
 for number_ in range(257):
     identity = f"https://example.invalid/registries/r-{number_:03d}"
     fake_registry = {"id": identity, "version": "1.0.0", "digest": sha(identity.encode("utf-8"))}
-    known_many.append(canonical(f"vectors/assemble-known-limit/indexes/index-{number_:03d}.json", {
+    known_index = {
         "indexFormatVersion": "1.1.0", "federation": {"digest": sha(b"federation " + identity.encode("utf-8"))},
         "registry": fake_registry,
         "sources": [{"name": "standard", "role": "standard", "repository": PLATFORM_REPO, "commit": SC,
-                     "documents": []}]}))
+                     "documents": []}]}
+    known_many.append(canonical(f"vectors/assemble-known-limit/indexes/index-{number_:03d}.json", known_index))
+    known_item = known_index["sources"][0]
+    known_locks.append(canonical(f"vectors/assemble-known-lock-limit/locks/lock-{number_:03d}.json", {
+        "lockFormatVersion": "1.1.0", "serial": 1, "registry": fake_registry, "kinds": [],
+        "resolved": [{"environment": "dev", "digest": sha(b"resolved " + identity.encode("utf-8"))}],
+        "index": {"digest": digest(known_index)},
+        "sources": [{"name": "standard", "role": "standard", "repository": PLATFORM_REPO,
+                     "statement": digest({"repository": known_item["repository"], "commit": known_item["commit"],
+                                          "documents": known_item["documents"]}),
+                     "signature": sha(b"signature " + identity.encode("utf-8"))}]}))
 assemble("assemble-known-limit", "§4",
          "A list of 257 known assembled indexes is FED-KNOWN-LIMIT, before any source is read. reading: located at "
          "the manifest's root, the assembly as a whole.",
          FED_A, SRC_A, report(False, [diag("FED-KNOWN-LIMIT", "federation", "")]),
          known={"indexes": known_many, "locks": []})
+assemble("assemble-known-lock-limit", "§4",
+         "A known list of no index and 257 locks is FED-KNOWN-LIMIT, before any source is read: the locks are "
+         "counted on their own, as the indexes are. reading: located at the manifest's root, the assembly as a "
+         "whole.",
+         FED_A, SRC_A, report(False, [diag("FED-KNOWN-LIMIT", "federation", "")]),
+         known={"indexes": [], "locks": known_locks})
+assemble("assemble-known-at-limit", "§4",
+         "A known list of exactly 256 indexes and 256 locks, none of whose registries is a source's, is admitted: "
+         "the assembly is the two-source row's, valid, and writes the same registry and index.",
+         FED_A, SRC_A, report(True, (), REG_A), writes=OUT_A,
+         known={"indexes": known_many[:256], "locks": known_locks[:256]})
 
 COPY_REG_7_0_1 = pretty("sources/copies/registry-7.0.1.json", dict(REG_A, version="7.0.1"))
 assemble("assemble-source-assembled-by-index", "§4",
@@ -1145,6 +1167,15 @@ LA_T3_DOC = lock(7, REG_A, IDX_A, lock_sources(IDX_A, {"billing": SIG_BILLING_T3
 LA_T3 = write_lock("locks/assembled-7-billing-wrong-key.lock.json", LA_T3_DOC)
 LA_OC_DOC = lock(7, REG_A, IDX_A, lock_sources(IDX_A, {"billing": SIG_BILLING_OC, "standard": SIG_STANDARD}))
 LA_OC = write_lock("locks/assembled-7-billing-another-commit.lock.json", LA_OC_DOC)
+SIG_STANDARD_T2 = sign_source("signatures/standard-repository-key.json", IDX_A["sources"][1], SIGN2, PK2)
+LA_SR_DOC = lock(7, REG_A, IDX_A, lock_sources(IDX_A, {"billing": SIG_BILLING, "standard": SIG_STANDARD_T2}))
+LA_SR = write_lock("locks/assembled-7-standard-repository-key.lock.json", LA_SR_DOC)
+# A lock whose billing statement is the one the signature at another commit names, not the index's: signed by
+# the standard owner, so that only the statement rebuilt from the index tells it apart.
+statement_other = copy.deepcopy(LA_OC_DOC)
+statement_other["sources"][0]["statement"] = parse(FILES[SIG_BILLING_OC])["sourceDigest"]
+assert statement_other["sources"][0]["statement"] != LA_OC_DOC["sources"][0]["statement"]
+LA_SO = write_lock("vectors/verify-statement-another-commit/lock.json", statement_other)
 
 # ---------------------------------------------------------------------------------------------------
 # Lock writer (section 8). reading: a writer's refusal is compared by its code alone, since section 2.1 gives
@@ -1250,6 +1281,17 @@ two_standards["sources"][0]["role"] = "standard"
 IDX_TWO = canonical("vectors/check-index-two-standards/index.json", two_standards)
 L_TWO = canonical("vectors/check-index-two-standards/lock.json", lock(7, REG_A, two_standards, lock_sources(
     two_standards, {"billing": SIG_BILLING, "standard": SIG_STANDARD})))
+# An index the lock does not name: the two-source index with another manifest's digest, its registry digest and
+# items the lock's, so that its digest alone differs.
+other_federation = copy.deepcopy(IDX_A)
+other_federation["federation"]["digest"] = digest(document_of(FED_A_EXPLICIT))
+IDX_OTHER = canonical("vectors/check-index-digest-mismatch/index.json", other_federation)
+# An index the lock names by digest whose registry digest is another registry's, with the lock's items.
+other_registry = copy.deepcopy(IDX_A)
+other_registry["registry"]["digest"] = digest(REG_B)
+IDX_OTHER_REGISTRY = canonical("vectors/check-index-registry-mismatch/index.json", other_registry)
+L_OTHER_REGISTRY = write_lock("vectors/check-index-registry-mismatch/lock.json", lock(
+    7, REG_A, other_registry, lock_sources(other_registry, {"billing": SIG_BILLING, "standard": SIG_STANDARD})))
 GRANT_CHANGED = put("vectors/check-emitter-file-differs/grant.sh", b"#!/bin/sh\n# Synthetic: grants one more thing.\nexit 0\n")
 EXTRA_SQL = put("vectors/check-emitter-unlisted-file/extra.sql", b"-- Synthetic: a file the lock does not list.\n")
 
@@ -1313,6 +1355,14 @@ check("check-index-two-standards", "§9", "An index with two standard items, whi
       "LOCK-INDEX-MISMATCH. The index schema refuses it too. reading: located at the index's /sources.",
       assembled_check(L_TWO, index=IDX_TWO), report(False, [diag("LOCK-INDEX-MISMATCH", "index", "/sources")], REG_A),
       schema_refuses=[IDX_TWO])
+check("check-index-digest-mismatch", "§9", "An index whose digest is not the lock's index digest, though its "
+      "registry digest and items are the lock's: LOCK-INDEX-MISMATCH. reading: located at the lock's /index, as "
+      "LOCK-REGISTRY-MISMATCH is at the lock's /registry.", assembled_check(index=IDX_OTHER),
+      report(False, [diag("LOCK-INDEX-MISMATCH", "lock", "/index")], REG_A))
+check("check-index-registry-mismatch", "§9", "An index the lock names by digest whose registry digest is another "
+      "registry's than the lock's: LOCK-INDEX-MISMATCH. reading: located at the index's /registry/digest.",
+      assembled_check(L_OTHER_REGISTRY, index=IDX_OTHER_REGISTRY),
+      report(False, [diag("LOCK-INDEX-MISMATCH", "index", "/registry/digest")], REG_A))
 check("check-index-unlocked", "§9", "An index given for a lock that names none: LOCK-INDEX-UNLOCKED, so that no "
       "caller believes provenance was checked. reading: located at the index's root.", single_check(index=OUT_A["index"]),
       report(False, [diag("LOCK-INDEX-UNLOCKED", "index", "")], SINGLE_DOC))
@@ -1368,6 +1418,10 @@ coverage("coverage-file-other-source", "The same path, mode and digest, of anoth
 coverage("coverage-environment-missing", "Coverage is given no environment: LOCK-EXPECTED. reading: located at the "
          "lock's root.", {"lock": L42, "expect": SINGLE_EXPECT, "resolved": "single/resolved-prod.json"},
          report(False, [diag("LOCK-EXPECTED", "lock", "")]))
+coverage("coverage-not-canonical", "Coverage holds the lock to step 1 of section 9 first: a lock written indented is "
+         "LOCK-NOT-CANONICAL, although the resolved registry given is prod's, which the lock names. reading: "
+         "located at the lock's root.", {"lock": L42_PRETTY, "expect": PROD_EXPECT, "resolved": "single/resolved-prod.json"},
+         report(False, [diag("LOCK-NOT-CANONICAL", "lock", "")]))
 
 # ---------------------------------------------------------------------------------------------------
 # Lock signature verifier (sections 10 and 11). A record is the rows' own form: null for none, {"serial",
@@ -1495,6 +1549,11 @@ verify("verify-map-shares-a-key", "§11", "The map gives one key to two reposito
        "reading: located at the lock's root.",
        dict(ASSEMBLED_VERIFY, signers={"key": PK1, "repositories": {BILLING_REPO: PK2, LEDGER_REPO: PK2}}),
        refusal("LOCK-EXPECTED"), NO_RECORD, NO_RECORD)
+verify("verify-map-key-small-order", "§11", "The map gives the repository a key of small order, under which anyone "
+       "can forge: each key of the set is held to the trust rule, LOCK-SIG-EXPECTED-KEY, before anything is read. "
+       "reading: located at the lock's root.",
+       dict(ASSEMBLED_VERIFY, signers={"key": PK1, "repositories": {BILLING_REPO: SMALL_ORDER_KEY}}),
+       refusal("LOCK-SIG-EXPECTED-KEY"), NO_RECORD, NO_RECORD)
 
 # The lock signature (step 2) and its document (section 10.1).
 verify("verify-lock-signature-missing", "§11", "No lock signature document: LOCK-SIG-MISSING. reading: located at the "
@@ -1586,6 +1645,17 @@ verify("verify-index-missing", "§11", "An assembled lock verified without its i
        "LOCK-INDEX-MISSING. reading: located at /index, and no source signature is checked without the index the "
        "statements are rebuilt from.", no_index_verify, refusal("LOCK-INDEX-MISSING", pointer="/index"),
        NO_RECORD, NO_RECORD)
+verify("verify-index-digest-mismatch", "§11", "An index whose digest is not the lock's index digest, its registry "
+       "digest and items the lock's, so that every source signature is accepted: step 5 holds the index to step 6 "
+       "of section 9, LOCK-INDEX-MISMATCH. reading: located at the lock's /index, as LOCK-REGISTRY-MISMATCH is at "
+       "the lock's /registry.", dict(ASSEMBLED_VERIFY, index=IDX_OTHER),
+       refusal("LOCK-INDEX-MISMATCH", pointer="/index"), NO_RECORD, NO_RECORD)
+verify("verify-index-registry-mismatch", "§11", "An index the signed lock names by digest whose registry digest is "
+       "another registry's, its items the lock's, so that every source signature is accepted: step 5 holds the "
+       "index to step 6 of section 9, LOCK-INDEX-MISMATCH. reading: located at the index's /registry/digest.",
+       dict(ASSEMBLED_VERIFY, lock=L_OTHER_REGISTRY, lockSignatures=[L_OTHER_REGISTRY + ".sig.json"],
+            index=IDX_OTHER_REGISTRY),
+       refusal("LOCK-INDEX-MISMATCH", "index", "/registry/digest"), NO_RECORD, NO_RECORD)
 
 # The source signatures (step 6).
 verify("verify-source-signature-missing", "§11", "No source signature for the repository's item: LOCK-SIG-MISSING "
@@ -1594,6 +1664,25 @@ verify("verify-source-signature-missing", "§11", "No source signature for the r
 verify("verify-source-signature-twice", "§11", "The repository's source signature given twice: LOCK-SIG-EXTRA. "
        "reading: located at the signature document's root.",
        dict(ASSEMBLED_VERIFY, sourceSignatures=[SIG_BILLING, SIG_STANDARD, SIG_BILLING]),
+       refusal("LOCK-SIG-EXTRA", "signature"), NO_RECORD, NO_RECORD)
+verify("verify-source-signature-duplicate-within-cap", "§11", "The repository's source signature given twice and "
+       "the standard's not at all: three documents with the lock signature, within the lock's sources count plus "
+       "one, so each is read. The second copy for one item is LOCK-SIG-EXTRA, and the standard item that no "
+       "document matches is LOCK-SIG-MISSING: the set is refused, not trimmed. reading: LOCK-SIG-EXTRA is located "
+       "at the signature document's root, LOCK-SIG-MISSING at the lock's item.",
+       dict(ASSEMBLED_VERIFY, sourceSignatures=[SIG_BILLING, SIG_BILLING]),
+       report(False, [diag("LOCK-SIG-MISSING", "lock", "/sources/1"), diag("LOCK-SIG-EXTRA", "signature", "")]),
+       NO_RECORD, NO_RECORD)
+CAP_UNREAD = put("vectors/verify-signature-cap-unread/extra-signature.txt",
+                 FILES[SIG_STANDARD][:-2] + b"\\}\n")
+assert b"\\" in FILES[CAP_UNREAD]
+verify("verify-signature-cap-unread", "§11", "Four documents for a lock of two sources: the lock signature, one "
+       "source signature for each item, and last a document that holds a backslash and is not JSON. The one beyond "
+       "the lock's sources count plus one is LOCK-SIG-EXTRA before any is read, so it is never read and no "
+       "LOCK-SIG-DOCUMENT is reported, and the other three are accepted. reading: the document beyond the count is "
+       "the last given, the lock signature counted first; LOCK-SIG-EXTRA is located at the signature document's "
+       "root.",
+       dict(ASSEMBLED_VERIFY, sourceSignatures=[SIG_BILLING, SIG_STANDARD, CAP_UNREAD]),
        refusal("LOCK-SIG-EXTRA", "signature"), NO_RECORD, NO_RECORD)
 verify("verify-source-signature-stray", "§11", "A source signature given for a lock with no sources: LOCK-SIG-EXTRA. "
        "reading: located at the signature document's root.", {"floor": 1, "sourceSignatures": [SIG_BILLING]},
@@ -1618,6 +1707,23 @@ verify("verify-source-another-commit", "§11", "The repository's signature over 
        dict(ASSEMBLED_VERIFY, lock=LA_OC, lockSignatures=[LA_OC + ".sig.json"],
             sourceSignatures=[SIG_BILLING_OC, SIG_STANDARD]),
        refusal("LOCK-SIG-DIGEST-MISMATCH", "signature", "/sourceDigest"), NO_RECORD, NO_RECORD)
+verify("verify-statement-another-commit", "§11", "A lock, signed by the standard owner, whose statement digest for "
+       "the repository is the one its signature at another commit names, so that the lock's statement member and "
+       "the signature agree: step 5 holds the index to step 7 of section 9, LOCK-SOURCES-MISMATCH at the item, and "
+       "step 6 checks the signature against the statement rebuilt from the index's item, never against the lock's "
+       "statement member alone, LOCK-SIG-DIGEST-MISMATCH. reading: step 6 runs after step 5's mismatch, since the "
+       "report gives every signature's result and section 9 ends a check only at its steps 1 and 2; "
+       "LOCK-SIG-DIGEST-MISMATCH is located at /sourceDigest.",
+       dict(ASSEMBLED_VERIFY, lock=LA_SO, lockSignatures=[LA_SO + ".sig.json"],
+            sourceSignatures=[SIG_BILLING_OC, SIG_STANDARD]),
+       report(False, [diag("LOCK-SOURCES-MISMATCH", "lock", "/sources/0"),
+                      diag("LOCK-SIG-DIGEST-MISMATCH", "signature", "/sourceDigest")]), NO_RECORD, NO_RECORD)
+verify("verify-standard-signed-by-repository-key", "§11", "The standard source's statement signed by the "
+       "repository's key, a key of the set but not the one it names for the standard item, in a lock that names "
+       "that signature: LOCK-SIG-UNEXPECTED-KEY. reading: located at /publicKey.",
+       dict(ASSEMBLED_VERIFY, lock=LA_SR, lockSignatures=[LA_SR + ".sig.json"],
+            sourceSignatures=[SIG_BILLING, SIG_STANDARD_T2]),
+       refusal("LOCK-SIG-UNEXPECTED-KEY", "signature", "/publicKey"), NO_RECORD, NO_RECORD)
 
 # ---------------------------------------------------------------------------------------------------
 

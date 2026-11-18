@@ -1,0 +1,8 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "diagnostics": [
+    {"code": "LOCK-SOURCES-MISMATCH", "severity": "error", "location": {"document": "lock", "pointer": "/sources/0"}},
+    {"code": "LOCK-SIG-DIGEST-MISMATCH", "severity": "error", "location": {"document": "signature", "pointer": "/sourceDigest"}}
+  ]
+}
