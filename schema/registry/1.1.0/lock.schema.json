@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://judgmentpack.org/schema/registry/1.1.0/lock.schema.json",
-  "title": "DRAFT Registry companion 1.1.0: lock",
-  "description": "Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, and served by no bundle and no site. A lock (section 7), closed: the serial, the registry's identity, its pins, each environment's resolved digest and, for an assembly, the index and each source's statement and accepted signature, with the emitters the writer was given. A lock the schema refuses is LOCK-FORM.",
+  "title": "Registry companion 1.1.0: lock",
+  "description": "Released on registry-v1.1.0 with spec/registry-1.1.0.md, which governs where they differ. A lock (section 7), closed: the serial, the registry's identity, its pins, each environment's resolved digest and, for an assembly, the index and each source's statement and accepted signature, with the emitters the writer was given. A lock the schema refuses is LOCK-FORM.",
   "$comment": "The reader's to check: that the lock's bytes are its JCS bytes (LOCK-NOT-CANONICAL), that kinds are the registry's pins and resolved its environments in order, that sources are the index's in its order, that emitters are sorted by source and path and each one's files by path, and the bound of 1 MiB. The schema holds that sources is present exactly when index is, and that an emitter item has a source exactly in an assembled lock.",
   "type": "object",
   "additionalProperties": false,

@@ -1,0 +1,59 @@
+{
+  "reason": "Released with registry format 1.1.0 on registry-v1.1.0: each schema's title drops DRAFT and its description says released on registry-v1.1.0 with spec/registry-1.1.0.md rather than staged, proposed and served by no bundle and no site. No shape changes; the site serves each schema at its $id from this release on, and these are the bytes it serves.",
+  "changes": [
+    {
+      "path": "schema/registry/1.1.0/assembled-index.schema.json",
+      "family": "registry",
+      "from": "sha256:f41aa6d70666292c4549e08579f5756db4a64189998523bffbe03279bde50f7c",
+      "to": "sha256:2cdaa750f31e745159ecd96d76047aacfd13417d228bf292e9ad4860b33aaa75"
+    },
+    {
+      "path": "schema/registry/1.1.0/bounds.schema.json",
+      "family": "registry",
+      "from": "sha256:6548752130b84e817ab8894a407d702d7cca9d81f682517f5dedea202440d34f",
+      "to": "sha256:b48e5c28d95e767d956ebbc1cb657dd3fe163f071373ff9ba54371266b42cdad"
+    },
+    {
+      "path": "schema/registry/1.1.0/common.schema.json",
+      "family": "registry",
+      "from": "sha256:75cb40fe46986330ce8da318db5efb0379a27d104095d66ced59f6489c2bf009",
+      "to": "sha256:dd6595834c23b8d06da55380170c243eb1c388f07fac855ee648e3a48f613611"
+    },
+    {
+      "path": "schema/registry/1.1.0/federation-manifest.schema.json",
+      "family": "registry",
+      "from": "sha256:689f68c03397a15bb256602fd554f94cf3ed6b0eca6c8f9ce33df2243309161b",
+      "to": "sha256:d8c276f1840c830e15fbe13ede8ed822ce789e31e2b38d66a202139a46f80f22"
+    },
+    {
+      "path": "schema/registry/1.1.0/lock-signature.schema.json",
+      "family": "registry",
+      "from": "sha256:bd6a75e90ac414548762a6275767fb237ff497f9618cae75a920b0520618c120",
+      "to": "sha256:40405199655b806651c8d08abe3a2204a71e0ad48afb3655a87d4dcd06079f86"
+    },
+    {
+      "path": "schema/registry/1.1.0/lock.schema.json",
+      "family": "registry",
+      "from": "sha256:a8b6516f5d5e110042f110c3ab35b5a675ea1e5a7ee97b824caff60db16b1c71",
+      "to": "sha256:42ba5ce8633ba5061e608cc79c232b43d670ab03af99d2e12cec93e089b1ba49"
+    },
+    {
+      "path": "schema/registry/1.1.0/source-signature.schema.json",
+      "family": "registry",
+      "from": "sha256:a99487e85d319e1ae6bb7fec3e03671f1116e8113af0474812f499496d934920",
+      "to": "sha256:ac461db1d88166d6392bae5cda4d30860a2b6ffb00a69ddbd32d1f172a5cdb48"
+    },
+    {
+      "path": "schema/registry/1.1.0/source-statement.schema.json",
+      "family": "registry",
+      "from": "sha256:6f03e597e876d696cdeed64ac268964b3f732d3f814a392a9ff58c80056e6581",
+      "to": "sha256:5e449e583d842f3c25e4648a9a252a922a7c85ad483257d1b37f762498844138"
+    },
+    {
+      "path": "schema/registry/1.1.0/validation-report.schema.json",
+      "family": "registry",
+      "from": "sha256:81aabfc64bacae06f0c2d80ea0d92f6772e0145021302ab824e416ce92b926b7",
+      "to": "sha256:1469caf0661f1ef19a78dac6d7958f2e2b3e704747de506cd3d610eca66f4b74"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://judgmentpack.org/schema/registry/1.1.0/bounds.schema.json",
-  "title": "DRAFT Registry companion 1.1.0: bounds",
-  "description": "Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, and served by no bundle and no site. A bounds document (section 6.1), closed at every level: per kind, entry counts and fields, each a bound of section 6.2's rows with optional per-environment bounds (section 6.4). A bounds document the schema refuses is FED-BOUND-FORM, or FED-BOUND-NOT-COMPARABLE for a keyword of registry section 3.2's table in a bound.",
+  "title": "Registry companion 1.1.0: bounds",
+  "description": "Released on registry-v1.1.0 with spec/registry-1.1.0.md, which governs where they differ. A bounds document (section 6.1), closed at every level: per kind, entry counts and fields, each a bound of section 6.2's rows with optional per-environment bounds (section 6.4). A bounds document the schema refuses is FED-BOUND-FORM, or FED-BOUND-NOT-COMPARABLE for a keyword of registry section 3.2's table in a bound.",
   "$comment": "The reader's to check: that kinds are sorted by kind and each appears once, that fields are sorted by pointer and each appears once, that only the standard's bounds state maxAssemblyEntries, that a bounded kind is governed or pinned and a pointer reachable (section 6.1), that a per-environment member names an environment the manifest names and the repository serves (section 6.4), every comparison of sections 6.2 to 6.5, and the bound of 256 KiB.",
   "type": "object",
   "additionalProperties": false,

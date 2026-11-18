@@ -43,10 +43,11 @@ Version `1.0.0` is released, on `registry-v1.0.0`, and not yet stable, the bar i
   harness since `v0.48.0`. No second, independently written reader, host or harness exists. The
   stable bar is two readers agreeing on every row (§15).
 
-Format `1.1.0`, status `proposed`, adds assembly from several repositories, the assembled index,
-bounds, locks and signatures. Its text is [`registry-1.1.0.md`](registry-1.1.0.md), a second file of
-this companion with its own section numbers: format `1.1.0` is this text (§§1 to 17, unchanged)
-together with that file, and nothing in that file changes a rule of this one (§13).
+Format `1.1.0`, released on `registry-v1.1.0` and not yet stable, adds assembly from several
+repositories, the assembled index, bounds, locks and signatures. Its text is
+[`registry-1.1.0.md`](registry-1.1.0.md), a second file of this companion with its own section
+numbers: format `1.1.0` is this text (§§1 to 17, unchanged) together with that file, and nothing in
+that file changes a rule of this one (§13).
 
 Core is unchanged by this document. A registry is not a pack, no Core document carries a registry
 selector, and every pack Core accepts it still accepts, with the same results. A facts document of

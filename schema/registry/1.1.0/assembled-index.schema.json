@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://judgmentpack.org/schema/registry/1.1.0/assembled-index.schema.json",
-  "title": "DRAFT Registry companion 1.1.0: assembled index",
-  "description": "Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, and served by no bundle and no site. An assembled index (section 5), closed: the manifest's digest, the assembled registry's identity, and each source's repository, commit and documents, with exactly one standard source.",
+  "title": "Registry companion 1.1.0: assembled index",
+  "description": "Released on registry-v1.1.0 with spec/registry-1.1.0.md, which governs where they differ. An assembled index (section 5), closed: the manifest's digest, the assembled registry's identity, and each source's repository, commit and documents, with exactly one standard source.",
   "$comment": "The reader's to check: that sources are the manifest's in its order and each source's documents sorted by path, that the index equals the one an assembly at its commits writes (section 5.1), and the bound of 8 MiB. An index with no standard item or more than one, which the schema refuses, is LOCK-INDEX-MISMATCH to a lock check or a verification (section 9, step 6).",
   "type": "object",
   "additionalProperties": false,

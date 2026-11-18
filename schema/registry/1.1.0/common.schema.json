@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json",
-  "title": "DRAFT Registry companion 1.1.0: common",
-  "description": "Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, and served by no bundle and no site. Shared definitions of the documents format 1.1.0 adds; it is the schema of no document. The definitions of format 1.0.0 that hold unchanged are referenced from its common schema, and a pattern ends with (?![\\s\\S]) as there.",
+  "title": "Registry companion 1.1.0: common",
+  "description": "Released on registry-v1.1.0 with spec/registry-1.1.0.md, which governs where they differ. Shared definitions of the documents format 1.1.0 adds; it is the schema of no document. The definitions of format 1.0.0 that hold unchanged are referenced from its common schema, and a pattern ends with (?![\\s\\S]) as there.",
   "$comment": "Admission (registry section 2.2) holds for every document of format 1.1.0 under its own bound (section 2): I-JSON under the number rule, no repeated member name, a nesting depth of at most 32. No schema states these; a reader checks them at admission.",
   "$defs": {
     "sourceName": {

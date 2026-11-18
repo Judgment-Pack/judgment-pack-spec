@@ -1,4 +1,4 @@
-"""The registry companion's rows of format 1.1.0, status proposed, against its second reader.
+"""The registry companion's rows of format 1.1.0, status released, against its second reader.
 
 tools/registry_1_1_0_reader.py was written from spec/registry-1.1.0.md and registry.md alone, and
 gives each row's result from the row's inputs. Every row of conformance/registry/1.1.0/manifest.json

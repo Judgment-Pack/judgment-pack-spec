@@ -1866,8 +1866,8 @@ def main() -> None:
         target = BASE / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
-    rows = {"companion": "registry", "formatVersion": "1.1.0", "status": "proposed",
-            "label": "Registry companion 1.1.0, proposed: hand-written synthetic vectors, staged in no corpus",
+    rows = {"companion": "registry", "formatVersion": "1.1.0", "status": "released",
+            "label": "Registry companion 1.1.0, released: hand-written synthetic vectors",
             "codes": "codes.json", "vectors": ROWS}
     (BASE / "manifest.json").write_text(json.dumps(rows, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"{len(ROWS)} rows, {len(FILES)} files")
