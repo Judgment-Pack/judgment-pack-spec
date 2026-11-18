@@ -1,4 +1,4 @@
-"""A second reader of the terraform-file reading `1.0.0`, status proposed (spec/terraform-file.md).
+"""A second reader of the terraform-file reading `1.0.0`, status released (spec/terraform-file.md).
 
 It was written from the text alone: spec/terraform-file.md §§1-12, the registry companion's §10.1
 (the number normal form and the facts bound) and §10.2 (batch lines and their id bound), RFC 8785

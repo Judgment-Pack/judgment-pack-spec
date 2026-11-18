@@ -7,12 +7,13 @@ of a Terraform plan or state, as `terraform show -json` writes it: the checks a 
 file's bytes to, the removal of every value marked sensitive, the selection of resources, the value
 acquired and its acquisition record, and the batch a reference runtime may write from that value.
 
-This text is the terraform-file reading `1.0.0`, status `proposed`. The version is this document's
+This text is the terraform-file reading `1.0.0`, status `released`. The version is this document's
 own: it is neither a Core `specVersion` nor a dialect version, and no pack declares it. The
 companion is released on its own scoped tag, `terraform-file-v<major>.<minor>.<patch>`, beside Core
-and independent of `specVersion`; its first release is `terraform-file-v1.0.0` (§10). Until a tag
-releases this text, it is normative for nothing, and no conformance claim may cite it. Once a tag
-releases it, it is normative for the conformance class of §12, and for nothing else. Publication
+and independent of `specVersion`; its first release is `terraform-file-v1.0.0` (§10). A text no
+terraform-file tag released is normative for nothing, and no conformance claim may cite it. This
+text, released on `terraform-file-v1.0.0`, is normative for the conformance class of §12, and for
+nothing else. Publication
 beside a Core release, on the site or in a Core bundle, releases nothing.
 
 Its design record is [RFC 0038](../rfcs/0038-terraform-file-source.md), accepted on 2026-11-16,
@@ -28,17 +29,19 @@ The dialect names the kind whose file this text reads: a `terraform-file` source
 Dialect version 3 and later Core releases cite this text rather than carry it. Core is unchanged by
 this document, and so is every form of the dialect.
 
-Version `1.0.0` is proposed. Its first release makes it `released`, and not yet stable:
+Version `1.0.0` is released, on `terraform-file-v1.0.0`, and not yet stable:
 
-- **Its vectors are proposed with it.** The machine-readable code list and format table, and the
-  hand-written vectors, are under `conformance/terraform-file/1.0.0/` (§§11, 12). Until a release
-  publishes them they are not a conformance corpus, and no claim may cite them.
+- **Its vectors are published.** The machine-readable code list and format table, and the
+  hand-written vectors, under `conformance/terraform-file/1.0.0/` (§§11, 12), are in that release's
+  own bundle, and its release record names each file's digest (§10). No Core bundle carries them,
+  and the site does not serve them.
 - **Two readers exist.** The reference runtime reads the file, deposed objects (§3, step 4)
   included (`v0.49.0`), and where this text settles what RFC 0038 left open, it says what that
   reader does. A second reader, written from this text alone, is in this repository
   (`tools/terraform_file_reader.py`) and gives every vector's expected result; it was written by a
   model from the drafting vendor, a same-vendor reader and not a cross-vendor claim. The stable bar
-  is two readers agreeing on every vector (§12).
+  (§12) is two independently written readers agreeing on every vector, the second from a
+  different vendor; this same-vendor reader does not meet it, so the reading is not yet stable.
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** and **MAY** have their
 BCP 14 meanings only in capitals.
@@ -150,7 +153,8 @@ written by hand to the shape that Terraform's documentation of its JSON output f
 that version, with no Terraform run and no recorded output. A version not in a reader's claimed
 table, including a newer minor of a listed major, is `TF-FORMAT`. The table grows by a patch release
 and never shrinks within a dialect version. The first table (RFC 0038, Unresolved question 2,
-resolved) is the one the reference runtime's reader holds as `proposed-1`:
+resolved) is the one the reference runtime's reader held under the provisional name `proposed-1`, and
+now holds as release `1.0.0`:
 
 | `document` | Accepted `format_version` |
 | --- | --- |
@@ -273,7 +277,7 @@ Dialect version 3, which is proposed, and later Core releases cite this text rat
 
 ## 11. Machine-readable form and vectors
 
-The machine-readable form and the vectors are under `conformance/terraform-file/1.0.0/`, proposed
+The machine-readable form and the vectors are under `conformance/terraform-file/1.0.0/`, released
 with this text: the code list of §9 as `codes.json`, with each code's severity, status and step; the
 accepted table of §4 as `formats.json`, with its release; and the vectors of §12, with a manifest
 that names, for each vector, the table release that added its row. Every input is synthetic. Where a
@@ -283,7 +287,7 @@ file and this text differ, this text governs.
 
 | Class | Sections | Vectors |
 | --- | --- | --- |
-| Reader | §§2–7 and §9, and §8 for a reader that writes the batch | `conformance/terraform-file/1.0.0/`, proposed |
+| Reader | §§2–7 and §9, and §8 for a reader that writes the batch | `conformance/terraform-file/1.0.0/`, released |
 
 A claim names the exact release, the table release it implements, and its complete vectors. A
 reader is held only to the vectors of the table releases it claims: a file whose `format_version` is

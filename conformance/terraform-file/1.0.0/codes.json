@@ -1,7 +1,7 @@
 {
   "companion": "terraform-file",
   "reading": "1.0.0",
-  "status": "proposed",
+  "status": "released",
   "codes": [
     {"code": "TF-SIZE", "severity": "error", "status": "active", "step": "1", "meaning": "the file, or an input read as a stream, is longer than maxBytes"},
     {"code": "TF-JSON", "severity": "error", "status": "active", "step": "2", "meaning": "the bytes are not one JSON value in UTF-8 with no byte-order mark, no lone surrogate escape, only white space after it, nesting at most 128 deep and no duplicate member name"},
