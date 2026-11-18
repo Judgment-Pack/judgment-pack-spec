@@ -39,7 +39,8 @@ leaves a choice open, the code says which it took, marked `READING`.
 Running it also found where the text was silent: §2.1's report had no member for the key identifier
 §11 says it names, and §11 did not say when, or for which documents, the cap of the lock's `sources`
 count plus one applies. The text now says both (its Status lists the changes), the rows carry
-`keyId` and three rows more, and the reader gives all 157 rows their result.
+`keyId` and three rows more. With one row more for an `S` raised by L, the reader gives all 158 rows
+their result.
 
 ## What it is not
 

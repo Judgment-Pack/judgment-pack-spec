@@ -20,8 +20,8 @@ bounds) and [RFC 0040](../rfcs/0040-registry-locks-and-signatures.md) (locks and
 are Drafts. Every question either record left open is decided here, as §17 lists. Where this text
 and a record differ, this text governs. Its merge into `registry.md` is editorial only (§17).
 
-Not yet published: the closed schemas of the new documents, their code list and their rows. No
-reader exists. The text is published first so that it can be frozen and reviewed before anything is
+Not yet published: the closed schemas of the new documents, their code list and their rows. The
+text is published first so that it can be frozen and reviewed before anything is
 built.
 
 Changes after acceptance:
@@ -31,6 +31,8 @@ Changes after acceptance:
   once step 3 accepts the lock, before any source signature document is read.
 - §§11 (Verifying), 12.2: the documents beyond that count are the last given, the lock signature
   document counted first, and a lock signature document after the first is never read.
+- §11 (Keys): a document carries the key and a report its identifier, never the key.
+- §11 (Verifying): the report gives each refused signature, with its key identifier.
 
 ## 1. Conventions
 
@@ -678,7 +680,7 @@ shape and by the prefix rule above.
 - **Form.** A key is the 32-byte encoding of an Ed25519 public key. Its **key identifier** is the
   first 32 lowercase hexadecimal characters of the SHA-256 of those bytes, the form of
   [`checkpoint-witness.md`](checkpoint-witness.md) §1. A document carries the full key, never its
-  identifier, so a verifier compares bytes. Reports name both.
+  identifier, so a verifier compares bytes; a report carries the identifier, never the key.
 - **Trust.** A verifier MAY trust a key exactly when `checkpoint-witness.md` §5 admits it:
   canonical, not of small order, and on the curve. A verifier MUST hold every expected key, and
   every document's key, to that rule.
@@ -793,7 +795,7 @@ expected registry id, another registry's lock signed by the same key would verif
 7. **The rest**: the rest of §9 when the documents are given, and coverage (§9.1) when a resolved
    registry or a file is.
 
-The report gives every result: each signature, accepted or refused, with its key identifier, and the
+The report gives every result: each refused signature, with its key identifier (§2.1), and the
 lock's result. An accepted lock signature over a lock that fails any later step is a refusal of the
 lock, not a pass.
 

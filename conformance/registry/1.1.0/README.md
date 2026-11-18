@@ -15,8 +15,9 @@ expected set names. No other private key or seed exists here, so any reader can 
 signature again.
 
 They are not recordings. Every expectation was written by hand from the text. Those of the first 154
-rows were written before any reader of format `1.1.0` existed; the key identifiers and three rows
-came later, with the text that says them (below).
+rows were written before any reader of format `1.1.0` existed; the key identifiers and four rows
+came later: three with the text that says them (below), and `verify-lock-signature-s-plus-l`, an
+accepted signature's `S` raised by L, which §11's equation refuses.
 [`tools/registry_1_1_0_reader.py`](../../../tools/registry_1_1_0_reader.py), a second reader written
 from the text, gives every row its expected result
 ([`tests/test_registry_1_1_0_reader.py`](../../../tests/test_registry_1_1_0_reader.py)).

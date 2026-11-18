@@ -1645,6 +1645,20 @@ for identity, what, text, code, pointer, refused_by_schema, key in DOCUMENT_ROWS
            refusal(code, "signature", pointer, key), NO_RECORD, NO_RECORD,
            schema_refuses=[path] if refused_by_schema else ())
 
+# The accepted lock signature with S raised by L, the group order: [S + L]B is [S]B, so the equation would hold
+# without section 11's bound on S. S + L stays 32 little-endian bytes and below 2^253, so the top three bits that
+# a shortcut tests are clear.
+_R = bytes.fromhex(GOOD_SIG42["signature"][:64])
+_S = int.from_bytes(bytes.fromhex(GOOD_SIG42["signature"][64:]), "little")
+assert _S < ED.L and _S + ED.L < 2 ** 253
+S_PLUS_L = signature_variant("verify-lock-signature-s-plus-l", jcs(members(
+    signature=(_R + (_S + ED.L).to_bytes(32, "little")).hex())) + "\n")
+verify("verify-lock-signature-s-plus-l", "§11", "The accepted lock signature with S raised by L, the group order, "
+       "still 32 little-endian bytes and below 2^253: the cofactorless equation holds for S + L as for S, but S is "
+       "not below L, so the signature does not verify: LOCK-SIG-INVALID. reading: located at /signature.",
+       {"floor": 1, "lockSignatures": [S_PLUS_L]}, refusal("LOCK-SIG-INVALID", "signature", "/signature", PK1),
+       NO_RECORD, NO_RECORD)
+
 # The lock (step 3), the serial (step 4) and the index (step 5).
 verify("verify-unexpected-registry", "§11", "Another registry's lock signed by the expected key verifies as a "
        "signature and is refused for its registry id: LOCK-UNEXPECTED-REGISTRY. reading: located at /registry/id.",

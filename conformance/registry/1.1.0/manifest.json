@@ -4811,6 +4811,29 @@
       ]
     },
     {
+      "id": "verify-lock-signature-s-plus-l",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The accepted lock signature with S raised by L, the group order, still 32 little-endian bytes and below 2^253: the cofactorless equation holds for S + L as for S, but S is not below L, so the signature does not verify: LOCK-SIG-INVALID. reading: located at /signature.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-lock-signature-s-plus-l/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-lock-signature-s-plus-l/report.json",
+      "expectedRecord": null
+    },
+    {
       "id": "verify-unexpected-registry",
       "section": "§11",
       "operation": "verify",
