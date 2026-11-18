@@ -737,8 +737,9 @@ this section and the index rows that record the acceptance.
 *Amended 2026-11-18.* Every question is now decided. Questions 1 (several signatures), 2 (time and
 rollback), 4 (emitters) and 5 (several registries per lock) of the first draft were settled by the
 maintainer's ruling of 2026-11-17, in §§2, 3, 5 and 7. The five that remained are decided as their
-proposed resolutions said, and the proposed companion text
-([`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), format `1.1.0`, proposed) states each one.
+proposed resolutions said, and the companion text
+([`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), format `1.1.0`, released on
+`registry-v1.1.0` and not stable) states each one.
 
 1. **File names:** defaults for the lock and the lock signature only. The lock of `<name>.json` is
    `<name>.lock.json` beside it, and the signature of a lock file is `<lock file>.sig.json`; a

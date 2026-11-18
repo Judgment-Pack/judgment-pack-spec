@@ -564,8 +564,9 @@ this section and the index rows that record the acceptance.
 *Amended 2026-11-18.* Every question is now decided. Questions 1 (environments), 2 (layered
 standards), 3 (per-environment bounds) and 8 (assemblies of assemblies) of the first draft were
 settled by the maintainer's ruling of 2026-11-17, in §§2, 3 and 5. The six that remained are
-decided as their proposed resolutions said, and the proposed companion text
-([`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), format `1.1.0`, proposed) states each one.
+decided as their proposed resolutions said, and the companion text
+([`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), format `1.1.0`, released on
+`registry-v1.1.0` and not stable) states each one.
 
 1. **Pattern inclusion:** not in `1.1.0`. Adding a pattern already narrows, and two readers agree on
    that at no cost; inclusion would need one algorithm and one budget in every reader, and is
