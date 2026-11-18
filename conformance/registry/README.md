@@ -24,7 +24,9 @@ Core's corpora are unchanged. Nothing here is named by `conformance/manifest.jso
 
 ## The files
 
-Each format version has its own directory. [`1.0.0/`](1.0.0/) holds:
+Each format version has its own directory. [`1.1.0/`](1.1.0/) holds format `1.1.0`'s rows, code
+list and README, released on `registry-v1.1.0` ([`spec/registry-1.1.0.md`](../../spec/registry-1.1.0.md)
+§14). [`1.0.0/`](1.0.0/) holds:
 
 - [`codes.json`](1.0.0/codes.json), the machine-readable diagnostic code list: each code, its
   severity, its status (`active` or `deprecated`) and the section that defines it. It equals the
