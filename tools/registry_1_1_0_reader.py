@@ -3738,11 +3738,15 @@ def _check_index_and_sources(lock: dict, index: bytes | None, diags: list[dict])
 def _check_emitters(lock: dict, emitters: list[Emitter] | None, diags: list[dict]) -> None:
     """§9 step 8."""
     if "emitters" not in lock:
+        if emitters:
+            diags.append(diag("LOCK-EMITTER-MISMATCH", "lock", "/emitters"))
         return
     if not emitters:
         diags.append(diag("LOCK-EMITTER-MISSING", "lock", "/emitters"))
         return
     given = {(e.source or "", e.path): e for e in emitters}
+    if set(given) - {_emitter_key(item) for item in lock["emitters"]}:
+        diags.append(diag("LOCK-EMITTER-MISMATCH", "lock", "/emitters"))
     for i, item in enumerate(lock["emitters"]):
         at = pointer("emitters", i)
         e = given.get(_emitter_key(item))

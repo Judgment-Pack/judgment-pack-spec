@@ -1305,6 +1305,11 @@ SINGLE_EXPECT = {"registryId": SINGLE_ID, "requireIndex": False}
 ASSEMBLED_EXPECT = {"registryId": ASSEMBLED_ID, "requireIndex": True}
 A_KINDS = ["kinds/database.json", "kinds/db-role.json"]
 EMITTERS_GIVEN = [{"manifest": EMITTER, "path": "emitters/db-roles.json", "files": EMITTER_FILES}]
+EMITTER_EXTRA = pretty("vectors/check-emitter-unlisted-manifest/emitter.json", {
+    "emitterManifestVersion": "1.0.0", "id": "https://example.invalid/emitters/db-grants", "version": "1.0.0",
+    "owner": "platform-data", "reads": [{"kind": "db-role", "id": "https://example.invalid/kinds/db-role",
+                                         "versions": "^1.2.0"}],
+    "requestVersions": ["1.0.0"], "environments": "each", "command": ["tools/emit-db-grants"], "owns": ["grants/**"]})
 
 
 def check(identity, section, description, inputs, expected, schema_refuses=()):
@@ -1444,6 +1449,14 @@ check("check-emitter-unlisted-file", "§9", "A file the manifest's owns matches 
       single_check(LE43, emitters=[dict(EMITTERS_GIVEN[0], files=EMITTER_FILES + [
           {"path": "gen/extra.sql", "mode": "0644", "file": EXTRA_SQL}])]),
       report(False, [diag("LOCK-EMITTER-MISMATCH", "lock", "/emitters/0")], SINGLE_DOC))
+check("check-emitter-unlisted-manifest", "§9", "A manifest given that the lock lists no item for: "
+      "LOCK-EMITTER-MISMATCH at /emitters.",
+      single_check(LE43, emitters=EMITTERS_GIVEN + [{"manifest": EMITTER_EXTRA, "path": "emitters/db-grants.json",
+                                                    "files": []}]),
+      report(False, [diag("LOCK-EMITTER-MISMATCH", "lock", "/emitters")], SINGLE_DOC))
+check("check-emitters-unlocked", "§9", "A manifest given for a lock that names no emitters: "
+      "LOCK-EMITTER-MISMATCH at /emitters.", single_check(L42, emitters=EMITTERS_GIVEN),
+      report(False, [diag("LOCK-EMITTER-MISMATCH", "lock", "/emitters")], SINGLE_DOC))
 
 
 def coverage(identity, description, inputs, expected):
@@ -1665,6 +1678,9 @@ DOCUMENT_ROWS = [
      "otherwise admitted when read: LOCK-SIG-DOCUMENT. reading: located at the document's root.",
      "{" + ",\n".join(" " * 800 + json.dumps(k) + ":" + json.dumps(v) for k, v in GOOD_SIG42.items()) + "}\n",
      "LOCK-SIG-DOCUMENT", "", False, None),
+    ("verify-signature-integer-range", "An integer above 2^53 - 1 in a member that is not defined, which admission "
+     "refuses before any member is read: LOCK-SIG-DOCUMENT, not LOCK-SIG-MEMBER. reading: located at the "
+     "document's root.", jcs(GOOD_SIG42)[:-1] + ',"x":9007199254740993}\n', "LOCK-SIG-DOCUMENT", "", True, None),
     ("verify-signature-version", "A lockSignatureVersion of 1.2.0, a later version named as such: LOCK-SIG-VERSION. "
      "reading: located at the member.", jcs(members(lockSignatureVersion="1.2.0")) + "\n", "LOCK-SIG-VERSION",
      "/lockSignatureVersion", True, PK1),

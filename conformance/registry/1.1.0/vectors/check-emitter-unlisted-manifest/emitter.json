@@ -1,0 +1,23 @@
+{
+  "emitterManifestVersion": "1.0.0",
+  "id": "https://example.invalid/emitters/db-grants",
+  "version": "1.0.0",
+  "owner": "platform-data",
+  "reads": [
+    {
+      "kind": "db-role",
+      "id": "https://example.invalid/kinds/db-role",
+      "versions": "^1.2.0"
+    }
+  ],
+  "requestVersions": [
+    "1.0.0"
+  ],
+  "environments": "each",
+  "command": [
+    "tools/emit-db-grants"
+  ],
+  "owns": [
+    "grants/**"
+  ]
+}

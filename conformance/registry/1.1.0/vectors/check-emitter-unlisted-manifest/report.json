@@ -1,0 +1,8 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "registry": {"digest": "sha256:8d905b1e568fafed8051ca8f04fe376e3cb71acb6c09053636a67845de7f5edb"},
+  "diagnostics": [
+    {"code": "LOCK-EMITTER-MISMATCH", "severity": "error", "location": {"document": "lock", "pointer": "/emitters"}}
+  ]
+}

@@ -43,6 +43,11 @@ count plus one applies. The text now says both (its Status lists the changes), t
 their result. One row more, for a project listed for dev, prod and dev again by three sources, found that the reader
 reported `REF-SECRET-SCOPE-SHARED` against a project's first listing alone, not against every earlier listing
 as §4 step 6 reads; it now follows the text, and gives all 159 rows their result.
+Two rows more, for a manifest given that the lock lists no item for and for a manifest given to a lock
+that names no emitters, found that the reader ignored both, where §9 step 8 now says
+`LOCK-EMITTER-MISMATCH` at `/emitters`; it now gives them their result. One row more, for a signature document with an integer above 2^53 - 1 and a
+member that is not defined, the reader already read as §11 now says: admission comes first, so
+`LOCK-SIG-DOCUMENT`. It gives all 162 rows their result.
 
 ## What it is not
 

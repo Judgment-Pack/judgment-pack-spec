@@ -3588,6 +3588,83 @@
       "expected": "vectors/check-emitter-unlisted-file/report.json"
     },
     {
+      "id": "check-emitter-unlisted-manifest",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A manifest given that the lock lists no item for: LOCK-EMITTER-MISMATCH at /emitters.",
+      "lock": "locks/single-43-emitters.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "emitters": [
+        {
+          "manifest": "emitters/db-roles.json",
+          "path": "emitters/db-roles.json",
+          "files": [
+            {
+              "path": "gen/db-roles.sql",
+              "mode": "0644",
+              "file": "emitters/gen/db-roles.sql"
+            },
+            {
+              "path": "gen/grant.sh",
+              "mode": "0755",
+              "file": "emitters/gen/grant.sh"
+            }
+          ]
+        },
+        {
+          "manifest": "vectors/check-emitter-unlisted-manifest/emitter.json",
+          "path": "emitters/db-grants.json",
+          "files": []
+        }
+      ],
+      "expected": "vectors/check-emitter-unlisted-manifest/report.json"
+    },
+    {
+      "id": "check-emitters-unlocked",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A manifest given for a lock that names no emitters: LOCK-EMITTER-MISMATCH at /emitters.",
+      "lock": "locks/single-42.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "emitters": [
+        {
+          "manifest": "emitters/db-roles.json",
+          "path": "emitters/db-roles.json",
+          "files": [
+            {
+              "path": "gen/db-roles.sql",
+              "mode": "0644",
+              "file": "emitters/gen/db-roles.sql"
+            },
+            {
+              "path": "gen/grant.sh",
+              "mode": "0755",
+              "file": "emitters/gen/grant.sh"
+            }
+          ]
+        }
+      ],
+      "expected": "vectors/check-emitters-unlocked/report.json"
+    },
+    {
       "id": "coverage-resolved",
       "section": "§9.1",
       "operation": "coverage",
@@ -4672,6 +4749,32 @@
       "floor": 1,
       "expected": "vectors/verify-signature-over-bound/report.json",
       "expectedRecord": null
+    },
+    {
+      "id": "verify-signature-integer-range",
+      "section": "§§10.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "An integer above 2^53 - 1 in a member that is not defined, which admission refuses before any member is read: LOCK-SIG-DOCUMENT, not LOCK-SIG-MEMBER. reading: located at the document's root. reading: a document refused when read is not then checked against a key.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-signature-integer-range/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-integer-range/report.json",
+      "expectedRecord": null,
+      "schemaRefuses": [
+        "vectors/verify-signature-integer-range/lock.sig.json"
+      ]
     },
     {
       "id": "verify-signature-version",

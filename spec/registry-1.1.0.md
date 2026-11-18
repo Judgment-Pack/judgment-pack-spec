@@ -33,6 +33,9 @@ Changes after acceptance:
   document counted first, and a lock signature document after the first is never read.
 - §11 (Keys): a document carries the key and a report its identifier, never the key.
 - §11 (Verifying): the report gives each refused signature, with its key identifier.
+- §9 (step 8): an emitter manifest given that the lock lists no item for is LOCK-EMITTER-MISMATCH.
+- §11 (Reading a signature document): a signature document that admission refuses, an integer above
+  2^53 − 1 included, is LOCK-SIG-DOCUMENT even when it also has a member that is not defined.
 
 ## 1. Conventions
 
@@ -583,7 +586,10 @@ the emitter manifests and their files when it names emitters. Its steps:
 8. **Emitters.** A lock that names emitters, checked without them, is `LOCK-EMITTER-MISSING` at
    `/emitters`, and a manifest or file the lock lists that is not given is the same code at the
    item. A manifest or file given that differs from the lock's item, or a file the manifest's `owns`
-   matches that the lock does not list, is `LOCK-EMITTER-MISMATCH` at the item.
+   matches that the lock does not list, is `LOCK-EMITTER-MISMATCH` at the item. A manifest given that
+   the lock lists no item for, and any manifest given for a lock that names no emitters, is
+   `LOCK-EMITTER-MISMATCH` at `/emitters`, since the lock has one item per manifest the writer was
+   given (§7).
 
 A failure in step 1 or 2 ends the check. Steps 3 to 8 report every diagnostic of their own. The
 report's `valid` is `true` exactly when there is no error. A check reads `serial` for its form only:
@@ -739,8 +745,9 @@ shape and by the prefix rule above.
 
 **Reading a signature document**, of either kind, with one code per failure:
 
-- over 4 096 bytes, not one JSON object in UTF-8, a member given twice, or a backslash:
-  `LOCK-SIG-DOCUMENT`;
+- over 4 096 bytes, not one JSON object in UTF-8, a member given twice, or a backslash, or a
+  document registry §2.2 refuses in any other way, such as an integer above 2^53 − 1, before any
+  member is read: `LOCK-SIG-DOCUMENT`;
 - a version member other than `"1.1.0"`: `LOCK-SIG-VERSION`, checked before the other members so
   that a later version is named as such;
 - a member that is not defined, or one that is missing: `LOCK-SIG-MEMBER`;
@@ -906,7 +913,7 @@ meanings, and are reported as registry §7 says wherever this text applies it.
 | `LOCK-INDEX-UNLOCKED` | an index was given for a lock that names none | §9 |
 | `LOCK-SOURCES-MISMATCH` | the lock's sources are not the index's, or a statement digest differs | §9 |
 | `LOCK-EMITTER-MISSING` | the lock names emitters and none were given, or a manifest or file it lists was not given | §9 |
-| `LOCK-EMITTER-MISMATCH` | an emitter manifest or owned file given differs from the lock's item, an owned file is absent from the lock, or a host check did not exit 0 | §§8, 9 |
+| `LOCK-EMITTER-MISMATCH` | an emitter manifest or owned file given differs from the lock's item, a manifest given has no item in the lock, an owned file is absent from the lock, or a host check did not exit 0 | §§8, 9 |
 | `LOCK-NOT-COVERED` | a resolved registry is not of the expected environment, or not the one the lock names for it; or a file is not one the lock lists | §9.1 |
 | `LOCK-SERIAL-ROLLBACK` | the lock's serial is below the verifier's record, or below its floor | §11 |
 | `LOCK-SERIAL-CONFLICT` | the lock's serial is the record's and its digest is not | §11 |
@@ -914,7 +921,7 @@ meanings, and are reported as registry §7 says wherever this text applies it.
 | `LOCK-SIG-EXPECTED-KEY` | an expected key is missing, or one a verifier may not trust | §11 |
 | `LOCK-SIG-MISSING` | the lock signature, or an item's source signature, is not given | §11 |
 | `LOCK-SIG-EXTRA` | a second lock signature is given, a source signature that no item expects or that is given twice, or more signature documents than the lock's `sources` count plus one | §11 |
-| `LOCK-SIG-DOCUMENT` | a signature document is over its bound, not one JSON object, repeats a member or holds a backslash | §11 |
+| `LOCK-SIG-DOCUMENT` | a signature document is over its bound, not one JSON object, repeats a member, holds a backslash or is refused by admission (registry §2.2) | §11 |
 | `LOCK-SIG-VERSION` | `lockSignatureVersion` or `sourceSignatureVersion` is not `"1.1.0"` | §11 |
 | `LOCK-SIG-MEMBER` | a member is unknown or missing | §11 |
 | `LOCK-SIG-ALGORITHM` | `algorithm` is not `ed25519` | §11 |
