@@ -5,6 +5,10 @@
   ([`spec/registry.md`](../spec/registry.md)) as registry format `1.1.0`; format `1.0.0` and every
   document it defines are unchanged
 - Created: 2026-11-17
+- Amended: 2026-11-17, settling four of the first draft's Unresolved questions by the maintainer's
+  ruling: all of a set of signatures, per repository (§§5 and 7), a serial against rollback (§§2
+  and 7), emitters in the lock (§§2 to 4) and one lock per assembly (§2); each remaining question
+  carries a proposed resolution
 - Related: [RFC 0034](0034-registry-profile.md) (the registry profile);
   [RFC 0039](0039-federated-registry.md) (the assembled index a lock may pin); the key and
   signature rules of the checkpoint witness companion
@@ -25,21 +29,24 @@
 
 A registry pins its kind declarations by digest, but nothing pins the registry itself, its
 resolved forms, or, for an assembled registry (RFC 0039), the sources it came from. Nothing lets a
-reader refuse a registry that a key it expects did not vouch for. This RFC proposes two documents
+reader refuse a registry that a key it expects did not vouch for. This RFC proposes three documents
 for registries, modelled on what the reference runtime already does for packs:
 
 - A **lock** names, by digest, the registry, every kind declaration it pins, the resolved registry
-  of each environment, and the assembled index when there is one. A lock check compares the lock
-  with the documents it is given and refuses on any difference. Writing a lock reviews nothing: it
-  makes an amendment visible in a diff.
+  of each environment, the emitter manifests and the files they own, and, for an assembly, its
+  index and each source's signature. It carries a **serial** that rises with each lock of one
+  registry. A lock check compares the lock with the documents it is given and refuses on any
+  difference. Writing a lock reviews nothing: it makes an amendment visible in a diff.
 - A **lock signature** is a detached Ed25519 signature over a context-prefixed message that names
-  the lock's digest. It is the runtime's pack signature design applied to a lock, under its own
-  prefix and member name. A verifier is given the key, the registry id and, for coverage, the
-  environment it expects, checks the signature before it reads the lock, and never takes any of
-  them from a document.
+  the lock's digest, by the standard owner's key (for a single registry, its owner's). It is the
+  runtime's pack signature design applied to a lock, under its own prefix and member name.
+- A **source signature**, for an assembly, is one repository's signature, by that repository's
+  key, over its own documents at its commit. An assembled lock is accepted only with all of its set.
 
-No cryptography is new. The key and signature rules are those the checkpoint witness companion
-already states, and the document's shape is the pack signature's.
+A verifier is given the keys, the registry id and, for coverage, the environment it expects, and
+never takes any of them from a document. It keeps, per registry id, the serial of the last lock it
+accepted, and refuses an older one. No cryptography is new: the key and signature rules are those
+the checkpoint witness companion already states, and the documents' shape is the pack signature's.
 
 ## Problem
 
@@ -87,28 +94,41 @@ when, they appear in capitals. Section numbers prefixed § are those of `spec/re
 | --- | --- | --- | --- |
 | Lock | `lockFormatVersion` | `"1.1.0"` | 1 MiB |
 | Lock signature | `lockSignatureVersion` | `"1.1.0"` | 4 096 bytes |
+| Source signature | `sourceSignatureVersion` | `"1.1.0"` | 4 096 bytes |
 | Lock report | `reportFormatVersion` | `"1.1.0"` | as §7.4 |
 
 The lock is admitted by §2.2 with its bound. The lock report is the validation report under the
-minor selector `"1.1.0"`, as RFC 0039 §1 has it. It adds the location `document` values `lock` and
-`signature`, and the `LOCK-` codes of §8.
+minor selector `"1.1.0"`, as RFC 0039 §1 has it. It adds the location `document` values `lock`,
+`signature` and `emitter`, and the `LOCK-` codes of §8.
 
 ### 2. The lock
 
 ```json
 {
   "lockFormatVersion": "1.1.0",
+  "serial": 42,
   "registry": { "id": "https://example.invalid/registries/platform", "version": "4.0.0", "digest": "sha256:…" },
   "kinds": [
     { "kind": "database", "id": "https://example.invalid/kinds/database", "version": "1.0.0", "digest": "sha256:…" },
     { "kind": "db-role", "id": "https://example.invalid/kinds/db-role", "version": "1.2.0", "digest": "sha256:…" } ],
   "resolved": [ { "environment": "dev", "digest": "sha256:…" }, { "environment": "prod", "digest": "sha256:…" } ],
-  "index": { "digest": "sha256:…" }
+  "index": { "digest": "sha256:…" },
+  "sources": [
+    { "name": "billing", "role": "repository", "repository": "https://example.invalid/scm/billing",
+      "statement": "sha256:…", "signature": "sha256:…" },
+    { "name": "standard", "role": "standard", "repository": "https://example.invalid/scm/platform",
+      "statement": "sha256:…", "signature": "sha256:…" } ],
+  "emitters": [
+    { "source": "billing", "path": "emitters/db-roles.json", "digest": "sha256:…",
+      "files": [ { "path": "gen/db-roles.sql", "mode": "0644", "digest": "sha256:…" } ] } ]
 }
 ```
 
 A lock has these members, and no other:
 
+- **`serial`**: an integer from 1 to 9 007 199 254 740 991 (2^53 − 1). Each lock of one registry
+  `id` has a higher serial than the lock before it (§3), and the lock signature covers it (§7,
+  Rollback).
 - **`registry`**: the `id`, `version` and digest (§2.3) of the registry, single or assembled.
 - **`kinds`**: the registry's pins, exactly as written and in its order. The registry's digest
   already covers them. The lock repeats them so that a lock's diff names the kind that changed. The
@@ -119,20 +139,40 @@ A lock has these members, and no other:
   write it. An assembled registry is an ordinary `1.0.0` document, so a lock written from the
   registry alone cannot hold it, and a lock without `index` claims no provenance. A verifier that
   needs provenance requires it out of band (§4, Expected inputs).
+- **`sources`**: present exactly when `index` is. One item per source of the index, in its order:
+  the source's `name`, `role` and `repository` as the index gives them; `statement`, the digest of
+  the source's statement (§5.2); and `signature`, the digest (§2.3) of the source signature
+  document the writer accepted for it. So the lock, and the signature over it, name the repository
+  signatures the assembly was made with.
+- **`emitters`**: optional. *Amended 2026-11-17, by the maintainer's ruling (first draft's question
+  4).* One item per emitter manifest (§11.1) the writer was given, sorted by `source` and then
+  `path`: the manifest's `path` in its repository (§11.3's form), its `digest` (§2.3), and `files`,
+  every file its `owns` matches, sorted by `path`, each with `path`, `mode` (`"0644"` or `"0755"`)
+  and `digest` (`sha256:` over its exact bytes). In an assembled lock each item also has `source`,
+  the name of the source whose repository holds it.
+
+**One lock, one registry.** *Amended 2026-11-17, by the maintainer's ruling (first draft's question
+5).* A lock names exactly one registry: one single registry, or one assembly with its index.
+Several assemblies (one per region, for example) have one lock each, with its own serial and
+signatures, and a verifier that expects several verifies each against its own expected registry id.
 
 **What is locked.** Through these digests, a lock pins:
 
 - the registry's entries, overlays, owners and secret scopes;
 - every kind declaration it pins;
 - each environment's resolved form, which is what emitters and loaders read;
+- the serial, which orders the locks of one registry id;
+- every emitter manifest the writer was given, and each file it owns, by path, mode and digest;
 - for an assembly, the index, and through the index the manifest, each source's repository,
-  commit and paths, the content digest of every document read, and the bounds.
+  commit and paths, the content digest of every document read, and the bounds, per-environment
+  bounds included (RFC 0039 §5.5); and, by digest, each source's statement and the source
+  signature accepted for it.
 
 **What is not locked:**
 
 - secret values, which a registry never holds, only references pinned to a version;
-- emitter manifests and the files they write;
 - facts contracts, which follow from the kinds;
+- files no emitter the writer was given owns;
 - the tools that read the documents;
 - the time, and the people who reviewed.
 
@@ -148,6 +188,18 @@ re-formatted lock is an edited lock.
   lock a registry that validation (§7) finds an error in, or an assembly with an error
   (`LOCK-REGISTRY-INVALID`).
 - It resolves every environment (§8) and digests each resolved registry.
+- **Serial.** *Amended 2026-11-17, by the maintainer's ruling (first draft's question 2).* It is
+  given the previous lock of the registry id, and writes `serial` one above that lock's; a previous
+  lock of another registry id is `LOCK-UNEXPECTED-REGISTRY`. With no previous lock, it is given the
+  first serial out of band; there is no default. The lock is thus deterministic in its inputs: the
+  documents, and the previous serial.
+- **Source signatures.** For an assembly, it is given one source signature document per source and
+  the expected signer set (§7), and verifies each as §7 does. A source whose signature does not
+  verify is refused with that signature's code, and no lock is written.
+- **Emitters.** For each emitter manifest it is given, it runs, or is given the outcome of, the host
+  in check mode (§11.4) against this registry. It writes `emitters` only when every run exits 0, so
+  that the files it lists are those the emitters write from this registry; otherwise
+  `LOCK-EMITTER-MISMATCH`.
 - It writes the lock's JCS bytes, and never a lock over its bound.
 - Writing a lock reviews and approves nothing. As with the runtime's `packs lock`, running it is
   how an amendment is declared, in a file that a reviewer sees change beside the documents it
@@ -157,12 +209,13 @@ re-formatted lock is an edited lock.
 
 **Expected inputs.** Every check, coverage and verification is also given, out of band and every
 time, under the rule §7 states for the expected key: the **registry `id`** it expects, and whether
-it **requires an index**; coverage is also given the **environment** it serves. None has a default,
-and none is taken from a lock, a registry or a signature document. One missing, or a registry id
-that is not an absolute URI, is `LOCK-EXPECTED`, before anything is read.
+it **requires an index**; coverage is also given the **environment** it serves, and verification
+the expected signer set and its serial record or floor (§7). None has a default, and none is taken
+from a lock, a registry or a signature document. One missing, or a registry id that is not an
+absolute URI, is `LOCK-EXPECTED`, before anything is read.
 
-A check is given a lock, the registry, the kind declarations, and the index when the lock names
-one. Its steps:
+A check is given a lock, the registry, the kind declarations, the index when the lock names one,
+and the emitter manifests and their files when it names emitters. Its steps:
 
 1. **The lock.** Admission (§2.2), its form (`LOCK-FORM`), and its canonical bytes
    (`LOCK-NOT-CANONICAL`). Its `registry.id` is the expected id (`LOCK-UNEXPECTED-REGISTRY`), and
@@ -182,9 +235,17 @@ one. Its steps:
      the lock's registry digest (`LOCK-INDEX-MISMATCH`).
    - An index supplied for a lock that names none is `LOCK-INDEX-UNLOCKED`, so that a caller never
      believes provenance was checked when it was not.
+7. **Sources.** With the index, each `sources` item's `name`, `role` and `repository` are the
+   index's, in its order, and its `statement` is the digest of the statement the index's item
+   gives (§5.2); otherwise `LOCK-SOURCES-MISMATCH` at the item. The signatures are verified in §7.
+8. **Emitters.** A lock that names emitters, checked without them, is `LOCK-EMITTER-MISSING`. A
+   manifest or file given that differs from the lock's item, a file the manifest's `owns` matches
+   that the lock does not list, or an item with nothing given for it, is `LOCK-EMITTER-MISMATCH` at
+   the item.
 
-A failure in step 1 or 2 ends the check. Steps 3 to 6 report every diagnostic of their own. The
-report's `valid` is `true` exactly when there is no error.
+A failure in step 1 or 2 ends the check. Steps 3 to 8 report every diagnostic of their own. The
+report's `valid` is `true` exactly when there is no error. A check reads `serial` for its form
+only: ordering is the verifier's (§7, Rollback).
 
 The check does not re-run the assembly. RFC 0039's index check does that, against the sources at
 their commits, and a verifier that wants provenance runs both.
@@ -195,11 +256,15 @@ environment it expects. The lock is first held to step 1. The resolved registry 
 when its `environment` is the expected environment, its `registry.digest` is the lock's registry
 digest, and its digest is the lock's `resolved` digest for the expected environment; otherwise it
 is `LOCK-NOT-COVERED`. A `dev` resolved registry handed to a `prod` loader is thus not covered,
-although the lock names it. This is the runtime's `packs covers` question asked of a registry.
-Coverage establishes byte identity with what the lock names, and it re-derives nothing. A consumer
-that relies on it relies on whoever checked or signed the lock.
+although the lock names it. A generated file is covered exactly when an `emitters` item, of its
+source in an assembled lock, lists its path with its mode and digest. This is the runtime's
+`packs covers` question asked of a registry. Coverage establishes byte identity with what the lock
+names, and it re-derives nothing. A consumer that relies on it relies on whoever checked or signed
+the lock, and verifies the lock (§7) first.
 
-### 5. The signature document
+### 5. The signature documents
+
+#### 5.1 The lock signature
 
 ```json
 {"algorithm":"ed25519","lockDigest":"sha256:<64 hex>","lockSignatureVersion":"1.1.0","publicKey":"<64 hex>","signature":"<128 hex>"}
@@ -218,24 +283,40 @@ and `signatureVersion` replaced, and with the same algorithm and spelling:
 Each value of its form has one spelling, so an uppercase letter, a base64 spelling or another
 length is refused. No name or value needs an escape, and a backslash anywhere in the document is
 refused. White space between tokens is admitted. The document is detached: neither the lock nor the
-registry carries it, and neither changes when it is made. Several documents, by several keys, may
-sign one lock.
+registry carries it, and neither changes when it is made. A lock has one lock signature (§7).
+
+#### 5.2 The source signature and its statement
+
+*Amended 2026-11-17, by the maintainer's ruling (first draft's question 1).* A **source statement**
+is the JCS of an object of exactly `repository`, `commit` and `documents`, with the values of the
+index's source item (RFC 0039 §4): the repository identity, the commit, and every document's
+`path`, `role`, `contentDigest` and `digest`, in the index's order. Its digest (§2.3) is what a
+source signature signs. It names no source name, manifest or other source: a repository vouches for
+its own documents at its own commit, and for nothing else.
+
+The source signature document has exactly five string members, written and read as the lock
+signature's are, with the same forms and bound: `sourceSignatureVersion` (`"1.1.0"`), `algorithm`,
+`publicKey`, `sourceDigest` (the statement's digest) and `signature`. It names a commit, so it
+cannot be stored in that commit: it travels beside the bytes the assembler is given, as a CI job's
+output or in a store the standard owner keeps.
 
 ### 6. What is signed
 
-The signature is Ed25519 (RFC 8032, pure, with no context string) over these ASCII bytes:
+Each signature is Ed25519 (RFC 8032, pure, with no context string) over these ASCII bytes:
 
 ```text
 judgment-pack-registry/lock-signature/1:{"lockDigest":"sha256:<64 hex>","lockSignatureVersion":"1.1.0"}
+judgment-pack-registry/source-signature/1:{"sourceDigest":"sha256:<64 hex>","sourceSignatureVersion":"1.1.0"}
 ```
 
-The part after the prefix is the JCS of those two members. Every signing prefix of the project is
+The part after each prefix is the JCS of those two members. Every signing prefix of the project is
 a namespace with no `/` in it (`judgment-pack`, `judgment-pack-runtime`, `judgment-pack-gateway`),
-then `/`, a name, a version and `:`. No other prefix starts `judgment-pack-registry/`, and a later
-one in this namespace MUST have another name or version. Two prefixes of different namespaces are
-neither a prefix of the other, and every message begins with its own prefix, so no signature of
-another kind is a lock signature, even under one key, and the reverse holds too. The message names
-the digest, not the bytes: it is small and of one shape, and the digest binds the bytes.
+then `/`, a name, a version and `:`. No prefix but these two starts `judgment-pack-registry/`, and a
+later one in this namespace MUST have another name or version. Two prefixes that differ in their
+namespace or name are neither a prefix of the other, and every message begins with its own prefix,
+so no signature of another kind is a lock or source signature, even under one key, and a lock
+signature is never a source signature. A message names a digest, not the bytes: it is small and of
+one shape, and the digest binds the bytes.
 
 ### 7. Keys, signing and verification
 
@@ -247,54 +328,118 @@ the digest, not the bytes: it is small and of one shape, and the digest binds th
   The document carries the full key, never its identifier, so a verifier compares bytes. Reports
   name both.
 - **Trust.** A verifier MAY trust a key exactly when `spec/checkpoint-witness.md` §5 admits it:
-  canonical, not of small order, and on the curve. A verifier MUST hold the expected key, and the
-  document's key, to that rule.
+  canonical, not of small order, and on the curve. A verifier MUST hold every expected key, and
+  every document's key, to that rule.
 - **The equation.** A signature verifies exactly when §5 of that companion says it does:
   cofactorless, with `S` below L and `R` compared byte for byte. The cofactored check is not used.
 - **The expected key.** A verifier is given the key it expects, out of band, every time. It MUST
-  NOT take a key from the signature document, and it has no mode that does. How keys are
+  NOT take a key from a signature document, and it has no mode that does. How keys are
   distributed, rotated and retired is the verifier's concern. The companion keeps no list of keys
   and knows no revocation.
 
+**The expected signer set.** *Amended 2026-11-17, by the maintainer's ruling (first draft's
+question 1).*
+
+- **A single registry's lock** has one signer: the expected key, which signs the lock.
+- **An assembled lock** has the **standard owner's key**, which signs the lock and the standard
+  source's statement, and a **repository key map**, from repository identity to key, naming the
+  key that signs each repository source's statement. Both are given as the expected key is: out of
+  band, every time, each key held to the trust rule (`LOCK-SIG-EXPECTED-KEY`), and none taken from a
+  document. A repository source of the lock whose identity the map does not name, found once the
+  lock is read (Verifying, step 5), is `LOCK-EXPECTED`. The map MAY name repositories the lock does
+  not, so one map can serve several assemblies, and two sources of one repository identity are
+  signed by its one key.
+- **What each signature covers.** The lock signature covers the lock: the registry, its kinds,
+  resolved forms, serial, emitters and index, and, by digest, each source's statement and accepted
+  signature; that is, the assembly as a whole. A source signature covers one statement: its
+  repository's documents, by path and digest, at one commit. It says nothing of the assembly, the
+  bounds comparison or any other source.
+- **All of the set.** An assembled lock is accepted only with its lock signature and exactly one
+  source signature for each item of `sources`, each by the key the set names for it. There is no
+  k-of-n rule: each signature vouches for what only its signer can, so none stands in for another.
+
 **Signing.**
 
-- A signer MUST check the lock (§4) against the documents it names, and MUST NOT sign a lock that
-  does not check or is not canonical. A signature over a lock nobody checked vouches for a digest
-  blindly.
+- A repository's CI signs its source statement at a commit with that repository's key. The standard
+  owner's CI signs the standard source's statement, writes the lock (§3) once it holds every
+  source's signature, checks it (§4), and signs it.
+- A signer MUST check what it signs: the lock against the documents it names (§4), or a statement
+  against its own documents at its commit. It MUST NOT sign a lock that does not check or is not
+  canonical. A signature over something nobody checked vouches for a digest blindly.
 - The private key is the signer's to hold. The runtime holds a pack-signing seed as it holds an
   audit trail's key, and a registry signer would do the same. Given the public key it means to sign
   with, it refuses, before signing anything, a seed whose public key is another.
 - Signing writes a new signature document, and never replaces one.
 
-**Verifying.** The verifier is given the lock's bytes, the signature document's bytes, the
-expected key and the expected inputs of §4 (registry id, and whether an index is required). A
-signature binds only a lock's digest: without the expected registry id, another registry's lock
-signed by the same key would verify. The order is the pack signature's:
+**Reading a signature document**, of either kind, with one code per failure:
 
-1. no expected key, or one the trust rule refuses: `LOCK-SIG-EXPECTED-KEY`, and an expected input
-   missing: `LOCK-EXPECTED`, each before anything is read;
-2. the document, read strictly, with one code per failure:
-   - over 4 096 bytes, not one JSON object in UTF-8, a member given twice, or a backslash:
-     `LOCK-SIG-DOCUMENT`;
-   - a `lockSignatureVersion` other than `"1.1.0"`: `LOCK-SIG-VERSION`, checked before the other
-     members so that a later version is named as such;
-   - a member that is not defined, or one that is missing: `LOCK-SIG-MEMBER`;
-   - an `algorithm` other than `ed25519`: `LOCK-SIG-ALGORITHM`;
-   - a `publicKey` not of its form, or refused by the trust rule: `LOCK-SIG-PUBLIC-KEY`;
-   - a `lockDigest` or `signature` not of its form: `LOCK-SIG-FORM`;
-3. the document's key is not the expected key, compared as 32 bytes: `LOCK-SIG-UNEXPECTED-KEY`;
-4. the SHA-256 of the lock's bytes, without one final line feed, is not `lockDigest`:
-   `LOCK-SIG-DIGEST-MISMATCH`. This is also how a signature of another lock, moved beside this one,
-   is refused;
-5. the signature does not verify under the expected key over §6's message: `LOCK-SIG-INVALID`.
+- over 4 096 bytes, not one JSON object in UTF-8, a member given twice, or a backslash:
+  `LOCK-SIG-DOCUMENT`;
+- a version member other than `"1.1.0"`: `LOCK-SIG-VERSION`, checked before the other members so
+  that a later version is named as such;
+- a member that is not defined, or one that is missing: `LOCK-SIG-MEMBER`;
+- an `algorithm` other than `ed25519`: `LOCK-SIG-ALGORITHM`;
+- a `publicKey` not of its form, or refused by the trust rule: `LOCK-SIG-PUBLIC-KEY`;
+- a digest member or `signature` not of its form: `LOCK-SIG-FORM`.
 
-Steps 3 and 4 come before step 5, so the reader learns the plainer reason.
+**Checking a document** against a key and a digest, in this order, so the reader learns the
+plainer reason first: the document's key is not that key, compared as 32 bytes
+(`LOCK-SIG-UNEXPECTED-KEY`); its digest member is not that digest (`LOCK-SIG-DIGEST-MISMATCH`);
+the signature does not verify under that key over §6's message (`LOCK-SIG-INVALID`).
 
-**After a verdict.** The lock's bytes are not parsed until the signature is accepted. Then the lock
-is held to §4's step 1, which includes the expected registry id and the index requirement, and to
-the rest of §4 when the documents are given, or to coverage when a resolved registry is. The report
-gives both results: the signature accepted, with its key and key identifier, and the lock's result.
-An accepted signature over a lock that fails any of these is a refusal of the lock, not a pass.
+**Verifying.** The verifier is given the lock's bytes, the lock signature document, for an
+assembled lock the source signature documents, the expected signer set, the expected inputs of §4,
+and its serial record (Rollback, below). A signature binds only a digest: without the expected
+registry id, another registry's lock signed by the same key would verify. In order:
+
+1. an expected key missing or refused by the trust rule: `LOCK-SIG-EXPECTED-KEY`; another expected
+   input missing, including both a record for the expected registry id and a floor:
+   `LOCK-EXPECTED`; each before anything is read;
+2. **the lock signature**, read, then checked against the standard owner's key (for a single
+   registry, the expected key) and the SHA-256 of the lock's bytes without one final line feed. No
+   lock signature document is `LOCK-SIG-MISSING`, and a second is `LOCK-SIG-EXTRA`. A signature of
+   another lock, moved beside this one, is `LOCK-SIG-DIGEST-MISMATCH`. The lock's bytes are not
+   parsed until it is accepted;
+3. **the lock**, held to §4's step 1, which includes the expected registry id and the index
+   requirement;
+4. **the serial**, against the record (Rollback);
+5. **the source signatures**. Each source signature document given is read, and matched to the
+   `sources` item whose `signature` is its digest (§2.3). An item that no document matches is
+   `LOCK-SIG-MISSING` at the item. A document that matches no item, a second copy for one item, or
+   any document given for a lock with no `sources`, is `LOCK-SIG-EXTRA`: a set with a stray
+   signature is refused, not trimmed. A repository item whose `repository` the map does not name is
+   `LOCK-EXPECTED`. Each matched document is checked against the key the set names for its item
+   (the standard owner's for the `standard` item, the map's for the item's `repository` otherwise)
+   and the item's `statement`;
+6. the rest of §4 when the documents are given, and coverage when a resolved registry or a file is.
+
+The report gives every result: each signature, accepted or refused, with its key and key
+identifier, and the lock's result. An accepted lock signature over a lock that fails any later step
+is a refusal of the lock, not a pass.
+
+**Rollback.** *Amended 2026-11-17, by the maintainer's ruling (first draft's question 2).* The
+lock's `serial`, which the lock signature covers, orders the locks of one registry id.
+
+- **What the verifier keeps.** For each registry id it has accepted a lock of, a **record**: the
+  `serial` and the lock digest of the last lock it accepted. Nothing else is kept: keys and the
+  other expected inputs are given each time, and one record serves every environment of the
+  registry.
+- **The rule.** A lock whose serial is below the record's is `LOCK-SERIAL-ROLLBACK`. One whose
+  serial equals the record's is accepted only when its digest is the record's: verifying the
+  accepted lock again, after a restart for example, is no rollback. Another lock with that serial
+  is `LOCK-SERIAL-CONFLICT`, two locks claiming one place. A higher serial is admitted, however
+  far above: a verifier need not see every lock.
+- **First contact.** With no record for the registry id, the verifier MUST be given, out of band, a
+  **floor**: the lowest serial it may accept. A lock below it is `LOCK-SERIAL-ROLLBACK`; no record
+  and no floor is `LOCK-EXPECTED`. A floor of 1 accepts whatever lock comes first: trust on first
+  use, which a verifier chooses by giving it, never by default. A lost record is a first contact.
+- **Recording.** Only when every step of the verification accepts does the verifier replace the
+  record with the lock's serial and digest, durably, before it reports the lock accepted. A record
+  it cannot write is `LOCK-SERIAL-STATE`, and the lock is not accepted. A refused lock changes no
+  record.
+- **The state is the verifier's.** It is not in the lock, the registry or a signature, and nothing
+  here writes it into a document another reader trusts. Two verifiers keep two records; verifiers
+  that must agree share theirs by their own means, outside this text.
 
 ### 8. Diagnostic codes
 
@@ -303,10 +448,10 @@ gives, so that one implementation can serve both.
 
 | Code | Raised when | Pack signature code |
 | --- | --- | --- |
-| `LOCK-EXPECTED` | an expected registry id, index requirement or environment (coverage) is missing, or the id is not an absolute URI | — |
+| `LOCK-EXPECTED` | an expected input is missing: the registry id, the index requirement, the environment (coverage), a repository source's key, or a floor at first contact; or the id is not an absolute URI | — |
 | `LOCK-FORM` | the lock is not of its form | — |
 | `LOCK-NOT-CANONICAL` | the lock's bytes are not its JCS bytes | — |
-| `LOCK-UNEXPECTED-REGISTRY` | the lock's `registry.id` is not the expected registry id | — |
+| `LOCK-UNEXPECTED-REGISTRY` | the lock's `registry.id`, or a writer's previous lock's, is not the expected registry id | — |
 | `LOCK-INDEX-REQUIRED` | an index is required and the lock names none | — |
 | `LOCK-REGISTRY-INVALID` | the registry, or the assembly, has an error | `-PACK-NOT-VALID` (signing) |
 | `LOCK-REGISTRY-MISMATCH` | the registry is not the one the lock names | — |
@@ -315,34 +460,46 @@ gives, so that one implementation can serve both.
 | `LOCK-INDEX-MISSING` | the lock names an index and none was given | — |
 | `LOCK-INDEX-MISMATCH` | the index is not the one the lock names, or names another registry | — |
 | `LOCK-INDEX-UNLOCKED` | an index was given for a lock that names none | — |
-| `LOCK-NOT-COVERED` | a resolved registry is not of the expected environment, or not the one the lock names for it | `document-drift` (`packs covers`) |
-| `LOCK-SIG-EXPECTED-KEY` | no expected key, or one a verifier may not trust | `-EXPECTED-KEY` |
-| `LOCK-SIG-DOCUMENT` | the document is over its bound, not one JSON object, repeats a member or holds a backslash | `-TOO-LARGE`, `-MALFORMED`, `-DUPLICATE-MEMBER` |
-| `LOCK-SIG-VERSION` | `lockSignatureVersion` is not `"1.1.0"` | `-VERSION` |
+| `LOCK-SOURCES-MISMATCH` | the lock's sources are not the index's, or a statement digest differs | — |
+| `LOCK-EMITTER-MISSING` | the lock names emitters and none were given | — |
+| `LOCK-EMITTER-MISMATCH` | an emitter manifest or owned file differs from, or is absent from, the lock, or a host check did not exit 0 | — |
+| `LOCK-NOT-COVERED` | a resolved registry is not of the expected environment, or not the one the lock names for it; or a file is not one the lock lists | `document-drift` (`packs covers`) |
+| `LOCK-SERIAL-ROLLBACK` | the lock's serial is below the verifier's record, or below its floor | — |
+| `LOCK-SERIAL-CONFLICT` | the lock's serial is the record's and its digest is not | — |
+| `LOCK-SERIAL-STATE` | the verifier cannot write its record | — |
+| `LOCK-SIG-EXPECTED-KEY` | an expected key is missing, or one a verifier may not trust | `-EXPECTED-KEY` |
+| `LOCK-SIG-MISSING` | the lock signature, or an item's source signature, is not given | `-MISSING` |
+| `LOCK-SIG-EXTRA` | a second lock signature is given, or a source signature that no item expects or that is given twice | — |
+| `LOCK-SIG-DOCUMENT` | a document is over its bound, not one JSON object, repeats a member or holds a backslash | `-TOO-LARGE`, `-MALFORMED`, `-DUPLICATE-MEMBER` |
+| `LOCK-SIG-VERSION` | `lockSignatureVersion` or `sourceSignatureVersion` is not `"1.1.0"` | `-VERSION` |
 | `LOCK-SIG-MEMBER` | a member is unknown or missing | `-UNKNOWN-MEMBER`, `-MISSING-MEMBER` |
 | `LOCK-SIG-ALGORITHM` | `algorithm` is not `ed25519` | `-ALGORITHM` |
 | `LOCK-SIG-PUBLIC-KEY` | `publicKey` is not of its form, or not a key a verifier may trust | `-PUBLIC-KEY` |
-| `LOCK-SIG-FORM` | `lockDigest` or `signature` is not of its form | `-PACK-DIGEST`, `-VALUE` |
-| `LOCK-SIG-UNEXPECTED-KEY` | the document's key is not the expected key | `-UNEXPECTED-KEY` |
-| `LOCK-SIG-DIGEST-MISMATCH` | the lock's bytes are not the bytes the document names | `-DIGEST-MISMATCH` |
-| `LOCK-SIG-INVALID` | the signature does not hold under the expected key | `-INVALID` |
+| `LOCK-SIG-FORM` | a digest member or `signature` is not of its form | `-PACK-DIGEST`, `-VALUE` |
+| `LOCK-SIG-UNEXPECTED-KEY` | a document's key is not the key the expected set names for it | `-UNEXPECTED-KEY` |
+| `LOCK-SIG-DIGEST-MISMATCH` | the lock's bytes, or a source's statement, are not what the document names | `-DIGEST-MISMATCH` |
+| `LOCK-SIG-INVALID` | a signature does not hold under its expected key | `-INVALID` |
 
 A diagnostic carries no value: no key but the key identifier, which the report names for an
 accepted signature, and no document content.
 
-### 9. What an accepted signature establishes
+### 9. What an accepted set of signatures establishes
 
-- **It establishes** that the holder of the expected key signed this lock's digest. Through the
-  lock's digests, that covers the registry, its kinds, its resolved forms and, when the lock names
-  one, the index. Through the index, it covers the repositories, commits, paths and content digests
-  the index claims.
+- **It establishes** that the holder of the expected key (for an assembly, the standard owner's)
+  signed this lock's digest, and, for an assembly, that the holder of each repository's expected
+  key signed its own statement: its documents, by digest, at the commit the index names. Through
+  the lock's digests, that covers the registry, its kinds, its resolved forms, the serial, the
+  emitters and their files and, when the lock names one, the index; through the index, the
+  repositories, commits, paths and content digests it claims, each vouched for by that
+  repository's key. With the verifier's record, it establishes that no lock of that registry
+  accepted earlier had a higher serial.
 - **It does not establish**:
   - that the registry is right, tested, reviewed, approved or current;
-  - when it was signed, because the document holds no time;
-  - that the signer had authority over any entry or source;
-  - that the index's provenance is true;
+  - when it was signed: the serial orders locks, and dates none;
+  - that no newer lock exists: a verifier never shown one keeps accepting the last;
+  - that the signer had authority over any entry, or a repository's key over its history;
   - that any secret exists;
-  - that any emitted file matches.
+  - that the locked files are the ones deployed.
 
 ## Alternatives
 
@@ -350,17 +507,25 @@ accepted signature, and no document content.
   cover the resolved forms consumers hold, or an assembly's provenance, and an assembled registry is
   read from several documents.
 - **Sign each document.** That gives many signatures and nothing that binds the set. A reviewed
-  registry mixed with another registry's kinds would verify.
+  registry mixed with another registry's kinds would verify. Source signatures sign each
+  repository's documents, but only as members of a set the lock binds.
+- **k of n signatures.** Rejected by the maintainer's ruling: a repository's signature vouches for
+  its own documents and the standard owner's for the assembly, so no number of other signatures
+  can stand in for a missing one.
 - **Put the signature inside the registry or the lock.** It would change the closed registry
   document of `1.0.0`, and a document cannot sign its own bytes.
+- **A time, or a log, against rollback.** A time brings a clock into verification, and two
+  writers' clocks disagree; a log orders locks too, at the cost of a service. A serial needs only
+  the previous lock. Nothing here excludes a log a verifier adds on top.
 - **A new envelope or algorithm**, such as a general-purpose signing envelope, or a keyless signing
   service with a transparency log. Each brings a time source, a service or a second algorithm
   family. The specification already has one Ed25519 verification with fixed rules, and another
-  implementation of it is cheaper than a second scheme. A transparency log is something a verifier
-  may add on top, and nothing here excludes it.
+  implementation of it is cheaper than a second scheme.
 - **The pack signature document, unchanged, naming a lock's digest.** That would be a pack signature
   that every pack verifier reads as one. A prefix and member name of its own keep the two apart
   (§6).
+- **Several registries per lock.** Rejected by the maintainer's ruling: one lock per registry keeps
+  one serial, one expected registry id and one coverage question per lock.
 - **Commits pinned in the federation manifest.** RFC 0039 keeps the manifest as intent and the
   index as record. The lock pins the record.
 - **A lock without resolved digests.** Consumers hold resolved registries. Without these digests,
@@ -369,66 +534,89 @@ accepted signature, and no document content.
 ## Compatibility
 
 - **Registry format `1.0.0` is unchanged.** Nothing is removed or changes meaning. The registry,
-  kind and resolved documents keep selector `"1.0.0"`, and a lock and a signature sit beside them.
-- **Additions only, under new minor selectors.** The lock and the signature are format `1.1.0`
-  documents, and a `1.0.0` reader refuses either by its selector. The lock report is the validation
-  report at `"1.1.0"`, and a plain validation still writes `"1.0.0"` (§13).
+  kind, resolved and emitter documents keep their selectors, and a lock and its signatures sit
+  beside them.
+- **Additions only, under new minor selectors.** The lock and the two signature documents are
+  format `1.1.0` documents, and a `1.0.0` reader refuses each by its selector. The lock report is
+  the validation report at `"1.1.0"`, and a plain validation still writes `"1.0.0"` (§13).
 - **Packs are unchanged.** The runtime's reviewed-set lock, its pack signature document and its
   codes stay the runtime's convention. This RFC reuses that design under its own name and prefix,
   and changes nothing in Core.
-- **It does not depend on RFC 0039.** Without it, `index` is not defined, and a lock pins one
-  registry. Both would be released on `registry-v1.1.0`, by the route of VERSIONING.md.
+- **It does not depend on RFC 0039.** Without it, `index`, `sources` and source signatures are not
+  defined, and a lock pins one registry with one signer. Both would be released on
+  `registry-v1.1.0`, by the route of VERSIONING.md.
 
 ## Security and privacy
 
 - **A signature says who, not whether right.** See §9. It is evidence of an act by a key holder,
   not of a review.
-- **No time, so replay and rollback are open.** An older signed lock, with its older registry, still
-  verifies. For a single registry whose writers bump `version` on every change, a verifier can
-  compare it with one it has seen. That does not reach assemblies: an assembly's `version` is its
-  manifest's, unchanged when only a source's commit changes, so an older assembly under one manifest
-  version is not refused. This draft does not address that rollback (Unresolved question 2).
+- **All of a set, no stand-ins.** A repository's key signs only its own statement: one by another
+  key, where the map names another, is `LOCK-SIG-UNEXPECTED-KEY`, and a statement of another
+  commit is `LOCK-SIG-DIGEST-MISMATCH`. A missing signature is a refusal, and a stray one is
+  refused rather than ignored (`LOCK-SIG-EXTRA`). A compromised repository key can sign false
+  documents for its own repository only, and they still had to pass the assembly the standard
+  owner then signed.
+- **Rollback is refused by the verifier's record, not by the lock.** A signed older lock verifies
+  as a signature, and its serial refuses it against a record that has seen a newer one
+  (`LOCK-SERIAL-ROLLBACK`). A first contact is as strong as its floor, a lost record is a first
+  contact, and withholding a newer lock (a freeze) is not detected. A holder of the standard
+  owner's key can sign any serial, a very high one included; recovering from that is a new record,
+  given out of band, and a verifier that must survive it needs a log of its own.
 - **Expected registry and environment.** A key that signs several registries' locks makes each
   verify, and a lock names every environment's resolved registry. So the registry id and the
-  environment are named by the verifier, never read from a document (§4), as the key is: another
+  environment are named by the verifier, never read from a document (§4), as the keys are: another
   registry's lock is `LOCK-UNEXPECTED-REGISTRY`, and a `dev` resolved registry is not covered for
   `prod`. Provenance is likewise required by the verifier, since a lock may omit it (§2).
-- **Keys.** The expected key is mandatory, and a key the trust rule refuses is refused before
+- **Keys.** Every expected key is mandatory, and a key the trust rule refuses is refused before
   anything is read. That includes keys of small order, under which anyone can forge. A compromised
   key cannot be revoked in this format: a verifier stops expecting it.
-- **Domain separation.** The prefix keeps a lock signature apart from pack signatures, witness
-  statements and every other signature the project's keys make (§6).
-- **Unsigned input is read little.** The signature is checked before the lock is parsed, and the
-  signature document is bounded at 4 096 bytes.
-- **No secrets in a lock.** It holds identifiers and digests only. A digest of a very small resolved
-  registry can be confirmed by guessing its content, as RFC 0039 says of the index.
+- **Domain separation.** The prefixes keep lock and source signatures apart from each other, from
+  pack signatures and witness statements, and from every other signature the project's keys make
+  (§6).
+- **Unsigned input is read little.** The lock signature is checked before the lock is parsed, and
+  each signature document is bounded at 4 096 bytes.
+- **No secrets in a lock.** It holds identifiers, paths and digests only. A digest of a very small
+  resolved registry or generated file can be confirmed by guessing its content, as RFC 0039 says of
+  the index.
 - **Coverage and signing trust the checker.** Coverage relies on whoever checked or signed the lock.
   A signer that signs without checking is a defect a verifier cannot see. A verifier sees only that
-  the lock does not check (§7, After a verdict).
-- **Resources.** A lock is at most 1 MiB, a signature document at most 4 096 bytes, and each
-  signature costs one verification.
+  the lock does not check (§7, Verifying).
+- **Resources.** A lock is at most 1 MiB, each signature document at most 4 096 bytes, an assembly
+  at most 256 sources (RFC 0039 §2), so at most 257 signatures, each one verification.
 
 ## Conformance
 
 Rows would be hand-written and synthetic, under the registry's `1.1.0` rows, for three new
 classes: **lock writer** (§§2 and 3), **lock checker** (§4) and **lock signature verifier**
 (§§5 to 7). Signing rows use RFC 8032 §7.1 TEST 1's published seed, as the dialect vectors do, so
-that any reader can reproduce them, and a second published seed for wrong-key rows.
+that any reader can reproduce them, and further published seeds for repository and wrong-key rows.
+A verifier's record is part of a row's input and of its expected output.
 
-- **Positive.** A lock of a single registry; a lock of an assembly, with its index; coverage of each
-  environment's resolved registry; an accepted signature over a lock with and without its final
-  line feed.
+- **Positive.** A lock of a single registry; a lock of an assembly, with its index and every source
+  signature; coverage of each environment's resolved registry and of a generated file; an accepted
+  signature over a lock with and without its final line feed; the accepted lock verified again
+  (equal serial, same digest); a first contact with a floor of 1; a higher serial replacing the
+  record.
 - **Negative.** One row per code of §8. These include kinds reordered, an environment missing from
   `resolved`, a lock naming an index checked without one, an index given for a lock that names
-  none, a lock with no index where one is required, and each expected input missing.
+  none, a lock with no index where one is required, each expected input missing, a source signature
+  missing, a second copy of one, a serial below the record, an equal serial with another digest, no
+  floor at first contact, a record the harness makes unwritable, a lock naming emitters checked
+  without them, and an owned file changed by one byte.
 - **Boundary.** A signature document of 4 096 bytes and one of 4 097; a lock at 1 MiB and one over
-  it; a lock followed by two line feeds (`LOCK-SIG-DIGEST-MISMATCH`).
+  it; a lock followed by two line feeds (`LOCK-SIG-DIGEST-MISMATCH`); serials 1 and 2^53 − 1, and
+  0 and 2^53 (`LOCK-FORM`).
 - **Adversarial.**
-  - A pack signature's message, made under the expected key, presented as a lock signature
-    (`LOCK-SIG-INVALID`).
+  - A signature over a pack signature's message, and one over the source signature message naming
+    the lock's digest, each made under the expected key and placed in a lock signature document
+    that names the lock's digest (`LOCK-SIG-INVALID`).
   - Another lock's signature moved beside this lock.
   - Another registry's lock, signed by the expected key (`LOCK-UNEXPECTED-REGISTRY`).
   - The `dev` resolved registry offered for `prod` (`LOCK-NOT-COVERED`).
+  - One repository's key signing another repository's statement (`LOCK-SIG-UNEXPECTED-KEY`); a
+    repository's statement at another commit (`LOCK-SIG-DIGEST-MISMATCH`); the standard owner's
+    key signing a repository's statement (`LOCK-SIG-UNEXPECTED-KEY`).
+  - A signed older lock offered after a newer was accepted (`LOCK-SERIAL-ROLLBACK`).
   - A document naming a key other than the expected one, whose signature holds under its own key.
   - An expected key that is all zeros, of small order, or not canonical.
   - A signature with `S` at or above L, and one that holds only under the cofactored check.
@@ -440,32 +628,44 @@ that any reader can reproduce them, and a second published seed for wrong-key ro
 ## Implementation
 
 - **The reference runtime (Go)** would add `jpack registry lock`, `registry covers`, `registry
-  sign` and `registry verify-signature`, reusing the key checks of its pack signatures, the seed
-  handling of `packs sign` and its registry reader.
+  sign` (of a lock or a source statement) and `registry verify-signature`, reusing the key checks of
+  its pack signatures, the seed handling of `packs sign`, its registry reader and its emitter host,
+  with the verifier's record in a file the verifier names.
 - **A second reader**, independently written, in this repository's Python tooling, which already
   makes and checks Ed25519 signatures for the dialect vectors.
-- **Hosts** hold the keys, distribute the expected ones and decide which signatures they require.
-  That is theirs, outside this text.
+- **Hosts** hold the keys, distribute the expected ones, keep the records and decide where the
+  signature documents travel. That is theirs, outside this text.
 
 ## Unresolved questions
 
-1. **Several signatures.** A standard's owner and a service's owner may both need to sign. Is the
-   rule that combines them (all of a set, k of n) the verifier's policy, or a document of its own?
-2. **Time and rollback.** Should a lock carry a monotonic serial, or its signature a time, so that a
-   verifier can refuse an older assembly under one manifest version? Either makes a writer read the
-   previous lock or a clock, and a verifier keep state or a log.
-3. **File names.** Should the companion name a sibling convention (`<registry>.lock.json`,
-   `<lock>.sig.json`), as the runtime does for packs, so that independent tools find each other's
-   files?
-4. **Emitters.** Should a lock also pin emitter manifests and the digests of the files they own, so
-   that a deployment can check its generated files against the reviewed set?
-5. **Several registries per lock.** Should one lock cover several assemblies, for example one per
-   region, under one signature?
-6. **One signature document for packs and registries.** A shared document with a `subject` member
-   would need one specification. Today the pack signature is a runtime convention and this one would
-   be the companion's.
-7. **Key rotation.** The runtime's audit trail has rotation statements, and a lock signature has
-   none. Is a rotation statement needed here, or is the expected key enough?
-8. **Provenance in `valid`.** Should a lock check that is given the sources also run RFC 0039's
-   index check, making provenance part of the lock's result?
-9. **Review regime:** as in RFC 0034, question 1.
+*Amended 2026-11-17.* Questions 1 (several signatures), 2 (time and rollback), 4 (emitters) and 5
+(several registries per lock) of the first draft are settled in §§2, 3, 5 and 7 by the
+maintainer's ruling. The rest are renumbered, and each carries a proposed resolution for the
+maintainer to decide.
+
+1. **File names.** Should the companion name a sibling convention, as the runtime does for packs,
+   so that independent tools find each other's files? *Proposed resolution:* yes, for the lock and
+   its signature only: `<registry or manifest file>.lock.json` beside the registry or the
+   federation manifest, and `<lock file>.sig.json` beside the lock, as defaults a command line may
+   override. A source signature names a commit and so cannot live in it (§5.2); it gets no file
+   name, and travels with the bytes the assembler is given.
+2. **One signature document for packs and registries.** A shared document with a `subject` member
+   would need one specification. Today the pack signature is a runtime convention and these would
+   be the companion's. *Proposed resolution:* no. Keep the documents apart, joined by a shape and
+   a prefix rule: a shared document would make every verifier class read every subject, and the
+   pack document is fixed at its `1.0.0`.
+3. **Key rotation.** The runtime's audit trail has rotation statements, and these signatures have
+   none. Is a rotation statement needed here, or is the expected key enough? *Proposed
+   resolution:* the expected keys are enough for `1.1.0`. They are given every time, so a rotation
+   is a change to the verifier's configuration, and the serial record, kept per registry id, is
+   unaffected by it. A later version may add a statement signed by the old key if verifiers need
+   continuity without that change.
+4. **Provenance in `valid`.** Should a lock check that is given the sources also run RFC 0039's
+   index check, making provenance part of the lock's result? *Proposed resolution:* no; keep the
+   two checks apart and report both. The lock check needs no source bytes and runs where a
+   deployment runs; the index check needs every source at its commit. Source signatures already
+   bring each repository's word on its commit into the lock's verification.
+5. **Review regime:** as in RFC 0034, question 1. *Proposed resolution:* record a different-vendor
+   review before acceptance. This record defines two signatures, a rollback rule and their
+   refusals, the kind of change RFC 0009's review is for; a waiver, as for RFCs 0034 to 0038, is the
+   maintainer's to give.
