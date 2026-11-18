@@ -227,5 +227,7 @@ Two Drafts propose additions to the released registry companion as format `1.1.0
   documents, and all of the set is required. A verifier keeps, per registry id, the serial it last
   accepted, and refuses an older lock.
 
-Both were amended on 2026-11-17 by the maintainer's rulings on eight of their Unresolved questions;
-each remaining question carries a proposed resolution.
+Both were amended on 2026-11-17 by the maintainer's rulings on eight of their Unresolved questions,
+and on 2026-11-18 the remaining questions were decided as proposed. The proposed companion text,
+[`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), states both as format `1.1.0` would; it is
+normative for nothing until a `registry-v1.1.0` tag releases it.
