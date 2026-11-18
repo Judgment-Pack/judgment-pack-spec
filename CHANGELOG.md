@@ -93,6 +93,19 @@ here.
   is the verifier's own and is never lowered; the lock pins the emitter manifests and the files
   they own; and a lock names one registry. Each remaining question carries a proposed resolution. Both stay Drafts, and nothing is
   built.
+- **The registry companion's format `1.1.0` text, proposed** (`spec/registry-1.1.0.md`; RFC 0039's
+  and RFC 0040's amendments of 2026-11-18). The text states RFC 0039's assembly, assembled index
+  and tighten-only bounds and RFC 0040's lock, lock signature and source signatures as the
+  companion would at format `1.1.0`, with their diagnostic codes, versioning, conformance classes
+  and security considerations. It keeps the eight rulings of 2026-11-17 as the records state them,
+  and decides the eleven questions that remained as their proposed resolutions: no pattern
+  inclusion and no structural bounds in `1.1.0`; no per-entry provenance in the index; selectors
+  `"1.1.0"`; an assembly-wide cap only the standard states (`maxAssemblyEntries`); default file
+  names for the lock and its signature; separate signature documents for packs and registries; no
+  rotation statement; the lock check and the index check reported apart; and one review round over
+  both records. The RFCs' questions sections become Settled questions, and both stay Drafts. It is
+  normative for nothing until `registry-v1.1.0`, and format `1.0.0` and `spec/registry.md` are
+  unchanged. No schema, code list, row or reader exists.
 - **The registry companion's first release, `registry-v1.0.0`** (registry format `1.0.0`, status
   `released`, and not stable; release notes `releases/registry-v1.0.0.md`). The text's status
   sentence, the code list and the rows' manifest say `released`, the rows' README and its heading

@@ -8,14 +8,17 @@
 - Amended: 2026-11-17, settling four of the first draft's Unresolved questions by the maintainer's
   ruling: a repository's subset of environments (§§2 and 3), one standard per assembly (§2),
   per-environment bounds (§5) and no assembly as a source (§3); each remaining question carries a
-  proposed resolution
+  proposed resolution; 2026-11-18, deciding the remaining questions as proposed (Settled questions),
+  with the proposed companion text [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md)
 - Related: [RFC 0034](0034-registry-profile.md) (the registry profile, and its Unresolved question
   4, cross-registry references); [RFC 0035](0035-registry-references.md) (references);
   [RFC 0040](0040-registry-locks-and-signatures.md) (locks and signatures, which pin an assembled
   index)
 
 > **Draft.** This record is normative for nothing. Nothing is built: no schema, no row, no reader.
-> The Specification below is a sketch of text that a later registry format `1.1.0` would hold.
+> The Specification below is the sketch; the proposed companion text,
+> [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), states it as format `1.1.0` would, and
+> governs where the two differ.
 >
 > **Review standing.** [RFC 0009](0009-interim-review-regime.md) asks for a recorded adversarial
 > review by a model from a different vendor on the pull request that creates an RFC. None is
@@ -291,7 +294,7 @@ A repository's bounds for the same kind might set `"maximum": 50` at `/connectio
   §3.5's rule, in the schema of the declaration that governs or is pinned for the kind
   (`FED-BOUND-POINTER-UNREACHABLE`), for the same reason.
 - `maxEntries` bounds the number of entries of the kind that **one source** holds, in all
-  environments. Nothing caps a kind across the assembly (Unresolved question 5).
+  environments. A cap across the assembly is the standard's alone (Settled questions, 5).
 - `bound` holds only the constraints of §5.2.
 - `environments`, optional, holds per-environment bounds (§5.5).
 
@@ -437,7 +440,7 @@ pointers, sources and paths, never a repository's content.
   inside the standard, and this RFC does so (§5.4, 2). The comparison is added because a looser
   stated limit misleads: a reader of the repository's bounds would take `maximum: 600` as allowed.
 - **Pattern inclusion by automata.** Exact, but exponential in the worst case, and two readers
-  would need one algorithm and one budget (Unresolved question 1).
+  would need one algorithm and one budget (Settled questions, 1).
 - **Commits pinned in the manifest.** The manifest would be a lock, changed by every service change.
   The manifest says what, the index records which, and RFC 0040's lock pins the index.
 
@@ -528,36 +531,27 @@ Rows would be hand-written and synthetic, under `conformance/registry/1.1.0/`, f
   and hand over the bytes; that is theirs, outside this text.
 - **This repository** would hold the text, the `1.1.0` schemas, the code list and the rows.
 
-## Unresolved questions
+## Settled questions
 
-*Amended 2026-11-17.* Questions 1 (environments), 2 (layered standards), 3 (per-environment bounds)
-and 8 (assemblies of assemblies) of the first draft are settled in §§2, 3 and 5 by the maintainer's
-ruling. The rest are renumbered, and each carries a proposed resolution for the maintainer to
-decide.
+*Amended 2026-11-18.* Every question is now decided. Questions 1 (environments), 2 (layered
+standards), 3 (per-environment bounds) and 8 (assemblies of assemblies) of the first draft were
+settled by the maintainer's ruling of 2026-11-17, in §§2, 3 and 5. The six that remained are
+decided as their proposed resolutions said, and the proposed companion text
+([`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), format `1.1.0`, proposed) states each one.
 
-1. **Pattern inclusion.** Should a later version decide inclusion between two patterns under a
-   published size budget every reader shares, so a pattern can be replaced by a narrower one?
-   *Proposed resolution:* no, not in `1.1.0`. Adding a pattern already narrows, and two readers
-   agree on that at no cost; inclusion needs one algorithm and one budget in every reader, and is
-   worth defining only when a replacement is shown to be needed.
-2. **Bounds on structure.** Should a standard also narrow a kind's `overlayable` positions, the
-   target kinds of a reference, or the stores a secret may name? *Proposed resolution:* yes, in a
-   later minor version, as three more rows of §5.2. Each is a finite set compared by subset, so it
-   is decidable at no cost; none is needed to bound values, which is this version's scope.
-3. **Entry provenance in the index.** Entries are found through their source's pinned registry. Is
-   a per-entry list worth its size for an auditor? *Proposed resolution:* no. Each entry is held by
-   exactly one source's registry, which the index pins by digest, so an auditor derives entry to
-   source from documents it already holds, and the index stays within its bound.
-4. **Selector values.** New documents take `"1.1.0"`, the format that defines them. Is `"1.0.0"`,
-   a document's first version, the better reading of §13? *Proposed resolution:* keep `"1.1.0"`.
-   A selector names the format that defines the document; `"1.0.0"` would name a format in which
-   the document does not exist, and a `1.0.0` reader's refusal by selector would then be ambiguous.
-5. **Assembly-wide caps.** `maxEntries` bounds one source. Should a bound also cap a kind's entries
-   across the assembly, and how would a repository's narrower cap compare with it? *Proposed
-   resolution:* yes, as a member only the standard may state (a repository stating it is
-   `FED-BOUND-FORM`), checked once after step 6. An assembly-wide cap is a limit only the standard
-   owner speaks for, so it needs no comparison.
-6. **Review regime:** as in RFC 0034, question 1. *Proposed resolution:* review this record with
-   RFC 0040 in one round. This record defines no cryptography, so a same-vendor review with the
-   different-vendor review waived, as for RFCs 0034 to 0038, would fit it alone; RFC 0040's
-   signatures argue for one review of both, of whichever kind RFC 0040 receives.
+1. **Pattern inclusion:** not in `1.1.0`. Adding a pattern already narrows, and two readers agree on
+   that at no cost; inclusion would need one algorithm and one budget in every reader, and is
+   defined only if a replacement is shown to be needed (text §6.3).
+2. **Bounds on structure:** not in `1.1.0`. A later minor version may add a kind's `overlayable`
+   positions, the target kinds of a reference and the stores a secret may name as three more rows
+   of §5.2, each a finite set compared by subset (text §13).
+3. **Entry provenance in the index:** none. Each entry is held by exactly one source's registry,
+   which the index pins by digest, so an auditor derives entry to source from documents it already
+   holds, and the index stays within its bound (text §5).
+4. **Selector values:** `"1.1.0"`. A selector names the format that defines the document, and a
+   `1.0.0` reader's refusal by selector stays unambiguous (text §2).
+5. **Assembly-wide caps:** a member only the standard may state, `maxAssemblyEntries` (a repository
+   stating it is `FED-BOUND-FORM`), checked once on the assembled registry and compared with
+   nothing; exceeding it is `FED-BOUND-ENTRIES` (text §§6.1 and 6.5).
+6. **Review regime:** this record and RFC 0040 are reviewed together in one round, of the kind RFC
+   0040 receives: a recorded different-vendor review, unless the maintainer waives it.

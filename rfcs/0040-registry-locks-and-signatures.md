@@ -8,7 +8,8 @@
 - Amended: 2026-11-17, settling four of the first draft's Unresolved questions by the maintainer's
   ruling: all of a set of signatures, per repository (§§5 and 7), a serial against rollback (§§2
   and 7), emitters in the lock (§§2 to 4) and one lock per assembly (§2); each remaining question
-  carries a proposed resolution
+  carries a proposed resolution; 2026-11-18, deciding the remaining questions as proposed (Settled
+  questions), with the proposed companion text [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md)
 - Related: [RFC 0034](0034-registry-profile.md) (the registry profile);
   [RFC 0039](0039-federated-registry.md) (the assembled index a lock may pin); the key and
   signature rules of the checkpoint witness companion
@@ -19,7 +20,9 @@
   re-serialization)
 
 > **Draft.** This record is normative for nothing. Nothing is built: no schema, no row, no reader.
-> The Specification below is a sketch of text that a later registry format `1.1.0` would hold.
+> The Specification below is the sketch; the proposed companion text,
+> [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), states it as format `1.1.0` would, and
+> governs where the two differ.
 >
 > **Review standing.** [RFC 0009](0009-interim-review-regime.md) asks for a recorded adversarial
 > review by a model from a different vendor on the pull request that creates an RFC. None is
@@ -698,39 +701,28 @@ A verifier's record is part of a row's input and of its expected output.
 - **Hosts** hold the keys, distribute the expected ones, keep the records and decide where the
   signature documents travel. That is theirs, outside this text.
 
-## Unresolved questions
+## Settled questions
 
-*Amended 2026-11-17.* Questions 1 (several signatures), 2 (time and rollback), 4 (emitters) and 5
-(several registries per lock) of the first draft are settled in §§2, 3, 5 and 7 by the
-maintainer's ruling. The rest are renumbered, and each carries a proposed resolution for the
-maintainer to decide.
+*Amended 2026-11-18.* Every question is now decided. Questions 1 (several signatures), 2 (time and
+rollback), 4 (emitters) and 5 (several registries per lock) of the first draft were settled by the
+maintainer's ruling of 2026-11-17, in §§2, 3, 5 and 7. The five that remained are decided as their
+proposed resolutions said, and the proposed companion text
+([`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md), format `1.1.0`, proposed) states each one.
 
-1. **File names.** Should the companion name a sibling convention, as the runtime does for packs,
-   so that independent tools find each other's files? *Proposed resolution:* yes, for the lock and
-   its signature only: `<registry or manifest file>.lock.json` beside the registry or the
-   federation manifest, and `<lock file>.sig.json` beside the lock, as defaults a command line may
-   override. A source signature names a commit and so cannot live in it (§5.2); it gets no file
-   name, and travels with the bytes the assembler is given.
-2. **One signature document for packs and registries.** A shared document with a `subject` member
-   would need one specification. Today the pack signature is a runtime convention and these would
-   be the companion's. *Proposed resolution:* no. Keep the documents apart, joined by a shape and
-   a prefix rule: a shared document would make every verifier class read every subject, and the
-   pack document is fixed at its `1.0.0`.
-3. **Key rotation.** The runtime's audit trail has rotation statements, and these signatures have
-   none. Is a rotation statement needed here, or is the expected key enough? *Proposed
-   resolution:* the expected keys are enough for `1.1.0`. They are given every time, so a rotation
+1. **File names:** defaults for the lock and the lock signature only. The lock of `<name>.json` is
+   `<name>.lock.json` beside it, and the signature of a lock file is `<lock file>.sig.json`; a
+   command line may name either otherwise. A source signature names a commit, so it cannot live in
+   it (§5.2): it has no file name, and travels with the bytes the assembler is given (text §7).
+2. **One signature document for packs and registries:** no. The documents stay apart, joined by a
+   shape and a prefix rule: a shared document would make every verifier class read every subject,
+   and the pack document is fixed at its `1.0.0` (text §10.3).
+3. **Key rotation:** the expected keys suffice for `1.1.0`. They are given every time, so a rotation
    is a change to the verifier's configuration, and the serial record, kept per registry id, is
-   unaffected by it. A later version may add a statement signed by the old key if verifiers need
-   continuity without that change.
-4. **Provenance in `valid`.** Should a lock check that is given the sources also run RFC 0039's
-   index check, making provenance part of the lock's result? *Proposed resolution:* no; keep the
-   two checks apart and report both. The lock check needs no source bytes and runs where a
-   deployment runs; the index check needs every source at its commit. Verification already
-   requires an assembled lock's index and rebuilds each source statement from it (§7, Verifying,
-   steps 5 and 6), so each repository's word on the documents and commit the index records is
-   part of the lock's result. What the index check adds is that those documents assemble to the
-   registry the lock names, which only the source bytes show.
-5. **Review regime:** as in RFC 0034, question 1. *Proposed resolution:* record a different-vendor
-   review before acceptance. This record defines two signatures, a rollback rule and their
-   refusals, the kind of change RFC 0009's review is for; a waiver, as for RFCs 0034 to 0038, is the
-   maintainer's to give.
+   unaffected. A later version may add a statement signed by the old key (text §§11 and 13).
+4. **Provenance in `valid`:** no. The lock check and RFC 0039's index check stay apart, and both
+   are reported. Verification already requires an assembled lock's index and rebuilds each source
+   statement from it; the index check adds that the documents assemble to the registry the lock
+   names, which only the source bytes show (text §9).
+5. **Review regime:** a recorded different-vendor review before acceptance, in one round with RFC
+   0039. This record defines two signatures, a rollback rule and their refusals, the kind of change
+   RFC 0009's review is for; a waiver, as for RFCs 0034 to 0038, is the maintainer's to give.

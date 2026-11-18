@@ -835,6 +835,7 @@ class StaticSiteTests(unittest.TestCase):
             "spec/dialect/index.html": "spec/dialect.md",
             "spec/annotation-vocabulary/index.html": "spec/annotation-vocabulary.md",
             "spec/registry/index.html": "spec/registry.md",
+            "spec/registry-1.1.0/index.html": "spec/registry-1.1.0.md",
             "spec/terraform-file/index.html": "spec/terraform-file.md",
             # Rendered from the immutable final notes; docs/releases/v0.3.0.md is only a pointer.
             "project/releases/0.3.0/index.html": "releases/v0.3.0.md",

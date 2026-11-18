@@ -421,6 +421,18 @@ PAGES = (
         source_ref="main",
     ),
     Page(
+        "spec/registry-1.1.0.md",
+        PurePosixPath("spec/registry-1.1.0/index.html"),
+        "The registry, format 1.1.0",
+        "A proposed addition to the registry companion: a registry assembled from several "
+        "repositories at recorded commits, bounds a repository may only tighten, and a lock that "
+        "pins a registry and what it depends on, with the signatures that vouch for it. Format "
+        "1.1.0, proposed, normative for nothing until registry-v1.1.0 releases it.",
+        "spec",
+        "Normative for nothing until a registry tag releases it; format 1.1.0 proposed",
+        source_ref="main",
+    ),
+    Page(
         "spec/terraform-file.md",
         PurePosixPath("spec/terraform-file/index.html"),
         "The terraform-file reading",
@@ -2803,6 +2815,7 @@ conformance.
 - [The dialect]({guide_url(PurePosixPath("spec/dialect/index.html"))}): a companion document, normative only for the preparation-verifier reader class; its vectors are staged until the next specVersion
 - [The annotation vocabulary]({guide_url(PurePosixPath("spec/annotation-vocabulary/index.html"))}): a companion document, normative only for the vocabulary-checker class; version 1.0.0 is proposed, and its rows are staged
 - [The registry]({guide_url(PurePosixPath("spec/registry/index.html"))}): a companion document, normative only for the registry classes; format 1.0.0 is released on registry-v1.0.0, not yet stable, with its schemas, code list and rows
+- [The registry, format 1.1.0]({guide_url(PurePosixPath("spec/registry-1.1.0/index.html"))}): a proposed addition to the registry companion, a registry assembled from several repositories, tighten-only bounds, and a signed lock; normative for nothing until registry-v1.1.0
 - [The terraform-file reading]({guide_url(PurePosixPath("spec/terraform-file/index.html"))}): a companion document, the reading of a Terraform plan or state file that the dialect's `terraform-file` kind cites; reading 1.0.0 is proposed, normative for nothing until terraform-file-v1.0.0, and its vectors are proposed with it
 - [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
 
