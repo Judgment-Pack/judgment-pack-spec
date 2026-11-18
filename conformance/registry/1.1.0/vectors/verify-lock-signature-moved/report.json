@@ -2,6 +2,6 @@
   "reportFormatVersion": "1.1.0",
   "valid": false,
   "diagnostics": [
-    {"code": "LOCK-SIG-DIGEST-MISMATCH", "severity": "error", "location": {"document": "signature", "pointer": "/lockDigest"}}
+    {"code": "LOCK-SIG-DIGEST-MISMATCH", "severity": "error", "location": {"document": "signature", "keyId": "21fe31dfa154a261626bf854046fd227", "pointer": "/lockDigest"}}
   ]
 }

@@ -3,6 +3,6 @@
   "valid": false,
   "diagnostics": [
     {"code": "LOCK-SIG-MISSING", "severity": "error", "location": {"document": "lock", "pointer": "/sources/1"}},
-    {"code": "LOCK-SIG-EXTRA", "severity": "error", "location": {"document": "signature", "pointer": ""}}
+    {"code": "LOCK-SIG-EXTRA", "severity": "error", "location": {"document": "signature", "keyId": "39f713d0a644253f04529421b9f51b9b", "pointer": ""}}
   ]
 }

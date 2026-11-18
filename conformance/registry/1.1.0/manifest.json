@@ -4497,7 +4497,7 @@
       "section": "§11",
       "operation": "verify",
       "class": "lock-signature-verifier",
-      "description": "A second lock signature document beside an accepted one: LOCK-SIG-EXTRA, and the set is refused, not trimmed. reading: located at the signature document's root.",
+      "description": "A second lock signature document beside an accepted one: LOCK-SIG-EXTRA, and the set is refused, not trimmed. Step 2 never reads the second, so its diagnostic names no key identifier (section 2.1). reading: located at the signature document's root.",
       "lock": "locks/single-42.lock.json",
       "lockSignatures": [
         "locks/single-42.lock.json.sig.json",
@@ -4740,7 +4740,7 @@
       "section": "§§10.1, 11",
       "operation": "verify",
       "class": "lock-signature-verifier",
-      "description": "A publicKey in uppercase hexadecimal, another spelling of one key: LOCK-SIG-PUBLIC-KEY. reading: located at the member. reading: a document refused when read is not then checked against a key.",
+      "description": "A publicKey in uppercase hexadecimal, another spelling of one key: LOCK-SIG-PUBLIC-KEY, naming no key identifier since the key is not of its form. reading: located at the member. reading: a document refused when read is not then checked against a key.",
       "lock": "locks/single-42.lock.json",
       "lockSignatures": [
         "vectors/verify-signature-key-uppercase/lock.sig.json"
@@ -4766,7 +4766,7 @@
       "section": "§§10.1, 11",
       "operation": "verify",
       "class": "lock-signature-verifier",
-      "description": "A document whose publicKey is of small order, which the trust rule refuses: LOCK-SIG-PUBLIC-KEY, before the key is compared. reading: located at the member. reading: a document refused when read is not then checked against a key.",
+      "description": "A document whose publicKey is of small order, which the trust rule refuses: LOCK-SIG-PUBLIC-KEY, before the key is compared, naming that key's identifier since the key is of its form. reading: located at the member. reading: a document refused when read is not then checked against a key.",
       "lock": "locks/single-42.lock.json",
       "lockSignatures": [
         "vectors/verify-signature-key-small-order/lock.sig.json"
@@ -4809,6 +4809,29 @@
       "schemaRefuses": [
         "vectors/verify-signature-form/lock.sig.json"
       ]
+    },
+    {
+      "id": "verify-lock-signature-s-plus-l",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The accepted lock signature with S raised by L, the group order, still 32 little-endian bytes and below 2^253: the cofactorless equation holds for S + L as for S, but S is not below L, so the signature does not verify: LOCK-SIG-INVALID. reading: located at /signature.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-lock-signature-s-plus-l/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-lock-signature-s-plus-l/report.json",
+      "expectedRecord": null
     },
     {
       "id": "verify-unexpected-registry",
@@ -4982,7 +5005,7 @@
       "section": "§11",
       "operation": "verify",
       "class": "lock-signature-verifier",
-      "description": "The repository's source signature given twice: LOCK-SIG-EXTRA. reading: located at the signature document's root.",
+      "description": "The repository's source signature given twice, the copy last: the copy is beyond the lock's sources count plus one, LOCK-SIG-EXTRA, never read and naming no key identifier. reading: located at the signature document's root.",
       "lock": "locks/assembled-7.lock.json",
       "lockSignatures": [
         "locks/assembled-7.lock.json.sig.json"
@@ -5013,7 +5036,7 @@
       "section": "§11",
       "operation": "verify",
       "class": "lock-signature-verifier",
-      "description": "The repository's source signature given twice and the standard's not at all: three documents with the lock signature, within the lock's sources count plus one, so each is read. The second copy for one item is LOCK-SIG-EXTRA, and the standard item that no document matches is LOCK-SIG-MISSING: the set is refused, not trimmed. reading: LOCK-SIG-EXTRA is located at the signature document's root, LOCK-SIG-MISSING at the lock's item.",
+      "description": "The repository's source signature given twice and the standard's not at all: three documents with the lock signature, within the lock's sources count plus one, so each is read. The second copy for one item is LOCK-SIG-EXTRA, naming the copy's key identifier, and the standard item that no document matches is LOCK-SIG-MISSING: the set is refused, not trimmed. reading: LOCK-SIG-EXTRA is located at the signature document's root, LOCK-SIG-MISSING at the lock's item.",
       "lock": "locks/assembled-7.lock.json",
       "lockSignatures": [
         "locks/assembled-7.lock.json.sig.json"
@@ -5043,7 +5066,7 @@
       "section": "§11",
       "operation": "verify",
       "class": "lock-signature-verifier",
-      "description": "Four documents for a lock of two sources: the lock signature, one source signature for each item, and last a document that holds a backslash and is not JSON. The one beyond the lock's sources count plus one is LOCK-SIG-EXTRA before any is read, so it is never read and no LOCK-SIG-DOCUMENT is reported, and the other three are accepted. reading: the document beyond the count is the last given, the lock signature counted first; LOCK-SIG-EXTRA is located at the signature document's root.",
+      "description": "Four documents for a lock of two sources: the lock signature, one source signature for each item, and last a document that holds a backslash and is not JSON. The documents are counted in the order given, the lock signature first, so the one beyond the lock's sources count plus one is the last given: it is LOCK-SIG-EXTRA and never read, so no LOCK-SIG-DOCUMENT is reported and no key identifier named, and the other three are accepted. reading: LOCK-SIG-EXTRA is located at the signature document's root.",
       "lock": "locks/assembled-7.lock.json",
       "lockSignatures": [
         "locks/assembled-7.lock.json.sig.json"
@@ -5067,6 +5090,92 @@
       "index": "assembled/two-sources/index.json",
       "floor": 1,
       "expected": "vectors/verify-signature-cap-unread/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-signature-cap-last-given",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "Four documents for a lock of two sources: the lock signature, the repository's source signature twice, and last the standard's. The last given is beyond the lock's sources count plus one, so it is LOCK-SIG-EXTRA and never read, though it would match the standard item, which is LOCK-SIG-MISSING; the second copy, read, is LOCK-SIG-EXTRA and names its key identifier, and the two LOCK-SIG-EXTRA are two diagnostics, the unread one's absent key identifier sorting first. reading: LOCK-SIG-EXTRA is located at the signature document's root, LOCK-SIG-MISSING at the lock's item.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/billing.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-signature-cap-last-given/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-signature-cap-after-lock",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A single registry's lock, its signature accepted, refused at step 3 for another registry id, with a source signature document beyond the count that holds a backslash and is not JSON: the documents beyond the count are found only once step 3 accepts the lock, so the report holds LOCK-UNEXPECTED-REGISTRY alone, with no LOCK-SIG-EXTRA and no LOCK-SIG-DOCUMENT. reading: located at /registry/id.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "vectors/verify-signature-cap-unread/extra-signature.txt"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/billing",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-cap-after-lock/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-source-signatures-told-apart",
+      "section": "§§2.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "Two source signature documents within the lock's sources count plus one, each read, that match no item: the repository's statement signed by another key, and its signature at another commit. Each is LOCK-SIG-EXTRA at the document's root, and the two are told apart by the key identifier each names, so the report holds both; each item that no document matches is LOCK-SIG-MISSING. reading: LOCK-SIG-MISSING is located at the lock's item.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing-wrong-key.json",
+        "signatures/billing-another-commit.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-source-signatures-told-apart/report.json",
       "expectedRecord": null
     },
     {

@@ -20,9 +20,19 @@ bounds) and [RFC 0040](../rfcs/0040-registry-locks-and-signatures.md) (locks and
 are Drafts. Every question either record left open is decided here, as §17 lists. Where this text
 and a record differ, this text governs. Its merge into `registry.md` is editorial only (§17).
 
-Not yet published: the closed schemas of the new documents, their code list and their rows. No
-reader exists. The text is published first so that it can be frozen and reviewed before anything is
+Not yet published: the closed schemas of the new documents, their code list and their rows. The
+text is published first so that it can be frozen and reviewed before anything is
 built.
+
+Changes after acceptance:
+
+- §2.1: the location member `keyId`, which names a signature document's key on its diagnostics.
+- §11 (Verifying): the signature documents beyond the lock's `sources` count plus one are found
+  once step 3 accepts the lock, before any source signature document is read.
+- §§11 (Verifying), 12.2: the documents beyond that count are the last given, the lock signature
+  document counted first, and a lock signature document after the first is never read.
+- §11 (Keys): a document carries the key and a report its identifier, never the key.
+- §11 (Verifying): the report gives each refused signature, with its key identifier.
 
 ## 1. Conventions
 
@@ -67,10 +77,15 @@ still writes `"1.0.0"`. The report at `"1.1.0"` adds:
 - the location member `source`, the `name` of the source whose document a diagnostic is about. On
   `FED-VALUE-BOUND` it is the source whose bound the value fails. It is absent on a diagnostic of
   the manifest, of a lock, of a signature document or of the assembly as a whole;
+- the location member `keyId`, the key identifier (§11) of a signature document's `publicKey`. It is
+  present on a diagnostic of a signature document exactly when that document was read, is not
+  `LOCK-SIG-DOCUMENT`, and has a `publicKey` of its form, whether the trust rule admits the key or
+  not. It is absent on every other diagnostic;
 - the codes of §12.
 
 In registry §7.4's order, `source` sorts directly after `document`, an absent `source` as `""`.
 It is part of equality: one code at one pointer in two sources is two diagnostics, each reported.
+`keyId` sorts directly after `source`, an absent `keyId` as `""`, and is part of equality as well.
 The bound, the rule against values and the agreement rule of registry §7.4 hold unchanged. A
 diagnostic of §12 names pointers, sources, paths and key identifiers, never a document's content.
 
@@ -665,7 +680,7 @@ shape and by the prefix rule above.
 - **Form.** A key is the 32-byte encoding of an Ed25519 public key. Its **key identifier** is the
   first 32 lowercase hexadecimal characters of the SHA-256 of those bytes, the form of
   [`checkpoint-witness.md`](checkpoint-witness.md) §1. A document carries the full key, never its
-  identifier, so a verifier compares bytes. Reports name both.
+  identifier, so a verifier compares bytes; a report carries the identifier, never the key.
 - **Trust.** A verifier MAY trust a key exactly when `checkpoint-witness.md` §5 admits it:
   canonical, not of small order, and on the curve. A verifier MUST hold every expected key, and
   every document's key, to that rule.
@@ -741,8 +756,10 @@ signature does not verify under that key over §10.3's message (`LOCK-SIG-INVALI
 **Verifying.** The verifier is given the lock's bytes, the lock signature document, for an assembled
 lock its index and the source signature documents, the expected signer set, the expected inputs of
 §9, and its serial record or a floor (Rollback). At most the lock's `sources` count plus one
-signature documents are given: before any is read, every one beyond that count is
-`LOCK-SIG-EXTRA`. A signature binds only a digest: without the
+signature documents are given, counted in the order given, the lock signature document first.
+Step 2 reads only the first lock signature document, and once step 3 accepts the lock, before any
+source signature document is read, every document beyond that count is `LOCK-SIG-EXTRA` and is
+never read. A signature binds only a digest: without the
 expected registry id, another registry's lock signed by the same key would verify. In order:
 
 1. **The expected inputs.** An expected key missing or refused by the trust rule is
@@ -778,7 +795,7 @@ expected registry id, another registry's lock signed by the same key would verif
 7. **The rest**: the rest of §9 when the documents are given, and coverage (§9.1) when a resolved
    registry or a file is.
 
-The report gives every result: each signature, accepted or refused, with its key identifier, and the
+The report gives every result: each refused signature, with its key identifier (§2.1), and the
 lock's result. An accepted lock signature over a lock that fails any later step is a refusal of the
 lock, not a pass.
 
@@ -896,7 +913,7 @@ meanings, and are reported as registry §7 says wherever this text applies it.
 | `LOCK-SERIAL-STATE` | the verifier's record exists and cannot be read or is not of its form, or cannot be written | §11 |
 | `LOCK-SIG-EXPECTED-KEY` | an expected key is missing, or one a verifier may not trust | §11 |
 | `LOCK-SIG-MISSING` | the lock signature, or an item's source signature, is not given | §11 |
-| `LOCK-SIG-EXTRA` | a second lock signature is given, a source signature that no item expects or that is given twice, or more source signatures than the lock's `sources` count plus one | §11 |
+| `LOCK-SIG-EXTRA` | a second lock signature is given, a source signature that no item expects or that is given twice, or more signature documents than the lock's `sources` count plus one | §11 |
 | `LOCK-SIG-DOCUMENT` | a signature document is over its bound, not one JSON object, repeats a member or holds a backslash | §11 |
 | `LOCK-SIG-VERSION` | `lockSignatureVersion` or `sourceSignatureVersion` is not `"1.1.0"` | §11 |
 | `LOCK-SIG-MEMBER` | a member is unknown or missing | §11 |

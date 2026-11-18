@@ -38,6 +38,11 @@
       "type": "string",
       "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
     },
+    "keyId": {
+      "description": "Section 11: a key identifier, the first 32 lowercase hexadecimal characters of the SHA-256 of a key's 32 bytes.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+    },
     "signatureValue": {
       "description": "Section 10.1: a 64-byte signature as 128 lowercase hexadecimal characters.",
       "type": "string",
@@ -265,8 +270,8 @@
       ]
     },
     "location": {
-      "description": "Registry section 7.3's location, with section 2.1's documents and its member source.",
-      "$comment": "Which members a diagnostic carries depends on its code and step and is the reader's to check; source is absent on a diagnostic of the manifest, a lock, a signature document or the assembly as a whole (section 2.1), which the schema holds for those documents.",
+      "description": "Registry section 7.3's location, with section 2.1's documents and its members source and keyId.",
+      "$comment": "Which members a diagnostic carries depends on its code and step and is the reader's to check; source is absent on a diagnostic of the manifest, a lock, a signature document or the assembly as a whole (section 2.1), which the schema holds for those documents; keyId is on a diagnostic of a signature document alone, which the schema holds, and whether that document's publicKey was read is the reader's to check.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -279,6 +284,9 @@
         },
         "source": {
           "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/sourceName"
+        },
+        "keyId": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/keyId"
         },
         "manifest": {
           "type": "integer",
@@ -346,6 +354,13 @@
                 "bounds",
                 "emitter"
               ]
+            }
+          }
+        },
+        "keyId": {
+          "properties": {
+            "document": {
+              "const": "signature"
             }
           }
         },

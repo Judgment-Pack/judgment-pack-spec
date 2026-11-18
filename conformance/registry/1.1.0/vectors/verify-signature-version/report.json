@@ -2,6 +2,6 @@
   "reportFormatVersion": "1.1.0",
   "valid": false,
   "diagnostics": [
-    {"code": "LOCK-SIG-VERSION", "severity": "error", "location": {"document": "signature", "pointer": "/lockSignatureVersion"}}
+    {"code": "LOCK-SIG-VERSION", "severity": "error", "location": {"document": "signature", "keyId": "21fe31dfa154a261626bf854046fd227", "pointer": "/lockSignatureVersion"}}
   ]
 }

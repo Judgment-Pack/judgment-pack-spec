@@ -1,0 +1,7 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "diagnostics": [
+    {"code": "LOCK-SIG-INVALID", "severity": "error", "location": {"document": "signature", "keyId": "21fe31dfa154a261626bf854046fd227", "pointer": "/signature"}}
+  ]
+}
