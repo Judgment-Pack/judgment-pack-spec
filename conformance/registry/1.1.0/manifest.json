@@ -4,5 +4,4034 @@
   "status": "proposed",
   "label": "Registry companion 1.1.0, proposed: hand-written synthetic vectors, staged in no corpus",
   "codes": "codes.json",
-  "vectors": []
+  "vectors": [
+    {
+      "id": "assemble-two-sources",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A repository and the standard assemble: the standard's entry refers to the repository's, and the repository's to the standard's, so each alone defers REF-ENTRY-MISSING to step 6; the repository's bounds tighten the standard's, add a pattern at a pointer the standard does not bound, and every value meets both. The index records each document's content digest beside its digest, which differ for a file not in its JCS form. reading: the report's registry is the digest of the registry the assembly validates by registry section 7, here the assembled registry.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-two-sources/report.json",
+      "writes": {
+        "registry": "assembled/two-sources/registry.json",
+        "index": "assembled/two-sources/index.json"
+      }
+    },
+    {
+      "id": "assemble-served-subset",
+      "section": "§§3, 4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A repository that serves prod alone, with a registry of that one environment, in an assembly of dev and prod: its entry is written with environments [\"prod\"], so it applies only where its source said it does, and the bounds are compared in prod alone.",
+      "federation": "federation/billing-serves-prod.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-prod.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry-subset.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-served-subset/report.json",
+      "writes": {
+        "registry": "assembled/billing-serves-prod/registry.json",
+        "index": "assembled/billing-serves-prod/index.json"
+      }
+    },
+    {
+      "id": "assemble-per-environment-bounds",
+      "section": "§6.4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Per-environment bounds in both documents: the standard bounds /connectionLimit at 200 and at 100 in prod; the repository at 50, 30 in dev and 45 in prod. Each environment's bound is at least as tight as its own field's, each effective bound as the standard's there, and the values (20 in dev, 40 in prod) meet both. The assembled registry is the two-source row's; only the index differs.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds-per-environment.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-per-environment-bounds/report.json",
+      "writes": {
+        "registry": "assembled/per-environment-bounds/registry.json",
+        "index": "assembled/per-environment-bounds/index.json"
+      }
+    },
+    {
+      "id": "assemble-one-repository-two-sources",
+      "section": "§§3, 4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Two sources name one repository identity, one repository holding two services, and are given one commit. The source without bounds is held to the standard's alone.",
+      "federation": "federation/one-repository-two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "billing-jobs": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "jobs/registry.json": "sources/billing/jobs-registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-one-repository-two-sources/report.json",
+      "writes": {
+        "registry": "assembled/one-repository-two-sources/registry.json",
+        "index": "assembled/one-repository-two-sources/index.json"
+      }
+    },
+    {
+      "id": "assemble-tightened-rows",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Every row of section 6.2 tightened at once, against a standard with no registry of its own: a type inside the standard's (integer inside number), a const inside its enum, an exclusive lower bound equal to its inclusive one, an upper bound taken as the tighter of maximum and exclusiveMaximum, shorter length, item and member counts, uniqueItems where the standard has it, required and patterns added, and a smaller maxEntries.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-tightened-rows/report.json",
+      "writes": {
+        "registry": "assembled/services/registry.json",
+        "index": "assembled/services/index.json"
+      }
+    },
+    {
+      "id": "assemble-scopes-within-the-standard",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "The standard declares secretScopes and the repository's scopes list only projects the standard's list for the same environment and store: each source's references are checked against its own scopes, and the assembled registry carries the standard's.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-scopes.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry-scopes.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-scopes-within-the-standard/report.json",
+      "writes": {
+        "registry": "assembled/scopes/registry.json",
+        "index": "assembled/scopes/index.json"
+      }
+    },
+    {
+      "id": "assemble-scopes-unscoped",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "The standard declares no secretScopes: the repository's own scopes hold its references in step 5, and the assembled registry, which has none, reads them unscoped. The assembly is valid with the warning REF-SECRET-UNSCOPED in each environment, located in the source that holds the entry. reading: a value diagnostic of the assembled registry keeps document value and its pointer into the value, and source names the source that holds the entry.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-scopes.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-scopes-unscoped/report.json",
+      "writes": {
+        "registry": "assembled/unscoped/registry.json",
+        "index": "assembled/unscoped/index.json"
+      }
+    },
+    {
+      "id": "assemble-source-alone-refused",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "An entry whose owner is not among its source's owners is REG-ENTRY-OWNER in step 5, located in that source, although the assembled registry's owners, the union, name it: assembly never makes valid what a source alone refuses.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-owner.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-source-alone-refused/report.json"
+    },
+    {
+      "id": "assemble-environment-gap",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "The repository serves prod alone; the standard's entry, which applies in dev and prod, refers to the repository's entry. In dev the reference is FED-ENVIRONMENT-GAP, beside the REF-ENTRY-ABSENT-IN-ENVIRONMENT that registry section 7 reports for it, both located in the standard. reading: the second keeps document value and its pointer into the value, as the first does.",
+      "federation": "federation/billing-serves-prod.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-prod.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-environment-gap/report.json"
+    },
+    {
+      "id": "assemble-environments-mismatch",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A repository that serves prod alone gives a registry of dev and prod: FED-ENVIRONMENTS, and the assembly ends after step 3, with no registry validated. reading: located at the source's registry /environments.",
+      "federation": "federation/billing-serves-prod.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry-subset.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-environments-mismatch/report.json"
+    },
+    {
+      "id": "assemble-layer-role",
+      "section": "§3",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A role other than standard or repository, such as a later version's layer role, is FED-MANIFEST: the manifest is refused rather than read as a flat assembly. reading: located at the role.",
+      "federation": "federation/layer-role.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-layer-role/report.json",
+      "schemaRefuses": [
+        "federation/layer-role.json"
+      ]
+    },
+    {
+      "id": "assemble-manifest-names-a-commit",
+      "section": "§3",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "The manifest names no commit: a commit member is not one of its members, FED-MANIFEST. reading: located at the member.",
+      "federation": "federation/names-a-commit.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-manifest-names-a-commit/report.json",
+      "schemaRefuses": [
+        "federation/names-a-commit.json"
+      ]
+    },
+    {
+      "id": "assemble-commit-abbreviated",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A commit of seven hexadecimal digits is an abbreviation, never a full commit identifier: FED-COMMIT. reading: located at the source's item in the manifest.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-commit-abbreviated/report.json"
+    },
+    {
+      "id": "assemble-commit-disagrees",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Two sources of one repository identity given different commits: FED-COMMIT. reading: located at the later source's item.",
+      "federation": "federation/one-repository-two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "billing-jobs": {
+          "commit": "9bdc1882ef822d1fab6677ca91ab3c57cc1ae74c",
+          "files": {
+            "jobs/registry.json": "sources/billing/jobs-registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-commit-disagrees/report.json"
+    },
+    {
+      "id": "assemble-repository-userinfo",
+      "section": "§3",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A repository identity with userinfo, where a credential would be written, is FED-REPOSITORY. reading: FED-REPOSITORY alone, not also FED-MANIFEST, located at the identity.",
+      "federation": "federation/repository-userinfo.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-repository-userinfo/report.json",
+      "schemaRefuses": [
+        "federation/repository-userinfo.json"
+      ]
+    },
+    {
+      "id": "assemble-path-missing",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "The bytes of a path the manifest names are not given: FED-SOURCE-MISSING, a refusal and never a fetch. reading: located at the manifest member that names the path.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-path-missing/report.json"
+    },
+    {
+      "id": "assemble-known-limit",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A list of 257 known assembled indexes is FED-KNOWN-LIMIT, before any source is read. reading: located at the manifest's root, the assembly as a whole.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [
+          "vectors/assemble-known-limit/indexes/index-000.json",
+          "vectors/assemble-known-limit/indexes/index-001.json",
+          "vectors/assemble-known-limit/indexes/index-002.json",
+          "vectors/assemble-known-limit/indexes/index-003.json",
+          "vectors/assemble-known-limit/indexes/index-004.json",
+          "vectors/assemble-known-limit/indexes/index-005.json",
+          "vectors/assemble-known-limit/indexes/index-006.json",
+          "vectors/assemble-known-limit/indexes/index-007.json",
+          "vectors/assemble-known-limit/indexes/index-008.json",
+          "vectors/assemble-known-limit/indexes/index-009.json",
+          "vectors/assemble-known-limit/indexes/index-010.json",
+          "vectors/assemble-known-limit/indexes/index-011.json",
+          "vectors/assemble-known-limit/indexes/index-012.json",
+          "vectors/assemble-known-limit/indexes/index-013.json",
+          "vectors/assemble-known-limit/indexes/index-014.json",
+          "vectors/assemble-known-limit/indexes/index-015.json",
+          "vectors/assemble-known-limit/indexes/index-016.json",
+          "vectors/assemble-known-limit/indexes/index-017.json",
+          "vectors/assemble-known-limit/indexes/index-018.json",
+          "vectors/assemble-known-limit/indexes/index-019.json",
+          "vectors/assemble-known-limit/indexes/index-020.json",
+          "vectors/assemble-known-limit/indexes/index-021.json",
+          "vectors/assemble-known-limit/indexes/index-022.json",
+          "vectors/assemble-known-limit/indexes/index-023.json",
+          "vectors/assemble-known-limit/indexes/index-024.json",
+          "vectors/assemble-known-limit/indexes/index-025.json",
+          "vectors/assemble-known-limit/indexes/index-026.json",
+          "vectors/assemble-known-limit/indexes/index-027.json",
+          "vectors/assemble-known-limit/indexes/index-028.json",
+          "vectors/assemble-known-limit/indexes/index-029.json",
+          "vectors/assemble-known-limit/indexes/index-030.json",
+          "vectors/assemble-known-limit/indexes/index-031.json",
+          "vectors/assemble-known-limit/indexes/index-032.json",
+          "vectors/assemble-known-limit/indexes/index-033.json",
+          "vectors/assemble-known-limit/indexes/index-034.json",
+          "vectors/assemble-known-limit/indexes/index-035.json",
+          "vectors/assemble-known-limit/indexes/index-036.json",
+          "vectors/assemble-known-limit/indexes/index-037.json",
+          "vectors/assemble-known-limit/indexes/index-038.json",
+          "vectors/assemble-known-limit/indexes/index-039.json",
+          "vectors/assemble-known-limit/indexes/index-040.json",
+          "vectors/assemble-known-limit/indexes/index-041.json",
+          "vectors/assemble-known-limit/indexes/index-042.json",
+          "vectors/assemble-known-limit/indexes/index-043.json",
+          "vectors/assemble-known-limit/indexes/index-044.json",
+          "vectors/assemble-known-limit/indexes/index-045.json",
+          "vectors/assemble-known-limit/indexes/index-046.json",
+          "vectors/assemble-known-limit/indexes/index-047.json",
+          "vectors/assemble-known-limit/indexes/index-048.json",
+          "vectors/assemble-known-limit/indexes/index-049.json",
+          "vectors/assemble-known-limit/indexes/index-050.json",
+          "vectors/assemble-known-limit/indexes/index-051.json",
+          "vectors/assemble-known-limit/indexes/index-052.json",
+          "vectors/assemble-known-limit/indexes/index-053.json",
+          "vectors/assemble-known-limit/indexes/index-054.json",
+          "vectors/assemble-known-limit/indexes/index-055.json",
+          "vectors/assemble-known-limit/indexes/index-056.json",
+          "vectors/assemble-known-limit/indexes/index-057.json",
+          "vectors/assemble-known-limit/indexes/index-058.json",
+          "vectors/assemble-known-limit/indexes/index-059.json",
+          "vectors/assemble-known-limit/indexes/index-060.json",
+          "vectors/assemble-known-limit/indexes/index-061.json",
+          "vectors/assemble-known-limit/indexes/index-062.json",
+          "vectors/assemble-known-limit/indexes/index-063.json",
+          "vectors/assemble-known-limit/indexes/index-064.json",
+          "vectors/assemble-known-limit/indexes/index-065.json",
+          "vectors/assemble-known-limit/indexes/index-066.json",
+          "vectors/assemble-known-limit/indexes/index-067.json",
+          "vectors/assemble-known-limit/indexes/index-068.json",
+          "vectors/assemble-known-limit/indexes/index-069.json",
+          "vectors/assemble-known-limit/indexes/index-070.json",
+          "vectors/assemble-known-limit/indexes/index-071.json",
+          "vectors/assemble-known-limit/indexes/index-072.json",
+          "vectors/assemble-known-limit/indexes/index-073.json",
+          "vectors/assemble-known-limit/indexes/index-074.json",
+          "vectors/assemble-known-limit/indexes/index-075.json",
+          "vectors/assemble-known-limit/indexes/index-076.json",
+          "vectors/assemble-known-limit/indexes/index-077.json",
+          "vectors/assemble-known-limit/indexes/index-078.json",
+          "vectors/assemble-known-limit/indexes/index-079.json",
+          "vectors/assemble-known-limit/indexes/index-080.json",
+          "vectors/assemble-known-limit/indexes/index-081.json",
+          "vectors/assemble-known-limit/indexes/index-082.json",
+          "vectors/assemble-known-limit/indexes/index-083.json",
+          "vectors/assemble-known-limit/indexes/index-084.json",
+          "vectors/assemble-known-limit/indexes/index-085.json",
+          "vectors/assemble-known-limit/indexes/index-086.json",
+          "vectors/assemble-known-limit/indexes/index-087.json",
+          "vectors/assemble-known-limit/indexes/index-088.json",
+          "vectors/assemble-known-limit/indexes/index-089.json",
+          "vectors/assemble-known-limit/indexes/index-090.json",
+          "vectors/assemble-known-limit/indexes/index-091.json",
+          "vectors/assemble-known-limit/indexes/index-092.json",
+          "vectors/assemble-known-limit/indexes/index-093.json",
+          "vectors/assemble-known-limit/indexes/index-094.json",
+          "vectors/assemble-known-limit/indexes/index-095.json",
+          "vectors/assemble-known-limit/indexes/index-096.json",
+          "vectors/assemble-known-limit/indexes/index-097.json",
+          "vectors/assemble-known-limit/indexes/index-098.json",
+          "vectors/assemble-known-limit/indexes/index-099.json",
+          "vectors/assemble-known-limit/indexes/index-100.json",
+          "vectors/assemble-known-limit/indexes/index-101.json",
+          "vectors/assemble-known-limit/indexes/index-102.json",
+          "vectors/assemble-known-limit/indexes/index-103.json",
+          "vectors/assemble-known-limit/indexes/index-104.json",
+          "vectors/assemble-known-limit/indexes/index-105.json",
+          "vectors/assemble-known-limit/indexes/index-106.json",
+          "vectors/assemble-known-limit/indexes/index-107.json",
+          "vectors/assemble-known-limit/indexes/index-108.json",
+          "vectors/assemble-known-limit/indexes/index-109.json",
+          "vectors/assemble-known-limit/indexes/index-110.json",
+          "vectors/assemble-known-limit/indexes/index-111.json",
+          "vectors/assemble-known-limit/indexes/index-112.json",
+          "vectors/assemble-known-limit/indexes/index-113.json",
+          "vectors/assemble-known-limit/indexes/index-114.json",
+          "vectors/assemble-known-limit/indexes/index-115.json",
+          "vectors/assemble-known-limit/indexes/index-116.json",
+          "vectors/assemble-known-limit/indexes/index-117.json",
+          "vectors/assemble-known-limit/indexes/index-118.json",
+          "vectors/assemble-known-limit/indexes/index-119.json",
+          "vectors/assemble-known-limit/indexes/index-120.json",
+          "vectors/assemble-known-limit/indexes/index-121.json",
+          "vectors/assemble-known-limit/indexes/index-122.json",
+          "vectors/assemble-known-limit/indexes/index-123.json",
+          "vectors/assemble-known-limit/indexes/index-124.json",
+          "vectors/assemble-known-limit/indexes/index-125.json",
+          "vectors/assemble-known-limit/indexes/index-126.json",
+          "vectors/assemble-known-limit/indexes/index-127.json",
+          "vectors/assemble-known-limit/indexes/index-128.json",
+          "vectors/assemble-known-limit/indexes/index-129.json",
+          "vectors/assemble-known-limit/indexes/index-130.json",
+          "vectors/assemble-known-limit/indexes/index-131.json",
+          "vectors/assemble-known-limit/indexes/index-132.json",
+          "vectors/assemble-known-limit/indexes/index-133.json",
+          "vectors/assemble-known-limit/indexes/index-134.json",
+          "vectors/assemble-known-limit/indexes/index-135.json",
+          "vectors/assemble-known-limit/indexes/index-136.json",
+          "vectors/assemble-known-limit/indexes/index-137.json",
+          "vectors/assemble-known-limit/indexes/index-138.json",
+          "vectors/assemble-known-limit/indexes/index-139.json",
+          "vectors/assemble-known-limit/indexes/index-140.json",
+          "vectors/assemble-known-limit/indexes/index-141.json",
+          "vectors/assemble-known-limit/indexes/index-142.json",
+          "vectors/assemble-known-limit/indexes/index-143.json",
+          "vectors/assemble-known-limit/indexes/index-144.json",
+          "vectors/assemble-known-limit/indexes/index-145.json",
+          "vectors/assemble-known-limit/indexes/index-146.json",
+          "vectors/assemble-known-limit/indexes/index-147.json",
+          "vectors/assemble-known-limit/indexes/index-148.json",
+          "vectors/assemble-known-limit/indexes/index-149.json",
+          "vectors/assemble-known-limit/indexes/index-150.json",
+          "vectors/assemble-known-limit/indexes/index-151.json",
+          "vectors/assemble-known-limit/indexes/index-152.json",
+          "vectors/assemble-known-limit/indexes/index-153.json",
+          "vectors/assemble-known-limit/indexes/index-154.json",
+          "vectors/assemble-known-limit/indexes/index-155.json",
+          "vectors/assemble-known-limit/indexes/index-156.json",
+          "vectors/assemble-known-limit/indexes/index-157.json",
+          "vectors/assemble-known-limit/indexes/index-158.json",
+          "vectors/assemble-known-limit/indexes/index-159.json",
+          "vectors/assemble-known-limit/indexes/index-160.json",
+          "vectors/assemble-known-limit/indexes/index-161.json",
+          "vectors/assemble-known-limit/indexes/index-162.json",
+          "vectors/assemble-known-limit/indexes/index-163.json",
+          "vectors/assemble-known-limit/indexes/index-164.json",
+          "vectors/assemble-known-limit/indexes/index-165.json",
+          "vectors/assemble-known-limit/indexes/index-166.json",
+          "vectors/assemble-known-limit/indexes/index-167.json",
+          "vectors/assemble-known-limit/indexes/index-168.json",
+          "vectors/assemble-known-limit/indexes/index-169.json",
+          "vectors/assemble-known-limit/indexes/index-170.json",
+          "vectors/assemble-known-limit/indexes/index-171.json",
+          "vectors/assemble-known-limit/indexes/index-172.json",
+          "vectors/assemble-known-limit/indexes/index-173.json",
+          "vectors/assemble-known-limit/indexes/index-174.json",
+          "vectors/assemble-known-limit/indexes/index-175.json",
+          "vectors/assemble-known-limit/indexes/index-176.json",
+          "vectors/assemble-known-limit/indexes/index-177.json",
+          "vectors/assemble-known-limit/indexes/index-178.json",
+          "vectors/assemble-known-limit/indexes/index-179.json",
+          "vectors/assemble-known-limit/indexes/index-180.json",
+          "vectors/assemble-known-limit/indexes/index-181.json",
+          "vectors/assemble-known-limit/indexes/index-182.json",
+          "vectors/assemble-known-limit/indexes/index-183.json",
+          "vectors/assemble-known-limit/indexes/index-184.json",
+          "vectors/assemble-known-limit/indexes/index-185.json",
+          "vectors/assemble-known-limit/indexes/index-186.json",
+          "vectors/assemble-known-limit/indexes/index-187.json",
+          "vectors/assemble-known-limit/indexes/index-188.json",
+          "vectors/assemble-known-limit/indexes/index-189.json",
+          "vectors/assemble-known-limit/indexes/index-190.json",
+          "vectors/assemble-known-limit/indexes/index-191.json",
+          "vectors/assemble-known-limit/indexes/index-192.json",
+          "vectors/assemble-known-limit/indexes/index-193.json",
+          "vectors/assemble-known-limit/indexes/index-194.json",
+          "vectors/assemble-known-limit/indexes/index-195.json",
+          "vectors/assemble-known-limit/indexes/index-196.json",
+          "vectors/assemble-known-limit/indexes/index-197.json",
+          "vectors/assemble-known-limit/indexes/index-198.json",
+          "vectors/assemble-known-limit/indexes/index-199.json",
+          "vectors/assemble-known-limit/indexes/index-200.json",
+          "vectors/assemble-known-limit/indexes/index-201.json",
+          "vectors/assemble-known-limit/indexes/index-202.json",
+          "vectors/assemble-known-limit/indexes/index-203.json",
+          "vectors/assemble-known-limit/indexes/index-204.json",
+          "vectors/assemble-known-limit/indexes/index-205.json",
+          "vectors/assemble-known-limit/indexes/index-206.json",
+          "vectors/assemble-known-limit/indexes/index-207.json",
+          "vectors/assemble-known-limit/indexes/index-208.json",
+          "vectors/assemble-known-limit/indexes/index-209.json",
+          "vectors/assemble-known-limit/indexes/index-210.json",
+          "vectors/assemble-known-limit/indexes/index-211.json",
+          "vectors/assemble-known-limit/indexes/index-212.json",
+          "vectors/assemble-known-limit/indexes/index-213.json",
+          "vectors/assemble-known-limit/indexes/index-214.json",
+          "vectors/assemble-known-limit/indexes/index-215.json",
+          "vectors/assemble-known-limit/indexes/index-216.json",
+          "vectors/assemble-known-limit/indexes/index-217.json",
+          "vectors/assemble-known-limit/indexes/index-218.json",
+          "vectors/assemble-known-limit/indexes/index-219.json",
+          "vectors/assemble-known-limit/indexes/index-220.json",
+          "vectors/assemble-known-limit/indexes/index-221.json",
+          "vectors/assemble-known-limit/indexes/index-222.json",
+          "vectors/assemble-known-limit/indexes/index-223.json",
+          "vectors/assemble-known-limit/indexes/index-224.json",
+          "vectors/assemble-known-limit/indexes/index-225.json",
+          "vectors/assemble-known-limit/indexes/index-226.json",
+          "vectors/assemble-known-limit/indexes/index-227.json",
+          "vectors/assemble-known-limit/indexes/index-228.json",
+          "vectors/assemble-known-limit/indexes/index-229.json",
+          "vectors/assemble-known-limit/indexes/index-230.json",
+          "vectors/assemble-known-limit/indexes/index-231.json",
+          "vectors/assemble-known-limit/indexes/index-232.json",
+          "vectors/assemble-known-limit/indexes/index-233.json",
+          "vectors/assemble-known-limit/indexes/index-234.json",
+          "vectors/assemble-known-limit/indexes/index-235.json",
+          "vectors/assemble-known-limit/indexes/index-236.json",
+          "vectors/assemble-known-limit/indexes/index-237.json",
+          "vectors/assemble-known-limit/indexes/index-238.json",
+          "vectors/assemble-known-limit/indexes/index-239.json",
+          "vectors/assemble-known-limit/indexes/index-240.json",
+          "vectors/assemble-known-limit/indexes/index-241.json",
+          "vectors/assemble-known-limit/indexes/index-242.json",
+          "vectors/assemble-known-limit/indexes/index-243.json",
+          "vectors/assemble-known-limit/indexes/index-244.json",
+          "vectors/assemble-known-limit/indexes/index-245.json",
+          "vectors/assemble-known-limit/indexes/index-246.json",
+          "vectors/assemble-known-limit/indexes/index-247.json",
+          "vectors/assemble-known-limit/indexes/index-248.json",
+          "vectors/assemble-known-limit/indexes/index-249.json",
+          "vectors/assemble-known-limit/indexes/index-250.json",
+          "vectors/assemble-known-limit/indexes/index-251.json",
+          "vectors/assemble-known-limit/indexes/index-252.json",
+          "vectors/assemble-known-limit/indexes/index-253.json",
+          "vectors/assemble-known-limit/indexes/index-254.json",
+          "vectors/assemble-known-limit/indexes/index-255.json",
+          "vectors/assemble-known-limit/indexes/index-256.json"
+        ],
+        "locks": []
+      },
+      "expected": "vectors/assemble-known-limit/report.json"
+    },
+    {
+      "id": "assemble-source-assembled-by-index",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A source whose registry's digest is the registry digest of a known assembled index is FED-SOURCE-ASSEMBLED: an assembled registry is never a source. reading: located at the source's registry document.",
+      "federation": "federation/outer.json",
+      "sources": {
+        "copy": {
+          "commit": "475f96eca831d080a0c1c4e82e61660869fdbccd",
+          "files": {
+            "assembled/registry.json": "assembled/two-sources/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [
+          "assembled/two-sources/index.json"
+        ],
+        "locks": []
+      },
+      "expected": "vectors/assemble-source-assembled-by-index/report.json"
+    },
+    {
+      "id": "assemble-source-assembled-by-lock",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A source whose registry's id is the registry id of a known lock is FED-SOURCE-ASSEMBLED, although its bytes differ from the locked registry's. reading: located at the source's registry document.",
+      "federation": "federation/outer.json",
+      "sources": {
+        "copy": {
+          "commit": "475f96eca831d080a0c1c4e82e61660869fdbccd",
+          "files": {
+            "assembled/registry.json": "sources/copies/registry-7.0.1.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": [
+          "locks/assembled-7.lock.json"
+        ]
+      },
+      "expected": "vectors/assemble-source-assembled-by-lock/report.json"
+    },
+    {
+      "id": "assemble-registry-duplicate",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A source's registry has the assembled registry's id: FED-REGISTRY-DUPLICATE, and the assembly ends after step 3. reading: located at that registry's /id.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-duplicate-id.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-registry-duplicate/report.json"
+    },
+    {
+      "id": "assemble-kind-not-standard",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A repository pins db-role, a kind the standard governs, to a declaration of its own that allows more connections: FED-KIND-NOT-STANDARD at its pin. The standard's registry pins no db-role, so no pin conflicts. reading: the pin's diagnostic names its kind as registry section 7.3 does for a pin; the assembled registry holds the repository's pin, and its validation is given the declarations its pins name.",
+      "federation": "federation/billing-declares-db-role.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "kinds/db-role.json": "kinds/db-role-1.3.0.json",
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-own-kind.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry-no-role.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-kind-not-standard/report.json"
+    },
+    {
+      "id": "assemble-kind-conflict",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "The standard supplies two versions of db-role; the repository pins one and the standard's registry the other: FED-KIND-CONFLICT at the later source's pin. reading: the pin's diagnostic names its kind; the assembled registry holds the earlier source's pin, and its validation is given the declarations its pins name.",
+      "federation": "federation/standard-supplies-two-versions.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-role-1.3.0.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role-1.3.0.json": "kinds/db-role-1.3.0.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-kind-conflict/report.json"
+    },
+    {
+      "id": "assemble-scope-widens",
+      "section": "§4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "The repository's scopes list, for dev and gcp-sm, a project the standard's do not: FED-SCOPE-WIDENS. reading: located at the repository's listing.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-scopes-widens.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry-scopes.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-scope-widens/report.json"
+    },
+    {
+      "id": "assemble-bound-form",
+      "section": "§§6.1, 6.3",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A repository's bounds state maxAssemblyEntries, which only the standard states, and a bound holds format, a keyword registry section 3.2 names only as refused: each is FED-BOUND-FORM. reading: located at the member.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds-form.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-bound-form/report.json",
+      "schemaRefuses": [
+        "sources/billing/bounds-form.json"
+      ]
+    },
+    {
+      "id": "assemble-bound-environment",
+      "section": "§6.4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "In an assembly where the repository serves prod alone, its bounds name dev, which it does not serve, and the standard's name staging, which the manifest does not: each is FED-BOUND-ENVIRONMENT. reading: located at the environment's member.",
+      "federation": "federation/billing-serves-prod.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds-environment-dev.json",
+            "registry/registry.json": "sources/billing/registry-prod.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds-staging.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry-subset.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-bound-environment/report.json"
+    },
+    {
+      "id": "assemble-bound-kind",
+      "section": "§6.1",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "The repository bounds db-rolee, a misspelt kind neither governed nor pinned, and the standard bounds topic, which the assembly pins but the standard does not govern: each is FED-BOUND-KIND. The repository's bound of topic, a kind the assembly pins, is admitted. reading: located at the item's kind.",
+      "federation": "federation/billing-declares-a-kind.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "kinds/topic.json": "kinds/topic.json",
+            "registry/bounds.json": "sources/billing/bounds-kind.json",
+            "registry/registry.json": "sources/billing/registry-topic.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds-kind.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-bound-kind/report.json"
+    },
+    {
+      "id": "assemble-bound-pointer-unreachable",
+      "section": "§6.1",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A field at /connectionLimits, a misspelt member the kind's closed schema cannot reach, is FED-BOUND-POINTER-UNREACHABLE: it would bound nothing and look like a limit. reading: located at the field's pointer.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds-unreachable.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-bound-pointer-unreachable/report.json"
+    },
+    {
+      "id": "assemble-bound-not-comparable",
+      "section": "§6.3",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A bound holds pattern, a replacement whose comparison would be language inclusion: FED-BOUND-NOT-COMPARABLE at the keyword, though the standard bounds no field at that pointer.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds-pattern.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-bound-not-comparable/report.json",
+      "schemaRefuses": [
+        "sources/billing/bounds-pattern.json"
+      ]
+    },
+    {
+      "id": "assemble-bound-overlap",
+      "section": "§6.3",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A repository field at /privileges/0 can match a position the standard's /privileges/* matches without being equal to it: FED-BOUND-OVERLAP. Its field at /privileges/*, equal to the standard's, is compared. reading: located at the overlapping field's pointer.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds-overlap.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-bound-overlap/report.json"
+    },
+    {
+      "id": "assemble-widens-type",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Type: string is not inside the standard's number. FED-BOUND-WIDENS at the repository's member; every value still meets both bounds. reading: located at the keyword.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds-type.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-type/report.json"
+    },
+    {
+      "id": "assemble-widens-value-set",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Value set: platinum is not in the standard's enum, and the standard's bound refuses it. FED-BOUND-WIDENS at the repository's member; every value still meets both bounds. reading: located at the keyword.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds-value-set.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-value-set/report.json"
+    },
+    {
+      "id": "assemble-widens-lower-bound",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Lower bound: 0 is below the standard's minimum of 1. FED-BOUND-WIDENS at the repository's member; every value still meets both bounds. reading: located at the keyword.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds-lower-bound.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-lower-bound/report.json"
+    },
+    {
+      "id": "assemble-widens-upper-bound-per-row",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Upper bound: exclusiveMaximum 11 is looser than maximum 10, and is reported although type integer rules out every value in between: the comparison is per row. FED-BOUND-WIDENS at the repository's member; every value still meets both bounds. reading: located at the keyword.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds-upper-bound-per-row.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-upper-bound-per-row/report.json"
+    },
+    {
+      "id": "assemble-widens-length",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Length: a maxLength of 50 above the standard's 40. FED-BOUND-WIDENS at the repository's member; every value still meets both bounds. reading: located at the keyword.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds-length.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-length/report.json"
+    },
+    {
+      "id": "assemble-widens-item-count",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Item count: a maxItems of 7 above the standard's 6. FED-BOUND-WIDENS at the repository's member; every value still meets both bounds. reading: located at the keyword.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds-item-count.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-item-count/report.json"
+    },
+    {
+      "id": "assemble-widens-member-count",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Member count: a maxProperties of 9 above the standard's 8. FED-BOUND-WIDENS at the repository's member; every value still meets both bounds. reading: located at the keyword.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds-member-count.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-member-count/report.json"
+    },
+    {
+      "id": "assemble-widens-uniqueness",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Uniqueness: uniqueItems false where the standard's is true. FED-BOUND-WIDENS at the repository's member; every value still meets both bounds. reading: located at the keyword.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds-uniqueness.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-uniqueness/report.json"
+    },
+    {
+      "id": "assemble-widens-value-refused",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A value the bound names that the standard's whole bound refuses: the empty string fails its minLength of 1, although the standard states no value set to compare with. FED-BOUND-WIDENS at the repository's member; every value still meets both bounds. reading: located at the keyword.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds-value-refused.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-value-refused/report.json"
+    },
+    {
+      "id": "assemble-widens-max-entries",
+      "section": "§6.2",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Entry count: a maxEntries of 12 above the standard's 10 is FED-BOUND-WIDENS at the member.",
+      "federation": "federation/services.json",
+      "sources": {
+        "payments": {
+          "commit": "40c4770202821f32b6da336e22f1dfb6263e542f",
+          "files": {
+            "bounds.json": "sources/payments/bounds-max-entries.json",
+            "registry.json": "sources/payments/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "kinds/app.json": "kinds/app.json",
+            "services/bounds.json": "sources/platform/services-bounds.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-max-entries/report.json"
+    },
+    {
+      "id": "assemble-widens-in-prod",
+      "section": "§6.4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A repository bound of 150 is tight enough beside the standard's 200, but not in prod, where the standard's effective bound is 100: FED-BOUND-WIDENS at the repository's bound, since it states no prod member. reading: located at the keyword.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds-widens-in-prod.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-in-prod/report.json"
+    },
+    {
+      "id": "assemble-widens-own-bound",
+      "section": "§6.4",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Within one document, a prod bound of 60 is looser than its own field's 50: FED-BOUND-WIDENS at the environment's member, though 60 is within the standard's 100 in prod. reading: located at the keyword.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds-widens-own-bound.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-widens-own-bound/report.json"
+    },
+    {
+      "id": "assemble-value-bound",
+      "section": "§6.5",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "Values are checked against both bounds whatever the comparison says: 60 in dev fails the repository's 50, and 120 in prod fails the repository's 50 and the standard's 100 there. Each is FED-VALUE-BOUND, with source naming the source whose bound it fails.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-value.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-value-bound/report.json"
+    },
+    {
+      "id": "assemble-entries-per-source",
+      "section": "§6.5",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "A repository's own maxEntries of 1 against its two db-role entries: FED-BOUND-ENTRIES at its first entry beyond it. reading: the diagnostic names that entry, at its pointer in the source's registry.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds-max-entries-1.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-entries-per-source/report.json"
+    },
+    {
+      "id": "assemble-entries-assembly",
+      "section": "§6.5",
+      "operation": "assemble",
+      "class": "assembler",
+      "description": "The standard's maxAssemblyEntries of 2 against three db-role entries in the assembled registry: FED-BOUND-ENTRIES at the third, with source naming the source that holds it. reading: located at that entry in its source's registry, as section 4 step 6 locates an entry's diagnostics.",
+      "federation": "federation/one-repository-two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "billing-jobs": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "jobs/registry.json": "sources/billing/jobs-registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds-assembly-2.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "expected": "vectors/assemble-entries-assembly/report.json"
+    },
+    {
+      "id": "index-check-passes",
+      "section": "§5.1",
+      "operation": "check-index",
+      "class": "index-checker",
+      "description": "The index check assembles again at the index's commits, and the index it would write equals the given one, JCS for JCS.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "index": "assembled/two-sources/index.json",
+      "expected": "vectors/index-check-passes/report.json"
+    },
+    {
+      "id": "index-check-content-digest",
+      "section": "§5.1",
+      "operation": "check-index",
+      "class": "index-checker",
+      "description": "The repository's registry is given in another layout: its digest is unchanged and its content digest is not, FED-INDEX-MISMATCH at that document's contentDigest.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-jcs.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "index": "assembled/two-sources/index.json",
+      "expected": "vectors/index-check-content-digest/report.json"
+    },
+    {
+      "id": "index-check-manifest-digest",
+      "section": "§5.1",
+      "operation": "check-index",
+      "class": "index-checker",
+      "description": "A manifest that names the repository's environments, all of them, assembles the same registry under another digest: FED-INDEX-MISMATCH at /federation/digest.",
+      "federation": "federation/two-sources-every-environment-named.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "index": "assembled/two-sources/index.json",
+      "expected": "vectors/index-check-manifest-digest/report.json"
+    },
+    {
+      "id": "index-check-other-difference",
+      "section": "§5.1",
+      "operation": "check-index",
+      "class": "index-checker",
+      "description": "An index whose bounds document is recorded with the role kind: FED-INDEX-MISMATCH at the first differing pointer.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "index": "vectors/index-check-other-difference/index.json",
+      "expected": "vectors/index-check-other-difference/report.json"
+    },
+    {
+      "id": "index-check-assembly-error",
+      "section": "§5.1",
+      "operation": "check-index",
+      "class": "index-checker",
+      "description": "The second assembly finds an error: the check fails with that error's diagnostics. reading: no FED-INDEX-MISMATCH is reported, since no index is written to compare.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-owner.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "index": "assembled/two-sources/index.json",
+      "expected": "vectors/index-check-assembly-error/report.json"
+    },
+    {
+      "id": "write-first-serial",
+      "section": "§8",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "A single registry's first lock: no previous lock, and the first serial, 42, given out of band. The lock is its JCS bytes.",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "firstSerial": 42,
+      "expected": "locks/single-42.lock.json"
+    },
+    {
+      "id": "write-next-serial",
+      "section": "§8",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "Given the previous lock of the registry id, the writer writes the serial one above it.",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "previous": "locks/single-42.lock.json",
+      "expected": "locks/single-43.lock.json"
+    },
+    {
+      "id": "write-emitters",
+      "section": "§§7, 8",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "An emitter manifest whose host check exits 0: the lock lists the manifest by path and digest and every file its owns matches, sorted by path, each with its mode and digest, and no source, since the registry is single.",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "previous": "locks/single-42.lock.json",
+      "emitters": [
+        {
+          "manifest": "emitters/db-roles.json",
+          "path": "emitters/db-roles.json",
+          "check": 0,
+          "files": [
+            {
+              "path": "gen/db-roles.sql",
+              "mode": "0644",
+              "file": "emitters/gen/db-roles.sql"
+            },
+            {
+              "path": "gen/grant.sh",
+              "mode": "0755",
+              "file": "emitters/gen/grant.sh"
+            }
+          ]
+        }
+      ],
+      "expected": "locks/single-43-emitters.lock.json"
+    },
+    {
+      "id": "write-assembled",
+      "section": "§§7, 8",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "An assembly's lock: the index's digest, and for each source its name, role, repository, the digest of its statement rebuilt from the index, and the digest of the source signature the writer verified, each by the key the signer set names.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "previous": "locks/assembled-6.lock.json",
+      "expected": "locks/assembled-7.lock.json"
+    },
+    {
+      "id": "write-registry-invalid",
+      "section": "§8",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "A registry that validation refuses is never locked: LOCK-REGISTRY-INVALID.",
+      "registry": "single/registry-owner.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "previous": "locks/single-42.lock.json",
+      "expected": "vectors/write-registry-invalid/refused.json"
+    },
+    {
+      "id": "write-assembly-invalid",
+      "section": "§8",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "An assembly with an error, here an environment gap, is never locked: LOCK-REGISTRY-INVALID. Each source signature is over its source's statement at these commits, so nothing else is refused.",
+      "federation": "federation/billing-serves-prod.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry-prod.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "sourceSignatures": [
+        "signatures/billing-serves-prod.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "previous": "locks/assembled-6.lock.json",
+      "expected": "vectors/write-assembly-invalid/refused.json"
+    },
+    {
+      "id": "write-previous-other-registry",
+      "section": "§8",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "A previous lock of another registry id: LOCK-UNEXPECTED-REGISTRY.",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "previous": "locks/assembled-7.lock.json",
+      "expected": "vectors/write-previous-other-registry/refused.json"
+    },
+    {
+      "id": "write-serial-exhausted",
+      "section": "§8",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "A previous lock whose serial is 2^53 - 1 leaves no next serial: LOCK-FORM.",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "previous": "locks/single-max.lock.json",
+      "expected": "vectors/write-serial-exhausted/refused.json"
+    },
+    {
+      "id": "write-emitter-check-fails",
+      "section": "§8",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "The host's check of the emitter exits 1: LOCK-EMITTER-MISMATCH, and no lock is written.",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "previous": "locks/single-42.lock.json",
+      "emitters": [
+        {
+          "manifest": "emitters/db-roles.json",
+          "path": "emitters/db-roles.json",
+          "check": 1,
+          "files": [
+            {
+              "path": "gen/db-roles.sql",
+              "mode": "0644",
+              "file": "emitters/gen/db-roles.sql"
+            },
+            {
+              "path": "gen/grant.sh",
+              "mode": "0755",
+              "file": "emitters/gen/grant.sh"
+            }
+          ]
+        }
+      ],
+      "expected": "vectors/write-emitter-check-fails/refused.json"
+    },
+    {
+      "id": "write-source-signature-wrong-key",
+      "section": "§§8, 11",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "The repository's source signature is by another key than the signer set names: refused with that signature's code, LOCK-SIG-UNEXPECTED-KEY, and no lock is written.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "sourceSignatures": [
+        "signatures/billing-wrong-key.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "previous": "locks/assembled-6.lock.json",
+      "expected": "vectors/write-source-signature-wrong-key/refused.json"
+    },
+    {
+      "id": "check-single",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A single registry's lock checks: its registry, kinds and each environment's resolved digest are the registry's. reading: the report's registry is the checked registry's digest, present once its validation passed registry section 7's step 3.",
+      "lock": "locks/single-42.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-single/report.json"
+    },
+    {
+      "id": "check-final-line-feed",
+      "section": "§7",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A lock written with one final line feed, which is not part of the document, checks.",
+      "lock": "vectors/check-final-line-feed/lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-final-line-feed/report.json"
+    },
+    {
+      "id": "check-assembled",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "An assembled lock checks with its index: the index's digest and registry digest are the lock's, it has one standard item, and each source's name, role, repository and statement are the index's.",
+      "lock": "locks/assembled-7.lock.json",
+      "registry": "assembled/two-sources/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "index": "assembled/two-sources/index.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "expected": "vectors/check-assembled/report.json"
+    },
+    {
+      "id": "check-emitters",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A lock that names emitters checks with the manifest and its files as given.",
+      "lock": "locks/single-43-emitters.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "emitters": [
+        {
+          "manifest": "emitters/db-roles.json",
+          "path": "emitters/db-roles.json",
+          "files": [
+            {
+              "path": "gen/db-roles.sql",
+              "mode": "0644",
+              "file": "emitters/gen/db-roles.sql"
+            },
+            {
+              "path": "gen/grant.sh",
+              "mode": "0755",
+              "file": "emitters/gen/grant.sh"
+            }
+          ]
+        }
+      ],
+      "expected": "vectors/check-emitters/report.json"
+    },
+    {
+      "id": "check-expected-missing",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "No index requirement is given: LOCK-EXPECTED, before anything is read. reading: an expected input's diagnostic is located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform"
+      },
+      "expected": "vectors/check-expected-missing/report.json"
+    },
+    {
+      "id": "check-expected-id-not-uri",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "An expected registry id that is not an absolute URI: LOCK-EXPECTED. reading: located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "platform",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-expected-id-not-uri/report.json"
+    },
+    {
+      "id": "check-lock-form",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A serial of 0 is not of the lock's form: LOCK-FORM, and the check ends. reading: located at the member.",
+      "lock": "vectors/check-lock-form/lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-lock-form/report.json",
+      "schemaRefuses": [
+        "vectors/check-lock-form/lock.json"
+      ]
+    },
+    {
+      "id": "check-not-canonical",
+      "section": "§7",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A lock written indented is not its JCS bytes: LOCK-NOT-CANONICAL. A re-formatted lock is an edited lock. reading: located at the root.",
+      "lock": "vectors/check-not-canonical/lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-not-canonical/report.json"
+    },
+    {
+      "id": "check-unexpected-registry",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "The lock's registry id is not the expected one: LOCK-UNEXPECTED-REGISTRY. reading: located at /registry/id.",
+      "lock": "locks/single-42.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-unexpected-registry/report.json"
+    },
+    {
+      "id": "check-index-required",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "An index is required and the lock names none: LOCK-INDEX-REQUIRED. reading: located at /index, the pointer it would have.",
+      "lock": "locks/single-42.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": true
+      },
+      "expected": "vectors/check-index-required/report.json"
+    },
+    {
+      "id": "check-registry-invalid",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "The registry given has an error: LOCK-REGISTRY-INVALID beside the validation's own diagnostic, and the check ends. reading: located at the registry's root.",
+      "lock": "locks/single-42.lock.json",
+      "registry": "single/registry-owner.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-registry-invalid/report.json"
+    },
+    {
+      "id": "check-registry-mismatch",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A valid registry that is not the one the lock names: LOCK-REGISTRY-MISMATCH at /registry, and each environment's resolved digest differs, since a resolved registry names its registry's digest.",
+      "lock": "locks/single-42.lock.json",
+      "registry": "single/registry-4.0.1.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-registry-mismatch/report.json"
+    },
+    {
+      "id": "check-kinds-mismatch",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "The lock's second pin names another version than the registry's: LOCK-KINDS-MISMATCH at the item.",
+      "lock": "vectors/check-kinds-mismatch/lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-kinds-mismatch/report.json"
+    },
+    {
+      "id": "check-resolved-mismatch",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "The lock names prod's resolved digest for dev: LOCK-RESOLVED-MISMATCH at the item.",
+      "lock": "vectors/check-resolved-mismatch/lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-resolved-mismatch/report.json"
+    },
+    {
+      "id": "check-index-missing",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "An assembled lock checked without its index: LOCK-INDEX-MISSING, a refusal and never a skipped check. reading: located at the lock's /index.",
+      "lock": "locks/assembled-7.lock.json",
+      "registry": "assembled/two-sources/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "expected": "vectors/check-index-missing/report.json"
+    },
+    {
+      "id": "check-index-two-standards",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "An index with two standard items, which its lock names by digest: LOCK-INDEX-MISMATCH. The index schema refuses it too. reading: located at the index's /sources.",
+      "lock": "vectors/check-index-two-standards/lock.json",
+      "registry": "assembled/two-sources/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "index": "vectors/check-index-two-standards/index.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "expected": "vectors/check-index-two-standards/report.json",
+      "schemaRefuses": [
+        "vectors/check-index-two-standards/index.json"
+      ]
+    },
+    {
+      "id": "check-index-unlocked",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "An index given for a lock that names none: LOCK-INDEX-UNLOCKED, so that no caller believes provenance was checked. reading: located at the index's root.",
+      "lock": "locks/single-42.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "index": "assembled/two-sources/index.json",
+      "expected": "vectors/check-index-unlocked/report.json"
+    },
+    {
+      "id": "check-sources-mismatch",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "The lock's statement digest for the repository is not that of the statement rebuilt from the index's item: LOCK-SOURCES-MISMATCH at the item.",
+      "lock": "vectors/check-sources-mismatch/lock.json",
+      "registry": "assembled/two-sources/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "index": "assembled/two-sources/index.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "expected": "vectors/check-sources-mismatch/report.json"
+    },
+    {
+      "id": "check-emitters-missing",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A lock that names emitters, checked without them: LOCK-EMITTER-MISSING at /emitters.",
+      "lock": "locks/single-43-emitters.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "expected": "vectors/check-emitters-missing/report.json"
+    },
+    {
+      "id": "check-emitter-file-missing",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A file the lock lists is not given: LOCK-EMITTER-MISSING at the item.",
+      "lock": "locks/single-43-emitters.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "emitters": [
+        {
+          "manifest": "emitters/db-roles.json",
+          "path": "emitters/db-roles.json",
+          "files": [
+            {
+              "path": "gen/db-roles.sql",
+              "mode": "0644",
+              "file": "emitters/gen/db-roles.sql"
+            }
+          ]
+        }
+      ],
+      "expected": "vectors/check-emitter-file-missing/report.json"
+    },
+    {
+      "id": "check-emitter-file-differs",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A file given differs from the lock's item: LOCK-EMITTER-MISMATCH at the item.",
+      "lock": "locks/single-43-emitters.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "emitters": [
+        {
+          "manifest": "emitters/db-roles.json",
+          "path": "emitters/db-roles.json",
+          "files": [
+            {
+              "path": "gen/db-roles.sql",
+              "mode": "0644",
+              "file": "emitters/gen/db-roles.sql"
+            },
+            {
+              "path": "gen/grant.sh",
+              "mode": "0755",
+              "file": "vectors/check-emitter-file-differs/grant.sh"
+            }
+          ]
+        }
+      ],
+      "expected": "vectors/check-emitter-file-differs/report.json"
+    },
+    {
+      "id": "check-emitter-unlisted-file",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "A file the manifest's owns matches that the lock does not list: LOCK-EMITTER-MISMATCH. reading: located at the emitter's item.",
+      "lock": "locks/single-43-emitters.lock.json",
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "emitters": [
+        {
+          "manifest": "emitters/db-roles.json",
+          "path": "emitters/db-roles.json",
+          "files": [
+            {
+              "path": "gen/db-roles.sql",
+              "mode": "0644",
+              "file": "emitters/gen/db-roles.sql"
+            },
+            {
+              "path": "gen/grant.sh",
+              "mode": "0755",
+              "file": "emitters/gen/grant.sh"
+            },
+            {
+              "path": "gen/extra.sql",
+              "mode": "0644",
+              "file": "vectors/check-emitter-unlisted-file/extra.sql"
+            }
+          ]
+        }
+      ],
+      "expected": "vectors/check-emitter-unlisted-file/report.json"
+    },
+    {
+      "id": "coverage-resolved",
+      "section": "§9.1",
+      "operation": "coverage",
+      "class": "lock-checker",
+      "description": "A prod loader holds prod's resolved registry: its environment, registry digest and digest are the lock's for prod. reading: coverage writes the report of a lock check, with no registry.",
+      "lock": "locks/single-42.lock.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false,
+        "environment": "prod"
+      },
+      "resolved": "single/resolved-prod.json",
+      "expected": "vectors/coverage-resolved/report.json"
+    },
+    {
+      "id": "coverage-wrong-environment",
+      "section": "§9.1",
+      "operation": "coverage",
+      "class": "lock-checker",
+      "description": "A dev resolved registry handed to a prod loader is not covered, although the lock names it: LOCK-NOT-COVERED. reading: located at the lock's resolved item for the expected environment.",
+      "lock": "locks/single-42.lock.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false,
+        "environment": "prod"
+      },
+      "resolved": "single/resolved-dev.json",
+      "expected": "vectors/coverage-wrong-environment/report.json"
+    },
+    {
+      "id": "coverage-file",
+      "section": "§9.1",
+      "operation": "coverage",
+      "class": "lock-checker",
+      "description": "A generated file whose path, mode and digest an emitters item lists is covered.",
+      "lock": "locks/single-43-emitters.lock.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false,
+        "environment": "prod"
+      },
+      "file": {
+        "path": "gen/grant.sh",
+        "mode": "0755",
+        "file": "emitters/gen/grant.sh"
+      },
+      "expected": "vectors/coverage-file/report.json"
+    },
+    {
+      "id": "coverage-file-mode",
+      "section": "§9.1",
+      "operation": "coverage",
+      "class": "lock-checker",
+      "description": "A file whose path and digest the lock lists, given with another mode, is not covered: LOCK-NOT-COVERED. reading: located at the lock's /emitters.",
+      "lock": "locks/single-43-emitters.lock.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false,
+        "environment": "prod"
+      },
+      "file": {
+        "path": "gen/grant.sh",
+        "mode": "0644",
+        "file": "emitters/gen/grant.sh"
+      },
+      "expected": "vectors/coverage-file-mode/report.json"
+    },
+    {
+      "id": "coverage-unlisted-file",
+      "section": "§9.1",
+      "operation": "coverage",
+      "class": "lock-checker",
+      "description": "A file no emitters item lists is not covered: LOCK-NOT-COVERED. reading: located at the lock's /emitters.",
+      "lock": "locks/single-43-emitters.lock.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false,
+        "environment": "prod"
+      },
+      "file": {
+        "path": "gen/extra.sql",
+        "mode": "0644",
+        "file": "vectors/check-emitter-unlisted-file/extra.sql"
+      },
+      "expected": "vectors/coverage-unlisted-file/report.json"
+    },
+    {
+      "id": "coverage-environment-missing",
+      "section": "§9.1",
+      "operation": "coverage",
+      "class": "lock-checker",
+      "description": "Coverage is given no environment: LOCK-EXPECTED. reading: located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "resolved": "single/resolved-prod.json",
+      "expected": "vectors/coverage-environment-missing/report.json"
+    },
+    {
+      "id": "verify-first-contact",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "First contact with a floor of 1: trust on first use, which the verifier chose by giving it. The lock is accepted and its serial and digest recorded.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-first-contact/report.json",
+      "expectedRecord": {
+        "serial": 42,
+        "digest": "sha256:17daddbd0d76af8847e788444afc5db180a97c3aafe1167cc7aad184a72360fd"
+      }
+    },
+    {
+      "id": "verify-record-equal",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The record holds this lock's serial and digest: verifying the accepted lock again is no rollback, and needs no write.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": 42,
+        "digest": "sha256:17daddbd0d76af8847e788444afc5db180a97c3aafe1167cc7aad184a72360fd"
+      },
+      "expected": "vectors/verify-record-equal/report.json",
+      "expectedRecord": {
+        "serial": 42,
+        "digest": "sha256:17daddbd0d76af8847e788444afc5db180a97c3aafe1167cc7aad184a72360fd"
+      }
+    },
+    {
+      "id": "verify-higher-serial",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A serial far above the record's is admitted: a verifier need not see every lock.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": 3,
+        "digest": "sha256:c8a2f8ef39749b4238b90943f055a8face8cd3a613ca0c3bfa7cfe2c81118593"
+      },
+      "expected": "vectors/verify-higher-serial/report.json",
+      "expectedRecord": {
+        "serial": 42,
+        "digest": "sha256:17daddbd0d76af8847e788444afc5db180a97c3aafe1167cc7aad184a72360fd"
+      }
+    },
+    {
+      "id": "verify-rollback",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A serial below the record's: LOCK-SERIAL-ROLLBACK, and the record stays. reading: located at /serial.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": 43,
+        "digest": "sha256:bcd4584b36f205c0fe4600ecf6763fe8a196417202c60767febadef98a9ab4e5"
+      },
+      "expected": "vectors/verify-rollback/report.json",
+      "expectedRecord": {
+        "serial": 43,
+        "digest": "sha256:bcd4584b36f205c0fe4600ecf6763fe8a196417202c60767febadef98a9ab4e5"
+      }
+    },
+    {
+      "id": "verify-serial-conflict",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "Another lock with the record's serial: LOCK-SERIAL-CONFLICT, two locks claiming one place. reading: located at /serial.",
+      "lock": "locks/single-43.lock.json",
+      "lockSignatures": [
+        "locks/single-43.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": 43,
+        "digest": "sha256:6e049201955b659331a648d13c29f5e1b67d4d4aacc0d89e34534ed18c4acf1d"
+      },
+      "expected": "vectors/verify-serial-conflict/report.json",
+      "expectedRecord": {
+        "serial": 43,
+        "digest": "sha256:6e049201955b659331a648d13c29f5e1b67d4d4aacc0d89e34534ed18c4acf1d"
+      }
+    },
+    {
+      "id": "verify-floor-alone",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "No record and a floor equal to the lock's serial: admitted, and recorded.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 42,
+      "expected": "vectors/verify-floor-alone/report.json",
+      "expectedRecord": {
+        "serial": 42,
+        "digest": "sha256:17daddbd0d76af8847e788444afc5db180a97c3aafe1167cc7aad184a72360fd"
+      }
+    },
+    {
+      "id": "verify-floor-rollback",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "No record and a floor above the lock's serial: LOCK-SERIAL-ROLLBACK, and no record is written. reading: located at /serial.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 43,
+      "expected": "vectors/verify-floor-rollback/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-floor-above-record",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A floor above the record's serial is held as a floor alone: 43 refuses the lock, though the record's 40 would admit it. reading: located at /serial.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": 40,
+        "digest": "sha256:bb8898c1b4a92a3ccd313c12f29851a44beea9437c1417d3f6f382313a127039"
+      },
+      "floor": 43,
+      "expected": "vectors/verify-floor-above-record/report.json",
+      "expectedRecord": {
+        "serial": 40,
+        "digest": "sha256:bb8898c1b4a92a3ccd313c12f29851a44beea9437c1417d3f6f382313a127039"
+      }
+    },
+    {
+      "id": "verify-floor-above-record-admits",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A floor above the record's serial, held as a floor alone, admits a lock at or above it: 42 against a floor of 42 and a record of 40, and the lock is recorded.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": 40,
+        "digest": "sha256:bb8898c1b4a92a3ccd313c12f29851a44beea9437c1417d3f6f382313a127039"
+      },
+      "floor": 42,
+      "expected": "vectors/verify-floor-above-record-admits/report.json",
+      "expectedRecord": {
+        "serial": 42,
+        "digest": "sha256:17daddbd0d76af8847e788444afc5db180a97c3aafe1167cc7aad184a72360fd"
+      }
+    },
+    {
+      "id": "verify-floor-below-record",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A floor at or below the record's serial changes nothing: the record admits the lock.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": 40,
+        "digest": "sha256:bb8898c1b4a92a3ccd313c12f29851a44beea9437c1417d3f6f382313a127039"
+      },
+      "floor": 30,
+      "expected": "vectors/verify-floor-below-record/report.json",
+      "expectedRecord": {
+        "serial": 42,
+        "digest": "sha256:17daddbd0d76af8847e788444afc5db180a97c3aafe1167cc7aad184a72360fd"
+      }
+    },
+    {
+      "id": "verify-floor-below-record-refuses",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A floor below the record's serial does not lower it: the record's 43 refuses the lock. reading: located at /serial.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": 43,
+        "digest": "sha256:bcd4584b36f205c0fe4600ecf6763fe8a196417202c60767febadef98a9ab4e5"
+      },
+      "floor": 10,
+      "expected": "vectors/verify-floor-below-record-refuses/report.json",
+      "expectedRecord": {
+        "serial": 43,
+        "digest": "sha256:bcd4584b36f205c0fe4600ecf6763fe8a196417202c60767febadef98a9ab4e5"
+      }
+    },
+    {
+      "id": "verify-first-contact-no-floor",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "No record and no floor: LOCK-EXPECTED, before the lock is read. reading: located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "expected": "vectors/verify-first-contact-no-floor/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-record-unreadable",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A record that exists and cannot be read: LOCK-SERIAL-STATE, never a first contact, and the floor given beside it does not stand in for it. reading: located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": "unreadable",
+      "floor": 1,
+      "expected": "vectors/verify-record-unreadable/report.json",
+      "expectedRecord": "unreadable"
+    },
+    {
+      "id": "verify-record-malformed",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A record not of its form, its serial a string: LOCK-SERIAL-STATE. reading: located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": "40",
+        "digest": "sha256:bb8898c1b4a92a3ccd313c12f29851a44beea9437c1417d3f6f382313a127039"
+      },
+      "floor": 1,
+      "expected": "vectors/verify-record-malformed/report.json",
+      "expectedRecord": {
+        "serial": "40",
+        "digest": "sha256:bb8898c1b4a92a3ccd313c12f29851a44beea9437c1417d3f6f382313a127039"
+      }
+    },
+    {
+      "id": "verify-compare-and-set-passes",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "Another process writes serial 41 after the verifier reads 40: the write's compare and set fails, the verifier reads the record again, the lock still passes, and it is written.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": 40,
+        "digest": "sha256:bb8898c1b4a92a3ccd313c12f29851a44beea9437c1417d3f6f382313a127039"
+      },
+      "concurrent": {
+        "serial": 41,
+        "digest": "sha256:d48ad57de4d905c81909a1b58cd3b7ef6353bf270886c40f52709e637d711506"
+      },
+      "expected": "vectors/verify-compare-and-set-passes/report.json",
+      "expectedRecord": {
+        "serial": 42,
+        "digest": "sha256:17daddbd0d76af8847e788444afc5db180a97c3aafe1167cc7aad184a72360fd"
+      }
+    },
+    {
+      "id": "verify-compare-and-set-fails",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "Another process writes serial 43 after the verifier reads 40: read again, the record refuses the lock, LOCK-SERIAL-ROLLBACK, and the other process's record stands. reading: located at /serial.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": {
+        "serial": 40,
+        "digest": "sha256:bb8898c1b4a92a3ccd313c12f29851a44beea9437c1417d3f6f382313a127039"
+      },
+      "concurrent": {
+        "serial": 43,
+        "digest": "sha256:bcd4584b36f205c0fe4600ecf6763fe8a196417202c60767febadef98a9ab4e5"
+      },
+      "expected": "vectors/verify-compare-and-set-fails/report.json",
+      "expectedRecord": {
+        "serial": 43,
+        "digest": "sha256:bcd4584b36f205c0fe4600ecf6763fe8a196417202c60767febadef98a9ab4e5"
+      }
+    },
+    {
+      "id": "verify-record-write-fails",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "Every step accepts and the record cannot be written: LOCK-SERIAL-STATE, and the lock is not accepted. reading: located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "writeFails": true,
+      "expected": "vectors/verify-record-write-fails/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-assembled",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "An assembled lock with its lock signature by the standard owner's key, its index, and one source signature per source, each by the key the set names and over the statement rebuilt from the index: all of the set, accepted and recorded.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-assembled/report.json",
+      "expectedRecord": {
+        "serial": 7,
+        "digest": "sha256:e4059933ec53ff063a491785ffeeb5c43ca4af744b70f1abd687138452bd01f5"
+      }
+    },
+    {
+      "id": "verify-coverage",
+      "section": "§§9.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A verification given prod's resolved registry and the environment prod: the lock is accepted and covers it.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false,
+        "environment": "prod"
+      },
+      "record": null,
+      "floor": 1,
+      "resolved": "single/resolved-prod.json",
+      "expected": "vectors/verify-coverage/report.json",
+      "expectedRecord": {
+        "serial": 42,
+        "digest": "sha256:17daddbd0d76af8847e788444afc5db180a97c3aafe1167cc7aad184a72360fd"
+      }
+    },
+    {
+      "id": "verify-not-covered",
+      "section": "§§9.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A verification given dev's resolved registry for prod: the lock signature is accepted and the lock is refused, LOCK-NOT-COVERED, so nothing is recorded. reading: located at the lock's resolved item for prod.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false,
+        "environment": "prod"
+      },
+      "record": null,
+      "floor": 1,
+      "resolved": "single/resolved-dev.json",
+      "expected": "vectors/verify-not-covered/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-with-documents",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A verification given the registry and its kinds runs the rest of section 9 as well, and accepts. reading: the report's registry is present, as in a lock check, since a registry was validated.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "registry": "single/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "expected": "vectors/verify-with-documents/report.json",
+      "expectedRecord": {
+        "serial": 42,
+        "digest": "sha256:17daddbd0d76af8847e788444afc5db180a97c3aafe1167cc7aad184a72360fd"
+      }
+    },
+    {
+      "id": "verify-expected-key-missing",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "No expected key: LOCK-SIG-EXPECTED-KEY, before anything is read. reading: located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {},
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-expected-key-missing/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-expected-key-small-order",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "An expected key of small order, under which anyone can forge: LOCK-SIG-EXPECTED-KEY. reading: located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "0100000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-expected-key-small-order/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-map-without-index",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A repository key map given with no index required: LOCK-EXPECTED. reading: located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-map-without-index/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-index-without-map",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "An index required with no repository key map: LOCK-EXPECTED. reading: located at the lock's root.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-index-without-map/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-map-gives-standard-key",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The map gives the repository the standard owner's key: one key in two roles, LOCK-EXPECTED. reading: located at the lock's root.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-map-gives-standard-key/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-map-shares-a-key",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The map gives one key to two repository identities: LOCK-EXPECTED. reading: located at the lock's root.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
+          "https://example.invalid/scm/ledger": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-map-shares-a-key/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-lock-signature-missing",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "No lock signature document: LOCK-SIG-MISSING. reading: located at the lock's root.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-lock-signature-missing/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-second-lock-signature",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A second lock signature document beside an accepted one: LOCK-SIG-EXTRA, and the set is refused, not trimmed. reading: located at the signature document's root.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json",
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-second-lock-signature/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-lock-signature-wrong-key",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A lock signature by another key than the expected one: LOCK-SIG-UNEXPECTED-KEY, the plainer reason, first. reading: located at /publicKey.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-lock-signature-wrong-key/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-lock-signature-wrong-key/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-lock-signature-moved",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The signature of another lock, moved beside this one: LOCK-SIG-DIGEST-MISMATCH. reading: located at /lockDigest.",
+      "lock": "locks/single-43.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-lock-signature-moved/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-lock-signature-invalid",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The expected key and this lock's digest, with a signature over another lock's message: LOCK-SIG-INVALID. reading: located at /signature.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-lock-signature-invalid/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-lock-signature-invalid/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-signature-backslash",
+      "section": "§§10.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A backslash anywhere in the document, here an escape that spells ed25519: LOCK-SIG-DOCUMENT. reading: located at the document's root. reading: a document refused when read is not then checked against a key.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-signature-backslash/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-backslash/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-signature-over-bound",
+      "section": "§§10.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A document of more than 4096 bytes, its members spread by white space, which is otherwise admitted when read: LOCK-SIG-DOCUMENT. reading: located at the document's root. reading: a document refused when read is not then checked against a key.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-signature-over-bound/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-over-bound/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-signature-version",
+      "section": "§§10.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A lockSignatureVersion of 1.2.0, a later version named as such: LOCK-SIG-VERSION. reading: located at the member. reading: a document refused when read is not then checked against a key.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-signature-version/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-version/report.json",
+      "expectedRecord": null,
+      "schemaRefuses": [
+        "vectors/verify-signature-version/lock.sig.json"
+      ]
+    },
+    {
+      "id": "verify-signature-member",
+      "section": "§§10.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A member that is not defined: LOCK-SIG-MEMBER. reading: located at the member. reading: a document refused when read is not then checked against a key.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-signature-member/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-member/report.json",
+      "expectedRecord": null,
+      "schemaRefuses": [
+        "vectors/verify-signature-member/lock.sig.json"
+      ]
+    },
+    {
+      "id": "verify-signature-member-missing",
+      "section": "§§10.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A document without its signature member: LOCK-SIG-MEMBER. reading: located at the pointer the member would have. reading: a document refused when read is not then checked against a key.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-signature-member-missing/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-member-missing/report.json",
+      "expectedRecord": null,
+      "schemaRefuses": [
+        "vectors/verify-signature-member-missing/lock.sig.json"
+      ]
+    },
+    {
+      "id": "verify-signature-algorithm",
+      "section": "§§10.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "An algorithm other than ed25519: LOCK-SIG-ALGORITHM. reading: located at the member. reading: a document refused when read is not then checked against a key.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-signature-algorithm/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-algorithm/report.json",
+      "expectedRecord": null,
+      "schemaRefuses": [
+        "vectors/verify-signature-algorithm/lock.sig.json"
+      ]
+    },
+    {
+      "id": "verify-signature-key-uppercase",
+      "section": "§§10.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A publicKey in uppercase hexadecimal, another spelling of one key: LOCK-SIG-PUBLIC-KEY. reading: located at the member. reading: a document refused when read is not then checked against a key.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-signature-key-uppercase/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-key-uppercase/report.json",
+      "expectedRecord": null,
+      "schemaRefuses": [
+        "vectors/verify-signature-key-uppercase/lock.sig.json"
+      ]
+    },
+    {
+      "id": "verify-signature-key-small-order",
+      "section": "§§10.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A document whose publicKey is of small order, which the trust rule refuses: LOCK-SIG-PUBLIC-KEY, before the key is compared. reading: located at the member. reading: a document refused when read is not then checked against a key.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-signature-key-small-order/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-key-small-order/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-signature-form",
+      "section": "§§10.1, 11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A signature of 126 hexadecimal characters: LOCK-SIG-FORM. reading: located at the member. reading: a document refused when read is not then checked against a key.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "vectors/verify-signature-form/lock.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-signature-form/report.json",
+      "expectedRecord": null,
+      "schemaRefuses": [
+        "vectors/verify-signature-form/lock.sig.json"
+      ]
+    },
+    {
+      "id": "verify-unexpected-registry",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "Another registry's lock signed by the expected key verifies as a signature and is refused for its registry id: LOCK-UNEXPECTED-REGISTRY. reading: located at /registry/id.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/billing",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-unexpected-registry/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-index-required",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A verifier that holds a map requires an index: a single registry's lock signed by the standard owner's key is LOCK-INDEX-REQUIRED, never a lock that needs no repository's signature. reading: located at /index.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": true
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-index-required/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-index-missing",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "An assembled lock verified without its index, whatever else is given: LOCK-INDEX-MISSING. reading: located at /index, and no source signature is checked without the index the statements are rebuilt from.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-index-missing/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-source-signature-missing",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "No source signature for the repository's item: LOCK-SIG-MISSING at the item. reading: located at the lock's item.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-source-signature-missing/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-source-signature-twice",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The repository's source signature given twice: LOCK-SIG-EXTRA. reading: located at the signature document's root.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/standard.json",
+        "signatures/billing.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-source-signature-twice/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-source-signature-stray",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "A source signature given for a lock with no sources: LOCK-SIG-EXTRA. reading: located at the signature document's root.",
+      "lock": "locks/single-42.lock.json",
+      "lockSignatures": [
+        "locks/single-42.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/platform",
+        "requireIndex": false
+      },
+      "record": null,
+      "floor": 1,
+      "expected": "vectors/verify-source-signature-stray/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-map-misses-repository",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The map names another repository and not the lock's: LOCK-EXPECTED, found once the lock is read. reading: located at the lock's item.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/ledger": "fc51cd8e6218a1a38da47ed00230f0580816ed13ba3303ac5deb911548908025"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-map-misses-repository/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-map-names-standard-repository",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The map names the standard item's repository: LOCK-EXPECTED, since a repository's identity there would let its statement pass without its own key. reading: located at the lock's item.",
+      "lock": "locks/assembled-7.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
+          "https://example.invalid/scm/platform": "fc51cd8e6218a1a38da47ed00230f0580816ed13ba3303ac5deb911548908025"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-map-names-standard-repository/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-source-wrong-key",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The repository's statement signed by another key than the map names, in a lock that names that signature: LOCK-SIG-UNEXPECTED-KEY. reading: located at /publicKey.",
+      "lock": "locks/assembled-7-billing-wrong-key.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7-billing-wrong-key.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing-wrong-key.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-source-wrong-key/report.json",
+      "expectedRecord": null
+    },
+    {
+      "id": "verify-source-another-commit",
+      "section": "§11",
+      "operation": "verify",
+      "class": "lock-signature-verifier",
+      "description": "The repository's signature over its statement at another commit than the index records: the statement rebuilt from the index is not what it names, LOCK-SIG-DIGEST-MISMATCH. reading: located at /sourceDigest.",
+      "lock": "locks/assembled-7-billing-another-commit.lock.json",
+      "lockSignatures": [
+        "locks/assembled-7-billing-another-commit.lock.json.sig.json"
+      ],
+      "sourceSignatures": [
+        "signatures/billing-another-commit.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "record": null,
+      "index": "assembled/two-sources/index.json",
+      "floor": 1,
+      "expected": "vectors/verify-source-another-commit/report.json",
+      "expectedRecord": null
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "federationFormatVersion": "1.1.0",
+  "registry": {
+    "id": "https://example.invalid/registries/services",
+    "version": "1.0.0"
+  },
+  "environments": [
+    "dev",
+    "prod"
+  ],
+  "sources": [
+    {
+      "name": "payments",
+      "role": "repository",
+      "repository": "https://example.invalid/scm/payments",
+      "registry": "registry.json",
+      "bounds": "bounds.json"
+    },
+    {
+      "name": "standard",
+      "role": "standard",
+      "repository": "https://example.invalid/scm/platform",
+      "bounds": "services/bounds.json",
+      "kinds": [
+        "kinds/app.json"
+      ]
+    }
+  ]
+}

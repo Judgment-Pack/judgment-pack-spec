@@ -1,0 +1,57 @@
+{
+  "boundsFormatVersion": "1.1.0",
+  "kinds": [
+    {
+      "kind": "app",
+      "maxEntries": 4,
+      "fields": [
+        {
+          "pointer": "/labels",
+          "bound": {
+            "maxProperties": 4,
+            "required": [
+              "team"
+            ]
+          }
+        },
+        {
+          "pointer": "/name",
+          "bound": {
+            "enum": [
+              "payments-api",
+              ""
+            ],
+            "maxLength": 20
+          }
+        },
+        {
+          "pointer": "/replicas",
+          "bound": {
+            "exclusiveMinimum": 1,
+            "maximum": 10,
+            "exclusiveMaximum": 8
+          }
+        },
+        {
+          "pointer": "/tags",
+          "bound": {
+            "maxItems": 3,
+            "uniqueItems": true
+          }
+        },
+        {
+          "pointer": "/tier",
+          "bound": {
+            "const": "gold"
+          }
+        },
+        {
+          "pointer": "/weight",
+          "bound": {
+            "type": "integer"
+          }
+        }
+      ]
+    }
+  ]
+}

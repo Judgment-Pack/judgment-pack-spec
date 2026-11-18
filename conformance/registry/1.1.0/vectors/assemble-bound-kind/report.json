@@ -1,0 +1,9 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "registry": {"digest": "sha256:ebb0195a864aa2802df48dabd8466c3ee9e4f1241c606f5c112b8a6a5c171126"},
+  "diagnostics": [
+    {"code": "FED-BOUND-KIND", "severity": "error", "location": {"document": "bounds", "source": "billing", "pointer": "/kinds/1/kind"}},
+    {"code": "FED-BOUND-KIND", "severity": "error", "location": {"document": "bounds", "source": "standard", "pointer": "/kinds/1/kind"}}
+  ]
+}

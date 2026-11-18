@@ -1,0 +1,1 @@
+-- Synthetic: a file the lock does not list.

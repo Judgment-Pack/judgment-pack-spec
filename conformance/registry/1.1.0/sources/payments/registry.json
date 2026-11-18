@@ -1,0 +1,40 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/payments",
+  "version": "1.0.0",
+  "environments": [
+    "dev",
+    "prod"
+  ],
+  "owners": [
+    "team-payments"
+  ],
+  "kinds": [
+    {
+      "kind": "app",
+      "id": "https://example.invalid/kinds/app",
+      "version": "1.0.0",
+      "digest": "sha256:62d29e098f545de48985706e478b35482d0ad2f3e74425916508d748f77cd45c"
+    }
+  ],
+  "entries": [
+    {
+      "kind": "app",
+      "id": "payments-api",
+      "owner": "team-payments",
+      "value": {
+        "labels": {
+          "team": "payments"
+        },
+        "name": "payments-api",
+        "replicas": 3,
+        "tags": [
+          "api",
+          "edge"
+        ],
+        "tier": "gold",
+        "weight": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "registry": {"digest": "sha256:d58eca3a479a1ea9906bc4db61286492afe54d4935845cc5c518c26e750773d5"},
+  "diagnostics": [
+    {"code": "FED-BOUND-WIDENS", "severity": "error", "location": {"document": "bounds", "source": "payments", "pointer": "/kinds/0/fields/1/bound/maxLength"}}
+  ]
+}

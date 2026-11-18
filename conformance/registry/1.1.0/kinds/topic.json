@@ -1,0 +1,20 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/topic",
+  "version": "1.0.0",
+  "kind": "topic",
+  "owner": "team-billing",
+  "description": "A topic a service publishes to.",
+  "schema": {
+    "type": "object",
+    "required": [
+      "name"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "type": "string"
+      }
+    }
+  }
+}

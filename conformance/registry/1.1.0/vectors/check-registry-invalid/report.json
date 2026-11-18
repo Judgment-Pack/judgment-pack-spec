@@ -1,0 +1,9 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "registry": {"digest": "sha256:8177791d51dc4b4de7424339a39ce8f2bffe7ad97893792a1a3bdc7807da118b"},
+  "diagnostics": [
+    {"code": "LOCK-REGISTRY-INVALID", "severity": "error", "location": {"document": "registry", "pointer": ""}},
+    {"code": "REG-ENTRY-OWNER", "severity": "error", "location": {"document": "registry", "entry": {"kind": "db-role", "id": "billing-api"}, "pointer": "/entries/1/owner"}}
+  ]
+}

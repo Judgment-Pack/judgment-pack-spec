@@ -1,0 +1,1 @@
+-- Synthetic: the roles of one registry, as a test emitter writes them.

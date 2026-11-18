@@ -1,0 +1,55 @@
+{
+  "boundsFormatVersion": "1.1.0",
+  "kinds": [
+    {
+      "kind": "app",
+      "maxEntries": 10,
+      "fields": [
+        {
+          "pointer": "/labels",
+          "bound": {
+            "maxProperties": 8
+          }
+        },
+        {
+          "pointer": "/name",
+          "bound": {
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        {
+          "pointer": "/replicas",
+          "bound": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        {
+          "pointer": "/tags",
+          "bound": {
+            "maxItems": 6,
+            "uniqueItems": true
+          }
+        },
+        {
+          "pointer": "/tier",
+          "bound": {
+            "enum": [
+              "gold",
+              "silver",
+              "bronze"
+            ]
+          }
+        },
+        {
+          "pointer": "/weight",
+          "bound": {
+            "type": "number"
+          }
+        }
+      ]
+    }
+  ]
+}

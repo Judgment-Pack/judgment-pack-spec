@@ -1,0 +1,7 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "diagnostics": [
+    {"code": "FED-KNOWN-LIMIT", "severity": "error", "location": {"document": "federation", "pointer": ""}}
+  ]
+}

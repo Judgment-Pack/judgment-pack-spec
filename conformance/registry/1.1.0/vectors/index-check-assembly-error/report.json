@@ -1,0 +1,8 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "registry": {"digest": "sha256:e9a3442f1335a568636509356943aca66aabc98c3c743bda7d067cb7661a891e"},
+  "diagnostics": [
+    {"code": "REG-ENTRY-OWNER", "severity": "error", "location": {"document": "registry", "source": "billing", "entry": {"kind": "db-role", "id": "billing-api"}, "pointer": "/entries/0/owner"}}
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "registry": {"digest": "sha256:b48573a8af0c17e7dfd2f38247ceadaca226149d7f3351742cbd4deaea640d10"},
+  "diagnostics": [
+    {"code": "FED-KIND-NOT-STANDARD", "severity": "error", "location": {"document": "registry", "source": "billing", "kind": "db-role", "pointer": "/kinds/0"}}
+  ]
+}

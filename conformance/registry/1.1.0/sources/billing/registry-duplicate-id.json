@@ -1,0 +1,63 @@
+{
+  "registryFormatVersion": "1.0.0",
+  "id": "https://example.invalid/registries/assembled",
+  "version": "2.1.0",
+  "environments": [
+    "dev",
+    "prod"
+  ],
+  "owners": [
+    "team-billing"
+  ],
+  "kinds": [
+    {
+      "kind": "db-role",
+      "id": "https://example.invalid/kinds/db-role",
+      "version": "1.2.0",
+      "digest": "sha256:64e30653b5b2743af0fb78d555d186ea9a57551aa1c800c8f972f824ef7da020"
+    }
+  ],
+  "entries": [
+    {
+      "kind": "db-role",
+      "id": "billing-api",
+      "owner": "team-billing",
+      "value": {
+        "database": "entry:database/billing",
+        "privileges": [
+          "read",
+          "write"
+        ],
+        "connectionLimit": 20
+      }
+    },
+    {
+      "kind": "db-role",
+      "id": "billing-backfill",
+      "owner": "team-billing",
+      "environments": [
+        "dev"
+      ],
+      "value": {
+        "database": "entry:database/billing#/engine",
+        "privileges": [
+          "read"
+        ]
+      }
+    }
+  ],
+  "overlays": [
+    {
+      "environment": "prod",
+      "patches": [
+        {
+          "kind": "db-role",
+          "id": "billing-api",
+          "set": {
+            "/connectionLimit": 40
+          }
+        }
+      ]
+    }
+  ]
+}
