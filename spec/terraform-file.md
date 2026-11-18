@@ -40,7 +40,8 @@ Version `1.0.0` is released, on `terraform-file-v1.0.0`, and not yet stable:
   reader does. A second reader, written from this text alone, is in this repository
   (`tools/terraform_file_reader.py`) and gives every vector's expected result; it was written by a
   model from the drafting vendor, a same-vendor reader and not a cross-vendor claim. The stable bar
-  is two readers agreeing on every vector (§12).
+  (§12) is two independently written readers agreeing on every vector, the second from a
+  different vendor; this same-vendor reader does not meet it, so the reading is not yet stable.
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** and **MAY** have their
 BCP 14 meanings only in capitals.
@@ -152,7 +153,8 @@ written by hand to the shape that Terraform's documentation of its JSON output f
 that version, with no Terraform run and no recorded output. A version not in a reader's claimed
 table, including a newer minor of a listed major, is `TF-FORMAT`. The table grows by a patch release
 and never shrinks within a dialect version. The first table (RFC 0038, Unresolved question 2,
-resolved) is the one the reference runtime's reader holds as `proposed-1`:
+resolved) is the one the reference runtime's reader held under the provisional name `proposed-1`, and
+now holds as release `1.0.0`:
 
 | `document` | Accepted `format_version` |
 | --- | --- |

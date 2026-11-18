@@ -8,7 +8,8 @@ beside Core and independent of `specVersion`, as the Policy and registry compani
 
 - **Released, and not stable.** The text is normative for the reader class of its §12, and for
   nothing else. No stability promise is made before the first stable release (§10), and the bar for
-  that is two independently written readers agreeing on every vector (§12).
+  that is two independently written readers agreeing on every vector (§12), the second from a
+  different vendor. The two readers below are both same-vendor, so they do not meet it.
 - **Two readers.** The reference runtime (Go) reads the file and runs every vector it can express:
   its batch tool takes a source's members as flags, so the malformed declarations that no command
   line can write have no counterpart there. A second reader in this repository

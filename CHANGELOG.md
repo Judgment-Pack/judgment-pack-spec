@@ -21,7 +21,7 @@ here.
   reader, both from the drafting vendor, give every vector's expected result. Core, its bundles and
   its corpora are unchanged.
 - **The `terraform-file` reading is a companion of its own** (`spec/terraform-file.md`, reading
-  `1.0.0`, proposed; RFC 0018's and RFC 0038's amendments of 2026-11-17; #365). The reading of a
+  `1.0.0`; RFC 0018's and RFC 0038's amendments of 2026-11-17; #365). The reading of a
   `terraform-file` source's file, which `spec/dialect.md` §4.5 carried, moves to the new text,
   unchanged but for the maintainer's rulings: it is released under its own selector, the scoped
   tag `terraform-file-v<major>.<minor>.<patch>`, first `terraform-file-v1.0.0`, as released and not
@@ -31,12 +31,12 @@ here.
   RFC 0038's Unresolved question 2. A refusal's source outcome is defined when dialect version 3
   opens; RFC 0038's new Unresolved question 6 records the proposal. The text adds a table of its
   eight codes, a reader conformance class and the claim rule of RFC 0038's Conformance section; its
-  machine-readable code list, format table and vectors come later. §4.5 now names the kind, its
+  machine-readable code list, format table and vectors are the next entry. §4.5 now names the kind, its
   members and class, and cites the companion; RFC 0018's Specification section follows. The site
   publishes the text at `spec/terraform-file/`. No release record is added, and nothing released
   changes.
 - **The `terraform-file` reading's code list, format table and vectors**
-  (`conformance/terraform-file/1.0.0/`, proposed with reading `1.0.0`; `spec/terraform-file.md`
+  (`conformance/terraform-file/1.0.0/`, with reading `1.0.0`; `spec/terraform-file.md`
   §§4, 9, 11 and 12). `codes.json` lists §9's eight codes, each `error` and `active`, with the step
   that raises it and when; `formats.json` is §4's first table, release `1.0.0`: `plan` `1.0`, `1.1`
   and `1.2`, and `state` `1.0`. 188 hand-written, synthetic vectors, each with a source declaration
@@ -150,7 +150,7 @@ here.
 ### Changed
 
 - **The terraform-file reading has a release route of its own** (`spec/terraform-file.md` §10,
-  reading `1.0.0`, proposed; VERSIONING.md, "Independently versioned terraform-file companion").
+  reading `1.0.0`; VERSIONING.md, "Independently versioned terraform-file companion").
   Its first release is the scoped tag `terraform-file-v1.0.0`, at status `released`, which is not
   stable; this change cuts no tag and changes no status. As for the registry, the release builder
   gives a `terraform-file-v` tag a bundle of its own, `judgment-pack-terraform-file-<version>`, with

@@ -674,11 +674,11 @@
     }
   },
   "formatDigests": {
-    "spec/terraform-file.md": "sha256:73e2aefcddd04e1c37f901aeccf4b72d5e4a2dbafeae4bc937dccb5d221b9a5d",
+    "spec/terraform-file.md": "sha256:8edd780f04bf99bdc2596c18d9d3355881770eed2b71f72701aade2854ded70a",
     "conformance/terraform-file/README.md": "sha256:4643f9d48a80c22cc8612abed7e7b576cd76f53f0ff100498a4366753ffd6203"
   },
   "reader": {
     "path": "tools/terraform_file_reader.py",
-    "sha256": "sha256:39f4d7c412b3e4fd63ce13b182c9acab20446571be5ad5e59b8ca296467bcc34"
+    "sha256": "sha256:055333b567d793666dd4c1aa1ec1a1e50a5f5d0c2cc2da76f645e48b7c48db33"
   }
 }
