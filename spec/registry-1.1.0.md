@@ -11,18 +11,19 @@ lock and for each repository's part of it.
 
 This text is registry format `1.1.0`, status `proposed`. It is normative for nothing, and no
 conformance claim may cite it. It becomes normative only when a registry tag releases it,
-`registry-v1.1.0`, by the companion's route (registry §13). At that release this text and
-`registry.md` become one document of format `1.1.0`; until then `registry.md` is the released
-`1.0.0` text, and nothing here changes it.
+`registry-v1.1.0`, by the companion's route (registry §13). At that release format `1.1.0` is
+`registry.md` (its §§1 to 17, unchanged) together with this text: two files of one companion,
+each with its own section numbers. Until then `registry.md` is the released `1.0.0` text, and
+nothing here changes it.
 
 Its design records are [RFC 0039](../rfcs/0039-federated-registry.md) (assembly, the index and
 bounds) and [RFC 0040](../rfcs/0040-registry-locks-and-signatures.md) (locks and signatures). Both
 are Drafts. Every question either record left open is decided here, as §17 lists. Where this text
-and a record differ, this text governs. Its merge into `registry.md` is editorial only (§17).
+and a record differ, this text governs.
 
-Not yet published: the closed schemas of the new documents, their code list and their rows. The
-text is published first so that it can be frozen and reviewed before anything is
-built.
+This text is kept as its own companion file with its own section numbers, so every code meaning
+and schema citation stays as accepted. The closed schemas of its documents, its code list and its
+rows are published with it, at status `proposed` (§14).
 
 Changes after acceptance:
 
@@ -36,6 +37,10 @@ Changes after acceptance:
 - §9 (step 8): an emitter manifest given that the lock lists no item for is LOCK-EMITTER-MISMATCH.
 - §11 (Reading a signature document): a signature document that admission refuses, an integer above
   2^53 − 1 included, is LOCK-SIG-DOCUMENT even when it also has a member that is not defined.
+- Status, §§13 and 17: this text and `registry.md` are two files of one companion, each with its
+  own section numbers, rather than one merged document; no rule, code, order or bound changes.
+- Status, §§14, 15 and 17: the schemas, the code list and the rows, published since, are no
+  longer described as unpublished.
 
 ## 1. Conventions
 
@@ -948,8 +953,9 @@ each signature, and no document content.
   `1.0.0` reader refuses each by its selector. Registry §13's rules from the first stable release
   hold for them as for the documents of `1.0.0`.
 - **Release.** Only on a `registry-v1.1.0` tag, with the schemas, the code list and the rows, by the
-  route of registry §13 and VERSIONING.md. That release publishes this text and `registry.md` as one
-  document of format `1.1.0`. Core is unchanged.
+  route of registry §13 and VERSIONING.md. That release publishes this text and `registry.md`
+  together as format `1.1.0`, two files of one companion, each with its own section numbers. Core
+  is unchanged.
 - **What a later version may add**, each under a new minor selector: a layer role in the manifest
   (§3); bound rows for a kind's `overlayable` positions, the target kinds of a reference, and the
   stores a secret may name, each a finite set compared by subset, as further rows of §6.2; and a
@@ -957,10 +963,10 @@ each signature, and no document content.
 
 ## 14. Machine-readable form and rows
 
-None is published yet. The release that publishes this text publishes, under
-`conformance/registry/1.1.0/` and `schema/registry/1.1.0/`, the code list of §12 with each code's
-severity and status, the closed schemas of the documents of §2, and hand-written, synthetic rows for
-each class of §15, as registry §14 does for `1.0.0`. Signing rows use RFC 8032 §7.1 TEST 1's
+The code list of §12 with each code's severity and status, the closed schemas of the documents of
+§2, and hand-written, synthetic rows for each class of §15 are under `conformance/registry/1.1.0/`
+and `schema/registry/1.1.0/`, as registry §14 has them for `1.0.0`. They are published with this
+text, at status `proposed`, and the release that publishes this text publishes them. Signing rows use RFC 8032 §7.1 TEST 1's
 published seed, and further published seeds for the repository and wrong-key rows, so that any
 reader can reproduce them; no private key of anyone's is recorded. A verifier's record is part of a
 row's input and of its expected output.
@@ -975,7 +981,7 @@ row's input and of its expected output.
 | Lock checker | §9 |
 | Lock signature verifier | §§10, 11 |
 
-A class without rows is defined and not claimable; every class here has none yet. A claim names its
+A class without rows is defined and not claimable; every class here has rows (§14). A claim names its
 class, the exact release and its complete rows, as registry §15 says. The stable bar is two
 independently written readers agreeing on every row of a class.
 
@@ -1103,12 +1109,9 @@ them:
 - an emitter item of a single registry's lock has no `source` (§7);
 - a writer that refuses the emitters writes no lock (§8);
 - a file that no `emitters` item lists is `LOCK-NOT-COVERED` (§9.1);
-- a signer refuses a private key whose public key is not the one it means to sign with (§11).
+- a signer refuses a private key whose public key is not the one it means to sign with (§11);
+- the companion text's form once released: this text and `registry.md` are two files of one
+  companion, each with its own section numbers (Status, §13), so that no MUST, code,
+  code-to-condition mapping, order or bound changes at its release.
 
-**Open:**
-
-- the schemas, the code list and the rows (§14), which follow the review of this text;
-- the companion text's form once released: this text and `registry.md` become one document at
-  `registry-v1.1.0` (§13). The merge into `spec/registry.md` is editorial only. No MUST, code,
-  code-to-condition mapping, order or bound changes. The merged text is reviewed as a diff against
-  this frozen text.
+**Open:** nothing in `1.1.0`. What a later version may add is in §13.
