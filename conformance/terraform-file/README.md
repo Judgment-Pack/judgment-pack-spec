@@ -3,9 +3,11 @@
 The machine-readable form and the hand-written vectors of the terraform-file reading `1.0.0`,
 status `proposed` (`spec/terraform-file.md`, whose design record is RFC 0038). They are proposed
 with the text: until a terraform-file tag releases them they are not a conformance corpus, and no
-claim may cite them (the companion's §12). No Core bundle carries them, and the site does not serve
-them. The `status` of `codes.json`, `formats.json` and `manifest.json` says `proposed`, as the
-text's does.
+claim may cite them (the companion's §12). They are packaged on the companion's own scoped tag: a
+`terraform-file-v` tag's bundle carries them, with the text, this README and the checks that hold
+them to the text, and its release record pins every file here (the companion's §10, VERSIONING.md).
+No Core bundle carries them, and the site serves none of them, before a release or after it. The
+`status` of `codes.json`, `formats.json` and `manifest.json` says `proposed`, as the text's does.
 
 Every input is synthetic, written by hand to the shape that Terraform's documentation of its JSON
 output format gives for its `format_version` (§4), with no Terraform run and no recorded output. The
@@ -19,10 +21,12 @@ No reader of the file exists in this repository. `tests/test_terraform_file_vect
 `codes.json` to the text's §9 table and `formats.json` to its §4 table, the manifest to the files,
 and each expected result to its form: an acquisition record of its own input, whose `sha256` and
 `bytes` are the input's; a value in id order with no JSON number and no sensitive text; a refusal of
-a listed code; batch lines in canonical form. It reads each declaration with the first reader,
-`tools/dialect_verify.py`, which holds a `terraform-file` source to its form and reads no file:
-directly, as the members of §2, and as a source of a dialect document, where the document's own
-number domain refuses `1.0` and `1e2` first (`spec/dialect.md` §1).
+a listed code; batch lines in canonical form. It reads only the text and the files here, and the
+companion's bundle carries it and runs it. `tests/test_terraform_file_declarations.py` reads each
+declaration with the first reader, `tools/dialect_verify.py`, which holds a `terraform-file` source
+to its form and reads no file: directly, as the members of §2, and as a source of a dialect
+document, where the document's own number domain refuses `1.0` and `1e2` first (`spec/dialect.md`
+§1). It needs the dialect's staged vectors, which no bundle carries, so it stays in the repository.
 
 The reference runtime's reader was run over every vector as they were written. It reports each
 expected result but for one member: its acquisition record's `formatTable` is `proposed-1`, its own

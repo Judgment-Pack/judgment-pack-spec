@@ -2654,8 +2654,9 @@ def build_license(output_root: Path) -> None:
 # are (conformance/registry/README.md): the site serves none of them as files, and serves each
 # schema at its $id from the companion's first release on (registry_schema_sources); its companion
 # document, spec/registry.md, is published. The terraform-file reading's code list, format table and
-# vectors are proposed and in no corpus (conformance/terraform-file/README.md); its companion
-# document, spec/terraform-file.md, is published.
+# vectors are packaged on the companion's own scoped tag (conformance/terraform-file/README.md). The
+# companion has no schema, so the site serves none of them, before its first release or after it;
+# its companion document, spec/terraform-file.md, is published.
 UNPUBLISHED_ARTIFACT_DIRECTORIES = (
     PurePosixPath("conformance/evaluation/staged"),
     PurePosixPath("conformance/witness"),

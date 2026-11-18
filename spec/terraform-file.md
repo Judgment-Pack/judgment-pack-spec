@@ -33,10 +33,10 @@ Version `1.0.0` is proposed. Its first release makes it `released`, and not yet 
 - **Its vectors are proposed with it.** The machine-readable code list and format table, and the
   hand-written vectors, are under `conformance/terraform-file/1.0.0/` (§§11, 12). Until a release
   publishes them they are not a conformance corpus, and no claim may cite them.
-- **One reader exists.** The reference runtime reads the file (`v0.48.0`), and where this text
-  settles what RFC 0038 left open, it says what that reader does, except for deposed objects (§3,
-  step 4), which that reader does not yet carry. No second, independently written reader exists.
-  The stable bar is two readers agreeing on every vector (§12).
+- **One reader exists.** The reference runtime reads the file, deposed objects (§3, step 4)
+  included (`v0.49.0`), and where this text settles what RFC 0038 left open, it says what that
+  reader does. No second, independently written reader exists. The stable bar is two readers
+  agreeing on every vector (§12).
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** and **MAY** have their
 BCP 14 meanings only in capitals.
@@ -224,10 +224,18 @@ companion's codes ([`spec/registry.md`](registry.md) §12), and not this list's.
 
 The companion is released on the scoped tag `terraform-file-v<major>.<minor>.<patch>`. The first
 release is `terraform-file-v1.0.0`, at status `released`: it is released, and not stable, and it
-carries the first table, release `1.0.0` (§4). [VERSIONING.md](../VERSIONING.md) defines the scoped
-routes of the Policy and registry companions, and none yet for this one, so this text does not yet
-say what record a tag of it names or what bundle it publishes. No stability promise is made before
-the first stable release, which needs the second reader §12 asks for.
+carries the first table, release `1.0.0` (§4). A tag's number is the table release it carries, so a
+tag that adds a row to the table is a patch release ([VERSIONING.md](../VERSIONING.md)).
+
+A tag names, in its release record `releases/<tag>.json`, the reading `1.0.0`; the SHA-256 of this
+text and of the vectors' README; the format table with its digest, its release and its rows; the
+code list with its digest and its codes; and the vectors' manifest with its digest, the id of every
+vector and the digest of every file under `conformance/terraform-file/1.0.0/`. Its bundle,
+`judgment-pack-terraform-file-<version>`, publishes this text, the code list, the format table, the
+declarations and the vectors with their README, the checks that hold the vectors to this text, and
+the record and the notes. A Core bundle carries this text and none of those files. No code, table
+row or vector that a release names is dropped by a later release of the same reading. No stability
+promise is made before the first stable release, which needs the second reader §12 asks for.
 
 Dialect version 3, which is proposed, and later Core releases cite this text rather than carry it.
 

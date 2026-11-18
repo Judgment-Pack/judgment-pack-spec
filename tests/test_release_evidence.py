@@ -256,7 +256,8 @@ class ReleaseWorkflowTests(unittest.TestCase):
         expected = {"v0.3.0": "evidence", "v1.10.0": "evidence", "v10.0.0": "evidence",
                     "v0.3.0-rc.1": "fresh", "v0.3.0-rc.10": "fresh", "v0.2.0-draft": "fresh",
                     "v1.0.0-0": "fresh", "v1.0.0+build": "fresh", "policy-v1.0.0": "fresh",
-                    "policy-v1.0.0-draft.1": "fresh", "registry-v1.0.0": "fresh", "v1.2": "fresh",
+                    "policy-v1.0.0-draft.1": "fresh", "registry-v1.0.0": "fresh",
+                    "terraform-file-v1.0.0": "fresh", "v1.2": "fresh",
                     "v01.0.0": "fresh",
                     "v0.3.0.1": "fresh", "v0.3.0 ": "fresh", "v\u0660.\u0663.\u0660": "fresh",
                     "demo/deal-evidence-readiness/v0.2.0": "fresh"}
@@ -371,9 +372,10 @@ class ReleaseWorkflowTests(unittest.TestCase):
                 with self.subTest(route=value):
                     self.assertIn("--prerelease", drafted(value))
 
-    def test_a_plain_registry_tag_is_drafted_as_a_full_release_that_is_not_latest(self):
-        # A plain registry-vMAJOR.MINOR.PATCH tag takes the fresh route, and is drafted as a full
-        # release with --latest=false; any other registry-v or policy-v tag stays a pre-release.
+    def test_a_plain_registry_or_terraform_file_tag_is_drafted_as_a_full_release_that_is_not_latest(self):
+        # A plain registry-vMAJOR.MINOR.PATCH or terraform-file-vMAJOR.MINOR.PATCH tag takes the
+        # fresh route, and is drafted as a full release with --latest=false; any other registry-v,
+        # terraform-file-v or policy-v tag stays a pre-release.
         draft = script_of(step_named(self.jobs["release"], DRAFT_STEP))
         with tempfile.TemporaryDirectory() as directory:
             stub = Path(directory) / "bin"
@@ -389,14 +391,17 @@ class ReleaseWorkflowTests(unittest.TestCase):
                                  "GITHUB_REF_NAME": tag}, directory)
                 return arguments.read_text().splitlines()
 
-            for tag in ("registry-v1.0.0", "registry-v1.10.2", "registry-v0.1.0"):
+            for tag in ("registry-v1.0.0", "registry-v1.10.2", "registry-v0.1.0", "terraform-file-v1.0.0",
+                        "terraform-file-v1.0.1", "terraform-file-v2.10.0"):
                 with self.subTest(tag=tag):
                     called = drafted(tag)
                     self.assertIn("--draft", called)
                     self.assertIn("--latest=false", called)
                     self.assertNotIn("--prerelease", called)
             for tag in ("registry-v1.0.0-rc.1", "registry-v01.0.0", "registry-v1.0", "registry-v1.0.0x",
-                        "policy-v1.0.0", "policy-v1.0.0-draft.1", "xregistry-v1.0.0"):
+                        "policy-v1.0.0", "policy-v1.0.0-draft.1", "xregistry-v1.0.0",
+                        "terraform-file-v1.0.0-rc.1", "terraform-file-v01.0.0", "terraform-file-v1.0",
+                        "xterraform-file-v1.0.0", "terraform-v1.0.0", "registry-terraform-file-v1.0.0"):
                 with self.subTest(tag=tag):
                     called = drafted(tag)
                     self.assertIn("--prerelease", called)

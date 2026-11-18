@@ -292,6 +292,49 @@ and its complete rows, which that release's record identifies ([the companion](s
 §15). The first stable release needs the second reader §15 requires, and its own reviewed change to
 the builder.
 
+## Independently versioned terraform-file companion
+
+The [terraform-file companion](spec/terraform-file.md) uses the scoped tag
+`terraform-file-v<releaseVersion>`, where `releaseVersion` is strict three-component SemVer with no
+prerelease or build suffix. It is the registry's route: a terraform-file release has maturity
+`released`, which is not stable. Only the tag and a maintainer-published GitHub release together
+establish one. The first is `terraform-file-v1.0.0`; preparing it publishes nothing.
+
+The reading's table of accepted `format_version` values has a release number of its own, a semantic
+version in which each newly accepted row is a patch release ([the companion](spec/terraform-file.md)
+§4). A tag's number is the table release it carries: the first tag carries table release `1.0.0`,
+and a later tag that adds a row carries the next patch, so `terraform-file-v1.0.1` carries table
+release `1.0.1`. The builder refuses a tag whose number is not the release the table gives.
+
+A terraform-file release names, in its own JSON release record `releases/<tag>.json` beside its
+notes, the exact reading `1.0.0` and the SHA-256 of the companion text and of the vectors' README;
+the format table with its digest, its release and its rows; the code list with its digest and its
+codes; and the vectors' manifest with its digest, the id of every vector and the digest of every
+file under `conformance/terraform-file/1.0.0/`, every declaration and vector among them. The builder
+derives that record from the tagged tree and refuses the tag unless the committed record equals it,
+its maturity is `released`, the text's status sentence, the code list, the format table and the
+vectors' manifest all say `released`, and neither the text nor the vectors' README still calls the
+reading proposed. They say so until the commit the tag names, which changes all of them.
+
+The release's bundle, `judgment-pack-terraform-file-<releaseVersion>`, carries the text, its code
+list, format table and vectors with their README, the checks that hold the vectors to the text, the
+design records and the companion texts the text links, this document, the license and the record
+and notes. A Core bundle carries the text and not the vectors' directory, as it carries none of the
+registry's or Policy's. The companion has no schema, so a release serves nothing new on the site:
+the text's page is published as it is now, and no code list, table, declaration or vector is served
+as a file, before a release or after it.
+
+A reading never shrinks from one release to the next: the builder refuses a release whose record
+and an earlier record of the same reading, in the worktree or at an earlier terraform-file tag,
+carry the same table release, or where the record of the higher table release lacks a code, an
+accepted `format_version` of a `document` or a vector that the lower one names. A later release may
+change the bytes of the text, the lists and the vectors, as a later registry release may change its
+rows' bytes. A conformance claim names the exact terraform-file release, the table release it
+implements and its complete vectors, which that release's record identifies ([the
+companion](spec/terraform-file.md) §12). The first stable release needs a second, independently
+written reader that agrees with the first on every vector (§12), and its own reviewed change to the
+builder.
+
 ## Proposed workflow attribution model for Spec 0.5.0
 
 [RFC 0028](rfcs/0028-complete-workflow-contributors.md) stages complete contributor attribution;

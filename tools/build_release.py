@@ -261,8 +261,6 @@ REGISTRY_BUNDLE_PATHS = (
     "rfcs/0036-registry-emitter-contract.md", "rfcs/0037-generated-facts-contracts.md",
     "rfcs/0038-terraform-file-source.md",
 )
-# Independently versioned companions whose schema and row directories no Core bundle carries.
-INDEPENDENT_DIRECTORIES = ("policy", "registry")
 
 
 def is_registry_tag(tag: str) -> bool:
@@ -402,6 +400,191 @@ def validate_registry_history(tag: str) -> None:
             raise ValueError("registry exact format conflicts with immutable tagged release history")
 
 
+# The terraform-file companion's route is the registry's (VERSIONING.md, "Independently versioned
+# terraform-file companion"): a plain three-component tag, a release at maturity `released`, which
+# is not stable, and a record that names the code list, the format table and the vectors with their
+# digests. The companion has no schema, so nothing of it is served at an `$id`. A tag's number is
+# the release of the format table it carries (spec/terraform-file.md section 4), and the builder
+# holds the two to one number. Every file under the reading's directory is pinned, derived from the
+# tree rather than listed here.
+TERRAFORM_FILE_READING = "1.0.0"
+TERRAFORM_FILE_MATURITY = "released"
+TERRAFORM_FILE_ROOT = f"conformance/terraform-file/{TERRAFORM_FILE_READING}"
+TERRAFORM_FILE_TEXT = "spec/terraform-file.md"
+TERRAFORM_FILE_README = "conformance/terraform-file/README.md"
+TERRAFORM_FILE_TAG_PATTERN = re.compile(
+    r"terraform-file-v((?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))"
+)
+# The text says its status in this one sentence; the code list, the format table and the vectors'
+# manifest say it in their `status` member. All four say `proposed` until the commit a
+# terraform-file tag names.
+TERRAFORM_FILE_STATUS_SENTENCE = re.compile(
+    rf"^This text is the terraform-file reading `{re.escape(TERRAFORM_FILE_READING)}`, "
+    r"status `([a-z]+)`\.",
+    re.MULTILINE,
+)
+# The text's and the README's statements of the reading's status, read with whitespace collapsed:
+# "status `proposed`" and "Version `1.0.0` is proposed".
+TERRAFORM_FILE_PROPOSED_STATEMENT = re.compile(
+    rf"`{re.escape(TERRAFORM_FILE_READING)}`(?:, status `proposed`| is proposed)", re.IGNORECASE
+)
+TERRAFORM_FILE_RECORD_KEYS = {"companion", "releaseVersion", "tag", "maturity", "reading",
+                              "formatTable", "codes", "corpus", "formatDigests"}
+# The text, what it and the vectors' README link to, the checks that hold the vectors to the text,
+# and the license. The checks that read each declaration with the dialect's first reader need the
+# dialect's staged vectors, which no bundle carries, and stay in the repository
+# (tests/test_terraform_file_declarations.py).
+TERRAFORM_FILE_BUNDLE_PATHS = (
+    "LICENSE", "NOTICE", "VERSIONING.md",
+    TERRAFORM_FILE_TEXT, "spec/dialect.md", "spec/registry.md", TERRAFORM_FILE_README,
+    TERRAFORM_FILE_ROOT, "tests/test_terraform_file_vectors.py",
+    "rfcs/0018-dialect.md", "rfcs/0038-terraform-file-source.md",
+)
+# Independently versioned companions whose schema and row directories no Core bundle carries.
+INDEPENDENT_DIRECTORIES = ("policy", "registry", "terraform-file")
+
+
+def is_terraform_file_tag(tag: str) -> bool:
+    return TERRAFORM_FILE_TAG_PATTERN.fullmatch(tag) is not None
+
+
+def terraform_file_record(version: str, tag: str, root: Path = ROOT) -> dict:
+    """The release record the tree gives a terraform-file tag; its record must equal it."""
+    codes_path = f"{TERRAFORM_FILE_ROOT}/codes.json"
+    table_path = f"{TERRAFORM_FILE_ROOT}/formats.json"
+    vectors_path = f"{TERRAFORM_FILE_ROOT}/manifest.json"
+    codes = json.loads((root / codes_path).read_text("utf-8"))
+    formats = json.loads((root / table_path).read_text("utf-8"))
+    vectors = json.loads((root / vectors_path).read_text("utf-8"))
+    listed = codes.get("codes") if isinstance(codes, dict) else None
+    if (not isinstance(listed, list) or not listed
+            or not all(isinstance(code, dict) and isinstance(code.get("code"), str) for code in listed)
+            or len({code["code"] for code in listed}) != len(listed)):
+        raise ValueError("terraform-file code list has no codes, or names one twice")
+    rows = formats.get("table") if isinstance(formats, dict) else None
+    if (not isinstance(rows, list) or not rows
+            or not all(isinstance(row, dict) and isinstance(row.get("document"), str)
+                       and isinstance(row.get("accepted"), list) and row["accepted"]
+                       and all(isinstance(accepted, str) for accepted in row["accepted"])
+                       and len(set(row["accepted"])) == len(row["accepted"]) for row in rows)
+            or len({row["document"] for row in rows}) != len(rows)
+            or not isinstance(formats.get("release"), str)
+            or PLAIN_VERSION.fullmatch(formats["release"]) is None):
+        raise ValueError("terraform-file format table has no rows or no release, or names a "
+                         "document or a format_version twice")
+    listed_vectors = vectors.get("vectors") if isinstance(vectors, dict) else None
+    if (not isinstance(listed_vectors, list) or not listed_vectors
+            or not all(isinstance(row, dict) and isinstance(row.get("id"), str) for row in listed_vectors)
+            or len({row["id"] for row in listed_vectors}) != len(listed_vectors)):
+        raise ValueError("terraform-file vectors' manifest has no vectors, or two share an id")
+    return {"companion": "terraform-file", "releaseVersion": version, "tag": tag,
+            "maturity": TERRAFORM_FILE_MATURITY, "reading": TERRAFORM_FILE_READING,
+            "formatTable": {"path": table_path, "sha256": "sha256:" + sha256(root / table_path),
+                            "release": formats["release"],
+                            "table": {row["document"]: sorted(row["accepted"]) for row in rows}},
+            "codes": {"path": codes_path, "sha256": "sha256:" + sha256(root / codes_path),
+                      "codes": [code["code"] for code in listed]},
+            "corpus": {"path": vectors_path, "sha256": "sha256:" + sha256(root / vectors_path),
+                       "vectors": sorted(row["id"] for row in listed_vectors),
+                       "files": tree_digests(TERRAFORM_FILE_ROOT, root)},
+            "formatDigests": {path: "sha256:" + sha256(root / path)
+                              for path in (TERRAFORM_FILE_TEXT, TERRAFORM_FILE_README)}}
+
+
+def validate_terraform_file_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
+    """Gate the independently versioned terraform-file companion on its own release record."""
+    record_path = root / "releases" / f"{tag}.json"
+    if not record_path.is_file():
+        raise ValueError("terraform-file release record is missing for the exact tag")
+    release = json.loads(record_path.read_text("utf-8"))
+    if not isinstance(release, dict) or set(release) != TERRAFORM_FILE_RECORD_KEYS:
+        raise ValueError("terraform-file release record has an invalid closed shape")
+    expected = terraform_file_record(version, tag, root)
+    for keys, message in (
+            (("companion", "releaseVersion", "tag", "maturity", "reading"),
+             "terraform-file release identity, maturity or reading does not match"),
+            (("formatDigests",), "terraform-file text or README bytes differ from the release record"),
+            (("formatTable",), "terraform-file format table identity or rows do not match"),
+            (("corpus",), "terraform-file corpus identity or vectors do not match"),
+            (("codes",), "terraform-file code list identity or codes do not match")):
+        if any(release[key] != expected[key] for key in keys):
+            raise ValueError(message)
+    # The tag's number is the release of the table it carries (spec/terraform-file.md section 4).
+    if release["formatTable"]["release"] != version:
+        raise ValueError(f"a terraform-file tag's number must be the release of the format table it "
+                         f"carries: {tag} carries table release {release['formatTable']['release']}")
+    for previous_path in (root / "releases").glob("terraform-file-v*.json"):
+        if previous_path == record_path or previous_path.name.endswith(".milestone.json"):
+            continue
+        if not terraform_file_records_agree(json.loads(previous_path.read_text("utf-8")), release):
+            raise ValueError("terraform-file reading conflicts with an earlier release record")
+    documents = [json.loads((root / release[key]["path"]).read_text("utf-8"))
+                 for key in ("codes", "formatTable", "corpus")]
+    text = (root / TERRAFORM_FILE_TEXT).read_text("utf-8")
+    if TERRAFORM_FILE_STATUS_SENTENCE.findall(text) != [TERRAFORM_FILE_MATURITY] or any(
+            not isinstance(document, dict)
+            or (document.get("companion"), document.get("reading"), document.get("status"))
+            != ("terraform-file", TERRAFORM_FILE_READING, TERRAFORM_FILE_MATURITY)
+            for document in documents):
+        raise ValueError("a terraform-file release requires the text, the code list, the format "
+                         f"table and the vectors' manifest to say status {TERRAFORM_FILE_MATURITY}")
+    readme = (root / TERRAFORM_FILE_README).read_text("utf-8")
+    label = documents[2].get("label", "")
+    if (any(TERRAFORM_FILE_PROPOSED_STATEMENT.search(" ".join(document.split()))
+            for document in (text, readme))
+            or any(REGISTRY_UNRELEASED_WORDING.search(heading)
+                   for heading in re.findall(r"^# .*$", readme, re.MULTILINE))
+            or not isinstance(label, str) or REGISTRY_UNRELEASED_WORDING.search(label)):
+        raise ValueError("a terraform-file release requires the text and the vectors' README not to "
+                         "call the reading proposed, nor the README's heading or the manifest's label")
+    if not (root / "releases" / f"{tag}.md").is_file():
+        raise ValueError("terraform-file release notes are missing for the exact tag")
+
+
+def terraform_file_records_agree(previous: object, release: dict) -> bool:
+    """Two records of one reading never shrink from the lower table release to the higher: every
+    code, every accepted format_version of each document and every vector the lower names, the
+    higher names too, and two records never carry one table release. The bytes of the text, the
+    lists and the vectors may change, as the registry's rows may; a claim names the exact release,
+    whose record pins them. A record that is not of this form conflicts."""
+    if not isinstance(previous, dict) or not isinstance(previous.get("reading"), str):
+        return False
+    if previous["reading"] != release["reading"]:
+        return True
+
+    def contents(record: dict) -> tuple[tuple[int, ...], set[str], set[tuple[str, str]], set[str]] | None:
+        table, codes, corpus = record.get("formatTable"), record.get("codes"), record.get("corpus")
+        if not (isinstance(table, dict) and isinstance(codes, dict) and isinstance(corpus, dict)
+                and isinstance(table.get("release"), str) and isinstance(table.get("table"), dict)
+                and isinstance(codes.get("codes"), list) and isinstance(corpus.get("vectors"), list)):
+            return None
+        number = PLAIN_VERSION.fullmatch(table["release"])
+        rows = table["table"].items()
+        if (number is None or not all(isinstance(accepted, list) for _, accepted in rows)
+                or not all(isinstance(item, str) for item in (*codes["codes"], *corpus["vectors"],
+                                                              *(a for _, accepted in rows for a in accepted)))):
+            return None
+        return (tuple(int(part) for part in number.groups()), set(codes["codes"]),
+                {(document, accepted) for document, row in rows for accepted in row}, set(corpus["vectors"]))
+
+    earlier, current = contents(previous), contents(release)
+    if earlier is None or current is None or earlier[0] == current[0]:
+        return False
+    lower, higher = sorted((earlier, current))
+    return all(kept <= grown for kept, grown in zip(lower[1:], higher[1:]))
+
+
+def validate_terraform_file_history(tag: str) -> None:
+    """Compare immutable tagged records, so editing old working files cannot shrink the reading."""
+    release = json.loads((ROOT / "releases" / f"{tag}.json").read_text("utf-8"))
+    for previous in git("tag", "--list", "terraform-file-v*").splitlines():
+        if previous == tag or not is_terraform_file_tag(previous):
+            continue
+        old = json.loads(git("show", f"refs/tags/{previous}:releases/{previous}.json"))
+        if not terraform_file_records_agree(old, release):
+            raise ValueError("terraform-file reading conflicts with immutable tagged release history")
+
+
 def validate_policy_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     """Gate only the independently versioned, draft Policy companion surface."""
     manifest_path = root / "releases" / f"{tag}.json"
@@ -482,9 +665,11 @@ def bundle_paths(tag: str, commit: str) -> tuple[str, ...]:
         return (*POLICY_BUNDLE_PATHS, f"releases/{tag}.md", f"releases/{tag}.json")
     if is_registry_tag(tag):
         return (*REGISTRY_BUNDLE_PATHS, f"releases/{tag}.md", f"releases/{tag}.json")
-    # Policy and the registry have their own release identities. Do not carry their separately
-    # versioned schemas/corpora in a Core archive or alter the frozen Core manifests; the companion
-    # texts under spec/ stay in it.
+    if is_terraform_file_tag(tag):
+        return (*TERRAFORM_FILE_BUNDLE_PATHS, f"releases/{tag}.md", f"releases/{tag}.json")
+    # Policy, the registry and the terraform-file reading have their own release identities. Do not
+    # carry their separately versioned schemas/corpora in a Core archive or alter the frozen Core
+    # manifests; the companion texts under spec/ stay in it.
     paths = []
     for path in BUNDLE_PATHS:
         if path in ("schema", "conformance"):
@@ -524,12 +709,13 @@ def git(*arguments: str) -> str:
 
 
 def release_version(tag: str) -> str:
-    scoped = POLICY_TAG_PATTERN.fullmatch(tag) or REGISTRY_TAG_PATTERN.fullmatch(tag)
+    scoped = (POLICY_TAG_PATTERN.fullmatch(tag) or REGISTRY_TAG_PATTERN.fullmatch(tag)
+              or TERRAFORM_FILE_TAG_PATTERN.fullmatch(tag))
     if scoped:
         return scoped.group(1)
     if not tag.startswith("v") or not VERSION_PATTERN.fullmatch(tag[1:]):
-        raise ValueError("release tag must be exact v-SemVer, policy-vSemVer-draft.N or "
-                         "registry-vMAJOR.MINOR.PATCH")
+        raise ValueError("release tag must be exact v-SemVer, policy-vSemVer-draft.N, "
+                         "registry-vMAJOR.MINOR.PATCH or terraform-file-vMAJOR.MINOR.PATCH")
     return tag[1:]
 
 
@@ -727,6 +913,8 @@ def validate(tag: str, commit: str) -> str:
         validate_policy_artifacts(version, tag)
     elif is_registry_tag(tag):
         validate_registry_artifacts(version, tag)
+    elif is_terraform_file_tag(tag):
+        validate_terraform_file_artifacts(version, tag)
     else:
         validate_artifacts(version, tag)
 
@@ -746,6 +934,8 @@ def validate(tag: str, commit: str) -> str:
         validate_policy_history(tag)
     if is_registry_tag(tag):
         validate_registry_history(tag)
+    if is_terraform_file_tag(tag):
+        validate_terraform_file_history(tag)
     if git("status", "--porcelain", "--untracked-files=no"):
         raise ValueError("tracked release worktree is dirty")
     return version
@@ -763,7 +953,9 @@ def build(tag: str, commit: str, output: Path) -> list[Path]:
     version = validate(tag, commit)
     output.mkdir(parents=True, exist_ok=True)
     artifact = ("judgment-pack-policy" if is_policy_tag(tag)
-                else "judgment-pack-registry" if is_registry_tag(tag) else "judgment-pack-spec")
+                else "judgment-pack-registry" if is_registry_tag(tag)
+                else "judgment-pack-terraform-file" if is_terraform_file_tag(tag)
+                else "judgment-pack-spec")
     prefix = f"{artifact}-{version}/"
     extra = ()
     identity = release_identity(tag)

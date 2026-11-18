@@ -26,11 +26,12 @@ release; the draft of every other tag is marked pre-release. A `vMAJOR.MINOR.PAT
 main's conformance evidence at the tagged commit instead of running the repository suite again
 (Release evidence, below).
 
-For every next Core, Policy or registry tag, commit `releases/<tag>.milestone.json` before
-tagging, with exactly the repository milestone's positive integer number and exact title. The Core
-v0.3.0 link is `{"number": 2, "title": "v0.3.0"}`. An independently versioned companion may share
-that train: for example, a future `releases/policy-v1.0.0-draft.2.milestone.json` can contain the
-same link. This is an example, not metadata retroactively added to a released companion tag.
+For every next Core, Policy, registry or terraform-file tag, commit
+`releases/<tag>.milestone.json` before tagging, with exactly the repository milestone's positive
+integer number and exact title. The Core v0.3.0 link is `{"number": 2, "title": "v0.3.0"}`. An
+independently versioned companion may share that train: for example, a future
+`releases/policy-v1.0.0-draft.2.milestone.json` can contain the same link. This is an example, not
+metadata retroactively added to a released companion tag.
 
 Both release preparation and deployment query the repository milestone through GitHub and refuse
 missing, malformed or mismatched links or API failures before dependencies, builds or cloud
@@ -39,12 +40,14 @@ open after one release publishes. Closing a milestone alone never releases or de
 publication never closes a milestone automatically.
 
 Only a `release: published` event for an exact supported Core `v-SemVer`, Policy
-`policy-vSemVer-draft.N` or registry `registry-vMAJOR.MINOR.PATCH` tag deploys automatically,
-including a published prerelease. Demo releases are excluded. The workflow checks out the exact
-tag, verifies its commit and clean tracked tree, then builds the production artifact and runs
-focused site and indexing checks before cloud authentication. The production environment still
-requires its configured approval; deployments share one concurrency group. Firebase tooling
-remains pinned to `15.34.1`.
+`policy-vSemVer-draft.N`, registry `registry-vMAJOR.MINOR.PATCH` or terraform-file
+`terraform-file-vMAJOR.MINOR.PATCH` tag deploys automatically, including a published prerelease.
+The terraform-file companion has no schema, so a terraform-file tag's deployment publishes the
+text's page as the tagged commit has it and serves no code list, table or vector. Demo releases are
+excluded. The workflow checks out the exact tag, verifies its commit and clean tracked tree, then
+builds the production artifact and runs focused site and indexing checks before cloud
+authentication. The production environment still requires its configured approval; deployments
+share one concurrency group. Firebase tooling remains pinned to `15.34.1`.
 
 These workflows become available through the normal next release that includes them. Older tags
 lack the new milestone metadata and must not be retagged or have released bytes edited to make

@@ -4,19 +4,18 @@ The vectors under conformance/terraform-file/1.0.0/ are hand-written and synthet
 codes.json to the companion's §9 table and formats.json to its §4 table; the manifest to its files;
 and every vector to one expected result of the form §§5 to 9 give it: the acquisition record of its
 own input, a value in id order that carries no number and no sensitive text, a refusal of a listed
-code with the input's sha256 and size, or batch lines in canonical form. Each declaration is read
-by the first reader, tools/dialect_verify.py, which holds a `terraform-file` source to its form and
-reads no file (spec/dialect.md §4.5): directly, as §2's members, and as a source of a dialect
-document. No reader of the file exists in this repository, so what a vector expects of the reading
-itself is checked for form only; a second, independent reader is the companion's stable bar (§12).
+code with the input's sha256 and size, or batch lines in canonical form. They read only the text
+and the files under that directory, so the companion's bundle carries them and runs them. The first
+reader's reading of each declaration is held in tests/test_terraform_file_declarations.py, which
+needs the dialect's staged vectors and stays in the repository. No reader of the file exists in
+this repository, so what a vector expects of the reading itself is checked for form only; a second,
+independent reader is the companion's stable bar (§12).
 """
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import re
-import sys
 import unittest
 from pathlib import Path
 from typing import Any
@@ -91,19 +90,6 @@ def object_id(resource: dict[str, Any]) -> str:
 
 def code_points(text: str) -> list[int]:
     return [ord(c) for c in text]
-
-
-def first_reader_tests() -> Any:
-    """tests/test_dialect.py, which holds the version-3 dialect vector a source is added to, and the first
-    reader, loaded once as tests/test_dialect_ts.py loads them."""
-    module = sys.modules.get("test_dialect") or sys.modules.get("tests.test_dialect")
-    if module is None:
-        spec = importlib.util.spec_from_file_location("test_dialect", Path(__file__).with_name("test_dialect.py"))
-        assert spec is not None and spec.loader is not None
-        module = importlib.util.module_from_spec(spec)
-        sys.modules["test_dialect"] = module
-        spec.loader.exec_module(module)
-    return module
 
 
 MANIFEST = load(BASE / "manifest.json")
@@ -308,6 +294,14 @@ class TerraformFileManifestTests(unittest.TestCase):
             with self.subTest(declaration=name):
                 self.assertIs(True, verdicts[f"declarations/{name}.json"])
 
+    def test_every_declaration_has_one_verdict(self) -> None:
+        # Every vector of a declaration expects it malformed, or none does, and every declaration
+        # file is named by a vector.
+        verdicts = declaration_verdicts()
+        self.assertEqual([], sorted(name for name, verdict in verdicts.items() if verdict is None))
+        on_disk = {p.relative_to(BASE).as_posix() for p in (BASE / "declarations").glob("*.json")}
+        self.assertEqual(on_disk, set(verdicts))
+
 
 class TerraformFileResultTests(unittest.TestCase):
     def test_an_accepted_result_is_the_record_of_its_input_and_a_value_of_section_6s_form(self) -> None:
@@ -401,62 +395,6 @@ class TerraformFileResultTests(unittest.TestCase):
         for row in ROWS:
             with self.subTest(id=row["id"]):
                 self.assertNotIn(SENSITIVE.encode(), (BASE / row["expected"]).read_bytes().lower())
-
-
-class TerraformFileDeclarationTests(unittest.TestCase):
-    """§2: a declaration is a source's members, held to their forms with no file read. The first reader holds a
-    `terraform-file` source to those forms (spec/dialect.md §4.5) and then refuses it `kind-unread`."""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.tests = first_reader_tests()
-        cls.reader = cls.tests.READER
-        cls.verdicts = declaration_verdicts()
-
-    def test_every_declaration_has_one_verdict(self) -> None:
-        self.assertEqual([], sorted(name for name, verdict in self.verdicts.items() if verdict is None))
-        on_disk = {p.relative_to(BASE).as_posix() for p in (BASE / "declarations").glob("*.json")}
-        self.assertEqual(on_disk, set(self.verdicts))
-
-    def test_the_first_reader_holds_each_declaration_to_its_form(self) -> None:
-        required, optional = self.reader.TERRAFORM_MEMBERS
-        for name, malformed in sorted(self.verdicts.items()):
-            with self.subTest(declaration=name):
-                data = (BASE / name).read_bytes()
-                try:
-                    value = self.reader.read_document(data, "declaration")
-                    self.reader.check_terraform_file(self.reader.closed(value, required, optional, "declaration"),
-                                                     "declaration")
-                    verdict = False
-                except self.reader.Refused as refused:
-                    self.assertEqual("input-malformed", refused.name)
-                    verdict = True
-                self.assertEqual(malformed, verdict)
-
-    def test_each_declaration_is_read_as_a_source_of_a_dialect_document(self) -> None:
-        # Added to the version-3-bound vector's dialect as test_dialect.py's terraform_file_cases() adds one,
-        # its bytes spliced in as written, so that a literal such as 1e2 stays as written. A malformed source
-        # is input-malformed, a well-formed one kind-unread. A declaration that is not an object cannot be a
-        # source's members; it is held directly above. On this path the dialect document's own number domain
-        # (spec/dialect.md §1) refuses 1.0 and 1e2 before any source is read.
-        placeholder = "\u0000terraform-file source"
-        for name, malformed in sorted(self.verdicts.items()):
-            text = (BASE / name).read_text(encoding="utf-8").strip()
-            if not text.startswith("{"):
-                continue
-            with self.subTest(declaration=name):
-                inputs = self.tests.Inputs("version-3-bound", self.tests.REQUIRES_BINDING["version-3-bound"])
-                document = json.loads(inputs.dialect)
-                document["sources"].append(placeholder)
-                inner = text[1:].lstrip()
-                source = ('{"name": "terraform", "kind": "terraform-file", "read": {"copy": {"facts": [], '
-                          '"evidence": []}}' + ("" if inner.startswith("}") else ", ") + inner)
-                written = json.dumps(document)
-                self.assertEqual(1, written.count(json.dumps(placeholder)))
-                inputs.dialect = written.replace(json.dumps(placeholder), source).encode("utf-8")
-                result = self.reader.report(inputs.verify().answer)
-                expected = "refusal:input-malformed" if malformed else "refusal:kind-unread"
-                self.assertEqual(expected, f"{result['result']}:{result[result['result']]}", result)
 
 
 if __name__ == "__main__":
