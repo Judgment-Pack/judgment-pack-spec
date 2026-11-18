@@ -36,6 +36,11 @@ map names, at the lock's `sources` item. When twelve more rows were added, its f
 another registry's at the index's `/registry/digest`, and the reader took that too. Where the text
 leaves a choice open, the code says which it took, marked `READING`.
 
+Running it also found where the text was silent: §2.1's report had no member for the key identifier
+§11 says it names, and §11 did not say when, or for which documents, the cap of the lock's `sources`
+count plus one applies. The text now says both (its Status lists the changes), the rows carry
+`keyId` and three rows more, and the reader gives all 157 rows their result.
+
 ## What it is not
 
 It is a test reader. It holds each document's size bound before parsing and its depth bound while

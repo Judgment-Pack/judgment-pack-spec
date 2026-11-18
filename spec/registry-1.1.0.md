@@ -24,6 +24,14 @@ Not yet published: the closed schemas of the new documents, their code list and 
 reader exists. The text is published first so that it can be frozen and reviewed before anything is
 built.
 
+Changes after acceptance:
+
+- §2.1: the location member `keyId`, which names a signature document's key on its diagnostics.
+- §11 (Verifying): the signature documents beyond the lock's `sources` count plus one are found
+  once step 3 accepts the lock, before any source signature document is read.
+- §§11 (Verifying), 12.2: the documents beyond that count are the last given, the lock signature
+  document counted first, and a lock signature document after the first is never read.
+
 ## 1. Conventions
 
 The key words MUST, MUST NOT, SHOULD and MAY are to be read as described in BCP 14 when, and only
@@ -67,10 +75,15 @@ still writes `"1.0.0"`. The report at `"1.1.0"` adds:
 - the location member `source`, the `name` of the source whose document a diagnostic is about. On
   `FED-VALUE-BOUND` it is the source whose bound the value fails. It is absent on a diagnostic of
   the manifest, of a lock, of a signature document or of the assembly as a whole;
+- the location member `keyId`, the key identifier (§11) of a signature document's `publicKey`. It is
+  present on a diagnostic of a signature document exactly when that document was read, is not
+  `LOCK-SIG-DOCUMENT`, and has a `publicKey` of its form, whether the trust rule admits the key or
+  not. It is absent on every other diagnostic;
 - the codes of §12.
 
 In registry §7.4's order, `source` sorts directly after `document`, an absent `source` as `""`.
 It is part of equality: one code at one pointer in two sources is two diagnostics, each reported.
+`keyId` sorts directly after `source`, an absent `keyId` as `""`, and is part of equality as well.
 The bound, the rule against values and the agreement rule of registry §7.4 hold unchanged. A
 diagnostic of §12 names pointers, sources, paths and key identifiers, never a document's content.
 
@@ -741,8 +754,10 @@ signature does not verify under that key over §10.3's message (`LOCK-SIG-INVALI
 **Verifying.** The verifier is given the lock's bytes, the lock signature document, for an assembled
 lock its index and the source signature documents, the expected signer set, the expected inputs of
 §9, and its serial record or a floor (Rollback). At most the lock's `sources` count plus one
-signature documents are given: before any is read, every one beyond that count is
-`LOCK-SIG-EXTRA`. A signature binds only a digest: without the
+signature documents are given, counted in the order given, the lock signature document first.
+Step 2 reads only the first lock signature document, and once step 3 accepts the lock, before any
+source signature document is read, every document beyond that count is `LOCK-SIG-EXTRA` and is
+never read. A signature binds only a digest: without the
 expected registry id, another registry's lock signed by the same key would verify. In order:
 
 1. **The expected inputs.** An expected key missing or refused by the trust rule is
@@ -896,7 +911,7 @@ meanings, and are reported as registry §7 says wherever this text applies it.
 | `LOCK-SERIAL-STATE` | the verifier's record exists and cannot be read or is not of its form, or cannot be written | §11 |
 | `LOCK-SIG-EXPECTED-KEY` | an expected key is missing, or one a verifier may not trust | §11 |
 | `LOCK-SIG-MISSING` | the lock signature, or an item's source signature, is not given | §11 |
-| `LOCK-SIG-EXTRA` | a second lock signature is given, a source signature that no item expects or that is given twice, or more source signatures than the lock's `sources` count plus one | §11 |
+| `LOCK-SIG-EXTRA` | a second lock signature is given, a source signature that no item expects or that is given twice, or more signature documents than the lock's `sources` count plus one | §11 |
 | `LOCK-SIG-DOCUMENT` | a signature document is over its bound, not one JSON object, repeats a member or holds a backslash | §11 |
 | `LOCK-SIG-VERSION` | `lockSignatureVersion` or `sourceSignatureVersion` is not `"1.1.0"` | §11 |
 | `LOCK-SIG-MEMBER` | a member is unknown or missing | §11 |

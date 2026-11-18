@@ -2,6 +2,6 @@
   "reportFormatVersion": "1.1.0",
   "valid": false,
   "diagnostics": [
-    {"code": "LOCK-SIG-UNEXPECTED-KEY", "severity": "error", "location": {"document": "signature", "pointer": "/publicKey"}}
+    {"code": "LOCK-SIG-UNEXPECTED-KEY", "severity": "error", "location": {"document": "signature", "keyId": "39f713d0a644253f04529421b9f51b9b", "pointer": "/publicKey"}}
   ]
 }

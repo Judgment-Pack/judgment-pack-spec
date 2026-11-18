@@ -14,13 +14,16 @@ standard owner's key and a single registry's signer, TEST 2 the repository's, an
 expected set names. No other private key or seed exists here, so any reader can make every
 signature again.
 
-They are not recordings. Every expectation was written by hand from the text, before any reader of
-format `1.1.0` existed. [`tools/registry_1_1_0_reader.py`](../../../tools/registry_1_1_0_reader.py),
-a second reader written from the text afterwards, gives every row its expected result
-([`tests/test_registry_1_1_0_reader.py`](../../../tests/test_registry_1_1_0_reader.py)). [`tools/registry_1_1_0_rows.py`](../../../tools/registry_1_1_0_rows.py)
-holds the rows as data and writes this directory, `README.md` and `codes.json` aside. It only lays
-the data out and computes what is mechanical: digests, resolved digests, source statements and
-signatures. An edit to the rows is an edit to that file, run again.
+They are not recordings. Every expectation was written by hand from the text. Those of the first 154
+rows were written before any reader of format `1.1.0` existed; the key identifiers and three rows
+came later, with the text that says them (below).
+[`tools/registry_1_1_0_reader.py`](../../../tools/registry_1_1_0_reader.py), a second reader written
+from the text, gives every row its expected result
+([`tests/test_registry_1_1_0_reader.py`](../../../tests/test_registry_1_1_0_reader.py)).
+[`tools/registry_1_1_0_rows.py`](../../../tools/registry_1_1_0_rows.py) holds the rows as data and
+writes this directory, `README.md` and `codes.json` aside. It only lays the data out and computes
+what is mechanical: digests, key identifiers, resolved digests, source statements and signatures. An
+edit to the rows is an edit to that file, run again.
 
 ## The files
 
@@ -92,13 +95,17 @@ These hold wherever the rows meet them:
 - An index check whose second assembly finds an error reports that error's diagnostics and no
   `FED-INDEX-MISMATCH`.
 
-## What the rows cannot say
+## Added with the text
 
-- §11's report "gives every result: each signature, accepted or refused, with its key identifier".
-  The report of §2.1 has no member for a key identifier, so the rows hold each signature's refusal
-  by code and location alone, and no row tells two signature documents apart by location.
-- How many signature documents are "beyond" the lock's `sources` count before the lock is parsed:
-  the rows that give too many are built so that every reading of that sentence gives one report.
+The text once left two points open that the rows could not settle, and says them now (its Status
+lists the changes). The rows that came with them:
+
+- `verify-source-signatures-told-apart`: two `LOCK-SIG-EXTRA` at one pointer, told apart by the
+  location member `keyId` (§2.1).
+- `verify-signature-cap-after-lock`: no document is beyond the count until step 3 accepts the lock
+  (§11).
+- `verify-signature-cap-last-given`, with `verify-signature-cap-unread`: the documents are counted
+  in the order given, the lock signature first, so those beyond the count are the last given (§11).
 
 ## Checks
 
@@ -108,5 +115,6 @@ says; `codes.json` equals the §12 table, and every code is used by a row and ev
 listed (or is one of format `1.0.0`); every class has rows; every digest, content digest, resolved
 digest and source statement follows from its inputs; every written document is its JCS bytes; every
 signature that should verify does, under the key the row's signer set names; every report is in
-order, distinct, and `valid` exactly when it holds no error; and every `expectedRecord` follows
+order, distinct, and `valid` exactly when it holds no error, and its every `keyId` is on a
+signature document's diagnostic and names a key the row gives; and every `expectedRecord` follows
 from a model of §11's Rollback. It does not assemble, check or verify: that is a reader's work.

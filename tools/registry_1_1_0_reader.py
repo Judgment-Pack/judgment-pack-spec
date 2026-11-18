@@ -2362,12 +2362,10 @@ class SignatureDocument:
         return None
 
 
-# READING (until the text names it): a signature document's diagnostic carries no key identifier.
-SIGNATURE_KEY_IDS = False
-
-
 def sig_diag(code: str, at: str, document: SignatureDocument | None) -> dict:
-    kid = document.key_id if (SIGNATURE_KEY_IDS and document is not None) else None
+    """§2.1: a signature document's diagnostic names its key identifier when the document was read, is
+    not LOCK-SIG-DOCUMENT, and has a publicKey of its form; a document never read (None) names none."""
+    kid = document.key_id if document is not None else None
     return diag(code, "signature", at, keyId=kid)
 
 
@@ -3863,7 +3861,7 @@ def verify(*, lock: bytes, lock_signatures: list[bytes], source_signatures: list
         diags.append(diag("LOCK-EXPECTED", "lock", ""))
     if diags:
         return done()
-    # Step 2: the lock signature, before the lock is parsed.
+    # Step 2: the lock signature, before the lock is parsed. §11 (Verifying): only the first is read.
     if not lock_signatures:
         diags.append(diag("LOCK-SIG-MISSING", "lock", ""))
         return done()
@@ -3896,8 +3894,9 @@ def verify(*, lock: bytes, lock_signatures: list[bytes], source_signatures: list
     # Step 6: the source signatures.
     items = value.get("sources", [])
     room = max(0, len(items) + 1 - len(lock_signatures))
-    # READING: the documents are counted in the order given, the lock signature first; those beyond
-    # the lock's `sources` count plus one are refused unread.
+    # §11 (Verifying): counted in the order given, the lock signature first; once step 3 accepts the
+    # lock, before any source signature document is read, those beyond the lock's `sources` count plus
+    # one are LOCK-SIG-EXTRA and never read.
     for _ in source_signatures[room:]:
         diags.append(sig_diag("LOCK-SIG-EXTRA", "", None))
     docs = [SignatureDocument(d, SOURCE_SIGNATURE) for d in source_signatures[:room]]

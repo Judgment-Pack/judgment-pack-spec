@@ -2,6 +2,6 @@
   "reportFormatVersion": "1.1.0",
   "valid": false,
   "diagnostics": [
-    {"code": "LOCK-SIG-PUBLIC-KEY", "severity": "error", "location": {"document": "signature", "pointer": "/publicKey"}}
+    {"code": "LOCK-SIG-PUBLIC-KEY", "severity": "error", "location": {"document": "signature", "keyId": "01d0fabd251fcbbe2b93b4b927b26ad2", "pointer": "/publicKey"}}
   ]
 }

@@ -4,9 +4,10 @@ This is a generator, committed so that the rows can be reviewed as data and writ
 input document, every expected result and every diagnostic location below is written by hand from
 spec/registry-1.1.0.md, which governs; nothing here reads a reader's output. The generator only lays
 the data out as files and computes what is mechanical: digests (registry section 2.3, and section 4
-step 2's content digests), resolution of a valid registry (registry section 8), source statements
-(section 10.2), and Ed25519 signatures (RFC 8032) made with the published seeds of RFC 8032 section
-7.1, TEST 1 to TEST 3. No other seed or private key exists in the rows or here.
+step 2's content digests), key identifiers (section 11), resolution of a valid registry (registry
+section 8), source statements (section 10.2), and Ed25519 signatures (RFC 8032) made with the
+published seeds of RFC 8032 section 7.1, TEST 1 to TEST 3. No other seed or private key exists in the
+rows or here.
 
 Run it from anywhere: `python tools/registry_1_1_0_rows.py`. It rewrites manifest.json and every file
 it names under conformance/registry/1.1.0/, and leaves README.md and codes.json alone. It reuses the
@@ -570,14 +571,25 @@ IDX_A = document_of(OUT_A["index"])
 # ---------------------------------------------------------------------------------------------------
 # Reports (registry section 7.4 at the selector 1.1.0, section 2.1). Rows leave messages out.
 
-ORDER = ("document", "source", "kindDocument", "kind", "entry.kind", "entry.id", "environment", "pointer",
-         "line", "column")
+ORDER = ("document", "source", "keyId", "kindDocument", "kind", "entry.kind", "entry.id", "environment",
+         "pointer", "line", "column")
 
 
-def diag(code, document, pointer, source=None, kind=None, entry=None, environment=None, severity="error"):
+def key_id(public_key: str) -> str:
+    """Section 11: the first 32 lowercase hexadecimal characters of the SHA-256 of the key's bytes."""
+    return hashlib.sha256(bytes.fromhex(public_key)).hexdigest()[:32]
+
+
+def diag(code, document, pointer, source=None, kind=None, entry=None, environment=None, severity="error",
+         key=None):
+    """One diagnostic; `key` is the public key of the signature document it is about, when section 2.1
+    names it."""
     location = {"document": document}
     if source is not None:
         location["source"] = source
+    if key is not None:
+        assert document == "signature"
+        location["keyId"] = key_id(key)
     if kind is not None:
         location["kind"] = kind
     if entry is not None:
@@ -1463,8 +1475,8 @@ ASSEMBLED_VERIFY = {"lock": LA_PATH, "lockSignatures": [SIGLA], "index": OUT_A["
                     "expect": ASSEMBLED_EXPECT, "floor": 1}
 
 
-def refusal(code, document="lock", pointer=""):
-    return report(False, [diag(code, document, pointer)])
+def refusal(code, document="lock", pointer="", key=None):
+    return report(False, [diag(code, document, pointer, key=key)])
 
 
 verify("verify-first-contact", "§11", "First contact with a floor of 1: trust on first use, which the verifier chose "
@@ -1559,24 +1571,25 @@ verify("verify-map-key-small-order", "§11", "The map gives the repository a key
 verify("verify-lock-signature-missing", "§11", "No lock signature document: LOCK-SIG-MISSING. reading: located at the "
        "lock's root.", {"floor": 1, "lockSignatures": []}, refusal("LOCK-SIG-MISSING"), NO_RECORD, NO_RECORD)
 verify("verify-second-lock-signature", "§11", "A second lock signature document beside an accepted one: "
-       "LOCK-SIG-EXTRA, and the set is refused, not trimmed. reading: located at the signature document's root.",
+       "LOCK-SIG-EXTRA, and the set is refused, not trimmed. Step 2 never reads the second, so its diagnostic "
+       "names no key identifier (section 2.1). reading: located at the signature document's root.",
        {"floor": 1, "lockSignatures": [SIG42, SIG42]}, refusal("LOCK-SIG-EXTRA", "signature"), NO_RECORD, NO_RECORD)
 verify("verify-lock-signature-wrong-key", "§11", "A lock signature by another key than the expected one: "
        "LOCK-SIG-UNEXPECTED-KEY, the plainer reason, first. reading: located at /publicKey.",
        {"floor": 1, "lockSignatures": [put("vectors/verify-lock-signature-wrong-key/lock.sig.json", signature_document(
-           "lock", D42, SIGN3, PK3))]}, refusal("LOCK-SIG-UNEXPECTED-KEY", "signature", "/publicKey"),
+           "lock", D42, SIGN3, PK3))]}, refusal("LOCK-SIG-UNEXPECTED-KEY", "signature", "/publicKey", PK3),
        NO_RECORD, NO_RECORD)
 verify("verify-lock-signature-moved", "§11", "The signature of another lock, moved beside this one: "
        "LOCK-SIG-DIGEST-MISMATCH. reading: located at /lockDigest.",
        {"floor": 1, "lock": L43, "lockSignatures": [SIG42]},
-       refusal("LOCK-SIG-DIGEST-MISMATCH", "signature", "/lockDigest"), NO_RECORD, NO_RECORD)
+       refusal("LOCK-SIG-DIGEST-MISMATCH", "signature", "/lockDigest", PK1), NO_RECORD, NO_RECORD)
 bad_signature = parse(signature_document("lock", D43, SIGN1, PK1))["signature"]
 verify("verify-lock-signature-invalid", "§11", "The expected key and this lock's digest, with a signature over "
        "another lock's message: LOCK-SIG-INVALID. reading: located at /signature.",
        {"floor": 1, "lockSignatures": [put("vectors/verify-lock-signature-invalid/lock.sig.json", (jcs({
            "algorithm": "ed25519", "lockDigest": D42, "lockSignatureVersion": "1.1.0", "publicKey": PK1,
            "signature": bad_signature}) + "\n").encode("ascii"))]},
-       refusal("LOCK-SIG-INVALID", "signature", "/signature"), NO_RECORD, NO_RECORD)
+       refusal("LOCK-SIG-INVALID", "signature", "/signature", PK1), NO_RECORD, NO_RECORD)
 
 GOOD_SIG42 = parse(FILES[SIG42])
 
@@ -1598,36 +1611,39 @@ def members(**changes) -> dict:
 DOCUMENT_ROWS = [
     ("verify-signature-backslash", "A backslash anywhere in the document, here an escape that spells ed25519: "
      "LOCK-SIG-DOCUMENT. reading: located at the document's root.",
-     jcs(GOOD_SIG42).replace('"ed25519"', '"ed2551\\u0039"') + "\n", "LOCK-SIG-DOCUMENT", "", False),
+     jcs(GOOD_SIG42).replace('"ed25519"', '"ed2551\\u0039"') + "\n", "LOCK-SIG-DOCUMENT", "", False, None),
     ("verify-signature-over-bound", "A document of more than 4096 bytes, its members spread by white space, which is "
      "otherwise admitted when read: LOCK-SIG-DOCUMENT. reading: located at the document's root.",
      "{" + ",\n".join(" " * 800 + json.dumps(k) + ":" + json.dumps(v) for k, v in GOOD_SIG42.items()) + "}\n",
-     "LOCK-SIG-DOCUMENT", "", False),
+     "LOCK-SIG-DOCUMENT", "", False, None),
     ("verify-signature-version", "A lockSignatureVersion of 1.2.0, a later version named as such: LOCK-SIG-VERSION. "
      "reading: located at the member.", jcs(members(lockSignatureVersion="1.2.0")) + "\n", "LOCK-SIG-VERSION",
-     "/lockSignatureVersion", True),
+     "/lockSignatureVersion", True, PK1),
     ("verify-signature-member", "A member that is not defined: LOCK-SIG-MEMBER. reading: located at the member.",
      jcs(members(keyId=hashlib.sha256(bytes.fromhex(PK1)).hexdigest()[:32])) + "\n", "LOCK-SIG-MEMBER", "/keyId",
-     True),
+     True, PK1),
     ("verify-signature-member-missing", "A document without its signature member: LOCK-SIG-MEMBER. reading: located "
      "at the pointer the member would have.", jcs(members(signature=None)) + "\n", "LOCK-SIG-MEMBER", "/signature",
-     True),
+     True, PK1),
     ("verify-signature-algorithm", "An algorithm other than ed25519: LOCK-SIG-ALGORITHM. reading: located at the "
-     "member.", jcs(members(algorithm="ed448")) + "\n", "LOCK-SIG-ALGORITHM", "/algorithm", True),
+     "member.", jcs(members(algorithm="ed448")) + "\n", "LOCK-SIG-ALGORITHM", "/algorithm", True, PK1),
     ("verify-signature-key-uppercase", "A publicKey in uppercase hexadecimal, another spelling of one key: "
-     "LOCK-SIG-PUBLIC-KEY. reading: located at the member.", jcs(members(publicKey=PK1.upper())) + "\n",
-     "LOCK-SIG-PUBLIC-KEY", "/publicKey", True),
+     "LOCK-SIG-PUBLIC-KEY, naming no key identifier since the key is not of its form. reading: located at the "
+     "member.", jcs(members(publicKey=PK1.upper())) + "\n", "LOCK-SIG-PUBLIC-KEY", "/publicKey", True, None),
     ("verify-signature-key-small-order", "A document whose publicKey is of small order, which the trust rule refuses: "
-     "LOCK-SIG-PUBLIC-KEY, before the key is compared. reading: located at the member.",
-     jcs(members(publicKey=SMALL_ORDER_KEY)) + "\n", "LOCK-SIG-PUBLIC-KEY", "/publicKey", False),
+     "LOCK-SIG-PUBLIC-KEY, before the key is compared, naming that key's identifier since the key is of its form. "
+     "reading: located at the member.",
+     jcs(members(publicKey=SMALL_ORDER_KEY)) + "\n", "LOCK-SIG-PUBLIC-KEY", "/publicKey", False, SMALL_ORDER_KEY),
     ("verify-signature-form", "A signature of 126 hexadecimal characters: LOCK-SIG-FORM. reading: located at the "
-     "member.", jcs(members(signature=GOOD_SIG42["signature"][:126])) + "\n", "LOCK-SIG-FORM", "/signature", True),
+     "member.", jcs(members(signature=GOOD_SIG42["signature"][:126])) + "\n", "LOCK-SIG-FORM", "/signature", True,
+     PK1),
 ]
-for identity, what, text, code, pointer, refused_by_schema in DOCUMENT_ROWS:
+for identity, what, text, code, pointer, refused_by_schema, key in DOCUMENT_ROWS:
     path = signature_variant(identity, text)
     verify(identity, "§§10.1, 11", what + " reading: a document refused when read is not then checked against a "
            "key.", {"floor": 1, "lockSignatures": [path]},
-           refusal(code, "signature", pointer), NO_RECORD, NO_RECORD, schema_refuses=[path] if refused_by_schema else ())
+           refusal(code, "signature", pointer, key), NO_RECORD, NO_RECORD,
+           schema_refuses=[path] if refused_by_schema else ())
 
 # The lock (step 3), the serial (step 4) and the index (step 5).
 verify("verify-unexpected-registry", "§11", "Another registry's lock signed by the expected key verifies as a "
@@ -1661,29 +1677,59 @@ verify("verify-index-registry-mismatch", "§11", "An index the signed lock names
 verify("verify-source-signature-missing", "§11", "No source signature for the repository's item: LOCK-SIG-MISSING "
        "at the item. reading: located at the lock's item.", dict(ASSEMBLED_VERIFY, sourceSignatures=[SIG_STANDARD]),
        refusal("LOCK-SIG-MISSING", pointer="/sources/0"), NO_RECORD, NO_RECORD)
-verify("verify-source-signature-twice", "§11", "The repository's source signature given twice: LOCK-SIG-EXTRA. "
-       "reading: located at the signature document's root.",
+verify("verify-source-signature-twice", "§11", "The repository's source signature given twice, the copy last: the "
+       "copy is beyond the lock's sources count plus one, LOCK-SIG-EXTRA, never read and naming no key "
+       "identifier. reading: located at the signature document's root.",
        dict(ASSEMBLED_VERIFY, sourceSignatures=[SIG_BILLING, SIG_STANDARD, SIG_BILLING]),
        refusal("LOCK-SIG-EXTRA", "signature"), NO_RECORD, NO_RECORD)
 verify("verify-source-signature-duplicate-within-cap", "§11", "The repository's source signature given twice and "
        "the standard's not at all: three documents with the lock signature, within the lock's sources count plus "
-       "one, so each is read. The second copy for one item is LOCK-SIG-EXTRA, and the standard item that no "
-       "document matches is LOCK-SIG-MISSING: the set is refused, not trimmed. reading: LOCK-SIG-EXTRA is located "
-       "at the signature document's root, LOCK-SIG-MISSING at the lock's item.",
+       "one, so each is read. The second copy for one item is LOCK-SIG-EXTRA, naming the copy's key identifier, "
+       "and the standard item that no document matches is LOCK-SIG-MISSING: the set is refused, not trimmed. "
+       "reading: LOCK-SIG-EXTRA is located at the signature document's root, LOCK-SIG-MISSING at the lock's item.",
        dict(ASSEMBLED_VERIFY, sourceSignatures=[SIG_BILLING, SIG_BILLING]),
-       report(False, [diag("LOCK-SIG-MISSING", "lock", "/sources/1"), diag("LOCK-SIG-EXTRA", "signature", "")]),
+       report(False, [diag("LOCK-SIG-MISSING", "lock", "/sources/1"),
+                      diag("LOCK-SIG-EXTRA", "signature", "", key=PK2)]),
        NO_RECORD, NO_RECORD)
 CAP_UNREAD = put("vectors/verify-signature-cap-unread/extra-signature.txt",
                  FILES[SIG_STANDARD][:-2] + b"\\}\n")
 assert b"\\" in FILES[CAP_UNREAD]
 verify("verify-signature-cap-unread", "§11", "Four documents for a lock of two sources: the lock signature, one "
-       "source signature for each item, and last a document that holds a backslash and is not JSON. The one beyond "
-       "the lock's sources count plus one is LOCK-SIG-EXTRA before any is read, so it is never read and no "
-       "LOCK-SIG-DOCUMENT is reported, and the other three are accepted. reading: the document beyond the count is "
-       "the last given, the lock signature counted first; LOCK-SIG-EXTRA is located at the signature document's "
-       "root.",
+       "source signature for each item, and last a document that holds a backslash and is not JSON. The documents "
+       "are counted in the order given, the lock signature first, so the one beyond the lock's sources count plus "
+       "one is the last given: it is LOCK-SIG-EXTRA and never read, so no LOCK-SIG-DOCUMENT is reported and no "
+       "key identifier named, and the other three are accepted. reading: LOCK-SIG-EXTRA is located at the "
+       "signature document's root.",
        dict(ASSEMBLED_VERIFY, sourceSignatures=[SIG_BILLING, SIG_STANDARD, CAP_UNREAD]),
        refusal("LOCK-SIG-EXTRA", "signature"), NO_RECORD, NO_RECORD)
+verify("verify-signature-cap-last-given", "§11", "Four documents for a lock of two sources: the lock signature, the "
+       "repository's source signature twice, and last the standard's. The last given is beyond the lock's sources "
+       "count plus one, so it is LOCK-SIG-EXTRA and never read, though it would match the standard item, which is "
+       "LOCK-SIG-MISSING; the second copy, read, is LOCK-SIG-EXTRA and names its key identifier, and the two "
+       "LOCK-SIG-EXTRA are two diagnostics, the unread one's absent key identifier sorting first. reading: "
+       "LOCK-SIG-EXTRA is located at the signature document's root, LOCK-SIG-MISSING at the lock's item.",
+       dict(ASSEMBLED_VERIFY, sourceSignatures=[SIG_BILLING, SIG_BILLING, SIG_STANDARD]),
+       report(False, [diag("LOCK-SIG-MISSING", "lock", "/sources/1"), diag("LOCK-SIG-EXTRA", "signature", ""),
+                      diag("LOCK-SIG-EXTRA", "signature", "", key=PK2)]),
+       NO_RECORD, NO_RECORD)
+verify("verify-signature-cap-after-lock", "§11", "A single registry's lock, its signature accepted, refused at step "
+       "3 for another registry id, with a source signature document beyond the count that holds a backslash and is "
+       "not JSON: the documents beyond the count are found only once step 3 accepts the lock, so the report holds "
+       "LOCK-UNEXPECTED-REGISTRY alone, with no LOCK-SIG-EXTRA and no LOCK-SIG-DOCUMENT. reading: located at "
+       "/registry/id.",
+       {"floor": 1, "expect": {"registryId": BILLING_REGISTRY_ID, "requireIndex": False},
+        "sourceSignatures": [CAP_UNREAD]},
+       refusal("LOCK-UNEXPECTED-REGISTRY", pointer="/registry/id"), NO_RECORD, NO_RECORD)
+verify("verify-source-signatures-told-apart", "§§2.1, 11", "Two source signature documents within the lock's "
+       "sources count plus one, each read, that match no item: the repository's statement signed by another key, "
+       "and its signature at another commit. Each is LOCK-SIG-EXTRA at the document's root, and the two are told "
+       "apart by the key identifier each names, so the report holds both; each item that no document matches is "
+       "LOCK-SIG-MISSING. reading: LOCK-SIG-MISSING is located at the lock's item.",
+       dict(ASSEMBLED_VERIFY, sourceSignatures=[SIG_BILLING_T3, SIG_BILLING_OC]),
+       report(False, [diag("LOCK-SIG-MISSING", "lock", "/sources/0"), diag("LOCK-SIG-MISSING", "lock", "/sources/1"),
+                      diag("LOCK-SIG-EXTRA", "signature", "", key=PK3),
+                      diag("LOCK-SIG-EXTRA", "signature", "", key=PK2)]),
+       NO_RECORD, NO_RECORD)
 verify("verify-source-signature-stray", "§11", "A source signature given for a lock with no sources: LOCK-SIG-EXTRA. "
        "reading: located at the signature document's root.", {"floor": 1, "sourceSignatures": [SIG_BILLING]},
        refusal("LOCK-SIG-EXTRA", "signature"), NO_RECORD, NO_RECORD)
@@ -1700,13 +1746,13 @@ verify("verify-source-wrong-key", "§11", "The repository's statement signed by 
        "lock that names that signature: LOCK-SIG-UNEXPECTED-KEY. reading: located at /publicKey.",
        dict(ASSEMBLED_VERIFY, lock=LA_T3, lockSignatures=[LA_T3 + ".sig.json"],
             sourceSignatures=[SIG_BILLING_T3, SIG_STANDARD]),
-       refusal("LOCK-SIG-UNEXPECTED-KEY", "signature", "/publicKey"), NO_RECORD, NO_RECORD)
+       refusal("LOCK-SIG-UNEXPECTED-KEY", "signature", "/publicKey", PK3), NO_RECORD, NO_RECORD)
 verify("verify-source-another-commit", "§11", "The repository's signature over its statement at another commit than "
        "the index records: the statement rebuilt from the index is not what it names, LOCK-SIG-DIGEST-MISMATCH. "
        "reading: located at /sourceDigest.",
        dict(ASSEMBLED_VERIFY, lock=LA_OC, lockSignatures=[LA_OC + ".sig.json"],
             sourceSignatures=[SIG_BILLING_OC, SIG_STANDARD]),
-       refusal("LOCK-SIG-DIGEST-MISMATCH", "signature", "/sourceDigest"), NO_RECORD, NO_RECORD)
+       refusal("LOCK-SIG-DIGEST-MISMATCH", "signature", "/sourceDigest", PK2), NO_RECORD, NO_RECORD)
 verify("verify-statement-another-commit", "§11", "A lock, signed by the standard owner, whose statement digest for "
        "the repository is the one its signature at another commit names, so that the lock's statement member and "
        "the signature agree: step 5 holds the index to step 7 of section 9, LOCK-SOURCES-MISMATCH at the item, and "
@@ -1717,13 +1763,14 @@ verify("verify-statement-another-commit", "§11", "A lock, signed by the standar
        dict(ASSEMBLED_VERIFY, lock=LA_SO, lockSignatures=[LA_SO + ".sig.json"],
             sourceSignatures=[SIG_BILLING_OC, SIG_STANDARD]),
        report(False, [diag("LOCK-SOURCES-MISMATCH", "lock", "/sources/0"),
-                      diag("LOCK-SIG-DIGEST-MISMATCH", "signature", "/sourceDigest")]), NO_RECORD, NO_RECORD)
+                      diag("LOCK-SIG-DIGEST-MISMATCH", "signature", "/sourceDigest", key=PK2)]), NO_RECORD,
+       NO_RECORD)
 verify("verify-standard-signed-by-repository-key", "§11", "The standard source's statement signed by the "
        "repository's key, a key of the set but not the one it names for the standard item, in a lock that names "
        "that signature: LOCK-SIG-UNEXPECTED-KEY. reading: located at /publicKey.",
        dict(ASSEMBLED_VERIFY, lock=LA_SR, lockSignatures=[LA_SR + ".sig.json"],
             sourceSignatures=[SIG_BILLING, SIG_STANDARD_T2]),
-       refusal("LOCK-SIG-UNEXPECTED-KEY", "signature", "/publicKey"), NO_RECORD, NO_RECORD)
+       refusal("LOCK-SIG-UNEXPECTED-KEY", "signature", "/publicKey", PK2), NO_RECORD, NO_RECORD)
 
 # ---------------------------------------------------------------------------------------------------
 

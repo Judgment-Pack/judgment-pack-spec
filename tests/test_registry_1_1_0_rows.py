@@ -73,8 +73,8 @@ RFC8032_SEEDS = {
 }
 SMALL_ORDER_KEY = "01" + "00" * 31
 PREFIX = {"lock": b"judgment-pack-registry/lock-signature/1:", "source": b"judgment-pack-registry/source-signature/1:"}
-ORDER = ("document", "source", "kindDocument", "kind", "entry.kind", "entry.id", "environment", "pointer", "line",
-         "column")
+ORDER = ("document", "source", "keyId", "kindDocument", "kind", "entry.kind", "entry.id", "environment", "pointer",
+         "line", "column")
 DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
 MESSAGE = "A fixed text."
 SERIAL_CODES = {"LOCK-SERIAL-ROLLBACK", "LOCK-SERIAL-CONFLICT", "LOCK-SERIAL-STATE"}
@@ -111,6 +111,19 @@ def text_of(relative: str) -> bytes:
 
 def document(relative: str):
     return load(BASE / relative)
+
+
+def given_key_ids(row: dict) -> set[str]:
+    """The key identifiers (section 11) of the signature documents a row gives that hold a key of its form."""
+    found = set()
+    for relative in row.get("lockSignatures", []) + row.get("sourceSignatures", []):
+        try:
+            key = json.loads(text_of(relative)).get("publicKey")
+        except ValueError:
+            continue
+        if isinstance(key, str) and re.fullmatch(r"[0-9a-f]{64}", key):
+            found.add(hashlib.sha256(bytes.fromhex(key)).hexdigest()[:32])
+    return found
 
 
 def tree() -> set[str]:
@@ -274,6 +287,21 @@ class Schemas(unittest.TestCase):
     def test_the_report_schema_lists_exactly_the_codes_of_both_formats(self) -> None:
         common = SCHEMA_DOCUMENTS["common.schema.json"]["$defs"]
         self.assertEqual(sorted(CODES), sorted(common["newCode"]["enum"]))
+
+    def test_the_report_schema_holds_key_id_to_a_signature_documents_diagnostic(self) -> None:
+        reports = validator(NAMESPACE + "validation-report.schema.json")
+
+        def errors(location: dict) -> list[str]:
+            diagnostic = {"code": "LOCK-SIG-EXTRA", "severity": "error", "message": MESSAGE, "location": location}
+            value = {"reportFormatVersion": "1.1.0", "valid": False, "diagnostics": [diagnostic]}
+            return [error.message for error in reports.iter_errors(value)]
+        key = hashlib.sha256(bytes.fromhex(sorted(RFC8032_KEYS)[0])).hexdigest()[:32]
+        self.assertEqual([], errors({"document": "signature", "keyId": key, "pointer": ""}))
+        for location in ({"document": "lock", "keyId": key, "pointer": ""},
+                         {"document": "signature", "keyId": key[:31], "pointer": ""},
+                         {"document": "signature", "keyId": key.upper(), "pointer": ""}):
+            with self.subTest(location=location):
+                self.assertTrue(errors(location))
 
     def test_row_documents_are_admitted_or_refused_as_their_rows_say(self) -> None:
         refused = {path for row in MANIFEST["vectors"] for path in row.get("schemaRefuses", [])}
@@ -577,6 +605,11 @@ class Derived(unittest.TestCase):
                         self.assertNotIn("source", location)
                     if "source" in location:
                         self.assertIn(location["source"], {s["name"] for s in document(row["federation"])["sources"]})
+                    if "keyId" in location:
+                        # Section 2.1: on a signature document's diagnostic alone, the identifier of a given
+                        # document's key (section 11).
+                        self.assertEqual("signature", location["document"])
+                        self.assertIn(location["keyId"], given_key_ids(row))
 
     def test_diagnostic_pointers_address_their_documents(self) -> None:
         absent = {("LOCK-INDEX-REQUIRED", "/index"), ("LOCK-SIG-MEMBER", "/signature")}
