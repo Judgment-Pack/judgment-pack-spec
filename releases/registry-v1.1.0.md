@@ -8,7 +8,7 @@ repositories, the assembled index, bounds a repository may only tighten, a lock 
 registry and what it depends on, and the signatures that vouch for a lock and for each
 repository's part of it. It is tagged on the companion's own scoped route, beside Core and
 independent of `specVersion` ([VERSIONING.md](../VERSIONING.md)). Tagged on
-<!-- PLACEHOLDER(tag-date) -->.
+2026-11-18.
 
 - **Released, and not stable.** `spec/registry-1.1.0.md` is normative for the conformance classes
   of its §15 (the assembler, the index checker, the lock writer, the lock checker and the lock
