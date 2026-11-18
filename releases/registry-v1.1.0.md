@@ -20,23 +20,27 @@ independent of `specVersion` ([VERSIONING.md](../VERSIONING.md)). Tagged on
   a same-vendor reader, not a cross-vendor claim.
 - **What it publishes.** The release's own bundle, `judgment-pack-registry-1.1.0`, carries both
   texts; the closed schemas of the documents format `1.1.0` adds and of the definitions they share
-  (`schema/registry/1.1.0/`, nine files); the code list (`conformance/registry/1.1.0/codes.json`,
-  53 codes); the 162 hand-written, synthetic rows under `conformance/registry/1.1.0/` and their
-  README; format `1.0.0`'s schemas, code list and rows, unchanged, on which the rows of `1.1.0`
-  build; the checks that hold the rows to the texts and the schemas to the rows, the reader above
-  with its check, the rows' generator, and the Ed25519 arithmetic they use; the records and
-  companions the texts link (RFC 0034 to RFC 0040, the dialect and the checkpoint witness
-  statement); and these notes with the release record. No Core bundle carries the schemas, the code
-  list or the rows.
+  (`schema/registry/1.1.0/`, nine files); the code list (`conformance/registry/1.1.0/codes.json`, 53
+  codes); the 162 hand-written, synthetic rows under `conformance/registry/1.1.0/` and their README;
+  format `1.0.0`'s schemas, code list and rows, byte for byte as the record of `registry-v1.0.0`
+  pins them, on which the rows of `1.1.0` build, and format `1.0.0`'s rows' README,
+  `conformance/registry/README.md`, which now also names the rows of `1.1.0`; the checks that hold
+  the rows to the texts and the schemas to the rows, the reader above with its check, the rows'
+  generator, and the Ed25519 arithmetic they use; the records and companions the texts link (RFC
+  0034 to RFC 0040, the dialect and the checkpoint witness statement); and these notes with the
+  release record. No Core bundle carries the schemas, the code list or the rows.
 - **What the record pins.** [`registry-v1.1.0.json`](registry-v1.1.0.json) names the format, the
   `$id` of each schema under `https://judgmentpack.org/schema/registry/1.1.0/`, and the SHA-256 of
-  both texts, the rows' README, every schema, the code list and every row file. The release builder
-  admits the tag only when the tagged tree gives exactly that record; when `spec/registry-1.1.0.md`,
-  the code list and the rows' manifest all say `released`; when neither text nor the rows' README
-  still calls format `1.1.0` proposed; and when no schema's title, description or comment calls the
-  format draft or unreleased. Format `1.0.0`'s files are pinned by the record of `registry-v1.0.0`,
-  which keeps its bytes. A later release of format `1.1.0` names the same schemas with the same
-  digests.
+  both texts, the rows' README, format `1.0.0`'s rows' README, every schema, the code list and every
+  row file. The release builder admits the tag only when the tagged tree gives exactly that record;
+  when `spec/registry-1.1.0.md`, the code list and the rows' manifest all say `released`; when
+  neither text nor the rows' README still calls format `1.1.0` proposed; and when no schema's title,
+  description or comment calls the format draft or unreleased. Format `1.0.0`'s schemas, code list
+  and rows, which the bundle carries unchanged, are held to the record of `registry-v1.0.0`, which
+  keeps its bytes: the builder refuses the tag when any of them differs from that record, or a file
+  is added or missing. Of the files that record pins, `spec/registry.md` and
+  `conformance/registry/README.md` have changed since, and this record pins them itself. A later
+  release of format `1.1.0` names the same schemas with the same digests.
 - **What the release changed.** The status sentence of `spec/registry-1.1.0.md`, its Status
   paragraphs and its §14, and the paragraph of `spec/registry.md`'s Status on format `1.1.0`, say
   released; the code list and the rows' manifest say `released`, and the manifest's label is the

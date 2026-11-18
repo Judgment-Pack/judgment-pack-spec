@@ -279,7 +279,11 @@ and its number of codes; and its rows' manifest with its digest, its number of r
 of every file under `conformance/registry/<format>/`. For `registry-v1.0.0` that is
 `schema/registry/1.0.0/`, `conformance/registry/README.md` and `conformance/registry/1.0.0/`; for
 `registry-v1.1.0` it is `schema/registry/1.1.0/`, `conformance/registry/1.1.0/README.md` and
-`conformance/registry/1.1.0/`, and its record names neither format `1.0.0`'s schemas nor its rows.
+`conformance/registry/1.1.0/`, with format `1.0.0`'s rows' README, `conformance/registry/README.md`,
+which its bundle carries and which changed after `registry-v1.0.0`. Its record names neither format
+`1.0.0`'s schemas nor its rows: the bundle carries them as the latest record of format `1.0.0` pins
+them, and the builder refuses the tag when one differs from that record or a file is added or
+missing.
 The builder derives that record from the tagged tree and refuses the tag unless the committed
 record equals it, its maturity is `released`, the format's status sentence occurs once across its
 texts and says `released`, its code list and its rows' manifest say `released`, no text, rows'

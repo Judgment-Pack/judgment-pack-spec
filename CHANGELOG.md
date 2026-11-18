@@ -127,7 +127,9 @@ here.
   manifest say `released`, the rows' README and the second reader no longer say proposed, and no
   schema's title or description says draft, staged, proposed or not released. Its release record,
   `releases/registry-v1.1.0.json`, names each schema's `$id` and the SHA-256 of both texts, the
-  rows' README, every schema, the code list and every row file. The release builder knows both
+  rows' README, format `1.0.0`'s rows' README, every schema, the code list and every row file;
+  format `1.0.0`'s schemas, code list and rows, which the bundle carries, must be the bytes the
+  record of `registry-v1.0.0` pins. The release builder knows both
   formats: a `registry-v1.1.0` tag releases format `1.1.0`, and a `registry-v1.0.0` tag still gives
   the bytes it gave. The site serves each format's schemas at their `$id` once that format is
   released, and a change record names the nine schemas' new digests. The stable bar is unchanged:

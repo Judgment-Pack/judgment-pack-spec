@@ -55,7 +55,7 @@ class Release:
     bundle carries."""
 
     def __init__(self, tag: str, status_text: str, document_schema: str, checks: tuple[str, ...],
-                 readmes: tuple[str, ...], tools: tuple[str, ...]):
+                 readmes: tuple[str, ...], tools: tuple[str, ...], earlier_pins: tuple[str, ...] = ()):
         self.tag = tag
         self.version = BUILDER.release_version(tag)
         self.form = BUILDER.registry_format(self.version)
@@ -72,6 +72,8 @@ class Release:
         self.checks = checks
         self.readmes = readmes
         self.tools = tools
+        # The files of an earlier format the bundle carries that this release's record pins itself.
+        self.earlier_pins = earlier_pins
         self.status_sentence = re.compile(
             rf"^(This text is registry format `{re.escape(self.format)}`, status `)([a-z]+)(`\.)", re.M)
         self.lead = re.compile(rf"`{re.escape(self.format)}`(\s+)is(\s+)proposed\b")
@@ -87,7 +89,8 @@ CURRENT = Release(
      "test_registry_1_1_0_reader"),
     ("conformance/registry/README.md", "conformance/registry/1.1.0/README.md"),
     ("tools/registry_1_1_0_reader.py", "tools/registry_1_1_0_rows.py", "tools/dialect_verify.py",
-     "tools/retained_column.py", "tools/_retained_column.py"))
+     "tools/retained_column.py", "tools/_retained_column.py"),
+    ("conformance/registry/README.md",))
 HISTORICAL = Release(
     "registry-v1.0.0", "spec/registry.md", "registry",
     ("test_registry_companion", "test_registry_schemas"),
@@ -117,7 +120,8 @@ def record(release: Release, root: Path) -> dict:
                    "rows": len(rows["vectors"]), "files": files(root, release.rows)},
         "formatDigests": {**files(root, release.schemas),
                           **{text: digest(root / text) for text in release.texts},
-                          release.readme: digest(root / release.readme)},
+                          release.readme: digest(root / release.readme),
+                          **{pin: digest(root / pin) for pin in release.earlier_pins}},
     }
 
 
@@ -232,6 +236,10 @@ class FormatReleaseTests:
             else:
                 shutil.copyfile(source, target)
         (root / "releases").mkdir()
+        # The records of the other releases, which hold the earlier formats the bundle carries.
+        for record_path in sorted((source_root / "releases").glob("registry-v*.json")):
+            if record_path.name not in (f"{self.release.tag}.json",) and not record_path.name.endswith(".milestone.json"):
+                shutil.copyfile(record_path, root / "releases" / record_path.name)
         return root
 
     def released_tree(self, directory: str) -> Path:
@@ -298,7 +306,7 @@ class FormatReleaseTests:
                 (lambda r: r["corpus"].update(rows=r["corpus"]["rows"] + 1), "corpus identity"),
                 (lambda r: r["codes"].update(codes=r["codes"]["codes"] - 1), "code list identity")]
             changes += [(lambda r, text=text: r["formatDigests"].pop(text), "format bytes")
-                        for text in (*self.release.texts, self.release.readme)]
+                        for text in (*self.release.texts, self.release.readme, *self.release.earlier_pins)]
             for change, message in changes:
                 changed = copy.deepcopy(original)
                 change(changed)
@@ -545,6 +553,80 @@ class CurrentRegistryReleaseTests(FormatReleaseTests, unittest.TestCase):
         return worktree_tree(temporary, self.release.tag)
 
 
+    def test_the_earlier_format_it_carries_is_the_bytes_of_its_record(self):
+        # Format 1.0.0's schemas, code list and rows are carried as the record of registry-v1.0.0
+        # pins them: a changed byte, a status, a file added or missing refuses the tag.
+        self.assertEqual([HISTORICAL.form], BUILDER.registry_carried_formats(self.release.form))
+        self.assertEqual(list(self.release.earlier_pins), BUILDER.registry_carried_prose(self.release.form))
+
+        def append(name):
+            return lambda root: (root / name).write_bytes((root / name).read_bytes() + b" ")
+
+        def remove(name):
+            return lambda root: (root / name).unlink()
+
+        def proposed(root):
+            set_status(HISTORICAL, root, "proposed", (HISTORICAL.manifest,))
+
+        def first_row(root):
+            return next(path for path in sorted((root / HISTORICAL.rows / "vectors").rglob("*")) if path.is_file())
+
+        for label, change, message in (
+                ("a byte added to a schema", append(f"{HISTORICAL.schemas}/registry.schema.json"),
+                 "registry.schema.json, which the registry bundle carries, differs"),
+                ("the rows' manifest says proposed", proposed, "schemas, code list or rows"),
+                ("a byte added to the code list", append(HISTORICAL.codes), "schemas, code list or rows"),
+                ("a byte added to a row", lambda root: first_row(root).write_bytes(first_row(root).read_bytes() + b" "),
+                 "schemas, code list or rows"),
+                ("a row file added", lambda root: (root / HISTORICAL.rows / "vectors/unlisted.json").write_text("{}\n"),
+                 "schemas, code list or rows"),
+                ("a row file missing", lambda root: first_row(root).unlink(), "schemas, code list or rows"),
+                ("a schema directory file added", lambda root: (root / HISTORICAL.schemas / "notes.txt").write_text("x\n"),
+                 "schemas, code list or rows"),
+                ("a schema missing", remove(f"{HISTORICAL.schemas}/emit-request.schema.json"),
+                 "schemas, code list or rows"),
+                ("no record of the format", remove(f"releases/{HISTORICAL.tag}.json"), "has no release record")):
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                root = self.released_tree(temporary)
+                self.validate(root)
+                change(root)
+                with self.assertRaisesRegex(ValueError, message):
+                    self.validate(root)
+
+    def test_an_earlier_file_this_record_does_not_pin_must_be_the_earlier_bytes(self):
+        # The rows' README of format 1.0.0 changed after registry-v1.0.0; only this release's own
+        # pin of it lets it differ from that record.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.released_tree(temporary)
+            earlier = json.loads((root / "releases" / f"{HISTORICAL.tag}.json").read_text("utf-8"))
+            current = record(self.release, root)
+            for pin in self.release.earlier_pins:
+                self.assertNotEqual(earlier["formatDigests"][pin], current["formatDigests"][pin])
+                BUILDER.validate_registry_carried(self.release.form, current, root)
+                unpinned = copy.deepcopy(current)
+                unpinned["formatDigests"].pop(pin)
+                with self.subTest(pin=pin), self.assertRaisesRegex(ValueError, "does not pin it"):
+                    BUILDER.validate_registry_carried(self.release.form, unpinned, root)
+                write_record(self.release, root, unpinned)
+                with self.subTest(pin=pin), self.assertRaisesRegex(ValueError, "format bytes"):
+                    self.validate(root)
+
+    def test_the_record_of_a_carried_format_must_be_the_tagged_one(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.released_tree(temporary)
+            tagged = json.loads((root / "releases" / f"{HISTORICAL.tag}.json").read_text("utf-8"))
+            moved = copy.deepcopy(tagged)
+            moved["formatDigests"][f"{HISTORICAL.schemas}/registry.schema.json"] = ZERO
+            for old, refused in ((tagged, False), (moved, True)):
+                with self.subTest(refused=refused), patch.object(BUILDER, "ROOT", root), \
+                        patch.object(BUILDER, "git", side_effect=[HISTORICAL.tag, json.dumps(old)]):
+                    if refused:
+                        with self.assertRaisesRegex(ValueError, "differs from the one its tag names"):
+                            BUILDER.validate_registry_history(self.release.tag)
+                    else:
+                        BUILDER.validate_registry_history(self.release.tag)
+
+
 class HistoricalRegistryReleaseTests(FormatReleaseTests, unittest.TestCase):
     """registry-v1.0.0, format 1.0.0, from the tree its tag names: this builder still admits it and
     packages it as the builder at that tag did."""
@@ -568,6 +650,10 @@ class HistoricalRegistryReleaseTests(FormatReleaseTests, unittest.TestCase):
 
     def candidate_tree(self, temporary: str) -> str:
         return self.tree
+
+    def test_it_carries_no_earlier_format(self):
+        self.assertEqual([], BUILDER.registry_carried_formats(self.release.form))
+        self.assertEqual([], BUILDER.registry_carried_prose(self.release.form))
 
     def test_the_tagged_builder_and_this_one_agree(self):
         # What the builder at the tag derived and packaged, this one derives and packages the same.

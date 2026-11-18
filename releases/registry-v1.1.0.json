@@ -855,6 +855,7 @@
     "schema/registry/1.1.0/validation-report.schema.json": "sha256:a5f0e4fa890b98f7688dc49eb7db2a77a78b3f462adc56aaaea7eb8fedd7ec28",
     "spec/registry.md": "sha256:2bf30b624e16f52a9d93aad8206a383fb3491ec6e458c1812784294962b56a19",
     "spec/registry-1.1.0.md": "sha256:e86a63fa0ab80dd6b5e7744a152eef1a472691ee587636b5bf9f8520aa98a9c5",
-    "conformance/registry/1.1.0/README.md": "sha256:22b93f0f51fa5b81ffb79f02ecb361756ff9fea9ff56e77e348d59af0d0432e9"
+    "conformance/registry/1.1.0/README.md": "sha256:22b93f0f51fa5b81ffb79f02ecb361756ff9fea9ff56e77e348d59af0d0432e9",
+    "conformance/registry/README.md": "sha256:52c633c2dcd18f966724eb5a3f63e5323d8c1d6aed67bf7971dc3b865614be0a"
   }
 }
