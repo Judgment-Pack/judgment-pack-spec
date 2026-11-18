@@ -68,7 +68,8 @@ print(os.environ.get('FIXTURE_MILESTONE', '{"number":2,"title":"v0.3.0","state":
                               capture_output=True, text=True)
 
     def test_published_core_prerelease_and_companion_share_open_or_closed_milestone(self):
-        for tag in ("v0.3.0", "v0.3.0-rc.1", "policy-v1.0.0-draft.1", "registry-v1.0.0"):
+        for tag in ("v0.3.0", "v0.3.0-rc.1", "policy-v1.0.0-draft.1", "registry-v1.0.0",
+                    "terraform-file-v1.0.0"):
             for state in ("open", "closed"):
                 with self.subTest(tag=tag, state=state):
                     result = self.run_gate(tag, env={"FIXTURE_MILESTONE": json.dumps(
@@ -107,7 +108,8 @@ print(os.environ.get('FIXTURE_MILESTONE', '{"number":2,"title":"v0.3.0","state":
         for event in events:
             self.assertNotEqual(self.run_gate(event=event).returncode, 0)
         for tag in ("demos-v0.3.0", "v01.3.0", "policy-v1.0.0", "v0.3.0+build", "registry-v1.0.0-draft.1",
-                    "registry-v01.0.0"):
+                    "registry-v01.0.0", "terraform-file-v1.0.0-draft.1", "terraform-file-v01.0.0",
+                    "terraform-file-v1.0"):
             self.assertNotEqual(self.run_gate(tag).returncode, 0)
 
     def test_mismatched_head_and_dirty_checkout_are_refused(self):
@@ -187,6 +189,7 @@ class ReleaseWorkflowTests(unittest.TestCase):
         self.assertIn("environment: production", deploy)
         self.assertIn("startsWith(github.event.release.tag_name, 'policy-v')", deploy)
         self.assertIn("startsWith(github.event.release.tag_name, 'registry-v')", deploy)
+        self.assertIn("startsWith(github.event.release.tag_name, 'terraform-file-v')", deploy)
         self.assertIn("startsWith(github.event.release.tag_name, 'v')", deploy)
         for workflow in (deploy, release):
             self.assertLess(workflow.index("release_milestone.py"), workflow.index("pip install"))

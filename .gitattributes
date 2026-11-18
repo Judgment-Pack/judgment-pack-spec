@@ -37,12 +37,13 @@ conformance/annotation-vocabulary/** export-ignore
 conformance/registry/** -text
 schema/registry/** -text
 
-# The terraform-file reading's code list, format table and vectors are proposed with the companion
-# (conformance/terraform-file/README.md): until a terraform-file tag releases them they are in no
-# corpus, and no Core bundle carries them. Each expected result pins its input's SHA-256, so no
-# checkout may convert a line ending in them.
-conformance/terraform-file export-ignore
-conformance/terraform-file/** export-ignore -text
+# The terraform-file reading's code list, format table and vectors are packaged independently, as
+# the registry's are: a terraform-file-v tag's own bundle carries them with the companion's first
+# release, and no Core bundle does, since tools/build_release.py leaves the terraform-file directory
+# out of a Core archive's paths (spec/terraform-file.md section 10, VERSIONING.md). Each expected
+# result pins its input's SHA-256, and the release record pins every file, so no checkout may
+# convert a line ending in them.
+conformance/terraform-file/** -text
 
 # Independently packaged Policy fixture/schema bytes must never undergo text conversion.
 schema/policy/** -text

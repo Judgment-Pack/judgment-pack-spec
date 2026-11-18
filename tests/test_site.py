@@ -35,9 +35,9 @@ ANNOTATION_VOCABULARY_ROWS = "conformance/annotation-vocabulary"
 # document is published.
 REGISTRY_ROWS = "conformance/registry"
 REGISTRY_SCHEMAS = "schema/registry"
-# The terraform-file reading's code list, format table and hand-written vectors are proposed with
-# the companion, in no corpus until a terraform-file tag releases them
-# (conformance/terraform-file/README.md): the site serves none of them. Its companion document is
+# The terraform-file reading's code list, format table and hand-written vectors are packaged on the
+# companion's own scoped tag (conformance/terraform-file/README.md). The companion has no schema, so
+# the site serves none of them, before its first release or after it. Its companion document is
 # published.
 TERRAFORM_FILE_VECTORS = "conformance/terraform-file"
 # The staged draft Core specVersion 0.4.0-draft graduated to the released 0.5.0 in place; its staged
@@ -1514,6 +1514,29 @@ class RegistrySchemaSourcesTests(unittest.TestCase):
         status = json.loads((ROOT / REGISTRY_ROWS / "1.0.0/manifest.json").read_text(encoding="utf-8"))["status"]
         self.assertEqual(status == "released", bool(self.build.registry_schema_sources()))
         self.assertFalse(any("/registry/" in source for source in self.build.CANONICAL_SCHEMA_SOURCES))
+
+
+class TerraformFileSiteTests(unittest.TestCase):
+    # The terraform-file companion has no schema, so its release serves nothing new on the site: its
+    # code list, format table, declarations and vectors are never served, whatever they say of their
+    # status (VERSIONING.md, "Independently versioned terraform-file companion").
+    @classmethod
+    def setUpClass(cls) -> None:
+        sys.path.insert(0, str(ROOT / "web"))
+        import build  # noqa: PLC0415
+
+        cls.build = build
+
+    def test_no_file_of_the_companion_is_ever_served(self) -> None:
+        sources = sorted(path.relative_to(ROOT) for path in (ROOT / TERRAFORM_FILE_VECTORS).rglob("*")
+                         if path.is_file())
+        self.assertGreater(len(sources), 100)
+        for source in sources:
+            with self.subTest(source=source.as_posix()):
+                self.assertFalse(self.build.is_published_artifact(source))
+        self.assertEqual([], sorted((ROOT / TERRAFORM_FILE_VECTORS).rglob("*.schema.json")))
+        self.assertFalse(any("terraform-file" in source for source in self.build.CANONICAL_SCHEMA_SOURCES))
+        self.assertFalse(any("terraform-file" in source for source in self.build.registry_schema_sources()))
 
 
 class FieldReferenceDriftTests(unittest.TestCase):

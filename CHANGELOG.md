@@ -136,6 +136,38 @@ here.
 
 ### Changed
 
+- **The terraform-file reading has a release route of its own** (`spec/terraform-file.md` §10,
+  reading `1.0.0`, proposed; VERSIONING.md, "Independently versioned terraform-file companion").
+  Its first release is the scoped tag `terraform-file-v1.0.0`, at status `released`, which is not
+  stable; this change cuts no tag and changes no status. As for the registry, the release builder
+  gives a `terraform-file-v` tag a bundle of its own, `judgment-pack-terraform-file-<version>`, with
+  the text, the code list, the format table, the declarations and vectors with their README, the
+  checks that hold the vectors to the text with the second reader they run, and the records and
+  companion texts the text links, and
+  leaves `conformance/terraform-file/` out of every Core bundle by path rather than by
+  `export-ignore`, which no longer marks it; `-text` does, as its digests are pinned. The builder
+  refuses a `terraform-file-v` tag unless its release record, `releases/<tag>.json`, equals the one
+  the tree gives (the SHA-256 of the text, the README, `codes.json`, `formats.json`, the manifest,
+  every declaration and vector file and the second reader; the table's release, its rows and the
+  rows it adds, the codes and the vector ids), unless the tag's number is the table release `formats.json` gives,
+  unless the text's status sentence, the code list, the format table and the manifest all say
+  `released` and neither the text nor the README still calls the reading proposed, and unless notes
+  exist. The reading's first table release is `1.0.0`, and each later one is exactly the next patch
+  of the latest earlier one, in the worktree and at tags: one that accepts new rows, and an erratum,
+  which accepts none and whose record's `added` is empty. The text defines no minor or major
+  release of the table, so none is on the route. An earlier record of the same reading must carry
+  another table release, and the record of the higher one must keep every code, table row and
+  vector of the lower; the bytes are not frozen from one release to the next. The release
+  and deploy workflows take `terraform-file-v` tags, a plain one drafted as a full release that is
+  never marked latest, as a registry tag is. The companion has no schema, so the site serves
+  nothing new: no code list, table or vector, before a release or after it. The checks that read
+  each declaration with the dialect's first reader move to
+  `tests/test_terraform_file_declarations.py`, since they need the dialect's staged vectors, which
+  no bundle carries; `tests/test_terraform_file_vectors.py` keeps the rest, the second reader's
+  checks among them, and runs inside the bundle, which carries the second reader. The second
+  reader's tests load it by its path. `tests/test_terraform_file_release.py` holds the route. The
+  text's status bullet now says that the reference runtime reads deposed objects too (`v0.49.0`);
+  the second reader and the stable bar are unchanged.
 - **The registry companion's rows, code list and schemas are no longer staged: they are published
   with its first release** (`spec/registry.md` §§13 and 14, format `1.0.0`; VERSIONING.md,
   "Independently versioned registry companion"). That release is the scoped tag `registry-v1.0.0`,
