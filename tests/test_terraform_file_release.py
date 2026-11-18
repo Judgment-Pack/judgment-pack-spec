@@ -6,7 +6,9 @@ tests hold the builder to that: the exact tag grammar; the tree as it stands, re
 commit a tag names and passing from it on; a candidate tree, with its statuses said `released`
 (whichever they say now) and its record written here from the bytes, which passes, and each
 mismatch, unlisted file, tag number that is not the table release, status, statement, missing note
-and earlier record that shrinks the reading, which refuses; the tagged history; the routing; what
+and earlier record that shrinks the reading, which refuses; each later table release the next patch
+of the latest earlier one, an erratum's with no new row, and every other number refused; the tagged
+history; the routing; what
 the bundle carries, whose own checks pass in it, and what a Core bundle leaves out; and the
 attributes that keep the bytes as committed.
 """
@@ -61,16 +63,19 @@ def files(root: Path, directory: str) -> dict[str, str]:
             for path in sorted((root / directory).rglob("*")) if path.is_file()}
 
 
-def record(root: Path, tag: str = TAG, version: str = VERSION) -> dict:
-    """The record of the candidate tree, from its bytes; the builder must derive the same."""
+def record(root: Path, tag: str = TAG, version: str = VERSION, added: dict | None = None) -> dict:
+    """The record of the candidate tree, from its bytes; the builder must derive the same. `added`
+    is the rows its table release accepts beyond the latest earlier one: all of them, unless given,
+    as for the first release."""
     vectors = json.loads((root / MANIFEST).read_text("utf-8"))
     codes = json.loads((root / CODES).read_text("utf-8"))
     formats = json.loads((root / FORMATS).read_text("utf-8"))
+    table = {row["document"]: sorted(row["accepted"]) for row in formats["table"]}
     return {
         "companion": "terraform-file", "releaseVersion": version, "tag": tag, "maturity": "released",
         "reading": "1.0.0",
         "formatTable": {"path": FORMATS, "sha256": digest(root / FORMATS), "release": formats["release"],
-                        "table": {row["document"]: sorted(row["accepted"]) for row in formats["table"]}},
+                        "table": table, "added": copy.deepcopy(table) if added is None else added},
         "codes": {"path": CODES, "sha256": digest(root / CODES), "codes": [code["code"] for code in codes["codes"]]},
         "corpus": {"path": MANIFEST, "sha256": digest(root / MANIFEST),
                    "vectors": sorted(row["id"] for row in vectors["vectors"]), "files": files(root, VECTORS)},
@@ -135,6 +140,22 @@ class TerraformFileReleaseTests(unittest.TestCase):
         write_record(root)
         return root
 
+    def later_release(self, root: Path, number: str, added: dict, change=None) -> str:
+        """Make the tree the candidate of table release `number`, beside the records it has: the
+        table says that release, `change` edits it, notes exist, and the record is written from the
+        bytes, naming `added` as the rows it accepts beyond the latest earlier release."""
+        tag = f"terraform-file-v{number}"
+
+        def edit(document):
+            document.update(release=number)
+            if change is not None:
+                change(document)
+
+        edit_json(root / FORMATS, edit)
+        (root / "releases" / f"{tag}.md").write_text("Synthetic notes.\n")
+        write_record(root, record(root, tag, number, added), tag)
+        return tag
+
     def test_exact_tag_and_refused_aliases(self):
         self.assertEqual(BUILDER.release_version(TAG), VERSION)
         self.assertTrue(BUILDER.is_terraform_file_tag(TAG))
@@ -198,6 +219,8 @@ class TerraformFileReleaseTests(unittest.TestCase):
                     (lambda r: r["formatDigests"].pop(README), "text or README bytes"),
                     (lambda r: r["formatTable"].update(release="1.0.1"), "format table"),
                     (lambda r: r["formatTable"]["table"]["plan"].pop(), "format table"),
+                    (lambda r: r["formatTable"].update(added={}), "format table"),
+                    (lambda r: r["formatTable"].pop("added"), "format table"),
                     (lambda r: r["corpus"]["vectors"].pop(), "corpus identity"),
                     (lambda r: r["corpus"]["files"].popitem(), "corpus identity"),
                     (lambda r: r["codes"]["codes"].pop(), "code list identity"),
@@ -260,13 +283,12 @@ class TerraformFileReleaseTests(unittest.TestCase):
             # is the tree's.
             later, number = "terraform-file-v1.0.1", "1.0.1"
             (root / "releases" / f"{later}.md").write_text("Synthetic notes.\n")
-            (root / "releases" / f"{TAG}.json").unlink()
             write_record(root, record(root, later, number), later)
             with self.assertRaisesRegex(ValueError, "tag's number must be the release of the format table"):
                 BUILDER.validate_terraform_file_artifacts(number, later, root)
-            # Once the table says that release, the same tag passes.
+            # Once the table says that release, the same tag passes, as an erratum of the first.
             edit_json(root / FORMATS, lambda document: document.update(release=number))
-            write_record(root, record(root, later, number), later)
+            write_record(root, record(root, later, number, {}), later)
             BUILDER.validate_terraform_file_artifacts(number, later, root)
             # And the first tag no longer does.
             write_record(root, record(root))
@@ -274,10 +296,11 @@ class TerraformFileReleaseTests(unittest.TestCase):
                 BUILDER.validate_terraform_file_artifacts(VERSION, TAG, root)
 
     def test_every_status_must_say_released(self):
-        for name in (TEXT, MANIFEST, CODES, FORMATS):
-            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
+        # `stable` is a status no wording check reads, so only the status check refuses it.
+        for name, word in ((name, word) for name in (TEXT, MANIFEST, CODES, FORMATS) for word in ("proposed", "stable")):
+            with self.subTest(name=name, word=word), tempfile.TemporaryDirectory() as temporary:
                 root = self.released_tree(temporary)
-                set_status(root, "proposed", (name,))
+                set_status(root, word, (name,))
                 write_record(root)
                 with self.assertRaisesRegex(ValueError, "say status released"):
                     BUILDER.validate_terraform_file_artifacts(VERSION, TAG, root)
@@ -329,85 +352,165 @@ class TerraformFileReleaseTests(unittest.TestCase):
     def test_an_earlier_record_of_the_reading_never_shrinks(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.released_tree(temporary)
-            current = record(root)
+            first = record(root)
+            earlier = root / "releases" / f"{TAG}.json"
+            later = self.later_release(root, "1.0.1", {})
 
-            def lower(change=None, release="0.9.0"):
-                previous = copy.deepcopy(current)
-                previous.update(tag=f"terraform-file-v{release}", releaseVersion=release)
-                previous["formatTable"]["release"] = release
-                if change is not None:
-                    change(previous)
+            def variant(change):
+                previous = copy.deepcopy(first)
+                change(previous)
                 return previous
-
-            earlier = root / "releases/terraform-file-v0.9.0.json"
 
             def drop_plan_row(previous):
                 previous["formatTable"]["table"]["plan"].remove("1.2")
+                previous["formatTable"]["added"]["plan"].remove("1.2")
 
             def other_bytes(previous):
                 previous["formatDigests"] = {TEXT: ZERO, README: ZERO}
                 previous["corpus"]["files"] = {f"{VECTORS}/vectors/formats/plan-1.0.json": ZERO}
 
-            # A lower release that names less, or other bytes, or another reading, agrees.
-            for label, previous in (
-                    ("the same contents", lower()),
-                    ("fewer codes", lower(lambda p: p["codes"]["codes"].pop())),
-                    ("fewer rows", lower(drop_plan_row)),
-                    ("fewer vectors", lower(lambda p: p["corpus"]["vectors"].pop())),
-                    ("other bytes", lower(other_bytes)),
-                    ("another reading", lower(lambda p: p.update(reading="0.9.0", codes={})))):
+            # An earlier release that names less, or other bytes, agrees; the later record names
+            # the rows it accepts beyond it, none for an erratum.
+            for label, previous, added in (
+                    ("the same contents", first, {}),
+                    ("fewer codes", variant(lambda p: p["codes"]["codes"].pop()), {}),
+                    ("fewer rows", variant(drop_plan_row), {"plan": ["1.2"]}),
+                    ("fewer vectors", variant(lambda p: p["corpus"]["vectors"].pop()), {}),
+                    ("other bytes", variant(other_bytes), {})):
                 earlier.write_text(json.dumps(previous))
+                write_record(root, record(root, later, "1.0.1", added), later)
                 with self.subTest(agrees=label):
-                    BUILDER.validate_terraform_file_artifacts(VERSION, TAG, root)
+                    BUILDER.validate_terraform_file_artifacts("1.0.1", later, root)
+            # A record of another reading, and a milestone link, are not records of this one.
+            earlier.write_text(json.dumps(first))
+            write_record(root, record(root, later, "1.0.1", {}), later)
+            (root / "releases/terraform-file-v0.9.0.json").write_text(
+                json.dumps(variant(lambda p: p.update(reading="0.9.0", codes={}))))
             (root / "releases/terraform-file-v0.9.0.milestone.json").write_text("[]")
-            earlier.write_text(json.dumps(lower()))
-            BUILDER.validate_terraform_file_artifacts(VERSION, TAG, root)
-            # A lower release that names a code, a row or a vector this one lacks, one of the same
-            # table release, and one not of the record's form conflict.
+            BUILDER.validate_terraform_file_artifacts("1.0.1", later, root)
+            # An earlier release that names a code, a row or a vector the later lacks, one of the
+            # same table release, and one not of the record's form conflict. The later record is the
+            # builder's own here, so that only the history can refuse it.
             for label, previous in (
-                    ("a code dropped", lower(lambda p: p["codes"]["codes"].append("TF-RETIRED"))),
-                    ("a row dropped", lower(lambda p: p["formatTable"]["table"]["plan"].append("0.2"))),
-                    ("a document dropped", lower(lambda p: p["formatTable"]["table"].update(apply=["1.0"]))),
-                    ("a vector dropped", lower(lambda p: p["corpus"]["vectors"].append("retired-vector"))),
-                    ("the same table release", lower(release="1.0.0")),
-                    ("a release not of its form", lower(release="1.0")),
-                    ("no reading", lower(lambda p: p.pop("reading"))),
-                    ("no vectors", lower(lambda p: p["corpus"].pop("vectors"))),
-                    ("a code not a string", lower(lambda p: p["codes"]["codes"].append(7))),
+                    ("a code dropped", variant(lambda p: p["codes"]["codes"].append("TF-RETIRED"))),
+                    ("a row dropped", variant(lambda p: p["formatTable"]["table"]["plan"].append("0.2"))),
+                    ("a document dropped", variant(lambda p: p["formatTable"]["table"].update(apply=["1.0"]))),
+                    ("a vector dropped", variant(lambda p: p["corpus"]["vectors"].append("retired-vector"))),
+                    ("the same table release", variant(lambda p: p["formatTable"].update(release="1.0.1"))),
+                    ("a release not of its form", variant(lambda p: p["formatTable"].update(release="1.0"))),
+                    ("no reading", variant(lambda p: p.pop("reading"))),
+                    ("no vectors", variant(lambda p: p["corpus"].pop("vectors"))),
+                    ("a code not a string", variant(lambda p: p["codes"]["codes"].append(7))),
                     ("a list", []), ("a string", "terraform-file")):
                 earlier.write_text(json.dumps(previous))
+                write_record(root, BUILDER.terraform_file_record("1.0.1", later, root), later)
                 with self.subTest(conflicts=label), self.assertRaisesRegex(ValueError, "earlier release record"):
-                    BUILDER.validate_terraform_file_artifacts(VERSION, TAG, root)
-            earlier.unlink()
-            # A higher release must name everything this one does; it may name more.
+                    BUILDER.validate_terraform_file_artifacts("1.0.1", later, root)
+        # A higher release must name everything a lower one does; it may name more.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.released_tree(temporary)
             higher = root / "releases/terraform-file-v1.0.1.json"
-            grown = lower(lambda p: p["codes"]["codes"].append("TF-LATER"), release="1.0.1")
+            grown = record(root, "terraform-file-v1.0.1", "1.0.1", {"state": ["1.1"]})
+            grown["formatTable"]["release"] = "1.0.1"
             grown["formatTable"]["table"]["state"].append("1.1")
+            grown["codes"]["codes"].append("TF-LATER")
             higher.write_text(json.dumps(grown))
             BUILDER.validate_terraform_file_artifacts(VERSION, TAG, root)
-            higher.write_text(json.dumps(lower(lambda p: p["corpus"]["vectors"].pop(), release="1.0.1")))
-            with self.assertRaisesRegex(ValueError, "earlier release record"):
+            shrunk = record(root, "terraform-file-v1.0.1", "1.0.1", {})
+            shrunk["formatTable"]["release"] = "1.0.1"
+            shrunk["corpus"]["vectors"].pop()
+            higher.write_text(json.dumps(shrunk))
+            with self.assertRaisesRegex(ValueError, "earlier release record: table release 1.0.1 lacks"):
                 BUILDER.validate_terraform_file_artifacts(VERSION, TAG, root)
+
+    def test_each_later_table_release_is_the_next_patch_and_an_erratum_accepts_no_row(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.released_tree(temporary)
+            table = record(root)["formatTable"]["table"]
+            # The first release accepts every row of its table.
+            self.assertEqual(table, BUILDER.terraform_file_record(VERSION, TAG, root)["formatTable"]["added"])
+            # An erratum takes the next patch and accepts no new row, and its record says so.
+            erratum = self.later_release(root, "1.0.1", {})
+            self.assertEqual({}, BUILDER.terraform_file_record("1.0.1", erratum, root)["formatTable"]["added"])
+            BUILDER.validate_terraform_file_artifacts("1.0.1", erratum, root)
+            # A release that accepts a row takes the next patch too, and its record names the row.
+            grown = self.later_release(root, "1.0.2", {"state": ["1.1"]},
+                                       lambda document: document["table"][1]["accepted"].append("1.1"))
+            BUILDER.validate_terraform_file_artifacts("1.0.2", grown, root)
+            # A record that misstates the rows its release accepts is not the tree's.
+            for added in ({}, table, {"state": ["1.0", "1.1"]}):
+                write_record(root, record(root, grown, "1.0.2", added), grown)
+                with self.subTest(added=added), self.assertRaisesRegex(ValueError, "format table identity or rows"):
+                    BUILDER.validate_terraform_file_artifacts("1.0.2", grown, root)
+            write_record(root, record(root, grown, "1.0.2", {"state": ["1.1"]}), grown)
+            # Any number but the next patch of the latest earlier release is refused, with rows or
+            # with none; the text defines no minor or major release of the table.
+            for number in ("1.0.4", "1.1.0", "2.0.0", "1.1.3"):
+                with self.subTest(number=number), tempfile.TemporaryDirectory() as copied:
+                    candidate = Path(copied) / "tree"
+                    shutil.copytree(root, candidate)
+                    tag = self.later_release(candidate, number, {})
+                    with self.assertRaisesRegex(ValueError, "earlier release record: .*not the next patch"):
+                        BUILDER.validate_terraform_file_artifacts(number, tag, candidate)
+            # A release whose predecessor's record is gone from the tree skips a patch.
+            with tempfile.TemporaryDirectory() as copied:
+                candidate = Path(copied) / "tree"
+                shutil.copytree(root, candidate)
+                (candidate / "releases" / f"{erratum}.json").unlink()
+                with self.assertRaisesRegex(ValueError, "earlier release record: table release 1.0.2 is not the next patch"):
+                    BUILDER.validate_terraform_file_artifacts("1.0.2", grown, candidate)
+            next_patch = self.later_release(root, "1.0.3", {})
+            BUILDER.validate_terraform_file_artifacts("1.0.3", next_patch, root)
+        # With no earlier record, the reading's first table release is 1.0.0, and no other.
+        for number in ("1.0.1", "1.1.0", "0.9.0", "2.0.0"):
+            with self.subTest(first=number), tempfile.TemporaryDirectory() as temporary:
+                root = self.released_tree(temporary)
+                (root / "releases" / f"{TAG}.json").unlink()
+                tag = self.later_release(root, number, record(root)["formatTable"]["table"])
+                with self.assertRaisesRegex(ValueError, "first table release is 1.0.0"):
+                    BUILDER.validate_terraform_file_artifacts(number, tag, root)
 
     def test_tagged_history_cannot_be_rewritten_through_worktree_records(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.released_tree(temporary)
-            old = record(root, "terraform-file-v0.9.0", "0.9.0")
-            old["formatTable"]["release"] = "0.9.0"
+            old = record(root)
+            later = self.later_release(root, "1.0.1", {})
             shrunk = copy.deepcopy(old)
             shrunk["codes"]["codes"].append("TF-RETIRED")
-            for listed in (f"terraform-file-v0.9.0\n{TAG}", "terraform-file-v0.9.0"):
+            # Only the tags are read, whatever the worktree's records say.
+            (root / "releases" / f"{TAG}.json").write_text(json.dumps(shrunk))
+            for listed in (f"{TAG}\n{later}", TAG):
                 with self.subTest(listed=listed), patch.object(BUILDER, "ROOT", root), \
                         patch.object(BUILDER, "git", side_effect=[listed, json.dumps(shrunk)]):
-                    with self.assertRaisesRegex(ValueError, "immutable tagged"):
-                        BUILDER.validate_terraform_file_history(TAG)
+                    with self.assertRaisesRegex(ValueError, "immutable tagged release history: table release 1.0.1 lacks"):
+                        BUILDER.validate_terraform_file_history(later)
+            (root / "releases" / f"{TAG}.json").write_text(json.dumps(old))
             with patch.object(BUILDER, "ROOT", root), \
-                    patch.object(BUILDER, "git", side_effect=["terraform-file-v0.9.0", json.dumps(old)]):
-                BUILDER.validate_terraform_file_history(TAG)
+                    patch.object(BUILDER, "git", side_effect=[TAG, json.dumps(old)]):
+                BUILDER.validate_terraform_file_history(later)
             # A tag outside the grammar is not read.
             with patch.object(BUILDER, "ROOT", root), \
-                    patch.object(BUILDER, "git", side_effect=["terraform-file-v0.9"]):
-                BUILDER.validate_terraform_file_history(TAG)
+                    patch.object(BUILDER, "git", side_effect=[f"terraform-file-v0.9\n{TAG}", json.dumps(old)]):
+                BUILDER.validate_terraform_file_history(later)
+            # With the first tag gone, the later one has no predecessor, and 1.0.1 is not the first.
+            with patch.object(BUILDER, "ROOT", root), patch.object(BUILDER, "git", side_effect=[""]), \
+                    self.assertRaisesRegex(ValueError, "immutable tagged release history: .*first table release"):
+                BUILDER.validate_terraform_file_history(later)
+            # A tagged predecessor the worktree's records do not show: the rows the later release
+            # accepts beyond it must be the ones its record names.
+            fewer = copy.deepcopy(old)
+            fewer["formatTable"]["table"]["plan"].remove("1.2")
+            with patch.object(BUILDER, "ROOT", root), \
+                    patch.object(BUILDER, "git", side_effect=[TAG, json.dumps(fewer)]), \
+                    self.assertRaisesRegex(ValueError, "immutable tagged release history: the record's added rows"):
+                BUILDER.validate_terraform_file_history(later)
+            # And a tagged predecessor two patches below.
+            skipped = copy.deepcopy(old)
+            skipped["formatTable"]["release"] = "0.9.9"
+            with patch.object(BUILDER, "ROOT", root), \
+                    patch.object(BUILDER, "git", side_effect=["terraform-file-v0.9.9", json.dumps(skipped)]), \
+                    self.assertRaisesRegex(ValueError, "immutable tagged release history: .*not the next patch"):
+                BUILDER.validate_terraform_file_history(later)
 
     def test_terraform_file_validation_routes_to_its_own_gate(self):
         commit = "a" * 40

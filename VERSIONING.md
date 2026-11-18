@@ -302,15 +302,23 @@ establish one. The first is `terraform-file-v1.0.0`; preparing it publishes noth
 
 The reading's table of accepted `format_version` values has a release number of its own, a semantic
 version in which each newly accepted row is a patch release ([the companion](spec/terraform-file.md)
-§4). A tag's number is the table release it carries: the first tag carries table release `1.0.0`,
-and a later tag that adds a row carries the next patch, so `terraform-file-v1.0.1` carries table
-release `1.0.1`. The builder refuses a tag whose number is not the release the table gives.
+§4). A tag's number is the table release it carries. The first tag carries table release `1.0.0`,
+and each later tag carries exactly the next patch of the latest earlier release, whether it accepts
+new rows or none. An erratum release, one that corrects the text, the lists or the vectors and
+accepts no new row, also bumps the table's release by a patch, with no new row; its record says so
+with an empty `added`. So `terraform-file-v1.0.1` carries table release `1.0.1`, whatever it
+changes. The text defines no minor or major release of the table, so this route has none until the
+text defines one. The builder refuses a tag whose number is not the release the table gives, a
+first release whose table release is not `1.0.0`, and a later one whose table release is not the
+next patch of the latest earlier release, in the worktree or at an earlier terraform-file tag.
 
 A terraform-file release names, in its own JSON release record `releases/<tag>.json` beside its
 notes, the exact reading `1.0.0` and the SHA-256 of the companion text and of the vectors' README;
-the format table with its digest, its release and its rows; the code list with its digest and its
-codes; and the vectors' manifest with its digest, the id of every vector and the digest of every
-file under `conformance/terraform-file/1.0.0/`, every declaration and vector among them. The builder
+the format table with its digest, its release, its rows and, as `added`, the rows its release
+accepts beyond the latest earlier release (every row for the first, none for an erratum); the code
+list with its digest and its codes; and the vectors' manifest with its digest, the id of every
+vector and the digest of every file under `conformance/terraform-file/1.0.0/`, every declaration and
+vector among them. The builder
 derives that record from the tagged tree and refuses the tag unless the committed record equals it,
 its maturity is `released`, the text's status sentence, the code list, the format table and the
 vectors' manifest all say `released`, and neither the text nor the vectors' README still calls the
@@ -329,7 +337,8 @@ and an earlier record of the same reading, in the worktree or at an earlier terr
 carry the same table release, or where the record of the higher table release lacks a code, an
 accepted `format_version` of a `document` or a vector that the lower one names. A later release may
 change the bytes of the text, the lists and the vectors, as a later registry release may change its
-rows' bytes. A conformance claim names the exact terraform-file release, the table release it
+rows' bytes: no byte is frozen from one release to the next, and each release's record pins its
+own. A conformance claim names the exact terraform-file release, the table release it
 implements and its complete vectors, which that release's record identifies ([the
 companion](spec/terraform-file.md) §12). The first stable release needs a second, independently
 written reader that agrees with the first on every vector (§12), and its own reviewed change to the

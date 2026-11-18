@@ -224,18 +224,21 @@ companion's codes ([`spec/registry.md`](registry.md) §12), and not this list's.
 
 The companion is released on the scoped tag `terraform-file-v<major>.<minor>.<patch>`. The first
 release is `terraform-file-v1.0.0`, at status `released`: it is released, and not stable, and it
-carries the first table, release `1.0.0` (§4). A tag's number is the table release it carries, so a
-tag that adds a row to the table is a patch release ([VERSIONING.md](../VERSIONING.md)).
+carries the first table, release `1.0.0` (§4). A tag's number is the table release it carries, and
+each later tag is the next patch: one that adds a row to the table, and one, an erratum, that
+corrects this text, the lists or the vectors and adds no row ([VERSIONING.md](../VERSIONING.md)).
 
 A tag names, in its release record `releases/<tag>.json`, the reading `1.0.0`; the SHA-256 of this
-text and of the vectors' README; the format table with its digest, its release and its rows; the
-code list with its digest and its codes; and the vectors' manifest with its digest, the id of every
-vector and the digest of every file under `conformance/terraform-file/1.0.0/`. Its bundle,
-`judgment-pack-terraform-file-<version>`, publishes this text, the code list, the format table, the
-declarations and the vectors with their README, the checks that hold the vectors to this text, and
-the record and the notes. A Core bundle carries this text and none of those files. No code, table
-row or vector that a release names is dropped by a later release of the same reading. No stability
-promise is made before the first stable release, which needs the second reader §12 asks for.
+text and of the vectors' README; the format table with its digest, its release, its rows and the
+rows that release adds, none for an erratum; the code list with its digest and its codes; and the
+vectors' manifest with its digest, the id of every vector and the digest of every file under
+`conformance/terraform-file/1.0.0/`. Its bundle, `judgment-pack-terraform-file-<version>`,
+publishes this text, the code list, the format table, the declarations and the vectors with their
+README, the checks that hold the vectors to this text, and the record and the notes. A Core bundle
+carries this text and none of those files. No code, table row or vector that a release names is
+dropped by a later release of the same reading, whose bytes may change and whose own record pins
+them. No stability promise is made before the first stable release, which needs the second reader
+§12 asks for.
 
 Dialect version 3, which is proposed, and later Core releases cite this text rather than carry it.
 

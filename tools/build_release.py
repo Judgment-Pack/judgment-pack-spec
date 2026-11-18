@@ -406,8 +406,12 @@ def validate_registry_history(tag: str) -> None:
 # digests. The companion has no schema, so nothing of it is served at an `$id`. A tag's number is
 # the release of the format table it carries (spec/terraform-file.md section 4), and the builder
 # holds the two to one number. Every file under the reading's directory is pinned, derived from the
-# tree rather than listed here.
+# tree rather than listed here. The reading's first table release is 1.0.0 and each later one is the
+# next patch of the latest earlier one, whether it accepts new rows or, as an erratum, none; the
+# record's `added` names the rows it accepts. The text defines no minor or major release of the
+# table, so this route has none.
 TERRAFORM_FILE_READING = "1.0.0"
+TERRAFORM_FILE_FIRST_TABLE = (1, 0, 0)
 TERRAFORM_FILE_MATURITY = "released"
 TERRAFORM_FILE_ROOT = f"conformance/terraform-file/{TERRAFORM_FILE_READING}"
 TERRAFORM_FILE_TEXT = "spec/terraform-file.md"
@@ -477,11 +481,13 @@ def terraform_file_record(version: str, tag: str, root: Path = ROOT) -> dict:
             or not all(isinstance(row, dict) and isinstance(row.get("id"), str) for row in listed_vectors)
             or len({row["id"] for row in listed_vectors}) != len(listed_vectors)):
         raise ValueError("terraform-file vectors' manifest has no vectors, or two share an id")
+    table = {row["document"]: sorted(row["accepted"]) for row in rows}
     return {"companion": "terraform-file", "releaseVersion": version, "tag": tag,
             "maturity": TERRAFORM_FILE_MATURITY, "reading": TERRAFORM_FILE_READING,
             "formatTable": {"path": table_path, "sha256": "sha256:" + sha256(root / table_path),
-                            "release": formats["release"],
-                            "table": {row["document"]: sorted(row["accepted"]) for row in rows}},
+                            "release": formats["release"], "table": table,
+                            "added": terraform_file_added(table, formats["release"],
+                                                          terraform_file_worktree_records(tag, root))},
             "codes": {"path": codes_path, "sha256": "sha256:" + sha256(root / codes_path),
                       "codes": [code["code"] for code in listed]},
             "corpus": {"path": vectors_path, "sha256": "sha256:" + sha256(root / vectors_path),
@@ -513,23 +519,21 @@ def validate_terraform_file_artifacts(version: str, tag: str, root: Path = ROOT)
     if release["formatTable"]["release"] != version:
         raise ValueError(f"a terraform-file tag's number must be the release of the format table it "
                          f"carries: {tag} carries table release {release['formatTable']['release']}")
-    for previous_path in (root / "releases").glob("terraform-file-v*.json"):
-        if previous_path == record_path or previous_path.name.endswith(".milestone.json"):
-            continue
-        if not terraform_file_records_agree(json.loads(previous_path.read_text("utf-8")), release):
-            raise ValueError("terraform-file reading conflicts with an earlier release record")
-    documents = [json.loads((root / release[key]["path"]).read_text("utf-8"))
-                 for key in ("codes", "formatTable", "corpus")]
+    conflict = terraform_file_history_conflict(terraform_file_worktree_records(tag, root), release)
+    if conflict is not None:
+        raise ValueError(f"terraform-file reading conflicts with an earlier release record: {conflict}")
+    codes, table, manifest = (json.loads((root / release[key]["path"]).read_text("utf-8"))
+                              for key in ("codes", "formatTable", "corpus"))
     text = (root / TERRAFORM_FILE_TEXT).read_text("utf-8")
     if TERRAFORM_FILE_STATUS_SENTENCE.findall(text) != [TERRAFORM_FILE_MATURITY] or any(
             not isinstance(document, dict)
             or (document.get("companion"), document.get("reading"), document.get("status"))
             != ("terraform-file", TERRAFORM_FILE_READING, TERRAFORM_FILE_MATURITY)
-            for document in documents):
+            for document in (codes, table, manifest)):
         raise ValueError("a terraform-file release requires the text, the code list, the format "
                          f"table and the vectors' manifest to say status {TERRAFORM_FILE_MATURITY}")
     readme = (root / TERRAFORM_FILE_README).read_text("utf-8")
-    label = documents[2].get("label", "")
+    label = manifest.get("label", "")
     if (any(TERRAFORM_FILE_PROPOSED_STATEMENT.search(" ".join(document.split()))
             for document in (text, readme))
             or any(REGISTRY_UNRELEASED_WORDING.search(heading)
@@ -541,48 +545,108 @@ def validate_terraform_file_artifacts(version: str, tag: str, root: Path = ROOT)
         raise ValueError("terraform-file release notes are missing for the exact tag")
 
 
-def terraform_file_records_agree(previous: object, release: dict) -> bool:
-    """Two records of one reading never shrink from the lower table release to the higher: every
-    code, every accepted format_version of each document and every vector the lower names, the
-    higher names too, and two records never carry one table release. The bytes of the text, the
-    lists and the vectors may change, as the registry's rows may; a claim names the exact release,
-    whose record pins them. A record that is not of this form conflicts."""
-    if not isinstance(previous, dict) or not isinstance(previous.get("reading"), str):
-        return False
-    if previous["reading"] != release["reading"]:
-        return True
+def terraform_file_worktree_records(tag: str, root: Path = ROOT) -> list[object]:
+    """Every terraform-file release record in the worktree but the tag's own, as read."""
+    own = root / "releases" / f"{tag}.json"
+    return [json.loads(path.read_text("utf-8"))
+            for path in sorted((root / "releases").glob("terraform-file-v*.json"))
+            if path != own and not path.name.endswith(".milestone.json")]
 
-    def contents(record: dict) -> tuple[tuple[int, ...], set[str], set[tuple[str, str]], set[str]] | None:
-        table, codes, corpus = record.get("formatTable"), record.get("codes"), record.get("corpus")
-        if not (isinstance(table, dict) and isinstance(codes, dict) and isinstance(corpus, dict)
-                and isinstance(table.get("release"), str) and isinstance(table.get("table"), dict)
-                and isinstance(codes.get("codes"), list) and isinstance(corpus.get("vectors"), list)):
-            return None
-        number = PLAIN_VERSION.fullmatch(table["release"])
-        rows = table["table"].items()
-        if (number is None or not all(isinstance(accepted, list) for _, accepted in rows)
-                or not all(isinstance(item, str) for item in (*codes["codes"], *corpus["vectors"],
-                                                              *(a for _, accepted in rows for a in accepted)))):
-            return None
-        return (tuple(int(part) for part in number.groups()), set(codes["codes"]),
-                {(document, accepted) for document, row in rows for accepted in row}, set(corpus["vectors"]))
 
-    earlier, current = contents(previous), contents(release)
-    if earlier is None or current is None or earlier[0] == current[0]:
-        return False
-    lower, higher = sorted((earlier, current))
-    return all(kept <= grown for kept, grown in zip(lower[1:], higher[1:]))
+def terraform_file_contents(
+        record: object) -> tuple[tuple[int, int, int], set[str], set[tuple[str, str]], set[str]] | None:
+    """The table release, the codes, the table rows (document, accepted format_version) and the vector
+    ids a record names, or None for a record not of the record's form."""
+    if not isinstance(record, dict):
+        return None
+    table, codes, corpus = record.get("formatTable"), record.get("codes"), record.get("corpus")
+    if not (isinstance(table, dict) and isinstance(codes, dict) and isinstance(corpus, dict)
+            and isinstance(table.get("release"), str) and isinstance(table.get("table"), dict)
+            and isinstance(codes.get("codes"), list) and isinstance(corpus.get("vectors"), list)):
+        return None
+    number = PLAIN_VERSION.fullmatch(table["release"])
+    rows = table["table"].items()
+    if (number is None or not all(isinstance(accepted, list) for _, accepted in rows)
+            or not all(isinstance(item, str) for item in (*codes["codes"], *corpus["vectors"],
+                                                          *(a for _, accepted in rows for a in accepted)))):
+        return None
+    major, minor, patch = (int(part) for part in number.groups())
+    return ((major, minor, patch), set(codes["codes"]),
+            {(document, accepted) for document, row in rows for accepted in row}, set(corpus["vectors"]))
+
+
+def terraform_file_added(table: dict[str, list[str]], release: str, records: list[object]) -> dict[str, list[str]]:
+    """The rows of `table`, at table release `release`, that the latest lower table release of the
+    reading among `records` does not accept: every row for the first release, and none for an
+    erratum, which takes the next patch with no new row. A record not of the form is left to
+    terraform_file_history_conflict, which refuses it."""
+    number = PLAIN_VERSION.fullmatch(release)
+    current = tuple(int(part) for part in number.groups()) if number else None
+    lower = [contents for contents in (terraform_file_contents(record) for record in records
+                                       if isinstance(record, dict)
+                                       and record.get("reading") == TERRAFORM_FILE_READING)
+             if contents is not None and current is not None and contents[0] < current]
+    kept = max(lower, key=lambda contents: contents[0])[2] if lower else set()
+    return {document: new for document, accepted in table.items()
+            if (new := sorted(version for version in accepted if (document, version) not in kept))}
+
+
+def terraform_file_history_conflict(records: list[object], release: dict) -> str | None:
+    """Why `release` cannot stand beside the other records of its reading, or None.
+
+    Two records never carry one table release. The record of the higher table release names every
+    code, every accepted format_version of each document and every vector the lower names. The
+    reading's first table release is 1.0.0, and each later one is the next patch of the latest
+    earlier one, whether it accepts new rows or, as an erratum, none; the text defines no minor or
+    major release of the table. The record's `added` names exactly the rows its table release
+    accepts that the latest earlier one does not. The bytes of the text, the lists and the vectors
+    may change, as the registry's rows may; a claim names the exact release, whose record pins them.
+    A record not of the record's form conflicts."""
+    current = terraform_file_contents(release)
+    if current is None:
+        return "the release record is not of the record's form"
+    earlier: list[tuple[int, int, int]] = []
+    for previous in records:
+        if not isinstance(previous, dict) or not isinstance(previous.get("reading"), str):
+            return "a record is not of the record's form"
+        if previous["reading"] != release["reading"]:
+            continue
+        contents = terraform_file_contents(previous)
+        if contents is None:
+            return "a record is not of the record's form"
+        if contents[0] == current[0]:
+            return "two records carry table release %d.%d.%d" % current[0]
+        lower, higher = sorted((contents, current), key=lambda pair: pair[0])
+        if not all(kept <= grown for kept, grown in zip(lower[1:], higher[1:])):
+            return ("table release %d.%d.%d lacks a code, a table row or a vector that %d.%d.%d names"
+                    % (*higher[0], *lower[0]))
+        if contents[0] < current[0]:
+            earlier.append(contents[0])
+    if earlier:
+        latest = max(earlier)
+        expected = (latest[0], latest[1], latest[2] + 1)
+        if current[0] != expected:
+            return ("table release %d.%d.%d is not the next patch of the latest earlier one, %d.%d.%d"
+                    % (*current[0], *latest))
+    elif current[0] != TERRAFORM_FILE_FIRST_TABLE:
+        return "the reading's first table release is %d.%d.%d, not %d.%d.%d" % (
+            *TERRAFORM_FILE_FIRST_TABLE, *current[0])
+    table = release["formatTable"]
+    if table.get("added") != terraform_file_added(table["table"], table["release"], records):
+        return "the record's added rows are not the rows its table release accepts beyond the last"
+    return None
 
 
 def validate_terraform_file_history(tag: str) -> None:
-    """Compare immutable tagged records, so editing old working files cannot shrink the reading."""
+    """Compare immutable tagged records, so editing old working files cannot shrink the reading,
+    skip a table release or misstate the rows one adds."""
     release = json.loads((ROOT / "releases" / f"{tag}.json").read_text("utf-8"))
-    for previous in git("tag", "--list", "terraform-file-v*").splitlines():
-        if previous == tag or not is_terraform_file_tag(previous):
-            continue
-        old = json.loads(git("show", f"refs/tags/{previous}:releases/{previous}.json"))
-        if not terraform_file_records_agree(old, release):
-            raise ValueError("terraform-file reading conflicts with immutable tagged release history")
+    records = [json.loads(git("show", f"refs/tags/{previous}:releases/{previous}.json"))
+               for previous in git("tag", "--list", "terraform-file-v*").splitlines()
+               if previous != tag and is_terraform_file_tag(previous)]
+    conflict = terraform_file_history_conflict(records, release)
+    if conflict is not None:
+        raise ValueError(f"terraform-file reading conflicts with immutable tagged release history: {conflict}")
 
 
 def validate_policy_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
