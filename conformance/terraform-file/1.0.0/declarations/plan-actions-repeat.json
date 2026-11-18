@@ -1,0 +1,1 @@
+{"document": "plan", "select": {"types": ["google_compute_instance", "google_project", "google_sql_database_instance", "google_sql_user", "google_storage_bucket"], "actions": ["delete", "delete"]}}

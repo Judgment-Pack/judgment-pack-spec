@@ -33,10 +33,12 @@ Version `1.0.0` is proposed. Its first release makes it `released`, and not yet 
 - **Its vectors are proposed with it.** The machine-readable code list and format table, and the
   hand-written vectors, are under `conformance/terraform-file/1.0.0/` (§§11, 12). Until a release
   publishes them they are not a conformance corpus, and no claim may cite them.
-- **One reader exists.** The reference runtime reads the file (`v0.48.0`), and where this text
+- **Two readers exist.** The reference runtime reads the file (`v0.48.0`), and where this text
   settles what RFC 0038 left open, it says what that reader does, except for deposed objects (§3,
-  step 4), which that reader does not yet carry. No second, independently written reader exists.
-  The stable bar is two readers agreeing on every vector (§12).
+  step 4), which that reader does not yet carry. A second reader, written from this text alone, is
+  in this repository (`tools/terraform_file_reader.py`) and gives every vector's expected result; it
+  was written by a model from the drafting vendor, a same-vendor reader and not a cross-vendor
+  claim. The stable bar is two readers agreeing on every vector (§12).
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** and **MAY** have their
 BCP 14 meanings only in capitals.
@@ -70,14 +72,16 @@ malformed, and no file is read under it. What holds the declaration refuses it:
 ## 3. Reading the file
 
 A reader takes these steps in order. The first failure refuses the acquisition with its code (§9),
-and later steps do not run. A diagnostic carries its code, the file's sha256 and its size, and
-nothing else: no value, member name, pointer or position. The one exception is a stream's `TF-SIZE`
-(step 1), which carries neither the sha256 nor the size.
+and later steps do not run. A diagnostic carries its code, the file's sha256 and its size, and a
+`message`: a fixed text for its code, which holds nothing read from the file. It carries nothing
+else: no value, member name, pointer or position. The wording of a message is the reader's own, and
+not part of this text. The one exception is a stream's `TF-SIZE` (step 1), which carries its code
+and its message, and neither the sha256 nor the size.
 
 1. The sha256 of the whole file and its length are recorded. A file longer than `maxBytes` is
    `TF-SIZE`, unparsed. An input read as a stream, such as standard input, is read to at most
    `maxBytes` and one byte more: a longer stream is `TF-SIZE`, unparsed, and its diagnostic carries
-   the code and a fixed reading that the input was a stream, with no sha256 and no size, since its
+   the code and a fixed message that the input was a stream, with no sha256 and no size, since its
    whole length is never read. A stream within `maxBytes` has its sha256 and length recorded as a
    file's are.
 2. The bytes are UTF-8 with no byte-order mark and no lone surrogate escape, one JSON value with only
@@ -86,17 +90,27 @@ nothing else: no value, member name, pointer or position. The one exception is a
 3. The top-level value is an object whose `format_version` is a string in the accepted table for
    `document` (§4); otherwise `TF-FORMAT`.
 4. A `plan` has `planned_values`, an object, and `resource_changes`, when present, an array (absent
-   reads as empty). A `state` has neither `planned_values` nor `resource_changes`, and `values`, when
-   present, is an object (absent reads as no resources). Otherwise `TF-DOCUMENT`. A resource of the
-   read section (step 5) that is a deposed object, one an apply replaced but has not yet destroyed,
-   has a **deposed key**, `deposed` in a `plan` and `deposed_key` in a `state`, which is a
-   non-empty string. A resource's **id** is its `address`, or, with a deposed key, its `address`, a
-   space, `deposed`, a space and the key. A deposed key of another type, an empty one, or two
-   resources of the read section with one id, is `TF-DOCUMENT`. In a `plan`, each item of
-   `resource_changes` is an object whose `change` is an object, with `actions` an array of
-   strings; any other item is `TF-DOCUMENT`. A resource change's
-   `change.after_unknown`, when present, has a mirror's form: `true`, `false`, or an object or
-   array of mirrors. Any other `after_unknown`, null included, is `TF-DOCUMENT`.
+   reads as empty). A `state` has neither `planned_values` nor `resource_changes`, and `values`,
+   when present, is an object (absent reads as no resources). In a `state`, `values.root_module`,
+   when present, is a module (absent reads as no resources). A module is an object, which needs no
+   `address`. Its `resources`, when present, is an array of objects, and its `child_modules`, when
+   present, is an array of modules; either one, when absent, reads as empty. Otherwise
+   `TF-DOCUMENT`. Modules nest with no bound but step 2's depth. Each resource of the read section
+   (step 5), an item of `resource_changes` or of a module's `resources`, has `address`, `type`,
+   `name`, `mode` and `provider_name`, each a string, which may be empty. Its `index` is optional,
+   and when present a string or a number. A state's resource may lack `values`. None of these is
+   checked against another: `mode` is not restricted when read, and a resource whose `mode` is not
+   the one `select` names is read and not selected (§5); an `address` is not checked against its
+   `type` or `name`. Any other resource is `TF-DOCUMENT`. A resource of the read section that is a
+   deposed object, one an apply replaced but has not yet destroyed, has a **deposed key**, `deposed`
+   in a `plan` and `deposed_key` in a `state`, which is a non-empty string. A resource's **id** is
+   its `address`, or, with a deposed key, its `address`, a space, `deposed`, a space and the key. A
+   deposed key of another type, an empty one, or two resources of the read section with one id, is
+   `TF-DOCUMENT`. In a `plan`, each item of `resource_changes` is an object whose `change` is an
+   object, with `actions` an array of strings, and `before` and `after` optional; any other item is
+   `TF-DOCUMENT`. A resource change's `change.after_unknown`, when present, has a mirror's form:
+   `true`, `false`, or an object or array of mirrors. Any other `after_unknown`, null included, is
+   `TF-DOCUMENT`.
 5. The read section is `resource_changes` for a `plan`, and every resource under
    `values.root_module` and its `child_modules`, recursively, for a `state`. Every resource in it,
    selected or not, carries its sensitivity mirror (`change.before_sensitive` and
@@ -148,13 +162,19 @@ The first table's release is `1.0.0`, which the acquisition record's `formatTabl
 
 ## 5. Selection
 
-`select` has `types`, a non-empty array of at most 64 distinct resource type names; `mode`,
-`managed` (default) or `data`; `address`, optional, a pattern of at most 512 characters that
-matches the whole address, in which `*` matches any run of characters other than `.`, `[` and `]`
-and every other character matches itself; `actions`, optional and `plan` only, of `create`,
-`update`, `delete`, `read` and `no-op`, keeping changes whose `change.actions` include one; and
-`max`, an integer from 1 to 10000 (default 1000), past which the acquisition is `TF-SELECT-BOUND`.
-`actions` on a `state`, or a malformed `select`, makes the declaration malformed (§2).
+`select` has `types`, a non-empty array of at most 64 distinct resource type names, each a
+non-empty string with no other bound on its length or its characters; `mode`, `managed` (default)
+or `data`, compared with each resource's `mode`, which is not restricted when read (§3, step 4), so
+a resource of any other `mode` is read and never selected; `address`, optional, a pattern of at
+most 512 characters that matches the whole address, in which `*` matches any run of characters
+other than `.`, `[` and `]` and every other character matches itself; `actions`, optional and
+`plan` only, an array of names from `create`, `update`, `delete`, `read` and `no-op`, keeping
+changes whose `change.actions` include one; and `max`, an integer from 1 to 10000 (default 1000),
+past which the acquisition is `TF-SELECT-BOUND`. A name may repeat in `actions`, which is read as
+the set of its names, so neither a repeat nor the order changes what is kept. An empty `actions`
+keeps no change, and so selects nothing: it is not the absence of the filter. An empty `types`, an
+empty or repeated type name, more than 64 type names, an `actions` name outside the five, `actions`
+on a `state`, or another malformed `select`, makes the declaration malformed (§2).
 Child-module resources are included with their full address; selecting nothing gives an empty
 array.
 
@@ -196,9 +216,18 @@ selected resource whose id is outside it refuses the whole run, before any line 
 `FACTS-ID-LIMIT`, the registry companion's code of a batch line's id bound
 ([`spec/registry.md`](registry.md) §10.2), and neither a dialect code nor one of §9's: every
 selected resource is checked for it before any facts document is held to the registry companion's
-facts bound (`FACTS-DOCUMENT-LIMIT`, [`spec/registry.md`](registry.md) §10.1). Its diagnostic
-carries what a refusal of the reading carries, the code, the file's sha256 and its size, and never
-the id.
+facts bound (`FACTS-DOCUMENT-LIMIT`, [`spec/registry.md`](registry.md) §10.1). An id is outside the
+bound when it is empty or longer than 256 bytes. Then every selected resource's facts document is
+held to the facts bound, and one over it refuses the whole run in the same way, before any line is
+written, with `FACTS-DOCUMENT-LIMIT`. Either refusal covers the whole run: no line is written, and
+a batch is written whole or not at all. The diagnostic of each carries what a refusal of the reading
+carries (§3), the code, the file's sha256, its size and the code's message, and never the id. The
+reference runtime's batch tool gives either refusal as exit status 2 with nothing on standard
+output, and writes its diagnostic to standard error as one RFC 8785 canonical object, of the members
+`bytes`, `code`, `message` and `sha256`, and a line feed. The tool may refuse an empty `actions` on
+its command line, since a command line has no other way to say that nothing is to be selected; that
+is a rule of the tool's flags, not of the reading, in which an empty `actions` selects nothing
+(§5).
 
 ## 9. Diagnostic codes
 

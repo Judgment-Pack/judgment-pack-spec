@@ -279,6 +279,30 @@
       "expected": "vectors/plans/plan-no-resource-changes.expected.json"
     },
     {
+      "id": "plan-resource-changes-empty",
+      "group": "plans",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A plan whose resource_changes is an empty array: accepted, and nothing selected.",
+      "declaration": "declarations/plan.json",
+      "input": "vectors/plans/resource-changes-empty.json",
+      "expected": "vectors/plans/plan-resource-changes-empty.expected.json"
+    },
+    {
+      "id": "plan-actions-repeat",
+      "group": "plans",
+      "section": "§5",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "actions delete written twice: actions is read as a set, so the value is plan-actions-delete's.",
+      "declaration": "declarations/plan-actions-repeat.json",
+      "input": "vectors/plans/mixed.json",
+      "expected": "vectors/plans/plan-actions-repeat.expected.json"
+    },
+    {
       "id": "state-no-values",
       "group": "state",
       "section": "§3 step 4",
@@ -352,6 +376,121 @@
       "declaration": "declarations/state.json",
       "input": "vectors/state/outputs-sensitive.json",
       "expected": "vectors/state/state-outputs-not-read.expected.json"
+    },
+    {
+      "id": "state-resource-provider-name-missing",
+      "group": "state",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A state resource with no provider_name.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/state/resource-provider-name-missing.json",
+      "broken": "provider_name missing",
+      "expected": "vectors/state/state-resource-provider-name-missing.expected.json"
+    },
+    {
+      "id": "state-resource-type-empty",
+      "group": "state",
+      "section": "§3 step 4, §5",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A state resource whose type is the empty string, beside a bucket: it is read, not refused, and no declaration can select it, since a type name is non-empty.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/state/resource-type-empty.json",
+      "expected": "vectors/state/state-resource-type-empty.expected.json"
+    },
+    {
+      "id": "state-values-null",
+      "group": "state",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A state whose values is null.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/state/values-null.json",
+      "broken": "values null",
+      "expected": "vectors/state/state-values-null.expected.json"
+    },
+    {
+      "id": "state-root-module-null",
+      "group": "state",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A state whose values.root_module is null.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/state/root-module-null.json",
+      "broken": "root_module null",
+      "expected": "vectors/state/state-root-module-null.expected.json"
+    },
+    {
+      "id": "state-resources-not-array",
+      "group": "state",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A module whose resources is an object.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/state/resources-object.json",
+      "broken": "resources an object",
+      "expected": "vectors/state/state-resources-not-array.expected.json"
+    },
+    {
+      "id": "state-resource-not-object",
+      "group": "state",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A module whose resources holds a string.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/state/resource-string.json",
+      "broken": "a resource a string",
+      "expected": "vectors/state/state-resource-not-object.expected.json"
+    },
+    {
+      "id": "state-child-modules-not-array",
+      "group": "state",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A module whose child_modules is an object.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/state/child-modules-object.json",
+      "broken": "child_modules an object",
+      "expected": "vectors/state/state-child-modules-not-array.expected.json"
+    },
+    {
+      "id": "state-child-module-not-object",
+      "group": "state",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A module whose child_modules holds a string.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/state/child-module-string.json",
+      "broken": "a child module a string",
+      "expected": "vectors/state/state-child-module-not-object.expected.json"
+    },
+    {
+      "id": "state-child-module-no-address",
+      "group": "state",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A child module with no address: a module needs none, and its resource is read with its own full address.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/state/child-module-no-address.json",
+      "expected": "vectors/state/state-child-module-no-address.expected.json"
     },
     {
       "id": "state-read-as-plan",
@@ -520,6 +659,45 @@
       "input": "vectors/document/after-unknown-nested-number.json",
       "broken": "A change whose after_unknown holds a number below an object.",
       "expected": "vectors/document/after-unknown-nested-number.expected.json"
+    },
+    {
+      "id": "resource-name-number",
+      "group": "document",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A resource change whose name is a number: address, type, name, mode and provider_name are strings.",
+      "declaration": "declarations/plan.json",
+      "input": "vectors/document/resource-name-number.json",
+      "broken": "name a number",
+      "expected": "vectors/document/resource-name-number.expected.json"
+    },
+    {
+      "id": "resource-index-null",
+      "group": "document",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A resource change whose index is null: an index, when present, is a string or a number.",
+      "declaration": "declarations/plan.json",
+      "input": "vectors/document/resource-index-null.json",
+      "broken": "index null",
+      "expected": "vectors/document/resource-index-null.expected.json"
+    },
+    {
+      "id": "plan-resource-changes-null",
+      "group": "document",
+      "section": "§3 step 4",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A plan whose resource_changes is null: when present, it is an array.",
+      "declaration": "declarations/plan.json",
+      "input": "vectors/document/plan-resource-changes-null.json",
+      "broken": "resource_changes null",
+      "expected": "vectors/document/plan-resource-changes-null.expected.json"
     },
     {
       "id": "sensitive-attribute",
@@ -1426,6 +1604,18 @@
       "expected": "vectors/selection/select-max-2-of-3.expected.json"
     },
     {
+      "id": "select-mode-other",
+      "group": "selection",
+      "section": "§3 step 4, §5",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A state resource whose mode is neither managed nor data, beside a managed bucket: mode is not restricted when read, so it is read, not refused, and not selected.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/selection/mode-other.json",
+      "expected": "vectors/selection/select-mode-other.expected.json"
+    },
+    {
       "id": "numbers-normal-forms",
       "group": "numbers",
       "section": "§6",
@@ -1798,6 +1988,38 @@
       "declaration": "declarations/state.json",
       "input": "vectors/batch/deposed-id-257.json",
       "expected": "vectors/batch/batch-deposed-id-257.expected.json"
+    },
+    {
+      "id": "batch-facts-document-limit",
+      "group": "batch",
+      "section": "§8",
+      "operation": "batch",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "The bulky input of batch-id-257-beside-bulky with only its bucket selected, whose facts document holds a string over 1 MiB: FACTS-DOCUMENT-LIMIT, and no line.",
+      "declaration": "declarations/state-batch-archive.json",
+      "generate": {
+        "template": "batch/id-257-beside-bulky.template.json",
+        "replace": "\"<generated>\"",
+        "with": {
+          "repeat": "a",
+          "times": 1048577,
+          "quoted": true
+        }
+      },
+      "expected": "vectors/batch/batch-facts-document-limit.expected.json"
+    },
+    {
+      "id": "batch-id-empty",
+      "group": "batch",
+      "section": "§3 step 4, §8",
+      "operation": "batch",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A selected resource whose address, its id, is empty, beside a bucket: an address may be empty when read, and its id is outside the batch's bound, so FACTS-ID-LIMIT, and no line.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/batch/id-empty.json",
+      "expected": "vectors/batch/batch-id-empty.expected.json"
     },
     {
       "id": "declaration-max-bytes-1.0",
@@ -2266,6 +2488,18 @@
       "declaration": "declarations/declaration-address-512.json",
       "input": "vectors/declarations/plan.json",
       "expected": "vectors/declarations/declaration-address-512.expected.json"
+    },
+    {
+      "id": "declaration-types-empty-name",
+      "group": "declarations",
+      "section": "§2, §5",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A type name that is the empty string: each name is a non-empty string.",
+      "declaration": "declarations/declaration-types-empty-name.json",
+      "input": "vectors/declarations/not-json.txt",
+      "expected": "vectors/declarations/declaration-types-empty-name.expected.json"
     },
     {
       "id": "order-json-before-format",
