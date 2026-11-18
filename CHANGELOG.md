@@ -122,7 +122,8 @@ here.
   unchanged. No schema, code list, row or reader exists.
 - **The registry companion's format `1.1.0`, released as `registry-v1.1.0`** (status `released`,
   and not stable; release notes `releases/registry-v1.1.0.md`). Format `1.1.0` is `spec/registry.md`
-  (its §§1 to 17, unchanged) together with `spec/registry-1.1.0.md`, two files of one companion,
+  (its §§1 to 17, whose rules are unchanged; §§13 to 15 and 17 add only pointers to the second
+  file) together with `spec/registry-1.1.0.md`, two files of one companion,
   each with its own section numbers. Both texts' status sentences, the code list and the rows'
   manifest say `released`, the rows' README and the second reader no longer say proposed, and no
   schema's title or description says draft, staged, proposed or not released. Its release record,

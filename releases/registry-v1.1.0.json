@@ -853,8 +853,8 @@
     "schema/registry/1.1.0/source-signature.schema.json": "sha256:fa5a20eb2fb77e5abc3b68a5c88c5723d510ee85ca6e9831323c5db491581957",
     "schema/registry/1.1.0/source-statement.schema.json": "sha256:ff32ec9da747a567e702d2de20d1a658df1ebbe89188fffafc3f924f7893bc5e",
     "schema/registry/1.1.0/validation-report.schema.json": "sha256:a5f0e4fa890b98f7688dc49eb7db2a77a78b3f462adc56aaaea7eb8fedd7ec28",
-    "spec/registry.md": "sha256:2bf30b624e16f52a9d93aad8206a383fb3491ec6e458c1812784294962b56a19",
-    "spec/registry-1.1.0.md": "sha256:e86a63fa0ab80dd6b5e7744a152eef1a472691ee587636b5bf9f8520aa98a9c5",
+    "spec/registry.md": "sha256:6a0f8b06a436ba57c5982de7c25b739cd51cc3197f0096b26155078ba03267b9",
+    "spec/registry-1.1.0.md": "sha256:89c48bd40e387411acf970be80a720c753ef65d1b4ff331901a67227fb40cbcd",
     "conformance/registry/1.1.0/README.md": "sha256:22b93f0f51fa5b81ffb79f02ecb361756ff9fea9ff56e77e348d59af0d0432e9",
     "conformance/registry/README.md": "sha256:52c633c2dcd18f966724eb5a3f63e5323d8c1d6aed67bf7971dc3b865614be0a"
   }

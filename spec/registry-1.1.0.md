@@ -13,8 +13,9 @@ This text is registry format `1.1.0`, status `released`. A text no registry tag 
 normative for nothing, and no conformance claim may cite it. This text, released on
 `registry-v1.1.0` by the companion's route (registry §13), is normative for the conformance classes
 of §15, and for nothing else. At that release format `1.1.0` is
-`registry.md` (its §§1 to 17, unchanged) together with this text: two files of one companion,
-each with its own section numbers. `registry.md` alone remains the `1.0.0` text, released on
+`registry.md` (its §§1 to 17, whose rules are unchanged; its §§13 to 15 and 17 add only pointers
+to this text) together with this text: two files of one companion, each with its own section
+numbers. `registry.md` alone remains the `1.0.0` text, released on
 `registry-v1.0.0`, and nothing here changes it.
 
 Its design records are [RFC 0039](../rfcs/0039-federated-registry.md) (assembly, the index and
@@ -46,6 +47,8 @@ Changes after acceptance:
   longer described as unpublished.
 - Status: the design records, RFCs 0039 and 0040, are accepted rather than Drafts; no rule, code,
   order or bound changes.
+- Status: `registry.md`'s §§1 to 17 are described as keeping their rules, with pointers to this
+  text added in §§13 to 15 and 17, rather than as unchanged.
 
 ## 1. Conventions
 

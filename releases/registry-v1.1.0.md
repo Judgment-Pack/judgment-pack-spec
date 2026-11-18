@@ -2,8 +2,8 @@
 
 `registry-v1.1.0` is the second release of the registry companion: registry format `1.1.0`, at
 status `released`. Format `1.1.0` is [`spec/registry.md`](../spec/registry.md) (its §§1 to 17,
-unchanged) together with [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md): two files of one
-companion, each with its own section numbers. It adds assembly of one registry from several
+whose rules are unchanged; §§13 to 15 and 17 add only pointers to the second file) together
+with [`spec/registry-1.1.0.md`](../spec/registry-1.1.0.md): two files of one companion, each with its own section numbers. It adds assembly of one registry from several
 repositories, the assembled index, bounds a repository may only tighten, a lock that pins a
 registry and what it depends on, and the signatures that vouch for a lock and for each
 repository's part of it. It is tagged on the companion's own scoped route, beside Core and
