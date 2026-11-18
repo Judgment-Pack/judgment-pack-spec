@@ -15,21 +15,30 @@ and the text differ, the text governs.
 
 ## Readers
 
-No reader of the file exists in this repository. `tests/test_terraform_file_vectors.py` holds
-`codes.json` to the text's §9 table and `formats.json` to its §4 table, the manifest to the files,
-and each expected result to its form: an acquisition record of its own input, whose `sha256` and
-`bytes` are the input's; a value in id order with no JSON number and no sensitive text; a refusal of
-a listed code; batch lines in canonical form. It reads each declaration with the first reader,
-`tools/dialect_verify.py`, which holds a `terraform-file` source to its form and reads no file:
-directly, as the members of §2, and as a source of a dialect document, where the document's own
-number domain refuses `1.0` and `1e2` first (`spec/dialect.md` §1).
+`tools/terraform_file_reader.py` is a second reader of the file, written from the companion text
+alone (its §§1 to 12, the registry companion's §10.1 and §10.2, RFC 8785 and RFC 6901), with no
+other reader ported and no expected result read before it was written. It uses the standard library
+only, reads bytes only, and runs no program. `tests/test_terraform_file_vectors.py` runs every
+vector through it, and each must give its expected result exactly: a refusal's code and members, an
+accepted read's record and value, the value's canonical bytes, and a batch's bytes. It gives every
+one. It was written by a model from the drafting vendor: a same-vendor reader, not a cross-vendor
+claim.
+
+The same tests hold `codes.json` to the text's §9 table and `formats.json` to its §4 table, the
+manifest to the files, and each expected result to its form: an acquisition record of its own
+input, whose `sha256` and `bytes` are the input's; a value in id order with no JSON number and no
+sensitive text; a refusal of a listed code; batch lines in canonical form. They read each
+declaration with the first reader, `tools/dialect_verify.py`, which holds a `terraform-file` source
+to its form and reads no file: directly, as the members of §2, and as a source of a dialect
+document, where the document's own number domain refuses `1.0` and `1e2` first (`spec/dialect.md`
+§1).
 
 The reference runtime's reader was run over every vector as they were written. It reports each
 expected result but for one member: its acquisition record's `formatTable` is `proposed-1`, its own
 name for the first table, where §7 gives `1.0.0`, in each of the 70 accepted reads. The text
 governs. The reference runtime reads no declaration document (it takes a source's members as
-options), so the `declarations` group's malformed forms have no counterpart there. A second,
-independently written reader is the companion's stable bar (§12).
+options), so the `declarations` group's malformed forms have no counterpart there. Two
+independently written readers agreeing on every vector is the companion's stable bar (§12).
 
 ## The files
 

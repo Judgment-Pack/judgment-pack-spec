@@ -33,10 +33,12 @@ Version `1.0.0` is proposed. Its first release makes it `released`, and not yet 
 - **Its vectors are proposed with it.** The machine-readable code list and format table, and the
   hand-written vectors, are under `conformance/terraform-file/1.0.0/` (§§11, 12). Until a release
   publishes them they are not a conformance corpus, and no claim may cite them.
-- **One reader exists.** The reference runtime reads the file (`v0.48.0`), and where this text
+- **Two readers exist.** The reference runtime reads the file (`v0.48.0`), and where this text
   settles what RFC 0038 left open, it says what that reader does, except for deposed objects (§3,
-  step 4), which that reader does not yet carry. No second, independently written reader exists.
-  The stable bar is two readers agreeing on every vector (§12).
+  step 4), which that reader does not yet carry. A second reader, written from this text alone, is
+  in this repository (`tools/terraform_file_reader.py`) and gives every vector's expected result; it
+  was written by a model from the drafting vendor, a same-vendor reader and not a cross-vendor
+  claim. The stable bar is two readers agreeing on every vector (§12).
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** and **MAY** have their
 BCP 14 meanings only in capitals.

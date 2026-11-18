@@ -43,6 +43,16 @@ here.
   (§6); and such a removal counts one in `removedSensitive`, which counts nothing removed inside a
   removed value or an array removed up to its object member (§3, step 6). No Core bundle carries
   them, the site serves none of them, and no release record is added.
+- **A second reader of the `terraform-file` reading** (`tools/terraform_file_reader.py`; RFC 0038,
+  Implementation item 3; #369). It is written from the companion text alone, with the registry
+  companion's §10.1 and §10.2, RFC 8785 and RFC 6901, uses the standard library only, and reads
+  bytes only: it holds the declaration to §2's form, and the file to `maxBytes` (a stream read to
+  one byte past it), a depth of 128, the 64-character number bound, `max` and the value bound `L`
+  before it writes what they bound. `tests/test_terraform_file_vectors.py` now runs every one of the
+  188 vectors through it, and it gives each one's expected result exactly, so the reading's
+  results are no longer checked for form only. The companion's status says a second reader is in
+  the repository and agrees on every vector; it is a same-vendor reader, not a cross-vendor claim.
+  The reading stays `proposed`, and nothing about its stability changes.
 - RFC 0039, a Draft, proposes a federated registry as registry format `1.1.0`: a manifest of
   sources (one standard repository, the rest service repositories), an assembly from bytes the
   caller supplies at full commit ids into one ordinary `1.0.0` registry, and an index that records
