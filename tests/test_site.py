@@ -330,8 +330,8 @@ class StaticSiteTests(unittest.TestCase):
         # Packaged on the companion's own tag and never served as files. Each is served at its
         # $id from its first release on, which the rows' manifest says, and not before: a URL
         # served once keeps its bytes (spec/registry.md section 13).
-        # Each format's schemas follow that format's rows: format 1.1.0 is staged beside the released
-        # 1.0.0 (spec/registry-1.1.0.md) and is served at no $id until its own release.
+        # Each format's schemas follow that format's rows: format 1.1.0's (spec/registry-1.1.0.md)
+        # are served at their $id from its own release, registry-v1.1.0, on, and not before.
         self.assertFalse((self.output / "artifacts" / REGISTRY_SCHEMAS).exists())
         manifest = json.loads((ROOT / REGISTRY_ROWS / "1.0.0/manifest.json").read_text(encoding="utf-8"))
         self.assertIn(manifest["status"], ("proposed", "released"))
@@ -1430,6 +1430,9 @@ class RegistrySchemaSourcesTests(unittest.TestCase):
     NAMESPACE = "https://judgmentpack.org/schema/registry/1.0.0/"
     RELEASED = '{"status": "released", "vectors": [{"id": "a"}]}'
     SERVED = ("schema/registry/1.0.0/common.schema.json", "schema/registry/1.0.0/registry.schema.json")
+    # Format 1.1.0 is spec/registry.md together with spec/registry-1.1.0.md; its rows' README is in
+    # its own rows' directory.
+    SERVED_1_1_0 = ("schema/registry/1.1.0/common.schema.json", "schema/registry/1.1.0/lock.schema.json")
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -1456,6 +1459,30 @@ class RegistrySchemaSourcesTests(unittest.TestCase):
         (root / "spec/registry.md").write_text("Synthetic.\n")
         (root / "releases").mkdir()
         return root
+
+    def add_1_1_0(self, root: Path, manifest: str) -> None:
+        # The second format beside the first: two schemas under its own $id, its rows' manifest,
+        # code list and README, and its second text.
+        schemas = root / "schema/registry/1.1.0"
+        schemas.mkdir(parents=True)
+        for name in ("lock", "common"):
+            (schemas / f"{name}.schema.json").write_text(json.dumps(
+                {"$id": f"https://judgmentpack.org/schema/registry/1.1.0/{name}.schema.json"}))
+        rows = root / "conformance/registry/1.1.0"
+        rows.mkdir(parents=True)
+        (rows / "manifest.json").write_text(manifest)
+        (rows / "codes.json").write_text('{"codes": [{"code": "LOCK-A"}]}')
+        (rows / "README.md").write_text("Synthetic.\n")
+        (root / "spec/registry-1.1.0.md").write_text("Synthetic.\n")
+
+    def record_1_1_0(self, root: Path, tag: str = "registry-v1.1.0") -> dict:
+        schemas = root / "schema/registry/1.1.0"
+        return {"companion": "registry", "tag": tag, "formatVersion": "1.1.0",
+                "schemas": {name: f"https://judgmentpack.org/schema/registry/1.1.0/{name}.schema.json"
+                            for name in ("common", "lock")},
+                "formatDigests": {path.relative_to(root).as_posix():
+                                  "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+                                  for path in sorted(schemas.iterdir())}}
 
     def record(self, root: Path, tag: str = "registry-v1.0.0") -> dict:
         schemas = root / "schema/registry/1.0.0"
@@ -1518,9 +1545,65 @@ class RegistrySchemaSourcesTests(unittest.TestCase):
                 self.write(root, self.record(root))
                 self.assertEqual((), self.build.registry_schema_sources(root))
 
+    def test_each_released_format_with_its_record_serves_its_schemas(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.tree(temporary, self.RELEASED)
+            self.add_1_1_0(root, self.RELEASED)
+            self.write(root, self.record(root))
+            self.write(root, self.record_1_1_0(root), "registry-v1.1.0")
+            self.write(root, {"number": 12, "title": "registry-v1.1.0"}, "registry-v1.1.0.milestone")
+            self.assertEqual(self.SERVED + self.SERVED_1_1_0, self.build.registry_schema_sources(root))
+
+    def test_a_format_without_its_own_released_record_serves_none_of_its_schemas(self) -> None:
+        def changed_digest(release):
+            release["formatDigests"]["schema/registry/1.1.0/lock.schema.json"] = "sha256:" + "0" * 64
+
+        for label, manifest, change, tag in (
+                ("proposed", '{"status": "proposed", "vectors": [{"id": "a"}]}', None, "registry-v1.1.0"),
+                ("no record", self.RELEASED, None, None),
+                ("a schema's digest differs", self.RELEASED, changed_digest, "registry-v1.1.0"),
+                ("the first format's record", self.RELEASED,
+                 lambda release: release.update(formatVersion="1.0.0"), "registry-v1.1.0"),
+                ("a 1.0 tag", self.RELEASED, lambda release: release.update(tag="registry-v1.0.1"), "registry-v1.0.1")):
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                root = self.tree(temporary, self.RELEASED)
+                self.add_1_1_0(root, manifest)
+                self.write(root, self.record(root))
+                if tag is not None:
+                    release = self.record_1_1_0(root, tag)
+                    if change is not None:
+                        change(release)
+                    self.write(root, release, tag)
+                self.assertEqual(self.SERVED, self.build.registry_schema_sources(root))
+        # The second format's record serves its own schemas, whatever the first format's rows say.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.tree(temporary, '{"status": "proposed", "vectors": [{"id": "a"}]}')
+            self.add_1_1_0(root, self.RELEASED)
+            self.write(root, self.record(root))
+            self.write(root, self.record_1_1_0(root), "registry-v1.1.0")
+            self.assertEqual(self.SERVED_1_1_0, self.build.registry_schema_sources(root))
+
+    def test_a_record_the_builder_cannot_read_serves_none_at_all(self) -> None:
+        for name, content in (("registry-v1.2.0", '{"tag": "registry-v1.2.0"}'), ("registry-v2.0.0", "{}"),
+                              ("registry-v1.1.0", "{")):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
+                root = self.tree(temporary, self.RELEASED)
+                self.add_1_1_0(root, self.RELEASED)
+                self.write(root, self.record(root))
+                if name != "registry-v1.1.0":
+                    self.write(root, self.record_1_1_0(root), "registry-v1.1.0")
+                (root / "releases" / f"{name}.json").write_text(content)
+                self.assertEqual((), self.build.registry_schema_sources(root))
+
     def test_the_tree_as_it_stands_and_no_core_list_names_a_registry_schema(self) -> None:
-        status = json.loads((ROOT / REGISTRY_ROWS / "1.0.0/manifest.json").read_text(encoding="utf-8"))["status"]
-        self.assertEqual(status == "released", bool(self.build.registry_schema_sources()))
+        sources = self.build.registry_schema_sources()
+        formats = sorted(path.name for path in (ROOT / REGISTRY_SCHEMAS).iterdir() if path.is_dir())
+        self.assertEqual(["1.0.0", "1.1.0"], formats)
+        for version in formats:
+            status = json.loads((ROOT / REGISTRY_ROWS / version / "manifest.json").read_text(encoding="utf-8"))["status"]
+            with self.subTest(version=version):
+                self.assertEqual(status == "released",
+                                 any(source.startswith(f"{REGISTRY_SCHEMAS}/{version}/") for source in sources))
         self.assertFalse(any("/registry/" in source for source in self.build.CANONICAL_SCHEMA_SOURCES))
 
 

@@ -220,21 +220,14 @@ def is_policy_tag(tag: str) -> bool:
 # release at maturity `released`, which is not stable. Its record names the rows and the code list
 # with their digests; every file under the format's schema and row directories is pinned, derived
 # from the tree rather than listed here.
-REGISTRY_FORMAT = "1.0.0"
+#
+# The builder knows each registry format by its text files, the README of its rows and what its
+# bundle carries. A tag releases the format its major and minor numbers name: `registry-v1.0.x`
+# format `1.0.0`, and `registry-v1.1.x` format `1.1.0`, which is spec/registry.md together with
+# spec/registry-1.1.0.md (registry section 13). A tag whose numbers name no format here is refused.
 REGISTRY_MATURITY = "released"
-REGISTRY_ROOT = f"conformance/registry/{REGISTRY_FORMAT}"
-REGISTRY_SCHEMA_ROOT = f"schema/registry/{REGISTRY_FORMAT}"
-REGISTRY_TEXT = "spec/registry.md"
-REGISTRY_README = "conformance/registry/README.md"
-REGISTRY_SCHEMA_NAMESPACE = f"{SCHEMA_NAMESPACE}registry/{REGISTRY_FORMAT}/"
 REGISTRY_TAG_PATTERN = re.compile(
     r"registry-v((?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))"
-)
-# The text says its status in this one sentence; the code list and the rows' manifest say it in
-# their `status` member. All three say `proposed` until the commit a registry tag names.
-REGISTRY_STATUS_SENTENCE = re.compile(
-    rf"^This text is registry format `{re.escape(REGISTRY_FORMAT)}`, status `([a-z]+)`\.",
-    re.MULTILINE,
 )
 # What the companion's files say of it while the format is proposed: a schema's titles,
 # descriptions and comments, the rows' README heading and the rows' manifest label. A JSON Schema
@@ -244,27 +237,86 @@ REGISTRY_UNRELEASED_WORDING = re.compile(
     r"|no bundle|no site|no corpus)\b",
     re.IGNORECASE,
 )
-# The text's and the README's statements of the format's status, read with whitespace collapsed:
-# "status `proposed`" and "Version `1.0.0` is proposed".
-REGISTRY_PROPOSED_STATEMENT = re.compile(
-    rf"`{re.escape(REGISTRY_FORMAT)}`(?:, status `proposed`| is proposed)", re.IGNORECASE
-)
 REGISTRY_RECORD_KEYS = {"companion", "releaseVersion", "tag", "maturity", "formatVersion", "schemas",
                         "codes", "corpus", "formatDigests"}
-# The text, what it and the rows' README link to, the checks that hold the rows to the text, and
-# the license. Core's corpora and Policy's are not carried.
-REGISTRY_BUNDLE_PATHS = (
-    "LICENSE", "NOTICE", "VERSIONING.md", "requirements-dev.txt",
-    REGISTRY_TEXT, "spec/dialect.md", REGISTRY_SCHEMA_ROOT, REGISTRY_README, REGISTRY_ROOT,
-    "tests/test_registry_companion.py", "tests/test_registry_schemas.py",
-    "rfcs/0034-registry-profile.md", "rfcs/0035-registry-references.md",
-    "rfcs/0036-registry-emitter-contract.md", "rfcs/0037-generated-facts-contracts.md",
-    "rfcs/0038-terraform-file-source.md",
-)
+REGISTRY_TEXT = "spec/registry.md"
+
+
+class RegistryFormat:
+    """One registry format: its text files, the README of its rows, and what its bundle carries.
+
+    Its rows and code list are under conformance/registry/<version>/ and its schemas under
+    schema/registry/<version>/, each at an `$id` under the format's own namespace.
+    """
+
+    def __init__(self, version: str, texts: tuple[str, ...], readme: str, bundle: tuple[str, ...]):
+        self.version = version
+        self.texts = texts
+        self.readme = readme
+        self.root = f"conformance/registry/{version}"
+        self.schema_root = f"schema/registry/{version}"
+        self.namespace = f"{SCHEMA_NAMESPACE}registry/{version}/"
+        self.bundle_paths = bundle
+        # The format's texts say its status in one sentence, of exactly one of them; the code list
+        # and the rows' manifest say it in their `status` member. All three say `proposed` until
+        # the commit a registry tag names.
+        self.status_sentence = re.compile(
+            rf"^This text is registry format `{re.escape(version)}`, status `([a-z]+)`\.", re.MULTILINE)
+        # The texts' and the README's statements of the format's status, read with whitespace
+        # collapsed: "status `proposed`", "Version `1.0.0` is proposed", and a list that "says
+        # `proposed`".
+        self.proposed_statement = re.compile(
+            rf"`{re.escape(version)}`(?:, status `proposed`| is proposed)|\bstatus `proposed`"
+            r"|\bsays `proposed`",
+            re.IGNORECASE,
+        )
+
+
+# Each bundle carries the format's texts, what they and the rows' READMEs link to, the checks that
+# hold the rows to the text, and the license. Core's corpora and Policy's are not carried. Format
+# 1.1.0's bundle also carries format 1.0.0's schemas, rows and checks, which its own rows and
+# checks build on, and the second reader and the generator its rows' README names, with the
+# Ed25519 arithmetic its checks use.
+REGISTRY_FORMATS = {
+    "1.0.0": RegistryFormat("1.0.0", (REGISTRY_TEXT,), "conformance/registry/README.md", (
+        "LICENSE", "NOTICE", "VERSIONING.md", "requirements-dev.txt",
+        REGISTRY_TEXT, "spec/dialect.md", "schema/registry/1.0.0", "conformance/registry/README.md",
+        "conformance/registry/1.0.0",
+        "tests/test_registry_companion.py", "tests/test_registry_schemas.py",
+        "rfcs/0034-registry-profile.md", "rfcs/0035-registry-references.md",
+        "rfcs/0036-registry-emitter-contract.md", "rfcs/0037-generated-facts-contracts.md",
+        "rfcs/0038-terraform-file-source.md",
+    )),
+    "1.1.0": RegistryFormat("1.1.0", (REGISTRY_TEXT, "spec/registry-1.1.0.md"),
+                            "conformance/registry/1.1.0/README.md", (
+        "LICENSE", "NOTICE", "VERSIONING.md", "requirements-dev.txt",
+        REGISTRY_TEXT, "spec/registry-1.1.0.md", "spec/dialect.md", "spec/checkpoint-witness.md",
+        "schema/registry/1.0.0", "schema/registry/1.1.0",
+        "conformance/registry/README.md", "conformance/registry/1.0.0", "conformance/registry/1.1.0",
+        "tests/test_registry_companion.py", "tests/test_registry_schemas.py",
+        "tests/test_registry_1_1_0_rows.py", "tests/test_registry_1_1_0_reader.py",
+        "tools/registry_1_1_0_reader.py", "tools/registry_1_1_0_rows.py",
+        "tools/dialect_verify.py", "tools/retained_column.py", "tools/_retained_column.py",
+        "rfcs/0034-registry-profile.md", "rfcs/0035-registry-references.md",
+        "rfcs/0036-registry-emitter-contract.md", "rfcs/0037-generated-facts-contracts.md",
+        "rfcs/0038-terraform-file-source.md", "rfcs/0039-federated-registry.md",
+        "rfcs/0040-registry-locks-and-signatures.md",
+    )),
+}
 
 
 def is_registry_tag(tag: str) -> bool:
     return REGISTRY_TAG_PATTERN.fullmatch(tag) is not None
+
+
+def registry_format(version: str) -> RegistryFormat:
+    """The format a registry release of this version carries: the one its major and minor numbers
+    name. A later release of a format is a patch of it; any other version is refused."""
+    plain = PLAIN_VERSION.fullmatch(version)
+    form = REGISTRY_FORMATS.get(f"{plain.group(1)}.{plain.group(2)}.0") if plain else None
+    if form is None:
+        raise ValueError("registry release version names no registry format this builder knows")
+    return form
 
 
 def tree_digests(directory: str, root: Path = ROOT) -> dict[str, str]:
@@ -275,18 +327,19 @@ def tree_digests(directory: str, root: Path = ROOT) -> dict[str, str]:
 
 def registry_record(version: str, tag: str, root: Path = ROOT) -> dict:
     """The release record the tree gives a registry tag; its record must equal it."""
+    form = registry_format(version)
     schemas = {}
-    for path in sorted((root / REGISTRY_SCHEMA_ROOT).glob("*.schema.json")):
-        identity = REGISTRY_SCHEMA_NAMESPACE + path.name
+    for path in sorted((root / form.schema_root).glob("*.schema.json")):
+        identity = form.namespace + path.name
         if json.loads(path.read_text("utf-8")).get("$id") != identity:
             raise ValueError("registry schema $id differs from its immutable format identity")
         schemas[path.name[:-len(".schema.json")]] = identity
     if not schemas:
         raise ValueError("registry release has no schema")
-    digests = tree_digests(REGISTRY_SCHEMA_ROOT, root)
-    for path in (REGISTRY_TEXT, REGISTRY_README):
+    digests = tree_digests(form.schema_root, root)
+    for path in (*form.texts, form.readme):
         digests[path] = "sha256:" + sha256(root / path)
-    rows_path, codes_path = f"{REGISTRY_ROOT}/manifest.json", f"{REGISTRY_ROOT}/codes.json"
+    rows_path, codes_path = f"{form.root}/manifest.json", f"{form.root}/codes.json"
     rows = json.loads((root / rows_path).read_text("utf-8"))
     codes = json.loads((root / codes_path).read_text("utf-8"))
     vectors = rows.get("vectors") if isinstance(rows, dict) else None
@@ -297,16 +350,17 @@ def registry_record(version: str, tag: str, root: Path = ROOT) -> dict:
     if not isinstance(listed, list) or not listed:
         raise ValueError("registry code list has no codes")
     return {"companion": "registry", "releaseVersion": version, "tag": tag,
-            "maturity": REGISTRY_MATURITY, "formatVersion": REGISTRY_FORMAT, "schemas": schemas,
+            "maturity": REGISTRY_MATURITY, "formatVersion": form.version, "schemas": schemas,
             "codes": {"path": codes_path, "sha256": "sha256:" + sha256(root / codes_path),
                       "codes": len(listed)},
             "corpus": {"path": rows_path, "sha256": "sha256:" + sha256(root / rows_path),
-                       "rows": len(vectors), "files": tree_digests(REGISTRY_ROOT, root)},
+                       "rows": len(vectors), "files": tree_digests(form.root, root)},
             "formatDigests": digests}
 
 
 def validate_registry_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
     """Gate the independently versioned registry companion on its own release record."""
+    form = registry_format(version)
     record_path = root / "releases" / f"{tag}.json"
     if not record_path.is_file():
         raise ValueError("registry release record is missing for the exact tag")
@@ -330,16 +384,16 @@ def validate_registry_artifacts(version: str, tag: str, root: Path = ROOT) -> No
             raise ValueError("registry exact format identity conflicts with an earlier release record")
     rows = json.loads((root / release["corpus"]["path"]).read_text("utf-8"))
     codes = json.loads((root / release["codes"]["path"]).read_text("utf-8"))
-    text = REGISTRY_STATUS_SENTENCE.findall((root / REGISTRY_TEXT).read_text("utf-8"))
-    if text != [REGISTRY_MATURITY] or any(
+    texts = [(root / path).read_text("utf-8") for path in form.texts]
+    said = [status for text in texts for status in form.status_sentence.findall(text)]
+    if said != [REGISTRY_MATURITY] or any(
             (document.get("companion"), document.get("formatVersion"), document.get("status"))
-            != ("registry", REGISTRY_FORMAT, REGISTRY_MATURITY) for document in (rows, codes)):
+            != ("registry", form.version, REGISTRY_MATURITY) for document in (rows, codes)):
         raise ValueError("a registry release requires the text, the code list and the rows' "
                          f"manifest to say status {REGISTRY_MATURITY}")
-    readme = (root / REGISTRY_README).read_text("utf-8")
+    readme = (root / form.readme).read_text("utf-8")
     label = rows.get("label", "")
-    if (any(REGISTRY_PROPOSED_STATEMENT.search(" ".join(document.split()))
-            for document in ((root / REGISTRY_TEXT).read_text("utf-8"), readme))
+    if (any(form.proposed_statement.search(" ".join(document.split())) for document in (*texts, readme))
             or any(REGISTRY_UNRELEASED_WORDING.search(heading)
                    for heading in re.findall(r"^# .*$", readme, re.MULTILINE))
             or not isinstance(label, str) or REGISTRY_UNRELEASED_WORDING.search(label)):
@@ -349,7 +403,7 @@ def validate_registry_artifacts(version: str, tag: str, root: Path = ROOT) -> No
     # still call itself a draft, or unreleased, when the release publishes it: not in its own title
     # and description, which it must have, nor in any nested one or any comment.
     for name in release["schemas"]:
-        schema = json.loads((root / REGISTRY_SCHEMA_ROOT / f"{name}.schema.json").read_text("utf-8"))
+        schema = json.loads((root / form.schema_root / f"{name}.schema.json").read_text("utf-8"))
         if (not isinstance(schema, dict) or not isinstance(schema.get("title"), str)
                 or not isinstance(schema.get("description"), str)
                 or any(REGISTRY_UNRELEASED_WORDING.search(said) for said in schema_annotations(schema))):
@@ -376,15 +430,16 @@ def schema_annotations(value: object):
 def same_registry_schemas(previous: object, release: dict) -> bool:
     """A schema published at its $id never changes: an earlier record of the same format must
     name the same schema identities and the same schema bytes. A record that is not of this form
-    conflicts."""
+    conflicts; one of another format does not."""
     if not isinstance(previous, dict) or not isinstance(previous.get("formatDigests"), dict):
         return False
     if previous.get("formatVersion") != release["formatVersion"]:
         return True
+    schema_root = f"schema/registry/{release['formatVersion']}/"
 
     def pinned(record: dict) -> dict:
         return {path: digest for path, digest in record["formatDigests"].items()
-                if path.startswith(REGISTRY_SCHEMA_ROOT + "/")}
+                if path.startswith(schema_root)}
 
     return previous.get("schemas") == release["schemas"] and pinned(previous) == pinned(release)
 
@@ -757,7 +812,8 @@ def bundle_paths(tag: str, commit: str) -> tuple[str, ...]:
     if is_policy_tag(tag):
         return (*POLICY_BUNDLE_PATHS, f"releases/{tag}.md", f"releases/{tag}.json")
     if is_registry_tag(tag):
-        return (*REGISTRY_BUNDLE_PATHS, f"releases/{tag}.md", f"releases/{tag}.json")
+        return (*registry_format(release_version(tag)).bundle_paths, f"releases/{tag}.md",
+                f"releases/{tag}.json")
     if is_terraform_file_tag(tag):
         return (*TERRAFORM_FILE_BUNDLE_PATHS, f"releases/{tag}.md", f"releases/{tag}.json")
     # Policy, the registry and the terraform-file reading have their own release identities. Do not
