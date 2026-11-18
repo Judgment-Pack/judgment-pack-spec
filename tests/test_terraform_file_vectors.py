@@ -33,6 +33,13 @@ DEFAULT_MAX_BYTES = 67108864
 ROW_MEMBERS = {"id", "group", "section", "operation", "class", "formatTable", "description", "declaration",
                "expected"}
 ROW_OPTIONAL = {"input", "generate", "broken"}
+# The groups of conformance/terraform-file/README.md, a closed list: each is a directory under vectors/.
+GROUPS = ("formats", "plans", "state", "document", "sensitivity", "mirrors", "diagnostics", "json", "size",
+          "selection", "numbers", "value-limit", "deposed", "batch", "declarations", "order")
+# A row's section: one or more of the text's sections, each with the steps of §3 it holds, if any.
+SECTION = re.compile(r"§(\d+)(?: steps? [1-7](?: and [1-7])?)?(?:, §(\d+)(?: steps? [1-7](?: and [1-7])?)?)*")
+GENERATE = {"template", "replace", "with"}
+GENERATE_WITH = {"repeat", "times", "quoted"}
 IDENTITY = {"address", "type", "name", "mode", "providerName"}
 STATE_OPTIONAL = {"index", "deposed", "values"}
 PLAN_REQUIRED = IDENTITY | {"actions", "afterUnknown"}
@@ -105,8 +112,26 @@ CODES = load(BASE / "codes.json")
 FORMATS = load(BASE / "formats.json")
 
 
+_GENERATED: dict[str, bytes] = {}
+
+
 def generated(rule: dict[str, Any]) -> bytes:
-    """A large input is not committed: its template is, and the rule that writes it (README.md)."""
+    """A large input is not committed: its template is, and the rule that writes it (README.md). A rule of
+    any other members or forms is refused, not read."""
+    if not (isinstance(rule, dict) and set(rule) == GENERATE and isinstance(rule["with"], dict)
+            and set(rule["with"]) == GENERATE_WITH and isinstance(rule["template"], str)
+            and isinstance(rule["replace"], str) and rule["replace"]
+            and isinstance(rule["with"]["repeat"], str) and rule["with"]["repeat"]
+            and type(rule["with"]["times"]) is int and rule["with"]["times"] >= 1
+            and isinstance(rule["with"]["quoted"], bool)):
+        raise ValueError(f"a generate rule not of its form: {rule!r}")
+    key = json.dumps(rule, sort_keys=True)
+    if key not in _GENERATED:
+        _GENERATED[key] = _generate(rule)
+    return _GENERATED[key]
+
+
+def _generate(rule: dict[str, Any]) -> bytes:
     template = (BASE / "vectors" / rule["template"]).read_bytes()
     placeholder = rule["replace"].encode("utf-8")
     if template.count(placeholder) != 1:
@@ -130,6 +155,30 @@ def expected_of(row: dict[str, Any]) -> Any:
     return path.read_bytes() if path.suffix == ".jsonl" else load(path)
 
 
+def shape_of(row: dict[str, Any]) -> str | None:
+    """The one known shape a row's expected result has (README.md), or None for any other."""
+    expected = expected_of(row)
+    operation = row["operation"]
+    if isinstance(expected, bytes):
+        return "batch-lines" if operation == "batch" and row["expected"].endswith(".expected.jsonl") else None
+    if not row["expected"].endswith(".expected.json") or not isinstance(expected, dict):
+        return None
+    if set(expected) == {"record", "value"} and operation in ("read", "read-stream"):
+        if isinstance(expected["record"], dict) and isinstance(expected["value"], list):
+            return "accepted"
+        return None
+    if set(expected) == {"refusal"} and isinstance(expected["refusal"], dict):
+        refusal = expected["refusal"]
+        if set(refusal) == {"code", "sha256", "bytes"}:
+            return "refusal"
+        if refusal == {"code": "TF-SIZE", "stream": True} and operation == "read-stream":
+            return "stream-refusal"
+        return None
+    if expected == {"declaration": "malformed"} and operation == "read":
+        return "malformed"
+    return None
+
+
 def holds_a_number(value: Any) -> bool:
     # §6: every number of the acquired value is a decimal string, so the value holds no JSON number.
     if isinstance(value, dict):
@@ -143,7 +192,7 @@ def declaration_verdicts() -> dict[str, bool | None]:
     """Each declaration file, and whether its vectors expect it malformed: None if they disagree."""
     verdicts: dict[str, set[bool]] = {}
     for row in ROWS:
-        verdicts.setdefault(row["declaration"], set()).add(expected_of(row) == {"declaration": "malformed"})
+        verdicts.setdefault(row["declaration"], set()).add(shape_of(row) == "malformed")
     return {name: found.pop() if len(found) == 1 else None for name, found in verdicts.items()}
 
 
@@ -191,6 +240,7 @@ class TerraformFileManifestTests(unittest.TestCase):
         self.assertEqual(set(), on_disk - named, "on disk and named by no vector")
 
     def test_each_vector_has_one_expected_result_and_names_its_table_release(self) -> None:
+        headings = set(re.findall(r"^## (\d+)\. ", SPEC.read_text(encoding="utf-8"), re.M))
         ids = [row["id"] for row in ROWS]
         self.assertEqual(len(ids), len(set(ids)))
         expected = [row["expected"] for row in ROWS]
@@ -202,8 +252,22 @@ class TerraformFileManifestTests(unittest.TestCase):
                 self.assertEqual("reader", row["class"])
                 self.assertEqual(FORMATS["release"], row["formatTable"])
                 self.assertIn(row["operation"], ("read", "read-stream", "batch"))
+                self.assertIn(row["group"], GROUPS)
                 self.assertTrue(row["expected"].startswith(f"vectors/{row['group']}/{row['id']}.expected."))
                 self.assertTrue(row["declaration"].startswith("declarations/"))
+                cited = SECTION.fullmatch(row["section"])
+                self.assertIsNotNone(cited, row["section"])
+                for number in re.findall(r"§(\d+)", row["section"]):
+                    self.assertIn(number, headings, row["section"])
+
+    def test_the_groups_are_a_closed_list(self) -> None:
+        self.assertEqual(set(GROUPS), {row["group"] for row in ROWS})
+        self.assertEqual(set(GROUPS), {p.name for p in (BASE / "vectors").iterdir() if p.is_dir()})
+
+    def test_every_expected_result_is_of_one_known_shape(self) -> None:
+        for row in ROWS:
+            with self.subTest(id=row["id"]):
+                self.assertIsNotNone(shape_of(row), row["expected"])
 
     def test_a_generated_input_is_small_as_committed_and_follows_its_rule(self) -> None:
         rows = [row for row in ROWS if "generate" in row]
@@ -213,8 +277,9 @@ class TerraformFileManifestTests(unittest.TestCase):
                 template = BASE / "vectors" / row["generate"]["template"]
                 self.assertLess(template.stat().st_size, 4096)
                 data = generated(row["generate"])
-                refusal = expected_of(row)["refusal"]
-                self.assertEqual((hashlib.sha256(data).hexdigest(), len(data)), (refusal["sha256"], refusal["bytes"]))
+                result = expected_of(row)
+                pinned = result["record"] if shape_of(row) == "accepted" else result["refusal"]
+                self.assertEqual((hashlib.sha256(data).hexdigest(), len(data)), (pinned["sha256"], pinned["bytes"]))
         for path in BASE.rglob("*"):
             if path.is_file():
                 with self.subTest(path=path.relative_to(BASE).as_posix()):
@@ -247,7 +312,7 @@ class TerraformFileManifestTests(unittest.TestCase):
 class TerraformFileResultTests(unittest.TestCase):
     def test_an_accepted_result_is_the_record_of_its_input_and_a_value_of_section_6s_form(self) -> None:
         accepted = {(row["document"], v) for row in FORMATS["table"] for v in row["accepted"]}
-        rows = [row for row in ROWS if isinstance(expected_of(row), dict) and "record" in expected_of(row)]
+        rows = [row for row in ROWS if shape_of(row) == "accepted"]
         self.assertTrue(rows)
         for row in rows:
             with self.subTest(id=row["id"]):
@@ -287,7 +352,7 @@ class TerraformFileResultTests(unittest.TestCase):
                 self.assertTrue(isinstance(resource["deposed"], str) and resource["deposed"])
 
     def test_a_refusal_names_a_listed_code_and_its_input_only(self) -> None:
-        rows = [row for row in ROWS if isinstance(expected_of(row), dict) and "refusal" in expected_of(row)]
+        rows = [row for row in ROWS if shape_of(row) in ("refusal", "stream-refusal")]
         self.assertTrue(rows)
         for row in rows:
             with self.subTest(id=row["id"]):
@@ -308,7 +373,7 @@ class TerraformFileResultTests(unittest.TestCase):
                 self.assertEqual(refusal["code"] == "TF-SIZE", over)
 
     def test_a_batch_is_one_canonical_line_per_selected_resource(self) -> None:
-        rows = [row for row in ROWS if row["operation"] == "batch" and row["expected"].endswith(".jsonl")]
+        rows = [row for row in ROWS if shape_of(row) == "batch-lines"]
         self.assertTrue(rows)
         for row in rows:
             with self.subTest(id=row["id"]):

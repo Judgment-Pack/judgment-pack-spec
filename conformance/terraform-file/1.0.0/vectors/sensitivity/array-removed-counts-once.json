@@ -1,0 +1,38 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "1.9.8",
+  "values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_sql_user.app",
+          "mode": "managed",
+          "type": "google_sql_user",
+          "name": "app",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "name": "app",
+            "users": [
+              {
+                "name": "a",
+                "password": "secret-password-a"
+              },
+              {
+                "name": "secret-user-b"
+              }
+            ]
+          },
+          "sensitive_values": {
+            "users": [
+              {
+                "password": true
+              },
+              true
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

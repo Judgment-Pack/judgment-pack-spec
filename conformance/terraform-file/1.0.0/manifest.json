@@ -618,6 +618,18 @@
       "expected": "vectors/sensitivity/sensitive-root-true-state.expected.json"
     },
     {
+      "id": "sensitive-array-removed-counts-once",
+      "group": "sensitivity",
+      "section": "§3 step 6",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "An array whose first element has a member marked true and whose second element is marked true: the array is removed up to its object member, users, which counts one; the password removed inside it is not counted apart from it.",
+      "declaration": "declarations/state.json",
+      "input": "vectors/sensitivity/array-removed-counts-once.json",
+      "expected": "vectors/sensitivity/sensitive-array-removed-counts-once.expected.json"
+    },
+    {
       "id": "provider-unmarked",
       "group": "sensitivity",
       "section": "§3 step 6",
@@ -1143,6 +1155,46 @@
       "expected": "vectors/size/size-stream-over-max.expected.json"
     },
     {
+      "id": "size-file-at-default-max",
+      "group": "size",
+      "section": "§3 step 1, §2",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A file of exactly the default maxBytes, 67108864 bytes, under a declaration with no maxBytes: accepted. The input is generated.",
+      "declaration": "declarations/plan.json",
+      "generate": {
+        "template": "size/default-max-bytes.template.json",
+        "replace": "\"<generated>\"",
+        "with": {
+          "repeat": "x",
+          "times": 67107879,
+          "quoted": true
+        }
+      },
+      "expected": "vectors/size/size-file-at-default-max.expected.json"
+    },
+    {
+      "id": "size-file-over-default-max",
+      "group": "size",
+      "section": "§3 step 1, §2",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "A file of the default maxBytes and one byte more, under a declaration with no maxBytes: TF-SIZE, with the sha256 and size of the whole file. The input is generated.",
+      "declaration": "declarations/plan.json",
+      "generate": {
+        "template": "size/default-max-bytes.template.json",
+        "replace": "\"<generated>\"",
+        "with": {
+          "repeat": "x",
+          "times": 67107880,
+          "quoted": true
+        }
+      },
+      "expected": "vectors/size/size-file-over-default-max.expected.json"
+    },
+    {
       "id": "size-before-json",
       "group": "size",
       "section": "§3 step 1",
@@ -1516,6 +1568,18 @@
       "declaration": "declarations/plan.json",
       "input": "vectors/value-limit/charged.json",
       "expected": "vectors/value-limit/value-limit-charged.expected.json"
+    },
+    {
+      "id": "value-limit-at-L",
+      "group": "value-limit",
+      "section": "§6",
+      "operation": "read",
+      "class": "reader",
+      "formatTable": "1.0.0",
+      "description": "The same two resources, the first with a description of 8 characters, in a file padded until the second resource's pointers as charged are exactly what remains of L: not more, so accepted.",
+      "declaration": "declarations/plan.json",
+      "input": "vectors/value-limit/at-limit.json",
+      "expected": "vectors/value-limit/value-limit-at-L.expected.json"
     },
     {
       "id": "value-limit-fits",
