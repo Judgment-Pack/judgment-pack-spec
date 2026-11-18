@@ -156,7 +156,7 @@
       "section": "§6.2",
       "operation": "assemble",
       "class": "assembler",
-      "description": "Every row of section 6.2 tightened at once, against a standard with no registry of its own: a type inside the standard's (integer inside number), a const inside its enum, an exclusive lower bound equal to its inclusive one, an upper bound taken as the tighter of maximum and exclusiveMaximum, shorter length, item and member counts, uniqueItems where the standard has it, required and patterns added, and a smaller maxEntries.",
+      "description": "Every row of section 6.2 tightened at once, against a standard with no registry of its own: a type inside the standard's (integer inside number), a const inside its enum, an exclusive lower bound equal to its inclusive one, an upper bound taken as the tighter of maximum and exclusiveMaximum, shorter length, item and member counts (a minimum item count raised, a minimum member count added), uniqueItems where the standard has it, required and patterns added, and a smaller maxEntries.",
       "federation": "federation/services.json",
       "sources": {
         "payments": {
@@ -1934,11 +1934,73 @@
       "expected": "locks/assembled-7.lock.json"
     },
     {
+      "id": "write-assembled-emitters",
+      "section": "§§7, 8",
+      "operation": "write-lock",
+      "class": "lock-writer",
+      "description": "An assembly's lock with an emitter manifest from the repository source: its item names that source, and the serial is one above the previous lock's.",
+      "federation": "federation/two-sources.json",
+      "sources": {
+        "billing": {
+          "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6",
+          "files": {
+            "registry/bounds.json": "sources/billing/bounds.json",
+            "registry/registry.json": "sources/billing/registry.json"
+          }
+        },
+        "standard": {
+          "commit": "d294fcce0cc88587843099d85dd805aeef1b09a63b0db1dd3e4dc62a343c1db5",
+          "files": {
+            "bounds.json": "sources/platform/bounds.json",
+            "kinds/database.json": "kinds/database.json",
+            "kinds/db-role.json": "kinds/db-role.json",
+            "registry.json": "sources/platform/registry.json"
+          }
+        }
+      },
+      "known": {
+        "indexes": [],
+        "locks": []
+      },
+      "sourceSignatures": [
+        "signatures/billing.json",
+        "signatures/standard.json"
+      ],
+      "signers": {
+        "key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+        "repositories": {
+          "https://example.invalid/scm/billing": "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
+        }
+      },
+      "previous": "locks/assembled-7.lock.json",
+      "emitters": [
+        {
+          "source": "billing",
+          "manifest": "emitters/db-roles.json",
+          "path": "emitters/db-roles.json",
+          "check": 0,
+          "files": [
+            {
+              "path": "gen/db-roles.sql",
+              "mode": "0644",
+              "file": "emitters/gen/db-roles.sql"
+            },
+            {
+              "path": "gen/grant.sh",
+              "mode": "0755",
+              "file": "emitters/gen/grant.sh"
+            }
+          ]
+        }
+      ],
+      "expected": "locks/assembled-8-emitters.lock.json"
+    },
+    {
       "id": "write-registry-invalid",
       "section": "§8",
       "operation": "write-lock",
       "class": "lock-writer",
-      "description": "A registry that validation refuses is never locked: LOCK-REGISTRY-INVALID.",
+      "description": "A registry that validation refuses is never locked: LOCK-REGISTRY-INVALID. reading: a writer's refusal is compared by its code alone, since section 2.1 gives writing a lock no report.",
       "registry": "single/registry-owner.json",
       "kinds": [
         "kinds/database.json",
@@ -1952,7 +2014,7 @@
       "section": "§8",
       "operation": "write-lock",
       "class": "lock-writer",
-      "description": "An assembly with an error, here an environment gap, is never locked: LOCK-REGISTRY-INVALID. Each source signature is over its source's statement at these commits, so nothing else is refused.",
+      "description": "An assembly with an error, here an environment gap, is never locked: LOCK-REGISTRY-INVALID. Each source signature is over its source's statement at these commits, so nothing else is refused. reading: a writer's refusal is compared by its code alone, since section 2.1 gives writing a lock no report.",
       "federation": "federation/billing-serves-prod.json",
       "sources": {
         "billing": {
@@ -1994,7 +2056,7 @@
       "section": "§8",
       "operation": "write-lock",
       "class": "lock-writer",
-      "description": "A previous lock of another registry id: LOCK-UNEXPECTED-REGISTRY.",
+      "description": "A previous lock of another registry id: LOCK-UNEXPECTED-REGISTRY. reading: a writer's refusal is compared by its code alone, since section 2.1 gives writing a lock no report.",
       "registry": "single/registry.json",
       "kinds": [
         "kinds/database.json",
@@ -2008,7 +2070,7 @@
       "section": "§8",
       "operation": "write-lock",
       "class": "lock-writer",
-      "description": "A previous lock whose serial is 2^53 - 1 leaves no next serial: LOCK-FORM.",
+      "description": "A previous lock whose serial is 2^53 - 1 leaves no next serial: LOCK-FORM. reading: a writer's refusal is compared by its code alone, since section 2.1 gives writing a lock no report.",
       "registry": "single/registry.json",
       "kinds": [
         "kinds/database.json",
@@ -2022,7 +2084,7 @@
       "section": "§8",
       "operation": "write-lock",
       "class": "lock-writer",
-      "description": "The host's check of the emitter exits 1: LOCK-EMITTER-MISMATCH, and no lock is written.",
+      "description": "The host's check of the emitter exits 1: LOCK-EMITTER-MISMATCH, and no lock is written. reading: a writer's refusal is compared by its code alone, since section 2.1 gives writing a lock no report.",
       "registry": "single/registry.json",
       "kinds": [
         "kinds/database.json",
@@ -2055,7 +2117,7 @@
       "section": "§§8, 11",
       "operation": "write-lock",
       "class": "lock-writer",
-      "description": "The repository's source signature is by another key than the signer set names: refused with that signature's code, LOCK-SIG-UNEXPECTED-KEY, and no lock is written.",
+      "description": "The repository's source signature is by another key than the signer set names: refused with that signature's code, LOCK-SIG-UNEXPECTED-KEY, and no lock is written. reading: a writer's refusal is compared by its code alone, since section 2.1 gives writing a lock no report.",
       "federation": "federation/two-sources.json",
       "sources": {
         "billing": {
@@ -2182,6 +2244,44 @@
         }
       ],
       "expected": "vectors/check-emitters/report.json"
+    },
+    {
+      "id": "check-assembled-emitters",
+      "section": "§9",
+      "operation": "check-lock",
+      "class": "lock-checker",
+      "description": "An assembled lock whose emitter item names its source checks with that source's manifest and files.",
+      "lock": "locks/assembled-8-emitters.lock.json",
+      "registry": "assembled/two-sources/registry.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ],
+      "index": "assembled/two-sources/index.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true
+      },
+      "emitters": [
+        {
+          "manifest": "emitters/db-roles.json",
+          "path": "emitters/db-roles.json",
+          "files": [
+            {
+              "path": "gen/db-roles.sql",
+              "mode": "0644",
+              "file": "emitters/gen/db-roles.sql"
+            },
+            {
+              "path": "gen/grant.sh",
+              "mode": "0755",
+              "file": "emitters/gen/grant.sh"
+            }
+          ],
+          "source": "billing"
+        }
+      ],
+      "expected": "vectors/check-assembled-emitters/report.json"
     },
     {
       "id": "check-expected-missing",
@@ -2655,6 +2755,46 @@
         "file": "vectors/check-emitter-unlisted-file/extra.sql"
       },
       "expected": "vectors/coverage-unlisted-file/report.json"
+    },
+    {
+      "id": "coverage-file-assembled",
+      "section": "§9.1",
+      "operation": "coverage",
+      "class": "lock-checker",
+      "description": "In an assembled lock, a file is covered by an emitters item of its source that lists its path, mode and digest.",
+      "lock": "locks/assembled-8-emitters.lock.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true,
+        "environment": "prod"
+      },
+      "file": {
+        "path": "gen/grant.sh",
+        "mode": "0755",
+        "file": "emitters/gen/grant.sh",
+        "source": "billing"
+      },
+      "expected": "vectors/coverage-file-assembled/report.json"
+    },
+    {
+      "id": "coverage-file-other-source",
+      "section": "§9.1",
+      "operation": "coverage",
+      "class": "lock-checker",
+      "description": "The same path, mode and digest, of another source than the item's: LOCK-NOT-COVERED. reading: located at the lock's /emitters.",
+      "lock": "locks/assembled-8-emitters.lock.json",
+      "expect": {
+        "registryId": "https://example.invalid/registries/assembled",
+        "requireIndex": true,
+        "environment": "prod"
+      },
+      "file": {
+        "path": "gen/grant.sh",
+        "mode": "0755",
+        "file": "emitters/gen/grant.sh",
+        "source": "standard"
+      },
+      "expected": "vectors/coverage-file-other-source/report.json"
     },
     {
       "id": "coverage-environment-missing",

@@ -8,6 +8,7 @@
         {
           "pointer": "/labels",
           "bound": {
+            "minProperties": 1,
             "maxProperties": 4,
             "required": [
               "team"

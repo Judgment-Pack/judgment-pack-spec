@@ -364,14 +364,14 @@ APP_STANDARD = {"kind": "app", "maxEntries": 10, "fields": [
     {"pointer": "/labels", "bound": {"maxProperties": 8}},
     {"pointer": "/name", "bound": {"minLength": 1, "maxLength": 40}},
     {"pointer": "/replicas", "bound": {"type": "integer", "minimum": 1, "maximum": 10}},
-    {"pointer": "/tags", "bound": {"maxItems": 6, "uniqueItems": True}},
+    {"pointer": "/tags", "bound": {"minItems": 1, "maxItems": 6, "uniqueItems": True}},
     {"pointer": "/tier", "bound": {"enum": ["gold", "silver", "bronze"]}},
     {"pointer": "/weight", "bound": {"type": "number"}}]}
 APP_TIGHT = {"kind": "app", "maxEntries": 4, "fields": [
-    {"pointer": "/labels", "bound": {"maxProperties": 4, "required": ["team"]}},
+    {"pointer": "/labels", "bound": {"minProperties": 1, "maxProperties": 4, "required": ["team"]}},
     {"pointer": "/name", "bound": {"maxLength": 20, "patterns": ["^payments-"]}},
     {"pointer": "/replicas", "bound": {"exclusiveMinimum": 1, "maximum": 10, "exclusiveMaximum": 8}},
-    {"pointer": "/tags", "bound": {"maxItems": 3, "uniqueItems": True}},
+    {"pointer": "/tags", "bound": {"minItems": 2, "maxItems": 3, "uniqueItems": True}},
     {"pointer": "/tier", "bound": {"const": "gold"}},
     {"pointer": "/weight", "bound": {"type": "integer"}}]}
 STD_APP_BOUNDS = pretty("sources/platform/services-bounds.json", bounds(APP_STANDARD))
@@ -709,7 +709,7 @@ assemble("assemble-tightened-rows", "§6.2",
          "Every row of section 6.2 tightened at once, against a standard with no registry of its own: a type "
          "inside the standard's (integer inside number), a const inside its enum, an exclusive lower bound equal "
          "to its inclusive one, an upper bound taken as the tighter of maximum and exclusiveMaximum, shorter "
-         "length, item and member counts, uniqueItems where the standard has it, required and patterns added, "
+         "length, item and member counts (a minimum item count raised, a minimum member count added), uniqueItems where the standard has it, required and patterns added, "
          "and a smaller maxEntries.",
          FED_T, SRC_T, report(True, (), REG_T), writes=OUT_T)
 
@@ -1137,6 +1137,10 @@ LA_SOURCES = lock_sources(IDX_A, {"billing": SIG_BILLING, "standard": SIG_STANDA
 LA_DOC = lock(7, REG_A, IDX_A, LA_SOURCES)
 assert write_lock(LA_PATH, LA_DOC) == LA_PATH
 LA6 = write_lock("locks/assembled-6.lock.json", lock(6, REG_A, IDX_A, LA_SOURCES), signed=False)
+LAE_DOC = lock(8, REG_A, IDX_A, LA_SOURCES, emitters=[{
+    "source": "billing", "path": "emitters/db-roles.json", "digest": digest(document_of(EMITTER)),
+    "files": [{"path": f["path"], "mode": f["mode"], "digest": sha(FILES[f["file"]])} for f in EMITTER_FILES]}])
+LAE = write_lock("locks/assembled-8-emitters.lock.json", LAE_DOC, signed=False)
 LA_T3_DOC = lock(7, REG_A, IDX_A, lock_sources(IDX_A, {"billing": SIG_BILLING_T3, "standard": SIG_STANDARD}))
 LA_T3 = write_lock("locks/assembled-7-billing-wrong-key.lock.json", LA_T3_DOC)
 LA_OC_DOC = lock(7, REG_A, IDX_A, lock_sources(IDX_A, {"billing": SIG_BILLING_OC, "standard": SIG_STANDARD}))
@@ -1155,6 +1159,9 @@ def refused(*codes):
 
 
 def write(identity, section, description, inputs, expected):
+    if isinstance(expected, dict):
+        description += (" reading: a writer's refusal is compared by its code alone, since section 2.1 gives "
+                        "writing a lock no report.")
     row(identity, section, "write-lock", description, inputs, expected)
 
 
@@ -1173,6 +1180,11 @@ ASSEMBLY_INPUT = {"federation": FED_A, "sources": SRC_A, "known": NO_KNOWN,
 write("write-assembled", "§§7, 8", "An assembly's lock: the index's digest, and for each source its name, role, "
       "repository, the digest of its statement rebuilt from the index, and the digest of the source signature the "
       "writer verified, each by the key the signer set names.", dict(ASSEMBLY_INPUT, previous=LA6), LA_PATH)
+write("write-assembled-emitters", "§§7, 8", "An assembly's lock with an emitter manifest from the repository "
+      "source: its item names that source, and the serial is one above the previous lock's.",
+      dict(ASSEMBLY_INPUT, previous=LA_PATH, emitters=[{"source": "billing", "manifest": EMITTER,
+                                                        "path": "emitters/db-roles.json", "check": 0,
+                                                        "files": EMITTER_FILES}]), LAE)
 write("write-registry-invalid", "§8", "A registry that validation refuses is never locked: LOCK-REGISTRY-INVALID.",
       {"registry": SINGLE_OWNER, "kinds": SINGLE_KINDS, "previous": L42}, refused("LOCK-REGISTRY-INVALID"))
 write("write-assembly-invalid", "§8", "An assembly with an error, here an environment gap, is never locked: "
@@ -1251,6 +1263,9 @@ check("check-assembled", "§9", "An assembled lock checks with its index: the in
       "index's.", assembled_check(), report(True, (), REG_A))
 check("check-emitters", "§9", "A lock that names emitters checks with the manifest and its files as given.",
       single_check(LE43, emitters=EMITTERS_GIVEN), report(True, (), SINGLE_DOC))
+check("check-assembled-emitters", "§9", "An assembled lock whose emitter item names its source checks with that "
+      "source's manifest and files.", assembled_check(LAE, emitters=[dict(EMITTERS_GIVEN[0], source="billing")]),
+      report(True, (), REG_A))
 check("check-expected-missing", "§9", "No index requirement is given: LOCK-EXPECTED, before anything is read. "
       "reading: an expected input's diagnostic is located at the lock's root.",
       single_check(expect={"registryId": SINGLE_ID}), report(False, [diag("LOCK-EXPECTED", "lock", "")]))
@@ -1341,6 +1356,14 @@ coverage("coverage-file-mode", "A file whose path and digest the lock lists, giv
 coverage("coverage-unlisted-file", "A file no emitters item lists is not covered: LOCK-NOT-COVERED. reading: located "
          "at the lock's /emitters.",
          {"lock": LE43, "expect": PROD_EXPECT, "file": {"path": "gen/extra.sql", "mode": "0644", "file": EXTRA_SQL}},
+         report(False, [diag("LOCK-NOT-COVERED", "lock", "/emitters")]))
+ASSEMBLED_PROD = dict(ASSEMBLED_EXPECT, environment="prod")
+coverage("coverage-file-assembled", "In an assembled lock, a file is covered by an emitters item of its source "
+         "that lists its path, mode and digest.", {"lock": LAE, "expect": ASSEMBLED_PROD,
+                                                   "file": dict(EMITTER_FILES[1], source="billing")}, report(True))
+coverage("coverage-file-other-source", "The same path, mode and digest, of another source than the item's: "
+         "LOCK-NOT-COVERED. reading: located at the lock's /emitters.",
+         {"lock": LAE, "expect": ASSEMBLED_PROD, "file": dict(EMITTER_FILES[1], source="standard")},
          report(False, [diag("LOCK-NOT-COVERED", "lock", "/emitters")]))
 coverage("coverage-environment-missing", "Coverage is given no environment: LOCK-EXPECTED. reading: located at the "
          "lock's root.", {"lock": L42, "expect": SINGLE_EXPECT, "resolved": "single/resolved-prod.json"},

@@ -29,6 +29,7 @@
         {
           "pointer": "/tags",
           "bound": {
+            "minItems": 1,
             "maxItems": 6,
             "uniqueItems": true
           }

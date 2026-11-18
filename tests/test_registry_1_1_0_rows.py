@@ -491,8 +491,12 @@ class Derived(unittest.TestCase):
                                          (source["name"], source["role"], source["repository"]))
                         self.assertEqual(digest(statement(item)), source["statement"])
                         self.assertIn(source["signature"], signatures)
+                self.assertEqual(sorted(lock.get("emitters", []), key=lambda e: (e.get("source", ""), e["path"])),
+                                 lock.get("emitters", []))
                 for emitter in lock.get("emitters", []):
-                    self.assertNotIn("source", emitter)
+                    self.assertEqual("index" in lock, "source" in emitter)
+                    if "source" in emitter:
+                        self.assertIn(emitter["source"], [source["name"] for source in lock["sources"]])
                     self.assertEqual(digest(document(emitter["path"])), emitter["digest"])
                     self.assertEqual(sorted(f["path"] for f in emitter["files"]), [f["path"] for f in emitter["files"]])
                     for item in emitter["files"]:
@@ -513,10 +517,11 @@ class Derived(unittest.TestCase):
                 else:
                     given = [sha(text_of(path)[:-1]) for path in row["sourceSignatures"]]
                     self.assertEqual(sorted(given), sorted(source["signature"] for source in lock["sources"]))
-                emitters = [{"path": e["path"], "digest": digest(document(e["manifest"])),
+                emitters = [{**({"source": e["source"]} if "source" in e else {}), "path": e["path"],
+                             "digest": digest(document(e["manifest"])),
                              "files": [{"path": f["path"], "mode": f["mode"], "digest": sha(text_of(f["file"]))}
                                        for f in sorted(e["files"], key=lambda f: f["path"])]}
-                            for e in row.get("emitters", [])]
+                            for e in sorted(row.get("emitters", []), key=lambda e: (e.get("source", ""), e["path"]))]
                 self.assertEqual(emitters, lock.get("emitters", []))
 
     def test_signatures_are_by_published_keys_and_verify(self) -> None:

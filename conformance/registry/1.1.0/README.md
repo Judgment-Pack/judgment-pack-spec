@@ -57,8 +57,9 @@ supports.
 - `signers` is the expected signer set of §11: `key`, the expected key (for an assembly, the
   standard owner's), and `repositories`, the repository key map. Keys are 64 lowercase hexadecimal
   characters.
-- `emitters` is a list of `{"manifest", "path", "files"}`, with `check`, the host check's exit
-  code, for a writer. Each file is `{"path", "mode", "file"}`, `file` naming its bytes.
+- `emitters` is a list of `{"manifest", "path", "files"}`, with `source` in an assembled row and
+  `check`, the host check's exit code, for a writer. Each file is `{"path", "mode", "file"}`,
+  `file` naming its bytes, with `source` too for coverage in an assembled lock.
 - `record` is the verifier's record for the expected registry id before the verification: `null`
   for none, `{"serial", "digest"}` for one, `"unreadable"` for one that exists and cannot be read,
   and any other value for one that exists and is not of its form. `concurrent` is a record another

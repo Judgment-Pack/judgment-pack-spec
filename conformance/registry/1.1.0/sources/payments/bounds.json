@@ -8,6 +8,7 @@
         {
           "pointer": "/labels",
           "bound": {
+            "minProperties": 1,
             "maxProperties": 4,
             "required": [
               "team"
@@ -34,6 +35,7 @@
         {
           "pointer": "/tags",
           "bound": {
+            "minItems": 2,
             "maxItems": 3,
             "uniqueItems": true
           }
