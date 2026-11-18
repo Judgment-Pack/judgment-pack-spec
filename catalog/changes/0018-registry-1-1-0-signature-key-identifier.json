@@ -1,0 +1,11 @@
+{
+  "reason": "The proposed registry format 1.1.0 report gains the location member keyId, the key identifier of a signature document's key, on that document's diagnostics (spec/registry-1.1.0.md section 2.1, a change after acceptance). Still staged: no bundle carries it and the site does not serve it.",
+  "changes": [
+    {
+      "path": "schema/registry/1.1.0/common.schema.json",
+      "family": "registry",
+      "from": "sha256:5938be74f468f5f749063a876ff3bb47d62d1fa2a14a975bcb6a1388acc4600e",
+      "to": "sha256:75cb40fe46986330ce8da318db5efb0379a27d104095d66ced59f6489c2bf009"
+    }
+  ]
+}
