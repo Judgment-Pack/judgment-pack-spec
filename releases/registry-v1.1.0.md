@@ -34,12 +34,13 @@ independent of `specVersion` ([VERSIONING.md](../VERSIONING.md)). Tagged on
   both texts, the rows' README, format `1.0.0`'s rows' README, every schema, the code list and every
   row file. The release builder admits the tag only when the tagged tree gives exactly that record;
   when `spec/registry-1.1.0.md`, the code list and the rows' manifest all say `released`; when
-  neither text nor the rows' README still calls format `1.1.0` proposed; and when no schema's title,
-  description or comment calls the format draft or unreleased. Format `1.0.0`'s schemas, code list
-  and rows, which the bundle carries unchanged, are held to the record of `registry-v1.0.0`, which
-  keeps its bytes: the builder refuses the tag when any of them differs from that record, or a file
-  is added or missing. Of the files that record pins, `spec/registry.md` and
-  `conformance/registry/README.md` have changed since, and this record pins them itself. A later
+  neither text nor the rows' README still calls format `1.1.0` proposed, or calls the format, its
+  rows or its lists a draft or unreleased; when no schema's title, description or comment calls the
+  format draft or unreleased; and when the design records, RFCs 0039 and 0040, say Accepted. Format
+  `1.0.0`'s schemas, code list and rows, which the bundle carries unchanged, are held to the record
+  of `registry-v1.0.0`, which keeps its bytes: the builder refuses the tag when any of them differs
+  from that record, or a file is added or missing. Of the files that record pins, `spec/registry.md`
+  and `conformance/registry/README.md` have changed since, and this record pins them itself. A later
   release of format `1.1.0` names the same schemas with the same digests.
 - **What the release changed.** The status sentence of `spec/registry-1.1.0.md`, its Status
   paragraphs and its §14, and the paragraph of `spec/registry.md`'s Status on format `1.1.0`, say

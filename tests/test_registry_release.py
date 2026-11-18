@@ -431,6 +431,55 @@ class FormatReleaseTests:
                 with self.assertRaisesRegex(ValueError, "call the format proposed"):
                     self.validate(root)
 
+    def test_no_prose_may_still_call_the_format_unreleased(self):
+        def append(name, addition):
+            return lambda root: (root / name).write_text((root / name).read_text("utf-8") + addition)
+
+        prose = (*self.release.texts, self.release.readme, *self.release.earlier_pins)
+        changes = [(f"{name}: a draft", append(name, "\nThis companion is a draft and is not yet released.\n"))
+                   for name in prose]
+        changes += [(f"{name}: proposed rows", append(name, "\nThese rows are proposed and no claim may cite them.\n"))
+                    for name in prose]
+        changes += [
+            ("no claim may cite them", append(self.release.readme, "\nNo conformance claim may\ncite them.\n")),
+            ("the code list", append(self.release.status_text, "\nThe code list is not yet released.\n")),
+            ("normative for nothing", append(self.release.status_text,
+                                             "\nThis text is normative for nothing until its tag.\n")),
+            ("the format, proposed", append(self.release.readme, f"\nRows of format `{self.release.format}`, proposed.\n")),
+            ("the rows' directory", append(self.release.readme, f"\nThe rows, `{self.release.rows}/`, proposed.\n"))]
+        for label, change in changes:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                root = self.released_tree(temporary)
+                change(root)
+                write_record(self.release, root)
+                with self.assertRaisesRegex(ValueError, "a draft, proposed or unreleased"):
+                    self.validate(root)
+        # A rule about text no tag released, a record that proposed a resolution, and design
+        # records accepted rather than Drafts are not the format.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.released_tree(temporary)
+            for name in prose:
+                append(name, "\nA text no registry tag released is normative for nothing, and no conformance claim"
+                             " may cite it. The records proposed a resolution. The design records are accepted"
+                             " rather than Drafts, on the route without its draft-only restriction.\n")(root)
+            write_record(self.release, root)
+            self.validate(root)
+
+    def test_the_design_records_must_be_accepted(self):
+        self.assertTrue(self.release.form.rfcs)
+        self.assertLessEqual(set(self.release.form.rfcs), set(self.release.form.bundle_paths))
+        for name in self.release.form.rfcs:
+            for label, change in (
+                    ("draft", lambda path: replace_once(path, "- Status: Accepted\n", "- Status: Draft\n")),
+                    ("a second status", lambda path: replace_once(
+                        path, "- Status: Accepted\n", "- Status: Accepted\n- Status: Draft\n")),
+                    ("no status", lambda path: replace_once(path, "- Status: Accepted\n", ""))):
+                with self.subTest(name=name, label=label), tempfile.TemporaryDirectory() as temporary:
+                    root = self.released_tree(temporary)
+                    change(root / name)
+                    with self.assertRaisesRegex(ValueError, "design records to say Status: Accepted"):
+                        self.validate(root)
+
     def test_notes_are_required(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.released_tree(temporary)

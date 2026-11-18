@@ -287,9 +287,11 @@ missing.
 The builder derives that record from the tagged tree and refuses the tag unless the committed
 record equals it, its maturity is `released`, the format's status sentence occurs once across its
 texts and says `released`, its code list and its rows' manifest say `released`, no text, rows'
-README, README heading or manifest label still calls the format proposed, and no schema's title or
+README, README heading or manifest label still calls the format proposed, no text or rows' README
+calls the format, its rows or its lists a draft, proposed or unreleased, and no schema's title or
 description still calls it a draft, staged, proposed or unreleased. They say so until the commit
-the tag names, which changes all of them. Each format's record is held to its own tag's tree:
+the tag names, which changes all of them. Each of the format's design records must also say
+`Status: Accepted`. Each format's record is held to its own tag's tree:
 `registry-v1.0.0` builds from its tag exactly as before, with the same bundle and record bytes.
 
 A release's bundle, `judgment-pack-registry-<releaseVersion>`, carries the format's texts, its

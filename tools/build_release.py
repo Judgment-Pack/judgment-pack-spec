@@ -237,6 +237,28 @@ REGISTRY_UNRELEASED_WORDING = re.compile(
     r"|no bundle|no site|no corpus)\b",
     re.IGNORECASE,
 )
+# What still calls the format, its rows or its lists a draft, proposed or unreleased in prose, read
+# with whitespace collapsed in the format's texts and the rows' READMEs: "this companion is a
+# draft", "these rows are proposed", "the code list is not yet released", "no claim may cite them",
+# "normative for nothing until", "proposed with the text", "`conformance/registry/1.1.0/`,
+# proposed" and "format `1.1.0`, proposed". A general rule about text no tag released ("no
+# conformance claim may cite it"), a record that proposed a resolution, design records accepted
+# rather than Drafts, and the route's "draft-only restriction" are not the format.
+REGISTRY_UNRELEASED_PROSE = re.compile(
+    "|".join((
+        r"\b(?:this|the|its|these|that) "
+        r"(?:texts?|companion|format|rows|code list|schemas?|corpus|release)(?: `[^`]*`)? (?:is|are) (?:still |now |yet |only )?(?:an? )?"
+        r"(?:drafts?\b|proposed\b|staged\b|unreleased\b|not(?: yet)? released\b|pre-?release\b)",
+        r"\bno (?:conformance )?claim may cite (?:them|the rows|these rows)\b",
+        r"\bnormative for nothing until\b",
+        r"\bproposed with (?:it|the text|this text|the companion)\b",
+        r"`conformance/registry/[^`]*`, proposed\b",
+        r"\bformat `[0-9.]+`,? (?:proposed|a draft)\b",
+    )),
+    re.IGNORECASE,
+)
+# A design record is accepted when its one status line says so, as Core's and Policy's are.
+REGISTRY_RFC_STATUS = re.compile(r"^- Status: (.*)$", re.MULTILINE)
 REGISTRY_RECORD_KEYS = {"companion", "releaseVersion", "tag", "maturity", "formatVersion", "schemas",
                         "codes", "corpus", "formatDigests"}
 REGISTRY_TEXT = "spec/registry.md"
@@ -424,6 +446,13 @@ def validate_registry_artifacts(version: str, tag: str, root: Path = ROOT) -> No
             or not isinstance(label, str) or REGISTRY_UNRELEASED_WORDING.search(label)):
         raise ValueError("a registry release requires the text and the rows' README not to call "
                          "the format proposed, nor the README's heading or the manifest's label")
+    if any(REGISTRY_UNRELEASED_PROSE.search(" ".join((root / path).read_text("utf-8").split()))
+           for path in (*form.texts, form.readme, *registry_carried_prose(form))):
+        raise ValueError("a registry release requires its texts and rows' READMEs not to call the "
+                         "format, its rows or its lists a draft, proposed or unreleased")
+    if any(REGISTRY_RFC_STATUS.findall((root / rfc).read_text("utf-8")) != ["Accepted"]
+           for rfc in form.rfcs):
+        raise ValueError("a registry release requires its design records to say Status: Accepted")
     # A schema's bytes are served at its $id from the release on and never change, so none may
     # still call itself a draft, or unreleased, when the release publishes it: not in its own title
     # and description, which it must have, nor in any nested one or any comment.
