@@ -330,6 +330,8 @@ class StaticSiteTests(unittest.TestCase):
         # Packaged on the companion's own tag and never served as files. Each is served at its
         # $id from its first release on, which the rows' manifest says, and not before: a URL
         # served once keeps its bytes (spec/registry.md section 13).
+        # Each format's schemas follow that format's rows: format 1.1.0 is staged beside the released
+        # 1.0.0 (spec/registry-1.1.0.md) and is served at no $id until its own release.
         self.assertFalse((self.output / "artifacts" / REGISTRY_SCHEMAS).exists())
         manifest = json.loads((ROOT / REGISTRY_ROWS / "1.0.0/manifest.json").read_text(encoding="utf-8"))
         self.assertIn(manifest["status"], ("proposed", "released"))
@@ -337,11 +339,16 @@ class StaticSiteTests(unittest.TestCase):
             self._assert_nothing_published_under(REGISTRY_SCHEMAS)
         sources = sorted((ROOT / REGISTRY_SCHEMAS).rglob("*.schema.json"))
         self.assertTrue(sources)
+        formats = sorted({source.parent.name for source in sources})
+        self.assertIn("1.0.0", formats)
         for source in sources:
+            status = json.loads((ROOT / REGISTRY_ROWS / source.parent.name / "manifest.json")
+                                .read_text(encoding="utf-8"))["status"]
+            self.assertIn(status, ("proposed", "released"))
             schema_id = json.loads(source.read_text(encoding="utf-8"))["$id"]
             published = self.output / urlsplit(schema_id).path.lstrip("/")
-            with self.subTest(schema=source.name):
-                if manifest["status"] == "proposed":
+            with self.subTest(schema=source.relative_to(ROOT / REGISTRY_SCHEMAS).as_posix()):
+                if status == "proposed":
                     self.assertFalse(published.exists())
                 else:
                     self.assertEqual(source.read_bytes(), published.read_bytes())

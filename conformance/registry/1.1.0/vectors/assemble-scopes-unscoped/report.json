@@ -1,0 +1,9 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": true,
+  "registry": {"digest": "sha256:6577e140c321405d8c8c293963ba8357a995a48bd418c30bc6e1a508627a74d0"},
+  "diagnostics": [
+    {"code": "REF-SECRET-UNSCOPED", "severity": "warning", "location": {"document": "value", "source": "billing", "entry": {"kind": "db-role", "id": "billing-api"}, "environment": "dev", "pointer": "/password"}},
+    {"code": "REF-SECRET-UNSCOPED", "severity": "warning", "location": {"document": "value", "source": "billing", "entry": {"kind": "db-role", "id": "billing-api"}, "environment": "prod", "pointer": "/password"}}
+  ]
+}

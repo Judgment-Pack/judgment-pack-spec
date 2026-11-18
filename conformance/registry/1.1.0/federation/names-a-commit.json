@@ -1,0 +1,32 @@
+{
+  "federationFormatVersion": "1.1.0",
+  "registry": {
+    "id": "https://example.invalid/registries/assembled",
+    "version": "7.0.0"
+  },
+  "environments": [
+    "dev",
+    "prod"
+  ],
+  "sources": [
+    {
+      "name": "billing",
+      "role": "repository",
+      "repository": "https://example.invalid/scm/billing",
+      "registry": "registry/registry.json",
+      "bounds": "registry/bounds.json"
+    },
+    {
+      "name": "standard",
+      "role": "standard",
+      "repository": "https://example.invalid/scm/platform",
+      "registry": "registry.json",
+      "bounds": "bounds.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ]
+    }
+  ],
+  "commit": "acd14c7a6c04c1dd6dc6c2d66d487a28667c0ad6"
+}

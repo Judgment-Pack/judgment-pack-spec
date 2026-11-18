@@ -1,0 +1,7 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "diagnostics": [
+    {"code": "LOCK-SERIAL-CONFLICT", "severity": "error", "location": {"document": "lock", "pointer": "/serial"}}
+  ]
+}

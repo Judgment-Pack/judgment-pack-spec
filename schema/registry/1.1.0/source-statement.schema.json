@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.1.0/source-statement.schema.json",
+  "title": "DRAFT Registry companion 1.1.0: source statement",
+  "description": "Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, and served by no bundle and no site. A source statement (section 10.2), closed: a repository's identity, the commit and every document's path, role and digests, with the values of the index's source item. It has no selector: it is never a file, only the JCS bytes whose digest a source signature signs.",
+  "$comment": "That its values and order are the index's item's is the reader's to check.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "repository",
+    "commit",
+    "documents"
+  ],
+  "properties": {
+    "repository": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/repositoryIdentity"
+    },
+    "commit": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/commit"
+    },
+    "documents": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/documents"
+    }
+  }
+}

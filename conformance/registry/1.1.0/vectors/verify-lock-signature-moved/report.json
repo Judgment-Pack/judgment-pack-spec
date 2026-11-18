@@ -1,0 +1,7 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "diagnostics": [
+    {"code": "LOCK-SIG-DIGEST-MISMATCH", "severity": "error", "location": {"document": "signature", "pointer": "/lockDigest"}}
+  ]
+}

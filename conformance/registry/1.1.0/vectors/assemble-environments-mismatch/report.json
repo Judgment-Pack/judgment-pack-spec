@@ -1,0 +1,7 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "diagnostics": [
+    {"code": "FED-ENVIRONMENTS", "severity": "error", "location": {"document": "registry", "source": "billing", "pointer": "/environments"}}
+  ]
+}

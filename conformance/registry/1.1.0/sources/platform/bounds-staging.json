@@ -1,0 +1,44 @@
+{
+  "boundsFormatVersion": "1.1.0",
+  "kinds": [
+    {
+      "kind": "db-role",
+      "maxEntries": 40,
+      "maxAssemblyEntries": 400,
+      "fields": [
+        {
+          "pointer": "/connectionLimit",
+          "bound": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "environments": {
+            "prod": {
+              "maximum": 100
+            },
+            "staging": {
+              "maximum": 150
+            }
+          }
+        },
+        {
+          "pointer": "/privileges",
+          "bound": {
+            "maxItems": 2,
+            "uniqueItems": true
+          }
+        },
+        {
+          "pointer": "/privileges/*",
+          "bound": {
+            "enum": [
+              "read",
+              "write"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

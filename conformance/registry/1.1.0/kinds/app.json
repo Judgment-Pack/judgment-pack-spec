@@ -1,0 +1,39 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/app",
+  "version": "1.0.0",
+  "kind": "app",
+  "owner": "platform-data",
+  "description": "A service that runs.",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "labels": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "name": {
+        "type": "string"
+      },
+      "replicas": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "tier": {
+        "type": "string"
+      },
+      "weight": {
+        "type": "number"
+      }
+    }
+  }
+}

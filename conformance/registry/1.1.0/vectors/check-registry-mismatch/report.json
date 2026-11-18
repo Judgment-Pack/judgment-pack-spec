@@ -1,0 +1,10 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "registry": {"digest": "sha256:0e2632ffee9354103e82d218c1c65a950eb8447c0873eb1713a45c19f3b5e533"},
+  "diagnostics": [
+    {"code": "LOCK-REGISTRY-MISMATCH", "severity": "error", "location": {"document": "lock", "pointer": "/registry"}},
+    {"code": "LOCK-RESOLVED-MISMATCH", "severity": "error", "location": {"document": "lock", "pointer": "/resolved/0"}},
+    {"code": "LOCK-RESOLVED-MISMATCH", "severity": "error", "location": {"document": "lock", "pointer": "/resolved/1"}}
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "diagnostics": [
+    {"code": "LOCK-SIG-MISSING", "severity": "error", "location": {"document": "lock", "pointer": "/sources/1"}},
+    {"code": "LOCK-SIG-EXTRA", "severity": "error", "location": {"document": "signature", "pointer": ""}}
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "boundsFormatVersion": "1.1.0",
+  "kinds": [
+    {
+      "kind": "db-role",
+      "maxEntries": 10,
+      "fields": [
+        {
+          "pointer": "/connectionLimit",
+          "bound": {
+            "maximum": 50
+          },
+          "environments": {
+            "dev": {
+              "maximum": 30
+            },
+            "prod": {
+              "maximum": 45
+            }
+          },
+          "description": "Tighter in each environment than in the field's bound."
+        },
+        {
+          "pointer": "/database",
+          "bound": {
+            "patterns": [
+              "^entry:database/billing"
+            ]
+          }
+        },
+        {
+          "pointer": "/privileges/*",
+          "bound": {
+            "enum": [
+              "read",
+              "write"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

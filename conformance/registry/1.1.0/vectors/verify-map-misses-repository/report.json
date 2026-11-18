@@ -1,0 +1,7 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "diagnostics": [
+    {"code": "LOCK-EXPECTED", "severity": "error", "location": {"document": "lock", "pointer": "/sources/0"}}
+  ]
+}

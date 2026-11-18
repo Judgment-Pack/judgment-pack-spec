@@ -1,0 +1,7 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "diagnostics": [
+    {"code": "FED-MANIFEST", "severity": "error", "location": {"document": "federation", "pointer": "/sources/0/role"}}
+  ]
+}

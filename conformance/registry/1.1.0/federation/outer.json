@@ -1,0 +1,30 @@
+{
+  "federationFormatVersion": "1.1.0",
+  "registry": {
+    "id": "https://example.invalid/registries/outer",
+    "version": "1.0.0"
+  },
+  "environments": [
+    "dev",
+    "prod"
+  ],
+  "sources": [
+    {
+      "name": "copy",
+      "role": "repository",
+      "repository": "https://example.invalid/scm/copies",
+      "registry": "assembled/registry.json"
+    },
+    {
+      "name": "standard",
+      "role": "standard",
+      "repository": "https://example.invalid/scm/platform",
+      "registry": "registry.json",
+      "bounds": "bounds.json",
+      "kinds": [
+        "kinds/database.json",
+        "kinds/db-role.json"
+      ]
+    }
+  ]
+}

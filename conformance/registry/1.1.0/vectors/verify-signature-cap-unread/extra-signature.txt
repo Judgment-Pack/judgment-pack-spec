@@ -1,0 +1,1 @@
+{"algorithm":"ed25519","publicKey":"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a","signature":"e50384de12fdd5351a9fafc715b09e73e95759faf483bb2a51f49aa6c3e9990e15afbd9d9c597260a3fb2a3f49adfff685242f1aec505cb6dc7521fb028ae907","sourceDigest":"sha256:e62e5cbe11d9108df54cde6e637d8e3eb40b8167984d8bb588a7ee8fe9da2e07","sourceSignatureVersion":"1.1.0"\}

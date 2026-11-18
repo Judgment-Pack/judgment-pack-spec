@@ -1,0 +1,10 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "registry": {"digest": "sha256:1d0973ed35fb54e2b7f5ffe4e3156e8f73341856eddb6afbca762398895f7250"},
+  "diagnostics": [
+    {"code": "FED-VALUE-BOUND", "severity": "error", "location": {"document": "value", "source": "billing", "entry": {"kind": "db-role", "id": "billing-api"}, "environment": "dev", "pointer": "/connectionLimit"}},
+    {"code": "FED-VALUE-BOUND", "severity": "error", "location": {"document": "value", "source": "billing", "entry": {"kind": "db-role", "id": "billing-api"}, "environment": "prod", "pointer": "/connectionLimit"}},
+    {"code": "FED-VALUE-BOUND", "severity": "error", "location": {"document": "value", "source": "standard", "entry": {"kind": "db-role", "id": "billing-api"}, "environment": "prod", "pointer": "/connectionLimit"}}
+  ]
+}

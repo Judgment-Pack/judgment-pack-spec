@@ -1,0 +1,9 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "registry": {"digest": "sha256:ca587e97e1815f9878fecaa679e5643334317afdc80f92b98bf79c97fc05ca3a"},
+  "diagnostics": [
+    {"code": "FED-ENVIRONMENT-GAP", "severity": "error", "location": {"document": "value", "source": "standard", "entry": {"kind": "database", "id": "billing"}, "environment": "dev", "pointer": "/admin"}},
+    {"code": "REF-ENTRY-ABSENT-IN-ENVIRONMENT", "severity": "error", "location": {"document": "value", "source": "standard", "entry": {"kind": "database", "id": "billing"}, "environment": "dev", "pointer": "/admin"}}
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/db-role",
+  "version": "1.3.0",
+  "kind": "db-role",
+  "owner": "platform-data",
+  "description": "A database role a service connects as; a minor version that allows more connections.",
+  "entryId": {
+    "pattern": "^[a-z][a-z0-9-]{0,62}$"
+  },
+  "schema": {
+    "type": "object",
+    "required": [
+      "database",
+      "privileges"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "database": {
+        "type": "string",
+        "maxLength": 200
+      },
+      "privileges": {
+        "type": "array",
+        "items": {
+          "enum": [
+            "read",
+            "write",
+            "admin"
+          ]
+        },
+        "uniqueItems": true
+      },
+      "password": {
+        "type": "string"
+      },
+      "connectionLimit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1000
+      }
+    }
+  },
+  "secrets": [
+    "/password"
+  ],
+  "references": [
+    {
+      "pointer": "/database",
+      "kinds": [
+        "database"
+      ]
+    }
+  ],
+  "overlayable": [
+    "/connectionLimit",
+    "/password",
+    "/privileges",
+    "/privileges/*"
+  ],
+  "bounds": {
+    "maxEntries": 1000,
+    "maxEntryBytes": 16384
+  }
+}

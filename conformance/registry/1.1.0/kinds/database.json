@@ -1,0 +1,20 @@
+{
+  "kindFormatVersion": "1.0.0",
+  "id": "https://example.invalid/kinds/database",
+  "version": "1.0.0",
+  "kind": "database",
+  "owner": "platform-data",
+  "description": "A database a service keeps its data in.",
+  "schema": {
+    "type": "object",
+    "required": ["engine"],
+    "additionalProperties": false,
+    "properties": {
+      "engine": { "enum": ["postgres", "mysql"] },
+      "storageGb": { "type": "number", "minimum": 1 },
+      "admin": { "type": "string" }
+    }
+  },
+  "references": [{ "pointer": "/admin", "kinds": ["db-role"] }],
+  "overlayable": ["/storageGb"]
+}

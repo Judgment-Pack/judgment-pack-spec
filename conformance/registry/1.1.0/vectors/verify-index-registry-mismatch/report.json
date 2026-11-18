@@ -1,0 +1,7 @@
+{
+  "reportFormatVersion": "1.1.0",
+  "valid": false,
+  "diagnostics": [
+    {"code": "LOCK-INDEX-MISMATCH", "severity": "error", "location": {"document": "index", "pointer": "/registry/digest"}}
+  ]
+}

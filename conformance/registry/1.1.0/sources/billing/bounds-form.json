@@ -1,0 +1,36 @@
+{
+  "boundsFormatVersion": "1.1.0",
+  "kinds": [
+    {
+      "kind": "db-role",
+      "maxEntries": 10,
+      "maxAssemblyEntries": 20,
+      "fields": [
+        {
+          "pointer": "/connectionLimit",
+          "bound": {
+            "maximum": 50
+          }
+        },
+        {
+          "pointer": "/database",
+          "bound": {
+            "patterns": [
+              "^entry:database/billing"
+            ],
+            "format": "uri"
+          }
+        },
+        {
+          "pointer": "/privileges/*",
+          "bound": {
+            "enum": [
+              "read",
+              "write"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
