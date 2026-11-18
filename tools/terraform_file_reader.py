@@ -55,6 +55,21 @@ FACTS_STRING_LIMIT = 1024 * 1024
 
 CODES = ("TF-SIZE", "TF-JSON", "TF-FORMAT", "TF-DOCUMENT", "TF-SENSITIVITY", "TF-SELECT-BOUND", "TF-NUMBER",
          "TF-VALUE-LIMIT")
+BATCH_CODES = ("FACTS-ID-LIMIT", "FACTS-DOCUMENT-LIMIT")
+# §3: each code's message, a fixed text in this reader's own words that holds nothing read from the file.
+MESSAGES = {
+    "TF-SIZE": "the file is longer than maxBytes",
+    "TF-JSON": "the file is not one strict JSON value",
+    "TF-FORMAT": "the file's format_version is not in the accepted table for its document",
+    "TF-DOCUMENT": "the file is not of its document's shape",
+    "TF-SENSITIVITY": "a resource's sensitivity mirror is missing or not of a mirror's form",
+    "TF-SELECT-BOUND": "more resources are selected than max",
+    "TF-NUMBER": "a number's normal form is longer than 64 characters",
+    "TF-VALUE-LIMIT": "the acquired value is over its bound",
+    "FACTS-ID-LIMIT": "a selected resource's batch line id is not 1 to 256 bytes",
+    "FACTS-DOCUMENT-LIMIT": "a selected resource's facts document is over the facts bound",
+}
+STREAM_MESSAGE = "the input was read as a stream and is longer than maxBytes"
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -73,17 +88,28 @@ class _Refusal(Exception):
 
 @dataclass(frozen=True)
 class Refused:
-    """§3: a refusal carries its code, the file's sha256 and its size, and nothing else; a stream past
-    `maxBytes` carries the code and that it was a stream (step 1)."""
+    """§3: a refusal carries its code, the file's sha256, its size and the code's message, and nothing
+    else; a stream past `maxBytes` carries the code and a message that it was a stream (step 1)."""
     code: str
     sha256: str | None
     size: int | None
     stream: bool = False
 
+    @property
+    def message(self) -> str:
+        return STREAM_MESSAGE if self.stream else MESSAGES[self.code]
+
     def as_json(self) -> dict[str, Any]:
+        """The vectors' form, which leaves the message out, since its wording is a reader's own."""
         if self.stream:
             return {"code": self.code, "stream": True}
         return {"code": self.code, "sha256": self.sha256, "bytes": self.size}
+
+    def diagnostic(self) -> dict[str, Any]:
+        """The whole diagnostic (§3): the vectors' form and the message."""
+        if self.stream:
+            return {"code": self.code, "message": self.message}
+        return {"bytes": self.size, "code": self.code, "message": self.message, "sha256": self.sha256}
 
 
 @dataclass(frozen=True)

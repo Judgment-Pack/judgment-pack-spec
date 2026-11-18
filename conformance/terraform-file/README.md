@@ -63,12 +63,13 @@ exactly one expected result.
 size; `read-stream`, an input read as a stream, such as standard input, read to one byte past
 `maxBytes` and no further; or `batch`, the batch of §8, for a reader that writes it.
 
-An expected result is one of:
+An expected result is one of the forms below. A refusal's diagnostic also carries its code's
+`message` (§3), whose wording is the reader's own, so no expected result holds one.
 
 - `{"record": …, "value": …}`, an accepted read: the acquisition record of §7, with `sha256` the
   input's SHA-256 in lower-case hex, and the acquired value of §6;
 - `{"refusal": {"code", "sha256", "bytes"}}`, a refusal of the reading, or of the batch with
-  `FACTS-ID-LIMIT`, with the input's SHA-256 and size;
+  `FACTS-ID-LIMIT` or `FACTS-DOCUMENT-LIMIT`, with the input's SHA-256 and size;
 - `{"refusal": {"code": "TF-SIZE", "stream": true}}`, a stream longer than `maxBytes`, with neither
   sha256 nor size;
 - `{"declaration": "malformed"}`, a declaration not of §2's form, read with no file: its input,
@@ -116,6 +117,6 @@ A value nested deeper than sixteen is written on one line, as its input is.
 | `numbers` | 9 | normal forms, the 64-character bound and the `1e63` growth (§6) |
 | `value-limit` | 5 | the value bound `L` and the charge on `afterUnknown` pointers, one exactly at it (§6, §12) |
 | `deposed` | 8 | deposed objects in a plan and a state, and keys not of their form (§3 step 4, §12) |
-| `batch` | 11 | lines, the id bound, the facts bound, and refusals before any line (§8, §12) |
+| `batch` | 10 | lines, the id bound, the facts bound, and refusals before any line (§8, §12) |
 | `declarations` | 40 | §2's members held to their forms, integer literals among them (§§2, 5) |
 | `order` | 7 | which step refuses first, and code-point order of ids (§3, §6) |

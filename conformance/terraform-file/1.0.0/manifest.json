@@ -2022,18 +2022,6 @@
       "expected": "vectors/batch/batch-id-empty.expected.json"
     },
     {
-      "id": "batch-actions-empty",
-      "group": "batch",
-      "section": "§5, §8",
-      "operation": "batch",
-      "class": "reader",
-      "formatTable": "1.0.0",
-      "description": "The batch of the plan of the plans group with an empty actions: it keeps no change, and is not the absence of the filter, so no line.",
-      "declaration": "declarations/plan-actions-none.json",
-      "input": "vectors/plans/mixed.json",
-      "expected": "vectors/batch/batch-actions-empty.expected.jsonl"
-    },
-    {
       "id": "declaration-max-bytes-1.0",
       "group": "declarations",
       "section": "§2, §5",

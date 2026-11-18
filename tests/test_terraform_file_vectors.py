@@ -549,6 +549,13 @@ class TerraformFileSecondReaderTests(unittest.TestCase):
         self.assertFalse(reader.address_matches("*a" * 256, "a" * 20000 + "b"))
         self.assertTrue(reader.address_matches("m.*.r[*]", "m.x.r[0]"))
         self.assertFalse(reader.address_matches("m.*.r", "m.x.y.r"))
+        # §3: a diagnostic carries its code's message, a fixed text for every code, and the vectors' form
+        # leaves it out.
+        self.assertEqual(set(reader.CODES) | set(reader.BATCH_CODES), set(reader.MESSAGES))
+        refused = reader.read(bomb, declaration)
+        self.assertEqual({"bytes": len(bomb), "code": "TF-JSON", "message": reader.MESSAGES["TF-JSON"],
+                          "sha256": hashlib.sha256(bomb).hexdigest()}, refused.diagnostic())
+        self.assertEqual({"code", "sha256", "bytes"}, set(refused.as_json()))
 
     def test_the_reader_and_the_first_reader_give_each_declaration_one_verdict(self) -> None:
         for name, malformed in sorted(declaration_verdicts().items()):

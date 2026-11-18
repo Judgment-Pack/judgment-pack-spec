@@ -72,14 +72,16 @@ malformed, and no file is read under it. What holds the declaration refuses it:
 ## 3. Reading the file
 
 A reader takes these steps in order. The first failure refuses the acquisition with its code (§9),
-and later steps do not run. A diagnostic carries its code, the file's sha256 and its size, and
-nothing else: no value, member name, pointer or position. The one exception is a stream's `TF-SIZE`
-(step 1), which carries neither the sha256 nor the size.
+and later steps do not run. A diagnostic carries its code, the file's sha256 and its size, and a
+`message`: a fixed text for its code, which holds nothing read from the file. It carries nothing
+else: no value, member name, pointer or position. The wording of a message is the reader's own, and
+not part of this text. The one exception is a stream's `TF-SIZE` (step 1), which carries its code
+and its message, and neither the sha256 nor the size.
 
 1. The sha256 of the whole file and its length are recorded. A file longer than `maxBytes` is
    `TF-SIZE`, unparsed. An input read as a stream, such as standard input, is read to at most
    `maxBytes` and one byte more: a longer stream is `TF-SIZE`, unparsed, and its diagnostic carries
-   the code and a fixed reading that the input was a stream, with no sha256 and no size, since its
+   the code and a fixed message that the input was a stream, with no sha256 and no size, since its
    whole length is never read. A stream within `maxBytes` has its sha256 and length recorded as a
    file's are.
 2. The bytes are UTF-8 with no byte-order mark and no lone surrogate escape, one JSON value with only
@@ -219,7 +221,13 @@ bound when it is empty or longer than 256 bytes. Then every selected resource's 
 held to the facts bound, and one over it refuses the whole run in the same way, before any line is
 written, with `FACTS-DOCUMENT-LIMIT`. Either refusal covers the whole run: no line is written, and
 a batch is written whole or not at all. The diagnostic of each carries what a refusal of the reading
-carries, the code, the file's sha256 and its size, and never the id.
+carries (§3), the code, the file's sha256, its size and the code's message, and never the id. The
+reference runtime's batch tool gives either refusal as exit status 2 with nothing on standard
+output, and writes its diagnostic to standard error as one RFC 8785 canonical object, of the members
+`bytes`, `code`, `message` and `sha256`, and a line feed. The tool may refuse an empty `actions` on
+its command line, since a command line has no other way to say that nothing is to be selected; that
+is a rule of the tool's flags, not of the reading, in which an empty `actions` selects nothing
+(§5).
 
 ## 9. Diagnostic codes
 
