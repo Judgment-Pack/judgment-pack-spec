@@ -613,6 +613,8 @@ class Derived(unittest.TestCase):
 
     def test_diagnostic_pointers_address_their_documents(self) -> None:
         absent = {("LOCK-INDEX-REQUIRED", "/index"), ("LOCK-SIG-MEMBER", "/signature")}
+        # A member the lock lacks, named by the one row whose lock lacks it (section 9 step 8).
+        absent_in = {("check-emitters-unlocked", "LOCK-EMITTER-MISMATCH", "/emitters")}
         for row in MANIFEST["vectors"]:
             value = document(row["expected"])
             for diagnostic in value.get("diagnostics", []):
@@ -633,7 +635,8 @@ class Derived(unittest.TestCase):
                     continue
                 with self.subTest(row=row["id"], code=diagnostic["code"]):
                     _, found = lookup(load(BASE / target), tokens(location["pointer"]))
-                    self.assertEqual((diagnostic["code"], location["pointer"]) not in absent, found)
+                    self.assertEqual((diagnostic["code"], location["pointer"]) not in absent
+                                     and (row["id"], diagnostic["code"], location["pointer"]) not in absent_in, found)
 
     def test_records_follow_the_rollback_rule(self) -> None:
         modelled = 0
