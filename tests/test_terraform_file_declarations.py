@@ -4,8 +4,9 @@ Each declaration under conformance/terraform-file/1.0.0/declarations/ is read by
 which holds a `terraform-file` source to its form and reads no file (spec/dialect.md §4.5): directly, as
 §2's members, and as a source of a dialect document. These checks need the first reader and the dialect's
 staged vectors (tests/test_dialect.py), which no bundle carries, so they are kept apart from
-tests/test_terraform_file_vectors.py, whose checks need only the companion's own files and run inside the
-companion's bundle (VERSIONING.md, "Independently versioned terraform-file companion").
+tests/test_terraform_file_vectors.py, whose checks need only the companion's own files and its second
+reader, and run inside the companion's bundle (VERSIONING.md, "Independently versioned terraform-file
+companion"). Those checks hold the second reader to the same verdict on each declaration.
 """
 from __future__ import annotations
 

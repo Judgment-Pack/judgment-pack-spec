@@ -4,18 +4,23 @@ The vectors under conformance/terraform-file/1.0.0/ are hand-written and synthet
 codes.json to the companion's §9 table and formats.json to its §4 table; the manifest to its files;
 and every vector to one expected result of the form §§5 to 9 give it: the acquisition record of its
 own input, a value in id order that carries no number and no sensitive text, a refusal of a listed
-code with the input's sha256 and size, or batch lines in canonical form. They read only the text
-and the files under that directory, so the companion's bundle carries them and runs them. The first
-reader's reading of each declaration is held in tests/test_terraform_file_declarations.py, which
-needs the dialect's staged vectors and stays in the repository. No reader of the file exists in
-this repository, so what a vector expects of the reading itself is checked for form only; a second,
-independent reader is the companion's stable bar (§12).
+code with the input's sha256 and size, or batch lines in canonical form. The reading itself is held
+by the second reader, tools/terraform_file_reader.py, written from the companion text alone: every
+vector, declarations included, must give its expected result exactly. Two readers agreeing on every
+vector is the companion's stable bar (§12). These tests read only the text, the files under that
+directory and the second reader, so the companion's bundle carries them, with the second reader, and
+runs them. The first reader's reading of each declaration is held in
+tests/test_terraform_file_declarations.py, which needs the dialect's staged vectors and stays in the
+repository.
 """
 from __future__ import annotations
 
 import hashlib
+import importlib.util
+import io
 import json
 import re
+import sys
 import unittest
 from pathlib import Path
 from typing import Any
@@ -26,8 +31,9 @@ SPEC = ROOT / "spec" / "terraform-file.md"
 CODE = re.compile(r"TF-[A-Z]+(?:-[A-Z]+)*")
 REFUSALS = {"TF-SIZE", "TF-JSON", "TF-FORMAT", "TF-DOCUMENT", "TF-SENSITIVITY", "TF-SELECT-BOUND", "TF-NUMBER",
             "TF-VALUE-LIMIT"}
-# §8: the batch's own refusal, the registry companion's code, and not one of §9's.
-BATCH_CODES = {"FACTS-ID-LIMIT"}
+# §8: the batch's own refusals, the registry companion's codes, and not §9's: an id outside its bound, then a
+# facts document over the facts bound.
+BATCH_CODES = {"FACTS-ID-LIMIT", "FACTS-DOCUMENT-LIMIT"}
 DEFAULT_MAX_BYTES = 67108864
 ROW_MEMBERS = {"id", "group", "section", "operation", "class", "formatTable", "description", "declaration",
                "expected"}
@@ -395,6 +401,118 @@ class TerraformFileResultTests(unittest.TestCase):
         for row in ROWS:
             with self.subTest(id=row["id"]):
                 self.assertNotIn(SENSITIVE.encode(), (BASE / row["expected"]).read_bytes().lower())
+
+
+class _CountingStream(io.RawIOBase):
+    """A stream that counts what is read from it, so a test sees a stream read past maxBytes plus one."""
+
+    def __init__(self, data: bytes) -> None:
+        self.data = io.BytesIO(data)
+        self.taken = 0
+
+    def readable(self) -> bool:
+        return True
+
+    def read(self, size: int = -1) -> bytes:
+        chunk = self.data.read(size)
+        self.taken += len(chunk)
+        return chunk
+
+
+def exact(value: Any) -> str:
+    # One text per value that tells true from 1, so a comparison holds members, types and order exactly.
+    return json.dumps(value, sort_keys=True, ensure_ascii=False)
+
+
+class TerraformFileSecondReaderTests(unittest.TestCase):
+    """The second reader, tools/terraform_file_reader.py, written from the companion text alone, over every
+    vector of the manifest: each must equal its expected result exactly, a refusal's code and members, an
+    accepted read's record and value (its canonical bytes too), or a batch's bytes."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        # Loaded by its path, from the repository or from the companion's bundle, which carries it,
+        # so that no installed module named `tools` stands in for it.
+        spec = importlib.util.spec_from_file_location("terraform_file_reader",
+                                                      ROOT / "tools" / "terraform_file_reader.py")
+        assert spec is not None and spec.loader is not None
+        cls.reader = importlib.util.module_from_spec(spec)
+        sys.modules["terraform_file_reader"] = cls.reader
+        spec.loader.exec_module(cls.reader)
+
+    def result_of(self, row: dict[str, Any]) -> Any:
+        reader = self.reader
+        try:
+            declaration = reader.read_declaration((BASE / row["declaration"]).read_bytes())
+        except reader.Malformed:
+            return {"declaration": "malformed"}
+        data = input_of(row)
+        if row["operation"] == "batch":
+            written = reader.batch(data, declaration)
+            return written if isinstance(written, bytes) else {"refusal": written.as_json()}
+        if row["operation"] == "read-stream":
+            stream = _CountingStream(data)
+            result = reader.read_stream(stream, declaration)
+            # §3, step 1: a stream is read to at most maxBytes and one byte more.
+            self.assertLessEqual(stream.taken, declaration.max_bytes + 1)
+        else:
+            result = reader.read(data, declaration)
+        if isinstance(result, reader.Refused):
+            return {"refusal": result.as_json()}
+        return {"record": result.record, "value": result.value}
+
+    def test_every_vector_gives_its_expected_result(self) -> None:
+        agreed = 0
+        for row in ROWS:
+            with self.subTest(id=row["id"]):
+                expected = expected_of(row)
+                found = self.result_of(row)
+                if isinstance(expected, bytes):
+                    self.assertIsInstance(found, bytes)
+                    self.assertEqual(expected.decode("utf-8"), found.decode("utf-8"))
+                else:
+                    self.assertEqual(exact(expected), exact(found))
+                    if "value" in expected:
+                        self.assertEqual(canonical(expected["value"]).encode("utf-8"),
+                                         self.reader.canonical(found["value"]).encode("utf-8"))
+                agreed += 1
+        self.assertEqual(len(ROWS), agreed)
+
+    def test_the_reader_holds_its_bounds_on_inputs_no_vector_writes(self) -> None:
+        reader = self.reader
+        # §6: a number's normal-form length is found before it is written, so an exponent of thirty
+        # digits is TF-NUMBER at once, and a zero is 0 whatever its exponent.
+        self.assertIsNone(reader.normal_form("1e" + "9" * 30))
+        self.assertIsNone(reader.normal_form("1e-" + "9" * 30))
+        self.assertEqual("0", reader.normal_form("-0.0e" + "9" * 30))
+        self.assertEqual("100", reader.normal_form("1e" + "0" * 40 + "2"))
+        self.assertEqual("-0.0000001", reader.normal_form("-1e-7"))
+        # §3, step 2: depth is held while parsing, so a hundred thousand open brackets are TF-JSON.
+        declaration = reader.read_declaration(b'{"document": "plan", "select": {"types": ["t"]}}')
+        bomb = b"[" * 100000
+        self.assertEqual(reader.Refused("TF-JSON", hashlib.sha256(bomb).hexdigest(), len(bomb)),
+                         reader.read(bomb, declaration))
+        # §5: the address pattern is matched one character at a time, with no backtracking.
+        self.assertFalse(reader.address_matches("*a" * 256, "a" * 20000 + "b"))
+        self.assertTrue(reader.address_matches("m.*.r[*]", "m.x.r[0]"))
+        self.assertFalse(reader.address_matches("m.*.r", "m.x.y.r"))
+        # §3: a diagnostic carries its code's message, a fixed text for every code, and the vectors' form
+        # leaves it out.
+        self.assertEqual(set(reader.CODES) | set(reader.BATCH_CODES), set(reader.MESSAGES))
+        refused = reader.read(bomb, declaration)
+        self.assertEqual({"bytes": len(bomb), "code": "TF-JSON", "message": reader.MESSAGES["TF-JSON"],
+                          "sha256": hashlib.sha256(bomb).hexdigest()}, refused.diagnostic())
+        self.assertEqual({"code", "sha256", "bytes"}, set(refused.as_json()))
+
+    def test_the_reader_and_the_first_reader_give_each_declaration_one_verdict(self) -> None:
+        for name, malformed in sorted(declaration_verdicts().items()):
+            with self.subTest(declaration=name):
+                try:
+                    self.reader.read_declaration((BASE / name).read_bytes())
+                    verdict = False
+                except self.reader.Malformed:
+                    verdict = True
+                self.assertEqual(malformed, verdict)
 
 
 if __name__ == "__main__":

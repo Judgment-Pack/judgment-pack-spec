@@ -5,6 +5,10 @@
   ([`spec/registry.md`](../spec/registry.md)) as registry format `1.1.0`; format `1.0.0` and every
   document it defines are unchanged
 - Created: 2026-11-17
+- Amended: 2026-11-17, settling four of the first draft's Unresolved questions by the maintainer's
+  ruling: a repository's subset of environments (§§2 and 3), one standard per assembly (§2),
+  per-environment bounds (§5) and no assembly as a source (§3); each remaining question carries a
+  proposed resolution
 - Related: [RFC 0034](0034-registry-profile.md) (the registry profile, and its Unresolved question
   4, cross-registry references); [RFC 0035](0035-registry-references.md) (references);
   [RFC 0040](0040-registry-locks-and-signatures.md) (locks and signatures, which pin an assembled
@@ -97,7 +101,7 @@ reader that only validates still writes `"1.0.0"` (§13).
   "environments": ["dev", "prod"],
   "sources": [
     { "name": "billing", "role": "repository", "repository": "https://example.invalid/scm/billing",
-      "registry": "registry/registry.json", "bounds": "registry/bounds.json" },
+      "environments": ["prod"], "registry": "registry/registry.json", "bounds": "registry/bounds.json" },
     { "name": "standard", "role": "standard", "repository": "https://example.invalid/scm/platform",
       "registry": "registry.json", "bounds": "bounds.json",
       "kinds": ["kinds/database.json", "kinds/db-role.json"] }
@@ -112,6 +116,7 @@ reader that only validates still writes `"1.0.0"` (§13).
 | `sources` | 1 to 256 sources, sorted by `name` in code-point order |
 | `sources[].name` | `^[a-z][a-z0-9-]{0,62}$`, distinct |
 | `sources[].role` | `standard` for exactly one source, `repository` for every other |
+| `sources[].environments` | for a `repository` source, optional: the environments it **serves**, a non-empty subset of `environments` in their order; absent, it serves them all. The standard serves every environment and has no such member |
 | `sources[].repository` | the repository's identity: an absolute URI (RFC 3986) of at most 2048 characters with **no userinfo, no query and no fragment**, compared as exact code points, with no case folding, percent-decoding or Unicode normalization. It is an identity, not a location: nothing resolves it |
 | `sources[].registry` | a path; required for a `repository` source, optional for the standard |
 | `sources[].bounds` | a path, optional |
@@ -126,6 +131,14 @@ holds at most 4 096 paths in all. Within a source no two paths are equal once ca
 normalization. Two sources MAY name one repository identity (one repository holding several
 services), and are then given one commit (`FED-COMMIT`). The manifest names no commit: it says what
 to assemble, and the index (§4) records at which commits it was assembled.
+
+*Amended 2026-11-17, by the maintainer's ruling (first draft's question 2).* An assembly of format
+`1.1.0` has exactly one standard. Layers (an organization's standard above a division's, above the
+repositories) are left to a later minor version, and the format is kept open to them in two ways:
+`role` is a closed list that a later version may extend with a layer role, which a `1.1.0` reader
+refuses (`FED-MANIFEST`) rather than misreads as a flat assembly; and §5 states each comparison
+between a narrower bound and the one directly above it, so a chain would apply it to each adjacent
+pair, with the top layer governing the kinds.
 
 ### 3. Assembly
 
@@ -143,9 +156,10 @@ ends the assembly after that step.
 2. **Documents.** For each path, the **content digest**: `sha256:` over the bytes exactly as
    supplied. Then the import of a YAML path (§9), and the admission (§2.2) of every document, each
    under its own selector and bound.
-3. **Sources.** Each source's registry has the manifest's `environments`, as the same array
-   (`FED-ENVIRONMENTS`). No two sources' registries, and none of them and the assembled registry,
-   share an `id` (`FED-REGISTRY-DUPLICATE`).
+3. **Sources.** Each source's registry has, as the same array, the environments the source serves
+   (§2) (`FED-ENVIRONMENTS`). No two sources' registries, and none of them and the assembled
+   registry, share an `id` (`FED-REGISTRY-DUPLICATE`). No source is an assembled registry
+   (`FED-SOURCE-ASSEMBLED`, below).
 4. **Kinds.** A kind declaration the standard supplies **governs** its kind name. A source that pins
    a governed kind name MUST pin a declaration the standard supplies, by digest, or it is
    `FED-KIND-NOT-STANDARD`. A repository cannot loosen a governed kind by declaring its own. Two
@@ -162,10 +176,12 @@ ends the assembly after that step.
 6. **The assembled registry.** The registry document of format `1.0.0` that holds:
    - `id` and `version` from the manifest, and its `environments`. The `version` does not change
      when only a source's commit does, so it orders no two assemblies of one manifest version;
-     the index digest tells them apart (RFC 0040, Unresolved question 2);
+     the lock's `serial` does (RFC 0040 §§2 and 7);
    - `owners`: the union of the sources' owners, in code-point order;
    - `kinds`: the union of the sources' pins, one per kind name, in §4's order;
-   - `entries`: every source's entries, in §4's canonical order;
+   - `entries`: every source's entries, in §4's canonical order. An entry of a source that serves
+     fewer environments than the manifest names is written with `environments`: its own, or, when
+     it has none, the source's served environments. No entry applies where its source did not say;
    - `overlays`: one per environment that any source patches, in the order of `environments`, its
      patches in source order and then in each source's order;
    - `secretScopes`: the standard's, present when it declares them. A repository's own scopes
@@ -178,12 +194,34 @@ ends the assembly after that step.
    order. The sources' own scopes are also read together as §6.4's sharing rule reads one list: a
    project listed for `dev` in one source and `prod` in another is `REF-SECRET-SCOPE-SHARED` at the
    later listing in source order.
+
+   **Gaps.** *Amended 2026-11-17, by the maintainer's ruling (first draft's question 1).* In every
+   environment in which an entry applies, as the assembled registry writes it (its own
+   `environments`, or, when it has none, its source's served environments), each of its
+   references (§6.2) is satisfied there. A reference whose target, in one of those environments, is
+   held only by a source that does not serve it is `FED-ENVIRONMENT-GAP` at the reference, with
+   `environment` set, beside the `REF-ENTRY-ABSENT-IN-ENVIRONMENT` that §7 reports for it, so the
+   report names the cause. An environment no repository serves is not a gap: the standard serves
+   it.
 7. **Bounds** (§5): the form of every bounds document, the comparison of each repository's bounds
    with the standard's, and the check of values against both.
 8. **Output.** For an assembly with no error, the reader writes the assembled registry and the
    index. It MUST NOT write either for an assembly with an error, as §8 writes no resolved registry
    for an invalid one. The assembled registry is over its bound when it is over §2.2's 8 MiB
    (`REG-DOC-SIZE`).
+
+**No assembly is a source.** *Amended 2026-11-17, by the maintainer's ruling (first draft's question
+8).* An assembled registry is never a source of another assembly: the outer index would record the
+commit that holds the file, not the inner sources, and the inner bounds would be checked twice or
+not at all. An assembled registry is an ordinary `1.0.0` document with no mark of its own, so it is
+detected by identity. Beside the sources, the assembler MUST be given, as an input of every
+assembly, the list of **known assembled indexes**, and with RFC 0040 their locks: those a standard
+owner publishes, and any a repository's CI holds. The list has no default, and an empty list is
+given as such. A source is `FED-SOURCE-ASSEMBLED` when its registry's digest is the
+`registry.digest`, or its `id` the `registry.id`, of any index or lock in the list. An assembled
+registry the list does not name cannot be told from a repository's own by its bytes: it is then
+read as that repository's registry, held to the standard's governed kinds and bounds like any
+other, and only its inner provenance is lost (Security and privacy).
 
 ### 4. The assembled index
 
@@ -233,7 +271,8 @@ that cannot read the repositories holds only the index's word for where the byte
   "kinds": [
     { "kind": "db-role", "maxEntries": 40,
       "fields": [
-        { "pointer": "/connectionLimit", "bound": { "type": "integer", "minimum": 1, "maximum": 200 } },
+        { "pointer": "/connectionLimit", "bound": { "type": "integer", "minimum": 1, "maximum": 200 },
+          "environments": { "prod": { "maximum": 100 } } },
         { "pointer": "/privileges", "bound": { "maxItems": 2, "uniqueItems": true } },
         { "pointer": "/privileges/*", "bound": { "enum": ["read", "write"] } } ] } ]
 }
@@ -251,9 +290,10 @@ A repository's bounds for the same kind might set `"maximum": 50` at `/connectio
 - `pointer` is a pointer pattern (§3.5), or `""` for the whole value. It MUST be reachable, by
   §3.5's rule, in the schema of the declaration that governs or is pinned for the kind
   (`FED-BOUND-POINTER-UNREACHABLE`), for the same reason.
-- `maxEntries` bounds the number of entries of the kind that **one source** holds. Nothing caps a
-  kind across the assembly (Unresolved question 10).
+- `maxEntries` bounds the number of entries of the kind that **one source** holds, in all
+  environments. Nothing caps a kind across the assembly (Unresolved question 5).
 - `bound` holds only the constraints of §5.2.
+- `environments`, optional, holds per-environment bounds (§5.5).
 
 #### 5.2 What "tighter" means, construct by construct
 
@@ -315,8 +355,9 @@ constraints, and is admitted.
    `maxEntries`, then each field at a pointer the standard also bounds, row by row (§5.2). A
    looser row, a value S refuses, or a larger `maxEntries` is `FED-BOUND-WIDENS` at R's member.
 2. **Values.** In each environment where step 7 of §7.1 checks an entry, its resolved value is
-   checked at every position each applicable field's pointer matches, against the standard's bound
-   and, for an entry of a repository with bounds, against that repository's bound. Both are
+   checked at every position each applicable field's pointer matches, against the standard's
+   effective bound there (§5.5) and, for an entry of a repository with bounds, against that
+   repository's. Both are
    checked, so a defect in the comparison never lets a value past the standard. A failure is
    `FED-VALUE-BOUND` at the value's position (document `value`, with `entry` and `environment`),
    with `source` naming the source whose bound it fails. A source with more entries of a kind than
@@ -324,6 +365,28 @@ constraints, and is admitted.
 
 A matched position absent from the value checks nothing (as §6.1 reads references); a field
 that should require a member states `required` at its parent.
+
+#### 5.5 Per-environment bounds
+
+*Amended 2026-11-17, by the maintainer's ruling (first draft's question 3).* One bounds document
+may bound one environment more tightly than another.
+
+- **Form.** A field's `environments` is an object whose members are environments of the manifest,
+  each a bound of §5.2's rows and §5.3's limits. A member naming an environment the manifest does
+  not name, or, in a repository's bounds, one the repository does not serve, is
+  `FED-BOUND-ENVIRONMENT`: it would bound nothing. `maxEntries` has no per-environment form.
+- **Within one document.** Each environment's bound is at least as tight as the field's `bound`,
+  by §5.2 with the environment's bound as R and the field's as S, or it is `FED-BOUND-WIDENS` at
+  the environment's member.
+- **The effective bound** of a field in environment `e` is its `bound` with each row
+  `environments.e` states taking that row's place, except `required` and `patterns`, whose names
+  and patterns are added to the field's. Rows it does not state are inherited. Since each row is
+  at least as tight, the effective bound admits exactly the values both admit.
+- **Tighten-only, per environment.** §5.4's comparison is made between the fields' `bound`s, and
+  again, for each environment the repository serves, between the two effective bounds there. A
+  widening in any of them is `FED-BOUND-WIDENS`, at the repository's environment member when it
+  states that row, and at its `bound` otherwise. A repository bound that is tight enough for
+  `dev` but not for `prod`, where the standard is tighter, is thus refused.
 
 ### 6. Diagnostic codes
 
@@ -335,12 +398,15 @@ All are errors. None is raised by a `1.0.0` reader, and none changes a `1.0.0` c
 | `FED-COMMIT` | a commit is not 40 or 64 lowercase hexadecimal digits |
 | `FED-REPOSITORY` | a repository identity is not an absolute URI, or holds userinfo, a query or a fragment |
 | `FED-SOURCE-MISSING` | the bytes of a path the manifest names were not supplied |
-| `FED-ENVIRONMENTS` | a source's environments are not the manifest's |
+| `FED-ENVIRONMENTS` | a source's registry's environments are not the environments it serves |
+| `FED-ENVIRONMENT-GAP` | in an environment its entry applies in, a reference's target is held only by a source that does not serve it |
+| `FED-SOURCE-ASSEMBLED` | a source's registry is one that a known assembled index or lock names |
 | `FED-REGISTRY-DUPLICATE` | two registries of the assembly share an `id` |
 | `FED-KIND-NOT-STANDARD` | a governed kind is pinned to a declaration the standard does not supply |
 | `FED-KIND-CONFLICT` | two sources pin one kind name to different declarations |
 | `FED-SCOPE-WIDENS` | a repository's secret scopes list a project the standard's do not |
 | `FED-BOUND-FORM` | a bounds document is not of its form |
+| `FED-BOUND-ENVIRONMENT` | a per-environment bound names an environment the manifest does not, or the repository does not serve |
 | `FED-BOUND-KIND` | a bounded kind is neither governed nor pinned by the assembled registry, or a standard bound names a kind it does not govern |
 | `FED-BOUND-POINTER-UNREACHABLE` | a field's pointer reaches no position of the kind's schema |
 | `FED-BOUND-NOT-COMPARABLE` | a bound holds a keyword of §5.3 |
@@ -371,7 +437,7 @@ pointers, sources and paths, never a repository's content.
   inside the standard, and this RFC does so (§5.4, 2). The comparison is added because a looser
   stated limit misleads: a reader of the repository's bounds would take `maximum: 600` as allowed.
 - **Pattern inclusion by automata.** Exact, but exponential in the worst case, and two readers
-  would need one algorithm and one budget (Unresolved question 4).
+  would need one algorithm and one budget (Unresolved question 1).
 - **Commits pinned in the manifest.** The manifest would be a lock, changed by every service change.
   The manifest says what, the index records which, and RFC 0040's lock pins the index.
 
@@ -408,6 +474,13 @@ pointers, sources and paths, never a repository's content.
   misspelt kind or pointer (`FED-BOUND-KIND`, `FED-BOUND-POINTER-UNREACHABLE`).
 - **Refusal, not a pass.** An incomparable construct is refused (§5.3), and a missing path is
   refused, never fetched or skipped.
+- **An assembly as a source is refused only when it can be recognised**, by the known assembled
+  indexes the assembler is given (§3, No assembly is a source). One the list does not name reads as
+  a repository's own registry: the standard's kinds and bounds still hold over it, and the index
+  then records the copy's commit, not the inner sources.
+- **Served environments narrow, never widen.** An entry of a repository that serves fewer
+  environments is written to apply only in those (§3, step 6), and a reference that leaves them
+  is a gap (`FED-ENVIRONMENT-GAP`), not a silent miss.
 - **Resources.** At most 256 sources and 4 096 paths; every document keeps its §2.2 bound, the
   assembled registry 8 MiB and the report §7.4's cap. Owners stay identities that authorize nothing
   (§16).
@@ -424,7 +497,14 @@ Rows would be hand-written and synthetic, under `conformance/registry/1.1.0/`, f
 - **Negative.** One row per `FED-` code, among them a commit of 39 digits, in upper case, or a
   branch name; a repository with userinfo or a query; a duplicate entry across sources; a patch of
   another source's entry (`REG-OVERLAY-ENTRY-MISSING`, in its source); a cross-source scope share;
-  one repository identity at two commits; one code at one pointer in two sources, reported twice.
+  one repository identity at two commits; one code at one pointer in two sources, reported twice;
+  a repository serving `prod` only whose entry references an entry of one serving `dev` only
+  (`FED-ENVIRONMENT-GAP`); an index's registry offered as a source (`FED-SOURCE-ASSEMBLED`).
+- **Served environments and per-environment bounds.** A repository serving a subset, its entries
+  written with `environments`; an environment bound looser than its field's `bound`; a repository
+  bound tight enough in `dev` and loose in `prod` where the standard bounds `prod` more tightly;
+  `required` and `patterns` added per environment; an environment the repository does not serve;
+  an entry whose own `environments` leave out the one where its target is missing, which is no gap.
 - **The comparison table.** Each row of §5.2 tighter, equal and looser; exclusive against inclusive
   at one value; `integer` inside `number`, not the reverse; a `const` in the standard's `enum`; an
   `enum` value the standard's `maxLength` refuses; a cancelled widening, still reported.
@@ -450,22 +530,34 @@ Rows would be hand-written and synthetic, under `conformance/registry/1.1.0/`, f
 
 ## Unresolved questions
 
-1. **Environments.** May a repository serve a subset of the manifest's environments? Its entries'
-   `environments` would then be made explicit when merged, so none applies where its source did not.
-2. **Layered standards.** One standard per assembly here. An organization, division and service
-   chain would make the comparison transitive and the governed kinds layered.
-3. **Per-environment bounds.** Production is often bounded more tightly than development; a field
-   with an `environments` member would need its comparison defined per environment.
-4. **Pattern inclusion.** Should a later version decide inclusion between two patterns under a
+*Amended 2026-11-17.* Questions 1 (environments), 2 (layered standards), 3 (per-environment bounds)
+and 8 (assemblies of assemblies) of the first draft are settled in §§2, 3 and 5 by the maintainer's
+ruling. The rest are renumbered, and each carries a proposed resolution for the maintainer to
+decide.
+
+1. **Pattern inclusion.** Should a later version decide inclusion between two patterns under a
    published size budget every reader shares, so a pattern can be replaced by a narrower one?
-5. **Bounds on structure.** Should a standard also narrow a kind's `overlayable` positions, the
-   target kinds of a reference, or the stores a secret may name?
-6. **Entry provenance in the index.** Entries are found through their source's pinned registry. Is
-   a per-entry list worth its size for an auditor?
-7. **Selector values.** New documents take `"1.1.0"`, the format that defines them. Is `"1.0.0"`,
-   a document's first version, the better reading of §13?
-8. **Assemblies of assemblies.** Should an assembled registry be usable as a source of another
-   assembly (RFC 0034, Unresolved question 4)?
-9. **Review regime:** as in RFC 0034, question 1.
-10. **Assembly-wide caps.** `maxEntries` bounds one source. Should a bound also cap a kind's entries
-    across the assembly, and how would a repository's narrower cap compare with it?
+   *Proposed resolution:* no, not in `1.1.0`. Adding a pattern already narrows, and two readers
+   agree on that at no cost; inclusion needs one algorithm and one budget in every reader, and is
+   worth defining only when a replacement is shown to be needed.
+2. **Bounds on structure.** Should a standard also narrow a kind's `overlayable` positions, the
+   target kinds of a reference, or the stores a secret may name? *Proposed resolution:* yes, in a
+   later minor version, as three more rows of §5.2. Each is a finite set compared by subset, so it
+   is decidable at no cost; none is needed to bound values, which is this version's scope.
+3. **Entry provenance in the index.** Entries are found through their source's pinned registry. Is
+   a per-entry list worth its size for an auditor? *Proposed resolution:* no. Each entry is held by
+   exactly one source's registry, which the index pins by digest, so an auditor derives entry to
+   source from documents it already holds, and the index stays within its bound.
+4. **Selector values.** New documents take `"1.1.0"`, the format that defines them. Is `"1.0.0"`,
+   a document's first version, the better reading of §13? *Proposed resolution:* keep `"1.1.0"`.
+   A selector names the format that defines the document; `"1.0.0"` would name a format in which
+   the document does not exist, and a `1.0.0` reader's refusal by selector would then be ambiguous.
+5. **Assembly-wide caps.** `maxEntries` bounds one source. Should a bound also cap a kind's entries
+   across the assembly, and how would a repository's narrower cap compare with it? *Proposed
+   resolution:* yes, as a member only the standard may state (a repository stating it is
+   `FED-BOUND-FORM`), checked once after step 6. An assembly-wide cap is a limit only the standard
+   owner speaks for, so it needs no comparison.
+6. **Review regime:** as in RFC 0034, question 1. *Proposed resolution:* review this record with
+   RFC 0040 in one round. This record defines no cryptography, so a same-vendor review with the
+   different-vendor review waived, as for RFCs 0034 to 0038, would fit it alone; RFC 0040's
+   signatures argue for one review of both, of whichever kind RFC 0040 receives.

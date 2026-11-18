@@ -216,8 +216,16 @@ Two Drafts propose additions to the released registry companion as format `1.1.0
 - [RFC 0039](0039-federated-registry.md) assembles one `1.0.0` registry from a standard repository
   and service repositories, from bytes the caller supplies at full commit ids, and writes an index
   of each document's repository, commit, path and digests. A repository's bounds may only tighten
-  the standard's, compared construct by construct; a construct that cannot be compared is refused.
+  the standard's, compared construct by construct and in each environment it serves; a construct
+  that cannot be compared is refused. A repository may serve a subset of the environments, an
+  assembly has one standard, and an assembled registry is never a source.
 - [RFC 0040](0040-registry-locks-and-signatures.md) pins a registry, its kind declarations, each
-  environment's resolved registry and an assembled index in a canonical lock, and signs the lock's
-  digest with a detached Ed25519 document modelled on the reference runtime's pack signatures,
-  checked against an expected key before the lock is read.
+  environment's resolved registry, the emitter manifests and their files, and an assembled index in
+  a canonical lock with a rising serial, one lock per registry. It signs the lock's digest with a
+  detached Ed25519 document modelled on the reference runtime's pack signatures, checked against an
+  expected key before the lock is read; for an assembly, each repository also signs its own
+  documents, and all of the set is required. A verifier keeps, per registry id, the serial it last
+  accepted, and refuses an older lock.
+
+Both were amended on 2026-11-17 by the maintainer's rulings on eight of their Unresolved questions;
+each remaining question carries a proposed resolution.

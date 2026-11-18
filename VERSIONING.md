@@ -316,17 +316,18 @@ A terraform-file release names, in its own JSON release record `releases/<tag>.j
 notes, the exact reading `1.0.0` and the SHA-256 of the companion text and of the vectors' README;
 the format table with its digest, its release, its rows and, as `added`, the rows its release
 accepts beyond the latest earlier release (every row for the first, none for an erratum); the code
-list with its digest and its codes; and the vectors' manifest with its digest, the id of every
-vector and the digest of every file under `conformance/terraform-file/1.0.0/`, every declaration and
-vector among them. The builder
-derives that record from the tagged tree and refuses the tag unless the committed record equals it,
+list with its digest and its codes; the vectors' manifest with its digest, the id of every vector
+and the digest of every file under `conformance/terraform-file/1.0.0/`, every declaration and vector
+among them; and the SHA-256 of the second reader, `tools/terraform_file_reader.py`, whose agreement
+with every vector the release shows. The builder derives that record from the tagged tree and refuses the tag unless the committed record equals it,
 its maturity is `released`, the text's status sentence, the code list, the format table and the
 vectors' manifest all say `released`, and neither the text nor the vectors' README still calls the
 reading proposed. They say so until the commit the tag names, which changes all of them.
 
 The release's bundle, `judgment-pack-terraform-file-<releaseVersion>`, carries the text, its code
-list, format table and vectors with their README, the checks that hold the vectors to the text, the
-design records and the companion texts the text links, this document, the license and the record
+list, format table and vectors with their README, the checks that hold the vectors to the text and
+the second reader they run (it uses the standard library only and reads only the bytes it is given,
+so a consumer runs both from the bundle), the design records and the companion texts the text links, this document, the license and the record
 and notes. A Core bundle carries the text and not the vectors' directory, as it carries none of the
 registry's or Policy's. The companion has no schema, so a release serves nothing new on the site:
 the text's page is published as it is now, and no code list, table, declaration or vector is served

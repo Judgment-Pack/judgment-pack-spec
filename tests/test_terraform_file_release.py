@@ -42,6 +42,7 @@ README = "conformance/terraform-file/README.md"
 VECTORS = "conformance/terraform-file/1.0.0"
 MANIFEST = f"{VECTORS}/manifest.json"
 CODES = f"{VECTORS}/codes.json"
+READER = "tools/terraform_file_reader.py"
 FORMATS = f"{VECTORS}/formats.json"
 # The status each of the four says; one match each, whichever word it is.
 STATUS_SENTENCE = re.compile(r"^(This text is the terraform-file reading `1\.0\.0`, status `)([a-z]+)(`\.)", re.M)
@@ -80,6 +81,7 @@ def record(root: Path, tag: str = TAG, version: str = VERSION, added: dict | Non
         "corpus": {"path": MANIFEST, "sha256": digest(root / MANIFEST),
                    "vectors": sorted(row["id"] for row in vectors["vectors"]), "files": files(root, VECTORS)},
         "formatDigests": {TEXT: digest(root / TEXT), README: digest(root / README)},
+        "reader": {"path": READER, "sha256": digest(root / READER)},
     }
 
 
@@ -217,6 +219,8 @@ class TerraformFileReleaseTests(unittest.TestCase):
             for change, message in (
                     (lambda r: r.pop("formatTable"), "closed shape"),
                     (lambda r: r["formatDigests"].pop(README), "text or README bytes"),
+                    (lambda r: r.pop("reader"), "closed shape"),
+                    (lambda r: r["reader"].update(path="tools/dialect_verify.py"), "second reader bytes"),
                     (lambda r: r["formatTable"].update(release="1.0.1"), "format table"),
                     (lambda r: r["formatTable"]["table"]["plan"].pop(), "format table"),
                     (lambda r: r["formatTable"].update(added={}), "format table"),
@@ -241,6 +245,7 @@ class TerraformFileReleaseTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = self.released_tree(temporary)
             for name, message in ((TEXT, "text or README bytes"), (README, "text or README bytes"),
+                                  (READER, "second reader bytes"),
                                   (FORMATS, "format table"), (CODES, "corpus identity"),
                                   (MANIFEST, "corpus identity"),
                                   (f"{VECTORS}/declarations/plan.json", "corpus identity"),
@@ -583,13 +588,15 @@ class TerraformFileReleaseTests(unittest.TestCase):
             self.assertGreater(len(tracked), 100)
             self.assertLessEqual(tracked, file_members)
             for name in (TEXT, README, MANIFEST, CODES, FORMATS, "spec/dialect.md", "spec/registry.md",
-                         "VERSIONING.md", "LICENSE", "tests/test_terraform_file_vectors.py",
+                         "VERSIONING.md", "LICENSE", "tests/test_terraform_file_vectors.py", READER,
                          f"releases/{TAG}.md", f"releases/{TAG}.json"):
                 self.assertIn(name, file_members)
             for name in file_members:
                 self.assertFalse(name.startswith(("conformance/evaluation/", "conformance/policy/",
                                                   "conformance/registry/", "conformance/dialect/",
-                                                  "schema/", "examples/", "web/", "tools/")), name)
+                                                  "schema/", "examples/", "web/")), name)
+            # Of the tools, only the second reader, which the checks run over every vector.
+            self.assertEqual({READER}, {name for name in file_members if name.startswith("tools/")})
             self.assertEqual({"tests/test_terraform_file_vectors.py"},
                              {name for name in file_members if name.startswith("tests/")})
             packaged = unpacked / prefix
@@ -614,6 +621,7 @@ class TerraformFileReleaseTests(unittest.TestCase):
             self.assertRegex(checked.stderr, r"Ran [1-9][0-9]* tests")
             self.assertNotIn("skipped", checked.stderr)
             self.assertIn("test_terraform_file_vectors.", checked.stderr)
+            self.assertRegex(checked.stderr, r"test_every_vector_gives_its_expected_result .*\.\.\. ok")
             checksums = artifacts[2].read_text().splitlines()
             for artifact, line in zip(artifacts[:2], checksums):
                 self.assertEqual(line, BUILDER.sha256(artifact) + "  " + artifact.name)

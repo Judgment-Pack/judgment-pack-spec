@@ -43,6 +43,33 @@ here.
   (§6); and such a removal counts one in `removedSensitive`, which counts nothing removed inside a
   removed value or an array removed up to its object member (§3, step 6). No Core bundle carries
   them, the site serves none of them, and no release record is added.
+- **A second reader of the `terraform-file` reading** (`tools/terraform_file_reader.py`; RFC 0038,
+  Implementation item 3; #369). It is written from the companion text alone, with the registry
+  companion's §10.1 and §10.2, RFC 8785 and RFC 6901, uses the standard library only, and reads
+  bytes only: it holds the declaration to §2's form, and the file to `maxBytes` (a stream read to
+  one byte past it), a depth of 128, the 64-character number bound, `max` and the value bound `L`
+  before it writes what they bound. `tests/test_terraform_file_vectors.py` now runs every one of the
+  188 vectors through it, and it gives each one's expected result exactly, so the reading's
+  results are no longer checked for form only. The companion's status says a second reader is in
+  the repository and agrees on every vector; it is a same-vendor reader, not a cross-vendor claim,
+  and a test reader, whose memory grows with `maxBytes`, not one for production files. The reading
+  stays `proposed`, and nothing about its stability changes.
+- **The `terraform-file` reading settles five forms its text left open** (`spec/terraform-file.md`
+  §3 step 4, §§5 and 8; #369), each as the reference runtime's reader already reads it, and each
+  with vectors that decide it: 18 more, 206 in all. A resource's `address`, `type`, `name`, `mode`
+  and `provider_name` are strings, which may be empty, and its `index`, when present, a string or a
+  number; `mode` is not restricted when read, so a resource of another mode is read and never
+  selected. In a state, `values.root_module` and each child module, when present, is an object that
+  needs no `address`, whose `resources` and `child_modules`, when present, are arrays. A type name
+  of `select` is a non-empty string. `actions` may repeat a name, read as a set, and an empty
+  `actions` selects nothing. In the batch, every selected resource's id is checked, an empty one
+  among those refused, before any facts document is held to the facts bound, and either refusal,
+  `FACTS-ID-LIMIT` or `FACTS-DOCUMENT-LIMIT`, refuses the whole run before any line is written. A
+  refusal's diagnostic now carries a `message` too, a fixed text for its code that holds nothing
+  read from the file, in the reader's own words (§3), and §8 gives the reference runtime's batch
+  tool's form of a refusal: exit status 2, nothing on standard output, and one canonical object of
+  `bytes`, `code`, `message` and `sha256` on standard error. The tool may refuse an empty `actions`
+  on its command line, a rule of its flags and not of the reading.
 - RFC 0039, a Draft, proposes a federated registry as registry format `1.1.0`: a manifest of
   sources (one standard repository, the rest service repositories), an assembly from bytes the
   caller supplies at full commit ids into one ordinary `1.0.0` registry, and an index that records
@@ -54,6 +81,18 @@ here.
   assembled index, and a detached Ed25519 signature over the lock's digest, the reference runtime's
   pack signature design under its own prefix, checked against an expected key before the lock is
   read. Nothing is built.
+- RFC 0039 and RFC 0040, Drafts, are amended by the maintainer's rulings of 2026-11-17 on eight of
+  their Unresolved questions. In RFC 0039, a repository may serve a subset of the environments, and
+  the assembly refuses a gap in any environment a repository serves; an assembly has one standard,
+  and the format leaves room for layers; bounds may be given per environment, and tighten-only is
+  checked in each; and an assembled registry offered as a source is refused. In RFC 0040, an
+  assembled lock needs all of a set of signatures, each repository's documents by its own key and
+  the lock by the standard owner's, against a set given out of band with one key per role, and is
+  verified only with its index, from which each repository's statement is rebuilt; the lock carries
+  a serial that a verifier checks against the last it accepted for the registry id, a record that
+  is the verifier's own and is never lowered; the lock pins the emitter manifests and the files
+  they own; and a lock names one registry. Each remaining question carries a proposed resolution. Both stay Drafts, and nothing is
+  built.
 - **The registry companion's first release, `registry-v1.0.0`** (registry format `1.0.0`, status
   `released`, and not stable; release notes `releases/registry-v1.0.0.md`). The text's status
   sentence, the code list and the rows' manifest say `released`, the rows' README and its heading
@@ -103,13 +142,14 @@ here.
   stable; this change cuts no tag and changes no status. As for the registry, the release builder
   gives a `terraform-file-v` tag a bundle of its own, `judgment-pack-terraform-file-<version>`, with
   the text, the code list, the format table, the declarations and vectors with their README, the
-  checks that hold the vectors to the text and the records and companion texts the text links, and
+  checks that hold the vectors to the text with the second reader they run, and the records and
+  companion texts the text links, and
   leaves `conformance/terraform-file/` out of every Core bundle by path rather than by
   `export-ignore`, which no longer marks it; `-text` does, as its digests are pinned. The builder
   refuses a `terraform-file-v` tag unless its release record, `releases/<tag>.json`, equals the one
-  the tree gives (the SHA-256 of the text, the README, `codes.json`, `formats.json`, the manifest
-  and every declaration and vector file; the table's release, its rows and the rows it adds, the
-  codes and the vector ids), unless the tag's number is the table release `formats.json` gives,
+  the tree gives (the SHA-256 of the text, the README, `codes.json`, `formats.json`, the manifest,
+  every declaration and vector file and the second reader; the table's release, its rows and the
+  rows it adds, the codes and the vector ids), unless the tag's number is the table release `formats.json` gives,
   unless the text's status sentence, the code list, the format table and the manifest all say
   `released` and neither the text nor the README still calls the reading proposed, and unless notes
   exist. The reading's first table release is `1.0.0`, and each later one is exactly the next patch
@@ -123,10 +163,11 @@ here.
   nothing new: no code list, table or vector, before a release or after it. The checks that read
   each declaration with the dialect's first reader move to
   `tests/test_terraform_file_declarations.py`, since they need the dialect's staged vectors, which
-  no bundle carries; `tests/test_terraform_file_vectors.py` keeps the rest and runs inside the
-  bundle. `tests/test_terraform_file_release.py` holds the route. The text's status now says that
-  the reference runtime reads deposed objects too (`v0.49.0`); the one-reader bullet and the stable
-  bar are unchanged.
+  no bundle carries; `tests/test_terraform_file_vectors.py` keeps the rest, the second reader's
+  checks among them, and runs inside the bundle, which carries the second reader. The second
+  reader's tests load it by its path. `tests/test_terraform_file_release.py` holds the route. The
+  text's status bullet now says that the reference runtime reads deposed objects too (`v0.49.0`);
+  the second reader and the stable bar are unchanged.
 - **The registry companion's rows, code list and schemas are no longer staged: they are published
   with its first release** (`spec/registry.md` §§13 and 14, format `1.0.0`; VERSIONING.md,
   "Independently versioned registry companion"). That release is the scoped tag `registry-v1.0.0`,

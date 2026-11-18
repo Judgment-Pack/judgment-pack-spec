@@ -416,6 +416,10 @@ TERRAFORM_FILE_MATURITY = "released"
 TERRAFORM_FILE_ROOT = f"conformance/terraform-file/{TERRAFORM_FILE_READING}"
 TERRAFORM_FILE_TEXT = "spec/terraform-file.md"
 TERRAFORM_FILE_README = "conformance/terraform-file/README.md"
+# The second reader, written from the text alone and held to every vector by the bundle's own checks.
+# It uses the standard library only and reads only the bytes it is given, so the bundle carries it,
+# and the record pins the reader whose agreement the release shows.
+TERRAFORM_FILE_READER = "tools/terraform_file_reader.py"
 TERRAFORM_FILE_TAG_PATTERN = re.compile(
     r"terraform-file-v((?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))"
 )
@@ -433,15 +437,15 @@ TERRAFORM_FILE_PROPOSED_STATEMENT = re.compile(
     rf"`{re.escape(TERRAFORM_FILE_READING)}`(?:, status `proposed`| is proposed)", re.IGNORECASE
 )
 TERRAFORM_FILE_RECORD_KEYS = {"companion", "releaseVersion", "tag", "maturity", "reading",
-                              "formatTable", "codes", "corpus", "formatDigests"}
-# The text, what it and the vectors' README link to, the checks that hold the vectors to the text,
-# and the license. The checks that read each declaration with the dialect's first reader need the
+                              "formatTable", "codes", "corpus", "formatDigests", "reader"}
+# The text, what it and the vectors' README link to, the checks that hold the vectors to the text
+# with the second reader they run, and the license. The checks that read each declaration with the dialect's first reader need the
 # dialect's staged vectors, which no bundle carries, and stay in the repository
 # (tests/test_terraform_file_declarations.py).
 TERRAFORM_FILE_BUNDLE_PATHS = (
     "LICENSE", "NOTICE", "VERSIONING.md",
     TERRAFORM_FILE_TEXT, "spec/dialect.md", "spec/registry.md", TERRAFORM_FILE_README,
-    TERRAFORM_FILE_ROOT, "tests/test_terraform_file_vectors.py",
+    TERRAFORM_FILE_ROOT, "tests/test_terraform_file_vectors.py", TERRAFORM_FILE_READER,
     "rfcs/0018-dialect.md", "rfcs/0038-terraform-file-source.md",
 )
 # Independently versioned companions whose schema and row directories no Core bundle carries.
@@ -494,7 +498,9 @@ def terraform_file_record(version: str, tag: str, root: Path = ROOT) -> dict:
                        "vectors": sorted(row["id"] for row in listed_vectors),
                        "files": tree_digests(TERRAFORM_FILE_ROOT, root)},
             "formatDigests": {path: "sha256:" + sha256(root / path)
-                              for path in (TERRAFORM_FILE_TEXT, TERRAFORM_FILE_README)}}
+                              for path in (TERRAFORM_FILE_TEXT, TERRAFORM_FILE_README)},
+            "reader": {"path": TERRAFORM_FILE_READER,
+                       "sha256": "sha256:" + sha256(root / TERRAFORM_FILE_READER)}}
 
 
 def validate_terraform_file_artifacts(version: str, tag: str, root: Path = ROOT) -> None:
@@ -510,6 +516,7 @@ def validate_terraform_file_artifacts(version: str, tag: str, root: Path = ROOT)
             (("companion", "releaseVersion", "tag", "maturity", "reading"),
              "terraform-file release identity, maturity or reading does not match"),
             (("formatDigests",), "terraform-file text or README bytes differ from the release record"),
+            (("reader",), "terraform-file second reader bytes differ from the release record"),
             (("formatTable",), "terraform-file format table identity or rows do not match"),
             (("corpus",), "terraform-file corpus identity or vectors do not match"),
             (("codes",), "terraform-file code list identity or codes do not match")):

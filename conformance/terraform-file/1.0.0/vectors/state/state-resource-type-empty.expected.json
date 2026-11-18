@@ -1,0 +1,25 @@
+{
+  "record": {
+    "kind": "terraform-file",
+    "document": "state",
+    "formatVersion": "1.0",
+    "formatTable": "1.0.0",
+    "sha256": "ee6512f08b05f81bc5632ebee473ac0701bcbbda53fd487dcaf6eb79d75a62f3",
+    "bytes": 908,
+    "removedSensitive": 0,
+    "selected": 1
+  },
+  "value": [
+    {
+      "address": "google_storage_bucket.logs",
+      "type": "google_storage_bucket",
+      "name": "logs",
+      "mode": "managed",
+      "providerName": "registry.terraform.io/hashicorp/google",
+      "values": {
+        "location": "EU",
+        "name": "example-project-logs"
+      }
+    }
+  ]
+}
