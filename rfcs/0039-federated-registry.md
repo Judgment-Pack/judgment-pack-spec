@@ -360,11 +360,12 @@ constraints, and is admitted.
 2. **Values.** In each environment where step 7 of §7.1 checks an entry, its resolved value is
    checked at every position each applicable field's pointer matches, against the standard's
    effective bound there (§5.5) and, for an entry of a repository with bounds, against that
-   repository's. Both are
-   checked, so a defect in the comparison never lets a value past the standard. A failure is
-   `FED-VALUE-BOUND` at the value's position (document `value`, with `entry` and `environment`),
-   with `source` naming the source whose bound it fails. A source with more entries of a kind than
-   a `maxEntries` it is held to is `FED-BOUND-ENTRIES` at that source's first entry beyond it.
+   repository's. Both are checked, so a defect in the comparison never lets a value past the
+   standard. A failure is `FED-VALUE-BOUND` at the value's position (document `value`, with `entry`
+   and `environment`), with `source` naming the source whose bound it fails. Every source is held to
+   the standard's `maxEntries` for the kind, and a repository source also to its own. A source with
+   more entries of a kind than a `maxEntries` it is held to is `FED-BOUND-ENTRIES` at that source's
+   first entry beyond it.
 
 A matched position absent from the value checks nothing (as §6.1 reads references); a field
 that should require a member states `required` at its parent.
@@ -554,4 +555,5 @@ decided as their proposed resolutions said, and the proposed companion text
    stating it is `FED-BOUND-FORM`), checked once on the assembled registry and compared with
    nothing; exceeding it is `FED-BOUND-ENTRIES` (text §§6.1 and 6.5).
 6. **Review regime:** this record and RFC 0040 are reviewed together in one round, of the kind RFC
-   0040 receives: a recorded different-vendor review, unless the maintainer waives it.
+   0040 receives: a recorded different-vendor review, unless the maintainer waives it. Waived by the
+   maintainer; the review is same vendor, not a cross-vendor claim.

@@ -103,7 +103,8 @@ here.
   `"1.1.0"`; an assembly-wide cap only the standard states (`maxAssemblyEntries`); default file
   names for the lock and its signature; separate signature documents for packs and registries; no
   rotation statement; the lock check and the index check reported apart; and one review round over
-  both records. The RFCs' questions sections become Settled questions, and both stay Drafts. It is
+  both records, whose different-vendor review the maintainer waived (the review is same vendor, not
+  a cross-vendor claim). The RFCs' questions sections become Settled questions, and both stay Drafts. It is
   normative for nothing until `registry-v1.1.0`, and format `1.0.0` and `spec/registry.md` are
   unchanged. No schema, code list, row or reader exists.
 - **The registry companion's first release, `registry-v1.0.0`** (registry format `1.0.0`, status

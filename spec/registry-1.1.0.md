@@ -18,7 +18,7 @@ conformance claim may cite it. It becomes normative only when a registry tag rel
 Its design records are [RFC 0039](../rfcs/0039-federated-registry.md) (assembly, the index and
 bounds) and [RFC 0040](../rfcs/0040-registry-locks-and-signatures.md) (locks and signatures). Both
 are Drafts. Every question either record left open is decided here, as §17 lists. Where this text
-and a record differ, this text governs.
+and a record differ, this text governs. Its merge into `registry.md` is editorial only (§17).
 
 Not yet published: the closed schemas of the new documents, their code list and their rows. No
 reader exists. The text is published first so that it can be frozen and reviewed before anything is
@@ -139,7 +139,9 @@ would apply it to each adjacent pair.
   digits (a SHA-1 or SHA-256 object id; never an abbreviation, a branch or a tag), with the bytes of
   every path the manifest names for that source;
 - the list of **known assembled indexes**, and their locks (§7): those a standard owner publishes,
-  and any a repository's CI holds. The list has no default, and an empty list is given as such.
+  and any a repository's CI holds. The list has no default, and an empty list is given as such. It
+  holds at most 256 indexes and 256 locks; a longer list is `FED-KNOWN-LIMIT`, before any source is
+  read.
 
 A reader MUST NOT fetch. A path whose bytes are not given is `FED-SOURCE-MISSING`, a refusal.
 
@@ -249,6 +251,12 @@ An index has these members and no other:
   digests differ for a YAML file, or for a JSON file not in its JCS form: the first can be checked
   against the repository, and the second survives re-formatting.
 
+An index has exactly one `sources` item whose `role` is `standard`, as the manifest has one
+standard source. A lock check or verification refuses an index with none or with more than one
+(`LOCK-INDEX-MISMATCH`, §9 step 6): the role chooses the key a source signature is checked against
+(§11), and an index admitted without assembling again would otherwise let a repository's item claim
+the standard's role.
+
 The index lists documents, not entries: each entry is held by exactly one source's registry
 (§4, step 6), whose identity the index pins. An auditor derives an entry's source from the
 documents the index pins. The index holds identifiers, paths and digests, and no value.
@@ -350,9 +358,10 @@ widening: R would read as allowing it.
 
 ### 6.3 What is not comparable, and is refused
 
-A bound holds no other member. A registry §3.2 keyword in a bound that §6.2's table does not list is
-`FED-BOUND-NOT-COMPARABLE` at the keyword, in the standard's bounds and in a repository's alike;
-any other unknown member is `FED-BOUND-FORM`.
+A bound holds no other member. A keyword of registry §3.2's table in a bound that §6.2's table does
+not list is `FED-BOUND-NOT-COMPARABLE` at the keyword, in the standard's bounds and in a
+repository's alike. Any other unknown member is `FED-BOUND-FORM`, including a keyword such as
+`oneOf`, `format` or `if` that registry §3.2 names only as refused.
 
 - **`pattern`**, as a replacement. Comparing two different patterns is language inclusion:
   decidable for this regular subset, but exponential in the worst case, under limits readers do not
@@ -406,10 +415,11 @@ One bounds document may bound one environment more tightly than another.
    with `source` naming the source whose bound it fails. A matched position absent from the value
    checks nothing, as registry §6.1 reads references; a field that should require a member states
    `required` at its parent.
-3. **Entry counts.** A source with more entries of a kind than a `maxEntries` it is held to is
-   `FED-BOUND-ENTRIES` at that source's first entry beyond it, in its registry's order. Once the
-   assembled registry is made (§4, step 6), an assembly with more entries of a kind than the
-   standard's `maxAssemblyEntries` is `FED-BOUND-ENTRIES` at the first entry beyond it in the
+3. **Entry counts.** Every source is held to the standard's `maxEntries` for the kind, and a
+   repository source also to its own. A source with more entries of a kind than a `maxEntries` it is
+   held to is `FED-BOUND-ENTRIES` at that source's first entry beyond it, in its registry's order.
+   Once the assembled registry is made (§4, step 6), an assembly with more entries of a kind than
+   the standard's `maxAssemblyEntries` is `FED-BOUND-ENTRIES` at the first entry beyond it in the
    assembled registry's order, with `source` naming the source that holds it.
 
 ## 7. The lock
@@ -528,7 +538,7 @@ it **requires an index**. Coverage is also given the **environment** it serves, 
 the expected signer set (with a repository key map exactly when an index is required) and its serial
 record or a floor (§11). None has a default, and none is taken from a lock, a registry or a
 signature document. One missing, or a registry id that is not an absolute URI, is `LOCK-EXPECTED`,
-before anything is read.
+except an expected key, which is `LOCK-SIG-EXPECTED-KEY` (§11), before anything is read.
 
 A check is given a lock, the registry, the kind declarations, the index when the lock names one, and
 the emitter manifests and their files when it names emitters. Its steps:
@@ -547,8 +557,8 @@ the emitter manifests and their files when it names emitters. Its steps:
 6. **Index.**
    - A lock that names an index, checked without one, is `LOCK-INDEX-MISSING`: a refusal, never a
      check that is skipped.
-   - A given index is admitted. Its digest is the lock's, and its `registry.digest` is the lock's
-     registry digest (`LOCK-INDEX-MISMATCH`).
+   - A given index is admitted. Its digest is the lock's, its `registry.digest` is the lock's
+     registry digest, and it has exactly one `standard` item (§5) (`LOCK-INDEX-MISMATCH`).
    - An index given for a lock that names none is `LOCK-INDEX-UNLOCKED`, so that a caller never
      believes provenance was checked when it was not.
 7. **Sources.** With the index, each `sources` item's `name`, `role` and `repository` are the
@@ -585,8 +595,10 @@ expects. The lock is first held to step 1 of §9.
 - A generated file is covered exactly when an `emitters` item, of its source in an assembled lock,
   lists its path with its mode and digest. Otherwise it is `LOCK-NOT-COVERED`.
 
-Coverage establishes byte identity with what the lock names, and re-derives nothing. A consumer that
-relies on it relies on whoever checked or signed the lock, and verifies the lock (§11) first.
+Coverage is computed over the same lock bytes that verification (§11) accepted, never over a lock
+read again. Coverage establishes byte identity with what the lock names, and re-derives nothing. A
+consumer that relies on it relies on whoever checked or signed the lock, and verifies the lock (§11)
+first.
 
 ## 10. The signature documents
 
@@ -685,8 +697,10 @@ shape and by the prefix rule above.
   statement, and each repository's key signs that repository's statements only. A map that gives a
   repository the standard owner's key, or gives one key to two repository identities, keys compared
   as 32 bytes, is `LOCK-EXPECTED`, before anything is read: otherwise the set would hold with fewer
-  independent keys than it names. Two sources of one repository identity are no second role: both
-  are that repository's, and its one key signs both. There is no option to share a key.
+  independent keys than it names. Two repository sources of one repository identity are no second
+  role: both are that repository's, and its one key signs both. The standard source shares its
+  identity with no repository source the map names (Verifying, step 6). There is no option to share
+  a key.
 - **What each signature covers.** The lock signature covers the lock: the registry, its kinds,
   resolved forms, serial, emitters and index, and, by digest, each source's statement and accepted
   signature; that is, the assembly as a whole. A source signature covers one statement: its
@@ -726,7 +740,9 @@ signature does not verify under that key over §10.3's message (`LOCK-SIG-INVALI
 
 **Verifying.** The verifier is given the lock's bytes, the lock signature document, for an assembled
 lock its index and the source signature documents, the expected signer set, the expected inputs of
-§9, and its serial record or a floor (Rollback). A signature binds only a digest: without the
+§9, and its serial record or a floor (Rollback). At most the lock's `sources` count plus one
+signature documents are given: before any is read, every one beyond that count is
+`LOCK-SIG-EXTRA`. A signature binds only a digest: without the
 expected registry id, another registry's lock signed by the same key would verify. In order:
 
 1. **The expected inputs.** An expected key missing or refused by the trust rule is
@@ -752,7 +768,10 @@ expected registry id, another registry's lock signed by the same key would verif
    is `LOCK-SIG-MISSING` at the item. A document that matches no item, a second copy for one item,
    or any document given for a lock with no `sources`, is `LOCK-SIG-EXTRA`: a set with a stray
    signature is refused, not trimmed. A repository item whose `repository` the map does not name, or
-   any repository item when no map is given, is `LOCK-EXPECTED`. Each matched document is checked against the key the set names for its item
+   any repository item when no map is given, is `LOCK-EXPECTED`. The standard item's `repository`
+   MUST NOT be one the map names (`LOCK-EXPECTED`): the standard source is signed by the standard
+   owner's key alone, and a repository's identity in that item would let its statement pass without
+   its own key. Each matched document is checked against the key the set names for its item
    (the standard owner's for the `standard` item, the map's for the item's `repository` otherwise)
    and against the digest of the statement rebuilt from the index's item (§10.2), never against the
    lock's `statement` member alone.
@@ -835,6 +854,7 @@ meanings, and are reported as registry §7 says wherever this text applies it.
 | `FED-SOURCE-MISSING` | the bytes of a path the manifest names were not given | §4 |
 | `FED-ENVIRONMENTS` | a source's registry's environments are not the environments it serves | §4 |
 | `FED-ENVIRONMENT-GAP` | in an environment its entry applies in, a reference's target is held only by a source that does not serve it | §4 |
+| `FED-KNOWN-LIMIT` | the list of known assembled indexes holds more than 256 indexes or 256 locks | §4 |
 | `FED-SOURCE-ASSEMBLED` | a source's registry is one that a known assembled index or lock names | §4 |
 | `FED-REGISTRY-DUPLICATE` | two registries of the assembly share an `id` | §4 |
 | `FED-KIND-NOT-STANDARD` | a governed kind is pinned to a declaration the standard does not supply | §4 |
@@ -855,7 +875,7 @@ meanings, and are reported as registry §7 says wherever this text applies it.
 
 | Code | Raised when | Section |
 | --- | --- | --- |
-| `LOCK-EXPECTED` | an expected input is missing (the registry id, the index requirement, the environment for coverage, a repository source's key, or a floor at first contact); a repository key map is given without an index required, or the reverse; one key has two roles in the set; or the id is not an absolute URI | §§9, 11 |
+| `LOCK-EXPECTED` | an expected input is missing (the registry id, the index requirement, the environment for coverage, a repository source's key, or a floor at first contact); a repository key map is given without an index required, or the reverse; one key has two roles in the set, or the standard item's `repository` is one the map names; or the id is not an absolute URI | §§9, 11 |
 | `LOCK-FORM` | the lock is not of its form, or a writer's next serial would be out of range | §§7, 8 |
 | `LOCK-NOT-CANONICAL` | the lock's bytes are not its JCS bytes | §7 |
 | `LOCK-UNEXPECTED-REGISTRY` | the lock's `registry.id`, or a writer's previous lock's, is not the expected registry id | §§8, 9 |
@@ -865,7 +885,7 @@ meanings, and are reported as registry §7 says wherever this text applies it.
 | `LOCK-KINDS-MISMATCH` | the lock's kinds are not the registry's pins | §9 |
 | `LOCK-RESOLVED-MISMATCH` | an environment's resolved digest differs, or the environments do | §9 |
 | `LOCK-INDEX-MISSING` | the lock names an index and none was given, to a check or a verification | §§9, 11 |
-| `LOCK-INDEX-MISMATCH` | the index is not the one the lock names, or names another registry | §9 |
+| `LOCK-INDEX-MISMATCH` | the index is not the one the lock names, names another registry, or does not have exactly one `standard` item | §9 |
 | `LOCK-INDEX-UNLOCKED` | an index was given for a lock that names none | §9 |
 | `LOCK-SOURCES-MISMATCH` | the lock's sources are not the index's, or a statement digest differs | §9 |
 | `LOCK-EMITTER-MISSING` | the lock names emitters and none were given, or a manifest or file it lists was not given | §9 |
@@ -876,7 +896,7 @@ meanings, and are reported as registry §7 says wherever this text applies it.
 | `LOCK-SERIAL-STATE` | the verifier's record exists and cannot be read or is not of its form, or cannot be written | §11 |
 | `LOCK-SIG-EXPECTED-KEY` | an expected key is missing, or one a verifier may not trust | §11 |
 | `LOCK-SIG-MISSING` | the lock signature, or an item's source signature, is not given | §11 |
-| `LOCK-SIG-EXTRA` | a second lock signature is given, or a source signature that no item expects or that is given twice | §11 |
+| `LOCK-SIG-EXTRA` | a second lock signature is given, a source signature that no item expects or that is given twice, or more source signatures than the lock's `sources` count plus one | §11 |
 | `LOCK-SIG-DOCUMENT` | a signature document is over its bound, not one JSON object, repeats a member or holds a backslash | §11 |
 | `LOCK-SIG-VERSION` | `lockSignatureVersion` or `sourceSignatureVersion` is not `"1.1.0"` | §11 |
 | `LOCK-SIG-MEMBER` | a member is unknown or missing | §11 |
@@ -972,6 +992,11 @@ independently written readers agreeing on every row of a class.
   is refused rather than ignored (`LOCK-SIG-EXTRA`). A compromised repository key can sign false
   documents for its own repository only, and they still have to pass the assembly the standard owner
   then signs.
+- **A source signature never expires.** A repository's signature binds its statement, not a time
+  or a serial. The standard owner can put any commit a repository ever signed into a new lock with
+  a higher serial, and that lock verifies: a rollback of one source that the lock's serial does not
+  catch. This is a known property of `1.1.0`, not something it fixes. A consumer that must refuse
+  it pins the commits it accepts for each repository out of band, or waits for a later rule.
 - **Rollback is refused by the verifier's record, not by the lock.** A signed older lock verifies as
   a signature, and its serial refuses it against a record that has seen a newer one
   (`LOCK-SERIAL-ROLLBACK`). A first contact is as strong as its floor; a record that cannot be read
@@ -996,7 +1021,8 @@ independently written readers agreeing on every row of a class.
 - **Coverage and signing trust the checker.** Coverage relies on whoever checked or signed the lock,
   and a signer that signs without checking is a defect a verifier cannot see; a verifier sees only
   that the lock does not check.
-- **Resources.** At most 256 sources and 4 096 paths; every document keeps its bound (§2, registry
+- **Resources.** At most 256 sources and 4 096 paths, and at most 256 known assembled indexes and
+  256 locks (§4); every document keeps its bound (§2, registry
   §2.2); the assembled registry is at most 8 MiB and the report keeps registry §7.4's cap; a lock is
   at most 1 MiB, and an assembled lock has at most 257 signatures, each one verification. Owners stay
   identities that authorize nothing (registry §16).
@@ -1037,9 +1063,9 @@ them:
   keys, and leaves the serial record as it was (§11).
 - **Provenance in `valid`:** the lock check and the index check stay apart, and both are reported
   (§9).
-- **Review regime:** the two records are reviewed together in one round. RFC 0040 defines
-  signatures and a rollback rule, so the round is a recorded different-vendor review unless the
-  maintainer waives it.
+- **Review regime:** the two records are reviewed together in one round. RFC 0040 defines signatures
+  and a rollback rule, so the round is a recorded different-vendor review unless the maintainer
+  waives it. Waived by the maintainer; the review is same vendor, not a cross-vendor claim.
 
 **Settled here**, where the records left a detail open:
 
@@ -1048,8 +1074,8 @@ them:
 - the index check is given the list of known assembled indexes, since the assembly it repeats needs
   it (§5.1);
 - the bounds document's members and orders are closed, and a member that is neither listed nor a
-  keyword of registry §3.2 is `FED-BOUND-FORM` (§§6.1, 6.3); `maxEntries` and `maxAssemblyEntries`
-  are integers from 0 to 100 000, and `patterns` holds at most 16;
+  keyword of registry §3.2's table is `FED-BOUND-FORM` (§§6.1, 6.3); `maxEntries` and
+  `maxAssemblyEntries` are integers from 0 to 100 000, and `patterns` holds at most 16;
 - an emitter item of a single registry's lock has no `source` (§7);
 - a writer that refuses the emitters writes no lock (§8);
 - a file that no `emitters` item lists is `LOCK-NOT-COVERED` (§9.1);
@@ -1059,4 +1085,6 @@ them:
 
 - the schemas, the code list and the rows (§14), which follow the review of this text;
 - the companion text's form once released: this text and `registry.md` become one document at
-  `registry-v1.1.0` (§13), and how the two are merged is decided with that release.
+  `registry-v1.1.0` (§13). The merge into `spec/registry.md` is editorial only. No MUST, code,
+  code-to-condition mapping, order or bound changes. The merged text is reviewed as a diff against
+  this frozen text.

@@ -365,8 +365,10 @@ question 1).*
   statement, which is its own role, and each repository's key signs that repository's statements
   only. A map that gives a repository the standard owner's key, or gives one key to two repository
   identities, keys compared as 32 bytes, is `LOCK-EXPECTED`, before anything is read: otherwise all
-  of the set would hold with fewer independent keys than it names. Two sources of one repository
-  identity are no second role: both are that repository's, and its one key signs both. There is no
+  of the set would hold with fewer independent keys than it names. Two repository sources of one
+  repository identity are no second role: both are that repository's, and its one key signs both.
+  The standard source shares its identity with no repository source the map names (Verifying,
+  step 6). There is no
   option to share a key: a key per repository costs its owner nothing, and a shared one would let
   one holder fill two places in the set.
 - **What each signature covers.** The lock signature covers the lock: the registry, its kinds,
@@ -427,17 +429,19 @@ order:
    requirement;
 4. **the serial**, against the record or the floor (Rollback);
 5. **the index**, for a lock that names one. None given is `LOCK-INDEX-MISSING`, whatever else is
-   given: without the index no source statement can be rebuilt, and a repository's signature at
-   one commit could stand for an index that records another. The index is admitted and held to
-   §4's steps 6 and 7: its digest is the lock's and it names the lock's registry
-   (`LOCK-INDEX-MISMATCH`), and the lock's `sources` are its sources, each `statement` the digest of
-   the statement rebuilt from the index's item (`LOCK-SOURCES-MISMATCH`);
+   given: without the index no source statement can be rebuilt, and a repository's signature at one
+   commit could stand for an index that records another. The index is admitted and held to §4's
+   steps 6 and 7: its digest is the lock's, it names the lock's registry, and it has exactly one
+   `standard` item (`LOCK-INDEX-MISMATCH`), and the lock's `sources` are its sources, each
+   `statement` the digest of the statement rebuilt from the index's item (`LOCK-SOURCES-MISMATCH`);
 6. **the source signatures**. Each source signature document given is read, and matched to the
    `sources` item whose `signature` is its digest (§2.3). An item that no document matches is
    `LOCK-SIG-MISSING` at the item. A document that matches no item, a second copy for one item, or
    any document given for a lock with no `sources`, is `LOCK-SIG-EXTRA`: a set with a stray
    signature is refused, not trimmed. A repository item whose `repository` the map does not name,
-   or any repository item when no map is given, is `LOCK-EXPECTED`. Each matched document is
+   or any repository item when no map is given, is `LOCK-EXPECTED`, and so is a standard item whose
+   `repository` the map names: the role chooses the key, and nothing else pins it. Each matched
+   document is
    checked against the key the set names for its item (the standard owner's for the `standard`
    item, the map's for the item's `repository` otherwise) and the digest of the statement rebuilt
    from the index's item (§5.2), never against the lock's `statement` member alone;
@@ -490,7 +494,7 @@ gives, so that one implementation can serve both.
 
 | Code | Raised when | Pack signature code |
 | --- | --- | --- |
-| `LOCK-EXPECTED` | an expected input is missing: the registry id, the index requirement, the environment (coverage), a repository source's key, or a floor at first contact; a repository key map is given without an index required, or the reverse; one key has two roles in the set; or the id is not an absolute URI | — |
+| `LOCK-EXPECTED` | an expected input is missing: the registry id, the index requirement, the environment (coverage), a repository source's key, or a floor at first contact; a repository key map is given without an index required, or the reverse; one key has two roles in the set, or the standard item's `repository` is one the map names; or the id is not an absolute URI | — |
 | `LOCK-FORM` | the lock is not of its form, or a writer's next serial would be out of range | — |
 | `LOCK-NOT-CANONICAL` | the lock's bytes are not its JCS bytes | — |
 | `LOCK-UNEXPECTED-REGISTRY` | the lock's `registry.id`, or a writer's previous lock's, is not the expected registry id | — |
@@ -500,7 +504,7 @@ gives, so that one implementation can serve both.
 | `LOCK-KINDS-MISMATCH` | the lock's kinds are not the registry's pins | — |
 | `LOCK-RESOLVED-MISMATCH` | an environment's resolved digest differs, or the environments do | — |
 | `LOCK-INDEX-MISSING` | the lock names an index and none was given, to a check or a verification | — |
-| `LOCK-INDEX-MISMATCH` | the index is not the one the lock names, or names another registry | — |
+| `LOCK-INDEX-MISMATCH` | the index is not the one the lock names, names another registry, or does not have exactly one `standard` item | — |
 | `LOCK-INDEX-UNLOCKED` | an index was given for a lock that names none | — |
 | `LOCK-SOURCES-MISMATCH` | the lock's sources are not the index's, or a statement digest differs | — |
 | `LOCK-EMITTER-MISSING` | the lock names emitters and none were given, or a manifest or file it lists was not given | — |
@@ -511,7 +515,7 @@ gives, so that one implementation can serve both.
 | `LOCK-SERIAL-STATE` | the verifier's record exists and cannot be read or is not of its form, or cannot be written | — |
 | `LOCK-SIG-EXPECTED-KEY` | an expected key is missing, or one a verifier may not trust | `-EXPECTED-KEY` |
 | `LOCK-SIG-MISSING` | the lock signature, or an item's source signature, is not given | `-MISSING` |
-| `LOCK-SIG-EXTRA` | a second lock signature is given, or a source signature that no item expects or that is given twice | — |
+| `LOCK-SIG-EXTRA` | a second lock signature is given, a source signature that no item expects or that is given twice, or more source signatures than the lock's `sources` count plus one | — |
 | `LOCK-SIG-DOCUMENT` | a document is over its bound, not one JSON object, repeats a member or holds a backslash | `-TOO-LARGE`, `-MALFORMED`, `-DUPLICATE-MEMBER` |
 | `LOCK-SIG-VERSION` | `lockSignatureVersion` or `sourceSignatureVersion` is not `"1.1.0"` | `-VERSION` |
 | `LOCK-SIG-MEMBER` | a member is unknown or missing | `-UNKNOWN-MEMBER`, `-MISSING-MEMBER` |
@@ -725,4 +729,5 @@ proposed resolutions said, and the proposed companion text
    names, which only the source bytes show (text §9).
 5. **Review regime:** a recorded different-vendor review before acceptance, in one round with RFC
    0039. This record defines two signatures, a rollback rule and their refusals, the kind of change
-   RFC 0009's review is for; a waiver, as for RFCs 0034 to 0038, is the maintainer's to give.
+         RFC 0009's review is for; a waiver, as for RFCs 0034 to 0038, is the maintainer's to give.
+         Waived by the maintainer; the review is same vendor, not a cross-vendor claim.
