@@ -4,7 +4,7 @@
 ([`spec/terraform-file.md`](../spec/terraform-file.md)): reading `1.0.0`, at status `released`,
 with the first format table, release `1.0.0`. It is tagged on the companion's own scoped route,
 beside Core and independent of `specVersion`, as the Policy and registry companions' releases are
-([VERSIONING.md](../VERSIONING.md)). Tagged on <!-- PLACEHOLDER(tag-date) -->.
+([VERSIONING.md](../VERSIONING.md)). Tagged on 2026-11-18.
 
 - **Released, and not stable.** The text is normative for the reader class of its §12, and for
   nothing else. No stability promise is made before the first stable release (§10), and the bar for
