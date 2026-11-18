@@ -1,14 +1,14 @@
 # terraform-file vectors
 
 The machine-readable form and the hand-written vectors of the terraform-file reading `1.0.0`,
-status `proposed` (`spec/terraform-file.md`, whose design record is RFC 0038). They are proposed
-with the text: until a terraform-file tag releases them they are not a conformance corpus, and no
-claim may cite them (the companion's §12). They are packaged on the companion's own scoped tag: a
+status `released` (`spec/terraform-file.md`, whose design record is RFC 0038). They are published
+with the companion's first release, `terraform-file-v1.0.0`, which is released and not stable (the
+companion's §10), and a claim cites them by that release (§12). They are packaged on the companion's own scoped tag: a
 `terraform-file-v` tag's bundle carries them, with the text, this README, the checks that hold
 them to the text and the second reader those checks run, and its release record pins every file
 here and that reader (the companion's §10, VERSIONING.md).
 No Core bundle carries them, and the site serves none of them, before a release or after it. The
-`status` of `codes.json`, `formats.json` and `manifest.json` says `proposed`, as the text's does.
+`status` of `codes.json`, `formats.json` and `manifest.json` says `released`, as the text's does.
 
 Every input is synthetic, written by hand to the shape that Terraform's documentation of its JSON
 output format gives for its `format_version` (§4), with no Terraform run and no recorded output. The
@@ -40,10 +40,8 @@ reads no file, directly, as the members of §2, and as a source of a dialect doc
 document's own number domain refuses `1.0` and `1e2` first (`spec/dialect.md` §1). It needs the
 dialect's staged vectors, which no bundle carries, so it stays in the repository.
 
-The reference runtime's reader was run over every vector as they were written. It reports each
-expected result but for one member: its acquisition record's `formatTable` is `proposed-1`, its own
-name for the first table, where §7 gives `1.0.0`, in each of the 70 accepted reads. The text
-governs. The reference runtime reads no declaration document (it takes a source's members as
+The reference runtime's reader runs every vector it can express, and gives each its expected
+result, with no difference from this text. The reference runtime reads no declaration document (it takes a source's members as
 options), so the `declarations` group's malformed forms have no counterpart there. Two
 independently written readers agreeing on every vector is the companion's stable bar (§12).
 

@@ -1,8 +1,8 @@
 {
   "companion": "terraform-file",
   "reading": "1.0.0",
-  "status": "proposed",
-  "label": "terraform-file reading 1.0.0, proposed: hand-written synthetic vectors",
+  "status": "released",
+  "label": "terraform-file reading 1.0.0, released: hand-written synthetic vectors",
   "codes": "codes.json",
   "formats": "formats.json",
   "vectors": [

@@ -7,6 +7,19 @@ here.
 
 ### Added
 
+- **The terraform-file companion's first release, `terraform-file-v1.0.0`** (reading `1.0.0`,
+  status `released`, and not stable; release notes `releases/terraform-file-v1.0.0.md`). The
+  text's status sentence and §§11 and 12, the code list, the format table and the vectors' manifest
+  say `released`, and the vectors' README no longer says proposed. Its release record,
+  `releases/terraform-file-v1.0.0.json`, names the reading, the SHA-256 of the text and the vectors'
+  README, the format table, release `1.0.0`, with its rows (all of them added by this first
+  release), the code list with its eight codes, the id of every vector and the digest of every file
+  under `conformance/terraform-file/1.0.0/`, and the second reader's digest;
+  `releases/terraform-file-v1.0.0.milestone.json` links the release's milestone. The site's page
+  labels the text normative for its reader class. The stable bar is unchanged: two independently
+  written readers agreeing on every vector (§12); the reference runtime and the repository's second
+  reader, both from the drafting vendor, give every vector's expected result. Core, its bundles and
+  its corpora are unchanged.
 - **The `terraform-file` reading is a companion of its own** (`spec/terraform-file.md`, reading
   `1.0.0`, proposed; RFC 0018's and RFC 0038's amendments of 2026-11-17; #365). The reading of a
   `terraform-file` source's file, which `spec/dialect.md` §4.5 carried, moves to the new text,

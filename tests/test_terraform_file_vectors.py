@@ -1,4 +1,4 @@
-"""The terraform-file reading `1.0.0`, status proposed (spec/terraform-file.md), and its vectors.
+"""The terraform-file reading `1.0.0`, status released (spec/terraform-file.md), and its vectors.
 
 The vectors under conformance/terraform-file/1.0.0/ are hand-written and synthetic. These tests hold
 codes.json to the companion's §9 table and formats.json to its §4 table; the manifest to its files;
@@ -214,7 +214,7 @@ class TerraformFileListTests(unittest.TestCase):
     def test_the_text_the_lists_and_the_manifest_say_one_status(self) -> None:
         text = SPEC.read_text(encoding="utf-8")
         said = re.findall(r"^This text is the terraform-file reading `1\.0\.0`, status `([a-z]+)`\.", text, re.M)
-        self.assertEqual(["proposed"], said)
+        self.assertEqual(["released"], said)
         for name, document in (("codes.json", CODES), ("formats.json", FORMATS), ("manifest.json", MANIFEST)):
             with self.subTest(name=name):
                 self.assertEqual(("terraform-file", "1.0.0", said[0]),
