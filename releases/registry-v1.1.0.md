@@ -71,7 +71,8 @@ of an act by a key holder, not of a review (`spec/registry-1.1.0.md` §16). No c
 the truth of a registry's values.
 
 The design records, [RFC 0039](../rfcs/0039-federated-registry.md) and
-[RFC 0040](../rfcs/0040-registry-locks-and-signatures.md), are Drafts, and the text governs where
-they differ. They were reviewed together in one round, with the different-vendor review of the
-interim review regime waived by the maintainer, as the text's §17 records: a same-vendor review,
-not a cross-vendor claim. No independent implementation evidence is claimed.
+[RFC 0040](../rfcs/0040-registry-locks-and-signatures.md), were accepted together by the maintainer
+on 2026-11-18, and the text governs where they differ. They were reviewed together in one round,
+with the different-vendor review of the interim review regime waived by the maintainer, as the
+text's §17 records: a same-vendor review, not a cross-vendor claim. No independent
+implementation evidence is claimed.
