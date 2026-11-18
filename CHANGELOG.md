@@ -54,6 +54,18 @@ here.
   assembled index, and a detached Ed25519 signature over the lock's digest, the reference runtime's
   pack signature design under its own prefix, checked against an expected key before the lock is
   read. Nothing is built.
+- RFC 0039 and RFC 0040, Drafts, are amended by the maintainer's rulings of 2026-11-17 on eight of
+  their Unresolved questions. In RFC 0039, a repository may serve a subset of the environments, and
+  the assembly refuses a gap in any environment a repository serves; an assembly has one standard,
+  and the format leaves room for layers; bounds may be given per environment, and tighten-only is
+  checked in each; and an assembled registry offered as a source is refused. In RFC 0040, an
+  assembled lock needs all of a set of signatures, each repository's documents by its own key and
+  the lock by the standard owner's, against a set given out of band with one key per role, and is
+  verified only with its index, from which each repository's statement is rebuilt; the lock carries
+  a serial that a verifier checks against the last it accepted for the registry id, a record that
+  is the verifier's own and is never lowered; the lock pins the emitter manifests and the files
+  they own; and a lock names one registry. Each remaining question carries a proposed resolution. Both stay Drafts, and nothing is
+  built.
 - **The registry companion's first release, `registry-v1.0.0`** (registry format `1.0.0`, status
   `released`, and not stable; release notes `releases/registry-v1.0.0.md`). The text's status
   sentence, the code list and the rows' manifest say `released`, the rows' README and its heading
