@@ -196,11 +196,13 @@ ends the assembly after that step.
    later listing in source order.
 
    **Gaps.** *Amended 2026-11-17, by the maintainer's ruling (first draft's question 1).* In every
-   environment a source serves, each of its entries' references (§6.2) is satisfied there. A
-   reference whose target only a source that does not serve that environment holds is
-   `FED-ENVIRONMENT-GAP` at the reference, with `environment` set, beside the
-   `REF-ENTRY-ABSENT-IN-ENVIRONMENT` that §7 reports for it, so the report names the cause. An
-   environment no repository serves is not a gap: the standard serves it.
+   environment in which an entry applies, as the assembled registry writes it (its own
+   `environments`, or, when it has none, its source's served environments), each of its
+   references (§6.2) is satisfied there. A reference whose target, in one of those environments, is
+   held only by a source that does not serve it is `FED-ENVIRONMENT-GAP` at the reference, with
+   `environment` set, beside the `REF-ENTRY-ABSENT-IN-ENVIRONMENT` that §7 reports for it, so the
+   report names the cause. An environment no repository serves is not a gap: the standard serves
+   it.
 7. **Bounds** (§5): the form of every bounds document, the comparison of each repository's bounds
    with the standard's, and the check of values against both.
 8. **Output.** For an assembly with no error, the reader writes the assembled registry and the
@@ -212,14 +214,14 @@ ends the assembly after that step.
 8).* An assembled registry is never a source of another assembly: the outer index would record the
 commit that holds the file, not the inner sources, and the inner bounds would be checked twice or
 not at all. An assembled registry is an ordinary `1.0.0` document with no mark of its own, so it is
-detected by identity. Beside the sources, the assembler is given the assembled indexes it knows of
-(those a standard owner publishes, and any a repository's CI holds), and with RFC 0040 their locks.
-A source is `FED-SOURCE-ASSEMBLED` when its registry's digest is the `registry.digest`, or its `id`
-the `registry.id`, of any of them, or when a path of the source holds an assembled index, a
-federation manifest or a lock. An assembled registry offered without any of these cannot be told
-from a repository's own by its bytes: it is then read as that repository's registry, held to the
-standard's governed kinds and bounds like any other, and only its inner provenance is lost
-(Security and privacy).
+detected by identity. Beside the sources, the assembler MUST be given, as an input of every
+assembly, the list of **known assembled indexes**, and with RFC 0040 their locks: those a standard
+owner publishes, and any a repository's CI holds. The list has no default, and an empty list is
+given as such. A source is `FED-SOURCE-ASSEMBLED` when its registry's digest is the
+`registry.digest`, or its `id` the `registry.id`, of any index or lock in the list. An assembled
+registry the list does not name cannot be told from a repository's own by its bytes: it is then
+read as that repository's registry, held to the standard's governed kinds and bounds like any
+other, and only its inner provenance is lost (Security and privacy).
 
 ### 4. The assembled index
 
@@ -397,8 +399,8 @@ All are errors. None is raised by a `1.0.0` reader, and none changes a `1.0.0` c
 | `FED-REPOSITORY` | a repository identity is not an absolute URI, or holds userinfo, a query or a fragment |
 | `FED-SOURCE-MISSING` | the bytes of a path the manifest names were not supplied |
 | `FED-ENVIRONMENTS` | a source's registry's environments are not the environments it serves |
-| `FED-ENVIRONMENT-GAP` | in an environment its source serves, a reference's target is held only by a source that does not serve it |
-| `FED-SOURCE-ASSEMBLED` | a source is an assembled registry, by the identities the assembler is given, or holds an index, manifest or lock |
+| `FED-ENVIRONMENT-GAP` | in an environment its entry applies in, a reference's target is held only by a source that does not serve it |
+| `FED-SOURCE-ASSEMBLED` | a source's registry is one that a known assembled index or lock names |
 | `FED-REGISTRY-DUPLICATE` | two registries of the assembly share an `id` |
 | `FED-KIND-NOT-STANDARD` | a governed kind is pinned to a declaration the standard does not supply |
 | `FED-KIND-CONFLICT` | two sources pin one kind name to different declarations |
@@ -472,10 +474,10 @@ pointers, sources and paths, never a repository's content.
   misspelt kind or pointer (`FED-BOUND-KIND`, `FED-BOUND-POINTER-UNREACHABLE`).
 - **Refusal, not a pass.** An incomparable construct is refused (§5.3), and a missing path is
   refused, never fetched or skipped.
-- **An assembly as a source is refused only when it can be recognised.** By the identities the
-  assembler is given (§3, No assembly is a source). One copied without them reads as a repository's
-  own registry: the standard's kinds and bounds still hold over it, and the index then records the
-  copy's commit, not the inner sources.
+- **An assembly as a source is refused only when it can be recognised**, by the known assembled
+  indexes the assembler is given (§3, No assembly is a source). One the list does not name reads as
+  a repository's own registry: the standard's kinds and bounds still hold over it, and the index
+  then records the copy's commit, not the inner sources.
 - **Served environments narrow, never widen.** An entry of a repository that serves fewer
   environments is written to apply only in those (§3, step 6), and a reference that leaves them
   is a gap (`FED-ENVIRONMENT-GAP`), not a silent miss.
@@ -501,7 +503,8 @@ Rows would be hand-written and synthetic, under `conformance/registry/1.1.0/`, f
 - **Served environments and per-environment bounds.** A repository serving a subset, its entries
   written with `environments`; an environment bound looser than its field's `bound`; a repository
   bound tight enough in `dev` and loose in `prod` where the standard bounds `prod` more tightly;
-  `required` and `patterns` added per environment; an environment the repository does not serve.
+  `required` and `patterns` added per environment; an environment the repository does not serve;
+  an entry whose own `environments` leave out the one where its target is missing, which is no gap.
 - **The comparison table.** Each row of §5.2 tighter, equal and looser; exclusive against inclusive
   at one value; `integer` inside `number`, not the reverse; a `const` in the standard's `enum`; an
   `enum` value the standard's `maxLength` refuses; a cancelled widening, still reported.

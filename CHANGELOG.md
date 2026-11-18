@@ -39,10 +39,11 @@ here.
   and the format leaves room for layers; bounds may be given per environment, and tighten-only is
   checked in each; and an assembled registry offered as a source is refused. In RFC 0040, an
   assembled lock needs all of a set of signatures, each repository's documents by its own key and
-  the lock by the standard owner's, against a set given out of band; the lock carries a serial that
-  a verifier checks against the last it accepted for the registry id, a record that is the
-  verifier's own; the lock pins the emitter manifests and the files they own; and a lock names one
-  registry. Each remaining question carries a proposed resolution. Both stay Drafts, and nothing is
+  the lock by the standard owner's, against a set given out of band with one key per role, and is
+  verified only with its index, from which each repository's statement is rebuilt; the lock carries
+  a serial that a verifier checks against the last it accepted for the registry id, a record that
+  is the verifier's own and is never lowered; the lock pins the emitter manifests and the files
+  they own; and a lock names one registry. Each remaining question carries a proposed resolution. Both stay Drafts, and nothing is
   built.
 - **The registry companion's first release, `registry-v1.0.0`** (registry format `1.0.0`, status
   `released`, and not stable; release notes `releases/registry-v1.0.0.md`). The text's status
