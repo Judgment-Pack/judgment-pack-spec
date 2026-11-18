@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.1.0/source-signature.schema.json",
+  "title": "DRAFT Registry companion 1.1.0: source signature",
+  "description": "Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, and served by no bundle and no site. A source signature document (section 10.2) (section 10), closed: exactly five string members. A document the schema refuses is refused with one code of section 11's reading order (LOCK-SIG-DOCUMENT, -VERSION, -MEMBER, -ALGORITHM, -PUBLIC-KEY or -FORM).",
+  "$comment": "The reader's to check: the bound of 4096 bytes, one JSON object in UTF-8 with no member given twice and no backslash anywhere, the version member before the others, the trust rule of checkpoint-witness section 5 for publicKey, and, for a writer, the members in code-point order with no white space and one final line feed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "algorithm",
+    "sourceDigest",
+    "sourceSignatureVersion",
+    "publicKey",
+    "signature"
+  ],
+  "properties": {
+    "algorithm": {
+      "const": "ed25519"
+    },
+    "sourceDigest": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+    },
+    "sourceSignatureVersion": {
+      "const": "1.1.0"
+    },
+    "publicKey": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/publicKey"
+    },
+    "signature": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/signatureValue"
+    }
+  }
+}

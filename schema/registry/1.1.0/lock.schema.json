@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.1.0/lock.schema.json",
+  "title": "DRAFT Registry companion 1.1.0: lock",
+  "description": "Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, and served by no bundle and no site. A lock (section 7), closed: the serial, the registry's identity, its pins, each environment's resolved digest and, for an assembly, the index and each source's statement and accepted signature, with the emitters the writer was given. A lock the schema refuses is LOCK-FORM.",
+  "$comment": "The reader's to check: that the lock's bytes are its JCS bytes (LOCK-NOT-CANONICAL), that kinds are the registry's pins and resolved its environments in order, that sources are the index's in its order, that emitters are sorted by source and path and each one's files by path, and the bound of 1 MiB. The schema holds that sources is present exactly when index is, and that an emitter item has a source exactly in an assembled lock.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "lockFormatVersion",
+    "serial",
+    "registry",
+    "kinds",
+    "resolved"
+  ],
+  "properties": {
+    "lockFormatVersion": {
+      "const": "1.1.0"
+    },
+    "serial": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/serial"
+    },
+    "registry": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/registryIdentity"
+    },
+    "kinds": {
+      "type": "array",
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/pin"
+      }
+    },
+    "resolved": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "environment",
+          "digest"
+        ],
+        "properties": {
+          "environment": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/environment"
+          },
+          "digest": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+          }
+        }
+      }
+    },
+    "index": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "digest"
+      ],
+      "properties": {
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "role",
+          "repository",
+          "statement",
+          "signature"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/sourceName"
+          },
+          "role": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/sourceRole"
+          },
+          "repository": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/repositoryIdentity"
+          },
+          "statement": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+          },
+          "signature": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+          }
+        }
+      }
+    },
+    "emitters": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/emitter"
+      }
+    }
+  },
+  "dependentRequired": {
+    "index": [
+      "sources"
+    ],
+    "sources": [
+      "index"
+    ]
+  },
+  "if": {
+    "required": [
+      "index"
+    ]
+  },
+  "then": {
+    "properties": {
+      "emitters": {
+        "items": {
+          "required": [
+            "source"
+          ]
+        }
+      }
+    }
+  },
+  "else": {
+    "properties": {
+      "emitters": {
+        "items": {
+          "not": {
+            "required": [
+              "source"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "emitter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "digest",
+        "files"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/sourceName"
+        },
+        "path": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/relativePath"
+        },
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "mode",
+              "digest"
+            ],
+            "properties": {
+              "path": {
+                "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/relativePath"
+              },
+              "mode": {
+                "enum": [
+                  "0644",
+                  "0755"
+                ]
+              },
+              "digest": {
+                "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

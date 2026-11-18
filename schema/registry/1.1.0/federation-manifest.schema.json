@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.1.0/federation-manifest.schema.json",
+  "title": "DRAFT Registry companion 1.1.0: federation manifest",
+  "description": "Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, and served by no bundle and no site. A federation manifest (section 3), closed: what to assemble, with exactly one standard source. A manifest the schema refuses is FED-MANIFEST, or FED-REPOSITORY for a repository identity's form.",
+  "$comment": "The reader's to check: that sources are sorted by name in code-point order and their names distinct, that a repository source's environments are a subset of environments in their order, that a manifest holds at most 4096 paths and no two paths of one source are equal once case is folded, the rest of RFC 3986's grammar for an identity, and the bound of 256 KiB (section 2).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "federationFormatVersion",
+    "registry",
+    "environments",
+    "sources"
+  ],
+  "properties": {
+    "federationFormatVersion": {
+      "const": "1.1.0"
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/absoluteUri"
+        },
+        "version": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/version"
+        }
+      }
+    },
+    "environments": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/registry.schema.json#/properties/environments"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/source"
+      },
+      "contains": {
+        "required": [
+          "role"
+        ],
+        "properties": {
+          "role": {
+            "const": "standard"
+          }
+        }
+      },
+      "minContains": 1,
+      "maxContains": 1
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "role",
+        "repository"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/sourceName"
+        },
+        "role": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/sourceRole"
+        },
+        "environments": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/environment"
+          }
+        },
+        "repository": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/repositoryIdentity"
+        },
+        "registry": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/path"
+        },
+        "bounds": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/path"
+        },
+        "kinds": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/path"
+          }
+        }
+      },
+      "if": {
+        "required": [
+          "role"
+        ],
+        "properties": {
+          "role": {
+            "const": "repository"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "registry"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "environments"
+          ]
+        }
+      }
+    }
+  }
+}

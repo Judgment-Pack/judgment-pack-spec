@@ -1,0 +1,444 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json",
+  "title": "DRAFT Registry companion 1.1.0: common",
+  "description": "Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, and served by no bundle and no site. Shared definitions of the documents format 1.1.0 adds; it is the schema of no document. The definitions of format 1.0.0 that hold unchanged are referenced from its common schema, and a pattern ends with (?![\\s\\S]) as there.",
+  "$comment": "Admission (registry section 2.2) holds for every document of format 1.1.0 under its own bound (section 2): I-JSON under the number rule, no repeated member name, a nesting depth of at most 32. No schema states these; a reader checks them at admission.",
+  "$defs": {
+    "sourceName": {
+      "description": "Section 3: a source's name.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,62}(?![\\s\\S])"
+    },
+    "repositoryIdentity": {
+      "description": "Section 3: a repository identity, an RFC 3986 absolute URI of at most 2048 characters with no userinfo, no query and no fragment, compared as exact code points.",
+      "$comment": "The pattern holds the scheme, the characters RFC 3986 allows with no '?' or '#', and no '@' in an authority; the rest of RFC 3986's grammar is the reader's to check.",
+      "type": "string",
+      "maxLength": 2048,
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:(?!//[^/]*@)([A-Za-z0-9._~:/@!$&'()*+,;=\\[\\]-]|%[0-9A-Fa-f]{2})*(?![\\s\\S])"
+    },
+    "path": {
+      "description": "Section 3: a path below a repository's root, of registry section 11.3's response-path form without its owns condition, at most 512 bytes.",
+      "$comment": "That no two paths of one source are equal once case is folded, that a manifest holds at most 4096 paths, and the byte bound, of which maxLength is the weaker form, are the reader's to check.",
+      "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/relativePath"
+    },
+    "commit": {
+      "description": "Section 4: a full commit identifier, 40 or 64 lowercase hexadecimal digits.",
+      "type": "string",
+      "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})(?![\\s\\S])"
+    },
+    "serial": {
+      "description": "Section 7: a lock's serial, an integer from 1 to 2^53 - 1.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "publicKey": {
+      "description": "Section 10.1: a 32-byte Ed25519 public key as 64 lowercase hexadecimal characters.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "signatureValue": {
+      "description": "Section 10.1: a 64-byte signature as 128 lowercase hexadecimal characters.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{128}(?![\\s\\S])"
+    },
+    "sourceRole": {
+      "description": "Section 3: a closed list; a later layer role is refused.",
+      "enum": [
+        "repository",
+        "standard"
+      ]
+    },
+    "registryIdentity": {
+      "description": "Sections 5 and 7: a registry's id, version and digest (registry section 2.3).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "digest"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/absoluteUri"
+        },
+        "version": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/version"
+        },
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "indexDocument": {
+      "description": "Section 5: one document an index records for a source.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "role",
+        "contentDigest",
+        "digest"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/path"
+        },
+        "role": {
+          "enum": [
+            "registry",
+            "bounds",
+            "kind"
+          ]
+        },
+        "contentDigest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        },
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "documents": {
+      "description": "Section 5: one item per path of a source, sorted by path; a source names at most a registry, a bounds document and 64 kinds.",
+      "$comment": "The order by path is the reader's to check.",
+      "type": "array",
+      "maxItems": 66,
+      "items": {
+        "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/indexDocument"
+      }
+    },
+    "bound": {
+      "description": "Section 6.2: a bound, of the constraint rows of section 6.2 only, each member of the form registry section 3.2 gives the keyword of its name.",
+      "$comment": "Any other member is refused: the text names a keyword of registry section 3.2's table FED-BOUND-NOT-COMPARABLE and anything else FED-BOUND-FORM (section 6.3), which no schema tells apart. The comparisons of sections 6.2 to 6.5 are the reader's.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/type"
+        },
+        "enum": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/enum"
+        },
+        "const": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/const"
+        },
+        "minimum": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/minimum"
+        },
+        "exclusiveMinimum": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/exclusiveMinimum"
+        },
+        "maximum": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/maximum"
+        },
+        "exclusiveMaximum": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/exclusiveMaximum"
+        },
+        "minLength": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/minLength"
+        },
+        "maxLength": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/maxLength"
+        },
+        "minItems": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/minItems"
+        },
+        "maxItems": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/maxItems"
+        },
+        "minProperties": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/minProperties"
+        },
+        "maxProperties": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/maxProperties"
+        },
+        "uniqueItems": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/uniqueItems"
+        },
+        "required": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/schemaKeywords/properties/required"
+        },
+        "patterns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/pattern"
+          }
+        }
+      }
+    },
+    "locationDocument": {
+      "description": "Section 2.1: the location documents of format 1.0.0 and those format 1.1.0 adds.",
+      "enum": [
+        "registry",
+        "kind",
+        "value",
+        "yaml",
+        "facts",
+        "contract",
+        "pack",
+        "manifest",
+        "options",
+        "request",
+        "response",
+        "repository",
+        "vector",
+        "federation",
+        "index",
+        "bounds",
+        "lock",
+        "signature",
+        "emitter"
+      ]
+    },
+    "newCode": {
+      "description": "The codes of section 12, each an error.",
+      "enum": [
+        "FED-MANIFEST",
+        "FED-COMMIT",
+        "FED-REPOSITORY",
+        "FED-SOURCE-MISSING",
+        "FED-ENVIRONMENTS",
+        "FED-ENVIRONMENT-GAP",
+        "FED-KNOWN-LIMIT",
+        "FED-SOURCE-ASSEMBLED",
+        "FED-REGISTRY-DUPLICATE",
+        "FED-KIND-NOT-STANDARD",
+        "FED-KIND-CONFLICT",
+        "FED-SCOPE-WIDENS",
+        "FED-BOUND-FORM",
+        "FED-BOUND-ENVIRONMENT",
+        "FED-BOUND-KIND",
+        "FED-BOUND-POINTER-UNREACHABLE",
+        "FED-BOUND-NOT-COMPARABLE",
+        "FED-BOUND-OVERLAP",
+        "FED-BOUND-WIDENS",
+        "FED-BOUND-ENTRIES",
+        "FED-VALUE-BOUND",
+        "FED-INDEX-MISMATCH",
+        "LOCK-EXPECTED",
+        "LOCK-FORM",
+        "LOCK-NOT-CANONICAL",
+        "LOCK-UNEXPECTED-REGISTRY",
+        "LOCK-INDEX-REQUIRED",
+        "LOCK-REGISTRY-INVALID",
+        "LOCK-REGISTRY-MISMATCH",
+        "LOCK-KINDS-MISMATCH",
+        "LOCK-RESOLVED-MISMATCH",
+        "LOCK-INDEX-MISSING",
+        "LOCK-INDEX-MISMATCH",
+        "LOCK-INDEX-UNLOCKED",
+        "LOCK-SOURCES-MISMATCH",
+        "LOCK-EMITTER-MISSING",
+        "LOCK-EMITTER-MISMATCH",
+        "LOCK-NOT-COVERED",
+        "LOCK-SERIAL-ROLLBACK",
+        "LOCK-SERIAL-CONFLICT",
+        "LOCK-SERIAL-STATE",
+        "LOCK-SIG-EXPECTED-KEY",
+        "LOCK-SIG-MISSING",
+        "LOCK-SIG-EXTRA",
+        "LOCK-SIG-DOCUMENT",
+        "LOCK-SIG-VERSION",
+        "LOCK-SIG-MEMBER",
+        "LOCK-SIG-ALGORITHM",
+        "LOCK-SIG-PUBLIC-KEY",
+        "LOCK-SIG-FORM",
+        "LOCK-SIG-UNEXPECTED-KEY",
+        "LOCK-SIG-DIGEST-MISMATCH",
+        "LOCK-SIG-INVALID"
+      ]
+    },
+    "code": {
+      "description": "The codes of registry section 12 and of section 12.",
+      "anyOf": [
+        {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/code"
+        },
+        {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/newCode"
+        }
+      ]
+    },
+    "location": {
+      "description": "Registry section 7.3's location, with section 2.1's documents and its member source.",
+      "$comment": "Which members a diagnostic carries depends on its code and step and is the reader's to check; source is absent on a diagnostic of the manifest, a lock, a signature document or the assembly as a whole (section 2.1), which the schema holds for those documents.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document",
+        "pointer"
+      ],
+      "properties": {
+        "document": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/locationDocument"
+        },
+        "source": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/sourceName"
+        },
+        "manifest": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "kindDocument": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        },
+        "kind": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/kindName"
+        },
+        "entry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "id"
+          ],
+          "properties": {
+            "kind": {
+              "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/kindName"
+            },
+            "id": {
+              "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/entryId"
+            }
+          }
+        },
+        "environment": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/environment"
+        },
+        "pointer": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/pointer"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "pattern": "^/"
+          }
+        },
+        "variable": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/environmentVariable"
+        }
+      },
+      "dependentSchemas": {
+        "source": {
+          "properties": {
+            "document": {
+              "enum": [
+                "registry",
+                "kind",
+                "value",
+                "yaml",
+                "bounds",
+                "emitter"
+              ]
+            }
+          }
+        },
+        "manifest": {
+          "properties": {
+            "document": {
+              "const": "manifest"
+            }
+          }
+        },
+        "line": {
+          "properties": {
+            "document": {
+              "const": "yaml"
+            },
+            "pointer": {
+              "const": ""
+            }
+          }
+        },
+        "column": {
+          "properties": {
+            "document": {
+              "const": "yaml"
+            },
+            "pointer": {
+              "const": ""
+            }
+          }
+        },
+        "path": {
+          "properties": {
+            "document": {
+              "enum": [
+                "vector",
+                "repository"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "diagnostic": {
+      "description": "Registry section 7.4's diagnostic at format 1.1.0, its severity the code's.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "location",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/code"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning"
+          ]
+        },
+        "location": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/location"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "if": {
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/warningCode"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "severity": {
+            "const": "warning"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "severity": {
+            "const": "error"
+          }
+        }
+      }
+    }
+  }
+}

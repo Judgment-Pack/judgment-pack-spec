@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgmentpack.org/schema/registry/1.1.0/assembled-index.schema.json",
+  "title": "DRAFT Registry companion 1.1.0: assembled index",
+  "description": "Staged and proposed with spec/registry-1.1.0.md, which governs where they differ; not released, and served by no bundle and no site. An assembled index (section 5), closed: the manifest's digest, the assembled registry's identity, and each source's repository, commit and documents, with exactly one standard source.",
+  "$comment": "The reader's to check: that sources are the manifest's in its order and each source's documents sorted by path, that the index equals the one an assembly at its commits writes (section 5.1), and the bound of 8 MiB. An index with no standard item or more than one, which the schema refuses, is LOCK-INDEX-MISMATCH to a lock check or a verification (section 9, step 6).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "indexFormatVersion",
+    "federation",
+    "registry",
+    "sources"
+  ],
+  "properties": {
+    "indexFormatVersion": {
+      "const": "1.1.0"
+    },
+    "federation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "digest"
+      ],
+      "properties": {
+        "digest": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.0.0/common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "registry": {
+      "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/registryIdentity"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/source"
+      },
+      "contains": {
+        "required": [
+          "role"
+        ],
+        "properties": {
+          "role": {
+            "const": "standard"
+          }
+        }
+      },
+      "minContains": 1,
+      "maxContains": 1
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "role",
+        "repository",
+        "commit",
+        "documents"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/sourceName"
+        },
+        "role": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/sourceRole"
+        },
+        "repository": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/repositoryIdentity"
+        },
+        "commit": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/commit"
+        },
+        "documents": {
+          "$ref": "https://judgmentpack.org/schema/registry/1.1.0/common.schema.json#/$defs/documents"
+        }
+      }
+    }
+  }
+}
