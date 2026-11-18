@@ -431,10 +431,26 @@ TERRAFORM_FILE_STATUS_SENTENCE = re.compile(
     r"status `([a-z]+)`\.",
     re.MULTILINE,
 )
-# The text's and the README's statements of the reading's status, read with whitespace collapsed:
-# "status `proposed`" and "Version `1.0.0` is proposed".
+# What still calls the reading, its vectors or its lists proposed or unreleased, read with whitespace
+# collapsed in the text, the vectors' README, the second reader and the dialect's §4.5, which cites
+# the text: "status `proposed`", "Version `1.0.0` is proposed", "reading `1.0.0`, proposed",
+# "vectors are proposed with it", "`conformance/terraform-file/1.0.0/`, proposed", "no claim may
+# cite them", "normative for nothing until a terraform-file tag", a status that "says `proposed`",
+# and a runtime said to hold the table as `proposed-1`. Another proposed thing the text names, such as dialect version 3, is not
+# the reading.
+_TF_READING = re.escape(TERRAFORM_FILE_READING)
 TERRAFORM_FILE_PROPOSED_STATEMENT = re.compile(
-    rf"`{re.escape(TERRAFORM_FILE_READING)}`(?:, status `proposed`| is proposed)", re.IGNORECASE
+    "|".join((
+        rf"`?{_TF_READING}`?,? (?:status `?proposed|is proposed|proposed\b)",
+        r"\b(?:vectors|code list|format table|machine-readable form)\b[^.]{0,120}?\bproposed\b",
+        r"\bproposed with (?:it|the text|this text|reading)\b",
+        r"`conformance/terraform-file/[^`]*`, proposed",
+        r"\bno (?:conformance )?claim may cite them\b",
+        r"\bnormative for nothing until a terraform-file tag\b",
+        r"\bholds? (?:it )?as `proposed-1`",
+        r"\bsays? `proposed`",
+    )),
+    re.IGNORECASE,
 )
 TERRAFORM_FILE_RECORD_KEYS = {"companion", "releaseVersion", "tag", "maturity", "reading",
                               "formatTable", "codes", "corpus", "formatDigests", "reader"}
@@ -540,14 +556,20 @@ def validate_terraform_file_artifacts(version: str, tag: str, root: Path = ROOT)
         raise ValueError("a terraform-file release requires the text, the code list, the format "
                          f"table and the vectors' manifest to say status {TERRAFORM_FILE_MATURITY}")
     readme = (root / TERRAFORM_FILE_README).read_text("utf-8")
+    reader = (root / TERRAFORM_FILE_READER).read_text("utf-8")
+    dialect = (root / "spec/dialect.md").read_text("utf-8")
+    cited = re.search(r"^### 4\.5 .*?(?=^#{1,3} )", dialect, re.MULTILINE | re.DOTALL)
+    if cited is None:
+        raise ValueError("a terraform-file release requires the dialect's §4.5, which cites the text")
     label = manifest.get("label", "")
     if (any(TERRAFORM_FILE_PROPOSED_STATEMENT.search(" ".join(document.split()))
-            for document in (text, readme))
+            for document in (text, readme, reader, cited.group(0)))
             or any(REGISTRY_UNRELEASED_WORDING.search(heading)
                    for heading in re.findall(r"^# .*$", readme, re.MULTILINE))
             or not isinstance(label, str) or REGISTRY_UNRELEASED_WORDING.search(label)):
-        raise ValueError("a terraform-file release requires the text and the vectors' README not to "
-                         "call the reading proposed, nor the README's heading or the manifest's label")
+        raise ValueError("a terraform-file release requires the text, the vectors' README, the second "
+                         "reader and the dialect's §4.5 not to call the reading proposed, nor the "
+                         "README's heading or the manifest's label")
     if not (root / "releases" / f"{tag}.md").is_file():
         raise ValueError("terraform-file release notes are missing for the exact tag")
 

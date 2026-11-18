@@ -1,7 +1,7 @@
 {
   "companion": "terraform-file",
   "reading": "1.0.0",
-  "status": "proposed",
+  "status": "released",
   "release": "1.0.0",
   "table": [
     {

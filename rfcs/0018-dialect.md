@@ -2717,8 +2717,8 @@ vectors are staged.
 
 This kind is the source that [RFC 0038](../rfcs/0038-terraform-file-source.md) proposes. The reading
 of the file it names, from the file's bytes to the value acquired, is the terraform-file companion's,
-[`spec/terraform-file.md`](../spec/terraform-file.md), reading `1.0.0`, proposed, which is released
-under its own selector from `terraform-file-v1.0.0` on: this section names the kind, and cites that
+[`spec/terraform-file.md`](../spec/terraform-file.md), reading `1.0.0`, released under its own
+selector on `terraform-file-v1.0.0`: this section names the kind, and cites that
 text rather than carry it. It is a kind of version 3 (RFC 0038, Unresolved question 1, resolved), proposed
 as §4.3's kinds are: a document of version 2 that names it is refused (§4), no preparation reader
 implements it, and no vector holds one, so it is defined, and not claimable (§4). As a kind of

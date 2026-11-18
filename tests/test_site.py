@@ -353,14 +353,14 @@ class StaticSiteTests(unittest.TestCase):
 
     def test_terraform_file_companion_document_is_published(self) -> None:
         # The reading of a terraform-file source moved out of the dialect's §4.5 into a companion
-        # of its own: a page of its own, labelled as normative for nothing until its tag, which
+        # of its own: a page of its own, labelled as normative for its reader class on its tag, which
         # the dialect's page and RFC 0038's page link to rather than to the source.
         document = (self.output / "spec" / "terraform-file" / "index.html").read_text(
             encoding="utf-8"
         )
         self.assertIn(
-            '<span class="artifact-label">Normative for nothing until a terraform-file tag releases '
-            "it; reading 1.0.0 proposed</span>",
+            '<span class="artifact-label">Normative for the reader class on terraform-file-v1.0.0; '
+            "reading 1.0.0 released</span>",
             document,
         )
         for code in ("TF-SIZE", "TF-SENSITIVITY", "TF-VALUE-LIMIT"):

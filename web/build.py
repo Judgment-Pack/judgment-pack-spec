@@ -439,9 +439,9 @@ PAGES = (
         "A companion document of the specification: how a reader reads a Terraform plan or state "
         "JSON file a dialect source names, from its bytes to the value acquired, with the accepted "
         "formats, the acquisition record and the closed list of refusal codes. Reading 1.0.0, "
-        "proposed, to be released on its own scoped tag, terraform-file-v1.0.0.",
+        "released on its own scoped tag, terraform-file-v1.0.0, and not yet stable.",
         "spec",
-        "Normative for nothing until a terraform-file tag releases it; reading 1.0.0 proposed",
+        "Normative for the reader class on terraform-file-v1.0.0; reading 1.0.0 released",
         source_ref="main",
     ),
     Page(
@@ -2816,7 +2816,7 @@ conformance.
 - [The annotation vocabulary]({guide_url(PurePosixPath("spec/annotation-vocabulary/index.html"))}): a companion document, normative only for the vocabulary-checker class; version 1.0.0 is proposed, and its rows are staged
 - [The registry]({guide_url(PurePosixPath("spec/registry/index.html"))}): a companion document, normative only for the registry classes; format 1.0.0 is released on registry-v1.0.0, not yet stable, with its schemas, code list and rows
 - [The registry, format 1.1.0]({guide_url(PurePosixPath("spec/registry-1.1.0/index.html"))}): a proposed addition to the registry companion, a registry assembled from several repositories, tighten-only bounds, and a signed lock; normative for nothing until registry-v1.1.0
-- [The terraform-file reading]({guide_url(PurePosixPath("spec/terraform-file/index.html"))}): a companion document, the reading of a Terraform plan or state file that the dialect's `terraform-file` kind cites; reading 1.0.0 is proposed, normative for nothing until terraform-file-v1.0.0, and its vectors are proposed with it
+- [The terraform-file reading]({guide_url(PurePosixPath("spec/terraform-file/index.html"))}): a companion document, the reading of a Terraform plan or state file that the dialect's `terraform-file` kind cites; reading 1.0.0 is released on terraform-file-v1.0.0, and not yet stable, normative for its reader class, and its vectors are in that release's bundle
 - [Versioning policy]({guide_url(PurePosixPath("project/versioning/index.html"))})
 
 ## Explanations and direct answers
