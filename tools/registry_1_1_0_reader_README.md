@@ -31,8 +31,10 @@ does not state, and each row's `reading:` names the more specific one, which the
 `LOCK-INDEX-MISMATCH` for an index without exactly one standard item at the index's `/sources`;
 `LOCK-NOT-COVERED` for a resolved registry at the lock's `resolved` item for the expected
 environment; and `LOCK-EXPECTED` for a repository the map misses, or the standard's repository the
-map names, at the lock's `sources` item. Where the text leaves a choice open, the code says which it
-took, marked `READING`.
+map names, at the lock's `sources` item. When twelve more rows were added, its first run over the
+154 gave 152: the two others locate `LOCK-INDEX-MISMATCH` for an index whose registry digest is
+another registry's at the index's `/registry/digest`, and the reader took that too. Where the text
+leaves a choice open, the code says which it took, marked `READING`.
 
 ## What it is not
 

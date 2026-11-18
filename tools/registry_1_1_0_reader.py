@@ -3711,11 +3711,15 @@ def _check_index_and_sources(lock: dict, index: bytes | None, diags: list[dict])
         return None
     items = value.get("sources") if isinstance(value.get("sources"), list) else []
     standards = sum(1 for it in items if isinstance(it, dict) and it.get("role") == "standard")
-    if digest_of(value) != lock["index"]["digest"] or lookup(value, ["registry", "digest"]) != lock["registry"]["digest"]:
+    if digest_of(value) != lock["index"]["digest"]:
         diags.append(diag("LOCK-INDEX-MISMATCH", "lock", "/index"))
         return None
+    # READING: an index the lock names that breaks a rule of its own is located at the index's
+    # member that breaks it.
+    if lookup(value, ["registry", "digest"]) != lock["registry"]["digest"]:
+        diags.append(diag("LOCK-INDEX-MISMATCH", "index", "/registry/digest"))
+        return None
     if standards != 1:
-        # READING: at the index's /sources, whose items break the rule.
         diags.append(diag("LOCK-INDEX-MISMATCH", "index", "/sources"))
         return None
     ls = lock["sources"]
