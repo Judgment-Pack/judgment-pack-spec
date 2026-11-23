@@ -11,7 +11,7 @@ RFC is a Draft. Each case states its expected verdict.
 | --- | --- | --- |
 | [`es256-statements.json`](es256-statements.json) | 55: table 1 (30) and table 2 (25) | `5a687a254c35989951345cea7b7f7b5cdf3a2edc2cc1f02918ed2e3f7d900f8b` |
 | [`ed25519-statements.json`](ed25519-statements.json) | 39: the row `ed25519-unchanged` of table 1 | `b1bdfe50cbab49f6408395511c0f9fbee897193f6c58f63328a6d677b99c3bd9` |
-| [`admission-reads.json`](admission-reads.json) | 35: table 4 (22) and table 5 (13) | `57c8011e7b21ce0fbf4441a85061f01ae5686f5928720325e79fad18f3fdb095` |
+| [`admission-reads.json`](admission-reads.json) | 35: table 4 (22) and table 5 (13) | `a620f8e7280652a1c9402c4862ab3ebafa9b8286569a327fdbdd12492f5291e2` |
 
 ## How they were made
 

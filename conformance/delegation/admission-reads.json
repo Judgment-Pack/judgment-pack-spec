@@ -1,5 +1,5 @@
 {
- "note": "Hand-written cases of RFC 0030's tables 4 and 5 (section 2a, the admission reads on the wire), one per name, and read-v2-binding-step-12. body and answer are the exact canon bytes as strings, null where none is sent; skill-load-resume holds one of each per read, in order. inputs.chain names a case of ed25519-statements.json, whose link digests body's chain holds. applies holds the side a case is for: issuing-host, sender, or both, each with what that side does; senders names the implementations whose sender part it is. readVersion is the sender's configured version and hostReads the versions the host double reads. expect.verdict is the RFC's expected verdict, expect.sender what the sender reports, expect.counted whether anything is counted, expect.reads how many reads the sender makes, and for table 5 expect.loaded what is loaded. Synthetic data only.",
+ "note": "Hand-written cases of RFC 0030's tables 4 and 5 (section 2a, the admission reads on the wire), one per name, and read-v2-binding-step-12. body and answer are the exact canon bytes as strings, null where none is sent; skill-load-resume holds one of each per read, in order. inputs.chain names a case of ed25519-statements.json, whose link digests body's chain holds. applies holds the side a case is for: issuing-host, sender, or both, each with what that side does; senders names the implementations whose sender part it is. readVersion is the sender's configured version and hostReads the versions the host double reads. expect.verdict is the RFC's expected verdict, expect.sender what the sender reports, expect.counted whether anything is counted, expect.reads how many reads the sender makes, and for table 5 expect.loaded what is loaded. A case whose body no conforming sender emits says so in its note. Synthetic data only.",
  "chains": "ed25519-statements.json",
  "cases": [
   {
@@ -524,6 +524,7 @@
   },
   {
    "name": "read-version-unknown",
+   "note": "body is a hypothetical: no conforming sender emits it (it names readVersion \"3\"); readVersion above is the configured version of the sender under test, which never sends this body",
    "table": 4,
    "kind": "N",
    "applies": {
@@ -1448,6 +1449,7 @@
   },
   {
    "name": "skill-load-at-v1",
+   "note": "body is a hypothetical: no conforming sender emits it (a load at readVersion \"1\"); readVersion above is the configured version of the sender under test, which never sends this body",
    "table": 5,
    "kind": "N",
    "applies": {
