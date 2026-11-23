@@ -10,7 +10,7 @@ statement in scope here: [`witness/`](https://github.com/Judgment-Pack/judgment-
 holds the 54 vectors of its companion document,
 [`spec/checkpoint-witness.md`](../spec/checkpoint-witness.md), which are staged until the next
 `specVersion` opens: in no corpus, and not served by the site. Nor are the delegation statement
-cases of RFC 0030's amendment, in [`delegation/`](delegation/README.md), staged in no corpus. Nor is the dialect:
+cases of RFC 0030's amendment, in [`delegation/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/delegation), staged in no corpus and not served by the site. Nor is the dialect:
 [`dialect/`](https://github.com/Judgment-Pack/judgment-pack-spec/tree/main/conformance/dialect)
 holds the reference Runner's 47 preparation vectors for its companion document,
 [`spec/dialect.md`](../spec/dialect.md), recorded under Core `0.2.0-draft`, and 46 recorded again
