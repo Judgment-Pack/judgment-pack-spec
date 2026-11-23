@@ -507,10 +507,11 @@ calls reach that party's sources and no other's (agent issue #373).
   - **An unbound link under a bound one** is `widened`. It does not inherit the binding. Each link
     states its whole authority, as clause 6 makes it state its sources, so a reader of the leaf
     alone sees the binding.
-  - A bound link under an unbound one is `widened` as well. An unbound chain reaches what the
-    enforcing host lets an unbound delegation reach: at the reference gateway, the sources of no
-    scope identifier, and never a scope identifier (gateway §6). A binding would change that reach,
-    not narrow it, so a chain is bound from its root or not at all.
+  - A bound link under an unbound one is refused too, with clause 9's finding, although a binding
+    narrows: a binding starts at the root, because the issuing host's root signature is what lets a
+    chain name a scope identifier at all, and a child cannot grant its chain a reach the root never
+    named. An unbound chain reaches what the enforcing host lets an unbound delegation reach: at the
+    reference gateway, the sources of no scope identifier, and never a scope identifier (gateway §6).
 - **What it admits.** Under a bound chain, every entry of a `gateway` audience admits only a call to
   a source of that scope identifier, and every request names it. An `agent-host` entry is
   unaffected, since a host source has no scope identifier.
@@ -750,9 +751,10 @@ before it.
 subject's approvals say. A call it would admit but for the tool's version is refused
 `tool-version-refused`; one it would admit but for a loaded skill is refused `skill-refused`. Both
 are step 12, after `subject-mismatch` and `subject-unauthorized`, in that order, and like every
-refusal they count nothing. A `null` is judged by the host's policy. A policy that refused a call for
-skills it cannot see would refuse every gateway read, so the proposed default is to judge skills on
-the library's reads alone and to admit a gateway read's `null` (open question 25). A version `"1"`
+refusal they count nothing. A `null` means "not known", and the issuing host's policy decides; this
+text sets no default either way. A host whose policy requires a tool's version or a set of skills
+should refuse a call whose read gives `null` for it. A policy that refused every call for skills it
+cannot see would refuse every gateway read, whose `skills` is always `null` (open question 25). A version `"1"`
 read carries neither member, and is judged as a version `"2"` read carrying `null` for both.
 
 **The skill-load read** (version `"2"` only). The agent library asks it immediately before a skill
@@ -1578,7 +1580,8 @@ states, with `/acquire`'s sentence of a wrong scope.
 | `read-v2-library-two-skills`: two skills, ordered by `id` | P | `admit` |
 | `read-v2-skill-refused`: a loaded skill the host does not admit | N | `skill-refused`, nothing counted |
 | `read-v2-gateway`: `skills: null`, `version` the tool's `descriptorDigest` | P | `admit`, counted |
-| `read-v2-version-null`: `version: null` | B | `admit` (the proposed default) |
+| `read-v2-version-null`: `version: null`, under a host policy that requires a version | B | `tool-version-refused`, nothing counted |
+| `read-v2-version-null-not-required`: `version: null`, under a host policy that requires none | B | `admit` |
 | `read-v2-version-refused`: a digest other than the one the subject approved | N | `tool-version-refused`, nothing counted |
 | `read-v2-order`: the subject unauthorized and the version refused | N | `subject-unauthorized` |
 | `read-v2-binding`: `call: null` | P | `admit`, nothing counted |
@@ -1831,9 +1834,9 @@ Each has a proposed default. A default is a proposal for review, not a decision 
 24. **The library's descriptor digest.** The library's approval of a tool records the per-tool
     descriptor digest by the gateway's definition (§2a). Until it does, its reads carry `version`
     `null`.
-25. **A `null` in a version `"2"` read.** The issuing host admits a `null` `version`, and a gateway
-    read's `null` `skills`, by default, and judges skills on the library's reads. A host whose
-    policy refuses them refuses every such call, and says so where it states its policy.
+25. **A `null` in a version `"2"` read.** Settled: `null` means "not known", and the issuing host's
+    policy decides, with no default either way. A host that requires a version or a skill set
+    should refuse a `null` for it, and says so where it states its policy.
 26. **How a sender learns the host's read version.** By configuration, set by the operator from
     the issuing host's published contract (§2a). A machine-readable statement of the versions a
     host reads could replace it later. It would never be a per-read negotiation.
@@ -1851,7 +1854,9 @@ for Spec 0.5.0 requires a cross-vendor review before adoption.
 The amendment of 2026-11-09 (#284) closes the confirmation review's five LOW findings; its review
 is same-vendor as well, is recorded on its pull request, and is not RFC 0009 cross-vendor
 compliance either.
-The amendment of 2026-11-22 has had no review at this commit. It materially amends this record, so
-under RFC 0000 its pull request carries a recorded review with a written disposition for each
-finding: by a model from another vendor, or under a waiver the maintainer records. A review by the
-drafting vendor's model is same vendor, not a cross-vendor claim.
+The amendment of 2026-11-22 is accepted under a waiver the maintainer recorded on 2026-11-22: RFC
+0009's different-vendor review is waived for it, so that it is built this week. Its review is by
+the drafting vendor's model, is recorded on its pull request with a written disposition for each
+finding, and is same vendor, not a cross-vendor claim. Its evidence is two separately written
+implementations, the gateway and the agent library, passing the shared cases. A different-vendor
+review remains open as a follow-up issue, and is not claimed.
