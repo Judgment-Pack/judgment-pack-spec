@@ -1675,15 +1675,18 @@ An acquisition is held to its source and its profile, and any of these checks th
    `E.acquisition` has no member `pageItems`. A receipt with
    `pageItems` attests a page, which no preparation reads, whatever the source's shape, as the
    Runner reads none (Runner, "Deferred scope"). (No vector decides this.)
-   A receipt may carry `callRef`, the per-call reference a gateway sends a binding whose
-   operator opted in (the platform's `callReference`), in the `tools/call` request's
-   `params._meta` as `judgment-pack/callRef`, beside the receipt's `sessionId` as
+   A receipt may carry `callRef`, an optional, signed member: the per-call reference a gateway
+   sends a binding whose operator opted in (the platform's `callReference`), in the `tools/call`
+   request's `params._meta` as `judgment-pack/callRef`, beside the receipt's `sessionId` as
    `judgment-pack/sessionId` (the reference gateway's ADR-0060, from its release `v0.40.0`). No
    check here reads it, so it is held to no form here and changes no answer: check 2's signature
    covers it, as every member it retains, and a receipt with it is read as the same receipt
    without it would be. A gateway verifier of that release holds it to 64 lowercase hexadecimal
-   characters; one from before it tolerates it, as gateway §1.2a tolerates any signed member it
-   does not know.
+   characters; a verifier that does not know the member tolerates it, as gateway §1.2a tolerates
+   any signed member it does not know, and the signature still verifies. Two vectors of the
+   reference gateway's corpus show it: `corpus/v3/stores/v3-call-ref-valid.json`, a sealed
+   session whose receipts carry it, and `corpus/v3/stores/v3-call-ref-absent.json`, the same
+   session without it, both `ok`.
 2. `E.keyId` is the key identifier of the profile's `publicKey`, and `E.signature`, 128 hexadecimal
    characters, verifies under that key by the equation (§1), over the ASCII bytes
    `judgment-pack-gateway/receipt/3:` followed by the `canon` bytes of `E` with its top-level
